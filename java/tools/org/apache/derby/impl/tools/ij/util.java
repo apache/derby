@@ -853,6 +853,35 @@ AppUI.out.println("SIZE="+l);
 			 (framework.toUpperCase(Locale.ENGLISH).indexOf("JCC") != -1)));
 	}
 	
-
+	/**
+	 * Selects the current schema from the given connection.
+	 * 
+	 * As there are no way of getting current schema supported by
+	 * all major DBMS-es, this method may return null.
+	 * 
+	 * @param theConnection  Connection to get current schema for
+	 * @return the current schema of the connection, or null if error.
+	 */
+	public static String getSelectedSchema(Connection theConnection) throws SQLException {
+		String schema = null;
+                if (theConnection == null)
+                  return null;
+		Statement st = theConnection.createStatement();
+		try {
+			if(!st.execute("VALUES CURRENT SCHEMA"))
+				return null;
+			
+			ResultSet rs = st.getResultSet();
+			if(rs==null || !rs.next())
+				return null;
+			schema = rs.getString(1);
+		} catch(SQLException e) {
+			// There are no standard way of getting schema.
+			// Getting default schema may fail.
+		} finally {
+			st.close();
+		}
+		return schema;
+	}
 }
 

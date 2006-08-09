@@ -451,6 +451,15 @@ public class utilMain implements java.security.PrivilegedAction {
 					JDBCDisplayUtil.ShowWarnings(out,result.getSQLWarnings());
 					result.clearSQLWarnings();
 				}
+			} else if (result.isResultSet()) {
+				ResultSet rs = result.getResultSet();
+				try {
+					JDBCDisplayUtil.DisplayResults(out,rs,connEnv[currCE].getConnection(), result.getColumnDisplayList(), result.getColumnWidthList());
+				} catch (SQLException se) {
+					result.closeStatement();
+					throw se;
+				}
+				result.closeStatement();
 			} else if (result.isException()) {
 				JDBCDisplayUtil.ShowException(out,result.getException());
 			}

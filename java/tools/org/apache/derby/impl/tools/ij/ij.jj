@@ -551,6 +551,240 @@ class ij {
 	  	return new ijVectorResult(v,w);
 	}
 
+	/**
+	   Returns a subset of the input integer array
+	   
+	   @param input The input integer array
+	   @param start Starting index, inclusive
+	   @param end   Ending index, exclusive
+	 */
+	public static int[] intArraySubset(final int[] input, int start, int end) {
+		int[] res = new int[end-start];
+		System.arraycopy(input, start, res, 0, end-start);
+		return res;
+	}
+
+	/**
+	   Verify that a table exists within a schema. Throws an exception
+	   if table does not exist.
+	   
+	   @param schema Schema for the table
+	   @param table  Name of table to check for existence of
+	 */
+	public void verifyTableExists(String schema, String table) 
+	throws SQLException {
+		if(schema == null)
+			return;
+
+		ResultSet rs = null;
+		try {
+			DatabaseMetaData dbmd = theConnection.getMetaData();
+			rs = dbmd.getTables(null,schema,table,null);
+			if(!rs.next())
+				throw ijException.noSuchTable(table);
+		} finally {
+			if(rs!=null)
+				rs.close();
+		}
+	}
+
+	/**
+	   Return a resultset of tables (or views, procs...) in the given schema. 
+
+	   @param schema  Schema to get tables for, or null for search 
+	                  in all schemas.
+	   @param tableType Types of tables to return, see
+	                  {@link java.sql.DatabaseMetaData#getTableTypes}
+	 */
+	public ijResult showTables(String schema, String[] tableType) throws SQLException {
+		ResultSet rs = null;
+		try {
+			haveConnection();
+
+			DatabaseMetaData dbmd = theConnection.getMetaData();
+			rs = dbmd.getTables(null,schema,null,tableType);
+
+			int[] displayColumns = new int[] {
+				rs.findColumn("TABLE_SCHEM"),
+				rs.findColumn("TABLE_NAME"),
+				rs.findColumn("REMARKS"),
+			};
+			int[] columnWidths = new int[] {
+				20,
+				30,
+				20,
+			};
+
+			return new ijResultSetResult(rs, displayColumns, columnWidths);
+		} catch (SQLException e) {
+			if(rs!=null)
+				rs.close();
+			throw e;
+		}
+	}
+
+	/**
+	   Return a resultset of indexes for the given table or schema
+
+	   @param schema  schema to find indexes for
+	   @param table   table to find indexes for
+	 */
+	public ijResult showIndexes(String schema, String table) throws SQLException {
+		ResultSet rs = null;
+		try {
+			haveConnection();
+			verifyTableExists(schema, table);
+
+			DatabaseMetaData dbmd = theConnection.getMetaData();
+			rs = dbmd.getIndexInfo(null, schema, table, false, true);
+
+			int[] displayColumns = new int[] {
+				rs.findColumn("TABLE_SCHEM"),
+				rs.findColumn("TABLE_NAME"),
+				rs.findColumn("COLUMN_NAME"),
+				rs.findColumn("NON_UNIQUE"),
+				rs.findColumn("TYPE"),
+				rs.findColumn("ASC_OR_DESC"),
+				rs.findColumn("CARDINALITY"),
+				rs.findColumn("PAGES"),
+			};
+			int[] columnWidths = new int[] {
+				20,
+				20,
+				20,
+				6,
+				4,
+				4,
+				8,
+				8,
+			};
+
+			if(schema!=null) {
+				displayColumns = intArraySubset(displayColumns, 1, 
+												displayColumns.length);
+				columnWidths   = intArraySubset(columnWidths, 1, 
+												columnWidths.length);
+			}
+			return new ijResultSetResult(rs, displayColumns, columnWidths);
+		} catch (SQLException e) {
+			if(rs!=null)
+				rs.close();
+			throw e;
+		}
+	}
+
+	/**
+	   Return a resultset of procedures from database metadata
+	 */
+	public ijResult showProcedures(String schema) throws SQLException {
+		ResultSet rs = null;
+		try {
+			haveConnection();
+
+			DatabaseMetaData dbmd = theConnection.getMetaData();
+			rs = dbmd.getProcedures(null,schema,null);
+
+			int[] displayColumns = new int[] {
+				rs.findColumn("PROCEDURE_SCHEM"),
+				rs.findColumn("PROCEDURE_NAME"),
+				rs.findColumn("REMARKS"),
+			};
+			int[] columnWidths = new int[] {
+				20,
+				30,
+				20,
+			};
+
+			return new ijResultSetResult(rs, displayColumns, columnWidths);
+		} catch (SQLException e) {
+			if(rs!=null)
+				rs.close();
+			throw e;
+		}
+	}
+
+	/**
+	   Return a resultset of schemas from database metadata
+	 */
+	public ijResult showSchemas() throws SQLException {
+		ResultSet rs = null;
+		try {
+			haveConnection();
+
+			DatabaseMetaData dbmd = theConnection.getMetaData();
+			rs = dbmd.getSchemas();
+
+			int[] displayColumns = new int[] {
+				rs.findColumn("TABLE_SCHEM")
+			};
+			int[] columnWidths = new int[] {
+				30
+			};
+
+			return new ijResultSetResult(rs, displayColumns, columnWidths);
+		} catch (SQLException e) {
+			if(rs!=null)
+				rs.close();
+			throw e;
+		}
+	}
+
+	/**
+	   Outputs the names of all fields of given table. Outputs field
+	   names and data type.
+	 */
+	public ijResult describeTable(String schema, String table) throws SQLException {
+		ResultSet rs = null;
+		try {
+			haveConnection();
+			verifyTableExists(schema,table);
+
+			DatabaseMetaData dbmd = theConnection.getMetaData();
+			rs = dbmd.getColumns(null,schema,table,null);
+
+			int[] displayColumns = new int[] {
+				rs.findColumn("TABLE_SCHEM"),
+				rs.findColumn("TABLE_NAME"),
+				rs.findColumn("COLUMN_NAME"),
+				rs.findColumn("TYPE_NAME"),
+				rs.findColumn("DECIMAL_DIGITS"),
+				rs.findColumn("NUM_PREC_RADIX"),
+				rs.findColumn("COLUMN_SIZE"),
+				rs.findColumn("COLUMN_DEF"),
+				rs.findColumn("CHAR_OCTET_LENGTH"),
+				rs.findColumn("IS_NULLABLE"),
+			};
+			int[] columnWidths = new int[] {
+				20,
+				20,
+				20,
+				9,
+				4,
+				4,
+				6,
+				10,
+				10,
+				8
+			};
+
+			//
+			// If schema is specified (if util.getSelectedSchema in
+			// DescTableStatement() returns correct value), then we
+			// don't need to output schema and table names.
+			if(schema!=null) {
+				displayColumns = intArraySubset(displayColumns, 2, 
+												displayColumns.length);
+				columnWidths   = intArraySubset(columnWidths, 2, 
+												columnWidths.length);
+			}
+
+			return new ijResultSetResult(rs, displayColumns, columnWidths);
+		} catch (SQLException e) {
+			if(rs!=null)
+				rs.close();
+			throw e;
+		}
+	}
 
 	private Object makeXid(int xid)
 	{
@@ -589,6 +823,7 @@ TOKEN [IGNORE_CASE] :
 {	/* ij Keywords */
 	<ABSOLUTE: "absolute">
 |	<AFTER: "after">
+|	<ALIASES: "aliases">
 |	<ALL: "all">
 |	<AS: "as">
 |	<ASYNC: "async">
@@ -603,6 +838,7 @@ TOKEN [IGNORE_CASE] :
 | 	<CONNECTIONS: "connections">
 |	<CURRENT: "current">
 |	<CURSOR: "cursor">
+|	<DESCRIBE: "describe">
 |	<DISCONNECT: "disconnect">
 |	<DRIVER: "driver">
 |	<ELAPSEDTIME: "elapsedtime">
@@ -614,10 +850,13 @@ TOKEN [IGNORE_CASE] :
 |	<FAIL: "fail">
 |	<FIRST: "first">
 |	<FOR: "for">
+|	<FROM: "from">
 |	<GET: "get">
 |	<GETCURRENTROWNUMBER: "getcurrentrownumber">
 |	<HOLD: "hold">
 |	<HELP: "help">
+|	<IN: "in">
+|	<INDEXES: "indexes">
 |	<INSENSITIVE: "insensitive">
 |	<INTO: "into">
 |	<LAST: "last">
@@ -634,6 +873,7 @@ TOKEN [IGNORE_CASE] :
 |	<PREPARE: "prepare">
 |	<PREVIOUS: "previous">
 |	<PROCEDURE: "procedure">
+|	<PROCEDURES: "procedures">
 |	<PROPERTIES: "properties">
 |	<PROTOCOL: "protocol">
 |	<QUIT: "quit">
@@ -645,14 +885,18 @@ TOKEN [IGNORE_CASE] :
 |	<RUN: "run">
 |	<TO: "to">
 |	<SAVEPOINT: "savepoint">
+|	<SCHEMAS: "schemas">
 |	<SCROLL: "scroll">
 |	<SENSITIVE: "sensitive">
 |	<SET: "set">
 |	<SHOW: "show">
 |	<SHUTDOWN: "shutdown">
 |	<STATEMENT: "statement">
+|	<SYNONYMS: "synonyms">
+|	<TABLES: "tables">
 |	<USER: "user">
 |	<USING: "using">
+|	<VIEWS: "views">
 |	<WAIT: "wait">
 |	<WITH: "with">
 |	<XA_1PHASE: "XA_1phase">
@@ -985,6 +1229,7 @@ throws SQLException
 | 	r=CloseStatement()
 | 	r=CommitStatement()
 | 	r=ConnectStatement()
+|	r=DescTableStatement()
 |	r=DisconnectStatement()
 |	r=DriverStatement()
 |	r=ElapsedTimeStatement()	
@@ -1012,7 +1257,7 @@ throws SQLException
 |	r=RemoveStatement()	
 |	r=RunStatement()	
 |	r=SetConnectionStatement()	
-|	r=ShowConnectionsStatement()	
+|	r=ShowStatement()	
 |	r=WaitForStatement()	
 |	r=XA_DataSourceStatement()
 |	r=XA_ConnectStatement()
@@ -1246,6 +1491,43 @@ throws SQLException
 
 
 /**
+ * Handles DESCRIBE table
+ */
+ijResult
+DescTableStatement()
+throws SQLException
+:
+{
+	String i = null;
+	String i2 = null;
+	Token  s = null;
+}
+{
+	<DESCRIBE>
+	( ( i=identifier() <PERIOD> i2=identifier() )
+	| i2=identifier()
+	| s=<STRING>
+	)
+	{
+		if(s!=null) {
+			String image = stringValue(s.image.toUpperCase());
+
+			int dotPosition = image.indexOf('.');
+			if(dotPosition!=-1) {
+				i = image.substring(0,dotPosition);
+				i2 = image.substring(dotPosition+1);
+			}
+		}
+
+		if(i==null)
+			i = util.getSelectedSchema(theConnection);
+
+		return describeTable(i,i2);
+	}
+}
+
+
+/**
   * Handles CONNECT yadda.yadda.foo( stringArg, ... stringArg ) AS connectionName
   */
 ijResult
@@ -1334,18 +1616,68 @@ throws SQLException
 }
 
 /**
-	Shows the current connections for the current environment.
+ * Handles showing current connections for the current environment, and
+ * SHOW TABLES/VIEWS/... commands.
  */
 ijResult
-ShowConnectionsStatement()
+ShowStatement()
 throws SQLException
 :
 {
+	String schema  = null;
+	String tblname = null;
+	String str     = null;
+	String[] types = null;
+	Token t = null;
+	Token v = null;
 }
 {
 	<SHOW> <CONNECTIONS>
 	{
 		return showConnectionsMethod(false);
+	}
+|   <SHOW> (t=<TABLES> | v=<VIEWS> | <SYNONYMS> | <ALIASES>)
+		[ <IN> schema=identifier() ]
+	{
+		if(t!=null) {
+			// Only show non-system tables by default.
+			// If schema specified (i.e. SYS), also display system tables.
+			if(schema!=null)
+				types = new String[] { "TABLE", "SYSTEM TABLE" };
+			else
+				types = new String[] { "TABLE" };
+		}
+		else if(v!=null)
+			types = new String[] { "VIEW" };
+		else
+			types = new String[] { "ALIAS" };
+		return showTables(schema, types);
+	}
+|	<SHOW> <INDEXES> 
+		[ (<IN> schema=identifier()) |
+		  (<FROM> tblname=identifier() [ <PERIOD> str=identifier() ] ) ]
+	{
+		if(str != null) {
+			// if absolute table reference given
+			schema = tblname;
+			tblname = str;
+		}
+
+		// If user specifies a table name, then assume schema is
+		// current schema. Note that getSelectedSchema may return
+		// null for some DBMSes.
+		if(schema == null && tblname != null)
+			schema = util.getSelectedSchema(theConnection);
+		return showIndexes(schema,tblname);
+	}
+|	<SHOW> <PROCEDURES>
+		[ <IN> schema=identifier() ]
+	{
+		return showProcedures(schema);
+	}
+|	<SHOW> <SCHEMAS>
+	{
+		return showSchemas();
 	}
 }
 
@@ -3097,6 +3429,7 @@ keyword() :
 	(
 	tok = <ABSOLUTE>
 |	tok = <AFTER>
+|	tok = <ALIASES>
 |	tok = <ALL>
 |	tok = <AS>
 |	tok = <ASYNC>
@@ -3111,6 +3444,7 @@ keyword() :
 | 	tok = <CONNECTIONS>
 |	tok = <CURRENT>
 |	tok = <CURSOR>
+|	tok = <DESCRIBE>
 |	tok = <DISCONNECT>
 |	tok = <DRIVER>
 |	tok = <ELAPSEDTIME>
@@ -3121,10 +3455,13 @@ keyword() :
 |	tok = <FAIL>
 |	tok = <FIRST>
 |	tok = <FOR>
+|	tok = <FROM>
 |	tok = <GET>
 |	tok = <GETCURRENTROWNUMBER>
 |	tok = <HOLD>
 |	tok = <HELP>
+|	tok = <IN>
+|	tok = <INDEXES>
 |	tok = <INSENSITIVE>
 |	tok = <INTO>
 |	tok = <LAST>
@@ -3141,6 +3478,7 @@ keyword() :
 |	tok = <PREPARE>
 |	tok = <PREVIOUS>
 |	tok = <PROCEDURE>
+|	tok = <PROCEDURES>
 |	tok = <PROPERTIES>
 |	tok = <PROTOCOL>
 |	tok = <QUIT>
@@ -3151,14 +3489,18 @@ keyword() :
 |	tok = <ROLLBACK>
 |	tok = <RUN>
 |	tok = <TO>
+|	tok = <SCHEMAS>
 |	tok = <SCROLL>
 |	tok = <SENSITIVE>
 |	tok = <SET>
 |	tok = <SHOW>
 |	tok = <SHUTDOWN>
 |	tok = <STATEMENT>
+|	tok = <SYNONYMS>
+|	tok = <TABLES>
 |	tok = <USER>
 |	tok = <USING>
+|	tok = <VIEWS>
 |	tok = <WAIT>
 |	tok = <WITH>
 |	tok = <XA_1PHASE>

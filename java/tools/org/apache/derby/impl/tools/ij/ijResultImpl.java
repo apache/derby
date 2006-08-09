@@ -53,6 +53,9 @@ abstract class ijResultImpl implements ijResult {
 	public Vector getVector() { return null; }
 	public SQLException getException() { return null; }
 
+	public int[] getColumnDisplayList() { return null; }
+	public int[] getColumnWidthList() { return null; }
+
 	public void closeStatement() throws SQLException { }
 
 	public abstract SQLWarning getSQLWarnings() throws SQLException;
@@ -66,6 +69,10 @@ abstract class ijResultImpl implements ijResult {
 		if (isVector()) return LocalizedResource.getMessage("IJ_Vec0",getVector().toString());
 		if (isMulti()) return LocalizedResource.getMessage("IJ_Mul0",getVector().toString());
 		if (isException()) return LocalizedResource.getMessage("IJ_Exc0",getException().toString());
+		try {
+			if (isResultSet()) return LocalizedResource.getMessage("IJ_Rse0",getStatement().toString());
+		} catch(SQLException se) {
+		}
 		return LocalizedResource.getMessage("IJ_Unkn0",this.getClass().getName());
 	}
 }

@@ -1,0 +1,89 @@
+ij> -- This test will cover SHOW TABLES, SHOW SCHEMAS, etc.
+-- and the DESCRIBE command.
+connect 'jdbc:derby:wombat;create=true';
+ij> SET SCHEMA = APP;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE t1 (i int generated always as identity, d DECIMAL(5,2), test VARCHAR(20));
+0 rows inserted/updated/deleted
+ij> CREATE SCHEMA USER1;
+0 rows inserted/updated/deleted
+ij> SET SCHEMA = USER1;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE t2 (i int);
+0 rows inserted/updated/deleted
+ij> CREATE SYNONYM USER1.T3 FOR USER1.T2;
+0 rows inserted/updated/deleted
+ij> CREATE VIEW v1 AS SELECT * from app.t1;
+0 rows inserted/updated/deleted
+ij> CREATE INDEX idx1 ON APP.t1 (test ASC);
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE APP.PROCTEST(IN A INTEGER, OUT B DECIMAL(10,2))
+PARAMETER STYLE JAVA READS SQL DATA LANGUAGE JAVA 
+EXTERNAL NAME 'a.b.c.d.e';
+0 rows inserted/updated/deleted
+ij> -- first display all tables, then display tables in one schema
+SHOW TABLES;
+TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
+------------------------------------------------------------------------
+APP                 |T1                            |                    
+USER1               |T2                            |                    
+2 rows selected
+ij> SHOW TABLES IN APP;
+TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
+------------------------------------------------------------------------
+APP                 |T1                            |                    
+1 row selected
+ij> -- 'describe t1' will give error, as not in current schema
+DESCRIBE t1;
+IJ ERROR: No table exists with the name T1
+ij> DESCRIBE APP.t1;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+I                   |INTEGER  |0   |10  |10    |AUTOINCRE&|NULL      |NO      
+D                   |DECIMAL  |2   |10  |5     |NULL      |NULL      |YES     
+TEST                |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+3 rows selected
+ij> DESCRIBE v1;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+I                   |INTEGER  |0   |10  |10    |NULL      |NULL      |NO      
+D                   |DECIMAL  |2   |10  |5     |NULL      |NULL      |YES     
+TEST                |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+3 rows selected
+ij> SHOW SCHEMAS;
+TABLE_SCHEM                   
+------------------------------
+APP                           
+NULLID                        
+SQLJ                          
+SYS                           
+SYSCAT                        
+SYSCS_DIAG                    
+SYSCS_UTIL                    
+SYSFUN                        
+SYSIBM                        
+SYSPROC                       
+SYSSTAT                       
+USER1                         
+12 rows selected
+ij> SHOW VIEWS IN USER1;
+TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
+------------------------------------------------------------------------
+USER1               |V1                            |                    
+1 row selected
+ij> SHOW PROCEDURES IN APP;
+PROCEDURE_SCHEM     |PROCEDURE_NAME                |REMARKS             
+------------------------------------------------------------------------
+APP                 |PROCTEST                      |a.b.c.d.e           
+1 row selected
+ij> SHOW SYNONYMS IN USER1;
+TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
+------------------------------------------------------------------------
+USER1               |T3                            |                    
+1 row selected
+ij> SHOW INDEXES FROM APP.t1;
+TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
+----------------------------------------------------------------------------
+T1                  |TEST                |true  |3   |A   |NULL    |NULL    
+1 row selected
+ij> 

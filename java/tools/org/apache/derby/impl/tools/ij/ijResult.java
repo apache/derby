@@ -54,6 +54,8 @@ interface ijResult {
 	ResultSet getNextRowOfResultSet();
 	Vector getVector();
 	SQLException getException();
+	int[] getColumnDisplayList();
+	int[] getColumnWidthList();
 
 	void closeStatement() throws SQLException ;
 

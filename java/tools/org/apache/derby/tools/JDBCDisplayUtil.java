@@ -258,18 +258,20 @@ public class JDBCDisplayUtil {
 	static public void DisplayResults(PrintWriter out, Statement stmt, Connection conn )
 		throws SQLException
 	{
-		indent_DisplayResults( out, stmt, conn, 0);			
+		indent_DisplayResults( out, stmt, conn, 0, null, null);			
 	}
 
 	static private void indent_DisplayResults
-	(PrintWriter out, Statement stmt, Connection conn, int indentLevel)
+	(PrintWriter out, Statement stmt, Connection conn, int indentLevel,
+	 int[] displayColumns, int[] displayColumnWidths)
 		throws SQLException {
 
 		checkNotNull(stmt, "Statement");
 
 		ResultSet rs = stmt.getResultSet();
 		if (rs != null) {
-			indent_DisplayResults(out, rs, conn, indentLevel);
+			indent_DisplayResults(out, rs, conn, indentLevel, 
+								  displayColumns, displayColumnWidths);
 			rs.close(); // let the result set go away
 		}
 		else {
@@ -297,20 +299,48 @@ public class JDBCDisplayUtil {
 	}
 
 	/**
+	    Calculates column display widths from the default widths of the
+	    result set.
+	 */
+	static private int[] getColumnDisplayWidths(ResultSetMetaData rsmd, int[] dispColumns,
+												boolean localizedOutput)
+		throws SQLException {
+		int count = (dispColumns == null) ? rsmd.getColumnCount() : dispColumns.length;
+		int[] widths = new int[count];
+
+		for(int i=0; i<count; i++) {
+			int colnum = (dispColumns == null) ? (i + 1) : dispColumns[i];
+			int dispsize = localizedOutput
+				? LocalizedResource.getInstance().getColumnDisplaySize(rsmd, colnum)
+                : rsmd.getColumnDisplaySize(colnum);
+			widths[i] = Math.min(maxWidth,
+				Math.max((rsmd.isNullable(colnum) == ResultSetMetaData.columnNoNulls)?
+				0 : MINWIDTH, dispsize));
+		}
+		return widths;
+	}
+
+
+	/**
 		@param out the place to write to
 		@param rs the ResultSet to display
 		@param conn the Connection against which the ResultSet was retrieved
+	    @param displayColumns Column numbers to display, or null if all
+	    @param displayColumnWidths Column widths, in characters, if displayColumns is specified.
 
 		@exception SQLException on JDBC access failure
 	 */
-	static public void DisplayResults(PrintWriter out, ResultSet rs, Connection conn)
+	static public void DisplayResults(PrintWriter out, ResultSet rs, Connection conn,
+									  int[] displayColumns, int[] displayColumnWidths)
 		throws SQLException
 	{
-		indent_DisplayResults( out, rs, conn, 0);
+		indent_DisplayResults( out, rs, conn, 0, displayColumns, 
+							   displayColumnWidths);
 	}
 
 	static private void indent_DisplayResults
-	(PrintWriter out, ResultSet rs, Connection conn, int indentLevel)
+	(PrintWriter out, ResultSet rs, Connection conn, int indentLevel, 
+	 int[] displayColumns, int[] displayColumnWidths)
 		throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		checkNotNull(rsmd, "ResultSetMetaData");
@@ -324,7 +354,11 @@ public class JDBCDisplayUtil {
 		else
 			nestedResults = null;
 
-		int len = indent_DisplayBanner(out,rsmd, indentLevel);
+		if(displayColumnWidths == null)
+			displayColumnWidths = getColumnDisplayWidths(rsmd, displayColumns,true);
+		
+		int len = indent_DisplayBanner(out,rsmd, indentLevel, displayColumns,
+									   displayColumnWidths);
 
 		// When displaying rows, keep going past errors
 		// unless/until the maximum # of errors is reached.
@@ -335,7 +369,9 @@ public class JDBCDisplayUtil {
 				doNext = rs.next();
 				if (doNext) {
 
-		    		DisplayRow(out, rs, rsmd, len, nestedResults, conn, indentLevel);
+		    		DisplayRow(out, rs, rsmd, len, nestedResults, conn, 
+							   indentLevel, displayColumns, 
+							   displayColumnWidths);
 					ShowWarnings(out, rs);
 					numberOfRowsSelected++;
 				}
@@ -392,7 +428,8 @@ public class JDBCDisplayUtil {
 			LocalizedResource.OutputWriter().println(b);
 			LocalizedResource.OutputWriter().println(LocalizedResource.getMessage("UT_Resul0", LocalizedResource.getNumber(i)));
 			LocalizedResource.OutputWriter().println(b);
-			indent_DisplayResults(out, (ResultSet) nr.elementAt(i), conn, indentLevel);
+			indent_DisplayResults(out, (ResultSet) nr.elementAt(i), conn,
+								  indentLevel, null, null);
 		}
 	}
 
@@ -409,10 +446,12 @@ public class JDBCDisplayUtil {
 	static public void DisplayNextRow(PrintWriter out, ResultSet rs, Connection conn )
 		throws SQLException
 	{
-		indent_DisplayNextRow( out, rs, conn, 0 );
+		indent_DisplayNextRow( out, rs, conn, 0, null, (rs == null) ? null
+							   : getColumnDisplayWidths(rs.getMetaData(), null, true));
 	}
 
-	static private void indent_DisplayNextRow(PrintWriter out, ResultSet rs, Connection conn, int indentLevel )
+	static private void indent_DisplayNextRow(PrintWriter out, ResultSet rs, Connection conn, int indentLevel,
+											  int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException {
 
 		Vector nestedResults;
@@ -431,8 +470,9 @@ public class JDBCDisplayUtil {
 
 		// Only print stuff out if there is a row to be had.
 		if (rs.next()) {
-			int rowLen = indent_DisplayBanner(out, rsmd, indentLevel);
-    		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel );
+			int rowLen = indent_DisplayBanner(out, rsmd, indentLevel, displayColumns, displayColumnWidths);
+    		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel,
+					   null, null );
 		}
 		else {
 			indentedPrintLine( out, indentLevel, LocalizedResource.getMessage("UT_NoCurreRow"));
@@ -458,10 +498,12 @@ public class JDBCDisplayUtil {
 	static public void DisplayCurrentRow(PrintWriter out, ResultSet rs, Connection conn )
 		throws SQLException
 	{
-		indent_DisplayCurrentRow( out, rs, conn, 0 );
+		indent_DisplayCurrentRow( out, rs, conn, 0, null, (rs == null) ? null
+								  : getColumnDisplayWidths(rs.getMetaData(), null, true) );
 	}
 
-	static private void indent_DisplayCurrentRow(PrintWriter out, ResultSet rs, Connection conn, int indentLevel )
+	static private void indent_DisplayCurrentRow(PrintWriter out, ResultSet rs, Connection conn, 
+												 int indentLevel, int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException {
 
 		Vector nestedResults;
@@ -481,8 +523,9 @@ public class JDBCDisplayUtil {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		checkNotNull(rsmd, "ResultSetMetaData");
 
-		int rowLen = indent_DisplayBanner(out, rsmd, indentLevel);
-   		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel );
+		int rowLen = indent_DisplayBanner(out, rsmd, indentLevel, displayColumns, displayColumnWidths);
+   		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel,
+				   displayColumns, displayColumnWidths );
 
 		ShowWarnings(out, rs);
 
@@ -504,42 +547,38 @@ public class JDBCDisplayUtil {
 	static public int DisplayBanner(PrintWriter out, ResultSetMetaData rsmd )
 		throws SQLException
 	{
-		return indent_DisplayBanner( out, rsmd, 0 );
+		return indent_DisplayBanner( out, rsmd, 0, null, 
+									 getColumnDisplayWidths(rsmd, null, true) );
 	}
 
-	static private int indent_DisplayBanner(PrintWriter out, ResultSetMetaData rsmd, int indentLevel )
+	static private int indent_DisplayBanner(PrintWriter out, ResultSetMetaData rsmd, int indentLevel,
+											int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException	{
 
 		StringBuffer buf = new StringBuffer();
 
-		int numCols = rsmd.getColumnCount();
+		int numCols = displayColumnWidths.length;
 		int rowLen;
 
 		// do some precalculation so the buffer is allocated only once
 		// buffer is twice as long as the display length plus one for a newline
 		rowLen = (numCols - 1); // for the column separators
-		for (int i=1; i <= numCols; i++) {
-			rowLen += Math.min(maxWidth,
-				Math.max((rsmd.isNullable(i) == 
-							ResultSetMetaData.columnNoNulls)?
-							0 : MINWIDTH, LocalizedResource.getInstance().getColumnDisplaySize(rsmd, i)));
-		}
+		for (int i=1; i <= numCols; i++)
+			rowLen += displayColumnWidths[i-1];
 		buf.ensureCapacity(rowLen);
 
 		// get column header info
 		// truncate it to the column display width
 		// add a bar between each item.
 		for (int i=1; i <= numCols; i++) {
+			int colnum = displayColumns==null ? i : displayColumns[i-1];
 
 			if (i>1)
 				buf.append('|');
 
-			String s = rsmd.getColumnLabel(i);
+			String s = rsmd.getColumnLabel(colnum);
 
-			int w = Math.min(maxWidth,
-				Math.max(((rsmd.isNullable(i) == 
-							ResultSetMetaData.columnNoNulls)?
-							0 : MINWIDTH), LocalizedResource.getInstance().getColumnDisplaySize(rsmd, i)));
+			int w = displayColumnWidths[i-1];
 
 			if (s.length() < w) {
 				
@@ -592,34 +631,39 @@ public class JDBCDisplayUtil {
 		@param nestedResults
 		@param conn
 		@param indentLevel number of tab stops to indent line
+	    @param displayColumns A list of column numbers to display
+	    @param displayColumnWidths If displayColumns is set, the width of
+								columns to display, in characters.
 
 		@exception SQLException thrown on JDBC access failure
 	 */
-	static private void DisplayRow(PrintWriter out, ResultSet rs, ResultSetMetaData rsmd, int rowLen, Vector nestedResults, Connection conn, int indentLevel )
+	static private void DisplayRow(PrintWriter out, ResultSet rs, ResultSetMetaData rsmd, int rowLen, Vector nestedResults, Connection conn, int indentLevel,
+								   int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException
 	{
 		StringBuffer buf = new StringBuffer();
 		buf.ensureCapacity(rowLen);
 
-		int numCols = rsmd.getColumnCount();
+		int numCols = displayColumnWidths.length;
 		int i;
 
 		// get column header info
 		// truncate it to the column display width
 		// add a bar between each item.
 		for (i=1; i <= numCols; i++){
+			int colnum = displayColumns==null ? i : displayColumns[i-1];
 			if (i>1)
 				buf.append('|');
 
 			String s;
-			switch (rsmd.getColumnType(i)) {
+			switch (rsmd.getColumnType(colnum)) {
 			default:
-				s = LocalizedResource.getInstance().getLocalizedString(rs, rsmd, i );
+				s = LocalizedResource.getInstance().getLocalizedString(rs, rsmd, colnum );
 				break;
 			case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
 			case Types.OTHER:
 			{
-				Object o = rs.getObject(i);
+				Object o = rs.getObject(colnum);
 				if (o == null) { s = "NULL"; }
 				else if (o instanceof ResultSet && nestedResults != null)
 				{
@@ -629,7 +673,7 @@ public class JDBCDisplayUtil {
 				else
 				{
 					try {
-						s = rs.getString(i);
+						s = rs.getString(colnum);
 					} catch (SQLException se) {
 						// oops, they don't support refetching the column
 						s = o.toString();
@@ -640,10 +684,7 @@ public class JDBCDisplayUtil {
 			}
 			if (s==null) s = "NULL";
 
-			int w = Math.min(maxWidth,
-				Math.max((rsmd.isNullable(i) == 
-							ResultSetMetaData.columnNoNulls)?
-							0 : MINWIDTH, LocalizedResource.getInstance().getColumnDisplaySize(rsmd, i)));
+			int w = displayColumnWidths[i-1];
 			if (s.length() < w) {
 				StringBuffer fullS = new StringBuffer(s);
 				fullS.ensureCapacity(w);
@@ -816,18 +857,20 @@ public class JDBCDisplayUtil {
 	static public void DisplayResults(PrintStream out, Statement stmt, Connection conn )
 		throws SQLException
 	{
-		indent_DisplayResults( out, stmt, conn, 0);			
+		indent_DisplayResults( out, stmt, conn, 0, null, null);			
 	}
 
 	static private void indent_DisplayResults
-	(PrintStream out, Statement stmt, Connection conn, int indentLevel)
+	(PrintStream out, Statement stmt, Connection conn, int indentLevel,
+	 int[] displayColumns, int[] displayColumnWidths)
 		throws SQLException {
 
 		checkNotNull(stmt, "Statement");
 
 		ResultSet rs = stmt.getResultSet();
 		if (rs != null) {
-			indent_DisplayResults(out, rs, conn, indentLevel);
+			indent_DisplayResults(out, rs, conn, indentLevel, displayColumns,
+								  displayColumnWidths);
 			rs.close(); // let the result set go away
 		}
 		else {
@@ -852,11 +895,12 @@ public class JDBCDisplayUtil {
 	static public void DisplayResults(PrintStream out, ResultSet rs, Connection conn)
 		throws SQLException
 	{
-		indent_DisplayResults( out, rs, conn, 0);
+		indent_DisplayResults( out, rs, conn, 0, null, null);
 	}
 
 	static private void indent_DisplayResults
-	(PrintStream out, ResultSet rs, Connection conn, int indentLevel)
+	(PrintStream out, ResultSet rs, Connection conn, int indentLevel,
+	 int[] displayColumns, int[] displayColumnWidths)
 		throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		checkNotNull(rsmd, "ResultSetMetaData");
@@ -870,7 +914,11 @@ public class JDBCDisplayUtil {
 		else
 			nestedResults = null;
 
-		int len = indent_DisplayBanner(out,rsmd, indentLevel);
+		if(displayColumnWidths == null)
+			displayColumnWidths = getColumnDisplayWidths(rsmd, displayColumns, false);
+
+		int len = indent_DisplayBanner(out,rsmd, indentLevel, displayColumns,
+									   displayColumnWidths);
 
 		// When displaying rows, keep going past errors
 		// unless/until the maximum # of errors is reached.
@@ -881,7 +929,9 @@ public class JDBCDisplayUtil {
 				doNext = rs.next();
 				if (doNext) {
 
-		    		DisplayRow(out, rs, rsmd, len, nestedResults, conn, indentLevel);
+		    		DisplayRow(out, rs, rsmd, len, nestedResults, conn, 
+							   indentLevel, displayColumns, 
+							   displayColumnWidths);
 					ShowWarnings(out, rs);
 					numberOfRowsSelected++;
 				}
@@ -930,17 +980,20 @@ public class JDBCDisplayUtil {
 			System.out.println(b);
 			System.out.println(s+i+" +");
 			System.out.println(b);
-			indent_DisplayResults(out, (ResultSet) nr.elementAt(i), conn, indentLevel);
+			indent_DisplayResults(out, (ResultSet) nr.elementAt(i), conn, 
+								  indentLevel, null, null);
 		}
 	}
 
 	static public void DisplayNextRow(PrintStream out, ResultSet rs, Connection conn )
 		throws SQLException
 	{
-		indent_DisplayNextRow( out, rs, conn, 0 );
+		indent_DisplayNextRow( out, rs, conn, 0, null, (rs == null) ? null
+							   : getColumnDisplayWidths(rs.getMetaData(),null,false) );
 	}
 
-	static private void indent_DisplayNextRow(PrintStream out, ResultSet rs, Connection conn, int indentLevel )
+	static private void indent_DisplayNextRow(PrintStream out, ResultSet rs, Connection conn, int indentLevel,
+											  int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException {
 
 		Vector nestedResults;
@@ -959,8 +1012,9 @@ public class JDBCDisplayUtil {
 
 		// Only print stuff out if there is a row to be had.
 		if (rs.next()) {
-			int rowLen = indent_DisplayBanner(out, rsmd, indentLevel);
-    		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel );
+			int rowLen = indent_DisplayBanner(out, rsmd, indentLevel, null, null);
+    		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel,
+					   displayColumns, displayColumnWidths);
 		}
 		else {
 			indentedPrintLine( out, indentLevel, LocalizedResource.getMessage("UT_NoCurreRow"));
@@ -976,10 +1030,12 @@ public class JDBCDisplayUtil {
 	static public void DisplayCurrentRow(PrintStream out, ResultSet rs, Connection conn )
 		throws SQLException
 	{
-		indent_DisplayCurrentRow( out, rs, conn, 0 );
+		indent_DisplayCurrentRow( out, rs, conn, 0, null, (rs == null) ? null
+								  : getColumnDisplayWidths(rs.getMetaData(),null,false) );
 	}
 
-	static private void indent_DisplayCurrentRow(PrintStream out, ResultSet rs, Connection conn, int indentLevel )
+	static private void indent_DisplayCurrentRow(PrintStream out, ResultSet rs, Connection conn, 
+												 int indentLevel, int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException {
 
 		Vector nestedResults;
@@ -999,8 +1055,9 @@ public class JDBCDisplayUtil {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		checkNotNull(rsmd, "ResultSetMetaData");
 
-		int rowLen = indent_DisplayBanner(out, rsmd, indentLevel);
-   		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel );
+		int rowLen = indent_DisplayBanner(out, rsmd, indentLevel, displayColumns, displayColumnWidths);
+   		DisplayRow(out, rs, rsmd, rowLen, nestedResults, conn, indentLevel,
+				   displayColumns, displayColumnWidths);
 
 		ShowWarnings(out, rs);
 
@@ -1012,26 +1069,24 @@ public class JDBCDisplayUtil {
 	static public int DisplayBanner(PrintStream out, ResultSetMetaData rsmd )
 		throws SQLException
 	{
-		return indent_DisplayBanner( out, rsmd, 0 );
+		return indent_DisplayBanner( out, rsmd, 0, null,
+									 getColumnDisplayWidths(rsmd,null,false) );
 	}
 
-	static private int indent_DisplayBanner(PrintStream out, ResultSetMetaData rsmd, int indentLevel )
+	static private int indent_DisplayBanner(PrintStream out, ResultSetMetaData rsmd, int indentLevel,
+											int[] displayColumns, int[] displayColumnWidths )
 		throws SQLException	{
 
 		StringBuffer buf = new StringBuffer();
 
-		int numCols = rsmd.getColumnCount();
+		int numCols = displayColumnWidths.length;
 		int rowLen;
 
 		// do some precalculation so the buffer is allocated only once
 		// buffer is twice as long as the display length plus one for a newline
 		rowLen = (numCols - 1); // for the column separators
 		for (int i=1; i <= numCols; i++) {
-			rowLen += Math.min(maxWidth,
-				Math.max((rsmd.isNullable(i) == 
-							ResultSetMetaData.columnNoNulls)?
-							0 : MINWIDTH,
-						rsmd.getColumnDisplaySize(i)));
+			rowLen += displayColumnWidths[i-1];
 		}
 		buf.ensureCapacity(rowLen);
 
@@ -1039,17 +1094,14 @@ public class JDBCDisplayUtil {
 		// truncate it to the column display width
 		// add a bar between each item.
 		for (int i=1; i <= numCols; i++) {
+			int colnum = displayColumns==null ? i : displayColumns[i-1];
 
 			if (i>1)
 				buf.append('|');
 
-			String s = rsmd.getColumnLabel(i);
+			String s = rsmd.getColumnLabel(colnum);
 
-			int w = Math.min(maxWidth,
-				Math.max(((rsmd.isNullable(i) == 
-							ResultSetMetaData.columnNoNulls)?
-							0 : MINWIDTH),
-						rsmd.getColumnDisplaySize(i)));
+			int w = displayColumnWidths[i-1];
 
 			if (s.length() < w) {
 				// build a string buffer to hold the whitespace
@@ -1095,31 +1147,33 @@ public class JDBCDisplayUtil {
 		return rowLen;
 	} // DisplayBanner
 
-	static private void DisplayRow(PrintStream out, ResultSet rs, ResultSetMetaData rsmd, int rowLen, Vector nestedResults, Connection conn, int indentLevel )
+	static private void DisplayRow(PrintStream out, ResultSet rs, ResultSetMetaData rsmd, int rowLen, Vector nestedResults, Connection conn, int indentLevel,
+								   int[] displayColumns, int[] displayColumnWidths)
 		throws SQLException
 	{
 		StringBuffer buf = new StringBuffer();
 		buf.ensureCapacity(rowLen);
 
-		int numCols = rsmd.getColumnCount();
+		int numCols = displayColumnWidths.length;
 		int i;
 
 		// get column header info
 		// truncate it to the column display width
 		// add a bar between each item.
 		for (i=1; i <= numCols; i++){
+			int colnum = displayColumns==null ? i : displayColumns[i-1];
 			if (i>1)
 				buf.append('|');
 
 			String s;
-			switch (rsmd.getColumnType(i)) {
+			switch (rsmd.getColumnType(colnum)) {
 			default:
-				s = rs.getString(i);
+				s = rs.getString(colnum);
 				break;
 			case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
 			case Types.OTHER:
 			{
-				Object o = rs.getObject(i);
+				Object o = rs.getObject(colnum);
 				if (o == null) { s = "NULL"; }
 				else if (o instanceof ResultSet && nestedResults != null)
 				{
@@ -1129,7 +1183,7 @@ public class JDBCDisplayUtil {
 				else
 				{
 					try {
-						s = rs.getString(i);
+						s = rs.getString(colnum);
 					} catch (SQLException se) {
 						// oops, they don't support refetching the column
 						s = o.toString();
@@ -1141,11 +1195,7 @@ public class JDBCDisplayUtil {
 
 			if (s==null) s = "NULL";
 
-			int w = Math.min(maxWidth,
-				Math.max((rsmd.isNullable(i) == 
-							ResultSetMetaData.columnNoNulls)?
-							0 : MINWIDTH,
-						rsmd.getColumnDisplaySize(i)));
+			int w = displayColumnWidths[i-1];
 			if (s.length() < w) {
 				StringBuffer fullS = new StringBuffer(s);
 				fullS.ensureCapacity(w);

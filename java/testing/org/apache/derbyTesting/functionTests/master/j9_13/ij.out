@@ -49,6 +49,12 @@ help;
   DISCONNECT [ CURRENT | connectionName | ALL ];
                                -- drop current, named, or all connections;
                                -- the default is CURRENT
+  SHOW SCHEMAS;                -- lists all schemas in the current database
+  SHOW [ TABLES | VIEWS | PROCEDURES | SYNONYMS ] { IN schema };
+                               -- lists tables, views, procedures or synonyms
+  SHOW INDEXES { IN schema | FROM table };
+                               -- lists indexes in a schema, or for a table
+  DESCRIBE name;               -- lists columns in the named table
   COMMIT;                      -- commits the current transaction
   ROLLBACK;                    -- rolls back the current transaction
   PREPARE name AS 'SQL-J text'; -- prepares the SQL-J text
