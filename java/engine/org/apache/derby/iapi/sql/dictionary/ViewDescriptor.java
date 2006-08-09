@@ -268,19 +268,20 @@ public final class ViewDescriptor extends TupleDescriptor
 			*/
 		    case DependencyManager.SET_CONSTRAINTS_ENABLE:
 		    case DependencyManager.SET_TRIGGERS_ENABLE:
-		    //Notice that REVOKE_EXECUTE_PRIVILEGE is not included here.
-		    //This is because Derby supports only RESTRICT form of revoke 
-		    //execute and that means that if there are any dependent objects 
-		    //on execute permission on routine, revoke execute on that 
-		    //routine should fail
-		    //
-		    //For all the other types of revoke privileges, for instance,
-		    //SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER, we don't 
-		    //do anything here and later in makeInvalid, we make the 
-		    //ViewDescriptor drop itself. 
+			//When REVOKE_PRIVILEGE gets sent (this happens for privilege 
+			//types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
+			//don't do anything here. Later in makeInvalid method, we make  
+			//the ViewDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
 		    	break;
 
+			//Notice that REVOKE_PRIVILEGE_RESTRICT is not caught earlier.
+		    //It gets handled in this default: action where an exception
+		    //will be thrown. This is because, if such an invalidation 
+		    //action type is ever received by a dependent, the dependent 
+		    //show throw an exception.
+			//In Derby, at this point, REVOKE_PRIVILEGE_RESTRICT gets sent
+		    //when execute privilege on a routine is getting revoked.
 		    default:
 
 				DependencyManager dm;
@@ -306,9 +307,7 @@ public final class ViewDescriptor extends TupleDescriptor
 	{
 		switch ( action )
 		{
-			/* creating or dropping another publication won't affect
-			 * this view. so we allow these actions.
-			 * We don't care about creating or dropping indexes or
+			/* We don't care about creating or dropping indexes or
 			 * alter table on an underlying table.
 			 */
 		    case DependencyManager.CREATE_INDEX:
@@ -327,12 +326,9 @@ public final class ViewDescriptor extends TupleDescriptor
 			case DependencyManager.TRUNCATE_TABLE:
 				break;
 
-	    	//Notice that REVOKE_EXECUTE_PRIVILEGE is not included here.
-	    	//This is because Derby supports only RESTRICT form of revoke 
-		    //execute and that means that if there are any dependent 
-		    //objects on execute permission on routine, revoke execute on 
-		    //that routine should fail. This behvaior for revoke execute
-		    //gets implemented in prepareToInvalidate method
+			//When REVOKE_PRIVILEGE gets sent (this happens for privilege 
+			//types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
+			//make the ViewDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
 				dropViewWork(getDataDictionary(), 
 						getDataDictionary().getDependencyManager(), lcc,

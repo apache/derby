@@ -79,8 +79,11 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 		for( Iterator itr = grantees.iterator(); itr.hasNext();)
 		{
 			String grantee = (String) itr.next();
-			if (dd.addRemovePermissionsDescriptor( grant, routinePermsDesc, grantee, tc))					
-        		dd.getDependencyManager().invalidateFor(routinePermsDesc, DependencyManager.REVOKE_EXECUTE_PRIVILEGE, lcc);
+			if (dd.addRemovePermissionsDescriptor( grant, routinePermsDesc, grantee, tc))
+				//Derby currently supports only restrict form of revoke execute
+				//privilege and that is why, we are sending invalidation action 
+				//as REVOKE_PRIVILEGE_RESTRICT rather than REVOKE_PRIVILEGE
+        		dd.getDependencyManager().invalidateFor(routinePermsDesc, DependencyManager.REVOKE_PRIVILEGE_RESTRICT, lcc);
 
 		}
 	} // end of executeConstantAction

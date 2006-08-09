@@ -839,8 +839,8 @@ public class BasicDependencyManager implements DependencyManager {
 		    case REVOKE_PRIVILEGE:
 			    return "REVOKE PRIVILEGE";
 
-		    case REVOKE_EXECUTE_PRIVILEGE:
-			    return "REVOKE EXECUTE PRIVILEGE";
+		    case REVOKE_PRIVILEGE_RESTRICT:
+			    return "REVOKE PRIVILEGE RESTRICT";
 			    			   
 			default:
 				if (SanityManager.DEBUG)

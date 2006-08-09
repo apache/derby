@@ -309,11 +309,20 @@ public interface DependencyManager {
 	//  UPDATE and DELETE privileges. For all these privilege types,
 	//  a revoke statement causes the dependents to drop
 	public static final int REVOKE_PRIVILEGE = 44;
-	//A special action for revoke execute...restrict privilege. This is
-	//  because when revoke execute ... restrict is issued, the dependents
-	//  need to throw an exception. As long as there are dependent objects
-	//  on the execute privilege, the execute privilege can't be revoked.
-	public static final int REVOKE_EXECUTE_PRIVILEGE = 45;
+	
+	//This special revoke action is for when revoke should fail if
+	//  there are dependents on the privilege being revoked. When
+	//  such an action type is received by any dependents, they 
+	//  should throw an exception. Such a form of revoke will succeed
+	//  only if there are no dependents on the privilege being revoked.
+	//
+	//Currently, this is supported only for execute privilege on a
+	//  routine. In Derby, at this point, execute privilege on a
+	//  routine can be revoked only if there are no dependents on
+	//  that privilege. So, when a revoke execute..,restrict is
+	//  issued, this invalidation action will be sent to all
+	//  it's dependents.
+	public static final int REVOKE_PRIVILEGE_RESTRICT = 45;
 
     /**
      * Extensions to this interface may use action codes > MAX_ACTION_CODE without fear of
