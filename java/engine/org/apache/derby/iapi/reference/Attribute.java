@@ -222,13 +222,25 @@ public interface Attribute {
 	 */
 	String RESTORE_FROM = "restoreFrom";
 
-	
 	/**
 		The attribute that is used to request a roll-forward recovery of the database.
 	*/
 	String ROLL_FORWARD_RECOVERY_FROM = "rollForwardRecoveryFrom";
 
+    /**
+     * securityMechanism sets the DRDA mechanism in-use for the client.
+     * Internal only.
+     */
+    String CLIENT_SECURITY_MECHANISM = "securityMechanism";
 
+    /**
+     * Internal attributes. Mainly used by DRDA and Derby BUILTIN
+     * authentication provider in some security mechanism context
+     * (SECMEC_USRSSBPWD).
+     *
+     * DRDA_SECTKN_IN is the random client seed (RDs)
+     * DRDA_SECTKN_OUT is the random server seed (RDr)
+     */
+    String DRDA_SECTKN_IN = "drdaSecTokenIn";
+    String DRDA_SECTKN_OUT = "drdaSecTokenOut";
 }
-
-

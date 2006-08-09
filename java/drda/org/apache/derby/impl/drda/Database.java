@@ -35,6 +35,7 @@ import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+
 /**
 	Database stores information about the current database
 	It is used so that a session may have more than one database
@@ -50,12 +51,13 @@ class Database
 	protected String password;			// password
 	protected String decryptedUserId;	// Decrypted User id
 	protected String decryptedPassword;	// Decrypted password
+    protected byte[] passwordSubstitute;// password substitute - SECMEC_USRSSBPWD
 	protected boolean rdbAllowUpdates = true; // Database allows updates -default is true		
 	protected int	accessCount;		// Number of times we have tried to
 										// set up access to this database (only 1 
 										// allowed)
-	protected byte[] publicKeyIn;		// Security token from app requester
-	protected byte[] publicKeyOut;		// Security token sent to app requester
+    protected byte[] secTokenIn;		// Security token from app requester
+    protected byte[] secTokenOut;		// Security token sent to app requester
 	protected byte[] crrtkn;			// Correlation token
 	protected String typDefNam;			// Type definition name
 	protected int byteOrder;			//deduced from typDefNam, save String comparisons
@@ -223,8 +225,8 @@ class Database
 	{
 		p.put(Attribute.USERNAME_ATTR, userId);
                 
-                // take care of case of SECMEC_USRIDONL
-                if(password != null) 
+        // take care of case of SECMEC_USRIDONL
+        if (password != null) 
 		    p.put(Attribute.PASSWORD_ATTR, password);
                 
         // Contract between network server and embedded engine
@@ -232,12 +234,37 @@ class Database
         EngineConnection conn = (EngineConnection)
             NetworkServerControlImpl.getDriver().connect(Attribute.PROTOCOL
 							 + shortDbName + attrString, p);
-		if(conn != null){
+		if (conn != null) {
 			conn.setAutoCommit(false);
 		}
 		setConnection(conn);
 	}
 
+    /**
+     * This makes a dummy connection to the database in order to 
+     * boot and/or create this last one. If database cannot
+     * be found or authentication does not succeed, this will throw
+     * a SQLException which we catch and do nothing. We don't pass a
+     * userid and password here as we don't need to for the purpose
+     * of this method - main goal is to cause the database to be
+     * booted via a dummy connection.
+     */
+    void makeDummyConnection()
+    {
+        try {
+            // Contract between network server and embedded engine
+            // is that any connection returned implements EngineConnection.
+            EngineConnection conn = (EngineConnection)
+                NetworkServerControlImpl.getDriver().connect(Attribute.PROTOCOL
+                    + shortDbName + attrString, new Properties());
+
+            // If we succeeded in getting a connection, well just close it
+            if (conn != null) {
+                conn.close();
+            }
+        } catch (SQLException se) {} // Simply do nothing
+    }
+    
 	// Create string to pass to DataSource.setConnectionAttributes
 	String appendAttrString(Properties p)
 	{
@@ -248,7 +275,7 @@ class Database
 		while (pKeys.hasMoreElements()) 
 		{
 			String key = (String) pKeys.nextElement();
-			attrString +=";" + key  +"=" + p.getProperty(key);
+			attrString +=";" + key  + "=" + p.getProperty(key);
 		}
 
 		return attrString;
@@ -386,28 +413,15 @@ class Database
     public void reset()
     {
         // Reset variables for connection re-use. Currently only takes care
-        // of reset the variables that affect EUSRIDPWD security mechanism.  (DERBY-1080)
+        // of reset the variables that affect EUSRIDPWD and USRSSBPWD
+        // security mechanisms.  (DERBY-1080)
         decryptedUserId = null;
         decryptedPassword = null;
-        publicKeyIn = null;
-        publicKeyOut = null;
+        passwordSubstitute = null;
+        secTokenIn = null;
+        secTokenOut = null;
         userId = null;
         password = null;
         securityMechanism = 0;
     }
-        
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

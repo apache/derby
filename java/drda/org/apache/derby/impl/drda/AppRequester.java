@@ -121,6 +121,19 @@ class AppRequester
 	}
 
 	/**
+	 * Returns true if Derby's client driver supports SECMEC_USRSSBPWD 
+	 * DRDA security mechanism.
+	 */
+	protected boolean supportsSecMecUSRSSBPWD()
+	{
+		return
+			(
+			    ( clientType == DNC_CLIENT ) &&
+			    ( greaterThanOrEqualTo( 10, 2, 0 ) )
+			);
+	}
+
+	/**
 	 * Check if the client expects QRYCLSIMP to be supported when the
 	 * protocol is LMTBLKPRC.
 	 *

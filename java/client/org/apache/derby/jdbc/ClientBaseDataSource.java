@@ -201,6 +201,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // <li> CLEAR_TEXT_PASSWORD_SECURITY
     // <li> ENCRYPTED_PASSWORD_SECURITY
     // <li> ENCRYPTED_USER_AND_PASSWORD_SECURITY - both password and user are encrypted
+    // <li> STRONG_PASSWORD_SUBSTITUTE_SECURITY
     // </ul>
     // The default security mechanism is USER_ONLY_SECURITY.
     // <p>
@@ -209,7 +210,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // If the specified security mechanism is not supported by the conversation
     // then an exception will be thrown and there will be no additional retries.
     // <p>
-    // This property is currently only available for the  DNC driver.
+    // This property is currently only available for the DNC driver.
     // <p>
     // Both user and password need to be set for all security mechanism except USER_ONLY_SECURITY
     // When using USER_ONLY_SECURITY, only the user property needs to be specified.
@@ -229,13 +230,12 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // If the security mechanism is not explicitly set as mentioned above, in that case
     // the Client will try to upgrade the security mechanism to a more secure one, if possible.
     // @see #getUpgradedSecurityMechanism
-    // Therefore, need to keep track if the seurityMechanism has been explicitly set 
+    // Therefore, need to keep track if the securityMechanism has been explicitly set 
     protected short securityMechanism = SECMEC_HAS_NOT_EXPLICITLY_SET;
-    // TODO default  should be  USER_ONLY_SECURITY. Change when working on
-    // Network Server
-    //  public final static short propertyDefault_securityMechanism = (short)
-    //  org.apache.derby.client.net.NetConfiguration.SECMEC_USRIDONL;
-    public final static short propertyDefault_securityMechanism = (short) NetConfiguration.SECMEC_USRIDONL;
+
+    //  Default security mechanism is USER_ONLY_SECURITY.
+    public final static short propertyDefault_securityMechanism =
+                                    (short) NetConfiguration.SECMEC_USRIDONL;
 
     
     // We use the NET layer constants to avoid a mapping for the NET driver.
@@ -248,7 +248,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      */
     public static short getSecurityMechanism(Properties properties) {
         short secmec;
-        String securityMechanismString = properties.getProperty(Attribute.CLIENT_SECURITY_MECHANISM);
+        String securityMechanismString =
+            properties.getProperty(Attribute.CLIENT_SECURITY_MECHANISM);
+
         if ( securityMechanismString != null )
         {
             // security mechanism has been set, do not override, but instead return
@@ -269,16 +271,17 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     }
 
     /**
-     * This method has logic to upgrade security mechanism to a better (more secure) one 
-     * if it is possible.   Currently derby server only has support for USRIDPWD,USRIDONL,
-     * EUSRIDPWD and this method only considers these possibilities. 
-     * USRIDPWD, EUSRIDPWD require a password, USRIDONL is the only security mechanism
-     * which does not require password.
+     * This method has logic to upgrade security mechanism to a better (more secure)
+     * one if it is possible. Currently derby server only has support for USRIDPWD,
+     * USRIDONL, EUSRIDPWD and USRSSBPWD (10.2+) - this method only considers these
+     * possibilities. USRIDPWD, EUSRIDPWD and USRSSBPWD require a password, USRIDONL
+     * is the only security mechanism which does not require password.
      * 1. if password is not available, then security mechanism possible is USRIDONL
      * 2. if password is available, if client supports EUSRIDPWD, then EUSRIDPWD is 
      * returned
-     * 3. if password is available, if client does not support EUSRIDPWD, then USRIDPWD
-     * is returned.
+     * 3. if password is available, if client does not support EUSRIDPWD, then
+     * USRIDPWD is returned.
+     *
      * @param password password argument 
      * @return upgraded security mechanism if possible
      */
@@ -288,8 +291,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         if ( password == null )
             return propertyDefault_securityMechanism;
 
-        // if password is available, then a security mechanism is picked in following
-        // order if support is available
+        // if password is available, then a security mechanism is picked in
+        // following order if support is available.
         // 1. EUSRIDPWD
         // 2. USRIDPWD
         // when we have support for more security mechanisms on server 
@@ -299,7 +302,18 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         if (SUPPORTS_EUSRIDPWD)
             return (short)NetConfiguration.SECMEC_EUSRIDPWD;
         else 
+            // IMPORTANT NOTE:
+            // --------------
+            // If DERBY-1517 can be fixed, we should default to
+            // SECMEC_USRSSBPWD (strong password substitute).
+            // Until then, connecting with a 10.2+ client to
+            // a derby server < 10.2, and hence does not support
+            // SECMEC_USRSSBPWD as a SECMEC, will cause a DRDA protocol
+            // exception, as described in DERBY-926).
+            // 
+            // return (short)NetConfiguration.SECMEC_USRSSBPWD;
             return (short)NetConfiguration.SECMEC_USRIDPWD;
+
     }
 
     // ---------------------------- getServerMessageTextOnGetMessage -----------------------------------
@@ -716,8 +730,12 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     /**
      * The source security mechanism to use when connecting to this data source.
      * <p/>
-     * Security mechanism options are: <ul> <li> USER_ONLY_SECURITY <li> CLEAR_TEXT_PASSWORD_SECURITY <li>
-     * ENCRYPTED_PASSWORD_SECURITY <li> ENCRYPTED_USER_AND_PASSWORD_SECURITY - both password and user are encrypted
+     * Security mechanism options are: <ul>
+     * <li> USER_ONLY_SECURITY
+     * <li> CLEAR_TEXT_PASSWORD_SECURITY
+     * <li> ENCRYPTED_PASSWORD_SECURITY
+     * <li> ENCRYPTED_USER_AND_PASSWORD_SECURITY - both password and user are encrypted
+     * <li> STRONG_PASSWORD_SUBSTITUTE_SECURITY
      * </ul> The default security mechanism is USER_ONLY SECURITY
      * <p/>
      * If the application specifies a security mechanism then it will be the only one attempted. If the specified
@@ -733,6 +751,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static short CLEAR_TEXT_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_USRIDPWD;
     public final static short ENCRYPTED_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_USRENCPWD;
     public final static short ENCRYPTED_USER_AND_PASSWORD_SECURITY = (short) NetConfiguration.SECMEC_EUSRIDPWD;
+    public final static short STRONG_PASSWORD_SUBSTITUTE_SECURITY = (short) NetConfiguration.SECMEC_USRSSBPWD;
 
     /**
      * sets the security mechanism
@@ -859,8 +878,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     }
 
 
-
-
     // --- private helper methods
 
 
@@ -888,15 +905,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         if (prop.containsKey(Attribute.CLIENT_TRACE_APPEND)) {
             setTraceFileAppend(getTraceFileAppend(prop));
         }
-        if (prop.containsKey(Attribute.CLIENT_SECURITY_MECHANISM)) {
-            setSecurityMechanism(getSecurityMechanism(prop));
-        }
         if (prop.containsKey(Attribute.CLIENT_RETIEVE_MESSAGE_TEXT)) {
             setRetrieveMessageText(getRetrieveMessageText(prop));
         }
     }
-
-
 }
-
-

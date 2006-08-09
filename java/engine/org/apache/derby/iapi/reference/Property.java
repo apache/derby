@@ -774,6 +774,7 @@ public interface Property {
      * USER_ONLY_SECURITY
      * CLEAR_TEXT_PASSWORD_SECURITY
      * ENCRYPTED_USER_AND_PASSWORD_SECURITY
+     * STRONG_PASSWORD_SUBSTITUTE_SECURITY
      * <BR>
      * if derby.drda.securityMechanism is set to a valid mechanism, then
      * the Network Server accepts only connections which use that

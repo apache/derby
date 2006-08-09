@@ -156,12 +156,14 @@ public class NetConfiguration {
     // Indicates userid/password security mechanism.
     public static final int SECMEC_USRIDPWD = 0x03;
 
-
     //Indicates Encrypted userid and Encrypted Security-sensitive Data security mechanism
     public static final int SECMEC_EUSRIDDTA = 0x0C;
 
     //Indicates Encrypted userid,Encrypted password and Encrypted Security-sensitive Data security mechanism
     public static final int SECMEC_EUSRPWDDTA = 0x0D;
+
+    // Indicates userid with strong password substitute security mechanism.
+    public static final int SECMEC_USRSSBPWD = 0x08;
 
     // list of security mechanisms supported by this driver
     static final int[] SECMGR_SECMECS = {NetConfiguration.SECMEC_EUSRIDPWD,
@@ -169,7 +171,8 @@ public class NetConfiguration {
                                          NetConfiguration.SECMEC_USRIDPWD,
                                          NetConfiguration.SECMEC_USRIDONL,
                                          NetConfiguration.SECMEC_EUSRIDDTA,
-                                         NetConfiguration.SECMEC_EUSRPWDDTA};
+                                         NetConfiguration.SECMEC_EUSRPWDDTA,
+                                         NetConfiguration.SECMEC_USRSSBPWD};
 
 
     // IEEE ASCII constant.

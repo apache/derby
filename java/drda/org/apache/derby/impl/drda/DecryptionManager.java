@@ -35,6 +35,7 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.sql.SQLException;
 import java.math.BigInteger;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * This class is used to decrypt password and/or userid.
@@ -88,6 +89,10 @@ class DecryptionManager
   private KeyPair keyPair_;
   private KeyAgreement keyAgreement_;
   private DHParameterSpec paramSpec_;
+
+  // Random Number Generator (PRNG) Algorithm
+  private final static String SHA_1_PRNG_ALGORITHM = "SHA1PRNG";
+  private final static int SECMEC_USRSSBPWD_SEED_LEN = 8;  // Seed length
 
   /**
    * EncryptionManager constructor. In this constructor,DHParameterSpec,
@@ -381,4 +386,109 @@ class DecryptionManager
     }
     return plainText;
   }
+
+    /**
+     * This method generates an 8-Byte random seed.
+     *
+     * Required for the SECMEC_USRSSBPWD security mechanism
+     *
+     * @return a random 8-Byte seed.
+     */
+    protected static byte[] generateSeed() throws SQLException {
+        java.security.SecureRandom secureRandom = null;
+        try {
+          // We're verifying that we can instantiate a randon number
+          // generator (PRNG).
+          secureRandom =
+              java.security.SecureRandom.getInstance(SHA_1_PRNG_ALGORITHM);
+        } catch (java.security.NoSuchAlgorithmException nsae) {
+            throw new SQLException(
+                    "java.security.NoSuchAlgorithmException is caught" +
+                    " when initializing DecryptionManager '" +
+                    nsae.getMessage() + "'");
+        }
+        byte randomSeedBytes[] = new byte[SECMEC_USRSSBPWD_SEED_LEN];
+        secureRandom.setSeed(secureRandom.generateSeed(
+                                        SECMEC_USRSSBPWD_SEED_LEN));
+        secureRandom.nextBytes(randomSeedBytes);
+        // Return the 8-byte generated random seed
+        return randomSeedBytes;
+    }
+
+    /*********************************************************************
+     * RESOLVE:                                                          *
+     * The methods and static vars below should go into some 'shared'    *
+     * package when the capability is put back in (StringUtil.java).     *
+     *********************************************************************/
+
+    private static char[] hex_table = {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+                'a', 'b', 'c', 'd', 'e', 'f'
+            };
+    
+    /**
+        Convert a byte array to a String with a hexidecimal format.
+        The String may be converted back to a byte array using fromHexString.
+        <BR>
+        For each byte (b) two characaters are generated, the first character
+        represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
+        the second character represents the low nibble (<code>b & 0x0f</code>).
+		<BR>
+        The byte at <code>data[offset]</code> is represented by the first two characters in the returned String.
+
+        @param	data	byte array
+        @param	offset	starting byte (zero based) to convert.
+        @param	length	number of bytes to convert.
+
+        @return the String (with hexidecimal format) form of the byte array
+    */
+    protected static String toHexString(byte[] data, int offset, int length)
+    {
+        StringBuffer s = new StringBuffer(length*2);
+        int end = offset+length;
+
+        for (int i = offset; i < end; i++)
+        {
+            int high_nibble = (data[i] & 0xf0) >>> 4;
+            int low_nibble = (data[i] & 0x0f);
+            s.append(hex_table[high_nibble]);
+            s.append(hex_table[low_nibble]);
+        }
+
+        return s.toString();
+    }
+
+    /**
+  
+        Convert a string into a byte array in hex format.
+        <BR>
+        For each character (b) two bytes are generated, the first byte 
+        represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
+        the second byte 
+        represents the low nibble (<code>b & 0x0f</code>).
+        <BR>
+        The character at <code>str.charAt(0)</code> is represented by the first two bytes 
+        in the returned String.
+
+        @param	str string 
+        @param	offset	starting character (zero based) to convert.
+        @param	length	number of characters to convert.
+
+        @return the byte[]  (with hexidecimal format) form of the string (str) 
+    */
+    protected static byte[] toHexByte(String str, int offset, int length)
+    {
+  	    byte[] data = new byte[(length - offset) * 2];
+        int end = offset+length;
+
+        for (int i = offset; i < end; i++)
+ 	    {
+            char ch = str.charAt(i);
+            int high_nibble = (ch & 0xf0) >>> 4;
+            int low_nibble = (ch & 0x0f);
+            data[i] = (byte)high_nibble;
+            data[i+1] = (byte)low_nibble;
+        }
+        return data;
+    }
 }

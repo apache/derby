@@ -24,7 +24,7 @@ package org.apache.derby.client.am;
 import java.security.Provider;
 import java.security.Security;
 import org.apache.derby.shared.common.reference.SQLState;
-
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 // This class is get used when using encrypted password and/or userid mechanism.
 // The <b>EncryptionManager</b> classs uses Diffie_Hellman algorithm to get the publick key and
@@ -36,6 +36,8 @@ import org.apache.derby.shared.common.reference.SQLState;
 // obtainPublicKey(), calculateEncryptionToken(int, byte[]) and encryptData(byte[], int, byte[], byte[])
 // The agreed public value for the Diffie-Hellman prime is 256 bits
 // and hence the encrytion will work only if the jce provider supports a 256 bits prime
+//
+// This class also have methods for the SECMEC_USRSSBPWD security mechanism.
 
 public class EncryptionManager {
     transient Agent agent_; // for obtaining an exception log writer only
@@ -87,6 +89,22 @@ public class EncryptionManager {
     private String providerName; // security provider name
     private Provider provider;
 
+    // Required for SECMEC_USRSSBPWD DRDA security mechanism
+    // NOTE: In a next incarnation, these constants are being moved
+    // to a dedicated/specialized SecMec_USRSSBPWD class implementing
+    // a SecurityMechanism interface.
+    private java.security.MessageDigest messageDigest = null;
+    private java.security.SecureRandom secureRandom = null;
+    private final static int SECMEC_USRSSBPWD_SEED_LEN = 8;  // Seed length
+    // PWSEQs's 8-byte value constant - See DRDA Vol 3
+    private static final byte SECMEC_USRSSBPWD_PWDSEQS[] = {
+        (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+        (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01
+    };
+    // Random Number Generator (PRNG) Algorithm
+    private final static String SHA_1_PRNG_ALGORITHM = "SHA1PRNG";
+    public final static String SHA_1_DIGEST_ALGORITHM = "SHA-1";
+
     // EncryptionManager constructor. In this constructor,DHParameterSpec,
     // KeyPairGenerator, KeyPair, and KeyAgreement  are initialized.
     public EncryptionManager(Agent agent) throws SqlException {
@@ -108,6 +126,36 @@ public class EncryptionManager {
         } catch (java.security.GeneralSecurityException e) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED), e); 
+        }
+    }
+
+    // Retrieve a particular instance of the Encryption manager for a given
+    // (Messsage Digest) algorithm. This is currently required for the
+    // SECMEC_USRSSBPWD (strong password substitute) security mechanism.
+    // 
+    // NOTE: This is temporary logic as the encryption manager is being
+    // rewritten into a DRDASecurityManager and have some of the
+    // client/engine common logic moved to the Derby 'shared' package.
+    public EncryptionManager(Agent agent, String algorithm) throws SqlException {
+        agent_ = agent;
+        try {
+            // Instantiate the encryption manager for the passed-in security
+            // algorithm and this from the default provider
+            // NOTE: We're only dealing with Message Digest algorithms for now.
+            messageDigest = java.security.MessageDigest.getInstance(algorithm);
+            // We're also verifying that we can instantiate a randon number
+            // generator (PRNG).
+            secureRandom =
+                java.security.SecureRandom.getInstance(SHA_1_PRNG_ALGORITHM);
+        } catch (java.security.NoSuchAlgorithmException nsae) {
+            // The following exception should not be raised for SHA-1 type of
+            // message digest as we've already verified during boot-up that this
+            // algorithm was available as part of the JRE (since BUILT-IN
+            // authentication requires it); but we still raise the exception if
+            // a client were to request a different algorithm.
+            throw new SqlException(agent_.logWriter_, 
+                new ClientMessageId(SQLState.SECURITY_EXCEPTION_ENCOUNTERED),
+                                    nsae); 
         }
     }
 
@@ -457,5 +505,187 @@ public class EncryptionManager {
         secKey_ = null;
     }
 
-}
+    /****************************************************************
+     * Below are methods for the SECMEC_USRSSBPWD security mechanism.
+     ****************************************************************/
 
+	/**
+	 * This method generates an 8-Byte random seed for the client (source).
+	 *
+	 * @return a random 8-Byte seed.
+	 */
+    public byte[] generateSeed() {
+        byte randomSeedBytes[] = new byte[SECMEC_USRSSBPWD_SEED_LEN];
+        secureRandom.setSeed(secureRandom.generateSeed(
+                                        SECMEC_USRSSBPWD_SEED_LEN));
+        secureRandom.nextBytes(randomSeedBytes);
+        return randomSeedBytes;
+    }
+
+    /**
+     * Strong Password Substitution (USRSSBPWD).
+     *
+     * This method generate a password subtitute to send to the target
+     * server.
+     * 
+     * Substitution algorithm works as follow:
+     *
+     * PW_TOKEN = SHA-1(PW, ID)
+     * The password (PW) and user name (ID) can be of any length greater
+     * than or equal to 1 byte.
+     * The client generates a 20-byte password substitute (PW_SUB) as follows:
+     * PW_SUB = SHA-1(PW_TOKEN, RDr, RDs, ID, PWSEQs)
+     * 
+     * w/ (RDs) as the random client seed and (RDr) as the server one.
+     * 
+     * See PWDSSB - Strong Password Substitution Security Mechanism
+     * (DRDA Vol.3 - P.650)
+     *
+     * @param userName The user's name
+     * @param password The user's password
+     * @param sourceSeed_ random client seed (RDs)
+     * @param targetSeed_ random server seed (RDr)
+     *
+     * @return a password substitute.
+     */
+    public byte[] substitutePassword(
+                String userName,
+                String password,
+                byte[] sourceSeed_,
+                byte[] targetSeed_) throws SqlException {
+
+        // Pattern that is prefixed to the BUILTIN encrypted password
+        String ID_PATTERN_NEW_SCHEME = "3b60";
+        
+        // Generated password substitute
+        byte[] passwordSubstitute;
+
+        // Assert we have a SHA-1 Message Digest already instantiated
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT((messageDigest != null) &&
+                                 (SHA_1_DIGEST_ALGORITHM.equals(
+                                    messageDigest.getAlgorithm())));
+        }
+
+        // IMPORTANT NOTE: As the password is stored single-hashed in the
+        // database on the target side, it is impossible for the target to
+        // decrypt the password and recompute a substitute to compare with
+        // one generated on the source side - Hence, for now we have to
+        // single-hash and encrypt the password the same way the target is
+        // doing it and we will still generate a substitute obviously - The
+        // password, even pre-hashed will never make it across the wire as
+        // a substitute is generated. In other words, if the target cannot
+        // figure what the original password is (because of not being able
+        // to decrypt it or not being able to retrieve it (i.e. LDAP), then
+        // It may be problematic - so in a way, Strong Password Substitution
+        // (USRSSBPWD) cannot be supported for targets which can't access or
+        // decrypt some password on their side.
+        //
+        // So in short, SECMEC_USRSSBPWD is only supported if the
+        // authentication provider on the target side is NONE or Derby's
+        // BUILTIN one and if using Derby's Client Network driver (for now).
+        //
+        // Encrypt the password as it is done by the derby engine - Note that
+        // this code (logic) is not shared yet - will be in next revision.
+        messageDigest.reset();
+
+		messageDigest.update(this.toHexByte(password, 0, password.length()));
+		byte[] encryptVal = messageDigest.digest();
+		String hexString = ID_PATTERN_NEW_SCHEME +
+                     this.toHexString(encryptVal, 0, encryptVal.length);
+
+        // Generate some 20-byte password token
+        byte[] userBytes = this.toHexByte(userName, 0, userName.length());
+        messageDigest.update(userBytes);
+        messageDigest.update(this.toHexByte(hexString, 0, hexString.length()));
+        byte[] passwordToken = messageDigest.digest();
+        
+        // Now we generate the 20-byte password substitute
+        messageDigest.update(passwordToken);
+        messageDigest.update(targetSeed_);
+        messageDigest.update(sourceSeed_);
+        messageDigest.update(userBytes);
+        messageDigest.update(SECMEC_USRSSBPWD_PWDSEQS);
+
+        passwordSubstitute = messageDigest.digest();
+
+        return passwordSubstitute;
+    }
+
+    /*********************************************************************
+     * RESOLVE:                                                          *
+     * The methods and static vars below should go into some 'shared'    *
+     * package when the capability is put back in (StringUtil.java).     *
+     *********************************************************************/
+
+    private static char[] hex_table = {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+                'a', 'b', 'c', 'd', 'e', 'f'
+            };
+
+    /**
+        Convert a byte array to a String with a hexidecimal format.
+        The String may be converted back to a byte array using fromHexString.
+        <BR>
+        For each byte (b) two characaters are generated, the first character
+        represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
+        the second character represents the low nibble (<code>b & 0x0f</code>).
+        <BR>
+        The byte at <code>data[offset]</code> is represented by the first two
+        characters in the returned String.
+
+        @param	data	byte array
+        @param	offset	starting byte (zero based) to convert.
+        @param	length	number of bytes to convert.
+
+        @return the String (with hexidecimal format) form of the byte array
+    */
+    private String toHexString(byte[] data, int offset, int length)
+    {
+		StringBuffer s = new StringBuffer(length*2);
+        int end = offset+length;
+
+        for (int i = offset; i < end; i++)
+        {
+            int high_nibble = (data[i] & 0xf0) >>> 4;
+            int low_nibble = (data[i] & 0x0f);
+            s.append(hex_table[high_nibble]);
+            s.append(hex_table[low_nibble]);
+        }
+
+        return s.toString();
+    }
+
+    /**
+  
+        Convert a string into a byte array in hex format.
+        <BR>
+        For each character (b) two bytes are generated, the first byte 
+        represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
+        the second byte represents the low nibble (<code>b & 0x0f</code>).
+        <BR>
+        The character at <code>str.charAt(0)</code> is represented by the first two bytes 
+        in the returned String.
+
+        @param	str string 
+        @param	offset	starting character (zero based) to convert.
+        @param	length	number of characters to convert.
+
+        @return the byte[]  (with hexidecimal format) form of the string (str) 
+    */
+    private byte[] toHexByte(String str, int offset, int length)
+    {
+        byte[] data = new byte[(length - offset) * 2];
+        int end = offset+length;
+
+        for (int i = offset; i < end; i++)
+        {
+            char ch = str.charAt(i);
+            int high_nibble = (ch & 0xf0) >>> 4;
+            int low_nibble = (ch & 0x0f);
+            data[i] = (byte)high_nibble;
+            data[i+1] = (byte)low_nibble;
+        }
+        return data;
+    }
+}

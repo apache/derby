@@ -2534,12 +2534,15 @@ public final class NetworkServerControlImpl {
     private int getSecMecValue(String s)
     {
         int secmec = INVALID_OR_NOTSET_SECURITYMECHANISM;
+
         if( StringUtil.SQLEqualsIgnoreCase(s,"USER_ONLY_SECURITY"))
                 secmec = CodePoint.SECMEC_USRIDONL;
         else if( StringUtil.SQLEqualsIgnoreCase(s,"CLEAR_TEXT_PASSWORD_SECURITY"))
                 secmec = CodePoint.SECMEC_USRIDPWD;
         else if( StringUtil.SQLEqualsIgnoreCase(s,"ENCRYPTED_USER_AND_PASSWORD_SECURITY"))
                 secmec = CodePoint.SECMEC_EUSRIDPWD;
+        else if( StringUtil.SQLEqualsIgnoreCase(s,"STRONG_PASSWORD_SUBSTITUTE_SECURITY"))
+                secmec = CodePoint.SECMEC_USRSSBPWD;
         
         return secmec;
     }
@@ -2563,6 +2566,9 @@ public final class NetworkServerControlImpl {
             
             case CodePoint.SECMEC_EUSRIDPWD:
                 return "ENCRYPTED_USER_AND_PASSWORD_SECURITY";
+            
+            case CodePoint.SECMEC_USRSSBPWD:
+                return "STRONG_PASSWORD_SUBSTITUTE_SECURITY";
         }
         return null;
     }

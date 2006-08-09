@@ -120,6 +120,10 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     transient byte[] publicKey_;
     transient byte[] targetPublicKey_;
 
+    // Seeds used for strong password substitute generation (USRSSBPWD)
+    transient byte[] sourceSeed_;   // Client seed
+    transient byte[] targetSeed_;   // Server seed
+
     // Product-Specific Data (prddta) sent to the server in the accrdb command.
     // The prddta has a specified format.  It is saved in case it is needed again
     // since it takes a little effort to compute.  Saving this information is
@@ -313,6 +317,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             targetSrvrlslv_ = null;
             publicKey_ = null;
             targetPublicKey_ = null;
+            sourceSeed_ = null;
+            targetSeed_ = null;
             targetSecmec_ = 0;
             if (ds != null && securityMechanism_ == 0) {
                 securityMechanism_ = ds.getSecurityMechanism(password);
@@ -363,6 +369,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             targetSrvrlslv_ = null;
             publicKey_ = null;
             targetPublicKey_ = null;
+            sourceSeed_ = null;
+            targetSeed_ = null;
             targetSecmec_ = 0;
             if (ds != null && securityMechanism_ == 0) {
                 securityMechanism_ = ds.getSecurityMechanism();
@@ -445,6 +453,10 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             case NetConfiguration.SECMEC_EUSRPWDDTA:
                 checkUserPassword(user_, password);
                 flowEUSRPWDDTAconnect(password);
+                break;
+            case NetConfiguration.SECMEC_USRSSBPWD: // Clear text user, strong password substitute
+                checkUserPassword(user_, password);
+                flowUSRSSBPWDconnect(password);
                 break;
 
             default:
@@ -565,6 +577,11 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 resetConnectionAtFirstSql_ = true;
                 setDeferredResetPassword(password);
                 return true;
+            case NetConfiguration.SECMEC_USRSSBPWD: // Clear text user, strong password substitute
+                checkUserPassword(user_, password);
+                resetConnectionAtFirstSql_ = true;
+                setDeferredResetPassword(password);
+                return true;
             default:
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.SECMECH_NOT_SUPPORTED),
@@ -679,6 +696,39 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 encryptedPasswordForEUSRIDPWD(password));
     }
 
+    /**
+     * The User ID and Strong Password Substitute mechanism (USRSSBPWD)
+     * authenticates the user like the user ID and password mechanism, but
+     * the password does not flow. A password substitute is generated instead
+     * using the SHA-1 algorithm, and is sent to the application server.
+     *
+     * The application server generates a password substitute using the same
+     * algorithm and compares it with the application requester’s password
+     * substitute. If equal, the user is authenticated.
+     *
+     * The SECTKN parameter is used to flow the client and server encryption
+     * seeds on the ACCSEC and ACCSECRD commands.
+     *
+     * More information in DRDA, V3, Volume 3 standard - PWDSSB (page 650)
+     */
+    private void flowUSRSSBPWDconnect(String password) throws SqlException {
+        flowServerAttributes();
+
+        checkSecmgrForSecmecSupport(NetConfiguration.SECMEC_USRSSBPWD);
+        // Generate a random client seed to send to the target server - in
+        // response we will also get a generated seed from this last one.
+        // Seeds are used on both sides to generate the password substitute.
+        initializeClientSeed();
+
+        flowSeedExchange(NetConfiguration.SECMEC_USRSSBPWD, sourceSeed_);
+
+        flowSecurityCheckAndAccessRdb(targetSecmec_, //securityMechanism
+                user_,
+                null,
+                null,
+                passwordSubstituteForUSRSSBPWD(password)); // PWD Substitute
+    }
+
     private void flowServerAttributes() throws SqlException {
         agent_.beginWriteChainOutsideUOW();
         netAgent_.netConnectionRequest_.writeExchangeServerAttributes(extnam_, //externalName
@@ -706,12 +756,31 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         agent_.endReadChain();
     }
 
+    private void flowSeedExchange(int securityMechanism, byte[] sourceSeed) throws SqlException {
+        agent_.beginWriteChainOutsideUOW();
+        netAgent_.netConnectionRequest_.writeAccessSecurity(securityMechanism,
+                databaseName_,
+                sourceSeed);
+        agent_.flowOutsideUOW();
+        netAgent_.netConnectionReply_.readAccessSecurity(this, securityMechanism);
+        agent_.endReadChain();
+    }
+
     private void flowServerAttributesAndKeyExchange(int securityMechanism,
                                                     byte[] publicKey) throws SqlException {
         agent_.beginWriteChainOutsideUOW();
         writeServerAttributesAndKeyExchange(securityMechanism, publicKey);
         agent_.flowOutsideUOW();
         readServerAttributesAndKeyExchange(securityMechanism);
+        agent_.endReadChain();
+    }
+
+    private void flowServerAttributesAndSeedExchange(int securityMechanism,
+                                                     byte[] sourceSeed) throws SqlException {
+        agent_.beginWriteChainOutsideUOW();
+        writeServerAttributesAndSeedExchange(sourceSeed);
+        agent_.flowOutsideUOW();
+        readServerAttributesAndSeedExchange();
         agent_.endReadChain();
     }
 
@@ -765,9 +834,22 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 publicKey);
     }
 
+    private void writeServerAttributesAndSeedExchange(byte[] sourceSeed)
+                                                        throws SqlException {
+        
+        // For now, we're just calling our cousin method to do the job
+        writeServerAttributesAndKeyExchange(NetConfiguration.SECMEC_USRSSBPWD,
+                                            sourceSeed);
+    }
+
     private void readServerAttributesAndKeyExchange(int securityMechanism) throws SqlException {
         netAgent_.netConnectionReply_.readExchangeServerAttributes(this);
         netAgent_.netConnectionReply_.readAccessSecurity(this, securityMechanism);
+    }
+
+    private void readServerAttributesAndSeedExchange() throws SqlException {
+        // For now, we're just calling our cousin method to do the job
+        readServerAttributesAndKeyExchange(NetConfiguration.SECMEC_USRSSBPWD);
     }
 
     private void writeSecurityCheckAndAccessRdb(int securityMechanism,
@@ -830,21 +912,33 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 endOffset = netAgent_.netConnectionRequest_.offset_;
                 cacheConnectBytes(beginOffset, endOffset);
             }
-            // either NetConfiguration.SECMEC_USRENCPWD or NetConfiguration.SECMEC_EUSRIDPWD
+            // Either NetConfiguration.SECMEC_USRENCPWD,
+            // NetConfiguration.SECMEC_EUSRIDPWD or
+            // NetConfiguration.SECMEC_USRSSBPWD
             else {
-                initializePublicKeyForEncryption();
+                if (securityMechanism_ == NetConfiguration.SECMEC_USRSSBPWD)
+                    initializeClientSeed();
+                else // SECMEC_USRENCPWD, SECMEC_EUSRIDPWD
+                    initializePublicKeyForEncryption();
+
                 // Set the resetConnectionAtFirstSql_ to false to avoid going in an
                 // infinite loop, since all the flow methods call beginWriteChain which then
                 // calls writeDeferredResetConnection where the check for resetConnectionAtFirstSql_
                 // is done. By setting the resetConnectionAtFirstSql_ to false will avoid calling the
                 // writeDeferredReset method again.
                 resetConnectionAtFirstSql_ = false;
-                flowServerAttributesAndKeyExchange(securityMechanism_, publicKey_);
+
+                if (securityMechanism_ == NetConfiguration.SECMEC_USRSSBPWD)
+                    flowSeedExchange(securityMechanism_, sourceSeed_);
+                else // SECMEC_USRENCPWD, SECMEC_EUSRIDPWD
+                    flowServerAttributesAndKeyExchange(securityMechanism_, publicKey_);
+
                 agent_.beginWriteChainOutsideUOW();
 
                 // Reset the resetConnectionAtFirstSql_ to true since we are done
                 // with the flow method.
                 resetConnectionAtFirstSql_ = true;
+
                 // NetConfiguration.SECMEC_USRENCPWD
                 if (securityMechanism_ == NetConfiguration.SECMEC_USRENCPWD) {
                     writeSecurityCheckAndAccessRdb(NetConfiguration.SECMEC_USRENCPWD,
@@ -853,8 +947,15 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                             null, //encryptedUserid
                             encryptedPasswordForUSRENCPWD(getDeferredResetPassword()));
                 }
-                // NetConfiguration.SECMEC_EUSRIDPWD
-                else {
+                // NetConfiguration.SECMEC_USRSSBPWD
+                else if (securityMechanism_ == NetConfiguration.SECMEC_USRSSBPWD) {
+                    writeSecurityCheckAndAccessRdb(NetConfiguration.SECMEC_USRSSBPWD,
+                            user_,
+                            null,
+                            null,
+                            passwordSubstituteForUSRSSBPWD(getDeferredResetPassword()));
+                }
+                else {  // NetConfiguration.SECMEC_EUSRIDPWD
                     writeSecurityCheckAndAccessRdb(NetConfiguration.SECMEC_EUSRIDPWD,
                             null, //user
                             null, //password
@@ -924,6 +1025,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
                 if ((targetSecmec_ == NetConfiguration.SECMEC_USRENCPWD) ||
                         (targetSecmec_ == NetConfiguration.SECMEC_EUSRIDPWD) ||
+                        (targetSecmec_ == NetConfiguration.SECMEC_USRSSBPWD) ||
                         (targetSecmec_ == NetConfiguration.SECMEC_EUSRIDDTA) ||
                         (targetSecmec_ == NetConfiguration.SECMEC_EUSRPWDDTA)) {
 
@@ -933,7 +1035,10 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                             new DisconnectException(agent_, 
                                 new ClientMessageId(SQLState.NET_SECTKN_NOT_RETURNED)));
                     } else {
-                        targetPublicKey_ = sectkn;
+                        if (targetSecmec_ == NetConfiguration.SECMEC_USRSSBPWD)
+                            targetSeed_ = sectkn;
+                        else
+                            targetPublicKey_ = sectkn;
                         if (encryptionManager_ != null) {
                             encryptionManager_.resetSecurityKeys();
                         }
@@ -1309,11 +1414,21 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     private void initializePublicKeyForEncryption() throws SqlException {
         if (encryptionManager_ == null) {
-            encryptionManager_ = new org.apache.derby.client.am.EncryptionManager(agent_);
+            encryptionManager_ = new EncryptionManager(agent_);
         }
         publicKey_ = encryptionManager_.obtainPublicKey();
     }
 
+    // SECMEC_USRSSBPWD security mechanism - Generate a source (client) seed
+    // to send to the target (application) server.
+    private void initializeClientSeed() throws SqlException {
+        if (encryptionManager_ == null) {
+            encryptionManager_ = new EncryptionManager(
+                                    agent_,
+                                    EncryptionManager.SHA_1_DIGEST_ALGORITHM);
+        }
+        sourceSeed_ = encryptionManager_.generateSeed();
+    }
 
     private byte[] encryptedPasswordForUSRENCPWD(String password) throws SqlException {
         return encryptionManager_.encryptData(netAgent_.sourceCcsidManager_.convertFromUCS2(password, netAgent_),
@@ -1334,6 +1449,35 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 NetConfiguration.SECMEC_EUSRIDPWD,
                 targetPublicKey_,
                 targetPublicKey_);
+    }
+
+    private byte[] passwordSubstituteForUSRSSBPWD(String password) throws SqlException {
+        String userName = user_;
+        
+        // Define which userName takes precedence - If we have a dataSource
+        // available here, it is posible that the userName has been
+        // overriden by some defined as part of the connection attributes
+        // (see ClientBaseDataSource.updateDataSourceValues().
+        // We need to use the right userName as strong password
+        // substitution depends on the userName when the substitute
+        // password is generated; if we were not using the right userName
+        // then authentication would fail when regenerating the substitute
+        // password on the engine server side, where userName as part of the
+        // connection attributes would get used to authenticate the user.
+        if (dataSource_ != null)
+        {
+            String dataSourceUserName = dataSource_.getUser();
+            if (!dataSourceUserName.equals("") &&
+                userName.equalsIgnoreCase(
+                    dataSource_.propertyDefault_user) &&
+                !dataSourceUserName.equalsIgnoreCase(
+                    dataSource_.propertyDefault_user))
+            {
+                userName = dataSourceUserName;
+            }
+        }
+        return encryptionManager_.substitutePassword(
+                userName, password, sourceSeed_, targetSeed_);
     }
 
     // Methods to get the manager levels for Regression harness only.

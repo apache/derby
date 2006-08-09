@@ -719,6 +719,7 @@ class CodePoint
 	static final int SECMEC_USRIDNWPWD = 5;  // Userid, Password, and new Password
 	static final int SECMEC_USRSBSPWD = 6;  // Userid with substitute password
 	static final int SECMEC_USRENCPWD = 7;  // Userid with encrypted password
+    static final int SECMEC_USRSSBPWD = 8;  // Userid with Strong password substitute
 	static final int SECMEC_EUSRIDPWD = 9;  // Encrpyted userid and password
 	static final int SECMEC_EUSRIDNWPWD = 10;  // Encrpyted userid and password
 

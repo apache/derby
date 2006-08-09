@@ -142,6 +142,7 @@ readLengthAndCodePoint ACCSECRD // ACCSECRD
 readScalar2Bytes SECMEC 3// SECMEC
 readScalar2Bytes SECMEC 9// SECMEC
 readScalar2Bytes SECMEC 4// SECMEC
+readScalar2Bytes SECMEC 8// SECMEC
 readScalar1Byte SECCHKCD 1// SECMEC
 endTest
 //
@@ -298,6 +299,7 @@ readLengthAndCodePoint ACCSECRD // ACCSECRD
 readScalar2Bytes SECMEC 3// SECMEC
 readScalar2Bytes SECMEC 9// SECMEC
 readScalar2Bytes SECMEC 4// SECMEC
+readScalar2Bytes SECMEC 8// SECMEC
 readScalar1Byte SECCHKCD 1// SECMEC
 // ok send one we support
 createDssRequest

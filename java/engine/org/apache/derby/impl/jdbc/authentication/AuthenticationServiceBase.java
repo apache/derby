@@ -94,6 +94,10 @@ public abstract class AuthenticationServiceBase
 	*/
 	public static final String ID_PATTERN_NEW_SCHEME = "3b60";
 
+    /**
+        Userid with Strong password substitute DRDA security mechanism
+    */
+    protected static final int SECMEC_USRSSBPWD = 8;
 
 	/**
 		Length of the encrypted password in the new authentication scheme
@@ -368,6 +372,7 @@ public abstract class AuthenticationServiceBase
 														);
 		return Boolean.valueOf(requireAuthentication).booleanValue();
 	}
+
 	/**
 	 * This method encrypts a clear user password using a
 	 * Single Hash algorithm such as SHA-1 (SHA equivalent)
@@ -395,44 +400,144 @@ public abstract class AuthenticationServiceBase
 
 		algorithm.reset();
 		byte[] bytePasswd = null;
-		bytePasswd = AuthenticationServiceBase.toHexByte(plainTxtUserPassword,0,plainTxtUserPassword.length());
+        bytePasswd = StringUtil.toHexByte(
+                plainTxtUserPassword,0,plainTxtUserPassword.length());
 		algorithm.update(bytePasswd);
 		byte[] encryptVal = algorithm.digest();
-		String hexString = ID_PATTERN_NEW_SCHEME + org.apache.derby.iapi.util.StringUtil.toHexString(encryptVal,0,encryptVal.length);
+        String hexString = ID_PATTERN_NEW_SCHEME +
+                StringUtil.toHexString(encryptVal,0,encryptVal.length);
 		return (hexString);
 
 	}
-	/**
-  
-	   Convert a string into a byte array in hex format.
-	   <BR>
-	   For each character (b) two bytes are generated, the first byte 
-	   represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
-           the second byte 
-	   represents the low nibble (<code>b & 0x0f</code>).
-	   <BR>
-	   The character at <code>str.charAt(0)</code> is represented by the first two bytes 
-	   in the returned String.
 
-	   @param	str string 
-	   @param	offset	starting character (zero based) to convert.
-	   @param	length	number of characters to convert.
+    /**
+     * Strong Password Substitution (USRSSBPWD).
+     *
+     * This method generate a password subtitute to authenticate a client
+     * which is using a DRDA security mechanism such as SECMEC_USRSSBPWD.
+     *
+     * Depending how the user is defined in Derby and if BUILTIN
+     * is used, the stored password can be in clear-text (system level)
+     * or encrypted (hashed - *not decryptable*)) (database level) - If the
+     * user has authenticated at the network level via SECMEC_USRSSBPWD, it
+     * means we're presented with a password substitute and we need to
+     * generate a substitute password coming from the store to compare with
+     * the one passed-in.
+     *
+     * NOTE: A lot of this logic could be shared with the DRDA decryption
+     *       and client encryption managers - This will be done _once_
+     *       code sharing along with its rules are defined between the
+     *       Derby engine, client and network code (PENDING).
+     * 
+     * Substitution algorithm works as follow:
+     *
+     * PW_TOKEN = SHA-1(PW, ID)
+     * The password (PW) and user name (ID) can be of any length greater
+     * than or equal to 1 byte.
+     * The client generates a 20-byte password substitute (PW_SUB) as follows:
+     * PW_SUB = SHA-1(PW_TOKEN, RDr, RDs, ID, PWSEQs)
+     * 
+     * w/ (RDs) as the random client seed and (RDr) as the server one.
+     * 
+     * See PWDSSB - Strong Password Substitution Security Mechanism
+     * (DRDA Vol.3 - P.650)
+     *
+	 * @return a substituted password.
+     */
+    protected String substitutePassword(
+                String userName,
+                String password,
+                Properties info,
+                boolean databaseUser) {
 
-	   @return the byte[]  (with hexidecimal format) form of the string (str) 
-	*/
-	public static byte[] toHexByte(String str, int offset, int length)
-	{
-  	    byte[] data = new byte[(length - offset) * 2];
-	    int end = offset+length;
+        MessageDigest messageDigest = null;
 
-            for (int i = offset; i < end; i++)
- 	    {
-	        char ch = str.charAt(i);
-		int high_nibble = (ch & 0xf0) >>> 4;
-		int low_nibble = (ch & 0x0f);
-		data[i] = (byte)high_nibble;
-		data[i+1] = (byte)low_nibble;
-	    }
-	    return data;
-	}
+        // Pattern that is prefixed to the BUILTIN encrypted password
+        String ID_PATTERN_NEW_SCHEME = "3b60";
+
+        // PWSEQs's 8-byte value constant - See DRDA Vol 3
+        byte SECMEC_USRSSBPWD_PWDSEQS[] = {
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01
+                };
+        
+        // Generated password substitute
+        byte[] passwordSubstitute;
+
+        try
+        {
+            messageDigest = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException nsae)
+        {
+            // Ignore as we checked already during service boot-up
+        }
+        // IMPORTANT NOTE: As the password is stored single-hashed in the
+        // database, it is impossible for us to decrypt the password and
+        // recompute a substitute to compare with one generated on the source
+        // side - Hence, we have to generate a password substitute.
+        // In other words, we cannot figure what the original password was -
+        // Strong Password Substitution (USRSSBPWD) cannot be supported for
+        // targets which can't access or decrypt passwords on their side.
+        //
+        messageDigest.reset();
+
+        byte[] bytePasswd = null;
+        byte[] userBytes = StringUtil.toHexByte(userName, 0, userName.length());
+
+        if (SanityManager.DEBUG)
+        {
+            // We must have a source and target seed 
+            SanityManager.ASSERT(
+              (((String) info.getProperty(Attribute.DRDA_SECTKN_IN) != null) &&
+              ((String) info.getProperty(Attribute.DRDA_SECTKN_OUT) != null)), 
+                "Unexpected: Requester or server seed not available");
+        }
+
+        // Retrieve source (client)  and target 8-byte seeds
+        String sourceSeedstr = info.getProperty(Attribute.DRDA_SECTKN_IN);
+        String targetSeedstr = info.getProperty(Attribute.DRDA_SECTKN_OUT);
+
+        byte[] sourceSeed_ =
+            StringUtil.fromHexString(sourceSeedstr, 0, sourceSeedstr.length());
+        byte[] targetSeed_ =
+            StringUtil.fromHexString(targetSeedstr, 0, targetSeedstr.length());
+
+        String hexString = null;
+        // If user is at the database level, we don't encrypt the password
+        // as it is already encrypted (BUILTIN scheme) - we only do the
+        // BUILTIN encryption if the user is defined at the system level
+        // only - this is required beforehands so that we can do the password
+        // substitute generation right afterwards.
+        if (!databaseUser)
+        {
+            bytePasswd = StringUtil.toHexByte(password, 0, password.length());
+            messageDigest.update(bytePasswd);
+            byte[] encryptVal = messageDigest.digest();
+            hexString = ID_PATTERN_NEW_SCHEME +
+                StringUtil.toHexString(encryptVal, 0, encryptVal.length);
+        }
+        else
+            // Already encrypted from the database store
+            hexString = password;
+
+        // Generate the password substitute now
+
+        // Generate some 20-byte password token
+        messageDigest.update(userBytes);
+        messageDigest.update(
+                StringUtil.toHexByte(hexString, 0, hexString.length()));
+        byte[] passwordToken = messageDigest.digest();
+        
+        // Now we generate the 20-byte password substitute
+        messageDigest.update(passwordToken);
+        messageDigest.update(targetSeed_);
+        messageDigest.update(sourceSeed_);
+        messageDigest.update(userBytes);
+        messageDigest.update(SECMEC_USRSSBPWD_PWDSEQS);
+
+        passwordSubstitute = messageDigest.digest();
+
+        return StringUtil.toHexString(passwordSubstitute, 0,
+                                      passwordSubstitute.length);
+    }
 }

@@ -45,6 +45,7 @@ import java.lang.reflect.*;
 /**
  * This class tests the security mechanisms supported by Network Server
  * Network server supports SECMEC_EUSRIDPWD, SECMEC_USRIDPWD, SECMEC_USRIDONL
+ * and SECMEC_USRSSBPWD.
  * 
  * -----------------------------------------------------------------
  * Security Mechanism | secmec codepoint value | User friendly name
@@ -52,6 +53,7 @@ import java.lang.reflect.*;
  * USRIDONL           | 0x04                   | USER_ONLY_SECURITY
  * USRIDPWD           | 0x03                   | CLEAR_TEXT_PASSWORD_SECURITY
  * EUSRIDPWD          | 0x09                   | ENCRYPTED_USER_AND_PASSWORD_SECURITY
+ * USRSSBPWD          | 0x08                   | STRONG_PASSWORD_SUBSTITUTE_SECURITY
  * -----------------------------------------------------------------
  * 
  * Key points: 
@@ -97,8 +99,9 @@ import java.lang.reflect.*;
  * - If securityMechanism is not explicitly specified on connection request, 
  * and if no password is specified, an exception is thrown - null password not supported
  * If securityMechanism is explicitly specified to be USRIDONL,  then a password 
- * is not required. But in other cases (EUSRIDPWD,USRIDPWD)  if password is null,
- *  - an exception with the message 'a null password not valid' will be thrown.
+ * is not required. But in other cases (EUSRIDPWD, USRIDPWD, USRSSBPWD)  if
+ * password is null, an exception with the message 'a null password not valid'
+ * will be thrown.
  * - On datasource, setting a security mechanism works. It also allows a security 
  * mechanism of USRIDONL to be set on datasource unlike jcc 2.4.
  * 
@@ -113,18 +116,21 @@ import java.lang.reflect.*;
  *  is not required. But in other cases (EUSRIDPWD,USRIDPWD)  if password is null
  *  - an exception with the message 'a null password not valid' will be thrown.
  * On datasource, setting a security mechanism does not work (bug). It defaults
- * to USRIDPWD.  Setting a value of USRIDONL or EUSRIDPWD does not seem to have an effect.
+ * to USRIDPWD.  Setting a value of USRIDONL or EUSRIDPWD does not seem to have
+ * an effect.
  * 
  * #4) Note, if  server restricts the client connections based on security mechanism 
  * by setting derby.drda.securityMechanism, in that case the clients will see an 
  * error similar to this
  * "Connection authorization failure occurred. Reason: security mechanism not supported"
- * 
+ *
+ * #5) USRSSBPWD - Strong password substitute is only supported starting from
+ *     Apache Derby 10.2.
+ *	 NOTE: USRSSBPWD only works with the derby network client driver for now.
+ *   ---- 
  */
 public class testSecMec extends dataSourcePermissions_net
-
 {
-
     // Need this to keep track of database has been created or not
     // to avoid case of DERBY-300
     private static boolean dbNotCreated = true;
@@ -132,7 +138,8 @@ public class testSecMec extends dataSourcePermissions_net
     // values for derby.drda.securityMechanism property
     private static String[] derby_drda_securityMechanism = { null, //not set
             "USER_ONLY_SECURITY", "CLEAR_TEXT_PASSWORD_SECURITY",
-            "ENCRYPTED_USER_AND_PASSWORD_SECURITY", "INVALID_VALUE", "" };
+            "ENCRYPTED_USER_AND_PASSWORD_SECURITY",
+            "STRONG_PASSWORD_SUBSTITUTE_SECURITY", "INVALID_VALUE", "" };
 
     // possible interesting combinations with respect to security mechanism
     // upgrade logic for user attribute
@@ -145,7 +152,7 @@ public class testSecMec extends dataSourcePermissions_net
 	private static int NETWORKSERVER_PORT;
 
 	private static NetworkServerControl networkServer = null;
-    
+
     private testSecMec(SwitchablePrintStream consoleLogStream,
 		       PrintStream originalStream,
 		       FileOutputStream shutdownLogStream,
@@ -159,11 +166,9 @@ public class testSecMec extends dataSourcePermissions_net
 	      consoleErrLogStream,
 	      originalErrStream,
 	      shutdownErrLogStream);
-	
     }
 
 	public static void main(String[] args) throws Exception {
-
 		// Load harness properties.
 		ij.getPropertyArg(args);
 		
@@ -201,7 +206,6 @@ public class testSecMec extends dataSourcePermissions_net
 
 		System.setOut( consoleLogStream );
 		System.setErr( consoleErrLogStream );
-
            
         // Start server with a specific value for derby.drda.securityMechanism
         // and run tests. Note connections will be successful or not depending on
@@ -278,6 +282,8 @@ public class testSecMec extends dataSourcePermissions_net
 		        consoleErrLogStream.switchOutput( originalErrStream );
 		        
 		    }
+
+            // Now we want to test 
 		}
 		System.out.println("Completed testSecMec");
 
@@ -286,44 +292,48 @@ public class testSecMec extends dataSourcePermissions_net
 
 		originalErrStream.close();
 		shutdownErrLogStream.close();
-
 	}
+    
+	// Indicates userid/encrypted password security mechanism.
+	static final short SECMEC_EUSRIDPWD = 0x09;
 
+	// Indicates userid only security mechanism.
+	static final short SECMEC_USRIDONL = 0x04;
 
-	  // Indicates userid/encrypted password security mechanism.
-	  static final short SECMEC_EUSRIDPWD = 0x09;
+	// Indicates userid/encrypted password security mechanism.
+	static final short SECMEC_USRENCPWD = 0x07;
 
-	  // Indicates userid only security mechanism.
-	  static final short SECMEC_USRIDONL = 0x04;
+	// Indicates userid/new password security mechanism.
+	static final short SECMEC_USRIDNWPWD = 0x05;
 
-	  // Indicates userid/encrypted password security mechanism.
-	  static final short SECMEC_USRENCPWD = 0x07;
+	// Indicates userid/password security mechanism.
+	static final short SECMEC_USRIDPWD = 0x03;
 
-	  // Indicates userid/new password security mechanism.
-	  static final short SECMEC_USRIDNWPWD = 0x05;
-
-	  // Indicates userid/password security mechanism.
-	  static final short SECMEC_USRIDPWD = 0x03;
+	// Indicates strong password substitute security mechanism.
+	static final short SECMEC_USRSSBPWD = 0x08;
       
-	  // client and server recognize these secmec values
-	  private static short[] SECMEC_ATTRIBUTE = { SECMEC_USRIDONL,
-	          SECMEC_USRIDPWD,
-	          SECMEC_EUSRIDPWD
-	  };
-
+	// client and server recognize these secmec values
+	private static short[] SECMEC_ATTRIBUTE = {
+                SECMEC_USRIDONL,
+	            SECMEC_USRIDPWD,
+	            SECMEC_EUSRIDPWD,
+                SECMEC_USRSSBPWD
+	};
 
 	/**
 	 *  Test cases for security mechanism
 	 *  ---------------------------------------------------------------
 	 *  T1 - default , no user			PASS (for derbyclient)
-	 *  T2 - user only					PASS (for derbyclient)
-	 *	T3 - user,password			PASS (only for derbynet)
+	 *  T2 - user only				PASS (for derbyclient)
+	 *  T3 - user,password				PASS (only for derbynet)
 	 *  T4 - user,password, security mechanism not set  FAIL
-	 *  T5 - user,password, security mechanism set to SECMEC_USRIDPWD    PASS
+	 *  T5 - user,password, security mechanism set to SECMEC_EUSRIDPWD  PASS/FAIL
+     *       (Fails with Sun JVM as EUSRIDPWD secmec cannot be used)
 	 *  T6 - user, security mechanism set to SECMEC_USRIDONL   PASS
-	 *  T7 - user,password, security mechanism set to SECMEC_USRENCPWD   FAIL
+	 *  T7 - user,password, security mechanism set to SECMEC_USRENCPWD  FAIL
 	 *  Test with datasource as well as DriverManager
 	 *  T8 - user,password security mechanism set to SECMEC_USRIDONL   PASS
+	 *  T9 - user,password security mechanism set to SECMEC_USRSSBPWD  PASS
 	 *  Test with datasource as well as DriverManager
      * Note, that with DERBY928, the pass/fail for the connections 
      * will depend on the security mechanism specified at the server by property
@@ -331,12 +341,12 @@ public class testSecMec extends dataSourcePermissions_net
      * http://issues.apache.org/jira/secure/attachment/12322971/Derby928_Table_SecurityMechanisms..htm
      * for a combination of url/security mechanisms and the expected results 
 	 */
-
 	protected void runTest()
 	{
 		// Test cases with get connection via drivermanager and using
 		// different security mechanisms.
-		// Network server supports SECMEC_USRIDPWD, SECMEC_USRIDONL,SECMEC_EUSRIDPWD
+		// Network server supports SECMEC_USRIDPWD, SECMEC_USRIDONL,
+        // SECMEC_EUSRIDPWD and USRSSBPWD (derby network client only)
 		System.out.println("Checking security mechanism authentication with DriverManager");
         
         // DERBY-300; Creation of SQLWarning on a getConnection causes hang on 
@@ -366,19 +376,34 @@ public class testSecMec extends dataSourcePermissions_net
                 // disable as ibm142 and sun jce doesnt support DH prime of 32 bytes
 		//getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee;securityMechanism="+SECMEC_USRENCPWD),"T7:");
 		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee;securityMechanism="+SECMEC_USRIDONL),"T8:");
+        // Test strong password substitute DRDA security mechanism (only works with DerbyClient driver right now)
+		getConnectionUsingDriverManager(getJDBCUrl("wombat","user=neelima;password=lee;securityMechanism="+SECMEC_USRSSBPWD),"T9:");
 
 		getConnectionUsingDataSource();
 
         // regression test for DERBY-1080
         testDerby1080();
+
         // test for DERBY-962
         testAllCombinationsOfUserPasswordSecMecInput();
+
+        // test USRSSBPWD (DERBY-528) with Derby BUILTIN authentication scheme
+        // both with none and USRSSBPWD specified DRDA SecMec upon
+        // starting the network server.
+        String serverSecurityMechanism =
+            System.getProperty("derby.drda.securityMechanism");
+
+        if ((serverSecurityMechanism == null) ||
+            (serverSecurityMechanism.equals(
+                        "STRONG_PASSWORD_SUBSTITUTE_SECURITY")))
+        {
+            testUSRSSBPWD_with_BUILTIN();
+        }
 	}
 
-        /*
-         * Get connection from datasource and also set security mechanism
-         */
-
+    /**
+     * Get connection from datasource and also set security mechanism
+     */
 	public void getConnectionUsingDataSource()
 	{
 		// bug in jcc, throws error with null password
@@ -399,6 +424,8 @@ public class testSecMec extends dataSourcePermissions_net
             // Hence the following call to get connection might not be successful when 
             // client is running in JVM  where the JCE does not support the DH (32 byte prime)
             testSecurityMechanism("john","sarah",new Short(SECMEC_EUSRIDPWD),"SECMEC_EUSRIDPWD:");
+            // JCC does not support USRSSBPWD security mechanism
+		    testSecurityMechanism("john","sarah",new Short(SECMEC_USRSSBPWD),"SECMEC_USRSSBPWD:");
         }
 	}
 
@@ -432,12 +459,10 @@ public class testSecMec extends dataSourcePermissions_net
             System.out.println("UNEXPECTED EXCEPTION!!!" +msg);
             e.printStackTrace();
         }
-        
 	}
 
 	public void getConnectionUsingDriverManager(String dbUrl, String msg)
 	{
-
 		try
 		{
 			DriverManager.getConnection(dbUrl);
@@ -458,24 +483,27 @@ public class testSecMec extends dataSourcePermissions_net
 	/**
 	 * Test different interesting combinations of user,password, security mechanism
 	 * for testing security mechanism upgrade logic. This test has been added 
-     * as part of DERBY-962.  Two things have been fixed in DERBY-962, affects
+     * as part of DERBY-962. Two things have been fixed in DERBY-962, affects
      * only client behavior.
+     *
 	 * 1)Upgrade logic should not override security mechanism if it has been 
      * explicitly set in connection request (either via DriverManager or 
      * using DataSource)
+     *
      * 2)Upgrade security mechanism to a more secure one , ie preferably 
      * to encrypted userid and password if the JVM in which the client is 
      * running has support for it.
+     * 
      * Details are:  
      * If security mechanism is not specified as part of the connection request,
      * then client will do an automatic switching (upgrade) of
-     * security mechanism to use.  The logic is as follows :
+     * security mechanism to use. The logic is as follows :
      * if password is available, and if the JVM in which the client is running 
      * supports EUSRIDPWD mechanism, in that case the security mechanism is 
      * upgraded to EUSRIDPWD.
      * if password is available, and if the JVM in which the client is running 
-     * does not support EUSRIDPWD mechanism, in that case the security mechanism is
-     * upgraded to USRIDPWD
+     * does not support EUSRIDPWD mechanism, in that case the client will then
+     * default to USRIDPWD.
      * Also see DERBY-962 http://issues.apache.org/jira/browse/DERBY-962
      * <BR>
      * To understand which JVMs support EUSRIDPWD or not, please see class level 
@@ -493,7 +521,7 @@ public class testSecMec extends dataSourcePermissions_net
      * derby.drda.securityMechanism to restrict client connections based on
      * security mechanism. 
      * 
-     TABLE with all different combinations of userid,password,
+     TABLE with all different combinations of userid, password,
      security mechanism of derby client that is covered by this testcase if test
      is run against IBM15 and JDK15. 
           
@@ -506,6 +534,7 @@ public class testSecMec extends dataSourcePermissions_net
      |USRIDONL   |   0x04        |   USER_ONLY_SECURITY                  |
      |USRIDPWD   |   0x03        |   CLEAR_TEXT_PASSWORD_SECURITY        |
      |EUSRIDPWD  |   0x09        |   ENCRYPTED_USER_AND_PASSWORD_SECURITY|
+     |USRSSBPWD  |   0x08        |   STRONG_PASSWORD_SUBSTITUTE_SECURITY |
      =====================================================================
 	 Explanation of columns in table. 
 	 
@@ -513,7 +542,7 @@ public class testSecMec extends dataSourcePermissions_net
 	 Note: if no user is specified, client defaults to APP
 	 b) Connection request specifies a password or not
 	 c) Connection request specifies securityMechanism or not. the valid
-	 values are 4(USRIDONL), 3(USRIDPWD), 9(EUSRIDPWD).
+	 values are 4(USRIDONL), 3(USRIDPWD), 9(EUSRIDPWD) and 8(USRSSBPWD).
 	 d) support eusridpwd means whether this jvm supports encrypted userid/
 	 password security mechanism or not.  A value of Y means it supports
 	 and N means no.
@@ -606,7 +635,24 @@ public class testSecMec extends dataSourcePermissions_net
      -----------------------------------------------------------------
      |     |      |4       |N         |Y        N       4            |
      =================================================================
- 
+	 SecMec specified to 8 (strong password substitute)
+     =================================================================
+     |Y    |Y     |8       |Y         |Y        Y       8            |
+     |----------------------------------------------------------------
+     |     |Y     |8       |Y         |Y        Y       8            |
+     -----------------------------------------------------------------
+     |Y    |      |8       |Y         | -       -       Err1         |
+     -----------------------------------------------------------------
+     |     |      |8       |Y         | -       -       Err1         |
+     =================================================================
+     |Y    |Y     |8       |N         | -       Y       8            |
+     |----------------------------------------------------------------
+     |     |Y     |8       |N         | -       Y       8            |
+     -----------------------------------------------------------------
+     |Y    |      |8       |N         | -       -       Err1         |
+     -----------------------------------------------------------------
+     |     |      |8       |N         | -       -       Err1         |
+     ================================================================= 
 	 */
     public void testAllCombinationsOfUserPasswordSecMecInput() {
         // Try following combinations:
@@ -649,12 +695,9 @@ public class testSecMec extends dataSourcePermissions_net
                     testSecurityMechanism(USER_ATTRIBUTE[k],PWD_ATTRIBUTE[j],
                             new Short(SECMEC_ATTRIBUTE[i]),"TEST_DS ("+urlAttributes+
                             ",securityMechanism="+SECMEC_ATTRIBUTE[i]+")");
-                    
                 }
             }
         }
-
-
     }
 
     /**
@@ -673,37 +716,38 @@ public class testSecMec extends dataSourcePermissions_net
     {
         Connection conn;
         try {
-            
             // get connection via datasource without setting securityMechanism
-            DataSource ds = getDS("wombat", user,password);
+            DataSource ds = getDS("wombat", user, password);
             conn = ds.getConnection();
             conn.close();
-            System.out.println(msg +" OK");
+            System.out.println(msg + " OK");
         }
         catch (SQLException sqle)
         {
-            // Exceptions expected in certain case hence printing message instead of stack traces
-            // here. 
-            // - For cases when userid is null or password is null and by default 
-            // JCC does not allow a null password or null userid.
-            // - For case when JVM does not support EUSRIDPWD and JCC 2.6 tries to do
-            // autoswitching of security mechanism.
-            // - For case if server doesnt accept connection with this security mechanism
-            System.out.println(msg +"EXCEPTION getDataSourceConnection()  " + sqle.getMessage());
+            // Exceptions expected in certain case hence printing message
+            // instead of stack traces here. 
+            // - For cases when userid is null or password is null and
+            // by default JCC does not allow a null password or null userid.
+            // - For case when JVM does not support EUSRIDPWD and JCC 2.6 tries
+            // to do autoswitching of security mechanism.
+            // - For case if server doesnt accept connection with this security
+            // mechanism
+            // - For case when client driver does support USRSSBPWD security
+            // mechanism
+            System.out.println(msg + "EXCEPTION getDataSourceConnection()  " + sqle.getMessage());
             dumpSQLException(sqle.getNextException());
         }
         catch (Exception e)
         {
-            System.out.println("UNEXPECTED EXCEPTION!!!" +msg);
+            System.out.println("UNEXPECTED EXCEPTION!!!" + msg);
             e.printStackTrace();
         }
-        
     }
 
     /**
      * Dump SQLState and message for the complete nested chain of SQLException 
-     * @param sqle SQLException whose complete chain of exceptions is traversed and sqlstate and 
-     * message is printed out
+     * @param sqle SQLException whose complete chain of exceptions is
+     * traversed and sqlstate and message is printed out
      */
     public static void dumpSQLException(SQLException sqle)
     {
@@ -753,6 +797,7 @@ public class testSecMec extends dataSourcePermissions_net
         conn.close();
         System.out.println("OK");
     }
+
     /**
      * Test a connection by executing a sample query
      * @param   conn    database connection
@@ -786,13 +831,12 @@ public class testSecMec extends dataSourcePermissions_net
             stmt.close();
       }
     }
-
-    
     
     /**
      * This is a regression test for DERBY-1080 - where some variables required
      * only for the EUSRIDPWD security mechanism case were not getting reset on
-     * connection re-use and resulting in protocol error.
+     * connection re-use and resulting in protocol error. This also applies to
+     * USRSSBPWD security mechanism. 
      * 
      * Read class level comments (#1) to understand what is specified by drda
      * spec for EUSRIDPWD.  
@@ -857,4 +901,140 @@ public class testSecMec extends dataSourcePermissions_net
         }
 
     }
+
+    /**
+     * Test SECMEC_USRSSBPWD with derby BUILTIN authentication turned ON.
+     *
+     * We want to test a combination of USRSSBPWD with BUILTIN as password
+     * substitute is only supported with NONE or BUILTIN Derby authentication
+     * scheme right now (DERBY-528).
+     * 
+     * @throws Exception if there an unexpected error
+     */
+    public void testUSRSSBPWD_with_BUILTIN()
+    {
+        // Turn on Derby BUILTIN authentication and attempt connecting
+        // with USRSSBPWD security mechanism.
+        System.out.println(
+            "Test USRSSBPWD_with_BUILTIN - derby.drda.securityMechanism=" +
+            System.getProperty("derby.drda.securityMechanism"));
+
+        try
+        {
+            System.out.println("Turning ON Derby BUILTIN authentication");
+            Connection conn =
+                getConnectionWithSecMec("neelima", "lee",
+                                        new Short(SECMEC_USRSSBPWD));
+            if (conn == null)
+                return; // Exception would have been raised
+
+            // Turn on BUILTIN authentication
+            CallableStatement cs =
+                conn.prepareCall(
+                        "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+            
+            cs.setString(1, "derby.user.neelima");
+            cs.setString(2, "lee");
+            cs.execute();
+            
+            cs.setString(1, "derby.connection.requireAuthentication");
+            cs.setString(2, "true");
+            cs.execute();
+
+            cs.close();
+            cs = null;
+
+            conn.close();
+
+            // Shutdown 'wombat' database for BUILTIN
+            // authentication to take effect the next time it is
+            // booted - derby.connection.requireAuthentication is a
+            // static property.
+		    getConnectionUsingDriverManager(getJDBCUrl(
+                "wombat","user=neelima;password=lee;shutdown=true;securityMechanism=" +
+                SECMEC_USRSSBPWD),"USRSSBPWD (T0):");
+
+            // Now test some connection(s) with SECMEC_USRSSBPWD
+            // via DriverManager and Datasource
+		    getConnectionUsingDriverManager(getJDBCUrl(
+                "wombat","user=neelima;password=lee;securityMechanism=" +
+                SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T1):");
+		    testSecurityMechanism("neelima","lee",new Short(SECMEC_USRSSBPWD),
+                                  "TEST_DS - USRSSBPWD + BUILTIN (T2):");
+            // Attempting to connect with some invalid user
+		    getConnectionUsingDriverManager(getJDBCUrl(
+                "wombat","user=invalid;password=user;securityMechanism=" +
+                SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T3):");
+		    testSecurityMechanism("invalid","user",new Short(SECMEC_USRSSBPWD),
+                                  "TEST_DS - USRSSBPWD + BUILTIN (T4):");
+
+            System.out.println("Turning OFF Derby BUILTIN authentication");
+            conn = getConnectionWithSecMec("neelima", "lee",
+                                           new Short(SECMEC_USRSSBPWD));
+
+            if (conn == null)
+                return; // Exception would have been raised
+
+            // Turn off BUILTIN authentication
+            cs = conn.prepareCall(
+                "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+            
+            cs.setString(1, "derby.connection.requireAuthentication");
+            cs.setString(2, "false");
+            cs.execute();
+
+            cs.close();
+            cs = null;
+            conn.close();
+
+            // Shutdown 'wombat' database for BUILTIN authentication
+            // to take effect the next time it is booted
+		    getConnectionUsingDriverManager(getJDBCUrl(
+                "wombat","user=neelima;password=lee;shutdown=true;securityMechanism=" +
+                SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T5):");
+        } 
+        catch (Exception e)
+        {
+            System.out.println(
+                "FAIL: testUSRSSBPWD_with_BUILTIN(). Unexpected Exception " +
+                e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+	public Connection getConnectionWithSecMec(String user,
+                                              String password,
+                                              Short secMec)
+	{
+		Connection conn = null;
+		String securityMechanismProperty = "SecurityMechanism";
+		Class[] argType = { Short.TYPE };
+		String methodName = TestUtil.getSetterName(securityMechanismProperty);
+		Object[] args = new Short[1];
+		args[0] = secMec;
+
+		try {
+			DataSource ds = getDS("wombat", user, password);
+			Method sh = ds.getClass().getMethod(methodName, argType);
+			sh.invoke(ds, args);
+			conn = ds.getConnection();
+		}
+		catch (SQLException sqle)
+		{
+            // Exceptions expected in certain cases depending on JCE used for 
+            // running the test. hence printing message instead of stack traces
+            // here.
+            System.out.println("EXCEPTION getConnectionWithSecMec()  " + sqle.getMessage());
+            dumpSQLException(sqle.getNextException());
+		}
+        catch (Exception e)
+        {
+            System.out.println(
+                    "UNEXPECTED EXCEPTION!!! getConnectionWithSecMec() - " +
+                    secMec);
+            e.printStackTrace();
+        }
+
+        return conn;
+	}
 }
