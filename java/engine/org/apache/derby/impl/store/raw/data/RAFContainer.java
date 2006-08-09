@@ -1287,10 +1287,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         BasePage page = null; 
         StorageFile newFile = 
             dataFactory.getStorageFactory().newStorageFile(newFilePath);
+        StorageRandomAccessFile newRaf = null;
         try {
             long lastPageNumber= getLastPageNumber(handle);
  
-            StorageRandomAccessFile newRaf = privGetRandomAccessFile(newFile);
+            newRaf = privGetRandomAccessFile(newFile);
 
             byte[] encryptionBuf = null;
             encryptionBuf = new byte[pageSize];
@@ -1317,7 +1318,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                 page = null;
             }
 
+            // sync the new version of the container.
+            newRaf.sync(true);
             newRaf.close();
+            newRaf = null;
             
         }catch (IOException ioe) {
             throw StandardException.newException(
@@ -1329,6 +1333,20 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
             if (page != null) {
                 page.unlatch();
                 page = null;
+            }
+            
+            if (newRaf != null) {
+                try {
+                    newRaf.close();
+                }catch (IOException ioe) 
+                {
+                    newRaf = null;
+                    throw StandardException.newException(
+                                    SQLState.FILE_CONTAINER_EXCEPTION, 
+                                    ioe, 
+                                    newFile);
+                    
+                }
             }
         }
     }

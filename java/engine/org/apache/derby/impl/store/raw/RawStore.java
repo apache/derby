@@ -1149,6 +1149,20 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 // connection URL by mistake on an already encrypted database, 
                 // it is ignored.
 
+
+                // prevent attempt to (re)encrypt of a read-only database
+                if (encryptDatabase) 
+                {
+                    if (isReadOnly()) 
+                    {
+                        if (reEncrypt) 
+                            throw StandardException.newException(
+                                     SQLState.CANNOT_REENCRYPT_READONLY_DATABASE);
+                        else
+                            throw StandardException.newException(
+                                     SQLState.CANNOT_ENCRYPT_READONLY_DATABASE);
+                    }
+                }
             }
 
             // setup encryption engines. 
@@ -1866,7 +1880,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * @exception  StandardException  
      *             if there is global transaction in the prepared state or
      *             if the database is not at the version 10.2 or above, this
-     *             feature is not supported.  
+     *             feature is not supported or  
+     *             if the log is archived for the database.
      */
     private void canEncryptDatabase(boolean reEncrypt) 
         throws StandardException 
@@ -1897,6 +1912,26 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             else 
                 throw StandardException.newException(
                        SQLState.ENCRYPTION_PREPARED_XACT_EXIST);
+        }
+
+
+        // check if the database has the log archived. 
+        // database can not be congured of encryption or
+        // or re-encrypt it with a new key when the database 
+        // log is being archived. The reason for this restriction is 
+        // it will create a scenarion where users will 
+        // have some logs encrypted with new key and some with old key 
+        // when rollforward recovery is performed. 
+    
+        if (logFactory.logArchived()) 
+        {
+            if(reEncrypt) 
+                throw StandardException.newException(
+                       SQLState.CANNOT_REENCRYPT_LOG_ARCHIVED_DATABASE);
+            else 
+                throw StandardException.newException(
+                       SQLState.CANNOT_ENCRYPT_LOG_ARCHIVED_DATABASE);
+            
         }
     }
 

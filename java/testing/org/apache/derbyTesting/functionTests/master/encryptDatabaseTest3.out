@@ -1,0 +1,261 @@
+ij> -- This script tests error cases where encryption of an un-encryped database 
+-- or re-encrption of an encrypted databases with new password/key should fail 
+-- when 
+--   1) the database is booted read-only mode using jar subprotocol.
+--   2) the databases with log archive mode enabled. It shoud 
+---     succeed after disabling the log archive mode.
+--------------------------------------------------------------------
+-- Case : create a plain database, jar it up and then attempt 
+-- to encrypt using the jar protocol 
+connect 'jdbc:derby:endb;create=true';
+ij> create table t1(a int ) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(2) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(3) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(4) ;
+1 row inserted/updated/deleted
+ij> insert into t1 values(5) ;
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:endb;shutdown=true';
+ERROR 08006: Database 'endb' shutdown.
+ij> -- now create archive of the  database.
+connect 'jdbc:derby:wombat;create=true';
+ij> create procedure CREATEARCHIVE(jarName VARCHAR(20), path VARCHAR(20), dbName VARCHAR(20))
+LANGUAGE JAVA PARAMETER STYLE JAVA
+NO SQL
+EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.dbjarUtil.createArchive';
+0 rows inserted/updated/deleted
+ij> -- archive the "endb" and put in "ina.jar" with dbname as "jdb1".
+call CREATEARCHIVE('ina.jar', 'endb', 'jdb1');
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> -- try encrypting the database 'jdb1' using the jar protocol.
+-- should fail 
+connect 'jdbc:derby:jar:(ina.jar)jdb1;dataEncryption=true;bootPassword=xyz1234abc';
+ERROR XJ040: Failed to start database 'jar:(ina.jar)jdb1', see the next exception for details.
+ERROR XBCXQ: Cannot configure a read-only database for encryption.
+ij> connect 'jdbc:derby:jar:(ina.jar)jdb1;dataEncryption=true;encryptionKey=6162636465666768';
+ERROR XJ040: Failed to start database 'jar:(ina.jar)jdb1', see the next exception for details.
+ERROR XBCXQ: Cannot configure a read-only database for encryption.
+ij> -- Case: create a a jar file of an encrypted database and  
+-- try  re-encrypting it while boot it with the jar sub protocol 
+-- encrypt the databases.
+connect 'jdbc:derby:endb;dataEncryption=true;bootPassword=xyz1234abc';
+ij> insert into t1 values(6);
+1 row inserted/updated/deleted
+ij> insert into t1 values(7);
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:endb;shutdown=true';
+ERROR 08006: Database 'endb' shutdown.
+ij> -- create archive of encrypted  database.
+connect 'jdbc:derby:wombat';
+ij> call CREATEARCHIVE('ina.jar', 'endb', 'jdb1');
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> -- test the encrypted jar db 
+connect 'jdbc:derby:jar:(ina.jar)jdb1;dataEncryption=true;bootPassword=xyz1234abc;';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+7 rows selected
+ij> disconnect;
+ij> connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
+ij> -- now finally attempt to re-encrypt the encrypted jar db with 
+-- a new boot password, it should fail.
+connect 'jdbc:derby:jar:(ina.jar)jdb1;dataEncryption=true;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
+ERROR XJ040: Failed to start database 'jar:(ina.jar)jdb1', see the next exception for details.
+ERROR XBCXR: Cannot re-encrypt a read-only database with a new boot password or an external encryption key .
+ij> -- testing (re) encryption of a database 
+-- when the log arhive mode enabled -----
+-- Case : configuring a un-encrypted database for 
+-- encryption should fail, when log archive mode is enabled.
+connect 'jdbc:derby:wombat';
+ij> create table emp(id int, name char (200));
+0 rows inserted/updated/deleted
+ij> insert into emp values (1, 'john');
+1 row inserted/updated/deleted
+ij> insert into emp values(2 , 'mike');
+1 row inserted/updated/deleted
+ij> insert into emp values(3 , 'robert');
+1 row inserted/updated/deleted
+ij> -- enable the log archive mode and perform backup.
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+                                           'extinout/mybackup1', 0);
+0 rows inserted/updated/deleted
+ij> insert into emp select * from emp ;
+3 rows inserted/updated/deleted
+ij> insert into emp select * from emp ;
+6 rows inserted/updated/deleted
+ij> insert into emp select * from emp ;
+12 rows inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- attempt to configure the database for encryption using password.
+connect 'jdbc:derby:wombat;dataEncryption=true;bootPassword=xyz1234abc;';
+ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XBCXS: Cannot configure a database for encryption, when database is in the log archive mode.
+ij> -- attempt to configure the database for encryption using key.
+connect 'jdbc:derby:wombat;dataEncryption=true;encryptionKey=6162636465666768';
+ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XBCXS: Cannot configure a database for encryption, when database is in the log archive mode.
+ij> -- disable log archive mode and then reattempt encryption on 
+-- next boot.
+connect 'jdbc:derby:wombat';
+ij> select count(*) from emp ;
+1          
+-----------
+24         
+1 row selected
+ij> call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- Case: encrypt the database, with log archive mode disabled.  
+connect 'jdbc:derby:wombat;dataEncryption=true;bootPassword=xyz1234abc;';
+ij> select count(*) from emp;
+1          
+-----------
+24         
+1 row selected
+ij> create table t1(a int ) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1);
+1 row inserted/updated/deleted
+ij> -- enable log archive mode and perform backup.
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+                                           'extinout/mybackup2', 0);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(2);
+1 row inserted/updated/deleted
+ij> insert into t1 values(3);
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- attempt to re-encrypt the database , with log archive mode enabled.
+-- it should fail.
+connect 'jdbc:derby:wombat;dataEncryption=true;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
+ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XBCXT: Cannot re-encrypt a database with a new boot password or an external encryption key, when database is in the log archive mode.
+ij> -- reboot the db and disable the log archive mode
+connect 'jdbc:derby:wombat;bootPassword=xyz1234abc';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+3 rows selected
+ij> call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- re-encrypt the database, with the log archive mode disabled. 
+-- it should pass. 
+connect 'jdbc:derby:wombat;dataEncryption=true;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+3 rows selected
+ij> select count(*) from emp;
+1          
+-----------
+24         
+1 row selected
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- testing re-encryption with external key on a log archived database.
+-- restore from the backup orignal un-encrypted database and
+-- encrypt with a key. 
+connect 'jdbc:derby:wombat;restoreFrom=extinout/mybackup1/wombat';
+ij> select count(*) from emp;
+1          
+-----------
+3          
+1 row selected
+ij> call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- encrypt with a key and enable the log archive mode.
+connect 'jdbc:derby:wombat;dataEncryption=true;encryptionKey=6162636465666768';
+ij> select count(*) from emp;
+1          
+-----------
+3          
+1 row selected
+ij> create table t1(a int ) ;
+0 rows inserted/updated/deleted
+ij> insert into t1 values(1);
+1 row inserted/updated/deleted
+ij> -- enable log archive mode and perform backup.
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
+                                           'extinout/mybackup2', 0);
+0 rows inserted/updated/deleted
+ij> insert into t1 values(2);
+1 row inserted/updated/deleted
+ij> insert into t1 values(3);
+1 row inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- attempt to re-encrypt the database with external key, with log archive mode enabled.
+-- it should fail.
+connect 'jdbc:derby:wombat;encryptionKey=6162636465666768;newEncryptionKey=5666768616263646';
+ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XBCXT: Cannot re-encrypt a database with a new boot password or an external encryption key, when database is in the log archive mode.
+ij> -- reboot the db and disable the log archive mode
+connect 'jdbc:derby:wombat;encryptionKey=6162636465666768';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+3 rows selected
+ij> call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
+0 rows inserted/updated/deleted
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- now re-encrypt the database, with the log archive mode disbaled.
+-- it should pass. 
+connect 'jdbc:derby:wombat;encryptionKey=6162636465666768;newEncryptionKey=5666768616263646';
+ij> select * from t1;
+A          
+-----------
+1          
+2          
+3          
+3 rows selected
+ij> select count(*) from emp;
+1          
+-----------
+3          
+1 row selected
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> 
