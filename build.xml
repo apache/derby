@@ -1196,6 +1196,9 @@
       	<section name="org/apache/derby/tools/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
+    	<section name="org/apache/derby/loc/">
+    	  <attribute name="Sealed" value="false"/>
+    	</section>
     </manifest> 
 
     <delete file="${derby.jar.dir}/derbynet.jar"/>
@@ -1211,6 +1214,7 @@
     	 manifest="${derby.jar.dir}/lists/smfnet.mf">
       <fileset dir="${out.dir}"
                includes="org/apache/derby/loc/drda/**,
+                         org/apache/derby/loc/sysinfoMessages.properties,
                          org/apache/derby/info/net.properties"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
@@ -1266,6 +1270,12 @@
       	<section name="org/apache/derby/tools">
     	  <attribute name="Sealed" value="false"/>
     	</section>
+    	<section name="org/apache/derby/impl/tools/sysinfo/">
+    	  <attribute name="Sealed" value="false"/>
+    	</section>
+    	<section name="org/apache/derby/loc/">
+    	  <attribute name="Sealed" value="false"/>
+    	</section>
     </manifest> 
  	
     <delete file="${derby.jar.dir}/derbyclient.jar"/>
@@ -1279,6 +1289,7 @@
                includesfile="${derby.jar.dir}/lists/dnc.list"/>
       <fileset dir="${out.dir}"
                includes="org/apache/derby/info/dnc.properties,
+                         org/apache/derby/loc/sysinfoMessages.properties,
                          org/apache/derby/loc/clientmessages*.properties"
                excludes="org/apache/derby/loc/clientmessages_qq_PP_testOnly.properties"/>
       <fileset dir="${derby.jar.dir}/lists"
