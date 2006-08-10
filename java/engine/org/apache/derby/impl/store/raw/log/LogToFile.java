@@ -4713,6 +4713,15 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	public void endLogBackup(File toDir) throws StandardException
 	{
 		long lastLogFileToBackup;
+
+
+        // Make sure all log records are synced to disk.  The online backup
+        // copied data "through" the cache, so may have picked up dirty pages
+        // which have not yet synced the associated log records to disk. 
+        // Without this force, the backup may end up with page versions 
+        // in the backup without their associated log records.
+        flush(logFileNumber, endPosition);
+
 		if (logArchived)
 		{
 			// when the log is being archived for roll-forward recovery
