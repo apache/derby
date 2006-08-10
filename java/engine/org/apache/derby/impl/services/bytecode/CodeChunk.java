@@ -1392,27 +1392,7 @@ final class CodeChunk {
             BCMethod subMethod = startSubMethod(mb, "void", split_pc,
                     splitLength);
 
-            CodeChunk subChunk = subMethod.myCode;
-
-            byte[] codeBytes = cout.getData();
-
-            // the code to be moved into the sub method
-            // as a block. This will correctly increase the
-            // program counter.
-            try {
-                subChunk.cout.write(codeBytes, CODE_OFFSET + split_pc,
-                        splitLength);
-            } catch (IOException ioe) {
-                limitHit(ioe);
-            }
-
-            // Just cause the sub-method to return,
-            // fix up its maxStack and then complete it.
-            subChunk.addInstr(VMOpcode.RETURN);
-            subMethod.maxStack = subChunk.findMaxStack(ch, 0, subChunk.getPC());
-            subMethod.complete();
-
-            return removePushedCode(mb, ch, subMethod, split_pc, splitLength,
+            return splitCodeIntoSubMethod(mb, ch, subMethod, split_pc, splitLength,
                     codeLength);
         }
         return -1;
@@ -1500,10 +1480,9 @@ final class CodeChunk {
         }
         return false;
     }
-
     /**
-     * Remove a block of code from this method that was
-     * pushed into a sub-method and call the sub-method.
+     * Split a block of code from this method into a sub-method
+     * and call it.
      * 
      * Returns the pc of this method just after the call
      * to the sub-method.
@@ -1514,6 +1493,50 @@ final class CodeChunk {
      * @param split_pc Program counter the split started at
      * @param splitLength Length of code split
      * @param codeLength Length of code before split
+     */
+    private int splitCodeIntoSubMethod(BCMethod mb, ClassHolder ch,
+            BCMethod subMethod, int split_pc, int splitLength, int codeLength) {
+        CodeChunk subChunk = subMethod.myCode;
+
+        byte[] codeBytes = cout.getData();
+
+        // the code to be moved into the sub method
+        // as a block. This will correctly increase the
+        // program counter.
+        try {
+            subChunk.cout.write(codeBytes, CODE_OFFSET + split_pc, splitLength);
+        } catch (IOException ioe) {
+            limitHit(ioe);
+        }
+
+        // Just cause the sub-method to return,
+        // fix up its maxStack and then complete it.
+        subChunk.addInstr(VMOpcode.RETURN);
+        subMethod.maxStack = subChunk.findMaxStack(ch, 0, subChunk.getPC());
+        subMethod.complete();
+
+        return removePushedCode(mb, ch, subMethod, split_pc, splitLength,
+                codeLength);
+    }
+
+    /**
+     * Remove a block of code from this method that was pushed into a sub-method
+     * and call the sub-method.
+     * 
+     * Returns the pc of this method just after the call to the sub-method.
+     * 
+     * @param mb
+     *            My method
+     * @param ch
+     *            My class
+     * @param subMethod
+     *            Sub-method code was pushed into
+     * @param split_pc
+     *            Program counter the split started at
+     * @param splitLength
+     *            Length of code split
+     * @param codeLength
+     *            Length of code before split
      */
     private int removePushedCode(BCMethod mb, ClassHolder ch,
             BCMethod subMethod, int split_pc, int splitLength, int codeLength) {
