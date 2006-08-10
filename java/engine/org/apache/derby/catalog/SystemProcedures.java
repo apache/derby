@@ -1236,7 +1236,7 @@ public class SystemProcedures  {
 		String entityName = (schemaName == null ? tableName : schemaName + "." + tableName); 
 		String binsertSql = 
 			"insert into " + entityName +
-			" PROPERTIES insertMode=bulkInsert " +
+			" --DERBY-PROPERTIES insertMode=bulkInsert \n" +
 			"select * from new " + vtiName + 
 			"(" + 
 			"'" + schemaName + "'" + ", " + 
