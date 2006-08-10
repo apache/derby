@@ -1594,7 +1594,7 @@ final class CodeChunk {
      * for the arguments will push and pop values but never drop
      * below the stack value at the start of the byte code sequence.
      * E.g. in the examples the stack before the first arg will be
-     * N+1 (the instance for the method call) and at the end of the
+     * N+1 (the objectref for the method call) and at the end of the
      * byte code for arg1 will be N+2 or N+3 depending on if arg1 is
      * a single or double word argument. During the execution of
      * the byte code the stack may have had many arguments pushed
@@ -1602,7 +1602,7 @@ final class CodeChunk {
      * code for arg1 is independent of the stack's previous values
      * and is self contained. This self-containment then extends to
      * all the arguements, the method call itself and pushing the
-     * object reference for the method call, thus the complete
+     * objectref for the method call, thus the complete
      * sequence is self-contained.
      * <BR>
      * The self-containment breaks in a few cases, take the simple
@@ -1611,23 +1611,28 @@ final class CodeChunk {
      * push3 this swap invoke
      * </code>
      * In this case the byte code for arg1 (swap) is not self-contained
-     * and relies on earlier stack values. The set of instrcutions
+     * and relies on earlier stack values. The set of instructions
      * that break the self-containment are limited and thus can be
      * checked for easily.
      * <P>
      * How to identify "self-contained blocks of code".
      * <BR>
      * We walk through the byte code and maintain a history of
-     * the program counter when the stack most recently
-     * achieved each depth. E.g.
+     * the program counter when the stack changed. If a word
+     * was pushed by an opcode that does not depend on previous
+     * stack values the current program counter is recorded
+     * otherwise -1 is set to indicate stack value may depend
+     * on previous stack values.
      * <code>
      * pcDepth[N] = 45
-     * pcDepth[N+1] = 46
+     * pcDepth[N+1] = -1
      * pcDepth[N+2] = 52
      * </code>
-     * When an instruction causes the stack to decrease to M
-     * all the entries between M and the current stack value
-     * are cleared, once we determine if we need to split or not.
+     * <BR>
+     * The pcDepth represents a program counter that caused
+     * the stack to reach that depth and is independent of
+     * previous stack entries. Initially a very limited
+     * number of opcodes are supported as independent.
      * <BR>
      * If the instruction that caused the stack decrease
      * is an invoke byte code that matches what we are looking for
@@ -1647,7 +1652,8 @@ final class CodeChunk {
      *  WORK IN PROGRESS - Incremental development
      *  <BR>
      *  Currently just walks the method maintaining the
-     *  pcByDepth array. Does not perform any split.
+     *  pcByDepth array and identifies potential blocks
+     *  to splt. Does not perform any split.
      *  Not called by submitted code. Tested with local
      *  changes from calls in BCMethod.
      *  
@@ -1664,14 +1670,13 @@ final class CodeChunk {
         
         int stack = 0;
                
+        //TODO: this conditional handling is copied from
+        //the splitZeroStack code, need to check to see
+        // how it fits with the expression logic.
         // do not split until at least this point (inclusive)
         // used to ensure no split occurs in the middle of
         // a conditional.
-        int outerConditionalEnd_pc = -1;
-        
-        System.out.println("splitExpressionOut " + mb.getName()
-        		+ " " + codeLength);
-   
+        int outerConditionalEnd_pc = -1;  
 
         int end_pc = 0 + codeLength;
         for (int pc = 0; pc < end_pc;) {
@@ -1719,50 +1724,129 @@ final class CodeChunk {
                 }
                 continue;
             }
-            
-            if (stackDelta == 0)
-                continue;
+
+            // Set up independent points.
+            // 
+            // Code in this switch either
+            // 1) 'break's out not changing anything
+            // to indicate the instruction left the
+            // stack in such that its independence
+            // at the current stack level is left unchanged.
+            //
+            // 2) Marks the opcode_pc as the independent
+            // start point for the current stack depth.
+            //
+            // 3) marks the current stack depth as not
+            // having an independent start point. In some cases
+            // that may be a false assertion as it's a fail safe
+            // system. Only a small defined set of instructions
+            // are handled as valid starting points. More development
+            // and thought can be put into handling more cases as required.
+            // The 'this' ALOAD_0 instruction will cover most cases.
             
             int opcode_pc = pc - instructionLength(opcode);
-
-            // Only split when the stack is having items popped
-            if (stackDelta > 0)
+            switch (opcode)
             {
-                // pushing double word.
-                if (stackDelta == 2)
-                    pcByDepth[stack - 1] = -1;
-                pcByDepth[stack] = opcode_pc;
-                continue;
-            }
-            
-            // Only handle the cases discussed above.
-            switch (opcode) {
+            // Independent instructions that do not modify the stack
+            case VMOpcode.NOP: 
+            	break;
+            	
+            // Independent instructions that push one value
+            case VMOpcode.ALOAD_0: // push 'this'
+            	pcByDepth[stack] = opcode_pc;
+            	break;
+
             case VMOpcode.INVOKEINTERFACE:
             case VMOpcode.INVOKEVIRTUAL:
-                //TODO: work on identifying self-contained blocks
-                //TODO: work on splits.
+            {
+            	//   ...,objectref[,word]*
+            	//   
+            	// => ...
+            	// => ...,word
+            	// => ...,word1,word2
+            	
+                // Width of the value returned by the method call.
+                String vmDescriptor = getTypeDescriptor(ch, opcode_pc);
+                int width = CodeChunk.getDescriptorWordCount(vmDescriptor);
+     
+                // Need to determine the pc of the
+            	// instruction that pushed the objectref
+            	// for the method call. Three cases depending
+            	// on the return type:
+            	// 1) void method
+            	//     pcDepth[stack + 1]
+            	// 2) returns single word
+            	//     pcDepth[stack]
+            	// 3) returns double word
+            	//     pcDepth[stack - 1]
+                
+                // Special case of zero arguments
+                // and returning an single word value.
+                // In this case most likely the code
+                // block to the objectref is not
+                // worth splitting, but it also
+                // does not affect the independence
+                // of the current stack depth.
+                // If the objectref was independent
+                // then the current stack value will
+                // be. This is looking
+                // for the case of this.getXXXFactory().
+                //
+                // 
+                // objectref is popped and single word
+                // value pushed by method call, so
+                // stackDelta must be zero.
+                if (stackDelta == 0 && width == 1)
+                {
+                	break;
+                }
+                
+                int stackDepthForObjectref = stack + (1 - width);
+                
+                // Look for an starting point that is independent
+                // starting at the objectref and working backwards
+                // in the code by looking for program counters
+                // that pushed an independent value.
+                int selfContainedBlockStart = -1;
+                for (int sd = stackDepthForObjectref; sd >= 0; sd--)
+                {
+                	int pcStart = pcByDepth[sd];
+                	
+                	// not a independent value
+                	if (pcStart == -1)
+                		continue;
+                	
+                	// found a suitable block if
+                	if ((pc - pcStart) >= optimalMinLength)
+                	{
+                		selfContainedBlockStart = pcStart;
+                		break;
+                	}
+                }
+            	
+            	// Did we find an independent starting pc
+            	if (selfContainedBlockStart != -1)
+            	{     
+            		// TODO: actual extract & split
+             	    return -1;
+            	}
+            	pcByDepth[stack] = -1;
+            	if (width == 2)
+            		pcByDepth[stack - 1] = -1;
             	break;
-            default:
-            	// no split to handle
-            	continue;
-            }
-
+              }
+               //TODO: work on splits.
+              default:
+            	// assume the instruction is not independent
+            	// (fail-safe)
+            	pcByDepth[stack] = -1;
+                // account for opcodes pushing longs/doubles.
+                if (stackDelta == 2)
+                	pcByDepth[stack - 1] = -1;
+                break;
+            }   	
+       }
             
-            // assume single word args, single word return
-            // this arg1 arg2 arg3 invoke
-            // 
-            // Stack was 7
-            // Stack now 4
-            // stackDelta = -3
-            // pcByDepth[4] = -1?
-            // pcByDepth[4] = pc of this instruction?
-            // pcByDepth[4] = pc of original instruction (this)?
-            // 
-            //
-            Arrays.fill(pcByDepth, stack,
-            		(stack - stackDelta) + 1, -1);
-         
-        }
         return -1;
     }
     
