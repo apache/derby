@@ -66,7 +66,8 @@ public class ExternalSortFactory implements
 
 	protected static final int DEFAULT_MEM_USE = 1024*1024; // aim for about 1Meg
 	// how many sort runs to combined into a larger sort run
-	protected static final int DEFAULT_MAX_MERGE_RUN = 1024; 
+    // (DERBY-1661)
+	protected static final int DEFAULT_MAX_MERGE_RUN = 512; 
 
 	// sizeof Node + reference to Node + 12 bytes tax
 	private static final int SORT_ROW_OVERHEAD = 8*4+12; 
