@@ -163,7 +163,7 @@ class BCMethod implements MethodBuilder {
 		myEntry = modClass.addMember(methodName, sig, modifiers);
 
 		// get code chunk
-		myCode = new CodeChunk();
+		myCode = new CodeChunk(this.cb);
         
         parameterTypes = parms;
 	}
@@ -1339,7 +1339,7 @@ class BCMethod implements MethodBuilder {
                 returnType, subMethodName, withParameters ? parameterTypes
                         : null);
         subMethod.thrownExceptions = this.thrownExceptions;
-
+        
         return subMethod;
     }
 

@@ -498,6 +498,15 @@ final class CodeChunk {
 	
 	};
 	
+    /**
+     * Assume an IOException means some limit of the class file
+     * format was hit
+     * 
+     */
+    private void limitHit(IOException ioe)
+    {
+        cb.addLimitExceeded(ioe.toString());
+    }
 	
 	
 	/**
@@ -508,6 +517,7 @@ final class CodeChunk {
 		try {
 		cout.putU1(opcode);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 
 		if (SanityManager.DEBUG) {			
@@ -521,10 +531,12 @@ final class CodeChunk {
 	 * Add an instruction that has a 16 bit operand.
 	 */
 	void addInstrU2(short opcode, int operand) {
+        
 		try {
 		cout.putU1(opcode);
 		cout.putU2(operand);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 
 		if (SanityManager.DEBUG) {			
@@ -542,6 +554,7 @@ final class CodeChunk {
 		cout.putU1(opcode);
 		cout.putU4(operand);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 		if (SanityManager.DEBUG) {			
 			if (OPCODE_ACTION[opcode][1] != 5)
@@ -559,6 +572,7 @@ final class CodeChunk {
 		cout.putU1(opcode);
 		cout.putU1(operand);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 
 		// Only debug code from here.
@@ -614,6 +628,7 @@ final class CodeChunk {
 		cout.putU1(operand2);
 		cout.putU1(operand3);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 		if (SanityManager.DEBUG) {			
 			if (OPCODE_ACTION[opcode][1] != 5)
@@ -654,14 +669,22 @@ final class CodeChunk {
 	 * @see #insertCodeSpace
 	 */
 	private final int pcDelta;
+    
+    /**
+     * The class we are generating code for, used to indicate that
+     * some limit was hit during code generation.
+     */
+    final BCClass       cb;
 
-	CodeChunk() {
+	CodeChunk(BCClass cb) {
+        this.cb = cb;
         cout = new ClassFormatOutput();
 		try {
 			cout.putU2(0); // max_stack, placeholder for now
 			cout.putU2(0); // max_locals, placeholder for now
 			cout.putU4(0); // code_length, placeholder 4 now
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 		pcDelta = - CodeChunk.CODE_OFFSET;
 	}
@@ -672,10 +695,10 @@ final class CodeChunk {
 	 * into an existing stream.
 	 * @param pc
 	 * @param byteCount
-	 * @throws IOException 
 	 */
 	private CodeChunk(CodeChunk main, int pc, int byteCount)
 	{
+        this.cb = main.cb;
 		ArrayOutputStream aos =
 			new ArrayOutputStream(main.cout.getData());
 		
@@ -683,6 +706,7 @@ final class CodeChunk {
 			aos.setPosition(CODE_OFFSET + pc);
 			aos.setLimit(byteCount);
 		} catch (IOException e) {
+            limitHit(e);
 		}
 		
 		cout = new ClassFormatOutput(aos);
@@ -706,20 +730,20 @@ final class CodeChunk {
 
 		// max_stack is in bytes 0-1
 		if (mb != null && maxStack > 65535)
-			mb.cb.addLimitExceeded(mb, "max_stack", 65535, maxStack);
+			cb.addLimitExceeded(mb, "max_stack", 65535, maxStack);
 			
 		codeBytes[0] = (byte)(maxStack >> 8 );
 		codeBytes[1] = (byte)(maxStack );
 
 		// max_locals is in bytes 2-3
 		if (mb != null && maxLocals > 65535)
-			mb.cb.addLimitExceeded(mb, "max_locals", 65535, maxLocals);
+			cb.addLimitExceeded(mb, "max_locals", 65535, maxLocals);
 		codeBytes[2] = (byte)(maxLocals >> 8 );
 		codeBytes[3] = (byte)(maxLocals );
 
 		// code_length is in bytes 4-7
 		if (mb != null && codeLength > VMOpcode.MAX_CODE_LENGTH)
-			mb.cb.addLimitExceeded(mb, "code_length",
+			cb.addLimitExceeded(mb, "code_length",
 					VMOpcode.MAX_CODE_LENGTH, codeLength);
 		codeBytes[4] = (byte)(codeLength >> 24 );
 		codeBytes[5] = (byte)(codeLength >> 16 );
@@ -767,6 +791,7 @@ final class CodeChunk {
 				// attributes is empty, a 0-element array.
 			}
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 
 		fixLengths(mb, maxStack, maxLocals, codeLength);
@@ -1378,7 +1403,7 @@ final class CodeChunk {
                 subChunk.cout.write(codeBytes, CODE_OFFSET + split_pc,
                         splitLength);
             } catch (IOException ioe) {
-                // writing to a byte array
+                limitHit(ioe);
             }
 
             // Just cause the sub-method to return,
@@ -1495,7 +1520,7 @@ final class CodeChunk {
         // now need to fix up this method, create
         // a new CodeChunk just to be clearer than
         // trying to modify this chunk directly.
-        CodeChunk replaceChunk = new CodeChunk();
+        CodeChunk replaceChunk = new CodeChunk(mb.cb);
         mb.myCode = replaceChunk;
         mb.maxStack = 0;
 
@@ -1507,7 +1532,7 @@ final class CodeChunk {
             try {
                 replaceChunk.cout.write(codeBytes, CODE_OFFSET, split_pc);
             } catch (IOException ioe) {
-                // writing to a byte array
+                limitHit(ioe);
             }
         }
 
@@ -1523,9 +1548,16 @@ final class CodeChunk {
             replaceChunk.cout.write(codeBytes, CODE_OFFSET + split_pc
                     + splitLength, remainingCodeLength);
         } catch (IOException ioe) {
-            // writing to a byte array
+            limitHit(ioe);
         }
 
+        // Finding the max stack requires the class format to
+        // still be valid. If we have blown the number of constant
+        // pool entries then we can no longer guarantee that indexes
+        // into the constant pool in the code stream are valid.
+        if (cb.limitMsg != null)
+            return -1;
+                
         mb.maxStack = replaceChunk.findMaxStack(ch, 0, replaceChunk.getPC());
 
         return postSplit_pc;

@@ -372,7 +372,7 @@ class BCClass extends GClass {
 
 		ClassMember method = classHold.addMember(getter, sig, methodModifers);
 
-		CodeChunk chunk = new CodeChunk();
+		CodeChunk chunk = new CodeChunk(this);
 
 		// load 'this' if required
 		if (!staticField)
@@ -396,7 +396,7 @@ class BCClass extends GClass {
 		pda[0] = vmType;
 		sig = new BCMethodDescriptor(pda, VMDescriptor.VOID, factory).toString();
 		method = classHold.addMember(setter, sig, methodModifers);
-		chunk = new CodeChunk();
+		chunk = new CodeChunk(this);
 
 		// load 'this' if required
 		if (!staticField)
@@ -414,7 +414,7 @@ class BCClass extends GClass {
 	
 	/**
 	 * Add the fact that some class limit was exceeded while generating
-	 * the class. We create a set ofg them and report at the end, this
+	 * the class. We create a set of them and report at the end, this
 	 * allows the generated class file to still be dumped.
 	 * @param mb
 	 * @param limitName
@@ -442,5 +442,24 @@ class BCClass extends GClass {
 		
 		limitMsg = sb.toString();
 	}
+    
+    /**
+     * Add the fact that some class limit was exceeded while generating
+     * the class. Text is the simple string passed in.
+     * @param rawText Text to be reported.
+     * 
+     * @see BCClass#addLimitExceeded(BCMethod, String, int, int)
+     */
+    void addLimitExceeded(String rawText)
+    {
+        if (limitMsg != null)
+        {
+            limitMsg = limitMsg + ", " + rawText;
+       }
+        else
+        {
+            limitMsg = rawText;
+        }
+    }
 
 }
