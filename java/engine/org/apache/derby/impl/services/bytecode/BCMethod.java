@@ -281,7 +281,7 @@ class BCMethod implements MethodBuilder {
                 optimalMinLength = lengthToCheck;
 
             split_pc = myCode.splitZeroStack(this, modClass, split_pc,
-                    lengthToCheck, optimalMinLength);
+                    optimalMinLength);
 
             // Negative split point returned means that no split
             // was possible. Give up on this approach and goto

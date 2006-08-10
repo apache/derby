@@ -834,7 +834,7 @@ final class CodeChunk {
 		byte[] codeBytes = cout.getData();
 		
 		int u2p = CODE_OFFSET + pc + 1;
-		
+        		
 		return ((codeBytes[u2p] & 0xff) << 8) | (codeBytes[u2p+1] & 0xff);
 	}
 
@@ -942,7 +942,7 @@ final class CodeChunk {
      */
     private int findMaxStack(ClassHolder ch, int pc, int codeLength) {
 
-        int endPc = pc + codeLength;
+        final int endPc = pc + codeLength;
         int stack = 0;
         int maxStack = 0;
 
@@ -958,7 +958,7 @@ final class CodeChunk {
                 maxStack = stack;
  
             int[] cond_pcs = findConditionalPCs(pc, opcode);
-            if (cond_pcs != null) {
+            if (cond_pcs != null) {                 
                 // an else block exists.
                 if (cond_pcs[3] != -1) {
                     int blockMaxStack = findMaxStack(ch, cond_pcs[1],
@@ -1281,11 +1281,10 @@ final class CodeChunk {
      * 
      * @param mb Method for this chunk.
      * @param ch Class definition
-     * @param codeLength codeLength to check
      * @param optimalMinLength minimum length required for split
      */
     final int splitZeroStack(BCMethod mb, ClassHolder ch, final int split_pc,
-            final int codeLength, final int optimalMinLength) {
+            final int optimalMinLength) {
         int stack = 0;
 
         // maximum possible split seen that is less than
@@ -1297,7 +1296,7 @@ final class CodeChunk {
         // a conditional.
         int outerConditionalEnd_pc = -1;
 
-        int end_pc = split_pc + codeLength;
+        int end_pc = getPC(); // pc will be positioned at the end.
         for (int pc = split_pc; pc < end_pc;) {
 
             short opcode = getOpcode(pc);
@@ -1392,8 +1391,8 @@ final class CodeChunk {
             BCMethod subMethod = startSubMethod(mb, "void", split_pc,
                     splitLength);
 
-            return splitCodeIntoSubMethod(mb, ch, subMethod, split_pc, splitLength,
-                    codeLength);
+            return splitCodeIntoSubMethod(mb, ch, subMethod,
+                    split_pc, splitLength);
         }
         return -1;
     }
@@ -1492,10 +1491,9 @@ final class CodeChunk {
      * @param subMethod Sub-method code was pushed into
      * @param split_pc Program counter the split started at
      * @param splitLength Length of code split
-     * @param codeLength Length of code before split
      */
     private int splitCodeIntoSubMethod(BCMethod mb, ClassHolder ch,
-            BCMethod subMethod, int split_pc, int splitLength, int codeLength) {
+            BCMethod subMethod, final int split_pc, final int splitLength) {
         CodeChunk subChunk = subMethod.myCode;
 
         byte[] codeBytes = cout.getData();
@@ -1515,8 +1513,7 @@ final class CodeChunk {
         subMethod.maxStack = subChunk.findMaxStack(ch, 0, subChunk.getPC());
         subMethod.complete();
 
-        return removePushedCode(mb, ch, subMethod, split_pc, splitLength,
-                codeLength);
+        return removePushedCode(mb, ch, subMethod, split_pc, splitLength);
     }
 
     /**
@@ -1535,20 +1532,22 @@ final class CodeChunk {
      *            Program counter the split started at
      * @param splitLength
      *            Length of code split
-     * @param codeLength
-     *            Length of code before split
      */
     private int removePushedCode(BCMethod mb, ClassHolder ch,
-            BCMethod subMethod, int split_pc, int splitLength, int codeLength) {
+            BCMethod subMethod, final int split_pc, final int splitLength) {
         // now need to fix up this method, create
         // a new CodeChunk just to be clearer than
         // trying to modify this chunk directly.
+        
+        // total length of the code for this method before split
+        final int codeLength = getPC();
+        
         CodeChunk replaceChunk = new CodeChunk(mb.cb);
         mb.myCode = replaceChunk;
         mb.maxStack = 0;
 
         byte[] codeBytes = cout.getData();
-
+        
         // write any existing code before the split point
         // into the replacement chunk.
         if (split_pc != 0) {
@@ -1566,10 +1565,12 @@ final class CodeChunk {
 
         // Write the code remaining in this method into the replacement chunk
 
-        int remainingCodeLength = codeLength - splitLength;
-        try {
-            replaceChunk.cout.write(codeBytes, CODE_OFFSET + split_pc
-                    + splitLength, remainingCodeLength);
+        int remainingCodePC = split_pc + splitLength;
+        int remainingCodeLength = codeLength - splitLength - split_pc;
+        
+       try {
+            replaceChunk.cout.write(codeBytes, CODE_OFFSET + remainingCodePC,
+                    remainingCodeLength);
         } catch (IOException ioe) {
             limitHit(ioe);
         }
@@ -1580,7 +1581,7 @@ final class CodeChunk {
         // into the constant pool in the code stream are valid.
         if (cb.limitMsg != null)
             return -1;
-                
+        
         mb.maxStack = replaceChunk.findMaxStack(ch, 0, replaceChunk.getPC());
 
         return postSplit_pc;
