@@ -63,7 +63,15 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 	{
 		this.listenAddress = listenAddress;
 		this.portNumber = portNumber;
-		this.consoleWriter = consoleWriter;
+
+        // wrap the user-set consoleWriter with autoflush to true.
+        // this will ensure that messages to console will be 
+        // written out to the consoleWriter on a println.
+        // DERBY-1466
+        if (consoleWriter != null)
+            this.consoleWriter = new PrintWriter(consoleWriter,true);
+        else
+            this.consoleWriter = consoleWriter;
 	}
 
 

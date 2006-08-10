@@ -394,7 +394,14 @@ public final class NetworkServerControlImpl {
 	 */
 	public void setLogWriter(PrintWriter outWriter)
 	{
-		logWriter = outWriter;
+        // wrap the user-set outWriter with, autoflush to true.
+        // this will ensure that messages to console will be 
+        // written out to the outWriter on a println.
+        // DERBY-1466
+        if ( outWriter != null )
+            logWriter = new PrintWriter(outWriter,true);
+        else
+            logWriter = outWriter;
     }
 
 
