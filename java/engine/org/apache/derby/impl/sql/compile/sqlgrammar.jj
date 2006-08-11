@@ -6662,6 +6662,10 @@ ValueNode
 {
 	ValueNode value;
 	checkVersion(DataDictionary.DD_VERSION_DERBY_10_1, "XML");
+
+	// We only allow XML operations if the classpath has all
+	// of the required external classes (namley, JAXP and Xalan).
+	org.apache.derby.iapi.types.XML.checkXMLRequirements();
 }
 {
 	<XMLPARSE> <LEFT_PAREN>

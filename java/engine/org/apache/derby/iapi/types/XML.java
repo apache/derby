@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.TypedFormat;
+import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -123,17 +124,11 @@ public class XML
     // Derby string types.
     private SQLChar xmlStringValue;
 
-    /**
-      Loaded at execution time, this holds XML-related objects
-      that were created once during compilation but can be re-used
-      for each row in the target result set for the current
-      SQL statement.  In other words, we create the objects
-      once per SQL statement, instead of once per row.  In the
-      case of XMLEXISTS, one of the "objects" is the compiled
-      query expression, which means we don't have to compile
-      the expression for each row and thus we save some time.
+    /*
+     * Status variable used to verify that user's classpath contains
+     * required classes for accessing/operating on XML data values.
      */
-    private SqlXmlUtil sqlxUtil;
+    private static String xmlReqCheck = null;
 
     /**
      * Default constructor.
@@ -292,7 +287,7 @@ public class XML
          * brings us to this method).
          */
         if (theValue instanceof XMLDataValue)
-        	setXType(((XMLDataValue)theValue).getXType());
+            setXType(((XMLDataValue)theValue).getXType());
     }
 
     /** 
@@ -779,6 +774,71 @@ public class XML
     public int getXType()
     {
         return xType;
+    }
+
+    /**
+     * See if the required JAXP and Xalan classes are in the
+     * user's classpath.  Assumption is that we will always
+     * call this method before instantiating an instance of
+     * SqlXmlUtil, and thus we will never get a ClassNotFound
+     * exception caused by missing JAXP/Xalan classes.  Instead,
+     * if either is missing we should throw an informative
+     * error indicating what the problem is.
+     *
+     * NOTE: This method only does the checks necessary to
+     * allow successful instantiation of the SqlXmlUtil
+     * class.  Further checks (esp. the presence of a JAXP
+     * _implementation_ in addition to the JAXP _interfaces_)
+     * are performed in the SqlXmlUtil constructor.
+     *
+     * @exception StandardException thrown if the required
+     *  classes cannot be located in the classpath.
+     */
+    public static void checkXMLRequirements()
+        throws StandardException
+    {
+        // Only check once; after that, just re-use the result.
+        if (xmlReqCheck == null)
+        {
+            xmlReqCheck = "";
+
+            /* If the w3c Document class exists, then we
+             * assume a JAXP implementation is present in
+             * the classpath.  If this assumption is incorrect
+             * then we at least know that the JAXP *interface*
+             * exists and thus we'll be able to instantiate
+             * the SqlXmlUtil class.  We can then do a check
+             * for an actual JAXP *implementation* from within
+             * the SqlXmlUtil class (see the constructor of
+             * that class).
+             *
+             * Note: The JAXP API and implementation are
+             * provided as part the JVM if it is jdk 1.4 or
+             * greater.
+             */
+            if (!ClassInspector.classIsLoadable("org.w3c.dom.Document"))
+                xmlReqCheck = "JAXP";
+
+            /* If the XPath class exists, then we assume that our XML
+             * query processor (in this case, Xalan), is present in the
+             * classpath.  Note: if JAXP API classes aren't present
+             * then the following check will return false even if the
+             * Xalan classes *are* present; this is because the Xalan
+             * XPath class relies on JAXP, as well.  Thus there's no
+             * point in checking for Xalan unless we've already confirmed
+             * that we have the JAXP interfaces.
+             */
+            else if (!ClassInspector.classIsLoadable("org.apache.xpath.XPath"))
+                xmlReqCheck = "Xalan";
+        }
+
+        if (xmlReqCheck.length() != 0)
+        {
+            throw StandardException.newException(
+                SQLState.LANG_MISSING_XML_CLASSES, xmlReqCheck);
+        }
+
+        return;
     }
 
 }

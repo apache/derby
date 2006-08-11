@@ -89,7 +89,8 @@ import org.apache.xalan.templates.OutputProperties;
  *       this class's constructor, we can detect early on whether
  *       some classes (ex. Xalan) are missing, and can throw a friendly
  *       error up front, instead of a ClassNotFoundException somewhere
- *       deeper in the execution codepath.
+ *       deeper in the execution codepath.  The initial check for the
+ *       required XML classes can be found in XML.checkXMLRequirements().
  *
  *       Note that we don't want to put references to XML-specific
  *       objects directly into XML.java because that class (XML.java) is
@@ -154,7 +155,38 @@ public class SqlXmlUtil
              * etc--but that's it; no validation errors will be thrown.
              */
 
-            DocumentBuilderFactory dBF = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory dBF = null;
+            try {
+
+                dBF = DocumentBuilderFactory.newInstance();
+
+            } catch (Throwable e) {
+
+                /* We assume that if we get an error creating the
+                 * DocumentBuilderFactory, it's because there's no
+                 * JAXP implementation.  This can happen in the
+                 * (admittedly unlikely) case where the classpath
+                 * contains the JAXP _interfaces_ (ex. via xml-apis.jar)
+                 * and the Xalan classes but does not actually
+                 * contain a JAXP _implementation_.  In that case the
+                 * check in XML.checkXMLRequirements() will pass
+                 * and this class (SqlXmlUtil) will be instantiated
+                 * successfully--which is how we get to this constructor.
+                 * But then attempts to create a DocumentBuilderFactory
+                 * will fail, bringing us here.  Note that we can't
+                 * check for a valid JAXP implementation in the
+                 * XML.checkXMLRequirements() method because we
+                 * always want to allow the XML.java class to be
+                 * instantiated, even if the required XML classes
+                 * are not present--and that means that it (the
+                 * XML class) cannot reference DocumentBuilder nor
+                 * any of the JAXP classes directly.
+                 */
+                 throw StandardException.newException(
+                     SQLState.LANG_MISSING_XML_CLASSES, "JAXP");
+
+            }
+
             dBF.setValidating(false);
             dBF.setNamespaceAware(true);
 
@@ -165,6 +197,11 @@ public class SqlXmlUtil
             // Load serializer for serializing XML into string according
             // XML serialization rules.
             loadSerializer();
+
+        } catch (StandardException se) {
+
+            // Just rethrow it.
+            throw se;
 
         } catch (Exception e) {
 

@@ -1083,6 +1083,27 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 	}
 
 	/**
+	 * Determine whether or not the received class can be
+	 * loaded.
+	 *
+	 * @param className The name of the class in question
+	 * @return True if className can be loaded, false otherwise
+	 */
+	public static boolean classIsLoadable(String className)
+	{
+		try {
+
+			Class.forName(className);
+			return true;
+
+		} catch (ClassNotFoundException ce) {
+			return false;
+		} catch (LinkageError ce) {
+			return false;
+		}
+	}
+
+	/**
 	 * Get the declaring class for a method.
 	 *
 	 * @param method	A Member describing a method
