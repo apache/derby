@@ -153,6 +153,9 @@ public class JDBC {
 	 * TODO: Handle dependencies by looping in some intelligent
 	 * way until everything can be dropped.
 	 * 
+	 * TODO: Drop Functions
+	 * TODO: Drop Synonyms
+	 * 
 	 * @param dmd DatabaseMetaData object for database
 	 * @param schema Name of the schema
 	 * @throws SQLException database error
