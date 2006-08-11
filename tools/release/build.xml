@@ -104,7 +104,9 @@
       <zipfileset dir="${basedir}/javadoc/publishedapi" prefix="${derby.bin}/javadoc" includes="**"/>   
       <!-- lib -->
       <zipfileset dir="${basedir}/jars/insane" prefix="${derby.bin}/lib" includes="derby*.*"
-	              excludes="derby_core_plugin*"/>
+	          excludes="derby_core_plugin*,derbyTesting.jar"/>
+      <!-- test -->
+      <zipfileset dir="${basedir}/jars/insane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
     </zip>
   </target>
 
@@ -143,7 +145,9 @@
       <tarfileset dir="${basedir}/javadoc/publishedapi" prefix="${derby.bin}/javadoc" includes="**"/>   
       <!-- lib -->
       <tarfileset dir="${basedir}/jars/insane" prefix="${derby.bin}/lib" includes="derby*.*"
-	              excludes="derby_core_plugin*"/>
+	              excludes="derby_core_plugin*,derbyTesting.jar"/>
+      <!-- test -->
+      <tarfileset dir="${basedir}/jars/insane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
     </tar>
   </target>
 
@@ -155,7 +159,8 @@
       <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
       			  prefix="${derby.lib}/"/>
       <zipfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
-	              excludes="derby_core_plugin*"/>
+	              excludes="derby_core_plugin*,derbyTesting.jar"/>
+      <zipfileset dir="${basedir}/jars/insane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
     </zip>
   </target>
   <target name="lib.tgz">
@@ -164,7 +169,8 @@
       <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
       			  prefix="${derby.lib}/"/>
       <tarfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
-	              excludes="derby_core_plugin*"/>
+	              excludes="derby_core_plugin*,derbyTesting.jar"/>
+      <tarfileset dir="${basedir}/jars/insane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
     </tar>
   </target>
 
@@ -176,7 +182,8 @@
       <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
       			  prefix="${derby.lib-debug}/"/>
       <zipfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
-	              excludes="derby_core_plugin*"/>
+	              excludes="derby_core_plugin*,derbyTesting.jar"/>
+      <zipfileset dir="${basedir}/jars/sane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
     </zip>
   </target>
   <target name="lib-debug.tgz">
@@ -185,7 +192,8 @@
       <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
       			  prefix="${derby.lib-debug}/"/>
       <tarfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
-	              excludes="derby_core_plugin*"/>
+	              excludes="derby_core_plugin*,derbyTesting.jar"/>
+      <tarfileset dir="${basedir}/jars/sane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
     </tar>
   </target>
 
