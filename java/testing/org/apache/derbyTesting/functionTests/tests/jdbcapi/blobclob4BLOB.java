@@ -922,6 +922,10 @@ public class blobclob4BLOB {
                 blobclob4BLOB.printInterval(clob, 68, 50, 4, i, clobLength);
                 blobclob4BLOB.printInterval(clob, 1, 50, 5, i, clobLength);
                 blobclob4BLOB.printInterval(clob, 1, 1, 6, i, clobLength);
+                blobclob4BLOB.printInterval(
+                        clob, 1, 0, 7, i, clobLength); // length 0 at start
+                blobclob4BLOB.printInterval(
+                        clob, clobLength + 1, 0, 8, i, clobLength); // and end
                 /*
                 System.out.println(i + "(0) " + clob.getSubString(9905,50));
                 System.out.println(i + "(1) " + clob.getSubString(5910,150));
@@ -934,7 +938,7 @@ public class blobclob4BLOB {
                 if (clobLength > 100)
                 {
                     String res = clob.getSubString(clobLength-99,200);
-                    System.out.println(i + "(7) ");
+                    System.out.println(i + "(9) ");
                     if (res.length() != 100)
                         System.out.println("FAIL : length of substring is " +
                             res.length() + " should be 100");
@@ -1470,11 +1474,6 @@ public class blobclob4BLOB {
 
             
             // 0 or negative position value
-			if (isDerbyNet)
-				System.out.println(" negative tests for clob.getSubstring won't run  for network server  until 5243 is fixed");
-			if (! isDerbyNet)
-			{
-
 				try
 				{
 					clob.getSubString(0,5);
@@ -1497,14 +1496,28 @@ public class blobclob4BLOB {
             {
                 TestUtil.dumpSQLExceptions(e, isOutOfBoundException(e));
             }
-            // zero length value
+            // boundary negative 1 length
+            try {
+                clob.getSubString(1,-1);
+                System.out.println("FAIL = getSubString(1,-1)");
+            } catch (SQLException e) {
+                 TestUtil.dumpSQLExceptions(e, isOutOfBoundException(e));
+             }
+            // before start with length zero
             try
             {
-                clob.getSubString(1,0);
- 				System.out.println("FAIL = getSubString(1,0)");
+                clob.getSubString(0,0);
+ 				System.out.println("FAIL = getSubString(0,0)");
            }
             catch (SQLException e)
             {
+                TestUtil.dumpSQLExceptions(e, isOutOfBoundException(e));
+            }
+            // 2 past end with length 0
+            try {
+                clob.getSubString(clobLength + 2,0);
+                System.out.println("FAIL = getSubString(clobLength + 2,0)");
+            }  catch (SQLException e) {
                 TestUtil.dumpSQLExceptions(e, isOutOfBoundException(e));
             }
             // 0 or negative position value
@@ -1548,7 +1561,6 @@ public class blobclob4BLOB {
                 TestUtil.dumpSQLExceptions(e, "XJ072".equals(e.getSQLState()));
             }
             System.out.println("clobTest6 finished");
-			}
         }
 		catch (SQLException e) {
 			TestUtil.dumpSQLExceptions(e);
@@ -3264,6 +3276,10 @@ public class blobclob4BLOB {
                 blobclob4BLOB.printInterval(blob, 68, 50, 4, i, blobLength);
                 blobclob4BLOB.printInterval(blob, 1, 50, 5, i, blobLength);
                 blobclob4BLOB.printInterval(blob, 1, 1, 6, i, blobLength);
+                blobclob4BLOB.printInterval(
+                        blob, 1, 0, 7, i, blobLength); // length 0 at start
+                blobclob4BLOB.printInterval(
+                        blob, blobLength + 1, 0, 8, i, blobLength); // and end
                 /*
                 System.out.println(i + "(0) " + new String(blob.getBytes(9905,50), "US-ASCII"));
                 System.out.println(i + "(1) " + new String(blob.getBytes(5910,150), "US-ASCII"));
@@ -3276,7 +3292,7 @@ public class blobclob4BLOB {
                 if (blobLength > 100)
                 {
                     byte[] res = blob.getBytes(blobLength-99,200);
-                    System.out.println(i + "(7) ");
+                    System.out.println(i + "(9) ");
                     if (res.length != 100)
                         System.out.println("FAIL : length of bytes is " +
                             res.length + " should be 100");
@@ -3745,12 +3761,24 @@ public class blobclob4BLOB {
                 // zero length value
                 try
                 {
-                    blob.getBytes(1,0);
+                    blob.getBytes(1,-1);
                 }
         		catch (SQLException e)
                 {
 			        TestUtil.dumpSQLExceptions(e,isOutOfBoundException(e));
 		        }
+                // before begin length 0
+                try {
+                    blob.getBytes(0,0);
+                } catch (SQLException e) {
+                    TestUtil.dumpSQLExceptions(e,isOutOfBoundException(e));
+                }
+                // after end length 0
+                try {
+                    blob.getBytes(blobLength + 2,0);
+                } catch (SQLException e) {
+                    TestUtil.dumpSQLExceptions(e,isOutOfBoundException(e));
+                }
                 // 0 or negative position value
                 try
                 {
@@ -4616,7 +4644,7 @@ public class blobclob4BLOB {
     static void printInterval(Clob clob, long pos, int length,
         int testNum, int iteration, int clobLength)
     {
-		if (pos > clobLength)
+		if (pos > clobLength + 1)
 			System.out.println("CLOB getSubString " + pos + " > " + clobLength);
         try
         {
@@ -4635,7 +4663,7 @@ public class blobclob4BLOB {
 			if (l1 != clobLength) {
 				System.out.println("CHECK - test has mismatched lengths " + l1 + " != " + clobLength);
 			}
-			if (pos > clobLength)
+			if (pos > clobLength + 1)
 				System.out.println("CLOB FAIL - NO ERROR ON getSubString POS TOO LARGE " + pos + " > " + clobLength);
 
 
@@ -4646,7 +4674,7 @@ public class blobclob4BLOB {
 			boolean expected = false;
 
 
-			if (pos < 1 || pos > clobLength)
+			if (pos < 1 || pos > clobLength + 1)
 			{
 				if (isOutOfBoundException(e))
 					expected = true;
@@ -4680,7 +4708,7 @@ public class blobclob4BLOB {
     static void printInterval(Blob blob, long pos, int length,
         int testNum, int iteration, long blobLength)
     {
-		if (pos > blobLength)
+		if (pos > blobLength + 1)
 			System.out.println("testing Blob.getBytes() with pos " + pos + " > " + blobLength);
         try
         {
@@ -4693,7 +4721,7 @@ public class blobclob4BLOB {
 			if (l1 != blobLength) {
 				System.out.println("CHECK - test has mismatched lengths " + l1 + " != " + blobLength);
 			}
-			if (pos > blobLength)
+			if (pos > blobLength + 1)
 				System.out.println("FAIL testing Blob.getBytes() with pos " + pos + " > " + blobLength);
         }
 		catch (SQLException e)
@@ -4701,15 +4729,15 @@ public class blobclob4BLOB {
 			String state = e.getSQLState();
 			boolean expected = false;
 
-			if (pos < 1 || pos > blobLength)
+			if (pos < 1 || pos > blobLength + 1)
 				expected = isOutOfBoundException(e);
 
 			TestUtil.dumpSQLExceptions(e, expected);
 		}
 		catch (Exception e)
 		{
-			if ((pos > blobLength) && isDerbyNet)
-				System.out.println("Known JCC Bug 5914");
+			System.out.println("FAIL: Caught exception " + 
+                                e.toString());
 		}
     }
     static void printPosition(

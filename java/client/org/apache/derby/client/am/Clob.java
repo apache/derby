@@ -229,6 +229,28 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
+  /**
+   * Returns a copy of the specified substring
+   * in the <code>CLOB</code> value
+   * designated by this <code>Clob</code> object.
+   * The substring begins at position
+   * <code>pos</code> and has up to <code>length</code> consecutive
+   * characters. The starting position must be between 1 and the length
+   * of the CLOB plus 1. This allows for zero-length CLOB values, from
+   * which only zero-length substrings can be returned. 
+   * If a larger length is requested than there are characters available,
+   * characters to the end of the CLOB are returned.
+   * @param pos the first character of the substring to be extracted.
+   *            The first character is at position 1.
+   * @param length the number of consecutive characters to be copied
+   * @return a <code>String</code> that is the specified substring in
+   *         the <code>CLOB</code> value designated by this <code>Clob</code> object
+   * @exception SQLException if there is an error accessing the
+   * <code>CLOB</code>
+
+   * NOTE: If the starting position is the length of the CLOB plus 1,
+   * zero characters are returned regardless of the length requested.
+   */
     public String getSubString(long pos, int length) throws SQLException {
         
         //call checkValidity to exit by throwing a SQLException if
@@ -244,8 +266,6 @@ public class Clob extends Lob implements java.sql.Clob {
                     agent_.logWriter_.traceEntry(this, "getSubString", (int) pos, length);
                 }
 
-                // We can also do a check for pos > length()
-                // Defer it till FP7 so that proper testing can be performed on this
                 if ( pos <= 0 ) {
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.BLOB_BAD_POSITION),
@@ -258,6 +278,11 @@ public class Clob extends Lob implements java.sql.Clob {
                         new Integer(length));
                 }
 
+                if (pos > this.length() + 1) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), 
+                        new Long(pos));                    
+                }
                 retVal = getSubStringX(pos, length);
 
                 if (agent_.loggingEnabled()) {
@@ -276,6 +301,8 @@ public class Clob extends Lob implements java.sql.Clob {
         try
         {
             checkForClosedConnection();
+            // actual length is the lesser of the length requested
+            // and the number of characters available from pos to the end
             long actualLength = Math.min(this.length() - pos + 1, (long) length);
             return string_.substring((int) pos - 1, (int) (pos - 1 + actualLength));
         }
@@ -378,6 +405,11 @@ public class Clob extends Lob implements java.sql.Clob {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
                 }
+                if (start < 1) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new ClientMessageId(SQLState.BLOB_BAD_POSITION), 
+                            new Long(start));
+                }
 
                 long pos = positionX(searchstr, start);
                 if (agent_.loggingEnabled()) {
@@ -424,6 +456,12 @@ public class Clob extends Lob implements java.sql.Clob {
                             searchstr,
                             start);
                 }
+                if (start < 1) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new ClientMessageId(SQLState.BLOB_BAD_POSITION), 
+                            new Long(start));
+                }
+
                 if (searchstr == null) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));

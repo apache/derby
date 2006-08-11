@@ -78,70 +78,76 @@ statement trigger: length 300000 crc32 3781770763 300000
 clobTest13Trigger finished
 START: clobTest2
 CLOB getSubString 9905 > 0
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 0
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 0
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 0
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 0
-EXPECTED Out of bounds exception
-CLOB getSubString 1 > 0
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 1(5) (len 50) 
-CLOB FAIL - NO ERROR ON getSubString POS TOO LARGE 1 > 0
-CLOB getSubString 1 > 0
 1(6) (len 1) 
-CLOB FAIL - NO ERROR ON getSubString POS TOO LARGE 1 > 0
+1(7) (len 0) 
+1(8) (len 0) 
 CLOB getSubString 9905 > 65
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 65
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 65
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 65
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 65
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 2(5) (len 50) you can lead a horse to water but you can't form i
 2(6) (len 1) y
+2(7) (len 0) 
+2(8) (len 0) 
 CLOB getSubString 9905 > 26
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 26
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 26
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 26
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 26
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 3(5) (len 50) a stitch in time says ouch
 3(6) (len 1) a
+3(7) (len 0) 
+3(8) (len 0) 
 CLOB getSubString 9905 > 42
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 42
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 42
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 42
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 42
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 4(5) (len 50) here is a string with a return 
  character
 4(6) (len 1) h
+4(7) (len 0) 
+4(8) (len 0) 
 CLOB getSubString 9905 > 56
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 56
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 56
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 56
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 56
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 5(5) (len 50) test data: a string column inserted as an Ascii st
 5(6) (len 1) t
+5(7) (len 0) 
+5(8) (len 0) 
 6(0) (len 50) wwPosition-9907-behold-the-end-of-the-clob-is-nigh
 6(1) (len 150) I-am-hiding-here-at-position-5910-in-this-little-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
@@ -151,36 +157,38 @@ wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 ine-we-are-now-on
 6(5) (len 50) Beginning-this-is-itwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 6(6) (len 1) B
-6(7) 
+6(7) (len 0) 
+6(8) (len 0) 
+6(9) 
 wwwwwwPosition-9907-behold-the-end-of-the-clob-is-nighwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 CLOB getSubString 9905 > 0
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 0
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 0
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 204 > 0
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 68 > 0
-EXPECTED Out of bounds exception
-CLOB getSubString 1 > 0
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 7(5) (len 50) 
-CLOB FAIL - NO ERROR ON getSubString POS TOO LARGE 1 > 0
-CLOB getSubString 1 > 0
 7(6) (len 1) 
-CLOB FAIL - NO ERROR ON getSubString POS TOO LARGE 1 > 0
+7(7) (len 0) 
+7(8) (len 0) 
 CLOB getSubString 9905 > 5000
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 5000
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 CLOB getSubString 5910 > 5000
-EXPECTED Out of bounds exception
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 8(3) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 8(4) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 wwwwwwwwwwwwwwwww
 8(5) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 8(6) (len 1) w
-8(7) 
+8(7) (len 0) 
+8(8) (len 0) 
+8(9) 
 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 9(0) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 9(1) (len 150) I-am-hiding-here-at-position-5910-in-this-humungus-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
@@ -191,7 +199,9 @@ wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 wwwwwwwwwwwwwwwww
 9(5) (len 50) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 9(6) (len 1) w
-9(7) 
+9(7) (len 0) 
+9(8) (len 0) 
+9(9) 
 wwHere-I-am-at-position-299003-near-the-end-of-the-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 clobTest2 finished
 START: clobTest22
@@ -457,7 +467,16 @@ START: clobTest54
 EXPECTED SQLSTATE(22018): Invalid character string format for type INTEGER.
 end clobTest54
 START: clobTest6
- negative tests for clob.getSubstring won't run  for network server  until 5243 is fixed
+EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
+EXPECTED SQLSTATE(XJ071): Negative length argument '-76' passed in a BLOB or CLOB method.
+EXPECTED SQLSTATE(XJ071): Negative length argument '-1' passed in a BLOB or CLOB method.
+EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
+EXPECTED SQLSTATE(XJ076): The position argument '2' exceeds the size of the BLOB/CLOB.
+EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-4,000' passed in a Blob or Clob method.
+EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
+EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-42' passed in a Blob or Clob method.
+EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
+clobTest6 finished
 START: clobTest7
 clobTest7 finished
 START: clobTest8
@@ -574,70 +593,76 @@ Row Count 9 Null Row 1
 blobTest0 finished
 START: blobTest2
 testing Blob.getBytes() with pos 9905 > 0
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 0
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 0
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 0
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 0
-Known JCC Bug 5914
-testing Blob.getBytes() with pos 1 > 0
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 1(5) 
-FAIL testing Blob.getBytes() with pos 1 > 0
-testing Blob.getBytes() with pos 1 > 0
 1(6) 
-FAIL testing Blob.getBytes() with pos 1 > 0
+1(7) 
+1(8) 
 testing Blob.getBytes() with pos 9905 > 65
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 65
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 65
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 65
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 65
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 2(5) you can lead a horse to water but you can't form i
 2(6) y
+2(7) 
+2(8) 
 testing Blob.getBytes() with pos 9905 > 26
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 26
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 26
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 26
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 26
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 3(5) a stitch in time says ouch
 3(6) a
+3(7) 
+3(8) 
 testing Blob.getBytes() with pos 9905 > 42
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 42
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 42
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 42
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 42
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 4(5) here is a string with a return 
  character
 4(6) h
+4(7) 
+4(8) 
 testing Blob.getBytes() with pos 9905 > 56
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 56
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 56
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 56
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 56
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 5(5) test data: a string column inserted as an Ascii st
 5(6) t
+5(7) 
+5(8) 
 6(0) wwPosition-9907-behold-the-end-of-the-clob-is-nigh
 6(1) I-am-hiding-here-at-position-5910-in-this-little-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
@@ -648,35 +673,37 @@ ine-we-are-now-on
 6(5) Beginning-this-is-itwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 6(6) B
 6(7) 
+6(8) 
+6(9) 
 wwwwwwPosition-9907-behold-the-end-of-the-clob-is-nighwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 testing Blob.getBytes() with pos 9905 > 0
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 0
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 0
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 204 > 0
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '204' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 68 > 0
-Known JCC Bug 5914
-testing Blob.getBytes() with pos 1 > 0
+EXPECTED SQLSTATE(XJ076): The position argument '68' exceeds the size of the BLOB/CLOB.
 7(5) 
-FAIL testing Blob.getBytes() with pos 1 > 0
-testing Blob.getBytes() with pos 1 > 0
 7(6) 
-FAIL testing Blob.getBytes() with pos 1 > 0
+7(7) 
+7(8) 
 testing Blob.getBytes() with pos 9905 > 5000
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '9,905' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 5000
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 testing Blob.getBytes() with pos 5910 > 5000
-Known JCC Bug 5914
+EXPECTED SQLSTATE(XJ076): The position argument '5,910' exceeds the size of the BLOB/CLOB.
 8(3) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 8(4) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 wwwwwwwwwwwwwwwww
 8(5) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 8(6) w
 8(7) 
+8(8) 
+8(9) 
 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 9(0) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 9(1) I-am-hiding-here-at-position-5910-in-this-humungus-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
@@ -688,6 +715,8 @@ wwwwwwwwwwwwwwwww
 9(5) wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 9(6) w
 9(7) 
+9(8) 
+9(9) 
 wwHere-I-am-at-position-299003-near-the-end-of-the-clobwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 blobTest2 finished
 START: blobTest3
@@ -750,8 +779,13 @@ EXPECTED SQLSTATE(XCL12): An attempt was made to put a data value of type 'byte[
 blobTest54 finished
 START: blobTest6
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
-EXPECTED SQLSTATE(XJ071): Zero or negative length argument '-76' passed in a BLOB or CLOB method.
+EXPECTED SQLSTATE(XJ071): Negative length argument '-76' passed in a BLOB or CLOB method.
+EXPECTED SQLSTATE(XJ071): Negative length argument '-1' passed in a BLOB or CLOB method.
+EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
+EXPECTED SQLSTATE(XJ076): The position argument '2' exceeds the size of the BLOB/CLOB.
+EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-4,000' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
+EXPECTED SQLSTATE(XJ070): Negative or zero position argument '-42' passed in a Blob or Clob method.
 EXPECTED SQLSTATE(XJ072): Null pattern or searchStr passed in to a BLOB or CLOB position method.
 blobTest6 finished
 START: blobTest7

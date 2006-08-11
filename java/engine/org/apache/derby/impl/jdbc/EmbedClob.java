@@ -210,7 +210,11 @@ final class EmbedClob extends ConnectionChild implements Clob
    * designated by this <code>Clob</code> object.
    * The substring begins at position
    * <code>pos</code> and has up to <code>length</code> consecutive
-   * characters.
+   * characters. The starting position must be between 1 and the length
+   * of the CLOB plus 1. This allows for zero-length CLOB values, from
+   * which only zero-length substrings can be returned. 
+   * If a larger length is requested than there are characters available,
+   * characters from the start position to the end of the CLOB are returned.
    * @param pos the first character of the substring to be extracted.
    *            The first character is at position 1.
    * @param length the number of consecutive characters to be copied
@@ -219,9 +223,9 @@ final class EmbedClob extends ConnectionChild implements Clob
    * @exception SQLException if there is an error accessing the
    * <code>CLOB</code>
 
-   NOTE: return the empty string if pos is too large
+   * NOTE: If the starting position is the length of the CLOB plus 1,
+   * zero characters are returned regardless of the length requested.
    */
-
     public String getSubString(long pos, int length) throws SQLException
     {
         //call checkValidity to exit by throwing a SQLException if
@@ -231,7 +235,7 @@ final class EmbedClob extends ConnectionChild implements Clob
         if (pos < 1)
             throw Util.generateCsSQLException(
                 SQLState.BLOB_BAD_POSITION, new Long(pos));
-        if (length <= 0)
+        if (length < 0)
             throw Util.generateCsSQLException(
                 SQLState.BLOB_NONPOSITIVE_LENGTH, new Integer(length));
 
@@ -239,11 +243,11 @@ final class EmbedClob extends ConnectionChild implements Clob
         if (isString)
         {
             int sLength = myString.length();
-            if (sLength < pos)
+            if (sLength + 1 < pos)
                 throw Util.generateCsSQLException(
                     SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
             int endIndex = ((int) pos) + length - 1;
-            // cannot go over length of string, or we get an exception
+            // cannot go over length of string
             return myString.substring(((int) pos) - 1, (sLength > endIndex ? endIndex : sLength));
         }
 

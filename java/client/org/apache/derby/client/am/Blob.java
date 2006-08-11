@@ -125,8 +125,29 @@ public class Blob extends Lob implements java.sql.Blob {
         }
     }
 
-    // can return an array that may be have a length shorter than the supplied
-    // length (no padding occurs)
+  /**
+   * Returns as an array of bytes part or all of the <code>BLOB</code>
+   * value that this <code>Blob</code> object designates.  The byte
+   * array contains up to <code>length</code> consecutive bytes
+   * starting at position <code>pos</code>.
+   * The starting position must be between 1 and the length
+   * of the BLOB plus 1. This allows for zero-length BLOB values, from
+   * which only zero-length byte arrays can be returned. 
+   * If a larger length is requested than there are bytes available,
+   * characters from the start position to the end of the BLOB are returned.
+   * @param pos the ordinal position of the first byte in the
+   * <code>BLOB</code> value to be extracted; the first byte is at
+   * position 1
+   * @param length is the number of consecutive bytes to be copied
+   * @return a byte array containing up to <code>length</code>
+   * consecutive bytes from the <code>BLOB</code> value designated
+   * by this <code>Blob</code> object, starting with the
+   * byte at position <code>startPos</code>.
+   * @exception SQLException if there is an error accessing the
+   * <code>BLOB</code>
+   * NOTE: If the starting position is the length of the BLOB plus 1,
+   * zero bytess are returned regardless of the length requested.
+   */
     public byte[] getBytes(long pos, int length) throws SQLException {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
@@ -140,6 +161,11 @@ public class Blob extends Lob implements java.sql.Blob {
                 if (pos <= 0) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.BLOB_BAD_POSITION), 
+                        new Long(pos));
+                }
+                if (pos > this.length() + 1) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), 
                         new Long(pos));
                 }
                 if (length < 0) {
@@ -163,14 +189,14 @@ public class Blob extends Lob implements java.sql.Blob {
     private byte[] getBytesX(long pos, int length) throws SqlException {
         checkForClosedConnection();
 
-        // we may need to check for overflow on this cast
         long actualLength;
         try {
+            // actual length is the lesser of the number of bytes requested
+            // and the number of bytes available from pos to the end
             actualLength = Math.min(this.length() - pos + 1, (long) length);
         } catch ( SQLException se ) {
             throw new SqlException(se);
         }
-
         byte[] retVal = new byte[(int) actualLength];
         System.arraycopy(binaryString_, (int) pos + dataOffset_ - 1, retVal, 0, (int) actualLength);
         return retVal;
@@ -225,6 +251,11 @@ public class Blob extends Lob implements java.sql.Blob {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
                 }
+                if (start < 1) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new ClientMessageId(SQLState.BLOB_BAD_POSITION), 
+                            new Long(start));
+                }
                 long pos = positionX(pattern, start);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "position(byte[], long)", pos);
@@ -257,6 +288,11 @@ public class Blob extends Lob implements java.sql.Blob {
                 if (pattern == null) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
+                }
+                if (start < 1) {
+                    throw new SqlException(agent_.logWriter_, 
+                        new ClientMessageId(SQLState.BLOB_BAD_POSITION), 
+                            new Long(start));
                 }
                 long pos = positionX(pattern, start);
                 if (agent_.loggingEnabled()) {

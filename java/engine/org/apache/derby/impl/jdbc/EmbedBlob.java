@@ -294,7 +294,12 @@ final class EmbedBlob extends ConnectionChild implements Blob
    * Returns as an array of bytes part or all of the <code>BLOB</code>
    * value that this <code>Blob</code> object designates.  The byte
    * array contains up to <code>length</code> consecutive bytes
-   * starting at position <code>pos</code>.
+   * starting at position <code>startPos</code>.
+   * The starting position must be between 1 and the length
+   * of the BLOB plus 1. This allows for zero-length BLOB values, from
+   * which only zero-length byte arrays can be returned. 
+   * If a larger length is requested than there are bytes available,
+   * characters from the start position to the end of the BLOB are returned.
    * @param startPos the ordinal position of the first byte in the
    * <code>BLOB</code> value to be extracted; the first byte is at
    * position 1
@@ -302,13 +307,12 @@ final class EmbedBlob extends ConnectionChild implements Blob
    * @return a byte array containing up to <code>length</code>
    * consecutive bytes from the <code>BLOB</code> value designated
    * by this <code>Blob</code> object, starting with the
-   * byte at position <code>pos</code>.
+   * byte at position <code>startPos</code>.
    * @exception SQLException if there is an error accessing the
    * <code>BLOB</code>
-   NOTE: return new byte[0] if startPos is too large
+   * NOTE: If the starting position is the length of the BLOB plus 1,
+   * zero bytess are returned regardless of the length requested.
    */
-   // PT stream part may get pushed to store
-
     public byte[] getBytes(long startPos, int length)
         throws SQLException
     {
@@ -322,7 +326,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
             if (startPos < 1)
                 throw StandardException.newException(
                     SQLState.BLOB_BAD_POSITION, new Long(startPos));
-            if (length <= 0)
+            if (length < 0)
                 throw StandardException.newException(
                     SQLState.BLOB_NONPOSITIVE_LENGTH, new Integer(length));
 
@@ -330,8 +334,8 @@ final class EmbedBlob extends ConnectionChild implements Blob
             // if we have a byte array, not a stream
             if (isBytes)
             {
-                // if blob length is less than pos bytes, raise an exception
-                if (myBytes.length < startPos)
+                // if blob length is less than pos bytes + 1, raise an exception
+                if (myBytes.length + 1 < startPos)
                     throw StandardException.newException(
                         SQLState.BLOB_POSITION_TOO_LARGE, new Long(startPos));
                 // cannot go over length of array
