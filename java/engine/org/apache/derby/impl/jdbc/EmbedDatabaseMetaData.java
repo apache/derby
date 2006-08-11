@@ -1595,10 +1595,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	}
 
     /**
-     * Implements DatabaseMetaData.getFunctionParameters() for an embedded
+     * Implements DatabaseMetaData.getFunctionColumns() for an embedded
      * database. Queries the database to get information about
      * function parameters. Executes the
-     * 'getFunctionParameters' query from metadata.properties to obtain the
+     * 'getFunctionColumns' query from metadata.properties to obtain the
      * ResultSet.<p> Compatibility: This is a new method in
      * the API which is only available with with Derby versions > 10.1 and
      * JDK versions >= 1.6 <p>Upgrade: Since this is a new query it
@@ -1616,12 +1616,12 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return a ResultSet with metadata information
      * @throws SQLException if a database error occurs
      */
-	public ResultSet getFunctionParameters(String catalog,
+	public ResultSet getFunctionColumns(String catalog,
 										   String schemaPattern,
 										   String functionNamePattern,
 										   String parameterNamePattern) 
 		throws SQLException {
-		PreparedStatement s = getPreparedQuery("getFunctionParameters");
+		PreparedStatement s = getPreparedQuery("getFunctionColumns");
 
 		// Cannot use doGetProcCols() because our query requires
 		// parameterNamePattern twice, because both LIKE and = is

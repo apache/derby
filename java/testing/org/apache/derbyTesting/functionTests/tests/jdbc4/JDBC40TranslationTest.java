@@ -36,17 +36,17 @@ public class JDBC40TranslationTest extends BaseJDBCTestCase {
     }
 
     public void testDatabaseMetaDataFUNCTION_PARAMETER_UNKNOWN() {
-        assertEquals(DatabaseMetaData.functionParameterUnknown,
+        assertEquals(DatabaseMetaData.functionColumnUnknown,
                      JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN);
     }
 
     public void testDatabaseMetaDataFUNCTION_PARAMETER_IN() {
-        assertEquals(DatabaseMetaData.functionParameterIn,
+        assertEquals(DatabaseMetaData.functionColumnIn,
                      JDBC40Translation.FUNCTION_PARAMETER_IN);
     }
 
     public void testDatabaseMetaDataFUNCTION_PARAMETER_INOUT() {
-        assertEquals(DatabaseMetaData.functionParameterInOut,
+        assertEquals(DatabaseMetaData.functionColumnInOut,
                      JDBC40Translation.FUNCTION_PARAMETER_INOUT);
     }
 

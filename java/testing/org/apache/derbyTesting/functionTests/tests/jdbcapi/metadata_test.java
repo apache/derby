@@ -468,26 +468,26 @@ public abstract class metadata_test {
 
 				}
 				
-				// Test getFunctionParameters(String,String,String,String)
+				// Test getFunctionColumns(String,String,String,String)
 				java.lang.reflect.Method gfp = 
-					met.getClass().getMethod("getFunctionParameters", 
+					met.getClass().getMethod("getFunctionColumns", 
 											 new Class [] { s, s, s, s });
 
 				if (!java.lang.reflect.Modifier.
 					isAbstract(gfp.getModifiers())){
-					System.out.println("getFunctionParameters(null,"+
+					System.out.println("getFunctionColumns(null,"+
 									   "null,null,null):");
 					dumpRS(IGNORE_PROC_ID, (ResultSet)gfp.
 						   invoke(met, 
 								  new String [] {null, null, null, null}));
 
-					System.out.println("getFunctionParameters(null,\"APP\","+
+					System.out.println("getFunctionColumns(null,\"APP\","+
 									   "\"DUMMY%\",\"X\"):");
 					dumpRS(IGNORE_PROC_ID, (ResultSet)gfp.
 						   invoke(met, 
 								  new String [] {null, "APP", "DUMMY%", "X"}));
 
-					System.out.println("getFunctionParameters(null,\"APP\","+
+					System.out.println("getFunctionColumns(null,\"APP\","+
 									   "\"DUMMY%\",\"\"):");
 					dumpRS(IGNORE_PROC_ID, (ResultSet)gfp.
 						   invoke(met, 

@@ -96,13 +96,13 @@ public class TestDbMetaData {
 
 		// Make sure the constants provided in JDBC40Translation is correct
   		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN == 
- 							   DatabaseMetaData.functionParameterUnknown));
+ 							   DatabaseMetaData.functionColumnUnknown));
 		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_IN == 
-							   DatabaseMetaData.functionParameterIn));
+							   DatabaseMetaData.functionColumnIn));
 		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_INOUT == 
-							   DatabaseMetaData.functionParameterInOut));
+							   DatabaseMetaData.functionColumnInOut));
 		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_OUT == 
-							   DatabaseMetaData.functionParameterOut));
+							   DatabaseMetaData.functionColumnOut));
 		System.out.println(""+(JDBC40Translation.FUNCTION_RETURN == 
 							   DatabaseMetaData.functionReturn));
     
@@ -122,7 +122,7 @@ public class TestDbMetaData {
 							   DatabaseMetaData.procedureNullable));
 		
         // Create some functions in the default schema (app) to make
-        // the output from getFunctions() and getFunctionParameters
+        // the output from getFunctions() and getFunctionColumns
         // more interesting
         s.execute("CREATE FUNCTION DUMMY1 ( X SMALLINT ) RETURNS SMALLINT "+
                   "PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL "+
@@ -152,12 +152,12 @@ public class TestDbMetaData {
         // NO catalog (none)
         checkEmptyRS(met.getFunctions("", "", null));
 
-		// Test getFunctionParameters
+		// Test getFunctionColumns
 		// Dump parameters for all functions beigging with DUMMY
-		dumpRS(met.getFunctionParameters(null,null,"DUMMY%",null));
+		dumpRS(met.getFunctionColumns(null,null,"DUMMY%",null));
 		
 		// Dump return value for all DUMMY functions
-		dumpRS(met.getFunctionParameters(null,null,"DUMMY%",""));
+		dumpRS(met.getFunctionColumns(null,null,"DUMMY%",""));
 
         // Test the new getSchemas() with no schema qualifiers
         dumpRS(met.getSchemas(null, null));

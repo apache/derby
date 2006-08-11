@@ -394,7 +394,7 @@ public class SystemProcedures  {
 	
 	/**
 	 *  Map SQLFunctionParameters to
-	 *  EmbedDatabaseMetaData.getFunctionParameters()
+	 *  EmbedDatabaseMetaData.getFunctionColumns()
 	 *
 	 * @param catalogName SYSIBM.SQLFunctionParameters CatalogName
 	 * varchar(128),
@@ -407,7 +407,7 @@ public class SystemProcedures  {
 	 * @param options SYSIBM.SQLFunctionParameters Options
 	 * varchar(4000))
 	 * @param rs output parameter, the resultset object containing the
-	 * result of getFunctionParameters(). 
+	 * result of getFunctionColumns(). 
 	 */
 	public static void SQLFUNCTIONPARAMS(String catalogName,
 										 String schemaName,
@@ -417,7 +417,7 @@ public class SystemProcedures  {
 										 ResultSet[] rs) throws SQLException
         {
 			rs[0] = ((EmbedDatabaseMetaData)getDMD()).
-				getFunctionParameters(catalogName, schemaName, funcName, 
+				getFunctionColumns(catalogName, schemaName, funcName, 
 									  paramName);
         }
 	

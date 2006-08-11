@@ -1183,7 +1183,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * varchar(128), SchemaName varchar(128), FuncName varchar(128),
      * ParamName varchar(128), Options varchar(4000))</code> on the
      * server. This procedure will in turn call
-     * <code>EmbedDatabaseMetaData.getFunctionParameters(String,String,
+     * <code>EmbedDatabaseMetaData.getFunctionColumns(String,String,
      * String,String)</code><p> Compatibility: Only available if both
      * server and client version > 10.1, and JDK version >= 1.6. Older
      * clients will not have this method available. Newer clients will
@@ -1201,12 +1201,12 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * pattern
      * @return a <code>ResultSet</code> listing the fucntions
      * @exception SqlException if a database error occurs
-     * @see #getFunctionParametersX(String, String, String,String)
+     * @see #getFunctionColumnsX(String, String, String,String)
      * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,UUID)
      * @see org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
      */
     public java.sql.ResultSet 
-        getFunctionParameters(String catalog,
+        getFunctionColumns(String catalog,
                               String schemaPattern,
                               String functionNamePattern,
                               String parameterNamePattern) 
@@ -1217,11 +1217,11 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.
                         traceEntry(this, 
-                                   "getFunctionParameters", 
+                                   "getFunctionColumns", 
                                    catalog, schemaPattern, 
                                    functionNamePattern, parameterNamePattern);
                 }
-                return getFunctionParametersX(catalog, schemaPattern, 
+                return getFunctionColumnsX(catalog, schemaPattern, 
                                               functionNamePattern, 
                                               parameterNamePattern);
             }
@@ -1233,7 +1233,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     }
 
     /** 
-     * Untraced version of <code>getFunctionParameters(String, String,
+     * Untraced version of <code>getFunctionColumns(String, String,
      * String, String)</code>.
      * @param catalog limit search to this catalog
      * @param schemaPattern limit search to schemas matching this pattern
@@ -1243,15 +1243,15 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * this pattern
      * @return a <code>ResultSet</code> listing the fucntions
      * @exception SqlException if a database error occurs
-     * @see #getFunctionParameters(String, String, String, String)
+     * @see #getFunctionColumns(String, String, String, String)
      */
-    private ResultSet getFunctionParametersX(String catalog,
+    private ResultSet getFunctionColumnsX(String catalog,
                                              String schemaPattern,
                                              String functionNamePattern,
                                              String parameterNamePattern) 
         throws SqlException {
         checkForClosedConnectionX();
-        checkServerJdbcVersionX("getFunctionParameters"+
+        checkServerJdbcVersionX("getFunctionColumns"+
                                 "(String,String,String,String)", 4, 0);
  
         PreparedStatement cs = 
