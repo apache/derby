@@ -130,6 +130,34 @@ create index oops_ix on t1(x);
 ERROR X0X67: Columns of type 'XML' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> select i from t1 where x is null order by x;
 ERROR X0X67: Columns of type 'XML' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
+ij> -- XML cannot be imported or exported.  These should all fail.
+CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE (
+  null, 'T1', 'xmlexport.del', null, null, null);
+ERROR 38000: The exception 'java.sql.SQLException: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.' was thrown while evaluating an expression. SQLSTATE: X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ij> CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY(
+  'select x from t1', 'xmlexport.del', null, null, null);
+ERROR 38000: The exception 'java.sql.SQLException: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.' was thrown while evaluating an expression. SQLSTATE: X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ij> CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY (
+  'select xmlserialize(x as clob) from t1',
+  'xmlexport.del', null, null, null);
+ERROR XIE0B: Column '1' in the table is of type CLOB, it is not supported by the import/export feature.   
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE (
+  null, 'T1', 'shouldntmatter.del', null, null, null, 0);
+ERROR XIE0B: Column 'X' in the table is of type XML, it is not supported by the import/export feature.   
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_DATA (
+  NULL, 'T1', null, '2', 'shouldntmatter.del', null, null, null,0);
+ERROR XIE0B: Column 'X' in the table is of type XML, it is not supported by the import/export feature.   
+ij> -- XML cannot be used with procedures/functions.
+create procedure hmmproc (in i int, in x xml)
+  parameter style java language java external name 'hi.there';
+ERROR 42962: Long column type column or parameter 'X' not permitted in declared global temporary tables or procedure definitions. 
+ij> create function hmmfunc (i int, x xml) returns int
+  parameter style java language java external name 'hi.there';
+ERROR 42962: Long column type column or parameter 'X' not permitted in declared global temporary tables or procedure definitions. 
+ij> -- XML columns cannot be used for global temporary tables.
+declare global temporary table SESSION.xglobal (myx XML)
+  not logged on commit preserve rows;
+ERROR 42962: Long column type column or parameter 'MYX' not permitted in declared global temporary tables or procedure definitions. 
 ij> -- XML cols can be used in a SET clause, if target value is XML.
 create trigger tr2 after insert on t1 for each row mode db2sql update t1 set x = 'hmm';
 ERROR 42821: Columns of type 'XML' cannot hold values of type 'CHAR'. 
@@ -153,6 +181,8 @@ ij> select i from t1 where xmlparse(document '<hein/>' preserve whitespace);
 ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'XML' expression.  It must be a BOOLEAN expression.
 ij> insert into t1 values (1, xmlparse(document '<oops>' preserve whitespace));
 ERROR 2200L: XMLPARSE operand is not an XML document; see next exception for details. SQLSTATE: XJ001: Java exception: 'XML document structures must start and end within the same entity.: xxxFILTERED-SAX-EXCEPTIONxxx'.
+ij> prepare ps1 as 'insert into t1(x) values XMLPARSE(document ? preserve whitespace)';
+ERROR X0X25: Unable to determine the parameter type for XMLPARSE; try using a CAST.
 ij> -- These should work.
 insert into t1 values (5, xmlparse(document '<hmm/>' preserve whitespace));
 1 row inserted/updated/deleted
@@ -188,6 +218,10 @@ I
 5          
 6          
 7          
+ij> prepare ps1 as 'insert into t3(i, x) values (0, XMLPARSE(document cast (? as CLOB) preserve whitespace))';
+ij> execute ps1 using 'values ''<ay>caramba</ay>''';
+IJ WARNING: Autocommit may close using result set
+1 row inserted/updated/deleted
 ij> -- "is [not] null" should work with XML.
 select i from t1 where x is not null;
 I          
@@ -777,6 +811,7 @@ I |2
 ij> select i, xmlserialize(x as char(75)) from t3;
 I |2                                                                          
 -----
+0 |<ay>caramba</ay>                                                           
 0 |<there><goes><my weight="180">attribute</my></goes></there>                
 ij> -- These should all fail because the result of the XMLQUERY op is
 ----- not a valid document (it's either an empty sequence, an attribute,
@@ -887,6 +922,7 @@ ij> -- Verify results.
 select i, xmlserialize(x as char(75)) from t3;
 I |2                                                                          
 -----
+0 |<ay>caramba</ay>                                                           
 0 |<there><goes><my weight="180">attribute</my></goes></there>                
 29 |NULL                                                                       
 30 |NULL                                                                       
@@ -957,6 +993,7 @@ ij> -- Verify results.
 select i, xmlserialize(x as char(75)) from t3;
 I |2                                                                          
 -----
+0 |<ay>caramba</ay>                                                           
 0 |<there><goes><my weight="180">attribute</my></goes></there>                
 29 |<none><here/></none>                                                       
 30 |<my height="4.4">attribute</my>                                            

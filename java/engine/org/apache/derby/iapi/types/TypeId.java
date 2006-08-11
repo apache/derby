@@ -961,9 +961,14 @@ public final class TypeId implements Formatable
                               break;
 
                       case StoredFormatIds.XML_TYPE_ID:
+
                               typePrecedence = XML_PRECEDENCE;
                               javaTypeName = "org.apache.derby.iapi.types.XML";
                               maxMaxWidth = TypeId.XML_MAXWIDTH;
+
+                              // We set this to true in order to disallow use
+                              // of the XML datatype for procedure/function args.
+                              isLongConcatableTypeId = true;
                               break;
 
                 }

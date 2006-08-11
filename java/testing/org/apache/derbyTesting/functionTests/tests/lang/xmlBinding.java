@@ -236,7 +236,7 @@ public class xmlBinding
 
             PreparedStatement pSt = conn.prepareStatement(
                 "insert into xTable.t1(x) values " +
-                "(XMLPARSE (DOCUMENT ? PRESERVE WHITESPACE))");
+                "(XMLPARSE (DOCUMENT CAST (? as CLOB) PRESERVE WHITESPACE))");
 
             // This should work.  Note we check binding to
             // a character stream method in "insertFiles".
@@ -396,7 +396,7 @@ public class xmlBinding
 
         PreparedStatement pSt = conn.prepareStatement(
             "insert into xTable.t1(x) values (" +
-            "xmlparse(document ? preserve whitespace))");
+            "xmlparse(document cast (? as clob) preserve whitespace))");
 
         for (int i = 0; i < numRows; i++) {
 
@@ -499,7 +499,7 @@ public class xmlBinding
         docAsString = sBuf.toString();
         PreparedStatement pSt = conn.prepareStatement(
             "insert into xTable.t1(x) values (" +
-            "xmlparse(document ? preserve whitespace))");
+            "xmlparse(document cast (? as clob) preserve whitespace))");
 
         charCount = docAsString.length();
         for (int i = 0; i < numRows; i++) {

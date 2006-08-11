@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.load;
 
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -209,7 +211,8 @@ class ColumnInfo {
 				 type == java.sql.Types.JAVA_OBJECT ||
 				 type == java.sql.Types.OTHER ||
 				 type == java.sql.Types.CLOB ||
-				 type == java.sql.Types.BLOB); 
+				 type == java.sql.Types.BLOB ||
+				 type == StoredFormatIds.XML_TYPE_ID); 
 	}
 
 

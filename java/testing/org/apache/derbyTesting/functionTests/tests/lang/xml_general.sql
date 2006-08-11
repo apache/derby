@@ -79,6 +79,29 @@ select i from t1 where x > 'some char';
 create index oops_ix on t1(x);
 select i from t1 where x is null order by x;
 
+-- XML cannot be imported or exported.  These should all fail.
+CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE (
+  null, 'T1', 'xmlexport.del', null, null, null);
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY(
+  'select x from t1', 'xmlexport.del', null, null, null);
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY (
+  'select xmlserialize(x as clob) from t1',
+  'xmlexport.del', null, null, null); 
+CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE (
+  null, 'T1', 'shouldntmatter.del', null, null, null, 0);
+CALL SYSCS_UTIL.SYSCS_IMPORT_DATA (
+  NULL, 'T1', null, '2', 'shouldntmatter.del', null, null, null,0);
+
+-- XML cannot be used with procedures/functions.
+create procedure hmmproc (in i int, in x xml)
+  parameter style java language java external name 'hi.there';
+create function hmmfunc (i int, x xml) returns int
+  parameter style java language java external name 'hi.there';
+
+-- XML columns cannot be used for global temporary tables.
+declare global temporary table SESSION.xglobal (myx XML)
+  not logged on commit preserve rows;
+
 -- XML cols can be used in a SET clause, if target value is XML.
 create trigger tr2 after insert on t1 for each row mode db2sql update t1 set x = 'hmm';
 create trigger tr1 after insert on t1 for each row mode db2sql update t1 set x = null;
@@ -93,6 +116,7 @@ insert into t1 values (1, xmlparse(content '<hmm/>' preserve whitespace));
 select xmlparse(document xmlparse(document '<hein/>' preserve whitespace) preserve whitespace) from t1;
 select i from t1 where xmlparse(document '<hein/>' preserve whitespace);
 insert into t1 values (1, xmlparse(document '<oops>' preserve whitespace));
+prepare ps1 as 'insert into t1(x) values XMLPARSE(document ? preserve whitespace)';
 -- These should work.
 insert into t1 values (5, xmlparse(document '<hmm/>' preserve whitespace));
 insert into t1 values (6, xmlparse(document '<half> <masted> bass </masted> boosted. </half>' preserve whitespace));
@@ -103,6 +127,8 @@ update t1 set x = xmlparse(document '<update> document was inserted as part of a
 update t1 set x = xmlparse(document '<update2> document was inserted as part of an UPDATE </update2>' preserve whitespace) where xmlexists('/update' passing by ref x);
 select i from t1 where xmlparse(document '<hein/>' preserve whitespace) is not null;
 select i from t1 where xmlparse(document '<hein/>' preserve whitespace) is not null order by i;
+prepare ps1 as 'insert into t3(i, x) values (0, XMLPARSE(document cast (? as CLOB) preserve whitespace))';
+execute ps1 using 'values ''<ay>caramba</ay>''';
 
 -- "is [not] null" should work with XML.
 select i from t1 where x is not null;

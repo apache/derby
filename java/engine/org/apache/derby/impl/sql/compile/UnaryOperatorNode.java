@@ -605,14 +605,37 @@ public class UnaryOperatorNode extends ValueNode
 
 	void bindParameter() throws StandardException
 	{
-		if (operatorType == XMLPARSE_OP) {
-        // According to the SQL/XML standard, the XMLParse parameter
-        // takes a string operand.  RESOLVE: We use CLOB here because
-        // an XML string can be arbitrarily long...is this okay?
-        // The SQL/XML spec doesn't state what the type of the param
-        // should be; only that it "shall be a character type".
-	        operand.setType(
- 	           DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CLOB));
+		if (operatorType == XMLPARSE_OP)
+		{
+			/* SQL/XML[2006] allows both binary and character strings for
+			 * the XMLParse parameter (section 10.16:Function).  The spec
+			 * also goes on to say, in section 6.15:Conformance Rules:4,
+			 * that:
+			 *
+			 * "Without Feature X066, XMLParse: BLOB input and DOCUMENT
+			 * option, in conforming SQL language, the declared type of
+			 * the <string value expression> immediately contained in
+			 * <XML parse> shall not be a binary string type."
+			 *
+			 * Thus since Derby doesn't currently support BLOB input,
+			 * we have to ensure that the "declared type" of the parameter
+			 * is not a binary string type; i.e. it must be a character
+			 * string type.  Since there's no way to determine what the
+			 * declared type is from the XMLPARSE syntax, the user must
+			 * explicitly declare the type of the parameter, and it must
+			 * be a character string. They way s/he does that is by
+			 * specifying an explicit CAST on the parameter, such as:
+			 *
+			 *  insert into myXmlTable (xcol) values
+			 *    XMLPARSE(DOCUMENT cast (? as CLOB) PRESERVE WHITESPACE);
+			 *
+			 * If that was done then we wouldn't be here; we only get
+			 * here if the parameter was specified without a cast.  That
+			 * means we don't know what the "declared type" is and so
+			 * we throw an error.
+			 */
+			throw StandardException.newException(
+				SQLState.LANG_XMLPARSE_UNKNOWN_PARAM_TYPE);
 		}
 		else if (operatorType == XMLSERIALIZE_OP) {
         // For now, since JDBC has no type defined for XML, we
