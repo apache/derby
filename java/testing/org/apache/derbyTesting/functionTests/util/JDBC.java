@@ -146,6 +146,113 @@ public class JDBC {
 	}
 	
 	/**
+	 * Drop a database schema by dropping all objects in it
+	 * and then executing DROP SCHEMA. If the schema is
+	 * APP it is cleaned but DROP SCHEMA is not executed.
+	 * 
+	 * TODO: Handle dependencies by looping in some intelligent
+	 * way until everything can be dropped.
+	 * 
+	 * @param dmd DatabaseMetaData object for database
+	 * @param schema Name of the schema
+	 * @throws SQLException database error
+	 */
+	public static void dropSchema(DatabaseMetaData dmd, String schema) throws SQLException
+	{		
+		Connection conn = dmd.getConnection();
+		Assert.assertFalse(conn.getAutoCommit());
+		Statement s = dmd.getConnection().createStatement();
+		// Procedures first
+		ResultSet rs = dmd.getProcedures((String) null,
+				schema, (String) null);
+		
+		dropUsingDMD(s, rs, schema, "PROCEDURE_NAME", "PROCEDURE");
+		
+		// Views
+		rs = dmd.getTables((String) null, schema, (String) null,
+				new String[] {"VIEW"});
+		
+		dropUsingDMD(s, rs, schema, "TABLE_NAME", "VIEW");
+		
+		// Tables
+		rs = dmd.getTables((String) null, schema, (String) null,
+				new String[] {"TABLE"});
+		
+		dropUsingDMD(s, rs, schema, "TABLE_NAME", "TABLE");
+		
+		// Finally drop the schema if it is not APP
+		if (!schema.equals("APP")) {
+			s.execute("DROP SCHEMA " + JDBC.escape(schema) + " RESTRICT");
+		}
+		conn.commit();
+		s.close();
+	}
+	
+	/**
+	 * DROP a set of objects based upon a ResultSet from a
+	 * DatabaseMetaData call.
+	 * 
+	 * TODO: Handle errors to ensure all objects are dropped,
+	 * probably requires interaction with its caller.
+	 * 
+	 * @param s Statement object used to execute the DROP commands.
+	 * @param rs DatabaseMetaData ResultSet
+	 * @param schema Schema the objects are contained in
+	 * @param mdColumn The column name used to extract the object's
+	 * name from rs
+	 * @param dropType The keyword to use after DROP in the SQL statement
+	 * @throws SQLException database errors.
+	 */
+	private static void dropUsingDMD(
+			Statement s, ResultSet rs, String schema,
+			String mdColumn,
+			String dropType) throws SQLException
+	{
+		String dropLeadIn = "DROP " + dropType + " ";
+		
+		s.clearBatch();
+		int batchCount = 0;
+		while (rs.next())
+		{
+			String view = rs.getString(mdColumn);
+			s.addBatch(dropLeadIn + JDBC.escape(schema, view));
+			batchCount++;
+		}
+		rs.close();
+		int[] results;
+		try {
+		    results = s.executeBatch();
+		    Assert.assertNotNull(results);
+		    Assert.assertEquals("Incorrect result length from executeBatch",
+		    		batchCount, results.length);
+		} catch (BatchUpdateException batchException) {
+			results = batchException.getUpdateCounts();
+			Assert.assertNotNull(results);
+			Assert.assertTrue("Too many results in BatchUpdateException",
+					results.length <= batchCount);
+		}
+		
+		boolean hadError = false;
+		boolean didDrop = false;
+		for (int i = 0; i < results.length; i++)
+		{
+			int result = results[i];
+			if (result == -3 /* Statement.EXECUTE_FAILED*/)
+				hadError = true;
+			else if (result == -2/*Statement.SUCCESS_NO_INFO*/)
+				didDrop = true;
+			else if (result >= 0)
+				didDrop = true;
+			else
+				Assert.fail("Negative executeBatch status");
+		}
+		
+		// Commit any work we did do.
+		s.getConnection().commit();
+		s.clearBatch();
+	}
+	
+	/**
 	 * Assert all columns in the ResultSetMetaData match the
 	 * table's defintion through DatabaseMetadDta. Only works
 	 * if the complete select list correspond to columns from
@@ -207,5 +314,22 @@ public class JDBC {
 			}
 		}
 		rs.close();
+	}
+	
+	/**
+	 * Escape a non-qualified name so that it is suitable
+	 * for use in a SQL query executed by JDBC.
+	 */
+	public static String escape(String name)
+	{
+		return "\"" + name + "\"";
+	}	
+	/**
+	 * Escape a schama-qualified name so that it is suitable
+	 * for use in a SQL query executed by JDBC.
+	 */
+	public static String escape(String schema, String name)
+	{
+		return "\"" + schema + "\".\"" + name + "\"";
 	}
 }
