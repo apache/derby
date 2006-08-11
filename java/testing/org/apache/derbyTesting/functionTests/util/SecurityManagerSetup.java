@@ -77,6 +77,17 @@ public final class SecurityManagerSetup extends TestSetup {
 	}
 	
 	/**
+	 * Install a SecurityManager with the default test policy
+	 * file:
+	 * org/apache/derbyTesting/functionTests/util/derby_tests.policy
+	 * 
+	 */
+	static void noSecurityManager() throws PrivilegedActionException
+	{
+		installSecurityManager("<NONE>");
+	}
+	
+	/**
 	 * Install specific polciy file with the security manager
 	 * including the special case of no security manager.
 	 */
@@ -148,6 +159,10 @@ public final class SecurityManagerSetup extends TestSetup {
 	private static void setSecurityPolicy(Properties set,
 			String policyResource) throws PrivilegedActionException
 	{
+		if ("<NONE>".equals(policyResource)) {
+			set.setProperty("java.security.policy", policyResource);
+			return;
+		}
 		URL policyURL = BaseTestCase.getTestResource(policyResource);
 
 		if (policyURL != null)

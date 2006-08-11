@@ -425,5 +425,29 @@ public class TestConfiguration {
                                     driverClass + "': " + ie.getMessage());
         }
     }
+    
+    /*
+     * SecurityManager related configuration.
+     */
+    
+    /**
+     * Install the default security manager setup,
+     * for the current configuration.
+     * @throws PrivilegedActionException 
+     */
+    boolean defaultSecurityManagerSetup() throws PrivilegedActionException {
+    	
+    	// Testing with the DB2 client has not been performed
+    	// under the security manager since it's not part
+    	// of Derby so no real interest in tracking down issues.
+    	if (jdbcClient.isDB2Client()) {
+    		SecurityManagerSetup.noSecurityManager();
+    		return false;
+    	} else {
+    		SecurityManagerSetup.installSecurityManager();
+    		return true;
+    	}
+    }
+    
         
 }

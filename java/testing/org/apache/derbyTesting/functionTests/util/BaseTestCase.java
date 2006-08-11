@@ -20,8 +20,9 @@
 package org.apache.derbyTesting.functionTests.util;
 
 import junit.framework.TestCase;
-import java.io.InputStream;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.PrintStream;
 import java.net.URL;
@@ -76,9 +77,19 @@ public abstract class BaseTestCase
      * setUp, tearDown methods and decorators.
      */
     public final void runBare() throws Throwable {
-    	// Not ready for prime time!
-    	// SecurityManagerSetup.installSecurityManager();
+        // still not ready for prime time
+    	//if (getTestConfiguration().defaultSecurityManagerSetup())
+    	//	assertSecurityManager();
+    	
     	super.runBare();
+    }
+
+    /**
+     * Return the current configuration for the test.
+     */
+    public final TestConfiguration getTestConfiguration()
+    {
+    	return CONFIG;
     }
     
     /**
@@ -204,6 +215,27 @@ public abstract class BaseTestCase
 		}
 	     );
     }  
+  
+    /**
+     * Open the URL for a a test resource, e.g. a policy
+     * file or a SQL script.
+     * @param url URL obtained from getTestResource
+     * @return An open stream
+    */
+    protected static InputStream openTestResource(final URL url)
+        throws PrivilegedActionException
+    {
+    	return (InputStream)AccessController.doPrivileged
+	    (new java.security.PrivilegedExceptionAction(){
+
+		    public Object run() throws IOException{
+			return url.openStream();
+
+		    }
+
+		}
+	     );    	
+    }
     
     /**
      * Assert a security manager is installed.
