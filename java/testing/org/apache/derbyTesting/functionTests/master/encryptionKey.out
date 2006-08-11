@@ -73,7 +73,7 @@ I1
 -----------
 1          
 ij(CONNECTION3)> -- case 3 :create db from backup using correct key
-connect 'jdbc:derby:encdbcbc_key2;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
+connect 'jdbc:derby:encdbcbc_key2;createFrom=extinout/bkup1/encdbcbc_key;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 ij(CONNECTION4)> select * from t1;
 I1         
 -----------
@@ -81,7 +81,7 @@ I1
 ij(CONNECTION4)> connect 'jdbc:derby:encdbcbc_key2;shutdown=true';
 ERROR 08006: Database 'encdbcbc_key2' shutdown.
 ij(CONNECTION4)> -- create db from backup using wrong key
-connect 'jdbc:derby:encdbcbc_key3;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6122636465666768';
+connect 'jdbc:derby:encdbcbc_key3;createFrom=extinout/bkup1/encdbcbc_key;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6122636465666768';
 ERROR XJ040: Failed to start database 'encdbcbc_key3', see the next exception for details.
 ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij(CONNECTION4)> select * from t1;
@@ -89,7 +89,7 @@ ERROR 08003: No current connection.
 ij(CONNECTION4)> connect 'jdbc:derby:encdbcbc_key3;shutdown=true';
 ERROR XJ004: Database 'encdbcbc_key3' not found.
 ij(CONNECTION4)> -- create db from backup using correct key
-connect 'jdbc:derby:encdbcbc_12;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
+connect 'jdbc:derby:encdbcbc_12;createFrom=extinout/bkup1/encdbcbc_key;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 ij(CONNECTION5)> select * from t1;
 I1         
 -----------
@@ -110,7 +110,7 @@ ij(CONNECTION6)> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup2');
 ij(CONNECTION6)> connect 'jdbc:derby:encdb;shutdown=true';
 ERROR 08006: Database 'encdb' shutdown.
 ij(CONNECTION6)> disconnect;
-ij> connect 'jdbc:derby:encdb;restoreFrom=extinout/mybackup2/encdb;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
+ij> connect 'jdbc:derby:encdb;restoreFrom=extinout/mybackup2/encdb;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 ij(CONNECTION6)> select * from t1;
 I1         |C2                  
 --------------------------------

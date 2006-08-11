@@ -116,7 +116,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     private CipherProvider newEncryptionEngine;
 	private CipherProvider newDecryptionEngine;
 	private CipherFactory  currentCipherFactory;
-    private boolean reEncrypt = false;
     private CipherFactory newCipherFactory = null;
 	private int counter_encrypt;
 	private int counter_decrypt;
@@ -201,7 +200,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         // setup database encryption engines.
         if (create) 
-            setupEncryptionEngines(create, restoreFromBackup, properties);
+            setupEncryptionEngines(create, properties);
 
 
 		// let everyone knows who their rawStoreFactory is and they can use it
@@ -298,7 +297,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 handleIncompleteDatabaseEncryption(properties);
             }
 
-            setupEncryptionEngines(create, restoreFromBackup, properties);
+            setupEncryptionEngines(create, properties);
         }
 
         if (databaseEncrypted) {
@@ -317,7 +316,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         // new alogorithm then do that now.  
         if (encryptDatabase) {
             configureDatabaseForEncryption(properties, 
-                                           reEncrypt, 
                                            newCipherFactory);
         }
 	}
@@ -1088,9 +1086,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     /*
      * Setup Encryption Engines. 
      */
-    private void setupEncryptionEngines(boolean create, 
-                                        String restoreFromBackup, 
-                                        Properties properties) 
+    private void setupEncryptionEngines(boolean create, Properties properties)
         throws StandardException
     {
                     
@@ -1101,8 +1097,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 properties.getProperty(Attribute.DATA_ENCRYPTION);
             databaseEncrypted = Boolean.valueOf(dataEncryption).booleanValue(); 
 
+            boolean reEncrypt = false;
 
-            if (!create && restoreFromBackup == null) {
+            if (!create) {
                 // check if database is already encrypted, by directly peeking at the
                 // database service propertes instead of the properties passed 
                 // to this method. By looking at properties to the boot method ,
@@ -1144,6 +1141,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                     }
 
                 }
+                
                 
                 // NOTE: if user specifies Attribute.DATA_ENCRYPTION on the
                 // connection URL by mistake on an already encrypted database, 
@@ -1464,10 +1462,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * @exception StandardException Standard Derby Error Policy
      */
     public void configureDatabaseForEncryption(Properties properties,
-                                               boolean reEncrypt, 
                                                CipherFactory newCipherFactory) 
         throws StandardException 
     {
+
+        boolean reEncrypt = (databaseEncrypted && encryptDatabase);
 
         // check if the database can be encrypted.
         canEncryptDatabase(reEncrypt);

@@ -41,8 +41,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *  set database boot itself fails. To test the recovery, it is just a matter 
  *  of clearing up the debug flag and rebooting the database. 
  *  
- * In Non debug mode, this tests just acts as a plain re-encryption test,
- * just testing re-encrytpion multiple times. 
+ * In Non debug mode, this tests does not do anything.
  *
  * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
@@ -176,8 +175,6 @@ public class ReEncryptCrashRecovery
         int passwordKey = (reEncrypt ? OLD : NONE );
 
         crash(reEncrypt, TEST_REENCRYPT_CRASH_BEFORE_COMMT);
-        recover(passwordKey);
-        shutdown();
 
         crash(reEncrypt, TEST_REENCRYPT_CRASH_AFTER_COMMT);
         crashInRecovery(passwordKey, 
@@ -186,8 +183,13 @@ public class ReEncryptCrashRecovery
                      TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY);
         crashInRecovery(passwordKey, 
                      TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
-        recover(passwordKey);
-        shutdown();
+
+        
+        crash(reEncrypt, TEST_REENCRYPT_CRASH_AFTER_COMMT);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_LOGFILE_DELETE);
+        // retry (re)encryption and crash.
+        crash(reEncrypt, TEST_REENCRYPT_CRASH_AFTER_COMMT);
 
 
         crash(reEncrypt, TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY);
@@ -198,8 +200,15 @@ public class ReEncryptCrashRecovery
         crashInRecovery(passwordKey, 
                      TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
 
-        recover(passwordKey);
-        shutdown();
+
+        crash(reEncrypt, TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY);
+        // retry (re)encryption and crash.
+        crash(reEncrypt, TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY);
+        crashInRecovery(passwordKey, 
+                     TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
+
 
         // following cases  (re) encryption should be successful, only 
         // cleanup is pending. 
@@ -565,6 +574,10 @@ public class ReEncryptCrashRecovery
                 ";newEncryptionKey=" + NEW_KEY;
         }
         
+        if (verbose)
+            logMessage("re-encrypting " + currentTestDatabase + 
+                       " with " + connAttrs);
+
         return TestUtil.getConnection(currentTestDatabase, connAttrs); 
     }
 

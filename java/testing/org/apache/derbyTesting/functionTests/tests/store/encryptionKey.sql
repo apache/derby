@@ -57,18 +57,18 @@ connect 'jdbc:derby:encdbcbc_key;create=true;dataEncryption=true;encryptionAlgor
 select * from t1;
 
 -- case 3 :create db from backup using correct key
-connect 'jdbc:derby:encdbcbc_key2;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
+connect 'jdbc:derby:encdbcbc_key2;createFrom=extinout/bkup1/encdbcbc_key;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 select * from t1;
 connect 'jdbc:derby:encdbcbc_key2;shutdown=true';
 
 -- create db from backup using wrong key
-connect 'jdbc:derby:encdbcbc_key3;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6122636465666768';
+connect 'jdbc:derby:encdbcbc_key3;createFrom=extinout/bkup1/encdbcbc_key;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6122636465666768';
 select * from t1;
 
 connect 'jdbc:derby:encdbcbc_key3;shutdown=true';
 
 -- create db from backup using correct key
-connect 'jdbc:derby:encdbcbc_12;createFrom=extinout/bkup1/encdbcbc_key;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
+connect 'jdbc:derby:encdbcbc_12;createFrom=extinout/bkup1/encdbcbc_key;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 select * from t1;
 
 connect 'jdbc:derby:encdbcbc_key12;shutdown=true';
@@ -83,7 +83,7 @@ call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup2');
 connect 'jdbc:derby:encdb;shutdown=true';
 disconnect;
 
-connect 'jdbc:derby:encdb;restoreFrom=extinout/mybackup2/encdb;dataEncryption=true;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
+connect 'jdbc:derby:encdb;restoreFrom=extinout/mybackup2/encdb;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666768';
 select * from t1;
 disconnect;
 

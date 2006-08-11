@@ -339,6 +339,20 @@ public class EmbedConnection implements EngineConnection
 		if(restoreCount > 1)
 			throw newSQLException(SQLState.CONFLICTING_RESTORE_ATTRIBUTES);
 	
+        // check if user has specified re-encryption attributes 
+        // in combination with create/restore/recover attributes.
+        // re-encryption is not allowed when restoring from backup. 
+        if (restoreCount != 0 && 
+            (Boolean.valueOf(p.getProperty(
+                            Attribute.DATA_ENCRYPTION)).booleanValue() ||
+             p.getProperty(Attribute.NEW_BOOT_PASSWORD) != null ||
+             p.getProperty(Attribute.NEW_CRYPTO_EXTERNAL_KEY) != null
+             )) 
+        {
+            throw newSQLException(SQLState.CONFLICTING_RESTORE_ATTRIBUTES);
+        }
+
+
 		//add the restore count to create count to make sure 
 		//user has not specified and restore together by mistake.
 		createCount = createCount + restoreCount ;

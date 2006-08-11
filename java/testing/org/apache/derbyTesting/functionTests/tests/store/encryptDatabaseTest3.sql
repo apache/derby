@@ -2,8 +2,9 @@
 -- or re-encrption of an encrypted databases with new password/key should fail 
 -- when 
 --   1) the database is booted read-only mode using jar subprotocol.
---   2) the databases with log archive mode enabled. It shoud 
+--   2) the databases with log archive mode enabled. It should 
 ---     succeed after disabling the log archive mode.
+--   3) when restoring from backup.
 
 --------------------------------------------------------------------
 -- Case : create a plain database, jar it up and then attempt 
@@ -70,7 +71,8 @@ create table emp(id int, name char (200));
 insert into emp values (1, 'john');
 insert into emp values(2 , 'mike');
 insert into emp values(3 , 'robert');
-
+-- take a backup , this is used later. 
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup');
 -- enable the log archive mode and perform backup.
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
                                            'extinout/mybackup1', 0);
@@ -156,6 +158,7 @@ connect 'jdbc:derby:wombat;encryptionKey=6162636465666768;newEncryptionKey=56667
 connect 'jdbc:derby:wombat;encryptionKey=6162636465666768';
 select * from t1;
 call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup1');
 disconnect;
 connect 'jdbc:derby:wombat;shutdown=true';
 
@@ -164,5 +167,26 @@ connect 'jdbc:derby:wombat;shutdown=true';
 connect 'jdbc:derby:wombat;encryptionKey=6162636465666768;newEncryptionKey=5666768616263646';
 select * from t1;
 select count(*) from emp;
+
 disconnect;
 connect 'jdbc:derby:wombat;shutdown=true';
+
+-- restore from backup and attempt to configure database for encryption.
+-- it shoud fail.
+connect 'jdbc:derby:wombat;restoreFrom=extinout/mybackup/wombat;dataEncryption=true;bootPassword=xyz1234abc';
+
+-- creating database from backup and attempting to configure database for encryption.
+-- it shoud fail.
+connect 'jdbc:derby:wombat_new;createFrom=extinout/mybackup/wombat;dataEncryption=true;bootPassword=xyz1234abc';
+
+-- restore from backup and attempt to reEncrypt
+-- it should fail.
+connect 'jdbc:derby:wombat;restoreFrom=extinout/mybackup1/wombat;encryptionKey=6162636465666768;newEncryptionKey=5666768616263646';
+
+-- restore from backup without re-encryption
+-- it shoud boot. 
+connect 'jdbc:derby:wombat;restoreFrom=extinout/mybackup1/wombat;encryptionKey=6162636465666768';
+select count(*) from emp;
+disconnect;
+connect 'jdbc:derby:wombat;shutdown=true';
+

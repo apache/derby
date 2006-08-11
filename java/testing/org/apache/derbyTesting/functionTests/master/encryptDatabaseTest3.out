@@ -2,8 +2,9 @@ ij> -- This script tests error cases where encryption of an un-encryped database
 -- or re-encrption of an encrypted databases with new password/key should fail 
 -- when 
 --   1) the database is booted read-only mode using jar subprotocol.
---   2) the databases with log archive mode enabled. It shoud 
+--   2) the databases with log archive mode enabled. It should 
 ---     succeed after disabling the log archive mode.
+--   3) when restoring from backup.
 --------------------------------------------------------------------
 -- Case : create a plain database, jar it up and then attempt 
 -- to encrypt using the jar protocol 
@@ -92,6 +93,9 @@ ij> insert into emp values(2 , 'mike');
 1 row inserted/updated/deleted
 ij> insert into emp values(3 , 'robert');
 1 row inserted/updated/deleted
+ij> -- take a backup , this is used later. 
+call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup');
+0 rows inserted/updated/deleted
 ij> -- enable the log archive mode and perform backup.
 call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
                                            'extinout/mybackup1', 0);
@@ -237,6 +241,8 @@ A
 3 rows selected
 ij> call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
 0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_BACKUP_DATABASE('extinout/mybackup1');
+0 rows inserted/updated/deleted
 ij> disconnect;
 ij> connect 'jdbc:derby:wombat;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
@@ -250,6 +256,29 @@ A
 2          
 3          
 3 rows selected
+ij> select count(*) from emp;
+1          
+-----------
+3          
+1 row selected
+ij> disconnect;
+ij> connect 'jdbc:derby:wombat;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> -- restore from backup and attempt to configure database for encryption.
+-- it shoud fail.
+connect 'jdbc:derby:wombat;restoreFrom=extinout/mybackup/wombat;dataEncryption=true;bootPassword=xyz1234abc';
+ERROR XJ081: Conflicting create/restore/recovery attributes specified.
+ij> -- creating database from backup and attempting to configure database for encryption.
+-- it shoud fail.
+connect 'jdbc:derby:wombat_new;createFrom=extinout/mybackup/wombat;dataEncryption=true;bootPassword=xyz1234abc';
+ERROR XJ081: Conflicting create/restore/recovery attributes specified.
+ij> -- restore from backup and attempt to reEncrypt
+-- it should fail.
+connect 'jdbc:derby:wombat;restoreFrom=extinout/mybackup1/wombat;encryptionKey=6162636465666768;newEncryptionKey=5666768616263646';
+ERROR XJ081: Conflicting create/restore/recovery attributes specified.
+ij> -- restore from backup without re-encryption
+-- it shoud boot. 
+connect 'jdbc:derby:wombat;restoreFrom=extinout/mybackup1/wombat;encryptionKey=6162636465666768';
 ij> select count(*) from emp;
 1          
 -----------
