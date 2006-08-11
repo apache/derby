@@ -182,6 +182,7 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
         try
         {
             LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
+            updateDataSourceValues(tokenizeAttributes(getConnectionAttributes(), null));
             return ClientDriver.getFactory().newNetConnection
                     ((NetLogWriter) dncLogWriter, user,
                     password, this, -1, false);

@@ -31,7 +31,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.sql.SQLException;
 
 import javax.naming.RefAddr;
 import javax.naming.Referenceable;
@@ -800,24 +799,15 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * Any attributes that can be set using a property of this DataSource implementation
      * (e.g user, password) should not be set in connectionAttributes. Conflicting
      * settings in connectionAttributes and properties of the DataSource will lead to
-     * unexpected behaviour. Specifically, databaseName attribute cannot be set using 
-     * this method. (DERBY-1130). databaseName has to be set using the DataSource 
-     * property.
+     * unexpected behaviour. 
      *
      * @param prop set to the list of Cloudscape connection attributes separated by semi-colons.   E.g., to specify an
      *             encryption bootPassword of "x8hhk2adf", and set upgrade to true, do the following: <PRE>
      *             ds.setConnectionAttributes("bootPassword=x8hhk2adf;upgrade=true"); </PRE> See Derby documentation for
      *             complete list.
-     * @throws SQLException if we attempt to set databaseName property in the connection attributes
      */
-    public final void setConnectionAttributes(String prop) throws SQLException {
+    public final void setConnectionAttributes(String prop) {
         connectionAttributes = prop;
-        
-        try {
-        	updateDataSourceValues(tokenizeAttributes(prop, null));
-        }  catch(SqlException se) {
-        	throw se.getSQLException();
-        }
     }
 
     /**
@@ -895,15 +885,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * The dataSource keeps individual fields for the values that are relevant to the client. These need to be updated
      * when set connection attributes is called.
      */
-    void updateDataSourceValues(Properties prop) throws SqlException {
+    void updateDataSourceValues(Properties prop) {
         if (prop == null) {
             return;
-        }
-        
-        if (prop.containsKey(Attribute.DBNAME_ATTR)) {
-        	throw new SqlException(null, 
-                    new ClientMessageId(SQLState.ATTRIBUTE_NOT_ALLOWED),
-					Attribute.DBNAME_ATTR);
         }
         
         if (prop.containsKey(Attribute.USERNAME_ATTR)) {

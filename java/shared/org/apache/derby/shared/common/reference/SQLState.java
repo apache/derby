@@ -1490,7 +1490,6 @@ public interface SQLState {
     String TRACELEVEL_FORMAT_INVALID = "XJ213.C";
     String IO_ERROR_UPON_LOB_FREE = "XJ214.S";
     String LOB_OBJECT_INVALID = "XJ215.S";
-    String ATTRIBUTE_NOT_ALLOWED = "XJ216.S";
     
     //XN - Network-level messages
     String NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK         = "XN001.S";
