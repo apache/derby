@@ -244,3 +244,11 @@ drop table t2;
 drop table t1;
 drop table temp1;
 commit;
+
+-- Test that SYSCS_BULK_INSERT works (DERBY-1660)
+create table warehouse(t1 int);
+-- bulk insert 10 rows
+call  SYSCS_UTIL.SYSCS_BULK_INSERT('APP','WAREHOUSE','org.apache.derbyTesting.functionTests.tests.lang.WarehouseVTI','10');
+select * from warehouse order by t1;
+-- cleanup
+drop table warehouse;
