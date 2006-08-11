@@ -40,9 +40,15 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 	
 	private final String inputEncoding;
 	private final String outputEncoding = "US-ASCII";
+	
+    /**
+     * Default connection.
+     */
+	private Connection conn;
 
 	/**
-	 * Create a ScriptTestCase to run a single test. 
+	 * Create a ScriptTestCase to run a single test
+     * using a connection obtained from getConnection()
 	 * @param script Base name of the .sql script
 	 * excluding the .sql suffix.
 	 */
@@ -105,14 +111,14 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 		URL sql = getTestResource(resource);
 		assertNotNull("SQL script missing: " + resource, sql);
 		
-		InputStream sqlIn = sql.openStream();
+		InputStream sqlIn = openTestResource(sql);
 		
 		ByteArrayOutputStream rawBytes =
 			new ByteArrayOutputStream(20 * 1024);
 		
 		PrintStream printOut = new PrintStream(rawBytes);
 	
-		Connection conn = getConnection();
+		conn = getConnection();
 		org.apache.derby.tools.ij.runScript(
 				conn,
 				sqlIn,
@@ -120,7 +126,8 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 				printOut,
 				outputEncoding);
 		
-		conn.close();
+		if (!conn.isClosed() && !conn.getAutoCommit())
+		    conn.commit();
 		
 		printOut.flush();
 		printOut.close();
@@ -176,5 +183,14 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 			outFile.close();
 			throw t;
 		}
+	}
+	
+    /**
+     * Clean up the connection on teardown.
+     */
+	protected void tearDown() throws Exception
+	{
+		JDBC.cleanup(conn);
+        super.tearDown();
 	}
 }

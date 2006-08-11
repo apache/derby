@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.util.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 
 public final class LangScripts extends ScriptTestCase {
@@ -33,6 +34,9 @@ public final class LangScripts extends ScriptTestCase {
 		"arithmetic",
 		"bit2",
 		"case",
+		"constantExpression",
+		"depend",
+		"derived",
 		"union",
 		};
 	
@@ -65,13 +69,16 @@ public final class LangScripts extends ScriptTestCase {
 	
     /**
      * Return a suite of language SQL tests from the list of
-     * script names.
+     * script names. Each test is surrounded in a decorator
+     * that cleans the database.
       */
 	private static Test getSuite(String[] list)
 	{
         TestSuite suite = new TestSuite();
         for (int i = 0; i < list.length; i++)
-            suite.addTest(new LangScripts(list[i]));
+            suite.addTest(
+            		new CleanDatabaseTestSetup(
+            		new LangScripts(list[i])));
 
         return getIJConfig(suite);
     }
