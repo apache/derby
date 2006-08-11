@@ -31,6 +31,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestSetup;
+import org.apache.derbyTesting.functionTests.util.JDBC;
 
 /**
  * Tests of stored procedures.
@@ -662,7 +663,12 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @return test suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite(ProcedureTest.class);
+        TestSuite suite = new TestSuite();
+        
+        // Need JDBC 2 DriverManager to run these tests
+        if (JDBC.vmSupportsJDBC2()) {        	
+        
+        suite.addTestSuite(ProcedureTest.class);
         if (!usingDerbyNet()) {
             suite.addTest
                 (new ProcedureTest
@@ -697,6 +703,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
                 (new ProcedureTest
                  ("xtestRollbackStoredProcWhenExecuteUpdateReturnsResults" +
                   "_prepared"));
+        }
         }
         return new BaseJDBCTestSetup(suite) {
             /**

@@ -20,8 +20,10 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.JDBC;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import junit.framework.*;
+
 import java.sql.*;
 
 /**
@@ -45,6 +47,17 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
     /** Creates a new instance of ScrollResultSetTest */
     public ScrollResultSetTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+                
+        // Requires holdability
+        if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169()) {
+        	suite.addTestSuite(ScrollResultSetTest.class);
+        }
+        
+        return suite;
     }
 
     /**

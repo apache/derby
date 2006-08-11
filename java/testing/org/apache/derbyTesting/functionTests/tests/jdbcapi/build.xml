@@ -58,14 +58,37 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilex,compilet2,compilet1,copyfiles"/>
+  <target name="FTOtestsubdir" depends="compileSuite,copyfiles"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
     <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/jdbcapi"/>
   </target>
 
-  <target name="compilet1" depends="compilet2">
+	  <target name="compileSuite" depends="compilet2">
+	    <javac
+	      source="1.3"
+	      target="1.3"
+	      bootclasspath="${empty}"
+	      nowarn="on"
+	      debug="${debug}"
+	      depend="${depend}"
+	      deprecation="${deprecation}"
+	      optimize="${optimize}"
+	      proceed="${proceed}"
+	      verbose="${verbose}" 
+	      srcdir="${derby.testing.src.dir}"
+	      destdir="${out.dir}">
+	      <classpath>
+	        <!--pathelement location="${oro}"/-->
+	        <pathelement path="${compile.classpath}"/>
+			<pathelement path="${junit}"/>
+	      </classpath>
+	      <include name="${this.dir}/_Suite.java"/>
+	    </javac>
+	  </target>
+	
+  <target name="compilet1">
     <javac
       source="1.3"
       target="1.3"
@@ -99,10 +122,11 @@
       <exclude name="${this.dir}/lobStreams.java"/>
       <exclude name="${this.dir}/XATest.java"/>
       <exclude name="${this.dir}/ScrollResultSetTest.java"/>
+      <exclude name="${this.dir}/_Suite.java"/>
     </javac>
   </target>
 
-  <target name="compilet2">
+  <target name="compilet2" depends="compilet1,compilex">
     <javac
       source="1.4"
       target="1.4"

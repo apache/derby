@@ -21,6 +21,8 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import junit.framework.*;
 import java.sql.*;
 
+import org.apache.derbyTesting.functionTests.util.JDBC;
+
 /**
  * Testing concurrency behaviour in derby when creating the resultsets with
  * different parameters.
@@ -812,6 +814,9 @@ public class ConcurrencyTest extends SURBaseTest {
     
     public static Test suite() {
         TestSuite suite = new TestSuite();
+                
+        // Requires holdability
+        if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169()) {
         
         suite.addTest(new ConcurrencyTest("testUpdateLockDownGrade1"));
         suite.addTest(new ConcurrencyTest("testAquireUpdateLock1"));
@@ -836,6 +841,7 @@ public class ConcurrencyTest extends SURBaseTest {
 //         suite.addTest(new ConcurrencyTest("testTruncateDuringScan"));
         /// ---------------
                 
+        }
             
         return suite;
     }
