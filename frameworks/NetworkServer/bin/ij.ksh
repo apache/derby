@@ -48,10 +48,6 @@ DERBY_HOME=${DERBY_HOME:-$DERBY_INSTALL}
   }
 } 
 
-[ -z "$CLASSPATH" ] && {
-  . "$DERBY_HOME"/frameworks/NetworkServer/bin/setNetworkClientCP.ksh
-}
- 
 export IJ_HOST=localhost
 export IJ_PORT=1527
 export IJ_USER=APP
@@ -60,7 +56,7 @@ export IJ_PASSWORD=APP
 # ---------------------------------------------------------
 # -- start ij
 # ---------------------------------------------------------
-"$JAVA_HOME/bin/java" -Dij.driver=org.apache.derby.jdbc.ClientDriver -Dij.protocol=jdbc:derby://$IJ_HOST:$IJ_PORT/ -Dij.user=$IJ_USER -Dij.password=$IJ_PASSWORD  org.apache.derby.tools.ij
+"$JAVA_HOME/bin/java" -cp "${DERBY_HOME}/lib/derbyclient.jar:${DERBY_HOME}/lib/derbytools.jar:${CLASSPATH}" -Dij.driver=org.apache.derby.jdbc.ClientDriver -Dij.protocol=jdbc:derby://$IJ_HOST:$IJ_PORT/ -Dij.user=$IJ_USER -Dij.password=$IJ_PASSWORD  org.apache.derby.tools.ij
 
 # ---------------------------------------------------------
 # -- To use a different JVM with a different syntax, simply edit

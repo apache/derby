@@ -35,13 +35,10 @@ rem set DERBY_INSTALL=
 @if "%JAVA_HOME%"=="" goto nojavahome
 @if not exist "%JAVA_HOME%\bin\java.exe" goto nojavahome
 
-if !"%CLASSPATH%"==! call "%DERBY_HOME%"/frameworks/NetworkServer/bin/setNetworkClientCP.bat
-if "%CLASSPATH%" == "" call "%DERBY_HOME%"/frameworks/NetworkServer/bin/setNetworkClientCP.bat
-
 @REM ---------------------------------------------------------
 @REM -- start dblook
 @REM ---------------------------------------------------------
-"%JAVA_HOME%\bin\java" org.apache.derby.tools.dblook %*
+"%JAVA_HOME%\bin\java" -cp "%DERBY_HOME%\lib\derbyclient.jar;%DERBY_HOME%\lib\derbytools.jar;%CLASSPATH%" org.apache.derby.tools.dblook %*
 @GOTO end
 
 @REM ---------------------------------------------------------

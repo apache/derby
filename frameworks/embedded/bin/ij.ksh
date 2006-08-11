@@ -48,14 +48,10 @@ DERBY_HOME=${DERBY_HOME:-$DERBY_INSTALL}
   }
 }
  
-[ -z "$CLASSPATH" ] && {
-  . "$DERBY_HOME"/frameworks/embedded/bin/setEmbeddedCP.ksh
-}
- 
 # ---------------------------------------------------------
 # -- start ij
 # ---------------------------------------------------------
-"$JAVA_HOME/bin/java" -Dij.protocol=jdbc:derby: org.apache.derby.tools.ij
+"$JAVA_HOME/bin/java" -cp "${DERBY_HOME}/lib/derby.jar:${DERBY_HOME}/lib/derbytools.jar:${CLASSPATH}" -Dij.protocol=jdbc:derby: org.apache.derby.tools.ij
 
 # ---------------------------------------------------------
 # -- To use a different JVM with a different syntax, simply edit

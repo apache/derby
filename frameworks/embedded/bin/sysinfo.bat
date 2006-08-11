@@ -30,7 +30,7 @@
 @REM -- This file for use on Windows systems
 @REM ---------------------------------------------------------
 @echo off
-@rem set DERBY_INSTALL=
+rem set DERBY_INSTALL=
 
 @if "%DERBY_HOME%"=="" set DERBY_HOME=%DERBY_INSTALL%
 @if "%DERBY_HOME%"=="" goto noderbyhome
@@ -38,13 +38,10 @@
 @if "%JAVA_HOME%"=="" goto nojavahome
 @if not exist "%JAVA_HOME%\bin\java.exe" goto nojavahome
 
-@if !"%CLASSPATH%"==! call "%DERBY_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
-@if "%CLASSPATH%" == "" call "%DERBY_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
-
 @REM ---------------------------------------------------------
 @REM -- start sysinfo
 @REM ---------------------------------------------------------
-"%JAVA_HOME%\bin\java" org.apache.derby.tools.sysinfo
+"%JAVA_HOME%\bin\java" -cp "%DERBY_HOME%\lib\derby.jar;%DERBY_HOME%\lib\derbytools.jar;%CLASSPATH%" org.apache.derby.tools.sysinfo
 @GOTO end
 
 @REM ---------------------------------------------------------

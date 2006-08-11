@@ -48,15 +48,11 @@ DERBY_HOME=${DERBY_HOME:-$DERBY_INSTALL}
   }
 } 
 
-[ -z "$CLASSPATH" ] && {
-  . "$DERBY_HOME"/frameworks/NetworkServer/bin/setNetworkServerCP.ksh
-}
-
 # ---------------------------------------------------------
 # -- start Derby Network Server
 # ---------------------------------------------------------
 
-"$JAVA_HOME/bin/java" org.apache.derby.drda.NetworkServerControl $*
+"$JAVA_HOME/bin/java" -cp "${DERBY_HOME}/lib/derby.jar:${DERBY_HOME}/lib/derbytools.jar:${DERBY_HOME}/lib/derbynet.jar:${CLASSPATH}" org.apache.derby.drda.NetworkServerControl $*
 
 
 # ---------------------------------------------------------

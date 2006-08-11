@@ -38,9 +38,6 @@ rem set DERBY_INSTALL=
 @if "%JAVA_HOME%"=="" goto nojavahome
 @if not exist "%JAVA_HOME%\bin\java.exe" goto nojavahome
 
-@if !"%CLASSPATH%"==! call "%DERBY_HOME%"/frameworks/NetworkServer/bin/setNetworkClientCP.bat
-@if "%CLASSPATH%" == "" call "%DERBY_HOME%"/frameworks/NetworkServer/bin/setNetworkClientCP.bat
-
 set IJ_HOST=localhost
 set IJ_PORT=1527
 set IJ_USER=APP
@@ -50,8 +47,7 @@ set IJ_PASSWORD=APP
 @REM -- start ij
 @REM -- host, port, user and password may need to be changed
 @REM ---------------------------------------------------------
-@echo on
-"%JAVA_HOME%\bin\java" -Dij.driver=org.apache.derby.jdbc.ClientDriver -Dij.protocol=jdbc:derby://%IJ_HOST%:%IJ_PORT%/ -Dij.user=%IJ_USER% -Dij.password=%IJ_PASSWORD%  org.apache.derby.tools.ij
+"%JAVA_HOME%\bin\java" -cp "%DERBY_HOME%\lib\derbyclient.jar;%DERBY_HOME%\lib\derbytools.jar;%CLASSPATH%" -Dij.driver=org.apache.derby.jdbc.ClientDriver -Dij.protocol=jdbc:derby://%IJ_HOST%:%IJ_PORT%/ -Dij.user=%IJ_USER% -Dij.password=%IJ_PASSWORD%  org.apache.derby.tools.ij
 @goto end
 
 @REM ---------------------------------------------------------

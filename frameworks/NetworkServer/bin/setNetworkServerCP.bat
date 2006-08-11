@@ -25,8 +25,8 @@
 @REM -- This file for use on Windows systems
 @REM -- 
 @REM ---------------------------------------------------------
-
-@rem set DERBY_INSTALL=
+@echo off
+rem set DERBY_INSTALL=
 
 @if "%DERBY_HOME%"=="" set DERBY_HOME=%DERBY_INSTALL%
 @if "%DERBY_HOME%"=="" goto noderbyhome

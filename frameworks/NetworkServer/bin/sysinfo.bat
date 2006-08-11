@@ -38,13 +38,10 @@ rem set DERBY_INSTALL=
 @if "%JAVA_HOME%"=="" goto nojavahome
 @if not exist "%JAVA_HOME%\bin\java.exe" goto nojavahome
 
-@if !"%CLASSPATH%"==! call "%DERBY_HOME%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
-@if "%CLASSPATH%" == "" call "%DERBY_HOME%"/frameworks/NetworkServer/bin/setNetworkServerCP.bat
-
 @REM ---------------------------------------------------------
 @REM -- start sysinfo
 @REM ---------------------------------------------------------
-"%JAVA_HOME%\bin\java" org.apache.derby.drda.NetworkServerControl sysinfo %*
+"%JAVA_HOME%\bin\java" -cp "%DERBY_HOME%\lib\derby.jar;%DERBY_HOME%\lib\derbytools.jar;%DERBY_HOME%\lib\derbynet.jar;%CLASSPATH%" org.apache.derby.drda.NetworkServerControl sysinfo
 @GOTO end
 
 @REM ---------------------------------------------------------

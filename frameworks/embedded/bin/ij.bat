@@ -35,13 +35,10 @@ rem set DERBY_INSTALL=
 @if "%JAVA_HOME%"=="" goto nojavahome
 @if not exist "%JAVA_HOME%\bin\java.exe" goto nojavahome
 
-@if !"%CLASSPATH%"==! call "%DERBY_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
-@if "%CLASSPATH%" == "" call "%DERBY_INSTALL%"/frameworks/embedded/bin/setEmbeddedCP.bat
-
 @REM ---------------------------------------------------------
 @REM -- start ij
 @REM ---------------------------------------------------------
-"%JAVA_HOME%\bin\java" -Dij.protocol=jdbc:derby: org.apache.derby.tools.ij
+"%JAVA_HOME%\bin\java" -cp "%DERBY_HOME%\lib\derby.jar;%DERBY_HOME%\lib\derbytools.jar;%CLASSPATH%" -Dij.protocol=jdbc:derby: org.apache.derby.tools.ij
 @goto end
 
 @REM ---------------------------------------------------------
