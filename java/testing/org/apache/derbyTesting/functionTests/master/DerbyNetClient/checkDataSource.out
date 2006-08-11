@@ -555,4 +555,41 @@ Expected XA error code: -9
 acxs 3
 testing jira 95 for DataSource; ok - expected exception: XCY00
 testing jira 95 for XADataSource; ok - expected exception: XCY00
+DataSource - EMPTY
+  getConnection() - 08001:Required property databaseName not set.
+  getConnection(null, null) - 08001:Required property databaseName not set.
+  getConnection(fred, null) - 08001:Required property databaseName not set.
+  getConnection(fred, wilma) - 08001:Required property databaseName not set.
+  getConnection(null, wilma) - 08001:Required property databaseName not set.
+  getConnection(null, databaseName=wombat) - 08001:Required property databaseName not set.
+  getConnection(fred, databaseName=wombat) - 08001:Required property databaseName not set.
+  getConnection(fred, databaseName=wombat;password=wilma) - 08001:Required property databaseName not set.
+  getConnection(fred, databaseName=wombat;password=betty) - 08001:Required property databaseName not set.
+DataSource - connectionAttributes=databaseName=wombat
+Expected exception - databaseName attribute cannot be set using the DataSource method setConnectionAttributes. 
+ConnectionPoolDataSource - EMPTY
+  getPooledConnection() - 08001:Required property databaseName not set.
+  getPooledConnection(null, null) - 08001:Required property databaseName not set.
+  getPooledConnection(fred, null) - 08001:Required property databaseName not set.
+  getPooledConnection(fred, wilma) - 08001:Required property databaseName not set.
+  getPooledConnection(null, wilma) - 08001:Required property databaseName not set.
+  getPooledConnection(null, databaseName=wombat) - 08001:Required property databaseName not set.
+  getPooledConnection(fred, databaseName=wombat) - 08001:Required property databaseName not set.
+  getPooledConnection(fred, databaseName=wombat;password=wilma) - 08001:Required property databaseName not set.
+  getPooledConnection(fred, databaseName=wombat;password=betty) - 08001:Required property databaseName not set.
+ConnectionPoolDataSource - connectionAttributes=databaseName=wombat
+Expected exception - databaseName attribute cannot be set using the DataSource method setConnectionAttributes. 
+XADataSource - EMPTY
+  getXAConnection() - 08001:Required property databaseName not set.
+  getXAConnection(null, null) - 08001:Required property databaseName not set.
+  getXAConnection(fred, null) - 08001:Required property databaseName not set.
+  getXAConnection(fred, wilma) - 08001:Required property databaseName not set.
+  getXAConnection(null, wilma) - 08001:Required property databaseName not set.
+  getXAConnection(null, databaseName=wombat) - 08001:Required property databaseName not set.
+  getXAConnection(fred, databaseName=wombat) - 08001:Required property databaseName not set.
+  getXAConnection(fred, databaseName=wombat;password=wilma) - 08001:Required property databaseName not set.
+  getXAConnection(fred, databaseName=wombat;password=betty) - 08001:Required property databaseName not set.
+XADataSource - connectionAttributes=databaseName=wombat
+Expected exception - databaseName attribute cannot be set using the DataSource method setConnectionAttributes. 
+Checked class declared as: javax.sql.DataSource
 Completed checkDataSource

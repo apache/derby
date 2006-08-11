@@ -47,6 +47,10 @@ import javax.transaction.xa.Xid;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
+import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
+import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientXADataSource;
+
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
@@ -686,10 +690,12 @@ public class checkDataSource
 		} catch (Exception e) {
 				System.out.println("; wrong, unexpected exception: " + e.toString());
 		}
-		// skip testDSRequestAuthentication for  client because of these 
-		// two issues:
-		// DERBY-1130 : Client should not allow databaseName to be set with
-		// setConnectionAttributes
+		
+		// DERBY-1130 - Client should not allow databaseName to be set with setConnectionAttributes
+		if (TestUtil.isDerbyNetClientFramework())
+			testClientDSConnectionAttributes();
+		
+		// skip testDSRequestAuthentication for  client because of this issue: 
 		// DERBY-1131 : Deprecate  Derby DataSource property attributesAsPassword
 		if (TestUtil.isDerbyNetClientFramework())
 			return;
@@ -1383,6 +1389,53 @@ public class checkDataSource
 		xads.setDatabaseName(null);
 	}
 
+	/**
+	 * Check that database name cannot be set using setConnectionAttributes 
+	 * for Derby client data sources. This method tests DERBY-1130.
+	 * 
+	 * @throws SQLException
+	 */
+	private static void testClientDSConnectionAttributes() throws SQLException {
+
+		ClientDataSource ds = new ClientDataSource();
+
+		System.out.println("DataSource - EMPTY");
+		dsConnectionRequests(ds);
+
+		System.out.println("DataSource - connectionAttributes=databaseName=wombat");
+		try{ 
+			ds.setConnectionAttributes("databaseName=wombat");
+		} catch (SQLException sqle) {
+			System.out.println("Expected exception - " + sqle.getMessage());
+		}
+		
+		
+		// now with ConnectionPoolDataSource
+		ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+		System.out.println("ConnectionPoolDataSource - EMPTY");
+		dsConnectionRequests((ConnectionPoolDataSource)cpds);
+
+		System.out.println("ConnectionPoolDataSource - connectionAttributes=databaseName=wombat");
+		try {
+			cpds.setConnectionAttributes("databaseName=wombat");
+		} catch (SQLException sqle) {
+			System.out.println("Expected exception - " + sqle.getMessage());
+		}
+		
+		// now with XADataSource
+		ClientXADataSource xads = new ClientXADataSource();
+		System.out.println("XADataSource - EMPTY");
+		dsConnectionRequests((XADataSource) xads);
+
+		System.out.println("XADataSource - connectionAttributes=databaseName=wombat");
+		try {
+			xads.setConnectionAttributes("databaseName=wombat");
+		} catch (SQLException sqle) {
+			System.out.println("Expected exception - " + sqle.getMessage());
+		}
+		
+	}
+	
 	private static void dsConnectionRequests(DataSource ds) {
 		
 		SecurityCheck.inspect(ds, "javax.sql.DataSource");
