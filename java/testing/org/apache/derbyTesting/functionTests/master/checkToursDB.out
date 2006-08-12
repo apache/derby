@@ -161,7 +161,7 @@ CREATE TRIGGER TRIG1 AFTER UPDATE ON FLIGHTS REFERENCING OLD AS UPDATEDROW FOR E
 ij> CREATE TRIGGER TRIG2 AFTER DELETE ON FLIGHTS FOR EACH STATEMENT MODE DB2SQL
 INSERT INTO FLIGHTS_HISTORY (STATUS) VALUES ('INSERTED FROM TRIG2');
 0 rows inserted/updated/deleted
-ij> ij version 10.2
+ij> ij version 10.3
 WARNING 01J01: Database 'toursDB' not created, connection made to existing database instead.
 CONNECTION0* - 	jdbc:derby:toursDB
 * = current connection
