@@ -30,6 +30,19 @@ public class HoldabilityTest extends SURBaseTest {
     public HoldabilityTest(String name) {
         super(name, 1000); // We will use 1000 records
     }
+    
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+               
+        // DB2 client doesn't support this functionality
+        if (usingDerbyNet())
+            return suite;
+        
+        suite.addTestSuite(HoldabilityTest.class);
+        
+        return suite;
+
+    }
 
     /**
      * Sets up the connection, then create the data model

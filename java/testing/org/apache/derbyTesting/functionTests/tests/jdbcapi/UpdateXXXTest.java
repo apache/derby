@@ -53,6 +53,10 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public static Test suite() {
         TestSuite suite = new TestSuite();
         
+        // DB2 client doesn't support this functionality
+        if (usingDerbyNet())
+            return suite;
+        
         suite.addTest(new UpdateXXXTest("testUpdateShort"));
         suite.addTest(new UpdateXXXTest("testUpdateInt"));
         suite.addTest(new UpdateXXXTest("testUpdateLong"));

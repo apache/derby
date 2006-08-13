@@ -1527,6 +1527,10 @@ public class SURTest extends SURBaseTest {
         
         TestSuite mainSuite = new TestSuite();
         
+        // DB2 client doesn't support this functionality
+        if (usingDerbyNet())
+            return mainSuite;
+        
         // Iterate over all data models and decorate the tests:
         for (Iterator i = SURDataModelSetup.SURDataModel.values().iterator();
              i.hasNext();) {

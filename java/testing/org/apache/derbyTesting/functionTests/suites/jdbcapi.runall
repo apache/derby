@@ -1,4 +1,3 @@
-jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
 jdbcapi/characterStreams.java
 jdbcapi/checkDriver.java
@@ -16,17 +15,12 @@ jdbcapi/maxfieldsize.java
 jdbcapi/LOBTest.java
 jdbcapi/blobclob4BLOB.java
 jdbcapi/parameterMapping.java
-jdbcapi/ProcedureTest.junit
 jdbcapi/setTransactionIsolation.java
 jdbcapi/SetQueryTimeoutTest.java
 jdbcapi/prepStmtNull.java
 jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/Stream.java
-jdbcapi/UpdateXXXTest.junit
-jdbcapi/SURQueryMixTest.junit
-jdbcapi/SURTest.junit
-jdbcapi/ScrollResultSetTest.junit
-jdbcapi/URCoveringIndexTest.junit
 jdbcapi/SURTest_ij.sql
 jdbcapi/ResultSetCloseTest.junit
+jdbcapi/_Suite.junit

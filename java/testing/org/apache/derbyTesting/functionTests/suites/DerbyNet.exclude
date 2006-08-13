@@ -35,14 +35,6 @@ jdbcapi/savepointJdbc30_XA.java
 # excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test
 jdbcapi/derbyStress.java
 largedata/LobLimits.java
-# These next five tests fail since the
-# db2 driver produces statements which Derby cannot compile in 
-# ResultSet.updateRow()
-jdbcapi/UpdateXXXTest.junit
-jdbcapi/SURQueryMixTest.junit
-jdbcapi/SURTest.junit
-jdbcapi/ConcurrencyTest.junit
-jdbcapi/HoldabilityTest.junit
 # Excluding checkDataSource and checkDataSource30 because JCC has no XA
 jdbcapi/checkDataSource30.java
 jdbcapi/checkDataSource.java

@@ -814,6 +814,11 @@ public class ConcurrencyTest extends SURBaseTest {
     
     public static Test suite() {
         TestSuite suite = new TestSuite();
+        
+        // DB2 client doesn't support this functionality
+        if (usingDerbyNet())
+            return suite;
+
                 
         // Requires holdability
         if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169()) {
