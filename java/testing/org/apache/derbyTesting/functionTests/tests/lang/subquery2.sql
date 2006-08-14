@@ -337,3 +337,45 @@ drop table u_null;
 drop table v_empty;
 drop table w_2;
 
+-- DERBY-634: Dynamic subquery materialization can cause stack overflow
+
+create table parentT ( i int, j int, k int);
+create table childT ( i int, j int, k int);
+
+-- Load some data
+insert into parentT values (1,1,1), (2,2,2), (3,3,3), (4,4,4);
+insert into parentT select i+4, j+4, k+4 from parentT;
+insert into parentT select i+8, j+8, k+8 from parentT;
+insert into parentT select i+16, j+16, k+16 from parentT;
+insert into parentT select i+32, j+32, k+32 from parentT;
+insert into parentT select i+64, j+64, k+64 from parentT;
+insert into parentT select i+128, j+128, k+128 from parentT;
+insert into parentT select i+256, j+256, k+256 from parentT;
+insert into parentT select i+512, j+512, k+512 from parentT;
+insert into parentT select i+1024, j+1024, k+1024 from parentT;
+insert into parentT select i+2048, j+2048, k+2048 from parentT;
+insert into parentT select i+4096, j+4096, k+4096 from parentT;
+insert into parentT select i+8192, j+8192, k+8192 from parentT;
+
+-- Try with three different sizes of subquery results.
+update parentT set j = j /10;
+update parentT set k = k /100;
+create unique index parentIdx on parentT(i);
+
+insert into childT select * from parentT;
+
+select count(*) from parentT where i < 10 and i not in (select i from childT);
+
+select count(*) from parentT where i< 10 and exists (select i from childT where childT.i=parentT.i);
+
+select count(*) from parentT where i< 10 and j not in (select distinct j from childT);
+
+select count(*) from parentT where i< 10 and exists (select distinct j from childT where childT.j=parentT.j);
+
+select count(*) from parentT where i< 10 and k not in (select distinct k from childT);
+
+select count(*) from parentT where i< 10 and exists (select distinct k from childT where childT.k=parentT.k);
+
+drop table childT;
+drop table parentT;
+

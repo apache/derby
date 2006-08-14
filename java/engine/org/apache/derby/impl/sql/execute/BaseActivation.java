@@ -1409,6 +1409,19 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * in-memory converted resultset, or the original result set if not converted.
 	 * See beetle 4373 for details.
 	 *
+	 * Optimization implemented as part of Beetle: 4373 can cause severe stack overflow
+	 * problems. See JIRA entry DERBY-634. With default MAX_MEMORY_PER_TABLE of 1MG, it is
+	 * possible that this optimization could attempt to cache upto 250K rows as nested
+	 * union results. At runtime, this would cause stack overflow.
+	 *
+	 * As Jeff mentioned in DERBY-634, right way to optimize original problem would have been
+	 * to address subquery materialization during optimization phase, through hash joins.
+	 * Recent Army's optimizer work through DEBRY-781 and related work introduced a way to
+	 * materialize subquery results correctly and needs to be extended to cover this case.
+	 * While his optimization needs to be made more generic and stable, I propose to avoid
+	 * this regression by limiting size of the materialized resultset created here to be
+	 * less than MAX_MEMORY_PER_TABLE and MAX_DYNAMIC_MATERIALIZED_ROWS.
+	 *
 	 *	@param	rs	input result set
 	 *	@return	materialized resultset, or original rs if it can't be materialized
 	 */
@@ -1432,7 +1445,8 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		while (aRow != null)
 		{
 			cacheSize += aRow.getColumn(1).getLength();
-			if (cacheSize > maxMemoryPerTable)
+			if (cacheSize > maxMemoryPerTable ||
+					rowCache.size() > Optimizer.MAX_DYNAMIC_MATERIALIZED_ROWS)
 				break;
 			rowCache.addElement(aRow.getClone(toClone));
 			aRow = rs.getNextRowCore();

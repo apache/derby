@@ -70,6 +70,12 @@ public interface Optimizer {
 	String MAX_MEMORY_PER_TABLE = "derby.language.maxMemoryPerTable";
 
 	/**
+		Maximum size of dynamically created materialized rows. Caching large results
+		use lot of memory and can cause stack overflow. See DERBY-634
+	*/
+	int MAX_DYNAMIC_MATERIALIZED_ROWS = 512;
+
+	/**
 	   Property name for disabling statistics use for all queries.
 	*/
 	String USE_STATISTICS = "derby.language.useStatistics";

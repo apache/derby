@@ -1020,4 +1020,73 @@ ij> drop table v_empty;
 0 rows inserted/updated/deleted
 ij> drop table w_2;
 0 rows inserted/updated/deleted
+ij> -- DERBY-634: Dynamic subquery materialization can cause stack overflow
+create table parentT ( i int, j int, k int);
+0 rows inserted/updated/deleted
+ij> create table childT ( i int, j int, k int);
+0 rows inserted/updated/deleted
+ij> -- Load some data
+insert into parentT values (1,1,1), (2,2,2), (3,3,3), (4,4,4);
+4 rows inserted/updated/deleted
+ij> insert into parentT select i+4, j+4, k+4 from parentT;
+4 rows inserted/updated/deleted
+ij> insert into parentT select i+8, j+8, k+8 from parentT;
+8 rows inserted/updated/deleted
+ij> insert into parentT select i+16, j+16, k+16 from parentT;
+16 rows inserted/updated/deleted
+ij> insert into parentT select i+32, j+32, k+32 from parentT;
+32 rows inserted/updated/deleted
+ij> insert into parentT select i+64, j+64, k+64 from parentT;
+64 rows inserted/updated/deleted
+ij> insert into parentT select i+128, j+128, k+128 from parentT;
+128 rows inserted/updated/deleted
+ij> insert into parentT select i+256, j+256, k+256 from parentT;
+256 rows inserted/updated/deleted
+ij> insert into parentT select i+512, j+512, k+512 from parentT;
+512 rows inserted/updated/deleted
+ij> insert into parentT select i+1024, j+1024, k+1024 from parentT;
+1024 rows inserted/updated/deleted
+ij> insert into parentT select i+2048, j+2048, k+2048 from parentT;
+2048 rows inserted/updated/deleted
+ij> insert into parentT select i+4096, j+4096, k+4096 from parentT;
+4096 rows inserted/updated/deleted
+ij> insert into parentT select i+8192, j+8192, k+8192 from parentT;
+8192 rows inserted/updated/deleted
+ij> -- Try with three different sizes of subquery results.
+update parentT set j = j /10;
+16384 rows inserted/updated/deleted
+ij> update parentT set k = k /100;
+16384 rows inserted/updated/deleted
+ij> create unique index parentIdx on parentT(i);
+0 rows inserted/updated/deleted
+ij> insert into childT select * from parentT;
+16384 rows inserted/updated/deleted
+ij> select count(*) from parentT where i < 10 and i not in (select i from childT);
+1          
+-----------
+0          
+ij> select count(*) from parentT where i< 10 and exists (select i from childT where childT.i=parentT.i);
+1          
+-----------
+9          
+ij> select count(*) from parentT where i< 10 and j not in (select distinct j from childT);
+1          
+-----------
+0          
+ij> select count(*) from parentT where i< 10 and exists (select distinct j from childT where childT.j=parentT.j);
+1          
+-----------
+9          
+ij> select count(*) from parentT where i< 10 and k not in (select distinct k from childT);
+1          
+-----------
+0          
+ij> select count(*) from parentT where i< 10 and exists (select distinct k from childT where childT.k=parentT.k);
+1          
+-----------
+9          
+ij> drop table childT;
+0 rows inserted/updated/deleted
+ij> drop table parentT;
+0 rows inserted/updated/deleted
 ij> 
