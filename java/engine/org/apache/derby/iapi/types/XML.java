@@ -158,7 +158,6 @@ public class XML
      * object's qualified type.
      * @param val A SQLChar instance to clone and use for
      *  this XML value.
-     * @param qualXType Qualified XML type.
      */
     private XML(SQLChar val, int xmlType)
     {
@@ -255,9 +254,7 @@ public class XML
     }
 
     /**
-     * @see DataValueDescriptor#setFrom
-     *
-     * Note: 
+     * @see DataType#setFrom
      */
     protected void setFrom(DataValueDescriptor theValue)
         throws StandardException

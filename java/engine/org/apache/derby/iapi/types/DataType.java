@@ -478,6 +478,14 @@ public abstract class DataType
 		}
 	}
 
+	/**
+	 * Set the value of this DataValueDescriptor based on the value
+	 * of the specified DataValueDescriptor.
+	 *
+	 * @param dvd	The DataValueDescriptor that holds the value to
+	 *  which we want to set this DataValueDescriptor's value.
+	 *
+	 */
 	protected void setFrom(DataValueDescriptor dvd) throws StandardException
 	{
 		throw StandardException.newException(SQLState.NOT_IMPLEMENTED);
