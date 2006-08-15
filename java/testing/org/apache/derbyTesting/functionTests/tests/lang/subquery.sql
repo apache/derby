@@ -525,3 +525,18 @@ drop table t1;
 drop table t2;
 drop table t3;
 drop table t4;
+
+-- DERBY-1574: Subquery in COALESCE gives NPE due
+-- to preprocess not implemented for that node type
+create table t1 (id int);
+create table t2 (i integer primary key, j int);
+
+insert into t1 values 1,2,3,4,5;
+insert into t2 values (1,1),(2,4),(3,9),(4,16);
+ 
+update t1 set id = coalesce((select j from t2 where t2.i=t1.id), 0);
+select * from t1;
+
+drop table t1;
+drop table t2;
+

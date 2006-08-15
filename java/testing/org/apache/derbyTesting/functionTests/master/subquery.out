@@ -1645,4 +1645,28 @@ ij> drop table t3;
 0 rows inserted/updated/deleted
 ij> drop table t4;
 0 rows inserted/updated/deleted
+ij> -- DERBY-1574: Subquery in COALESCE gives NPE due
+-- to preprocess not implemented for that node type
+create table t1 (id int);
+0 rows inserted/updated/deleted
+ij> create table t2 (i integer primary key, j int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1,2,3,4,5;
+5 rows inserted/updated/deleted
+ij> insert into t2 values (1,1),(2,4),(3,9),(4,16);
+4 rows inserted/updated/deleted
+ij> update t1 set id = coalesce((select j from t2 where t2.i=t1.id), 0);
+5 rows inserted/updated/deleted
+ij> select * from t1;
+ID         
+-----------
+1          
+4          
+9          
+16         
+0          
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
 ij> 

@@ -317,4 +317,57 @@ public class CoalesceFunctionNode extends ValueNode
 		}
 	}
 
+	/**
+	 * Preprocess an expression tree.  We do a number of transformations
+	 * here (including subqueries, IN lists, LIKE and BETWEEN) plus
+	 * subquery flattening.
+	 * NOTE: This is done before the outer ResultSetNode is preprocessed.
+	 *
+	 * @param	numTables			Number of tables in the DML Statement
+	 * @param	outerFromList		FromList from outer query block
+	 * @param	outerSubqueryList	SubqueryList from outer query block
+	 * @param	outerPredicateList	PredicateList from outer query block
+	 *
+	 * @return						The modified expression
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public ValueNode preprocess(int numTables,
+								FromList outerFromList,
+								SubqueryList outerSubqueryList,
+								PredicateList outerPredicateList) 
+					throws StandardException
+	{
+		int argumentsListSize = argumentsList.size();
+		for (int i=0; i < argumentsListSize; i++) {
+			((ValueNode)argumentsList.elementAt(i)).preprocess
+				(numTables,
+				 outerFromList,
+				 outerSubqueryList,
+				 outerPredicateList);
+		}
+		return this;
+	}
+
+
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth					The depth of this node in the tree
+	 */
+
+	public void printSubNodes(int depth)
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes(depth);
+			printLabel(depth, "argumentsList: ");
+			int argumentsListSize = argumentsList.size();
+			for (int i=0; i < argumentsListSize; i++) {
+			    ((ValueNode)argumentsList.elementAt(i)).treePrint(depth+1);
+			}
+		}
+	}
+        
 }
