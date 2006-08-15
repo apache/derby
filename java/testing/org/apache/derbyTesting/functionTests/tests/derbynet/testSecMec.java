@@ -239,8 +239,10 @@ public class testSecMec extends dataSourcePermissions_net
 		        }
 		        
 		        // Wait for the NetworkServer to start.
-		        if (!isServerStarted(networkServer, 60))
-		            System.exit(-1);
+		        if (!isServerStarted(networkServer, 60)) {
+                    System.out.println("FAIL: Server failed to respond to ping - ending test");
+                    break;
+                }
 		    }
 		    
 		    // Now, go ahead and run the test.
