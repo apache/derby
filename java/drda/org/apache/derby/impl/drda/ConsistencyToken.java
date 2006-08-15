@@ -70,13 +70,23 @@ final class ConsistencyToken {
      * @return hash code
      */
     public int hashCode() {
-        if (hash == 0) {
+        // ConsistencyToken objects might be kept for a long time and are
+        // frequently used as keys in hash tables. Therefore, it is a good idea
+        // to cache their hash codes.
+        int h = hash;
+        if (h == 0) {
+            // The hash code has not been calculated yet (or perhaps the hash
+            // code actually is 0). Calculate a new one and cache it. No
+            // synchronization is needed since reads and writes of 32-bit
+            // primitive values are guaranteed to be atomic. See The
+            // "Double-Checked Locking is Broken" Declaration for details.
             int len = bytes.length;
             for (int i = 0; i < len; ++i) {
-                hash ^= bytes[i];
+                h ^= bytes[i];
             }
+            hash = h;
         }
-        return hash;
+        return h;
     }
 
     /**
