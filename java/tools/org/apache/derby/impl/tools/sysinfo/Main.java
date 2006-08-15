@@ -454,12 +454,13 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 	private static final String NET = "server";
 	private static final String CLIENT = "client";
+	private static final String DB2DRIVER = "db2driver";
 
 	/* you can add this if you like */
 
 	private static final String MAINUSAGESTRING = "java org.apache.derby.tools.sysinfo -cp";
 
-	private static final String USAGESTRINGPARTA = MAINUSAGESTRING + " [ [ " + EMBEDDED + " ][ " + NET + " ][ " + CLIENT + "] [ " + TOOLS + " ] [ ";
+	private static final String USAGESTRINGPARTA = MAINUSAGESTRING + " [ [ " + EMBEDDED + " ][ " + NET + " ][ " + CLIENT + "] [ " + DB2DRIVER + " ] [ " + TOOLS + " ] [ ";
     private static final String USAGESTRINGPARTB = ".class ] ]";
 
   static  void useMe(String[] args, java.io.PrintWriter pw) {
@@ -507,6 +508,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		  tryCoreClasspath(successes, failures);
 		  tryNetClasspath(successes, failures);
 		  tryClientClasspath(successes, failures);
+		  tryDB2DriverClasspath(successes, failures);
 		  tryUtilsClasspath(successes, failures);
 		  localPW.println(successes.toString());
 		  if (!failures.toString().equals(crLf() + Main.getTextMessage("SIF08.E") + crLf())) {
@@ -541,6 +543,10 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		  tryClientClasspath(successes, failures);
 			seenArg =true;
 
+		}
+		if (argumentsContain(args,DB2DRIVER)) {
+			tryDB2DriverClasspath(successes, failures);
+			seenArg =true;
 		}
 
 		if (argumentsContain(args,TOOLS) || argumentsContain(args,"utils")) {
@@ -584,9 +590,15 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		tryMyClasspath("org.apache.derby.drda.NetworkServerControl", Main.getTextMessage("SIF08.I", "derbynet.jar"), successes, failures);
 	}
 	private static void tryClientClasspath(StringBuffer successes, StringBuffer failures) {
-		tryMyClasspath("com.ibm.db2.jcc.DB2Driver", Main.getTextMessage("SIF08.L", "db2jcc.jar"), successes, failures);
 		tryMyClasspath("org.apache.derby.jdbc.ClientDriver", Main.getTextMessage("SIF08.L", "derbyclient.jar"), successes, failures);
 	}
+    private static void tryDB2DriverClasspath(StringBuffer successes,
+            StringBuffer failures)
+    {
+        tryMyClasspath("com.ibm.db2.jcc.DB2Driver",
+                Main.getTextMessage("SIF08.L", "db2jcc.jar"),
+                successes, failures);
+    }
 
 	private static void tryUtilsClasspath(StringBuffer successes, StringBuffer failures) {
 		tryMyClasspath("org.apache.derby.tools.ij", Main.getTextMessage("SIF08.Q", "derbytools.jar"), successes, failures);

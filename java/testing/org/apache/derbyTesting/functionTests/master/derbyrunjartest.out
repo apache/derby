@@ -1,7 +1,7 @@
 ij --help:
 Usage: java org.apache.derby.tools.ij [-p propertyfile] [-ca connectionAttributePropertyFile] [inputfile]
 sysinfo -cp help:
-USAGE: java org.apache.derby.tools.sysinfo -cp [ [ embedded ][ server ][ client] [ tools ] [  anyClass.class ] ]
+USAGE: java org.apache.derby.tools.sysinfo -cp [ [ embedded ][ server ][ client] [ db2driver ] [ tools ] [  anyClass.class ] ]
 dblook:
  USAGE:
  java org.apache.derby.tools.dblook -d <sourceDBUrl> [OPTIONS]
