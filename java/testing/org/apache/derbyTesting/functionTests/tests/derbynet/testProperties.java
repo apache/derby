@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 import java.sql.*;
 import java.util.Vector;
 import java.util.Properties;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
@@ -111,27 +112,43 @@ public class testProperties
 									"-p",
 									"1527"};	
     /**
-	 * Execute the given command and dump the results to standard out
+	 * Execute the given command and optionally wait and dump the results to standard out
 	 *
 	 * @param args	command and arguments
-	 * @param wait  true =wait for completion
+	 * @param wait  true =wait for completion and dump output, false don't wait and
+     * ignore the output.
 	 * @exception Exception
 	 */
 
-	private static void execCmdDumpResults (String[] args) throws Exception
+	private static void execCmdDumpResults (String[] args, boolean wait) throws Exception
 	{
         // We need the process inputstream and errorstream
         ProcessStreamResult prout = null;
         ProcessStreamResult prerr = null;
             
+        System.out.flush();
+        bos.flush();
+        
+        BufferedOutputStream _bos = bos;
+        if (!wait) {
+            // not interested in the output, don't expect a huge amount.
+            // information will just be written to the byte array in
+            // memory and never used.
+            _bos = new BufferedOutputStream(new ByteArrayOutputStream());
+        }
 		// Start a process to run the command
 		Process pr = execCmd(args);
-        prout = new ProcessStreamResult(pr.getInputStream(), bos, null);
-        prerr = new ProcessStreamResult(pr.getErrorStream(), bos, null);
+        prout = new ProcessStreamResult(pr.getInputStream(), _bos, null);
+        prerr = new ProcessStreamResult(pr.getErrorStream(), _bos, null);
+        
+        if (!wait)
+            return;
 
 		// wait until all the results have been processed
 		prout.Wait();
 		prerr.Wait();
+        _bos.flush();
+        System.out.flush();
 
 	}
 
@@ -182,10 +199,8 @@ public class testProperties
 			 {portString,"org.apache.derby.drda.NetworkServerControl", cmd};
 		else
 			cmdArr = new String[] {"org.apache.derby.drda.NetworkServerControl", cmd,"-p", portString};
-		if (!wait)
-			execCmd(cmdArr);
-		else 
-			execCmdDumpResults(cmdArr);
+		
+        execCmdDumpResults(cmdArr, wait);
 	}	
 	
 	private static void waitForStart(String portString, int timeToWait) throws Exception
@@ -278,23 +293,23 @@ public class testProperties
 
 			//Shutdown the server started by test
 			derbyServerCmd("shutdown","1527");
-			execCmd(startServerCmd);
+            execCmdDumpResults(startServerCmd, false);
 			waitForStart("1527",15000);
 			//check that default properties are used
 			listProperties("1527");
 			
 			//Test trace and logconnections commands
-			execCmdDumpResults(cmdTraceOn);
-			execCmdDumpResults(cmdLogconnectionsOn);
+			execCmdDumpResults(cmdTraceOn, true);
+			execCmdDumpResults(cmdLogconnectionsOn, true);
 			listProperties("1527");
-			execCmdDumpResults(cmdTraceOff);
+			execCmdDumpResults(cmdTraceOff, true);
 			listProperties("1527");
 			derbyServerCmd("shutdown","1527");
 			
 			//Test error conditions in command-line
-			execCmdDumpResults(cmdWithoutArgs);
-			execCmdDumpResults(cmdUnknown);
-			execCmdDumpResults(cmdWithWrongArgNum);
+			execCmdDumpResults(cmdWithoutArgs, true);
+			execCmdDumpResults(cmdUnknown, true);
+			execCmdDumpResults(cmdWithWrongArgNum, true);
 			
 			System.out.println("End test");
 			bos.close();
