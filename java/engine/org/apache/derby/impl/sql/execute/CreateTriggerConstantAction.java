@@ -257,23 +257,17 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		*/
 		UUID tmpTriggerId = dd.getUUIDFactory().createUUID();
 
-		/*	
-		** If we have a WHEN action we create it now.
-		*/ 
+		actionSPSId = (actionSPSId == null) ? 
+			dd.getUUIDFactory().createUUID() : actionSPSId;
+ 
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
-		if (whenText != null)
-		{
-			whenspsd = createSPS(lcc, ddg, dd, tc, tmpTriggerId, triggerSd,
-						whenSPSId, spsCompSchemaId, whenText, true, triggerTable);
-		}
 
 		/*
-		** Create the trigger action
+		** Create the trigger descriptor first so the trigger action
+		** compilation can pick up the relevant trigger especially in 
+		** the case of self triggering.
 		*/
-		actionspsd = createSPS(lcc, ddg, dd, tc, tmpTriggerId, triggerSd,
-						actionSPSId, spsCompSchemaId, actionText, false, triggerTable);
-		
-		TriggerDescriptor triggerd = 
+		TriggerDescriptor triggerd =
 				ddg.newTriggerDescriptor(
 									triggerSd,
 									tmpTriggerId,
@@ -284,7 +278,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 									isEnabled,
 									triggerTable,
 									whenspsd == null ? null : whenspsd.getUUID(),
-									actionspsd.getUUID(),
+									actionSPSId,
 									creationTimestamp == null ? new Timestamp(System.currentTimeMillis()) : creationTimestamp,
 									referencedCols,
 									originalActionText,
@@ -298,6 +292,22 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 								DataDictionary.SYSTRIGGERS_CATALOG_NUM, false,
 								tc);
 
+
+		/*	
+		** If we have a WHEN action we create it now.
+		*/
+		if (whenText != null)
+		{
+			whenspsd = createSPS(lcc, ddg, dd, tc, tmpTriggerId, triggerSd,
+						whenSPSId, spsCompSchemaId, whenText, true, triggerTable);
+		}
+
+		/*
+		** Create the trigger action
+		*/
+		actionspsd = createSPS(lcc, ddg, dd, tc, tmpTriggerId, triggerSd,
+						actionSPSId, spsCompSchemaId, actionText, false, triggerTable);
+		
 		/*
 		** Make underlying spses dependent on the trigger.
 		*/

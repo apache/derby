@@ -74,7 +74,8 @@ implements Resetable
 			try
             {
 				// fill the byte holder with data from the page.
-				BasePage columnOverflowPage = ((BasePage) this.owner.getPage(overflowPage));
+				BasePage columnOverflowPage = 
+                    ((BasePage) this.owner.getPage(overflowPage));
 
 				if (columnOverflowPage != null)
                 {

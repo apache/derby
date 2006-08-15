@@ -842,12 +842,10 @@ ij> -- after
 create trigger tgood after insert on x for each statement mode db2sql insert into x values 666;
 0 rows inserted/updated/deleted
 ij> insert into x values 1;
-1 row inserted/updated/deleted
+ERROR 54038: Maximum depth of nested triggers was exceeded.
 ij> select * from x;
 X          
 -----------
-1          
-666        
 ij> drop trigger tgood;
 0 rows inserted/updated/deleted
 ij> create trigger tgood after insert on x for each statement mode db2sql delete from x;
@@ -875,46 +873,36 @@ ij> create trigger tgood after insert on x
 for each statement mode db2sql insert into x values (666), (999), (333);
 0 rows inserted/updated/deleted
 ij> insert into x values 1;
-1 row inserted/updated/deleted
+ERROR 54038: Maximum depth of nested triggers was exceeded.
 ij> select * from x order by 1;
 X          
 -----------
-1          
-333        
-666        
-999        
 ij> drop trigger tgood;
 0 rows inserted/updated/deleted
 ij> delete from x;
-4 rows inserted/updated/deleted
+0 rows inserted/updated/deleted
 ij> create trigger tgood after insert on x
 referencing new as n
 for each row mode db2sql insert into x values (n.x);
 0 rows inserted/updated/deleted
 ij> insert into x values 7;
-1 row inserted/updated/deleted
+ERROR 54038: Maximum depth of nested triggers was exceeded.
 ij> select * from x order by 1;
 X          
 -----------
-7          
-7          
 ij> drop trigger tgood;
 0 rows inserted/updated/deleted
 ij> delete from x;
-2 rows inserted/updated/deleted
+0 rows inserted/updated/deleted
 ij> create trigger tgood after insert on x
 referencing new as n
 for each row mode db2sql insert into x values (333), (999), (333);
 0 rows inserted/updated/deleted
 ij> insert into x values 1;
-1 row inserted/updated/deleted
+ERROR 54038: Maximum depth of nested triggers was exceeded.
 ij> select * from x order by 1;
 X          
 -----------
-1          
-333        
-333        
-999        
 ij> drop trigger tgood;
 0 rows inserted/updated/deleted
 ij> -- DERBY-1204 trigger causes StringIndexOutOfBoundsException
@@ -1133,4 +1121,19 @@ Y
 -----------
 0          
 1          
+ij> -- DERBY-1652
+create table test (testid integer not null 
+    generated always as identity (start with 1, increment by 1), 
+    info integer not null, ts timestamp not null default '1980-01-01-00.00.00.000000');
+0 rows inserted/updated/deleted
+ij> create trigger update_test 
+    after update on test 
+    referencing old as old 
+    for each row mode db2sql 
+    update test set ts=current_timestamp where testid=old.testid;
+0 rows inserted/updated/deleted
+ij> insert into test(info) values (1),(2),(3);
+3 rows inserted/updated/deleted
+ij> UPDATE TEST SET INFO = 1 WHERE TESTID = 2;
+ERROR 54038: Maximum depth of nested triggers was exceeded.
 ij> 

@@ -625,3 +625,15 @@ SELECT * FROM T10641;
 SELECT * FROM T10642;
 SELECT * FROM T10641_DELETIONS;
 SELECT * FROM T10642_DELETIONS;
+
+-- DERBY-1652
+create table test (testid integer not null 
+    generated always as identity (start with 1, increment by 1), 
+    info integer not null, ts timestamp not null default '1980-01-01-00.00.00.000000');
+create trigger update_test 
+    after update on test 
+    referencing old as old 
+    for each row mode db2sql 
+    update test set ts=current_timestamp where testid=old.testid;
+insert into test(info) values (1),(2),(3);
+UPDATE TEST SET INFO = 1 WHERE TESTID = 2;
