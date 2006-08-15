@@ -464,7 +464,6 @@ EXPECTED SQL Exception: Invalid data conversion: Wrong result column type for re
 START: clobTest53
 clobTest53 finished
 START: clobTest54
-java.lang.StringIndexOutOfBoundsException: String index out of range: -1
 EXPECTED SQLSTATE(22018): Invalid character string format for type INTEGER.
 end clobTest54
 START: clobTest6
@@ -474,6 +473,7 @@ EXPECTED SQLSTATE(null): Invalid position 1 or length -1
 EXPECTED SQLSTATE(null): Invalid position 0 or length 0
 FAIL -- unexpected exception:java.lang.StringIndexOutOfBoundsException: String index out of range: -1
 START: clobTest7
+java.lang.StringIndexOutOfBoundsException: String index out of range: -1
 clobTest7 finished
 START: clobTest8
 small string pattern
@@ -773,7 +773,6 @@ START: blobTest53
 blobTest53 finished
 START: blobTest54
 EXPECTED SQLSTATE(XCL12): An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
-java.lang.NegativeArraySizeException
 blobTest54 finished
 START: blobTest6
 EXPECTED SQLSTATE(null): Invalid position 0 or length 5
@@ -782,6 +781,7 @@ EXPECTED SQLSTATE(null): Invalid position 1 or length -1
 EXPECTED SQLSTATE(null): Invalid position 0 or length 0
 FAIL -- unexpected exception:java.lang.NegativeArraySizeException
 START: blobTest7
+java.lang.NegativeArraySizeException
 blobTest7 finished
 START: blobTest8Trigger
 FAIL -- unexpected exception ****************
