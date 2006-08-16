@@ -55,7 +55,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
     protected Connection getNewConnection() 
         throws SQLException
     {
-        final Connection rcon = getConnection();
+        final Connection rcon = openDefaultConnection();
         rcon.setAutoCommit(false);
         rcon.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
         return rcon;

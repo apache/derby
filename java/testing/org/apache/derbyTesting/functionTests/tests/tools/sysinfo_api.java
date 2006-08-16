@@ -38,7 +38,6 @@ import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 
 public class sysinfo_api extends BaseJDBCTestCase {
 
-    Connection c;
     DatabaseMetaData dm;
 
     public sysinfo_api(String name) { 
@@ -139,13 +138,9 @@ public class sysinfo_api extends BaseJDBCTestCase {
      *              with sysinfo
      */
     public void setUp() throws SQLException {
-        c = getConnection();
-        dm = c.getMetaData();
+        dm = getXConnection().getMetaData();
     }
 
-    public void tearDown() throws SQLException {
-        c.close();
-    }
 
 }
 

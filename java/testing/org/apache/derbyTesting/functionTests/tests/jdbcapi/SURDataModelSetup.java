@@ -162,7 +162,7 @@ public class SURDataModelSetup extends TestSetup
     private Connection getNewConnection() 
         throws SQLException
     {
-        final Connection rcon = SURBaseTest.getConnection();
+        final Connection rcon = SURBaseTest.openDefaultConnection();
         rcon.setAutoCommit(false);
         return rcon;
     }

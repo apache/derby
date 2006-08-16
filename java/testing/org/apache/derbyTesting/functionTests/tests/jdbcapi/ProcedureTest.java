@@ -592,14 +592,19 @@ public class ProcedureTest extends BaseJDBCTestCase {
     public void testDynamicResultSetsFromOtherConnectionWithExecuteQuery()
         throws SQLException
     {
-        Statement stmt = getXConnection().createStatement();
+        PreparedStatement ps =
+            getXConnection().prepareStatement("CALL RETRIEVE_EXTERNAL_RESULT(?,?,?)");
+        
+        ps.setString(1, getTestConfiguration().getDatabaseName());
+        ps.setString(2, getTestConfiguration().getUserName());
+        ps.setString(3, getTestConfiguration().getUserPassword());
         try {
-            ResultSet rs = stmt.executeQuery("CALL RETRIEVE_EXTERNAL_RESULT()");
+            ps.executeQuery();
             fail("executeQuery() didn't fail.");
         } catch (SQLException sqle) {
             assertNoResultSetFromExecuteQuery(sqle);
         }
-        stmt.close();
+        ps.close();
     }
 
     /**
@@ -610,9 +615,15 @@ public class ProcedureTest extends BaseJDBCTestCase {
     public void testDynamicResultSetsFromOtherConnectionWithExecuteUpdate()
         throws SQLException
     {
-        Statement stmt = getXConnection().createStatement();
-        stmt.executeUpdate("CALL RETRIEVE_EXTERNAL_RESULT()");
-        stmt.close();
+        PreparedStatement ps =
+            getXConnection().prepareStatement("CALL RETRIEVE_EXTERNAL_RESULT(?,?,?)");
+        
+        ps.setString(1, getTestConfiguration().getDatabaseName());
+        ps.setString(2, getTestConfiguration().getUserName());
+        ps.setString(3, getTestConfiguration().getUserPassword());
+        
+        ps.executeUpdate();
+        ps.close();
     }
 
     // UTILITY METHODS
@@ -790,7 +801,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
           "DYNAMIC RESULT SETS 1"
         },
         { "RETRIEVE_EXTERNAL_RESULT",
-          "CREATE PROCEDURE RETRIEVE_EXTERNAL_RESULT() LANGUAGE JAVA " +
+          "CREATE PROCEDURE RETRIEVE_EXTERNAL_RESULT(" +
+          "DBNAME VARCHAR(128), DBUSER VARCHAR(128), DBPWD VARCHAR(128)) LANGUAGE JAVA " +
           "PARAMETER STYLE JAVA EXTERNAL NAME '" +
           ProcedureTest.class.getName() + ".retrieveExternalResult' " +
           "DYNAMIC RESULT SETS 1"
@@ -872,11 +884,17 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param external result set from another connection
      * @exception SQLException if a database error occurs
      */
-    public static void retrieveExternalResult(ResultSet[] external)
+    public static void retrieveExternalResult(String dbName, 
+            String user, String password, ResultSet[] external)
         throws SQLException
     {
+        // Use a server-side connection to the same database.
+        String url = "jdbc:derby:" + dbName;
+        
+        Connection conn = DriverManager.getConnection(url, user, password);
+        
         external[0] =
-            getConnection().createStatement().executeQuery("VALUES(1)");
+            conn.createStatement().executeQuery("VALUES(1)");
     }
 
     /**
