@@ -1866,10 +1866,14 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
             Section newSection = null;
             boolean repositionedCursor = false;
 
-            if (doWriteTimeout) {
+            // DERBY-1692: Statement objects need to send the timeout value for
+            // each execution since the server will create a new statement
+            // object each time. Since the server forgets the timeout value,
+            // doWriteTimeout should not be reset, and it is OK not to send the
+            // timeout value when it is zero.
+            if (doWriteTimeout && (timeout_ > 0)) {
                 timeoutArrayList.set(0, TIMEOUT_STATEMENT + timeout_);
                 writeSetSpecialRegister(timeoutArrayList);
-                doWriteTimeout = false;
                 timeoutSent = true;
             }
             switch (sqlMode_) {

@@ -12,5 +12,8 @@ Statements that should time out timed out, and statements that should complete c
 Testing setting a negative timeout value
 Negative timeout value caused exception, as expected
 Execute returned a ResultSet
+Testing that Statement remembers timeout.
+Testing that PreparedStatement remembers timeout.
+Testing that CallableStatement remembers timeout.
 Test SetQueryTimeoutTest PASSED
 Closed connections

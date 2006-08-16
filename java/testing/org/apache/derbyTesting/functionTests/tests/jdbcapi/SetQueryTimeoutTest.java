@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -32,12 +33,11 @@ import java.util.HashSet;
 import java.util.Collections;
 
 import org.apache.derby.tools.ij;
-import org.apache.derby.iapi.reference.SQLState;
 
 /**
  * Functional test for the Statement.setQueryTimeout() method.
  *
- * This test consists of three parts:
+ * This test consists of four parts:
  *
  * 1. Executes a SELECT query in 4 different threads concurrently.
  *    The query calls a user-defined, server-side function which
@@ -71,6 +71,8 @@ import org.apache.derby.iapi.reference.SQLState;
  * 3. Sets an invalid (negative) timeout. Verifies that the correct
  *    exception is thrown.
  *
+ * 4. Tests that the query timeout value is not forgotten after the execution
+ *    of a statement (DERBY-1692).
  */
 public class SetQueryTimeoutTest
 {
@@ -190,7 +192,7 @@ public class SetQueryTimeoutTest
             TestFailedException
     {
         Collection ignore = new HashSet();
-        ignore.add(SQLState.LANG_OBJECT_DOES_NOT_EXIST.substring(0,5));
+        ignore.add("42Y55");
         
         exec(conn, "drop table " + tablePrefix + "_orig", ignore);
         exec(conn, "drop table " + tablePrefix + "_copy", ignore);
@@ -393,7 +395,7 @@ public class SetQueryTimeoutTest
             throw new TestFailedException(failMsg);
         } else {
             String sqlState = sqlException.getSQLState();
-            if (!expectSqlState.startsWith(sqlState)) {
+            if (!expectSqlState.equals(sqlState)) {
                 throw new TestFailedException(sqlException);
             }
         }
@@ -475,7 +477,7 @@ public class SetQueryTimeoutTest
          * in this class (note that the TIMEOUT constant is in seconds,
          * while the execution time is in milliseconds). 
          */
-        expectException(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT,
+        expectException("XCL52",
                         statementExecutor[0].getSQLException(),
                         "fetch did not time out. Highest execution time: "
                         + statementExecutor[0].getHighestRunTime() + " ms");
@@ -568,7 +570,7 @@ public class SetQueryTimeoutTest
                 ? TIMEOUT
                 : 0;
             if (timeout > 0) {
-                expectException(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT,
+                expectException("XCL52",
                                 executors[i].getSQLException(),
                                 "exec did not time out. Execution time: "
                                 + executors[i].getHighestRunTime() + " ms");
@@ -615,7 +617,7 @@ public class SetQueryTimeoutTest
         try {
             stmt.setQueryTimeout(-1);
         } catch (SQLException e) {
-            expectException(SQLState.INVALID_QUERYTIMEOUT_VALUE, e,
+            expectException("XJ074", e,
                         "negative timeout value should give exception");
         }
         
@@ -643,6 +645,63 @@ public class SetQueryTimeoutTest
         }
     }
 
+    /** Test for DERBY-1692. */
+    private static void testRememberTimeoutValue(Connection conn)
+        throws TestFailedException
+    {
+        String sql = getFetchQuery("t");
+        try {
+            Statement stmt = conn.createStatement();
+            testStatementRemembersTimeout(stmt);
+            PreparedStatement ps = conn.prepareStatement(sql);
+            testStatementRemembersTimeout(ps);
+            CallableStatement cs = conn.prepareCall(sql);
+            testStatementRemembersTimeout(cs);
+        } catch (SQLException sqle) {
+            throw new TestFailedException("Should not happen", sqle);
+        }
+    }
+
+    /** Test that a statement remembers its timeout value when executed
+     * multiple times. */
+    private static void testStatementRemembersTimeout(Statement stmt)
+        throws SQLException, TestFailedException
+    {
+        System.out.println("Testing that Statement remembers timeout.");
+        stmt.setQueryTimeout(1);
+        for (int i = 0; i < 3; i++) {
+            try {
+                ResultSet rs = stmt.executeQuery(getFetchQuery("t"));
+                while (rs.next());
+                throw new TestFailedException("Should have timed out.");
+            } catch (SQLException sqle) {
+                expectException("XCL52", sqle, "Should have timed out.");
+            }
+        }
+        stmt.close();
+    }
+
+    /** Test that a prepared statement remembers its timeout value when
+     * executed multiple times. */
+    private static void testStatementRemembersTimeout(PreparedStatement ps)
+        throws SQLException, TestFailedException
+    {
+        String name = (ps instanceof CallableStatement) ?
+            "CallableStatement" : "PreparedStatement";
+        System.out.println("Testing that " + name + " remembers timeout.");
+        ps.setQueryTimeout(1);
+        for (int i = 0; i < 3; i++) {
+            try {
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()); 
+                throw new TestFailedException("Should have timed out.");
+           } catch (SQLException sqle) {
+                expectException("XCL52", sqle, "Should have timed out.");
+            }
+        }
+        ps.close();
+    }
+
     /**
      * Main program, makes this class invocable from the command line
      */
@@ -654,7 +713,7 @@ public class SetQueryTimeoutTest
     /**
      * The actual main bulk of this test.
      * Sets up the environment, prepares tables,
-     * runs part 1 and 2, and shuts down.
+     * runs the tests, and shuts down.
      */
     public void go(String[] args)
     {
@@ -684,6 +743,7 @@ public class SetQueryTimeoutTest
             testTimeoutWithFetch(connections[0], connections[1]);
             testTimeoutWithExec(connections);
             testInvalidTimeoutValue(connections[0]);
+            testRememberTimeoutValue(connections[0]);
   
             System.out.println("Test SetQueryTimeoutTest PASSED");
         } catch (Throwable e) {
