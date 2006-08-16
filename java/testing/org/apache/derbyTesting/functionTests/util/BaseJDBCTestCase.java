@@ -41,20 +41,30 @@ public abstract class BaseJDBCTestCase
         super(name);
     }
 
+    // TEMP
+    public static Connection getConnection() throws SQLException
+    {
+        return openDefaultConnection();
+    }
+
     /**
-     * Get connection to the default database.
+     * Open a connection to the default database.
      * If the database does not exist, it will be created.
      * A default username and password will be used for the connection.
      *
      * @return connection to default database.
+     * @see TestConfiguration#openDefaultConnection()
      */
-    public static Connection getConnection()
+    public static Connection openDefaultConnection()
         throws SQLException {
-        return CONFIG.getDefaultConnection();
+        return CONFIG.openDefaultConnection();
     }
     
-
-   
+    public Connection openConnection(String databaseName) throws SQLException
+    {
+        return getTestConfiguration().openConnection(databaseName);
+    }
+    
     /**
      * Tell if the client is embedded.
      *

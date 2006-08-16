@@ -21,7 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import org.apache.derbyTesting.functionTests.util.BaseTestCase;
+import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 import junit.framework.*;
@@ -35,7 +35,7 @@ import java.util.Arrays;
  * DERBY-1296 - Setting property derby.system.bootAll causes an Exception
  * 
  */
-public class BootAllTest  extends BaseTestCase {
+public class BootAllTest  extends BaseJDBCTestCase {
 
     /** JDBC Connection */
     private Connection con;
@@ -57,11 +57,10 @@ public class BootAllTest  extends BaseTestCase {
      */
     public void setUp() throws Exception {
         for (int i = 0; i < databases.length; i++) {
-            con = CONFIG.getConnection(databases[i]);
+            con = openConnection(databases[i]);
             con.close();
             try {
-                con = CONFIG.
-                        getConnection(databases[i] + ";shutdown=true");
+                con = openConnection(databases[i] + ";shutdown=true");
             } catch (SQLException se) {
                 assertEquals("Expected exception on setUp " + se.getSQLState(), 
                         DATABASE_SHUT_DOWN, se.getSQLState());
@@ -88,8 +87,7 @@ public class BootAllTest  extends BaseTestCase {
         Class.forName(driverName);
         println("Teardown of: " + getName());
         try {
-            con = CONFIG.
-                    getConnection(";shutdown=true");
+            con = openConnection(";shutdown=true");
         } catch (SQLException se) {
             assertEquals("Expected exception on tearDown " + se.getSQLState(), 
                     ALL_DATABASES_SHUT_DOWN, se.getSQLState());

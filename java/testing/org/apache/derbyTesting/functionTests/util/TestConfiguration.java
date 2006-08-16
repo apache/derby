@@ -189,27 +189,27 @@ public class TestConfiguration {
     }
     
     /**
-     * Get connection to the default database.
+     * Open connection to the default database.
      * If the database does not exist, it will be created.
      * A default username and password will be used for the connection.
      *
      * @return connection to default database.
      */
-    public Connection getDefaultConnection()
+    public Connection openDefaultConnection()
         throws SQLException {
-        return getConnection(getDatabaseName());
+        return openConnection(getDatabaseName());
     }
     
     /**
-     * Get connection to a database.
+     * Open a connection to a database.
      * If the database does not exist, it will be created.
      * A default username and password will be used for the connection.
      *
      * @param databaseName database to connect to
      *
-     * @return connection to default database.
+     * @return connection to database.
      */
-    public Connection getConnection (String databaseName) throws SQLException {
+    public Connection openConnection (String databaseName) throws SQLException {
         Connection con = null;
         JDBCClient client =getJDBCClient();
         if (JDBC.vmSupportsJDBC2()) {            

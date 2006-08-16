@@ -60,7 +60,7 @@ public abstract class BaseJDBCTestSetup
      * <P>
      * The tearDown method will close the connection if
      * it is open.
-     * @see TestConfiguration#getDefaultConnection()
+     * @see TestConfiguration#openDefaultConnection()
      */
     public final Connection getConnection() throws SQLException
     {
@@ -70,7 +70,7 @@ public abstract class BaseJDBCTestSetup
     			return conn;
     		conn = null;
     	}
-    	return conn = getTestConfiguration().getDefaultConnection();
+    	return conn = getTestConfiguration().openDefaultConnection();
     }
     
     /**
@@ -92,5 +92,6 @@ public abstract class BaseJDBCTestSetup
     throws java.lang.Exception
     {
     	JDBC.cleanup(conn);
+        conn = null;
     }
 }
