@@ -18,13 +18,14 @@
  * language governing permissions and limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
+import org.apache.derbyTesting.functionTests.util.BaseJDBCTestSetup;
+import org.apache.derbyTesting.functionTests.util.BaseTestCase;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 import java.util.Set;
 import java.util.HashSet;
@@ -36,7 +37,7 @@ import java.util.Collections;
  * tests.  It sets up a datamodel and populates it with data.
  * @author Andreas Korneliussen
  */
-public class SURDataModelSetup extends TestSetup
+public class SURDataModelSetup extends BaseJDBCTestSetup
 {  
     /**
      * Constructor.
@@ -60,8 +61,10 @@ public class SURDataModelSetup extends TestSetup
                                        int records) 
         throws SQLException
     {
+        Statement statement = con.createStatement();
+        
         try { 
-            con.createStatement().execute("drop table t1"); 
+            statement.execute("drop table t1"); 
         } catch (SQLException e) {
             assertEquals("'drop table t1' failed with unexpected SQL State",
                          TABLE_EXISTS_SQL_STATE, e.getSQLState());
@@ -78,16 +81,16 @@ public class SURDataModelSetup extends TestSetup
             
         };
         
-        Statement statement = con.createStatement();
+        
         
         /** Create the table */
         statement.execute(model.getCreateTableStatement());
-        println(model.getCreateTableStatement());
+        BaseTestCase.println(model.getCreateTableStatement());
         
         /** Create secondary index */
         if (model.hasSecondaryKey()) {
             statement.execute("create index a_on_t on t1(a)");
-            println("create index a_on_t on t1(a)");
+            BaseTestCase.println("create index a_on_t on t1(a)");
         }
         
         /** Populate with data */
@@ -127,8 +130,10 @@ public class SURDataModelSetup extends TestSetup
      */
     protected void setUp() throws  Exception {       
         println("Setting up datamodel: " + model);
+
         try {
-            con = getNewConnection();
+            Connection con = getConnection();
+            con.setAutoCommit(false);
             createDataModel(model, con);
         } catch (SQLException e) {
             printStackTrace(e); // Print the entire stack
@@ -143,31 +148,20 @@ public class SURDataModelSetup extends TestSetup
         throws Exception
     {
         try {
+            Connection con = getConnection();
             con.rollback();
             con.createStatement().execute("drop table t1");
             con.commit();
-            con.close();
         } catch (SQLException e) {
             printStackTrace(e);
         }
+        super.tearDown();
     }
     
     public String toString() {
         return "SURDataModel tests with model: " + model;
     }
 
-    /**
-     * Get a JDBC Connection to the Derby database
-     */
-    private Connection getNewConnection() 
-        throws SQLException
-    {
-        final Connection rcon = SURBaseTest.openDefaultConnection();
-        rcon.setAutoCommit(false);
-        return rcon;
-    }
-
-    private Connection con = null;
     private final SURDataModel model;
     final static int recordCount = 10;  // Number of records in data model.  
         
@@ -250,16 +244,6 @@ public class SURDataModelSetup extends TestSetup
         private final String name;
     }
 
-    /**
-     * <p>
-     * Println code to print chatty informational messages.
-     * </p>
-     */
-    public static void println(String text)
-    {
-        BaseJDBCTestCase.println(text);
-    }
-    
     /**
      * Prints the stack trace. If run in the harness, the
      * harness will mark the test as failed if this method
