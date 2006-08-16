@@ -102,6 +102,8 @@ public class SURDataModelSetup extends TestSetup
             ps.addBatch();
         }
         ps.executeBatch();
+        ps.close();
+        statement.close();
         con.commit();
     }
     

@@ -19,6 +19,8 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.JDBC;
+
 import junit.framework.*;
 import java.sql.*;
 
@@ -72,12 +74,8 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
      */
     public void tearDown() throws Exception {
         println("TearDown");
-        try { 
-            con.rollback();
-            con.close();
-        } catch (SQLException e) {
-            printStackTrace(e);
-        }      
+       JDBC.cleanup(con);
+        con = null;
     }
     
     /**

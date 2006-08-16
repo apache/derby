@@ -76,6 +76,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
         stmt.execute(createTableWithPK);
         
         stmt.execute(insertData);
+        stmt.close();
     }
     
     /**
@@ -83,13 +84,16 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
      */
     public void tearDown() throws Exception {
         println("TearDown");
+        Statement s = con.createStatement();
         try { 
-            con.createStatement().executeUpdate("DROP TABLE tableWithPK");
-            con.commit();
-            con.close();
-        } catch (SQLException e) {
+            
+            s.executeUpdate("DROP TABLE tableWithPK");
+         } catch (SQLException e) {
             printStackTrace(e);
-        }      
+        }    
+        s.close();
+        JDBC.cleanup(con);
+        con = null;
     }
     
     /**

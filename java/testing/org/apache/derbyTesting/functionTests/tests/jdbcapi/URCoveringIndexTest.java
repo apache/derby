@@ -18,6 +18,7 @@
  * language governing permissions and limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
+import org.apache.derbyTesting.functionTests.util.JDBC;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import junit.framework.*;
@@ -53,6 +54,8 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
         stmt.execute(createTableWithPK);
         
         stmt.execute(insertData);
+        
+        stmt.close();
     }
     
     /**
@@ -60,12 +63,8 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
      */
     public void tearDown() throws Exception {
         println("TearDown");
-        try { 
-            con.rollback();
-            con.close();
-        } catch (SQLException e) {
-            printStackTrace(e);
-        }      
+        JDBC.cleanup(con);
+        con = null;
     }
     
     private void testUpdateUpdatedTupleWithCoveringIndex(

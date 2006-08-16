@@ -69,18 +69,19 @@ public class HoldabilityTest extends SURBaseTest {
     
     /**
      * Drop the data model, and close the connection
+     * @throws Exception 
      */
-    public void tearDown() 
+    public void tearDown() throws Exception 
     {
         try {            
             con.rollback();
             Statement dropStatement = con.createStatement();
             dropStatement.execute("drop table t1");
-            con.commit();
-            con.close();
+            dropStatement.close();
         } catch (SQLException e) {
             printStackTrace(e); // Want to propagate the real exception.
         }
+        super.tearDown();
     }
     
     /**
