@@ -74,6 +74,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         verifyBlob(newVal, newSize, rs.getBlob(3));
         
         rs.close();
+        stmt.close();
     }
 
     /**
