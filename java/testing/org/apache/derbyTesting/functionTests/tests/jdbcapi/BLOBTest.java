@@ -104,6 +104,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         testUpdateBlobWithResultSetMethods(rs, newVal, newSize);
         
         rs.close();
+        stmt.close();
     }
 
     /**
@@ -134,6 +135,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         verifyBlob(newVal, newSize, rs.getBlob(3));
         
         rs.close();
+        stmt.close();
     }
 
     /**
@@ -162,6 +164,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         testUpdateBlobWithPositionedUpdate(rs, newVal, newSize);
         
         rs.close();
+        stmt.close();
     }
 
     /**
@@ -191,6 +194,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         verifyBlob(newVal, newSize, rs.getBlob(1));
         
         rs.close();
+        stmt.close();
     }
 
     /**
@@ -221,6 +225,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         testUpdateBlobWithResultSetMethods(rs, newVal, newSize);
         
         rs.close();
+        stmt.close();
     }
 
     /**
@@ -253,6 +258,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         verifyBlob(newVal, newSize, rs.getBlob("DATA"));
         
         rs.close();
+        stmt.close();
     }
 
     /**
@@ -279,6 +285,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         testUpdateBlobWithPositionedUpdate(rs, newVal, newSize);
         
         rs.close();
+        stmt.close();
     }
     
     
@@ -380,6 +387,9 @@ final public class BLOBTest extends BaseJDBCTestCase
             foundVal = true;
         }
         assertTrue("No column with value= " + newVal + " found ", foundVal);
+        
+        rs.close();
+        stmt.close();
     }
                           
     /**
