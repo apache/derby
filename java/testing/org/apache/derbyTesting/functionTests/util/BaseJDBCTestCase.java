@@ -33,12 +33,57 @@ public abstract class BaseJDBCTestCase
     extends BaseTestCase {
 
     /**
+     * Maintain a single connection to the default
+     * database, opened at the first call to getConnection.
+     * Typical setup will just require a single connection.
+     * @see BaseJDBCTestSetup#getConnection()
+     */
+    private Connection conn;
+    
+    /**
      * Create a test case with the given name.
      *
      * @param name of the test case.
      */
     public BaseJDBCTestCase(String name) {
         super(name);
+    }
+    
+    /**
+     * Obtain the connection to the default database.
+     * This class maintains a single connection returned
+     * by this class, it is opened on the first call to
+     * this method. Subsequent calls will return the same
+     * connection object unless it has been closed. In that
+     * case a new connection object will be returned.
+     * <P>
+     * The tearDown method will close the connection if
+     * it is open.
+     * @see TestConfiguration#openDefaultConnection()
+     */
+    // TEMP NAME - WILL BE getConnection() once all uses of the
+    // static getConnection() have been converted to openDefaultConnection
+    public final Connection getXConnection() throws SQLException
+    {
+        if (conn != null)
+        {
+            if (!conn.isClosed())
+                return conn;
+            conn = null;
+        }
+        return conn = getTestConfiguration().openDefaultConnection();
+    }
+    
+    /**
+     * Tear down this fixture, sub-classes should call
+     * super.tearDown(). This cleanups & closes the connection
+     * if it is open.
+     */
+    protected void tearDown()
+    throws java.lang.Exception
+    {
+        JDBC.cleanup(conn);
+        conn = null;
     }
 
     // TEMP

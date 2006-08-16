@@ -43,24 +43,18 @@ import java.sql.*;
  *
  */
 public class ResultSetCloseTest extends BaseJDBCTestCase {
-    
-    Connection con        = null;
-    Statement  s          = null;
-    PreparedStatement ps1 = null;
-    PreparedStatement ps2 = null;
-    ResultSet         rs1 = null;
-    ResultSet         rs2 = null;
-    
+  
+   
     /**
      * Create the tables and the Connection and PreparedStatements that will
      * be used in this test.
      */
     public void setUp()
     throws SQLException {
-        con = getConnection();
+        Connection con = getXConnection();
         con.setAutoCommit(false);
         
-        s = con.createStatement();
+        Statement s = con.createStatement();
         
         s.execute("create table t1 (a int)");
         
@@ -69,11 +63,9 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
         s.execute("insert into t1 values(2)");
         s.execute("insert into t1 values(3)");
         
+        s.close();
+        
         con.commit();
-        
-        ps1 = con.prepareStatement("select * from t1");
-        
-        ps2 = con.prepareStatement("select 10/a from t1");
     }
     
     /**
@@ -90,10 +82,15 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
      *
      */
     public void testResultSetDoesNotClose() throws SQLException {
-        rs1 = ps1.executeQuery();
+        Connection con = getXConnection();
+        
+        PreparedStatement ps1 = con.prepareStatement("select * from t1");
+        PreparedStatement ps2 = con.prepareStatement("select 10/a from t1");
+        
+        ResultSet rs1 = ps1.executeQuery();
         
         try {
-            rs2 = ps2.executeQuery();
+            ResultSet rs2 = ps2.executeQuery();
             while(rs2.next());
         } catch(SQLException sqle) {
             //Do Nothing expected exception
@@ -101,20 +98,11 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
         
         while(rs1.next());
         
-        con.commit();
-    }
-    
-    /**
-     * Destroy the objects used in this test.
-     */
-    public void tearDown()
-    throws SQLException {
-        if (con != null && !con.isClosed()) {
-            con.rollback();
-            con.close();
-        }
+        ps1.getConnection().commit();
         
-        con = null;
+        rs1.close();
+        ps1.close();
+        ps2.close();
     }
     
     /**

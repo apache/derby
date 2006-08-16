@@ -43,7 +43,7 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
      * Set up the connection to the database.
      */
     public void setUp() throws  Exception {       
-        con = getConnection();
+        Connection con = getXConnection();
         con.setAutoCommit(false);
 
         String createTableWithPK = "CREATE TABLE tableWithPK (" +
@@ -58,15 +58,6 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
         stmt.close();
     }
     
-    /**
-     * Rollback the transaction
-     */
-    public void tearDown() throws Exception {
-        println("TearDown");
-        JDBC.cleanup(con);
-        con = null;
-    }
-    
     private void testUpdateUpdatedTupleWithCoveringIndex(
             boolean scroll,
             boolean usePositionedUpdate) throws SQLException{
@@ -74,6 +65,8 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
         SQLWarning w = null;
         int resultsetType = scroll ? ResultSet.TYPE_SCROLL_INSENSITIVE :
                 ResultSet.TYPE_FORWARD_ONLY;
+        
+        Connection con = getXConnection();
         
         if (!(con.getMetaData().supportsResultSetConcurrency(resultsetType,
                 ResultSet.CONCUR_UPDATABLE))) {
@@ -145,8 +138,4 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
     public void testUpdateUpdatedTupleFOUpdateRow()  throws SQLException{
         testUpdateUpdatedTupleWithCoveringIndex(false, false);
     }
-
-
-    protected Connection con = null; // Connection established in setUp()
-       
 }

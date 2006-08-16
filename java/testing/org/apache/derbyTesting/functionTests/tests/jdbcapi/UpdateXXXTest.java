@@ -83,8 +83,9 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void setUp()
         throws Exception
     {
+        Connection con = getXConnection();
         try {
-            con = getConnection();
+            
             con.setAutoCommit(false);
             
             Statement stmt = con.createStatement();
@@ -128,22 +129,6 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
             con.rollback();
             throw e;
         }
-    }
-
-    /**
-     * Teardown test.
-     * Rollback connection and close it.
-     * @exception Exceptions causes the test to fail with error
-     */
-    public void tearDown() 
-        throws Exception 
-    {
-        try { 
-            con.rollback();
-            con.close();
-        } catch (SQLException e) {
-            printStackTrace(e);
-        }      
     }
         
     /**
@@ -317,7 +302,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     {
         rs.close();
         
-        rs = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        rs = getXConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                  ResultSet.CONCUR_READ_ONLY).
             executeQuery(SELECT_STMT);
         
@@ -343,7 +328,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     {
         rs.close();
         
-        rs = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        rs = getXConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                  ResultSet.CONCUR_READ_ONLY).
             executeQuery(SELECT_STMT);
         
@@ -363,9 +348,6 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     
     /* Updatable ResultSet */
     private ResultSet rs = null;
-    
-    /* Connection */
-    private Connection con = null;
     
     /* Table name */
     private static final String TABLE_NAME = "MultiTypeTable";
