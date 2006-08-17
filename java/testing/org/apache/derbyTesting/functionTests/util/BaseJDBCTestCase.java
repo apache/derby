@@ -63,7 +63,7 @@ public abstract class BaseJDBCTestCase
      */
     // TEMP NAME - WILL BE getConnection() once all uses of the
     // static getConnection() have been converted to openDefaultConnection
-    public final Connection getXConnection() throws SQLException
+    public Connection getXConnection() throws SQLException
     {
         if (conn != null)
         {
@@ -74,6 +74,59 @@ public abstract class BaseJDBCTestCase
         return conn = getTestConfiguration().openDefaultConnection();
     }
     
+    /**
+     * Utility method to create a Statement using the connection
+     * returned by getConnection.
+     * @return Statement object from getConnection.createStatement()
+     * @throws SQLException
+     */
+    public Statement createStatement() throws SQLException
+    {
+        return getXConnection().createStatement();
+    }
+
+    /**
+     * Utility method to create a Statement using the connection
+     * returned by getConnection.
+     * @return Statement object from
+     * getConnection.createStatement(resultSetType, resultSetConcurrency)
+     * @throws SQLException
+     */
+    public Statement createStatement(int resultSetType,
+            int resultSetConcurrency) throws SQLException
+    {
+        return getXConnection().createStatement(resultSetType, resultSetConcurrency);
+    }
+    /**
+     * Utility method to create a PreparedStatement using the connection
+     * returned by getConnection.
+     * @return Statement object from
+     * getConnection.createStatement(resultSetType, resultSetConcurrency)
+     * @throws SQLException
+     */
+    public PreparedStatement prepareStatement(String sql) throws SQLException
+    {
+        return getXConnection().prepareStatement(sql);
+    }    
+    
+    /**
+     * Utility method to commit using the connection
+     * returned by getConnection.
+     * @throws SQLException
+     */
+    public void commit() throws SQLException
+    {
+        getXConnection().commit();
+    }  
+    /**
+     * Utility method to rollback using the connection
+     * returned by getConnection.
+     * @throws SQLException
+     */
+    public void rollback() throws SQLException
+    {
+        getXConnection().rollback();
+    } 
     /**
      * Tear down this fixture, sub-classes should call
      * super.tearDown(). This cleanups & closes the connection
