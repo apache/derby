@@ -170,10 +170,14 @@ public abstract class SetOperatorNode extends TableOperatorNode
 		// Modify this node's access paths.
 		ResultSetNode topNode = (ResultSetNode)modifyAccessPath(outerTables);
 
-		// Now see if there are any left over predicates; if so, then we
-		// have to generate a ProjectRestrictNode.
-		if (((leftOptPredicates != null) && (leftOptPredicates.size() > 0)) ||
-			((rightOptPredicates != null) && (rightOptPredicates.size() > 0)))
+		/* Now see if there are any left over predicates; if so, then we
+		 * have to generate a ProjectRestrictNode.  Note: we walk the
+		 * entire chain of UnionNodes (if there is a chain) and see if
+		 * any UnionNode at any level has un-pushed predicates; if so, then
+		 * we use a PRN to enforce the predicate at this, the top-most
+		 * UnionNode.
+		 */
+		if (hasUnPushedPredicates())
 		{
 			// When we generate the project restrict node, we pass in the
 			// "pushedPredicates" list because that has the predicates in
@@ -459,6 +463,42 @@ public abstract class SetOperatorNode extends TableOperatorNode
 		// We're done with the pushedPredicates list, so clear it out
 		// in preparation for another phase of optimization.
 		pushedPredicates.removeAllElements();
+	}
+
+	/**
+	 * It's possible that we tried to push predicates to this node's
+	 * children but failed to do so. This can happen if this node's
+	 * children both satisfy the criteria for pushing a predicate
+	 * (namely, they reference base tables) but the children's
+	 * children do not (see modifyAccessPaths() above for an example
+	 * of how that can happen).  So this method will walk the chain
+	 * of nodes beneath this one and determine if any SetOperatorNode
+	 * at any level has predicates that were not successfully pushed
+	 * to both of its children (note: this currently only applies
+	 * to UnionNodes).
+	 *
+	 * @return True if any UnionNode (or actually, any SetOperatorNode)
+	 *  in the chain of SetOperatorNodes (starting with this one) has
+	 *  unpushed predicates; false otherwise.
+	 */
+	protected boolean hasUnPushedPredicates()
+	{
+		// Check this node.
+		if (((leftOptPredicates != null) && (leftOptPredicates.size() > 0)) ||
+			((rightOptPredicates != null) && (rightOptPredicates.size() > 0)))
+		{
+			return true;
+		}
+
+		// Now check the children.
+		if ((leftResultSet instanceof SetOperatorNode) &&
+			((SetOperatorNode)leftResultSet).hasUnPushedPredicates())
+		{
+			return true;
+		}
+
+		return ((rightResultSet instanceof SetOperatorNode) &&
+			((SetOperatorNode)rightResultSet).hasUnPushedPredicates());
 	}
 
 	/**
