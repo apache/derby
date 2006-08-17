@@ -894,7 +894,6 @@
   <target name="initjars" depends="setsanityname,getsvnversion">
     <property name="derby.jar.dir" value="${basedir}/jars/${sanity.name}"/>
     <property name="derby.jar.topdir" value="${basedir}/jars"/>
-    <property name="manifest.file" value="${derby.jar.dir}/lists/smf.mf"/>
     <mkdir dir="${derby.jar.dir}"/>
     <mkdir dir="${derby.jar.dir}/lists"/>
     <loadfile srcFile="${basedir}/changenumber.properties"
@@ -1021,20 +1020,24 @@
 
   <target name="derbyjarwithoutosgi" depends="checkosgijar" if="osgijar.unavailable">
 
-    <antcall target="make-core-derbyjar-manifest"/>
+    <antcall target="make-core-derbyjar-manifest">
+      <param name="manifest.file" value="${derby.jar.dir}/lists/smf.mf"/>
+    </antcall>
 
     <jar destfile="${derby.jar.dir}/derby.jar"
          basedir="${out.dir}"
 	 includesfile="${derby.jar.dir}/lists/derby.list"
          compress="true"
          filesonly="true"
-         manifest="${manifest.file}"/>
+         manifest="${derby.jar.dir}/lists/smf.mf"/>
 
   </target>
 
   <target name="derbyjarwithosgi" depends="checkosgijar" if="osgijar.available">
 
-    <antcall target="make-core-derbyjar-manifest"/>
+    <antcall target="make-core-derbyjar-manifest">
+      <param name="manifest.file" value="${derby.jar.dir}/lists/smf.mf"/>
+    </antcall>
 
     <!-- add extra osgi bits to manifest -->
 
@@ -1049,7 +1052,7 @@
 	 includesfile="${derby.jar.dir}/lists/derby.list"
          compress="true"
          filesonly="true"
-         manifest="${manifest.file}"/>
+         manifest="${derby.jar.dir}/lists/smf.mf"/>
 
   </target>
 
@@ -1083,10 +1086,10 @@
     	<section name="org/apache/derby/iapi/services/i18n/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
-    		<section name="org/apache/derby/impl/jdbc/">
+        <section name="org/apache/derby/iapi/tools/i18n/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
-    		<section name="org/apache/derby/iapi/tools/i18n/">
+    	<section name="org/apache/derby/impl/jdbc/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
     	<section name="org/apache/derby/loc/">
@@ -1096,13 +1099,6 @@
     	  <attribute name="Sealed" value="false"/>
     	</section>
     </manifest> 
-
-    <jar destfile="${derby.jar.dir}/derby.jar"
-         basedir="${out.dir}"
-	 includesfile="${derby.jar.dir}/lists/derby.list"
-         compress="true"
-         filesonly="true"
-         manifest="${manifest.file}"/>
 
   </target>
 
@@ -1256,28 +1252,15 @@
 
     <!-- copy boilerplate common to derby jar files -->
     <antcall target="meta-inf-common"/>
+    <antcall target="make-core-derbyjar-manifest">
+      <param name="manifest.file" value="${derby.jar.dir}/lists/smfclient.mf"/>
+    </antcall>
 
     <!-- declare the client driver for autoloading by the JDBC 4 DriverManager -->
     <antcall target="declare-autoloadable-driver">
       <param name="driver.name" value="org.apache.derby.jdbc.ClientDriver"/>
     </antcall>
 
-    <manifest file="${derby.jar.dir}/lists/smfclient.mf">
-      	<attribute name="Sealed" value="true"/>
-    	<section name="org/apache/derby/jdbc/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-      	<section name="org/apache/derby/tools">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/impl/tools/sysinfo/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    	<section name="org/apache/derby/loc/">
-    	  <attribute name="Sealed" value="false"/>
-    	</section>
-    </manifest> 
- 	
     <delete file="${derby.jar.dir}/derbyclient.jar"/>
 
     <jar destfile="${derby.jar.dir}/derbyclient.jar"
@@ -1566,23 +1549,23 @@
     <property file="${basedir}/snapshot/maintversion.properties"/>
     <zip destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,COPYRIGHT,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
     </zip>
     <tar destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
       <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin,COPYRIGHT,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
     </tar>
 
     <!-- debug archives - DERBY-178 --> 
     <zip destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
-      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,CHANGES,README,frameworks/**,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,COPYRIGHT,LICENSE,NOTICE,CHANGES,README,javadoc/publishedapi/**"/>
     </zip>
     <tar destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
       <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
-      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="COPYRIGHT,LICENSE,NOTICE,README,frameworks/**,javadoc/publishedapi/**"/>
+      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,COPYRIGHT,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
     </tar>
 
     <copy file="${basedir}/jars/insane/derby_core_plugin_${major}.${minor}.${interim}.zip"

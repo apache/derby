@@ -74,6 +74,8 @@
       <!-- top-level -->
       <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
                   prefix="${derby.bin}/"/>
+      <!-- bin -->
+      <zipfileset dir="${basedir}/bin" prefix="${derby.bin}/bin" includes="*"/>
       <!-- demo -->
       <zipfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo/programs" 
                   excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log"/>
@@ -120,6 +122,8 @@
       <!-- top-level -->
       <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
                   prefix="${derby.bin}/"/>
+      <!-- bin -->
+      <tarfileset dir="${basedir}/bin" prefix="${derby.bin}/bin" includes="*"/>
       <!-- demo -->
       <tarfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo/programs" 
                   excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log"/>
