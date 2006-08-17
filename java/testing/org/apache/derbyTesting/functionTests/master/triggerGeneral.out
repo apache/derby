@@ -1196,12 +1196,10 @@ ij> -- after
 create trigger tgood after insert on x for each statement mode db2sql insert into x values 666;
 0 rows inserted/updated/deleted
 ij> insert into x values 1;
-1 row inserted/updated/deleted
+ERROR 54038: Maximum depth of nested triggers was exceeded.
 ij> select * from x;
 X          
 -----------
-1          
-666        
 ij> drop trigger tgood;
 0 rows inserted/updated/deleted
 ij> create trigger tgood after insert on x for each statement mode db2sql delete from x;
@@ -1251,4 +1249,18 @@ ij(CONNECTION1)> create table myschema.mytable (i int);
 ij(CONNECTION1)> create trigger mytrigger after update on myschema.mytable for each row mode db2sql select * from sys.systables;
 0 rows inserted/updated/deleted
 ij(CONNECTION1)> rollback;
+ij(CONNECTION1)> create table test (testid integer not null 
+    generated always as identity (start with 1, increment by 1), 
+    info integer not null, ts timestamp not null default '1980-01-01-00.00.00.000000');
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> create trigger update_test 
+    after update on test 
+    referencing old as old 
+    for each row mode db2sql 
+    update test set ts=current_timestamp where testid=old.testid;
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> insert into test(info) values (1),(2),(3);
+3 rows inserted/updated/deleted
+ij(CONNECTION1)> UPDATE TEST SET INFO = 1 WHERE TESTID = 2;
+ERROR 54038: Maximum depth of nested triggers was exceeded.
 ij(CONNECTION1)> 

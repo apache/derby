@@ -1210,7 +1210,7 @@ public class updatableResultSet {
 			rs.next();
 			System.out.println("column 1 on this row is " + rs.getInt(1));
 			System.out.println("this update row will fire the update trigger which will update all the rows in the table to have c1=1 and hence no more rows will qualify for the resultset");
-			rs.updateLong(1,123);
+			rs.updateLong(2,2);
 			rs.updateRow();
 			rs.next();
 			try {
@@ -2456,9 +2456,9 @@ public class updatableResultSet {
 		stmt.executeUpdate("create trigger tr1 after delete on table0WithTriggers for each statement mode db2sql insert into deleteTriggerInsertIntoThisTable values (1)");
 		stmt.executeUpdate("create trigger tr2 after update on table0WithTriggers for each statement mode db2sql insert into updateTriggerInsertIntoThisTable values (1)");
 		stmt.executeUpdate("create table table1WithTriggers (c1 int, c2 bigint)");
-		stmt.executeUpdate("create trigger tr3 after delete on table1WithTriggers for each statement mode db2sql delete from table1WithTriggers");
+		stmt.executeUpdate("create trigger tr3 after delete on table1WithTriggers referencing old as old for each row mode db2sql delete from table1WithTriggers where c1=old.c1+1 or c1=old.c1-1");
 		stmt.executeUpdate("create table table2WithTriggers (c1 int, c2 bigint)");
-		stmt.executeUpdate("create trigger tr4 after update on table2WithTriggers for each statement mode db2sql update table2WithTriggers set c1=1");
+		stmt.executeUpdate("create trigger tr4 after update of c2 on table2WithTriggers for each statement mode db2sql update table2WithTriggers set c1=1");
 		stmt.executeUpdate("create table selfReferencingT1 (c1 char(2) not null, c2 char(2), constraint selfReferencingT1 primary key(c1), constraint manages1 foreign key(c2) references selfReferencingT1(c1) on delete cascade)");
 		stmt.executeUpdate("create table selfReferencingT2 (c1 char(2) not null, c2 char(2), constraint selfReferencingT2 primary key(c1), constraint manages2 foreign key(c2) references selfReferencingT2(c1) on update restrict)");
 
