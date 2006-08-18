@@ -25,10 +25,6 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
 
-// This import can be removed once junit classes are moved to this 
-// package:
-import org.apache.derbyTesting.functionTests.util.*;
-
 /**
  * Test decorator that starts the network server on startup
  * and stops it on teardown.
@@ -37,7 +33,7 @@ import org.apache.derbyTesting.functionTests.util.*;
  * embedded mode.
  *
  * Currently it will start the network server in the same VM
- * as, and it does not support starting it from a remote 
+ * and it does not support starting it from a remote 
  * machine.
  */
 final public class NetworkServerTestSetup extends TestSetup {
@@ -57,7 +53,7 @@ final public class NetworkServerTestSetup extends TestSetup {
      */
     protected void setUp() throws Exception {
         
-        if (config.getJDBCClient().isEmbedded()) {
+        if (!config.getJDBCClient().isEmbedded()) {
             BaseTestCase.println("Starting network server:");
             networkServerController = new NetworkServerControl
                 (InetAddress.getByName(config.getHostName()), config.getPort());
