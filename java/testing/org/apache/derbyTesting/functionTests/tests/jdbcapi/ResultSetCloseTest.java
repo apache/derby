@@ -117,7 +117,17 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
      * Create test suite for this test.
      */
     public static Test suite() {
-        return new TestSuite(ResultSetCloseTest.class,"ResultSetCloseTest suite");
+        
+        TestSuite suite = new TestSuite("ResultSetCloseTest");
+        
+        // DB2 client doesn't implement result set closing
+        // correctly wrt ensuring all its methods subsequently
+        // throw an exception.
+        if (usingDerbyNet())
+            return suite;
+        
+        suite.addTestSuite(ResultSetCloseTest.class);
+        return suite;
     }
     
 }
