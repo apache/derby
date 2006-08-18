@@ -33,7 +33,7 @@ public class TestConfiguration {
     /**
      * Default Derby test configuration object.
      */
-    static final TestConfiguration DERBY_TEST_CONFIG = 
+    public static final TestConfiguration DERBY_TEST_CONFIG = 
         new TestConfiguration(getSystemProperties());
     
     /**
