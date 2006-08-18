@@ -1,7 +1,6 @@
 jdbcapi/bestrowidentifier.sql
 jdbcapi/characterStreams.java
 jdbcapi/checkDriver.java
-jdbcapi/DataSourcePropertiesTest.junit
 jdbcapi/derbyStress.java
 jdbcapi/nullSQLText.java
 jdbcapi/prepStmtMetaData.java
@@ -22,5 +21,4 @@ jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/Stream.java
 jdbcapi/SURTest_ij.sql
-jdbcapi/ResultSetCloseTest.junit
 jdbcapi/_Suite.junit
