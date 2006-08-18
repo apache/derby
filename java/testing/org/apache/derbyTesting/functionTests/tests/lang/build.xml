@@ -58,14 +58,14 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="FTOtestsubdir" depends="compilet3,compilet2,compilet1,copyfiles"/>
+  <target name="FTOtestsubdir" depends="compilett4,copyfiles"/>
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
     <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/lang"/>
   </target>
 
-  <target name="compilet1" depends="compilet2">
+  <target name="compilet1" >
     <javac
       source="1.3"
       target="1.3"
@@ -93,9 +93,10 @@
       <exclude name="${this.dir}/procedureJdbc30.java"/>
       <exclude name="${this.dir}/SpillHash.java"/>
       <exclude name="${this.dir}/unaryArithmeticDynamicParameter.java"/>
+      <exclude name="${this.dir}/_Suite.java"/>
     </javac>
   </target>
-  <target name="compilet2" depends="compilet3">
+  <target name="compilet2" depends="compilet1">
     <javac
       source="1.3"
       target="1.3"
@@ -112,7 +113,6 @@
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
-      <exclude name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
       <include name="${this.dir}/holdCursorJavaReflection.java"/>
       <include name="${this.dir}/holdCursorJava.java"/>
       <include name="${this.dir}/streams.java"/>
@@ -122,7 +122,7 @@
       <include name="${this.dir}/unaryArithmeticDynamicParameter.java"/>
     </javac>
   </target>
-  <target name="compilet3">
+  <target name="compilet3" depends="compilet2">
     <javac
       source="1.4"
       target="1.4"
@@ -142,7 +142,31 @@
       <include name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
     </javac>
   </target> 
+	<!-- Compile _Suite last as it needs to include all other JUnit classes 
+	which may be compiled using a higher compiler level, but it needs to be at
+	base level -->
+	<target name="compilett4" depends="compilet3" >
+    <javac
+      source="1.3"
+      target="1.3"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}" 
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+      	<pathelement path="${junit}"/>
+      </classpath>
 
+      <include name="${this.dir}/_Suite.java"/>
+    </javac>
+  </target>
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/lang">
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang" 
