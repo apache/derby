@@ -31,6 +31,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestSetup;
+import org.apache.derbyTesting.functionTests.util.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.functionTests.util.JDBC;
 
 /**
@@ -720,7 +721,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
                   "_prepared"));
         }
         }
-        return new BaseJDBCTestSetup(suite) {
+        Test test = new BaseJDBCTestSetup(suite) {
             /**
              * Creates the tables and the stored procedures used in the test
              * cases.
@@ -761,6 +762,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
                 super.tearDown();
             }
         };
+        
+        return new CleanDatabaseTestSetup(test);
     }
 
     /**
