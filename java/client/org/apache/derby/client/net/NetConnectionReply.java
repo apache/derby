@@ -502,7 +502,7 @@ public class NetConnectionReply extends Reply
     /**
      * Perform necessary actions for parsing of a ABNUOWRM message.
      *
-     * @param connection an implementation of the StatementCallbackInterface
+     * @param s an implementation of the StatementCallbackInterface
      *
      * @return an NetSqlca object obtained from parsing the ABNUOWRM
      * @throws DisconnectException
@@ -515,7 +515,7 @@ public class NetConnectionReply extends Reply
     /**
      * Perform necessary actions for parsing of a ABNUOWRM message.
      *
-     * @param connection an implementation of the ResultsetCallbackInterface
+     * @param r an implementation of the ResultsetCallbackInterface
      *
      * @return an NetSqlca object obtained from parsing the ABNUOWRM
      * @throws DisconnectException
