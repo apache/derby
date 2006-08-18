@@ -57,7 +57,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         throws SQLException, IOException
     {
         final Statement stmt = 
-            getXConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+            createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                 ResultSet.CONCUR_UPDATABLE);
         final ResultSet rs = 
             stmt.executeQuery("SELECT * from " + 
@@ -86,7 +86,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         throws SQLException, IOException
     {
         final Statement stmt = 
-            getXConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY,
+            createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                 ResultSet.CONCUR_UPDATABLE);
         final ResultSet rs = 
             stmt.executeQuery("SELECT * from " + 
@@ -116,7 +116,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         throws SQLException, IOException
     {
         final Statement stmt = 
-            getXConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+            createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                 ResultSet.CONCUR_UPDATABLE);
         final ResultSet rs = 
             stmt.executeQuery("SELECT * from " + 
@@ -147,7 +147,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         throws SQLException, IOException
     {
         final Statement stmt = 
-            getXConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY,
+            createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                 ResultSet.CONCUR_UPDATABLE);
         final ResultSet rs = 
             stmt.executeQuery("SELECT * from " + 
@@ -177,7 +177,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         throws SQLException, IOException
     {
         final Statement stmt = 
-            getXConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+            createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                 ResultSet.CONCUR_UPDATABLE);
         final ResultSet rs = 
             stmt.executeQuery("SELECT data,val,length from " + 
@@ -207,7 +207,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         throws SQLException, IOException
     {
         final Statement stmt = 
-            getXConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY,
+            createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                 ResultSet.CONCUR_UPDATABLE);
         final ResultSet rs = 
             stmt.executeQuery("SELECT data,val,length from " + 
@@ -238,7 +238,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         throws SQLException, IOException
     {
         final Statement stmt = 
-            getXConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+            createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                 ResultSet.CONCUR_UPDATABLE);
         final ResultSet rs = 
             stmt.executeQuery("SELECT data from " + 
@@ -271,7 +271,7 @@ final public class BLOBTest extends BaseJDBCTestCase
         throws SQLException, IOException
     {
         final Statement stmt = 
-            getXConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY,
+            createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                 ResultSet.CONCUR_UPDATABLE);
         final ResultSet rs = 
             stmt.executeQuery("SELECT data from " + 
@@ -364,7 +364,7 @@ final public class BLOBTest extends BaseJDBCTestCase
     {
         println("Verify new value in table: " + newVal);
         
-        final Statement stmt = getXConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        final Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                                    ResultSet.CONCUR_READ_ONLY);
         
         final ResultSet rs = 

@@ -82,10 +82,9 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
      *
      */
     public void testResultSetDoesNotClose() throws SQLException {
-        Connection con = getXConnection();
         
-        PreparedStatement ps1 = con.prepareStatement("select * from t1");
-        PreparedStatement ps2 = con.prepareStatement("select 10/a from t1");
+        PreparedStatement ps1 = prepareStatement("select * from t1");
+        PreparedStatement ps2 = prepareStatement("select 10/a from t1");
         
         ResultSet rs1 = ps1.executeQuery();
         
@@ -98,7 +97,7 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
         
         while(rs1.next());
         
-        ps1.getConnection().commit();
+        commit();
         
         rs1.close();
         ps1.close();
