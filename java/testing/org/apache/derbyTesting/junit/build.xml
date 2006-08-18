@@ -3,7 +3,7 @@
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
-  The ASF licenses this file to you under the Apache License, Version 2.0
+  The ASF licenses this file to You under the Apache License, Version 2.0
   (the "License"); you may not use this file except in compliance with
   the License.  You may obtain a copy of the License at
 
@@ -17,10 +17,10 @@
 -->
 
 <!-- ==================================================================== -->
-<!--                       Apache Derby build file                        -->
+<!--                         Derby build file                             -->
 <!-- ==================================================================== -->
 
-<project default="testing" basedir="../..">
+<project default="junitcomponents" basedir="../../../../../..">
 
 <!-- ==================================================================== -->
 <!--                           Set properties                             -->
@@ -53,33 +53,27 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="testing" 
-          description="Build Derby testing files">
-
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/harness"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/util"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.unittest.dir}"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.junit.dir}"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/compatibility"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/junitTests/derbyNet"/>
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbcapi"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/store"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/storetests"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/tools"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/nist"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/demo"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/derbynet"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/unit"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/i18n"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/jdbc4"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/perf"/> 
-  	<ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/upgradeTests"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/largedata"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/master"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.suites.dir}"/> 
+  <target name="junitcomponents" 
+          description="Build Derby JUnit test components">
+    <javac
+      source="1.3"
+      target="1.3"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}" 
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${junit}"/>
+      </classpath>
+      <include name="${derby.testing.junit.dir}/**/*.java"/>
+    </javac>
   </target>
 
 <!--             ============= End Targets ==============                -->
@@ -87,4 +81,3 @@
 <!--             ============= End Project ==============                -->
 
 </project>
-
