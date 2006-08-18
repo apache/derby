@@ -372,10 +372,16 @@ public class Sed
         matcher = new Perl5Matcher();
 
         // Define the input and output files based on args
-        if (is == null)
+        if (is == null && isI18N) {
+            // read UTF-8 encoded file
+            InputStream fs = new FileInputStream(srcFile);
+            inFile = new BufferedReader(new InputStreamReader(fs, "UTF-8"));
+        } else if (is == null) {
+            // read the file using the default encoding
             inFile = new BufferedReader(new FileReader(srcFile));
-        else
+        } else {
             inFile = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        }
         outFile = new PrintWriter
         ( new BufferedWriter(new FileWriter(dstFile), 10000), true );
 

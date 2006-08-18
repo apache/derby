@@ -42,15 +42,20 @@ public class ProcessStreamResult implements Runnable
 	public ProcessStreamResult(InputStream in, BufferedOutputStream bos,
 		    String timemin) throws IOException, InterruptedException
 	{
-		this(in, bos, timemin, null);
+		this(in, bos, timemin, null, null);
 	}
-	
+
 	public ProcessStreamResult(InputStream in, BufferedOutputStream bos,
-	  String timemin, String encoding) throws IOException, InterruptedException
+	  String timemin, String inEncoding, String outEncoding)
+		throws IOException, InterruptedException
 	{
 		this.in = in;
-		this.outStream = new OutputStreamWriter(bos);
-		this.encoding = encoding;
+        if (outEncoding == null) {
+            this.outStream = new OutputStreamWriter(bos);
+        } else {
+            this.outStream = new OutputStreamWriter(bos, outEncoding);
+        }
+        this.encoding = inEncoding;
         this.startTime = System.currentTimeMillis();
         if (timemin != null)
         {

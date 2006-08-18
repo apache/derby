@@ -183,6 +183,9 @@ public class RunTest
     static boolean lastTestFailed = false;
 
     static boolean isI18N = false;
+    /** The value of derby.ui.codeset if it has been specified in the
+     * properties file. */
+    static String codeset = null;
     static boolean junitXASingle = false;
     
     /**
@@ -261,6 +264,10 @@ public class RunTest
 
         // Setup the directories for the test and test output
         setDirectories(scriptName,sp);
+
+        if (testDirName.startsWith("i18n")) {
+            isI18N=true;
+        }
 
         // Check for properties files, including derby.properties
         // and if needed, build the -p string to pass to the test
@@ -381,11 +388,6 @@ public class RunTest
 		
 		String outName = finalOutFile.getPath();
 
-        if (testDirName.startsWith("i18n"))
-        {
-            isI18N=true;
-        }
-        
         if (skipsed)
         {
             tmpOutFile.renameTo(finalOutFile);
@@ -1541,11 +1543,17 @@ clp.list(System.out);
 			// For IBM14 the console encoding is different from the platform
 			// encoding on windows.  We want it to be the same for our
 			// test output like the other JDK's.
+			//
+			// For i18n test, we want UTF-8 encoding (DERBY-244).
 			String conEnc = System.getProperty("console.encoding");
 			String fileEnc = System.getProperty("file.encoding");
 		
-			if ((conEnc != null) &&  (fileEnc != null )  &&
-				(ap.getProperty("derby.ui.codeset") == null) &&
+			if (ap.getProperty("derby.ui.codeset") != null) {
+				// derby.ui.codeset is specified explicitly, don't override
+				codeset = ap.getProperty("derby.ui.codeset");
+			} else if (isI18N) {
+				ap.put("derby.ui.codeset", "UTF-8");
+			} else if ((conEnc != null) &&  (fileEnc != null )  &&
 				conEnc.startsWith("Cp850"))
 			{
 				ap.put("derby.ui.codeset",fileEnc);
@@ -2290,6 +2298,13 @@ clp.list(System.out);
             jvmProps.addElement("file.encoding=" + testEncoding);
             jvmflags = (jvmflags==null?"":jvmflags+" ") 
                          + "-Dfile.encoding=" + testEncoding; 
+        } else if (isI18N) {
+            // The I18N tests should be run with UTF-8 encoding to avoid
+            // problems with characters that cannot be represented in the
+            // default encoding (DERBY-244).
+            jvmProps.addElement("file.encoding=UTF-8");
+            jvmflags = (jvmflags==null ? "" : jvmflags + " ") +
+                        "-Dfile.encoding=UTF-8";
         }
         
         if (upgradejarpath != null)
@@ -2340,8 +2355,13 @@ clp.list(System.out);
             // force the console encoding to Cp1252 for ij tests - unless 
             // we're on non-ascii systems.
             String isNotAscii = System.getProperty("platform.notASCII");
-            if ( (isNotAscii == null) || (isNotAscii.equals("false"))) 
+            if (isI18N) {
+                // DERBY-244: Use UTF-8 console encoding for the i18n tests to
+                // avoid MalformedInputException with the IBM jvm.
+                v.addElement("-Dconsole.encoding=UTF-8");
+            } else if ((isNotAscii == null) || (isNotAscii.equals("false"))) {
                 v.addElement("-Dconsole.encoding=Cp1252" );
+            }
             v.addElement("org.apache.derby.tools." + ij);
             if (ij.equals("ij"))
             {
@@ -2505,25 +2525,42 @@ clp.list(System.out);
             if (verbose) System.out.println(sb.toString());
             pr = Runtime.getRuntime().exec(testCmd);
 
+            String inEncoding = null;
+            String outEncoding = null;
+            if (isI18N) {
+                // DERBY-244: I18N tests are run with -Dfile.encoding=UTF-8, so
+                // we need to specify encoding to the streams as well.
+                inEncoding = "UTF-8";
+                outEncoding = inEncoding;
+            }
+
+            if (codeset != null) {
+                // The test explicitly specified a codeset, use that codeset
+                // when reading the test output.
+                inEncoding = codeset;
+            }
+
+            if (testEncoding != null) {
+                inEncoding = testEncoding;
+            }
+
             if (useOutput)
             {
                 fos = new FileOutputStream(tmpOutFile);
-                bos = new BufferedOutputStream(fos, 1024);
-                prout = 
-                    new ProcessStreamResult(pr.getInputStream(), bos, 
-                    					timeoutStr, testEncoding);
             }
             else
             {
                 fos = new FileOutputStream(stdOutFile);
-                bos = new BufferedOutputStream(fos, 1024);
-                prout = 
-                    new ProcessStreamResult(pr.getInputStream(), bos, 
-                    					timeoutStr, testEncoding);
             }
+            bos = new BufferedOutputStream(fos, 1024);
+            prout = 
+                new ProcessStreamResult(pr.getInputStream(), bos, 
+                                        timeoutStr,
+                                        inEncoding, outEncoding);
             prerr =
                 new ProcessStreamResult(pr.getErrorStream(), bos, 
-                						timeoutStr, testEncoding);
+                                        timeoutStr,
+                                        inEncoding, outEncoding);
     
             if (framework != null && ! framework.equals(""))
                 if (verbose) System.out.println("The test should be running...");
