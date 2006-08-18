@@ -50,6 +50,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.DRDAServerStarter;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.DRDAConstants;
@@ -662,10 +663,13 @@ public final class NetworkServerControlImpl {
 				// If we can't shutdown cloudscape. Perhaps authentication is
 				// set to true or some other reason. We will just print a
 				// message to the console and proceed.
-				if (((EmbedSQLException)sqle).getMessageId() !=
-				  SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN)
+				String expectedState =
+					StandardException.getSQLStateFromIdentifier(
+							SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
+				if (!expectedState.equals(sqle.getSQLState())) {
 					consolePropertyMessage("DRDA_ShutdownWarning.I",
 										   sqle.getMessage());
+				}
 			}
 		}
 
@@ -1555,7 +1559,8 @@ public final class NetworkServerControlImpl {
 		//localize message if necessary
 		while (se != null)
 		{
-			if (currentSession != null && currentSession.langUtil != null)
+			if (currentSession != null && currentSession.langUtil != null &&
+				se instanceof EmbedSQLException)
 			{
 				locMsg.append(se.getSQLState()+":"+ 
 					MessageService.getLocalizedMessage(
@@ -3235,7 +3240,10 @@ public final class NetworkServerControlImpl {
 			conn.close();
 	  	} catch (SQLException se) {
 			//ignore shutdown error
-			if (!(((EmbedSQLException)se).getMessageId() == SQLState.SHUTDOWN_DATABASE))
+			String expectedState =
+				StandardException.
+					getSQLStateFromIdentifier(SQLState.SHUTDOWN_DATABASE);
+			if (!expectedState.equals(se.getSQLState()))
 			{
 				sendSQLMessage(writer, se, SQLERROR);
 				return;
