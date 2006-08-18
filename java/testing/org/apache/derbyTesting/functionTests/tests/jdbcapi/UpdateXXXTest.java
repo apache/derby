@@ -57,18 +57,11 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
         if (usingDerbyNet())
             return suite;
         
-        suite.addTest(new UpdateXXXTest("testUpdateShort"));
-        suite.addTest(new UpdateXXXTest("testUpdateInt"));
-        suite.addTest(new UpdateXXXTest("testUpdateLong"));
-        suite.addTest(new UpdateXXXTest("testUpdateFloat"));
-        suite.addTest(new UpdateXXXTest("testUpdateDouble"));
-        suite.addTest(new UpdateXXXTest("testUpdateNull"));
-        suite.addTest(new UpdateXXXTest("testUpdateObjectWithNull"));
-        suite.addTest(new UpdateXXXTest("testUpdateString"));
+        suite.addTestSuite(UpdateXXXTest.class);
         
         // requires java.math.BigDecimal
         if (JDBC.vmSupportsJDBC2())
-            suite.addTest(new UpdateXXXTest("testUpdateBigDecimal"));
+            suite.addTest(new UpdateXXXTest("jdbc2testUpdateBigDecimal"));
                       
         return suite;
     }
@@ -239,7 +232,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
      * @exception SQLException database access error. Causes test to 
      *                         fail with an error.
      */
-    public void testUpdateBigDecimal() 
+    public void jdbc2testUpdateBigDecimal() 
         throws SQLException
     {
         for (int i = 1; i <= COLUMNS; i++) {
@@ -302,7 +295,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     {
         rs.close();
         
-        rs = getXConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        rs = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                  ResultSet.CONCUR_READ_ONLY).
             executeQuery(SELECT_STMT);
         
@@ -328,7 +321,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     {
         rs.close();
         
-        rs = getXConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        rs = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                  ResultSet.CONCUR_READ_ONLY).
             executeQuery(SELECT_STMT);
         
