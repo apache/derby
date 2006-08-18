@@ -30,6 +30,7 @@ import javax.sql.XADataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.functionTests.util.JDBC;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
@@ -50,20 +51,34 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
 
     /** Creates a test suite with all test cases. */
     public static Test suite() {
+        
+        
         TestSuite suite = new TestSuite();
-        Method[] methods = DataSourcePropertiesTest.class.getMethods();
-        // Add all methods starting with 'test'.
-        // When using embedded, add all methods starting with 'embedded'.
-        for (int i = 0; i < methods.length; i++) {
-            Method m = methods[i];
-            if (m.getParameterTypes().length > 0 ||
-                    m.getReturnType() != Void.TYPE) {
-                continue;
-            }
-            String name = m.getName();
-            if (name.startsWith("test") ||
-                    (name.startsWith("embedded") && usingEmbedded())) {
-                suite.addTest(new DataSourcePropertiesTest(name));
+        
+        // TODO: Run fixtures in J2ME and JDBC2 (with extensions)
+        // that can be supported there. This disabling matches
+        // the original _app.properties file. Concern was over
+        // XA support (which is supported in JDBC 2 with extensions).
+        if (JDBC.vmSupportsJDBC3()) {
+        
+            // Add all methods starting with 'test'.
+            //suite.addTestSuite(DataSourcePropertiesTest.class);
+            
+            if (usingEmbedded()) {
+           
+                // When using embedded, add all methods starting with 'embedded'.
+                Method[] methods = DataSourcePropertiesTest.class.getMethods();
+                for (int i = 0; i < methods.length; i++) {
+                    Method m = methods[i];
+                    if (m.getParameterTypes().length > 0 ||
+                            m.getReturnType().equals(Void.TYPE)) {
+                        continue;
+                    }
+                    String name = m.getName();
+                    if (name.startsWith("embedded")) {
+                        suite.addTest(new DataSourcePropertiesTest(name));
+                    }
+                }
             }
         }
         return suite;

@@ -52,6 +52,8 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(SURTest.suite());
 		suite.addTest(UpdateXXXTest.suite());
 		suite.addTestSuite(URCoveringIndexTest.class);
+        suite.addTest(ResultSetCloseTest.suite());
+        suite.addTest(DataSourcePropertiesTest.suite());
 		
 		// Tests that are compiled using 1.4 target need to
 		// be added this way, otherwise creating the suite
