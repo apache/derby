@@ -118,7 +118,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * @return a <code>Test</code> value
      * @exception Exception if an error occurs while building the test suite
      */
-    public static Test suite() throws Exception {
+    public static Test suite()  {
         TestSuite topSuite = new TestSuite();
 
         TestSuite dsSuite = new TestSuite();
@@ -149,11 +149,9 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      *
      * @param suite the test suite to fill
      * @param dsDecorator the decorator for the test suite
-     * @exception Exception if an error occurs while filling the suite
      */
     private static void fillDataSourceSuite(TestSuite suite,
                                             DataSourceDecorator dsDecorator)
-        throws Exception
     {
         TestSuite rsSuite = new TestSuite();
         ResultSetObjectDecorator rsDecorator =
@@ -193,12 +191,10 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * @param decorator a decorator for the test (used for obtaining a
      * closed object to test the method on)
      * @param iface the interface which contains the methods to test
-     * @exception Exception if an error occurs while filling the suite
      */
     private static void fillObjectSuite(TestSuite suite,
                                         ObjectDecorator decorator,
                                         Class iface)
-        throws Exception
     {
         for (Method m : iface.getMethods()) {
             ClosedObjectTest cot = new ClosedObjectTest(m, decorator);
