@@ -41,24 +41,18 @@ public class ConcurrencyTest extends SURBaseTest {
     public void setUp() 
         throws Exception 
     {      
-        try {
-            super.setUp();
-        } catch (SQLException e) {
-            if (con!=null) tearDown();
-            throw e;
-        }
         // For the concurrency tests, we recreate the model
         // for each testcase (since we do commits)
         SURDataModelSetup.createDataModel
-            (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, con);
-        con.commit();
+            (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, getXConnection());
+        commit();
     }
     
     public void tearDown() throws Exception 
     {
         try {
-            con.rollback();
-            Statement dropStatement = con.createStatement();
+            rollback();
+            Statement dropStatement = createStatement();
             dropStatement.execute("drop table t1");
             dropStatement.close();
         } catch (SQLException e) {
@@ -75,7 +69,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdateLockDownGrade1()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1 for update");
         
@@ -99,6 +93,11 @@ public class ConcurrencyTest extends SURBaseTest {
             con2.rollback();
         }
         assertTrue("Expected Derby to hold updatelocks in RR mode", false);
+        
+        s2.close();
+        con2.close();
+        
+        s.close();
     }
     
     /**
@@ -108,7 +107,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testAquireUpdateLock1()
         throws SQLException 
     {
-        Statement s = con.createStatement();
+        Statement s = createStatement();
         ResultSet rs = s.executeQuery("select * from t1");
         
         // After navigating through the resultset, 
@@ -126,6 +125,10 @@ public class ConcurrencyTest extends SURBaseTest {
         } finally {
             con2.rollback();
         }
+        
+        s2.close();
+        con2.close();
+        s.close();
     }
     
     /*
@@ -135,7 +138,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testSharedLocks1()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_READ_ONLY);
         final ResultSet rs = s.executeQuery("select * from t1");
         scrollForward(rs);
@@ -150,6 +153,8 @@ public class ConcurrencyTest extends SURBaseTest {
             con2.rollback();
             con2.close();
         }
+        
+        s.close();
     }
     
     /*
@@ -159,7 +164,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testSharedLocks2()
         throws SQLException 
     {
-        Statement s = con.createStatement();
+        Statement s = createStatement();
         ResultSet rs = s.executeQuery("select * from t1");
         scrollForward(rs);
         Connection con2 = getNewConnection();
@@ -172,6 +177,7 @@ public class ConcurrencyTest extends SURBaseTest {
             con2.rollback();
             con2.close();
         }
+        s.close();
     }
     
     /*
@@ -180,7 +186,7 @@ public class ConcurrencyTest extends SURBaseTest {
      **/
     public void testSharedAndUpdateLocks1()
         throws SQLException {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         
         ResultSet rs = s.executeQuery("select * from t1");
@@ -196,6 +202,7 @@ public class ConcurrencyTest extends SURBaseTest {
             con2.rollback();
             con2.close();
         }
+        s.close();
     }
     
     /*
@@ -206,7 +213,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testSharedAndUpdateLocks2()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1 for update");
         scrollForward(rs);
@@ -221,6 +228,7 @@ public class ConcurrencyTest extends SURBaseTest {
             con2.rollback();
             con2.close();
         }
+        s.close();
     }
     
     /**
@@ -232,8 +240,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdatePurgedTuple1()
         throws SQLException
     {
-        con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next();
@@ -294,7 +302,7 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: updateInt(2, 3);");
         rs.updateRow();
         println("T1: updateRow()");
-        con.commit();
+        commit();
         println("T1: commit");
         rs = s.executeQuery("select * from t1");
         println("T3: select * from table");
@@ -304,6 +312,9 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
             
         }
+        
+        con2.close();
+        s.close();
     }
     
     /**
@@ -313,8 +324,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdatePurgedTuple2()
         throws SQLException 
     {
-        con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next(); // Point to first tuple
@@ -346,14 +357,14 @@ public class ConcurrencyTest extends SURBaseTest {
                 rs.getInt(2) + "," +
                 rs.getInt(3) + ")");
         
-        PreparedStatement ps = con.prepareStatement
+        PreparedStatement ps = prepareStatement
             ("update T1 set a=? where current of " + rs.getCursorName());
         ps.setInt(1, 3);
         int updateCount = ps.executeUpdate();
         println("T1: update table, set a=3 where current of " + 
                 rs.getCursorName());
         println("T1: commit");
-        con.commit();
+        commit();
         rs = s.executeQuery("select * from t1");
         while (rs.next()) {
             println("T3: Tuple:(" + rs.getInt(1) + "," +
@@ -361,6 +372,8 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
             
         }
+        
+        con2.close();
     }
     
     /**
@@ -370,8 +383,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdatePurgedTuple3()
         throws SQLException 
     {
-        con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next(); // Point to first tuple
@@ -426,7 +439,7 @@ public class ConcurrencyTest extends SURBaseTest {
         rs.updateRow();
         println("T1: updated column 2, to value=3");
         println("T1: commit");
-        con.commit();
+        commit();
         rs = s.executeQuery("select * from t1");
         while (rs.next()) {
             println("T5: Read Tuple:(" + rs.getInt(1) + "," +
@@ -434,6 +447,8 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
             
         }
+        
+        con2.close();
     }
     
     /**
@@ -443,8 +458,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdatePurgedTuple4()
         throws SQLException 
     {
-        con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next(); // Point to first tuple
@@ -511,7 +526,7 @@ public class ConcurrencyTest extends SURBaseTest {
         rs.updateRow();
         println("T1: updated column 2, to value=3");
         println("T1: commit");
-        con.commit();
+        commit();
         rs = s.executeQuery("select * from t1");
         while (rs.next()) {
             println("T4: Read next Tuple:(" + rs.getInt(1) + "," +
@@ -528,8 +543,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdateModifiedTuple1()
         throws SQLException 
     {
-        con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next(); // Point to first tuple
@@ -564,7 +579,7 @@ public class ConcurrencyTest extends SURBaseTest {
         rs.updateInt(2, 3);
         rs.updateRow();
         println("T1: updated column 2, to value=3");
-        con.commit();
+        commit();
         println("T1: commit");
         rs = s.executeQuery("select * from t1");
         while (rs.next()) {
@@ -582,8 +597,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdateModifiedTuple2()
         throws SQLException 
     {
-        con.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next(); // Point to first tuple
@@ -618,7 +633,7 @@ public class ConcurrencyTest extends SURBaseTest {
         rs.updateInt(3, 9999);
         rs.updateRow();
         println("T1: updated column 3, to value=9999");
-        con.commit();
+        commit();
         println("T1: commit");
         rs = s.executeQuery("select * from t1");
         while (rs.next()) {
@@ -637,8 +652,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testTableIntentLock1()
         throws SQLException 
     {
-        con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         println("T1: select * from t1");
         ResultSet rs = s.executeQuery("select * from t1 for update");
@@ -678,8 +693,8 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdateLockInReadUncommitted()
         throws SQLException 
     {
-        con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next();
@@ -701,7 +716,9 @@ public class ConcurrencyTest extends SURBaseTest {
                          e.getSQLState());
         } finally {
             con2.rollback();
-        }          
+        }
+        con2.close();
+        s.close();
     }
     
     /**
@@ -731,8 +748,8 @@ public class ConcurrencyTest extends SURBaseTest {
                                         boolean testTruncate)
         throws SQLException 
     {
-        con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-        Statement delStatement = con.createStatement();
+        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        Statement delStatement = createStatement();
         // First delete all records except the last and first
         int deleted = delStatement.executeUpdate
             ("delete from T1 where id>0 and id<" + (recordCount-1));
@@ -740,10 +757,10 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: delete records");
         assertEquals("Invalid number of records deleted", expectedDeleted, 
                      deleted);
-        con.commit();
+        commit();
         println("T1: commit");
         
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next();
@@ -798,7 +815,7 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: updateInt(2, 3);");
         rs.updateRow();
         println("T1: updateRow()");
-        con.commit();
+        commit();
         println("T1: commit");
         rs = s.executeQuery("select * from t1");
         println("T4: select * from table");

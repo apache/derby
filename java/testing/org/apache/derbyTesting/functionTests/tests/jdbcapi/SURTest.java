@@ -19,6 +19,8 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
+
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,7 +42,7 @@ public class SURTest extends SURBaseTest {
     public SURTest(String name) {
         super(name);
     }
-    
+
     /**
      * Test that you get a warning when specifying a query which is not
      * updatable and concurrency mode CONCUR_UPDATABLE.
@@ -49,7 +51,7 @@ public class SURTest extends SURBaseTest {
     public void testConcurrencyModeWarning1()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1 order by a");
@@ -61,6 +63,7 @@ public class SURTest extends SURBaseTest {
         assertWarning(warn, QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
         scrollForward(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -71,7 +74,7 @@ public class SURTest extends SURBaseTest {
     public void testConcurrencyModeWarning2()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery
@@ -85,6 +88,7 @@ public class SURTest extends SURBaseTest {
         assertWarning(warn, QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
         scrollForward(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -96,7 +100,7 @@ public class SURTest extends SURBaseTest {
     public void testForUpdateException1()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         try {
             String queryString =
@@ -111,7 +115,8 @@ public class SURTest extends SURBaseTest {
                          FOR_UPDATE_NOT_PERMITTED_SQL_STATE,
                          e.getSQLState());
         }
-        con.rollback();
+        rollback();
+        s.close();
     }
     
     /**
@@ -122,7 +127,7 @@ public class SURTest extends SURBaseTest {
     public void testForUpdateException2()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         try {
             String queryString =
@@ -138,7 +143,8 @@ public class SURTest extends SURBaseTest {
                          FOR_UPDATE_NOT_PERMITTED_SQL_STATE,
                          e.getSQLState());
         }
-        con.rollback();
+        rollback();
+        s.close();
     }
     
     /**
@@ -148,13 +154,14 @@ public class SURTest extends SURBaseTest {
     public void testForwardOnlyReadOnly1()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_READ_ONLY);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1");
         
         scrollForward(rs);
         rs.close();
+        s.close();
     }
     
     
@@ -165,13 +172,14 @@ public class SURTest extends SURBaseTest {
     public void testFailOnUpdateOfReadOnlyResultSet1()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_READ_ONLY);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1");
         
         rs.next();
         assertFailOnUpdate(rs);
+        s.close();
     }
     
     /**
@@ -181,13 +189,14 @@ public class SURTest extends SURBaseTest {
     public void testFailOnUpdateOfReadOnlyResultSet2()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1 order by id");
         
         rs.next();
         assertFailOnUpdate(rs);
+        s.close();
     }
     
     /**
@@ -197,7 +206,7 @@ public class SURTest extends SURBaseTest {
     public void testFailOnUpdateOfReadOnlyResultSet3()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs =
@@ -205,6 +214,7 @@ public class SURTest extends SURBaseTest {
         
         rs.next();
         assertFailOnUpdate(rs);
+        s.close();
     }
     
     /**
@@ -214,7 +224,7 @@ public class SURTest extends SURBaseTest {
     public void testFailOnUpdateOfReadOnlyResultSet4()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery
@@ -223,6 +233,7 @@ public class SURTest extends SURBaseTest {
         rs.next();
         verifyTuple(rs);
         assertFailOnUpdate(rs);
+        s.close();
     }
     
     
@@ -233,7 +244,7 @@ public class SURTest extends SURBaseTest {
     public void testFailOnUpdateOfReadOnlyResultSet5()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.
+        Statement s = createStatement(ResultSet.
                                           TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_READ_ONLY);
         s.setCursorName(getNextCursorName());
@@ -243,6 +254,7 @@ public class SURTest extends SURBaseTest {
         rs.next();
         verifyTuple(rs);
         assertFailOnUpdate(rs);
+        s.close();
     }
 
     /** 
@@ -308,7 +320,7 @@ public class SURTest extends SURBaseTest {
                                             final int resultSetType) 
         throws SQLException
     {
-        final Statement s = con.createStatement(resultSetType, 
+        final Statement s = createStatement(resultSetType, 
                                                 ResultSet.CONCUR_UPDATABLE);
         final String cursorName = getNextCursorName();
         s.setCursorName(cursorName);
@@ -324,10 +336,10 @@ public class SURTest extends SURBaseTest {
             rs.absolute(recordToUpdate);
         }
         
-        con.commit();
+        commit();
         
         PreparedStatement ps = 
-            con.prepareStatement("update t1 set a=? where current of " +
+            prepareStatement("update t1 set a=? where current of " +
                                  cursorName);
         // First: check that we get an exception on update without repositioning:
         try {
@@ -362,6 +374,9 @@ public class SURTest extends SURBaseTest {
             rs.updateRow();
         }
         
+        s.close();
+        ps.close();
+        
     }
 
     /**
@@ -371,7 +386,7 @@ public class SURTest extends SURBaseTest {
     public void testMultiUpdateRow1() 
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1");
@@ -426,6 +441,7 @@ public class SURTest extends SURBaseTest {
                    "updateRow and cancelRowUpdates", rs.rowUpdated());
         
         rs.close();
+        s.close();
     }
 
     /**
@@ -435,7 +451,7 @@ public class SURTest extends SURBaseTest {
     public void testMultiUpdateRow2() 
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1");
@@ -491,6 +507,7 @@ public class SURTest extends SURBaseTest {
                    "updateRow and cancelRowUpdates", rs.rowUpdated());
         
         rs.close();
+        s.close();
     }
 
     /**
@@ -500,12 +517,12 @@ public class SURTest extends SURBaseTest {
     public void testCursorOperationConflictWarning1() 
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next();
-        con.createStatement().executeUpdate("delete from t1 where id=" +
+        createStatement().executeUpdate("delete from t1 where id=" +
                                             rs.getString("ID"));
         final int newValue = -3333;
         final int oldValue = rs.getInt(2);
@@ -528,6 +545,7 @@ public class SURTest extends SURBaseTest {
         assertEquals("Did not expect the resultset to be updated", oldValue, rs.getInt(2));
         
         rs.close();
+        s.close();
     }
 
     /**
@@ -538,18 +556,18 @@ public class SURTest extends SURBaseTest {
     public void testCursorOperationConflictWarning2() 
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1");
         rs.next();
-        con.createStatement().executeUpdate ("delete from t1 where id=" +
+        createStatement().executeUpdate ("delete from t1 where id=" +
                                              rs.getString("ID"));
         
         final int newValue = -3333;
         final int oldValue = rs.getInt(2);
         
-        Statement s3 = con.createStatement();
+        Statement s3 = createStatement();
         int updateCount = s3.executeUpdate
             ("update t1 set A=" + newValue + 
              " where current of " + rs.getCursorName());
@@ -562,7 +580,7 @@ public class SURTest extends SURBaseTest {
         assertEquals("Did not expect the resultset to be updated", oldValue, rs.getInt(2));
         assertEquals("Expected update count to be 0", 0, updateCount);
         
-        Statement s4 = con.createStatement();
+        Statement s4 = createStatement();
         updateCount = s4.executeUpdate("delete from t1 where current of " +
                                        rs.getCursorName());
         
@@ -575,6 +593,9 @@ public class SURTest extends SURBaseTest {
         assertEquals("Expected update count to be 0", 0, updateCount);
         
         rs.close();
+        s.close();
+        s3.close();
+        s4.close();
     }
     
     /**
@@ -584,7 +605,7 @@ public class SURTest extends SURBaseTest {
     public void testIndexedUpdateCursor1()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1 where a=1");
@@ -592,6 +613,7 @@ public class SURTest extends SURBaseTest {
         assertTrue("Expected to get a tuple on rs.next()", rs.next());
         verifyTuple(rs);
         updateTuple(rs);
+        s.close();
         
     }
     
@@ -602,7 +624,7 @@ public class SURTest extends SURBaseTest {
     public void testIndexedUpdateCursor2()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs =
@@ -611,6 +633,7 @@ public class SURTest extends SURBaseTest {
         assertTrue("Expected to get a tuple on rs.next()", rs.next());
         verifyTuple(rs);
         updateTuple(rs);
+        s.close();
     }
     
     /**
@@ -622,7 +645,7 @@ public class SURTest extends SURBaseTest {
      * to insert a row without being on insert row.
      */
     public void testInsertRowWithScrollCursor() throws SQLException {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
         
         int currentPosition, lastRow;
@@ -773,7 +796,7 @@ public class SURTest extends SURBaseTest {
         testIndexedScrollInsensitiveUpdateCursorWithoutForUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -785,6 +808,7 @@ public class SURTest extends SURBaseTest {
         rs.previous();
         verifyTuple(rs);
         updateTuple(rs);
+        s.close();
     }
     
     /**
@@ -795,7 +819,7 @@ public class SURTest extends SURBaseTest {
         testIndexedScrollInsensitiveUpdateCursorWithForUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -818,7 +842,7 @@ public class SURTest extends SURBaseTest {
     public void testPrimaryKeyUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -835,7 +859,7 @@ public class SURTest extends SURBaseTest {
                 rs.updateRow();
             }
         }
-        PreparedStatement ps = con.prepareStatement
+        PreparedStatement ps = prepareStatement
             ("select * from t1 where id=?");
         for (int i=0; i<recordCount; i++) {
             int key = (i%2==0) ? -i : i;
@@ -850,6 +874,8 @@ public class SURTest extends SURBaseTest {
                        "however rs2.next returned another row",
                        !rs2.next());
         }
+        s.close();
+        ps.close();
     }
         
     /**
@@ -859,7 +885,7 @@ public class SURTest extends SURBaseTest {
     public void testOtherPrimaryKeyUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -867,7 +893,7 @@ public class SURTest extends SURBaseTest {
         
         rs.last();
         int primaryKey = rs.getInt(1);
-        PreparedStatement ps = con.prepareStatement
+        PreparedStatement ps = prepareStatement
             ("update t1 set id = ? where id= ?");
         ps.setInt(1, -primaryKey);
         ps.setInt(2, primaryKey);
@@ -878,7 +904,7 @@ public class SURTest extends SURBaseTest {
         rs.updateInt(3, -777);
         rs.updateRow();
         
-        PreparedStatement ps2 = con.prepareStatement
+        PreparedStatement ps2 = prepareStatement
             ("select * from t1 where id=?");
         ps2.setInt(1, -primaryKey);
         ResultSet rs2 = ps2.executeQuery();
@@ -890,6 +916,11 @@ public class SURTest extends SURBaseTest {
         assertEquals("Expected b=-777", -777, rs2.getInt(3));
         assertTrue("Did not expect more than 1 row, however " +
                    "rs2.next() returned another row", !rs2.next());
+        
+        
+        s.close();
+        ps.close();
+        ps2.close();
     }
     
     /**
@@ -900,7 +931,7 @@ public class SURTest extends SURBaseTest {
     public void testOtherAndOwnPrimaryKeyUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -908,7 +939,7 @@ public class SURTest extends SURBaseTest {
         
         rs.last();
         int primaryKey = rs.getInt(1);
-        PreparedStatement ps = con.prepareStatement
+        PreparedStatement ps = prepareStatement
             ("update t1 set id = ? where id= ?");
         ps.setInt(1, -primaryKey);
         ps.setInt(2, primaryKey);
@@ -920,7 +951,7 @@ public class SURTest extends SURBaseTest {
         rs.updateRow();
         
         PreparedStatement ps2 =
-            con.prepareStatement("select * from t1 where id=?");
+            prepareStatement("select * from t1 where id=?");
         ps2.setInt(1, primaryKey*10);
         ResultSet rs2 = ps2.executeQuery();
         assertTrue("Expected query to have 1 row", rs2.next());
@@ -931,6 +962,10 @@ public class SURTest extends SURBaseTest {
         assertEquals("Expected b=-777", -777, rs2.getInt(3));
         assertTrue("Did not expect more than 1 row, however " +
                    "rs2.next() returned another row", !rs2.next());
+        
+        s.close();
+        ps.close();
+        ps2.close();
     }
     
     /**
@@ -939,7 +974,7 @@ public class SURTest extends SURBaseTest {
     public void testMultipleKeyUpdates()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -947,7 +982,7 @@ public class SURTest extends SURBaseTest {
         
         rs.last();
         int primaryKey = rs.getInt(1);
-        PreparedStatement ps = con.prepareStatement
+        PreparedStatement ps = s.getConnection().prepareStatement
             ("update t1 set id = ? where id= ?");
         ps.setInt(1, -primaryKey);
         ps.setInt(2, primaryKey);
@@ -969,6 +1004,8 @@ public class SURTest extends SURBaseTest {
             rs.updateInt(3, (-777 -i));
             rs.updateRow();
         }
+        rs.close();
+        s.close();
     }
     
     /**
@@ -978,7 +1015,7 @@ public class SURTest extends SURBaseTest {
         throws SQLException 
     {
         
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -992,7 +1029,7 @@ public class SURTest extends SURBaseTest {
             rs.updateInt(2, newKey--);
             rs.updateRow();
         }
-        PreparedStatement ps = con.prepareStatement
+        PreparedStatement ps = prepareStatement
             ("select * from t1 where a=?");
         for (int i=0; i<recordCount; i++) {
             int key = -i;
@@ -1007,6 +1044,9 @@ public class SURTest extends SURBaseTest {
                        "however rs2.next returned another row",
                        !rs2.next());
         }
+        
+        s.close();
+        ps.close();
     }
     
     /**
@@ -1016,7 +1056,7 @@ public class SURTest extends SURBaseTest {
     public void testOtherSecondaryKeyUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
@@ -1025,7 +1065,7 @@ public class SURTest extends SURBaseTest {
         rs.last();
         int indexedKey = rs.getInt(2);
         PreparedStatement ps =
-            con.prepareStatement("update t1 set a = ? where a= ?");
+            prepareStatement("update t1 set a = ? where a= ?");
         ps.setInt(1, -indexedKey);
         ps.setInt(2, indexedKey);
         assertEquals("Expected one row to be updated", 1,
@@ -1036,7 +1076,7 @@ public class SURTest extends SURBaseTest {
         rs.updateRow();
         
         PreparedStatement ps2 =
-            con.prepareStatement("select * from t1 where a=?");
+            prepareStatement("select * from t1 where a=?");
         ps2.setInt(1, -indexedKey);
         ResultSet rs2 = ps2.executeQuery();
         assertTrue("Expected query to have 1 row", rs2.next());
@@ -1047,6 +1087,10 @@ public class SURTest extends SURBaseTest {
         assertEquals("Expected b=-777", -777, rs2.getInt(3));
         assertTrue("Did not expect more than 1 row, however " +
                    "rs2.next() returned another row", !rs2.next());
+        
+        s.close();
+        ps.close();
+        ps2.close();
     }
     
     /**
@@ -1055,7 +1099,7 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveReadOnly1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_READ_ONLY);
         s.setCursorName(getNextCursorName());
@@ -1064,6 +1108,7 @@ public class SURTest extends SURBaseTest {
         scrollForward(rs);
         scrollBackward(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -1072,13 +1117,14 @@ public class SURTest extends SURBaseTest {
     public void testForwardOnlyConcurUpdatableWithForUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1 for update");
         
         scrollForwardAndUpdate(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -1087,13 +1133,14 @@ public class SURTest extends SURBaseTest {
     public void testForwardOnlyConcurUpdatableWithoutForUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1");
         
         scrollForwardAndUpdate(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -1103,13 +1150,14 @@ public class SURTest extends SURBaseTest {
     public void testPositionedUpdateWithoutForUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         s.setCursorName("MYCURSOR");
         ResultSet rs = s.executeQuery("select * from t1");
         
         scrollForwardAndUpdatePositioned(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -1119,12 +1167,13 @@ public class SURTest extends SURBaseTest {
     public void testPositionedUpdateWithForUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement();
+        Statement s = createStatement();
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1 for update");
         
         scrollForwardAndUpdatePositioned(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -1133,7 +1182,7 @@ public class SURTest extends SURBaseTest {
     public void testScrollablePositionedUpdateWithForUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement
+        Statement s = createStatement
             (ResultSet.TYPE_SCROLL_INSENSITIVE,
              ResultSet.CONCUR_READ_ONLY);
         s.setCursorName("MYCURSOR");
@@ -1152,7 +1201,7 @@ public class SURTest extends SURBaseTest {
         final int previousA = rs.getInt(2);
         final int previousB = rs.getInt(3);
         println(rs.getCursorName());
-        PreparedStatement ps = con.prepareStatement
+        PreparedStatement ps = prepareStatement
             ("update T1 set a=?,b=? where current of " + rs.getCursorName());
         ps.setInt(1, 666);
         ps.setInt(2, 777);
@@ -1181,7 +1230,9 @@ public class SURTest extends SURBaseTest {
                         "," + rs.getInt(3) + "," + rs.getString(4)+ ")");
             }
         }
-        
+
+        s.close();
+        ps.close();
     }
     
     /**
@@ -1191,12 +1242,13 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithForUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1 for update");
         scrollForwardAndUpdate(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -1206,7 +1258,7 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithForUpdate2()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         assertEquals("Invalid resultset concurrency on statement", 
                      ResultSet.CONCUR_UPDATABLE, s.getResultSetConcurrency());
@@ -1218,6 +1270,7 @@ public class SURTest extends SURBaseTest {
         scrollForward(rs);
         scrollBackwardAndUpdate(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -1256,7 +1309,7 @@ public class SURTest extends SURBaseTest {
             assertEquals("Incorrect row updated for row " + count, 1000, a);
         }
         rs.close();
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_READ_ONLY);
         s.setCursorName(getNextCursorName());
         rs = s.executeQuery("select * from t1");
@@ -1267,6 +1320,7 @@ public class SURTest extends SURBaseTest {
             int b = rs.getInt(3);
             println("Updated tuple:" + id + "," + a + "," + b);
         }
+        s.close();
     }
     
     /**
@@ -1277,12 +1331,13 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithForUpdate3()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select a,b from t1 for update");
         
         testScrollInsensistiveConurUpdatable3(rs);
+        s.close();
     }
     
     /**
@@ -1292,13 +1347,14 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithoutForUpdate1()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1");
         
         scrollForwardAndUpdate(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -1308,7 +1364,7 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithoutForUpdate2()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select * from t1");
@@ -1316,6 +1372,7 @@ public class SURTest extends SURBaseTest {
         scrollForward(rs);
         scrollBackwardAndUpdate(rs);
         rs.close();
+        s.close();
     }
     
     /**
@@ -1326,12 +1383,13 @@ public class SURTest extends SURBaseTest {
     public void testScrollInsensitiveConcurUpdatableWithoutForUpdate3()
         throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select a,b from t1");
         
         testScrollInsensistiveConurUpdatable3(rs);
+        s.close();
     }
     
     /**
@@ -1383,7 +1441,7 @@ public class SURTest extends SURBaseTest {
      * and deleteRow() methods.
      */
     public void testRowUpdatedAndRowDeleted() throws SQLException {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                            ResultSet.CONCUR_UPDATABLE);
         s.setCursorName(getNextCursorName());
         ResultSet rs = s.executeQuery("select a,b from t1");
@@ -1414,7 +1472,7 @@ public class SURTest extends SURBaseTest {
      */
     public void testDetectabilityExceptions() throws SQLException 
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
         
@@ -1447,7 +1505,7 @@ public class SURTest extends SURBaseTest {
         s.close();
 
         // Not strictly SUR, but fixed in same patch, so we test it here.
-        s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                 ResultSet.CONCUR_UPDATABLE);
         rs = s.executeQuery("select * from t1");
 
@@ -1486,7 +1544,7 @@ public class SURTest extends SURBaseTest {
      *
      */
     public void testDowngradeToScrollReadOnly() throws SQLException {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1 order by b");
 

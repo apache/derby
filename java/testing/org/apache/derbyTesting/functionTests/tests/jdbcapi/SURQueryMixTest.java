@@ -73,13 +73,13 @@ public class SURQueryMixTest extends SURBaseTest
         throws SQLException
     {
         println(query);
-        DatabaseMetaData dbMeta = con.getMetaData();
+        DatabaseMetaData dbMeta = getXConnection().getMetaData();
                 
         if (dbMeta.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
             checkRowDeleted = true;
         }
         
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                           ResultSet.CONCUR_UPDATABLE);
         
         s.setCursorName(cursorName);
@@ -138,6 +138,7 @@ public class SURQueryMixTest extends SURBaseTest
         }
         
         rs.close();
+        s.close();
     }
     
     /**
@@ -233,7 +234,7 @@ public class SURQueryMixTest extends SURBaseTest
             rs.absolute(key.intValue());            
             if (rs.rowDeleted()) continue; // skip deleting row if already deleted
             if (positioned) {
-                con.createStatement().executeUpdate
+                createStatement().executeUpdate
                         ("DELETE FROM T1 WHERE CURRENT OF \"" + cursorName + 
                          "\"");
             } else {
@@ -325,7 +326,7 @@ public class SURQueryMixTest extends SURBaseTest
         sb.append(cursorName);
         sb.append("\"");
         println(sb.toString());
-        PreparedStatement ps = con.prepareStatement(sb.toString());
+        PreparedStatement ps = prepareStatement(sb.toString());
         
         for (int column = 1; column<=meta.getColumnCount(); column++) {
            if (meta.getColumnType(column)==Types.INTEGER) {

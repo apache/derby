@@ -21,6 +21,8 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import junit.framework.*;
 import java.sql.*;
 
+import org.apache.derbyTesting.functionTests.util.CleanDatabaseTestSetup;
+
 /**
  * Tests holdable resultsets.
  */
@@ -40,7 +42,7 @@ public class HoldabilityTest extends SURBaseTest {
         
         suite.addTestSuite(HoldabilityTest.class);
         
-        return suite;
+        return new CleanDatabaseTestSetup(suite);
 
     }
 
@@ -50,21 +52,15 @@ public class HoldabilityTest extends SURBaseTest {
     public void setUp() 
         throws Exception 
     {      
-        try {
-            super.setUp();
-        } catch (SQLException e) {
-            if (con!=null) tearDown();
-            throw e;
-        }
-        // For the holdability tests, we recreate the model
+       // For the holdability tests, we recreate the model
         // for each testcase (since we do commits)
         
         // We also use more records to ensure that the disk
         // is being used.
         SURDataModelSetup.createDataModel
-            (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, con,
+            (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, getXConnection(),
              recordCount);
-        con.commit();
+        commit();
     }
     
     /**
@@ -74,8 +70,8 @@ public class HoldabilityTest extends SURBaseTest {
     public void tearDown() throws Exception 
     {
         try {            
-            con.rollback();
-            Statement dropStatement = con.createStatement();
+            rollback();
+            Statement dropStatement = createStatement();
             dropStatement.execute("drop table t1");
             dropStatement.close();
         } catch (SQLException e) {
@@ -91,12 +87,13 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldForwardOnlyResultSetScanInit() 
         throws SQLException
     {
-        Statement s = con.createStatement();
+        Statement s = createStatement();
         ResultSet rs = s.executeQuery(selectStatement);
         
-        con.commit(); // scan initialized
+        commit(); // scan initialized
         
         scrollForward(rs);
+        s.close();
     }
     
     /**
@@ -106,18 +103,19 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldForwardOnlyResultSetScanInProgress() 
         throws SQLException
     {
-        Statement s = con.createStatement();
+        Statement s = createStatement();
         ResultSet rs = s.executeQuery(selectStatement);
 
         for (int i=0; i<this.recordCount/2; i++) {
             rs.next();
             verifyTuple(rs);
         }
-        con.commit(); // Scan is in progress
+        commit(); // Scan is in progress
         
         while (rs.next()) {
             verifyTuple(rs);
         }
+        s.close();
     }
 
     /**
@@ -127,13 +125,14 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldForwardOnlyUpdatableResultSetScanInit() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
-        con.commit(); // scan initialized
+        commit(); // scan initialized
         rs.next();    // naviagate to a new tuple
         updateTuple(rs); // Updatable
         scrollForward(rs);
+        s.close();
     }
     
     
@@ -145,7 +144,7 @@ public class HoldabilityTest extends SURBaseTest {
     public void testCompressOnHeldForwardOnlyUpdatableResultSetScanInProgress()
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
 
@@ -154,10 +153,11 @@ public class HoldabilityTest extends SURBaseTest {
             verifyTuple(rs);
         }
         updateTuple(rs);
-        con.commit(); // Scan is in progress
+        commit(); // Scan is in progress
         
         // Verifies resultset can do updates after compress
         verifyResultSetUpdatableAfterCompress(rs);
+        s.close();
         
     }
 
@@ -169,13 +169,14 @@ public class HoldabilityTest extends SURBaseTest {
     public void testCompressOnHeldForwardOnlyUpdatableResultSetScanInit() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
-        con.commit(); // scan initialized
+        commit(); // scan initialized
         
         // Verifies resultset can do updates after compress
         verifyResultSetUpdatableAfterCompress(rs);
+        s.close();
     }
         
     /**
@@ -185,7 +186,7 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldForwardOnlyUpdatableResultSetScanInProgress() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
 
@@ -194,12 +195,13 @@ public class HoldabilityTest extends SURBaseTest {
             verifyTuple(rs);
         }
         updateTuple(rs);
-        con.commit(); // Scan is in progress
+        commit(); // Scan is in progress
         rs.next();
         updateTuple(rs); // Still updatable
         while (rs.next()) {
             verifyTuple(rs); // complete the scan
         }
+        s.close();
     }
     
     /**
@@ -209,14 +211,16 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldScrollableResultSetScanInit() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_READ_ONLY);
         ResultSet rs = s.executeQuery(selectStatement);
         
-        con.commit(); // scan initialized
+        commit(); // scan initialized
         
         scrollForward(rs);
         scrollBackward(rs);
+        
+        s.close();
     }
         
     /**
@@ -226,7 +230,7 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldScrollableResultSetScanInProgress() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_READ_ONLY);
         ResultSet rs = s.executeQuery(selectStatement);
 
@@ -234,12 +238,13 @@ public class HoldabilityTest extends SURBaseTest {
             rs.next();
             verifyTuple(rs);
         }
-        con.commit(); // Scan is in progress
+        commit(); // Scan is in progress
         
         while (rs.next()) {
             verifyTuple(rs);
         }
         scrollBackward(rs);
+        s.close();
     }
 
     /**
@@ -249,15 +254,16 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldScrollableResultSetScanDone() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_READ_ONLY);
         ResultSet rs = s.executeQuery(selectStatement);
         
         scrollForward(rs); // Scan is done
         
-        con.commit();
+        commit();
         
         scrollBackward(rs);
+        s.close();
     }
 
     /**
@@ -267,7 +273,7 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldScrollableUpdatableResultSetScanInit() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         
@@ -275,10 +281,12 @@ public class HoldabilityTest extends SURBaseTest {
             assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
                        false);
         }
-        con.commit(); // scan initialized
+        commit(); // scan initialized
         
         scrollForward(rs);
         scrollBackwardAndUpdate(rs);
+        
+        s.close();
     }    
     
     /**
@@ -288,7 +296,7 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldScrollableUpdatableResultSetScanInProgress() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
@@ -299,12 +307,14 @@ public class HoldabilityTest extends SURBaseTest {
             rs.next();
             verifyTuple(rs);
         }
-        con.commit(); // Scan is in progress
+        commit(); // Scan is in progress
         
         while (rs.next()) {
             verifyTuple(rs);
         }
         scrollBackwardAndUpdate(rs);
+        
+        s.close();
     }
 
     /**
@@ -314,7 +324,7 @@ public class HoldabilityTest extends SURBaseTest {
     public void testHeldScrollableUpdatableResultSetScanDone() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         
@@ -325,9 +335,11 @@ public class HoldabilityTest extends SURBaseTest {
       
         scrollForward(rs); // Scan is done
         
-        con.commit();
+        commit();
         
         scrollBackwardAndUpdate(rs);
+        
+        s.close();
     }
 
     /**
@@ -337,7 +349,7 @@ public class HoldabilityTest extends SURBaseTest {
     public void testUpdateRowAfterCommitOnHeldForwardOnlyResultSet() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         
@@ -346,7 +358,7 @@ public class HoldabilityTest extends SURBaseTest {
                        false);
         }
         rs.next();
-        con.commit();
+        commit();
         try {
             rs.updateInt(2, -100);
             rs.updateRow();
@@ -355,6 +367,7 @@ public class HoldabilityTest extends SURBaseTest {
             assertEquals("Unexpected SQLState",
                          INVALID_CURSOR_STATE_NO_CURRENT_ROW, e.getSQLState());
         }
+        s.close();
     }
 
     /**
@@ -364,7 +377,7 @@ public class HoldabilityTest extends SURBaseTest {
     public void testUpdateRowAfterCommitOnHeldScrollInsensitiveResultSet() 
         throws SQLException
     {
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         
@@ -373,7 +386,7 @@ public class HoldabilityTest extends SURBaseTest {
                        false);
         }
         rs.next();
-        con.commit();
+        commit();
         try {
             rs.updateInt(2, -100);
             rs.updateRow();
@@ -382,6 +395,7 @@ public class HoldabilityTest extends SURBaseTest {
             assertEquals("Unexpected SQLState",
                          INVALID_CURSOR_STATE_NO_CURRENT_ROW, e.getSQLState());
         }
+        s.close();
     }
 
     /**
@@ -393,7 +407,7 @@ public class HoldabilityTest extends SURBaseTest {
         throws SQLException
     {
         // First: Read all records in the table into the ResultSet:
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         
         ResultSet rs = s.executeQuery(selectStatement);
@@ -401,10 +415,12 @@ public class HoldabilityTest extends SURBaseTest {
             assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
                        false);
         }
-        con.commit(); // commit
+        commit(); // commit
         
         // Verifies resultset can do updates after compress
         verifyResultSetUpdatableAfterCompress(rs);
+        
+        s.close();
     }
 
     /**
@@ -416,7 +432,7 @@ public class HoldabilityTest extends SURBaseTest {
         throws SQLException
     {
         // First: Read all records in the table into the ResultSet:
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
@@ -425,9 +441,11 @@ public class HoldabilityTest extends SURBaseTest {
         }
         rs.next(); // Scan is in progress.
         
-        con.commit(); // commit, releases the lock on the records
+        commit(); // commit, releases the lock on the records
         
         verifyCompressInvalidation(rs);
+        
+        s.close();
     }
     
     /**
@@ -439,7 +457,7 @@ public class HoldabilityTest extends SURBaseTest {
         throws SQLException
     {
         // First: Read all records in the table into the ResultSet:
-        Statement s = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
@@ -449,9 +467,10 @@ public class HoldabilityTest extends SURBaseTest {
         
         scrollForward(rs); // scan is done
         
-        con.commit(); // commit, releases the lock on the records
+        commit(); // commit, releases the lock on the records
         
         verifyCompressInvalidation(rs);
+        s.close();
     }
 
     /**
@@ -462,19 +481,19 @@ public class HoldabilityTest extends SURBaseTest {
         throws SQLException
     {
                 // Delete all records except the first:
-        Statement delStatement = con.createStatement();
+        Statement delStatement = createStatement();
         int deleted = delStatement.executeUpdate("delete from T1 where id>0");
         int expectedDeleted = recordCount-1;    
         
         assertEquals("Invalid number of records deleted", expectedDeleted, 
                      deleted);
-        con.commit();
+        commit();
         
         // Execute online compress
         onlineCompress(true, true, true);
         
         // Now reinsert the tuples:
-        PreparedStatement ps = con.
+        PreparedStatement ps = 
             prepareStatement("insert into t1 values (?,?,?,?)");
         
         for (int i=0; i<recordCount*2; i++) {
@@ -486,7 +505,7 @@ public class HoldabilityTest extends SURBaseTest {
             ps.addBatch();
         }
         ps.executeBatch();
-        con.commit();
+        commit();
 
         rs.next();
         updateTuple(rs);
@@ -511,10 +530,10 @@ public class HoldabilityTest extends SURBaseTest {
             assertNull("Expected no warning when updating this row", warn);
         }
         
-        con.commit();
+        commit();
         
         // Verify data
-        rs = con.createStatement().executeQuery(selectStatement);
+        rs = createStatement().executeQuery(selectStatement);
         while (rs.next()) {            
             verifyTuple(rs);
         }
@@ -530,19 +549,20 @@ public class HoldabilityTest extends SURBaseTest {
     {
         
         // Delete all records except the first:
-        Statement delStatement = con.createStatement();
+        Statement delStatement = createStatement();
         int deleted = delStatement.executeUpdate("delete from T1 where id>0");
         int expectedDeleted = recordCount-1;    
+        delStatement.close();
         
         assertEquals("Invalid number of records deleted", expectedDeleted, 
                      deleted);
-        con.commit();
+        commit();
         
         // Execute online compress
         onlineCompress(true, true, true);
         
         // Now reinsert the tuples:
-        PreparedStatement ps = con.
+        PreparedStatement ps = 
             prepareStatement("insert into t1 values (?,?,?,?)");
         
         for (int i=0; i<recordCount*2; i++) {
@@ -554,7 +574,8 @@ public class HoldabilityTest extends SURBaseTest {
             ps.addBatch();
         }
         ps.executeBatch();
-        con.commit();
+        ps.close();
+        commit();
         
         // Update last tuple
         rs.last();         
@@ -570,10 +591,10 @@ public class HoldabilityTest extends SURBaseTest {
         updateTuple(rs); 
         warn = rs.getWarnings();
         assertWarning(warn, CURSOR_OPERATION_CONFLICT);
-        con.commit();
+        commit();
         
         // Verify data
-        rs = con.createStatement().executeQuery(selectStatement);
+        rs = createStatement().executeQuery(selectStatement);
         while (rs.next()) {            
             // This will fail if we managed to update reinserted tuple
             verifyTuple(rs); 
@@ -606,6 +627,7 @@ public class HoldabilityTest extends SURBaseTest {
         
         try { 
             ps2.executeUpdate();
+            ps2.close();
             con2.commit();
         } finally {
             con2.close();
