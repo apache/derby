@@ -37,7 +37,6 @@ import junit.framework.TestSuite;
  */
 public class PrepareExecuteDDL extends BaseJDBCTestCase {
 	
-	private Connection conn;
 	private Connection connDDL;
 	
 	/**
@@ -53,6 +52,10 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 	{
 		"SELECT * FROM PED001",
 		"SELECT A, B FROM PED001",
+		"GRANT SELECT ON PED001 TO U_PED_001",
+		"GRANT SELECT(A,B) ON PED001 TO U_PED_001",
+		"REVOKE SELECT(A,B) ON PED001 FROM U_PED_001",
+		"REVOKE SELECT ON PED001 FROM U_PED_001",
 	};
 	
 	/**
@@ -85,8 +88,15 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 		this.ddl = ddl;
 	}
 	
+	private boolean tableDropped()
+	{
+		return ddl.startsWith("DROP TABLE ");
+	}
+	
 	public void testPrepareExcute() throws SQLException
 	{
+        Connection conn = getXConnection();
+        
 		PreparedStatement[] psa= new PreparedStatement[STMTS.length];
 		for (int i = 0; i < STMTS.length; i++)
 		{
@@ -101,6 +111,13 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 			String sql = STMTS[i];
 			if (sql.startsWith("SELECT "))
 				checkSelect(psa[i], sql);
+			else if (sql.startsWith("GRANT ")
+					|| sql.startsWith("REVOKE "))
+				checkGrantRevoke(psa[i], sql);
+			else
+				fail("unknown SQL" + sql);
+            
+            psa[i].close();
 		}
 	}
 	
@@ -116,6 +133,7 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 			
 			//TODO: Use DMD to see if table exists or not.
 			assertSQLState("42X05", e);
+			assertTrue(tableDropped());
 			
 			return;
 		}
@@ -134,38 +152,53 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 		JDBC.assertDrainResults(rs);
 	}
 	
+	
+	private void checkGrantRevoke(PreparedStatement ps, String sql)
+	throws SQLException
+	{
+		assertEquals(true, sql.startsWith("GRANT ")
+				|| sql.startsWith("REVOKE "));
+		
+		try {
+			assertFalse(ps.execute());
+		} catch (SQLException e) {
+			
+			assertSQLState("42X05", e);
+			assertTrue(tableDropped());
+			
+			return;
+		}
+	}	
 	/**
 	 * Set the fixture up with a clean, standard table PED001.
 	 */
 	protected void setUp() throws SQLException
 	{
 		
-		connDDL = getConnection();
+		connDDL = openDefaultConnection();
 		Statement s = connDDL.createStatement();
 		
 		s.execute(
 		"CREATE TABLE PED001 (A INT NOT NULL, B DECIMAL(6,4), C VARCHAR(20))");
 		
 		s.close();
-		
-		conn = getConnection();
 	}
 	
 	/**
 	 * Tear-down the fixture by removing the table (if it still
 	 * exists).
 	 */
-	protected void tearDown() throws SQLException
+	protected void tearDown() throws Exception
 	{
-		Statement s = conn.createStatement();
+		Statement s = connDDL.createStatement();
 		try {
 			s.execute("DROP TABLE PED001");
 		} catch (SQLException e) {
 			assertSQLState("42Y55", e);
 		}
 		s.close();
-		JDBC.cleanup(conn);
 		JDBC.cleanup(connDDL);
+        super.tearDown();
 		
 	}
 }
