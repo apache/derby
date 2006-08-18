@@ -17,13 +17,14 @@
  * either express or implied. See the License for the specific 
  * language governing permissions and limitations under the License.
  */
-package org.apache.derbyTesting.functionTests.util;
+package org.apache.derbyTesting.junit;
 
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.util.Enumeration;
 import java.util.Properties;
+
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;

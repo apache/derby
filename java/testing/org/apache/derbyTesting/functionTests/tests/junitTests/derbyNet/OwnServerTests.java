@@ -21,8 +21,8 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.junitTests.derbyNet;
 
-import org.apache.derbyTesting.functionTests.util.BaseTestCase;
 import org.apache.derbyTesting.functionTests.tests.derbynet.SuicideOfStreaming;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import junit.framework.Test;

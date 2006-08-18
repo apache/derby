@@ -22,7 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import java.sql.DatabaseMetaData;
 import java.sql.Types;
 import org.apache.derby.shared.common.reference.JDBC40Translation;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 /**
  * JUnit test which checks that the constants in JDBC40Translation are

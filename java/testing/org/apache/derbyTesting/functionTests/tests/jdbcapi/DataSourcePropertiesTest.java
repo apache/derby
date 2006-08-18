@@ -29,10 +29,10 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
-import org.apache.derbyTesting.functionTests.util.JDBC;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * This class tests that properties of data sources are handled correctly.

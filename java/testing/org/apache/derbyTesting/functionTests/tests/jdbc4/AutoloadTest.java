@@ -34,8 +34,8 @@ import java.sql.*;
 import java.util.*;
 import junit.framework.*;
 
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 public	class	AutoloadTest	extends	BaseJDBCTestCase
 {

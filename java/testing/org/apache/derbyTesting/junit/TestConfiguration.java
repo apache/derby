@@ -17,13 +17,15 @@
  * either express or implied. See the License for the specific 
  * language governing permissions and limitations under the License.
  */
-package org.apache.derbyTesting.functionTests.util;
+package org.apache.derbyTesting.junit;
 
 import java.security.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+
+import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 
 /**
  * Class which holds information about the configuration of a Test.

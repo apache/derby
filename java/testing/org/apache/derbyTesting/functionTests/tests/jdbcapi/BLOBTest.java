@@ -18,8 +18,9 @@
  * language governing permissions and limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestInputStream;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import java.sql.PreparedStatement;

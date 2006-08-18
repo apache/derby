@@ -40,8 +40,8 @@ import javax.sql.XADataSource;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 /**
  * Test that all methods on <code>ResultSet</code>,

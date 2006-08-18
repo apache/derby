@@ -24,7 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

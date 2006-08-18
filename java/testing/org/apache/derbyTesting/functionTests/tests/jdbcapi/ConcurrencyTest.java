@@ -21,7 +21,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import junit.framework.*;
 import java.sql.*;
 
-import org.apache.derbyTesting.functionTests.util.JDBC;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Testing concurrency behaviour in derby when creating the resultsets with

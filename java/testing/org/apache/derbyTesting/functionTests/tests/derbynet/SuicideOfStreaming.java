@@ -39,7 +39,7 @@ import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.tools.ij;
 import org.apache.derby.client.am.SqlCode;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 /**
  *

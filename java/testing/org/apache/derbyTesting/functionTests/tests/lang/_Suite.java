@@ -21,8 +21,8 @@
 */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import org.apache.derbyTesting.functionTests.util.BaseTestCase;
-import org.apache.derbyTesting.functionTests.util.JDBC;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 
 import junit.framework.Test; 
 import junit.framework.TestSuite;

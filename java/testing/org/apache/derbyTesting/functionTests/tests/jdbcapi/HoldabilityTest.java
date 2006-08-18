@@ -21,7 +21,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import junit.framework.*;
 import java.sql.*;
 
-import org.apache.derbyTesting.functionTests.util.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 /**
  * Tests holdable resultsets.

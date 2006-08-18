@@ -31,9 +31,9 @@ import java.util.Set;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 /**
  * JUnit test which checks that all methods specified by the

@@ -25,7 +25,7 @@ import javax.xml.transform.Result;
 import junit.extensions.TestSetup;
 import junit.framework.*;
 
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 import java.io.*;
 import java.sql.*;

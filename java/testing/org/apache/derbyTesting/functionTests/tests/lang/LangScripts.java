@@ -22,8 +22,8 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.functionTests.util.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 public final class LangScripts extends ScriptTestCase {
 	

@@ -23,7 +23,8 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import java.sql.*;
 import javax.sql.*;
 import junit.framework.*;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 /**
  * Tests of the <code>java.sql.ParameterMetaData</code> JDBC40 API

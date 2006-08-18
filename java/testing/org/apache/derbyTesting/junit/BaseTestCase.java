@@ -17,7 +17,7 @@
  * either express or implied. See the License for the specific 
  * language governing permissions and limitations under the License.
  */
-package org.apache.derbyTesting.functionTests.util;
+package org.apache.derbyTesting.junit;
 
 import junit.framework.TestCase;
 
@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.security.AccessController;
 
 import java.security.PrivilegedActionException;
+
 
 /**
  * Base class for JUnit tests.

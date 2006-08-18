@@ -21,8 +21,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 import junit.framework.*;
 import java.sql.*;

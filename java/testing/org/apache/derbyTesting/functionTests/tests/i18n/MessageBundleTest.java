@@ -21,7 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.i18n;
 
-import org.apache.derbyTesting.functionTests.util.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 

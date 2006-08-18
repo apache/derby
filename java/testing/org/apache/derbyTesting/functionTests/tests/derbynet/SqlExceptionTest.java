@@ -19,7 +19,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import org.apache.derbyTesting.functionTests.util.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;

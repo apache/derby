@@ -17,12 +17,13 @@
  * either express or implied. See the License for the specific 
  * language governing permissions and limitations under the License.
  */
-package org.apache.derbyTesting.functionTests.util;
+package org.apache.derbyTesting.junit;
 
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.*;
+
 
 /**
  * Base class for JDBC JUnit tests.

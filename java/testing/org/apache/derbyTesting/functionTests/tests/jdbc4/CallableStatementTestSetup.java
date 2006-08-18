@@ -25,7 +25,7 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.extensions.TestSetup;
 
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.*;

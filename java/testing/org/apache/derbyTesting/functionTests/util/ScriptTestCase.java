@@ -29,6 +29,8 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.sql.Connection;
 
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+
 import junit.framework.Test;
 
 /**

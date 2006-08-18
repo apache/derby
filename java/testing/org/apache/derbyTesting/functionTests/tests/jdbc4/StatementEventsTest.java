@@ -25,8 +25,9 @@ import java.sql.*;
 import javax.sql.*;
 import junit.framework.*;
 
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+
 import java.util.Enumeration;
 
 /*

@@ -30,9 +30,9 @@ import junit.framework.*;
 
 import java.net.URL;
 
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 /**
  * JUnit test which checks that only expected methods throw

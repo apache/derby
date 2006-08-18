@@ -35,7 +35,7 @@ import junit.framework.*;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 public	class	AutoloadBooting	extends	BaseJDBCTestCase
 {

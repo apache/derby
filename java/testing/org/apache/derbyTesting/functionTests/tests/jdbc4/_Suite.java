@@ -23,7 +23,8 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.sql.SQLException;
 
-import org.apache.derbyTesting.functionTests.util.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
+
 import junit.framework.Test; 
 import junit.framework.TestSuite;
 

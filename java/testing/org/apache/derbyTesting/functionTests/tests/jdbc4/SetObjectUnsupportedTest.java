@@ -26,7 +26,8 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 /**
  * Tests that calling <code>setObject()</code> and <code>setNull()</code> with

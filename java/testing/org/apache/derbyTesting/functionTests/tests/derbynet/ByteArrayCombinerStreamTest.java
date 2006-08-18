@@ -20,7 +20,7 @@
 */
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import org.apache.derbyTesting.functionTests.util.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
 
 import org.apache.derby.client.am.ByteArrayCombinerStream;
 

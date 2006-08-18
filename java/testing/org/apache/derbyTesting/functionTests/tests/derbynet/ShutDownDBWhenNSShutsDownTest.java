@@ -21,9 +21,9 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.util.Properties;
-import org.apache.derbyTesting.functionTests.util.BaseTestCase;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derby.drda.NetworkServerControl;
 
 import junit.framework.*;

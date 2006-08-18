@@ -23,7 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import junit.framework.*;
 
-import org.apache.derbyTesting.functionTests.util.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 import java.sql.*;
 

@@ -27,6 +27,8 @@ import javax.sql.DataSource;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.XADataSource;
 
+import org.apache.derbyTesting.junit.TestConfiguration;
+
 /**
  * Utility class for JDBC JUnit tests.
  * Contains methods to obtain the various datasources.
