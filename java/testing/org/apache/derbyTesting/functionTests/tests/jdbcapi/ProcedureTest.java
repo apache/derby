@@ -55,7 +55,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public void testExecuteQueryWithNoDynamicResultSets() throws SQLException {
-        Statement stmt = getXConnection().createStatement();
+        Statement stmt = createStatement();
         try {
             stmt.executeQuery("CALL RETRIEVE_DYNAMIC_RESULTS(0)");
             fail("executeQuery() didn't fail.");
@@ -71,7 +71,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public void testExecuteQueryWithOneDynamicResultSet() throws SQLException {
-        Statement stmt = getXConnection().createStatement();
+        Statement stmt = createStatement();
         ResultSet rs = stmt.executeQuery("CALL RETRIEVE_DYNAMIC_RESULTS(1)");
         assertNotNull("executeQuery() returned null.", rs);
         assertTrue("Result set has no data.", rs.next());
@@ -87,7 +87,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
     public void testExecuteQueryWithMoreThanOneDynamicResultSet()
         throws SQLException
     {
-        Statement stmt = getXConnection().createStatement();
+        Statement stmt = createStatement();
         try {
             stmt.executeQuery("CALL RETRIEVE_DYNAMIC_RESULTS(2)");
             fail("executeQuery() didn't fail.");
@@ -120,7 +120,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public void testExecuteUpdateWithOneDynamicResultSet() throws SQLException {
-        Statement stmt = getXConnection().createStatement();
+        Statement stmt = createStatement();
         try {
             stmt.executeUpdate("CALL RETRIEVE_DYNAMIC_RESULTS(1)");
             fail("executeUpdate() didn't fail.");
@@ -337,11 +337,11 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public void testRollbackStoredProcWithExecuteQuery() throws SQLException {
-        Connection conn = getXConnection();
-        Statement stmt = conn.createStatement();
+
+        Statement stmt = createStatement();
         ResultSet rs = stmt.executeQuery("CALL PROC_WITH_SIDE_EFFECTS(1)");
         rs.close();
-        conn.rollback();
+        stmt.getConnection().rollback();
         ResultSet tableRs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
         // table should be empty after rollback
         assertFalse("Side effects from stored procedure not rolled back.",
@@ -357,10 +357,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public void testRollbackStoredProcWithExecuteUpdate() throws SQLException {
-        Connection conn = getXConnection();
-        Statement stmt = conn.createStatement();
+        Statement stmt = createStatement();
         stmt.executeUpdate("CALL PROC_WITH_SIDE_EFFECTS(0)");
-        conn.rollback();
+        stmt.getConnection().rollback();
         ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
         // table should be empty after rollback
         assertFalse("Side effects from stored procedure not rolled back.",
@@ -560,8 +559,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
     public void testClosedDynamicResultSetsFromExecuteQuery()
         throws SQLException
     {
-        Connection conn = getXConnection();
-        Statement stmt = conn.createStatement();
+        Statement stmt = createStatement();
         try {
             ResultSet rs = stmt.executeQuery("CALL RETRIEVE_CLOSED_RESULT()");
             fail("executeQuery() didn't fail.");
@@ -579,7 +577,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
     public void testClosedDynamicResultSetsFromExecuteUpdate()
         throws SQLException
     {
-        Statement stmt = getXConnection().createStatement();
+        Statement stmt = createStatement();
         stmt.executeUpdate("CALL RETRIEVE_CLOSED_RESULT()");
         stmt.close();
     }
