@@ -71,7 +71,22 @@ public abstract class BaseJDBCTestCase
                 return conn;
             conn = null;
         }
-        return conn = getTestConfiguration().openDefaultConnection();
+        conn = getTestConfiguration().openDefaultConnection();
+        initializeConnection(conn);
+        return conn;
+    }
+    
+    /**
+     * Allow a sub-class to initialize a connection to provide
+     * consistent connection state for its tests. Called only
+     * when getConnection() opens a new connection. Default
+     * action is to not modify the connection's state from
+     * the initialization provided by the data source.
+     * @param conn Connection to be intialized
+     * @throws SQLException Error setting the initial state.
+     */
+    protected void initializeConnection(Connection conn) throws SQLException
+    {
     }
     
     /**
