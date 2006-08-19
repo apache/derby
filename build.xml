@@ -1041,7 +1041,7 @@
 
     <!-- add extra osgi bits to manifest -->
 
-    <manifest file="${manifest.file}"  mode="update">
+    <manifest file="${derby.jar.dir}/lists/smf.mf"  mode="update">
       <attribute name="Bundle-Activator" value="org.apache.derby.osgi.EmbeddedActivator"/>
       <attribute name="DynamicImport-Package" value="*"/>
       <attribute name="Export-Package" value="org.apache.derby.authentication,org.apache.derby.database,org.apache.derby.io,org.apache.derby.jdbc,org.apache.derby.vti"/> 
