@@ -74,7 +74,7 @@ class BCMethod implements MethodBuilder {
      * cause some splitting. Tested with value set to 2000.
      */
     static final int CODE_SPLIT_LENGTH = VMOpcode.MAX_CODE_LENGTH;
-
+    
 	final BCClass		cb;
 	protected final ClassHolder modClass; // the class it is in (modifiable fmt)
 	final String myReturnType;
@@ -288,13 +288,14 @@ class BCMethod implements MethodBuilder {
             }
             else
             {
-                //TODO: re-start split at point left off
-                //split_pc = myCode.splitExpressionOut(this, modClass,
-                //        optimalMinLength, maxStack);
-                
-                // DERBY-766 temp - don't call the split method yet.
-                split_pc = -1;
-            }
+                // Note the split expression does not re-start split
+                // at point left off by the previous split expression.
+                // This could be done but would require some level
+                // of stack depth history to be kept across calls.
+                split_pc = myCode.splitExpressionOut(this, modClass,
+                        optimalMinLength, maxStack);
+
+             }
 
             // Negative split point returned means that no split
             // was possible. Give up on this approach and goto
