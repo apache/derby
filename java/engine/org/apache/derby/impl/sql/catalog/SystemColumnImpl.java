@@ -26,6 +26,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * Implements the description of a column in a system table.
@@ -37,14 +38,13 @@ import org.apache.derby.iapi.types.DataValueFactory;
 
 public class SystemColumnImpl implements SystemColumn
 {
-	private	String	name;
-	private	int		id;
-	private	int		precision;
-	private int		scale;
-	private	boolean	nullability;
-	private String	dataType;
-	private boolean	builtInType;
-	private	int		maxLength;
+	private	final String	name;
+	private	final int		id;
+    
+    /**
+     * Fully described type of the column.
+     */
+    private final DataTypeDescriptor type;
 
 	/**
 	 * Constructor to create a description of a column in a system table.
@@ -68,12 +68,26 @@ public class SystemColumnImpl implements SystemColumn
 	{
 		this.name			= name;
 		this.id				= id;
-		this.precision		= precision;
-		this.scale			= scale;
-		this.nullability	= nullability;
-		this.dataType		= dataType;
-		this.builtInType	= builtInType;
-		this.maxLength		= maxLength;
+        
+        TypeId  typeId;
+
+        if (builtInType)
+        {
+            typeId = TypeId.getBuiltInTypeId(dataType);
+        }
+        else
+        {
+
+            typeId = TypeId.getUserDefinedTypeId(dataType, false);
+        }
+
+        this.type = new DataTypeDescriptor(
+                               typeId,
+                               precision,
+                               scale,
+                               nullability,
+                               maxLength
+                               );
 	}
 
 	/**
@@ -88,12 +102,7 @@ public class SystemColumnImpl implements SystemColumn
 								int		id,
 								boolean	nullability)
 	{
-		this.name			= name;
-		this.id				= id;
-		this.nullability	= nullability;
-		this.dataType		= "VARCHAR";
-		this.builtInType	= true;
-		this.maxLength		= 128;
+        this(name, id, 0, 0, nullability, "VARCHAR", true, 128);
 	}
 
 	/**
@@ -116,65 +125,11 @@ public class SystemColumnImpl implements SystemColumn
 		return	id;
 	}
 
-	/**
-	 * Gets the precision of this column.
-	 *
-	 * @return	The precision of data stored in this column.
-	 */
-	public int	getPrecision()
-	{
-		return	precision;
-	}
-
-	/**
-	 * Gets the scale of this column.
-	 *
-	 * @return	The scale of data stored in this column.
-	 */
-	public int	getScale()
-	{
-		return	scale;
-	}
-
-	/**
-	 * Gets the nullability of this column.
-	 *
-	 * @return	True if this column is nullable. False otherwise.
-	 */
-	public boolean	getNullability()
-	{
-		return	nullability;
-	}
-
-	/**
-	 * Gets the datatype of this column.
-	 *
-	 * @return	The datatype of this column.
-	 */
-	public String	getDataType()
-	{
-		return	dataType;
-	}
-
-	/**
-	 * Is it a built-in type?
-	 *
-	 * @return	True if it's a built-in type.
-	 */
-	public boolean	builtInType()
-	{
-		return builtInType;
-	}
-
-	/**
-	 * Gets the maximum length of this column.
-	 *
-	 * @return	The maximum length of data stored in this column.
-	 */
-	public int	getMaxLength()
-	{
-		return	maxLength;
-	}
-
+    /**
+     * Return the type of this column.
+     */
+    public DataTypeDescriptor getType() {
+        return type;
+    }
 }
 

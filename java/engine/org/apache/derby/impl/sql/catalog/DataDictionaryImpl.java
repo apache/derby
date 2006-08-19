@@ -7240,30 +7240,9 @@ public final class	DataDictionaryImpl
 													  TableDescriptor	td )
 						throws StandardException
 	{
-		DataTypeDescriptor	typeDesc;
-		TypeId	typeId;
-
-		if (column.builtInType())
-	    {
-			typeId = TypeId.getBuiltInTypeId(column.getDataType());
-		}
-		else
-		{
-
-			typeId = TypeId.getUserDefinedTypeId(column.getDataType(), false);
-		}
-
-		typeDesc = new DataTypeDescriptor(
-							   typeId,
-							   column.getPrecision(),
-							   column.getScale(),
-							   column.getNullability(),
-							   column.getMaxLength()
-							   );
-
 		//RESOLVEAUTOINCREMENT
 		return new ColumnDescriptor
-			(column.getName(), column.getID(), typeDesc, null, null, td,
+			(column.getName(), column.getID(), column.getType(), null, null, td,
 			 (UUID) null, // No defaults yet for system columns
 			 0, 0
 			 );
