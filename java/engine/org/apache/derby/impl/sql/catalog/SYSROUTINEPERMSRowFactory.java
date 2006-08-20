@@ -25,7 +25,6 @@ import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.PermissionsCatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -280,7 +279,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
         return row;
     } // end of buildIndexKeyRow
     
-    public int getPrimaryIndexNumber()
+    public int getPrimaryKeyIndexNumber()
     {
         return GRANTEE_ALIAS_GRANTOR_INDEX_NUM;
     }

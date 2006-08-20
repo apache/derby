@@ -25,7 +25,6 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.iapi.sql.dictionary.PermissionsCatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -368,7 +367,7 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
         return row;
     } // end of buildIndexRow
     
-    public int getPrimaryIndexNumber()
+    public int getPrimaryKeyIndexNumber()
     {
         return GRANTEE_TABLE_GRANTOR_INDEX_NUM;
     }

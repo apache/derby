@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.sql.dictionary.PermissionsCatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -312,7 +311,7 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
         return row;
     } // end of buildIndexKeyRow
     
-    public int getPrimaryIndexNumber()
+    public int getPrimaryKeyIndexNumber()
     {
         return GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM;
     }

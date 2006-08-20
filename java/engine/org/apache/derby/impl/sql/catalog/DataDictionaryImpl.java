@@ -29,7 +29,6 @@ import org.apache.derby.iapi.sql.conn.Authorizer;
 
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
-import org.apache.derby.iapi.sql.dictionary.PermissionsCatalogRowFactory;
 
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -10171,7 +10170,7 @@ public final class	DataDictionaryImpl
         perm.setGrantee( grantee);
         TabInfo ti = getNonCoreTI( catalogNumber);
         PermissionsCatalogRowFactory rf = (PermissionsCatalogRowFactory) ti.getCatalogRowFactory();
-        int primaryIndexNumber = rf.getPrimaryIndexNumber();
+        int primaryIndexNumber = rf.getPrimaryKeyIndexNumber();
         ConglomerateController heapCC = tc.openConglomerate( ti.getHeapConglomerate(),
                                                              false,  // do not keep open across commits
                                                              0,

@@ -19,11 +19,12 @@
 
  */
 
-package org.apache.derby.iapi.sql.dictionary;
+package org.apache.derby.impl.sql.catalog;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -33,24 +34,24 @@ import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.StringDataValue;
 
-public abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
+abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
 {
-    public static final String AUTHORIZATION_ID_TYPE = "VARCHAR";
-    public static final boolean AUTHORIZATION_ID_IS_BUILTIN_TYPE = true;
-    public static final int AUTHORIZATION_ID_LENGTH = Limits.MAX_IDENTIFIER_LENGTH;
+    static final String AUTHORIZATION_ID_TYPE = "VARCHAR";
+    static final boolean AUTHORIZATION_ID_IS_BUILTIN_TYPE = true;
+    static final int AUTHORIZATION_ID_LENGTH = Limits.MAX_IDENTIFIER_LENGTH;
 
-    public PermissionsCatalogRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
+    PermissionsCatalogRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                         boolean convertIdToLower)
     {
         super(uuidf,ef,dvf,convertIdToLower);
     }
 
-    protected DataValueDescriptor getAuthorizationID( String value)
+    DataValueDescriptor getAuthorizationID( String value)
     {
         return getDataValueFactory().getVarcharDataValue( value);
     }
 
-    protected DataValueDescriptor getNullAuthorizationID()
+    DataValueDescriptor getNullAuthorizationID()
     {
         return getDataValueFactory().getNullVarchar( (StringDataValue) null);
     }
@@ -63,16 +64,11 @@ public abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      *
      * @return The internal authorization ID
      */
-    protected String getAuthorizationID( ExecRow row, int columnPos)
+    String getAuthorizationID( ExecRow row, int columnPos)
         throws StandardException
     {
         return row.getColumn( columnPos).getString();
     }
-    
-    /**
-     * @return the index number of the primary key index.
-     */
-    public abstract int getPrimaryIndexNumber();
 
     /**
      * Build an index key row from a permission descriptor. A key row does not include the RowLocation column.
@@ -82,7 +78,7 @@ public abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      *
      * @exception StandardException standard error policy
      */
-    public abstract ExecIndexRow buildIndexKeyRow( int indexNumber,
+    abstract ExecIndexRow buildIndexKeyRow( int indexNumber,
                                                    PermissionsDescriptor perm)
         throws StandardException;
 
@@ -98,7 +94,7 @@ public abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      *
      * @exception StandardException standard error policy
      */
-    abstract public int orPermissions( ExecRow row, PermissionsDescriptor perm, boolean[] colsChanged)
+    abstract int orPermissions( ExecRow row, PermissionsDescriptor perm, boolean[] colsChanged)
         throws StandardException;
 
     /**
@@ -113,7 +109,7 @@ public abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      *
      * @exception StandardException standard error policy
      */
-    abstract public int removePermissions( ExecRow row, PermissionsDescriptor perm, boolean[] colsChanged)
+    abstract int removePermissions( ExecRow row, PermissionsDescriptor perm, boolean[] colsChanged)
         throws StandardException;
 
     /**
@@ -126,5 +122,5 @@ public abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
      * @param perm Permission descriptor
      * @throws StandardException
      */
-    abstract public void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm) throws StandardException;
+    abstract void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm) throws StandardException;
 }
