@@ -44,6 +44,8 @@ public class _Suite extends BaseTestCase  {
 	public static Test suite() {
 
 		TestSuite suite = new TestSuite("lang");
+        
+        suite.addTest(largeCodeGen.suite());
 
 		// suite.addTest(PrepareExecuteDDL.suite());
 		// suite.addTest(LangScripts.suite());

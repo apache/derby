@@ -150,3 +150,4 @@ lang/valuesclause.sql
 lang/views.sql
 lang/wisconsin.java
 lang/ShutdownDatabase.java
+lang/_Suite.junit
