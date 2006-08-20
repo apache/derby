@@ -2834,4 +2834,48 @@ NULL
 0.011   
 0.023   
 3 rows selected
+ij(MAMTA1)> -- DERBY-1538: Disable ability to GRANT or REVOKE from self
+CREATE FUNCTION F_ABS(P1 INT)
+RETURNS INT NO SQL
+RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'java.lang.Math.abs'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> create table mamta1Table ( i int, j int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> -- Try granting or revoking to mamta1. Should all fail
+grant select on mamta1Table to mamta1;
+ERROR: Failed with SQLSTATE 2850F
+ij(MAMTA1)> revoke select on mamta1Table from mamta1;
+ERROR: Failed with SQLSTATE 2850F
+ij(MAMTA1)> grant execute on function f_abs to mamta1;
+ERROR: Failed with SQLSTATE 2850F
+ij(MAMTA1)> revoke execute on function f_abs from mamta1 restrict;
+ERROR: Failed with SQLSTATE 2850F
+ij(MAMTA1)> -- Connect as database owner. Even she can not grant to owner or revoke from owner
+set connection satConnection;
+ij(SATCONNECTION)> set schema mamta1;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant select on mamta1Table to mamta1;
+ERROR: Failed with SQLSTATE 2850F
+ij(SATCONNECTION)> revoke select on mamta1Table from mamta1;
+ERROR: Failed with SQLSTATE 2850F
+ij(SATCONNECTION)> grant execute on function f_abs to mamta1;
+ERROR: Failed with SQLSTATE 2850F
+ij(SATCONNECTION)> revoke execute on function f_abs from mamta1 restrict;
+ERROR: Failed with SQLSTATE 2850F
+ij(SATCONNECTION)> -- But Grant/Revoke to another user should pass
+grant select on mamta1Table to randy;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> revoke select on mamta1Table from randy;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> grant execute on function f_abs to randy;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> revoke execute on function f_abs from randy restrict;
+0 rows inserted/updated/deleted
+ij(SATCONNECTION)> set connection mamta1;
+ij(MAMTA1)> drop table mamta1Table;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> drop function f_abs;
+0 rows inserted/updated/deleted
 ij(MAMTA1)> 

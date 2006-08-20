@@ -35,6 +35,7 @@ import org.apache.derby.impl.sql.execute.PrivilegeInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This node represents a set of privileges that are granted or revoked on one object.
@@ -96,16 +97,17 @@ public class PrivilegeNode extends QueryTreeNode
      * @param dependencies The list of privilege objects that this statement has already seen.
      *               If the object of this privilege is not in the list then this statement is registered
      *               as dependent on the object.
+     * @param grantees The list of grantees
      *
      * @return the bound node
      *
      * @exception StandardException	Standard error policy.
      */
-	public QueryTreeNode bind( HashMap dependencies ) throws StandardException
+	public QueryTreeNode bind( HashMap dependencies, List grantees ) throws StandardException
 	{
         Provider dependencyProvider = null;
         SchemaDescriptor sd = null;
-        
+		
         switch( objectType)
         {
         case TABLE_PRIVILEGES:
@@ -123,10 +125,14 @@ public class PrivilegeNode extends QueryTreeNode
             if (isSessionSchema(sd.getSchemaName()))
                 throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 
-            // GrantRevoke TODO: Disable grant on VTIs and Synonyms
             if (td.getTableType() != TableDescriptor.BASE_TABLE_TYPE &&
             		td.getTableType() != TableDescriptor.VIEW_TYPE)
                 throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, tableName.getFullTableName());
+
+			// Can not grant/revoke permissions from self
+			if (grantees.contains(sd.getAuthorizationId()))
+				throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED,
+						 td.getQualifiedName());
 
             specificPrivileges.bind( td);
             dependencyProvider = td;
@@ -145,6 +151,11 @@ public class PrivilegeNode extends QueryTreeNode
                 sd.getUUID().toString(), rd.name.getTableName(),
                 rd.isFunction ? AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR : AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR
                 );
+
+			// Can not grant/revoke permissions from self
+			if (grantees.contains(sd.getAuthorizationId()))
+				throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED,
+						 rd.name.getFullTableName());
 
             if( rd.paramTypeList == null)
             {
@@ -198,6 +209,7 @@ public class PrivilegeNode extends QueryTreeNode
             dependencyProvider = proc;
             break;
         }
+
         if( dependencyProvider != null)
         {
             if( dependencies.get( dependencyProvider) == null)

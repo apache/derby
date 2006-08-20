@@ -94,7 +94,7 @@ public class RevokeNode extends MiscellaneousStatementNode
      */
 	public QueryTreeNode bind() throws StandardException
 	{
-        privileges = (PrivilegeNode) privileges.bind( new HashMap());
+        privileges = (PrivilegeNode) privileges.bind( new HashMap(), grantees);
         return this;
     } // end of bind
 

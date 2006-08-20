@@ -1782,3 +1782,43 @@ select cast (TAN(d) as DECIMAL(6,3)) AS TAN FROM SYSFUN_MATH_TEST;
 
 select cast (DEGREES(d) as DECIMAL(6,3)) AS DEGREES FROM SYSFUN_MATH_TEST;
 select cast (RADIANS(d) as DECIMAL(6,3)) AS RADIANS FROM SYSFUN_MATH_TEST;
+
+-- DERBY-1538: Disable ability to GRANT or REVOKE from self
+
+CREATE FUNCTION F_ABS(P1 INT)
+RETURNS INT NO SQL
+RETURNS NULL ON NULL INPUT
+EXTERNAL NAME 'java.lang.Math.abs'
+LANGUAGE JAVA PARAMETER STYLE JAVA;
+
+create table mamta1Table ( i int, j int);
+
+-- Try granting or revoking to mamta1. Should all fail
+
+grant select on mamta1Table to mamta1;
+revoke select on mamta1Table from mamta1;
+
+grant execute on function f_abs to mamta1;
+revoke execute on function f_abs from mamta1 restrict;
+
+-- Connect as database owner. Even she can not grant to owner or revoke from owner
+set connection satConnection;
+set schema mamta1;
+
+grant select on mamta1Table to mamta1;
+revoke select on mamta1Table from mamta1;
+
+grant execute on function f_abs to mamta1;
+revoke execute on function f_abs from mamta1 restrict;
+
+-- But Grant/Revoke to another user should pass
+grant select on mamta1Table to randy;
+revoke select on mamta1Table from randy;
+
+grant execute on function f_abs to randy;
+revoke execute on function f_abs from randy restrict;
+
+set connection mamta1;
+
+drop table mamta1Table;
+drop function f_abs;
