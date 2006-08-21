@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import java.sql.Types;
+
 import	org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -36,38 +38,123 @@ import org.apache.derby.iapi.types.TypeId;
  * @author Rick Hillegas
  */
 
-public class SystemColumnImpl implements SystemColumn
+class SystemColumnImpl implements SystemColumn
 {
 	private	final String	name;
-	private	final int		id;
-    
+   
     /**
      * Fully described type of the column.
      */
     private final DataTypeDescriptor type;
+    
+    /**
+     * Create a system column for a builtin type.
+     * 
+     * @param name
+     *            name of column
+     * @param jdbcTypeId
+     *            JDBC type id from java.sql.Types
+     * @param nullability
+     *            Whether or not column accepts nulls.
+     */
+    static SystemColumn getColumn(String name, int jdbcTypeId,
+            boolean nullability) {
+        return new SystemColumnImpl(name, DataTypeDescriptor
+                .getBuiltInDataTypeDescriptor(jdbcTypeId, nullability));
+    }
+
+    /**
+     * Create a system column for an identifer with consistent type of
+     * VARCHAR(128)
+     * 
+     * @param name
+     *            Name of the column.
+     * @param nullability
+     *            Nullability of the column.
+     * @return Object representing the column.
+     */
+    static SystemColumn getIdentifierColumn(String name, boolean nullability) {
+        return new SystemColumnImpl(name, DataTypeDescriptor
+                .getBuiltInDataTypeDescriptor(Types.VARCHAR, nullability, 128));
+    }
+
+    /**
+     * Create a system column for a character representation of a UUID with
+     * consistent type of CHAR(36)
+     * 
+     * @param name
+     *            Name of the column.
+     * @param nullability
+     *            Nullability of the column.
+     * @return Object representing the column.
+     */
+    static SystemColumn getUUIDColumn(String name, boolean nullability) {
+        return new SystemColumnImpl(name, DataTypeDescriptor
+                .getBuiltInDataTypeDescriptor(Types.CHAR, nullability, 36));
+    }
+
+    /**
+     * Create a system column for a character representation of an indicator
+     * column with consistent type of CHAR(1) NOT NULL
+     * 
+     * @param name
+     *            Name of the column.
+     * @return Object representing the column.
+     */
+    static SystemColumn getIndicatorColumn(String name) {
+        return new SystemColumnImpl(name, DataTypeDescriptor
+                .getBuiltInDataTypeDescriptor(Types.CHAR, false, 1));
+    }
+
+    /**
+     * Create a system column for a java column.
+     * 
+     * @param name
+     *            Name of the column.
+     * @param javaClassName
+     * @param nullability
+     *            Nullability of the column.
+     * @return Object representing the column.
+     */
+    static SystemColumn getJavaColumn(String name, String javaClassName,
+            boolean nullability) {
+
+        TypeId typeId = TypeId.getUserDefinedTypeId(javaClassName, false);
+
+        DataTypeDescriptor dtd = new DataTypeDescriptor(typeId, nullability);
+        return new SystemColumnImpl(name, dtd);
+    }
+
+    /**
+     * Create a SystemColumnImpl representing the given name and type.
+     */
+    private SystemColumnImpl(String name, DataTypeDescriptor type) {
+        this.name = name;
+        this.type = type;
+    }
 
 	/**
-	 * Constructor to create a description of a column in a system table.
-	 *
-	 *	@param	name of column.
-	 *	@param	id of column.
-	 *	@param	precision of data in column.
-	 *	@param	scale of data in column.
-	 *	@param	nullability Whether or not column accepts nulls.
-	 *	@param	dataType Datatype of column.
-	 *	@param	maxLength Maximum length of data in column.
-	 */
-	public	SystemColumnImpl(	String	name,
+     * Constructor to create a description of a column in a system table.
+     * 
+     * @param name
+     *            of column.
+     * @param id
+     *            of column.
+     * @param nullability
+     *            Whether or not column accepts nulls.
+     * @param dataType
+     *            Datatype of column.
+     * @param maxLength
+     *            Maximum length of data in column.
+     */
+	SystemColumnImpl(	String	name,
 								int		id,
-								int		precision,
-								int		scale,
 								boolean	nullability,
 								String	dataType,
 								boolean	builtInType,
 								int		maxLength )
 	{
 		this.name			= name;
-		this.id				= id;
         
         TypeId  typeId;
 
@@ -83,12 +170,23 @@ public class SystemColumnImpl implements SystemColumn
 
         this.type = new DataTypeDescriptor(
                                typeId,
-                               precision,
-                               scale,
+                               0,
+                               0,
                                nullability,
                                maxLength
                                );
 	}
+    SystemColumnImpl(   String  name,
+            int     id,
+            int ignoreP,
+            int ignoreS,
+            boolean nullability,
+            String  dataType,
+            boolean builtInType,
+            int     maxLength )
+{
+        this(name, id, nullability, dataType, builtInType, maxLength);
+}
 
 	/**
 	 * Constructor to create a description of a column in a system table.
@@ -98,11 +196,11 @@ public class SystemColumnImpl implements SystemColumn
 	 *	@param	id of column.
 	 *	@param	nullability Whether or not column accepts nulls.
 	 */
-	public	SystemColumnImpl(	String	name,
+	SystemColumnImpl(	String	name,
 								int		id,
 								boolean	nullability)
 	{
-        this(name, id, 0, 0, nullability, "VARCHAR", true, 128);
+        this(name, id, nullability, "VARCHAR", true, 128);
 	}
 
 	/**
@@ -113,16 +211,6 @@ public class SystemColumnImpl implements SystemColumn
 	public String	getName()
 	{
 		return	name;
-	}
-
-	/**
-	 * Gets the id of this column.
-	 *
-	 * @return	The column id.
-	 */
-	public int	getID()
-	{
-		return	id;
 	}
 
     /**

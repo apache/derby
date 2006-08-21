@@ -40,13 +40,6 @@ public interface SystemColumn
 	 * @return	The column name.
 	 */
 	public String	getName();
-
-	/**
-	 * Gets the id of this column.
-	 *
-	 * @return	The column id.
-	 */
-	public int	getID();
     
     /**
      * Return the type of this column.

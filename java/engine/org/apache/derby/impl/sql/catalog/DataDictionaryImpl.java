@@ -6505,7 +6505,7 @@ public final class	DataDictionaryImpl
 		TableDescriptor td = getTableDescriptor(rowFactory.getCatalogName(), sd);
 
 		theColumn = columns[columnNumber - 1];	// from 1 to 0 based
-		ColumnDescriptor cd = makeColumnDescriptor(theColumn, td );
+		ColumnDescriptor cd = makeColumnDescriptor(theColumn, columnNumber, td );
 		columnName = cd.getColumnName();
 		cd.getType().setNullability(nullability);
 		int[] columnNameColArray = new int[1];
@@ -6583,7 +6583,7 @@ public final class	DataDictionaryImpl
 			columnID = newColumnIDs[ix];
 			currentColumn = columns[ columnID - 1 ];	// from 1 to 0 based
 
-			cdArray[ix] = makeColumnDescriptor( currentColumn, td );
+			cdArray[ix] = makeColumnDescriptor( currentColumn, ix + 1, td );
 		}
 		addDescriptorArray(cdArray, td, SYSCOLUMNS_CATALOG_NUM, false, tc);
 
@@ -7215,7 +7215,8 @@ public final class	DataDictionaryImpl
 					SanityManager.THROWASSERT("column "+columnNumber+" for table "+ti.getTableName()+" is null");
 				}
 			}
-			cdlArray[columnNumber] = makeColumnDescriptor( column, td );
+			cdlArray[columnNumber] = makeColumnDescriptor( column,
+                    columnNumber + 1, td );
 		}
 		addDescriptorArray(cdlArray, td, SYSCOLUMNS_CATALOG_NUM, false, tc);
 		
@@ -7229,6 +7230,7 @@ public final class	DataDictionaryImpl
 	  *	Converts a SystemColumn to a ColumnDescriptor.
 	  *
 	  *	@param	column	a SystemColumn
+      * @param  columnPosition Position of the column in the table, one based.
 	  *	@param	td		descriptor for table that column lives in
 	  *
 	  *	@return	a ColumnDes*criptor
@@ -7236,12 +7238,13 @@ public final class	DataDictionaryImpl
 	  *	@exception StandardException Standard Cloudscape error policy
 	  */
 	private	ColumnDescriptor	makeColumnDescriptor( SystemColumn		column,
+            int columnPosition,
 													  TableDescriptor	td )
 						throws StandardException
 	{
 		//RESOLVEAUTOINCREMENT
 		return new ColumnDescriptor
-			(column.getName(), column.getID(), column.getType(), null, null, td,
+			(column.getName(), columnPosition, column.getType(), null, null, td,
 			 (UUID) null, // No defaults yet for system columns
 			 0, 0
 			 );
