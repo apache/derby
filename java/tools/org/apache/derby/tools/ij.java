@@ -31,6 +31,7 @@ import org.apache.derby.impl.tools.ij.utilMain;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
@@ -74,11 +75,12 @@ public class ij {
   /**
    * Run a SQL script from an InputStream and write
    * the resulting output to the provided PrintStream.
+   * SQL commands are separated by a semi-colon ';' character.
    * 
    * @param conn Connection to be used as the script's default connection. 
    * @param sqlIn InputStream for the script.
    * @param inputEncoding Encoding of the script.
-   * @param sqlOut PrintStream for the script's output
+   * @param sqlOut OutputStream for the script's output
    * @param outputEncoding Output encoding to use.
    * @return Number of SQLExceptions thrown during the execution, -1 if not known.
    * @throws UnsupportedEncodingException
@@ -87,7 +89,7 @@ public class ij {
 		  Connection conn,
 		  InputStream sqlIn,
 		  String inputEncoding,
-		  PrintStream sqlOut,
+		  OutputStream sqlOut,
 		  String outputEncoding)
 		  throws UnsupportedEncodingException
   {
@@ -119,9 +121,7 @@ public class ij {
 	  
 	  utilMain um = ijE.getutilMain(1, lo);
 
-	  um.goScript(conn, li);
-	  
-	  return -1;
+	  return um.goScript(conn, li);
   }
 
   private ij() { // no instances allowed

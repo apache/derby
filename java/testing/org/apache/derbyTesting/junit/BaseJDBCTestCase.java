@@ -19,10 +19,16 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.sql.*;
+
+import org.apache.derby.tools.ij;
 
 
 /**
@@ -177,6 +183,45 @@ public abstract class BaseJDBCTestCase
     public Connection openConnection(String databaseName) throws SQLException
     {
         return getTestConfiguration().openConnection(databaseName);
+    }
+    
+    /**
+     * Run a SQL script through ij discarding the output
+     * using this object's default connection. Intended for
+     * setup scripts.
+     * @throws UnsupportedEncodingException 
+     * @throws SQLException 
+     */
+    public int runScript(InputStream script, String encoding)
+        throws UnsupportedEncodingException, SQLException
+    {
+        // Sink output.
+        OutputStream sink = new OutputStream() {
+            public void write(byte[] b, int off, int len) {}
+            public void write(int b) {}
+        };
+        
+        // Use the same encoding as the input for the output.    
+        return ij.runScript(getXConnection(), script, encoding,
+                sink, encoding);       
+    }
+    
+    /**
+     * Run a set of SQL commands from a String discarding the output.
+     * Commands are separated by a semi-colon. Connection used
+     * is this objects default connection.
+     * @param sqlCommands
+     * @return Number of errors executing the script.
+     * @throws UnsupportedEncodingException
+     * @throws SQLException
+     */
+    public int runSQLCommands(String sqlCommands)
+        throws UnsupportedEncodingException, SQLException
+    {
+        byte[] raw = sqlCommands.getBytes("UTF-8");
+        ByteArrayInputStream in = new ByteArrayInputStream(raw);
+        
+        return runScript(in, "UTF-8");
     }
     
     /**

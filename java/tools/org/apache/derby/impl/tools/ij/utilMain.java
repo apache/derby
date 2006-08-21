@@ -83,6 +83,11 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * displaying a SQLException.
 	 */
 	private final boolean showErrorCode;
+    
+    /**
+     * Value of the system property ij.execptionTrace
+     */
+    private final String ijExceptionTrace;
 
 	protected boolean isJCC;	//The driver being used is JCC
 
@@ -146,6 +151,8 @@ public class utilMain implements java.security.PrivilegedAction {
 			Boolean.valueOf(
 					util.getSystemProperty("ij.showErrorCode")
 					).booleanValue();
+        
+        ijExceptionTrace = util.getSystemProperty("ij.exceptionTrace");
 
 		this.numConnections = numConnections;
 		/* 1 StatementFinder and ConnectionEnv per connection/user. */
@@ -359,11 +366,11 @@ public class utilMain implements java.security.PrivilegedAction {
 				}
 
     			} catch (ParseException e) {
-                    scriptErrorCount++;
-					if (command != null) doCatch(command);
+ 					if (command != null)
+                        scriptErrorCount += doCatch(command) ? 0 : 1;
 				} catch (TokenMgrError e) {
-                    scriptErrorCount++;
-					if (command != null) doCatch(command);
+ 					if (command != null)
+                        scriptErrorCount += doCatch(command) ? 0 : 1;
     			} catch (SQLException e) {
                     scriptErrorCount++;
 					// SQL exception occurred in ij's actions; print and continue
@@ -491,12 +498,13 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * catch processing on failed commands. This really ought to
 	 * be in ij somehow, but it was easier to catch in Main.
 	 */
-	private void doCatch(String command) {
+	private boolean doCatch(String command) {
 		// this retries the failed statement
 		// as a JSQL statement; it uses the
 		// ijParser since that maintains our
 		// connection and state.
 
+        
 	    try {
 			boolean	elapsedTimeOn = ijParser.getElapsedTimeState();
 			long	beginTime = 0;
@@ -515,6 +523,7 @@ public class utilMain implements java.security.PrivilegedAction {
 				out.println(langUtil.getTextMessage("IJ_ElapTime0Mil_4", 
 				langUtil.getNumberAsString(endTime - beginTime)));
 			}
+            return true;
 
 	    } catch (SQLException e) {
 			// SQL exception occurred in ij's actions; print and continue
@@ -530,6 +539,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	  		out.println(langUtil.getTextMessage("IJ_JavaErro0_7", t.toString()));
 			doTrace(t);
 	    }
+        return false;
 	}
 
 	/**
@@ -578,7 +588,7 @@ public class utilMain implements java.security.PrivilegedAction {
 			String st1 = JDBCDisplayUtil.mapNull(e.getSQLState(),langUtil.getTextMessage("IJ_NoSqls"));
 			String st2 = JDBCDisplayUtil.mapNull(e.getMessage(),langUtil.getTextMessage("IJ_NoMess"));
 			out.println(langUtil.getTextMessage("IJ_Erro012",  st1, st2, errorCode));
-			JDBCDisplayUtil.doTrace(out, e);
+			doTrace(e);
 		}
 		if (fatalException != null)
 		{
@@ -590,7 +600,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * stack trace dumper
 	 */
 	private void doTrace(Throwable t) {
-		if (util.getSystemProperty("ij.exceptionTrace") != null) {
+		if (ijExceptionTrace != null) {
 			t.printStackTrace(out);
 		}
 		out.flush();

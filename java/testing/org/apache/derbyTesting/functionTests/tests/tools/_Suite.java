@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.lang._Suite
+   Derby - Class org.apache.derbyTesting.functionTests.tests.tools._Suite
 
        Licensed to the Apache Software Foundation (ASF) under one
        or more contributor license agreements.  See the NOTICE file
@@ -19,7 +19,7 @@
        specific language governing permissions and limitations
        under the License
 */
-package org.apache.derbyTesting.functionTests.tests.lang;
+package org.apache.derbyTesting.functionTests.tests.tools;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.JDBC;
@@ -29,38 +29,30 @@ import junit.framework.TestSuite;
 
 /**
  * Suite to run all JUnit tests in this package:
- * org.apache.derbyTesting.functionTests.tests.lang
+ * org.apache.derbyTesting.functionTests.tests.tools
  *
  */
-public class _Suite extends BaseTestCase  {
+public class _Suite extends BaseTestCase {
 
-	/**
-	 * Use suite method instead.
-	 */
-	private _Suite(String name) {
-		super(name);
-	}
+    /**
+     * Use suite method instead.
+     */
+    private _Suite(String name) {
+        super(name);
+    }
 
-	public static Test suite() {
+    public static Test suite() {
 
-		TestSuite suite = new TestSuite("lang");
-        
-        // DERBY-1315 and DERBY-1735 need to be addressed
-        // before re-enabling this test as it's memory use is
-        // different on different vms leading to failures in
-        // the nightly runs.
-        // suite.addTest(largeCodeGen.suite());
+        TestSuite suite = new TestSuite("tools");
 
-		// suite.addTest(PrepareExecuteDDL.suite());
-		// suite.addTest(LangScripts.suite());
-		
-		// Tests that are compiled using 1.4 target need to
-		// be added this way, otherwise creating the suite
-		// will throw an invalid class version error
-		if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169())
-		{
-		}
+        suite.addTest(IJRunScriptTest.suite());
 
-		return suite;
-	}
+        // Tests that are compiled using 1.4 target need to
+        // be added this way, otherwise creating the suite
+        // will throw an invalid class version error
+        if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169()) {
+        }
+
+        return suite;
+    }
 }
