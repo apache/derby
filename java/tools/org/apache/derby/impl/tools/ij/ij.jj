@@ -128,6 +128,14 @@ class ij {
 	ij(ijTokenManager tm, utilMain utilInstance) {
 		this(tm);
 		this.utilInstance = utilInstance;
+	}
+	
+	/**
+	   Initialize this parser from the environment
+	   (system properties). Used when ij is being run
+	   as a command line program.
+	*/
+	void initFromEnvironment() {
 
 		// load all protocols specified via properties
 		//

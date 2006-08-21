@@ -78,6 +78,11 @@ public class utilMain implements java.security.PrivilegedAction {
 	private LocalizedOutput out = null;
 	private Properties connAttributeDefaults;
 	private Hashtable ignoreErrors;
+	/**
+	 * True if to display the error code when
+	 * displaying a SQLException.
+	 */
+	private final boolean showErrorCode;
 
 	protected boolean isJCC;	//The driver being used is JCC
 
@@ -136,6 +141,11 @@ public class utilMain implements java.security.PrivilegedAction {
 		ijParser = new ij(ijTokMgr, this);
 		this.out = out;
 		this.ignoreErrors = ignoreErrors;
+		
+		showErrorCode = 
+			Boolean.valueOf(
+					util.getSystemProperty("ij.showErrorCode")
+					).booleanValue();
 
 		this.numConnections = numConnections;
 		/* 1 StatementFinder and ConnectionEnv per connection/user. */
@@ -159,8 +169,10 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * Initialize the connections from the environment.
 	 *
 	 */
-	public void initConnections()
+	public void initFromEnvironment()
 	{
+		ijParser.initFromEnvironment();
+		
 		for (int ictr = 0; ictr < numConnections; ictr++)
 		{
 			try {
@@ -257,23 +269,25 @@ public class utilMain implements java.security.PrivilegedAction {
 	 * @param conn
 	 * @param in
 	 */
-	public void goScript(Connection conn,
+	public int goScript(Connection conn,
 			LocalizedInput in)
 	{
 		JDBCDisplayUtil.showSelectCount = false;
 		connEnv[0].addSession(conn, (String) null);
 		fileInput = initialFileInput = !in.isStandardInput();
 		commandGrabber[0].ReInit(in);
-		runScriptGuts();
+		return runScriptGuts();
 	}
 	
 	/**
 	 * Run the guts of the script. Split out to allow
 	 * calling from the full ij and the minimal goScript.
+     * @return The number of errors seen in the script.
 	 *
 	 */
-	private void runScriptGuts() {
+	private int runScriptGuts() {
 
+        int scriptErrorCount = 0;
 		
 		boolean done = false;
 		String command = null;
@@ -345,18 +359,23 @@ public class utilMain implements java.security.PrivilegedAction {
 				}
 
     			} catch (ParseException e) {
+                    scriptErrorCount++;
 					if (command != null) doCatch(command);
 				} catch (TokenMgrError e) {
+                    scriptErrorCount++;
 					if (command != null) doCatch(command);
     			} catch (SQLException e) {
+                    scriptErrorCount++;
 					// SQL exception occurred in ij's actions; print and continue
 					// unless it is considered fatal.
 					handleSQLException(out,e);
     			} catch (ijException e) {
+                    scriptErrorCount++;
 					// exception occurred in ij's actions; print and continue
     			  	out.println(langUtil.getTextMessage("IJ_IjErro0",e.getMessage()));
 					doTrace(e);
     			} catch (Throwable e) {
+                    scriptErrorCount++;
     			  	out.println(langUtil.getTextMessage("IJ_JavaErro0",e.toString()));
 					doTrace(e);
 				}
@@ -364,6 +383,8 @@ public class utilMain implements java.security.PrivilegedAction {
 			/* Go to the next connection/user, if there is one */
 			currCE = ++currCE % connEnv.length;
 		}
+        
+        return scriptErrorCount;
 	}
 	
 	/**
@@ -524,7 +545,7 @@ public class utilMain implements java.security.PrivilegedAction {
 		String sqlState = null;
 		SQLException fatalException = null;
 
-		if (Boolean.getBoolean("ij.showErrorCode")) {
+		if (showErrorCode) {
 			errorCode = langUtil.getTextMessage("IJ_Erro0", 
 			langUtil.getNumberAsString(e.getErrorCode()));
 		}

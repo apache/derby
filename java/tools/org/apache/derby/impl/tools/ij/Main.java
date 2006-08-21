@@ -216,7 +216,7 @@ public class Main {
 	        out = LocalizedResource.getInstance().getNewOutput(System.out);
 		}
 		utilInstance = getutilMain(1, out);
-		utilInstance.initConnections();
+		utilInstance.initFromEnvironment();
 	}
 
 	/**
