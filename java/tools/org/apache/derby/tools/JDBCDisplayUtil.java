@@ -67,40 +67,6 @@ public class JDBCDisplayUtil {
         LocalizedResource.getInstance();
     }
 
-
-	//-----------------------------------------------------------------
-	// Methods for initialization resource bundle and codeset's output
-	
-	/**
-	 * init method - will init the class to support a locale and
-	 * codeset based on the derby.ui.locale and derby.ui.codeset
-	 * properties if exists or using the default values from the JVM.
-	 */
-	static public boolean init() {
-		return (LocalizedResource.getInstance() != null);
-	}
-
-	/**
-	 * init method - will init the class to support a locale and
-	 * codeset based on the derby.ui.locale properties and on the 
-     * given codeset if exists or using the default values from the JVM.
-	 */
-	public static boolean init(String codeset) {
-		return init(codeset, null);
-	}
-
-	/**
-	 * init method - will init the class to support a locale and
-	 * codeset based on the given codeset and locale.
-	 * If the parameters are null it will try to init use derby.ui.locale
-	 * and derby.ui.codeset properties if exists or using the default
-	 * values from the JVM.
-	 */
-	public static boolean init(String pCodeset, String pLocale) {
-		LocalizedResource.getInstance().init(pCodeset, pLocale,null);
-		return true;
-	}
-
 	//-----------------------------------------------------------------
 	// Methods for displaying and checking errors
 
