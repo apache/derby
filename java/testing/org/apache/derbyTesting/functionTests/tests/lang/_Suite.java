@@ -45,7 +45,11 @@ public class _Suite extends BaseTestCase  {
 
 		TestSuite suite = new TestSuite("lang");
         
-        suite.addTest(largeCodeGen.suite());
+        // DERBY-1315 and DERBY-1735 need to be addressed
+        // before re-enabling this test as it's memory use is
+        // different on different vms leading to failures in
+        // the nightly runs.
+        // suite.addTest(largeCodeGen.suite());
 
 		// suite.addTest(PrepareExecuteDDL.suite());
 		// suite.addTest(LangScripts.suite());
