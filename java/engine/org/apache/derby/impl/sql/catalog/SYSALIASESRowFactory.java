@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql.catalog;
 
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.catalog.TypeDescriptor;
 
@@ -423,115 +424,31 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 										aliasInfo, specificName);
 	}
 
-	/**
-	 * Builds a list of columns suitable for creating this Catalog.
-	 *
-	 *
-	 * @return array of SystemColumn suitable for making this catalog.
-	 */
-	public SystemColumn[]	buildColumnList()
-	{
-		SystemColumn[]			columnList = new SystemColumn[SYSALIASES_COLUMN_COUNT];
-
-		// describe columns
-
-		columnList[0] =
-					new SystemColumnImpl(
-							convertIdCase( "ALIASID"),			// column name
-							1,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			               );
-
-		columnList[1] =
-					new SystemColumnImpl(
-							convertIdCase( "ALIAS"),			// column name
-							2,	// column number
-							false				// nullability
-			               );
-
-		columnList[2] = new SystemColumnImpl(	
-								convertIdCase( "SCHEMAID"),			// column name
-								3,	// column number
-								0,					// precision
-								0,					// scale
-								true,				// nullability
-								"CHAR",				// dataType
-								true,				// built-in type
-								36					// maxLength
-			                   );
-
-		columnList[3] =
-					new SystemColumnImpl(
-							convertIdCase( "JAVACLASSNAME"),		// column name
-							4,
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"LONG VARCHAR",			// dataType
-							true,				// built-in type
-							Integer.MAX_VALUE	// maxLength
-							);
-
-		columnList[4] =
-					new SystemColumnImpl(
-							convertIdCase( "ALIASTYPE"),		// column name
-							5,
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",			// dataType
-							true,				// built-in type
-							1					// maxLength
-							);
-
-		columnList[5] =
-					new SystemColumnImpl(
-							convertIdCase( "NAMESPACE"),		// column name
-							6,
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",			// dataType
-							true,				// built-in type
-							1					// maxLength
-							);
-
-		columnList[6] =
-					new SystemColumnImpl(
-							convertIdCase( "SYSTEMALIAS"),		// column name
-							7,
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"BOOLEAN",			// dataType
-							true,				// built-in type
-							0					// maxLength
-							);
-
-		columnList[7] = 
-					new SystemColumnImpl(	
-							convertIdCase( "ALIASINFO"),			// column name
-							8,	// column number
-							0,					// precision
-							0,					// scale
-							true,				// nullability
-							"org.apache.derby.catalog.AliasInfo",	    // dataType
-							false,				// built-in type
-							TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN // maxLength
-			               );
-
-		columnList[8] =
-					new SystemColumnImpl(
-							convertIdCase( "SPECIFICNAME"),
-							9,	// column number
-							false				// nullability
-			               );
-
-		return	columnList;
-	}
+    /**
+     * Builds a list of columns suitable for creating this Catalog.
+     * DERBY-1734 fixed an issue where older code created the
+     * BOOLEAN column SYSTEMALIAS with maximum length 0 instead of 1.
+     * DERBY-1742 was opened to track if upgrade changes are needed.
+     *
+     *
+     * @return array of SystemColumn suitable for making this catalog.
+     */
+    public SystemColumn[]   buildColumnList()
+    {
+      return new SystemColumn[] {
+        
+        SystemColumnImpl.getUUIDColumn("ALIASID", false),
+        SystemColumnImpl.getIdentifierColumn("ALIAS", false),
+        SystemColumnImpl.getUUIDColumn("SCHEMAID", true),
+        SystemColumnImpl.getColumn("JAVACLASSNAME",
+                java.sql.Types.LONGVARCHAR, false, Integer.MAX_VALUE),
+        SystemColumnImpl.getIndicatorColumn("ALIASTYPE"),
+        SystemColumnImpl.getIndicatorColumn("NAMESPACE"),
+        SystemColumnImpl.getColumn("SYSTEMALIAS",
+                JDBC30Translation.SQL_TYPES_BOOLEAN, false),
+        SystemColumnImpl.getJavaColumn("ALIASINFO",
+                "org.apache.derby.catalog.AliasInfo", true),
+        SystemColumnImpl.getIdentifierColumn("SPECIFICNAME", false)
+        };
+    }
 }

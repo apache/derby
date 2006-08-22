@@ -62,7 +62,23 @@ class SystemColumnImpl implements SystemColumn
         return new SystemColumnImpl(name, DataTypeDescriptor
                 .getBuiltInDataTypeDescriptor(jdbcTypeId, nullability));
     }
-
+    
+    /**
+     * Create a system column for a builtin type.
+     * 
+     * @param name
+     *            name of column
+     * @param jdbcTypeId
+     *            JDBC type id from java.sql.Types
+     * @param nullability
+     *            Whether or not column accepts nulls.
+     */
+    static SystemColumn getColumn(String name, int jdbcTypeId,
+            boolean nullability,int maxLength) {
+        return new SystemColumnImpl(name, DataTypeDescriptor
+                .getBuiltInDataTypeDescriptor(jdbcTypeId, nullability, maxLength));
+    }
+    
     /**
      * Create a system column for an identifer with consistent type of
      * VARCHAR(128)
