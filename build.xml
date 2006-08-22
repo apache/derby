@@ -71,7 +71,7 @@
       <or>
         <equals arg1="${sane}" arg2="true"/>
         <not>
-          <isset property="${sane}"/>
+          <isset property="sane"/>
         </not>
       </or>
     </condition>
