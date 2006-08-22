@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 
 import junit.framework.Test; 
 import junit.framework.TestSuite;
@@ -63,6 +64,6 @@ public class _Suite extends BaseTestCase  {
 			suite.addTest(ScrollResultSetTest.suite());
 		}
 
-		return suite;
+		return new NetworkServerTestSetup(suite);
 	}
 }

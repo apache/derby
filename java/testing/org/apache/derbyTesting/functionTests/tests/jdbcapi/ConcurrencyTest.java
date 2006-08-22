@@ -20,8 +20,9 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import junit.framework.*;
 import java.sql.*;
-
+import java.util.Properties;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
 /**
  * Testing concurrency behaviour in derby when creating the resultsets with
@@ -830,42 +831,51 @@ public class ConcurrencyTest extends SURBaseTest {
     // The default is to run all tests in the TestCase subclass.
     
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite();
         
-        // DB2 client doesn't support this functionality
-        if (usingDerbyNet())
-            return suite;
-
-                
-        // Requires holdability
-        if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169()) {
-        
-        suite.addTest(new ConcurrencyTest("testUpdateLockDownGrade1"));
-        suite.addTest(new ConcurrencyTest("testAquireUpdateLock1"));
-                
-        suite.addTest(new ConcurrencyTest("testSharedLocks1"));
+        // This testcase does not require JDBC3/JSR169, since it does not
+        // specify result set concurrency) in Connection.createStatement().
         suite.addTest(new ConcurrencyTest("testSharedLocks2"));
-        suite.addTest(new ConcurrencyTest("testSharedAndUpdateLocks1"));
-        suite.addTest(new ConcurrencyTest("testSharedAndUpdateLocks2"));
         
-        // The following testcases requires Scrollable Updatable ResultSets:
-//         suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple1"));
-//         suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple2"));
-//         suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple3"));
-//         suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple4"));
-        
-        
-//         suite.addTest(new ConcurrencyTest("testUpdateModifiedTuple1"));
-//         suite.addTest(new ConcurrencyTest("testUpdateModifiedTuple2"));
-//         suite.addTest(new ConcurrencyTest("testTableIntentLock1"));
-//         suite.addTest(new ConcurrencyTest("testUpdateLockInReadUncommitted"));
-//         suite.addTest(new ConcurrencyTest("testDefragmentDuringScan"));
-//         suite.addTest(new ConcurrencyTest("testTruncateDuringScan"));
-        /// ---------------
-                
-        }
+        // The following testcases requires JDBC3/JSR169:
+        if ((JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169())) {
             
-        return suite;
+            // The following testcases do not use updatable result sets:
+            suite.addTest(new ConcurrencyTest("testUpdateLockDownGrade1"));
+            suite.addTest(new ConcurrencyTest("testAquireUpdateLock1"));
+            suite.addTest(new ConcurrencyTest("testSharedLocks1"));
+            suite.addTest(new ConcurrencyTest("testSharedAndUpdateLocks1"));
+            suite.addTest(new ConcurrencyTest("testSharedAndUpdateLocks2"));
+            
+            // The following testcases do use updatable result sets.            
+            if (!usingDerbyNet()) { // DB2 client does not support UR with Derby
+                suite.addTest(new ConcurrencyTest ("testUpdatePurgedTuple2"));
+                suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple3"));
+                suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple4"));
+                suite.addTest(new ConcurrencyTest("testUpdateModifiedTuple1"));
+                suite.addTest(new ConcurrencyTest("testUpdateModifiedTuple2"));
+                suite.addTest(new ConcurrencyTest("testTableIntentLock1"));
+                suite.addTest
+                    (new ConcurrencyTest("testUpdateLockInReadUncommitted"));
+                suite.addTest(new ConcurrencyTest("testDefragmentDuringScan"));
+                suite.addTest(new ConcurrencyTest("testTruncateDuringScan"));
+                
+                // This testcase fails in DerbyNetClient framework due to 
+                // DERBY-1696
+                if (usingEmbedded()) {
+                    suite.addTest
+                        (new ConcurrencyTest("testUpdatePurgedTuple1"));
+                }
+                
+            }         
+        }
+        
+        // Since this test relies on lock waiting, setting this property will
+        // make it go a lot faster:
+        final Properties properties = new Properties();
+        properties.setProperty("derby.locks.waitTimeout", "4");
+        
+        return new SystemPropertyTestSetup(suite, properties);
     }
     
 }

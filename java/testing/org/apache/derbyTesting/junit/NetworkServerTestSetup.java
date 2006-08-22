@@ -58,7 +58,7 @@ final public class NetworkServerTestSetup extends TestSetup {
             networkServerController = new NetworkServerControl
                 (InetAddress.getByName(config.getHostName()), config.getPort());
             
-            networkServerController.start(new PrintWriter(System.out));
+            networkServerController.start(null);
             
             final long startTime = System.currentTimeMillis();
             while (true) {
