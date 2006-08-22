@@ -30,7 +30,6 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TabInfo;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -483,7 +482,7 @@ public	class DD_Version implements	Formatable
 	 *	@exception StandardException  Standard Cloudscape error policy.
 	 */
 	protected void makeSystemCatalog(TransactionController tc,
-									 TabInfo ti)
+									 TabInfoImpl ti)
 		throws StandardException
 	{
 		SchemaDescriptor sd = bootingDictionary.getSystemSchemaDescriptor();
@@ -551,7 +550,7 @@ public	class DD_Version implements	Formatable
 	(
 		TransactionController	tc,
 		long					heapConglomerateNumber,
-		TabInfo					tabInfo,
+		TabInfoImpl					tabInfo,
 		int						indexNumber
     )
 		throws StandardException

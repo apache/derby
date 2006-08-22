@@ -37,35 +37,27 @@ import org.apache.derby.catalog.UUID;
 */
 class IndexInfoImpl
 {
-	private boolean				isUnique;
-	private int[]				columnPositions;
 	private IndexRowGenerator	irg;
-	private int					columnCount;
+
 	private long				conglomerateNumber;
-	private String				name;
+    
+    private final CatalogRowFactory crf;
+    private final int indexNumber;
 
 	/**
 	 * Constructor
 	 *
-	 * @param conglomerateNumber	The conglomerate number for the index
-	 * @param indexName				The name of the index
-	 * @param columnCount			The number of columns in the index
-	 * @param isUnique				Whether or not the index was declared as unique
 	 * @param indexNumber			(0-based) number of index within catalog's indexes
 	 * @param crf					CatalogRowFactory for the catalog
 	 */
-	IndexInfoImpl(long conglomerateNumber, String indexName, int columnCount,
-				  boolean isUnique,
-				  int indexNumber, CatalogRowFactory crf)
+	IndexInfoImpl(int indexNumber, CatalogRowFactory crf)
 	{
-		this.conglomerateNumber = conglomerateNumber;
-		name = indexName;
-		this.columnCount = columnCount;
-		this.isUnique = isUnique;
-		columnPositions = crf.getIndexColumnPositions(indexNumber);
+        this.crf = crf;
+        this.indexNumber = indexNumber;
+		this.conglomerateNumber = -1;
 	}
 
-	/**
+    /**
 	 * Get the conglomerate number for the index.
 	 *
 	 * @return long	The conglomerate number for the index.
@@ -92,7 +84,7 @@ class IndexInfoImpl
 	 */
 	String getIndexName()
 	{
-		return name;
+		return crf.getIndexName(indexNumber);
 	}
 
 	/**
@@ -102,7 +94,7 @@ class IndexInfoImpl
 	 */
 	int getColumnCount()
 	{
-		return columnCount;
+		return crf.getIndexColumnCount(indexNumber);
 	}
 
 	/**
@@ -135,7 +127,7 @@ class IndexInfoImpl
 	 */
 	int getBaseColumnPosition(int colNumber)
 	{
-		return columnPositions[colNumber];
+		return crf.getIndexColumnPositions(indexNumber)[colNumber];
 	}
 
 	/**
@@ -145,6 +137,6 @@ class IndexInfoImpl
 	 */
 	boolean isIndexUnique()
 	{
-		return isUnique;
+		return crf.isIndexUnique(indexNumber);
 	}
 }

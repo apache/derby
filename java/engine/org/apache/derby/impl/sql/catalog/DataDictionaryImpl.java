@@ -58,7 +58,6 @@ import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SubCheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SubConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TabInfo;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
@@ -256,7 +255,7 @@ public final class	DataDictionaryImpl
 	private static final int[] SYSFUN_PMODE = {JDBC30Translation.PARAMETER_MODE_IN};
 
 	// the structure that holds all the core table info
-	private TabInfo[] coreInfo;
+	private TabInfoImpl[] coreInfo;
 
 	/*
 	** SchemaDescriptors for system and app schemas.  Both
@@ -338,7 +337,7 @@ public final class	DataDictionaryImpl
 	*/
 
 	// the structure that holds all the noncore info
-	private TabInfo[] noncoreInfo;
+	private TabInfoImpl[] noncoreInfo;
 
 	// no other system tables have id's in the configuration.
 
@@ -1495,7 +1494,7 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		DataValueDescriptor		UUIDStringOrderable;
-		TabInfo					ti = coreInfo[SYSSCHEMAS_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSSCHEMAS_CORE_NUM];
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
 		UUIDStringOrderable = dvf.getCharDataValue(schemaId.toString());
@@ -1534,7 +1533,7 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		DataValueDescriptor		  schemaNameOrderable;
-		TabInfo					  ti = coreInfo[SYSSCHEMAS_CORE_NUM];
+		TabInfoImpl					  ti = coreInfo[SYSSCHEMAS_CORE_NUM];
 
 		/* Use aliasNameOrderable in both start 
 		 * and stop position for scan. 
@@ -1645,7 +1644,7 @@ public final class	DataDictionaryImpl
 							  TransactionController tc, boolean wait)
 		throws StandardException
 	{
-		TabInfo ti =  (catalogNumber < NUM_CORE) ? coreInfo[catalogNumber] :
+		TabInfoImpl ti =  (catalogNumber < NUM_CORE) ? coreInfo[catalogNumber] :
 			getNonCoreTI(catalogNumber);
 
 		ExecRow row = ti.getCatalogRowFactory().makeRow(td, parent);
@@ -1654,7 +1653,7 @@ public final class	DataDictionaryImpl
 
 		if (!duplicatesAllowed)
 		{
-			if (insertRetCode != TabInfo.ROWNOTDUPLICATE)
+			if (insertRetCode != TabInfoImpl.ROWNOTDUPLICATE)
 				throw duplicateDescriptorException(td, parent);
 		}	
 	}
@@ -1687,7 +1686,7 @@ public final class	DataDictionaryImpl
 								   TransactionController tc)
 		throws StandardException
 	{
-		TabInfo ti =  (catalogNumber < NUM_CORE) ? coreInfo[catalogNumber] :
+		TabInfoImpl ti =  (catalogNumber < NUM_CORE) ? coreInfo[catalogNumber] :
 			getNonCoreTI(catalogNumber);
 		CatalogRowFactory crf = ti.getCatalogRowFactory();
 
@@ -1700,7 +1699,7 @@ public final class	DataDictionaryImpl
 		}
 
 		int insertRetCode = ti.insertRowList( rl, tc );
-		if (!allowDuplicates && insertRetCode != TabInfo.ROWNOTDUPLICATE)
+		if (!allowDuplicates && insertRetCode != TabInfoImpl.ROWNOTDUPLICATE)
 		{
 			throw duplicateDescriptorException(td[insertRetCode], parent);
 		}
@@ -1720,7 +1719,7 @@ public final class	DataDictionaryImpl
 	{
 		ExecIndexRow			keyRow1 = null;
 		DataValueDescriptor		schemaNameOrderable;
-		TabInfo					ti = coreInfo[SYSSCHEMAS_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSSCHEMAS_CORE_NUM];
 
 		if (SanityManager.DEBUG)
 		{
@@ -1832,7 +1831,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		  schemaIDOrderable;
 		DataValueDescriptor		  tableNameOrderable;
 		TableDescriptor			  td;
-		TabInfo					  ti = coreInfo[SYSTABLES_CORE_NUM];
+		TabInfoImpl					  ti = coreInfo[SYSTABLES_CORE_NUM];
 
 		/* Use tableNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for scan. 
@@ -1945,7 +1944,7 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		  tableIDOrderable;
 		TableDescriptor			  td;
-		TabInfo					  ti = coreInfo[SYSTABLES_CORE_NUM];
+		TabInfoImpl					  ti = coreInfo[SYSTABLES_CORE_NUM];
 
 		/* Use tableNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for scan. 
@@ -2067,7 +2066,7 @@ public final class	DataDictionaryImpl
 	 * @exception StandardException on error
 	 */
 	protected boolean isSchemaReferenced(TransactionController	tc, 
-						TabInfo					ti, 
+						TabInfoImpl					ti, 
 						int						indexId, 
 						int						indexCol, 
 						DataValueDescriptor		schemaIdOrderable )
@@ -2159,7 +2158,7 @@ public final class	DataDictionaryImpl
 		ExecIndexRow			keyRow1 = null;
 		DataValueDescriptor		schemaIDOrderable;
 		DataValueDescriptor		tableNameOrderable;
-		TabInfo					ti = coreInfo[SYSTABLES_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSTABLES_CORE_NUM];
 
 		/* Use tableIdOrderable and schemaIdOrderable in both start 
 		 * and stop position for index 1 scan. 
@@ -2194,7 +2193,7 @@ public final class	DataDictionaryImpl
 		ExecRow    				row;
 		DataValueDescriptor		schemaIDOrderable;
 		DataValueDescriptor		tableNameOrderable;
-		TabInfo					ti = coreInfo[SYSTABLES_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSTABLES_CORE_NUM];
 		SYSTABLESRowFactory  rf = (SYSTABLESRowFactory) ti.getCatalogRowFactory();
 
 		/* Use tableIdOrderable and schemaIdOrderable in both start 
@@ -2254,7 +2253,7 @@ public final class	DataDictionaryImpl
 				throws StandardException
 	{
 		DataValueDescriptor	UUIDStringOrderable;
-		TabInfo				ti = coreInfo[SYSCOLUMNS_CORE_NUM];
+		TabInfoImpl				ti = coreInfo[SYSCOLUMNS_CORE_NUM];
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
 		UUIDStringOrderable = dvf.getCharDataValue(uuid.toString());
@@ -2315,7 +2314,7 @@ public final class	DataDictionaryImpl
 		ColumnDescriptor		cd;
 		ColumnDescriptorList    cdlCopy         = new ColumnDescriptorList();
 		DataValueDescriptor		refIDOrderable  = null;
-		TabInfo                 ti              = coreInfo[SYSCOLUMNS_CORE_NUM];
+		TabInfoImpl                 ti              = coreInfo[SYSCOLUMNS_CORE_NUM];
 
 		/* Use refIDOrderable in both start and stop position for scan. */
 		refIDOrderable = getValueAsDVD(uuid);
@@ -2461,7 +2460,7 @@ public final class	DataDictionaryImpl
 	public void	dropAllRoutinePermDescriptors(UUID routineID, TransactionController tc)
 		throws StandardException
 	{
-		TabInfo	ti = getNonCoreTI(SYSROUTINEPERMS_CATALOG_NUM);
+		TabInfoImpl	ti = getNonCoreTI(SYSROUTINEPERMS_CATALOG_NUM);
 		SYSROUTINEPERMSRowFactory rf = (SYSROUTINEPERMSRowFactory) ti.getCatalogRowFactory();
 		DataValueDescriptor	routineIdOrderable;
 		ExecRow curRow;
@@ -2505,7 +2504,7 @@ public final class	DataDictionaryImpl
 					ExecIndexRow keyRow)
 			throws StandardException
 	{
-		TabInfo				   ti = coreInfo[SYSCOLUMNS_CORE_NUM];
+		TabInfoImpl				   ti = coreInfo[SYSCOLUMNS_CORE_NUM];
 
 		ti.deleteRow( tc, keyRow, SYSCOLUMNSRowFactory.SYSCOLUMNS_INDEX1_ID );
 	}
@@ -2527,7 +2526,7 @@ public final class	DataDictionaryImpl
 		ExecRow curRow;
 		PermissionsDescriptor perm;
 		ExecIndexRow newKey;
-		TabInfo	ti = getNonCoreTI(SYSTABLEPERMS_CATALOG_NUM);
+		TabInfoImpl	ti = getNonCoreTI(SYSTABLEPERMS_CATALOG_NUM);
 		SYSTABLEPERMSRowFactory rf = (SYSTABLEPERMSRowFactory) ti.getCatalogRowFactory();
 
 		while ((curRow=ti.getRow(tc, keyRow, rf.TABLEID_INDEX_NUM)) != null)
@@ -2559,7 +2558,7 @@ public final class	DataDictionaryImpl
 		ExecRow curRow;
 		PermissionsDescriptor perm;
 		ExecIndexRow newKey;
-		TabInfo	ti = getNonCoreTI(SYSCOLPERMS_CATALOG_NUM);
+		TabInfoImpl	ti = getNonCoreTI(SYSCOLPERMS_CATALOG_NUM);
 		SYSCOLPERMSRowFactory rf = (SYSCOLPERMSRowFactory) ti.getCatalogRowFactory();
 
 		while ((curRow=ti.getRow(tc, keyRow, rf.TABLEID_INDEX_NUM)) != null)
@@ -2606,7 +2605,7 @@ public final class	DataDictionaryImpl
 		ExecRow    					row;
 		DataValueDescriptor			refIDOrderable;
 		DataValueDescriptor			columnNameOrderable;
-		TabInfo						ti = coreInfo[SYSCOLUMNS_CORE_NUM];
+		TabInfoImpl						ti = coreInfo[SYSCOLUMNS_CORE_NUM];
 		SYSCOLUMNSRowFactory  rf = (SYSCOLUMNSRowFactory) ti.getCatalogRowFactory();
 
 		/* Use objectID/columnName in both start 
@@ -2735,7 +2734,7 @@ public final class	DataDictionaryImpl
 	{
 		ViewDescriptor		  vd;
 		DataValueDescriptor	  viewIdOrderable;
-		TabInfo				  ti = getNonCoreTI(SYSVIEWS_CATALOG_NUM);
+		TabInfoImpl				  ti = getNonCoreTI(SYSVIEWS_CATALOG_NUM);
 		UUID				  viewID = tdi.getUUID();
 
 		/* Use viewIdOrderable in both start 
@@ -2777,7 +2776,7 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		DataValueDescriptor		viewIdOrderable;
-		TabInfo					ti = getNonCoreTI(SYSVIEWS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSVIEWS_CATALOG_NUM);
 
 		/* Use aliasNameOrderable in both start 
 		 * and stop position for scan. 
@@ -2802,7 +2801,7 @@ public final class	DataDictionaryImpl
 				throws StandardException
 	{
 		DataValueDescriptor		  idOrderable;
-		TabInfo					  ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
+		TabInfoImpl					  ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
 		idOrderable = dvf.getCharDataValue(id.toString());
 
 		/* Set up the start/stop position for the scan */
@@ -2843,7 +2842,7 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		  schemaIDOrderable;
 		DataValueDescriptor		  nameOrderable;
-		TabInfo					  ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
+		TabInfoImpl					  ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
 
 		nameOrderable = dvf.getVarcharDataValue(name);
 		schemaIDOrderable = dvf.getCharDataValue(schemaId.toString());
@@ -2884,7 +2883,7 @@ public final class	DataDictionaryImpl
 		ConglomerateController	heapCC;
 		ExecIndexRow			keyRow1 = null;
 		DataValueDescriptor		idOrderable;
-		TabInfo					ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
 		TransactionController   tc = getTransactionExecute();
 		
 		/* Use tableIdOrderable and schemaIdOrderable in both start 
@@ -3024,7 +3023,7 @@ public final class	DataDictionaryImpl
 				throws StandardException
 	{
 		DataValueDescriptor		  stmtIDOrderable;
-		TabInfo					  ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
+		TabInfoImpl					  ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 
 		/* Use stmtIdOrderable in both start 
 		 * and stop position for scan. 
@@ -3116,7 +3115,7 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		  schemaIDOrderable;
 		DataValueDescriptor		  stmtNameOrderable;
-		TabInfo					  ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
+		TabInfoImpl					  ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 
 		/* Use stmtNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for scan. 
@@ -3175,7 +3174,7 @@ public final class	DataDictionaryImpl
 	) throws StandardException
 	{
 		ExecRow        			row;
-		TabInfo					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 		SYSSTATEMENTSRowFactory	rf = (SYSSTATEMENTSRowFactory) ti.getCatalogRowFactory();
 		int						insertRetCode;
 
@@ -3197,7 +3196,7 @@ public final class	DataDictionaryImpl
 		}
 
 		// Throw an exception duplicate table descriptor
-		if (insertRetCode != TabInfo.ROWNOTDUPLICATE)
+		if (insertRetCode != TabInfoImpl.ROWNOTDUPLICATE)
 		{
 			throw StandardException.newException(SQLState.LANG_OBJECT_ALREADY_EXISTS_IN_OBJECT, 
 												 descriptor.getDescriptorType(),
@@ -3312,7 +3311,7 @@ public final class	DataDictionaryImpl
 		ExecRow    					row;
 		DataValueDescriptor			idOrderable;
 		DataValueDescriptor			columnNameOrderable;
-		TabInfo						ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
+		TabInfoImpl						ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 		SYSSTATEMENTSRowFactory  rf = (SYSSTATEMENTSRowFactory) ti.getCatalogRowFactory();
 		int[] updCols;
 		if (recompile)
@@ -3463,7 +3462,7 @@ public final class	DataDictionaryImpl
 	 */
 	void clearSPSPlans() throws StandardException
 	{
-		TabInfo ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
+		TabInfoImpl ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 		faultInTabInfo(ti);
 
 		TransactionController tc = getTransactionExecute();
@@ -3537,7 +3536,7 @@ public final class	DataDictionaryImpl
 	) throws StandardException
 	{
 		DataValueDescriptor		stmtIdOrderable;
-		TabInfo					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 
 		stmtIdOrderable = getValueAsDVD(uuid);
 
@@ -3562,7 +3561,7 @@ public final class	DataDictionaryImpl
 	public List getAllSPSDescriptors()
 		throws StandardException
 	{
-		TabInfo					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 
 		List list = newSList();
 
@@ -3590,7 +3589,7 @@ public final class	DataDictionaryImpl
 	private ConstraintDescriptorList getAllConstraintDescriptors()
 		throws StandardException
 	{
-		TabInfo					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 
 		ConstraintDescriptorList list = new ConstraintDescriptorList();
 
@@ -3616,7 +3615,7 @@ public final class	DataDictionaryImpl
 	private GenericDescriptorList getAllTriggerDescriptors()
 		throws StandardException
 	{
-		TabInfo					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 
 		GenericDescriptorList list = new GenericDescriptorList();
 
@@ -3640,7 +3639,7 @@ public final class	DataDictionaryImpl
 	public TriggerDescriptor getTriggerDescriptor(UUID uuid)
 				throws StandardException
 	{
-		TabInfo					  ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
+		TabInfoImpl					  ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 		DataValueDescriptor triggerIdOrderable = dvf.getCharDataValue(uuid.toString());
 
 		/* Set up the start/stop position for the scan */
@@ -3674,7 +3673,7 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		  schemaIDOrderable;
 		DataValueDescriptor		  triggerNameOrderable;
-		TabInfo					  ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
+		TabInfoImpl					  ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 
 		/* Use triggerNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for scan. 
@@ -3755,7 +3754,7 @@ public final class	DataDictionaryImpl
 	{
 		GenericDescriptorList  	gdl = (td).getTriggerDescriptorList();
 		DataValueDescriptor		tableIDOrderable = null;
-		TabInfo					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 
 		/* Use tableIDOrderable in both start and stop positions for scan */
 		tableIDOrderable = getValueAsDVD(td.getUUID());
@@ -3792,7 +3791,7 @@ public final class	DataDictionaryImpl
 	) throws StandardException
 	{
 		DataValueDescriptor		idOrderable;
-		TabInfo					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 
 		idOrderable = getValueAsDVD(descriptor.getUUID());
 
@@ -3829,7 +3828,7 @@ public final class	DataDictionaryImpl
 		ExecRow    					row;
 		DataValueDescriptor			IDOrderable;
 		DataValueDescriptor			columnNameOrderable;
-		TabInfo						ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
+		TabInfoImpl						ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 		SYSTRIGGERSRowFactory  		rf = (SYSTRIGGERSRowFactory) ti.getCatalogRowFactory();
 
 		/* Use objectID in both start 
@@ -3915,7 +3914,7 @@ public final class	DataDictionaryImpl
 				throws StandardException
 	{
 		DataValueDescriptor		UUIDStringOrderable;
-		TabInfo					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
 		UUIDStringOrderable = dvf.getCharDataValue(uuid.toString());
@@ -3954,7 +3953,7 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		UUIDStringOrderable;
 		DataValueDescriptor		constraintNameOrderable;
-		TabInfo					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 
 		/* Construct keys for both start and stop positions for scan */
 		constraintNameOrderable = dvf.getVarcharDataValue(constraintName);
@@ -3980,7 +3979,7 @@ public final class	DataDictionaryImpl
 	public List getStatisticsDescriptors(TableDescriptor td)
 		throws StandardException
 	{
-		TabInfo ti = getNonCoreTI(SYSSTATISTICS_CATALOG_NUM);
+		TabInfoImpl ti = getNonCoreTI(SYSSTATISTICS_CATALOG_NUM);
 		List statDescriptorList = newSList();
 		DataValueDescriptor UUIDStringOrderable;
 
@@ -4174,7 +4173,7 @@ public final class	DataDictionaryImpl
 	{
 		ConstraintDescriptorList  cdl = td.getConstraintDescriptorList();
 		DataValueDescriptor		  tableIDOrderable = null;
-		TabInfo					  ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
+		TabInfoImpl					  ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 
 		/* Use tableIDOrderable in both start and stop positions for scan */
 		tableIDOrderable = getValueAsDVD(td.getUUID());
@@ -4200,7 +4199,7 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param indexId	The id of the index (0 to # of indexes on table) to use
 	 * @param keyRow	The supplied ExecIndexRow for search
-	 * @param ti		The TabInfo to use
+	 * @param ti		The TabInfoImpl to use
 	 * @param td		The TableDescriptor, if supplied.
 	 * @param dList		The list to build, if supplied.  If null, then caller expects
 	 *					a single descriptor
@@ -4213,7 +4212,7 @@ public final class	DataDictionaryImpl
 	protected ConstraintDescriptor getConstraintDescriptorViaIndex(
 						int indexId,
 						ExecIndexRow keyRow,
-						TabInfo ti,
+						TabInfoImpl ti,
 						TableDescriptor td,
 						ConstraintDescriptorList dList,
 						boolean forUpdate)
@@ -4345,7 +4344,7 @@ public final class	DataDictionaryImpl
 	 * SYSCONSTRAINTS through a heap scan 
 	 *
 	 * @param scanQualifiers			qualifiers
-	 * @param ti						The TabInfo to use
+	 * @param ti						The TabInfoImpl to use
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
 	 * @param list						The list to build, if supplied.  
 	 *									If null, then caller expects a single descriptor
@@ -4356,7 +4355,7 @@ public final class	DataDictionaryImpl
 	 */
 	protected TupleDescriptor getConstraintDescriptorViaHeap(
 						ScanQualifier [][] scanQualifiers,
-						TabInfo ti,
+						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
 						List list)
 			throws StandardException
@@ -4490,7 +4489,7 @@ public final class	DataDictionaryImpl
 	public ConstraintDescriptorList getForeignKeys(UUID constraintId)
 			throws StandardException
 	{
-		TabInfo ti = getNonCoreTI(SYSFOREIGNKEYS_CATALOG_NUM);
+		TabInfoImpl ti = getNonCoreTI(SYSFOREIGNKEYS_CATALOG_NUM);
 		List fkList = newSList();
 
 		// Use constraintIDOrderable in both start and stop positions for scan
@@ -4547,7 +4546,7 @@ public final class	DataDictionaryImpl
 		ConglomerateController	heapCC = null;
 		ScanController			scanController = null;
 		TransactionController	tc;
-		TabInfo 				ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
+		TabInfoImpl 				ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 		SYSCONSTRAINTSRowFactory rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();
 		TableDescriptor			td = null;
 		List					slist = newSList();
@@ -4663,7 +4662,7 @@ public final class	DataDictionaryImpl
 	{
 		ExecRow        			row = null;
 		int						type = descriptor.getConstraintType();
-		TabInfo					  ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
+		TabInfoImpl					  ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 		SYSCONSTRAINTSRowFactory  rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();
 		int						insertRetCode;
 
@@ -4741,7 +4740,7 @@ public final class	DataDictionaryImpl
 		ExecRow    					row;
 		DataValueDescriptor			IDOrderable;
 		DataValueDescriptor			columnNameOrderable;
-		TabInfo						ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
+		TabInfoImpl						ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 		SYSCONSTRAINTSRowFactory  	rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();
 
 		/* Use objectID/columnName in both start 
@@ -4829,7 +4828,7 @@ public final class	DataDictionaryImpl
 		ExecIndexRow			keyRow = null;
 		DataValueDescriptor		schemaIDOrderable;
 		DataValueDescriptor		constraintNameOrderable;
-		TabInfo					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 
 		switch (descriptor.getConstraintType())
 		{
@@ -4911,7 +4910,7 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		DataValueDescriptor		constraintIDOrderable = null;
-		TabInfo					ti;
+		TabInfoImpl					ti;
 		int						indexNum;
 		int						baseNum;
 
@@ -4958,7 +4957,7 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		ExecRow	row;
-		TabInfo	ti;
+		TabInfoImpl	ti;
 
 		/*
 		** Foreign keys get a row in SYSFOREIGNKEYS, and
@@ -5028,7 +5027,7 @@ public final class	DataDictionaryImpl
 	{
 		ExecIndexRow			keyRow1 = null;
 		DataValueDescriptor		constraintIdOrderable;
-		TabInfo					ti;
+		TabInfoImpl					ti;
 		int						baseNum;
 		int						indexNum;
 
@@ -5101,7 +5100,7 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		DataValueDescriptor			constraintIDOrderable = null;
-		TabInfo						ti = getNonCoreTI(SYSCHECKS_CATALOG_NUM);
+		TabInfoImpl						ti = getNonCoreTI(SYSCHECKS_CATALOG_NUM);
 		SYSCHECKSRowFactory			rf = (SYSCHECKSRowFactory) ti.getCatalogRowFactory();
 
 		/* Use constraintIDOrderable in both start and stop positions for scan */
@@ -5135,7 +5134,7 @@ public final class	DataDictionaryImpl
 	{
 		ExecIndexRow			checkRow1 = null;
 		DataValueDescriptor		constraintIdOrderable;
-		TabInfo					ti = getNonCoreTI(SYSCHECKS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSCHECKS_CATALOG_NUM);
 
 		/* Use constraintIdOrderable in both start 
 		 * and stop position for index 1 scan. 
@@ -5170,7 +5169,7 @@ public final class	DataDictionaryImpl
 		ScanController			  scanController;
 		ExecRow 				  outRow;
 		// ExecIndexRow			  keyRow = null;
-		TabInfo					  ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
+		TabInfoImpl					  ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 		SYSCONGLOMERATESRowFactory  rf = (SYSCONGLOMERATESRowFactory) ti.getCatalogRowFactory();
 
 		outRow = rf.makeEmptyRow();
@@ -5225,7 +5224,7 @@ public final class	DataDictionaryImpl
 		Hashtable ht = new Hashtable();
 		ScanController			  scanController;
 		ExecRow 				  outRow;
-		TabInfo					ti = coreInfo[SYSTABLES_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSTABLES_CORE_NUM];
 		SYSTABLESRowFactory
 					rf = (SYSTABLESRowFactory) ti.getCatalogRowFactory();
 
@@ -5298,7 +5297,7 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		UUIDStringOrderable;
 		SYSCONGLOMERATESRowFactory rf;
-		TabInfo					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
 		UUIDStringOrderable = dvf.getCharDataValue(uuid.toString());
@@ -5368,7 +5367,7 @@ public final class	DataDictionaryImpl
   		TransactionController	  tc;
   		ExecRow 				  outRow;
   		DataValueDescriptor		  conglomNumberOrderable = null;
-  		TabInfo					  ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
+  		TabInfoImpl					  ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
   		SYSCONGLOMERATESRowFactory  rf = (SYSCONGLOMERATESRowFactory) ti.getCatalogRowFactory();
 
   		conglomNumberOrderable = 
@@ -5416,7 +5415,7 @@ public final class	DataDictionaryImpl
 
 		ExecIndexRow			keyRow3 = null;
 		DataValueDescriptor		tableIDOrderable;
-		TabInfo					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
 		/* Use tableIDOrderable in both start and stop positions for scan */
 		tableIDOrderable = getValueAsDVD(td.getUUID());
@@ -5459,7 +5458,7 @@ public final class	DataDictionaryImpl
 		ExecIndexRow			  keyRow2 = null;
 		DataValueDescriptor		  nameOrderable;
 		DataValueDescriptor		  schemaIDOrderable = null;
-		TabInfo					  ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
+		TabInfoImpl					  ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
 		nameOrderable = dvf.getVarcharDataValue(indexName);
 		schemaIDOrderable = getValueAsDVD(sd.getUUID());
@@ -5496,7 +5495,7 @@ public final class	DataDictionaryImpl
 		ExecIndexRow			keyRow2 = null;
 		DataValueDescriptor		nameOrderable;
 		DataValueDescriptor		schemaIDOrderable = null;
-		TabInfo					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
 		nameOrderable = dvf.getVarcharDataValue(conglomerate.getConglomerateName());
 		schemaIDOrderable = getValueAsDVD(conglomerate.getSchemaID());
@@ -5526,7 +5525,7 @@ public final class	DataDictionaryImpl
 	{		
 		ExecIndexRow			keyRow3 = null;
 		DataValueDescriptor		tableIDOrderable;
-		TabInfo					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
 		/* Use tableIDOrderable in both start 
 		 * and stop position for index 3 scan. 
@@ -5607,7 +5606,7 @@ public final class	DataDictionaryImpl
 	{
 		ExecIndexRow				keyRow;
 		DataValueDescriptor			schemaNameOrderable;
-		TabInfo						ti = coreInfo[SYSSCHEMAS_CORE_NUM];
+		TabInfoImpl						ti = coreInfo[SYSSCHEMAS_CORE_NUM];
 
 		/* Use schemaNameOrderable in both start 
 		 * and stop position for index 1 scan. 
@@ -5657,7 +5656,7 @@ public final class	DataDictionaryImpl
 		ExecIndexRow				keyRow1 = null;
 		ExecRow[]    				rows = new ExecRow[cds.length];
 		DataValueDescriptor			conglomIDOrderable;
-		TabInfo						ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
+		TabInfoImpl						ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 		SYSCONGLOMERATESRowFactory  rf = (SYSCONGLOMERATESRowFactory) ti.getCatalogRowFactory();
 
 		/* Use conglomIDOrderable in both start 
@@ -5706,7 +5705,7 @@ public final class	DataDictionaryImpl
 	{
 		List					ddlList = newSList();
 		DataValueDescriptor		dependentIDOrderable;
-		TabInfo					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
 		/* Use dependentIDOrderable in both start and stop positions for scan */
 		dependentIDOrderable = dvf.getCharDataValue(dependentID);
@@ -5743,7 +5742,7 @@ public final class	DataDictionaryImpl
 	{
 		List					ddlList = newSList();
 		DataValueDescriptor		providerIDOrderable;
-		TabInfo					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
 		/* Use providerIDOrderable in both start and stop positions for scan */
 		providerIDOrderable = dvf.getCharDataValue(providerID);
@@ -5783,7 +5782,7 @@ public final class	DataDictionaryImpl
 		ExecRow					  	outRow;
 		ExecRow					 	templateRow;
 		List						ddl = newSList();
-		TabInfo						ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
+		TabInfoImpl						ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 		SYSDEPENDSRowFactory		rf = (SYSDEPENDSRowFactory) ti.getCatalogRowFactory();
 
 
@@ -5838,7 +5837,7 @@ public final class	DataDictionaryImpl
 		UUID					dependentID = dd.getUUID();
 		UUID					providerID = dd.getProviderID();
 		DataValueDescriptor		dependentIDOrderable = getValueAsDVD(dependentID);
-		TabInfo					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
 		/* Use dependentIDOrderable in both start 
 		 * and stop position for index 1 scan. 
@@ -5876,7 +5875,7 @@ public final class	DataDictionaryImpl
 	{
 		ExecIndexRow			keyRow1 = null;
 		DataValueDescriptor		dependentIDOrderable;
-		TabInfo					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
 		/* Use dependentIDOrderable in both start 
 		 * and stop position for index 1 scan. 
@@ -5916,7 +5915,7 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		UUIDStringOrderable;
 		SYSALIASESRowFactory	rf;
-		TabInfo					ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
 
 		rf = (SYSALIASESRowFactory) ti.getCatalogRowFactory();
 
@@ -5955,7 +5954,7 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		  aliasNameOrderable;
 		DataValueDescriptor		  nameSpaceOrderable;
-		TabInfo					  ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
+		TabInfoImpl					  ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
 		SYSALIASESRowFactory	  rf = (SYSALIASESRowFactory) ti.getCatalogRowFactory();
 
 		/* Use aliasNameOrderable and aliasTypeOrderable in both start 
@@ -6082,7 +6081,7 @@ public final class	DataDictionaryImpl
 		ExecIndexRow			keyRow1 = null;
 		DataValueDescriptor		aliasNameOrderable;
 		DataValueDescriptor		nameSpaceOrderable;
-		TabInfo					ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
 
 		/* Use aliasNameOrderable and nameSpaceOrderable in both start 
 		 * and stop position for index 1 scan. 
@@ -6142,13 +6141,13 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void loadCatalogs(DataDescriptorGenerator ddg, TabInfo[] catalogArray)
+	public void loadCatalogs(DataDescriptorGenerator ddg, TabInfoImpl[] catalogArray)
 		throws StandardException
 	{
 		int			ictr;
 		int			numIndexes;
 		int			indexCtr;
-		TabInfo		catalog;
+		TabInfoImpl		catalog;
 		int			catalogCount = catalogArray.length;
 
 		/* Initialize the various variables associated with index scans of these catalogs */
@@ -6215,7 +6214,7 @@ public final class	DataDictionaryImpl
 		 */
 		for (int coreCtr = 0; coreCtr < NUM_CORE; coreCtr++)
 		{
-			TabInfo	ti = coreInfo[coreCtr];
+			TabInfoImpl	ti = coreInfo[coreCtr];
 
 			Properties	heapProperties = ti.getCreateHeapProperties();
 
@@ -6239,7 +6238,7 @@ public final class	DataDictionaryImpl
 		for ( int ictr = 0; ictr < NUM_CORE; ictr++ )
 		{
 			/* RESOLVE - need to do something with COLUMNTYPE in following table creating code */
-			TabInfo			ti = coreInfo[ictr];
+			TabInfoImpl			ti = coreInfo[ictr];
 
 			addSystemTableToDictionary(ti, systemSchemaDesc, tc, ddg);
 		}
@@ -6322,7 +6321,7 @@ public final class	DataDictionaryImpl
 			int catalogNumber = noncoreCtr + NUM_CORE;
 			boolean isDummy = (catalogNumber == SYSDUMMY1_CATALOG_NUM);
 
-			TabInfo ti = getNonCoreTIByNumber(catalogNumber);
+			TabInfoImpl ti = getNonCoreTIByNumber(catalogNumber);
 
 			makeCatalog(ti, isDummy ? sysIBMSchemaDesc : systemSchemaDesc, tc );
 
@@ -6438,7 +6437,7 @@ public final class	DataDictionaryImpl
 	protected void upgradeMakeCatalog(TransactionController tc, int catalogNumber)
 		throws StandardException
 	{
-		TabInfo ti;
+		TabInfoImpl ti;
 		if (catalogNumber >= NUM_CORE)
 			ti = getNonCoreTIByNumber(catalogNumber);
 		else
@@ -6451,13 +6450,13 @@ public final class	DataDictionaryImpl
 	/**
 	 *	The dirty work of creating a catalog.
 	 *
-	 *	@param	ti			TabInfo describing catalog to create.
+	 *	@param	ti			TabInfoImpl describing catalog to create.
 	 *	@param	sd			Schema to create catalogs in.
 	 *	@param	tc			Transaction context.
 	 *
 	 *	@exception StandardException Standard Cloudscape error policy
 	 */
-	public	void	makeCatalog( TabInfo					ti,
+	public	void	makeCatalog( TabInfoImpl					ti,
 								 SchemaDescriptor			sd,
 								 TransactionController 		tc )
 					throws StandardException
@@ -6663,7 +6662,7 @@ public final class	DataDictionaryImpl
 	public	long	upgrade_makeOneIndex
 	(
 		TransactionController	tc,
-		TabInfo					ti,
+		TabInfoImpl					ti,
 		int						indexNumber,
 		long					heapConglomerateNumber
     )
@@ -6710,7 +6709,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor	    schemaIDOrderable;
 		DataValueDescriptor		tableNameOrderable;
 		ScanController			scanController;
-		TabInfo					ti = coreInfo[SYSTABLES_CORE_NUM];
+		TabInfoImpl					ti = coreInfo[SYSTABLES_CORE_NUM];
 		CatalogRowFactory		rf = ti.getCatalogRowFactory();
 
 		// We only want the 1st column from the heap
@@ -6806,7 +6805,7 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
 		
-		TabInfo ti = (isCoreTable) ?  coreInfo[tableNum] :
+		TabInfoImpl ti = (isCoreTable) ?  coreInfo[tableNum] :
 										getNonCoreTIByNumber(tableNum);
 
 		if (!isCoreTable)
@@ -6865,7 +6864,7 @@ public final class	DataDictionaryImpl
 								  SchemaDescriptor sd, 
 								  TransactionController tc,
 								  DataDescriptorGenerator ddg,
-								  TabInfo ti)
+								  TabInfoImpl ti)
 						throws StandardException
 	{
 		ConglomerateDescriptor[] cgd = new ConglomerateDescriptor[ti.getNumberOfIndexes()];
@@ -6927,7 +6926,7 @@ public final class	DataDictionaryImpl
 		FormatableBitSet columnToUpdate = new 
   			FormatableBitSet(SYSCOLUMNSRowFactory.SYSCOLUMNS_COLUMN_COUNT);
   		int columnNum = SYSCOLUMNSRowFactory.SYSCOLUMNS_AUTOINCREMENTVALUE;
-		TabInfo ti = coreInfo[SYSCOLUMNS_CORE_NUM];
+		TabInfoImpl ti = coreInfo[SYSCOLUMNS_CORE_NUM];
   		ConglomerateController heapCC = null;
 		SYSCOLUMNSRowFactory	rf = (SYSCOLUMNSRowFactory) ti.getCatalogRowFactory();
 		ExecRow row = rf.makeEmptyRow();
@@ -7002,7 +7001,7 @@ public final class	DataDictionaryImpl
 		SchemaDescriptor		sd, 
 		TransactionController	tc,
 		DataDescriptorGenerator	ddg,
-		TabInfo					ti,
+		TabInfoImpl					ti,
 		int						indexNumber,
 		long					heapConglomerateNumber
     )
@@ -7092,7 +7091,7 @@ public final class	DataDictionaryImpl
 	}
 
 	public void initSystemIndexVariables(DataDescriptorGenerator ddg,
-										   TabInfo ti,
+										   TabInfoImpl ti,
 										   int indexNumber)
 		throws StandardException
 	{
@@ -7128,8 +7127,7 @@ public final class	DataDictionaryImpl
 							TransactionController tc)
 		throws StandardException
 	{
-		TabInfo						ti = getNonCoreTI(SYSDUMMY1_CATALOG_NUM);
-		SYSDUMMY1RowFactory			rf = (SYSDUMMY1RowFactory) ti.getCatalogRowFactory();
+		TabInfoImpl						ti = getNonCoreTI(SYSDUMMY1_CATALOG_NUM);
 		ExecRow row = ti.getCatalogRowFactory().makeRow(null, null);
 
 		int insertRetCode = ti.insertRow(row, tc, true);
@@ -7160,7 +7158,7 @@ public final class	DataDictionaryImpl
 		Add the required entries to the data dictionary for a System table.
 	*/
 
-	private void addSystemTableToDictionary(TabInfo ti,
+	private void addSystemTableToDictionary(TabInfoImpl ti,
 		                          SchemaDescriptor sd, 
 								  TransactionController tc, 
 								  DataDescriptorGenerator ddg)
@@ -7310,7 +7308,7 @@ public final class	DataDictionaryImpl
 	private void initializeCoreInfo()
 		throws StandardException
 	{
-		TabInfo[] lcoreInfo = coreInfo = new TabInfo[NUM_CORE];
+		TabInfoImpl[] lcoreInfo = coreInfo = new TabInfoImpl[NUM_CORE];
 
 		UUIDFactory luuidFactory = uuidFactory;
 
@@ -7330,7 +7328,7 @@ public final class	DataDictionaryImpl
 	private void initializeNoncoreInfo()
 		throws StandardException
 	{
-		noncoreInfo = new TabInfo[NUM_NONCORE];
+		noncoreInfo = new TabInfoImpl[NUM_NONCORE];
 	}
 
 	/**
@@ -7410,7 +7408,7 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param indexId	The id of the index (0 to # of indexes on table) to use
 	 * @param keyRow	The supplied ExecIndexRow for search
-	 * @param ti		The TabInfo to use
+	 * @param ti		The TabInfoImpl to use
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
 	 * @param list		The list to build, if supplied.  If null, then caller expects
 	 *					a single descriptor
@@ -7424,7 +7422,7 @@ public final class	DataDictionaryImpl
 						int indexId,
 						ExecIndexRow keyRow,
 						ScanQualifier [][] scanQualifiers,
-						TabInfo ti,
+						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
 						List list,
 						boolean forUpdate)
@@ -7559,7 +7557,7 @@ public final class	DataDictionaryImpl
 
 
     private void debugGenerateInfo(StringBuffer strbuf,
-        TransactionController tc, ConglomerateController heapCC, TabInfo ti,
+        TransactionController tc, ConglomerateController heapCC, TabInfoImpl ti,
         int indexId)
     {
 		if (SanityManager.DEBUG) {
@@ -7621,7 +7619,7 @@ public final class	DataDictionaryImpl
 	 * system table where the access a heap scan
 	 *
 	 * @param scanQualifiers			qualifiers
-	 * @param ti						The TabInfo to use
+	 * @param ti						The TabInfoImpl to use
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
 	 * @param list						The list to build, if supplied.  
 	 *									If null, then caller expects a single descriptor
@@ -7632,7 +7630,7 @@ public final class	DataDictionaryImpl
 	 */
 	protected TupleDescriptor getDescriptorViaHeap(
 						ScanQualifier [][] scanQualifiers,
-						TabInfo ti,
+						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
 						List list)
 			throws StandardException
@@ -7686,17 +7684,17 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
-	 * Get a TabInfo for a non-core table.
+	 * Get a TabInfoImpl for a non-core table.
 	 * (We fault in information about non-core tables as needed.)
 	 *
 	 * @param catalogNumber	The index into noncoreTable[].
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	private TabInfo getNonCoreTI(int catalogNumber)
+	private TabInfoImpl getNonCoreTI(int catalogNumber)
 		throws StandardException
 	{
-		TabInfo	ti = getNonCoreTIByNumber(catalogNumber);
+		TabInfoImpl	ti = getNonCoreTIByNumber(catalogNumber);
 
 		faultInTabInfo( ti );
 
@@ -7706,19 +7704,19 @@ public final class	DataDictionaryImpl
 	/** returns the tabinfo for a non core system catalog. Input is a
 	 * catalogNumber (defined in DataDictionary). 
 	 */
-	protected TabInfo getNonCoreTIByNumber(int catalogNumber)
+	protected TabInfoImpl getNonCoreTIByNumber(int catalogNumber)
 						throws StandardException
 	{
 		int nonCoreNum = catalogNumber - NUM_CORE;
 
-		// Look up the TabInfo in the array. This does not have to be
+		// Look up the TabInfoImpl in the array. This does not have to be
 		// synchronized, because getting a reference is atomic.
 
-		TabInfo retval = noncoreInfo[nonCoreNum];
+		TabInfoImpl retval = noncoreInfo[nonCoreNum];
 
 		if (retval == null)
 		{
-			// If we did not find the TabInfo, get the right one and
+			// If we did not find the TabInfoImpl, get the right one and
 			// load it into the array. There is a small chance that
 			// two threads will do this at the same time. The code will
 			// work properly in that case, since storing a reference
@@ -7812,7 +7810,7 @@ public final class	DataDictionaryImpl
 		return retval;
 	}
 
-	protected void initSystemIndexVariables(TabInfo ti)
+	protected void initSystemIndexVariables(TabInfoImpl ti)
 						throws StandardException
 	{
 		int numIndexes = ti.getNumberOfIndexes();
@@ -7835,14 +7833,14 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
-	  *	Finishes building a TabInfo if it hasn't already been faulted in.
-	  *	NOP if TabInfo has already been faulted in.
+	  *	Finishes building a TabInfoImpl if it hasn't already been faulted in.
+	  *	NOP if TabInfoImpl has already been faulted in.
 	  *
-	  *	@param	ti	TabInfo to fault in.
+	  *	@param	ti	TabInfoImpl to fault in.
 	  *
 	  * @exception StandardException		Thrown on error
 	  */
-	public	void	faultInTabInfo( TabInfo ti )
+	public	void	faultInTabInfo( TabInfoImpl ti )
 		throws StandardException
 	{
 		int		numIndexes;
@@ -8134,7 +8132,7 @@ public final class	DataDictionaryImpl
 									  long aiValue, boolean incrementNeeded)
 			throws StandardException						  
 	{
-		TabInfo ti = coreInfo[SYSCOLUMNS_CORE_NUM];
+		TabInfoImpl ti = coreInfo[SYSCOLUMNS_CORE_NUM];
 		ExecIndexRow keyRow = null;
 
 		keyRow = (ExecIndexRow)exFactory.getIndexableRow(2);
@@ -8188,7 +8186,7 @@ public final class	DataDictionaryImpl
 										  String columnName)
 		throws StandardException								  
 	{
-		TabInfo ti = coreInfo[SYSCOLUMNS_CORE_NUM];
+		TabInfoImpl ti = coreInfo[SYSCOLUMNS_CORE_NUM];
 		ExecIndexRow keyRow = null;
 		ExecRow row;
 		UUID tableUUID = td.getUUID();
@@ -8277,7 +8275,7 @@ public final class	DataDictionaryImpl
 									 TransactionController tc)
 		throws StandardException
 	{
-		TabInfo					ti = getNonCoreTI(SYSSTATISTICS_CATALOG_NUM);
+		TabInfoImpl					ti = getNonCoreTI(SYSSTATISTICS_CATALOG_NUM);
 		DataValueDescriptor first, second;
 		first = dvf.getCharDataValue(tableUUID.toString());
 
@@ -10122,7 +10120,7 @@ public final class	DataDictionaryImpl
     	// call of this method.
     	perm.setUUID(null);    	
         perm.setGrantee( grantee);
-        TabInfo ti = getNonCoreTI( catalogNumber);
+        TabInfoImpl ti = getNonCoreTI( catalogNumber);
         PermissionsCatalogRowFactory rf = (PermissionsCatalogRowFactory) ti.getCatalogRowFactory();
         int primaryIndexNumber = rf.getPrimaryKeyIndexNumber();
         ConglomerateController heapCC = tc.openConglomerate( ti.getHeapConglomerate(),
@@ -10157,7 +10155,7 @@ public final class	DataDictionaryImpl
             ExecRow row = ti.getCatalogRowFactory().makeRow( perm, (TupleDescriptor) null);
             int insertRetCode = ti.insertRow(row, tc, true /* wait */);
             if( SanityManager.DEBUG)
-                SanityManager.ASSERT( insertRetCode == TabInfo.ROWNOTDUPLICATE,
+                SanityManager.ASSERT( insertRetCode == TabInfoImpl.ROWNOTDUPLICATE,
                                       "Race condition in inserting table privilege.");
         }
         else
@@ -10289,7 +10287,7 @@ public final class	DataDictionaryImpl
                                                               PermissionsDescriptor key)
         throws StandardException
     {
-		TabInfo ti = getNonCoreTI( catalogNumber);
+		TabInfoImpl ti = getNonCoreTI( catalogNumber);
         PermissionsCatalogRowFactory rowFactory = (PermissionsCatalogRowFactory) ti.getCatalogRowFactory();
         ExecIndexRow keyRow = rowFactory.buildIndexKeyRow( indexNumber, key);
         return
