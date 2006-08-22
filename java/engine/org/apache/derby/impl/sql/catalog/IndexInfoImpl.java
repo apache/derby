@@ -96,16 +96,6 @@ class IndexInfoImpl
 	}
 
 	/**
-	 * Set the name for the index.
-	 *
-	 * @param indexName		The name for the index.
-	 */
-	void setIndexName(String indexName)
-	{
-		name = indexName;
-	}
-
-	/**
 	 * Get the column count for the index.
 	 *
 	 * @return int	The column count for the index.
@@ -146,19 +136,6 @@ class IndexInfoImpl
 	int getBaseColumnPosition(int colNumber)
 	{
 		return columnPositions[colNumber];
-	}
-
-	/**
-	 * Set the base column position for a column within a catalog
-	 * given the (0-based) column number for the column within the index.
-	 *
-	 * @param colNumber		The column number within the index
-	 * @param baseColumnPosition	The base column position for the column.
-	 */
-	void setBaseColumnPosition(int colNumber,
-									 int baseColumnPosition)
-	{
-		columnPositions[colNumber] = baseColumnPosition;
 	}
 
 	/**

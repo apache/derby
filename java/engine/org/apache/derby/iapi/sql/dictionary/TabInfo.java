@@ -102,14 +102,6 @@ public interface TabInfo
 	 */
 	public String getIndexName(int indexID);
 
-	/**
-	 * Set the index name for the specified indexID
-	 *
-	 * @param indexID	Index number for index for table
-	 * @param indexName	The name for that index ID
-	 */
-	public void setIndexName(int indexID, String indexName);
-
 	/** 
 	 * Get the CatalogRowFactory for this TabInfo.
 	 *
@@ -169,19 +161,6 @@ public interface TabInfo
 	 * @return int		The base column position for the column.
 	 */
 	public int getBaseColumnPosition(int indexNumber, int colNumber);
-
-	/**
-	 * Set the base column position for a column within a catalog
-	 * given the (0-based) index number for this catalog and the
-	 * (0-based) column number for the column within the index.
-	 *
-	 * @param indexNumber	The index number
-	 * @param colNumber		The column number within the index
-	 * @param baseColumnPosition	The base column position for the column.
-	 *
-	 */
-	public void setBaseColumnPosition(int indexNumber, int colNumber,
-									  int baseColumnPosition);
 
 	/**
 	 * Return whether or not this index is declared unique

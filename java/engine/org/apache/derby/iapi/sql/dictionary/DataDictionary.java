@@ -273,21 +273,6 @@ public interface DataDictionary
 	public boolean usesSqlAuthorization();
 
 	/**
- 	  *	Get the tabinfo of a system catalog. Paw through the tabinfo arrays looking for the tabinfo
- 	  *	corresponding to this table name.
- 	  *
- 	  * RESOLVE: This does not bother to fault in the TabInfo. It assumes it already
- 	  *          has been faulted in. This seems odd.
- 	  *
- 	  *	@param	tableName	name of table to get the TabInfo for.
- 	  *
- 	  *	@return	tabinfo corresponding to tablename
- 	  *
- 	  * @exception StandardException		Thrown on error
- 	  */
-	public	TabInfo	getTabInfo( String tableName ) throws StandardException;
-
-	/**
 	 * Get the descriptor for the named schema.
 	   Schema descriptors include authorization ids and schema ids.
 	 * SQL92 allows a schema to specify a default character set - we will
@@ -1361,16 +1346,6 @@ public interface DataDictionary
 	public void dropAliasDescriptor(AliasDescriptor ad, 
 									TransactionController tc)
 			throws StandardException;
-
-	/**
-	 * Get core catalog info.
-	 *
-	 * @param coreNum	The index into coreInfo[].
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public TabInfo getCoreCatalog(int coreNum)
-		throws StandardException;
 
 	public	int	getEngineType();
 

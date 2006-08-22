@@ -7333,42 +7333,6 @@ public final class	DataDictionaryImpl
 		noncoreInfo = new TabInfo[NUM_NONCORE];
 	}
 
- 	/**
- 	  *	Get the tabinfo of a system catalog. Paw through the tabinfo arrays looking for the tabinfo
- 	  *	corresponding to this table name.
- 	  *
-	  * RESOLVE: This does not bother to fault in the TabInfo. It assumes it already
-	  *          has been faulted in. This seems odd.
- 	  *
-	  *	@param	tableName	name of table to get the TabInfo for.
- 	  *
-	  *	@return	tabinfo corresponding to tablename
- 	  *
- 	  * @exception StandardException		Thrown on error
-	  */
- 	public	TabInfo	getTabInfo( String tableName ) throws StandardException
- 	{
- 		TabInfo		tabinfo;
- 
- 		for ( int ictr = 0; ictr < coreInfo.length; ictr++ )
- 		{
- 			tabinfo = coreInfo[ ictr ];
- 			if ( tabinfo.getTableName().equals( tableName ) ) { return tabinfo; }
- 		}
- 
- 		// Non-core tables are not pre-loaded. Translate the name
- 		// to a number and look it up that way.
- 		for (int ictr = 0; ictr < nonCoreNames.length; ictr++)
-		{
- 			if (nonCoreNames[ictr].equals(tableName))
-			{
-				return getNonCoreTI(ictr);
-			}
-		}
-
- 		return	null;
-	}
-
 	/**
 	 * Get the TransactionController to use, when not
 	 * passed in as a parameter.  (This hides logic about
@@ -7868,19 +7832,6 @@ public final class	DataDictionaryImpl
 	private void clearNoncoreTable(int nonCoreNum)
 	{
 		noncoreInfo[nonCoreNum] = null;
-	}
-
-	/**
-	 * Get core catalog info.
-	 *
-	 * @param coreNum	The index into coreInfo[].
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public TabInfo getCoreCatalog(int coreNum)
-		throws StandardException
-	{
-		return coreInfo[coreNum];
 	}
 
 	/**

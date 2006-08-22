@@ -226,24 +226,6 @@ class TabInfoImpl implements TabInfo
 	}
 
 	/**
-	 * @see TabInfo#setIndexName
-	 */
-	public void setIndexName(int indexID, String indexName)
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(indexes != null,
-				"indexes is expected to be non-null");
-
-			if (indexID >= indexes.length)
-				SanityManager.THROWASSERT(
-				"indexID (" + indexID + ") is out of range(0-" +
-				indexes.length + ")");
-		}
-		indexes[indexID].setIndexName(indexName);
-	}
-
-	/**
 	 * @see TabInfo#getCatalogRowFactory
 	 */
 	public CatalogRowFactory getCatalogRowFactory()
@@ -357,26 +339,6 @@ class TabInfoImpl implements TabInfo
 		}
 
 		return indexes[indexNumber].getBaseColumnPosition(colNumber);
-	}
-
-	/**
-	 * @see TabInfo#setBaseColumnPosition
-	 */
-	public void setBaseColumnPosition(int indexNumber, int colNumber,
-									 int baseColumnPosition)
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(indexes != null,
-				"indexes is expected to be non-null");
-			if (indexNumber >= indexes.length)
-			{
-				SanityManager.THROWASSERT("indexNumber (" + indexNumber + ") is out of range(0-" +
-					indexes.length + ")");
-			}
-		}
-
-		indexes[indexNumber].setBaseColumnPosition(colNumber, baseColumnPosition);
 	}
 
 	/**
