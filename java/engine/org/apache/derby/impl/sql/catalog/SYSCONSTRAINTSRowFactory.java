@@ -94,13 +94,6 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		{SYSCONSTRAINTS_TABLEID}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{"CONSTRAINTID"},
-		{"CONSTRAINTNAME", "SCHEMAID"},
-		{"TABLEID"}
-	};
-
 	private	static	final	String[]	uuids =
 	{
 		 "8000002f-00d0-fd77-3ed8-000a0a0b1900"	// catalog UUID
@@ -121,7 +114,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
 		initInfo(SYSCONSTRAINTS_COLUMN_COUNT, TABLENAME_STRING, 
-				 indexColumnPositions, indexColumnNames, uniqueness, uuids );
+				 indexColumnPositions, uniqueness, uuids );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

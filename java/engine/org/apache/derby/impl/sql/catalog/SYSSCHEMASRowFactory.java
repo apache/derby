@@ -78,12 +78,6 @@ public class SYSSCHEMASRowFactory extends CatalogRowFactory
 		{SYSSCHEMAS_SCHEMAID}
 	};
 	
-	private static final String[][] indexColumnNames =
-	{
-		{"SCHEMANAME"},
-		{"SCHEMAID"}
-	};
-
     private	static	final	boolean[]	uniqueness = null;
 
 	private	static	final	String[]	uuids =
@@ -105,7 +99,7 @@ public class SYSSCHEMASRowFactory extends CatalogRowFactory
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
 		initInfo(SYSSCHEMAS_COLUMN_COUNT, TABLENAME_STRING, 
-				 indexColumnPositions, indexColumnNames, uniqueness, uuids );
+				 indexColumnPositions, uniqueness, uuids );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

@@ -84,12 +84,6 @@ public class SYSFILESRowFactory extends CatalogRowFactory
 		{ID_COL_NUM}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{NAME_COL_NAME, SCHEMA_ID_COL_NAME},
-		{ID_COL_NAME}
-	};
-
     private	static	final	boolean[]	uniqueness = null;
 
 	private	static	final	String[]	uuids =
@@ -111,7 +105,7 @@ public class SYSFILESRowFactory extends CatalogRowFactory
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
 		initInfo(SYSFILES_COLUMN_COUNT, TABLENAME_STRING, 
-				 indexColumnPositions, indexColumnNames, uniqueness, uuids );
+				 indexColumnPositions, uniqueness, uuids );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

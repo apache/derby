@@ -33,6 +33,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
@@ -60,7 +61,6 @@ public abstract	class CatalogRowFactory
 
 	protected 	String[] 			indexNames;
 	protected 	int[][] 			indexColumnPositions;
-	protected   String[][]          indexColumnNames;
 	protected	boolean[]			indexUniqueness;
 
 	protected	UUID				tableUUID;
@@ -140,9 +140,6 @@ public abstract	class CatalogRowFactory
 	   */
 	public	UUID	getCanonicalIndexUUID( int indexNumber )
 	{
-		if (SanityManager.DEBUG)
-			checkIndexNumber(indexNumber);
-
 		return indexUUID[indexNumber];
 	}
 
@@ -155,9 +152,6 @@ public abstract	class CatalogRowFactory
 	 */
 	public int getIndexColumnCount(int indexNum)
 	{
-		if (SanityManager.DEBUG)
-			checkIndexNumber(indexNum);
-
 		return indexColumnPositions[indexNum].length;
 	}
 
@@ -178,9 +172,6 @@ public abstract	class CatalogRowFactory
 	 */
 	public String getIndexName(int indexNum)
 	{
-		if (SanityManager.DEBUG)
-			checkIndexNumber(indexNum);
-
 		return indexNames[indexNum];
 	}
 
@@ -193,9 +184,6 @@ public abstract	class CatalogRowFactory
 	 */
 	public boolean isIndexUnique(int indexNumber)
 	{
-		if (SanityManager.DEBUG)
-			checkIndexNumber(indexNumber);
-
 		return (indexUniqueness != null ? indexUniqueness[indexNumber] : true);
 	}
 
@@ -233,8 +221,6 @@ public abstract	class CatalogRowFactory
 	  * @param  catalogName name of the catalog (the case might have to be converted).
 	  * @param  indexColumnPositions 2 dim array of ints specifying the base
 	  * column positions for each index.
-	  * @param  indexColumnNames    2 dim array of Strings specifying the name
-	  * of the base column for each index.
 	  *	@param	indexUniqueness		Uniqueness of the indices
 	  *	@param	uuidStrings			Array of stringified UUIDs for table and its conglomerates
 	  *
@@ -242,7 +228,6 @@ public abstract	class CatalogRowFactory
 	public	void	initInfo(int        columnCount,
 							 String 	catalogName,
 							 int[][] 	indexColumnPositions,
-							 String[][] indexColumnNames,
 							 boolean[] 	indexUniqueness,
 							 String[]	uuidStrings)
 							 
@@ -267,10 +252,8 @@ public abstract	class CatalogRowFactory
 				indexUUID[ictr] = uf.recreateUUID(uuidStrings[ictr + 2 ]);
 			}
 			this.indexColumnPositions = indexColumnPositions;
-			this.indexColumnNames = indexColumnNames;
 			this.indexUniqueness = indexUniqueness;
-
-
+ 
 		}
 	}
 
@@ -366,6 +349,7 @@ public abstract	class CatalogRowFactory
 
 	/** builds a column list for the catalog */
 	public abstract SystemColumn[]	buildColumnList();
+    
 
 	/**
 	 * builds an empty row given for a given index number.
@@ -377,36 +361,6 @@ public abstract	class CatalogRowFactory
 	/** Return the column positions for a given index number */
 	public int[] getIndexColumnPositions(int indexNumber)
 	{
-		if (SanityManager.DEBUG)
-			checkIndexNumber(indexNumber);
-
 		return indexColumnPositions[indexNumber];
-	}
-
-	/** Return the names of columns for a given index number */
-	public String[] getIndexColumnNames(int indexNumber)
-	{
-		if (SanityManager.DEBUG)		
-			checkIndexNumber(indexNumber);
-		
-		if (!convertIdToLower)
-			return indexColumnNames[indexNumber];
-
-		String[] s = new String[indexColumnNames[indexNumber].length];
-		for (int i = 0; i < s.length; i++)
-			s[i] = StringUtil.SQLToLowerCase(indexColumnNames[indexNumber][i]);
-		return s;
 	}	
-
-	protected void checkIndexNumber(int indexNumber)
-	{
-		if (SanityManager.DEBUG)
-  		{
-  			if (!(indexNumber < indexCount))
-  			{
-  				SanityManager.THROWASSERT("indexNumber (" + 
-										  indexNumber + ") expected to be < " + indexCount);
-  			}
-  		}
-	}		
 }

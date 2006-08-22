@@ -38,7 +38,6 @@ import org.apache.derby.catalog.UUID;
 class IndexInfoImpl
 {
 	private boolean				isUnique;
-	private String[]			columnNames;
 	private int[]				columnPositions;
 	private IndexRowGenerator	irg;
 	private int					columnCount;
@@ -63,7 +62,6 @@ class IndexInfoImpl
 		name = indexName;
 		this.columnCount = columnCount;
 		this.isUnique = isUnique;
-		columnNames = crf.getIndexColumnNames(indexNumber);
 		columnPositions = crf.getIndexColumnPositions(indexNumber);
 	}
 

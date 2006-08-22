@@ -79,10 +79,6 @@ public class SYSVIEWSRowFactory extends CatalogRowFactory
 		{SYSVIEWS_TABLEID}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{"TABLEID"}
-	};
 
 	// if you add a non-unique index allocate this array.
     private	static	final	boolean[]	uniqueness = null;
@@ -105,7 +101,7 @@ public class SYSVIEWSRowFactory extends CatalogRowFactory
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
 		initInfo(SYSVIEWS_COLUMN_COUNT, TABLENAME_STRING, 
-				 indexColumnPositions, indexColumnNames, uniqueness, uuids );
+				 indexColumnPositions, uniqueness, uuids );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

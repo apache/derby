@@ -109,13 +109,6 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 		{SYSALIASES_SCHEMAID, SYSALIASES_SPECIFIC_NAME},
 	};
 
-	private static String[][] indexColumnNames =
-	{
-		{"SCHEMAID", "ALIAS", "NAMESPACE"},
-		{"ALIASID"},
-		{"SCHEMAID", "SPECIFICNAME"},
-	};
-
 	private	static	final	String[]	uuids =
 	{
 		 "c013800d-00d7-ddbd-08ce-000a0a411400"	// catalog UUID
@@ -135,7 +128,7 @@ class SYSALIASESRowFactory extends CatalogRowFactory
                                  boolean convertIdToLower)
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
-		initInfo(SYSALIASES_COLUMN_COUNT, "SYSALIASES", indexColumnPositions, indexColumnNames, uniqueness, uuids);
+		initInfo(SYSALIASES_COLUMN_COUNT, "SYSALIASES", indexColumnPositions, uniqueness, uuids);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

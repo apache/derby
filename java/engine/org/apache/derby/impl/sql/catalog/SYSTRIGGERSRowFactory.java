@@ -97,13 +97,6 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		{SYSTRIGGERS_TABLEID, SYSTRIGGERS_CREATIONTIMESTAMP}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{"TRIGGERID"},
-		{"TRIGGERNAME", "SCHEMAID"},
-		{"CREATIONTIMESTAMP"}
-	};
-
 	private	static	final	boolean[]	uniqueness = {
 													   true,
 													   true,
@@ -129,7 +122,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
 		initInfo(SYSTRIGGERS_COLUMN_COUNT, TABLENAME_STRING, 
-				 indexColumnPositions, indexColumnNames,  uniqueness, uuids);
+				 indexColumnPositions,  uniqueness, uuids);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

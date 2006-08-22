@@ -84,11 +84,6 @@ public class SYSCHECKSRowFactory extends CatalogRowFactory
 		{SYSCHECKS_CONSTRAINTID}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{"CONSTRAINTID"}
-	};
-
 	private	static	final	String[]	uuids =
 	{
 		 "80000056-00d0-fd77-3ed8-000a0a0b1900"	// catalog UUID
@@ -109,7 +104,7 @@ public class SYSCHECKSRowFactory extends CatalogRowFactory
                                  boolean convertIdToLower)
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
-		initInfo(SYSCHECKS_COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, indexColumnNames, uniqueness, uuids );
+		initInfo(SYSCHECKS_COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, uniqueness, uuids );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

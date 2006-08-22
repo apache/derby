@@ -137,12 +137,6 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		{SYSCOLUMNS_COLUMNDEFAULTID}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{REFERENCEDID_STRING, COLUMNNAME_STRING},
-		{COLUMNDEFAULTID_STRING}
-	};
-
 	/////////////////////////////////////////////////////////////////////////////
 	//
 	//	STATE
@@ -167,7 +161,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
                                  boolean convertIdToLower, String myName )
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
-		initInfo(SYSCOLUMNS_COLUMN_COUNT, myName, indexColumnPositions, indexColumnNames, uniqueness, uuids);
+		initInfo(SYSCOLUMNS_COLUMN_COUNT, myName, indexColumnPositions, uniqueness, uuids);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

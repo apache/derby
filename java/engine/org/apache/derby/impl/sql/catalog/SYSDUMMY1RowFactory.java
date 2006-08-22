@@ -79,7 +79,7 @@ public class SYSDUMMY1RowFactory extends CatalogRowFactory
 		super(uuidf,ef,dvf,convertIdToLower);
 		
 		initInfo(SYSDUMMY1_COLUMN_COUNT, TABLENAME_STRING, 
-				 null, null, null, uuids);
+				 null, null, uuids);
 	}
 
 

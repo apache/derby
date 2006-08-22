@@ -87,12 +87,6 @@ public class SYSDEPENDSRowFactory extends CatalogRowFactory
 		{SYSDEPENDS_PROVIDERID}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{"DEPENDENTID"},   
-		{"PROVIDERID"}
-	};
-
 	private	static	final	String[]	uuids =
 	{
 		 "8000003e-00d0-fd77-3ed8-000a0a0b1900"	// catalog UUID
@@ -112,7 +106,7 @@ public class SYSDEPENDSRowFactory extends CatalogRowFactory
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
 		initInfo(SYSDEPENDS_COLUMN_COUNT,TABLENAME_STRING, indexColumnPositions,
-				 indexColumnNames, uniqueness, uuids );
+				 uniqueness, uuids );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

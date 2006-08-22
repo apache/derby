@@ -87,12 +87,6 @@ public class SYSFOREIGNKEYSRowFactory extends CatalogRowFactory
 		{SYSFOREIGNKEYS_KEYCONSTRAINTID}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{"CONSTRAINTID"},
-		{"KEYCONSTRAINTID"}
-	};
-
     private	static	final	boolean[]	uniqueness = {
 		                                               true,
 													   false
@@ -117,7 +111,7 @@ public class SYSFOREIGNKEYSRowFactory extends CatalogRowFactory
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
 		initInfo(SYSFOREIGNKEYS_COLUMN_COUNT, TABLENAME_STRING, 
-				 indexColumnPositions, indexColumnNames, uniqueness, uuids );
+				 indexColumnPositions, uniqueness, uuids );
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

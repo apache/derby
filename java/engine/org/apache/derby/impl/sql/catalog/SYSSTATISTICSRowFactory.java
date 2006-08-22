@@ -102,11 +102,6 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 		{SYSSTATISTICS_TABLEID, SYSSTATISTICS_REFERENCEID}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{"TABLEID", "REFERENCEID"}
-	};
-
 	private static final String[] uuids =
 	{
 		"f81e0010-00e3-6612-5a96-009e3a3b5e00", // catalog UUID
@@ -129,7 +124,7 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 		super(uuidf,ef,dvf,convertIdToLower);
 		
 		initInfo(SYSSTATISTICS_COLUMN_COUNT, TABLENAME_STRING, 
-				 indexColumnPositions, indexColumnNames, uniqueness, uuids);
+				 indexColumnPositions, uniqueness, uuids);
 	}
 
 

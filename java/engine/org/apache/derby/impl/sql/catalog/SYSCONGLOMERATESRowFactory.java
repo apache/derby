@@ -92,13 +92,6 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 		{SYSCONGLOMERATES_TABLEID}
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{"CONGLOMERATE_ID"},
-		{"CONGLOMERATE_NAME", "SCHEMAID"},
-		{"TABLEID"}
-	};
-
 	private	static	final	String[]	uuids =
 	{
 		 "80000010-00d0-fd77-3ed8-000a0a0b1900"	// catalog UUID
@@ -114,7 +107,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 		super(uuidf,ef,dvf,convertIdToLower);
 		initInfo(SYSCONGLOMERATES_COLUMN_COUNT, 
 				 TABLENAME_STRING, indexColumnPositions, 
-				 indexColumnNames, uniqueness, uuids );
+				 uniqueness, uuids );
 	}
 
   /**

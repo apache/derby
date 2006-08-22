@@ -90,12 +90,6 @@ public class SYSTABLESRowFactory extends CatalogRowFactory
 		{ SYSTABLES_TABLEID }
 	};
 
-	private static final String[][] indexColumnNames =
-	{
-		{"TABLENAME", "SCHEMAID"},
-		{"TABLEID"}
-	};
-
 	/////////////////////////////////////////////////////////////////////////////
 	//
 	//	CONSTRUCTORS
@@ -106,7 +100,7 @@ public class SYSTABLESRowFactory extends CatalogRowFactory
                                 boolean convertIdToLower)
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
-		initInfo(SYSTABLES_COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, indexColumnNames, (boolean[]) null, uuids);
+		initInfo(SYSTABLES_COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, (boolean[]) null, uuids);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////

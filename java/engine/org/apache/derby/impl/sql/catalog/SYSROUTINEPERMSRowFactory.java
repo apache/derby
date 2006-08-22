@@ -67,12 +67,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 		{ ROUTINEPERMSID_COL_NUM },
 		{ ALIASID_COL_NUM }
 	};
-	private static final String[][] indexColumnNames =
-	{
-		{"GRANTEE", "ALIASID", "GRANTOR"},
-		{"ROUTINEPERMSID"},
-		{"ALIASID"}
-	};
+
     private static final boolean[] indexUniqueness = { true, true, false };
 
     private	static final String[] uuids =
@@ -90,7 +85,7 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
                                      boolean convertIdToLower)
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
-		initInfo( COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, indexColumnNames, indexUniqueness, uuids);
+		initInfo( COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, indexUniqueness, uuids);
 	}
 
 	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent) throws StandardException
