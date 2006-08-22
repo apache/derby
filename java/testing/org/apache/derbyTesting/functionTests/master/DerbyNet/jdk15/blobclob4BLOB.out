@@ -780,8 +780,8 @@ EXPECTED SQLSTATE(null): Invalid position 1 or length -76
 EXPECTED SQLSTATE(null): Invalid position 1 or length -1
 EXPECTED SQLSTATE(null): Invalid position 0 or length 0
 FAIL -- unexpected exception:java.lang.NegativeArraySizeException
-java.lang.NegativeArraySizeException
 START: blobTest7
+java.lang.NegativeArraySizeException
 blobTest7 finished
 START: blobTest8Trigger
 FAIL -- unexpected exception ****************
