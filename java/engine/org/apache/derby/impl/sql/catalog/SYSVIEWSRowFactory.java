@@ -202,8 +202,6 @@ public class SYSVIEWSRowFactory extends CatalogRowFactory
 											RowLocation rowLocation) 
 			throws StandardException
 	{
-		if (SanityManager.DEBUG)
-			checkIndexNumber(indexNumber);
 		/* Build the row  */
 		ExecIndexRow row = getExecutionFactory().getIndexableRow(2);
 
