@@ -60,7 +60,7 @@ import java.util.Properties;
 *
 * @author jamie
 */
-public class TabInfoImpl implements TabInfo
+class TabInfoImpl implements TabInfo
 {
 	private IndexInfoImpl[]				indexes;
 	private String						name;
@@ -77,7 +77,7 @@ public class TabInfoImpl implements TabInfo
 	 *
 	 * @param crf				the associated CatalogRowFactory
 	 */
-	public TabInfoImpl(CatalogRowFactory crf)
+	TabInfoImpl(CatalogRowFactory crf)
 	{
 		this.name = crf.getCatalogName();
 		this.heapConglomerate = -1;

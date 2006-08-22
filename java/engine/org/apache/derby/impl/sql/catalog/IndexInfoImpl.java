@@ -35,15 +35,15 @@ import org.apache.derby.catalog.UUID;
 *
 * @author jerry
 */
-public class IndexInfoImpl
+class IndexInfoImpl
 {
-	boolean				isUnique;
-	String[]			columnNames;
-	int[]				columnPositions;
-	IndexRowGenerator	irg;
-	int					columnCount;
-	long				conglomerateNumber;
-	String				name;
+	private boolean				isUnique;
+	private String[]			columnNames;
+	private int[]				columnPositions;
+	private IndexRowGenerator	irg;
+	private int					columnCount;
+	private long				conglomerateNumber;
+	private String				name;
 
 	/**
 	 * Constructor
@@ -72,7 +72,7 @@ public class IndexInfoImpl
 	 *
 	 * @return long	The conglomerate number for the index.
 	 */
-	public long getConglomerateNumber()
+	long getConglomerateNumber()
 	{
 		return conglomerateNumber;
 	}
@@ -82,7 +82,7 @@ public class IndexInfoImpl
 	 *
 	 * @param conglomerateNumber	The conglomerateNumber for the index.
 	 */
-	public void setConglomerateNumber(long conglomerateNumber)
+	void setConglomerateNumber(long conglomerateNumber)
 	{
 		this.conglomerateNumber = conglomerateNumber;
 	}
@@ -92,7 +92,7 @@ public class IndexInfoImpl
 	 *
 	 * @return String	The index name for the index.
 	 */
-	public String getIndexName()
+	String getIndexName()
 	{
 		return name;
 	}
@@ -102,7 +102,7 @@ public class IndexInfoImpl
 	 *
 	 * @param indexName		The name for the index.
 	 */
-	public void setIndexName(String indexName)
+	void setIndexName(String indexName)
 	{
 		name = indexName;
 	}
@@ -112,7 +112,7 @@ public class IndexInfoImpl
 	 *
 	 * @return int	The column count for the index.
 	 */
-	public int getColumnCount()
+	int getColumnCount()
 	{
 		return columnCount;
 	}
@@ -122,7 +122,7 @@ public class IndexInfoImpl
 	 *
 	 * @return IndexRowGenerator	The IRG for this index.
 	 */
-	public IndexRowGenerator getIndexRowGenerator()
+	IndexRowGenerator getIndexRowGenerator()
 	{
 		return irg;
 	}
@@ -132,7 +132,7 @@ public class IndexInfoImpl
 	 *
 	 * @param irg			The IndexRowGenerator for this index.
 	 */
-	public void setIndexRowGenerator(IndexRowGenerator irg)
+	void setIndexRowGenerator(IndexRowGenerator irg)
 	{
 		this.irg = irg;
 	}
@@ -145,7 +145,7 @@ public class IndexInfoImpl
 	 *
 	 * @return int		The base column position for the column.
 	 */
-	public int getBaseColumnPosition(int colNumber)
+	int getBaseColumnPosition(int colNumber)
 	{
 		return columnPositions[colNumber];
 	}
@@ -157,7 +157,7 @@ public class IndexInfoImpl
 	 * @param colNumber		The column number within the index
 	 * @param baseColumnPosition	The base column position for the column.
 	 */
-	public void setBaseColumnPosition(int colNumber,
+	void setBaseColumnPosition(int colNumber,
 									 int baseColumnPosition)
 	{
 		columnPositions[colNumber] = baseColumnPosition;
@@ -168,7 +168,7 @@ public class IndexInfoImpl
 	 *
 	 * @return boolean		Whether or not this index is declared unique
 	 */
-	public boolean isIndexUnique()
+	boolean isIndexUnique()
 	{
 		return isUnique;
 	}
