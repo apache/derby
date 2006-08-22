@@ -239,7 +239,7 @@ public class SqlXmlUtil
             // Something went wrong during compilation of the
             // expression; wrap the error and re-throw it.
             throw StandardException.newException(
-                SQLState.LANG_UNEXPECTED_XML_EXCEPTION, te);
+                SQLState.LANG_XML_QUERY_ERROR, te);
 
         }
     }

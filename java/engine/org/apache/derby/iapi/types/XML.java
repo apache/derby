@@ -377,7 +377,7 @@ public class XML
 
         if (((XMLDataValue)source).getXType() != XML_DOC_ANY) {
             throw StandardException.newException(
-                SQLState.LANG_INVALID_XML_COLUMN_ASSIGN);
+                SQLState.LANG_NOT_AN_XML_DOCUMENT);
         }
 
         ((DataValueDescriptor) this).setValue(source);
@@ -559,7 +559,7 @@ public class XML
         // Couldn't parse the XML document.  Throw a StandardException
         // with the parse exception nested in it.
             throw StandardException.newException(
-                SQLState.LANG_NOT_AN_XML_DOCUMENT, xe);
+                SQLState.LANG_INVALID_XML_DOCUMENT, xe);
         }
 
         // If we get here, the text is valid XML so go ahead
@@ -677,13 +677,13 @@ public class XML
                 sqlxUtil.evalXQExpression(this, false, new int[1]));
 
         } catch (Exception xe) {
-        // We don't expect to get here.  Turn it into a StandardException
-        // (if needed), then throw it.
+        // Failed somewhere during evaluation of the XML query expression;
+        // turn error into a StandardException and throw it.
             if (xe instanceof StandardException)
                 throw (StandardException)xe;
             else {
                 throw StandardException.newException(
-                    SQLState.LANG_UNEXPECTED_XML_EXCEPTION, xe);
+                    SQLState.LANG_XML_QUERY_ERROR, xe, "XMLEXISTS");
             }
         }
     }
@@ -745,11 +745,10 @@ public class XML
             throw se;
 
         } catch (Exception xe) {
-        // We don't expect to get here.  Turn it into a
-        // StandardException and throw it.
-
+        // Failed somewhere during evaluation of the XML query expression;
+        // turn error into a StandardException and throw it.
             throw StandardException.newException(
-                SQLState.LANG_UNEXPECTED_XML_EXCEPTION, xe);
+                SQLState.LANG_XML_QUERY_ERROR, xe, "XMLQUERY");
         }
     }
 

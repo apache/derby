@@ -1,11 +1,11 @@
 [ Beginning XML binding tests. ]
-XML column -- bind String to XML: PASS -- caught expected error X0X14.
-XML column -- bind Java null to XML: PASS -- caught expected error X0X14.
-XML column -- bind SQL NULL to XML: PASS -- caught expected error X0X14.
-XML column -- bind integer to XML: PASS -- caught expected error X0X14.
-Trying to bind to XML in XMLSERIALIZE: PASS -- caught expected error X0X14.
-Trying to bind to XML in XMLEXISTS: PASS -- caught expected error X0X14.
-XML value in result set: PASS -- caught expected error X0X15.
+XML column -- bind String to XML: PASS -- caught expected error 42Z70.
+XML column -- bind Java null to XML: PASS -- caught expected error 42Z70.
+XML column -- bind SQL NULL to XML: PASS -- caught expected error 42Z70.
+XML column -- bind integer to XML: PASS -- caught expected error 42Z70.
+Trying to bind to XML in XMLSERIALIZE: PASS -- caught expected error 42Z70.
+Trying to bind to XML in XMLEXISTS: PASS -- caught expected error 42Z70.
+XML value in result set: PASS -- caught expected error 42Z71.
 [ End XML binding tests. ]
 [ Beginning XMLPARSE tests. ]
 Test insertions from file: 
@@ -44,6 +44,6 @@ Running XMLEXISTS with: //person/@id
 -----> Matching rows: 4
 Running XMLEXISTS with: //person/@noteTwo
 -----> Matching rows: 1
-Parameter as first operand in XMLEXISTS: PASS -- caught expected error X0X19.
+Parameter as first operand in XMLEXISTS: PASS -- caught expected error 42Z75.
 [ End XMLEXISTS tests. ]
 [ Done. ]

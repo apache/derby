@@ -126,21 +126,21 @@ public class xmlBinding
                 "insert into xTable.t1(x) values (?)");
 
             System.out.print("XML column -- bind String to XML: ");
-            bindAndExecute(pSt, 1, Types.VARCHAR, "shouldn't work", "X0X14", false);
+            bindAndExecute(pSt, 1, Types.VARCHAR, "shouldn't work", "42Z70", false);
 
             System.out.print("XML column -- bind Java null to XML: ");
-               bindAndExecute(pSt, 1, Types.VARCHAR, null, "X0X14", false);
+               bindAndExecute(pSt, 1, Types.VARCHAR, null, "42Z70", false);
 
             System.out.print("XML column -- bind SQL NULL to XML: ");
-            bindAndExecute(pSt, 1, Types.VARCHAR, null, "X0X14", true);
+            bindAndExecute(pSt, 1, Types.VARCHAR, null, "42Z70", true);
 
             System.out.print("XML column -- bind integer to XML: ");
-            bindAndExecute(pSt, 1, Types.INTEGER, new Integer(8), "X0X14", false);
+            bindAndExecute(pSt, 1, Types.INTEGER, new Integer(8), "42Z70", false);
 
         } catch (SQLException se) {
             // Must be running with embedded or Derby Network Client.
             System.out.print("XML column -- insertion via parameter:  ");
-            checkException(se, "X0X14");
+            checkException(se, "42Z70");
         }
 
         // Binding to an XML value in the XMLSERIALIZE operator.
@@ -150,9 +150,9 @@ public class xmlBinding
         try {
             pSt = conn.prepareStatement(
                 "select XMLSERIALIZE(? AS CLOB) FROM XTABLE.T1");
-            bindAndExecute(pSt, 1, Types.VARCHAR, null, "X0X14", true);
+            bindAndExecute(pSt, 1, Types.VARCHAR, null, "42Z70", true);
         } catch (SQLException se) {
-            checkException(se, "X0X14");
+            checkException(se, "42Z70");
         }
 
         // Binding to an XML value in the XMLEXISTS operator.
@@ -163,9 +163,9 @@ public class xmlBinding
             pSt = conn.prepareStatement(
                 "select i from xTable.t1 where " +
                 "XMLEXISTS('//*' PASSING BY REF ?)");
-            bindAndExecute(pSt, 1, Types.VARCHAR, null, "X0X14", true);
+            bindAndExecute(pSt, 1, Types.VARCHAR, null, "42Z70", true);
         } catch (SQLException se) {
-            checkException(se, "X0X14");
+            checkException(se, "42Z70");
         }
 
         // Make sure that attempts to bind _from_ XML will fail.
@@ -176,7 +176,7 @@ public class xmlBinding
             pSt = conn.prepareStatement("select x from xTable.t1");
             pSt.execute();
         } catch (SQLException se) {
-            checkException(se, "X0X15");
+            checkException(se, "42Z71");
         }
 
         System.out.println("\n[ End XML binding tests. ]\n");
@@ -360,7 +360,7 @@ public class xmlBinding
             pSt.execute();
 
         } catch (SQLException se) {
-            checkException(se, "X0X19");
+            checkException(se, "42Z75");
         }
 
         System.out.println("\n[ End XMLEXISTS tests. ]\n");

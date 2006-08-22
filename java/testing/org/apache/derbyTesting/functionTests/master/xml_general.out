@@ -134,11 +134,11 @@ ij> -- XML cannot be imported or exported.  These should all fail.
 CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE (
   null, 'T1', 'xmlexport.del', null, null, null);
 ERROR 38000: The exception 'java.sql.SQLException: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.' was thrown while evaluating an expression.
-ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ERROR 42Z71: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
 ij> CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY(
   'select x from t1', 'xmlexport.del', null, null, null);
 ERROR 38000: The exception 'java.sql.SQLException: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.' was thrown while evaluating an expression.
-ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ERROR 42Z71: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
 ij> CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY (
   'select xmlserialize(x as clob) from t1',
   'xmlexport.del', null, null, null);
@@ -170,22 +170,22 @@ ij> drop trigger tr1;
 ij> -- Test XMLPARSE operator.
 -- These should fail.
 insert into t1 values (1, xmlparse(document '<hmm/>' strip whitespace));
-ERROR X0X18: XML feature not supported: 'STRIP WHITESPACE'.
+ERROR 42Z74: XML feature not supported: 'STRIP WHITESPACE'.
 ij> insert into t1 values (1, xmlparse(document '<hmm/>'));
-ERROR X0X16: XML syntax error; missing keyword(s): 'PRESERVE WHITESPACE'.
+ERROR 42Z72: XML syntax error; missing keyword(s): 'PRESERVE WHITESPACE'.
 ij> insert into t1 values (1, xmlparse('<hmm/>' preserve whitespace));
-ERROR X0X16: XML syntax error; missing keyword(s): 'DOCUMENT'.
+ERROR 42Z72: XML syntax error; missing keyword(s): 'DOCUMENT'.
 ij> insert into t1 values (1, xmlparse(content '<hmm/>' preserve whitespace));
-ERROR X0X18: XML feature not supported: 'CONTENT'.
+ERROR 42Z74: XML feature not supported: 'CONTENT'.
 ij> select xmlparse(document xmlparse(document '<hein/>' preserve whitespace) preserve whitespace) from t1;
 ERROR 42X25: The 'XMLParse' function is not allowed on the 'XML' type.
 ij> select i from t1 where xmlparse(document '<hein/>' preserve whitespace);
 ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'XML' expression.  It must be a BOOLEAN expression.
 ij> insert into t1 values (1, xmlparse(document '<oops>' preserve whitespace));
-ERROR 2200L: XMLPARSE operand is not an XML document; see next exception for details.
+ERROR 2200M: Failed to parse XMLPARSE operand; see next exception for details.
 ERROR XJ001: Java exception: 'XML document structures must start and end within the same entity.: xxxFILTERED-SAX-EXCEPTIONxxx'.
 ij> prepare ps1 as 'insert into t1(x) values XMLPARSE(document ? preserve whitespace)';
-ERROR X0X25: Unable to determine the parameter type for XMLPARSE; try using a CAST.
+ERROR 42Z79: Unable to determine the parameter type for XMLPARSE; try using a CAST.
 ij> -- These should work.
 insert into t1 values (5, xmlparse(document '<hmm/>' preserve whitespace));
 1 row inserted/updated/deleted
@@ -241,15 +241,15 @@ I
 3          
 ij> -- XML columns can't be returned in a top-level result set.
 select x from t1;
-ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ERROR 42Z71: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
 ij> select * from t1;
-ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ERROR 42Z71: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
 ij> select xmlparse(document vc preserve whitespace) from t4;
-ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ERROR 42Z71: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
 ij> values xmlparse(document '<bye/>' preserve whitespace);
-ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ERROR 42Z71: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
 ij> values xmlparse(document '<hel' || 'lo/>' preserve whitespace);
-ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ERROR 42Z71: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
 ij> -- Test XMLSERIALIZE operator.
 insert into t4 values ('<hmm/>');
 1 row inserted/updated/deleted
@@ -257,13 +257,13 @@ ij> insert into t4 values 'no good';
 1 row inserted/updated/deleted
 ij> -- These should fail.
 select xmlserialize(x) from t1;
-ERROR X0X16: XML syntax error; missing keyword(s): 'AS'.
+ERROR 42Z72: XML syntax error; missing keyword(s): 'AS'.
 ij> select xmlserialize(x as) from t1;
-ERROR X0X16: XML syntax error; missing keyword(s): 'AS'.
+ERROR 42Z72: XML syntax error; missing keyword(s): 'AS'.
 ij> select xmlserialize(x as int) from t1;
-ERROR X0X17: Invalid target type for XMLSERIALIZE: 'INTEGER'.
+ERROR 42Z73: Invalid target type for XMLSERIALIZE: 'INTEGER'.
 ij> select xmlserialize(x as varchar(20) for bit data) from t1;
-ERROR X0X17: Invalid target type for XMLSERIALIZE: 'VARCHAR () FOR BIT DATA'.
+ERROR 42Z73: Invalid target type for XMLSERIALIZE: 'VARCHAR () FOR BIT DATA'.
 ij> select xmlserialize(y as char(10)) from t1;
 ERROR 42X04: Column 'Y' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'Y' is not a column in the target table.
 ij> select xmlserialize(xmlserialize(x as clob) as clob) from t1;
@@ -311,7 +311,7 @@ select xmlserialize(xmlparse(document vc preserve whitespace) as char(10)) from 
 1         
 ----------
 <hmm/>    
-ERROR 2200L: XMLPARSE operand is not an XML document; see next exception for details.
+ERROR 2200M: Failed to parse XMLPARSE operand; see next exception for details.
 ERROR XJ001: Java exception: 'Content is not allowed in prolog.: xxxFILTERED-SAX-EXCEPTIONxxx'.
 ij> select xmlserialize(x as char) from t1;
 1   
@@ -352,7 +352,7 @@ ij> -- Test XMLPARSE/XMLSERIALIZE combinations.
 select xmlserialize(xmlparse(document '<hmm>' preserve whitespace) as clob) from t2;
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
-ERROR 2200L: XMLPARSE operand is not an XML document; see next exception for details.
+ERROR 2200M: Failed to parse XMLPARSE operand; see next exception for details.
 ERROR XJ001: Java exception: 'XML document structures must start and end within the same entity.: xxxFILTERED-SAX-EXCEPTIONxxx'.
 ij> select xmlserialize(xmlparse(document x preserve whitespace) as char(100)) from t1;
 ERROR 42X25: The 'XMLParse' function is not allowed on the 'XML' type.
@@ -401,13 +401,13 @@ ERROR 42X01: Syntax error: Encountered "x" at line 1, column 40.
 ij> select i from t1 where xmlexists('//*' passing x);
 ERROR 42X01: Syntax error: Encountered "x" at line 1, column 48.
 ij> select i from t1 where xmlexists('//*' passing by value x);
-ERROR X0X18: XML feature not supported: 'BY VALUE'.
+ERROR 42Z74: XML feature not supported: 'BY VALUE'.
 ij> select i from t1 where xmlexists('//*' passing by ref i);
-ERROR X0X21: Context item must have type 'XML'; 'INTEGER' is not allowed.
+ERROR 42Z77: Context item must have type 'XML'; 'INTEGER' is not allowed.
 ij> select i from t1 where xmlexists(i passing by ref x);
-ERROR X0X19: XML query expression must be a string literal.
+ERROR 42Z75: XML query expression must be a string literal.
 ij> select i from t1 where xmlexists(i passing by ref x, x);
-ERROR X0X20: Multiple XML context items are not allowed.
+ERROR 42Z76: Multiple XML context items are not allowed.
 ij> -- These should succeed.
 select i from t1 where xmlexists('//*' passing by ref x);
 I          
@@ -637,20 +637,20 @@ ij> select i, xmlquery(xmlquery('//*' returning sequence empty on empty) as char
 ERROR 42X01: Syntax error: Encountered "returning" at line 1, column 35.
 ij> -- These should fail with "not supported" errors.
 select i, xmlquery('//*' passing by ref x returning sequence null on empty) from t1;
-ERROR X0X18: XML feature not supported: 'NULL ON EMPTY'.
+ERROR 42Z74: XML feature not supported: 'NULL ON EMPTY'.
 ij> select i, xmlquery('//*' passing by ref x returning content empty on empty) from t1;
-ERROR X0X18: XML feature not supported: 'RETURNING CONTENT'.
+ERROR 42Z74: XML feature not supported: 'RETURNING CONTENT'.
 ij> -- This should fail because XMLQUERY returns an XML value which
 -- is not allowed in top-level result set.
 select i, xmlquery('//*' passing by ref x empty on empty) from t1;
-ERROR X0X15: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
+ERROR 42Z71: XML values are not allowed in top-level result sets; try using XMLSERIALIZE.
 ij> -- These should fail because context item must be XML.
 select i, xmlquery('//*' passing by ref i empty on empty) from t1;
-ERROR X0X21: Context item must have type 'XML'; 'INTEGER' is not allowed.
+ERROR 42Z77: Context item must have type 'XML'; 'INTEGER' is not allowed.
 ij> select i, xmlquery('//*' passing by ref 'hello' empty on empty) from t1;
-ERROR X0X21: Context item must have type 'XML'; 'CHAR' is not allowed.
+ERROR 42Z77: Context item must have type 'XML'; 'CHAR' is not allowed.
 ij> select i, xmlquery('//*' passing by ref cast ('hello' as clob) empty on empty) from t1;
-ERROR X0X21: Context item must have type 'XML'; 'CLOB' is not allowed.
+ERROR 42Z77: Context item must have type 'XML'; 'CLOB' is not allowed.
 ij> -- These should all succeed.  Since it's Xalan that's actually doing
 -- the query evaluation we don't need to test very many queries; we
 -- just want to make sure we get the correct results when there is
@@ -842,7 +842,7 @@ insert into t2 (i, x) values (
     from t1 where i = 9
   )
 );
-ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> insert into t2 (i, x) values (
   21,
   (select
@@ -850,7 +850,7 @@ ij> insert into t2 (i, x) values (
     from t1 where i = 9
   )
 );
-ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> insert into t2 (i, x) values (
   22,
   (select
@@ -858,7 +858,7 @@ ij> insert into t2 (i, x) values (
     from t1 where i = 9
   )
 );
-ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> insert into t2 (i, x) values (
   23,
   (select
@@ -866,7 +866,7 @@ ij> insert into t2 (i, x) values (
     from t1 where i = 9
   )
 );
-ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> insert into t2 (i, x) values (
   24,
   (select
@@ -874,7 +874,7 @@ ij> insert into t2 (i, x) values (
     from t1 where i = 9
   )
 );
-ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> -- These should succeed.
 insert into t2 (i, x) values (
   25,
@@ -970,11 +970,11 @@ ij> -- These should fail because result of XMLQUERY isn't a DOCUMENT.
 update t3
   set x = xmlquery('.//*' passing by ref x empty on empty)
 where i = 29;
-ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> update t3
   set x = xmlquery('./notthere' passing by ref x empty on empty)
 where i = 30;
-ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> update t3
   set x =
     xmlquery('//*[@weight]' passing by ref
@@ -985,7 +985,7 @@ ij> update t3
       )
     empty on empty)
 where i = 30;
-ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> update t3
   set x =
     xmlquery('//*/@height' passing by ref
@@ -996,7 +996,7 @@ ij> update t3
       )
     empty on empty)
 where i = 30;
-ERROR X0X22: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> -- Next two should succeed because there's no row with i = 100
 -- in t3 and thus t3 should remain unchanged after these updates.
 update t3
@@ -1030,7 +1030,7 @@ select i,
 from t1 where i > 5;
 I          |2                                                                                                   
 ----------------------------------------------------------------------------------------------------------------
-ERROR X0X23: Invalid context item for XMLQUERY operation; context items must be well-formed DOCUMENT nodes.
+ERROR 2200V: Invalid context item for XMLQUERY operator; context items must be well-formed DOCUMENT nodes.
 ij> select i,
   xmlserialize(
     xmlquery('.' passing by ref
@@ -1042,7 +1042,7 @@ ij> select i,
 from t1 where i > 5;
 I          |2                                                                                                   
 ----------------------------------------------------------------------------------------------------------------
-ERROR X0X23: Invalid context item for XMLQUERY operation; context items must be well-formed DOCUMENT nodes.
+ERROR 2200V: Invalid context item for XMLQUERY operator; context items must be well-formed DOCUMENT nodes.
 ij> select i,
   xmlexists('.' passing by ref
     xmlquery('//lets/@*' passing by ref
@@ -1052,7 +1052,7 @@ ij> select i,
 from t1 where i > 5;
 I          |2    
 -----------------
-ERROR X0X23: Invalid context item for XMLEXISTS operation; context items must be well-formed DOCUMENT nodes.
+ERROR 2200V: Invalid context item for XMLEXISTS operator; context items must be well-formed DOCUMENT nodes.
 ij> -- Should succeed but result is empty sequence.
 select i,
   xmlserialize(
