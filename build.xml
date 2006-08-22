@@ -54,7 +54,7 @@
       <or>
         <equals arg1="${sane}" arg2="true"/>
         <not>
-          <isset property="${sane}"/>
+          <isset property="sane"/>
         </not>
       </or>
     </condition>
@@ -305,7 +305,7 @@
     <ant dir="${derby.build.src.dir}"/>
   </target>
 
-  <target name="demo">
+  <target name="demo" depends="buildsource">
     <ant dir="${derby.demo.src.dir}"/>
   </target>
 
