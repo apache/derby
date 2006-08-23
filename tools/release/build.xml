@@ -74,6 +74,7 @@
       <!-- top-level -->
       <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
                   prefix="${derby.bin}/"/>
+      <zipfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
       <zipfileset dir="${basedir}/bin" prefix="${derby.bin}/bin" includes="*"/>
       <!-- demo -->
@@ -95,7 +96,7 @@
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
 
       <!-- docs -->
-      <zipfileset dir="${docs.out}" includes="**/*.html"
+      <zipfileset dir="${docs.out}" includes="**/*.html,**/*.jpg,**/*.gif"
                   prefix="${derby.bin}/docs/html"/>
       <zipfileset dir="${docs.out}" includes="**/*.pdf"
                   prefix="${derby.bin}/docs/pdf"/>
@@ -122,6 +123,7 @@
       <!-- top-level -->
       <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
                   prefix="${derby.bin}/"/>
+      <tarfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
       <tarfileset dir="${basedir}/bin" prefix="${derby.bin}/bin" includes="*"/>
       <!-- demo -->
@@ -142,9 +144,9 @@
       <tarfileset dir="${basedir}/classes" includes="Wwd*.class"
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
       <!-- docs -->
-      <tarfileset dir="${docs.out}" includes="**/*.html"
+      <tarfileset dir="${docs.out}" includes="**/*.html,**/*.jpg,**/*.gif"
 		          prefix="${derby.bin}/docs/html"/>
-	  <tarfileset dir="${docs.out}" includes="**/*.pdf"
+      <tarfileset dir="${docs.out}" includes="**/*.pdf"
 	              prefix="${derby.bin}/docs/pdf"/>
       <!-- frameworks -->
       <tarfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks" includes="**/*.html"/> 
