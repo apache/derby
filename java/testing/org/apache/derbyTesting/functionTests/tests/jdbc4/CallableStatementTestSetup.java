@@ -26,6 +26,7 @@ import junit.framework.Test;
 import junit.extensions.TestSetup;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.*;
@@ -38,7 +39,7 @@ import java.sql.*;
  * functions and procedures.
  */
 public class CallableStatementTestSetup
-    extends TestSetup {
+    extends BaseJDBCTestSetup {
 
     private static final String SOURCECLASS = "org.apache.derbyTesting." +
         "functionTests.tests.jdbc4.CallableStatementTestSetup.";
@@ -74,9 +75,9 @@ public class CallableStatementTestSetup
         super(test);
     }
 
-    public void setUp()
+    protected void setUp()
         throws SQLException {
-        Connection con = BaseJDBCTestCase.getConnection();
+        Connection con = getConnection();
         // Create the tables, functions and procedures we need.
         Statement stmt = con.createStatement();
         // Create table CSDATA and populate
@@ -122,11 +123,12 @@ public class CallableStatementTestSetup
                 "RETURNS VARCHAR(256) " +
                 "PARAMETER STYLE JAVA READS SQL DATA LANGUAGE JAVA " +
                 "EXTERNAL NAME '" + SOURCECLASS + "getVarcharFromDb'");
+        stmt.close();
     }
 
-    public void tearDown()
-        throws SQLException {
-        Connection con = BaseJDBCTestCase.getConnection();
+    protected void tearDown()
+        throws Exception {
+        Connection con = getConnection();
         Statement stmt = con.createStatement();
         // Drop functions
         for (String function : FUNCTION_DROPS) {
@@ -141,7 +143,7 @@ public class CallableStatementTestSetup
             stmt.execute("DROP TABLE "  + table);
         }
         stmt.close();
-        con.close();
+        super.tearDown();
     }
 
     // Methods for getting CallableStatements

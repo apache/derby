@@ -123,13 +123,25 @@ public abstract class BaseJDBCTestCase
      * Utility method to create a PreparedStatement using the connection
      * returned by getConnection.
      * @return Statement object from
-     * getConnection.createStatement(resultSetType, resultSetConcurrency)
+     * getConnection.prepareStatement(sql)
      * @throws SQLException
      */
     public PreparedStatement prepareStatement(String sql) throws SQLException
     {
         return getXConnection().prepareStatement(sql);
     }    
+
+    /**
+     * Utility method to create a CallableStatement using the connection
+     * returned by getConnection.
+     * @return Statement object from
+     * getConnection().prepareCall(sql)
+     * @throws SQLException
+     */
+    public CallableStatement prepareCall(String sql) throws SQLException
+    {
+        return getXConnection().prepareCall(sql);
+    }
     
     /**
      * Utility method to commit using the connection
@@ -159,12 +171,6 @@ public abstract class BaseJDBCTestCase
     {
         JDBC.cleanup(conn);
         conn = null;
-    }
-
-    // TEMP
-    public static Connection getConnection() throws SQLException
-    {
-        return openDefaultConnection();
     }
 
     /**

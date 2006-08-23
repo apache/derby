@@ -31,7 +31,7 @@ import javax.sql.*;
 
 public class ResultSetMetaDataTest extends BaseJDBCTestCase {
     //classes that will be used for the test
-    private Connection        conn =null;
+
     private PreparedStatement ps   =null;
     private ResultSet         rs   =null;
     //The ResultSetMetaData object that will be used throughout the test
@@ -51,9 +51,8 @@ public class ResultSetMetaDataTest extends BaseJDBCTestCase {
     /**
      * Create a default DataSource
      */
-    public void setUp() throws SQLException {
-        conn =   getConnection();
-        ps   =   conn.prepareStatement("select count(*) from sys.systables");
+    protected void setUp() throws SQLException {
+         ps   =   prepareStatement("select count(*) from sys.systables");
 	rs   =   ps.executeQuery();
         rsmd =   rs.getMetaData();
     }
@@ -63,15 +62,14 @@ public class ResultSetMetaDataTest extends BaseJDBCTestCase {
      * Initialize the ds to null once the tests that need to be run have been 
      * run
      */
-    public void tearDown() throws SQLException {
+    protected void tearDown() throws Exception {
         if(rs != null && !rs.isClosed())
             rs.close();
         if(ps != null && !ps.isClosed())
             ps.close();
-        if(conn != null && !conn.isClosed()) {
-            conn.rollback();
-            conn.close();
-        }
+        
+        super.tearDown();
+
     }
 
     public void testIsWrapperForResultSetMetaData() throws SQLException {

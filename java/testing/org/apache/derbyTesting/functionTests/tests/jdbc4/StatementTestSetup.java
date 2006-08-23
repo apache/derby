@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 
 import junit.framework.Test;
 import junit.extensions.TestSetup;
@@ -33,7 +34,7 @@ import java.sql.*;
  *  @see StatementTest
  */
 public class StatementTestSetup 
-    extends TestSetup {
+    extends BaseJDBCTestSetup {
 
     /**
      * Initialize database schema.
@@ -52,9 +53,9 @@ public class StatementTestSetup
      *
      * @see StatementTest
      */
-    public void setUp()
+    protected void setUp()
         throws SQLException {
-        Connection con = BaseJDBCTestCase.getConnection();
+        Connection con = getConnection();
         // Create tables used by the test.
         Statement stmt = con.createStatement();
         // See if the table is already there, and if so, delete it.
@@ -79,7 +80,6 @@ public class StatementTestSetup
         rs.close();
         stmt.close();
         con.commit();
-        con.close();
     }
 
     /**
@@ -88,14 +88,14 @@ public class StatementTestSetup
      *
      * @throws SQLException if database operations fail.
      */
-    public void tearDown() 
-        throws SQLException {
-        Connection con = BaseJDBCTestCase.getConnection();
+    protected void tearDown() 
+        throws Exception {
+        Connection con = getConnection();
         Statement stmt = con.createStatement();
         stmt.execute("drop table stmtTable");
         stmt.close();
         con.commit();
-        con.close();
+        super.tearDown();
     }
    
 } // End class StatementTestSetup

@@ -26,6 +26,7 @@ import junit.extensions.TestSetup;
 import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 
 import java.io.*;
 import java.sql.*;
@@ -56,8 +57,6 @@ public class ResultSetTest
      **/
     private static int insertKey = 0;
 
-    /** Default connection used by the tests. */
-    private Connection con = null;
     /** Statement used to obtain default resultset. */
     private Statement stmt = null;
     /** Default resultset used by the tests. */
@@ -74,11 +73,10 @@ public class ResultSetTest
         super(name);
     }
 
-    public void setUp()
+    protected void setUp()
         throws SQLException {
         key = requestKey();
-        con = getConnection();
-        stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE);
 
         rs = stmt.executeQuery("SELECT * FROM SYS.SYSTABLES");
@@ -87,8 +85,8 @@ public class ResultSetTest
         rs.next();
     }
 
-    public void tearDown()
-        throws SQLException {
+    protected void tearDown()
+        throws Exception {
 
         if (rs != null) {
             rs.close();
@@ -96,10 +94,8 @@ public class ResultSetTest
         if (stmt != null) {
             stmt.close();
         }
-        if (con != null && !con.isClosed()) {
-            con.rollback();
-            con.close();
-        }
+
+        super.tearDown();
     }
 
     public void testGetNCharacterStreamIntNotImplemented()
@@ -346,7 +342,7 @@ public class ResultSetTest
                 java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dLongBit");
+        PreparedStatement ps_sb = prep("dLongBit");
         ps_sb.setInt(1,key);
         ps_sb.setBinaryStream(2,is,BYTES1.length);
         ps_sb.executeUpdate();
@@ -356,7 +352,7 @@ public class ResultSetTest
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
 
-        ResultSet rs1 = fetchUpd(con, "dLongBit", key);
+        ResultSet rs1 = fetchUpd("dLongBit", key);
         rs1.next();
         rs1.updateBinaryStream(1,is_for_update,(int)BYTES2.length);
         rs1.updateRow();
@@ -366,7 +362,7 @@ public class ResultSetTest
         //using the updateBinaryStream method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dLongBit", key);
+        rs1 = fetch("dLongBit", key);
         rs1.next();
         InputStream is_ret = rs1.getBinaryStream(1);
 
@@ -408,7 +404,7 @@ public class ResultSetTest
                 java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = con.prepareStatement
+        PreparedStatement ps_sb = prepareStatement
                 ("insert into UpdateTestTable_ResultSet values(?,?)");
         ps_sb.setInt(1,1);
         ps_sb.setAsciiStream(2,is,BYTES1.length);
@@ -463,7 +459,7 @@ public class ResultSetTest
                 (str_for_update);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dLongVarchar"); 
+        PreparedStatement ps_sb = prep("dLongVarchar"); 
         ps_sb.setInt(1,key);
         ps_sb.setCharacterStream(2,r,str.length());
         ps_sb.executeUpdate();
@@ -472,7 +468,7 @@ public class ResultSetTest
         //Update operation
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
-        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
+        ResultSet rs1 = fetchUpd("dLongVarchar", key);
         rs1.next();
         rs1.updateCharacterStream(1,r_for_update,str_for_update.length());
         rs1.updateRow();
@@ -482,7 +478,7 @@ public class ResultSetTest
         //using the updateAsciiStream method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dLongVarchar", key); 
+        rs1 = fetch("dLongVarchar", key); 
         rs1.next();
 
         StringReader r_ret = (StringReader)rs1.getCharacterStream(1);
@@ -525,7 +521,7 @@ public class ResultSetTest
                 java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dLongBit");
+        PreparedStatement ps_sb = prep("dLongBit");
         ps_sb.setInt(1, key);
         ps_sb.setBinaryStream(2,is,BYTES1.length);
         ps_sb.executeUpdate();
@@ -536,7 +532,7 @@ public class ResultSetTest
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
 
-        ResultSet rs1 = fetchUpd(con, "dLongBit", key);
+        ResultSet rs1 = fetchUpd("dLongBit", key);
         rs1.next();
         rs1.updateBinaryStream("dLongBit",is_for_update,(int)BYTES2.length);
         rs1.updateRow();
@@ -546,7 +542,7 @@ public class ResultSetTest
         //using the updateBinaryStream method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dLongBit", key);
+        rs1 = fetch("dLongBit", key);
         rs1.next();
         InputStream is_ret = rs1.getBinaryStream(1);
 
@@ -570,14 +566,14 @@ public class ResultSetTest
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dLongBit");
+        PreparedStatement ps_sb = prep("dLongBit");
         ps_sb.setInt(1, key);
         ps_sb.setBinaryStream(2, is1);
         ps_sb.executeUpdate();
         ps_sb.close();
 
         //Update operation
-        ResultSet rs1 = fetchUpd(con, "dLongBit", key);
+        ResultSet rs1 = fetchUpd("dLongBit", key);
         rs1.next();
         rs1.updateBinaryStream(1, is2);
         rs1.updateRow();
@@ -587,7 +583,7 @@ public class ResultSetTest
         //using the updateBinaryStream method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dLongBit", key);
+        rs1 = fetch("dLongBit", key);
         rs1.next();
         assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
         rs1.close();
@@ -604,14 +600,14 @@ public class ResultSetTest
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dBlob");
+        PreparedStatement ps_sb = prep("dBlob");
         ps_sb.setInt(1, key);
         ps_sb.setBinaryStream(2, is1);
         ps_sb.executeUpdate();
         ps_sb.close();
 
         //Update operation
-        ResultSet rs1 = fetchUpd(con, "dBlob", key);
+        ResultSet rs1 = fetchUpd("dBlob", key);
         rs1.next();
         rs1.updateBinaryStream(1, is2);
         rs1.updateRow();
@@ -621,7 +617,7 @@ public class ResultSetTest
         //using the updateBinaryStream method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dBlob", key);
+        rs1 = fetch("dBlob", key);
         rs1.next();
         assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
         rs1.close();
@@ -634,14 +630,14 @@ public class ResultSetTest
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dLongBit");
+        PreparedStatement ps_sb = prep("dLongBit");
         ps_sb.setInt(1, key);
         ps_sb.setBinaryStream(2, is1);
         ps_sb.executeUpdate();
         ps_sb.close();
 
         //Update operation
-        ResultSet rs1 = fetchUpd(con, "dLongBit", key);
+        ResultSet rs1 = fetchUpd("dLongBit", key);
         rs1.next();
         rs1.updateBinaryStream("dLongBit", is2);
         rs1.updateRow();
@@ -651,7 +647,7 @@ public class ResultSetTest
         //using the updateBinaryStream method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dLongBit", key);
+        rs1 = fetch("dLongBit", key);
         rs1.next();
         assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
         rs1.close();
@@ -682,7 +678,7 @@ public class ResultSetTest
                 java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dLongVarchar");
+        PreparedStatement ps_sb = prep("dLongVarchar");
         ps_sb.setInt(1, key);
         ps_sb.setAsciiStream(2,is,BYTES1.length);
         ps_sb.executeUpdate();
@@ -692,7 +688,7 @@ public class ResultSetTest
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
 
-        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
+        ResultSet rs1 = fetchUpd("dLongVarchar", key);
         rs1.next();
         rs1.updateAsciiStream("dLongVarchar",is_for_update,(int)BYTES2.length);
         rs1.updateRow();
@@ -702,7 +698,7 @@ public class ResultSetTest
         //using the updateAsciiStream method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dLongVarchar", key);
+        rs1 = fetch("dLongVarchar", key);
         rs1.next();
         InputStream is_ret = rs1.getAsciiStream(1);
 
@@ -728,21 +724,21 @@ public class ResultSetTest
                 java.io.ByteArrayInputStream(BYTES2);
 
         // Prepared Statement used to insert the data.
-        PreparedStatement ps_sb = prep(con, "dLongVarchar");
+        PreparedStatement ps_sb = prep("dLongVarchar");
         ps_sb.setInt(1, key);
         ps_sb.setAsciiStream(2, is, BYTES1.length);
         ps_sb.executeUpdate();
         ps_sb.close();
 
         // Update the data.
-        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
+        ResultSet rs1 = fetchUpd("dLongVarchar", key);
         rs1.next();
         rs1.updateAsciiStream(1, isForUpdate);
         rs1.updateRow();
         rs1.close();
 
         // Query to see whether the data that has been updated.
-        rs1 = fetch(con, "dLongVarchar", key);
+        rs1 = fetch("dLongVarchar", key);
         rs1.next();
         InputStream isRet = rs1.getAsciiStream(1);
         isRet.read(bytesRet);
@@ -767,21 +763,21 @@ public class ResultSetTest
                 java.io.ByteArrayInputStream(BYTES2);
 
         // Prepared Statement used to insert the data.
-        PreparedStatement ps_sb = prep(con, "dLongVarchar");
+        PreparedStatement ps_sb = prep("dLongVarchar");
         ps_sb.setInt(1, key);
         ps_sb.setAsciiStream(2, is, BYTES1.length);
         ps_sb.executeUpdate();
         ps_sb.close();
 
         // Update the data.
-        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
+        ResultSet rs1 = fetchUpd("dLongVarchar", key);
         rs1.next();
         rs1.updateAsciiStream("dLongVarchar", isForUpdate);
         rs1.updateRow();
         rs1.close();
 
         // Query to see whether the data that has been updated.
-        rs1 = fetch(con, "dLongVarchar", key);
+        rs1 = fetch("dLongVarchar", key);
         rs1.next();
         InputStream isRet = rs1.getAsciiStream(1);
         isRet.read(bytesRet);
@@ -810,7 +806,7 @@ public class ResultSetTest
                 (str_for_update);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dLongVarchar");
+        PreparedStatement ps_sb = prep("dLongVarchar");
         ps_sb.setInt(1, key);
         ps_sb.setCharacterStream(2,r,str.length());
         ps_sb.executeUpdate();
@@ -819,7 +815,7 @@ public class ResultSetTest
         //Update operation
         //use a different ResultSet variable so that the
         //other tests can go on unimpacted
-        ResultSet rs1 = fetchUpd(con, "dLongVarchar", key);
+        ResultSet rs1 = fetchUpd("dLongVarchar", key);
         rs1.next();
         rs1.updateCharacterStream("dLongVarchar", 
                                   r_for_update,
@@ -831,7 +827,7 @@ public class ResultSetTest
         //using the updateAsciiStream method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dLongVarchar", key);
+        rs1 = fetch("dLongVarchar", key);
         rs1.next();
 
         StringReader r_ret = (StringReader)rs1.getCharacterStream(1);
@@ -854,21 +850,21 @@ public class ResultSetTest
         String strUpdated = "An updated (\u0FEF\u9876) test string";
 
         // Insert test data
-        PreparedStatement psChar = prep(con, "dLongVarchar");
+        PreparedStatement psChar = prep("dLongVarchar");
         psChar.setInt(1, key);
         psChar.setCharacterStream(2, new StringReader(str));
         psChar.execute();
         psChar.close();
 
         // Update test data
-        ResultSet rs = fetchUpd(con, "dLongVarchar", key);
+        ResultSet rs = fetchUpd("dLongVarchar", key);
         rs.next();
         rs.updateCharacterStream(1, new StringReader(strUpdated));
         rs.updateRow();
         rs.close();
 
         // Verify that update took place and is correct.
-        rs = fetch(con, "dLongVarchar", key);
+        rs = fetch("dLongVarchar", key);
         rs.next();
         Reader updatedStr = rs.getCharacterStream(1);
         for (int i=0; i < strUpdated.length(); i++) {
@@ -886,21 +882,21 @@ public class ResultSetTest
         String strUpdated = "An updated (\u0FEF\u9876) test string";
 
         // Insert test data
-        PreparedStatement psChar = prep(con, "dLongVarchar");
+        PreparedStatement psChar = prep("dLongVarchar");
         psChar.setInt(1, key);
         psChar.setCharacterStream(2, new StringReader(str));
         psChar.execute();
         psChar.close();
 
         // Update test data
-        ResultSet rs = fetchUpd(con, "dLongVarchar", key);
+        ResultSet rs = fetchUpd("dLongVarchar", key);
         rs.next();
         rs.updateCharacterStream("dLongVarchar", new StringReader(strUpdated));
         rs.updateRow();
         rs.close();
 
         // Verify that update took place and is correct.
-        rs = fetch(con, "dLongVarchar", key);
+        rs = fetch("dLongVarchar", key);
         rs.next();
         Reader updatedStr = rs.getCharacterStream(1);
         for (int i=0; i < strUpdated.length(); i++) {
@@ -935,7 +931,7 @@ public class ResultSetTest
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dClob");
+        PreparedStatement ps_sb = prep("dClob");
 
         //first insert
         ps_sb.setInt(1,key);
@@ -958,12 +954,12 @@ public class ResultSetTest
         //update the second result set with this
         //Clob value
 
-        ResultSet rs1 = fetchUpd(con, "dClob", key);
+        ResultSet rs1 = fetchUpd("dClob", key);
         rs1.next();
         Clob clob = rs1.getClob(1);
         rs1.close();
 
-        rs1 = fetchUpd(con, "dClob", key2);
+        rs1 = fetchUpd("dClob", key2);
         rs1.next();
         rs1.updateClob(1,clob);
         rs1.updateRow();
@@ -973,7 +969,7 @@ public class ResultSetTest
         //using the updateClob method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dClob", key2);
+        rs1 = fetch("dClob", key2);
         rs1.next();
         assertEquals(clob, rs1.getClob(1));
         rs1.close();
@@ -986,21 +982,21 @@ public class ResultSetTest
         Reader r2 = new java.io.StringReader(new String(BYTES2));
 
         // Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dClob");
+        PreparedStatement ps_sb = prep("dClob");
         ps_sb.setInt(1, key);
         ps_sb.setCharacterStream(2, r1);
         ps_sb.executeUpdate();
         ps_sb.close();
 
         // Update operation
-        ResultSet rs1 = fetchUpd(con, "dClob", key);
+        ResultSet rs1 = fetchUpd("dClob", key);
         rs1.next();
         rs1.updateClob(1, r2);
         rs1.updateRow();
         rs1.close();
 
         // Query to see whether the data that has been updated.
-        rs1 = fetch(con, "dClob", key);
+        rs1 = fetch("dClob", key);
         rs1.next();
         assertEquals(new StringReader(new String(BYTES2)),
                      rs1.getCharacterStream(1));
@@ -1030,7 +1026,7 @@ public class ResultSetTest
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dBlob");
+        PreparedStatement ps_sb = prep("dBlob");
 
         //first insert
         ps_sb.setInt(1, key);
@@ -1053,12 +1049,12 @@ public class ResultSetTest
         //update the second result set with this
         //Clob value
 
-        ResultSet rs1 = fetch(con, "dBlob", key);
+        ResultSet rs1 = fetch("dBlob", key);
         rs1.next();
         Blob blob = rs1.getBlob(1);
         rs1.close();
 
-        rs1 = fetchUpd(con, "dBlob", key2);
+        rs1 = fetchUpd("dBlob", key2);
         rs1.next();
         rs1.updateBlob(1,blob);
         rs1.updateRow();
@@ -1068,7 +1064,7 @@ public class ResultSetTest
         //using the updateBlob method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dBlob", key2);
+        rs1 = fetch("dBlob", key2);
         rs1.next();
         assertEquals(blob, rs1.getBlob(1));
         rs1.close();
@@ -1081,21 +1077,21 @@ public class ResultSetTest
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         // Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dBlob");
+        PreparedStatement ps_sb = prep("dBlob");
         ps_sb.setInt(1, key);
         ps_sb.setBinaryStream(2, is1);
         ps_sb.executeUpdate();
         ps_sb.close();
 
         // Update operation
-        ResultSet rs1 = fetchUpd(con, "dBlob", key);
+        ResultSet rs1 = fetchUpd("dBlob", key);
         rs1.next();
         rs1.updateBlob(1, is2);
         rs1.updateRow();
         rs1.close();
 
         // Query to see whether the data that has been updated.
-        rs1 = fetch(con, "dBlob", key);
+        rs1 = fetch("dBlob", key);
         rs1.next();
         assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
         rs1.close();
@@ -1124,7 +1120,7 @@ public class ResultSetTest
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dClob");
+        PreparedStatement ps_sb = prep("dClob");
 
         //first insert
         ps_sb.setInt(1, key);
@@ -1147,12 +1143,12 @@ public class ResultSetTest
         //update the second result set with this
         //Clob value
 
-        ResultSet rs1 = fetch(con, "dClob", key);
+        ResultSet rs1 = fetch("dClob", key);
         rs1.next();
         Clob clob = rs1.getClob(1);
         rs1.close();
 
-        rs1 = fetchUpd(con, "dClob", key2);
+        rs1 = fetchUpd("dClob", key2);
         rs1.next();
         rs1.updateClob("dClob",clob);
         rs1.updateRow();
@@ -1162,7 +1158,7 @@ public class ResultSetTest
         //using the updateClob method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dClob", key2);
+        rs1 = fetch("dClob", key2);
         rs1.next();
         assertEquals(clob, rs1.getClob(1));
         rs1.close();
@@ -1175,21 +1171,21 @@ public class ResultSetTest
         Reader r2 = new java.io.StringReader(new String(BYTES2));
 
         // Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dClob");
+        PreparedStatement ps_sb = prep("dClob");
         ps_sb.setInt(1, key);
         ps_sb.setCharacterStream(2, r1);
         ps_sb.executeUpdate();
         ps_sb.close();
 
         // Update operation
-        ResultSet rs1 = fetchUpd(con, "dClob", key);
+        ResultSet rs1 = fetchUpd("dClob", key);
         rs1.next();
         rs1.updateClob("dClob", r2);
         rs1.updateRow();
         rs1.close();
 
         // Query to see whether the data that has been updated.
-        rs1 = fetch(con, "dClob", key);
+        rs1 = fetch("dClob", key);
         rs1.next();
         assertEquals(new StringReader(new String(BYTES2)),
                      rs1.getCharacterStream(1));
@@ -1219,7 +1215,7 @@ public class ResultSetTest
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         //Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dBlob");
+        PreparedStatement ps_sb = prep("dBlob");
 
         //first insert
         ps_sb.setInt(1, key);
@@ -1242,12 +1238,12 @@ public class ResultSetTest
         //update the second result set with this
         //Clob value
 
-        ResultSet rs1 = fetch(con, "dBlob", key);
+        ResultSet rs1 = fetch("dBlob", key);
         rs1.next();
         Blob blob = rs1.getBlob(1);
         rs1.close();
 
-        rs1 = fetchUpd(con, "dBlob", key2);
+        rs1 = fetchUpd("dBlob", key2);
         rs1.next();
         rs1.updateBlob("dBlob",blob);
         rs1.updateRow();
@@ -1257,7 +1253,7 @@ public class ResultSetTest
         //using the updateBlob method is the same
         //data that we expected
 
-        rs1 = fetch(con, "dBlob", key2);
+        rs1 = fetch("dBlob", key2);
         rs1.next();
         assertEquals(blob, rs1.getBlob(1)); 
         rs1.close();
@@ -1270,21 +1266,21 @@ public class ResultSetTest
         InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
 
         // Prepared Statement used to insert the data
-        PreparedStatement ps_sb = prep(con, "dBlob");
+        PreparedStatement ps_sb = prep("dBlob");
         ps_sb.setInt(1, key);
         ps_sb.setBinaryStream(2, is1);
         ps_sb.executeUpdate();
         ps_sb.close();
 
         // Update operation
-        ResultSet rs1 = fetchUpd(con, "dBlob", key);
+        ResultSet rs1 = fetchUpd("dBlob", key);
         rs1.next();
         rs1.updateBlob("dBlob", is2);
         rs1.updateRow();
         rs1.close();
 
         // Query to see whether the data that has been updated.
-        rs1 = fetch(con, "dBlob", key);
+        rs1 = fetch("dBlob", key);
         rs1.next();
         assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
         rs1.close();
@@ -1331,48 +1327,29 @@ public class ResultSetTest
                     embeddedSuite("ResultSetTest embedded-only suite"));
         }
         // Wrap suite in a TestSetup-class.
-        return new TestSetup(rsSuite) {
-                public void setUp()
+        return new BaseJDBCTestSetup(rsSuite) {
+                protected void setUp()
                         throws SQLException {
-                    oneTimeSetup();
-                }
+                    Connection con = getConnection();
+                    Statement stmt = con.createStatement();
+                    stmt.execute("create table UpdateTestTableResultSet (" +
+                            "sno int not null unique," +
+                            "dBlob BLOB," +
+                            "dClob CLOB," +
+                            "dLongVarchar LONG VARCHAR," +
+                            "dLongBit LONG VARCHAR FOR BIT DATA)");
+                    stmt.close();
+               }
 
-                public void tearDown()
-                        throws SQLException {
-                    oneTimeTearDown();
+                protected void tearDown()
+                        throws Exception {
+                    Connection con = getConnection();
+                    Statement stmt = con.createStatement();
+                    stmt.execute("drop table UpdateTestTableResultSet");
+                    stmt.close();
+                    super.tearDown();
                 }
             };
-    }
-
-    /**
-     * Perform one-time setup for the suite.
-     * Creates the necessary tables for the tests.
-     */
-    protected static void oneTimeSetup()
-            throws SQLException {
-        Connection con = getConnection();
-        Statement stmt = con.createStatement();
-        stmt.execute("create table UpdateTestTableResultSet (" +
-                "sno int not null unique," +
-                "dBlob BLOB," +
-                "dClob CLOB," +
-                "dLongVarchar LONG VARCHAR," +
-                "dLongBit LONG VARCHAR FOR BIT DATA)");
-        stmt.close();
-        con.close();
-    }
-
-    /**
-     * Perform one-time cleanup for the suite.
-     * Deletes the tables used by the tests.
-     */
-    protected static void oneTimeTearDown()
-            throws SQLException {
-        Connection con = getConnection();
-        Statement stmt = con.createStatement();
-        stmt.execute("drop table UpdateTestTableResultSet");
-        stmt.close();
-        con.close();
     }
 
     /*************************************************************************
@@ -1396,9 +1373,9 @@ public class ResultSetTest
      * @param con connection to database
      * @param colName name of the column to insert into
      */
-    private static PreparedStatement prep(Connection con, String colName)
+    private PreparedStatement prep(String colName)
             throws SQLException {
-        return con.prepareStatement("insert into UpdateTestTableResultSet " +
+        return prepareStatement("insert into UpdateTestTableResultSet " +
                 "(sno, " + colName + ") values (?,?)");
     }
 
@@ -1411,9 +1388,9 @@ public class ResultSetTest
      * @return a <code>ResultSet</code> with zero or one row, depending on
      *      the key used
      */
-    private static ResultSet fetchUpd(Connection con, String colName, int key)
+    private ResultSet fetchUpd(String colName, int key)
             throws SQLException {
-        Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                              ResultSet.CONCUR_UPDATABLE);
         return stmt.executeQuery("select " + colName +
                 " from UpdateTestTableResultSet where sno = " + key +
@@ -1429,9 +1406,9 @@ public class ResultSetTest
      * @return a <code>ResultSet</code> with zero or one row, depending on
      *      the key used
      */
-    private static ResultSet fetch(Connection con, String colName, int key)
+    private ResultSet fetch(String colName, int key)
             throws SQLException {
-        Statement stmt = con.createStatement();
+        Statement stmt = createStatement();
         return stmt.executeQuery("select " + colName +
                 " from UpdateTestTableResultSet where sno = " + key);
     }

@@ -33,9 +33,7 @@ import java.sql.*;
 public class StatementTest
     extends BaseJDBCTestCase {
 
-    /** Default connection used by the tests. */
-    private Connection con = null;
-    /** Default statement used by the tests. */
+   /** Default statement used by the tests. */
     private Statement stmt = null;
     
     /**
@@ -53,13 +51,11 @@ public class StatementTest
      * @throws SQLException if setAutoCommit, createStatement or 
      *                      BaseJDBCTestCase.getConnection fails.
      */
-    public void setUp() 
+    protected void setUp() 
         throws SQLException {
-        con = getConnection();
-        assertFalse("Connection must be open initially", con.isClosed());
-        con.setAutoCommit(false);
+        getXConnection().setAutoCommit(false);
         // Create a default statement.
-        stmt = con.createStatement();
+        stmt = createStatement();
         assertFalse("First statement must be open initially", 
                 stmt.isClosed());
     }
@@ -69,20 +65,14 @@ public class StatementTest
      *
      * @throws SQLException if a database access exception occurs.
      */
-    public void tearDown() 
-        throws SQLException {
+    protected void tearDown() 
+        throws Exception {
         // Close default statement
         if (stmt != null) {
             stmt.close();
         }
-        // Close default connection
-        // Check if connection is open to avoid exception on rollback.
-        if (con != null && !con.isClosed()) {
-            // Abort changes that may have been done in the test.
-            // The test-method may however commit these itself.
-            con.rollback();
-            con.close();
-        }
+
+        super.tearDown();
     }
 
     /**
@@ -108,7 +98,7 @@ public class StatementTest
     public void testIsClosedWithTwoStatementsOnSameConnection()
         throws SQLException {
         // Create a second statement on the default connection.
-        Statement stmt2 = con.createStatement();
+        Statement stmt2 = createStatement();
         assertFalse("Second statement must be open initially", 
                 stmt2.isClosed());
         assertFalse("First statement should not be closed when " +
@@ -132,7 +122,7 @@ public class StatementTest
     public void testIsClosedWhenClosingConnection()
         throws SQLException {
         // Create an extra statement for good measure.
-        Statement stmt2 = con.createStatement();
+        Statement stmt2 = createStatement();
         assertFalse("Second statement must be open initially",
                 stmt2.isClosed());
         // Exeute something on it, as opposed to the default statement.
@@ -141,7 +131,8 @@ public class StatementTest
                 "execute()", stmt2.isClosed());
         // Close the connection. We must commit/rollback first, or else a
         // "Invalid transaction state" exception is raised.
-        con.rollback();
+        rollback();
+        Connection con = getXConnection();
         con.close();
         assertTrue("Connection should be closed after close()", 
                 con.isClosed());
@@ -165,6 +156,7 @@ public class StatementTest
         throws SQLException {
         stmt.executeQuery("select count(*) from stmtTable");
         // Connection should now be in an invalid transaction state.
+        Connection con = stmt.getConnection();
         try {
             con.close();
             fail("Invalid transaction state exception was not thrown");
@@ -207,6 +199,7 @@ public class StatementTest
      */
     public void testStatementExecuteAfterConnectionClose() 
         throws SQLException {
+        Connection con = stmt.getConnection();
         con.close();
         assertTrue("Connection should be closed after close()", 
                 con.isClosed());

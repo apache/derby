@@ -37,8 +37,7 @@ import java.util.Vector;
 public class CallableStatementTest
     extends BaseJDBCTestCase {
 
-    /** Default connection used by the tests. */
-    private Connection con = null;
+
     /** Default callable statement used by the tests. */
     private CallableStatement cStmt = null;
     
@@ -57,10 +56,9 @@ public class CallableStatementTest
      * @throws SQLException if creation of connection or callable statement
      *                      fail.
      */
-    public void setUp() 
+    protected void setUp() 
         throws SQLException {
-        con = getConnection();
-        cStmt = con.prepareCall("? = CALL FLOOR(?)");
+        cStmt = prepareCall("? = CALL FLOOR(?)");
         cStmt.registerOutParameter(1, Types.DOUBLE);
     }
 
@@ -70,22 +68,18 @@ public class CallableStatementTest
      * @throws SQLException if closing of the connection or the callable
      *                      statement fail.
      */
-    public void tearDown()
-        throws SQLException {
+    protected void tearDown()
+        throws Exception {
         if (cStmt != null && !cStmt.isClosed()) {
             cStmt.close();
         }
-        if (con != null && !con.isClosed()) {
-            con.rollback();
-            con.close();
-        }
-        cStmt = null;
-        con = null;
+
+        super.tearDown();
     }
    
     public void testNamedParametersAreNotSupported()
         throws SQLException {
-        DatabaseMetaData met = con.getMetaData();
+        DatabaseMetaData met = getXConnection().getMetaData();
         assertFalse("Named parameters are not supported, but the metadata " +
                     "says they are", met.supportsNamedParameters());
         met = null;
@@ -191,7 +185,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntOnInParameterOfValidType()
         throws SQLException {
-        cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(con);
+        cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(getXConnection());
         cStmt.setString(1, "A string");
         cStmt.execute();
         try {
@@ -215,7 +209,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntVARCHAR()
         throws IOException, SQLException {
-        cStmt = CallableStatementTestSetup.getIntToStringFunction(con);
+        cStmt = CallableStatementTestSetup.getIntToStringFunction(getXConnection());
         cStmt.setInt(2, 4509);
         assertFalse("No resultsets should be returned", cStmt.execute());
         assertEquals("Incorrect updatecount", -1, cStmt.getUpdateCount());
@@ -246,7 +240,7 @@ public class CallableStatementTest
     public void testGetCharacterStreamIntVARBINARYDirect()
         throws IOException, SQLException {
         String data = "This is the test string.";
-        cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(con);
+        cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(getXConnection());
         cStmt.setString(1, data);
         assertFalse("No resultsets should be returned", cStmt.execute());
         // Note that getUpdateCount behaves differently on client and embedded.
@@ -285,7 +279,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntVARBINARYFromDb()
         throws IOException, SQLException {
-        cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(con);
+        cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(getXConnection());
         cStmt.setInt(2, CallableStatementTestSetup.STRING_BYTES_ID);
         assertFalse("No resultsets should be returned", cStmt.execute());
         assertEquals("Incorrect updatecount", -1, cStmt.getUpdateCount());
@@ -316,7 +310,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntOnVARBINARYWithNull()
         throws SQLException {
-        cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(con);
+        cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(getXConnection());
         cStmt.setInt(2, CallableStatementTestSetup.SQL_NULL_ID);
         assertFalse("No resultsets should be returned", cStmt.execute());
         assertEquals("Incorrect updatecount", -1, cStmt.getUpdateCount());
@@ -331,7 +325,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntOnVARCHARWithNull()
         throws SQLException {
-        cStmt = CallableStatementTestSetup.getVarcharFromDbFunction(con);
+        cStmt = CallableStatementTestSetup.getVarcharFromDbFunction(getXConnection());
         cStmt.setInt(2, CallableStatementTestSetup.SQL_NULL_ID);
         assertFalse("No resultsets should be returned", cStmt.execute());
         assertEquals("Incorrect updatecount", -1, cStmt.getUpdateCount());

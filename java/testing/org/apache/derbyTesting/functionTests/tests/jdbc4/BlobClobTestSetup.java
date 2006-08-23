@@ -25,6 +25,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -39,17 +40,13 @@ import java.sql.*;
  * because the createBlob/-Clob methods are not yet implemented.
  */
 public class BlobClobTestSetup
-    extends TestSetup {
+    extends BaseJDBCTestSetup {
 
     /** Constant for accessing the row with null values. */
     public static final int ID_NULLVALUES = 1;
     /** Constant for accessing the row with sample values. */
     public static final int ID_SAMPLEVALUES = 2;
 
-    /** ResultSet used to fetch BLOB or CLOB. */
-    private static ResultSet rs = null;
-    /** Statement used to fetch BLOB or CLOB. */
-    private static Statement stmt = null;
     /** Blob data. */
     private static final byte[] blobData = new byte[] {
         0x65, 0x66, 0x67, 0x68, 0x69,
@@ -72,9 +69,9 @@ public class BlobClobTestSetup
      * Create a table with BLOB and CLOB, so that such objects can be
      * accessed/used from JDBC.
      */
-    public void setUp() 
+    protected void setUp() 
         throws IOException, SQLException {
-        Connection con = BaseJDBCTestCase.getConnection();
+        Connection con = getConnection();
         Statement stmt = con.createStatement();
         stmt.execute("create table BLOBCLOB (ID int primary key, " +
                                             "BLOBDATA blob(1k)," + 
@@ -89,14 +86,15 @@ public class BlobClobTestSetup
 
     /**
      * Drop the table we created during setup.
+     * @throws Exception 
      */
-    public void tearDown()
-        throws SQLException {
-        Connection con = BaseJDBCTestCase.getConnection();
+    protected void tearDown()
+        throws Exception {
+        Connection con = getConnection();
         Statement stmt = con.createStatement();
         stmt.execute("drop table BLOBCLOB");
         stmt.close();
-        con.close();
+        super.tearDown();
     }
     
     /**
@@ -119,8 +117,8 @@ public class BlobClobTestSetup
         pStmt.setBlob(1, blobInput, blobData.length);
         pStmt.setInt(2, ID_SAMPLEVALUES);
         assertEquals("Invalid update count", 1, pStmt.executeUpdate());
-        stmt = con.createStatement();
-        rs = stmt.executeQuery("select BLOBDATA from BLOBCLOB where ID = " +
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("select BLOBDATA from BLOBCLOB where ID = " +
                 ID_SAMPLEVALUES);
         rs.next();
         Blob blob = rs.getBlob(1);
@@ -149,8 +147,8 @@ public class BlobClobTestSetup
         pStmt.setClob(1, clobInput, clobData.length());
         pStmt.setInt(2, ID_SAMPLEVALUES);
         assertEquals("Invalid update count", 1, pStmt.executeUpdate());
-        stmt = con.createStatement();
-        rs = stmt.executeQuery("select CLOBDATA from BLOBCLOB where ID = " +
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("select CLOBDATA from BLOBCLOB where ID = " +
                 ID_SAMPLEVALUES);
         rs.next();
         Clob clob = rs.getClob(1);

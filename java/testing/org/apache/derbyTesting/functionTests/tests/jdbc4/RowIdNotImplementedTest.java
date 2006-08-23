@@ -43,9 +43,6 @@ import java.sql.*;
 public class RowIdNotImplementedTest 
     extends BaseJDBCTestCase {
 
-    /** Default connection used by the tests. */
-    private Connection con = null;
-
     /**
      * Create test with given name.
      *
@@ -55,33 +52,11 @@ public class RowIdNotImplementedTest
         super(name);
     }
     
-    /**
-     * Obtain default connection.
-     *
-     * @throws SQLException if obtaining connection fails.
-     */
-    public void setUp()
-        throws SQLException {
-        con = getConnection();
-    }
-
-    /**
-     * Do rollback and close on connection.
-     *
-     * @throws SQLException if rollback or close fails on connection.
-     */
-    public void tearDown()
-        throws SQLException {
-        if (con != null && !con.isClosed()) {
-            con.rollback();
-            con.close();
-        }
-    }
 
     public void testRowIdInPreparedStatementSetRowId() 
         throws SQLException {
         PreparedStatement pStmt = 
-            con.prepareStatement("select count(*) from sys.systables");
+            prepareStatement("select count(*) from sys.systables");
         try {
             pStmt.setRowId(1, null);
             fail("PreparedStatement.setRowId should not be implemented");
@@ -170,7 +145,7 @@ public class RowIdNotImplementedTest
 
     public void testRowIdInDatabaseMetaDataRowIdLifeTime() 
         throws SQLException {
-        DatabaseMetaData meta = con.getMetaData();
+        DatabaseMetaData meta = getXConnection().getMetaData();
         RowIdLifetime rowIdLifetime = meta.getRowIdLifetime();
         assertEquals("RowIdLifetime should be ROWID_UNSUPPORTED",
             RowIdLifetime.ROWID_UNSUPPORTED,
@@ -227,7 +202,7 @@ public class RowIdNotImplementedTest
     private CallableStatement getCallableStatement() 
         throws SQLException {
         // No need to actuall call a stored procedure.
-        return con.prepareCall("values 1");
+        return prepareCall("values 1");
     }
 
     /**
@@ -239,7 +214,7 @@ public class RowIdNotImplementedTest
     private ResultSet getResultSet()
         throws SQLException {
         // Create a very simple resultset.
-        return con.createStatement().executeQuery("values 1");
+        return createStatement().executeQuery("values 1");
     }
     
     /**

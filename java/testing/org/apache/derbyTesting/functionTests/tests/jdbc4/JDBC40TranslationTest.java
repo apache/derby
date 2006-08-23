@@ -23,13 +23,14 @@ import java.sql.DatabaseMetaData;
 import java.sql.Types;
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
 
 /**
  * JUnit test which checks that the constants in JDBC40Translation are
  * correct. Each constant in JDBC40Translation should have a test
  * method comparing it to the value in the java.sql interface.
  */
-public class JDBC40TranslationTest extends BaseJDBCTestCase {
+public class JDBC40TranslationTest extends BaseTestCase {
 
     public JDBC40TranslationTest(String name) {
         super(name);

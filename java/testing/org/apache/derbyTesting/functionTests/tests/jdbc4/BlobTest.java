@@ -119,8 +119,6 @@ public class BlobTest
 
     /** Default Blob object used by the tests. */
     private Blob blob = null;
-    /** Default connection used by the tests. */
-    private Connection con = null;
     
     // Initialize with the details of the method that are exempted from 
     //throwing a SQLException when they are called after calling free()
@@ -156,24 +154,14 @@ public class BlobTest
     
     public void setUp() 
         throws SQLException {
-        con = getConnection();
-        blob = BlobClobTestSetup.getSampleBlob(con);
+
+        blob = BlobClobTestSetup.getSampleBlob(getXConnection());
         
         //call the buildHashSetMethod to initialize the 
         //HashSet with the method signatures that are exempted 
         //from throwing a SQLException after free has been called
         //on the Clob object.
         buildHashSet();
-    }
-    
-    public void tearDown()
-        throws SQLException {
-        blob = null;
-        if (con != null && !con.isClosed()) {
-            con.rollback();
-            con.close();
-        }
-        con = null;
     }
     
     /**

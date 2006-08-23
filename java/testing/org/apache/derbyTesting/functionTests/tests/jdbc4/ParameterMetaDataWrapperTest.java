@@ -31,12 +31,10 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
  */
 public class ParameterMetaDataWrapperTest extends BaseJDBCTestCase {
     
-    //Default Connection used by the tests
-    Connection conn = null;
     //Default PreparedStatement used by the tests
-    PreparedStatement ps = null;
+    private PreparedStatement ps = null;
     //Default ParameterMetaData object used by the tests
-    ParameterMetaData pmd = null;
+    private ParameterMetaData pmd = null;
     
     /**
      * Create a test with the given name
@@ -53,10 +51,9 @@ public class ParameterMetaDataWrapperTest extends BaseJDBCTestCase {
      * @throws SQLException if creation of connection or callable statement
      *                      fail.
      */
-    public void setUp() 
+    protected void setUp() 
         throws SQLException {
-        conn = getConnection();
-        ps   = conn.prepareStatement("values 1");
+        ps   = prepareStatement("values 1");
         pmd  = ps.getParameterMetaData();
     }
 
@@ -66,12 +63,12 @@ public class ParameterMetaDataWrapperTest extends BaseJDBCTestCase {
      * @throws SQLException if closing of the connection or the callable
      *                      statement fail.
      */
-    public void tearDown()
-        throws SQLException {
+    protected void tearDown()
+        throws Exception {
         if(ps != null && !ps.isClosed())
             ps.close();
-        if(conn != null && !conn.isClosed())
-            conn.close();
+        
+        super.tearDown();
     }
 
     public void testIsWrapperForParameterMetaData() throws SQLException {

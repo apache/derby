@@ -76,8 +76,7 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
      */
     private PreparedStatement prepare() throws SQLException {
         String sql = "values (CAST (? AS VARCHAR(128)))";
-        Connection c = getConnection();
-        return callable ? c.prepareCall(sql) : c.prepareStatement(sql);
+        return callable ? prepareCall(sql) : prepareStatement(sql);
     }
 
     /**

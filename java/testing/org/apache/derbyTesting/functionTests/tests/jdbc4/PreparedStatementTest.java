@@ -45,11 +45,10 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * Default connection and prepared statements that are used by the tests.
      */
     //Connection object
-    Connection conn      = null;
     //PreparedStatement object
-    PreparedStatement ps = null;
+    private PreparedStatement ps = null;
     //Statement object
-    Statement s = null;
+    private Statement s = null;
 
     
     /**
@@ -70,14 +69,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     public void setUp() 
         throws SQLException {
-        conn = getConnection();
-        //create the statement object
-        s = conn.createStatement();
+       //create the statement object
+        s = createStatement();
         //Create the PreparedStatement that will then be used as the basis 
         //throughout this test henceforth
         //This prepared statement will however NOT be used for testing
         //setClob and setBlob
-        ps = conn.prepareStatement("select count(*) from sys.systables");
+        ps = prepareStatement("select count(*) from sys.systables");
         
          // STEP1: create the tables
          // Structure of table
@@ -97,17 +95,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      *
      */
     public void tearDown() 
-        throws SQLException {
+        throws Exception {
         
         s.execute("drop table ClobTestTable");
         s.execute("drop table BlobTestTable");
         s.close();
         
-        if (conn != null && !conn.isClosed()) {
-            conn.rollback();
-            conn.close();
-        }
-        conn = null;
+        super.tearDown();
     }
 
     public static Test suite() {
@@ -327,7 +321,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         StringReader is = new StringReader("Test data for the Clob object");
         is.reset();
         
-        PreparedStatement ps_sc = conn.prepareStatement("insert into ClobTestTable values(?,?)");
+        PreparedStatement ps_sc = prepareStatement("insert into ClobTestTable values(?,?)");
         
         //initially insert the data
         ps_sc.setInt(1,1);
@@ -369,7 +363,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         // Insert test data.
         String testString = "Test string for setCharacterStream\u1A00";
         Reader reader = new StringReader(testString);
-        PreparedStatement psChar = conn.prepareStatement(
+        PreparedStatement psChar = prepareStatement(
                 "insert into ClobTestTable values (?,?)");
         psChar.setInt(1, 1);
         psChar.setCharacterStream(2, reader);
@@ -409,7 +403,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         InputStream is = new java.io.ByteArrayInputStream(BYTES);
         is.reset();
         
-        PreparedStatement ps_sb = conn.prepareStatement("insert into BlobTestTable values(?,?)");
+        PreparedStatement ps_sb = prepareStatement("insert into BlobTestTable values(?,?)");
         
         //initially insert the data
         ps_sb.setInt(1,1);
@@ -450,7 +444,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             throws IOException, SQLException {
         // Insert test data.
         InputStream is = new ByteArrayInputStream(BYTES);
-        PreparedStatement psByte = conn.prepareStatement(
+        PreparedStatement psByte = prepareStatement(
                 "insert into BlobTestTable values (?,?)");
         psByte.setInt(1, 1);
         psByte.setBinaryStream(2, is);
@@ -553,7 +547,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         is.reset();
         
-        PreparedStatement ps_sc = conn.prepareStatement("insert into ClobTestTable values(?,?)");
+        PreparedStatement ps_sc = prepareStatement("insert into ClobTestTable values(?,?)");
         
         //initially insert the data
         ps_sc.setInt(1,1);
@@ -577,7 +571,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         // Insert test data.
         String testString = "Test string for setCharacterStream\u1A00";
         Reader reader = new StringReader(testString);
-        PreparedStatement psChar = conn.prepareStatement(
+        PreparedStatement psChar = prepareStatement(
                 "insert into ClobTestTable values (?,?)");
         psChar.setInt(1, 1);
         psChar.setCharacterStream(2, reader);
@@ -612,7 +606,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         is.reset();
         
-        PreparedStatement ps_sb = conn.prepareStatement("insert into ClobTestTable values(?,?)");
+        PreparedStatement ps_sb = prepareStatement("insert into ClobTestTable values(?,?)");
         
         //initially insert the data
         ps_sb.setInt(1,1);
@@ -641,7 +635,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             throws IOException, SQLException {
         // Insert test data.
         InputStream is = new ByteArrayInputStream(BYTES);
-        PreparedStatement psAscii = conn.prepareStatement(
+        PreparedStatement psAscii = prepareStatement(
                 "insert into ClobTestTable values (?,?)");
         psAscii.setInt(1, 1);
         psAscii.setAsciiStream(2, is);
@@ -686,7 +680,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         is.reset();
         
-        PreparedStatement ps_sb = conn.prepareStatement("insert into BlobTestTable values(?,?)");
+        PreparedStatement ps_sb = prepareStatement("insert into BlobTestTable values(?,?)");
         
         //initially insert the data
         ps_sb.setInt(1,1);
@@ -716,7 +710,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             throws IOException, SQLException {
         // Insert test data.
         InputStream is = new ByteArrayInputStream(BYTES);
-        PreparedStatement psBinary = conn.prepareStatement(
+        PreparedStatement psBinary = prepareStatement(
                 "insert into BlobTestTable values (?,?)");
         psBinary.setInt(1, 1);
         psBinary.setBinaryStream(2, is);
