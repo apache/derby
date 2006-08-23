@@ -294,8 +294,7 @@ class DRDAProtocolException extends Exception
 								   agent.getSession().drdaID, 
 								   msg);
 			NetworkServerControlImpl s = agent.getServer();
-			s.consoleMessage(msg);
-			this.printStackTrace(s.logWriter);
+			s.consoleExceptionPrintTrace(this);
 		}
 	}
 	
