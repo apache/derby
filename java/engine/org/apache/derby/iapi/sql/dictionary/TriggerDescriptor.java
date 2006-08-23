@@ -689,17 +689,29 @@ public class TriggerDescriptor extends TupleDescriptor
 		// the trigger table, so there is a very large number of actions
 		// that we would have to check against. This is hard to maintain,
 		// so don't bother.
-		// When REVOKE_PRIVILEGE gets sent (this happens for privilege 
-		// types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
-		// make the TriggerDescriptor drop itself. 
-		if (action ==  DependencyManager.REVOKE_PRIVILEGE)
+
+		switch (action)
 		{
-		    DropTriggerConstantAction.dropTriggerDescriptor(
-				lcc,getDataDictionary().getDependencyManager(), 
-				getDataDictionary(), lcc.getTransactionExecute(), this,
-				null);
-		    return;
+			// invalidate this trigger descriptor
+			case DependencyManager.USER_RECOMPILE_REQUEST:
+				DependencyManager dm = getDataDictionary().getDependencyManager();
+				dm.invalidateFor(this, DependencyManager.PREPARED_STATEMENT_RELEASE, lcc);
+				break;
+
+			// When REVOKE_PRIVILEGE gets sent (this happens for privilege 
+			// types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
+			// make the TriggerDescriptor drop itself. 
+			case DependencyManager.REVOKE_PRIVILEGE:
+				DropTriggerConstantAction.dropTriggerDescriptor(
+					lcc, getDataDictionary().getDependencyManager(),
+					getDataDictionary(), lcc.getTransactionExecute(), this,
+					null);
+				break;
+
+			default:
+				break;
 		}
+		
 	}
 
 	/**

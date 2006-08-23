@@ -616,9 +616,26 @@ class TabInfoImpl implements TabInfo
 						   null,
 						   key,
 						   ScanController.GT,
-						   indexNumber);
+						   indexNumber,
+						   true);
 	}
 
+	public int deleteRow( TransactionController tc, ExecIndexRow key,
+							int indexNumber, boolean wait)
+		throws StandardException
+	{
+		//  Always row locking
+		return  deleteRows(tc,
+						   key,
+						   ScanController.GE,
+						   null,
+						   null,
+						   key,
+						   ScanController.GT,
+						   indexNumber,
+						   wait);
+	}
+	
 	/**
 	 * LOCKING: row locking if there is both a start and
 	 * stop key; otherwise table locking
@@ -627,13 +644,37 @@ class TabInfoImpl implements TabInfo
 	 * @see TabInfo#deleteRows
 	 */
 	public int deleteRows(TransactionController tc,
+							ExecIndexRow startKey,
+							int startOp,
+							Qualifier[][] qualifier,
+							TupleFilter filter,
+							ExecIndexRow stopKey,
+							int stopOp,
+							int indexNumber) throws StandardException
+    {
+		return  deleteRows(tc,
+				   startKey,
+				   startOp,
+				   qualifier,
+				   filter,
+				   stopKey,
+				   stopOp,
+				   indexNumber,
+				   true);
+    }
+
+	/**
+	 * @inheritDoc
+	 */
+	public int deleteRows(TransactionController tc,
 						  ExecIndexRow startKey,
 						  int startOp,
 						  Qualifier[][] qualifier,
 						  TupleFilter filter,
 						  ExecIndexRow stopKey,
 						  int stopOp,
-						  int indexNumber)
+						  int indexNumber,
+						  boolean wait)
 		 throws StandardException
 	{
 		ConglomerateController		heapCC;
@@ -644,7 +685,7 @@ class TabInfoImpl implements TabInfo
 		ExecRow						baseRow = crf.makeEmptyRow();
 		int                         rowsDeleted = 0;
 		boolean						passedFilter = true;
-
+		
 		rc = getRowChanger( tc, (int[])null,baseRow );
 
 		/*
@@ -666,7 +707,7 @@ class TabInfoImpl implements TabInfo
 				TransactionController.ISOLATION_SERIALIZABLE;
 
 		// Row level locking
-		rc.open(lockMode);
+		rc.open(lockMode, wait);
 
 		DataValueDescriptor[] startKeyRow = 
             startKey == null ? null : startKey.getRowArray();
@@ -678,14 +719,16 @@ class TabInfoImpl implements TabInfo
 		heapCC = tc.openConglomerate(
                     getHeapConglomerate(),
                     false,
-                    TransactionController.OPENMODE_FORUPDATE,
+                    (TransactionController.OPENMODE_FORUPDATE |
+                            ((wait) ? 0 : TransactionController.OPENMODE_LOCK_NOWAIT)),
                     lockMode,
                     TransactionController.ISOLATION_REPEATABLE_READ);
 
 		drivingScan = tc.openScan(
 			getIndexConglomerate(indexNumber),  // conglomerate to open
 			false, // don't hold open across commit
-            TransactionController.OPENMODE_FORUPDATE, // for update
+			(TransactionController.OPENMODE_FORUPDATE | 
+				((wait) ? 0 : TransactionController.OPENMODE_LOCK_NOWAIT)),
             lockMode,
 			isolation,
 			(FormatableBitSet) null, // all fields as objects
@@ -729,6 +772,7 @@ class TabInfoImpl implements TabInfo
 		heapCC.close();
 		drivingScan.close();
 		rc.close();
+		
 		return rowsDeleted;
 	}
 

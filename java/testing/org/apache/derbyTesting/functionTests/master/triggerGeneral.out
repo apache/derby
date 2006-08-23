@@ -1136,4 +1136,131 @@ ij> insert into test(info) values (1),(2),(3);
 3 rows inserted/updated/deleted
 ij> UPDATE TEST SET INFO = 1 WHERE TESTID = 2;
 ERROR 54038: Maximum depth of nested triggers was exceeded.
+ij> drop table test;
+0 rows inserted/updated/deleted
+ij> -- DERBY-1621
+-- creating and dropping index on the table in the trigger action
+create table t1 (i int);
+0 rows inserted/updated/deleted
+ij> create table t2 (i int);
+0 rows inserted/updated/deleted
+ij> create trigger tt after insert on t1 for each statement mode db2sql insert into t2 values 1;
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1;
+1 row inserted/updated/deleted
+ij> create unique index tu on t2(i);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1;
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'TU' defined on 'T2'.
+ij> select * from t2;
+I          
+-----------
+1          
+ij> insert into t1 values 1;
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'TU' defined on 'T2'.
+ij> select * from t2;
+I          
+-----------
+1          
+ij> drop index tu;
+0 rows inserted/updated/deleted
+ij> select * from t2;
+I          
+-----------
+1          
+ij> insert into t1 values 1;
+1 row inserted/updated/deleted
+ij> select * from t2;
+I          
+-----------
+1          
+1          
+ij> drop trigger tt;
+0 rows inserted/updated/deleted
+ij> -- dropping and recreating a table which the trigger references
+create table t3 (i int);
+0 rows inserted/updated/deleted
+ij> create table t4 (i int);
+0 rows inserted/updated/deleted
+ij> create trigger tt2 after insert on t3 for each statement mode db2sql insert into t4 values 1;
+0 rows inserted/updated/deleted
+ij> insert into t3 values 1;
+1 row inserted/updated/deleted
+ij> select * from t4;
+I          
+-----------
+1          
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> insert into t3 values 1;
+ERROR 42X05: Table/View 'T4' does not exist.
+ij> create table t4 (i int);
+0 rows inserted/updated/deleted
+ij> insert into t3 values 1;
+1 row inserted/updated/deleted
+ij> select * from t4;
+I          
+-----------
+1          
+ij> -- dropping a function which the trigger references
+create function max_value(x int, y int) returns int language java parameter style java external name 'java.lang.Math.max';
+0 rows inserted/updated/deleted
+ij> create table test(a integer);
+0 rows inserted/updated/deleted
+ij> create trigger test_trigger AFTER insert on test FOR EACH ROW MODE DB2SQL values max_value(2,4);
+0 rows inserted/updated/deleted
+ij> insert into test values(1);
+1 row inserted/updated/deleted
+ij> --- drop function and again do inserts. these should not work as the trigger would be invalid
+drop function max_value;
+0 rows inserted/updated/deleted
+ij> insert into test values(2);
+ERROR 42Y03: 'MAX_VALUE' is not recognized as a function or procedure.
+ij> insert into test values(1);
+ERROR 42Y03: 'MAX_VALUE' is not recognized as a function or procedure.
+ij> -- dropping a view which the trigger references
+create table t11TriggerTest (c111 int not null primary key, c112 int);
+0 rows inserted/updated/deleted
+ij> insert into t11TriggerTest values(1,1);
+1 row inserted/updated/deleted
+ij> insert into t11TriggerTest values(2,2);
+1 row inserted/updated/deleted
+ij> -- create a view based on table t11TriggerTest
+create view v21ViewTest as select * from t11TriggerTest;
+0 rows inserted/updated/deleted
+ij> -- get ready to create a trigger. Trigger is created on t31TriggerTest and it inserts into t32TriggerTest
+create table t31TriggerTest (c311 int);
+0 rows inserted/updated/deleted
+ij> create table t32TriggerTest (c321 int);
+0 rows inserted/updated/deleted
+ij> create trigger tr31t31TriggerTest after insert on t31TriggerTest for each statement mode db2sql
+   insert into t32TriggerTest values (select c111 from v21ViewTest where c112=1);
+0 rows inserted/updated/deleted
+ij> -- try an insert which will fire the trigger
+insert into t31TriggerTest values(1);
+1 row inserted/updated/deleted
+ij> select * from t31TriggerTest;
+C311       
+-----------
+1          
+ij> -- we know the trigger got fired if there is one row in t32TriggerTest
+select * from t32TriggerTest;
+C321       
+-----------
+1          
+ij> -- drop the view used by the trigger.
+drop view v21ViewTest;
+0 rows inserted/updated/deleted
+ij> -- try an insert which would cause insert trigger to fire. The insert trigger should have failed because view doesn't
+-- exist anymore.
+insert into t31TriggerTest values(1);
+ERROR 42X05: Table/View 'V21VIEWTEST' does not exist.
+ij> select * from t31TriggerTest;
+C311       
+-----------
+1          
+ij> select * from t32TriggerTest;
+C321       
+-----------
+1          
 ij> 

@@ -1636,10 +1636,13 @@ public final class	DataDictionaryImpl
 							  TransactionController tc)
 		throws StandardException
 	{
-		addDescriptorNow(td, parent, catalogNumber, duplicatesAllowed, tc, true);
+		addDescriptor(td, parent, catalogNumber, duplicatesAllowed, tc, true);
 	}
 
-	private void addDescriptorNow(TupleDescriptor td, TupleDescriptor parent,
+	/**
+	 * @inheritDoc
+	 */
+	public void addDescriptor(TupleDescriptor td, TupleDescriptor parent,
 							  int catalogNumber, boolean duplicatesAllowed,
 							  TransactionController tc, boolean wait)
 		throws StandardException
@@ -3242,7 +3245,7 @@ public final class	DataDictionaryImpl
                     uuid,
                     (UUID) null, 0, 0);
 										
-			addDescriptorNow(cd, null, SYSCOLUMNS_CATALOG_NUM, 
+			addDescriptor(cd, null, SYSCOLUMNS_CATALOG_NUM, 
 						  false, // no chance of duplicates here
 						  tc, wait);
 		}
@@ -5873,6 +5876,17 @@ public final class	DataDictionaryImpl
 									   TransactionController tc) 
 				throws StandardException	
 	{
+		 dropDependentsStoredDependencies(dependentsUUID, tc, true);
+	}
+				
+	/** 
+	 * @inheritDoc
+	 */
+	public void dropDependentsStoredDependencies(UUID dependentsUUID,
+									   TransactionController tc,
+									   boolean wait) 
+				throws StandardException	
+	{
 		ExecIndexRow			keyRow1 = null;
 		DataValueDescriptor		dependentIDOrderable;
 		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
@@ -5886,7 +5900,8 @@ public final class	DataDictionaryImpl
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
 		keyRow1.setColumn(1, dependentIDOrderable);
 
-		ti.deleteRow( tc, keyRow1, SYSDEPENDSRowFactory.SYSDEPENDS_INDEX1_ID );
+		ti.deleteRow( tc, keyRow1, SYSDEPENDSRowFactory.SYSDEPENDS_INDEX1_ID, 
+				wait );
 
 	}
 

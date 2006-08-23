@@ -260,13 +260,15 @@ public class SPSDescriptor extends TupleDescriptor
 	 * @param lcc the language connection context
 	 * @param triggerTable the table descriptor to bind against.  Had
 	 * 	better be null if this isn't a trigger sps.
+	 * @param tc the transaction controller
 	 *
 	 * @exception StandardException on error
 	 */
 	public final synchronized void prepareAndRelease
 	(
 		LanguageConnectionContext	lcc, 
-		TableDescriptor				triggerTable
+		TableDescriptor				triggerTable,
+		TransactionController       tc
 	) throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -277,9 +279,35 @@ public class SPSDescriptor extends TupleDescriptor
 			}
 		}
 		
-		compileStatement(lcc, triggerTable);
+		compileStatement(lcc, triggerTable, tc);
 	
 		preparedStatement.makeInvalid(DependencyManager.PREPARED_STATEMENT_RELEASE, lcc);
+	}
+	
+	/**
+	 * FOR TRIGGERS ONLY
+	 * <p>
+	 * Generate the class for this SPS and immediately
+	 * release it.  This is useful for cases where we
+	 * don't want to immediately execute the statement 
+	 * corresponding to this sps (e.g. CREATE STATEMENT).
+ 	 * <p>
+	 * <I>SIDE EFFECTS</I>: will update and SYSDEPENDS 
+	 * with the prepared statement dependency info.
+ 	 * 
+	 * @param lcc the language connection context
+	 * @param triggerTable the table descriptor to bind against.  Had
+	 * 	better be null if this isn't a trigger sps.
+	 *
+	 * @exception StandardException on error
+	 */
+	public final synchronized void prepareAndRelease
+	(
+		LanguageConnectionContext	lcc, 
+		TableDescriptor				triggerTable
+	) throws StandardException
+	{
+		prepareAndRelease(lcc, triggerTable, (TransactionController)null);
 	}
 
 	/**
@@ -297,13 +325,14 @@ public class SPSDescriptor extends TupleDescriptor
 	 */
 	public final synchronized void prepareAndRelease(LanguageConnectionContext lcc) throws StandardException
 	{
-		prepareAndRelease(lcc, (TableDescriptor)null);
+		prepareAndRelease(lcc, (TableDescriptor)null, (TransactionController)null);
 	}
 
 	private void compileStatement
 	(
 		LanguageConnectionContext	lcc,
-		TableDescriptor				triggerTable
+		TableDescriptor				triggerTable,
+		TransactionController       tc
 	)
 		throws StandardException
 	{
@@ -388,7 +417,7 @@ public class SPSDescriptor extends TupleDescriptor
 			** before we recreate them so we don't grow
 			** SYS.SYSDEPENDS forever.
 			*/
-			dm.clearDependencies(lcc, this);
+			dm.clearDependencies(lcc, this, tc);
 
 			/*
 			** Copy over all the dependencies to me
@@ -396,7 +425,8 @@ public class SPSDescriptor extends TupleDescriptor
 			dm.copyDependencies(preparedStatement, 	// from
 											this, 	// to
 											false,	// persistent only
-											cm);
+											cm,
+											tc);
 		}
 
 		// mark it as valid
@@ -673,7 +703,7 @@ public class SPSDescriptor extends TupleDescriptor
 			*/
 			LanguageConnectionContext lcc = (LanguageConnectionContext)
 					cm.getContext(LanguageConnectionContext.CONTEXT_ID);
-			prepareAndRelease(lcc);
+			
 
 
 			if (!((org.apache.derby.impl.sql.catalog.DataDictionaryImpl) (lcc.getDataDictionary())).readOnlyUpgrade) {
@@ -697,6 +727,7 @@ public class SPSDescriptor extends TupleDescriptor
 
 				try
 				{
+					prepareAndRelease(lcc, null, nestedTC);
 					updateSYSSTATEMENTS(lcc, RECOMPILE, nestedTC);
 				}
 				catch (StandardException se)
@@ -711,6 +742,7 @@ public class SPSDescriptor extends TupleDescriptor
 						}
 						// if we couldn't do this with a nested xaction, retry with
 						// parent-- we need to wait this time!
+						prepareAndRelease(lcc, null, null);
 						updateSYSSTATEMENTS(lcc, RECOMPILE, null);
 					}
 					else throw se;

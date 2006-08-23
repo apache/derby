@@ -1687,4 +1687,52 @@ public interface DataDictionary
 	public String getVTIClass(TableDescriptor td)
 		throws StandardException;
 
+	
+	/**
+	 * Adds a descriptor to a system catalog identified by the catalogNumber. 
+	 *
+	 * @param tuple			   descriptor to insert.
+	 * @param parent           parent descriptor; e.g for a column parent is the
+	 * tabledescriptor to which the descriptor is beign inserted. for most other
+	 * objects it is the schema descriptor.
+	 * @param catalogNumber	   a value which identifies the catalog into which
+	 * the descriptor should be inserted. It is the users responsibility to
+	 * ensure that the catalogNumber is consistent with the tuple being
+	 * inserted. 
+	 * @see DataDictionary#SYSCONGLOMERATES_CATALOG_NUM
+	 * @param allowsDuplicates whether an exception should be thrown if the
+	 * insert results in a duplicate; if this parameter is FALSE then one
+	 * of the following exception will be thrown; LANG_OBJECT_ALREADY_EXISTS (if
+	 * parent is null) or LANG_OBJECT_ALREADY_EXISTS_IN_OBJECT (if parent is not
+	 * null). The error message is created by getting the name and type of the
+	 * tuple and parent.
+	 * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#duplicateDescriptorException
+	 * @param 	tc	the transaction controller to use to do all of this.
+	 * @param wait  If true, then the caller wants to wait for locks. False will
+	 *	            be when we using a nested user xaction - we want to timeout 
+	 *              right away if the parent holds the lock. 
+	 * @see #addDescriptorArray
+	 */
+	public void addDescriptor(TupleDescriptor tuple, TupleDescriptor parent,
+							  int catalogNumber, boolean allowsDuplicates,
+							  TransactionController tc, boolean wait) 
+		throws StandardException;
+	
+	/** 
+	 * Remove all of the stored dependencies for a given dependent's ID 
+	 * from the data dictionary.
+	 * 
+	 * @param dependentsUUID	Dependent's uuid
+	 * @param tc				TransactionController for the transaction
+	 * @param wait  If true, then the caller wants to wait for locks. False will
+	 *	            be when we using a nested user xaction - we want to timeout 
+	 *              right away if the parent holds the lock. 
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void dropDependentsStoredDependencies(UUID dependentsUUID,
+									   TransactionController tc,
+									   boolean wait) 
+				throws StandardException;	
+
 }	

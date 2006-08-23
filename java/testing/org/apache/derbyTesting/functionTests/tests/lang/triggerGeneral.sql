@@ -624,7 +624,7 @@ DELETE FROM T10641;
 SELECT * FROM T10641;
 SELECT * FROM T10642;
 SELECT * FROM T10641_DELETIONS;
-SELECT * FROM T10642_DELETIONS;
+SELECT * FROM T10642_DELETIONS; 
 
 -- DERBY-1652
 create table test (testid integer not null 
@@ -637,3 +637,75 @@ create trigger update_test
     update test set ts=current_timestamp where testid=old.testid;
 insert into test(info) values (1),(2),(3);
 UPDATE TEST SET INFO = 1 WHERE TESTID = 2;
+drop table test;
+
+-- DERBY-1621
+-- creating and dropping index on the table in the trigger action
+create table t1 (i int);
+create table t2 (i int);
+create trigger tt after insert on t1 for each statement mode db2sql insert into t2 values 1;
+insert into t1 values 1;
+create unique index tu on t2(i);
+insert into t1 values 1;
+select * from t2;
+insert into t1 values 1;
+select * from t2;
+drop index tu;
+select * from t2;
+insert into t1 values 1;
+select * from t2;
+drop trigger tt;
+
+-- dropping and recreating a table which the trigger references
+create table t3 (i int);
+create table t4 (i int);
+create trigger tt2 after insert on t3 for each statement mode db2sql insert into t4 values 1;
+insert into t3 values 1;
+select * from t4;
+drop table t4;
+insert into t3 values 1;
+create table t4 (i int);
+insert into t3 values 1;
+select * from t4;
+
+-- dropping a function which the trigger references
+create function max_value(x int, y int) returns int language java parameter style java external name 'java.lang.Math.max';
+create table test(a integer);
+create trigger test_trigger AFTER insert on test FOR EACH ROW MODE DB2SQL values max_value(2,4);
+
+insert into test values(1);
+
+--- drop function and again do inserts. these should not work as the trigger would be invalid
+drop function max_value;
+insert into test values(2);
+insert into test values(1);
+
+
+-- dropping a view which the trigger references
+create table t11TriggerTest (c111 int not null primary key, c112 int);
+insert into t11TriggerTest values(1,1);
+insert into t11TriggerTest values(2,2);
+
+-- create a view based on table t11TriggerTest
+create view v21ViewTest as select * from t11TriggerTest;
+
+-- get ready to create a trigger. Trigger is created on t31TriggerTest and it inserts into t32TriggerTest
+create table t31TriggerTest (c311 int);
+create table t32TriggerTest (c321 int);
+create trigger tr31t31TriggerTest after insert on t31TriggerTest for each statement mode db2sql
+   insert into t32TriggerTest values (select c111 from v21ViewTest where c112=1);
+
+-- try an insert which will fire the trigger
+insert into t31TriggerTest values(1);
+select * from t31TriggerTest;
+-- we know the trigger got fired if there is one row in t32TriggerTest
+select * from t32TriggerTest;
+
+-- drop the view used by the trigger.
+drop view v21ViewTest;
+
+-- try an insert which would cause insert trigger to fire. The insert trigger should have failed because view doesn't
+-- exist anymore.
+insert into t31TriggerTest values(1);
+select * from t31TriggerTest;
+select * from t32TriggerTest;

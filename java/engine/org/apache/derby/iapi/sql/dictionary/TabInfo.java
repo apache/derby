@@ -444,4 +444,64 @@ public interface TabInfo
 	 * @return The Properties associated with creating the specified index.
 	 */
 	public Properties getCreateIndexProperties(int indexNumber);
+	
+	/**
+	  *	Given a key row, delete all matching heap rows and their index
+	  *	rows.
+	  * <p>
+	  * LOCKING: row locking if there is a key; otherwise, 
+	  * table locking.
+	  *
+	  *	@param	tc			transaction controller
+	  *	@param	key			key to delete by.
+	  *	@param	indexNumber	Key is appropriate for this index.
+	  * @param  wait        If true, then the caller wants to wait for locks. 
+	  *						False will be when we using a nested user xaction 
+	  *						- we want to timeout right away if the parent holds 
+	  *                     the lock.
+	  * @return the number of rows deleted. If key is not unique,
+	  *         this may be more than one.
+	  * @exception StandardException		Thrown on failure
+	  */
+	public int deleteRow( TransactionController tc,
+						  ExecIndexRow key,
+						  int indexNumber,
+						  boolean wait)
+		throws StandardException;
+	
+	/**
+	  *	Delete the set of rows defined by a scan on an index
+	  * from the table. Most of the parameters are simply passed
+	  * to TransactionController.openScan. Please refer to the
+	  * TransactionController documentation for details.
+	  * <p>
+	  * LOCKING: row locking if there is a start and a stop
+	  * key; otherwise, table locking
+	  *
+	  *	@param	tc			transaction controller
+	  *	@param	startKey	key to start the scan.
+	  * @param  startOp     operation to start the scan.
+	  *	@param	stopKey	    key to start the scan.
+	  * @param  qualifier   a qualifier for the scan.
+	  * @param  filter		filter on base rows
+	  * @param  stopOp      operation to start the scan.
+	  *	@param	indexNumber	Key is appropriate for this index.
+	  * @param  wait        If true, then the caller wants to wait for locks. 
+	  *						False will be when we using a nested user xaction 
+	  *						- we want to timeout right away if the parent holds 
+	  *                     the lock.
+	  * @return the number of rows deleted.
+	  * @exception StandardException		Thrown on failure
+	  * @see TransactionController#openScan
+	  */
+	public int deleteRows(TransactionController tc,
+						  ExecIndexRow startKey,
+						  int startOp,
+						  Qualifier[][] qualifier,
+						  TupleFilter filter,
+						  ExecIndexRow stopKey,
+						  int stopOp,
+						  int indexNumber,
+						  boolean wait)
+		 throws StandardException;
 }

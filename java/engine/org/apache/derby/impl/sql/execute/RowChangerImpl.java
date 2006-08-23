@@ -247,6 +247,15 @@ class RowChangerImpl	implements	RowChanger
 	public void open(int lockMode)
 		 throws StandardException
 	{
+		open(lockMode, true);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public void open(int lockMode, boolean wait)
+		 throws StandardException
+	{
 		//
 		//We open for update but say to fix every index on
 		//updates.
@@ -256,9 +265,9 @@ class RowChangerImpl	implements	RowChanger
 			for (int ix = 0; ix < irgs.length; ix++)
 				fixOnUpdate[ix] = true;
 		}
-		openForUpdate(fixOnUpdate, lockMode, true);
+		openForUpdate(fixOnUpdate, lockMode, wait);
 	}
-	
+
 	/**
 	  Open this RowChanger to avoid fixing indexes that do not change
 	  during update operations. 

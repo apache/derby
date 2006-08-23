@@ -94,7 +94,13 @@ public class BasicDependencyManager implements DependencyManager {
 
 		@exception StandardException thrown if something goes wrong
 	 */
-	public void addDependency(Dependent d, Provider p, ContextManager cm) throws StandardException {
+	public void addDependency(Dependent d, Provider p, ContextManager cm) 
+		throws StandardException {
+		addDependency(d, p, cm, null);
+	}
+	
+	private void addDependency(Dependent d, Provider p, ContextManager cm, 
+			TransactionController tc) throws StandardException {
 
 		synchronized(this)
 		{
@@ -145,13 +151,14 @@ public class BasicDependencyManager implements DependencyManager {
 				LanguageConnectionContext	lcc = getLanguageConnectionContext(cm);
 				DataDictionary				dd = getDataDictionary();
 				DependencyDescriptor		dependencyDescriptor;
+				boolean wait = (tc == null);
 			
 				dependencyDescriptor = new DependencyDescriptor(d, p);
 
 				/* We can finally call the DataDictionary to store the dependency */
 				dd.addDescriptor(dependencyDescriptor, null,
 								 DataDictionary.SYSDEPENDS_CATALOG_NUM, true,
-								 lcc.getTransactionExecute());
+								 ((wait)?lcc.getTransactionExecute():tc), wait);
 			}
 		}
 	}
@@ -422,6 +429,14 @@ public class BasicDependencyManager implements DependencyManager {
 	 * @exception StandardException		Thrown on failure
 	 */
 	public void clearDependencies(LanguageConnectionContext lcc, Dependent d) throws StandardException {
+		clearDependencies(lcc, d, null);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public void clearDependencies(LanguageConnectionContext lcc, 
+									Dependent d, TransactionController tc) throws StandardException {
 		List deps = (List) dependents.get(d.getObjectID());
 
 		synchronized(this)
@@ -430,9 +445,11 @@ public class BasicDependencyManager implements DependencyManager {
 			if (d.isPersistent())
 			{
 				DataDictionary			  dd = getDataDictionary();
-
+				boolean wait = (tc == null);
+				
 				dd.dropDependentsStoredDependencies(d.getObjectID(),
-													lcc.getTransactionExecute());
+								((wait)?lcc.getTransactionExecute():tc),
+								wait);
 			}
 
 			/* Now remove the in-memory dependencies */
@@ -697,11 +714,23 @@ public class BasicDependencyManager implements DependencyManager {
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
+	public void copyDependencies(Dependent	copy_From, 
+								Dependent	copyTo,
+								boolean		persistentOnly,
+								ContextManager cm) throws StandardException
+	{
+		copyDependencies(copy_From, copyTo, persistentOnly, cm, null);
+	}
+	
+	/**
+	 * @inheritDoc 
+	 */
 	public synchronized void copyDependencies(
 									Dependent	copy_From, 
 									Dependent	copyTo,
 									boolean		persistentOnly,
-									ContextManager cm)
+									ContextManager cm,
+									TransactionController tc)
 		throws StandardException
 	{
 
@@ -715,7 +744,7 @@ public class BasicDependencyManager implements DependencyManager {
 				
 			if (!persistentOnly || provider.isPersistent())
 			{
-				this.addDependency(copyTo, provider, cm);
+				this.addDependency(copyTo, provider, cm, tc);
 			}
 		}
 	}

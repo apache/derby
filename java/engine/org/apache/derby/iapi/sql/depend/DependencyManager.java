@@ -27,6 +27,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
+import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
 	Dependency Manager Interface
@@ -491,4 +492,54 @@ public interface DependencyManager {
 		@exception java.sql.SQLException thrown if something goes wrong
 	 */
 	public String dumpDependencies() throws StandardException, java.sql.SQLException;
+	
+	/**
+	 	Erases all of the dependencies the dependent has, be they
+	 	valid or invalid, of any dependency type.  This action is
+	 	usually performed as the first step in revalidating a
+	 	dependent; it first erases all the old dependencies, then
+	 	revalidates itself generating a list of new dependencies,
+	 	and then marks itself valid if all its new dependencies are
+	 	valid.
+	 	<p>
+	 	There might be a future want to clear all dependencies for
+	 	a particular provider, e.g. when destroying the provider.
+	 	However, at present, they are assumed to stick around and
+	 	it is the responsibility of the dependent to erase them when
+	 	revalidating against the new version of the provider.
+	 	<p>
+	 	clearDependencies will delete dependencies if they are
+	 	stored; the delete is finalized at the next commit.
+
+		@param lcc	Compiler state
+		@param d the dependent
+		@param tc transaction controller
+	
+		@exception StandardException		Thrown on failure
+	*/
+	public void clearDependencies(LanguageConnectionContext lcc, 
+									Dependent d, 
+									TransactionController tc) 
+		throws StandardException;
+
+
+	/**
+ 	 * Copy dependencies from one dependent to another.
+	 *
+	 * @param copy_From the dependent to copy from	
+	 * @param copyTo the dependent to copy to
+	 * @param persistentOnly only copy persistent dependencies
+	 * @param cm			Current ContextManager
+	 * @param tc            Transaction Controller
+	 *
+	 * @exception StandardException		Thrown on error.
+	 */
+	public void copyDependencies(
+									Dependent	copy_From, 
+									Dependent	copyTo,
+									boolean		persistentOnly,
+									ContextManager cm, 
+									TransactionController tc)
+			throws StandardException;
+	
 }

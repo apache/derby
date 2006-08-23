@@ -146,4 +146,19 @@ public interface RowChanger
 	 */
 	public ConglomerateController getHeapConglomerateController();
 
+	/**
+	  Open this RowChanger.
+
+	  <P>Note to avoid the cost of fixing indexes that do not
+	  change during update operations use openForUpdate(). 
+	  @param lockMode	The lock mode to use
+							(row or table, see TransactionController)
+	  @param wait		If true, then the caller wants to wait for locks. False will be
+							when we using a nested user xaction - we want to timeout right away
+							if the parent holds the lock.  
+
+	  @exception StandardException thrown on failure to convert
+	  */
+	public void open(int lockMode, boolean wait)
+		 throws StandardException;
 }
