@@ -46,6 +46,8 @@ import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
+
+import java.sql.Types;
 import java.util.Properties;
 
 /**
@@ -56,27 +58,27 @@ import java.util.Properties;
  * @author Rick Hillegas (extracted from DataDictionaryImpl).
  */
 
-public class SYSFILESRowFactory extends CatalogRowFactory
+class SYSFILESRowFactory extends CatalogRowFactory
 {
-	protected static final String	TABLENAME_STRING = "SYSFILES";
+	private static final String	TABLENAME_STRING = "SYSFILES";
 
-	protected static final int		SYSFILES_COLUMN_COUNT = 4;
+    private static final int		SYSFILES_COLUMN_COUNT = 4;
 
 	/* Column #s (1 based) */
-	protected static final int		ID_COL_NUM = 1;
-	protected static final String   ID_COL_NAME = "FILEID";
+    private static final int		ID_COL_NUM = 1;
+    private static final String   ID_COL_NAME = "FILEID";
 
-	protected static final int		SCHEMA_ID_COL_NUM = 2;
-	protected static final String   SCHEMA_ID_COL_NAME = "SCHEMAID";
+    private static final int		SCHEMA_ID_COL_NUM = 2;
+    private static final String   SCHEMA_ID_COL_NAME = "SCHEMAID";
 
-	protected static final int		NAME_COL_NUM = 3;
-	protected static final String   NAME_COL_NAME = "FILENAME";
+    private static final int		NAME_COL_NUM = 3;
+    private static final String   NAME_COL_NAME = "FILENAME";
 
-	protected static final int		GENERATION_ID_COL_NUM = 4;
-	protected static final String   GENERATION_ID_COL_NAME = "GENERATIONID";
+    private static final int		GENERATION_ID_COL_NUM = 4;
+    private static final String   GENERATION_ID_COL_NAME = "GENERATIONID";
 
-	protected static final int		SYSFILES_INDEX1_ID = 0;
-	protected static final int		SYSFILES_INDEX2_ID = 1;
+    static final int		SYSFILES_INDEX1_ID = 0;
+    static final int		SYSFILES_INDEX2_ID = 1;
 
 	private static final int[][] indexColumnPositions =
 	{
@@ -100,7 +102,7 @@ public class SYSFILESRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
-    public	SYSFILESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
+    SYSFILESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                  boolean convertIdToLower) 
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
@@ -282,52 +284,14 @@ public class SYSFILESRowFactory extends CatalogRowFactory
 	 *
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
-	public SystemColumn[]	buildColumnList()
-	{
-		int						index = 0;
-		SystemColumn[]			columnList = new SystemColumn[SYSFILES_COLUMN_COUNT];
-
-		// describe columns
-
-		columnList[index++] = new SystemColumnImpl(	
-								convertIdCase( ID_COL_NAME),		// column name
-								ID_COL_NUM,	        // column number
-								0,					// precision
-								0,					// scale
-								false,				// nullability
-								"CHAR",				// dataType
-								true,				// built-in type
-								36					// maxLength
-			                   );
-
-		columnList[index++] = new SystemColumnImpl(	
-								convertIdCase( SCHEMA_ID_COL_NAME),	// column name
-								SCHEMA_ID_COL_NUM,	// schema number
-								0,					// precision
-								0,					// scale
-								false,				// nullability
-								"CHAR",				// dataType
-								true,				// built-in type
-								36					// maxLength
-			                   );
-
-		columnList[index++] = new SystemColumnImpl(	
-								convertIdCase( NAME_COL_NAME),		// column name
-								NAME_COL_NUM, 	    // column number
-								false				// nullability
-			                   );
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( GENERATION_ID_COL_NAME),		// column name
-							GENERATION_ID_COL_NUM,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"BIGINT",			// dataType
-							true,				// built-in type
-							TypeId.LONGINT_MAXWIDTH	// maxLength
-			               );
-		return	columnList;
-	}
-
+    public SystemColumn[]   buildColumnList()
+    {
+        return new SystemColumn[] {
+           SystemColumnImpl.getUUIDColumn(ID_COL_NAME, false),
+           SystemColumnImpl.getUUIDColumn(SCHEMA_ID_COL_NAME, false),
+           SystemColumnImpl.getIdentifierColumn(NAME_COL_NAME, false),
+           SystemColumnImpl.getColumn(GENERATION_ID_COL_NAME, Types.BIGINT, false)
+                
+        };
+    }
 }

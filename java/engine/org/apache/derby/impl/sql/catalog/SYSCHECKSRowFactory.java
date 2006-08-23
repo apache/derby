@@ -55,6 +55,7 @@ import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
 
+import java.sql.Types;
 import java.util.Properties;
 
 /**
@@ -63,18 +64,16 @@ import java.util.Properties;
  * @author jerry
  */
 
-public class SYSCHECKSRowFactory extends CatalogRowFactory
+class SYSCHECKSRowFactory extends CatalogRowFactory
 {
 	private  static final String	TABLENAME_STRING = "SYSCHECKS";
 
-	protected static final int		SYSCHECKS_COLUMN_COUNT = 3;
-	protected static final int		SYSCHECKS_CONSTRAINTID = 1;
-	protected static final int		SYSCHECKS_CHECKDEFINITION = 2;
-	protected static final int		SYSCHECKS_REFERENCEDCOLUMNS = 3;
+	private static final int		SYSCHECKS_COLUMN_COUNT = 3;
+	private static final int		SYSCHECKS_CONSTRAINTID = 1;
+	private static final int		SYSCHECKS_CHECKDEFINITION = 2;
+	private static final int		SYSCHECKS_REFERENCEDCOLUMNS = 3;
 
-	// Column widths
-	protected static final int		SYSCHECKS_CONSTRAINTID_WIDTH = 36;
-	protected static final int		SYSCHECKS_INDEX1_ID = 0;
+	static final int		SYSCHECKS_INDEX1_ID = 0;
 
 	// index is unique.
     private	static	final	boolean[]	uniqueness = null;
@@ -99,7 +98,6 @@ public class SYSCHECKSRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
-    public
 	SYSCHECKSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                  boolean convertIdToLower)
 	{
@@ -261,50 +259,14 @@ public class SYSCHECKSRowFactory extends CatalogRowFactory
 	 *
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
-	public SystemColumn[]	buildColumnList()
-	{
-		int						index = 0;
-		int						columnNumber = 1;
-		SystemColumn[]			columnList = new SystemColumn[SYSCHECKS_COLUMN_COUNT];
 
-		// describe columns
-
-		columnList[index++] = new SystemColumnImpl(	
-							convertIdCase( "CONSTRAINTID"),			// name 
-							SYSCHECKS_CONSTRAINTID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "CHECKDEFINITION"),		// column name
-							SYSCHECKS_CHECKDEFINITION,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"LONG VARCHAR",	    // dataType
-							true,				// built-in type
-							TypeId.LONGVARCHAR_MAXWIDTH // maxLength
-			               );
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "REFERENCEDCOLUMNS"),		// column name
-							SYSCHECKS_REFERENCEDCOLUMNS,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"org.apache.derby.catalog.ReferencedColumns",	// datatype
-							false,				// built-in type
-							TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN
-												// maxLength
-			               );
-
-
-		return	columnList;
-	}
-
+    public SystemColumn[] buildColumnList() {
+        
+       return new SystemColumn[] {
+            SystemColumnImpl.getUUIDColumn("CONSTRAINTID", false),
+            SystemColumnImpl.getColumn("CHECKDEFINITION", Types.LONGVARCHAR, false),
+            SystemColumnImpl.getJavaColumn("REFERENCEDCOLUMNS",
+                    "org.apache.derby.catalog.ReferencedColumns", false)             
+        };
+    }
 }

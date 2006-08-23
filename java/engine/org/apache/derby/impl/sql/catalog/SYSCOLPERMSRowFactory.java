@@ -54,7 +54,7 @@ import java.sql.Timestamp;
  *
  */
 
-public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
+class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 {
 	static final String TABLENAME_STRING = "SYSCOLPERMS";
 
@@ -67,9 +67,9 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
     private static final int COLUMNS_COL_NUM = 6;
     private static final int COLUMN_COUNT = 6;
 
-    public static final int GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM = 0;
-    public static final int COLPERMSID_INDEX_NUM = 1;
-    public static final int TABLEID_INDEX_NUM = 2;
+    static final int GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM = 0;
+    static final int COLPERMSID_INDEX_NUM = 1;
+    static final int TABLEID_INDEX_NUM = 2;
 	private static final int[][] indexColumnPositions = 
 	{ 
 		{ GRANTEE_COL_NUM, TABLEID_COL_NUM, TYPE_COL_NUM, GRANTOR_COL_NUM},
@@ -90,7 +90,7 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 
     private SystemColumn[] columnList;
 
-    public SYSCOLPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
+    SYSCOLPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                  boolean convertIdToLower)
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
@@ -170,71 +170,18 @@ public class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
     } // end of buildDescriptor
 
 	/** builds a column list for the catalog */
-	public SystemColumn[] buildColumnList()
+    public SystemColumn[] buildColumnList()
     {
-		if (columnList == null)
-        {
-            columnList = new SystemColumn[ COLUMN_COUNT];
-
-            columnList[ COLPERMSID_COL_NUM - 1] =
-                new SystemColumnImpl( convertIdCase( "COLPERMSID"),
-                                      COLPERMSID_COL_NUM,
-                                      0, // precision
-                                      0, // scale
-                                      false, // nullability
-                                      "CHAR",
-                                      true,
-                                      36);
-            columnList[ GRANTEE_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "GRANTEE"),
-                                    GRANTEE_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    AUTHORIZATION_ID_TYPE,
-                                    AUTHORIZATION_ID_IS_BUILTIN_TYPE,
-                                    AUTHORIZATION_ID_LENGTH);
-            columnList[ GRANTOR_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "GRANTOR"),
-                                    GRANTOR_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    AUTHORIZATION_ID_TYPE,
-                                    AUTHORIZATION_ID_IS_BUILTIN_TYPE,
-                                    AUTHORIZATION_ID_LENGTH);
-            columnList[ TABLEID_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "TABLEID"),
-                                    TABLEID_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    36);
-            columnList[ TYPE_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "TYPE"),
-                                    TYPE_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    1);
-            columnList[ COLUMNS_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "COLUMNS"),
-                                    COLUMNS_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "org.apache.derby.iapi.services.io.FormatableBitSet", // datatype
-                                    false,							// built-in type
-                                    DataTypeDescriptor.MAXIMUM_WIDTH_UNKNOWN // maxLength
-                  );
-        }
-		return columnList;
-    } // end of buildColumnList
-
+        return new SystemColumn[] {
+           SystemColumnImpl.getUUIDColumn("COLPERMSID", false),
+           SystemColumnImpl.getIdentifierColumn("GRANTEE", false),
+           SystemColumnImpl.getIdentifierColumn("GRANTOR", false),
+           SystemColumnImpl.getUUIDColumn("TABLEID", false),
+           SystemColumnImpl.getIndicatorColumn("TYPE"),
+           SystemColumnImpl.getJavaColumn("COLUMNS",
+                   "org.apache.derby.iapi.services.io.FormatableBitSet", false)    
+        };
+    }
 	/**
 	 * builds an empty row given for a given index number.
 	 */

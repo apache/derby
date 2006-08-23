@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import java.sql.Types;
+
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -46,16 +48,8 @@ import org.apache.derby.catalog.UUID;
  *
  */
 
-public class SYSDUMMY1RowFactory extends CatalogRowFactory
+class SYSDUMMY1RowFactory extends CatalogRowFactory
 {
-	static final String TABLENAME_STRING = "SYSDUMMY1";
-
-	/* column #s for sysstatistics (1 based) */
-	
-	/* only column
-	*/
-	protected static final int 	SYSDUMMY1_IBMREQD = 1;
-
 	protected static final int SYSDUMMY1_COLUMN_COUNT = 1;
 
 	private static final String[] uuids =
@@ -63,22 +57,18 @@ public class SYSDUMMY1RowFactory extends CatalogRowFactory
 		"c013800d-00f8-5b70-bea3-00000019ed88", // catalog UUID
 		"c013800d-00f8-5b70-fee8-000000198c88"  // heap UUID.
 	};
-	/*
-	 * STATE
-	 */
-	private	SystemColumn[]		columnList;
 
 	/*
 	 *	CONSTRUCTORS
 	 */
-    public	SYSDUMMY1RowFactory(UUIDFactory uuidf, 
+    SYSDUMMY1RowFactory(UUIDFactory uuidf, 
 									ExecutionFactory ef, 
 									DataValueFactory dvf,
                                     boolean convertIdToLower)
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
 		
-		initInfo(SYSDUMMY1_COLUMN_COUNT, TABLENAME_STRING, 
+		initInfo(SYSDUMMY1_COLUMN_COUNT, "SYSDUMMY1", 
 				 null, null, uuids);
 	}
 
@@ -124,24 +114,10 @@ public class SYSDUMMY1RowFactory extends CatalogRowFactory
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
 	public SystemColumn[] buildColumnList()
-	{
-		if (columnList != null)
-			return columnList;
-
-		columnList = new SystemColumn[SYSDUMMY1_COLUMN_COUNT];
-		
-		columnList[0] = new SystemColumnImpl(
-						   convertIdCase( "IBMREQD"),			// column name
-						   SYSDUMMY1_IBMREQD,    // column number
-						   0,					// precision
-						   0,					// scale
-						   true,				// nullability
-						   "CHAR",				// dataType
-						   true,				// built-in type
-						   1					// maxLength
-						   );
-		
-		return columnList;
+	{        
+        return new SystemColumn[] {
+                SystemColumnImpl.getColumn("IBMREQD", Types.CHAR, true, 1)
+        };
 	}
 
 
