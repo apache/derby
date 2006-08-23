@@ -153,7 +153,7 @@ public class ClobTest
     
     public void setUp() 
         throws SQLException {
-        clob = BlobClobTestSetup.getSampleClob(getXConnection());
+        clob = BlobClobTestSetup.getSampleClob(getConnection());
         
         //call the buildHashSetMethod to initialize the 
         //HashSet with the method signatures that are exempted 

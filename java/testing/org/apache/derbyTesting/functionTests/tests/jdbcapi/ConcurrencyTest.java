@@ -45,7 +45,7 @@ public class ConcurrencyTest extends SURBaseTest {
         // For the concurrency tests, we recreate the model
         // for each testcase (since we do commits)
         SURDataModelSetup.createDataModel
-            (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, getXConnection());
+            (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, getConnection());
         commit();
     }
     
@@ -79,7 +79,7 @@ public class ConcurrencyTest extends SURBaseTest {
         while (rs.next());
         
         // Now open up a connection
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         Statement s2 = con2.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                             ResultSet.CONCUR_UPDATABLE);
         
@@ -116,7 +116,7 @@ public class ConcurrencyTest extends SURBaseTest {
         while (rs.next());
         
         // Now open up a connection
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         Statement s2 = con2.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                             ResultSet.CONCUR_UPDATABLE);
         
@@ -143,7 +143,7 @@ public class ConcurrencyTest extends SURBaseTest {
                                           ResultSet.CONCUR_READ_ONLY);
         final ResultSet rs = s.executeQuery("select * from t1");
         scrollForward(rs);
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         Statement s2 = con2.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                             ResultSet.CONCUR_READ_ONLY);
         try {
@@ -168,7 +168,7 @@ public class ConcurrencyTest extends SURBaseTest {
         Statement s = createStatement();
         ResultSet rs = s.executeQuery("select * from t1");
         scrollForward(rs);
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         Statement s2 = con2.createStatement();
         try {
             final ResultSet rs2 = s2.executeQuery("select * from t1");
@@ -192,7 +192,7 @@ public class ConcurrencyTest extends SURBaseTest {
         
         ResultSet rs = s.executeQuery("select * from t1");
         scrollForward(rs);
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         Statement s2 = con2.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                             ResultSet.CONCUR_READ_ONLY);
         try {
@@ -218,7 +218,7 @@ public class ConcurrencyTest extends SURBaseTest {
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1 for update");
         scrollForward(rs);
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         Statement s2 = con2.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                             ResultSet.CONCUR_READ_ONLY);
         try {
@@ -241,7 +241,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdatePurgedTuple1()
         throws SQLException
     {
-        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
@@ -258,7 +258,7 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
         }
         
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         try {
             PreparedStatement ps2 = con2.prepareStatement
@@ -325,7 +325,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdatePurgedTuple2()
         throws SQLException 
     {
-        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
@@ -338,7 +338,7 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: Read next Tuple:(" + rs.getInt(1) + "," +
                 rs.getInt(2) + "," +
                 rs.getInt(3) + ")");
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         try {
             PreparedStatement ps2 = con2.prepareStatement
@@ -384,7 +384,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdatePurgedTuple3()
         throws SQLException 
     {
-        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
@@ -393,7 +393,7 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: read tuple with key " + firstKey);
         rs.next(); // Go to next
         println("T1: read next tuple");
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         try {
             PreparedStatement ps2 = con2.prepareStatement
@@ -459,7 +459,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdatePurgedTuple4()
         throws SQLException 
     {
-        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
@@ -476,7 +476,7 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: Read next Tuple:(" + rs.getInt(1) + "," +
                 rs.getInt(2) + "," +
                 rs.getInt(3) + ")");
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         try {
             PreparedStatement ps2 = con2.prepareStatement
@@ -544,7 +544,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdateModifiedTuple1()
         throws SQLException 
     {
-        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
@@ -557,7 +557,7 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: Read next Tuple:(" + rs.getInt(1) + "," +
                 rs.getInt(2) + "," +
                 rs.getInt(3) + ")");
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         try {
             PreparedStatement ps2 = con2.prepareStatement
@@ -598,7 +598,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdateModifiedTuple2()
         throws SQLException 
     {
-        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
@@ -611,7 +611,7 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: Read next Tuple:(" + rs.getInt(1) + "," +
                 rs.getInt(2) + "," +
                 rs.getInt(3) + ")");
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         try {
             PreparedStatement ps2 = con2.prepareStatement
@@ -653,7 +653,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testTableIntentLock1()
         throws SQLException 
     {
-        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, 
                                           ResultSet.CONCUR_UPDATABLE);
         println("T1: select * from t1");
@@ -665,7 +665,7 @@ public class ConcurrencyTest extends SURBaseTest {
         } // Now the cursor does not point to any tuples
         
         // Compressing the table in another transaction:
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         try {
             con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             PreparedStatement ps2 = con2.prepareStatement
@@ -694,7 +694,7 @@ public class ConcurrencyTest extends SURBaseTest {
     public void testUpdateLockInReadUncommitted()
         throws SQLException 
     {
-        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery("select * from t1");
@@ -703,7 +703,7 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: Read next Tuple:(" + rs.getInt(1) + "," +
                 rs.getInt(2) + "," +
                 rs.getInt(3) + ")");
-        Connection con2 = getNewConnection();
+        Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         try {
             PreparedStatement ps2 = con2.prepareStatement
@@ -749,7 +749,7 @@ public class ConcurrencyTest extends SURBaseTest {
                                         boolean testTruncate)
         throws SQLException 
     {
-        getXConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         Statement delStatement = createStatement();
         // First delete all records except the last and first
         int deleted = delStatement.executeUpdate
@@ -777,7 +777,7 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
         }
         
-        final Connection con2 = getNewConnection();
+        final Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         final PreparedStatement ps2 = con2.prepareStatement
             ("call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?,?,?,?,?)");

@@ -72,7 +72,7 @@ public class ConnectionTest
      */
     public void embeddedCreateBlob()
         throws SQLException {
-            Blob blob = getXConnection().createBlob();
+            Blob blob = getConnection().createBlob();
             //Check if the blob is empty
             if(blob.length() > 0)
                 fail("The new Blob should not have more than zero bytes " +
@@ -93,7 +93,7 @@ public class ConnectionTest
      */
     public void embeddedCreateClob()
         throws SQLException {
-            Clob clob = getXConnection().createClob();
+            Clob clob = getConnection().createClob();
             //check if the Clob is empty
             if(clob.length() > 0)
                 fail("The new Clob should not have a length of greater than " +
@@ -103,7 +103,7 @@ public class ConnectionTest
     public void testCreateArrayNotImplemented()
         throws SQLException {
         try {
-            getXConnection().createArrayOf(null, null);
+            getConnection().createArrayOf(null, null);
             fail("createArrayOf(String,Object[]) should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
             // Do nothing, we are fine
@@ -113,7 +113,7 @@ public class ConnectionTest
     public void testCreateNClobNotImplemented()
         throws SQLException {
         try {
-            getXConnection().createNClob();
+            getConnection().createNClob();
             fail("createNClob() should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
             // Do nothing, we are fine
@@ -129,14 +129,14 @@ public class ConnectionTest
      */
     public void testCreateQueryObjectIsImplemented()
         throws SQLException {
-        getXConnection().createQueryObject(TestQuery.class);
-        getXConnection().createQueryObject(TestQuery.class, getXConnection());
+        getConnection().createQueryObject(TestQuery.class);
+        getConnection().createQueryObject(TestQuery.class, getConnection());
     }
 
     public void testCreateSQLXMLNotImplemented()
         throws SQLException {
         try {
-            getXConnection().createSQLXML();
+            getConnection().createSQLXML();
             fail("createSQLXML() should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
             // Do nothing, we are fine
@@ -146,7 +146,7 @@ public class ConnectionTest
     public void testCreateStructNotImplemented()
         throws SQLException {
         try {
-            getXConnection().createStruct(null, null);
+            getConnection().createStruct(null, null);
             fail("createStruct(String,Object[]) should not be implemented");
         } catch (SQLFeatureNotSupportedException sfnse) {
             // Do nothing, we are fine
@@ -156,15 +156,15 @@ public class ConnectionTest
     public void testGetClientInfo()
         throws SQLException {
         assertTrue("getClientInfo() must return an empty Properties object", 
-                   getXConnection().getClientInfo().isEmpty());
+                   getConnection().getClientInfo().isEmpty());
     }
     
     public void testGetClientInfoString()
         throws SQLException {
         assertNull("getClientInfo(null) must return null",
-                   getXConnection().getClientInfo(null));
+                   getConnection().getClientInfo(null));
         assertNull("getClientInfo(\"someProperty\") must return null",
-                   getXConnection().getClientInfo("someProperty"));
+                   getConnection().getClientInfo("someProperty"));
     }
 
     /**
@@ -176,14 +176,14 @@ public class ConnectionTest
      */
     public void testIsValidImplemented() throws SQLException {
         // Test with an infinite (0) timeout
-        assertTrue(getXConnection().isValid(0));
+        assertTrue(getConnection().isValid(0));
 
         // Test with a 1 second timeout
-        assertTrue(getXConnection().isValid(1));
+        assertTrue(getConnection().isValid(1));
 
         // Test with an illegal timeout
         try {
-            getXConnection().isValid(-1);
+            getConnection().isValid(-1);
         } catch (SQLException sqle) {
             assertSQLState("Incorrect SQL state when calling isValid(-1)",
                            "XJ081", sqle);
@@ -196,29 +196,29 @@ public class ConnectionTest
      * @exception SQLException if an error occurs
      */
     public void testGetTypeMapReturnsEmptyMap() throws SQLException {
-        assertTrue(getXConnection().getTypeMap().isEmpty());
+        assertTrue(getConnection().getTypeMap().isEmpty());
     }
 
     public void testIsWrapperReturnsFalse()
         throws SQLException {
-        assertFalse(getXConnection().isWrapperFor(ResultSet.class));
+        assertFalse(getConnection().isWrapperFor(ResultSet.class));
     }
 
     public void testIsWrapperReturnsTrue()
         throws SQLException {
-        assertTrue(getXConnection().isWrapperFor(Connection.class));
+        assertTrue(getConnection().isWrapperFor(Connection.class));
     }
 
     public void testSetClientInfoProperties()
         throws SQLException {
-        getXConnection().setClientInfo(null);
+        getConnection().setClientInfo(null);
         Properties p = new Properties();
-        getXConnection().setClientInfo(p);
+        getConnection().setClientInfo(p);
 
         p.setProperty("prop1", "val1");
         p.setProperty("prop2", "val2");
         try {
-            getXConnection().setClientInfo(p);
+            getConnection().setClientInfo(p);
             fail("setClientInfo(String,String) should throw "+
                  "SQLClientInfoException");
         } catch (SQLClientInfoException cie) {
@@ -238,16 +238,16 @@ public class ConnectionTest
 
     public void testSetClientInfoString()
         throws SQLException {
-        getXConnection().setClientInfo(null, null);
+        getConnection().setClientInfo(null, null);
 
         try {
-            getXConnection().setClientInfo("foo", null);
+            getConnection().setClientInfo("foo", null);
             fail("setClientInfo(String, null) should throw "+
                  "NullPointerException");
         } catch (NullPointerException npe) {}
 
         try {
-            getXConnection().setClientInfo("name", "value");
+            getConnection().setClientInfo("name", "value");
             fail("setClientInfo(String,String) should throw "+
                  "SQLClientInfoException");
         } catch (SQLClientInfoException cie) {
@@ -263,14 +263,14 @@ public class ConnectionTest
     
     public void testUnwrapValid()
         throws SQLException {
-        Connection unwrappedCon = getXConnection().unwrap(Connection.class);
-        assertSame("Unwrap returned wrong object.", getXConnection(), unwrappedCon);
+        Connection unwrappedCon = getConnection().unwrap(Connection.class);
+        assertSame("Unwrap returned wrong object.", getConnection(), unwrappedCon);
     }
 
     public void testUnwrapInvalid()
         throws SQLException {
         try {
-            ResultSet unwrappedRs = getXConnection().unwrap(ResultSet.class);
+            ResultSet unwrappedRs = getConnection().unwrap(ResultSet.class);
             fail("unwrap should have thrown an exception");
         } catch (SQLException sqle) {
             assertSQLState("Incorrect SQL state when unable to unwrap",

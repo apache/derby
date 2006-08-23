@@ -138,7 +138,7 @@ public class sysinfo_api extends BaseJDBCTestCase {
      *              with sysinfo
      */
     public void setUp() throws SQLException {
-        dm = getXConnection().getMetaData();
+        dm = getConnection().getMetaData();
     }
 
 

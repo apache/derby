@@ -70,7 +70,7 @@ public abstract class BaseJDBCTestCase
      */
     // TEMP NAME - WILL BE getConnection() once all uses of the
     // static getConnection() have been converted to openDefaultConnection
-    public Connection getXConnection() throws SQLException
+    public Connection getConnection() throws SQLException
     {
         if (conn != null)
         {
@@ -78,14 +78,18 @@ public abstract class BaseJDBCTestCase
                 return conn;
             conn = null;
         }
-        conn = getTestConfiguration().openDefaultConnection();
-        initializeConnection(conn);
-        return conn;
+        return conn = openDefaultConnection();
     }
     
     /**
      * Allow a sub-class to initialize a connection to provide
-     * consistent connection state for its tests. Called only
+     * consistent connection state for its tests. Called once
+     * for each time these method calls open a connection:
+     * <UL>
+     * <LI> getConnection()
+     * <LI> openDefaultConnection()
+     * <LI> openConnection(database)
+     * </UL>
      * when getConnection() opens a new connection. Default
      * action is to not modify the connection's state from
      * the initialization provided by the data source.
@@ -104,7 +108,7 @@ public abstract class BaseJDBCTestCase
      */
     public Statement createStatement() throws SQLException
     {
-        return getXConnection().createStatement();
+        return getConnection().createStatement();
     }
 
     /**
@@ -117,7 +121,7 @@ public abstract class BaseJDBCTestCase
     public Statement createStatement(int resultSetType,
             int resultSetConcurrency) throws SQLException
     {
-        return getXConnection().createStatement(resultSetType, resultSetConcurrency);
+        return getConnection().createStatement(resultSetType, resultSetConcurrency);
     }
     /**
      * Utility method to create a PreparedStatement using the connection
@@ -128,7 +132,7 @@ public abstract class BaseJDBCTestCase
      */
     public PreparedStatement prepareStatement(String sql) throws SQLException
     {
-        return getXConnection().prepareStatement(sql);
+        return getConnection().prepareStatement(sql);
     }    
 
     /**
@@ -140,7 +144,7 @@ public abstract class BaseJDBCTestCase
      */
     public CallableStatement prepareCall(String sql) throws SQLException
     {
-        return getXConnection().prepareCall(sql);
+        return getConnection().prepareCall(sql);
     }
     
     /**
@@ -150,7 +154,7 @@ public abstract class BaseJDBCTestCase
      */
     public void commit() throws SQLException
     {
-        getXConnection().commit();
+        getConnection().commit();
     }  
     /**
      * Utility method to rollback using the connection
@@ -159,7 +163,7 @@ public abstract class BaseJDBCTestCase
      */
     public void rollback() throws SQLException
     {
-        getXConnection().rollback();
+        getConnection().rollback();
     } 
     /**
      * Tear down this fixture, sub-classes should call
@@ -181,14 +185,18 @@ public abstract class BaseJDBCTestCase
      * @return connection to default database.
      * @see TestConfiguration#openDefaultConnection()
      */
-    public static Connection openDefaultConnection()
+    public Connection openDefaultConnection()
         throws SQLException {
-        return CONFIG.openDefaultConnection();
+        Connection conn =  getTestConfiguration().openDefaultConnection();
+        initializeConnection(conn);
+        return conn;
     }
     
     public Connection openConnection(String databaseName) throws SQLException
     {
-        return getTestConfiguration().openConnection(databaseName);
+        Connection conn = getTestConfiguration().openConnection(databaseName);
+        initializeConnection(conn);
+        return conn;        
     }
     
     /**
@@ -208,7 +216,7 @@ public abstract class BaseJDBCTestCase
         };
         
         // Use the same encoding as the input for the output.    
-        return ij.runScript(getXConnection(), script, encoding,
+        return ij.runScript(getConnection(), script, encoding,
                 sink, encoding);       
     }
     

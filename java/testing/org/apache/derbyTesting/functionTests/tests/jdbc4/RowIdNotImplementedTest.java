@@ -145,7 +145,7 @@ public class RowIdNotImplementedTest
 
     public void testRowIdInDatabaseMetaDataRowIdLifeTime() 
         throws SQLException {
-        DatabaseMetaData meta = getXConnection().getMetaData();
+        DatabaseMetaData meta = getConnection().getMetaData();
         RowIdLifetime rowIdLifetime = meta.getRowIdLifetime();
         assertEquals("RowIdLifetime should be ROWID_UNSUPPORTED",
             RowIdLifetime.ROWID_UNSUPPORTED,

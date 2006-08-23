@@ -58,7 +58,7 @@ public class HoldabilityTest extends SURBaseTest {
         // We also use more records to ensure that the disk
         // is being used.
         SURDataModelSetup.createDataModel
-            (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, getXConnection(),
+            (SURDataModelSetup.SURDataModel.MODEL_WITH_PK, getConnection(),
              recordCount);
         commit();
     }
@@ -613,7 +613,7 @@ public class HoldabilityTest extends SURBaseTest {
         throws SQLException
     {
                // Use a new connection to compress the table        
-        final Connection con2 = getNewConnection();
+        final Connection con2 = openDefaultConnection();
         final String connId = con2.toString();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         

@@ -144,7 +144,7 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
     }
 
     private void createDatabase() throws SQLException {
-        Connection conn = getXConnection();
+        Connection conn = getConnection();
         conn.setAutoCommit(false);
         Statement st = conn.createStatement();
         st.execute("CREATE TABLE T1 (a int)");

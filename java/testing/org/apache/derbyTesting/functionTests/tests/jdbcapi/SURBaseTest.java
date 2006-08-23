@@ -48,26 +48,13 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Override the default connection's to ensure it
+     * Override a connection's  default state to ensure it
      * is always in autocommit false and repeatable
      * read as a starting point.
      */
     protected void initializeConnection(Connection conn) throws SQLException {
         conn.setAutoCommit(false);
         conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);   
-    }
-    
-    /**
-     * Get a JDBC Connection to the Derby database.
-     * The autocommit flag is set to false, and the isolation level
-     * for the transactions is set to repeatable read.
-     */
-    protected Connection getNewConnection() 
-        throws SQLException
-    {
-        final Connection rcon = openDefaultConnection();
-        initializeConnection(rcon);
-       return rcon;
     }
 
     /**
@@ -77,7 +64,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
         println("SetUp");
         // temp save the connection in this class as con
         // as well as the default connection in the parent
-        con = getXConnection();
+        con = getConnection();
     }
     
     /**

@@ -44,7 +44,7 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
      * Set up the connection to the database.
      */
     public void setUp() throws  Exception {       
-        Connection con = getXConnection();
+        Connection con = getConnection();
         con.setAutoCommit(false);
 
         String createTableWithPK = "CREATE TABLE tableWithPK (" +
@@ -67,7 +67,7 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
         int resultsetType = scroll ? ResultSet.TYPE_SCROLL_INSENSITIVE :
                 ResultSet.TYPE_FORWARD_ONLY;
         
-        Connection con = getXConnection();
+        Connection con = getConnection();
         
         if (!(con.getMetaData().supportsResultSetConcurrency(resultsetType,
                 ResultSet.CONCUR_UPDATABLE))) {

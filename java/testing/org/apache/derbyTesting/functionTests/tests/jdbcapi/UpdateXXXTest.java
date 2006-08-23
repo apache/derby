@@ -76,7 +76,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void setUp()
         throws Exception
     {
-        Connection con = getXConnection();
+        Connection con = getConnection();
         try {
             
             con.setAutoCommit(false);

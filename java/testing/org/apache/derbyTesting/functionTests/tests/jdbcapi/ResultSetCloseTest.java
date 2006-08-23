@@ -51,7 +51,7 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
      */
     public void setUp()
     throws SQLException {
-        Connection con = getXConnection();
+        Connection con = getConnection();
         con.setAutoCommit(false);
         
         Statement s = con.createStatement();

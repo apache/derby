@@ -113,7 +113,7 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 		ByteArrayOutputStream rawBytes =
 			new ByteArrayOutputStream(20 * 1024);
 			
-		Connection conn = getXConnection();
+		Connection conn = getConnection();
 		org.apache.derby.tools.ij.runScript(
 				conn,
 				sqlIn,

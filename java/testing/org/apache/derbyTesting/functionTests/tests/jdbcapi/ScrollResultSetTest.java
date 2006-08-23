@@ -65,7 +65,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
      * Set up the connection to the database.
      */
     public void setUp() throws  Exception {       
-        Connection con = getXConnection();
+        Connection con = getConnection();
         con.setAutoCommit(true);
 
         String createTableWithPK = "CREATE TABLE tableWithPK (" +
@@ -85,7 +85,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
      */
     public void tearDown() throws Exception {
         println("TearDown");
-        Statement s = getXConnection().createStatement();
+        Statement s = getConnection().createStatement();
         try { 
             
             s.executeUpdate("DROP TABLE tableWithPK");
@@ -103,7 +103,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
      */
     public void testNextOnLastRowForwardOnly()  throws SQLException{
 
-        Connection con = getXConnection();
+        Connection con = getConnection();
         con.setAutoCommit(true);
         con.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
         Statement roStmt = con.createStatement(
@@ -136,7 +136,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
      */
     public void testNextOnLastRowScrollable()  throws SQLException{
 
-        Connection con = getXConnection();
+        Connection con = getConnection();
         con.setAutoCommit(true);
         con.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
         Statement roStmt = con.createStatement(

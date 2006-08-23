@@ -155,7 +155,7 @@ public class BlobTest
     public void setUp() 
         throws SQLException {
 
-        blob = BlobClobTestSetup.getSampleBlob(getXConnection());
+        blob = BlobClobTestSetup.getSampleBlob(getConnection());
         
         //call the buildHashSetMethod to initialize the 
         //HashSet with the method signatures that are exempted 

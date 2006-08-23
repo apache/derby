@@ -60,7 +60,7 @@ public class largeCodeGen extends BaseJDBCTestCase
        
     protected void setUp() throws SQLException
     {
-        getXConnection().setAutoCommit(false);
+        getConnection().setAutoCommit(false);
     	Statement stmt = createStatement();
 		
 		String createSQL = 	"create table t0 " +

@@ -73,7 +73,7 @@ public class SURQueryMixTest extends SURBaseTest
         throws SQLException
     {
         println(query);
-        DatabaseMetaData dbMeta = getXConnection().getMetaData();
+        DatabaseMetaData dbMeta = getConnection().getMetaData();
                 
         if (dbMeta.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
             checkRowDeleted = true;

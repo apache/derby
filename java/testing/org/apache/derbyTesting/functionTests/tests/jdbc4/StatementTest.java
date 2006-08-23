@@ -53,7 +53,7 @@ public class StatementTest
      */
     protected void setUp() 
         throws SQLException {
-        getXConnection().setAutoCommit(false);
+        getConnection().setAutoCommit(false);
         // Create a default statement.
         stmt = createStatement();
         assertFalse("First statement must be open initially", 
@@ -132,7 +132,7 @@ public class StatementTest
         // Close the connection. We must commit/rollback first, or else a
         // "Invalid transaction state" exception is raised.
         rollback();
-        Connection con = getXConnection();
+        Connection con = getConnection();
         con.close();
         assertTrue("Connection should be closed after close()", 
                 con.isClosed());

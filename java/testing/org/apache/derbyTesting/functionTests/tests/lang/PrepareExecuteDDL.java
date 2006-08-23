@@ -37,6 +37,13 @@ import junit.framework.TestSuite;
  */
 public class PrepareExecuteDDL extends BaseJDBCTestCase {
 	
+    /**
+     * Connection to execute the DDL on. Needs
+     * to be different to the single connection
+     * provided by the super-class. This connection
+     * is used to execute DDL while the other connection
+     * has open objcts dependent on the objct changed by the DDL.
+     */
 	private Connection connDDL;
 	
 	/**
@@ -95,7 +102,7 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 	
 	public void testPrepareExcute() throws SQLException
 	{
-        Connection conn = getXConnection();
+        Connection conn = getConnection();
         
 		PreparedStatement[] psa= new PreparedStatement[STMTS.length];
 		for (int i = 0; i < STMTS.length; i++)

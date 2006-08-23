@@ -79,7 +79,7 @@ public class CallableStatementTest
    
     public void testNamedParametersAreNotSupported()
         throws SQLException {
-        DatabaseMetaData met = getXConnection().getMetaData();
+        DatabaseMetaData met = getConnection().getMetaData();
         assertFalse("Named parameters are not supported, but the metadata " +
                     "says they are", met.supportsNamedParameters());
         met = null;
@@ -185,7 +185,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntOnInParameterOfValidType()
         throws SQLException {
-        cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(getXConnection());
+        cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(getConnection());
         cStmt.setString(1, "A string");
         cStmt.execute();
         try {
@@ -209,7 +209,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntVARCHAR()
         throws IOException, SQLException {
-        cStmt = CallableStatementTestSetup.getIntToStringFunction(getXConnection());
+        cStmt = CallableStatementTestSetup.getIntToStringFunction(getConnection());
         cStmt.setInt(2, 4509);
         assertFalse("No resultsets should be returned", cStmt.execute());
         assertEquals("Incorrect updatecount", -1, cStmt.getUpdateCount());
@@ -240,7 +240,7 @@ public class CallableStatementTest
     public void testGetCharacterStreamIntVARBINARYDirect()
         throws IOException, SQLException {
         String data = "This is the test string.";
-        cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(getXConnection());
+        cStmt = CallableStatementTestSetup.getBinaryDirectProcedure(getConnection());
         cStmt.setString(1, data);
         assertFalse("No resultsets should be returned", cStmt.execute());
         // Note that getUpdateCount behaves differently on client and embedded.
@@ -279,7 +279,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntVARBINARYFromDb()
         throws IOException, SQLException {
-        cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(getXConnection());
+        cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(getConnection());
         cStmt.setInt(2, CallableStatementTestSetup.STRING_BYTES_ID);
         assertFalse("No resultsets should be returned", cStmt.execute());
         assertEquals("Incorrect updatecount", -1, cStmt.getUpdateCount());
@@ -310,7 +310,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntOnVARBINARYWithNull()
         throws SQLException {
-        cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(getXConnection());
+        cStmt = CallableStatementTestSetup.getBinaryFromDbFunction(getConnection());
         cStmt.setInt(2, CallableStatementTestSetup.SQL_NULL_ID);
         assertFalse("No resultsets should be returned", cStmt.execute());
         assertEquals("Incorrect updatecount", -1, cStmt.getUpdateCount());
@@ -325,7 +325,7 @@ public class CallableStatementTest
      */
     public void testGetCharacterStreamIntOnVARCHARWithNull()
         throws SQLException {
-        cStmt = CallableStatementTestSetup.getVarcharFromDbFunction(getXConnection());
+        cStmt = CallableStatementTestSetup.getVarcharFromDbFunction(getConnection());
         cStmt.setInt(2, CallableStatementTestSetup.SQL_NULL_ID);
         assertFalse("No resultsets should be returned", cStmt.execute());
         assertEquals("Incorrect updatecount", -1, cStmt.getUpdateCount());

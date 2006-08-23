@@ -95,7 +95,7 @@ public class IJRunScriptTest extends BaseJDBCTestCase {
     public void testAutoCommitCommand()
         throws SQLException, UnsupportedEncodingException
     {      
-        Connection conn = getXConnection();
+        Connection conn = getConnection();
         assertTrue(conn.getAutoCommit());
         runTestingScript("AUTOCOMMIT OFF;", 0);
         
