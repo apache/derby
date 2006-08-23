@@ -213,58 +213,6 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 		return makeRow(null, null);
 	}
 
-	/**
-	 * Builds an empty index row.
-	 *
-	 *	@param	indexNumber	Index to build empty row for.
-	 *  @param  rowLocation	Row location for last column of index row
-	 *
-	 * @return corresponding empty index row
-	 * @exception   StandardException thrown on failure
-	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
-											RowLocation rowLocation) 
-			throws StandardException
-	{
-		int ncols = getIndexColumnCount(indexNumber);
-		ExecIndexRow row =	getExecutionFactory().getIndexableRow(ncols + 1);
-
-		row.setColumn(ncols + 1, rowLocation);
-
-		switch( indexNumber )
-		{
-		    case SYSCONGLOMERATES_INDEX1_ID:
-				
-				/* 1st column is CONGLOMERATEID (char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-				break;
-
-		    case SYSCONGLOMERATES_INDEX2_ID:
-				
-				/* 1st column is CONGLOMERATENAME (varchar(128)) */
-				row.setColumn(1, getDataValueFactory().getVarcharDataValue((String) null));
-				
-				/* 2nd column is SCHEMAID (char(36)) */
-				row.setColumn(2, getDataValueFactory().getCharDataValue((String) null));
-
-				break;
-
-		    case SYSCONGLOMERATES_INDEX3_ID:
-				
-				/* Build the row */
-				/* NOTE: this index is not unique, need extra column in template for
-				 * drop method in DataDictionary.
-				 */
-
-				/* 1st column is TABLEID (char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-
-				break;
-
-		}	// end switch
-
-		return	row;
-	}
 
 	/**
 	 * Get the Properties associated with creating the heap.

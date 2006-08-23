@@ -55,7 +55,7 @@ import org.apache.derby.iapi.services.uuid.UUIDFactory;
  * @author Rick Hillegas (extracted from DataDictionaryImpl).
  */
 
-public class SYSTABLESRowFactory extends CatalogRowFactory
+class SYSTABLESRowFactory extends CatalogRowFactory
 {
 	private static final String		TABLENAME_STRING = "SYSTABLES";
 
@@ -96,7 +96,7 @@ public class SYSTABLESRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
-    public	SYSTABLESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
+    SYSTABLESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                 boolean convertIdToLower)
 	{
 		super(uuidf,ef,dvf,convertIdToLower);
@@ -227,7 +227,7 @@ public class SYSTABLESRowFactory extends CatalogRowFactory
 	 * @return corresponding empty index row
 	 * @exception   StandardException thrown on failure
 	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
+	ExecIndexRow	buildEmptyIndexRow( int indexNumber,
 											RowLocation rowLocation)
 			throws StandardException
 	{

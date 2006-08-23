@@ -180,29 +180,6 @@ public class SYSDEPENDSRowFactory extends CatalogRowFactory
 		return row;
 	}
 
-	/**
-	 * Builds an empty index row.
-	 *
-	 *	@param	indexNumber	Index to build empty row for.
-	 *  @param  rowLocation	Row location for last column of index row
-	 *
-	 * @return corresponding empty index row
-	 * @exception   StandardException thrown on failure
-	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
-											RowLocation rowLocation) 
-			throws StandardException
-	{
-		ExecIndexRow row = getExecutionFactory().getIndexableRow(2);
-
-		/* both indices are on UUID */
-		row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-
-		row.setColumn(2, rowLocation);
-
-		return	row;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	//
 	//	ABSTRACT METHODS TO BE IMPLEMENTED BY CHILDREN OF CatalogRowFactory

@@ -6725,7 +6725,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		tableNameOrderable;
 		ScanController			scanController;
 		TabInfoImpl					ti = coreInfo[SYSTABLES_CORE_NUM];
-		CatalogRowFactory		rf = ti.getCatalogRowFactory();
+        SYSTABLESRowFactory		rf = (SYSTABLESRowFactory) ti.getCatalogRowFactory();
 
 		// We only want the 1st column from the heap
 		row = exFactory.getValueRow(1);

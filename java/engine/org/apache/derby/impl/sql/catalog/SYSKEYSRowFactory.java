@@ -151,46 +151,7 @@ public class SYSKEYSRowFactory extends CatalogRowFactory
 		return row;
 	}
 
-	/**
-	 * Builds an empty index row.
-	 *
-	 *	@param	indexNumber	Index to build empty row for.
-	 *  @param  rowLocation	Row location for last column of index row
-	 *
-	 * @return corresponding empty index row
-	 * @exception   StandardException thrown on failure
-	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
-											RowLocation rowLocation) 
-			throws StandardException
-	{
-		ExecIndexRow			row = null;
 
-		switch( indexNumber )
-		{
-		    case SYSKEYS_INDEX1_ID:
-				
-				/* Build the row */
-				row = getExecutionFactory().getIndexableRow(2);
-
-				/* 1st column is CONSTRAINTID (char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-
-				row.setColumn(2, rowLocation);
-
-				break;
-
-		    default:
-
-				if (SanityManager.DEBUG)
-					SanityManager.NOTREACHED();
-				return null;
-
-
-		}	// end switch
-
-		return	row;
-	}
 
 	///////////////////////////////////////////////////////////////////////////
 	//

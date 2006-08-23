@@ -232,18 +232,6 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 										   statType, stat, columnCount);
 	}			
 
-	public ExecIndexRow	buildEmptyIndexRow(int indexNumber,
-										   RowLocation rowLocation) 
-			throws StandardException
-	{
-		/* there is only one index-- just use hardwired values. */
-		ExecIndexRow row = getExecutionFactory().getIndexableRow(3);
-		row.setColumn(1, getDataValueFactory().getCharDataValue((String)null));
-		row.setColumn(2, getDataValueFactory().getCharDataValue((String)null));
-		row.setColumn(3, rowLocation);
-		return row;
-	}
-
 	/**
 	 * Builds a list of columns suitable for creating this Catalog.
 	 *

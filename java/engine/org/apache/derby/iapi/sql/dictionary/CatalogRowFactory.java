@@ -349,14 +349,6 @@ public abstract	class CatalogRowFactory
 
 	/** builds a column list for the catalog */
 	public abstract SystemColumn[]	buildColumnList();
-    
-
-	/**
-	 * builds an empty row given for a given index number.
-	 */
-  	public abstract ExecIndexRow	buildEmptyIndexRow(int indexNumber,
-													   RowLocation rowLocation) 
-  		throws StandardException;
 
 	/** Return the column positions for a given index number */
 	public int[] getIndexColumnPositions(int indexNumber)

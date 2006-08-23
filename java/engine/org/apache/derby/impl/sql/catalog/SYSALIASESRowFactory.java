@@ -243,57 +243,6 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 		return row;
 	}
 
-	/**
-	 * Builds an empty index row.
-	 *
-	 *	@param	indexNumber	Index to build empty row for.
-	 *  @param  rowLocation	Row location for last column of index row
-	 *
-	 * @return corresponding empty index row
-	 * @exception   StandardException thrown on failure
-	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
-											RowLocation rowLocation) 
-			throws StandardException
-	{
-		int ncols = getIndexColumnCount(indexNumber);
-		ExecIndexRow row = getExecutionFactory().getIndexableRow(ncols + 1);
-
-		row.setColumn(ncols + 1, rowLocation);		
-
-		switch( indexNumber )
-		{
-		    case SYSALIASES_INDEX1_ID:
-				/* 1st column is SCHEMAID (char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-
-				/* 2nd column is ALIAS (varchar(128)) */
-				row.setColumn(2, getDataValueFactory().getVarcharDataValue((String) null));
-
-				/* 3rd column is NAMESPACE (char(1)) */
-				row.setColumn(3, getDataValueFactory().getCharDataValue((String) null));
-
-				break;
-
-		    case SYSALIASES_INDEX2_ID:
-				/* 1st column is ALIASID (UUID - char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-
-				break;
-
-		    case SYSALIASES_INDEX3_ID:
-				/* 1st column is SCHEMAID (char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-
-				/* 2nd column is SPECIFICNAME (varchar(128)) */
-				row.setColumn(2, getDataValueFactory().getVarcharDataValue((String) null));
-
-				break;
-		}	// end switch
-
-		return	row;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	//
 	//	ABSTRACT METHODS TO BE IMPLEMENTED BY CHILDREN OF CatalogRowFactory

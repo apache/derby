@@ -161,46 +161,6 @@ class SYSFILESRowFactory extends CatalogRowFactory
 		return row;
 	}
 
-	/**
-	 * Builds an empty index row.
-	 *
-	 *	@param	indexNumber	Index to build empty row for.
-	 *  @param  rowLocation	Row location for last column of index row
-	 *
-	 * @return corresponding empty index row
-	 * @exception   StandardException thrown on failure
-	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
-											RowLocation rowLocation) 
-			throws StandardException
-	{
-		int ncols = getIndexColumnCount(indexNumber);
-		ExecIndexRow row = getExecutionFactory().getIndexableRow(ncols + 1);
-
-		row.setColumn(ncols + 1,  rowLocation);
-
-		switch( indexNumber )
-		{
-		    case SYSFILES_INDEX1_ID:
-				/* 1st column is NAME (varchar(128)) */
-				row.setColumn(1, getDataValueFactory().getVarcharDataValue((String) null));
-
-				/* 2nd column is SCHEMAID (UUID - char(36)) */
-				row.setColumn(2, getDataValueFactory().getCharDataValue((String) null));
-
-				break;
-
-		    case SYSFILES_INDEX2_ID:
-				/* 1st column is ID (UUID - char(36)) */
-				row.setColumn(1,
-							  getDataValueFactory().getCharDataValue((String) null));
-
-				break;
-		}	// end switch
-
-		return	row;
-	}
-
 	///////////////////////////////////////////////////////////////////////////
 	//
 	//	ABSTRACT METHODS TO BE IMPLEMENTED BY CHILDREN OF CatalogRowFactory

@@ -188,31 +188,7 @@ public class SYSVIEWSRowFactory extends CatalogRowFactory
 
 		return row;
 	}
-
-	/**
-	 * Builds an empty index row.
-	 *
-	 *	@param	indexNumber	Index to build empty row for.
-	 *  @param  rowLocation	Row location for last column of index row
-	 *
-	 * @return corresponding empty index row
-	 * @exception   StandardException thrown on failure
-	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
-											RowLocation rowLocation) 
-			throws StandardException
-	{
-		/* Build the row  */
-		ExecIndexRow row = getExecutionFactory().getIndexableRow(2);
-
-		/* 1st column is TABLEID (char(36)) */
-		row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-
-		row.setColumn(2, rowLocation);
-
-		return	row;
-	}
-
+    
 	///////////////////////////////////////////////////////////////////////////
 	//
 	//	ABSTRACT METHODS TO BE IMPLEMENTED BY CHILDREN OF CatalogRowFactory
@@ -349,10 +325,5 @@ public class SYSVIEWSRowFactory extends CatalogRowFactory
 							36					// maxLength
 			                );
 		return	columnList;
-	}
-
-	public int heapColumnCount()
-	{
-		return SYSVIEWS_COLUMN_COUNT;
 	}
 }

@@ -182,33 +182,6 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
                    "org.apache.derby.iapi.services.io.FormatableBitSet", false)    
         };
     }
-	/**
-	 * builds an empty row given for a given index number.
-	 */
-  	public ExecIndexRow buildEmptyIndexRow(int indexNumber,
-                                           RowLocation rowLocation) 
-  		throws StandardException
-    {
-        ExecIndexRow row = getExecutionFactory().getIndexableRow( indexColumnPositions[indexNumber].length + 1);
-        row.setColumn( row.nColumns(), rowLocation);
-        
-        switch( indexNumber)
-        {
-        case GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM:
-            row.setColumn(1, getNullAuthorizationID()); // grantee
-            row.setColumn(2, getDataValueFactory().getNullChar( (StringDataValue) null)); // table UUID
-            row.setColumn(3, getDataValueFactory().getNullChar( (StringDataValue) null)); // type
-            row.setColumn(4, getNullAuthorizationID()); // grantor
-            break;
-        case COLPERMSID_INDEX_NUM:
-            row.setColumn(1, getDataValueFactory().getNullChar( (StringDataValue) null)); // COLPERMSID
-            break;
-        case TABLEID_INDEX_NUM:
-            row.setColumn(1, getDataValueFactory().getNullChar( (StringDataValue) null)); // TABLEID
-            break;
-        }
-        return row;
-    } // end of buildEmptyIndexRow
 
 	/**
 	 * builds an index key row for a given index number.

@@ -224,57 +224,6 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		return row;
 	}
 
-	/**
-	 * Builds an empty index row.
-	 *
-	 *	@param	indexNumber	Index to build empty row for.
-	 *  @param  rowLocation	Row location for last column of index row
-	 *
-	 * @return corresponding empty index row
-	 * @exception   StandardException thrown on failure
-	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
-											RowLocation rowLocation) 
-			throws StandardException
-	{
-		int ncols = getIndexColumnCount(indexNumber);
-		ExecIndexRow row = getExecutionFactory().getIndexableRow(ncols + 1);
-
-		row.setColumn(ncols + 1, rowLocation);
-
-		switch( indexNumber )
-		{
-		    case SYSCONSTRAINTS_INDEX1_ID:
-				/* 1st column is CONSTRAINTID (char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-				break;
-
-		    case SYSCONSTRAINTS_INDEX2_ID:
-				/* 1st column is CONSTRAINTNAME (varchar(128)) */
-				row.setColumn(1, getDataValueFactory().getVarcharDataValue((String) null));
-
-				/* 2nd column is SCHEMAID (UUID - char(36)) */
-				row.setColumn(2, getDataValueFactory().getCharDataValue((String) null));
-
-				break;
-
-		    case SYSCONSTRAINTS_INDEX3_ID:
-				/* 1st column is TABLEID (char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-
-				break;
-
-		    default:
-
-				if (SanityManager.DEBUG)
-					SanityManager.NOTREACHED();
-				return null;
-
-
-		}	// end switch
-
-		return	row;
-	}
 
 	///////////////////////////////////////////////////////////////////////////
 	//

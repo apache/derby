@@ -101,12 +101,6 @@ class SYSDUMMY1RowFactory extends CatalogRowFactory
 		return null;
 	}
 
-  	public ExecIndexRow	buildEmptyIndexRow(int indexNumber, RowLocation rowLocation)
-  		throws StandardException
-	{
-		return null;
-	}
-
 	/**
 	 * Builds a list of columns suitable for creating this Catalog.
 	 *

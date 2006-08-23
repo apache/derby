@@ -248,50 +248,6 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		return row;
 	}
 
-	/**
-	 * Builds an empty index row.
-	 *
-	 * @param	indexNumber	Index to build empty row for.
-	 * @param  rowLocation	Row location for last column of index row
-	 *
-	 * @return corresponding empty index row
-	 * @exception   StandardException thrown on failure
-	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
-											RowLocation rowLocation) 
-			throws StandardException
-	{
-		int ncols = getIndexColumnCount(indexNumber);
-		ExecIndexRow row = getExecutionFactory().getIndexableRow(ncols + 1);
-
-		row.setColumn(ncols + 1, rowLocation);
-
-		switch( indexNumber )
-		{
-		    case SYSTRIGGERS_INDEX1_ID:
-				/* 1st column is TRIGGERID (UUID - char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
-				break;
-
-		    case SYSTRIGGERS_INDEX2_ID:
-				/* 1st column is TRIGGERNAME (varchar(128)) */
-				row.setColumn(1, getDataValueFactory().getVarcharDataValue((String) null));
-
-				/* 2nd column is SCHEMAID (char(32)) */
-				row.setColumn(2, getDataValueFactory().getCharDataValue((String) null));
-				break;
-
-		    case SYSTRIGGERS_INDEX3_ID:
-				/* 1nd column is TABLEID (char(32)) */
-				row.setColumn(2, getDataValueFactory().getCharDataValue((String) null));
-
-				/* 2nd column is COMPILATIONTIMESTAMP (timestamp) */
-				row.setColumn(2, new SQLTimestamp());
-				break;
-		}	// end switch
-
-		return	row;
-	}
 
 	///////////////////////////////////////////////////////////////////////////
 	//
@@ -666,11 +622,6 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 							);
 
 		return	columnList;
-	}
-
-	public int heapColumnCount()
-	{
-		return SYSTRIGGERS_COLUMN_COUNT;
 	}
 
 	// a little helper

@@ -326,51 +326,6 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	///////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Builds an empty index row.
-	 *
-	 *	@param	indexNumber	Index to build empty row for.
-	 *  @param  rowLocation	Row location for last column of index row
-	 *
-	 * @return corresponding empty index row
-	 * @exception   StandardException thrown on failure
-	 */
-	public ExecIndexRow	buildEmptyIndexRow( int indexNumber,
-											RowLocation rowLocation) 
-			throws StandardException
-	{
-		int ncols = getIndexColumnCount(indexNumber);
-		ExecIndexRow row = getExecutionFactory().getIndexableRow(ncols + 1);
-
-		row.setColumn(ncols + 1, rowLocation);
-
-		switch(indexNumber)
-		{
-			case SYSCOLUMNS_INDEX1_ID:
-				/* 1st column is REFERENCEID (UUID - char(36)) */
-				row.setColumn
-					(1, getDataValueFactory().getCharDataValue((String) null));
-
-				/* 2nd column is COLUMNNAME (varchar(128)) */
-				row.setColumn
-				    (2, 
-					 getDataValueFactory().getVarcharDataValue((String) null));
-
-				break;
-
-		    case SYSCOLUMNS_INDEX2_ID:
-				
-				/* 1st column is DEFAULTID (UUID - char(36)) */
-				row.setColumn
-					(1, getDataValueFactory().getCharDataValue((String) null));
-
-				break;
-		}	// end switch
-
-		return	row;
-	}
-
-
-	/**
 	 * Make a ColumnDescriptor out of a SYSCOLUMNS row
 	 *
 	 * @param row 					a SYSCOLUMNS row

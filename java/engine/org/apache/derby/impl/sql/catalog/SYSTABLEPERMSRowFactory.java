@@ -296,33 +296,6 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
     } // end of buildColumnList
 
 	/**
-	 * builds an empty row given for a given index number.
-	 */
-  	public ExecIndexRow buildEmptyIndexRow(int indexNumber,
-                                           RowLocation rowLocation)
-  		throws StandardException
-    {
-        ExecIndexRow row = getExecutionFactory().getIndexableRow( indexColumnPositions[indexNumber].length + 1);
-        row.setColumn( row.nColumns(), rowLocation);
-        
-        switch( indexNumber)
-        {
-        case GRANTEE_TABLE_GRANTOR_INDEX_NUM:
-            row.setColumn(1, getNullAuthorizationID()); // grantee
-            row.setColumn(2, getDataValueFactory().getNullChar( (StringDataValue) null)); // table UUID
-            row.setColumn(3, getNullAuthorizationID()); // grantor
-            break;
-        case TABLEPERMSID_INDEX_NUM:
-            row.setColumn(1, getDataValueFactory().getNullChar( (StringDataValue) null)); // TABLEPERMSID
-            break;
-        case TABLEID_INDEX_NUM:
-            row.setColumn(1, getDataValueFactory().getNullChar( (StringDataValue) null)); // TABLEID
-            break;
-        }
-        return row;
-    } // end of buildEmptyIndexRow
-
-	/**
 	 * builds a key row given for a given index number.
 	 */
   	public ExecIndexRow buildIndexKeyRow( int indexNumber,
