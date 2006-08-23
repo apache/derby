@@ -42,3 +42,6 @@ jdbcapi/SURTest_ij.sql
 # Excluding ResultSetClose test since an exception in a statement results in all
 # the result sets associated with the connection closing
 jdbcapi/ResultSetCloseTest.junit
+# DERBY-1691: when run against JCC, exceptions in blobclob4BLOB can appear in
+# different places in the output.
+jdbcapi/blobclob4BLOB.java
