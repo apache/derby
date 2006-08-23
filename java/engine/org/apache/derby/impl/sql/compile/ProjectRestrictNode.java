@@ -547,8 +547,17 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		/* Remap all of the ColumnReferences to point to the
 		 * source of the values.
 		 */
-		RemapCRsVisitor rcrv = new RemapCRsVisitor(true);
-		((Predicate) optimizablePredicate).getAndNode().accept(rcrv);
+		Predicate pred = (Predicate)optimizablePredicate;
+
+		/* If the predicate is scoped then the call to "remapScopedPred()"
+		 * will do the necessary remapping for us and will return true;
+		 * otherwise, we'll just do the normal remapping here.
+		 */
+		if (!pred.remapScopedPred())
+		{
+			RemapCRsVisitor rcrv = new RemapCRsVisitor(true);
+			pred.getAndNode().accept(rcrv);
+		}
 
 		return true;
 	}
@@ -613,7 +622,14 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			// Remember that the original child was not Optimizable
 			origChildOptimizable = false;
 
-			childResult = childResult.modifyAccessPaths();
+			/* When we optimized the child we passed in our restriction list
+			 * so that scoped predicates could be pushed further down the
+			 * tree.  We need to do the same when modifying the access
+			 * paths to ensure we generate the same plans the optimizer
+			 * chose.
+			 */
+			childResult = childResult.modifyAccessPaths(restrictionList);
+
 			/* Mark this node as having the truly ... for
 			 * the underlying tree.
 			 */

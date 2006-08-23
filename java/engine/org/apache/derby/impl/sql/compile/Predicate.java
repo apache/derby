@@ -914,9 +914,12 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		BinaryRelationalOperatorNode opNode =
 			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
 
-		// If both sides are column references then this is a join pred.
+		// If both sides are column references AND they point to different
+		// tables, then this is a join pred.
 		return ((opNode.getLeftOperand() instanceof ColumnReference) &&
-			(opNode.getRightOperand() instanceof ColumnReference));
+			(opNode.getRightOperand() instanceof ColumnReference) &&
+			(((ColumnReference)opNode.getLeftOperand()).getTableNumber() !=
+			((ColumnReference)opNode.getRightOperand()).getTableNumber()));
 	}
 
 	/**
@@ -965,12 +968,16 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *  ResultSetNode to which they don't apply.
 	 * @param childRSN The result set node for which we want to create
 	 *  a scoped predicate.
+	 * @param whichRC If not -1 then this tells us which ResultColumn
+	 *  in the received childRSN we need to use for the scoped predicate;
+	 *  if -1 then the column position of the scoped column reference
+	 *  will be stored in this array and passed back to the caller.
 	 * @return A new predicate whose operands have been scoped to the
 	 *  received childRSN.
 	 */
 	protected Predicate getPredScopedForResultSet(
-		JBitSet parentRSNsTables, ResultSetNode childRSN)
-		throws StandardException
+		JBitSet parentRSNsTables, ResultSetNode childRSN,
+		int [] whichRC) throws StandardException
 	{
 		// We only deal with binary relational operators here.
 		if (!(getAndNode().getLeftOperand()
@@ -999,11 +1006,13 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 				opNode.getScopedOperand(
 					BinaryRelationalOperatorNode.LEFT,
 					parentRSNsTables,
-					childRSN),
+					childRSN,
+					whichRC),
 				opNode.getScopedOperand(
 					BinaryRelationalOperatorNode.RIGHT,
 					parentRSNsTables,
-					childRSN),
+					childRSN,
+					whichRC),
 				getContextManager());
 
 		// Bind the new op node.
@@ -1062,4 +1071,232 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		return scoped;
 	}
 
+	/**
+	 * When remapping a "normal" (i.e. non-scoped) predicate both
+	 * of the predicate's operands are remapped and that's it.
+	 * But when remapping a scoped predicate, things are slightly
+	 * different.  This method handles remapping of scoped predicates.
+	 *
+	 * We know that, for a scoped predicate, exactly one operand has
+	 * been scoped for a specific target result set; the other operand
+	 * is pointing to some other instance of FromTable with which the
+	 * target result set is to be joined (see getScopedOperand() in
+	 * BinaryRelationalOperatorNode.java).  For every level of the
+	 * query through which the scoped predicate is pushed, we have
+	 * to perform a remap operation of the scoped operand.  We do
+	 * *not*, however, remap the non-scoped operand.  The reason
+	 * is that the non-scoped operand is already pointing to the
+	 * result set against which it must be evaluated.  As the scoped
+	 * predicate is pushed down the query tree, the non-scoped
+	 * operand should not change where it's pointing and thus should
+	 * not be remapped.  For example, assume we have a query whose
+	 * tree has the following form:
+	 *
+	 *               SELECT[0] 
+	 *                /     \ 
+	 *              PRN      PRN 
+	 *               |        |
+	 *          SELECT[4]   UNION
+	 *           |           /   \ 
+	 *          PRN     SELECT[1]  SELECT[2] 
+	 *           |         |          | 
+	 *       <FBT:T1>     PRN        PRN 
+	 *                     |          |
+	 *                SELECT[3]  <FromBaseTable:T2> 
+	 *                     |
+	 *                    PRN
+	 *                     |
+	 *             <FromBaseTable:T3>
+	 *
+	 * Assume also that we have some predicate "SELECT[4].i = <UNION>.j".
+	 * If the optimizer decides to push the predicate to the UNION
+	 * node, it (the predicate) will be scoped to the UNION's children,
+	 * yielding something like "SELECT[4].i = SELECT[1].j" for the
+	 * left child and "SELECT[4].i = SELECT[2].j" for the right child.
+	 * These scoped predicates will then be pushed to the PRNs above
+	 * SELECT[3] and T2, respectively.  As part of that pushing
+	 * process a call to PRN.pushOptPredicate() will occur, which
+	 * brings us to this method.  So let's assume we're here for
+	 * the scoped predicate "SELECT[4].i = SELECT[1].j".  Then we want
+	 * to remap the scoped operand, "SELECT[1].j", so that it will
+	 * point to the correct column in "SELECT[3]".  We do NOT, however,
+	 * want to remap the non-scoped operand "SELECT[4].i" because that
+	 * operand is already pointing to the correct result set--namely,
+	 * to a column in SELECT[4].  That non-scoped operand should not
+	 * change regardless of how far down the UNION subtree the scoped
+	 * predicate is pushed.
+	 * 
+	 * If we did try to remap the non-scoped operand, it would end up
+	 * pointing to result sets too low in the tree, which could lead to
+	 * execution-time errors.  So when we remap a scoped predicate, we
+	 * have to make sure we only remap the scoped operand.  That's what
+	 * this method does.
+	 *
+	 * @return True if this predicate is a scoped predicate, in which
+	 *  case we performed a one-sided remap.  False if the predicate is
+	 *  not scoped; the caller can then make the calls to perform a
+	 *  "normal" remap on this predicate.
+	 */
+	protected boolean remapScopedPred()
+	{
+		if (!scoped)
+			return false;
+
+		/* Note: right now the only predicates we scope are those
+		 * which are join predicates and all scoped predicates will
+		 * have the same relational operator as the predicates from
+		 * which they were scoped.  Thus if we get here, we know
+		 * that andNode's leftOperand must be an instance of
+		 * BinaryRelationalOperatorNode (and therefore the following
+		 * cast is safe).
+		 */
+		BinaryRelationalOperatorNode binRelOp =
+			(BinaryRelationalOperatorNode)andNode.getLeftOperand();
+
+		ValueNode operand = null;
+
+		if (SanityManager.DEBUG)
+		{
+			/* If this predicate is scoped then one (and only one) of
+			 * its operands should be scoped.  Note that it's possible
+			 * for an operand to be scoped to a non-ColumnReference
+			 * value; if either operand is not a ColumnReference, then
+			 * that operand must be the scoped operand.
+			 */
+			operand = binRelOp.getLeftOperand();
+			boolean leftIsScoped =
+				!(operand instanceof ColumnReference) ||
+					((ColumnReference)operand).isScoped();
+
+			operand = binRelOp.getRightOperand();
+			boolean rightIsScoped =
+				!(operand instanceof ColumnReference) ||
+					((ColumnReference)operand).isScoped();
+
+			SanityManager.ASSERT(leftIsScoped ^ rightIsScoped,
+				"All scoped predicates should have exactly one scoped " +
+				"operand, but '" + binaryRelOpColRefsToString() +
+				"' has " + (leftIsScoped ? "TWO" : "NONE") + ".");
+		}
+
+		// Find the scoped operand and remap it.
+		operand = binRelOp.getLeftOperand();
+		if ((operand instanceof ColumnReference) &&
+			((ColumnReference)operand).isScoped())
+		{
+			// Left operand is the scoped operand.
+			((ColumnReference)operand).remapColumnReferences();
+		}
+		else
+		{
+			operand = binRelOp.getRightOperand();
+			if ((operand instanceof ColumnReference) &&
+				((ColumnReference)operand).isScoped())
+			{
+				// Right operand is the scoped operand.
+				((ColumnReference)operand).remapColumnReferences();
+			}
+
+			// Else scoped operand is not a ColumnReference, which
+			// means it can't (and doesn't need to) be remapped. So
+			// just fall through and return.
+		}
+
+		return true;
+	}
+
+	/**
+	 * Return true if this predicate is scoped AND the scoped
+	 * operand is a ColumnReference that points to a source result
+	 * set.  If the scoped operand is not a ColumnReference that
+	 * points to a source result set then it must be pointing to
+	 * some kind of expression, such as a literal (ex. 'strlit'),
+	 * an aggregate value (ex. "count(*)"), or the result of a
+	 * function (ex. "sin(i)") or operator (ex. "i+1").
+	 *
+	 * This method is used when pushing predicates to determine how
+	 * far down the query tree a scoped predicate needs to be pushed
+	 * to allow for successful evaluation of the scoped operand.  If
+	 * the scoped operand is not pointing to a source result set
+	 * then it should not be pushed any further down tree.  The reason
+	 * is that evaluation of the expression to which the operand is
+	 * pointing may depend on other values from the current level
+	 * in the tree (ex. "sin(i)" depends on the value of "i", which
+	 * could be a column at the predicate's current level).  If we
+	 * pushed the predicate further down, those values could become
+	 * inaccessible, leading to execution-time errors.
+	 *
+	 * If, on the other hand, the scoped operand *is* pointing to
+	 * a source result set, then we want to push it further down
+	 * the tree until it reaches that result set, which allows
+	 * evaluation of this predicate to occur as close to store as
+	 * possible.  This method doesn't actually do the push, it just
+	 * returns "true" and then the caller can push as appropriate.
+	 */
+	protected boolean isScopedToSourceResultSet()
+		throws StandardException
+	{
+		if (!scoped)
+			return false;
+
+		/* Note: right now the only predicates we scope are those
+		 * which are join predicates and all scoped predicates will
+		 * have the same relational operator as the predicates from
+		 * which they were scoped.  Thus if we get here, we know
+		 * that andNode's leftOperand must be an instance of
+		 * BinaryRelationalOperatorNode (and therefore the following
+		 * cast is safe).
+		 */
+		BinaryRelationalOperatorNode binRelOp =
+			(BinaryRelationalOperatorNode)andNode.getLeftOperand();
+
+		ValueNode operand = binRelOp.getLeftOperand();
+
+		/* If operand isn't a ColumnReference then is must be the
+		 * scoped operand.  This is because both operands have to
+		 * be column references in order for scoping to occur (as
+		 * per pushableToSubqueries()) and only the scoped operand
+		 * can change (esp. can become a non-ColumnReference) as
+		 * part of the scoping process.  And since it's not a
+		 * ColumnReference it can't be "a ColumnReference that
+		 * points to a source result set", so return false.
+		 */
+		if (!(operand instanceof ColumnReference))
+			return false;
+
+		/* If the operand is a ColumnReference and is scoped,
+		 * then see if it is pointing to a ResultColumn whose
+		 * expression is either another a CR or a Virtual
+		 * ColumnNode.  If it is then that operand applies
+		 * to a source result set further down the tree and
+		 * thus we return true.
+		 */
+		ValueNode exp = null;
+		ColumnReference cRef = (ColumnReference)operand;
+		if (cRef.isScoped())
+		{
+			exp = cRef.getSource().getExpression();
+			return ((exp instanceof VirtualColumnNode) ||
+				(exp instanceof ColumnReference));
+		}
+
+		operand = binRelOp.getRightOperand();
+		if (!(operand instanceof ColumnReference))
+			return false;
+
+		cRef = (ColumnReference)operand;
+		if (SanityManager.DEBUG)
+		{
+			// If we got here then the left operand was NOT the scoped
+			// operand; make sure the right one is scoped, then.
+			SanityManager.ASSERT(cRef.isScoped(),
+				"All scoped predicates should have exactly one scoped " +
+				"operand, but '" + binaryRelOpColRefsToString() +
+				"has NONE.");
+		}
+
+		exp = cRef.getSource().getExpression();
+		return ((exp instanceof VirtualColumnNode) ||
+			(exp instanceof ColumnReference));
+	}
 }

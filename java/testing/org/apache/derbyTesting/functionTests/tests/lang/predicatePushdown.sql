@@ -102,6 +102,11 @@ create view vz2 (z1, z2, z3, z4) as
   select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
     (select c1, c, c2, c3 from tc) xx1;
 
+create view vz3 (z1, z2, z3, z4) as
+  select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
+    (select c1, c, c2, 28 from tc) xx1
+      union select 'i','j','j',i from t2;
+
 -- Both sides of predicate reference aggregates.
 select x1.c1 from
   (select count(*) from t1 union select count(*) from t2) x1 (c1),
@@ -242,6 +247,15 @@ select x1.z4 from
   (select distinct j from t2 union select j from t1) x2 (c2)
 where x1.z4 = x2.c2;
 
+-- Same as above but with an expression ("i+1") instead of
+-- a numeric literal.
+select x1.z4, x2.c2 from
+  (select z1, z4, z3 from vz
+    union select '1', i+1, '3' from t1
+  ) x1 (z1, z4, z3),
+  (select distinct j from t2 union select j from t1) x2 (c2)
+where x1.z4 = x2.c2;
+
 -- Same as previous query but with a different nested
 -- view (vz2) that is missing the nested union found
 -- in vz.
@@ -252,9 +266,119 @@ select x1.z4 from
   (select distinct j from t2 union select j from t1) x2 (c2)
 where x1.z4 = x2.c2;
 
+-- Queries with Select->Union->Select chains having differently-
+-- ordered result column lists with some non-column reference
+-- expressions.  In all of these queries we specify LEFT join
+-- and force NESTEDLOOP in order to coerce the optimizer to
+-- push predicates to a specific subquery.  We do this to
+-- ensure that we test predicate pushdown during compilation
+-- AND during execution.  It's the execution-time testing
+-- that is particular important for verifying DERBY-1633
+-- functionality.
+
+-- Push predicate to union whose left child has a Select
+-- within a Select, both of which have the same result column
+-- ordering.
+select x1.z4, x2.c2 from
+  (select z1, z4, z3 from vz
+    union select '1', i+1, '3' from t1
+  ) x1 (z1, z4, z3)
+  left join
+  (select distinct i,j from (select distinct i,j from t2) x3
+    union select i, j from t1
+  ) x2 (c1, c2) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP  
+on x1.z4 = x2.c2;
+
+-- Push predicate to union whose left child has a Select
+-- within a Select, where the result column lists for the
+-- two Selects are different ("i,j" vs "j,i").
+select x1.z4, x2.c2 from
+  (select z1, z4, z3 from vz
+    union select '1', i+1, '3' from t1
+  ) x1 (z1, z4, z3)
+  left join
+  (select distinct i,j from (select distinct j,i from t2) x3
+   union select i, j from t1
+  ) x2 (c1, c2) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP  
+on x1.z4 = x2.c2;
+
+-- Push predicate to union whose left child is itself a
+-- nested subquery (through use of the view "vz") and
+-- whose right child has an expression in its result
+-- column list.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz
+    union select '1', i+1, '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+
+-- Same as previous but with a different expression.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz
+    union select '1', sin(i), '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+
+-- Same as previous but expression replaced with a regular
+-- column reference.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz
+    union select '1', i, '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+
+-- Same as previous but with a different expression and
+-- a different subquery (this time using view "vz3").
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz3
+    union select '1', sin(i), '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+
+-- Push predicate to chain of unions whose left-most child
+-- is itself a nested subquery (through use of the view "vz")
+-- and in which the other unions have expressions in their
+-- result column lists.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz
+    union select '1', sin(i), '3' from t1
+    union select '1', 14, '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+
+-- Push predicate to chain of unions whose right-most child
+-- is itself a nested subquery (through use of the view "vz")
+-- and in which the other unions have expressions in their
+-- result column lists.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select '1', sin(i), '3' from t1
+    union select '1', 14, '3' from t1
+    union select z1, z4, z3 from vz
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+
 -- Cleanup from this set of tests.
 drop view vz;
 drop view vz2;
+drop view vz3;
 drop table tc;
 
 -- Now bump up the size of tables T3 and T4 to the point where
@@ -744,3 +868,263 @@ drop view yyunion;
 drop table xx1;
 drop table yy1;
 
+
+-- DERBY-1633: Nested UNIONs of views with different column orderings
+-- leads to incorrectly scoped predicates.  We have a lot of different
+-- tables and views here to try to cover several different situations.
+-- Note that all of the views use DISTINCT because we don't want
+-- the views to be flattened and Derby doesn't flatten select
+-- queries with DISTINCT in them.
+
+CREATE TABLE "APP"."T1" ("I" INTEGER, "D" DOUBLE, "C" CHAR(10));
+CREATE TABLE "APP"."T2" ("I2" INTEGER, "D2" DOUBLE, "C2" CHAR(10));
+CREATE TABLE "APP"."T3" ("I3" INTEGER, "D3" DOUBLE, "C3" CHAR(10));
+
+insert into t1 values (1, -1, '1'), (2, -2, '2');
+insert into t2 values (2, -2, '2'), (4, -4, '4'), (8, -8, '8');
+insert into t3 values (3, -3, '3'), (6, -6, '6'), (9, -9, '9');
+
+CREATE TABLE "APP"."T4" ("C4" CHAR(10));
+insert into t4 values '1', '2', '3', '4', '5', '6', '7', '8', '9';
+insert into t4 select rtrim(c4) || rtrim(c4) from t4;
+
+CREATE TABLE "APP"."T5" ("I5" INTEGER, "D5" DOUBLE, "C5" CHAR(10));
+CREATE TABLE "APP"."T6" ("I6" INTEGER, "D6" DOUBLE, "C6" CHAR(10));
+
+insert into t5
+  values (100, 100.0, '100'), (200, 200.0, '200'), (300, 300.0, '300');
+
+insert into t6
+  values (400, 400.0, '400'), (200, 200.0, '200'), (300, 300.0, '300');
+
+create view v_keycol_at_pos_3 as
+  select distinct i col1, d col2, c col3 from t1;
+
+create view v1_keycol_at_pos_2 as
+  select distinct i2 col1, c2 col3, d2 col2 from t2;
+
+create view v2_keycol_at_pos_2 as
+  select distinct i3 col1, c3 col3, d3 col2 from t3;
+
+create view v1_intersect as
+  select distinct i5 col1, c5 col3, d5 col2 from t5;
+
+create view v2_intersect as
+  select distinct i6 col1, c6 col3, d6 col2 from t6;
+
+create view v1_values as
+  select distinct vals1 col1, vals2 col2, vals3 col3 from
+    (values (321, 321.0, '321'), (432, 432.0, '432'),
+      (654, 654.0, '654')
+    ) VT(vals1, vals2, vals3);
+
+create view v_union as
+  select distinct i col1, d col2, c col3 from t1
+    union select distinct i3 col1, d3 col2, c3 col3 from t3;
+
+-- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The right child of the top-level
+-- node is a view that is a simple select from a table.
+create view topview as
+  (select distinct 'other:' col0, vpos3.col3, vpos3.col1
+    from v_keycol_at_pos_3 vpos3
+   union
+    select distinct 't2stuff:' col0, vpos2_1.col3, vpos2_1.col1
+     from v1_keycol_at_pos_2 vpos2_1
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+  );
+
+-- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The right child of the top-level
+-- node is a view that is a select from yet another
+-- UNION node.
+create view topview2 as
+  (select distinct 'other:' col0, vpos3.col3, vpos3.col1
+    from v_keycol_at_pos_3 vpos3
+   union
+    select distinct 't2stuff:' col0, vpos2_1.col3, vpos2_1.col1
+     from v1_keycol_at_pos_2 vpos2_1
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+   union
+    select distinct 'morestuff:' col0, vu.col3, vu.col1
+     from v_union vu
+  );
+
+-- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The left-most child of the last
+-- UNION in the chain is an INTERSECT node to which
+-- predicates cannot (currently) be pushed.  In this
+-- case the intersect returns an empty result set.
+create view topview3 (col0, col3, col1) as
+  (select distinct 'other:' col0, vpos3.col3, vpos3.col1
+    from v_keycol_at_pos_3 vpos3
+   intersect
+    select distinct 't2stuff:' col0, vpos2_1.col3, vpos2_1.col1
+     from v1_keycol_at_pos_2 vpos2_1
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+   union
+    select distinct 'morestuff:' col0, vu.col3, vu.col1
+     from v_union vu
+  );
+
+-- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The left-most child of the last
+-- UNION in the chain is an INTERSECT node to which
+-- predicates cannot (currently) be pushed.  In this
+-- case the intersect returns a couple of rows.
+create view topview4 (col0, col3, col1) as
+  (select distinct 'intersect:' col0, vi1.col3, vi1.col1
+    from v1_intersect vi1
+   intersect
+    select distinct 'intersect:' col0, vi2.col3, vi2.col1
+     from v2_intersect vi2
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+   union
+    select distinct 'morestuff:' col0, vu.col3, vu.col1
+   from v_union vu
+  );
+
+-- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The left-most child of the last
+-- UNION in the chain is a view that is a selet from
+-- a VALUES list (i.e. no base table).
+create view topview5 (col0, col3, col1) as
+  (select distinct 'values:' col0, vv1.col3, vv1.col1
+    from v1_values vv1
+   union
+    select distinct 'intersect:' col0, vi2.col3, vi2.col1
+     from v2_intersect vi2
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+   union
+    select distinct 'morestuff:' col0, vu.col3, vu.col1
+   from v_union vu
+  );
+
+-- All of the following queries failed at some point while finalizing
+-- the fix for DERBY-1633; some failed with error 42818, others
+-- failed with execution-time NPEs caused by incorrect (esp. double)
+-- remapping.  The point here is to see how the top-level
+-- predicates are pushed through the nested unions to the
+-- bottom-most children.  Use of LEFT JOINs with NESTEDLOOP
+-- effectively allows us to force the join order and thus to
+-- ensure the predicates are pushed to the desired top-level
+-- at execution time.  All such queries are run once with
+-- NESTEDLOOP and once without, to make sure things work
+-- in both cases.
+
+select * from t4, topview where t4.c4 = topview.col3;
+select * from t4, topview where topview.col3 = t4.c4;
+select * from topview x1, topview where topview.col3 = x1.col3;
+
+select * from t4, topview2 where t4.c4 = topview2.col3;
+select * from topview2 x1, topview where topview.col3 = x1.col3;
+
+select * from t4
+  left join topview
+  on t4.c4 = topview.col3;
+
+select * from t4
+  left join topview --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on t4.c4 = topview.col3;
+
+select * from t4
+  left join topview
+  on topview.col3 = t4.c4;
+
+select * from t4
+  left join topview --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview.col3 = t4.c4;
+
+select * from topview x1
+  left join topview
+  on topview.col3 = x1.col3;
+
+select * from topview x1
+  left join topview --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview.col3 = x1.col3;
+
+select * from t4
+  left join topview2
+  on t4.c4 = topview2.col3;
+
+select * from t4
+  left join topview2 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on t4.c4 = topview2.col3;
+
+select * from topview2 x1
+  left join topview
+  on topview.col3 = x1.col3;
+
+select * from topview2 x1
+  left join topview --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview.col3 = x1.col3;
+
+select * from topview x1
+  left join topview2
+  on topview2.col3 = x1.col3;
+
+select * from topview x1
+  left join topview2 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview2.col3 = x1.col3;
+
+select * from topview x1
+  left join topview3
+  on topview3.col3 = x1.col3;
+
+select * from topview x1
+  left join topview3 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview3.col3 = x1.col3;
+
+select * from topview x1
+  left join topview4
+  on topview4.col3 = x1.col3;
+
+select * from topview x1
+  left join topview4 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview4.col3 = x1.col3;
+
+select * from topview x1
+  left join topview5
+  on topview5.col3 = x1.col3;
+
+select * from topview x1
+  left join topview5 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview5.col3 = x1.col3;
+
+-- Clean-up from DERBY-1633.
+
+drop view topview;
+drop view topview2;
+drop view topview3;
+drop view topview4;
+drop view topview5;
+
+drop view v_keycol_at_pos_3;
+drop view v1_keycol_at_pos_2;
+drop view v2_keycol_at_pos_2;
+drop view v1_intersect;
+drop view v2_intersect;
+drop view v1_values;
+drop view v_union;
+
+drop table t1;
+drop table t2;
+drop table t3;
+drop table t4;
+drop table t5;
+drop table t6;

@@ -305,33 +305,6 @@ abstract class SetOperatorNode extends TableOperatorNode
 		if (!canPush)
 			return false;
 
-		BinaryRelationalOperatorNode opNode =
-			(BinaryRelationalOperatorNode)pred.getAndNode().getLeftOperand();
-
-		// Note: we assume we only get here for predicates with col refs on
-		// both sides; if that ever changes, the following cast will need
-		// to be updated accordingly.
-		boolean opWasRemapped = 
-			((ColumnReference)opNode.getLeftOperand()).hasBeenRemapped();
-
-		/* If there is a ProjectRestrictNode directly above this node,
-		 * then the predicate in question may have been remapped to this
-		 * SetOperatorNode before we got here (see pushOptPredicate() in
-		 * ProjectRestrictNode).  If we leave it mapped when we try to
-		 * get scoped predicates for the left and right result sets, the
-		 * underlying column references of the scoped predicates will
-		 * effectively be doubly-mapped (i.e. mapped more than once), which
-		 * can cause problems at code generation time.  So we 1) un-remap
-		 * the predicate here, 2) get the scoped predicates, and then
-		 * 3) remap the predicate again at the end of this method.
-		 */
-		RemapCRsVisitor rcrv = null;
-		if (opWasRemapped)
-		{
-			rcrv = new RemapCRsVisitor(false);
-			pred.getAndNode().accept(rcrv);
-		}
-
 		// Get a list of all of the underlying base tables that this node
 		// references.  We pass this down when scoping so that we can tell
 		// if the operands are actually supposed to be scoped to _this_
@@ -359,6 +332,10 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 * in the following code does.
 		 */
 
+		// For details on how this whichRC variable is used, see the
+		// comments in BinaryRelationalOperatorNode.getScopedOperand().
+		int [] whichRC = new int[] { -1 };
+
 		// See if we already have a scoped version of the predicate cached,
 		// and if so just use that.
 		Predicate scopedPred = null;
@@ -369,7 +346,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		if (scopedPred == null)
 		{
 			scopedPred = pred.getPredScopedForResultSet(
-				tableNums, leftResultSet);
+				tableNums, leftResultSet, whichRC);
 			leftScopedPreds.put(pred, scopedPred);
 		}
 
@@ -384,20 +361,12 @@ abstract class SetOperatorNode extends TableOperatorNode
 		if (scopedPred == null)
 		{
 			scopedPred = pred.getPredScopedForResultSet(
-				tableNums, rightResultSet);
+				tableNums, rightResultSet, whichRC);
 			rightScopedPreds.put(pred, scopedPred);
 		}
 
 		// Add the scoped predicate to our list for the right child.
 		getRightOptPredicateList().addOptPredicate(scopedPred);
-
-		// Restore the original predicate to the way it was before we got
-		// here--i.e. remap it again if needed.
-		if (opWasRemapped)
-		{
-			rcrv = new RemapCRsVisitor(true);
-			pred.getAndNode().accept(rcrv);
-		}
 
 		// Add the predicate (in its original form) to our list of predicates
 		// that we've pushed during this phase of optimization.  We need to
@@ -453,11 +422,22 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 * push that predicate elsewhere
 		 */
 		Predicate pred = null;
+		RemapCRsVisitor rcrv = new RemapCRsVisitor(false);
 		for (int i = 0; i < pushedPredicates.size(); i++)
 		{
 			pred = (Predicate)pushedPredicates.getOptPredicate(i);
 			if (pred.isScopedForPush())
+			{
+				/* We don't need to pull the predicate if it's scoped, but
+				 * since scoped predicates are cached between rounds of
+				 * optimization, it's possible that we'll reuse the scoped
+				 * predicate again in a later round.  So to make sure we
+				 * get a "fresh start" in later rounds, we un-remap the
+				 * predicate here.
+				 */
+ 				pred.getAndNode().accept(rcrv);
 				continue;
+			}
 			optimizablePredicates.addOptPredicate(pred);
 		}
 

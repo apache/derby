@@ -81,6 +81,16 @@ public class ColumnReference extends ValueNode
 	private int			nestingLevel = -1;
 	private int			sourceLevel = -1;
 
+	/* Whether or not this column reference been scoped for the
+	   sake of predicate pushdown.
+	 */
+	private boolean		scoped;
+
+	/* List of saved remap data if this ColumnReference is scoped
+	   and has been remapped multiple times.
+	 */
+	private java.util.ArrayList remaps;
+
 	/**
 	 * Initializer.
 	 * This one is called by the parser where we could
@@ -105,6 +115,7 @@ public class ColumnReference extends ValueNode
 		this.setBeginOffset(((Integer) tokBeginOffset).intValue());
 		this.setEndOffset(((Integer) tokEndOffset).intValue());
 		tableNumber = -1;
+		remaps = null;
 	}
 
 	/**
@@ -119,6 +130,7 @@ public class ColumnReference extends ValueNode
 		this.columnName = (String) columnName;
 		this.tableName = (TableName) tableName;
 		tableNumber = -1;
+		remaps = null;
 	}
 
 	/**
@@ -299,6 +311,7 @@ public class ColumnReference extends ValueNode
 		nestingLevel = oldCR.getNestingLevel();
 		sourceLevel = oldCR.getSourceLevel();
 		replacesAggregate = oldCR.getGeneratedToReplaceAggregate();
+		scoped = oldCR.isScoped();
 	}
 
 	/**
@@ -642,15 +655,35 @@ public class ColumnReference extends ValueNode
 			return;
 		}
 
+		/* Scoped column references are a special case: they can be
+		 * remapped several times (once for every ProjectRestrictNode
+		 * through which the scoped ColumnReference is pushed before
+		 * reaching its target result set) and will be un-remapped
+		 * several times, as well (as the scoped predicate is "pulled"
+		 * back up the query tree to it's original location).  So we
+		 * have to keep track of the "orig" info for every remap
+		 * operation, not just for the most recent one.
+		 */
+		if (scoped && (origSource != null))
+		{
+			if (remaps == null)
+				remaps = new java.util.ArrayList();
+			remaps.add(new RemapInfo(
+				columnNumber, tableNumber, columnName, source));
+		}
+		else
+		{
+			origSource = source;
+			origName = columnName;
+			origColumnNumber = columnNumber;
+			origTableNumber = tableNumber;
+		}
+
 		/* Find the matching ResultColumn */
-		origSource = source;
 		source = getSourceResultColumn();
-		origName = columnName;
 		columnName = source.getName();
-		origColumnNumber = columnNumber;
 		columnNumber = source.getColumnPosition();
 
-		origTableNumber = tableNumber;
 		if (source.getExpression() instanceof ColumnReference)
 		{
 			ColumnReference cr = (ColumnReference) source.getExpression();
@@ -679,12 +712,28 @@ public class ColumnReference extends ValueNode
 			// 	"Trying to unremap a ColumnReference that was not remapped.");
 		}
 
-		source = origSource;
-		origSource = null;
-		columnName = origName;
-		origName = null;
-		tableNumber = origTableNumber;
-		columnNumber = origColumnNumber;
+		if ((remaps == null) || (remaps.size() == 0))
+		{
+			source = origSource;
+			origSource = null;
+			columnName = origName;
+			origName = null;
+			tableNumber = origTableNumber;
+			columnNumber = origColumnNumber;
+		}
+		else
+		{
+			// This CR is multiply-remapped, so undo the most
+			// recent (and only the most recent) remap operation.
+			RemapInfo rI = (RemapInfo)remaps.remove(remaps.size() - 1);
+			source = rI.getSource();
+			columnName = rI.getColumnName();
+			tableNumber = rI.getTableNumber();
+			columnNumber = rI.getColumnNumber();
+			rI = null;
+			if (remaps.size() == 0)
+				remaps = null;
+		}
 	}
 
 	/**
@@ -982,50 +1031,142 @@ public class ColumnReference extends ValueNode
     } // end of getTypeServices
 
 	/**
-	 * Determine whether or not this ColumnReference's source comes
-	 * from a FromBaseTable (as opposed to some other ResultSetNode).
-	 * We figure this out by walking the ResultColumn/VirtualColumnNode
-	 * chain until we get to last VirtualColumnNode in the chain
-	 * (if there is one), and then seeing what that VCN's source
-	 * result set is.  If there are no VCNs then we check to see
-	 * if the source is pointing to a BaseColumnNode.
+	 * Find the source result set for this ColumnReference and
+	 * return it.  Also, when the source result set is found,
+	 * return the position (within the source result set's RCL)
+	 * of the column referenced by this ColumnReference.  The
+	 * position is returned vai the colNum parameter.
 	 *
-	 * This is useful when scoping predicates for pushing; we
-	 * need to know if the predicate's column references are pointing
-	 * directly to base tables so that we can set the scoped references'
-	 * column numbers correctly.
+	 * @param colNum Place to store the position of the column
+	 *  to which this ColumnReference points (position is w.r.t
+	 *  the source result set).
+	 * @return The source result set for this ColumnReference;
+	 *  null if there is no source result set.
 	 */
-	protected boolean pointsToBaseTable() throws StandardException
+	protected ResultSetNode getSourceResultSet(int [] colNum)
+		throws StandardException
 	{
-		ResultColumn rc = getSource();
-
-		if (rc == null) {
-		// this can happen if column reference is pointing to a column
-		// that is not from a base table.  For example, if we have a
-		// VALUES clause like
-		//
-		//    (values (1, 2), (3, 4)) V1 (i, j)
-		//
-		// and then a column reference to VI.i, the column reference
-		// won't have a source.
-			return false;
+		if (source == null)
+		{
+			/* this can happen if column reference is pointing to a column
+			 * that is not from a base table.  For example, if we have a
+			 * VALUES clause like
+			 *
+			 *    (values (1, 2), (3, 4)) V1 (i, j)
+			 *
+			 * and then a column reference to VI.i, the column reference
+			 * won't have a source.
+			 */
+			return null;
 		}
 
-		// Walk the VirtualColumnNode->ResultColumn chain.
-		VirtualColumnNode vcn = null;
-		ValueNode rcExpr = rc.getExpression();
-		while (rcExpr instanceof VirtualColumnNode) {
-			vcn = (VirtualColumnNode)rcExpr;
-			rc = vcn.getSourceColumn();
+		ValueNode rcExpr = null;
+		ResultColumn rc = getSource();
+
+		// Walk the ResultColumn->ColumnReference chain until we
+		// find a ResultColumn whose expression is a VirtualColumnNode.
+
+		rcExpr = rc.getExpression();
+		colNum[0] = getColumnNumber();
+
+		while ((rcExpr != null) && (rcExpr instanceof ColumnReference))
+		{
+			colNum[0] = ((ColumnReference)rcExpr).getColumnNumber();
+			rc = ((ColumnReference)rcExpr).getSource();
+
+			/* If "rc" is redundant then that means it points to another
+			 * ResultColumn that in turn points to the source expression.
+			 * This can happen in cases where "rc" points to a subquery
+			 * that has been flattened into the query above it (flattening
+			 * of subqueries occurs during preprocessing).  In that case
+			 * we want to skip over the redundant rc and find the
+			 * ResultColumn that actually holds the source expression.
+			 */
+			while (rc.isRedundant())
+			{
+				rcExpr = rc.getExpression();
+				if (rcExpr instanceof VirtualColumnNode)
+					rc = ((VirtualColumnNode)rcExpr).getSourceResultColumn();
+				else if (rcExpr instanceof ColumnReference)
+				{
+					colNum[0] = ((ColumnReference)rcExpr).getColumnNumber();
+					rc = ((ColumnReference)rcExpr).getSource();
+				}
+				else
+				{
+					/* If rc isn't pointing to a VirtualColumnNode nor
+					 * to a ColumnReference, then it's not pointing to
+					 * a result set.  It could, for example, be pointing
+					 * to a constant node or to the result of an aggregate
+					 * or function.  Break out of both loops and return
+					 * null since there is no source result set.
+					 */
+					rcExpr = null;
+					break;
+				}
+			}
 			rcExpr = rc.getExpression();
 		}
 
-		// If we've reached the bottom of the chain then see if
-		// the VCN is pointing to a FromBaseTable.
-		if (vcn != null)
-			return (vcn.getSourceResultSet() instanceof FromBaseTable);
+		// If we found a VirtualColumnNode, return the VirtualColumnNode's
+		// sourceResultSet.  The column within that sourceResultSet that
+		// is referenced by this ColumnReference is also returned, via
+		// the colNum parameter, and was set above.
+		if ((rcExpr != null) && (rcExpr instanceof VirtualColumnNode))
+			return ((VirtualColumnNode)rcExpr).getSourceResultSet();
 
-		// Else check our source's expression.
-		return (rc.getExpression() instanceof BaseColumnNode);
+		// If we get here then the ColumnReference doesn't reference
+		// a result set, so return null.
+		colNum[0] = -1;
+		return null;
+	}
+
+	/**
+	 * Mark this column reference as "scoped", which means that it
+	 * was created (as a clone of another ColumnReference) to serve
+	 * as the left or right operand of a scoped predicate.
+	 */
+	protected void markAsScoped()
+	{
+		scoped = true;
+	}
+
+	/**
+	 * Return whether or not this ColumnReference is scoped.
+	 */
+	protected boolean isScoped()
+	{
+		return scoped;
+	}
+
+	/**
+	 * Helper class to keep track of remap data when a ColumnReference
+	 * is remapped multiple times.  This allows the CR to be UN-
+	 * remapped multiple times, as well.
+	 */
+	private class RemapInfo
+	{
+		int colNum;
+		int tableNum;
+		String colName;
+		ResultColumn source;
+
+		RemapInfo(int cNum, int tNum, String cName, ResultColumn rc)
+		{
+			colNum = cNum;
+			tableNum = tNum;
+			colName = cName;
+			source = rc;
+		}
+
+		int getColumnNumber() { return colNum; }
+		int getTableNumber() { return tableNum; }
+		String getColumnName() { return colName; }
+		ResultColumn getSource() { return source; }
+
+		void setColNumber(int cNum) { colNum = cNum; }
+		void setTableNumber(int tNum) { tableNum = tNum; }
+		void setColName(String cName) { colName = cName; }
+		void setSource(ResultColumn rc) { source = rc; }
 	}
 }

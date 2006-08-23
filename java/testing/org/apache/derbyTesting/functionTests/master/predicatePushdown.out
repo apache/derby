@@ -1321,6 +1321,11 @@ ij> create view vz2 (z1, z2, z3, z4) as
   select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
     (select c1, c, c2, c3 from tc) xx1;
 0 rows inserted/updated/deleted
+ij> create view vz3 (z1, z2, z3, z4) as
+  select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
+    (select c1, c, c2, 28 from tc) xx1
+      union select 'i','j','j',i from t2;
+0 rows inserted/updated/deleted
 ij> -- Both sides of predicate reference aggregates.
 select x1.c1 from
   (select count(*) from t1 union select count(*) from t2) x1 (c1),
@@ -1486,6 +1491,21 @@ Z4
 4          
 2          
 4          
+ij> -- Same as above but with an expression ("i+1") instead of
+-- a numeric literal.
+select x1.z4, x2.c2 from
+  (select z1, z4, z3 from vz
+    union select '1', i+1, '3' from t1
+  ) x1 (z1, z4, z3),
+  (select distinct j from t2 union select j from t1) x2 (c2)
+where x1.z4 = x2.c2;
+Z4         |C2         
+-----------------------
+2          |2          
+4          |4          
+6          |6          
+2          |2          
+4          |4          
 ij> -- Same as previous query but with a different nested
 -- view (vz2) that is missing the nested union found
 -- in vz.
@@ -1498,10 +1518,194 @@ where x1.z4 = x2.c2;
 Z4         
 -----------
 4          
+ij> -- Queries with Select->Union->Select chains having differently-
+-- ordered result column lists with some non-column reference
+-- expressions.  In all of these queries we specify LEFT join
+-- and force NESTEDLOOP in order to coerce the optimizer to
+-- push predicates to a specific subquery.  We do this to
+-- ensure that we test predicate pushdown during compilation
+-- AND during execution.  It's the execution-time testing
+-- that is particular important for verifying DERBY-1633
+-- functionality.
+-- Push predicate to union whose left child has a Select
+-- within a Select, both of which have the same result column
+-- ordering.
+select x1.z4, x2.c2 from
+  (select z1, z4, z3 from vz
+    union select '1', i+1, '3' from t1
+  ) x1 (z1, z4, z3)
+  left join
+  (select distinct i,j from (select distinct i,j from t2) x3
+    union select i, j from t1
+  ) x2 (c1, c2) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP  
+on x1.z4 = x2.c2;
+Z4         |C2         
+-----------------------
+2          |2          
+3          |NULL       
+4          |4          
+5          |NULL       
+6          |6          
+1          |NULL       
+2          |2          
+3          |NULL       
+4          |4          
+5          |NULL       
+ij> -- Push predicate to union whose left child has a Select
+-- within a Select, where the result column lists for the
+-- two Selects are different ("i,j" vs "j,i").
+select x1.z4, x2.c2 from
+  (select z1, z4, z3 from vz
+    union select '1', i+1, '3' from t1
+  ) x1 (z1, z4, z3)
+  left join
+  (select distinct i,j from (select distinct j,i from t2) x3
+   union select i, j from t1
+  ) x2 (c1, c2) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP  
+on x1.z4 = x2.c2;
+Z4         |C2         
+-----------------------
+2          |2          
+3          |NULL       
+4          |4          
+5          |NULL       
+6          |6          
+1          |NULL       
+2          |2          
+3          |NULL       
+4          |4          
+5          |NULL       
+ij> -- Push predicate to union whose left child is itself a
+-- nested subquery (through use of the view "vz") and
+-- whose right child has an expression in its result
+-- column list.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz
+    union select '1', i+1, '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+Z4         |C2         
+-----------------------
+2          |2          
+2          |2          
+NULL       |-4         
+4          |4          
+4          |4          
+6          |6          
+NULL       |-8         
+NULL       |8          
+NULL       |10         
+ij> -- Same as previous but with a different expression.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz
+    union select '1', sin(i), '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+Z4                    |C2         
+----------------------------------
+2.0                   |2          
+NULL                  |-4         
+4.0                   |4          
+NULL                  |6          
+NULL                  |-8         
+NULL                  |8          
+NULL                  |10         
+ij> -- Same as previous but expression replaced with a regular
+-- column reference.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz
+    union select '1', i, '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+Z4         |C2         
+-----------------------
+2          |2          
+2          |2          
+NULL       |-4         
+4          |4          
+4          |4          
+NULL       |6          
+NULL       |-8         
+NULL       |8          
+NULL       |10         
+ij> -- Same as previous but with a different expression and
+-- a different subquery (this time using view "vz3").
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz3
+    union select '1', sin(i), '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+Z4                    |C2         
+----------------------------------
+2.0                   |2          
+NULL                  |-4         
+4.0                   |4          
+NULL                  |6          
+NULL                  |-8         
+NULL                  |8          
+NULL                  |10         
+ij> -- Push predicate to chain of unions whose left-most child
+-- is itself a nested subquery (through use of the view "vz")
+-- and in which the other unions have expressions in their
+-- result column lists.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select z1, z4, z3 from vz
+    union select '1', sin(i), '3' from t1
+    union select '1', 14, '3' from t1
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+Z4                    |C2         
+----------------------------------
+2.0                   |2          
+NULL                  |-4         
+4.0                   |4          
+NULL                  |6          
+NULL                  |-8         
+NULL                  |8          
+NULL                  |10         
+ij> -- Push predicate to chain of unions whose right-most child
+-- is itself a nested subquery (through use of the view "vz")
+-- and in which the other unions have expressions in their
+-- result column lists.
+select x1.z4, x2.c2 from
+  (select distinct i,j from (select distinct j,i from t2) x3
+    union select i, j from t1) x2 (c1, c2)
+  left join
+  (select '1', sin(i), '3' from t1
+    union select '1', 14, '3' from t1
+    union select z1, z4, z3 from vz
+  ) x1 (z1, z4, z3) --DERBY-PROPERTIES joinStrategy=NESTEDLOOP 
+on x1.z4 = x2.c2;
+Z4                    |C2         
+----------------------------------
+2.0                   |2          
+NULL                  |-4         
+4.0                   |4          
+NULL                  |6          
+NULL                  |-8         
+NULL                  |8          
+NULL                  |10         
 ij> -- Cleanup from this set of tests.
 drop view vz;
 0 rows inserted/updated/deleted
 ij> drop view vz2;
+0 rows inserted/updated/deleted
+ij> drop view vz3;
 0 rows inserted/updated/deleted
 ij> drop table tc;
 0 rows inserted/updated/deleted
@@ -1768,101 +1972,75 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Project-Restrict ResultSet (10):
+			Index Row to Base Row ResultSet for T3:
 			Number of opens = 7
 			Rows seen = 2
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {0}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
+				Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 2
-				Columns accessed from heap = {0}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 2
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (13):
+			Index Row to Base Row ResultSet for T4:
 			Number of opens = 7
 			Rows seen = 0
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {0}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
+				Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 0
-				Columns accessed from heap = {0}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 0
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 ij> select * from V2, V1 where V1.j = V2.b;
 A          |B          |I          |J          
@@ -1887,7 +2065,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (14):
+Project-Restrict ResultSet (12):
 Number of opens = 1
 Rows seen = 2
 Rows filtered = 0
@@ -2003,101 +2181,75 @@ None
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Left result set:
-				Project-Restrict ResultSet (10):
+				Index Row to Base Row ResultSet for T3:
 				Number of opens = 7
 				Rows seen = 2
-				Rows filtered = 0
-				restriction = false
-				projection = false
+				Columns accessed from heap = {0}
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Index Row to Base Row ResultSet for T3:
+					Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 7
 					Rows seen = 2
-					Columns accessed from heap = {0}
+					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 7
-						Rows seen = 2
-						Rows filtered = 0
-						Fetch Size = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-							next time in milliseconds/row = 0
-						scan information: 
-							Bit set of columns fetched=All
-							Number of columns fetched=2
-							Number of deleted rows visited=0
-							Number of pages visited=3
-							Number of rows qualified=0
-							Number of rows visited=1
-							Scan type=btree
-							Tree height=3
-							start position: 
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of deleted rows visited=0
+						Number of pages visited=3
+						Number of rows qualified=0
+						Number of rows visited=1
+						Scan type=btree
+						Tree height=3
+						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							stop position: 
+						stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							qualifiers:
+						qualifiers:
 None
 			Right result set:
-				Project-Restrict ResultSet (13):
+				Index Row to Base Row ResultSet for T4:
 				Number of opens = 7
 				Rows seen = 0
-				Rows filtered = 0
-				restriction = false
-				projection = false
+				Columns accessed from heap = {0}
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Index Row to Base Row ResultSet for T4:
+					Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 7
 					Rows seen = 0
-					Columns accessed from heap = {0}
+					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 7
-						Rows seen = 0
-						Rows filtered = 0
-						Fetch Size = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-						scan information: 
-							Bit set of columns fetched=All
-							Number of columns fetched=2
-							Number of deleted rows visited=0
-							Number of pages visited=3
-							Number of rows qualified=0
-							Number of rows visited=1
-							Scan type=btree
-							Tree height=3
-							start position: 
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of deleted rows visited=0
+						Number of pages visited=3
+						Number of rows qualified=0
+						Number of rows visited=1
+						Scan type=btree
+						Tree height=3
+						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							stop position: 
+						stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							qualifiers:
+						qualifiers:
 None
 ij> -- Changes for DERBY-805 don't affect non-join predicates (ex. "IN" or one-
 -- sided predicates), but make sure things still behave--i.e. these queries
@@ -2779,101 +2931,75 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Project-Restrict ResultSet (13):
+			Index Row to Base Row ResultSet for T3:
 			Number of opens = 4
 			Rows seen = 1
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {0}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
+				Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 4
 				Rows seen = 1
-				Columns accessed from heap = {0}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 4
-					Rows seen = 1
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (16):
+			Index Row to Base Row ResultSet for T4:
 			Number of opens = 4
 			Rows seen = 0
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {0}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
+				Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 4
 				Rows seen = 0
-				Columns accessed from heap = {0}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 4
-					Rows seen = 0
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 ij> -- Make sure predicates are pushed even if the subquery is explicit (as
 -- opposed to a view). Should see index scans on T3 and T4.
@@ -3018,102 +3144,76 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Project-Restrict ResultSet (10):
+			Index Row to Base Row ResultSet for T3:
 			Number of opens = 7
 			Rows seen = 6
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
+				Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 6
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 6
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (13):
+			Index Row to Base Row ResultSet for T4:
 			Number of opens = 7
 			Rows seen = 3
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
+				Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 3
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 3
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 ij> -- In this case optimizer will consider pushing predicate to X1 but will
 -- choose not to because it's cheaper to push the predicate to T3.
@@ -3400,102 +3500,76 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Project-Restrict ResultSet (9):
+			Index Row to Base Row ResultSet for T3:
 			Number of opens = 10
 			Rows seen = 8
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
+				Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 10
 				Rows seen = 8
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 10
-					Rows seen = 8
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (12):
+			Index Row to Base Row ResultSet for T4:
 			Number of opens = 10
 			Rows seen = 4
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
+				Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 10
 				Rows seen = 4
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 10
-					Rows seen = 4
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 ij> select * from
   (select * from t1 union all select * from t2) x1,
@@ -3611,102 +3685,76 @@ Right result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 	Left result set:
-		Project-Restrict ResultSet (8):
+		Index Row to Base Row ResultSet for T3:
 		Number of opens = 10
 		Rows seen = 8
-		Rows filtered = 0
-		restriction = false
-		projection = false
+		Columns accessed from heap = {1}
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-			restriction time (milliseconds) = 0
-			projection time (milliseconds) = 0
-		Source result set:
-			Index Row to Base Row ResultSet for T3:
+			Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
 			Number of opens = 10
 			Rows seen = 8
-			Columns accessed from heap = {1}
+			Rows filtered = 0
+			Fetch Size = 1
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-				Number of opens = 10
-				Rows seen = 8
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of deleted rows visited=0
-					Number of pages visited=3
-					Number of rows qualified=0
-					Number of rows visited=1
-					Scan type=btree
-					Tree height=3
-					start position: 
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=3
+				Number of rows qualified=0
+				Number of rows visited=1
+				Scan type=btree
+				Tree height=3
+				start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					stop position: 
+				stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					qualifiers:
+				qualifiers:
 None
 	Right result set:
-		Project-Restrict ResultSet (11):
+		Index Row to Base Row ResultSet for T4:
 		Number of opens = 10
 		Rows seen = 4
-		Rows filtered = 0
-		restriction = false
-		projection = false
+		Columns accessed from heap = {1}
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-			restriction time (milliseconds) = 0
-			projection time (milliseconds) = 0
-		Source result set:
-			Index Row to Base Row ResultSet for T4:
+			Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
 			Number of opens = 10
 			Rows seen = 4
-			Columns accessed from heap = {1}
+			Rows filtered = 0
+			Fetch Size = 1
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-				Number of opens = 10
-				Rows seen = 4
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of deleted rows visited=0
-					Number of pages visited=3
-					Number of rows qualified=0
-					Number of rows visited=1
-					Scan type=btree
-					Tree height=3
-					start position: 
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=3
+				Number of rows qualified=0
+				Number of rows visited=1
+				Scan type=btree
+				Tree height=3
+				start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					stop position: 
+				stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					qualifiers:
+				qualifiers:
 None
 ij> -- Predicate with both sides referencing same UNION isn't a join predicate, so
 -- no pushing should happen.  So should see regular table scans on all tables.
@@ -3744,124 +3792,85 @@ Rows returned = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 Left result set:
-	Sort ResultSet:
+	Project-Restrict ResultSet (6):
 	Number of opens = 1
-	Rows input = 0
-	Rows returned = 0
-	Eliminate duplicates = true
-	In sorted order = false
-	Sort information: 
-		Number of rows input=0
-		Number of rows output=0
+	Rows seen = 7
+	Rows filtered = 7
+	restriction = true
+	projection = true
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
+		restriction time (milliseconds) = 0
+		projection time (milliseconds) = 0
 	Source result set:
-		Union ResultSet:
+		Sort ResultSet:
 		Number of opens = 1
-		Rows seen from the left = 0
-		Rows seen from the right = 0
-		Rows returned = 0
+		Rows input = 10
+		Rows returned = 7
+		Eliminate duplicates = true
+		In sorted order = false
+		Sort information: 
+			Number of rows input=10
+			Number of rows output=7
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		Left result set:
-			Project-Restrict ResultSet (6):
+		Source result set:
+			Union ResultSet:
 			Number of opens = 1
-			Rows seen = 0
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Rows seen from the left = 5
+			Rows seen from the right = 5
+			Rows returned = 10
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Project-Restrict ResultSet (5):
+			Left result set:
+				Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 1
 				Rows seen = 5
-				Rows filtered = 5
-				restriction = true
-				projection = false
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 1
-					Rows seen = 5
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of pages visited=1
-						Number of rows qualified=5
-						Number of rows visited=5
-						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=5
+					Number of rows visited=5
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
 None
-		Right result set:
-			Project-Restrict ResultSet (9):
-			Number of opens = 1
-			Rows seen = 0
-			Rows filtered = 0
-			restriction = false
-			projection = false
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Project-Restrict ResultSet (8):
+			Right result set:
+				Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 1
 				Rows seen = 5
-				Rows filtered = 5
-				restriction = true
-				projection = false
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 1
-					Rows seen = 5
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of pages visited=1
-						Number of rows qualified=5
-						Number of rows visited=5
-						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of pages visited=1
+					Number of rows qualified=5
+					Number of rows visited=5
+					Scan type=heap
+					start position: 
+null					stop position: 
+null					qualifiers:
 None
 Right result set:
 	Sort ResultSet:
@@ -4058,102 +4067,76 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Project-Restrict ResultSet (10):
+			Index Row to Base Row ResultSet for T3:
 			Number of opens = 7
 			Rows seen = 6
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
+				Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 6
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 6
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (13):
+			Index Row to Base Row ResultSet for T4:
 			Number of opens = 7
 			Rows seen = 3
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
+				Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 3
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 3
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 ij> select * from
   (select * from t1 union select * from t2) x1 (a, b),
@@ -4294,102 +4277,76 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Project-Restrict ResultSet (10):
+			Index Row to Base Row ResultSet for T3:
 			Number of opens = 7
 			Rows seen = 6
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
+				Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 6
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 6
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (13):
+			Index Row to Base Row ResultSet for T4:
 			Number of opens = 7
 			Rows seen = 3
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
+				Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 3
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 3
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 ij> -- In this query the optimizer will consider pushing, but will find
 -- that it's cheaper to do a hash join and thus will _not_ push.  So
@@ -4857,117 +4814,42 @@ Right result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Left result set:
-				Project-Restrict ResultSet (15):
+				Index Row to Base Row ResultSet for T3:
 				Number of opens = 7
 				Rows seen = 6
-				Rows filtered = 0
-				restriction = false
-				projection = false
+				Columns accessed from heap = {1}
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Index Row to Base Row ResultSet for T3:
+					Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 7
 					Rows seen = 6
-					Columns accessed from heap = {1}
+					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 7
-						Rows seen = 6
-						Rows filtered = 0
-						Fetch Size = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-							next time in milliseconds/row = 0
-						scan information: 
-							Bit set of columns fetched=All
-							Number of columns fetched=2
-							Number of deleted rows visited=0
-							Number of pages visited=3
-							Number of rows qualified=0
-							Number of rows visited=1
-							Scan type=btree
-							Tree height=3
-							start position: 
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of deleted rows visited=0
+						Number of pages visited=3
+						Number of rows qualified=0
+						Number of rows visited=1
+						Scan type=btree
+						Tree height=3
+						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							stop position: 
+						stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							qualifiers:
+						qualifiers:
 None
 			Right result set:
-				Project-Restrict ResultSet (18):
-				Number of opens = 7
-				Rows seen = 3
-				Rows filtered = 0
-				restriction = false
-				projection = false
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Index Row to Base Row ResultSet for T4:
-					Number of opens = 7
-					Rows seen = 3
-					Columns accessed from heap = {1}
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 7
-						Rows seen = 3
-						Rows filtered = 0
-						Fetch Size = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-							next time in milliseconds/row = 0
-						scan information: 
-							Bit set of columns fetched=All
-							Number of columns fetched=2
-							Number of deleted rows visited=0
-							Number of pages visited=3
-							Number of rows qualified=0
-							Number of rows visited=1
-							Scan type=btree
-							Tree height=3
-							start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-							stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-							qualifiers:
-None
-		Right result set:
-			Project-Restrict ResultSet (21):
-			Number of opens = 7
-			Rows seen = 3
-			Rows filtered = 0
-			restriction = false
-			projection = false
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
 				Index Row to Base Row ResultSet for T4:
 				Number of opens = 7
 				Rows seen = 3
@@ -5002,6 +4884,42 @@ None
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
 						qualifiers:
+None
+		Right result set:
+			Index Row to Base Row ResultSet for T4:
+			Number of opens = 7
+			Rows seen = 3
+			Columns accessed from heap = {1}
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+				Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
+				Number of opens = 7
+				Rows seen = 3
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
 None
 ij> -- Nested unions with non-join predicates should work as usual (no change
 -- with DERBY-805).  So should see scalar qualifiers on scans for all
@@ -5562,101 +5480,75 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Project-Restrict ResultSet (10):
+			Index Row to Base Row ResultSet for T3:
 			Number of opens = 7
 			Rows seen = 2
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {0}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
+				Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 2
-				Columns accessed from heap = {0}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 2
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (13):
+			Index Row to Base Row ResultSet for T4:
 			Number of opens = 7
 			Rows seen = 0
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {0}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
+				Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 7
 				Rows seen = 0
-				Columns accessed from heap = {0}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 7
-					Rows seen = 0
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 ij> -- Can't push predicates into VALUES clauses.  Predicate should end up
 -- at V2 (T3 and T4).
@@ -5885,102 +5777,76 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Project-Restrict ResultSet (18):
+			Index Row to Base Row ResultSet for T3:
 			Number of opens = 11
 			Rows seen = 10
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T3:
+				Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 11
 				Rows seen = 10
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 11
-					Rows seen = 10
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 		Right result set:
-			Project-Restrict ResultSet (21):
+			Index Row to Base Row ResultSet for T4:
 			Number of opens = 11
 			Rows seen = 5
-			Rows filtered = 0
-			restriction = false
-			projection = false
+			Columns accessed from heap = {1}
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Row to Base Row ResultSet for T4:
+				Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 11
 				Rows seen = 5
-				Columns accessed from heap = {1}
+				Rows filtered = 0
+				Fetch Size = 1
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 11
-					Rows seen = 5
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched=All
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=3
+					Number of rows qualified=0
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=3
+					start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+					stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+					qualifiers:
 None
 ij> -- Can't push predicates into VALUES clauses.  Optimizer might consider pushing
 -- but shouldn't do it; in the end we'll do a hash join between X1 and T2.
@@ -6402,7 +6268,7 @@ null				stop position:
 null				qualifiers:
 None
 Right result set:
-	Project-Restrict ResultSet (26):
+	Project-Restrict ResultSet (25):
 	Number of opens = 11
 	Rows seen = 1127
 	Rows filtered = 1108
@@ -6515,53 +6381,40 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 			Right result set:
-				Project-Restrict ResultSet (25):
+				Index Row to Base Row ResultSet for T4:
 				Number of opens = 11
 				Rows seen = 5
-				Rows filtered = 0
-				restriction = false
-				projection = false
+				Columns accessed from heap = {1}
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Index Row to Base Row ResultSet for T4:
+					Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 11
 					Rows seen = 5
-					Columns accessed from heap = {1}
+					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 11
-						Rows seen = 5
-						Rows filtered = 0
-						Fetch Size = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-							next time in milliseconds/row = 0
-						scan information: 
-							Bit set of columns fetched=All
-							Number of columns fetched=2
-							Number of deleted rows visited=0
-							Number of pages visited=3
-							Number of rows qualified=0
-							Number of rows visited=1
-							Scan type=btree
-							Tree height=3
-							start position: 
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of deleted rows visited=0
+						Number of pages visited=3
+						Number of rows qualified=0
+						Number of rows visited=1
+						Scan type=btree
+						Tree height=3
+						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							stop position: 
+						stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							qualifiers:
+						qualifiers:
 None
 ij> -- Make sure optimizer is still considering predicates for other, non-UNION
 -- nodes.  Here we should use the predicate to do a hash join between X0 and
@@ -6866,7 +6719,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (21):
+Project-Restrict ResultSet (19):
 Number of opens = 1
 Rows seen = 1
 Rows filtered = 0
@@ -6888,7 +6741,7 @@ Source result set:
 		close time (milliseconds) = 0
 	Index Key Optimization = false
 	Source result set:
-		Project-Restrict ResultSet (20):
+		Project-Restrict ResultSet (18):
 		Number of opens = 1
 		Rows seen = 909
 		Rows filtered = 0
@@ -7015,102 +6868,76 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 						Left result set:
-							Project-Restrict ResultSet (12):
+							Index Row to Base Row ResultSet for T4:
 							Number of opens = 7
 							Rows seen = 3
-							Rows filtered = 0
-							restriction = false
-							projection = false
+							Columns accessed from heap = {1}
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-								restriction time (milliseconds) = 0
-								projection time (milliseconds) = 0
-							Source result set:
-								Index Row to Base Row ResultSet for T4:
+								Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 7
 								Rows seen = 3
-								Columns accessed from heap = {1}
+								Rows filtered = 0
+								Fetch Size = 1
 									constructor time (milliseconds) = 0
 									open time (milliseconds) = 0
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
-									Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-									Number of opens = 7
-									Rows seen = 3
-									Rows filtered = 0
-									Fetch Size = 1
-										constructor time (milliseconds) = 0
-										open time (milliseconds) = 0
-										next time (milliseconds) = 0
-										close time (milliseconds) = 0
-										next time in milliseconds/row = 0
-									scan information: 
-										Bit set of columns fetched=All
-										Number of columns fetched=2
-										Number of deleted rows visited=0
-										Number of pages visited=3
-										Number of rows qualified=0
-										Number of rows visited=1
-										Scan type=btree
-										Tree height=3
-										start position: 
+									next time in milliseconds/row = 0
+								scan information: 
+									Bit set of columns fetched=All
+									Number of columns fetched=2
+									Number of deleted rows visited=0
+									Number of pages visited=3
+									Number of rows qualified=0
+									Number of rows visited=1
+									Scan type=btree
+									Tree height=3
+									start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										stop position: 
+									stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										qualifiers:
+									qualifiers:
 None
 						Right result set:
-							Project-Restrict ResultSet (15):
+							Index Row to Base Row ResultSet for T3:
 							Number of opens = 7
 							Rows seen = 6
-							Rows filtered = 0
-							restriction = false
-							projection = false
+							Columns accessed from heap = {1}
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-								restriction time (milliseconds) = 0
-								projection time (milliseconds) = 0
-							Source result set:
-								Index Row to Base Row ResultSet for T3:
+								Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 7
 								Rows seen = 6
-								Columns accessed from heap = {1}
+								Rows filtered = 0
+								Fetch Size = 1
 									constructor time (milliseconds) = 0
 									open time (milliseconds) = 0
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
-									Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-									Number of opens = 7
-									Rows seen = 6
-									Rows filtered = 0
-									Fetch Size = 1
-										constructor time (milliseconds) = 0
-										open time (milliseconds) = 0
-										next time (milliseconds) = 0
-										close time (milliseconds) = 0
-										next time in milliseconds/row = 0
-									scan information: 
-										Bit set of columns fetched=All
-										Number of columns fetched=2
-										Number of deleted rows visited=0
-										Number of pages visited=3
-										Number of rows qualified=0
-										Number of rows visited=1
-										Scan type=btree
-										Tree height=3
-										start position: 
+									next time in milliseconds/row = 0
+								scan information: 
+									Bit set of columns fetched=All
+									Number of columns fetched=2
+									Number of deleted rows visited=0
+									Number of pages visited=3
+									Number of rows qualified=0
+									Number of rows visited=1
+									Scan type=btree
+									Tree height=3
+									start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										stop position: 
+									stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										qualifiers:
+									qualifiers:
 None
 			Right result set:
 				Sort ResultSet:
@@ -7214,7 +7041,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (25):
+Project-Restrict ResultSet (21):
 Number of opens = 1
 Rows seen = 1
 Rows filtered = 0
@@ -7236,7 +7063,7 @@ Source result set:
 		close time (milliseconds) = 0
 	Index Key Optimization = false
 	Source result set:
-		Project-Restrict ResultSet (24):
+		Project-Restrict ResultSet (20):
 		Number of opens = 1
 		Rows seen = 9
 		Rows filtered = 0
@@ -7363,102 +7190,76 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 						Left result set:
-							Project-Restrict ResultSet (12):
+							Index Row to Base Row ResultSet for T4:
 							Number of opens = 7
 							Rows seen = 3
-							Rows filtered = 0
-							restriction = false
-							projection = false
+							Columns accessed from heap = {1}
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-								restriction time (milliseconds) = 0
-								projection time (milliseconds) = 0
-							Source result set:
-								Index Row to Base Row ResultSet for T4:
+								Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 7
 								Rows seen = 3
-								Columns accessed from heap = {1}
+								Rows filtered = 0
+								Fetch Size = 1
 									constructor time (milliseconds) = 0
 									open time (milliseconds) = 0
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
-									Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
-									Number of opens = 7
-									Rows seen = 3
-									Rows filtered = 0
-									Fetch Size = 1
-										constructor time (milliseconds) = 0
-										open time (milliseconds) = 0
-										next time (milliseconds) = 0
-										close time (milliseconds) = 0
-										next time in milliseconds/row = 0
-									scan information: 
-										Bit set of columns fetched=All
-										Number of columns fetched=2
-										Number of deleted rows visited=0
-										Number of pages visited=3
-										Number of rows qualified=0
-										Number of rows visited=1
-										Scan type=btree
-										Tree height=3
-										start position: 
+									next time in milliseconds/row = 0
+								scan information: 
+									Bit set of columns fetched=All
+									Number of columns fetched=2
+									Number of deleted rows visited=0
+									Number of pages visited=3
+									Number of rows qualified=0
+									Number of rows visited=1
+									Scan type=btree
+									Tree height=3
+									start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										stop position: 
+									stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										qualifiers:
+									qualifiers:
 None
 						Right result set:
-							Project-Restrict ResultSet (15):
+							Index Row to Base Row ResultSet for T3:
 							Number of opens = 7
 							Rows seen = 6
-							Rows filtered = 0
-							restriction = false
-							projection = false
+							Columns accessed from heap = {1}
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-								restriction time (milliseconds) = 0
-								projection time (milliseconds) = 0
-							Source result set:
-								Index Row to Base Row ResultSet for T3:
+								Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 7
 								Rows seen = 6
-								Columns accessed from heap = {1}
+								Rows filtered = 0
+								Fetch Size = 1
 									constructor time (milliseconds) = 0
 									open time (milliseconds) = 0
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
-									Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
-									Number of opens = 7
-									Rows seen = 6
-									Rows filtered = 0
-									Fetch Size = 1
-										constructor time (milliseconds) = 0
-										open time (milliseconds) = 0
-										next time (milliseconds) = 0
-										close time (milliseconds) = 0
-										next time in milliseconds/row = 0
-									scan information: 
-										Bit set of columns fetched=All
-										Number of columns fetched=2
-										Number of deleted rows visited=0
-										Number of pages visited=3
-										Number of rows qualified=0
-										Number of rows visited=1
-										Scan type=btree
-										Tree height=3
-										start position: 
+									next time in milliseconds/row = 0
+								scan information: 
+									Bit set of columns fetched=All
+									Number of columns fetched=2
+									Number of deleted rows visited=0
+									Number of pages visited=3
+									Number of rows qualified=0
+									Number of rows visited=1
+									Scan type=btree
+									Tree height=3
+									start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										stop position: 
+									stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										qualifiers:
+									qualifiers:
 None
 			Right result set:
 				Sort ResultSet:
@@ -7485,102 +7286,76 @@ None
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 					Left result set:
-						Project-Restrict ResultSet (20):
+						Index Row to Base Row ResultSet for T3:
 						Number of opens = 9
 						Rows seen = 6
-						Rows filtered = 0
-						restriction = false
-						projection = false
+						Columns accessed from heap = {0}
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
-							restriction time (milliseconds) = 0
-							projection time (milliseconds) = 0
-						Source result set:
-							Index Row to Base Row ResultSet for T3:
+							Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
 							Number of opens = 9
 							Rows seen = 6
-							Columns accessed from heap = {0}
+							Rows filtered = 0
+							Fetch Size = 1
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-								Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
-								Number of opens = 9
-								Rows seen = 6
-								Rows filtered = 0
-								Fetch Size = 1
-									constructor time (milliseconds) = 0
-									open time (milliseconds) = 0
-									next time (milliseconds) = 0
-									close time (milliseconds) = 0
-									next time in milliseconds/row = 0
-								scan information: 
-									Bit set of columns fetched=All
-									Number of columns fetched=2
-									Number of deleted rows visited=0
-									Number of pages visited=3
-									Number of rows qualified=0
-									Number of rows visited=1
-									Scan type=btree
-									Tree height=3
-									start position: 
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of deleted rows visited=0
+								Number of pages visited=3
+								Number of rows qualified=0
+								Number of rows visited=1
+								Scan type=btree
+								Tree height=3
+								start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-									stop position: 
+								stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-									qualifiers:
+								qualifiers:
 None
 					Right result set:
-						Project-Restrict ResultSet (23):
+						Index Row to Base Row ResultSet for T4:
 						Number of opens = 9
 						Rows seen = 3
-						Rows filtered = 0
-						restriction = false
-						projection = false
+						Columns accessed from heap = {0}
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
-							restriction time (milliseconds) = 0
-							projection time (milliseconds) = 0
-						Source result set:
-							Index Row to Base Row ResultSet for T4:
+							Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
 							Number of opens = 9
 							Rows seen = 3
-							Columns accessed from heap = {0}
+							Rows filtered = 0
+							Fetch Size = 1
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-								Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
-								Number of opens = 9
-								Rows seen = 3
-								Rows filtered = 0
-								Fetch Size = 1
-									constructor time (milliseconds) = 0
-									open time (milliseconds) = 0
-									next time (milliseconds) = 0
-									close time (milliseconds) = 0
-									next time in milliseconds/row = 0
-								scan information: 
-									Bit set of columns fetched=All
-									Number of columns fetched=2
-									Number of deleted rows visited=0
-									Number of pages visited=3
-									Number of rows qualified=1
-									Number of rows visited=2
-									Scan type=btree
-									Tree height=3
-									start position: 
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of deleted rows visited=0
+								Number of pages visited=3
+								Number of rows qualified=1
+								Number of rows visited=2
+								Scan type=btree
+								Tree height=3
+								start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-									stop position: 
+								stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-									qualifiers:
+								qualifiers:
 None
 ij> -- Predicates pushed from outer queries shouldn't interfere with inner
 -- predicates for subqueries.  Mostly checking for correct results here.
@@ -8486,7 +8261,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (17):
+Project-Restrict ResultSet (15):
 Number of opens = 1
 Rows seen = 1
 Rows filtered = 0
@@ -8508,7 +8283,7 @@ Source result set:
 		close time (milliseconds) = 0
 	Index Key Optimization = false
 	Source result set:
-		Project-Restrict ResultSet (16):
+		Project-Restrict ResultSet (14):
 		Number of opens = 1
 		Rows seen = 2
 		Rows filtered = 0
@@ -8521,7 +8296,7 @@ Source result set:
 			restriction time (milliseconds) = 0
 			projection time (milliseconds) = 0
 		Source result set:
-			Project-Restrict ResultSet (15):
+			Project-Restrict ResultSet (13):
 			Number of opens = 1
 			Rows seen = 2
 			Rows filtered = 0
@@ -8637,101 +8412,75 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 						Left result set:
-							Project-Restrict ResultSet (11):
+							Index Row to Base Row ResultSet for T3:
 							Number of opens = 7
 							Rows seen = 2
-							Rows filtered = 0
-							restriction = false
-							projection = false
+							Columns accessed from heap = {0}
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-								restriction time (milliseconds) = 0
-								projection time (milliseconds) = 0
-							Source result set:
-								Index Row to Base Row ResultSet for T3:
+								Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 7
 								Rows seen = 2
-								Columns accessed from heap = {0}
+								Rows filtered = 0
+								Fetch Size = 1
 									constructor time (milliseconds) = 0
 									open time (milliseconds) = 0
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
-									Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
-									Number of opens = 7
-									Rows seen = 2
-									Rows filtered = 0
-									Fetch Size = 1
-										constructor time (milliseconds) = 0
-										open time (milliseconds) = 0
-										next time (milliseconds) = 0
-										close time (milliseconds) = 0
-										next time in milliseconds/row = 0
-									scan information: 
-										Bit set of columns fetched=All
-										Number of columns fetched=2
-										Number of deleted rows visited=0
-										Number of pages visited=3
-										Number of rows qualified=0
-										Number of rows visited=1
-										Scan type=btree
-										Tree height=3
-										start position: 
+									next time in milliseconds/row = 0
+								scan information: 
+									Bit set of columns fetched=All
+									Number of columns fetched=2
+									Number of deleted rows visited=0
+									Number of pages visited=3
+									Number of rows qualified=0
+									Number of rows visited=1
+									Scan type=btree
+									Tree height=3
+									start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										stop position: 
+									stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										qualifiers:
+									qualifiers:
 None
 						Right result set:
-							Project-Restrict ResultSet (14):
+							Index Row to Base Row ResultSet for T4:
 							Number of opens = 7
 							Rows seen = 0
-							Rows filtered = 0
-							restriction = false
-							projection = false
+							Columns accessed from heap = {0}
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-								restriction time (milliseconds) = 0
-								projection time (milliseconds) = 0
-							Source result set:
-								Index Row to Base Row ResultSet for T4:
+								Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 7
 								Rows seen = 0
-								Columns accessed from heap = {0}
+								Rows filtered = 0
+								Fetch Size = 1
 									constructor time (milliseconds) = 0
 									open time (milliseconds) = 0
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
-									Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
-									Number of opens = 7
-									Rows seen = 0
-									Rows filtered = 0
-									Fetch Size = 1
-										constructor time (milliseconds) = 0
-										open time (milliseconds) = 0
-										next time (milliseconds) = 0
-										close time (milliseconds) = 0
-									scan information: 
-										Bit set of columns fetched=All
-										Number of columns fetched=2
-										Number of deleted rows visited=0
-										Number of pages visited=3
-										Number of rows qualified=0
-										Number of rows visited=1
-										Scan type=btree
-										Tree height=3
-										start position: 
+								scan information: 
+									Bit set of columns fetched=All
+									Number of columns fetched=2
+									Number of deleted rows visited=0
+									Number of pages visited=3
+									Number of rows qualified=0
+									Number of rows visited=1
+									Scan type=btree
+									Tree height=3
+									start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										stop position: 
+									stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-										qualifiers:
+									qualifiers:
 None
 ij> -- Multiple subqueries but NO UNIONs.  All predicates are used for joins
 -- at their current level (no pushing).
@@ -9386,7 +9135,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (17):
+Project-Restrict ResultSet (15):
 Number of opens = 1
 Rows seen = 0
 Rows filtered = 0
@@ -9552,84 +9301,58 @@ Negate comparison result: false
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Left result set:
-				Project-Restrict ResultSet (13):
+				Index Row to Base Row ResultSet for T4:
 				Number of opens = 0
 				Rows seen = 0
-				Rows filtered = 0
-				restriction = false
-				projection = false
+				Columns accessed from heap = {0}
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Index Row to Base Row ResultSet for T4:
+					Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 0
 					Rows seen = 0
-					Columns accessed from heap = {0}
+					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 0
-						Rows seen = 0
-						Rows filtered = 0
-						Fetch Size = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-						scan information: 
-							start position: 
+					scan information: 
+						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							stop position: 
+						stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							qualifiers:
+						qualifiers:
 None
 			Right result set:
-				Project-Restrict ResultSet (16):
+				Index Row to Base Row ResultSet for T3:
 				Number of opens = 0
 				Rows seen = 0
-				Rows filtered = 0
-				restriction = false
-				projection = false
+				Columns accessed from heap = {0}
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Index Row to Base Row ResultSet for T3:
+					Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 0
 					Rows seen = 0
-					Columns accessed from heap = {0}
+					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 0
-						Rows seen = 0
-						Rows filtered = 0
-						Fetch Size = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-						scan information: 
-							start position: 
+					scan information: 
+						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							stop position: 
+						stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							qualifiers:
+						qualifiers:
 None
 ij> -- Same as above but without the inner predicate (so no
 -- hash on T6).
@@ -9669,7 +9392,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (16):
+Project-Restrict ResultSet (14):
 Number of opens = 1
 Rows seen = 0
 Rows filtered = 0
@@ -9815,84 +9538,58 @@ None
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Left result set:
-				Project-Restrict ResultSet (12):
+				Index Row to Base Row ResultSet for T4:
 				Number of opens = 0
 				Rows seen = 0
-				Rows filtered = 0
-				restriction = false
-				projection = false
+				Columns accessed from heap = {0}
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Index Row to Base Row ResultSet for T4:
+					Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 0
 					Rows seen = 0
-					Columns accessed from heap = {0}
+					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for T4 using index T4_IX2 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 0
-						Rows seen = 0
-						Rows filtered = 0
-						Fetch Size = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-						scan information: 
-							start position: 
+					scan information: 
+						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							stop position: 
+						stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							qualifiers:
+						qualifiers:
 None
 			Right result set:
-				Project-Restrict ResultSet (15):
+				Index Row to Base Row ResultSet for T3:
 				Number of opens = 0
 				Rows seen = 0
-				Rows filtered = 0
-				restriction = false
-				projection = false
+				Columns accessed from heap = {0}
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					restriction time (milliseconds) = 0
-					projection time (milliseconds) = 0
-				Source result set:
-					Index Row to Base Row ResultSet for T3:
+					Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 0
 					Rows seen = 0
-					Columns accessed from heap = {0}
+					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for T3 using index T3_IX2 at read committed isolation level using share row locking chosen by the optimizer
-						Number of opens = 0
-						Rows seen = 0
-						Rows filtered = 0
-						Fetch Size = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-						scan information: 
-							start position: 
+					scan information: 
+						start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							stop position: 
+						stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-							qualifiers:
+						qualifiers:
 None
 ij> -- Same as above, but without the outer predicate.  Should see
 -- table scan on T3 and T4 (because nothing is pushed).
@@ -10226,5 +9923,639 @@ ij> drop view yyunion;
 ij> drop table xx1;
 0 rows inserted/updated/deleted
 ij> drop table yy1;
+0 rows inserted/updated/deleted
+ij> -- DERBY-1633: Nested UNIONs of views with different column orderings
+-- leads to incorrectly scoped predicates.  We have a lot of different
+-- tables and views here to try to cover several different situations.
+-- Note that all of the views use DISTINCT because we don't want
+-- the views to be flattened and Derby doesn't flatten select
+-- queries with DISTINCT in them.
+CREATE TABLE "APP"."T1" ("I" INTEGER, "D" DOUBLE, "C" CHAR(10));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."T2" ("I2" INTEGER, "D2" DOUBLE, "C2" CHAR(10));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."T3" ("I3" INTEGER, "D3" DOUBLE, "C3" CHAR(10));
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, -1, '1'), (2, -2, '2');
+2 rows inserted/updated/deleted
+ij> insert into t2 values (2, -2, '2'), (4, -4, '4'), (8, -8, '8');
+3 rows inserted/updated/deleted
+ij> insert into t3 values (3, -3, '3'), (6, -6, '6'), (9, -9, '9');
+3 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."T4" ("C4" CHAR(10));
+0 rows inserted/updated/deleted
+ij> insert into t4 values '1', '2', '3', '4', '5', '6', '7', '8', '9';
+9 rows inserted/updated/deleted
+ij> insert into t4 select rtrim(c4) || rtrim(c4) from t4;
+9 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."T5" ("I5" INTEGER, "D5" DOUBLE, "C5" CHAR(10));
+0 rows inserted/updated/deleted
+ij> CREATE TABLE "APP"."T6" ("I6" INTEGER, "D6" DOUBLE, "C6" CHAR(10));
+0 rows inserted/updated/deleted
+ij> insert into t5
+  values (100, 100.0, '100'), (200, 200.0, '200'), (300, 300.0, '300');
+3 rows inserted/updated/deleted
+ij> insert into t6
+  values (400, 400.0, '400'), (200, 200.0, '200'), (300, 300.0, '300');
+3 rows inserted/updated/deleted
+ij> create view v_keycol_at_pos_3 as
+  select distinct i col1, d col2, c col3 from t1;
+0 rows inserted/updated/deleted
+ij> create view v1_keycol_at_pos_2 as
+  select distinct i2 col1, c2 col3, d2 col2 from t2;
+0 rows inserted/updated/deleted
+ij> create view v2_keycol_at_pos_2 as
+  select distinct i3 col1, c3 col3, d3 col2 from t3;
+0 rows inserted/updated/deleted
+ij> create view v1_intersect as
+  select distinct i5 col1, c5 col3, d5 col2 from t5;
+0 rows inserted/updated/deleted
+ij> create view v2_intersect as
+  select distinct i6 col1, c6 col3, d6 col2 from t6;
+0 rows inserted/updated/deleted
+ij> create view v1_values as
+  select distinct vals1 col1, vals2 col2, vals3 col3 from
+    (values (321, 321.0, '321'), (432, 432.0, '432'),
+      (654, 654.0, '654')
+    ) VT(vals1, vals2, vals3);
+0 rows inserted/updated/deleted
+ij> create view v_union as
+  select distinct i col1, d col2, c col3 from t1
+    union select distinct i3 col1, d3 col2, c3 col3 from t3;
+0 rows inserted/updated/deleted
+ij> -- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The right child of the top-level
+-- node is a view that is a simple select from a table.
+create view topview as
+  (select distinct 'other:' col0, vpos3.col3, vpos3.col1
+    from v_keycol_at_pos_3 vpos3
+   union
+    select distinct 't2stuff:' col0, vpos2_1.col3, vpos2_1.col1
+     from v1_keycol_at_pos_2 vpos2_1
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+  );
+0 rows inserted/updated/deleted
+ij> -- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The right child of the top-level
+-- node is a view that is a select from yet another
+-- UNION node.
+create view topview2 as
+  (select distinct 'other:' col0, vpos3.col3, vpos3.col1
+    from v_keycol_at_pos_3 vpos3
+   union
+    select distinct 't2stuff:' col0, vpos2_1.col3, vpos2_1.col1
+     from v1_keycol_at_pos_2 vpos2_1
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+   union
+    select distinct 'morestuff:' col0, vu.col3, vu.col1
+     from v_union vu
+  );
+0 rows inserted/updated/deleted
+ij> -- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The left-most child of the last
+-- UNION in the chain is an INTERSECT node to which
+-- predicates cannot (currently) be pushed.  In this
+-- case the intersect returns an empty result set.
+create view topview3 (col0, col3, col1) as
+  (select distinct 'other:' col0, vpos3.col3, vpos3.col1
+    from v_keycol_at_pos_3 vpos3
+   intersect
+    select distinct 't2stuff:' col0, vpos2_1.col3, vpos2_1.col1
+     from v1_keycol_at_pos_2 vpos2_1
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+   union
+    select distinct 'morestuff:' col0, vu.col3, vu.col1
+     from v_union vu
+  );
+0 rows inserted/updated/deleted
+ij> -- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The left-most child of the last
+-- UNION in the chain is an INTERSECT node to which
+-- predicates cannot (currently) be pushed.  In this
+-- case the intersect returns a couple of rows.
+create view topview4 (col0, col3, col1) as
+  (select distinct 'intersect:' col0, vi1.col3, vi1.col1
+    from v1_intersect vi1
+   intersect
+    select distinct 'intersect:' col0, vi2.col3, vi2.col1
+     from v2_intersect vi2
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+   union
+    select distinct 'morestuff:' col0, vu.col3, vu.col1
+   from v_union vu
+  );
+0 rows inserted/updated/deleted
+ij> -- Chain of UNIONs with left-most child as a view with a
+-- an RCL that is ordered differently than that of the
+-- UNIONs above it.  The left-most child of the last
+-- UNION in the chain is a view that is a selet from
+-- a VALUES list (i.e. no base table).
+create view topview5 (col0, col3, col1) as
+  (select distinct 'values:' col0, vv1.col3, vv1.col1
+    from v1_values vv1
+   union
+    select distinct 'intersect:' col0, vi2.col3, vi2.col1
+     from v2_intersect vi2
+   union
+    select distinct 't3stuff:' col0, vpos2_2.col3, vpos2_2.col1
+     from v2_keycol_at_pos_2 vpos2_2
+   union
+    select distinct 'morestuff:' col0, vu.col3, vu.col1
+   from v_union vu
+  );
+0 rows inserted/updated/deleted
+ij> -- All of the following queries failed at some point while finalizing
+-- the fix for DERBY-1633; some failed with error 42818, others
+-- failed with execution-time NPEs caused by incorrect (esp. double)
+-- remapping.  The point here is to see how the top-level
+-- predicates are pushed through the nested unions to the
+-- bottom-most children.  Use of LEFT JOINs with NESTEDLOOP
+-- effectively allows us to force the join order and thus to
+-- ensure the predicates are pushed to the desired top-level
+-- at execution time.  All such queries are run once with
+-- NESTEDLOOP and once without, to make sure things work
+-- in both cases.
+select * from t4, topview where t4.c4 = topview.col3;
+C4        |COL0    |COL3      |COL1       
+------------------------------------------
+1         |other:  |1         |1          
+2         |other:  |2         |2          
+2         |t2stuff:|2         |2          
+4         |t2stuff:|4         |4          
+8         |t2stuff:|8         |8          
+3         |t3stuff:|3         |3          
+6         |t3stuff:|6         |6          
+9         |t3stuff:|9         |9          
+ij> select * from t4, topview where topview.col3 = t4.c4;
+C4        |COL0    |COL3      |COL1       
+------------------------------------------
+1         |other:  |1         |1          
+2         |other:  |2         |2          
+2         |t2stuff:|2         |2          
+4         |t2stuff:|4         |4          
+8         |t2stuff:|8         |8          
+3         |t3stuff:|3         |3          
+6         |t3stuff:|6         |6          
+9         |t3stuff:|9         |9          
+ij> select * from topview x1, topview where topview.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0    |COL3      |COL1       
+---------------------------------------------------------------
+other:  |1         |1          |other:  |1         |1          
+other:  |2         |2          |other:  |2         |2          
+other:  |2         |2          |t2stuff:|2         |2          
+t2stuff:|2         |2          |other:  |2         |2          
+t2stuff:|2         |2          |t2stuff:|2         |2          
+t2stuff:|4         |4          |t2stuff:|4         |4          
+t2stuff:|8         |8          |t2stuff:|8         |8          
+t3stuff:|3         |3          |t3stuff:|3         |3          
+t3stuff:|6         |6          |t3stuff:|6         |6          
+t3stuff:|9         |9          |t3stuff:|9         |9          
+ij> select * from t4, topview2 where t4.c4 = topview2.col3;
+C4        |COL0      |COL3      |COL1       
+--------------------------------------------
+1         |morestuff:|1         |1          
+2         |morestuff:|2         |2          
+3         |morestuff:|3         |3          
+6         |morestuff:|6         |6          
+9         |morestuff:|9         |9          
+1         |other:    |1         |1          
+2         |other:    |2         |2          
+2         |t2stuff:  |2         |2          
+4         |t2stuff:  |4         |4          
+8         |t2stuff:  |8         |8          
+3         |t3stuff:  |3         |3          
+6         |t3stuff:  |6         |6          
+9         |t3stuff:  |9         |9          
+ij> select * from topview2 x1, topview where topview.col3 = x1.col3;
+COL0      |COL3      |COL1       |COL0    |COL3      |COL1       
+-----------------------------------------------------------------
+morestuff:|1         |1          |other:  |1         |1          
+morestuff:|2         |2          |other:  |2         |2          
+morestuff:|2         |2          |t2stuff:|2         |2          
+morestuff:|3         |3          |t3stuff:|3         |3          
+morestuff:|6         |6          |t3stuff:|6         |6          
+morestuff:|9         |9          |t3stuff:|9         |9          
+other:    |1         |1          |other:  |1         |1          
+other:    |2         |2          |other:  |2         |2          
+other:    |2         |2          |t2stuff:|2         |2          
+t2stuff:  |2         |2          |other:  |2         |2          
+t2stuff:  |2         |2          |t2stuff:|2         |2          
+t2stuff:  |4         |4          |t2stuff:|4         |4          
+t2stuff:  |8         |8          |t2stuff:|8         |8          
+t3stuff:  |3         |3          |t3stuff:|3         |3          
+t3stuff:  |6         |6          |t3stuff:|6         |6          
+t3stuff:  |9         |9          |t3stuff:|9         |9          
+ij> select * from t4
+  left join topview
+  on t4.c4 = topview.col3;
+C4        |COL0    |COL3      |COL1       
+------------------------------------------
+1         |other:  |1         |1          
+2         |other:  |2         |2          
+2         |t2stuff:|2         |2          
+3         |t3stuff:|3         |3          
+4         |t2stuff:|4         |4          
+5         |NULL    |NULL      |NULL       
+6         |t3stuff:|6         |6          
+7         |NULL    |NULL      |NULL       
+8         |t2stuff:|8         |8          
+9         |t3stuff:|9         |9          
+11        |NULL    |NULL      |NULL       
+22        |NULL    |NULL      |NULL       
+33        |NULL    |NULL      |NULL       
+44        |NULL    |NULL      |NULL       
+55        |NULL    |NULL      |NULL       
+66        |NULL    |NULL      |NULL       
+77        |NULL    |NULL      |NULL       
+88        |NULL    |NULL      |NULL       
+99        |NULL    |NULL      |NULL       
+ij> select * from t4
+  left join topview --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on t4.c4 = topview.col3;
+C4        |COL0    |COL3      |COL1       
+------------------------------------------
+1         |other:  |1         |1          
+2         |other:  |2         |2          
+2         |t2stuff:|2         |2          
+3         |t3stuff:|3         |3          
+4         |t2stuff:|4         |4          
+5         |NULL    |NULL      |NULL       
+6         |t3stuff:|6         |6          
+7         |NULL    |NULL      |NULL       
+8         |t2stuff:|8         |8          
+9         |t3stuff:|9         |9          
+11        |NULL    |NULL      |NULL       
+22        |NULL    |NULL      |NULL       
+33        |NULL    |NULL      |NULL       
+44        |NULL    |NULL      |NULL       
+55        |NULL    |NULL      |NULL       
+66        |NULL    |NULL      |NULL       
+77        |NULL    |NULL      |NULL       
+88        |NULL    |NULL      |NULL       
+99        |NULL    |NULL      |NULL       
+ij> select * from t4
+  left join topview
+  on topview.col3 = t4.c4;
+C4        |COL0    |COL3      |COL1       
+------------------------------------------
+1         |other:  |1         |1          
+2         |other:  |2         |2          
+2         |t2stuff:|2         |2          
+3         |t3stuff:|3         |3          
+4         |t2stuff:|4         |4          
+5         |NULL    |NULL      |NULL       
+6         |t3stuff:|6         |6          
+7         |NULL    |NULL      |NULL       
+8         |t2stuff:|8         |8          
+9         |t3stuff:|9         |9          
+11        |NULL    |NULL      |NULL       
+22        |NULL    |NULL      |NULL       
+33        |NULL    |NULL      |NULL       
+44        |NULL    |NULL      |NULL       
+55        |NULL    |NULL      |NULL       
+66        |NULL    |NULL      |NULL       
+77        |NULL    |NULL      |NULL       
+88        |NULL    |NULL      |NULL       
+99        |NULL    |NULL      |NULL       
+ij> select * from t4
+  left join topview --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview.col3 = t4.c4;
+C4        |COL0    |COL3      |COL1       
+------------------------------------------
+1         |other:  |1         |1          
+2         |other:  |2         |2          
+2         |t2stuff:|2         |2          
+3         |t3stuff:|3         |3          
+4         |t2stuff:|4         |4          
+5         |NULL    |NULL      |NULL       
+6         |t3stuff:|6         |6          
+7         |NULL    |NULL      |NULL       
+8         |t2stuff:|8         |8          
+9         |t3stuff:|9         |9          
+11        |NULL    |NULL      |NULL       
+22        |NULL    |NULL      |NULL       
+33        |NULL    |NULL      |NULL       
+44        |NULL    |NULL      |NULL       
+55        |NULL    |NULL      |NULL       
+66        |NULL    |NULL      |NULL       
+77        |NULL    |NULL      |NULL       
+88        |NULL    |NULL      |NULL       
+99        |NULL    |NULL      |NULL       
+ij> select * from topview x1
+  left join topview
+  on topview.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0    |COL3      |COL1       
+---------------------------------------------------------------
+other:  |1         |1          |other:  |1         |1          
+other:  |2         |2          |other:  |2         |2          
+other:  |2         |2          |t2stuff:|2         |2          
+t2stuff:|2         |2          |other:  |2         |2          
+t2stuff:|2         |2          |t2stuff:|2         |2          
+t2stuff:|4         |4          |t2stuff:|4         |4          
+t2stuff:|8         |8          |t2stuff:|8         |8          
+t3stuff:|3         |3          |t3stuff:|3         |3          
+t3stuff:|6         |6          |t3stuff:|6         |6          
+t3stuff:|9         |9          |t3stuff:|9         |9          
+ij> select * from topview x1
+  left join topview --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0    |COL3      |COL1       
+---------------------------------------------------------------
+other:  |1         |1          |other:  |1         |1          
+other:  |2         |2          |other:  |2         |2          
+other:  |2         |2          |t2stuff:|2         |2          
+t2stuff:|2         |2          |other:  |2         |2          
+t2stuff:|2         |2          |t2stuff:|2         |2          
+t2stuff:|4         |4          |t2stuff:|4         |4          
+t2stuff:|8         |8          |t2stuff:|8         |8          
+t3stuff:|3         |3          |t3stuff:|3         |3          
+t3stuff:|6         |6          |t3stuff:|6         |6          
+t3stuff:|9         |9          |t3stuff:|9         |9          
+ij> select * from t4
+  left join topview2
+  on t4.c4 = topview2.col3;
+C4        |COL0      |COL3      |COL1       
+--------------------------------------------
+1         |morestuff:|1         |1          
+1         |other:    |1         |1          
+2         |morestuff:|2         |2          
+2         |other:    |2         |2          
+2         |t2stuff:  |2         |2          
+3         |morestuff:|3         |3          
+3         |t3stuff:  |3         |3          
+4         |t2stuff:  |4         |4          
+5         |NULL      |NULL      |NULL       
+6         |morestuff:|6         |6          
+6         |t3stuff:  |6         |6          
+7         |NULL      |NULL      |NULL       
+8         |t2stuff:  |8         |8          
+9         |morestuff:|9         |9          
+9         |t3stuff:  |9         |9          
+11        |NULL      |NULL      |NULL       
+22        |NULL      |NULL      |NULL       
+33        |NULL      |NULL      |NULL       
+44        |NULL      |NULL      |NULL       
+55        |NULL      |NULL      |NULL       
+66        |NULL      |NULL      |NULL       
+77        |NULL      |NULL      |NULL       
+88        |NULL      |NULL      |NULL       
+99        |NULL      |NULL      |NULL       
+ij> select * from t4
+  left join topview2 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on t4.c4 = topview2.col3;
+C4        |COL0      |COL3      |COL1       
+--------------------------------------------
+1         |morestuff:|1         |1          
+1         |other:    |1         |1          
+2         |morestuff:|2         |2          
+2         |other:    |2         |2          
+2         |t2stuff:  |2         |2          
+3         |morestuff:|3         |3          
+3         |t3stuff:  |3         |3          
+4         |t2stuff:  |4         |4          
+5         |NULL      |NULL      |NULL       
+6         |morestuff:|6         |6          
+6         |t3stuff:  |6         |6          
+7         |NULL      |NULL      |NULL       
+8         |t2stuff:  |8         |8          
+9         |morestuff:|9         |9          
+9         |t3stuff:  |9         |9          
+11        |NULL      |NULL      |NULL       
+22        |NULL      |NULL      |NULL       
+33        |NULL      |NULL      |NULL       
+44        |NULL      |NULL      |NULL       
+55        |NULL      |NULL      |NULL       
+66        |NULL      |NULL      |NULL       
+77        |NULL      |NULL      |NULL       
+88        |NULL      |NULL      |NULL       
+99        |NULL      |NULL      |NULL       
+ij> select * from topview2 x1
+  left join topview
+  on topview.col3 = x1.col3;
+COL0      |COL3      |COL1       |COL0    |COL3      |COL1       
+-----------------------------------------------------------------
+morestuff:|1         |1          |other:  |1         |1          
+morestuff:|2         |2          |other:  |2         |2          
+morestuff:|2         |2          |t2stuff:|2         |2          
+morestuff:|3         |3          |t3stuff:|3         |3          
+morestuff:|6         |6          |t3stuff:|6         |6          
+morestuff:|9         |9          |t3stuff:|9         |9          
+other:    |1         |1          |other:  |1         |1          
+other:    |2         |2          |other:  |2         |2          
+other:    |2         |2          |t2stuff:|2         |2          
+t2stuff:  |2         |2          |other:  |2         |2          
+t2stuff:  |2         |2          |t2stuff:|2         |2          
+t2stuff:  |4         |4          |t2stuff:|4         |4          
+t2stuff:  |8         |8          |t2stuff:|8         |8          
+t3stuff:  |3         |3          |t3stuff:|3         |3          
+t3stuff:  |6         |6          |t3stuff:|6         |6          
+t3stuff:  |9         |9          |t3stuff:|9         |9          
+ij> select * from topview2 x1
+  left join topview --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview.col3 = x1.col3;
+COL0      |COL3      |COL1       |COL0    |COL3      |COL1       
+-----------------------------------------------------------------
+morestuff:|1         |1          |other:  |1         |1          
+morestuff:|2         |2          |other:  |2         |2          
+morestuff:|2         |2          |t2stuff:|2         |2          
+morestuff:|3         |3          |t3stuff:|3         |3          
+morestuff:|6         |6          |t3stuff:|6         |6          
+morestuff:|9         |9          |t3stuff:|9         |9          
+other:    |1         |1          |other:  |1         |1          
+other:    |2         |2          |other:  |2         |2          
+other:    |2         |2          |t2stuff:|2         |2          
+t2stuff:  |2         |2          |other:  |2         |2          
+t2stuff:  |2         |2          |t2stuff:|2         |2          
+t2stuff:  |4         |4          |t2stuff:|4         |4          
+t2stuff:  |8         |8          |t2stuff:|8         |8          
+t3stuff:  |3         |3          |t3stuff:|3         |3          
+t3stuff:  |6         |6          |t3stuff:|6         |6          
+t3stuff:  |9         |9          |t3stuff:|9         |9          
+ij> select * from topview x1
+  left join topview2
+  on topview2.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0      |COL3      |COL1       
+-----------------------------------------------------------------
+other:  |1         |1          |morestuff:|1         |1          
+other:  |1         |1          |other:    |1         |1          
+other:  |2         |2          |morestuff:|2         |2          
+other:  |2         |2          |other:    |2         |2          
+other:  |2         |2          |t2stuff:  |2         |2          
+t2stuff:|2         |2          |morestuff:|2         |2          
+t2stuff:|2         |2          |other:    |2         |2          
+t2stuff:|2         |2          |t2stuff:  |2         |2          
+t2stuff:|4         |4          |t2stuff:  |4         |4          
+t2stuff:|8         |8          |t2stuff:  |8         |8          
+t3stuff:|3         |3          |morestuff:|3         |3          
+t3stuff:|3         |3          |t3stuff:  |3         |3          
+t3stuff:|6         |6          |morestuff:|6         |6          
+t3stuff:|6         |6          |t3stuff:  |6         |6          
+t3stuff:|9         |9          |morestuff:|9         |9          
+t3stuff:|9         |9          |t3stuff:  |9         |9          
+ij> select * from topview x1
+  left join topview2 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview2.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0      |COL3      |COL1       
+-----------------------------------------------------------------
+other:  |1         |1          |morestuff:|1         |1          
+other:  |1         |1          |other:    |1         |1          
+other:  |2         |2          |morestuff:|2         |2          
+other:  |2         |2          |other:    |2         |2          
+other:  |2         |2          |t2stuff:  |2         |2          
+t2stuff:|2         |2          |morestuff:|2         |2          
+t2stuff:|2         |2          |other:    |2         |2          
+t2stuff:|2         |2          |t2stuff:  |2         |2          
+t2stuff:|4         |4          |t2stuff:  |4         |4          
+t2stuff:|8         |8          |t2stuff:  |8         |8          
+t3stuff:|3         |3          |morestuff:|3         |3          
+t3stuff:|3         |3          |t3stuff:  |3         |3          
+t3stuff:|6         |6          |morestuff:|6         |6          
+t3stuff:|6         |6          |t3stuff:  |6         |6          
+t3stuff:|9         |9          |morestuff:|9         |9          
+t3stuff:|9         |9          |t3stuff:  |9         |9          
+ij> select * from topview x1
+  left join topview3
+  on topview3.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0      |COL3      |COL1       
+-----------------------------------------------------------------
+other:  |1         |1          |morestuff:|1         |1          
+other:  |2         |2          |morestuff:|2         |2          
+t2stuff:|2         |2          |morestuff:|2         |2          
+t2stuff:|4         |4          |NULL      |NULL      |NULL       
+t2stuff:|8         |8          |NULL      |NULL      |NULL       
+t3stuff:|3         |3          |morestuff:|3         |3          
+t3stuff:|3         |3          |t3stuff:  |3         |3          
+t3stuff:|6         |6          |morestuff:|6         |6          
+t3stuff:|6         |6          |t3stuff:  |6         |6          
+t3stuff:|9         |9          |morestuff:|9         |9          
+t3stuff:|9         |9          |t3stuff:  |9         |9          
+ij> select * from topview x1
+  left join topview3 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview3.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0      |COL3      |COL1       
+-----------------------------------------------------------------
+other:  |1         |1          |morestuff:|1         |1          
+other:  |2         |2          |morestuff:|2         |2          
+t2stuff:|2         |2          |morestuff:|2         |2          
+t2stuff:|4         |4          |NULL      |NULL      |NULL       
+t2stuff:|8         |8          |NULL      |NULL      |NULL       
+t3stuff:|3         |3          |morestuff:|3         |3          
+t3stuff:|3         |3          |t3stuff:  |3         |3          
+t3stuff:|6         |6          |morestuff:|6         |6          
+t3stuff:|6         |6          |t3stuff:  |6         |6          
+t3stuff:|9         |9          |morestuff:|9         |9          
+t3stuff:|9         |9          |t3stuff:  |9         |9          
+ij> select * from topview x1
+  left join topview4
+  on topview4.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0      |COL3      |COL1       
+-----------------------------------------------------------------
+other:  |1         |1          |morestuff:|1         |1          
+other:  |2         |2          |morestuff:|2         |2          
+t2stuff:|2         |2          |morestuff:|2         |2          
+t2stuff:|4         |4          |NULL      |NULL      |NULL       
+t2stuff:|8         |8          |NULL      |NULL      |NULL       
+t3stuff:|3         |3          |morestuff:|3         |3          
+t3stuff:|3         |3          |t3stuff:  |3         |3          
+t3stuff:|6         |6          |morestuff:|6         |6          
+t3stuff:|6         |6          |t3stuff:  |6         |6          
+t3stuff:|9         |9          |morestuff:|9         |9          
+t3stuff:|9         |9          |t3stuff:  |9         |9          
+ij> select * from topview x1
+  left join topview4 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview4.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0      |COL3      |COL1       
+-----------------------------------------------------------------
+other:  |1         |1          |morestuff:|1         |1          
+other:  |2         |2          |morestuff:|2         |2          
+t2stuff:|2         |2          |morestuff:|2         |2          
+t2stuff:|4         |4          |NULL      |NULL      |NULL       
+t2stuff:|8         |8          |NULL      |NULL      |NULL       
+t3stuff:|3         |3          |morestuff:|3         |3          
+t3stuff:|3         |3          |t3stuff:  |3         |3          
+t3stuff:|6         |6          |morestuff:|6         |6          
+t3stuff:|6         |6          |t3stuff:  |6         |6          
+t3stuff:|9         |9          |morestuff:|9         |9          
+t3stuff:|9         |9          |t3stuff:  |9         |9          
+ij> select * from topview x1
+  left join topview5
+  on topview5.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0      |COL3      |COL1       
+-----------------------------------------------------------------
+other:  |1         |1          |morestuff:|1         |1          
+other:  |2         |2          |morestuff:|2         |2          
+t2stuff:|2         |2          |morestuff:|2         |2          
+t2stuff:|4         |4          |NULL      |NULL      |NULL       
+t2stuff:|8         |8          |NULL      |NULL      |NULL       
+t3stuff:|3         |3          |morestuff:|3         |3          
+t3stuff:|3         |3          |t3stuff:  |3         |3          
+t3stuff:|6         |6          |morestuff:|6         |6          
+t3stuff:|6         |6          |t3stuff:  |6         |6          
+t3stuff:|9         |9          |morestuff:|9         |9          
+t3stuff:|9         |9          |t3stuff:  |9         |9          
+ij> select * from topview x1
+  left join topview5 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+  on topview5.col3 = x1.col3;
+COL0    |COL3      |COL1       |COL0      |COL3      |COL1       
+-----------------------------------------------------------------
+other:  |1         |1          |morestuff:|1         |1          
+other:  |2         |2          |morestuff:|2         |2          
+t2stuff:|2         |2          |morestuff:|2         |2          
+t2stuff:|4         |4          |NULL      |NULL      |NULL       
+t2stuff:|8         |8          |NULL      |NULL      |NULL       
+t3stuff:|3         |3          |morestuff:|3         |3          
+t3stuff:|3         |3          |t3stuff:  |3         |3          
+t3stuff:|6         |6          |morestuff:|6         |6          
+t3stuff:|6         |6          |t3stuff:  |6         |6          
+t3stuff:|9         |9          |morestuff:|9         |9          
+t3stuff:|9         |9          |t3stuff:  |9         |9          
+ij> -- Clean-up from DERBY-1633.
+drop view topview;
+0 rows inserted/updated/deleted
+ij> drop view topview2;
+0 rows inserted/updated/deleted
+ij> drop view topview3;
+0 rows inserted/updated/deleted
+ij> drop view topview4;
+0 rows inserted/updated/deleted
+ij> drop view topview5;
+0 rows inserted/updated/deleted
+ij> drop view v_keycol_at_pos_3;
+0 rows inserted/updated/deleted
+ij> drop view v1_keycol_at_pos_2;
+0 rows inserted/updated/deleted
+ij> drop view v2_keycol_at_pos_2;
+0 rows inserted/updated/deleted
+ij> drop view v1_intersect;
+0 rows inserted/updated/deleted
+ij> drop view v2_intersect;
+0 rows inserted/updated/deleted
+ij> drop view v1_values;
+0 rows inserted/updated/deleted
+ij> drop view v_union;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t5;
+0 rows inserted/updated/deleted
+ij> drop table t6;
 0 rows inserted/updated/deleted
 ij> 
