@@ -348,7 +348,7 @@ public	class	AutoloadBooting	extends	BaseJDBCTestCase
 	private	void	loadNetworkClientDriver()
 		throws Exception
 	{
-		boolean		isAutoloading = !CONFIG.autoloading();
+		boolean		isAutoloading = !getTestConfiguration().autoloading();
 		
 		//
 		// Forcibly load the network client if we are not autoloading it.

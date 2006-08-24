@@ -34,6 +34,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * JUnit test which checks that all methods specified by the
@@ -110,7 +111,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
         collectClassesFromConnectionPoolDataSource(classes);
         collectClassesFromXADataSource(classes);
         addClass(classes,
-                 DriverManager.getDriver(CONFIG.getJDBCUrl()).getClass(),
+                 DriverManager.getDriver(TestConfiguration.getCurrent().getJDBCUrl()).getClass(),
                  java.sql.Driver.class);
 
         TestSuite suite = new TestSuite();
@@ -151,8 +152,8 @@ public class VerifySignatures extends BaseJDBCTestCase {
         DataSource ds = TestDataSourceFactory.getDataSource();
         addClass(classes, ds.getClass(), javax.sql.DataSource.class);
         collectClassesFromConnection(ds.getConnection
-                                     (CONFIG.getUserName(),
-                                      CONFIG.getUserPassword()),
+                                     (TestConfiguration.getCurrent().getUserName(),
+                                             TestConfiguration.getCurrent().getUserPassword()),
                                      classes);
     }
 
@@ -173,8 +174,8 @@ public class VerifySignatures extends BaseJDBCTestCase {
                  cpds.getClass(), javax.sql.ConnectionPoolDataSource.class);
 
         PooledConnection pc =
-            cpds.getPooledConnection(CONFIG.getUserName(),
-                                     CONFIG.getUserPassword());
+            cpds.getPooledConnection(TestConfiguration.getCurrent().getUserName(),
+                    TestConfiguration.getCurrent().getUserPassword());
         addClass(classes, pc.getClass(), javax.sql.PooledConnection.class);
 
         collectClassesFromConnection(pc.getConnection(), classes);
@@ -196,8 +197,8 @@ public class VerifySignatures extends BaseJDBCTestCase {
         XADataSource xads = TestDataSourceFactory.getXADataSource();
         addClass(classes, xads.getClass(), javax.sql.XADataSource.class);
 
-        XAConnection xaconn = xads.getXAConnection(CONFIG.getUserName(),
-                                                   CONFIG.getUserPassword());
+        XAConnection xaconn = xads.getXAConnection(TestConfiguration.getCurrent().getUserName(),
+                TestConfiguration.getCurrent().getUserPassword());
         addClass(classes, xaconn.getClass(), javax.sql.XAConnection.class);
 
         collectClassesFromConnection(xaconn.getConnection(), classes);

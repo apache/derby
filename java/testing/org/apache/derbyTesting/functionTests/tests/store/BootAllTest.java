@@ -37,8 +37,6 @@ import java.util.Arrays;
  */
 public class BootAllTest  extends BaseJDBCTestCase {
 
-    /** JDBC Connection */
-    private Connection con;
     private Driver driver;
     private String databases[] = new String[] {"wombat1", "wombat2", "wombat3"};
     
@@ -57,16 +55,16 @@ public class BootAllTest  extends BaseJDBCTestCase {
      */
     public void setUp() throws Exception {
         for (int i = 0; i < databases.length; i++) {
-            con = openConnection(databases[i]);
+            Connection con = openConnection(databases[i]);
             con.close();
             try {
-                con = openConnection(databases[i] + ";shutdown=true");
+                openConnection(databases[i] + ";shutdown=true");
             } catch (SQLException se) {
                 assertEquals("Expected exception on setUp " + se.getSQLState(), 
                         DATABASE_SHUT_DOWN, se.getSQLState());
             }
         }
-        String url = CONFIG.getJDBCUrl("");
+        String url = getTestConfiguration().getJDBCUrl("");
         driver = DriverManager.getDriver(url);
         DriverManager.deregisterDriver(driver);
         try {
@@ -83,11 +81,11 @@ public class BootAllTest  extends BaseJDBCTestCase {
      * Shutdown all databases
      */
     public void tearDown() throws Exception {
-        String driverName = CONFIG.getJDBCClient().getJDBCDriverName();
+        String driverName = getTestConfiguration().getJDBCClient().getJDBCDriverName();
         Class.forName(driverName);
         println("Teardown of: " + getName());
         try {
-            con = openConnection(";shutdown=true");
+            openConnection(";shutdown=true");
         } catch (SQLException se) {
             assertEquals("Expected exception on tearDown " + se.getSQLState(), 
                     ALL_DATABASES_SHUT_DOWN, se.getSQLState());
@@ -111,8 +109,8 @@ public class BootAllTest  extends BaseJDBCTestCase {
 
         setSystemProperty("derby.system.bootAll", "true");
 
-        String driverName = CONFIG.getJDBCClient().getJDBCDriverName();
-        String url = CONFIG.getJDBCUrl("");
+        String driverName = getTestConfiguration().getJDBCClient().getJDBCDriverName();
+        String url = getTestConfiguration().getJDBCUrl("");
 
         Class.forName(driverName).newInstance();
         DriverManager.registerDriver(driver);

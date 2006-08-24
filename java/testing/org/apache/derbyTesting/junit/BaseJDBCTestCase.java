@@ -245,7 +245,7 @@ public abstract class BaseJDBCTestCase
      *         <code>false</code> otherwise.
      */
      public static boolean usingEmbedded() {
-         return CONFIG.getJDBCClient().isEmbedded();
+         return TestConfiguration.getCurrent().getJDBCClient().isEmbedded();
      }
     
     /**
@@ -255,7 +255,7 @@ public abstract class BaseJDBCTestCase
     *         <code>false</code> otherwise.
     */
     public static boolean usingDerbyNetClient() {
-        return CONFIG.getJDBCClient().isDerbyNetClient();
+        return TestConfiguration.getCurrent().getJDBCClient().isDerbyNetClient();
     }
     
     /**
@@ -265,7 +265,7 @@ public abstract class BaseJDBCTestCase
     *         <code>false</code> otherwise.
     */
     public static boolean usingDerbyNet() {
-        return CONFIG.getJDBCClient().isDB2Client();
+        return TestConfiguration.getCurrent().getJDBCClient().isDB2Client();
     }
 
     /**

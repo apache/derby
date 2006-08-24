@@ -43,15 +43,14 @@ final public class NetworkServerTestSetup extends TestSetup {
      */
     public NetworkServerTestSetup(Test test) {
         super(test);
-        
-        this.config = TestConfiguration.DERBY_TEST_CONFIG;
-        this.networkServerController = null;
     }
 
     /**
      * Start the network server.
      */
     protected void setUp() throws Exception {
+        
+        TestConfiguration config = TestConfiguration.getCurrent();
         
         if (!config.getJDBCClient().isEmbedded()) {
             BaseTestCase.println("Starting network server:");
@@ -87,9 +86,6 @@ final public class NetworkServerTestSetup extends TestSetup {
     
     /* Network Server Control */
     private NetworkServerControl networkServerController;
-    
-    /* Configuration of test */
-    private final TestConfiguration config;
     
     /** Wait maximum 1 minute for server to start */
     private static final int WAIT_TIME = 60000;

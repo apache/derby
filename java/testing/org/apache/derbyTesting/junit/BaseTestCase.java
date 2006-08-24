@@ -37,15 +37,6 @@ import java.security.PrivilegedActionException;
  */
 public abstract class BaseTestCase
     extends TestCase {
-
-    /**
-     * Configuration for the test case.
-     * The configuration is created based on system properties.
-     *
-     * @see TestConfiguration
-     */
-    public static final TestConfiguration CONFIG = 
-        TestConfiguration.DERBY_TEST_CONFIG;
     
     /**
      * No argument constructor made private to enforce naming of test cases.
@@ -90,7 +81,7 @@ public abstract class BaseTestCase
      */
     public final TestConfiguration getTestConfiguration()
     {
-    	return CONFIG;
+    	return TestConfiguration.getCurrent();
     }
     
     /**
@@ -106,7 +97,7 @@ public abstract class BaseTestCase
      * @param text String to print
      */
     public static void println(final String text) {
-        if (CONFIG.isVerbose()) {
+        if (TestConfiguration.getCurrent().isVerbose()) {
             out.println("DEBUG: " + text);
         }
     }

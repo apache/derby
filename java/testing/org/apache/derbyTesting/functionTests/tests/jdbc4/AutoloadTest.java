@@ -101,7 +101,7 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
 		// We expect that the connection to the database will fail for
 		// one reason or another.
 		//
-		if ( CONFIG.autoloading() )
+		if ( getTestConfiguration().autoloading() )
 		{
 			println( "We ARE autoloading..." );
 
@@ -136,12 +136,12 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
 	private	void	failToConnect( String expectedSQLState )
 		throws Exception
 	{
-		String			connectionURL = CONFIG.getJDBCUrl( NONEXISTENT_DATABASE );
+		String			connectionURL = getTestConfiguration().getJDBCUrl( NONEXISTENT_DATABASE );
 		Properties		properties = new Properties();
 		SQLException 	se = null;
 
-		properties.put( "user", CONFIG.getUserName() );
-		properties.put( "password", CONFIG.getUserPassword() );
+		properties.put( "user", getTestConfiguration().getUserName() );
+		properties.put( "password", getTestConfiguration().getUserPassword() );
 
 		try {
 			println( "Attempting to connect with this URL: '" + connectionURL + "'" );

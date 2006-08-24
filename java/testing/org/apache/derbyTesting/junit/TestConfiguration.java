@@ -1,4 +1,4 @@
-/*
+d/*
  *
  * Derby - Class TestConfiguration
  *
@@ -31,12 +31,41 @@ import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
  * Class which holds information about the configuration of a Test.
  */
 public class TestConfiguration {
-    
+
     /**
      * Default Derby test configuration object.
      */
-    public static final TestConfiguration DERBY_TEST_CONFIG = 
+    private static final TestConfiguration DERBY_TEST_CONFIG = 
         new TestConfiguration(getSystemProperties());
+    
+    /**
+     * Current configuration is stored in a ThreadLocal to
+     * allow the potential for multiple tests to be running
+     * concurrently with different configurations.
+     */
+    private static final ThreadLocal CURRENT_CONFIG = new ThreadLocal() {
+        protected Object initialValue() {
+            return DERBY_TEST_CONFIG;
+        }
+    };
+   
+    /**
+     * Get this Thread's current configuraiton for running
+     * the tests.
+     * @return TestConfiguration to use.
+     */
+    public static TestConfiguration getCurrent() {
+        return (TestConfiguration) CURRENT_CONFIG.get();
+    }
+    
+    /**
+     * Set this Thread's current configuration for running tests.
+     * @param config Configuration to set it to.
+     */
+    private static void setCurrent(TestConfiguration config)
+    {
+        CURRENT_CONFIG.set(config);
+    }
     
     /**
      * This constructor creates a TestConfiguration from a Properties object.

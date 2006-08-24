@@ -48,7 +48,7 @@ public abstract class BaseJDBCTestSetup
      */
     public final TestConfiguration getTestConfiguration()
     {
-    	return TestConfiguration.DERBY_TEST_CONFIG;
+    	return TestConfiguration.getCurrent();
     }
     
     /**

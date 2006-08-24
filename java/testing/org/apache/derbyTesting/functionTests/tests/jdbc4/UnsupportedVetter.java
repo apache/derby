@@ -364,7 +364,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	public	void	testSupportedMethods()
 		throws Exception
 	{
-		CONFIG.setVerbosity( true );
+        getTestConfiguration().setVerbosity( true );
 
 		HashSet<String>	vanishedMethodList = new HashSet<String>();
 		HashSet<String>	unsupportedList = new HashSet<String>();
@@ -418,7 +418,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	{
 		ConnectionPoolDataSource	ds = TestDataSourceFactory.getConnectionPoolDataSource();
 		PooledConnection			pc = ds.getPooledConnection
-			(CONFIG.getUserName(), CONFIG.getUserPassword());
+			(getTestConfiguration().getUserName(),
+                    getTestConfiguration().getUserPassword());
 		Connection					conn = pc.getConnection();
 
 		vetObject( ds, unsupportedList, notUnderstoodList );
@@ -436,7 +437,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	{
 		XADataSource				ds = TestDataSourceFactory.getXADataSource();
 		XAConnection				xaconn = ds.getXAConnection
-			(CONFIG.getUserName(), CONFIG.getUserPassword());
+			(getTestConfiguration().getUserName(),
+                    getTestConfiguration().getUserPassword());
 		Connection					conn = xaconn.getConnection();
 
 		vetObject( ds, unsupportedList, notUnderstoodList );

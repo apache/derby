@@ -42,6 +42,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test that all methods on <code>ResultSet</code>,
@@ -698,8 +699,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          */
         protected Connection newConnection_() throws SQLException {
             DataSource ds = TestDataSourceFactory.getDataSource();
-            return ds.getConnection(CONFIG.getUserName(),
-                                    CONFIG.getUserPassword());
+            return ds.getConnection(TestConfiguration.getCurrent().getUserName(),
+                    TestConfiguration.getCurrent().getUserPassword());
         }
     }
 
@@ -727,8 +728,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         protected Connection newConnection_() throws SQLException {
             ConnectionPoolDataSource ds = TestDataSourceFactory.getConnectionPoolDataSource();
             PooledConnection pc =
-                ds.getPooledConnection(CONFIG.getUserName(),
-                                       CONFIG.getUserPassword());
+                ds.getPooledConnection(TestConfiguration.getCurrent().getUserName(),
+                        TestConfiguration.getCurrent().getUserPassword());
             return pc.getConnection();
         }
     }
@@ -755,8 +756,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          */
         protected Connection newConnection_() throws SQLException {
             XADataSource ds = TestDataSourceFactory.getXADataSource();
-            XAConnection xac = ds.getXAConnection(CONFIG.getUserName(),
-                                                  CONFIG.getUserPassword());
+            XAConnection xac = ds.getXAConnection(TestConfiguration.getCurrent().getUserName(),
+                    TestConfiguration.getCurrent().getUserPassword());
             return xac.getConnection();
         }
     }
