@@ -367,7 +367,8 @@ public class BinaryOperatorNode extends ValueNode
         // compile the query expression.
             sqlxUtil = new SqlXmlUtil();
             sqlxUtil.compileXQExpr(
-                ((CharConstantNode)leftOperand).getString());
+                ((CharConstantNode)leftOperand).getString(),
+                (operatorType == XMLEXISTS_OP ? "XMLEXISTS" : "XMLQUERY"));
         }
 
         // Right operand must be an XML data value.  NOTE: This

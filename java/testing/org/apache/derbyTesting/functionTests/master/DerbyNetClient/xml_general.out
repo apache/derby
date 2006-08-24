@@ -633,6 +633,16 @@ ij> select i, xmlquery('//*' passing by ref 'hello' empty on empty) from t1;
 ERROR 42Z77: Context item must have type 'XML'; 'CHAR' is not allowed.
 ij> select i, xmlquery('//*' passing by ref cast ('hello' as clob) empty on empty) from t1;
 ERROR 42Z77: Context item must have type 'XML'; 'CLOB' is not allowed.
+ij> -- This should fail because the function is not recognized by Xalan.
+----- The failure should be an error from Xalan saying what the problem
+----- is; it should *NOT* be a NPE, which is what we were seeing before
+----- DERBY-688 was completed.
+select i,
+  xmlserialize(
+    xmlquery('data(//@*)' passing by ref x returning sequence empty on empty)
+  as char(70))
+from t1;
+ERROR 10000: Encountered error while evaluating XML query expression for XMLQUERY operator; see next exception for details. SQLSTATE: XJ001: Java exception: 'Could not find function: data: javax.xml.transform.TransformerException'.
 ij> -- These should all succeed.  Since it's Xalan that's actually doing
 ----- the query evaluation we don't need to test very many queries; we
 ----- just want to make sure we get the correct results when there is
@@ -791,8 +801,7 @@ as char(30));
 -----
 <lets> try this </lets>       
 ij> -- Check insertion of XMLQUERY result into a table.  Should only allow
------ results that constitute a valid DOCUMENT node (i.e. that can be parsed
------ by the XMLPARSE operator).
+----- results that are a sequence of exactly one Document node.
 insert into t1 values (
   9,
   xmlparse(document '<here><is><my height="4.4">attribute</my></is></here>' preserve whitespace)
@@ -814,9 +823,9 @@ I |2
 0 |<ay>caramba</ay>                                                           
 0 |<there><goes><my weight="180">attribute</my></goes></there>                
 ij> -- These should all fail because the result of the XMLQUERY op is
------ not a valid document (it's either an empty sequence, an attribute,
------ some undefined value, or a sequence with more than one item in
------ it.
+----- not a valid document (it's either an empty sequence, a node that is
+----- not a Document node, some undefined value, or a sequence with more
+----- than one item in it).
 insert into t2 (i, x) values (
   20, 
   (select
@@ -857,9 +866,25 @@ ij> insert into t2 (i, x) values (
   )
 );
 ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> insert into t2 (i, x) values (
+  25,
+  (select
+    xmlquery('//is' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
+ij> insert into t2 (i, x) values (
+  26,
+  (select
+    xmlquery('//*[@*]' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+ERROR 2200L: Values assigned to XML columns must be well-formed DOCUMENT nodes.
 ij> -- These should succeed.
 insert into t2 (i, x) values (
-  25,
+  27,
   (select
     xmlquery('.' passing by ref x returning sequence empty on empty)
     from t1 where i = 9
@@ -867,25 +892,9 @@ insert into t2 (i, x) values (
 );
 1 row inserted/updated/deleted
 ij> insert into t2 (i, x) values (
-  26,
-  (select
-    xmlquery('//is' passing by ref x returning sequence empty on empty)
-    from t1 where i = 9
-  )
-);
-1 row inserted/updated/deleted
-ij> insert into t2 (i, x) values (
-  27,
-  (select
-    xmlquery('/here' passing by ref x returning sequence empty on empty)
-    from t1 where i = 9
-  )
-);
-1 row inserted/updated/deleted
-ij> insert into t2 (i, x) values (
   28,
   (select
-    xmlquery('//*[@*]' passing by ref x returning sequence empty on empty)
+    xmlquery('/here/..' passing by ref x returning sequence empty on empty)
     from t1 where i = 9
   )
 );
@@ -895,10 +904,8 @@ select i, xmlserialize(x as char(75)) from t2;
 I |2                                                                          
 -----
 1 |<should> work as planned </should>                                         
-25 |<here><is><my height="4.4">attribute</my></is></here>                      
-26 |<is><my height="4.4">attribute</my></is>                                   
 27 |<here><is><my height="4.4">attribute</my></is></here>                      
-28 |<my height="4.4">attribute</my>                                            
+28 |<here><is><my height="4.4">attribute</my></is></here>                      
 ij> -- Next two should _both_ succeed because there's no row with i = 100
 ----- in t1, thus the SELECT will return null and XMLQuery operator should
 ----- never get executed.  x will be NULL in these cases.
@@ -939,7 +946,7 @@ where i = 29;
 1 row inserted/updated/deleted
 ij> update t3
   set x = 
-    xmlquery('//*[@height]' passing by ref
+    xmlquery('self::node()[//@height]' passing by ref
       (select
         xmlquery('.' passing by ref x empty on empty)
         from t1
@@ -996,7 +1003,7 @@ I |2
 0 |<ay>caramba</ay>                                                           
 0 |<there><goes><my weight="180">attribute</my></goes></there>                
 29 |<none><here/></none>                                                       
-30 |<my height="4.4">attribute</my>                                            
+30 |<here><is><my height="4.4">attribute</my></is></here>                      
 ij> -- Pass results of an XMLQUERY op into another XMLQUERY op.
 ----- Should work so long as results of the first op constitute
 ----- a valid document.
@@ -1014,7 +1021,7 @@ ERROR 2200V: Invalid context item for XMLQUERY operator; context items must be w
 ij> select i,
   xmlserialize(
     xmlquery('.' passing by ref
-      xmlquery('//lets/@*' passing by ref
+      xmlquery('//lets' passing by ref
         xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
       empty on empty)
     empty on empty)
@@ -1023,7 +1030,7 @@ from t1 where i > 5;
 ERROR 2200V: Invalid context item for XMLQUERY operator; context items must be well-formed DOCUMENT nodes.
 ij> select i,
   xmlexists('.' passing by ref
-    xmlquery('//lets/@*' passing by ref
+    xmlquery('/okay' passing by ref
       xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
     empty on empty)
   )
@@ -1033,7 +1040,7 @@ ij> -- Should succeed but result is empty sequence.
 select i,
   xmlserialize(
     xmlquery('/not' passing by ref
-      xmlquery('//lets' passing by ref
+      xmlquery('.' passing by ref
         xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
       empty on empty)
     empty on empty)
@@ -1048,8 +1055,8 @@ I |2
 ij> -- Should succeed with various results.
 select i,
   xmlserialize(
-    xmlquery('.' passing by ref
-      xmlquery('//lets' passing by ref
+    xmlquery('//lets' passing by ref
+      xmlquery('.' passing by ref
         xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
       empty on empty)
     empty on empty)
@@ -1063,8 +1070,8 @@ I |2
 9 |<lets boki="inigo"/>                                                                                
 ij> select i,
   xmlserialize(
-    xmlquery('//@boki' passing by ref
-      xmlquery('/okay' passing by ref
+    xmlquery('string(//@boki)' passing by ref
+      xmlquery('/okay/..' passing by ref
         xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
       empty on empty)
     empty on empty)
@@ -1078,8 +1085,8 @@ I |2
 9 |inigo                                                                                               
 ij> select i,
   xmlserialize(
-    xmlquery('/masted/text()' passing by ref
-      xmlquery('//masted' passing by ref x empty on empty)
+    xmlquery('/half/masted/text()' passing by ref
+      xmlquery('.' passing by ref x empty on empty)
     empty on empty)
   as char(100))
 from t1 where i = 6;
@@ -1087,8 +1094,8 @@ I |2
 -----
 6 | bass                                                                                               
 ij> select i,
-  xmlexists('/masted/text()' passing by ref
-    xmlquery('//masted' passing by ref x empty on empty)
+  xmlexists('/half/masted/text()' passing by ref
+    xmlquery('.' passing by ref x empty on empty)
   )
 from t1 where i = 6;
 I |2     

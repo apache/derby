@@ -265,6 +265,16 @@ select i, xmlquery('//*' passing by ref i empty on empty) from t1;
 select i, xmlquery('//*' passing by ref 'hello' empty on empty) from t1;
 select i, xmlquery('//*' passing by ref cast ('hello' as clob) empty on empty) from t1;
 
+-- This should fail because the function is not recognized by Xalan.
+-- The failure should be an error from Xalan saying what the problem
+-- is; it should *NOT* be a NPE, which is what we were seeing before
+-- DERBY-688 was completed.
+select i,
+  xmlserialize(
+    xmlquery('data(//@*)' passing by ref x returning sequence empty on empty)
+  as char(70))
+from t1;
+
 -- These should all succeed.  Since it's Xalan that's actually doing
 -- the query evaluation we don't need to test very many queries; we
 -- just want to make sure we get the correct results when there is
@@ -340,8 +350,7 @@ values xmlserialize(
 as char(30));
 
 -- Check insertion of XMLQUERY result into a table.  Should only allow
--- results that constitute a valid DOCUMENT node (i.e. that can be parsed
--- by the XMLPARSE operator).
+-- results that are a sequence of exactly one Document node.
 
 insert into t1 values (
   9,
@@ -359,9 +368,9 @@ select i, xmlserialize(x as char(75)) from t2;
 select i, xmlserialize(x as char(75)) from t3;
 
 -- These should all fail because the result of the XMLQUERY op is
--- not a valid document (it's either an empty sequence, an attribute,
--- some undefined value, or a sequence with more than one item in
--- it.
+-- not a valid document (it's either an empty sequence, a node that is
+-- not a Document node, some undefined value, or a sequence with more
+-- than one item in it).
 
 insert into t2 (i, x) values (
   20, 
@@ -403,18 +412,8 @@ insert into t2 (i, x) values (
   )
 );
 
--- These should succeed.
-
 insert into t2 (i, x) values (
   25,
-  (select
-    xmlquery('.' passing by ref x returning sequence empty on empty)
-    from t1 where i = 9
-  )
-);
-
-insert into t2 (i, x) values (
-  26,
   (select
     xmlquery('//is' passing by ref x returning sequence empty on empty)
     from t1 where i = 9
@@ -422,9 +421,19 @@ insert into t2 (i, x) values (
 );
 
 insert into t2 (i, x) values (
+  26,
+  (select
+    xmlquery('//*[@*]' passing by ref x returning sequence empty on empty)
+    from t1 where i = 9
+  )
+);
+
+-- These should succeed.
+
+insert into t2 (i, x) values (
   27,
   (select
-    xmlquery('/here' passing by ref x returning sequence empty on empty)
+    xmlquery('.' passing by ref x returning sequence empty on empty)
     from t1 where i = 9
   )
 );
@@ -432,7 +441,7 @@ insert into t2 (i, x) values (
 insert into t2 (i, x) values (
   28,
   (select
-    xmlquery('//*[@*]' passing by ref x returning sequence empty on empty)
+    xmlquery('/here/..' passing by ref x returning sequence empty on empty)
     from t1 where i = 9
   )
 );
@@ -478,7 +487,7 @@ where i = 29;
 
 update t3
   set x = 
-    xmlquery('//*[@height]' passing by ref
+    xmlquery('self::node()[//@height]' passing by ref
       (select
         xmlquery('.' passing by ref x empty on empty)
         from t1
@@ -551,7 +560,7 @@ from t1 where i > 5;
 select i,
   xmlserialize(
     xmlquery('.' passing by ref
-      xmlquery('//lets/@*' passing by ref
+      xmlquery('//lets' passing by ref
         xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
       empty on empty)
     empty on empty)
@@ -560,7 +569,7 @@ from t1 where i > 5;
 
 select i,
   xmlexists('.' passing by ref
-    xmlquery('//lets/@*' passing by ref
+    xmlquery('/okay' passing by ref
       xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
     empty on empty)
   )
@@ -571,7 +580,7 @@ from t1 where i > 5;
 select i,
   xmlserialize(
     xmlquery('/not' passing by ref
-      xmlquery('//lets' passing by ref
+      xmlquery('.' passing by ref
         xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
       empty on empty)
     empty on empty)
@@ -582,8 +591,8 @@ from t1 where i > 5;
 
 select i,
   xmlserialize(
-    xmlquery('.' passing by ref
-      xmlquery('//lets' passing by ref
+    xmlquery('//lets' passing by ref
+      xmlquery('.' passing by ref
         xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
       empty on empty)
     empty on empty)
@@ -592,8 +601,8 @@ from t1 where i > 5;
 
 select i,
   xmlserialize(
-    xmlquery('//@boki' passing by ref
-      xmlquery('/okay' passing by ref
+    xmlquery('string(//@boki)' passing by ref
+      xmlquery('/okay/..' passing by ref
         xmlparse(document '<okay><lets boki="inigo"/></okay>' preserve whitespace)
       empty on empty)
     empty on empty)
@@ -602,15 +611,15 @@ from t1 where i > 5;
 
 select i,
   xmlserialize(
-    xmlquery('/masted/text()' passing by ref
-      xmlquery('//masted' passing by ref x empty on empty)
+    xmlquery('/half/masted/text()' passing by ref
+      xmlquery('.' passing by ref x empty on empty)
     empty on empty)
   as char(100))
 from t1 where i = 6;
 
 select i,
-  xmlexists('/masted/text()' passing by ref
-    xmlquery('//masted' passing by ref x empty on empty)
+  xmlexists('/half/masted/text()' passing by ref
+    xmlquery('.' passing by ref x empty on empty)
   )
 from t1 where i = 6;
 

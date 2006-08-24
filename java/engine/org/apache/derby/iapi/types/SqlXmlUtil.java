@@ -56,6 +56,8 @@ import org.apache.xpath.XPathContext;
 import org.apache.xpath.objects.XObject;
 import org.apache.xpath.objects.XNodeSet;
 
+import org.apache.xml.utils.PrefixResolverDefault;
+
 import org.apache.xalan.serialize.DOMSerializer;
 import org.apache.xalan.serialize.Serializer;
 import org.apache.xalan.serialize.SerializerFactory;
@@ -203,12 +205,23 @@ public class SqlXmlUtil
             // Just rethrow it.
             throw se;
 
-        } catch (Exception e) {
+        } catch (Throwable t) {
 
-            // Must be something caused by JAXP or Xalan; wrap it in a
-            // StandardException and rethrow it.
+            /* Must be something caused by JAXP or Xalan; wrap it in a
+             * StandardException and rethrow it. Note: we catch "Throwable"
+             * here to catch as many external errors as possible in order
+             * to minimize the chance of an uncaught JAXP/Xalan error (such
+             * as a NullPointerException) causing Derby to fail in a more
+             * serious way.  In particular, an uncaught Java exception
+             * like NPE can result in Derby throwing "ERROR 40XT0: An
+             * internal error was identified by RawStore module" for all
+             * statements on the connection after the failure--which we
+             * clearly don't want.  If we catch the error and wrap it,
+             * though, the statement will fail but Derby will continue to
+             * run as normal.
+             */ 
             throw StandardException.newException(
-                SQLState.LANG_UNEXPECTED_XML_EXCEPTION, e);
+                SQLState.LANG_UNEXPECTED_XML_EXCEPTION, t);
 
         }
 
@@ -225,21 +238,43 @@ public class SqlXmlUtil
      *
      * @param queryExpr The XPath expression to compile
      */
-    public void compileXQExpr(String queryExpr)
+    public void compileXQExpr(String queryExpr, String opName)
         throws StandardException
     {
         try {
 
-            // The following XPath constructor compiles the expression
-            // as part of the construction process.
-            query = new XPath(queryExpr, null, null, XPath.SELECT);
+            /* The following XPath constructor compiles the expression
+             * as part of the construction process.  We have to pass
+             * in a PrefixResolver object in order to avoid NPEs when
+             * invalid/unknown functions are used, so we just create
+             * a dummy one, which means prefixes will not be resolved
+             * in the query (Xalan will just throw an error if a prefix
+             * is used).  In the future we may want to revisit this
+             * to make it easier for users to query based on namespaces.
+             */
+            query = new XPath(queryExpr, null,
+                new PrefixResolverDefault(dBuilder.newDocument()),
+                XPath.SELECT);
 
-        } catch (TransformerException te) {
+        } catch (Throwable te) {
 
-            // Something went wrong during compilation of the
-            // expression; wrap the error and re-throw it.
+            /* Something went wrong during compilation of the
+             * expression; wrap the error and re-throw it.
+             * Note: we catch "Throwable" here to catch as many
+             * Xalan-produced errors as possible in order to
+             * minimize the chance of an uncaught Xalan error
+             * (such as a NullPointerException) causing Derby
+             * to fail in a more serious way.  In particular, an
+             * uncaught Java exception like NPE can result in
+             * Derby throwing "ERROR 40XT0: An internal error was
+             * identified by RawStore module" for all statements on
+             * the connection after the failure--which we clearly
+             * don't want.  If we catch the error and wrap it,
+             * though, the statement will fail but Derby will
+             * continue to run as normal. 
+             */
             throw StandardException.newException(
-                SQLState.LANG_XML_QUERY_ERROR, te);
+                SQLState.LANG_XML_QUERY_ERROR, te, opName);
 
         }
     }
@@ -344,7 +379,7 @@ public class SqlXmlUtil
      *  results of the query
      * @param resultXType The qualified XML type of the result
      *  of evaluating the expression, if returnResults is true.
-     *  If the result is a sequence of one Document or Element node
+     *  If the result is a sequence of exactly one Document node
      *  then this will be XML(DOCUMENT(ANY)); else it will be
      *  XML(SEQUENCE).  If returnResults is false, this value
      *  is ignored.
@@ -438,16 +473,14 @@ public class SqlXmlUtil
 
         nodeList = null;
 
-        // Indicate what kind of XML result value we have.  If
-        // we have a sequence of exactly one Element or Document
-        // then it is XMLPARSE-able and so we consider it to be
-        // of type XML_DOC_ANY (which means we can store it in
-        // a Derby XML column).
-        if ((numItems == 1) && ((itemRefs.get(0) instanceof Document)
-            || (itemRefs.get(0) instanceof Element)))
-        {
+        /* Indicate what kind of XML result value we have.  If
+         * we have a sequence of exactly one Document then it
+         * is XMLPARSE-able and so we consider it to be of type
+         * XML_DOC_ANY (which means we can store it in a Derby
+         * XML column).
+         */
+        if ((numItems == 1) && (itemRefs.get(0) instanceof Document))
             resultXType[0] = XML.XML_DOC_ANY;
-        }
         else
             resultXType[0] = XML.XML_SEQUENCE;
 

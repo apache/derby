@@ -7098,9 +7098,9 @@ short
  * operator uses and the result is always a Document node).
  * Internally this means that we can only store a sequence if it
  * contains exactly one org.w3c.dom.Node that is an instance of
- * either org.w3c.dom.Document or org.w3c.dom.Element.  If the
- * result of an XMLQUERY operation does not fit this criteria then
- * it will *not* be storable into Derby XML columns.
+ * org.w3c.dom.Document.  If the result of an XMLQUERY operation
+ * does not fit this criteria then it will *not* be storable into
+ * Derby XML columns.
  */
 short
 	xqReturningClause() throws StandardException :

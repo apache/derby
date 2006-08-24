@@ -555,11 +555,23 @@ public class XML
                         "but we shouldn't have made it this far");
             }
 
-        } catch (Exception xe) {
-        // Couldn't parse the XML document.  Throw a StandardException
-        // with the parse exception nested in it.
+        } catch (Throwable t) {
+        /* Couldn't parse the XML document.  Throw a StandardException
+         * with the parse exception (or other error) nested in it.
+         * Note: we catch "Throwable" here to catch as many external
+         * errors as possible in order to minimize the chance of an
+         * uncaught JAXP/Xalan error (such as a NullPointerException)
+         * causing Derby to fail in a more serious way.  In particular,
+         * an uncaught Java exception like NPE can result in Derby
+         * throwing "ERROR 40XT0: An internal error was identified by
+         * RawStore module" for all statements on the connection after
+         * the failure--which we clearly don't want.  If we catch the
+         * error and wrap it, though, the statement will fail but Derby
+         * will continue to run as normal.
+         */ 
             throw StandardException.newException(
-                SQLState.LANG_INVALID_XML_DOCUMENT, xe);
+                SQLState.LANG_INVALID_XML_DOCUMENT, t);
+
         }
 
         // If we get here, the text is valid XML so go ahead
@@ -676,15 +688,26 @@ public class XML
             return new SQLBoolean(null !=
                 sqlxUtil.evalXQExpression(this, false, new int[1]));
 
-        } catch (Exception xe) {
-        // Failed somewhere during evaluation of the XML query expression;
-        // turn error into a StandardException and throw it.
-            if (xe instanceof StandardException)
-                throw (StandardException)xe;
-            else {
-                throw StandardException.newException(
-                    SQLState.LANG_XML_QUERY_ERROR, xe, "XMLEXISTS");
-            }
+        } catch (StandardException se) {
+
+            // Just re-throw it.
+            throw se;
+
+        } catch (Throwable xe) {
+        /* Failed somewhere during evaluation of the XML query expression;
+         * turn error into a StandardException and throw it.  Note: we
+         * catch "Throwable" here to catch as many Xalan-produced errors
+         * as possible in order to minimize the chance of an uncaught Xalan
+         * error (such as a NullPointerException) causing Derby to fail in
+         * a more serious way.  In particular, an uncaught Java exception
+         * like NPE can result in Derby throwing "ERROR 40XT0: An internal
+         * error was identified by RawStore module" for all statements on
+         * the connection after the failure--which we clearly don't want.  
+         * If we catch the error and wrap it, though, the statement will
+         * fail but Derby will continue to run as normal. 
+         */
+            throw StandardException.newException(
+                SQLState.LANG_XML_QUERY_ERROR, xe, "XMLEXISTS");
         }
     }
 
@@ -744,9 +767,19 @@ public class XML
             // Just re-throw it.
             throw se;
 
-        } catch (Exception xe) {
-        // Failed somewhere during evaluation of the XML query expression;
-        // turn error into a StandardException and throw it.
+        } catch (Throwable xe) {
+        /* Failed somewhere during evaluation of the XML query expression;
+         * turn error into a StandardException and throw it.  Note: we
+         * catch "Throwable" here to catch as many Xalan-produced errors
+         * as possible in order to minimize the chance of an uncaught Xalan
+         * error (such as a NullPointerException) causing Derby to fail in
+         * a more serious way.  In particular, an uncaught Java exception
+         * like NPE can result in Derby throwing "ERROR 40XT0: An internal
+         * error was identified by RawStore module" for all statements on
+         * the connection after the failure--which we clearly don't want.  
+         * If we catch the error and wrap it, though, the statement will
+         * fail but Derby will continue to run as normal. 
+         */
             throw StandardException.newException(
                 SQLState.LANG_XML_QUERY_ERROR, xe, "XMLQUERY");
         }
