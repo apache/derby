@@ -1,4 +1,4 @@
-d/*
+/*
  *
  * Derby - Class TestConfiguration
  *
