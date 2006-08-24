@@ -1201,6 +1201,7 @@ public abstract class EmbedPreparedStatement
 		// for these calls is consistent with the matching setXXX() value.
 
 		// These are the supported setObject conversions from JDBC 3.0 table B5
+		// Byte and Short were added to the table in JDBC 4.0.
 
 		if (x instanceof String) {
 			setString(parameterIndex, (String) x);
@@ -1209,6 +1210,14 @@ public abstract class EmbedPreparedStatement
 
 		if (x instanceof Boolean) {
 			setBoolean(parameterIndex, ((Boolean) x).booleanValue());
+			return;
+		}
+		if (x instanceof Byte) {
+			setByte(parameterIndex, ((Byte) x).byteValue());
+			return;
+		}
+		if (x instanceof Short) {
+			setShort(parameterIndex, ((Short) x).shortValue());
 			return;
 		}
 		if (x instanceof Integer) {
