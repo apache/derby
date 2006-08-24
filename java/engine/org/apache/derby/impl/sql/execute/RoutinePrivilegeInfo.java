@@ -78,13 +78,21 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 		dd.startWriting(lcc);
 		for( Iterator itr = grantees.iterator(); itr.hasNext();)
 		{
+			// Keep track to see if any privileges are revoked by a revoke 
+			// statement. If a privilege is not revoked, we need to raise a
+			// warning.
+			boolean privileges_revoked = false;
 			String grantee = (String) itr.next();
-			if (dd.addRemovePermissionsDescriptor( grant, routinePermsDesc, grantee, tc))
+			if (dd.addRemovePermissionsDescriptor( grant, routinePermsDesc, grantee, tc)) 
+			{
+				privileges_revoked = true;	
 				//Derby currently supports only restrict form of revoke execute
 				//privilege and that is why, we are sending invalidation action 
 				//as REVOKE_PRIVILEGE_RESTRICT rather than REVOKE_PRIVILEGE
         		dd.getDependencyManager().invalidateFor(routinePermsDesc, DependencyManager.REVOKE_PRIVILEGE_RESTRICT, lcc);
-
+			}
+			
+			addWarningIfPrivilegeNotRevoked(activation, grant, privileges_revoked, grantee);
 		}
 	} // end of executeConstantAction
 }

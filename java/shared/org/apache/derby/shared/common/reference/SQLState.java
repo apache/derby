@@ -638,7 +638,8 @@ public interface SQLState {
 	String LANG_VALUE_TRUNCATED                                        = "01505";
 	String LANG_SYNONYM_UNDEFINED                                      = "01522";
 	String LANG_NULL_ELIMINATED_IN_SET_FUNCTION						   = "01003";
-
+	String LANG_PRIVILEGE_NOT_REVOKED						   		   = "01006";
+	
 	String LANG_NO_ROW_FOUND									   	   = "02000";
 
 	String LANG_TOO_MANY_DYNAMIC_RESULTS_RETURNED					   = "0100E";
@@ -1598,7 +1599,7 @@ public interface SQLState {
     String UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER  = "01J12";
     String NUMBER_OF_ROWS_TOO_LARGE_FOR_INT = "01J13";
 	String SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION = "01J14";
-
+		
     String CURSOR_OPERATION_CONFLICT = "01001";
 
 

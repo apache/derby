@@ -76,4 +76,24 @@ public abstract class PrivilegeInfo
 									  sd.getSchemaName(),
 									  objectDescriptor.getDescriptorName());
 	}
+	
+	/**
+	 * This method adds a warning if a revoke statement has not revoked 
+	 * any privileges from a grantee.
+	 * 
+	 * @param activation
+	 * @param grant true if grant, false if revoke
+	 * @param privileges_revoked true, if at least one privilege has been 
+	 * 							revoked from a grantee, false otherwise
+	 * @param grantee authorization id of the user
+	 */
+	protected void addWarningIfPrivilegeNotRevoked( Activation activation,
+													boolean grant,
+													boolean privileges_revoked,
+													String grantee) 
+	{
+		if(!grant && !privileges_revoked)
+			activation.addWarning(StandardException.newWarning
+					(SQLState.LANG_PRIVILEGE_NOT_REVOKED, grantee));
+	}
 }

@@ -23,9 +23,14 @@ revoke delete on satheesh.tsat from foo;
 
 set connection satConnection;
 
--- Revoke permissions not granted already
+-- Revoke table permissions not granted already. This should raise warnings.
 revoke trigger on satheesh.tsat from foo;
 revoke references on satheesh.tsat from foo;
+-- This should raise warnings for bar
+revoke insert on satheesh.tsat from foo, bar;
+-- This should raise warnings for both foo and bar
+revoke insert on satheesh.tsat from foo, bar;
+grant insert on satheesh.tsat to foo;
 
 -- Following revokes should revoke permissions
 revoke update on satheesh.tsat from foo;
@@ -48,6 +53,9 @@ NO SQL
 RETURNS NULL ON NULL INPUT
 EXTERNAL NAME 'java.lang.Math.abs'
 LANGUAGE JAVA PARAMETER STYLE JAVA;
+
+-- Revoke routine permission not granted already. This should raise a warning.
+revoke execute on function F_ABS(int) from bar RESTRICT;
 
 grant execute on function F_ABS to foo;
 grant execute on function F_ABS(int) to bar;
