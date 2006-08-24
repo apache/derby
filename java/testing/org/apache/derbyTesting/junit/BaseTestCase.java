@@ -21,6 +21,7 @@ package org.apache.derbyTesting.junit;
 
 import junit.framework.TestCase;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -65,15 +66,15 @@ public abstract class BaseTestCase
      * <BR>
      * Method is final to ensure security manager is
      * enabled by default. Tests should not need to
-     * ovveride runTest, instead use test methods
+     * override runTest, instead use test methods
      * setUp, tearDown methods and decorators.
      */
     public final void runBare() throws Throwable {
         // still not ready for prime time
     	//if (getTestConfiguration().defaultSecurityManagerSetup())
     	//	assertSecurityManager();
-    	
-    	super.runBare();
+    	 
+    	super.runBare();   
     }
 
     /**
@@ -82,6 +83,16 @@ public abstract class BaseTestCase
     public final TestConfiguration getTestConfiguration()
     {
     	return TestConfiguration.getCurrent();
+    }
+    
+    /**
+     * Get the folder where a test leaves any information
+     * about its failure.
+     * @return Folder to use.
+     * @see TestConfiguration#getFailureFolder(TestCase)
+     */
+    public final File getFailureFolder() {
+        return getTestConfiguration().getFailureFolder(this);
     }
     
     /**

@@ -19,11 +19,15 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.File;
 import java.security.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
 
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 
@@ -59,6 +63,7 @@ public class TestConfiguration {
     }
     
     /**
+     * WORK IN PROGRESS
      * Set this Thread's current configuration for running tests.
      * @param config Configuration to set it to.
      */
@@ -66,7 +71,34 @@ public class TestConfiguration {
     {
         CURRENT_CONFIG.set(config);
     }
-    
+    /**
+     * WORK IN PROGRESS
+     * Return a decorator for the passed in tests that sets the
+     * configuration for the client to be Derby's JDBC client
+     * and to start the network server at setUp and shut it
+     * down at tearDown.
+     * <BR>
+     * The database configuration (name etc.) is based upon
+     * the previous configuration.
+     * <BR>
+     * The previous TestConfiguration is restored at tearDown.
+     * @param tests
+     * @return
+     */
+    public static Test derbyClientServerDecorator(Test tests)
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+        
+        // Already in the correct configuration, do nothing.
+        if (config.getJDBCClient().isDerbyNetClient())
+            return tests;
+        
+        TestConfiguration derbyClientConfig = null;
+            // new TestConfiguration(config, JDBCClient.DERBYNETCLIENT);
+        
+        return null;
+    }
+
     /**
      * This constructor creates a TestConfiguration from a Properties object.
      *
@@ -111,7 +143,7 @@ public class TestConfiguration {
     /**
      * Get the given system property as specified at startup.
      */
-	public	String	getSystemStartupProperty( String key )
+	private	String	getSystemStartupProperty( String key )
 	{
 		return systemStartupProperties.getProperty( key );
 	}
@@ -342,6 +374,7 @@ public class TestConfiguration {
 		//
 		// jvm.java sets this property to the build jar directory
 		// if we are using derbyTesting.jar.
+        // 
 		//
 		
 		return ( !UNUSED.equals( getSystemStartupProperty( "derbyTesting.codejar" ) ) );
@@ -353,6 +386,61 @@ public class TestConfiguration {
      */
     public boolean isSingleLegXA () {
         return singleLegXA;
+    }
+    
+    /**
+     * Get a folder already created where a test can
+     * write its failure information. The name of the folder,
+     * relative to ${user.dir} is:
+     * <BR>
+     * <code>
+     * fail/client/testclass/testname
+     * <code>
+     * <UL>
+     * <LI> client - value of JDBCClient.getName() for the test's configuration
+     * <LI> testclass - last element of the class name
+     * <LI> testname - value of test.getName()
+     *  </UL>
+     */
+    File getFailureFolder(TestCase test){
+        
+        StringBuffer sb = new StringBuffer();
+      
+        sb.append("fail");
+        sb.append(File.separatorChar);
+        sb.append(getJDBCClient().getName());
+        sb.append(File.separatorChar);
+        
+        String className = test.getClass().getName();
+        int lastDot = className.lastIndexOf('.');
+        if (lastDot != -1)
+            className = className.substring(lastDot+1, className.length());
+        
+        sb.append(className);
+        sb.append(File.separatorChar);
+        sb.append(test.getName());
+        
+        String base = sb.toString().intern();
+        final File folder = new File(base);
+        
+        // Create the folder
+        // TODO: Dump this configuration in some human readable format
+        synchronized (base) {
+            
+            AccessController.doPrivileged
+            (new java.security.PrivilegedAction(){
+                public Object run(){
+                    if (folder.exists()) {
+                        // do something
+                    }            
+                    return new Boolean(folder.mkdirs());
+                }
+            }
+             );            
+        }
+               
+        return folder;
+        
     }
     
     /**

@@ -19,17 +19,9 @@
  */
 package org.apache.derbyTesting.functionTests.util;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.URL;
 import java.sql.Connection;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 import junit.framework.Test;
 
@@ -38,10 +30,9 @@ import junit.framework.Test;
  * a master output file.
  *
  */
-public abstract class ScriptTestCase extends BaseJDBCTestCase {
+public abstract class ScriptTestCase extends CanonTestCase {
 	
 	private final String inputEncoding;
-	private final String outputEncoding = "US-ASCII";
 
 	/**
 	 * Create a ScriptTestCase to run a single test
@@ -109,74 +100,20 @@ public abstract class ScriptTestCase extends BaseJDBCTestCase {
 		assertNotNull("SQL script missing: " + resource, sql);
 		
 		InputStream sqlIn = openTestResource(sql);
-		
-		ByteArrayOutputStream rawBytes =
-			new ByteArrayOutputStream(20 * 1024);
-			
+					
 		Connection conn = getConnection();
 		org.apache.derby.tools.ij.runScript(
 				conn,
 				sqlIn,
 				inputEncoding,
-                rawBytes,
+                getOutputStream(),
 				outputEncoding);
 		
 		if (!conn.isClosed() && !conn.getAutoCommit())
 		    conn.commit();
 		
-        rawBytes.flush();
-        rawBytes.close();
 		sqlIn.close();
-			
-		
-		byte[] testRawBytes = rawBytes.toByteArray();
-		
-		try {
-			URL canonURL = getTestResource(canon);
-			assertNotNull("No master file " + canon, canonURL);
-				
-			InputStream canonStream = getTestResource(canon).openStream();
-			
-			BufferedReader cannonReader = new BufferedReader(
-					new InputStreamReader(canonStream, outputEncoding));
-			
-			BufferedReader testOutput = new BufferedReader(
-					new InputStreamReader(
-					new ByteArrayInputStream(testRawBytes),
-					   outputEncoding));
-			
-			for (int lineNumber = 1; ; lineNumber++)
-			{
-				String testLine = testOutput.readLine();
-				
-				// Skip blank lines.
-				if ("".equals(testLine))
-					continue;
-				
-				String canonLine = cannonReader.readLine();
-					
-				if (canonLine == null && testLine == null)
-					break;
-				
-				if (canonLine == null)
-					fail("More output from test than expected");
-				
-				if (testLine == null)
-					fail("Less output from test than expected, stoped at line"
-							+ lineNumber);
-										
-				assertEquals("Output at line " + lineNumber,
-						canonLine, testLine);
-			}
-			
-			cannonReader.close();
-			testOutput.close();
-		} catch (Throwable t) {
-			FileOutputStream outFile = new FileOutputStream(getName() + ".out");
-			outFile.write(testRawBytes);
-			outFile.flush();
-			outFile.close();
-			throw t;
-		}
+        
+        this.compareCanon(canon);
 	}
 }
