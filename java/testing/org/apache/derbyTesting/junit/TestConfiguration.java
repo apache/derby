@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.junit;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.security.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -67,12 +68,11 @@ public class TestConfiguration {
      * Set this Thread's current configuration for running tests.
      * @param config Configuration to set it to.
      */
-    private static void setCurrent(TestConfiguration config)
+    static void setCurrent(TestConfiguration config)
     {
         CURRENT_CONFIG.set(config);
     }
     /**
-     * WORK IN PROGRESS
      * Return a decorator for the passed in tests that sets the
      * configuration for the client to be Derby's JDBC client
      * and to start the network server at setUp and shut it
@@ -84,19 +84,67 @@ public class TestConfiguration {
      * The previous TestConfiguration is restored at tearDown.
      * @param tests
      * @return
+     * @throws Exception 
      */
-    public static Test derbyClientServerDecorator(Test tests)
+    public static Test derbyClientServerDecorator(Class suite) throws Exception
     {
         TestConfiguration config = TestConfiguration.getCurrent();
         
-        // Already in the correct configuration, do nothing.
-        if (config.getJDBCClient().isDerbyNetClient())
-            return tests;
+        TestConfiguration derbyClientConfig =
+            new TestConfiguration(config, JDBCClient.DERBYNETCLIENT,
+                    DEFAULT_HOSTNAME, DEFAULT_PORT);
         
-        TestConfiguration derbyClientConfig = null;
-            // new TestConfiguration(config, JDBCClient.DERBYNETCLIENT);
+        TestConfiguration.setCurrent(derbyClientConfig);
         
-        return null;
+        Test test = addSuiteByReflection(suite);
+        
+        TestConfiguration.setCurrent(config);
+            
+        test = new NetworkServerTestSetup(test);
+            
+        return new ChangeConfigurationSetup(derbyClientConfig, test);
+
+    }
+    private static Test addSuiteByReflection(Class clz) throws Exception
+    {
+        Method sm = clz.getMethod("suite", null);
+              
+        return (Test) sm.invoke(null, null);
+    }  
+    
+    
+    /**
+     * Default embedded configuration
+     *
+     */
+    private TestConfiguration() {
+        this.dbName = DEFAULT_DBNAME;
+        this.userName = DEFAULT_USER_NAME;
+        this.userPassword = DEFAULT_USER_PASSWORD;
+        this.hostName = null;
+        this.port = -1;
+        this.singleLegXA = false;
+        
+        this.jdbcClient = JDBCClient.EMBEDDED;
+        url = createJDBCUrlWithDatabaseName(dbName);
+ 
+    }
+    
+    private TestConfiguration(TestConfiguration copy, JDBCClient client,
+            String hostName, int port)
+    {
+        this.dbName = copy.dbName;
+        this.userName = copy.userName;
+        this.userPassword = copy.userPassword;
+
+        this.isVerbose = copy.isVerbose;
+        this.singleLegXA = copy.singleLegXA;
+        this.port = port;
+        
+        this.jdbcClient = client;
+        this.hostName = hostName;
+        
+        this.url = createJDBCUrlWithDatabaseName(dbName);
     }
 
     /**
@@ -106,7 +154,7 @@ public class TestConfiguration {
      */
     private TestConfiguration(Properties props) 
         throws NumberFormatException {
-		systemStartupProperties = props;
+
         dbName = props.getProperty(KEY_DBNAME, DEFAULT_DBNAME);
         userName = props.getProperty(KEY_USER_NAME, DEFAULT_USER_NAME);
         userPassword = props.getProperty(KEY_USER_PASSWORD, 
@@ -139,14 +187,6 @@ public class TestConfiguration {
         }
         url = createJDBCUrlWithDatabaseName(dbName);
     }
-
-    /**
-     * Get the given system property as specified at startup.
-     */
-	private	String	getSystemStartupProperty( String key )
-	{
-		return systemStartupProperties.getProperty( key );
-	}
 
     /**
      * Get the system properties in a privileged block.
@@ -390,7 +430,6 @@ public class TestConfiguration {
     /**
      * Immutable data members in test configuration
      */
-	private	final Properties systemStartupProperties;
     private final String dbName;
     private final String url;
     private final String userName; 
