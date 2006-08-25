@@ -645,6 +645,20 @@ public class SetQueryTimeoutTest
         }
     }
 
+    /** This tests timeout with executeUpdate call. */
+    private static void testTimeoutWithExecuteUpdate(Connection conn)
+        throws TestFailedException
+    {
+    	System.out.println("Testing timeout with executeUpdate call.");
+        try{
+            Statement stmt = conn.createStatement();
+            stmt.setQueryTimeout(TIMEOUT);
+            stmt.executeUpdate(getExecQuery("t"));    
+        } catch (SQLException sqle) {
+        	expectException("XCL52", sqle, "Should have timed out.");
+        }
+    }
+    
     /** Test for DERBY-1692. */
     private static void testRememberTimeoutValue(Connection conn)
         throws TestFailedException
@@ -744,6 +758,7 @@ public class SetQueryTimeoutTest
             testTimeoutWithExec(connections);
             testInvalidTimeoutValue(connections[0]);
             testRememberTimeoutValue(connections[0]);
+            testTimeoutWithExecuteUpdate(connections[0]);
   
             System.out.println("Test SetQueryTimeoutTest PASSED");
         } catch (Throwable e) {

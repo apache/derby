@@ -15,5 +15,6 @@ Execute returned a ResultSet
 Testing that Statement remembers timeout.
 Testing that PreparedStatement remembers timeout.
 Testing that CallableStatement remembers timeout.
+Testing timeout with executeUpdate call.
 Test SetQueryTimeoutTest PASSED
 Closed connections
