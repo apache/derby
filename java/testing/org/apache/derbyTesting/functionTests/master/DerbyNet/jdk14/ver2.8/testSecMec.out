@@ -5,14 +5,14 @@ T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat;create=tr
 T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;
-T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4;
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4;
 T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 SECMEC_USRIDPWD: OK
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+DERBY-1080  EXCEPTION ()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;
 TEST_DS(user=calvin;password=hobbes) OK
@@ -20,8 +20,8 @@ TEST_DS(user=calvin;password=hobbes) OK
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4) OK
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=3;
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3) OK
-# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported
@@ -64,14 +64,14 @@ T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4;
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4;
 T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+DERBY-1080  EXCEPTION ()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
@@ -79,8 +79,8 @@ TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connect
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4) OK
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=3; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported
@@ -120,14 +120,14 @@ T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;
-T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 SECMEC_USRIDPWD: OK
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+DERBY-1080  EXCEPTION ()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;
 TEST_DS(user=calvin;password=hobbes) OK
@@ -135,8 +135,8 @@ TEST_DS(user=calvin;password=hobbes) OK
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=3;
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3) OK
-# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported
@@ -173,33 +173,33 @@ TEST_DS (,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechan
 Testing with derby.drda.securityMechanism=ENCRYPTED_USER_AND_PASSWORD_SECURITY
 Checking security mechanism authentication with DriverManager
 T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=3; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-SQLSTATE(null): java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+SQLSTATE(null): java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-SQLSTATE(null): java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
-T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+SQLSTATE(null): java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-SQLSTATE(null): java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+SQLSTATE(null): java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+DERBY-1080  EXCEPTION ()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-SQLSTATE(null): java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+SQLSTATE(null): java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
-SQLSTATE(null): java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+SQLSTATE(null): java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=3; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-SQLSTATE(null): java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+SQLSTATE(null): java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-SQLSTATE(null): java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
-# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+SQLSTATE(null): java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported
@@ -239,14 +239,14 @@ T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
 T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
 T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
-T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
 Test DERBY-1080
 withConnectionPooling
-DERBY-1080  EXCEPTION ()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+DERBY-1080  EXCEPTION ()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 ******testAllCombinationsOfUserPasswordsSecMecInput***
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
@@ -254,8 +254,8 @@ TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connect
 TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=3; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
-# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
-TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.NoSuchAlgorithmException is caught when initializing EncryptionManager 'DH KeyPairGenerator not available'
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  java.security.InvalidAlgorithmParameterException is caught when initializing EncryptionManager 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)'
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported

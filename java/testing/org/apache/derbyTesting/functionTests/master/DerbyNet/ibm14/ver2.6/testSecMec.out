@@ -8,6 +8,7 @@ T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9;
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4;
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4;
+T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 SECMEC_USRIDPWD: OK
 Test DERBY-1080
 withConnectionPooling
@@ -22,6 +23,8 @@ TEST_DS (user=calvin;password=hobbes,securityMechanism=4) OK
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3) OK
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9;
 TEST_DS (user=calvin;password=hobbes,securityMechanism=9) OK
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported
 TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  null password not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=4;
@@ -30,6 +33,8 @@ TEST_DS (user=calvin,securityMechanism=4) OK
 TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=9; - EXCEPTION null password not supported
 TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes; - EXCEPTION null userid not supported
 TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=4; - EXCEPTION null userid not supported
@@ -38,6 +43,8 @@ TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  
 TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=9; - EXCEPTION null userid not supported
 TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:; - EXCEPTION Invalid database url syntax: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;
 TEST_DS()EXCEPTION getDataSourceConnection()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=4; - EXCEPTION null userid not supported
@@ -46,6 +53,11 @@ TEST_DS (,securityMechanism=4)EXCEPTION testSecurityMechanism()  null userid not
 TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=9; - EXCEPTION null userid not supported
 TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=8; - EXCEPTION null userid not supported
+TEST_DS (,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
+Test USRSSBPWD_with_BUILTIN - derby.drda.securityMechanism=null
+Turning ON Derby BUILTIN authentication
+EXCEPTION getConnectionWithSecMec()  security mechanism '8' not supported
 -----
 Testing with derby.drda.securityMechanism=USER_ONLY_SECURITY
 Checking security mechanism authentication with DriverManager
@@ -56,6 +68,7 @@ T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4;
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4;
+T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
 Test DERBY-1080
 withConnectionPooling
@@ -69,6 +82,8 @@ TEST_DS (user=calvin;password=hobbes,securityMechanism=4) OK
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported
 TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  null password not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=4;
@@ -77,6 +92,8 @@ TEST_DS (user=calvin,securityMechanism=4) OK
 TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=9; - EXCEPTION null password not supported
 TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes; - EXCEPTION null userid not supported
 TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=4; - EXCEPTION null userid not supported
@@ -85,6 +102,8 @@ TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  
 TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=9; - EXCEPTION null userid not supported
 TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:; - EXCEPTION Invalid database url syntax: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;
 TEST_DS()EXCEPTION getDataSourceConnection()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=4; - EXCEPTION null userid not supported
@@ -93,6 +112,8 @@ TEST_DS (,securityMechanism=4)EXCEPTION testSecurityMechanism()  null userid not
 TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=9; - EXCEPTION null userid not supported
 TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=8; - EXCEPTION null userid not supported
+TEST_DS (,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 -----
 Testing with derby.drda.securityMechanism=CLEAR_TEXT_PASSWORD_SECURITY
 Checking security mechanism authentication with DriverManager
@@ -103,6 +124,7 @@ T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 SECMEC_USRIDPWD: OK
 Test DERBY-1080
 withConnectionPooling
@@ -116,6 +138,8 @@ TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityM
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3) OK
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported
 TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  null password not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
@@ -124,6 +148,8 @@ TEST_DS (user=calvin,securityMechanism=4)EXCEPTION testSecurityMechanism()  Conn
 TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=9; - EXCEPTION null password not supported
 TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes; - EXCEPTION null userid not supported
 TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=4; - EXCEPTION null userid not supported
@@ -132,6 +158,8 @@ TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  
 TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=9; - EXCEPTION null userid not supported
 TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:; - EXCEPTION Invalid database url syntax: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;
 TEST_DS()EXCEPTION getDataSourceConnection()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=4; - EXCEPTION null userid not supported
@@ -140,6 +168,8 @@ TEST_DS (,securityMechanism=4)EXCEPTION testSecurityMechanism()  null userid not
 TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=9; - EXCEPTION null userid not supported
 TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=8; - EXCEPTION null userid not supported
+TEST_DS (,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 -----
 Testing with derby.drda.securityMechanism=ENCRYPTED_USER_AND_PASSWORD_SECURITY
 Checking security mechanism authentication with DriverManager
@@ -150,6 +180,7 @@ T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neel
 T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9;
 T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
 T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
 SECMEC_USRIDPWD: OK
 Test DERBY-1080
 withConnectionPooling
@@ -164,6 +195,8 @@ TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityM
 TEST_DS (user=calvin;password=hobbes,securityMechanism=3) OK
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9;
 TEST_DS (user=calvin;password=hobbes,securityMechanism=9) OK
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported
 TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  null password not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
@@ -172,6 +205,8 @@ TEST_DS (user=calvin,securityMechanism=4)EXCEPTION testSecurityMechanism()  Conn
 TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=9; - EXCEPTION null password not supported
 TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes; - EXCEPTION null userid not supported
 TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=4; - EXCEPTION null userid not supported
@@ -180,6 +215,8 @@ TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  
 TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=9; - EXCEPTION null userid not supported
 TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
 Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:; - EXCEPTION Invalid database url syntax: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;
 TEST_DS()EXCEPTION getDataSourceConnection()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=4; - EXCEPTION null userid not supported
@@ -188,6 +225,67 @@ TEST_DS (,securityMechanism=4)EXCEPTION testSecurityMechanism()  null userid not
 TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
 # jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=9; - EXCEPTION null userid not supported
 TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=8; - EXCEPTION null userid not supported
+TEST_DS (,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
+-----
+Testing with derby.drda.securityMechanism=STRONG_PASSWORD_SUBSTITUTE_SECURITY
+Checking security mechanism authentication with DriverManager
+T4: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=3; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T1: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat - EXCEPTION null userid not supported
+T2: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=max; - EXCEPTION null password not supported
+T3: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T5: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=9; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T6: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T8: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+T9: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=neelima;password=lee;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+SECMEC_USRIDPWD:EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+Test DERBY-1080
+withConnectionPooling
+DERBY-1080  EXCEPTION ()  Connection authorization failure occurred.  Reason: security mechanism not supported
+******testAllCombinationsOfUserPasswordsSecMecInput***
+Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+TEST_DS(user=calvin;password=hobbes)EXCEPTION getDataSourceConnection()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+TEST_DS (user=calvin;password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=3; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+TEST_DS (user=calvin;password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=9; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+TEST_DS (user=calvin;password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin;password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
+Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin; - EXCEPTION null password not supported
+TEST_DS(user=calvin)EXCEPTION getDataSourceConnection()  null password not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=4; - EXCEPTION Connection authorization failure occurred.  Reason: security mechanism not supported
+TEST_DS (user=calvin,securityMechanism=4)EXCEPTION testSecurityMechanism()  Connection authorization failure occurred.  Reason: security mechanism not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=3; - EXCEPTION null password not supported
+TEST_DS (user=calvin,securityMechanism=3)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=9; - EXCEPTION null password not supported
+TEST_DS (user=calvin,securityMechanism=9)EXCEPTION testSecurityMechanism()  null password not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:user=calvin;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (user=calvin,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
+Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes; - EXCEPTION null userid not supported
+TEST_DS(password=hobbes)EXCEPTION getDataSourceConnection()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=4; - EXCEPTION null userid not supported
+TEST_DS (password=hobbes,securityMechanism=4)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=3; - EXCEPTION null userid not supported
+TEST_DS (password=hobbes,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=9; - EXCEPTION null userid not supported
+TEST_DS (password=hobbes,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:password=hobbes;securityMechanism=8; - EXCEPTION security mechanism '8' not supported
+TEST_DS (password=hobbes,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
+Test: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:; - EXCEPTION Invalid database url syntax: jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;
+TEST_DS()EXCEPTION getDataSourceConnection()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=4; - EXCEPTION null userid not supported
+TEST_DS (,securityMechanism=4)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=3; - EXCEPTION null userid not supported
+TEST_DS (,securityMechanism=3)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=9; - EXCEPTION null userid not supported
+TEST_DS (,securityMechanism=9)EXCEPTION testSecurityMechanism()  null userid not supported
+# jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:xxxFILTEREDPORTxxx/wombat:;securityMechanism=8; - EXCEPTION null userid not supported
+TEST_DS (,securityMechanism=8)EXCEPTION testSecurityMechanism()  security mechanism '8' not supported
+Test USRSSBPWD_with_BUILTIN - derby.drda.securityMechanism=STRONG_PASSWORD_SUBSTITUTE_SECURITY
+Turning ON Derby BUILTIN authentication
+EXCEPTION getConnectionWithSecMec()  security mechanism '8' not supported
 -----
 Testing with derby.drda.securityMechanism=INVALID_VALUE
 EXPECTED EXCEPTION DRDA_InvalidValue.U:Invalid value, INVALID_VALUE, for derby.drda.securityMechanism.
