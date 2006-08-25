@@ -34,8 +34,8 @@ import junit.framework.Test;
  */
 public class SystemPropertyTestSetup extends TestSetup {
 	
-	private final Properties newValues;
-	private final Properties oldValues;
+	private Properties newValues;
+	private Properties oldValues;
 	
 	/**
 	 * Create a test decorator that sets and restores the passed
@@ -78,6 +78,8 @@ public class SystemPropertyTestSetup extends TestSetup {
        	}
     	// and then reset nay old values
     	setProperties(oldValues);
+        newValues = null;
+        oldValues = null;
     }
     
     private void setProperties(Properties values)
@@ -92,8 +94,12 @@ public class SystemPropertyTestSetup extends TestSetup {
     		boolean change;
     		if (old != null)
     		{
-    			// set, might need to be changed.
-    			if (change = !old.equals(value))
+                // set, might need to be changed.
+                change = !old.equals(value);
+                
+                // If we are not processing the oldValues
+                // then store in the oldValues. Reference equality is ok here.
+    			if (change && (values != oldValues))
     			   oldValues.setProperty(key, old);
     		}
     		else {
