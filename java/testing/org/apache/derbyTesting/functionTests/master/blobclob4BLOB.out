@@ -568,15 +568,15 @@ clobTest92 finished
 START: clobTest94
 shortClob length after commit is 26
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 clobTest94 finished
 START: clobTest95
 shortClob length after closing connection is 26
@@ -587,7 +587,7 @@ SQLSTATE(08003): No current connection.
 FAIL -- unexpected exception ****************
 SQLSTATE(08003): No current connection.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
 SQLSTATE(08003): No current connection.
 clobTest95 finished
@@ -832,28 +832,28 @@ blobTest93 finished
 START: blobTest94
 shortBlob length after commit is 26
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 blobTest94 finished
 START: blobTest95
 shortBlob length after closing the connection is 26
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 FAIL -- unexpected exception ****************
-SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB or CLOBs transaction may be committed, or its connection is closed.
+SQLSTATE(XJ073): The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.
 blobTest95 finished
 START: blobTest96
 blobTest96 finished
