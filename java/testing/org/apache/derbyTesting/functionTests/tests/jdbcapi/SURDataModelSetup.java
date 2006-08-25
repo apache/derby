@@ -22,6 +22,7 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,7 +72,7 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
                          TABLE_EXISTS_SQL_STATE, e.getSQLState());
             
             // The net framework does not give any valuable error code
-            if (TestUtil.isNetFramework()) {
+            if (!TestConfiguration.getCurrent().getJDBCClient().isEmbedded()) {
                 
                 assertEquals("'drop table t1' failed with unexpected error code",
                              NET_ERROR, e.getErrorCode());
