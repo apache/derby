@@ -70,9 +70,8 @@ public abstract class BaseTestCase
      * setUp, tearDown methods and decorators.
      */
     public final void runBare() throws Throwable {
-        // still not ready for prime time
-    	//if (getTestConfiguration().defaultSecurityManagerSetup())
-    	//	assertSecurityManager();
+    	if (getTestConfiguration().defaultSecurityManagerSetup())
+    		assertSecurityManager();
     	 
     	super.runBare();   
     }
