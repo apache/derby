@@ -46,8 +46,10 @@ public class _Suite extends BaseTestCase  {
 
 		TestSuite suite = new TestSuite();
 
+        // These really need to run standalone.
 		//suite.addTestSuite(AutoloadBooting.class);
 		//suite.addTestSuite(AutoloadTest.class);
+        
 		suite.addTest(BlobTest.suite());
 		suite.addTest(CallableStatementTest.suite());
 		suite.addTest(ClobTest.suite());
@@ -62,9 +64,13 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(RowIdNotImplementedTest.suite());
 		suite.addTest(StatementEventsTest.suite());
 		suite.addTest(StatementTest.suite());
-		suite.addTestSuite(UnsupportedVetter.class);
-		suite.addTest(VerifySignatures.suite());
+		suite.addTestSuite(UnsupportedVetter.class);		
 		suite.addTest(XA40Test.suite());
+        
+        // This test is a little strange in its suite
+        // method in that it accesses 
+        // the database to determine the set of tests to run.
+        // suite.addTest(VerifySignatures.suite());
 		
 		return suite;
 	}
