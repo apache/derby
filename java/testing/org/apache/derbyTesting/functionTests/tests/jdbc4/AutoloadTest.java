@@ -110,18 +110,18 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
             } catch (PrivilegedActionException e) {
                 // can't read property, assume not autoloading.
             }
-            
+                        
             // Also auto loading if this is JDBC 4 and loading from the
             // jar files, due to the required manifest entry.
             if (JDBC.vmSupportsJDBC4() &&
-                    TestConfiguration.getCurrent().loadingFromJars())
+                    TestConfiguration.loadingFromJars())
                 autoloadingCurrentDriver = true;
           
             if (autoloadingCurrentDriver)
                 suite.addTestSuite(AutoloadTest.class);
 
         }
-        
+               
         return suite;
     }
 

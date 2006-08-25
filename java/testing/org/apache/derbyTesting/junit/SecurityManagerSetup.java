@@ -37,8 +37,12 @@ import junit.framework.TestSuite;
  */
 public final class SecurityManagerSetup extends TestSetup {
 	
-	
 	private static final Properties classPathSet = new Properties();
+    
+    /**
+     * True if the classes are loaded from jars.
+     */
+    static boolean isJars;
 	
 	/**
 	 * True if a security manager was installed outside of the
@@ -214,13 +218,15 @@ public final class SecurityManagerSetup extends TestSetup {
 		if (isClasspath) {
 			classPathSet.setProperty("derbyTesting.codeclasses",
 					testing.toExternalForm());
+            isJars = false;
 			return false;
 		}
 		classPathSet.setProperty("derbyTesting.testjar", stripJar(testing));
+        isJars = true;
 		
 		URL derby = null;
 		try {
-			derby = getURL(org.apache.derby.jdbc.EmbeddedDataSource.class);
+			derby = getURL(org.apache.derby.jdbc.EmbeddedSimpleDataSource.class);
 		} catch (java.lang.NoClassDefFoundError e) {
 			derby = testing;
 		}		

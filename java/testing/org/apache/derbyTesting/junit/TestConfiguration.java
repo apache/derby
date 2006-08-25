@@ -319,15 +319,9 @@ public class TestConfiguration {
 	 * the server) comes out of a jar file.
 	 * </p>
 	 */
-	public	boolean	loadingFromJars()
+	public static boolean loadingFromJars()
 	{
-		//
-		// jvm.java sets this property to the build jar directory
-		// if we are using derbyTesting.jar.
-        // 
-		//
-		
-		return ( !UNUSED.equals( getSystemStartupProperty( "derbyTesting.codejar" ) ) );
+        return SecurityManagerSetup.isJars;
 	}
 
     /**

@@ -36,6 +36,7 @@ import junit.framework.*;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public	class	AutoloadBooting	extends	BaseJDBCTestCase
 {
@@ -355,7 +356,7 @@ public	class	AutoloadBooting	extends	BaseJDBCTestCase
         // This test is only run in JDBC 4 or higher which means the
         // drivers will always be auto-loading when the classes are
         // being loaded from the jars.
-		boolean		isAutoloading = getTestConfiguration().loadingFromJars();
+		boolean		isAutoloading = TestConfiguration.loadingFromJars();
 		
 		//
 		// Forcibly load the network client if we are not autoloading it.
