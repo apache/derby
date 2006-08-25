@@ -318,16 +318,6 @@ public class JDBC {
 		}
 		rs.close();
 	}
-    
-    /**
-     * Assert a SQL state is the expected value.
-     * @param expected Expected SQLState.
-     * @param sqle SQLException caught
-     */
-    public static void assertSQLState(String expected, SQLException sqle)
-    {
-        Assert.assertEquals("Unexpected SQL State", expected, sqle.getSQLState());
-    }
 	
 	/**
 	 * Escape a non-qualified name so that it is suitable

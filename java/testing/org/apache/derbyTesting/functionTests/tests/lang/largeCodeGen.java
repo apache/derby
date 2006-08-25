@@ -116,7 +116,7 @@ public class largeCodeGen extends BaseJDBCTestCase
             // The top level exception is expected to be
             // the "user-friendly" query is too complex
             // rather than some linkage error.
-            JDBC.assertSQLState("42ZA0", e);
+            assertSQLState("42ZA0", e);
 			return true;
 			
 		}
@@ -298,7 +298,7 @@ public class largeCodeGen extends BaseJDBCTestCase
             // The top level exception is expected to be
             // the "user-friendly" query is too complex
             // rather than some linkage error.
-            JDBC.assertSQLState("42ZA0", sqle);
+            assertSQLState("42ZA0", sqle);
 
 			return true;
 			
@@ -411,7 +411,7 @@ public class largeCodeGen extends BaseJDBCTestCase
             // The top level exception is expected to be
             // the "user-friendly" query is too complex
             // rather than some linkage error.
-            JDBC.assertSQLState("42ZA0", e);
+            assertSQLState("42ZA0", e);
         }
 
         return true;
