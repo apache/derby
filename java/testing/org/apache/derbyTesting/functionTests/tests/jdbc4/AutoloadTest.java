@@ -30,12 +30,15 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import java.security.PrivilegedActionException;
 import java.sql.*;
 import java.util.*;
 import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public	class	AutoloadTest	extends	BaseJDBCTestCase
 {
@@ -72,6 +75,57 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
 	//	JUnit BEHAVIOR
 	//
 	/////////////////////////////////////////////////////////////
+    
+    /**
+     * Only run a test if the driver will be auto-loaded.
+     */
+    public static Test suite()
+    {
+        TestSuite suite = new TestSuite();
+        
+        // need DriverManager at least and Derby drivers
+        // no interest in testing DB2's client.
+        if (JDBC.vmSupportsJDBC2() &&
+                (usingEmbedded() || usingDerbyNetClient()))
+        {
+
+            boolean autoloadingCurrentDriver = false;
+            
+            // Autoloading if the current driver is defined in the
+            // system property jdbc.drivers, see java.sql.DriverManager.
+            try {
+                String jdbcDrivers = getSystemProperty("jdbc.drivers");
+                if (jdbcDrivers != null)
+                {
+                    // Simple test to see if the driver class is
+                    // in the value. Could get fancy and see if it is
+                    // correctly formatted but not worth it.
+                    String driver =
+                        TestConfiguration.getCurrent().getJDBCClient().getJDBCDriverName();
+                    
+                    if (jdbcDrivers.indexOf(driver) != -1)
+                        autoloadingCurrentDriver = true;
+                }
+                
+            } catch (PrivilegedActionException e) {
+                // can't read property, assume not autoloading.
+            }
+            
+            // Also auto loading if this is JDBC 4 and loading from the
+            // jar files, due to the required manifest entry.
+            if (JDBC.vmSupportsJDBC4() &&
+                    TestConfiguration.getCurrent().loadingFromJars())
+                autoloadingCurrentDriver = true;
+          
+            if (autoloadingCurrentDriver)
+                suite.addTestSuite(AutoloadTest.class);
+
+        }
+        
+        System.out.println("TEST COUNT" + suite.countTestCases());
+        
+        return suite;
+    }
 
 	/////////////////////////////////////////////////////////////
 	//
@@ -101,30 +155,28 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
 		// We expect that the connection to the database will fail for
 		// one reason or another.
 		//
-		if ( getTestConfiguration().autoloading() )
-		{
-			println( "We ARE autoloading..." );
 
-			//
-			// The DriverManager should have autoloaded the client driver.
-			// This means that the connection request is passed on to the
-			// server. The server then determines that the database does
-			// not exist. This raises a different error depending on whether
-			// we're running embedded or with the Derby client.
-			//
-			if ( usingEmbedded() ) { failToConnect( "XJ004" ); }
-			else { failToConnect( "08004" ); }
-		}
-		else
-		{
-			println( "We are NOT autoloading..." );
+		println( "We ARE autoloading..." );
 
-			//
-			// We aren't autoloading the driver. The
-			// DriverManager returns the following SQLState.
-			//
-			failToConnect( "08001" );
-		}
+		//
+		// The DriverManager should have autoloaded the client driver.
+		// This means that the connection request is passed on to the
+		// server. The server then determines that the database does
+		// not exist. This raises a different error depending on whether
+		// we're running embedded or with the Derby client.
+		//
+        String expectedError =
+            usingEmbedded() ? "XJ004" : "08004";
+        
+        failToConnect(expectedError);
+       
+        // Test we can connect successfully to a database!
+        String url = getTestConfiguration().getJDBCUrl();
+        url = url.concat(";create=true");
+        String user = getTestConfiguration().getUserName();
+        String password = getTestConfiguration().getUserPassword();
+        DriverManager.getConnection(url, user, password).close();
+
 	}
 
 	/**
@@ -147,6 +199,8 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
 			println( "Attempting to connect with this URL: '" + connectionURL + "'" );
 			
 			DriverManager.getConnection( connectionURL, properties );
+            
+            fail("Connection succeed, expected to fail.");
 		}
 		catch ( SQLException e ) { se = e; }
 

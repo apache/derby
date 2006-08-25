@@ -61,6 +61,7 @@ public	class	AutoloadBooting	extends	BaseJDBCTestCase
 	//	STATE
 	//
 	/////////////////////////////////////////////////////////////
+    
 
 	/////////////////////////////////////////////////////////////
 	//
@@ -82,6 +83,18 @@ public	class	AutoloadBooting	extends	BaseJDBCTestCase
 	//
 	/////////////////////////////////////////////////////////////
 
+    /**
+     * Only run embedded.
+     */
+    public static Test suite() {
+        TestSuite suite = new TestSuite();
+        
+        if (usingEmbedded())
+            suite.addTestSuite(AutoloadBooting.class);
+        
+        return suite;
+    }
+    
 	/////////////////////////////////////////////////////////////
 	//
 	//	TEST ENTRY POINTS
@@ -102,15 +115,6 @@ public	class	AutoloadBooting	extends	BaseJDBCTestCase
 		// its progress.
 		//
 		//CONFIG.setVerbosity( true );
-
-		//
-		// Only run embedded.
-		//
-		if ( !usingEmbedded() )
-		{
-			println( "Not running in the embedded framework. Exitting..." );
-			return;
-		}
 
 		vetInitialization();
 		scenario1_3();
@@ -348,16 +352,19 @@ public	class	AutoloadBooting	extends	BaseJDBCTestCase
 	private	void	loadNetworkClientDriver()
 		throws Exception
 	{
-		boolean		isAutoloading = !getTestConfiguration().autoloading();
+        // This test is only run in JDBC 4 or higher which means the
+        // drivers will always be auto-loading when the classes are
+        // being loaded from the jars.
+		boolean		isAutoloading = getTestConfiguration().loadingFromJars();
 		
 		//
 		// Forcibly load the network client if we are not autoloading it.
 		//
-		if ( isAutoloading )
+		if ( !isAutoloading )
 		{
 			println( "Not autoloading, so forcibly faulting in the client driver." );
 
-			Class.forName( CLIENT_DRIVER_NAME );
+			Class.forName( CLIENT_DRIVER_NAME ).newInstance();
 		}
 
 		//
