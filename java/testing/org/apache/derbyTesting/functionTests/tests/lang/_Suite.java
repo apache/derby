@@ -30,6 +30,12 @@ import junit.framework.TestSuite;
 /**
  * Suite to run all JUnit tests in this package:
  * org.apache.derbyTesting.functionTests.tests.lang
+ * <P>
+ * All tests are run "as-is", just as if they were run
+ * individually. Thus this test is just a collection
+ * of all the JUNit tests in this package (excluding itself).
+ * While the old test harness is in use, some use of decorators
+ * may be required.
  *
  */
 public class _Suite extends BaseTestCase  {
@@ -52,7 +58,7 @@ public class _Suite extends BaseTestCase  {
         // suite.addTest(largeCodeGen.suite());
 
 		// suite.addTest(PrepareExecuteDDL.suite());
-		// suite.addTest(LangScripts.suite());
+		suite.addTest(LangScripts.suite());
 		
 		// Tests that are compiled using 1.4 target need to
 		// be added this way, otherwise creating the suite

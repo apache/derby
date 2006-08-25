@@ -28,20 +28,32 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 public final class LangScripts extends ScriptTestCase {
 	
 	/**
-	 * All the langauge SQL scripts to be run as JUnit tests.
+	 * Language SQL scripts that run under all configurations.
 	 */
 	private static final String[] SQL_LANGUAGE_TESTS = {
-		"arithmetic",
-		"bit2",
 		"case",
 		"constantExpression",
-		"depend",
-		"derived",
-		"union",
 		};
-	
+
+    /**
+     * Language SQL scripts that run under Derby's clients configurations.
+     */
+    private static final String[] DERBY_TESTS = {
+        "bit2",
+        "derived",
+        };
+    
+    /**
+     * Language SQL scripts that only run in embedded.
+     */
+    private static final String[] EMBEDDED_TESTS = {
+        "arithmetic",
+        "depend",
+        "union",
+        };	
+
 	/**
-	 * Run a set of langauge SQL scripts passed in on the
+	 * Run a set of language SQL scripts passed in on the
 	 * command line.
 	 * <code>
 	 * example
@@ -57,7 +69,16 @@ public final class LangScripts extends ScriptTestCase {
 	 * Return the suite that runs all the langauge SQL scripts.
 	 */
 	public static Test suite() {
-    	return getSuite(SQL_LANGUAGE_TESTS);
+        TestSuite suite = new TestSuite();
+        suite.addTest(getSuite(SQL_LANGUAGE_TESTS));
+        
+        if (usingEmbedded() || usingDerbyNetClient())
+            suite.addTest(getSuite(DERBY_TESTS));
+        
+        if (usingEmbedded())
+            suite.addTest(getSuite(EMBEDDED_TESTS));
+        
+        return suite;
     }
     
 	/*
