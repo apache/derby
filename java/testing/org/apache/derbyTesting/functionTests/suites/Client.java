@@ -37,7 +37,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * <LI> suites.AllPackages
  * </UL>
  */
-class Client extends BaseTestCase {
+public class Client extends BaseTestCase {
     /**
      * Use suite method instead.
      */

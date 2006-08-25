@@ -33,7 +33,7 @@ import org.apache.derbyTesting.junit.BaseTestCase;
  * <LI> suites.AllPackages
  * </UL>
  */
-class Embedded extends BaseTestCase {
+public class Embedded extends BaseTestCase {
     /**
      * Use suite method instead.
      */
