@@ -122,8 +122,6 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
 
         }
         
-        System.out.println("TEST COUNT" + suite.countTestCases());
-        
         return suite;
     }
 
