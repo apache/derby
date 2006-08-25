@@ -2900,4 +2900,40 @@ ij(MAMTA1)> drop table mamta1Table;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> drop function f_abs;
 0 rows inserted/updated/deleted
-ij(MAMTA1)> 
+ij(MAMTA1)> -- DERBY-1708
+-- Test LOCK TABLE statement
+connect 'grantRevokeDDL' user 'user1' as user1;
+WARNING 01J14: SQL authorization is being used without first enabling authentication.
+ij(USER1)> create table t100 (i int);
+0 rows inserted/updated/deleted
+ij(USER1)> connect 'grantRevokeDDL' user 'user2' as user2;
+WARNING 01J14: SQL authorization is being used without first enabling authentication.
+ij(USER2)> autocommit off;
+ij(USER2)> -- expect errors
+lock table user1.t100 in exclusive mode;
+ERROR: Failed with SQLSTATE 28506
+ij(USER2)> lock table user1.t100 in share mode;
+ERROR: Failed with SQLSTATE 28506
+ij(USER2)> commit;
+ij(USER2)> set connection user1;
+ij(USER1)> grant select on t100 to user2;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- ok
+lock table user1.t100 in exclusive mode;
+0 rows inserted/updated/deleted
+ij(USER2)> lock table user1.t100 in share mode;
+0 rows inserted/updated/deleted
+ij(USER2)> commit;
+ij(USER2)> set connection user1;
+ij(USER1)> revoke select on t100 from user2;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- expect errors
+lock table user1.t100 in exclusive mode;
+ERROR: Failed with SQLSTATE 28506
+ij(USER2)> lock table user1.t100 in share mode;
+ERROR: Failed with SQLSTATE 28506
+ij(USER2)> commit;
+ij(USER2)> autocommit on;
+ij(USER2)> 

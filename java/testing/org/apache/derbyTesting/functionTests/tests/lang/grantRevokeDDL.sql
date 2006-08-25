@@ -1830,3 +1830,29 @@ set connection mamta1;
 
 drop table mamta1Table;
 drop function f_abs;
+
+-- DERBY-1708
+-- Test LOCK TABLE statement
+connect 'grantRevokeDDL' user 'user1' as user1;
+create table t100 (i int);
+connect 'grantRevokeDDL' user 'user2' as user2;
+autocommit off;
+-- expect errors
+lock table user1.t100 in exclusive mode;
+lock table user1.t100 in share mode;
+commit;
+set connection user1;
+grant select on t100 to user2;
+set connection user2;
+-- ok
+lock table user1.t100 in exclusive mode;
+lock table user1.t100 in share mode;
+commit;
+set connection user1;
+revoke select on t100 from user2;
+set connection user2;
+-- expect errors
+lock table user1.t100 in exclusive mode;
+lock table user1.t100 in share mode;
+commit;
+autocommit on;

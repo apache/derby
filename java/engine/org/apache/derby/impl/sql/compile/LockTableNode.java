@@ -31,6 +31,8 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
+import org.apache.derby.iapi.sql.conn.Authorizer;
+
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
@@ -157,6 +159,14 @@ public class LockTableNode extends MiscellaneousStatementNode
 		/* Statement is dependent on the TableDescriptor and ConglomerateDescriptor */
 		cc.createDependency(lockTableDescriptor);
 		cc.createDependency(cd);
+
+		if (isPrivilegeCollectionRequired())
+		{
+			// need SELECT privilege to perform lock table statement.
+			cc.pushCurrentPrivType(Authorizer.SELECT_PRIV);
+			cc.addRequiredTablePriv(lockTableDescriptor);
+			cc.popCurrentPrivType();
+		}
 
 		return this;
 	}
