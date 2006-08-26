@@ -2846,6 +2846,7 @@ public abstract class EmbedResultSet extends ConnectionChild
     private void updateBinaryStreamInternal(int columnIndex, InputStream x,
                 final boolean lengthLess, long length, String updateMethodName)
             throws SQLException {
+        RawToBinaryFormatStream rawStream;
         if (!lengthLess) {
             if (length < 0)
                 throw newSQLException(SQLState.NEGATIVE_STREAM_LENGTH);
@@ -2857,14 +2858,18 @@ public abstract class EmbedResultSet extends ConnectionChild
                 throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
                         getColumnSQLType(columnIndex));
             }
+            rawStream = new RawToBinaryFormatStream(x, (int)length);
         } else {
             // Force length to -1 if stream is length less.
             length = -1;
+            rawStream = new RawToBinaryFormatStream(x,
+                    getMaxColumnWidth(columnIndex),
+                    getColumnSQLType(columnIndex));
         }
 
         try {
 			getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(
-                    new RawToBinaryFormatStream(x, (int) length), (int) length);
+                    rawStream, (int) length);
 		} catch (StandardException t) {
 			throw noStateChangeException(t);
 		}
@@ -2987,8 +2992,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 if (getColumnType(columnIndex) == Types.CLOB) {
                     // Need column width to figure out if truncation is
                     // needed
-                    int colWidth = resultDescription.getColumnDescriptor(
-                            columnIndex).getType().getMaximumWidth();
+                    int colWidth = getMaxColumnWidth(columnIndex);
 
                     // It is possible that the length of the stream passed in
                     // is greater than the column width, in which case the data
@@ -3002,13 +3006,16 @@ public abstract class EmbedResultSet extends ConnectionChild
                     }
                 }
 
-                utfIn = new ReaderToUTF8Stream(
-                            reader, usableLength, truncationLength);
+                utfIn = new ReaderToUTF8Stream(reader, usableLength,
+                        truncationLength, getColumnSQLType(columnIndex));
             } else {
+                int colWidth = getMaxColumnWidth(columnIndex);
                 utfIn = new ReaderToUTF8Stream(
-                            reader, ReaderToUTF8Stream.UNKNOWN_LENGTH, 0);
+                            reader, colWidth, getColumnSQLType(columnIndex));
             }
 
+            // NOTE: The length argument to setValue is not used. If that
+            //       changes, the value might also have to change.
             getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(
                     utfIn, (int) usableLength);
         } catch (StandardException t) {
@@ -4514,6 +4521,20 @@ public abstract class EmbedResultSet extends ConnectionChild
     {
         return resultDescription.getColumnDescriptor(column)
                        .getType().getTypeId().getSQLTypeName();
+    }
+
+    /**
+     * Return the user-defined maximum size of the column.
+     *
+     * Note that this may be different from the maximum column size Derby is
+     * able, or allowed, to handle (called 'maximum maximum length').
+     *
+     * @param columnIndex the 1-based index of the column
+     * @return the maximum length of the column
+     */
+    private final int getMaxColumnWidth(int columnIndex) {
+        return resultDescription.getColumnDescriptor(columnIndex).
+                    getType().getMaximumWidth();
     }
 
 	private final SQLException dataTypeConversion(String targetType, int column) {

@@ -733,8 +733,7 @@ public abstract class EmbedPreparedStatement
         */
         if (!lengthLess && length > Integer.MAX_VALUE)
                throw newSQLException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE,
-                  preparedStatement.getParameterTypes()
-                  [parameterIndex-1].getSQLstring());
+                                     getParameterSQLType(parameterIndex));
 
         try {
             ReaderToUTF8Stream utfIn;
@@ -784,19 +783,19 @@ public abstract class EmbedPreparedStatement
                     }
                 }
                 // Create a stream with truncation.
-                utfIn = new ReaderToUTF8Stream(reader,
-                                               usableLength,
-                                               truncationLength);
+                utfIn = new ReaderToUTF8Stream(reader, usableLength,
+                        truncationLength, getParameterSQLType(parameterIndex));
             } else {
-                // Create a stream without exactness checks and truncation.
-                utfIn = new ReaderToUTF8Stream(reader,
-                                            ReaderToUTF8Stream.UNKNOWN_LENGTH,
-                                            0);
+                // Create a stream without exactness checks,
+                // but with a maximum limit.
+                utfIn = new ReaderToUTF8Stream(reader, colWidth,
+                                getParameterSQLType(parameterIndex));
             }
 
             // JDBC is one-based, DBMS is zero-based.
             // Note that for lengthless stream, usableLength will be
-            // Integer.MIN_VALUE. This is okay, based on the observation that
+            // the maximum length for the column. 
+            // This is okay, based on the observation that
             // setValue does not use the value for anything at all.
             pvs.getParameterForSet(
                 parameterIndex - 1).setValue(utfIn, usableLength);
@@ -898,13 +897,20 @@ public abstract class EmbedPreparedStatement
         }
 
         try {
-            // If stream is lengthless, force length to -1 to get the expected
-            // behavior in RawToBinaryFormatStream.
+            RawToBinaryFormatStream rawStream;
             if (lengthLess) {
+                // Force length to -1 for good measure.
                 length = -1;
+                DataTypeDescriptor dtd[] = 
+                    preparedStatement.getParameterTypes();
+                rawStream = new RawToBinaryFormatStream(x,
+                        dtd[parameterIndex -1].getMaximumWidth(),
+                        dtd[parameterIndex -1].getTypeName());
+            } else {
+                rawStream = new RawToBinaryFormatStream(x, (int)length);
             }
             getParms().getParameterForSet(parameterIndex - 1).setValue(
-                    new RawToBinaryFormatStream(x, (int)length), (int)length);
+                    rawStream, (int)length);
 
 		} catch (StandardException t) {
 			throw EmbedResultSet.noStateChangeException(t);
@@ -1503,6 +1509,19 @@ public abstract class EmbedPreparedStatement
 
 		return type;
 	}
+
+    /**
+     * Return the SQL type name for the parameter.
+     *
+     * @param parameterIndex the 1-based index of the parameter
+     * @return SQL name of the parameter
+     * @throws SQLException if parameter is out of range
+     */
+    protected final String getParameterSQLType(int parameterIndex)
+            throws SQLException {
+        DataTypeDescriptor[] pTypes = getTypes(parameterIndex);
+        return pTypes[parameterIndex-1].getTypeName();
+    }
 
     /**
      * Set the scale of a parameter.

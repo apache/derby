@@ -111,10 +111,10 @@ No truncation and hence no error
 No truncation and hence no error.
 ===> testing(using setAsciiStream) extin/char32675.data length = 32675
 EXPECTED SQLSTATE(XSDA4): An unexpected exception was thrown
-EXPECTED SQLSTATE(XJ001): Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 32672.: java.io.IOException'.
+EXPECTED SQLSTATE(XJ001): Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 32672.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ===> testing(using setCharacterStream) extin/char32675.data length = 32675
 EXPECTED SQLSTATE(XSDA4): An unexpected exception was thrown
-EXPECTED SQLSTATE(XJ001): Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 32672.: java.io.IOException'.
+EXPECTED SQLSTATE(XJ001): Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 32672.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ===> testing trailing non-blanks(using setString) length = 32675
 expected exception for data > 32672 in length
 ===> testing trailing non-blanks(using setObject) length = 32675

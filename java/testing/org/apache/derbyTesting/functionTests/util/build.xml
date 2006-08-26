@@ -62,6 +62,7 @@
       </classpath>
       <include name="${this.dir}/*.java"/> 
       <include name="${this.dir}/StaticInitializers/*.java"/> 
+      <include name="${this.dir}/streams/*.java"/> 
       <include name="${this.dir}/corruptio/*.java"/>
       <exclude name="${this.dir}/XATestUtil.java"/>
     </javac>

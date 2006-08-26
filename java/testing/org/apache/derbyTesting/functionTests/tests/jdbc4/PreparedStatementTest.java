@@ -24,16 +24,39 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 
 import java.io.*;
 import java.sql.*;
 import javax.sql.*;
 
+import org.apache.derby.iapi.services.io.DerbyIOException;
+import org.apache.derby.impl.jdbc.EmbedSQLException;
+
 /**
  * This class is used to test JDBC4 specific methods in the PreparedStatement(s)
  * object.
+ *
+ * A number of methods and variables are in place to aid the writing of tests:
+ * <ul><li>setBinaryStreamOnBlob
+ *     <li>setAsciiStream
+ *     <li>key - an id. One is generated each time setUp is run.
+ *     <li>reqeustKey() - generate a new unique id.
+ *     <li>psInsertX - prepared statements for insert.
+ *     <li>psFetchX - prepared statements for fetching values.
+ * </ul>
+ *
+ * For table creation, see the <code>suite</code>-method.
  */
 public class PreparedStatementTest extends BaseJDBCTestCase {
+
+    private static final String BLOBTBL = "BlobTestTable";
+    private static final String CLOBTBL = "ClobTestTable";
+    private static final String LONGVARCHAR = "LongVarcharTestTable";
+
+    /** Key used to id data inserted into the database. */
+    private static int globalKey = 1;
 
     /** Byte array passed in to the database. **/
     private static final byte[] BYTES = {
@@ -41,14 +64,29 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         0x69, 0x68, 0x67, 0x66, 0x65
     };
 
-    /**
-     * Default connection and prepared statements that are used by the tests.
+    // Default connection and prepared statements that are used by the tests.
+    /** 
+     * Default key to use for insertions.
+     * Is unique for each fixture. More keys can be fetched by calling
+     * <link>requestKey</link>.
      */
-    //Connection object
-    //PreparedStatement object
+    private int key;
+    /** Default connection object. */
+    /** PreparedStatement object with no positional arguments. */
     private PreparedStatement ps = null;
+    /** PreparedStatement to fetch BLOB with specified id. */
+    private PreparedStatement psFetchBlob = null;
+    /** PreparedStatement to insert a BLOB with specified id. */
+    private PreparedStatement psInsertBlob = null;
+    /** PreparedStatement to fetch CLOB with specified id. */
+    private PreparedStatement psFetchClob = null;
+    /** PreparedStatement to insert a CLOB with specified id. */
+    private PreparedStatement psInsertClob = null;
+    /** PreparedStatement to insert a LONG VARCHAR with specified id. */
+    private PreparedStatement psInsertLongVarchar = null;
     //Statement object
     private Statement s = null;
+
 
     
     /**
@@ -69,7 +107,8 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     public void setUp() 
         throws SQLException {
-       //create the statement object
+        key = requestKey();
+        //create the statement object
         s = createStatement();
         //Create the PreparedStatement that will then be used as the basis 
         //throughout this test henceforth
@@ -77,14 +116,17 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         //setClob and setBlob
         ps = prepareStatement("select count(*) from sys.systables");
         
-         // STEP1: create the tables
-         // Structure of table
-         // --------------------------
-         // SNO            Clob Column
-         // --------------------------
-
-         s.execute("create table ClobTestTable (sno int, clobCol CLOB(1M))");
-         s.execute("create table BlobTestTable (sno int, blobCol BLOB(1M))");
+        // Prepare misc statements.
+        psFetchBlob = prepareStatement("SELECT dBlob FROM " +
+                BLOBTBL + " WHERE sno = ?");
+        psInsertBlob = prepareStatement("INSERT INTO " + BLOBTBL +
+                " VALUES (?, ?)");
+        psFetchClob = prepareStatement("SELECT dClob FROM " +
+                CLOBTBL + " WHERE sno = ?");
+        psInsertClob = prepareStatement("INSERT INTO " + CLOBTBL +
+                " VALUES (?, ?)");
+        psInsertLongVarchar = prepareStatement("INSERT INTO " + LONGVARCHAR +
+                " VALUES (?, ?)");
     }
 
     /**
@@ -97,9 +139,11 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public void tearDown() 
         throws Exception {
         
-        s.execute("drop table ClobTestTable");
-        s.execute("drop table BlobTestTable");
-        s.close();
+        psFetchBlob.close();
+        psFetchClob.close();
+        psInsertBlob.close();
+        psInsertClob.close();
+        psInsertLongVarchar.close();
         
         super.tearDown();
     }
@@ -108,7 +152,48 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite();
         suite.addTestSuite(PreparedStatementTest.class);
         suite.addTest(SetObjectUnsupportedTest.suite(false));
-        return suite;
+        return new BaseJDBCTestSetup(suite) {
+                public void setUp()
+                        throws java.lang.Exception {
+                        try {
+                            create();
+                        } catch (SQLException sqle) {
+                            if (sqle.getSQLState().equals("X0Y32")) {
+                                drop();
+                                create();
+                            } else {
+                                throw sqle;
+                            }
+                        }
+                }
+
+                public void tearDown()
+                        throws java.lang.Exception {
+                    drop();
+                    super.tearDown();
+                }
+
+                private void create()
+                        throws SQLException {
+                    Statement stmt = getConnection().createStatement();
+                    stmt.execute("create table " + BLOBTBL +
+                            " (sno int, dBlob BLOB(1M))");
+                    stmt.execute("create table " + CLOBTBL +
+                            " (sno int, dClob CLOB(1M))");
+                    stmt.execute("create table " + LONGVARCHAR  +
+                            " (sno int, dLongVarchar LONG VARCHAR)");
+                    stmt.close();
+                }
+
+                private void drop()
+                        throws SQLException {
+                    Statement stmt = getConnection().createStatement();
+                    stmt.execute("drop table " + BLOBTBL);
+                    stmt.execute("drop table " + CLOBTBL);
+                    stmt.execute("drop table " + LONGVARCHAR);
+                    stmt.close();
+                }
+            };
     }
     
     //--------------------------------------------------------------------------
@@ -321,30 +406,31 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         StringReader is = new StringReader("Test data for the Clob object");
         is.reset();
         
-        PreparedStatement ps_sc = prepareStatement("insert into ClobTestTable values(?,?)");
-        
         //initially insert the data
-        ps_sc.setInt(1,1);
-        ps_sc.setClob(2,is,str.length());
-        ps_sc.executeUpdate();
+        psInsertClob.setInt(1, key);
+        psInsertClob.setClob(2, is, str.length());
+        psInsertClob.executeUpdate();
         
         //Now query to retrieve the Clob
-        ResultSet rs = s.executeQuery("select * from ClobTestTable where sno = 1");
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
         rs.next();
-        Clob clobToBeInserted = rs.getClob(2);
+        Clob clobToBeInserted = rs.getClob(1);
         rs.close();
         
         //Now use the setClob method
-        ps_sc.setInt(1,2);
-        ps_sc.setClob(2,clobToBeInserted);
-        ps_sc.execute();
+        int secondKey = requestKey();
+        psInsertClob.setInt(1, secondKey);
+        psInsertClob.setClob(2, clobToBeInserted);
+        psInsertClob.execute();
         
-        ps_sc.close();
+        psInsertClob.close();
         
         //Now test to see that the Clob has been stored correctly
-        rs = s.executeQuery("select * from ClobTestTable where sno = 2");
+        psFetchClob.setInt(1, secondKey);
+        rs = psFetchClob.executeQuery();
         rs.next();
-        Clob clobRetrieved = rs.getClob(2);
+        Clob clobRetrieved = rs.getClob(1);
         
         assertEquals(clobToBeInserted,clobRetrieved);
     }
@@ -363,25 +449,24 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         // Insert test data.
         String testString = "Test string for setCharacterStream\u1A00";
         Reader reader = new StringReader(testString);
-        PreparedStatement psChar = prepareStatement(
-                "insert into ClobTestTable values (?,?)");
-        psChar.setInt(1, 1);
-        psChar.setCharacterStream(2, reader);
-        psChar.execute();
+        psInsertClob.setInt(1, key);
+        psInsertClob.setCharacterStream(2, reader);
+        psInsertClob.execute();
         reader.close();
         // Must fetch Clob from database because we don't support
         // Connection.createClob on the client yet.
-        ResultSet rs = s.executeQuery(
-                "select clobCol from ClobTestTable where sno = 1");
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
         assertTrue("No results retrieved", rs.next());
+        int secondKey = requestKey();
         Clob insertClob = rs.getClob(1);
-        psChar.setInt(1, 2);
-        psChar.setClob(2, insertClob);
-        psChar.execute();
+        psInsertClob.setInt(1, secondKey);
+        psInsertClob.setClob(2, insertClob);
+        psInsertClob.execute();
 
         // Read back test data from database.
-        rs = s.executeQuery(
-                "select clobCol from ClobTestTable where sno = 2");
+        psFetchClob.setInt(1, secondKey);
+        rs = psFetchClob.executeQuery();
         assertTrue("No results retrieved", rs.next());
         Clob clobRetrieved = rs.getClob(1);
 
@@ -403,30 +488,31 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         InputStream is = new java.io.ByteArrayInputStream(BYTES);
         is.reset();
         
-        PreparedStatement ps_sb = prepareStatement("insert into BlobTestTable values(?,?)");
-        
         //initially insert the data
-        ps_sb.setInt(1,1);
-        ps_sb.setBlob(2,is,BYTES.length);
-        ps_sb.executeUpdate();
+        psInsertBlob.setInt(1, key);
+        psInsertBlob.setBlob(2, is, BYTES.length);
+        psInsertBlob.executeUpdate();
         
         //Now query to retrieve the Blob
-        ResultSet rs = s.executeQuery("select * from BlobTestTable where sno = 1");
+        psFetchBlob.setInt(1, key);
+        ResultSet rs = psFetchBlob.executeQuery();
         rs.next();
-        Blob blobToBeInserted = rs.getBlob(2);
+        Blob blobToBeInserted = rs.getBlob(1);
         rs.close();
         
         //Now use the setBlob method
-        ps_sb.setInt(1,2);
-        ps_sb.setBlob(2,blobToBeInserted);
-        ps_sb.execute();
+        int secondKey = requestKey();
+        psInsertBlob.setInt(1, secondKey);
+        psInsertBlob.setBlob(2, blobToBeInserted);
+        psInsertBlob.execute();
         
-        ps_sb.close();
+        psInsertBlob.close();
         
         //Now test to see that the Blob has been stored correctly
-        rs = s.executeQuery("select * from BlobTestTable where sno = 2");
+        psFetchBlob.setInt(1, secondKey);
+        rs = psFetchBlob.executeQuery();
         rs.next();
-        Blob blobRetrieved = rs.getBlob(2);
+        Blob blobRetrieved = rs.getBlob(1);
         
         assertEquals(blobToBeInserted, blobRetrieved);
     }
@@ -444,25 +530,24 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             throws IOException, SQLException {
         // Insert test data.
         InputStream is = new ByteArrayInputStream(BYTES);
-        PreparedStatement psByte = prepareStatement(
-                "insert into BlobTestTable values (?,?)");
-        psByte.setInt(1, 1);
-        psByte.setBinaryStream(2, is);
-        psByte.execute();
+        psInsertBlob.setInt(1, key);
+        psInsertBlob.setBinaryStream(2, is);
+        psInsertBlob.execute();
         is.close();
         // Must fetch Blob from database because we don't support
         // Connection.createBlob on the client yet.
-        ResultSet rs = s.executeQuery(
-                "select blobCol from BlobTestTable where sno = 1");
+        psFetchBlob.setInt(1, key);
+        ResultSet rs = psFetchBlob.executeQuery();
         assertTrue("No results retrieved", rs.next());
         Blob insertBlob = rs.getBlob(1);
-        psByte.setInt(1, 2);
-        psByte.setBlob(2, insertBlob);
-        psByte.execute();
+        int secondKey = requestKey();
+        psInsertBlob.setInt(1, secondKey);
+        psInsertBlob.setBlob(2, insertBlob);
+        psInsertBlob.execute();
 
         // Read back test data from database.
-        rs = s.executeQuery(
-                "select blobCol from BlobTestTable where sno = 2");
+        psFetchBlob.setInt(1, secondKey);
+        rs = psFetchBlob.executeQuery();
         assertTrue("No results retrieved", rs.next());
         Blob blobRetrieved = rs.getBlob(1);
 
@@ -547,23 +632,22 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         is.reset();
         
-        PreparedStatement ps_sc = prepareStatement("insert into ClobTestTable values(?,?)");
-        
         //initially insert the data
-        ps_sc.setInt(1,1);
-        ps_sc.setCharacterStream(2,is,str.length());
-        ps_sc.executeUpdate();
+        psInsertClob.setInt(1, key);
+        psInsertClob.setCharacterStream(2, is, str.length());
+        psInsertClob.executeUpdate();
         
         //Now query to retrieve the Clob
-        ResultSet rs = s.executeQuery("select * from ClobTestTable where sno = 1");
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
         rs.next();
-        Clob clobRetrieved = rs.getClob(2);
+        Clob clobRetrieved = rs.getClob(1);
         rs.close();
         
         String str_out = clobRetrieved.getSubString(1L,(int)clobRetrieved.length());
         
         assertEquals("Error in inserting data into the Clob object",str,str_out);
-        ps_sc.close();
+        psInsertClob.close();
     }
 
     public void testSetCharacterStreamLengthless()
@@ -571,16 +655,14 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         // Insert test data.
         String testString = "Test string for setCharacterStream\u1A00";
         Reader reader = new StringReader(testString);
-        PreparedStatement psChar = prepareStatement(
-                "insert into ClobTestTable values (?,?)");
-        psChar.setInt(1, 1);
-        psChar.setCharacterStream(2, reader);
-        psChar.execute();
+        psInsertClob.setInt(1, key);
+        psInsertClob.setCharacterStream(2, reader);
+        psInsertClob.execute();
         reader.close();
 
         // Read back test data from database.
-        ResultSet rs = s.executeQuery(
-                "select clobCol from ClobTestTable where sno = 1");
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
         assertTrue("No results retrieved", rs.next());
         Clob clobRetrieved = rs.getClob(1);
 
@@ -606,17 +688,16 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         is.reset();
         
-        PreparedStatement ps_sb = prepareStatement("insert into ClobTestTable values(?,?)");
-        
         //initially insert the data
-        ps_sb.setInt(1,1);
-        ps_sb.setAsciiStream(2,is,BYTES.length);
-        ps_sb.executeUpdate();
+        psInsertClob.setInt(1, key);
+        psInsertClob.setAsciiStream(2, is, BYTES.length);
+        psInsertClob.executeUpdate();
         
         //Now query to retrieve the Clob
-        ResultSet rs = s.executeQuery("select * from ClobTestTable where sno = 1");
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
         rs.next();
-        Clob ClobRetrieved = rs.getClob(2);
+        Clob ClobRetrieved = rs.getClob(1);
         rs.close();
         
         try {
@@ -628,23 +709,21 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         for(int i=0;i<BYTES.length;i++) {
             assertEquals("Error in inserting data into the Clob",BYTES[i],bytes1[i]);
         }
-        ps_sb.close();
+        psInsertClob.close();
     }
 
     public void testSetAsciiStreamLengthless()
             throws IOException, SQLException {
         // Insert test data.
         InputStream is = new ByteArrayInputStream(BYTES);
-        PreparedStatement psAscii = prepareStatement(
-                "insert into ClobTestTable values (?,?)");
-        psAscii.setInt(1, 1);
-        psAscii.setAsciiStream(2, is);
-        psAscii.execute();
+        psInsertClob.setInt(1, key);
+        psInsertClob.setAsciiStream(2, is);
+        psInsertClob.execute();
         is.close();
 
         // Read back test data from database.
-        ResultSet rs = s.executeQuery(
-                "select clobCol from ClobTestTable where sno = 1");
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
         assertTrue("No results retrieved", rs.next());
         Clob clobRetrieved = rs.getClob(1);
 
@@ -660,7 +739,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
 
         // Cleanup
         isRetrieved.close();
-        psAscii.close();
+        psInsertClob.close();
     }
 
     /**
@@ -680,17 +759,16 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         
         is.reset();
         
-        PreparedStatement ps_sb = prepareStatement("insert into BlobTestTable values(?,?)");
-        
         //initially insert the data
-        ps_sb.setInt(1,1);
-        ps_sb.setBinaryStream(2,is,BYTES.length);
-        ps_sb.executeUpdate();
+        psInsertBlob.setInt(1, key);
+        psInsertBlob.setBinaryStream(2, is, BYTES.length);
+        psInsertBlob.executeUpdate();
         
         //Now query to retrieve the Clob
-        ResultSet rs = s.executeQuery("select * from BlobTestTable where sno = 1");
+        psFetchBlob.setInt(1, key);
+        ResultSet rs = psFetchBlob.executeQuery();
         rs.next();
-        Blob blobRetrieved = rs.getBlob(2);
+        Blob blobRetrieved = rs.getBlob(1);
         rs.close();
         
         try {
@@ -703,23 +781,21 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         for(int i=0;i<BYTES.length;i++) {
             assertEquals("Error in inserting data into the Blob",BYTES[i],bytes1[i]);
         }
-        ps_sb.close();
+        psInsertBlob.close();
     }
 
     public void testSetBinaryStreamLengthless()
             throws IOException, SQLException {
         // Insert test data.
         InputStream is = new ByteArrayInputStream(BYTES);
-        PreparedStatement psBinary = prepareStatement(
-                "insert into BlobTestTable values (?,?)");
-        psBinary.setInt(1, 1);
-        psBinary.setBinaryStream(2, is);
-        psBinary.execute();
+        psInsertBlob.setInt(1, key);
+        psInsertBlob.setBinaryStream(2, is);
+        psInsertBlob.execute();
         is.close();
 
         // Read back test data from database.
-        ResultSet rs = s.executeQuery(
-                "select blobCol from BlobTestTable where sno = 1");
+        psFetchBlob.setInt(1, key);
+        ResultSet rs = psFetchBlob.executeQuery();
         assertTrue("No results retrieved", rs.next());
         Blob blobRetrieved = rs.getBlob(1);
 
@@ -735,6 +811,363 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
 
         // Cleanup
         isRetrieved.close();
-        psBinary.close();
+        psInsertBlob.close();
+    }
+
+    public void testSetBinaryStreamLengthLess1KOnBlob()
+            throws IOException, SQLException {
+        int length = 1*1024;
+        setBinaryStreamOnBlob(key, length, -1, 0, true);
+        psFetchBlob.setInt(1, key);
+        ResultSet rs = psFetchBlob.executeQuery();
+        assertTrue("Empty resultset", rs.next());
+        assertEquals(new LoopingAlphabetStream(length),
+                     rs.getBinaryStream(1));
+        assertFalse("Resultset should have been exhausted", rs.next());
+        rs.close();
+    }
+
+    public void testSetBinaryStreamLengthLess32KOnBlob()
+            throws IOException, SQLException {
+        int length = 32*1024;
+        setBinaryStreamOnBlob(key, length, -1, 0, true);
+        psFetchBlob.setInt(1, key);
+        ResultSet rs = psFetchBlob.executeQuery();
+        assertTrue("Empty resultset", rs.next());
+        assertEquals(new LoopingAlphabetStream(length),
+                     rs.getBinaryStream(1));
+        assertFalse("Resultset should have been exhausted", rs.next());
+        rs.close();
+    }
+
+    public void testSetBinaryStreamLengthLess65KOnBlob()
+            throws IOException, SQLException {
+        int length = 65*1024;
+        setBinaryStreamOnBlob(key, length, -1, 0, true);
+        psFetchBlob.setInt(1, key);
+        ResultSet rs = psFetchBlob.executeQuery();
+        assertTrue("Empty resultset", rs.next());
+        LoopingAlphabetStream s1 = new LoopingAlphabetStream(length);
+        assertEquals(new LoopingAlphabetStream(length),
+                     rs.getBinaryStream(1));
+        assertFalse("Resultset should have been exhausted", rs.next());
+        rs.close();
+    }
+
+    public void testSetBinaryStreamLengthLessOnBlobTooLong() {
+        int length = 1*1024*1024+512;
+        try {
+            setBinaryStreamOnBlob(key, length, -1, 0, true);
+        } catch (SQLException sqle) {
+            if (usingEmbedded()) {
+                assertSQLState("XCL30", sqle);
+            } else {
+                assertSQLState("22001", sqle);
+            }
+        }
+    }
+
+    public void testExceptionPathOnePage_bs()
+            throws SQLException {
+        int length = 11;
+        try {
+            setBinaryStreamOnBlob(key, length -1, length, 0, false);
+            fail("Inserted a BLOB with fewer bytes than specified");
+        } catch (SQLException sqle) {
+            if (usingEmbedded()) {
+                assertSQLState("XSDA4", sqle);
+            } else {
+                assertSQLState("XN017", sqle);
+            }
+        }
+    }
+
+    public void testExceptionPathMultiplePages_bs()
+            throws SQLException {
+        int length = 1*1024*1024;
+        try {
+            setBinaryStreamOnBlob(key, length -1, length, 0, false);
+            fail("Inserted a BLOB with fewer bytes than specified");
+        } catch (SQLException sqle) {
+            if (usingEmbedded()) {
+                assertSQLState("XSDA4", sqle);
+            } else {
+                assertSQLState("XN017", sqle);
+            }
+        }
+    }
+
+    public void testBlobExceptionDoesNotRollbackOtherStatements()
+            throws IOException, SQLException {
+        getConnection().setAutoCommit(false);
+        int[] keys = {key, requestKey(), requestKey()};
+        for (int i=0; i < keys.length; i++) {
+            psInsertBlob.setInt(1, keys[i]);
+            psInsertBlob.setNull(2, Types.BLOB);
+            assertEquals(1, psInsertBlob.executeUpdate());
+        }
+        // Now insert a BLOB that fails because the stream is too short.
+        int failedKey = requestKey();
+        int length = 1*1024*1024;
+        try {
+            setBinaryStreamOnBlob(failedKey, length -1, length, 0, false);
+            fail("Inserted a BLOB with less data than specified");
+        } catch (SQLException sqle) {
+            if (usingEmbedded()) {
+                assertSQLState("XSDA4", sqle);
+            } else {
+                assertSQLState("XN017", sqle);
+            }
+        }
+        // Now make sure the previous statements are there, and that the last
+        // BLOB is not.
+        ResultSet rs;
+        for (int i=0; i < keys.length; i++) {
+            psFetchBlob.setInt(1, keys[i]);
+            rs = psFetchBlob.executeQuery();
+            assertTrue(rs.next());
+            assertFalse(rs.next());
+            rs.close();
+        }
+        psFetchBlob.setInt(1, failedKey);
+        rs = psFetchBlob.executeQuery();
+        // When using the Derby client driver, the data seems to be padded
+        // with 0s and inserted... Thus, the select returns a row.
+        if (!usingEmbedded()) {
+            assertTrue(rs.next());
+            InputStream is = rs.getBinaryStream(1);
+            int lastByte = -1;
+            int b = 99; // Just a value > 0.
+            while (b > -1) {
+                lastByte = b;
+                b = is.read();
+            }
+            assertEquals("Last padded byte is not 0", 0, lastByte);
+        }
+        assertFalse(rs.next());
+        rs.close();
+        rollback();
+        // Make sure all data is gone after the rollback.
+        for (int i=0; i < keys.length; i++) {
+            psFetchBlob.setInt(1, keys[i]);
+            rs = psFetchBlob.executeQuery();
+            assertFalse(rs.next());
+            rs.close();
+        }
+        // Make sure the failed insert has not "reappeared" somehow...
+        psFetchBlob.setInt(1, failedKey);
+        rs = psFetchBlob.executeQuery();
+        assertFalse(rs.next());
+
+    }
+
+    public void testSetAsciiStreamLengthLess1KOnClob()
+            throws IOException, SQLException {
+        int length = 1*1024;
+        setAsciiStream(psInsertClob, key, length, -1, 0, true);
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
+        assertTrue("Empty resultset", rs.next());
+        assertEquals(new LoopingAlphabetStream(length),
+                     rs.getAsciiStream(1));
+        assertFalse("Resultset should have been exhausted", rs.next());
+        rs.close();
+    }
+
+    public void testSetAsciiStreamLengthLess32KOnClob()
+            throws IOException, SQLException {
+        int length = 32*1024;
+        setAsciiStream(psInsertClob, key, length, -1, 0, true);
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
+        assertTrue("Empty resultset", rs.next());
+        assertEquals(new LoopingAlphabetStream(length),
+                     rs.getAsciiStream(1));
+        assertFalse("Resultset should have been exhausted", rs.next());
+        rs.close();
+    }
+
+    public void testSetAsciiStreamLengthLess65KOnClob()
+            throws IOException, SQLException {
+        int length = 65*1024;
+        setAsciiStream(psInsertClob, key, length, -1, 0, true);
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
+        assertTrue("Empty resultset", rs.next());
+        assertEquals(new LoopingAlphabetStream(length),
+                     rs.getAsciiStream(1));
+        assertFalse("Resultset should have been exhausted", rs.next());
+        rs.close();
+    }
+
+    public void testSetAsciiStreamLengthLessOnClobTooLong() {
+        int length = 1*1024*1024+512;
+        try {
+            setAsciiStream(psInsertClob, key, length, -1, 0, true);
+        } catch (SQLException sqle) {
+            if (usingEmbedded()) {
+                assertSQLState("XSDA4", sqle);
+            } else {
+                assertSQLState("22001", sqle);
+            }
+        }
+    }
+
+    public void testSetAsciiStreamLengthLessOnClobTooLongTruncate()
+            throws SQLException {
+        int trailingBlanks = 512;
+        int length = 1*1024*1024 + trailingBlanks;
+        setAsciiStream(psInsertClob, key, length, -1, trailingBlanks, true);
+    }
+
+    public void testSetAsciiStreamLengthlessOnLongVarCharTooLong() {
+        int length = 32700+512;
+        try {
+            setAsciiStream(psInsertLongVarchar, key, length, -1, 0, true);
+            fail("Inserted a LONG VARCHAR that is too long");
+        } catch (SQLException sqle) {
+            if (usingEmbedded()) {
+                assertInternalDerbyIOExceptionState("XCL30", "22001", sqle);
+            } else {
+                assertSQLState("22001", sqle);
+            }
+        }
+    }
+
+    public void testSetAsciiStreamLengthlessOnLongVarCharDontTruncate() {
+        int trailingBlanks = 2000;
+        int length = 32000 + trailingBlanks;
+        try {
+            setAsciiStream(psInsertLongVarchar, key, length, -1,
+                    trailingBlanks, true);
+            fail("Truncation is not allowed for LONG VARCHAR");
+        } catch (SQLException sqle) {
+            if (usingEmbedded()) {
+                assertInternalDerbyIOExceptionState("XCL30", "22001", sqle);
+            } else {
+                assertSQLState("22001", sqle);
+            }
+        }
+    }
+
+    /************************************************************************
+     *                 A U X I L I A R Y  M E T H O D S                     *
+     ************************************************************************/
+
+    /**
+     * Insert data into a Blob column with setBinaryStream.
+     *
+     * @param id unique id for inserted row
+     * @param actualLength the actual length of the stream
+     * @param specifiedLength the specified length of the stream
+     * @param trailingBlanks number of characters at the end that is blank
+     * @param lengthLess whether to use the length less overloads or not
+     */
+    private void setBinaryStreamOnBlob(int id,
+                                       int actualLength,
+                                       int specifiedLength,
+                                       int trailingBlanks,
+                                       boolean lengthLess)
+            throws SQLException {
+        psInsertBlob.setInt(1, id);
+        if (lengthLess) {
+            psInsertBlob.setBinaryStream(2, new LoopingAlphabetStream(
+                                                actualLength,
+                                                trailingBlanks));
+        } else {
+            psInsertBlob.setBinaryStream(2,
+                               new LoopingAlphabetStream(
+                                        actualLength,
+                                        trailingBlanks),
+                               specifiedLength);
+        }
+        assertEquals("Insert with setBinaryStream failed",
+                1, psInsertBlob.executeUpdate());
+    }
+
+    /**
+     * Insert data into a column with setAsciiStream.
+     * The prepared statement passed must have two positional parameters;
+     * one int and one more. Depending on the last parameter, the execute
+     * might succeed or it might fail. This is intended behavior, and should
+     * be handled by the caller. For instance, calling this method on an
+     * INT-column would fail, calling it on a CLOB-column would succeed.
+     *
+     * @param id unique id for inserted row
+     * @param actualLength the actual length of the stream
+     * @param specifiedLength the specified length of the stream
+     * @param trailingBlanks number of characters at the end that is blank
+     * @param lengthLess whether to use the length less overloads or not
+     */
+    private void setAsciiStream(PreparedStatement ps,
+                                int id,
+                                int actualLength,
+                                int specifiedLength,
+                                int trailingBlanks,
+                                boolean lengthLess)
+            throws SQLException {
+        ps.setInt(1, id);
+        if (lengthLess) {
+            ps.setAsciiStream(2, 
+                              new LoopingAlphabetStream(
+                                                actualLength,
+                                                trailingBlanks));
+        } else {
+            ps.setAsciiStream(2,
+                              new LoopingAlphabetStream(
+                                                actualLength,
+                                                trailingBlanks),
+                              specifiedLength);
+        }
+        assertEquals("Insert with setAsciiStream failed",
+                1, ps.executeUpdate());
+    }
+
+    /**
+     * Get next key to id inserted data with.
+     */
+    private static int requestKey() {
+        return globalKey++;
+    }
+
+    /**
+     * Return the last chained SQLException.
+     * If there are no exceptions chained, the original one is returned.
+     */
+    private SQLException getLastSQLException(SQLException sqle) {
+        SQLException last = sqle;
+        SQLException next = sqle;
+        while (next != null) {
+            last = next;
+            next = last.getNextException();
+        }
+        return last;
+    }
+
+    /**
+     * This methods is not to be used, but sometimes you have to!
+     *
+     * @param preSQLState the expected outer SQL state
+     * @param expectedInternal the expected internal SQL state
+     * @param sqle the outer SQLException
+     */
+    private void assertInternalDerbyIOExceptionState(
+                                        String preSQLState,
+                                        String expectedInternal,
+                                        SQLException sqle) {
+        assertSQLState("Outer/public SQL state incorrect",
+                       preSQLState, sqle);
+        // We need to dig a little with the current way exceptions are
+        // being reported. We can use getCause because we always run with
+        // Mustang/Java SE 6.
+        Throwable cause = getLastSQLException(sqle).getCause();
+        assertTrue("Exception not an EmbedSQLException",
+                   cause instanceof EmbedSQLException);
+        cause = ((EmbedSQLException)cause).getJavaException();
+        assertTrue("Exception not a DerbyIOException",
+                   cause instanceof DerbyIOException);
+        DerbyIOException dioe = (DerbyIOException)cause;
+        assertEquals("Incorrect internal SQL state", expectedInternal,
+                     dioe.getSQLState());
     }
 }

@@ -28,8 +28,9 @@ import java.io.Reader;
 import java.io.UTFDataFormatException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.io.DerbyIOException;
 import org.apache.derby.iapi.services.io.LimitReader;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
 	Converts a java.io.Reader to the on-disk UTF8 format used by Derby
@@ -38,8 +39,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 public final class ReaderToUTF8Stream
 	extends InputStream
 {
-    public static final int UNKNOWN_LENGTH = Integer.MIN_VALUE;
-
     /**
      * Application's reader wrapped in a LimitReader.
      */
@@ -59,8 +58,8 @@ public final class ReaderToUTF8Stream
      for clobs,varchar,char.
      If zero, no characters are truncated.
      */
-    private int charsToTruncate;
-    private static final char SPACE =' ';
+    private final int charsToTruncate;
+    private static final char SPACE = ' ';
     
     /**
      * Length of the final value, after truncation if any,
@@ -70,27 +69,71 @@ public final class ReaderToUTF8Stream
      information about the column width.
     */
     private final int valueLength; 
+    /** The maximum allowed length of the stream. */
+    private final int maximumLength;
+    /** The type name for the column data is inserted into. */
+    private final String typeName;
     
     /**
-     * Create a stream with truncation.
+     * Create a stream that will truncate trailing blanks if required/allowed.
+     *
+     * If the stream must be truncated, the number of blanks to truncate
+     * is specified to allow the stream to be checked for exact length, as
+     * required by JDBC 3.0. If the stream is shorter or longer than specified,
+     * an exception is thrown during read.
+     *
+     * @param appReader application reader
+     * @param valueLength the length of the reader in characters
+     * @param numCharsToTruncate the number of trailing blanks to truncate
+     * @param typeName type name of the column data is inserted into
      */
- 	public ReaderToUTF8Stream(Reader appReader, int valueLength,int numCharsToTruncate)
-	{
+    public ReaderToUTF8Stream(Reader appReader,
+                              int valueLength,
+                              int numCharsToTruncate,
+                              String typeName) {
         this.reader = new LimitReader(appReader);
-        if (valueLength != UNKNOWN_LENGTH) {
-            reader.setLimit(valueLength);
-        } 
-        if (SanityManager.DEBUG && valueLength == UNKNOWN_LENGTH) {
-            // Number of chars to truncate must be 0 if length is unknown.
-            // This count is used to check if the stream matches the
-            // specified length.
-            SanityManager.ASSERT(numCharsToTruncate == 0);
-        }
+        reader.setLimit(valueLength);
         buffer = new byte[BUFSIZE];
         blen = -1;        
         this.charsToTruncate = numCharsToTruncate;
         this.valueLength = valueLength;
-	}
+        this.maximumLength = -1;
+        this.typeName = typeName;
+    }
+
+    /**
+     * Create a UTF-8 stream for a length less application reader.
+     *
+     * A limit is placed on the length of the reader. If the reader exceeds
+     * the maximum length, truncation of trailing blanks is attempted. If
+     * truncation fails, an exception is thrown.
+     *
+     * @param appReader application reader
+     * @param maximumLength maximum allowed length in number of characters for
+     *      the reader
+     * @param typeName type name of the column data is inserted into
+     * @throws IllegalArgumentException if maximum length is negative, or type
+     *      name is <code>null<code>
+     */
+    public ReaderToUTF8Stream(Reader appReader,
+                              int maximumLength,
+                              String typeName) {
+        if (maximumLength < 0) {
+            throw new IllegalArgumentException("Maximum length for a capped " +
+                    "stream cannot be negative: " + maximumLength);
+        }
+        if (typeName == null) {
+            throw new IllegalArgumentException("Type name cannot be null");
+        }
+        this.reader = new LimitReader(appReader);
+        reader.setLimit(maximumLength);
+        buffer = new byte[BUFSIZE];
+        blen = -1;
+        this.maximumLength = maximumLength;
+        this.typeName = typeName;
+        this.charsToTruncate = -1;
+        this.valueLength = -1;
+    }
 
     /**
      * read from stream; characters converted to utf-8 derby specific encoding.
@@ -228,11 +271,19 @@ public final class ReaderToUTF8Stream
 			checkSufficientData();
 	}
 
-	/**
-		JDBC 3.0 (from tutorial book) requires that an
-		input stream has the correct number of bytes in
-		the stream.
-	*/
+    /**
+     * Validate the length of the stream, take corrective action if allowed.
+     *
+     * JDBC 3.0 (from tutorial book) requires that an input stream has the
+     * correct number of bytes in the stream.
+     * If the stream is too long, trailing blank truncation is attempted if
+     * allowed. If truncation fails, or is disallowed, an exception is thrown.
+     *
+     * @throws IOException if an errors occurs in the application stream
+     * @throws DerbyIOException if Derby finds a problem with the stream;
+     *      stream is too long and cannot be truncated, or the stream length
+     *      does not match the specified length
+     */
 	private void checkSufficientData() throws IOException
 	{
 		// now that we finished reading from the stream; the amount
@@ -240,54 +291,41 @@ public final class ReaderToUTF8Stream
         if (charsToTruncate > 0)
         {
             reader.setLimit(charsToTruncate);
-            int c = 0;
-            for (;;)
-            {
-                c = reader.read();
-                
-                if (c < 0)
-                {
-                    break;
-                }
-                else if (c != SPACE)
-                {
-                    // [NOTE] The assumption that this is always a Clob is not
-                    //        enforced anywhere (i.e. that 'charsToTruncate'
-                    //        is 0 for all other types)
-                    // throw truncation error, wont happen here for any other 
-                    // type except for clob
-                    // hence using TypeId.CLOB_NAME to avoid having to store
-                    // the type information along with this stream.
-                    throw new IOException(
-                        MessageService.getTextMessage(
-                            SQLState.LANG_STRING_TRUNCATION,
-                            TypeId.CLOB_NAME, 
-                            "XXXX", 
-                            String.valueOf(valueLength)));
-                }
-            }
+            truncate();
         }
         
+        // A length less stream that is capped, will return 0 even if there
+        // are more bytes in the application stream.
         int remainingBytes = reader.clearLimit();
-		if (remainingBytes > 0)
-			throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INEXACT_LENGTH_DATA));
+        if (remainingBytes > 0 && valueLength > 0) {
+            // If we had a specified length, throw exception.
+            throw new DerbyIOException(
+                    MessageService.getTextMessage(
+                        SQLState.SET_STREAM_INEXACT_LENGTH_DATA),
+                    SQLState.SET_STREAM_INEXACT_LENGTH_DATA);
+        }
 
 		// if we had a limit try reading one more character.
-		// JDBC 3.0 states the stream muct have the correct number of 
+		// JDBC 3.0 states the stream must have the correct number of
         // characters in it.
-
-		if (remainingBytes == 0) {
-			int c;
-			try
-			{
-				c = reader.read();
-               
-			}
-			catch (IOException ioe) {
-				c = -1;
-			}
-			if (c >= 0)
-				throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INEXACT_LENGTH_DATA));
+        if (remainingBytes == 0 && reader.read() >= 0) {
+            if (valueLength > -1) {
+                throw new DerbyIOException(
+                        MessageService.getTextMessage(
+                            SQLState.SET_STREAM_INEXACT_LENGTH_DATA),
+                        SQLState.SET_STREAM_INEXACT_LENGTH_DATA);
+            } else {
+                // Stream was capped (length less) and too long.
+                // Try to truncate if allowed, or else throw exception.
+                if (canTruncate()) {
+                    truncate();
+                } else {
+                    throw new DerbyIOException(
+                            MessageService.getTextMessage(
+                                SQLState.LANG_STRING_TRUNCATION),
+                            SQLState.LANG_STRING_TRUNCATION);
+                }
+            }
         }
 		
 		// can put the correct length into the stream.
@@ -306,6 +344,42 @@ public final class ReaderToUTF8Stream
 			buffer[blen++] = (byte) 0x00;
 		}
 	}
+
+    /**
+     * Determine if trailing blank truncation is allowed.
+     */
+    private boolean canTruncate() {
+        // Only a few types can be truncated, default is to not allow.
+        if (typeName.equals(TypeId.CLOB_NAME)) {
+            return true;
+        } else if (typeName.equals(TypeId.VARCHAR_NAME)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Attempt to truncate the stream by removing trailing blanks.
+     */
+    private void truncate()
+            throws IOException {
+        int c = 0;
+        for (;;) {
+            c = reader.read();
+
+            if (c < 0) {
+                break;
+            } else if (c != SPACE) {
+                throw new DerbyIOException(
+                    MessageService.getTextMessage(
+                        SQLState.LANG_STRING_TRUNCATION,
+                        typeName, 
+                        "XXXX", 
+                        String.valueOf(valueLength)),
+                    SQLState.LANG_STRING_TRUNCATION);
+            }
+        }
+    }
 
     /**
      * return resources 

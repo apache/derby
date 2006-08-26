@@ -317,7 +317,7 @@ public class SQLClob
                 throw this.outOfRange();
             
             setValue(new ReaderToUTF8Stream(vc.getCharacterStream(),
-                    (int) vcl, 0), (int) vcl);
+                    (int) vcl, 0, TypeId.CLOB_NAME), (int) vcl);
             
         } catch (SQLException e) {
             throw dataTypeConversion("DAN-438-tmp");

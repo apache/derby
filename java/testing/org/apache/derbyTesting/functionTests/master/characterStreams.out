@@ -4,11 +4,11 @@ CORRECT NUMBER OF BYTES IN STREAM
 MORE BYTES IN STREAM THAN PASSED IN VALUE
 MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS BYTES IN STREAM THAN PASSED IN VALUE
 LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 NULL ASCII STREAM
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
@@ -28,11 +28,11 @@ CORRECT NUMBER OF BYTES IN STREAM
 MORE BYTES IN STREAM THAN PASSED IN VALUE
 MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS BYTES IN STREAM THAN PASSED IN VALUE
 LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 NULL ASCII STREAM
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
@@ -52,11 +52,11 @@ CORRECT NUMBER OF BYTES IN STREAM
 MORE BYTES IN STREAM THAN PASSED IN VALUE
 MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS BYTES IN STREAM THAN PASSED IN VALUE
 LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 NULL ASCII STREAM
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
@@ -74,10 +74,10 @@ Results from Character Stream (read block) stream
 Test setCharacterStream into CHAR
 MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
 13         |A Mississippi Republican |24         |NULL                     |NULL       |NULL                     |NULL       
@@ -86,10 +86,10 @@ ID         |C                        |CLEN       |VC                       |VCLE
 Test setCharacterStream into VARCHAR
 MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
 18         |NULL                     |NULL       |A Mississippi Republican |24         |NULL                     |NULL       
@@ -98,10 +98,10 @@ ID         |C                        |CLEN       |VC                       |VCLE
 Test setCharacterStream into LONG VARCHAR
 MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
 23         |NULL                     |NULL       |NULL                     |NULL       |A Mississippi Republican |24         
@@ -187,11 +187,11 @@ CORRECT NUMBER OF BYTES IN STREAM
 MORE BYTES IN STREAM THAN PASSED IN VALUE
 MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS BYTES IN STREAM THAN PASSED IN VALUE
 LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 NULL ASCII STREAM
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
@@ -211,11 +211,11 @@ CORRECT NUMBER OF BYTES IN STREAM
 MORE BYTES IN STREAM THAN PASSED IN VALUE
 MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS BYTES IN STREAM THAN PASSED IN VALUE
 LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 NULL ASCII STREAM
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
@@ -235,11 +235,11 @@ CORRECT NUMBER OF BYTES IN STREAM
 MORE BYTES IN STREAM THAN PASSED IN VALUE
 MORE BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS BYTES IN STREAM THAN PASSED IN VALUE
 LESS BYTES IN ASCII STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 NULL ASCII STREAM
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
@@ -257,10 +257,10 @@ Results from Character Stream (read block) stream
 Test setCharacterStream into CHAR
 MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
 13         |A Mississippi Republican |24         |NULL                     |NULL       |NULL                     |NULL       
@@ -269,10 +269,10 @@ ID         |C                        |CLEN       |VC                       |VCLE
 Test setCharacterStream into VARCHAR
 MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XCL30) An IOException was thrown when reading a 'java.sql.String' from an InputStream.
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
 18         |NULL                     |NULL       |A Mississippi Republican |24         |NULL                     |NULL       
@@ -281,10 +281,10 @@ ID         |C                        |CLEN       |VC                       |VCLE
 Test setCharacterStream into CLOB
 MORE CHARACTERS IN READER THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 LESS CHARACTERS IN READER STREAM THAN SPECIFIED LENGTH - REJECTED 
 EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ID         |C                        |CLEN       |VC                       |VCLEN      |LVC                      |LVCLEN     
 -----------------------------------------------------------------------------------------------------------------------------
 23         |NULL                     |NULL       |NULL                     |NULL       |A Mississippi Republican |24         

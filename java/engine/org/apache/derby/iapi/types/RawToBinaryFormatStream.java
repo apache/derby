@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.EOFException;
 
+import org.apache.derby.iapi.services.io.DerbyIOException;
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
@@ -64,44 +65,103 @@ public final class RawToBinaryFormatStream extends LimitInputStream {
     // and eof reached
     private boolean eof = false;
 
-	/**
-		@param	in Application's raw binary stream passed into JDBC layer
-		@param	length - length of the stream, if known, otherwise -1.
-	*/
-	public RawToBinaryFormatStream(InputStream in, int length) {
-		super(in);
+    /**
+     * The length of the stream.
+     * Unknown if less than 0.
+     */
+    private final int length;
+    /**
+     * The maximum allowed length for the stream.
+     * No limit if less than 0.
+     */
+    private final int maximumLength;
+    /**
+     * The type of the column the stream is inserted into.
+     * Used for length less streams, <code>null</code> if not in use.
+     */
+    private final String typeName;
 
-		if (length >= 0) {
-			setLimit(length);
-            
-            if (length <= 31)
-            {
-                encodedLength = new byte[1];               
-                encodedLength[0] = (byte) (0x80 | (length & 0xff));
-            }
-            else if (length <= 0xFFFF)
-            {
-                encodedLength = new byte[3];
-                encodedLength[0] = (byte) 0xA0;
-                encodedLength[1] = (byte)(length >> 8);
-                encodedLength[2] = (byte)(length);    
-            }
-            else
-            {
-                encodedLength = new byte[5];
-                encodedLength[0] = (byte) 0xC0;
-                encodedLength[1] = (byte)(length >> 24);
-                encodedLength[2] = (byte)(length >> 16);
-                encodedLength[3] = (byte)(length >> 8);
-                encodedLength[4] = (byte)(length);
-            }
-		}
+    /**
+     * Create a binary on-disk stream from the given <code>InputStream</code>.
+     *
+     * The on-disk stream prepends a length encoding, and validates that the
+     * actual length of the stream matches the specified length (as according
+     * to JDBC 3.0).
+     *
+     * @param in application's raw binary stream passed into JDBC layer
+     * @param length length of the stream
+     * @throws IllegalArgumentException if <code>length</code> is negative.
+     *      This exception should never be exposed to the user, and seeing it
+     *      means a programming error exists in the code.
+     */
+    public RawToBinaryFormatStream(InputStream in, int length) {
+        super(in);
+        if (length < 0) {
+            throw new IllegalArgumentException(
+                    "Stream length cannot be negative: " + length);
+        }
+        this.length = length;
+        this.maximumLength = -1;
+        this.typeName = null;
+
+        setLimit(length);
+        
+        if (length <= 31)
+        {
+            encodedLength = new byte[1];               
+            encodedLength[0] = (byte) (0x80 | (length & 0xff));
+        }
+        else if (length <= 0xFFFF)
+        {
+            encodedLength = new byte[3];
+            encodedLength[0] = (byte) 0xA0;
+            encodedLength[1] = (byte)(length >> 8);
+            encodedLength[2] = (byte)(length);    
+        }
         else
         {
-            // unknown length, four zero bytes
-            encodedLength = new byte[4];
+            encodedLength = new byte[5];
+            encodedLength[0] = (byte) 0xC0;
+            encodedLength[1] = (byte)(length >> 24);
+            encodedLength[2] = (byte)(length >> 16);
+            encodedLength[3] = (byte)(length >> 8);
+            encodedLength[4] = (byte)(length);
         }
-	}
+    }
+
+    /**
+     * Create a binary on-disk stream from the given <code>InputStream</code>
+     * of unknown length.
+     *
+     * A limit is placed on the maximum length of the stream.
+     *
+     * @param in the application stream
+     * @param maximumLength maximum length of the column data is inserted into
+     * @param typeName type name for the column data is inserted into
+     * @throws IllegalArgumentException if maximum length is negative, or type
+     *      name is <code>null<code>. This exception should never be exposed
+     *      to the user, and seeing it means a programming error exists in the
+     *      code. Although a missing type name is not critical, an exception is
+     *      is thrown to signal the intended use of this constructor.
+     */
+    public RawToBinaryFormatStream(InputStream in,
+                                   int maximumLength,
+                                   String typeName) {
+        super(in);
+        if (maximumLength < 0) {
+            throw new IllegalArgumentException("Maximum length for a capped " +
+                    "stream cannot be negative: " + maximumLength);
+        }
+        if (typeName == null) {
+            throw new IllegalArgumentException("Type name cannot be null");
+        }
+        this.length = -1;
+        this.maximumLength = maximumLength;
+        this.typeName = typeName;
+        // Unknown length, four zero bytes.
+        encodedLength = new byte[4];
+        setLimit(maximumLength);
+    }
 
 	/**
 		Read from the wrapped stream prepending the intial bytes if needed.
@@ -143,8 +203,12 @@ public final class RawToBinaryFormatStream extends LimitInputStream {
 
 		int remainingBytes = clearLimit();
 
-		if (remainingBytes > 0)
-			throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INEXACT_LENGTH_DATA));
+        if (length > -1 && remainingBytes > 0) {
+            throw new DerbyIOException(
+                        MessageService.getTextMessage(
+                                    SQLState.SET_STREAM_INEXACT_LENGTH_DATA),
+                        SQLState.SET_STREAM_INEXACT_LENGTH_DATA);
+        }
 
 		// if we had a limit try reading one more byte.
 		// JDBC 3.0 states the stream muct have the correct number of characters in it.
@@ -157,8 +221,25 @@ public final class RawToBinaryFormatStream extends LimitInputStream {
 			catch (IOException ioe) {
 				c = -1;
 			}
-			if (c != -1)
-				throw new IOException(MessageService.getTextMessage(SQLState.SET_STREAM_INEXACT_LENGTH_DATA));
+			if (c != -1) {
+                if (length > -1) {
+                    // Stream is not capped, and should have matched the
+                    // specified length.
+                    throw new DerbyIOException(
+                                MessageService.getTextMessage(
+                                    SQLState.SET_STREAM_INEXACT_LENGTH_DATA),
+                                SQLState.SET_STREAM_INEXACT_LENGTH_DATA);
+                } else {
+                    // Stream is capped, and has exceeded the maximum length.
+                    throw new DerbyIOException(
+                            MessageService.getTextMessage(
+                                    SQLState.LANG_STRING_TRUNCATION,
+                                    typeName,
+                                    "XXXX",
+                                    String.valueOf(maximumLength)),
+                            SQLState.LANG_STRING_TRUNCATION);
+                }
+            }
 		}
 	}
 
