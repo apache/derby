@@ -867,4 +867,63 @@ ij> drop table logged;
 0 rows inserted/updated/deleted
 ij> declare global temporary table session.logged(logged int) on commit delete rows not logged;
 0 rows inserted/updated/deleted
+ij> -- tests for ALTER TABLE ALTER COLUMN [NOT] NULL
+create table atmcn_1 (a integer, b integer not null);
+0 rows inserted/updated/deleted
+ij> -- should fail because b cannot be null
+insert into atmcn_1 (a) values (1);
+ERROR 23502: Column 'B'  cannot accept a NULL value.
+ij> insert into atmcn_1 values (1,1);
+1 row inserted/updated/deleted
+ij> select * from atmcn_1;
+A          |B          
+-----------------------
+1          |1          
+ij> alter table atmcn_1 alter column a not null;
+0 rows inserted/updated/deleted
+ij> -- should fail because a cannot be null
+insert into atmcn_1 (b) values (2);
+ERROR 23502: Column 'A'  cannot accept a NULL value.
+ij> insert into atmcn_1 values (2,2);
+1 row inserted/updated/deleted
+ij> select * from atmcn_1;
+A          |B          
+-----------------------
+1          |1          
+2          |2          
+ij> alter table atmcn_1 alter column b null;
+0 rows inserted/updated/deleted
+ij> insert into atmcn_1 (a) values (1);
+1 row inserted/updated/deleted
+ij> select * from atmcn_1;
+A          |B          
+-----------------------
+1          |1          
+2          |2          
+1          |NULL       
+ij> -- Now that B has a null value, trying to modify it to NOT NULL should fail
+alter table atmcn_1 alter column b not null;
+ERROR X0Y80: ALTER table 'APP.ATMCN_1' failed. Null data found in column 'B'.
+ij> -- show that a column which is part of the PRIMARY KEY cannot be modified NULL
+create table atmcn_2 (a integer not null primary key, b integer not null);
+0 rows inserted/updated/deleted
+ij> alter table atmcn_2 alter column a null;
+ERROR 42Z20: Column 'A' cannot be made nullable. It is part of a primary key or unique constraint, which cannot have any nullable columns.
+ij> create table atmcn_3 (a integer not null, b integer not null);
+0 rows inserted/updated/deleted
+ij> alter table atmcn_3 add constraint atmcn_3_pk primary key(a, b);
+0 rows inserted/updated/deleted
+ij> alter table atmcn_3 alter column b null;
+ERROR 42Z20: Column 'B' cannot be made nullable. It is part of a primary key or unique constraint, which cannot have any nullable columns.
+ij> -- verify that the keyword "column" in the ALTER TABLE ... ALTER COLUMN ...
+-- statement is optional:
+create table atmcn_4 (a integer not null, b integer);
+0 rows inserted/updated/deleted
+ij> alter table atmcn_4 alter a null;
+0 rows inserted/updated/deleted
+ij> -- show that a column which has a UNIQUE constraint cannot be modified NULL:
+create table atmcn_5 (a integer not null, b integer not null unique);
+0 rows inserted/updated/deleted
+ij> alter table atmcn_5 alter column b null;
+ERROR 42Z20: Column 'B' cannot be made nullable. It is part of a primary key or unique constraint, which cannot have any nullable columns.
 ij> 

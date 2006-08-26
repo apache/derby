@@ -11791,22 +11791,10 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 	}
 |
 	<ALTER> [ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
-		typeDescriptor = DB2AlterColumn(autoIncrementInfo)
+		tableElement = columnAlterClause(columnName)
 	{
 		changeType[0] = DDLStatementNode.MODIFY_TYPE;
-		/* typeDescriptor is not null for MODIFY_COLUMN_TYPE_NODE */
-		if (typeDescriptor != null)
-			tableElementList.addTableElement((TableElementNode) nodeFactory.getNode(
-						C_NodeTypes.MODIFY_COLUMN_TYPE_NODE,
-						columnName, null,
-						typeDescriptor, null,
-						getContextManager()));
-		else
-			tableElementList.addTableElement((TableElementNode) nodeFactory.getNode(
-						C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
-						columnName,
-						null, null, autoIncrementInfo,
-						getContextManager()));
+		tableElementList.addTableElement(tableElement);
 		return lockGranularity;
 	}
 |
@@ -11842,29 +11830,61 @@ addColumnDefinition(TableElementList tableElementList) throws StandardException 
 	}
 }
 
-
-TableElementNode 
-columnAlter() throws StandardException :
-{
-	String columnName;
-	TableElementNode tn;
-}
-{
-	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) tn = columnAlterClause(columnName)
-	{
-		return tn;
-	}
-}
-
+/*
+ * Various variants of the ALTER TABLE ALTER COLUMN statement.
+ *
+ * By the type we get here, we've parsed
+ *    ALTER TABLE tablename ALTER [COLUMN] columnname
+ * and here we parse the remainder of the ALTER COLUMN clause, one of:
+ *		SET DATA TYPE data_type
+ *		SET INCREMENT BY increment_value
+ *		RESTART WITH increment_restart_value
+ *		[WITH] DEFAULT default_value
+ *      [NOT] NULL
+ */
 TableElementNode
 columnAlterClause(String columnName) throws StandardException :
 {
 	ValueNode	defaultNode;
-	DataTypeDescriptor typeDescriptor;
 	long[]				autoIncrementInfo = new long[4];
+	long				autoIncrementIncrement = 1;
+	long				autoIncrementRestartWith = 1;
+	DataTypeDescriptor	typeDescriptor = null;
 }
 {
-	// MODIFY column_name [WITH] DEFAULT <Value>
+	LOOKAHEAD( {getToken(2).kind == DATA} )
+	<SET> <DATA> <TYPE> typeDescriptor = dataTypeDDL()
+	{
+		return (TableElementNode) nodeFactory.getNode(
+						C_NodeTypes.MODIFY_COLUMN_TYPE_NODE,
+						columnName, null,
+						typeDescriptor, null,
+						getContextManager());
+	}
+|
+	LOOKAHEAD( {getToken(2).kind == INCREMENT} )
+	<SET> <INCREMENT> <BY> autoIncrementIncrement = exactNumber()
+	{
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE;
+		return (TableElementNode) nodeFactory.getNode(
+						C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
+						columnName,
+						null, null, autoIncrementInfo,
+						getContextManager());
+	}
+|
+	<RESTART> <WITH> autoIncrementRestartWith = exactNumber()
+	{
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementRestartWith;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE;
+		return (TableElementNode) nodeFactory.getNode(
+						C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
+						columnName,
+						null, null, autoIncrementInfo,
+						getContextManager());
+	}
+|
 	LOOKAHEAD( {getToken(1).kind == WITH || getToken(1).kind == _DEFAULT })
 	defaultNode = defaultClause(autoIncrementInfo, columnName)
 	{
@@ -11881,7 +11901,6 @@ columnAlterClause(String columnName) throws StandardException :
 								getContextManager());
 	}
 |
-	// MODIFY column_name NULL
 	LOOKAHEAD ({getToken(1).kind == NULL })
 	<NULL>
 	{
@@ -11896,7 +11915,6 @@ columnAlterClause(String columnName) throws StandardException :
 								getContextManager());
 	}
 |
-	// MODIFY column_name NOT NULL
 	LOOKAHEAD({getToken(1).kind == NOT})
 	<NOT> <NULL>
 	{
@@ -11909,49 +11927,6 @@ columnAlterClause(String columnName) throws StandardException :
 								C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NOT_NULL_NODE,
 								columnName, null, null, null,
 								getContextManager());
-	}
-|
-	// MODIFY column_name varchar(64)
-	typeDescriptor = dataTypeDDL()
-	{
-		return (TableElementNode) nodeFactory.getNode(
-								C_NodeTypes.MODIFY_COLUMN_TYPE_NODE,
-								columnName,
-								null, typeDescriptor, null,
-								getContextManager());
-	}
-}
-
-/*
- * DB2 syntax for ALTER COLUMN
- */
-DataTypeDescriptor
-DB2AlterColumn(long[] autoIncrementInfo) throws StandardException :
-{
-	long				autoIncrementIncrement = 1;
-	long				autoIncrementRestartWith = 1;
-	DataTypeDescriptor	typeDescriptor = null;
-}
-{
-	LOOKAHEAD( {getToken(2).kind == DATA} )
-	<SET> <DATA> <TYPE> typeDescriptor = dataTypeDDL()
-	{
-		return typeDescriptor;
-	}
-|
-	LOOKAHEAD( {getToken(2).kind == INCREMENT} )
-	<SET> <INCREMENT> <BY> autoIncrementIncrement = exactNumber()
-	{
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE;
-		return typeDescriptor;
-	}
-|
-	<RESTART> <WITH> autoIncrementRestartWith = exactNumber()
-	{
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementRestartWith;
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE;
-		return typeDescriptor;
 	}
 }
 

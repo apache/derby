@@ -193,15 +193,17 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 			
 			else
 			{
-				// a column that is part of a primary key is being made
-				// nullable; can't be done.
+				// a column that is part of a primary key or unique constraint
+                // is being made nullable; can't be done.
 				if ((getNodeType() == 
 					 C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE) &&
-					(existingConstraint.getConstraintType() == 
-					 DataDictionary.PRIMARYKEY_CONSTRAINT))
+					((existingConstraint.getConstraintType() == 
+					 DataDictionary.PRIMARYKEY_CONSTRAINT) ||
+					 (existingConstraint.getConstraintType() == 
+					 DataDictionary.UNIQUE_CONSTRAINT)))
 				{
 				throw StandardException.newException(
-					 SQLState.LANG_MODIFY_COLUMN_PKEY_CONSTRAINT, name);
+					 SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT, name);
 				}
 				// unique key or primary key.
 				ConstraintDescriptorList 

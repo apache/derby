@@ -552,3 +552,32 @@ create table logged(logged int);
 drop table logged;
 declare global temporary table session.logged(logged int) on commit delete rows not logged;
 
+-- tests for ALTER TABLE ALTER COLUMN [NOT] NULL
+create table atmcn_1 (a integer, b integer not null);
+-- should fail because b cannot be null
+insert into atmcn_1 (a) values (1);
+insert into atmcn_1 values (1,1);
+select * from atmcn_1;
+alter table atmcn_1 alter column a not null;
+-- should fail because a cannot be null
+insert into atmcn_1 (b) values (2);
+insert into atmcn_1 values (2,2);
+select * from atmcn_1;
+alter table atmcn_1 alter column b null;
+insert into atmcn_1 (a) values (1);
+select * from atmcn_1;
+-- Now that B has a null value, trying to modify it to NOT NULL should fail
+alter table atmcn_1 alter column b not null;
+-- show that a column which is part of the PRIMARY KEY cannot be modified NULL
+create table atmcn_2 (a integer not null primary key, b integer not null);
+alter table atmcn_2 alter column a null;
+create table atmcn_3 (a integer not null, b integer not null);
+alter table atmcn_3 add constraint atmcn_3_pk primary key(a, b);
+alter table atmcn_3 alter column b null;
+-- verify that the keyword "column" in the ALTER TABLE ... ALTER COLUMN ...
+-- statement is optional:
+create table atmcn_4 (a integer not null, b integer);
+alter table atmcn_4 alter a null;
+-- show that a column which has a UNIQUE constraint cannot be modified NULL:
+create table atmcn_5 (a integer not null, b integer not null unique);
+alter table atmcn_5 alter column b null;
