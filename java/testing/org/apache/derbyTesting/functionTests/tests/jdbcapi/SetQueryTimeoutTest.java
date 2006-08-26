@@ -436,10 +436,8 @@ public class SetQueryTimeoutTest
         // C - different stmt on different connection; should NOT time out
         // D - here just to create equal contention on conn1 and conn2
 
-        // FIXME: Should have used conn1 for statementB below, but
-        // this is blocked by DERBY-694
         PreparedStatement statementA = prepare(conn1, getFetchQuery("t"));
-        PreparedStatement statementB = prepare(conn2, getFetchQuery("t"));
+        PreparedStatement statementB = prepare(conn1, getFetchQuery("t"));
         PreparedStatement statementC = prepare(conn2, getFetchQuery("t"));
         PreparedStatement statementD = prepare(conn2, getFetchQuery("t"));
 
