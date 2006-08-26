@@ -423,4 +423,36 @@ public abstract class BinaryListOperatorNode extends ValueNode
 			
 		return returnNode;
 	}
+        
+        /**
+         * @inheritDoc
+         */
+	protected boolean isEquivalent(ValueNode o) throws StandardException
+	{
+		if (!isSameNodeType(o))
+		{
+			return false;
+		}
+		BinaryListOperatorNode other = (BinaryListOperatorNode)o;
+		if (!operator.equals(other.operator)
+				|| !leftOperand.isEquivalent(other.getLeftOperand())) 
+		{
+			return false;
+		}
+		
+		int sz = getRightOperandList().size();
+		if (sz != other.rightOperandList.size())
+		{
+			return false;
+		}
+		for (int i = 0; i < sz; i++)
+		{
+			ValueNode e = (ValueNode)rightOperandList.elementAt(i);
+			if (!e.isEquivalent((ValueNode)other.rightOperandList.elementAt(i))) 
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 }

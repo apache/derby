@@ -1031,6 +1031,21 @@ public class CastNode extends ValueNode
 	{
 		return forDataTypeFunction;
 	}
+        
+	/**
+	 * {@inheritDoc}
+	 * @throws StandardException 
+	 */
+	protected boolean isEquivalent(ValueNode o) throws StandardException
+	{
+		if (isSameNodeType(o)) 
+		{
+			CastNode other = (CastNode)o;
+			return castTarget.equals(other.castTarget)
+				&& castOperand.isEquivalent(other.castOperand);
+		}
+		return false;
+	}
 }
 
 

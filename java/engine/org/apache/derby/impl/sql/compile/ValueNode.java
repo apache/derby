@@ -1329,5 +1329,35 @@ public abstract class ValueNode extends QueryTreeNode
 	{
 		return false;
 	}
+	
+	/**
+	 * Tests if this node is equivalent to the specified ValueNode. Two 
+	 * ValueNodes are considered equivalent if they will evaluate to the same
+	 * value during query execution. 
+	 * 
+	 * @param other the node to compare this ValueNode against.
+	 * @return <code>true</code> if the two nodes are equivalent, 
+	 * <code>false</code> otherwise.
+	 * 
+	 * @throws StandardException 
+	 */
+	protected abstract boolean isEquivalent(ValueNode other)
+		throws StandardException;
 
+	/**
+	 * Tests if this node is of the same type as the specified node as
+	 * reported by {@link QueryTreeNode#getNodeType()}.
+	 * 
+	 * @param other the node to compare this value node against. 
+	 * 
+	 * @return <code>true</code> if the two nodes are of the same type.  
+	 */
+	protected final boolean isSameNodeType(ValueNode other)
+	{
+		if (other != null) {
+			return other.getNodeType() == getNodeType();
+		}
+		return false;
+	}
+	
 }

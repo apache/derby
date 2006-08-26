@@ -1433,8 +1433,9 @@ public class ResultColumn extends ValueNode
 
   		if (isAutoincrement())
   			newResultColumn.setAutoincrement();
-		
-		return newResultColumn;
+  		if (isGroupingColumn()) 
+  			newResultColumn.markAsGroupingColumn();
+  		return newResultColumn;
 	}
 
 	/**
@@ -1592,6 +1593,12 @@ public class ResultColumn extends ValueNode
   	{
   		autoincrement = true;
   	}
+        
+        public boolean isGroupingColumn()
+        {
+        	return isGroupingColumn;
+        }
+        
 	/**
 	 * @exception StandardException		Thrown on error
 	 */
@@ -1815,6 +1822,18 @@ public class ResultColumn extends ValueNode
 		// reference nor a FromBaseTable beneath it--for example,
 		// if it is of type BaseColumnNode. 
 		return -1;
+	}
+	
+	public boolean isEquivalent(ValueNode o) throws StandardException 
+	{
+        if (o.getNodeType() == getNodeType()) 
+        {                
+        	ResultColumn other = (ResultColumn)o;
+        	if (expression != null) {
+        		return expression.isEquivalent(other.expression);
+        	}
+        }
+        return false;
 	}
 
 }

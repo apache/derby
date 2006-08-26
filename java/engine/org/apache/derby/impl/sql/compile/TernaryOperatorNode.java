@@ -915,4 +915,17 @@ public class TernaryOperatorNode extends ValueNode
 	private DataTypeDescriptor getVarcharDescriptor() {
 		return new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), true);
 	}
+        
+    protected boolean isEquivalent(ValueNode o) throws StandardException
+    {
+    	if (isSameNodeType(o)) 
+	{
+		TernaryOperatorNode other = (TernaryOperatorNode)o;
+    		return (other.methodName.equals(methodName)
+				&& other.receiver.isEquivalent(receiver)
+    				&& other.leftOperand.isEquivalent(leftOperand)
+    				&& other.rightOperand.isEquivalent(rightOperand));
+        }
+    	return false;
+    }
 }

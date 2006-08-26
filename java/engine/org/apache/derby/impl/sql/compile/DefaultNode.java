@@ -276,4 +276,12 @@ public  class DefaultNode extends ValueNode
 				"generateExpression not expected to be called");
 		}
 	}
+
+    /**
+     * @inheritDoc
+     */
+	protected boolean isEquivalent(ValueNode other)
+    {
+		return false;
+    }
 }

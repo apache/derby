@@ -9408,15 +9408,26 @@ groupingColumnReferenceList() throws StandardException :
 void
 groupingColumnReference(GroupByList groupingCols) throws StandardException :
 {
-	ColumnReference colRef;
+        ValueNode columnExpression;
 }
 {
-	colRef = columnReference() 
+	columnExpression = additiveExpression(null, 0, false)
 	{
+		if (columnExpression.isParameterNode()) 
+	    	{
+			throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "?");
+	    	}
+		if (columnExpression instanceof AggregateNode)
+		{
+			AggregateNode agNode = (AggregateNode)columnExpression;
+			throw StandardException.newException(
+				SQLState.LANG_AGGREGATE_IN_GROUPBY_LIST, 
+				agNode.getAggregateName());
+		}        
 		groupingCols.addGroupByColumn(
 			(GroupByColumn) nodeFactory.getNode(
 							C_NodeTypes.GROUP_BY_COLUMN,
-							colRef,
+							columnExpression,
 							getContextManager()));
 	}
 }

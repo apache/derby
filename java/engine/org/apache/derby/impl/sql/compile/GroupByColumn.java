@@ -40,8 +40,8 @@ import java.util.Vector;
  */
 public class GroupByColumn extends OrderedColumn 
 {
-	private ColumnReference	colRef;
-
+	private ValueNode columnExpression;
+	
 	/**
 	 * Initializer.
 	 *
@@ -49,7 +49,7 @@ public class GroupByColumn extends OrderedColumn
 	 */
 	public void init(Object colRef) 
 	{
-		this.colRef = (ColumnReference) colRef;
+		this.columnExpression = (ValueNode)colRef;
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class GroupByColumn extends OrderedColumn
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "Column Reference: "+colRef+super.toString();
+			return "Column Expression: "+columnExpression+super.toString();
 		}
 		else
 		{
@@ -83,10 +83,10 @@ public class GroupByColumn extends OrderedColumn
 		{
 			super.printSubNodes(depth);
 
-			if (colRef != null)
+			if (columnExpression != null)
 			{
 				printLabel(depth, "colRef: ");
-				colRef.treePrint(depth + 1);
+				columnExpression.treePrint(depth + 1);
 			}
 		}
 	}
@@ -98,49 +98,7 @@ public class GroupByColumn extends OrderedColumn
 	 */
 	public String getColumnName() 
 	{
-		return colRef.getColumnName();
-	}
-
-	/**
-	 * Get the ColumnReference from this GroupByColumn.
-	 *
-	 * @return ColumnReference	The ColumnReference from this node.
-	 */
-	public ColumnReference getColumnReference()
-	{
-		return colRef;
-	}
-
-	/**
-	 * Set the ColumnReference for this GroupByColumn.
-	 *
-	 * @param colRef	The new ColumnReference for this node.
-	 */
-	public void setColumnReference(ColumnReference colRef)
-	{
-		this.colRef = colRef;
-	}
-
-	/**
-	 * Get the table number for this GroupByColumn.
-	 *
-	 * @return	int The table number for this GroupByColumn
-	 */
-
-	public int getTableNumber()
-	{
-		return colRef.getTableNumber();
-	}
-
-	/**
-	 * Get the source this GroupByColumn
-	 *
-	 * @return	The source of this GroupByColumn
-	 */
-
-	public ResultColumn getSource()
-	{
-		return colRef.getSource();
+		return columnExpression.getColumnName();
 	}
 
 	/**
@@ -162,12 +120,16 @@ public class GroupByColumn extends OrderedColumn
 				throws StandardException
 	{
 		/* Bind the ColumnReference to the FromList */
-		colRef = (ColumnReference) colRef.bindExpression(fromList,
+		columnExpression = (ValueNode) columnExpression.bindExpression(fromList,
 							  subqueryList,
 							  aggregateVector);
 
 		// Verify that we can group on the column
-
+		if (columnExpression.isParameterNode()) 
+		{
+			throw StandardException.newException(SQLState.LANG_INVALID_COL_REF_GROUPED_SELECT_LIST,
+					columnExpression);
+		}
 		/*
 		 * Do not check to see if we can map user types
 		 * to built-in types.  The ability to do so does
@@ -175,11 +137,22 @@ public class GroupByColumn extends OrderedColumn
 		 * as of version 2.0, ordering does not work on
 		 * user types.
 		 */
-		TypeId ctid = colRef.getTypeId();
+		TypeId ctid = columnExpression.getTypeId();
 		if (! ctid.orderable(getClassFactory()))
 		{
 			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_ORDERABLE_DURING_EXECUTION, 
 							ctid.getSQLTypeName());
 		}
+	}
+
+	public ValueNode getColumnExpression() 
+	{
+		return columnExpression;
+	}
+
+	public void setColumnExpression(ValueNode cexpr) 
+	{
+		this.columnExpression = cexpr;
+		
 	}
 }

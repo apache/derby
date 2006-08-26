@@ -180,4 +180,17 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 			return "";
 		}
 	}
+        
+        /**
+         * {@inheritDoc}
+         */
+	protected boolean isEquivalent(ValueNode o)
+	{
+		if (isSameNodeType(o)) 
+		{
+			CurrentDatetimeOperatorNode other = (CurrentDatetimeOperatorNode)o;
+			return other.whichType == whichType;
+		}
+		return false;
+	}
 }

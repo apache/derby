@@ -64,8 +64,8 @@ public class VerifyAggregateExpressionsVisitor implements Visitor
 	 *
 	 * @return me
 	 *
-	 * @exception StandardException on ColumnReferernce not
-	 *	in group by list, ValueNode or 
+	 * @exception StandardException on ColumnReference not
+	 * 	in group by list, ValueNode or	
 	 * 	JavaValueNode that isn't under an
 	 * 	aggregate
 	 */
@@ -81,11 +81,12 @@ public class VerifyAggregateExpressionsVisitor implements Visitor
 				throw StandardException.newException(SQLState.LANG_INVALID_COL_REF_NON_GROUPED_SELECT_LIST, cr.getSQLColumnName());
 			}
 
-			if (groupByList.containsColumnReference(cr) == null)
+			if (groupByList.findGroupingColumn(cr) == null)
 			{
-				throw StandardException.newException(SQLState.LANG_INVALID_COL_REF_GROUPED_SELECT_LIST, cr.getSQLColumnName());
+				throw StandardException.newException(SQLState.LANG_INVALID_GROUPED_SELECT_LIST);
 			}
 		} 
+		
 		/*
 		** Subqueries are only valid if they do not have
 		** correlations and are expression subqueries.  RESOLVE:
@@ -119,22 +120,34 @@ public class VerifyAggregateExpressionsVisitor implements Visitor
 							SQLState.LANG_INVALID_NON_GROUPED_SELECT_LIST :
 							SQLState.LANG_INVALID_GROUPED_SELECT_LIST);
 			}
+		} else if (node instanceof JavaToSQLValueNode) 
+		{
+			// disallow any expression which involves native java computation. 
+		    	// Not possible to consider java expressions for equivalence.
+			throw StandardException.newException( (groupByList == null) ?
+					SQLState.LANG_INVALID_NON_GROUPED_SELECT_LIST :
+						SQLState.LANG_INVALID_GROUPED_SELECT_LIST);
 		}
 
 		return node;
 	}
 
 	/**
-	 * Don't visit children under an aggregate
+	 * Don't visit children under an aggregate, subquery or any node which
+	 * is equivalent to any of the group by expressions.
 	 *
 	 * @param node 	the node to process
 	 *
 	 * @return true/false
+	 * @throws StandardException 
 	 */
-	public boolean skipChildren(Visitable node)
+	public boolean skipChildren(Visitable node) throws StandardException 
 	{
-		return (node instanceof AggregateNode) ||
-				(node instanceof SubqueryNode);
+		return ((node instanceof AggregateNode) ||
+				(node instanceof SubqueryNode) ||
+				(node instanceof ValueNode &&
+						groupByList != null 
+						&& groupByList.findGroupingColumn((ValueNode)node) != null));
 	}
 	
 	public boolean stopTraversal()

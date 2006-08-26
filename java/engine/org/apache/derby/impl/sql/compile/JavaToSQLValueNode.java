@@ -354,4 +354,13 @@ public class JavaToSQLValueNode extends ValueNode
 		
 		return returnNode;
 	}
+        
+	/**
+	 * {@inheritDoc}
+	 */
+    protected boolean isEquivalent(ValueNode o)
+    {
+    	// anything in the java domain is not equiavlent.
+    	return false;
+    }
 }

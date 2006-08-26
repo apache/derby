@@ -277,4 +277,13 @@ abstract class ConstantNode extends ValueNode
 		// Constants are constant for the life of the query
 		return Qualifier.CONSTANT;
 	}
+        
+	protected boolean isEquivalent(ValueNode o) throws StandardException
+	{
+		if (isSameNodeType(o)) {
+			ConstantNode other = (ConstantNode)o;
+			return other.getValue().compare(getValue()) == 0;
+		}
+		return false;
+	}
 }

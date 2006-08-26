@@ -91,5 +91,5 @@ public interface Visitor
 	 * 
 	 * @return true/false
 	 */
-	boolean skipChildren(Visitable node);
+	boolean skipChildren(Visitable node) throws StandardException;
 }	

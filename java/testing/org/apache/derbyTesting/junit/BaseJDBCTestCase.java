@@ -28,6 +28,8 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.sql.*;
 
+import junit.framework.AssertionFailedError;
+
 import org.apache.derby.tools.ij;
 
 
@@ -358,7 +360,6 @@ public abstract class BaseJDBCTestCase
 
     /**
      * Assert that SQLState is as expected.
-     * The expected SQLState is truncated to five characters if required.
      *
      * @param message message to print on failure.
      * @param expected the expected SQLState.
@@ -372,22 +373,29 @@ public abstract class BaseJDBCTestCase
         assertNotNull("Exception cannot be null when asserting on SQLState", 
                       exception);
         
-        String state = exception.getSQLState();
-        
-        if ( state != null )
-            assertTrue("The exception's SQL state must be five characters long",
-                exception.getSQLState().length() == 5);
-        
-        if ( expected != null )
-            assertTrue("The expected SQL state must be five characters long",
-                expected.length() == 5);
-        
-        assertEquals(message, expected, state);
+        try {
+            String state = exception.getSQLState();
+            
+            if ( state != null )
+                assertTrue("The exception's SQL state must be five characters long",
+                        state.length() == 5);
+            
+            if ( expected != null )
+                assertTrue("The expected SQL state must be five characters long",
+                    expected.length() == 5);
+            
+            assertEquals(message, expected, state);
+        } catch (AssertionFailedError e) {
+            
+            // Save the SQLException
+            // e.initCause(exception);
+
+            throw e;
+        }
     }
 
     /**
      * Assert that SQLState is as expected.
-     * The expected SQLState is truncated to five characters if required.
      *
      * @param expected the expected SQLState.
      * @param exception the exception to check the SQLState of.
@@ -395,5 +403,23 @@ public abstract class BaseJDBCTestCase
     public static void assertSQLState(String expected, SQLException exception) {
         assertSQLState("Unexpected SQL state.", expected, exception);
     }
+    /**
+     * Assert that the query does not compile and throws
+     * a SQLException with the expected state.
+     * 
+     * @param sqlstate expected sql state.
+     * @param query the query to compile.
+     */
+    public void assertCompileError(String sqlState, String query) {
+
+        try {
+            prepareStatement(query).close();
+            fail("expected compile error: " + sqlState);
+        } catch (SQLException se) {
+            assertSQLState(sqlState, se);
+        }
+    }
 
 } // End class BaseJDBCTestCase
+
+

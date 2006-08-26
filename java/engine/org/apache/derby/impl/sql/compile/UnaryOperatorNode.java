@@ -857,4 +857,22 @@ public class UnaryOperatorNode extends ValueNode
         mb.push(((Boolean)additionalArgs[0]).booleanValue());
         return 3;
     }
+    
+    /**
+     * @throws StandardException 
+     * {@inheritDoc}
+     */
+    protected boolean isEquivalent(ValueNode o) throws StandardException
+    {
+    	if (isSameNodeType(o)) 
+    	{
+		// the first condition in the || covers the case when 
+	    	// both operands are null.
+    		UnaryOperatorNode other = (UnaryOperatorNode)o;
+    		return (operator.equals(other.operator) && 
+			((operand == other.operand)|| 
+			 ((operand != null) && operand.isEquivalent(other.operand))));
+    	}
+    	return false;
+    }
 }

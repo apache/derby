@@ -485,4 +485,12 @@ public class ParameterNode extends ValueNode
 	{
 		return true;
 	}
+
+    /**
+     * @inheritDoc
+     */
+    protected boolean isEquivalent(ValueNode o)
+    {
+    	return false;
+    }
 }

@@ -1120,6 +1120,16 @@ public class ColumnReference extends ValueNode
 		colNum[0] = -1;
 		return null;
 	}
+	
+	protected boolean isEquivalent(ValueNode o) throws StandardException
+	{
+		if (!isSameNodeType(o)) {
+			return false;
+		}
+		ColumnReference other = (ColumnReference)o;
+		return (tableNumber == other.tableNumber 
+				&& columnName.equals(other.getColumnName()));
+	}
 
 	/**
 	 * Mark this column reference as "scoped", which means that it

@@ -202,14 +202,25 @@ public class GroupByNode extends SingleChildResultSetNode
 
 			// Now populate the CR array and see if ordered
 			int glSize = this.groupingList.size();
-			for (int index = 0; index < glSize; index++)
+			int index;
+			for (index = 0; index < glSize; index++)
 			{
 				GroupByColumn gc =
 						(GroupByColumn) this.groupingList.elementAt(index);
-				crs[index] = gc.getColumnReference();
+				if (gc.getColumnExpression() instanceof ColumnReference) 
+				{
+					crs[index] = (ColumnReference)gc.getColumnExpression();
+				} 
+				else 
+				{
+					isInSortedOrder = false;
+					break;
+				}
+				
 			}
-
-			isInSortedOrder = childResult.isOrderedOn(crs, true, (Vector)null);
+			if (index == glSize) {
+				isInSortedOrder = childResult.isOrderedOn(crs, true, (Vector)null);
+			}
 		}
 	}
 
@@ -314,6 +325,70 @@ public class GroupByNode extends SingleChildResultSetNode
 
 	}
 
+	/**
+	 * In the query rewrite for group by, add the columns on which
+	 * we are doing the group by.
+
+	 * @see #addNewColumnsForAggregation
+	 */
+	private void addUnAggColumns() throws StandardException
+	{
+		ResultColumnList bottomRCL  = childResult.getResultColumns();
+		ResultColumnList groupByRCL = resultColumns;
+
+		int sz = groupingList.size();
+		for (int i = 0; i < sz; i++) 
+		{
+			GroupByColumn gbc = (GroupByColumn) groupingList.elementAt(i);
+			ResultColumn newRC = (ResultColumn) getNodeFactory().getNode(
+					C_NodeTypes.RESULT_COLUMN,
+					"##UnaggColumn",
+					gbc.getColumnExpression(),
+					getContextManager());
+
+			// add this result column to the bottom rcl
+			bottomRCL.addElement(newRC);
+			newRC.markGenerated();
+			newRC.bindResultColumnToExpression();
+			newRC.setVirtualColumnId(bottomRCL.size());
+			
+			// now add this column to the groupbylist
+			ResultColumn gbRC = (ResultColumn) getNodeFactory().getNode(
+					C_NodeTypes.RESULT_COLUMN,
+					"##UnaggColumn",
+					gbc.getColumnExpression(),
+					getContextManager());
+			groupByRCL.addElement(gbRC);
+			gbRC.markGenerated();
+			gbRC.bindResultColumnToExpression();
+			gbRC.setVirtualColumnId(groupByRCL.size());
+
+			/*
+			 ** Reset the original node to point to the
+			 ** Group By result set.
+			 */
+			VirtualColumnNode vc = (VirtualColumnNode) getNodeFactory().getNode(
+					C_NodeTypes.VIRTUAL_COLUMN_NODE,
+					this, // source result set.
+					gbRC,
+					new Integer(groupByRCL.size()),
+					getContextManager());
+
+			// we replace each group by expression 
+			// in the projection list with a virtual column node
+			// that effectively points to a result column 
+			// in the result set doing the group by
+			SubstituteExpressionVisitor se = 
+				new SubstituteExpressionVisitor(
+						gbc.getColumnExpression(),
+						vc,
+						AggregateNode.class);
+			parent.getResultColumns().accept(se);
+
+			// finally reset gbc to its new position.
+			gbc.setColumnPosition(bottomRCL.size());
+		}
+	}
 
 	/**
 	 * Add a whole slew of columns needed for 
@@ -357,19 +432,26 @@ public class GroupByNode extends SingleChildResultSetNode
 	private void addNewColumnsForAggregation()
 		throws StandardException
 	{
-		/*
-		** Now we have two new nodes, the sort and a new PR above
-		** it.  They all map to the child result set.  Now we must
-		** find every aggregate and massage the tree.  For now we
-		** will examine every result column of the original select
-		** list.
-		*/
-		DataDictionary			dd;
+		aggInfo = new AggregatorInfoList();
+		if (groupingList != null)
+		{
+			addUnAggColumns();
+		}
+		addAggregateColumns();
+	}
+	
+	/**
+	 * In the query rewrite involving aggregates, add the columns for
+	 * aggregation.
+	 *
+	 * @see #addNewColumnsForAggregation
+	 */
+	private void addAggregateColumns() throws StandardException
+	{
+		DataDictionary			dd = getDataDictionary();
 		AggregateNode	aggregate = null;
 		ColumnReference	newColumnRef;
-		ResultColumn	rcBottom;
 		ResultColumn	newRC;
-		ResultColumn	gbRC;
 		ResultColumn	tmpRC;
 		ResultColumn	aggInputRC;
 		ResultColumnList bottomRCL  = childResult.getResultColumns();
@@ -378,84 +460,21 @@ public class GroupByNode extends SingleChildResultSetNode
 		int				aggregatorVColId;
 		int				aggInputVColId;
 		int				aggResultVColId;
-
-		LanguageFactory lf = getLanguageConnectionContext().getLanguageFactory();
-		dd = getDataDictionary();
-		aggInfo = new AggregatorInfoList();
-
-		/*
-		** Get a list of all column references in the
-		** parent RCL, skipping (not going below) AggregateNodes
-		*/
-		CollectNodesVisitor getUnaggVisitor = new CollectNodesVisitor(ColumnReference.class, AggregateNode.class);
-		parent.getResultColumns().accept(getUnaggVisitor);
-		Vector colRefVector = getUnaggVisitor.getList();
-
-		/*
-		** Walk the list of unaggregated column references
-		** and push them down.
-		*/
-		int crvSize = colRefVector.size();
-		for (int index = 0; index < crvSize; index++)
-		{
-			ColumnReference origColumnRef = (ColumnReference) colRefVector.elementAt(index);
-			newColumnRef = (ColumnReference)origColumnRef.getClone();
-
-			/*
-			** Put the column reference in the bottom PR.
-			*/
-			newRC = (ResultColumn) getNodeFactory().getNode(
-									C_NodeTypes.RESULT_COLUMN,
-									"##UnaggColumn",
-									newColumnRef,
-									getContextManager());
-			newRC.setExpression(newColumnRef);
-			bottomRCL.addElement(newRC);
-			newRC.markGenerated();
-			newRC.bindResultColumnToExpression();
-			newRC.setVirtualColumnId(bottomRCL.size());
-
-			/*
-			** Reset the group by column position
-			*/
-			if (groupingList != null) 
-			{
-				GroupByColumn	gbColumn;
-				if ((gbColumn = 
-						groupingList.containsColumnReference(newColumnRef)) 
-					!= null)
-				{
-					gbColumn.setColumnPosition(bottomRCL.size());
-				}
-			}
 		
-			/*
-			** Add the column to the group by list
-			*/
-			gbRC = getColumnReference(newRC, dd);
-			groupByRCL.addElement(gbRC);
-			gbRC.markGenerated();
-			gbRC.bindResultColumnToExpression();
-			gbRC.setVirtualColumnId(groupByRCL.size());
-	
-			/*
-			** Reset the original node to point to the
-			** Group By result set.
-			*/
-			origColumnRef.setSource(gbRC);
-		}
 		/*
-		** Now process all of the aggregates.  Replace
-		** every aggregate with an RC.  We toss out
-		** the list of RCs, we need to get each RC
-		** as we process its corresponding aggregate.
-		*/
+		 ** Now process all of the aggregates.  Replace
+		 ** every aggregate with an RC.  We toss out
+		 ** the list of RCs, we need to get each RC
+		 ** as we process its corresponding aggregate.
+		 */
+		LanguageFactory lf = getLanguageConnectionContext().getLanguageFactory();
+		
 		ReplaceAggregatesWithCRVisitor replaceAggsVisitor = 
 			new ReplaceAggregatesWithCRVisitor(
 					(ResultColumnList) getNodeFactory().getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager()),
-					((FromTable) childResult).getTableNumber());
+							C_NodeTypes.RESULT_COLUMN_LIST,
+							getContextManager()),
+				((FromTable) childResult).getTableNumber());
 		parent.getResultColumns().accept(replaceAggsVisitor);
 
 		/*
@@ -471,10 +490,10 @@ public class GroupByNode extends SingleChildResultSetNode
 			** bottom project restrict.
 			*/
 			newRC = (ResultColumn) getNodeFactory().getNode(
-										C_NodeTypes.RESULT_COLUMN,
-										"##aggregate result",
-										aggregate.getNewNullResultExpression(),
-										getContextManager());
+					C_NodeTypes.RESULT_COLUMN,
+					"##aggregate result",
+					aggregate.getNewNullResultExpression(),
+					getContextManager());
 			newRC.markGenerated();
 			newRC.bindResultColumnToExpression();
 			bottomRCL.addElement(newRC);
@@ -488,19 +507,19 @@ public class GroupByNode extends SingleChildResultSetNode
 			** ReplaceAggregatesWithColumnReferencesVisitor()
 			*/
 			newColumnRef = (ColumnReference) getNodeFactory().getNode(
-												C_NodeTypes.COLUMN_REFERENCE,
-												newRC.getName(),
-												null,
-												getContextManager());
+					C_NodeTypes.COLUMN_REFERENCE,
+					newRC.getName(),
+					null,
+					getContextManager());
 			newColumnRef.setSource(newRC);
 			newColumnRef.setType(newRC.getExpressionType());
 			newColumnRef.setNestingLevel(this.getLevel());
 			newColumnRef.setSourceLevel(this.getLevel());
 			tmpRC = (ResultColumn) getNodeFactory().getNode(
-								C_NodeTypes.RESULT_COLUMN,
-								newRC.getColumnName(),
-								newColumnRef,
-								getContextManager());
+					C_NodeTypes.RESULT_COLUMN,
+					newRC.getColumnName(),
+					newColumnRef,
+					getContextManager());
 			tmpRC.markGenerated();
 			tmpRC.bindResultColumnToExpression();
 			groupByRCL.addElement(tmpRC);
@@ -559,8 +578,8 @@ public class GroupByNode extends SingleChildResultSetNode
 			** to this agg if it is a user agg.
 			*/
 			aggRCL = (ResultColumnList) getNodeFactory().getNode(
-											C_NodeTypes.RESULT_COLUMN_LIST,
-											getContextManager());
+					C_NodeTypes.RESULT_COLUMN_LIST,
+					getContextManager());
 			aggRCL.addElement(aggInputRC);
 
 			/*
@@ -568,14 +587,14 @@ public class GroupByNode extends SingleChildResultSetNode
 			** so we have to subtract 1.
 			*/
 			aggInfo.addElement(new AggregatorInfo(
-							aggregate.getAggregateName(),
-							aggregate.getAggregatorClassName(),
-							aggInputVColId - 1,			// aggregate input column
-							aggResultVColId -1,			// the aggregate result column
-							aggregatorVColId - 1,		// the aggregator column	
-							aggregate.isDistinct(),
-							lf.getResultDescription(aggRCL.makeResultDescriptors(), "SELECT")
-						));
+					aggregate.getAggregateName(),
+					aggregate.getAggregatorClassName(),
+					aggInputVColId - 1,			// aggregate input column
+					aggResultVColId -1,			// the aggregate result column
+					aggregatorVColId - 1,		// the aggregator column	
+					aggregate.isDistinct(),
+					lf.getResultDescription(aggRCL.makeResultDescriptors(), "SELECT")
+			));
 		}
 	}
 

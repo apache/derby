@@ -162,4 +162,9 @@ public class CurrentRowLocationNode extends ValueNode
 		mbex.pushThis();
 		mbex.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null, mb.getName(), ClassName.DataValueDescriptor, 0);
 	}
+	
+	protected boolean isEquivalent(ValueNode o)
+	{
+		return false;
+	}
 }

@@ -858,17 +858,18 @@ public interface SQLState {
 	String LANG_NO_METHOD_MATCHING_ALIAS                               = "42Y16";
 	// String LANG_DROP_SYSTEM_TABLE_ATTEMPTED                         = "42Y17"; -- replaced by 42X62
 	String LANG_INVALID_CAST                                           = "42846";
-	String LANG_AMBIGUOUS_GROUPING_COLUMN                              = "42Y19";
+    //	String LANG_AMBIGUOUS_GROUPING_COLUMN                              = "42Y19"; -- unused post 883.
 	//	String LANG_UNMATCHED_GROUPING_COLUMN                              =	//	"42Y20"; -- not used
 	String LANG_USER_AGGREGATE_BAD_TYPE                                = "42Y22";
 	String LANG_BAD_J_D_B_C_TYPE_INFO                                  = "42Y23";
 	String LANG_VIEW_NOT_UPDATEABLE                                    = "42Y24";
 	String LANG_UPDATE_SYSTEM_TABLE_ATTEMPTED                          = "42Y25";
-	//	String LANG_NO_PARAMS_IN_TRIGGER_WHEN                              = "42Y26"; -- not used.
+    	String LANG_AGGREGATE_IN_GROUPBY_LIST                              = "42Y26";
 	String LANG_NO_PARAMS_IN_TRIGGER_ACTION                            = "42Y27";
 	// String LANG_NO_TRIGGER_ON_SYSTEM_TABLE                             = "42Y28"; -- replaced by 42X62
 	String LANG_INVALID_NON_GROUPED_SELECT_LIST                        = "42Y29";
 	String LANG_INVALID_GROUPED_SELECT_LIST                            = "42Y30";
+	
 	String LANG_TOO_MANY_ELEMENTS                            = "54004";
 	String LANG_BAD_AGGREGATOR_CLASS2                                  = "42Y32";
 	String LANG_USER_AGGREGATE_CONTAINS_AGGREGATE                      = "42Y33";

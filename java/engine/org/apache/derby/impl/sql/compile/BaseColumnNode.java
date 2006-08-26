@@ -171,4 +171,18 @@ public class BaseColumnNode extends ValueNode
 	{
 		return Qualifier.SCAN_INVARIANT;
 	}
+        
+        /**
+         * @inheritDoc
+         */
+	protected boolean isEquivalent(ValueNode o)
+	{
+		if (isSameNodeType(o)) 
+		{
+			BaseColumnNode other = (BaseColumnNode)o;
+			return other.tableName.equals(other.tableName) 
+			&& other.columnName.equals(columnName);
+		} 
+		return false;
+	}
 }

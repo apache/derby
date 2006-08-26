@@ -288,4 +288,13 @@ public class VirtualColumnNode extends ValueNode
         }
         return dtd;
     } // end of getTypeServices
+    
+    protected boolean isEquivalent(ValueNode o) throws StandardException
+    {
+    	if (isSameNodeType(o)) {
+    		VirtualColumnNode other = (VirtualColumnNode)o;
+    		return sourceColumn.isEquivalent(other.sourceColumn);
+    	}
+    	return false;
+    }
 }

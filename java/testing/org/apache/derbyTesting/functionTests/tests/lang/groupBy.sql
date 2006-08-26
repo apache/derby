@@ -5,7 +5,8 @@ create table t1 (a int, b int, c int);
 create table t2 (a int, b int, c int);
 insert into t2 values (1,1,1), (2,2,2);
 
--- group by position
+-- group by constant. should compile but fail because
+-- it is not a valid grouping expression.
 select * from t1 group by 1;
 
 -- column in group by list not in from list
@@ -15,10 +16,6 @@ select a as d from t1 group by d;
 select a as b from t1 group by b;
 select a from t1 group by b;
 select a, char(b) from t1 group by a;
-
--- columns in group by list must be unique
-select a, b from t1 group by a, a;
-select a, b from t1 group by a, t1.a;
 
 -- cursor with group by is not updatable
 get cursor c1 as 'select a from t1 group by a for update';

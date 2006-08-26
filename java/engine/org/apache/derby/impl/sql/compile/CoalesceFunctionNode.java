@@ -34,9 +34,12 @@ import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.Visitor;
 
 import java.lang.reflect.Modifier;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -306,7 +309,8 @@ public class CoalesceFunctionNode extends ValueNode
 	/*
 		print the non-node subfields
 	 */
-	public String toString() {
+	public String toString() 
+	{
 		if (SanityManager.DEBUG)
 		{
 			return super.toString()+functionName+"("+argumentsList+")\n";
@@ -316,7 +320,53 @@ public class CoalesceFunctionNode extends ValueNode
 			return "";
 		}
 	}
-
+        
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean isEquivalent(ValueNode o) throws StandardException
+	{
+		if (!isSameNodeType(o))
+		{
+			return false;
+		}
+		
+		CoalesceFunctionNode other = (CoalesceFunctionNode)o;
+		if (other.argumentsList.size() != argumentsList.size())
+		{
+			return false;
+			
+		}
+		
+		int size = argumentsList.size();
+		for (int index = 0; index < size; index++)
+		{
+			ValueNode v1 = (ValueNode)argumentsList.elementAt(index);
+			ValueNode v2 = (ValueNode)other.argumentsList.elementAt(index);
+			if (!v1.isEquivalent(v2)) 
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	public Visitable accept(Visitor v) throws StandardException 
+	{
+		Visitable returnNode = v.visit(this);
+		
+		if (v.skipChildren(this) || v.stopTraversal())
+		{
+			return returnNode;
+		}
+		
+		int size = argumentsList.size();
+		for (int index = 0; index < size; index++)
+		{
+			argumentsList.setElementAt(
+					(QueryTreeNode)(argumentsList.elementAt(index)).accept(v), index);
+		}
+		return returnNode;
+	}
 	/**
 	 * Preprocess an expression tree.  We do a number of transformations
 	 * here (including subqueries, IN lists, LIKE and BETWEEN) plus

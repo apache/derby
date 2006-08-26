@@ -2292,4 +2292,12 @@ public class SubqueryNode extends ValueNode
 		}
 		setType(dts);
 	}
+        
+    /**
+     * {@inheritDoc}
+     */    
+    protected boolean isEquivalent(ValueNode o)
+    {
+    	return false;
+    }
 }

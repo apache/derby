@@ -870,6 +870,21 @@ public class BinaryOperatorNode extends ValueNode
 		return returnNode;
 	}
 
+        /**
+         * @inheritDoc
+         */
+        protected boolean isEquivalent(ValueNode o) throws StandardException
+        {
+        	if (!isSameNodeType(o))
+        	{
+        		return false;
+        	}
+        	BinaryOperatorNode other = (BinaryOperatorNode)o;
+        	return methodName.equals(other.methodName)
+        	       && leftOperand.isEquivalent(other.leftOperand)
+        	       && rightOperand.isEquivalent(other.rightOperand);
+        }
+
 	/**
 	 * Push the fields necessary to generate an instance of
 	 * SqlXmlExecutor, which will then be used at execution

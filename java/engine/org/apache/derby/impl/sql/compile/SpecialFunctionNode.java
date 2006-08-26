@@ -222,4 +222,14 @@ public class SpecialFunctionNode extends ValueNode
 			return "";
 		}
 	}
+        
+	protected boolean isEquivalent(ValueNode o)
+	{
+		if (isSameNodeType(o))
+		{
+			SpecialFunctionNode other = (SpecialFunctionNode)o;
+			return methodName.equals(other.methodName);
+		}
+		return false;
+	}
 }
