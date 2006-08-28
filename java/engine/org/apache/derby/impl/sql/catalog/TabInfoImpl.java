@@ -30,7 +30,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.TabInfo;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
@@ -60,8 +59,16 @@ import java.util.Properties;
 *
 * @author jamie
 */
-class TabInfoImpl implements TabInfo
+class TabInfoImpl
 {
+    /**
+     * ROWNOTDUPLICATE is out of range for a row
+     * number.  If a return code does not equal
+     * this value, then it refers to the row
+     * that is a duplicate.
+     */
+    static  final   int     ROWNOTDUPLICATE = -1;
+
 	private IndexInfoImpl[]				indexes;
 	private long						heapConglomerate;
 	private int							numIndexesSet;
@@ -94,27 +101,33 @@ class TabInfoImpl implements TabInfo
 		}
 	}
 
-	/**
-	 * @see TabInfo#getHeapConglomerate
-	 */
-	public long getHeapConglomerate()
+    /**
+     * Get the conglomerate for the heap.
+     *
+     * @return long     The conglomerate for the heap.
+     */
+	long getHeapConglomerate()
 	{
 		return heapConglomerate;
 	}
 
-	/**
-	 * @see TabInfo#setHeapConglomerate
-	 */
-	public void setHeapConglomerate(long heapConglomerate)
+    /**
+     * Set the heap conglomerate for this.
+     *
+     * @param heapConglomerate  The new heap conglomerate.
+     */
+	void setHeapConglomerate(long heapConglomerate)
 	{
 		this.heapConglomerate = heapConglomerate;
 		heapSet = true;
 	}
 
-	/**
-	 * @see TabInfo#getIndexConglomerate
-	 */
-	public long getIndexConglomerate(int indexID)
+    /**
+     * Get the conglomerate for the specified index.
+     *
+     * @return long     The conglomerate for the specified index.
+     */
+	long getIndexConglomerate(int indexID)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -131,10 +144,13 @@ class TabInfoImpl implements TabInfo
 		return indexes[indexID].getConglomerateNumber();
 	}
 
-	/**
-	 * @see TabInfo#setIndexConglomerate
-	 */
-	public void setIndexConglomerate(int index, long indexConglomerate)
+    /**
+     * Set the index conglomerate for the table.
+     *
+     * @param index             Index number for index for table
+     * @param indexConglomerate The conglomerate for that index
+     */
+	void setIndexConglomerate(int index, long indexConglomerate)
 	{
 		/* Index names must be set before conglomerates.
 		 * Also verify that we are not setting the same conglomerate
@@ -155,7 +171,13 @@ class TabInfoImpl implements TabInfo
 		numIndexesSet++;
 	}
 
-	public void setIndexConglomerate(ConglomerateDescriptor cd)
+    /**
+     * Set the index conglomerate for the table.
+     *
+     * @param cd    The ConglomerateDescriptor for one of the index
+     *              for this table.
+     */
+    void setIndexConglomerate(ConglomerateDescriptor cd)
 	{
 		int		index;
 		String	indexName = cd.getConglomerateName();
@@ -199,34 +221,45 @@ class TabInfoImpl implements TabInfo
 		numIndexesSet++;
 	}
 
-	/**
-	 * @see TabInfo#getTableName
-	 */
-	public String getTableName()
+    /**
+     * Get the table name.
+     *
+     * @return String   The table name.
+     */
+	String getTableName()
 	{
 		return crf.getCatalogName();
 	}
 
-	/**
-	 * @see TabInfo#getIndexName
-	 */
-	public String getIndexName(int indexId)
+    /**
+     * Get the index name.
+     *
+     * @param indexID   Index number for index for table
+     *
+     * @return String   The index name.
+     */
+	String getIndexName(int indexId)
 	{
 		return indexes[indexId].getIndexName();
 	}
 
-	/**
-	 * @see TabInfo#getCatalogRowFactory
-	 */
-	public CatalogRowFactory getCatalogRowFactory()
+    /** 
+     * Get the CatalogRowFactory for this.
+     *
+     * @return CatalogRowFactory    The CatalogRowFactory for this.
+     */
+	CatalogRowFactory getCatalogRowFactory()
 	{
 		return crf;
 	}
 
-	/**
-	 * @see TabInfo#isComplete
-	 */
-	public boolean isComplete()
+    /**
+     * Is this fully initialized.  
+     * (i.e., is all conglomerate info initialized)
+     *
+     * @return boolean  Whether or not this is fully initialized.
+     */
+	boolean isComplete()
 	{
 		/* We are complete when heap conglomerate and all
 		 * index conglomerates are set.
@@ -238,10 +271,14 @@ class TabInfoImpl implements TabInfo
 		return (indexes == null ||	indexes.length == numIndexesSet);
 	}
 
-	/**
-	 * @see TabInfo#getIndexColumnCount
-	 */
-	public int getIndexColumnCount(int indexNumber)
+    /**
+     * Get the column count for the specified index number.
+     *
+     * @param indexNumber   The index number.
+     *
+     * @return int          The column count for the specified index.
+     */
+	int getIndexColumnCount(int indexNumber)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -258,10 +295,14 @@ class TabInfoImpl implements TabInfo
 		return indexes[indexNumber].getColumnCount();
 	}
 
-	/**
-	 * @see TabInfo#getIndexRowGenerator
-	 */
-	public IndexRowGenerator getIndexRowGenerator(int indexNumber)
+    /**
+     * Get the IndexRowGenerator for the specified index number.
+     *
+     * @param indexNumber   The index number.
+     *
+     * @return IndexRowGenerator    The IRG for the specified index number.
+     */
+	IndexRowGenerator getIndexRowGenerator(int indexNumber)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -277,10 +318,13 @@ class TabInfoImpl implements TabInfo
 		return indexes[indexNumber].getIndexRowGenerator();
 	}
 
-	/**
-	 * @see TabInfo#setIndexRowGenerator
-	 */
-	public void setIndexRowGenerator(int indexNumber, IndexRowGenerator irg)
+    /**
+     * Set the IndexRowGenerator for the specified index number.
+     *
+     * @param indexNumber   The index number.
+     * @param irg           The IndexRowGenerator for the specified index number.
+     */
+	void setIndexRowGenerator(int indexNumber, IndexRowGenerator irg)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -297,10 +341,12 @@ class TabInfoImpl implements TabInfo
 		indexes[indexNumber].setIndexRowGenerator(irg);
 	}
 
-	/**
-	 * @see TabInfo#getNumberOfIndexes
-	 */
-	public int getNumberOfIndexes()
+    /** 
+     * Get the number of indexes on this catalog.
+     *
+     * @return int  The number of indexes on this catalog.
+     */
+	int getNumberOfIndexes()
 	{
 		if (indexes == null)
 		{
@@ -312,10 +358,17 @@ class TabInfoImpl implements TabInfo
 		}
 	}
 
-	/**
-	 * @see TabInfo#getBaseColumnPosition
-	 */
-	public int getBaseColumnPosition(int indexNumber, int colNumber)
+    /**
+     * Get the base column position for a column within a catalog
+     * given the (0-based) index number for this catalog and the
+     * (0-based) column number for the column within the index.
+     *
+     * @param indexNumber   The index number
+     * @param colNumber     The column number within the index
+     *
+     * @return int      The base column position for the column.
+     */
+	int getBaseColumnPosition(int indexNumber, int colNumber)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -331,10 +384,14 @@ class TabInfoImpl implements TabInfo
 		return indexes[indexNumber].getBaseColumnPosition(colNumber);
 	}
 
-	/**
-	 * @see TabInfo#isIndexUnique
-	 */
-	public boolean isIndexUnique(int indexNumber)
+    /**
+     * Return whether or not this index is declared unique
+     *
+     * @param indexNumber   The index number
+     *
+     * @return boolean      Whether or not this index is declared unique
+     */
+	boolean isIndexUnique(int indexNumber)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -363,44 +420,13 @@ class TabInfoImpl implements TabInfo
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public int insertRow( ExecRow row, TransactionController tc, boolean wait)
+	int insertRow( ExecRow row, TransactionController tc, boolean wait)
 		throws StandardException
 	{
 
 		RowLocation[] 			notUsed = new RowLocation[1]; 
 
 		return insertRowListImpl(new ExecRow[] {row},tc,notUsed, wait);
-	}
-
-
-	/**
-	 * Inserts a base row into a catalog and inserts all the corresponding
-	 * index rows.
-	 *
-	 *	@param	row			row to insert
-	 *	@param	lcc			language state variable
-	 *	@return	row number (>= 0) if duplicate row inserted into an index
-	 *			ROWNOTDUPLICATE otherwise
-	 *
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	public int insertRow( ExecRow row, LanguageConnectionContext lcc )
-		throws StandardException
-	{
-		return	insertRowList(new ExecRow[] {row}, lcc.getTransactionExecute());
-	}
-
-	/**
-	 @see TabInfo#insertRowAndFetchRowLocation
-	 @exception StandardException Thrown on failure
-	 */
-	public RowLocation insertRowAndFetchRowLocation(ExecRow row, TransactionController tc)
-		throws StandardException
-	{
-		RowLocation[] rowLocationOut = new RowLocation[1]; 
-		insertRowListImpl(new ExecRow[] {row},tc,rowLocationOut, true);
-		return rowLocationOut[0];
 	}
 
 	/**
@@ -416,7 +442,7 @@ class TabInfoImpl implements TabInfo
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public int insertRowList(ExecRow[] rowList, TransactionController tc )
+	int insertRowList(ExecRow[] rowList, TransactionController tc )
 		throws StandardException
 	{
 		RowLocation[] 			notUsed = new RowLocation[1]; 
@@ -426,7 +452,7 @@ class TabInfoImpl implements TabInfo
 
 	/**
 	  Insert logic to insert a list of rows into a table. This logic has two
-	  odd features to support the TabInfo interface.
+	  odd features.
 
 	  <OL>
 	  <LI>Returns an indication if any returned row was a duplicate.
@@ -534,78 +560,22 @@ class TabInfoImpl implements TabInfo
 		return	retCode;
 	}
 
-	/**
-	  * @exception StandardException		Thrown on failure
-	  * @see TabInfo#truncate
-	  */
-	public int truncate( TransactionController tc )
-		 throws StandardException
-	{
-		ConglomerateController		heapCC;
-		ScanController				drivingScan;
-		RowLocation					baseRowLocation;
-		RowChanger 					rc;
-		ExecRow						baseRow = crf.makeEmptyRow();
 
-		rc = getRowChanger( tc, (int[])null,baseRow );
-		// Table level locking
-		rc.open(TransactionController.MODE_TABLE);
-		int rowsDeleted = 0;
-		
-		drivingScan = tc.openScan(
-			getHeapConglomerate(),  // conglomerate to open
-			false,        // don't hold open across commit
-            TransactionController.OPENMODE_FORUPDATE, // for update
-            TransactionController.MODE_TABLE,
-            TransactionController.ISOLATION_REPEATABLE_READ,
-			(FormatableBitSet) null, // all fields as objects
-			null,         // start position - first row
-            ScanController.NA,
-			null,         //scanQualifier
-			null,         // stop position - through last row
-            ScanController.NA
-                           // startSearchOperation
-			);     
-
-		/* Open the heap conglomerate */
-		heapCC = tc.openConglomerate(
-                    getHeapConglomerate(),
-                    false,
-                    TransactionController.OPENMODE_FORUPDATE,
-                    TransactionController.MODE_TABLE,
-                    TransactionController.ISOLATION_REPEATABLE_READ);
-
-		baseRowLocation = heapCC.newRowLocationTemplate();
-		while (drivingScan.next())
-		{
-			rowsDeleted++;
-			drivingScan.fetchLocation(baseRowLocation);
-			boolean base_row_exists = 
-                heapCC.fetch(
-                    baseRowLocation, baseRow.getRowArray(), (FormatableBitSet) null);
-
-            if (SanityManager.DEBUG)
-            {
-                // it can not be possible for heap row to disappear while 
-                // holding scan cursor on index at ISOLATION_REPEATABLE_READ.
-                SanityManager.ASSERT(base_row_exists, "base row not found");
-            }
-			rc.deleteRow( baseRow, baseRowLocation );
-		}
-
-		heapCC.close();
-		drivingScan.close();
-		rc.close();
-		return rowsDeleted;
-	}
-
-	/**
-	 * LOCKING: row locking if there there is a key
-	 *
-	 * @exception StandardException		Thrown on failure
-	 * @see TabInfo#deleteRow
-	 */
-	public int deleteRow( TransactionController tc, ExecIndexRow key, int indexNumber )
+    /**
+      * Given a key row, delete all matching heap rows and their index
+      * rows.
+      * <p>
+      * LOCKING: row locking if there is a key; otherwise, 
+      * table locking.
+      *
+      * @param  tc          transaction controller
+      * @param  key         key to delete by.
+      * @param  indexNumber Key is appropriate for this index.
+      * @return the number of rows deleted. If key is not unique,
+      *         this may be more than one.
+      * @exception StandardException        Thrown on failure
+      */
+	int deleteRow( TransactionController tc, ExecIndexRow key, int indexNumber )
 		throws StandardException
 	{
 		// Always row locking
@@ -620,7 +590,7 @@ class TabInfoImpl implements TabInfo
 						   true);
 	}
 
-	public int deleteRow( TransactionController tc, ExecIndexRow key,
+	int deleteRow( TransactionController tc, ExecIndexRow key,
 							int indexNumber, boolean wait)
 		throws StandardException
 	{
@@ -636,14 +606,28 @@ class TabInfoImpl implements TabInfo
 						   wait);
 	}
 	
-	/**
-	 * LOCKING: row locking if there is both a start and
-	 * stop key; otherwise table locking
-	 *
-	 * @exception StandardException		Thrown on failure
-	 * @see TabInfo#deleteRows
-	 */
-	public int deleteRows(TransactionController tc,
+    /**
+      * Delete the set of rows defined by a scan on an index
+      * from the table. Most of the parameters are simply passed
+      * to TransactionController.openScan. Please refer to the
+      * TransactionController documentation for details.
+      * <p>
+      * LOCKING: row locking if there is a start and a stop
+      * key; otherwise, table locking
+      *
+      * @param  tc          transaction controller
+      * @param  startKey    key to start the scan.
+      * @param  startOp     operation to start the scan.
+      * @param  stopKey     key to start the scan.
+      * @param  qualifier   a qualifier for the scan.
+      * @param  filter      filter on base rows
+      * @param  stopOp      operation to start the scan.
+      * @param  indexNumber Key is appropriate for this index.
+      * @return the number of rows deleted.
+      * @exception StandardException        Thrown on failure
+      * @see TransactionController#openScan
+      */
+	int deleteRows(TransactionController tc,
 							ExecIndexRow startKey,
 							int startOp,
 							Qualifier[][] qualifier,
@@ -666,7 +650,7 @@ class TabInfoImpl implements TabInfo
 	/**
 	 * @inheritDoc
 	 */
-	public int deleteRows(TransactionController tc,
+	private int deleteRows(TransactionController tc,
 						  ExecIndexRow startKey,
 						  int startOp,
 						  Qualifier[][] qualifier,
@@ -776,11 +760,17 @@ class TabInfoImpl implements TabInfo
 		return rowsDeleted;
 	}
 
-	/**
-	  * @exception StandardException		Thrown on failure
-	  * @see TabInfo#getRow
-	  */
-	public ExecRow getRow( TransactionController tc,
+    /**
+      * Given a key row, return the first matching heap row.
+      * <p>
+      * LOCKING: shared row locking.
+      *
+      * @param  tc          transaction controller
+      * @param  key         key to read by.
+      * @param  indexNumber Key is appropriate for this index.
+      * @exception StandardException        Thrown on failure
+      */
+	ExecRow getRow( TransactionController tc,
 						ExecIndexRow key,
 						int indexNumber )
 		throws StandardException
@@ -813,7 +803,7 @@ class TabInfoImpl implements TabInfo
 	 *
 	 * @exception		  StandardException thrown on failure.
 	 */
-	public RowLocation getRowLocation(TransactionController tc,
+	RowLocation getRowLocation(TransactionController tc,
 									  ExecIndexRow key,
 									  int indexNumber)
 			  throws StandardException
@@ -837,11 +827,18 @@ class TabInfoImpl implements TabInfo
 			heapCC.close();
 		}
 	}
-	/**
-	  * @exception StandardException		Thrown on failure
-	  * @see TabInfo#getRow
-	  */
-	public ExecRow getRow( TransactionController tc,
+    /**
+      * Given a key row, return the first matching heap row.
+      * <p>
+      * LOCKING: shared row locking.
+      *
+      * @param  tc          transaction controller
+      * @param  heap        heap to look in
+      * @param  key         key to read by.
+      * @param  indexNumber Key is appropriate for this index.
+      * @exception StandardException        Thrown on failure
+      */
+	ExecRow getRow( TransactionController tc,
 						   ConglomerateController heapCC,
 						   ExecIndexRow key,
 						   int indexNumber)
@@ -854,7 +851,6 @@ class TabInfoImpl implements TabInfo
 
 	/**
 	  * @exception StandardException		Thrown on failure
-	  * @see TabInfo#getRow
 	  */
 	private ExecRow getRowInternal( TransactionController tc,
 									ConglomerateController heapCC,
@@ -935,7 +931,7 @@ class TabInfoImpl implements TabInfo
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void updateRow( ExecIndexRow				key, 
+	void updateRow( ExecIndexRow				key, 
 						   ExecRow					newRow, 
 						   int						indexNumber,
 						   boolean[]				indicesToUpdate,
@@ -966,7 +962,7 @@ class TabInfoImpl implements TabInfo
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void updateRow( ExecIndexRow				key, 
+	void updateRow( ExecIndexRow				key, 
 						   ExecRow					newRow, 
 						   int						indexNumber,
 						   boolean[]				indicesToUpdate,
@@ -997,7 +993,7 @@ class TabInfoImpl implements TabInfo
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void updateRow( ExecIndexRow				key,
+	void updateRow( ExecIndexRow				key,
 						   ExecRow[]				newRows,
 						   int						indexNumber,
 						   boolean[]				indicesToUpdate,
@@ -1030,7 +1026,7 @@ class TabInfoImpl implements TabInfo
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void updateRow( ExecIndexRow				key,
+	private void updateRow( ExecIndexRow				key,
 						   ExecRow[]				newRows,
 						   int						indexNumber,
 						   boolean[]				indicesToUpdate,
@@ -1116,7 +1112,7 @@ class TabInfoImpl implements TabInfo
 	 *
 	 * @return The Properties associated with creating the heap.
 	 */
-	public Properties getCreateHeapProperties()
+	Properties getCreateHeapProperties()
 	{
 		return crf.getCreateHeapProperties();
 	}
@@ -1128,7 +1124,7 @@ class TabInfoImpl implements TabInfo
 	 *
 	 * @return The Properties associated with creating the specified index.
 	 */
-	public Properties getCreateIndexProperties(int indexNumber)
+	Properties getCreateIndexProperties(int indexNumber)
 	{
 		return crf.getCreateIndexProperties(indexNumber);
 	}
