@@ -70,8 +70,6 @@ public abstract class BaseJDBCTestCase
      * it is open.
      * @see TestConfiguration#openDefaultConnection()
      */
-    // TEMP NAME - WILL BE getConnection() once all uses of the
-    // static getConnection() have been converted to openDefaultConnection
     public Connection getConnection() throws SQLException
     {
         if (conn != null)
