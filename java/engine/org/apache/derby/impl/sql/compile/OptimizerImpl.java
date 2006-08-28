@@ -2394,7 +2394,7 @@ public class OptimizerImpl implements Optimizer
 	}
 
 	/**
-	 * Add predicates to this optimizer's predicateList. This method
+	 * Add scoped predicates to this optimizer's predicateList. This method
 	 * is intended for use during the modifyAccessPath() phase of
 	 * compilation, as it allows nodes (esp. SelectNodes) to add to the
 	 * list of predicates available for the final "push" before code
@@ -2410,7 +2410,7 @@ public class OptimizerImpl implements Optimizer
 	 * @param pList List of predicates to add to this OptimizerImpl's
 	 *  own list for pushing.
 	 */
-	protected void addPredicatesToList(PredicateList pList)
+	protected void addScopedPredicatesToList(PredicateList pList)
 		throws StandardException
 	{
 		if ((pList == null) || (pList == predicateList))
@@ -2435,9 +2435,22 @@ public class OptimizerImpl implements Optimizer
 				predicateList.removeOptPredicate(i);
 		}
 
-		// Now transfer all of the received predicates into this
-		// OptimizerImpl's list.
-		pList.transferAllPredicates(predicateList);
+		// Now transfer scoped predicates in the received list to
+		// this OptimizerImpl's list, where appropriate.
+		for (int i = pList.size() - 1; i >= 0; i--)
+		{
+			pred = (Predicate)pList.getOptPredicate(i);
+			if (pred.isScopedToSourceResultSet())
+			{
+				// Clear the scoped predicate's scan flags; they'll be set
+				// as appropriate when they make it to the restrictionList
+				// of the scoped pred's source result set.
+				pred.clearScanFlags();
+				predicateList.addOptPredicate(pred);
+				pList.removeOptPredicate(i);
+			}
+		}
+
 		return;
 	}
 

@@ -225,6 +225,52 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
+	 * Take a column position and a ResultSetNode and find the ResultColumn
+	 * in this RCL whose source result set is the same as the received
+	 * RSN and whose column position is the same as the received column
+	 * position.
+	 *
+	 * @param colNum The column position (w.r.t rsn) for which we're searching
+	 * @param rsn The result set node for which we're searching.
+	 * @return The ResultColumn in this RCL whose source is column colNum
+	 *  in result set rsn.  That ResultColumn's position w.r.t to this RCL
+	 *  is also returned via the whichRC parameter.  If no match is found,
+	 *  return null and leave whichRC untouched.
+	 */
+	public ResultColumn getResultColumn(int colNum, ResultSetNode rsn,
+		int [] whichRC) throws StandardException
+	{
+		if (colNum == -1)
+			return null;
+
+		ResultColumn rc = null;
+		ColumnReference colRef = null;
+		int [] crColNum = new int[] { -1 };
+
+		for (int index = size() - 1; index >= 0; index--)
+		{
+			rc = (ResultColumn) elementAt(index);
+			if (!(rc.getExpression() instanceof ColumnReference))
+			{
+				// If the rc's expression isn't a column reference then
+				// it can't be pointing to rsn, so just skip it.
+				continue;
+			}
+
+			colRef = (ColumnReference)rc.getExpression();
+			if ((rsn == colRef.getSourceResultSet(crColNum)) &&
+				(crColNum[0] == colNum))
+			{
+				// Found a match.
+				whichRC[0] = index+1;
+				return rc;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Get a ResultColumn from a column position (1-based) in the list,
 	 * null if out of range (for order by).
 	 *

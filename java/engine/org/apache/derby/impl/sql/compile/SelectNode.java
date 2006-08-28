@@ -1643,11 +1643,10 @@ public class SelectNode extends ResultSetNode
 			for (int i = sz - 1; i >= 0; i--)
 			{
 				// We can tell if a predicate was pushed into this select
-				// node because it will have been "scoped" for this node;
-				// see Predicate.getScopedPredForResultSet() for more on
-				// what scoping is and how it's done.
+				// node because it will have been "scoped" for this node
+				// or for some result set below this one.
 				pred = (Predicate)predicateList.getOptPredicate(i);
-				if (pred.isScopedForPush())
+				if (pred.isScopedToSourceResultSet())
 				{
 					// If we're pushing the predicate down here, we have to
 					// remove it from the predicate list of the node above
@@ -1671,6 +1670,26 @@ public class SelectNode extends ResultSetNode
 			while (optimizer.getNextDecoratedPermutation())
 			{
 				optimizer.costPermutation();
+			}
+		}
+
+		/* When we're done optimizing, any scoped predicates that
+		 * we pushed down the tree should now be sitting again
+		 * in our wherePredicates list.  Put those back in the
+		 * the list from which we received them, to allow them
+		 * to be "pulled" back up to where they came from.
+		 */
+		if (wherePredicates != null)
+		{
+			Predicate pred = null;
+			for (int i = wherePredicates.size() - 1; i >= 0; i--)
+			{
+				pred = (Predicate)wherePredicates.getOptPredicate(i);
+				if (pred.isScopedForPush())
+				{
+					predicateList.addOptPredicate(pred);
+					wherePredicates.removeOptPredicate(pred);
+				}
 			}
 		}
 
@@ -1720,7 +1739,7 @@ public class SelectNode extends ResultSetNode
 				"modifying access paths.");
 		}
 
-		((OptimizerImpl)optimizer).addPredicatesToList(predList);
+		((OptimizerImpl)optimizer).addScopedPredicatesToList(predList);
 		return modifyAccessPaths();
 	}
 

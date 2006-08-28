@@ -47,8 +47,8 @@ public class SectionManager {
     // setPKGNAMCBytes
     // holdPKGNAMCBytes stores PKGNAMCBytes when holdability is hold
     // noHoldPKGNAMCBytes stores PKGNAMCBytes when holdability is no hold
-    public static byte[] holdPKGNAMCBytes = null;
-    public static byte[] noHoldPKGNAMCBytes = null;
+    public /* static */ byte[] holdPKGNAMCBytes = null;
+    public /* static */ byte[] noHoldPKGNAMCBytes = null;
 
 
     final static String packageNameWithHold__ = "SYSLH000";
