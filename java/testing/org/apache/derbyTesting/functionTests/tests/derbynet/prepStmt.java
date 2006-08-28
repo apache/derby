@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.sql.SQLException;
 import java.sql.BatchUpdateException;
 import java.io.ByteArrayInputStream; 
@@ -49,7 +50,7 @@ public class prepStmt
     private static String[] testObjects =  // string array for cleaning up
         {"table t1", "table tab1", "table t2", "table bigtab", "table tstab",
          "table doubletab", "table numtab", "table Numeric_Tab", "table jira614", 
-	 "table jira614_a", "table jira428", "table jira125", 
+	 "table jira614_a", "table jira428", "table jira125", "table varcharclobtab", 
          "table jira125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125",
          "table jira1533_a", "table jira1533_b"};
 
@@ -309,6 +310,10 @@ public class prepStmt
 
 			testBigDecimalSetObject(conn);
 			testBigDecimalSetObjectWithScale(conn);
+            
+			if (!TestUtil.isJCCFramework()) {
+				testVaryingClientParameterTypeBatch(conn);
+			}
 
 			test4975(conn);
 			test5130(conn);
@@ -335,6 +340,36 @@ public class prepStmt
 			e.printStackTrace();
 		}
 	}
+    
+    // Test execution of batch update where the type of
+    // a parameter varies for difference entries in the batch.
+    private static void testVaryingClientParameterTypeBatch(Connection conn) throws Exception
+    {
+        Statement stmt = conn.createStatement();
+
+        try { stmt.execute("drop table varcharclobtab"); } catch (Throwable t) { }
+        stmt.execute("create table varcharclobtab (c1 varchar(100), c2 clob)");
+        stmt.close();
+        
+        PreparedStatement pStmt = conn.prepareStatement("insert into varcharclobtab VALUES(?,?)");
+
+        pStmt.setNull(1, Types.VARCHAR);
+        pStmt.setString(2, "clob");
+        pStmt.addBatch();
+        
+        pStmt.setString(1, "varchar");
+        pStmt.setNull(2, Types.CLOB);
+        pStmt.addBatch();
+     
+        // The following statement should not throw an exception.
+        try {
+            pStmt.executeBatch();
+        } catch (ClassCastException e) {
+            System.out.println("FAIL: ClassCastException thrown by testVaryingClientParameterTypeBatch test.");
+            throw e;
+        }
+        pStmt.close();
+    }
 
 	// Test creation and execution of many Prepared Statements
 	// Beetle 5130

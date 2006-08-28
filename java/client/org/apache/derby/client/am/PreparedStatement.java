@@ -27,6 +27,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.jdbc.ClientDriver;
 
@@ -62,6 +63,8 @@ public class PreparedStatement extends Statement
     }
 
     public ColumnMetaData parameterMetaData_; // type information for input sqlda
+    
+    private ArrayList parameterTypeList;
 
 
     // The problem with storing the scrollable ResultSet associated with cursorName in scrollableRS_ is
@@ -86,6 +89,7 @@ public class PreparedStatement extends Statement
         parameterSet_ = null;
         parameterRegistered_ = null;
         parameterMetaData_ = null;
+        parameterTypeList = null;
         isAutoCommittableStatement_ = true;
         isPreparedStatement_ = true;
     }
@@ -1361,6 +1365,10 @@ public class PreparedStatement extends Statement
                 }
                 checkForClosedStatement();
                 checkThatAllParametersAreSet();
+                
+                if (parameterTypeList == null) {
+                    parameterTypeList = new ArrayList();
+                }
 
                 // ASSERT: since OUT/INOUT parameters are not allowed, there should
                 //         be no problem in sharing the JDBC Wrapper object instances
@@ -1373,8 +1381,13 @@ public class PreparedStatement extends Statement
                     System.arraycopy(parameters_, 0, inputsClone, 0, parameters_.length);
 
                     batch_.add(inputsClone);
+                    
+                    // Get a copy of the parameter type data and save it in a list
+                    // which will be used later on at the time of batch execution.
+                    parameterTypeList.add(parameterMetaData_.clientParamtertype_.clone());
                 } else {
                     batch_.add(null);
+                    parameterTypeList.add(null);
                 }
             }
         }
@@ -2027,6 +2040,7 @@ public class PreparedStatement extends Statement
         }
 
         for (int i = 0; i < batchSize; i++) {
+            parameterMetaData_.clientParamtertype_ = (int[]) parameterTypeList.get(i);
             parameters_ = (Object[]) batch_.get(i);
 
             if (sqlMode_ != isCall__) {
@@ -2115,6 +2129,7 @@ public class PreparedStatement extends Statement
         }
         // We need to clear the batch before any exception is thrown from agent_.endBatchedReadChain().
         batch_.clear();
+        parameterTypeList = null;
 
         // restore the saved input set, setting it to "current"
         parameters_ = savedInputs;
