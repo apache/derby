@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class org.apache.derbyTesting.junit.ChangeConfigurationSetup
+ * Derby - Class org.apache.derbyTesting.junit.ChangeUserSetup
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,20 +22,29 @@ package org.apache.derbyTesting.junit;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-final class ChangeConfigurationSetup extends TestSetup {
+/**
+ * A decorator that changes the default user and password
+ * for the current configuration. Its tearDown method restores
+ * the previous configuration.
+ * 
+ */
+final class ChangeUserSetup extends TestSetup {
     
-    private final TestConfiguration config;
+    private final String user;
+    private final String password;
     private TestConfiguration old;
     
-    ChangeConfigurationSetup(TestConfiguration config, Test test)
+    ChangeUserSetup(Test test, String user, String password)
     {
         super(test);
-        this.config = config;
+        this.user = user;
+        this.password = password;
     }
     
     protected void setUp()
     {
         old = TestConfiguration.getCurrent();
+        TestConfiguration config = new TestConfiguration(old, user, password);
         TestConfiguration.setCurrent(config);
     }
     

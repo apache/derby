@@ -112,7 +112,10 @@ public class TestConfiguration {
         return (Test) sm.invoke(null, null);
     }  
     
-    
+    public static Test changeUserDecorator(Test test, String user, String password)
+    {
+        return new ChangeUserSetup(test, user, password);
+    }    
     /**
      * Default embedded configuration
      *
@@ -129,7 +132,7 @@ public class TestConfiguration {
         url = createJDBCUrlWithDatabaseName(dbName);
  
     }
-    
+
     private TestConfiguration(TestConfiguration copy, JDBCClient client,
             String hostName, int port)
     {
@@ -145,6 +148,30 @@ public class TestConfiguration {
         this.hostName = hostName;
         
         this.url = createJDBCUrlWithDatabaseName(dbName);
+    }
+
+    
+    /**
+     * Obtain a new configuration identical to the passed in
+     * one except for the default user and password.
+     * @param copy Configuration to copy.
+     * @param user New default user
+     * @param password New default password.
+     */
+    TestConfiguration(TestConfiguration copy, String user, String password)
+    {
+        this.dbName = copy.dbName;
+        this.userName = user;
+        this.userPassword = password;
+
+        this.isVerbose = copy.isVerbose;
+        this.singleLegXA = copy.singleLegXA;
+        this.port = copy.port;
+        
+        this.jdbcClient = copy.jdbcClient;
+        this.hostName = copy.hostName;
+        
+        this.url = copy.url;
     }
 
     /**
