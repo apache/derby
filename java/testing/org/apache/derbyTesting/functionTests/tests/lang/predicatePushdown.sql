@@ -1096,7 +1096,38 @@ select * from topview x1
   left join topview5 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
   on topview5.col3 = x1.col3;
 
--- Clean-up from DERBY-1633.
+-- DERBY-1681: 
+-- In order to reproduce the issue described in DERBY-1681
+-- we have to have a minimum amount of data in the tables;
+-- if we have too little, then somehow that affects the
+-- plan and we won't see the incorrect results.
+
+insert into t1 select * from t2;
+insert into t2 select * from t3;
+insert into t3 select * from t1;
+insert into t1 select * from t2;
+insert into t2 select * from t3;
+insert into t3 select * from t1;
+insert into t1 select * from t2;
+insert into t2 select * from t3;
+insert into t3 select * from t1;
+insert into t1 select * from t2;
+insert into t2 select * from t3;
+insert into t3 select * from t1;
+
+-- Now can just run one of the queries from DERBY-1633 to test
+-- the fix.  Before DERBY-1681 this query would return 84 rows
+-- and it was clear that the predicate wasn't being enforced;
+-- after the fix, we should only see 42 rows and for every row
+-- the first and second column should be equal.
+
+select topview4.col3, x1.col3 from
+  topview x1
+    left join
+      topview4
+    on topview4.col3 = x1.col3;
+
+-- Clean-up from DERBY-1633 and DERBY-1681.
 
 drop view topview;
 drop view topview2;

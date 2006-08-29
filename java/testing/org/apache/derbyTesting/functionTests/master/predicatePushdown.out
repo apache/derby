@@ -10521,7 +10521,90 @@ t3stuff:|6         |6          |morestuff:|6         |6
 t3stuff:|6         |6          |t3stuff:  |6         |6          
 t3stuff:|9         |9          |morestuff:|9         |9          
 t3stuff:|9         |9          |t3stuff:  |9         |9          
-ij> -- Clean-up from DERBY-1633.
+ij> -- DERBY-1681: 
+-- In order to reproduce the issue described in DERBY-1681
+-- we have to have a minimum amount of data in the tables;
+-- if we have too little, then somehow that affects the
+-- plan and we won't see the incorrect results.
+insert into t1 select * from t2;
+3 rows inserted/updated/deleted
+ij> insert into t2 select * from t3;
+3 rows inserted/updated/deleted
+ij> insert into t3 select * from t1;
+5 rows inserted/updated/deleted
+ij> insert into t1 select * from t2;
+6 rows inserted/updated/deleted
+ij> insert into t2 select * from t3;
+8 rows inserted/updated/deleted
+ij> insert into t3 select * from t1;
+11 rows inserted/updated/deleted
+ij> insert into t1 select * from t2;
+14 rows inserted/updated/deleted
+ij> insert into t2 select * from t3;
+19 rows inserted/updated/deleted
+ij> insert into t3 select * from t1;
+25 rows inserted/updated/deleted
+ij> insert into t1 select * from t2;
+33 rows inserted/updated/deleted
+ij> insert into t2 select * from t3;
+44 rows inserted/updated/deleted
+ij> insert into t3 select * from t1;
+58 rows inserted/updated/deleted
+ij> -- Now can just run one of the queries from DERBY-1633 to test
+-- the fix.  Before DERBY-1681 this query would return 84 rows
+-- and it was clear that the predicate wasn't being enforced;
+-- after the fix, we should only see 42 rows and for every row
+-- the first and second column should be equal.
+select topview4.col3, x1.col3 from
+  topview x1
+    left join
+      topview4
+    on topview4.col3 = x1.col3;
+COL3      |COL3      
+---------------------
+1         |1         
+1         |1         
+2         |2         
+2         |2         
+3         |3         
+3         |3         
+4         |4         
+4         |4         
+6         |6         
+6         |6         
+8         |8         
+8         |8         
+9         |9         
+9         |9         
+1         |1         
+1         |1         
+2         |2         
+2         |2         
+3         |3         
+3         |3         
+4         |4         
+4         |4         
+6         |6         
+6         |6         
+8         |8         
+8         |8         
+9         |9         
+9         |9         
+1         |1         
+1         |1         
+2         |2         
+2         |2         
+3         |3         
+3         |3         
+4         |4         
+4         |4         
+6         |6         
+6         |6         
+8         |8         
+8         |8         
+9         |9         
+9         |9         
+ij> -- Clean-up from DERBY-1633 and DERBY-1681.
 drop view topview;
 0 rows inserted/updated/deleted
 ij> drop view topview2;
