@@ -177,12 +177,15 @@ public abstract class Connection implements java.sql.Connection,
         user_ = user;
 
         // Extract common properties.
-        // Derby-409 fix
-        if (dataSource.getConnectionAttributes() != null) {
-            databaseName_ = dataSource.getDatabaseName() + ";" + dataSource.getConnectionAttributes();
-        } else {
-            databaseName_ = dataSource.getDatabaseName();
-        }
+        // Derby-409 fix - Append connectionAttributes only if it is non-null. 
+        // DERBY-1130 - Append connectionAttributes only if database name is
+        // non-null. This will prevent use of database name set using 
+        // "setConnectionAttributes" method.  
+        databaseName_ = dataSource.getDatabaseName();
+        String connAtrrs = dataSource.getConnectionAttributes();
+        if(databaseName_ != null && connAtrrs != null)
+        	databaseName_ = databaseName_ + ";" + connAtrrs;
+
         retrieveMessageText_ = dataSource.getRetrieveMessageText();
 
         loginTimeout_ = dataSource.getLoginTimeout();

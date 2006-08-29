@@ -555,4 +555,95 @@ Expected XA error code: -9
 acxs 3
 testing jira 95 for DataSource; ok - expected exception: XCY00
 testing jira 95 for XADataSource; ok - expected exception: XCY00
+DataSource - EMPTY
+  getConnection() - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(null, null) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, null) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(null, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(null, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, databaseName=wombat;password=wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, databaseName=wombat;password=betty) - 08001:Required Derby DataSource property databaseName not set.
+DataSource - connectionAttributes=databaseName=wombat
+  getConnection() - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(null, null) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, null) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(null, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(null, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, databaseName=wombat;password=wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getConnection(fred, databaseName=wombat;password=betty) - 08001:Required Derby DataSource property databaseName not set.
+DataSource - databaseName=wombat and connectionAttributes=databaseName=kangaroo
+  getConnection() - OK
+  getConnection(null, null) - 08001:User id can not be null.
+  getConnection(fred, null) - OK
+  getConnection(fred, wilma) - OK
+  getConnection(null, wilma) - 08001:User id can not be null.
+  getConnection(null, databaseName=wombat) - 08001:User id can not be null.
+  getConnection(fred, databaseName=wombat) - OK
+  getConnection(fred, databaseName=wombat;password=wilma) - OK
+  getConnection(fred, databaseName=wombat;password=betty) - OK
+ConnectionPoolDataSource - EMPTY
+  getPooledConnection() - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(null, null) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, null) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(null, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(null, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, databaseName=wombat;password=wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, databaseName=wombat;password=betty) - 08001:Required Derby DataSource property databaseName not set.
+ConnectionPoolDataSource - connectionAttributes=databaseName=wombat
+  getPooledConnection() - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(null, null) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, null) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(null, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(null, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, databaseName=wombat;password=wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getPooledConnection(fred, databaseName=wombat;password=betty) - 08001:Required Derby DataSource property databaseName not set.
+ConnectionPoolDataSource - databaseName=wombat and connectionAttributes=databaseName=kangaroo
+  getPooledConnection() - OK
+  getPooledConnection(null, null) - 08001:User id can not be null.
+  getPooledConnection(fred, null) - OK
+  getPooledConnection(fred, wilma) - OK
+  getPooledConnection(null, wilma) - 08001:User id can not be null.
+  getPooledConnection(null, databaseName=wombat) - 08001:User id can not be null.
+  getPooledConnection(fred, databaseName=wombat) - OK
+  getPooledConnection(fred, databaseName=wombat;password=wilma) - OK
+  getPooledConnection(fred, databaseName=wombat;password=betty) - OK
+XADataSource - EMPTY
+  getXAConnection() - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(null, null) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, null) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(null, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(null, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, databaseName=wombat;password=wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, databaseName=wombat;password=betty) - 08001:Required Derby DataSource property databaseName not set.
+XADataSource - connectionAttributes=databaseName=wombat
+  getXAConnection() - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(null, null) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, null) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(null, wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(null, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, databaseName=wombat) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, databaseName=wombat;password=wilma) - 08001:Required Derby DataSource property databaseName not set.
+  getXAConnection(fred, databaseName=wombat;password=betty) - 08001:Required Derby DataSource property databaseName not set.
+XADataSource - databaseName=wombat and connectionAttributes=databaseName=kangaroo
+  getXAConnection() - OK
+  getXAConnection(null, null) - 08001:User id can not be null.
+  getXAConnection(fred, null) - OK
+  getXAConnection(fred, wilma) - OK
+  getXAConnection(null, wilma) - 08001:User id can not be null.
+  getXAConnection(null, databaseName=wombat) - 08001:User id can not be null.
+  getXAConnection(fred, databaseName=wombat) - OK
+  getXAConnection(fred, databaseName=wombat;password=wilma) - OK
+  getXAConnection(fred, databaseName=wombat;password=betty) - OK
+Checked class declared as: javax.sql.DataSource
 Completed checkDataSource

@@ -47,6 +47,10 @@ import javax.transaction.xa.Xid;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
+import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
+import org.apache.derby.jdbc.ClientDataSource;
+import org.apache.derby.jdbc.ClientXADataSource;
+
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
@@ -686,11 +690,13 @@ public class checkDataSource
 		} catch (Exception e) {
 				System.out.println("; wrong, unexpected exception: " + e.toString());
 		}
-		// skip testDSRequestAuthentication for  client because of these 
-		// two issues:
-		// DERBY-1130 : Client should not allow databaseName to be set with
-		// setConnectionAttributes
+		
+		if (TestUtil.isDerbyNetClientFramework())
+			testClientDSConnectionAttributes();
+		
+		// skip testDSRequestAuthentication for  client because of this issue: 
 		// DERBY-1131 : Deprecate  Derby DataSource property attributesAsPassword
+		// First part of this test is covered by testClientDSConnectionAttributes()
 		if (TestUtil.isDerbyNetClientFramework())
 			return;
 		testDSRequestAuthentication();
@@ -1383,6 +1389,69 @@ public class checkDataSource
 		xads.setDatabaseName(null);
 	}
 
+	/**
+	 * Check that database name set using setConnectionAttributes is not used
+	 * by ClientDataSource. This method tests DERBY-1130.
+	 * 
+	 * @throws SQLException
+	 */
+	private static void testClientDSConnectionAttributes() throws SQLException {
+
+		ClientDataSource ds = new ClientDataSource();
+
+		System.out.println("DataSource - EMPTY");
+		dsConnectionRequests(ds);
+
+		System.out.println("DataSource - connectionAttributes=databaseName=wombat");
+		ds.setConnectionAttributes("databaseName=wombat");
+		dsConnectionRequests(ds);
+		ds.setConnectionAttributes(null);
+		
+		// Test that database name specified in connection attributes is not used
+		System.out.println("DataSource - databaseName=wombat and connectionAttributes=databaseName=kangaroo");
+		ds.setConnectionAttributes("databaseName=kangaroo");
+		ds.setDatabaseName("wombat");
+		dsConnectionRequests(ds);
+		ds.setConnectionAttributes(null);
+		ds.setDatabaseName(null);
+		
+		// now with ConnectionPoolDataSource
+		ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+		System.out.println("ConnectionPoolDataSource - EMPTY");
+		dsConnectionRequests((ConnectionPoolDataSource)cpds);
+
+		System.out.println("ConnectionPoolDataSource - connectionAttributes=databaseName=wombat");
+		cpds.setConnectionAttributes("databaseName=wombat");
+		dsConnectionRequests((ConnectionPoolDataSource)cpds);
+		cpds.setConnectionAttributes(null);
+		
+		// Test that database name specified in connection attributes is not used
+		System.out.println("ConnectionPoolDataSource - databaseName=wombat and connectionAttributes=databaseName=kangaroo");
+		cpds.setConnectionAttributes("databaseName=kangaroo");
+		cpds.setDatabaseName("wombat");
+		dsConnectionRequests((ConnectionPoolDataSource)cpds);
+		cpds.setConnectionAttributes(null);
+		cpds.setDatabaseName(null);
+		
+		// now with XADataSource
+		ClientXADataSource xads = new ClientXADataSource();
+		System.out.println("XADataSource - EMPTY");
+		dsConnectionRequests((XADataSource) xads);
+
+		System.out.println("XADataSource - connectionAttributes=databaseName=wombat");
+		xads.setConnectionAttributes("databaseName=wombat");
+		dsConnectionRequests((XADataSource) xads);
+		xads.setConnectionAttributes(null);
+		
+		// Test that database name specified in connection attributes is not used
+		System.out.println("XADataSource - databaseName=wombat and connectionAttributes=databaseName=kangaroo");
+		xads.setConnectionAttributes("databaseName=kangaroo");
+		xads.setDatabaseName("wombat");
+		dsConnectionRequests((XADataSource) xads);
+		xads.setConnectionAttributes(null);
+		xads.setDatabaseName(null);
+	}
+	
 	private static void dsConnectionRequests(DataSource ds) {
 		
 		SecurityCheck.inspect(ds, "javax.sql.DataSource");
