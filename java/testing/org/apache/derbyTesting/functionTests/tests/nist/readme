@@ -44,6 +44,12 @@ The following changes were made:
 
 - CHAR_LENGTH has been changed to LENGTH
 
+- exit commands removed from basetab.sql, schema1.sql and schema5.sql (possibly
+  were not in original scripts)
+
+- SQL routine creation and call to check if the suite is running with a Java
+  SecurityManager added to dml160.sql
+
 
 
 
