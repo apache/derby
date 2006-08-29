@@ -168,4 +168,4 @@ NUM&|COL2
 ij> -- PASS:Setup if count = 6?
 -- *************************************************////END-OF-MODULE
 disconnect;
-ij> exit;
+ij> 

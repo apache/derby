@@ -427,4 +427,3 @@
    CREATE VIEW VSTAFF3 AS SELECT * FROM STAFF3;
 
 disconnect;
-exit;

@@ -397,4 +397,4 @@ ij> CREATE VIEW UPDATE_VIEW9
 ij> CREATE VIEW VSTAFF3 AS SELECT * FROM STAFF3;
 0 rows inserted/updated/deleted
 ij> disconnect;
-ij> exit;
+ij> 

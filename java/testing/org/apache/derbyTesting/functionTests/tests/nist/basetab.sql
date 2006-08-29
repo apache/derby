@@ -102,4 +102,3 @@ AUTOCOMMIT OFF;
 -- PASS:Setup if count = 6?
 -- *************************************************////END-OF-MODULE
 disconnect;
-exit;

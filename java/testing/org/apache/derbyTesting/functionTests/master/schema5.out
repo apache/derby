@@ -119,4 +119,4 @@ ERROR 42X05: Table/View 'T0513' does not exist.
 ij> --0 PASS: if an error is returned that the view is circular
 -- ************* End of Schema *************
 disconnect;
-ij> exit;
+ij> 

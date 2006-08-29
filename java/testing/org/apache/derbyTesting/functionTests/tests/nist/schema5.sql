@@ -122,4 +122,3 @@
 -- ************* End of Schema *************
 
 disconnect;
-exit;
