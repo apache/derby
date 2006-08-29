@@ -136,8 +136,15 @@ public class SQLBlob extends SQLBinary
 			throws StandardException
     {
 
+		// Input is null, so there's nothing to do.
 		if (isNull())
 			return;
+
+		// Input is a stream with unknown length. The length will be checked
+		// while reading the stream.
+		if (isLengthLess()) {
+			return;
+		}
 
 		int sourceWidth = getLength();
 
@@ -231,6 +238,16 @@ public class SQLBlob extends SQLBinary
         } catch (SQLException e) {
             throw dataTypeConversion("DAN-438-tmp");
        }
+    }
+
+    /**
+     * Tell if this blob is length less.
+     *
+     * @return <code>true</code> if the length of the blob is not known,
+     *      <code>false</code> otherwise
+     */
+    private final boolean isLengthLess() {
+        return (stream != null && streamValueLength < 0);
     }
 }
 

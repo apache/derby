@@ -860,7 +860,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             setBinaryStreamOnBlob(key, length, -1, 0, true);
         } catch (SQLException sqle) {
             if (usingEmbedded()) {
-                assertSQLState("XCL30", sqle);
+                assertSQLState("XSDA4", sqle);
             } else {
                 assertSQLState("22001", sqle);
             }
