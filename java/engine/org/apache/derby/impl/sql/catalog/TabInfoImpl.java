@@ -234,7 +234,7 @@ class TabInfoImpl
     /**
      * Get the index name.
      *
-     * @param indexID   Index number for index for table
+     * @param indexId   Index number for index for table
      *
      * @return String   The index name.
      */
@@ -833,7 +833,7 @@ class TabInfoImpl
       * LOCKING: shared row locking.
       *
       * @param  tc          transaction controller
-      * @param  heap        heap to look in
+      * @param  heapCC      heap to look in
       * @param  key         key to read by.
       * @param  indexNumber Key is appropriate for this index.
       * @exception StandardException        Thrown on failure
