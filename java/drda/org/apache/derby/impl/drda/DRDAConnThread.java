@@ -1976,7 +1976,7 @@ class DRDAConnThread extends Thread {
 						break;
 					// optional
 					case CodePoint.EXTDTA:	
-						readAndSetAllExtParams(stmt);
+						readAndSetAllExtParams(stmt, false);
 						break;
 					default:
 						invalidCodePoint(codePoint);
@@ -3778,24 +3778,28 @@ class DRDAConnThread extends Thread {
 		// set the statement as the current statement
 		database.setCurrentStatement(stmt);
 		
-		
-		if (reader.isChainedWithSameID())
-			parseEXCSQLSTTobjects(stmt);
-		else if (isProcedure  && (needPrepareCall))
+		boolean hasResultSet;
+		if (reader.isChainedWithSameID()) 
 		{
-			// if we had parameters the callable statement would
-			// be prepared with parseEXCQLSTTobjects, otherwise we
-			// have to do it here
-			String prepareString = "call " + stmt.procName +"()";
-			if (SanityManager.DEBUG) 
-				trace ("$$$prepareCall is: "+prepareString);
-			database.getConnection().clearWarnings();
-			CallableStatement cs = (CallableStatement) stmt.prepare(prepareString);
+			hasResultSet = parseEXCSQLSTTobjects(stmt);
+		} else 
+		{
+			if (isProcedure  && (needPrepareCall))
+			{
+				// if we had parameters the callable statement would
+				// be prepared with parseEXCQLSTTobjects, otherwise we
+				// have to do it here
+				String prepareString = "call " + stmt.procName +"()";
+				if (SanityManager.DEBUG) 
+					trace ("$$$prepareCall is: "+prepareString);
+				database.getConnection().clearWarnings();
+				CallableStatement cs = (CallableStatement) stmt.prepare(prepareString);
+			}
+			stmt.ps.clearWarnings();
+			hasResultSet = stmt.execute();
 		}
-
-		stmt.ps.clearWarnings();
-
-		boolean hasResultSet = stmt.execute();
+		
+		
 		ResultSet rs = null;
 		if (hasResultSet)
 		{
@@ -3922,10 +3926,11 @@ class DRDAConnThread extends Thread {
 	 * @throws DRDAProtocolException
      * @throws SQLException
 	 */
-	private void parseEXCSQLSTTobjects(DRDAStatement stmt) throws DRDAProtocolException, SQLException
+	private boolean parseEXCSQLSTTobjects(DRDAStatement stmt) throws DRDAProtocolException, SQLException
 	{
 		int codePoint;
-		boolean gotSQLDTA = false, typeDefChanged = false;
+		boolean gotSQLDTA = false, gotEXTDTA = false;
+		boolean result = false;
 		do
 		{
 			correlationID = reader.readDssHeader();
@@ -3937,12 +3942,12 @@ class DRDAConnThread extends Thread {
 					// optional
 					case CodePoint.TYPDEFNAM:
 						setStmtOrDbByteOrder(false, stmt, parseTYPDEFNAM());
-						typeDefChanged = true;
+						stmt.setTypDefValues();
 						break;
 					// optional
 					case CodePoint.TYPDEFOVR:
 						parseTYPDEFOVR(stmt);
-						typeDefChanged = true;
+						stmt.setTypDefValues();
 						break;
 					// required
 					case CodePoint.SQLDTA:
@@ -3951,7 +3956,10 @@ class DRDAConnThread extends Thread {
 						break;
 					// optional
 					case CodePoint.EXTDTA:	
-						readAndSetAllExtParams(stmt);
+						readAndSetAllExtParams(stmt, true);
+						stmt.ps.clearWarnings();
+						result = stmt.execute();
+						gotEXTDTA = true;
 						break;
 					// optional
 					case CodePoint.OUTOVR:
@@ -3966,8 +3974,13 @@ class DRDAConnThread extends Thread {
 		// SQLDTA is required
 		if (! gotSQLDTA)
 			missingCodePoint(CodePoint.SQLDTA);
-		if (typeDefChanged)
-			stmt.setTypDefValues();
+		
+		if (! gotEXTDTA) {
+			stmt.ps.clearWarnings();
+			result = stmt.execute();
+		}
+		
+		return result;
 	}
 
 	/**
@@ -4206,7 +4219,7 @@ class DRDAConnThread extends Thread {
 					stmt.cliParamLens = paramLens;	
 					break;
 				case CodePoint.EXTDTA:
-					readAndSetAllExtParams(stmt);
+					readAndSetAllExtParams(stmt, false);
 					break;
 				default:
 					invalidCodePoint(codePoint);
@@ -4453,16 +4466,19 @@ class DRDAConnThread extends Thread {
 	}
 	
 
-	private void readAndSetAllExtParams(DRDAStatement stmt) 
+	private void readAndSetAllExtParams(final DRDAStatement stmt, final boolean streamLOB) 
 		throws SQLException, DRDAProtocolException
 	{
 		int numExt = stmt.cliParamExtPositions.size();
 		for (int i = 0; i < stmt.cliParamExtPositions.size(); i++)
 					{
 						int paramPos = ((Integer) (stmt.cliParamExtPositions).get(i)).intValue();
+						final boolean doStreamLOB = (streamLOB && i == numExt -1);
 						readAndSetExtParam(paramPos,
 										   stmt,
-										   ((Byte)stmt.cliParamDrdaTypes.elementAt(paramPos)).intValue(),((Integer)(stmt.cliParamLens.elementAt(paramPos))).intValue());
+										   ((Byte)stmt.cliParamDrdaTypes.elementAt(paramPos)).intValue(),
+										   ((Integer)(stmt.cliParamLens.elementAt(paramPos))).intValue(),
+										   doStreamLOB);
 						// Each extdta in it's own dss
 						if (i < numExt -1)
 						{
@@ -4484,7 +4500,7 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
 	 */
 	private void readAndSetExtParam( int i, DRDAStatement stmt,
-									  int drdaType, int extLen)
+									 int drdaType, int extLen, boolean streamLOB)
 				throws DRDAProtocolException, SQLException
 		{
 			PreparedStatement ps = stmt.getPreparedStatement();
@@ -4495,24 +4511,55 @@ class DRDAConnThread extends Thread {
 				checkNullability = true;
 	
 			try {	
-				byte[] paramBytes = reader.getExtData(checkNullability);
-				String paramString = null;
+				final byte[] paramBytes;
+				final String paramString;
+				
 				switch (drdaType)
 				{
 					case  DRDAConstants.DRDA_TYPE_LOBBYTES:
 					case  DRDAConstants.DRDA_TYPE_NLOBBYTES:
-						if (SanityManager.DEBUG) {
-							if (paramBytes==null) {
-								trace("parameter value is NULL (LOB)");
+						paramString = "";
+						final boolean useSetBinaryStream = 
+							stmt.getParameterMetaData().getParameterType(i+1)==Types.BLOB;
+						
+						if (streamLOB && useSetBinaryStream) {
+							paramBytes = null;
+							final EXTDTAReaderInputStream stream = 
+								reader.getEXTDTAReaderInputStream(checkNullability);
+							if (stream==null) {
+								ps.setBytes(i+1, null);
 							} else {
-								trace("parameter value is a LOB with length: " + 
-									  paramBytes.length);
+								ps.setBinaryStream(i+1, stream, (int) stream.getLength());
+							}
+							
+							if (SanityManager.DEBUG) {
+								if (stream==null) {
+									trace("parameter value : NULL");
+								} else {
+									trace("parameter value will be streamed");
+								}
+							}
+						} else {
+							paramBytes = reader.getExtData(checkNullability);
+							if (paramBytes==null || !useSetBinaryStream) {
+								ps.setBytes(i+1, paramBytes);
+							} else {
+								ps.setBinaryStream(i+1, new ByteArrayInputStream(paramBytes),
+												   paramBytes.length);
+							}
+							if (SanityManager.DEBUG) {
+								if (paramBytes==null) {
+									trace("parameter value : NULL");
+								} else {
+									trace("parameter value is a LOB with length:" +
+										  paramBytes.length);
+								}
 							}
 						}
-						ps.setBytes(i+1, paramBytes);
 						break;
 					case DRDAConstants.DRDA_TYPE_LOBCSBCS:
 					case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
+						paramBytes = reader.getExtData(checkNullability);
 						paramString = new String(paramBytes, stmt.ccsidSBCEncoding);
 						if (SanityManager.DEBUG)
 							trace("parameter value is: "+ paramString);
@@ -4520,6 +4567,7 @@ class DRDAConnThread extends Thread {
 						break;
 					case DRDAConstants.DRDA_TYPE_LOBCDBCS:
 					case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
+						paramBytes = reader.getExtData(checkNullability);
 						paramString = new String(paramBytes, stmt.ccsidDBCEncoding );
 						if (SanityManager.DEBUG)
 							trace("parameter value is: "+ paramString);
@@ -4527,12 +4575,16 @@ class DRDAConnThread extends Thread {
 						break;
 					case DRDAConstants.DRDA_TYPE_LOBCMIXED:
 					case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
+						paramBytes = reader.getExtData(checkNullability);
 						paramString = new String(paramBytes, stmt.ccsidMBCEncoding);
 						if (SanityManager.DEBUG)
 							trace("parameter value is: "+ paramString);
 						ps.setString(i+1,paramString);
 						break;
 					default:
+						paramBytes = null;
+						paramString = "";
+
 						invalidValue(drdaType);
 				}
 			     

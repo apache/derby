@@ -24,6 +24,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 
 /**
@@ -945,6 +946,85 @@ class DDMReader
 		return  getExtData(ddmScalarLen, checkNullability);
 	}
 
+	
+	/**
+	 * Creates an InputStream which can stream EXTDTA objects.
+	 * The InputStream uses this DDMReader to read data from network. The 
+	 * DDMReader should not be used before all data in the stream has been read.
+	 * @param checkNullability used to check if the stream is null. If it is 
+	 * null, this method returns null
+	 * @return EXTDTAReaderInputStream object which can be passed to prepared
+	 *         statement as a binary stream.
+	 * @exception DRDAProtocolException standard DRDA protocol exception
+	 */
+	EXTDTAReaderInputStream getEXTDTAReaderInputStream
+		(final boolean checkNullability)
+		throws DRDAProtocolException
+	{
+		if (checkNullability && isEXTDTANull()) {
+			return null;
+		} else {
+			return new EXTDTAReaderInputStream(this);
+		}
+	}
+
+	/**
+	 * This method is used by EXTDTAReaderInputStream to read the first chunk 
+	 * of data.
+	 * @param desiredLength the desired length of chunk
+	 * @exception DRDAProtocolException standard DRDA protocol exception
+	 */
+	ByteArrayInputStream readLOBInitStream(final long desiredLength) 
+		throws DRDAProtocolException
+	{
+		return readLOBChunk(false, desiredLength);
+	}
+	
+	/**
+	 * This method is used by EXTDTAReaderInputStream to read the next chunk 
+	 * of data.
+	 * @param desiredLength the desired length of chunk
+	 * @exception IOException IOException
+	 */
+	ByteArrayInputStream readLOBContinuationStream (final long desiredLength)
+		throws IOException
+	{		
+		try {
+			return readLOBChunk(true, desiredLength);
+		} catch (DRDAProtocolException e) {
+			e.printStackTrace(agent.getServer().logWriter);
+			throw new IOException(e.getMessage());
+		}
+	}
+
+	/**
+	 * This method is used by EXTDTAReaderInputStream to read the next chunk 
+	 * of data.
+	 * @param readHeader set to true if the dss continuation should be read
+	 * @param desiredLength the desired length of chunk
+	 * @exception DRDAProtocolException standard DRDA protocol exception
+	 */
+	private ByteArrayInputStream readLOBChunk
+		(final boolean readHeader, final long desiredLength)
+		throws DRDAProtocolException
+	{		
+		if (readHeader) {			
+			readDSSContinuationHeader();
+		}
+		int copySize = (int) Math.min(dssLength, desiredLength);
+		
+		// read the segment
+		ensureALayerDataInBuffer (copySize);
+		adjustLengths (copySize);
+		
+		// Create ByteArrayInputStream on top of buffer. 
+		// This will not make a copy of the buffer.
+		ByteArrayInputStream bais = 
+			new ByteArrayInputStream(buffer, pos, copySize);
+		pos += copySize;
+		
+		return bais;
+	}
 
 	byte[] getExtData (long desiredLength, boolean checkNullability) throws DRDAProtocolException
   {
