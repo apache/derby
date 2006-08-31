@@ -108,7 +108,8 @@
 
   <target name="jarup"> 
     <zip destfile="${derby.demo.src.dir}/toursdb/toursdb.jar"
-         basedir="${derby.demo.src.dir}/toursdb/toursdb"/>
+         basedir="${derby.demo.src.dir}/toursdb"
+         includes="toursdb/**"/>
     <echo message="Finished building toursdb"/>
   </target>
 
