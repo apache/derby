@@ -253,15 +253,15 @@ public interface Optimizable {
 	 * Optimizable saved which "best plan", and allows us to load the
 	 * appropriate plans after each round of optimization.
 	 * 
-	 * @param doAdd True if we're saving a best plan for the OptimizerImpl/
-	 *  Optimizable; false if we're loading/retrieving the best plan.
+	 * @param action Indicates whether we're adding, loading, or removing
+	 *  a best plan for the OptimizerImpl/Optimizable.
 	 * @param planKey Object to use as the map key when adding/looking up
 	 *  a plan.  If it is an instance of OptimizerImpl then it corresponds
 	 *  to an outer query; otherwise it's some Optimizable above this
 	 *  Optimizable that could potentially reject plans chosen by the
 	 *  OptimizerImpl to which this Optimizable belongs.
 	 */
-	public void addOrLoadBestPlanMapping(boolean doAdd,
+	public void updateBestPlanMap(short action,
 		Object planKey) throws StandardException;
 
 	/**

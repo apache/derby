@@ -165,16 +165,17 @@ abstract class SingleChildResultSetNode extends FromTable
 	}
 
 	/**
-	 * @see Optimizable#addOrLoadBestPlanMapping
+	 * @see Optimizable#updateBestPlanMap
 	 *
-	 * Makes a call to add/load the plan mapping for this node,
+	 * Makes a call to add/load/remove a plan mapping for this node,
 	 * and then makes the necessary call to recurse on this node's
-	 * child, in order to ensure that we have a full plan mapped.
+	 * child, in order to ensure that we've handled the full plan
+	 * all the way down this node's subtree.
 	 */
-	public void addOrLoadBestPlanMapping(boolean doAdd,
+	public void updateBestPlanMap(short action,
 		Object planKey) throws StandardException
 	{
-		super.addOrLoadBestPlanMapping(doAdd, planKey);
+		super.updateBestPlanMap(action, planKey);
 
 		// Now walk the child.  Note that if the child is not an
 		// Optimizable and the call to child.getOptimizerImpl()
@@ -185,12 +186,12 @@ abstract class SingleChildResultSetNode extends FromTable
 		if (childResult instanceof Optimizable)
 		{
 			((Optimizable)childResult).
-				addOrLoadBestPlanMapping(doAdd, planKey);
+				updateBestPlanMap(action, planKey);
 		}
 		else if (childResult.getOptimizerImpl() != null)
 		{
 			childResult.getOptimizerImpl().
-				addOrLoadBestPlanMappings(doAdd, planKey);
+				updateBestPlanMaps(action, planKey);
 		}
 	}
 

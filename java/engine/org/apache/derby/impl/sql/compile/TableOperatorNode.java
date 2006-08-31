@@ -156,17 +156,17 @@ abstract class TableOperatorNode extends FromTable
 	}
 
 	/**
-	 * @see Optimizable#addOrLoadBestPlanMapping
+	 * @see Optimizable#updateBestPlanMap
 	 *
-	 * Makes a call to add/load the plan mapping for this node,
+	 * Makes a call to add/load/remove the plan mapping for this node,
 	 * and then makes the necessary call to recurse on this node's
-	 * left and right child, in order to ensure that we have a
-	 * full plan mapped.
+	 * left and right child, in order to ensure that we've handled
+	 * the full plan all the way down this node's subtree. 
 	 */
-	public void addOrLoadBestPlanMapping(boolean doAdd,
+	public void updateBestPlanMap(short action,
 		Object planKey) throws StandardException
 	{
-		super.addOrLoadBestPlanMapping(doAdd, planKey);
+		super.updateBestPlanMap(action, planKey);
 
 		// Now walk the children.  Note that if either child is not
 		// an Optimizable and the call to child.getOptimizerImpl()
@@ -177,23 +177,23 @@ abstract class TableOperatorNode extends FromTable
 		if (leftResultSet instanceof Optimizable)
 		{
 			((Optimizable)leftResultSet).
-				addOrLoadBestPlanMapping(doAdd, planKey);
+				updateBestPlanMap(action, planKey);
 		}
 		else if (leftResultSet.getOptimizerImpl() != null)
 		{
 			leftResultSet.getOptimizerImpl().
-				addOrLoadBestPlanMappings(doAdd, planKey);
+				updateBestPlanMaps(action, planKey);
 		}
 
 		if (rightResultSet instanceof Optimizable)
 		{
 			((Optimizable)rightResultSet).
-				addOrLoadBestPlanMapping(doAdd, planKey);
+				updateBestPlanMap(action, planKey);
 		}
 		else if (rightResultSet.getOptimizerImpl() != null)
 		{
 			rightResultSet.getOptimizerImpl().
-				addOrLoadBestPlanMappings(doAdd, planKey);
+				updateBestPlanMaps(action, planKey);
 		}
 	}
 

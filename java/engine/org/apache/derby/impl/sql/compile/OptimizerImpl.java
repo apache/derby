@@ -366,6 +366,7 @@ public class OptimizerImpl implements Optimizer
 				trace(NO_TABLES, 0, 0, 0.0, null);
 			}
 
+			endOfRoundCleanup();
 			return false;
 		}
 
@@ -980,7 +981,7 @@ public class OptimizerImpl implements Optimizer
 				** can be expensive if there are deeply nested subqueries.
 				*/
 				if (reloadBestPlan)
-					pullMe.addOrLoadBestPlanMapping(false, this);
+					pullMe.updateBestPlanMap(FromTable.LOAD_PLAN, this);
 
 				/* Mark current join position as unused */
 				proposedJoinOrder[joinPosition] = -1;
@@ -1133,7 +1134,9 @@ public class OptimizerImpl implements Optimizer
 						rewindJoinOrder();
 						joinPosition = -1;
 					}
+
 					permuteState = READY_TO_JUMP;
+					endOfRoundCleanup();
 					return false;
 				}
 			}
@@ -1170,6 +1173,7 @@ public class OptimizerImpl implements Optimizer
 			return true;
 		}
 
+		endOfRoundCleanup();
 		return false;
 	}
 
@@ -1183,13 +1187,32 @@ public class OptimizerImpl implements Optimizer
 									proposedJoinOrder[joinPosition]);
 			pullMe.pullOptPredicates(predicateList);
 			if (reloadBestPlan)
-				pullMe.addOrLoadBestPlanMapping(false, this);
+				pullMe.updateBestPlanMap(FromTable.LOAD_PLAN, this);
 			proposedJoinOrder[joinPosition] = -1;
 			if (joinPosition == 0) break;
 		}
 		currentCost.setCost(0.0d, 0.0d, 0.0d);
 		currentSortAvoidanceCost.setCost(0.0d, 0.0d, 0.0d);
 		assignedTableMap.clearAll();
+	}
+
+	/**
+	 * Do any work that needs to be done after the current round
+	 * of optimization has completed.  For now this just means walking
+	 * the subtrees for each optimizable and removing the "bestPlan"
+	 * that we saved (w.r.t to this OptimizerImpl) from all of the
+	 * nodes.  If we don't do this post-optimization cleanup we
+	 * can end up consuming a huge amount of memory for deeply-
+	 * nested queries, which can lead to OOM errors.  DERBY-1315.
+	 */
+	private void endOfRoundCleanup()
+		throws StandardException
+	{
+		for (int i = 0; i < numOptimizables; i++)
+		{
+			optimizableList.getOptimizable(i).
+				updateBestPlanMap(FromTable.REMOVE_PLAN, this);
+		}
 	}
 
 	/*
@@ -1309,7 +1332,7 @@ public class OptimizerImpl implements Optimizer
 			if (curOpt.getBestAccessPath().getCostEstimate().compare(
 				curOpt.getCurrentAccessPath().getCostEstimate()) != 0)
 			{
-				curOpt.addOrLoadBestPlanMapping(false, curOpt);
+				curOpt.updateBestPlanMap(FromTable.LOAD_PLAN, curOpt);
 			}
 			else if (curOpt.getBestAccessPath().getCostEstimate().rowCount() <
 				curOpt.getCurrentAccessPath().getCostEstimate().rowCount())
@@ -1319,9 +1342,16 @@ public class OptimizerImpl implements Optimizer
 				// still need to revert the plans.  In this case the row
 				// count for currentCost will be greater than the row count
 				// for bestCost, so that's what we just checked.
-				curOpt.addOrLoadBestPlanMapping(false, curOpt);
+				curOpt.updateBestPlanMap(FromTable.LOAD_PLAN, curOpt);
 			}
 		}
+
+		/* If we needed to revert plans for curOpt, we just did it above.
+		 * So we no longer need to keep the previous best plan--and in fact,
+		 * keeping it can lead to extreme memory usage for very large
+		 * queries.  So delete the stored plan for curOpt. DERBY-1315.
+		 */
+		curOpt.updateBestPlanMap(FromTable.REMOVE_PLAN, curOpt);
 
 		/*
 		** When all the access paths have been looked at, we know what the
@@ -2373,30 +2403,39 @@ public class OptimizerImpl implements Optimizer
 	public boolean useStatistics() { return useStatistics && optimizableList.useStatistics(); }
 
 	/**
-	 * Remember the current best join order as the best one for
-	 * some outer query, represented by another OptimizerImpl. Then
+	 * Process (i.e. add, load, or remove) current best join order as the
+	 * best one for some outer query or ancestor node, represented by another
+	 * OptimizerImpl or an instance of FromTable, respectively. Then
 	 * iterate through our optimizableList and tell each Optimizable
-	 * to remember its best plan with respect to the outer query.
-	 * See Optimizable.addOrLoadBestPlan() for more on why this is
-	 * necessary.
+	 * to do the same.  See Optimizable.updateBestPlan() for more on why
+	 * this is necessary.
 	 *
-	 * @param doAdd True if we're adding a mapping, false if we're loading.
+	 * @param action Indicates whether to add, load, or remove the plan
 	 * @param planKey Object to use as the map key when adding/looking up
 	 *  a plan.  If this is an instance of OptimizerImpl then it corresponds
 	 *  to an outer query; otherwise it's some Optimizable above this
 	 *  OptimizerImpl that could potentially reject plans chosen by this
 	 *  OptimizerImpl.
 	 */
-	protected void addOrLoadBestPlanMappings(boolean doAdd,
+	protected void updateBestPlanMaps(short action,
 		Object planKey) throws StandardException
 	{
-		// First we save this OptimizerImpl's best join order.  If there's
+		// First we process this OptimizerImpl's best join order.  If there's
 		// only one optimizable in the list, then there's only one possible
 		// join order, so don't bother.
 		if (numOptimizables > 1)
 		{
 			int [] joinOrder = null;
-			if (doAdd)
+			if (action == FromTable.REMOVE_PLAN)
+			{
+				if (savedJoinOrders != null)
+				{
+					savedJoinOrders.remove(planKey);
+					if (savedJoinOrders.size() == 0)
+						savedJoinOrders = null;
+				}
+			}
+			else if (action == FromTable.ADD_PLAN)
 			{
 				// If the savedJoinOrder map already exists, search for the
 				// join order for the target optimizer and reuse that.
@@ -2438,13 +2477,13 @@ public class OptimizerImpl implements Optimizer
 			}
 		}
 
-		// Now iterate through all Optimizables in this OptimizerImpl's list
-	 	// and add/load the best plan "mapping" for each one, as described in
-	 	// in Optimizable.addOrLoadBestPlanMapping().
+		// Now iterate through all Optimizables in this OptimizerImpl's
+	 	// list and add/load/remove the best plan "mapping" for each one,
+		// as described in in Optimizable.updateBestPlanMap().
 		for (int i = optimizableList.size() - 1; i >= 0; i--)
 		{
 			optimizableList.getOptimizable(i).
-				addOrLoadBestPlanMapping(doAdd, planKey);
+				updateBestPlanMap(action, planKey);
 		}
 	}
 
