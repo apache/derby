@@ -45,7 +45,7 @@ public abstract class BaseJDBCTestCase
      * Maintain a single connection to the default
      * database, opened at the first call to getConnection.
      * Typical setup will just require a single connection.
-     * @see BaseJDBCTestSetup#getConnection()
+     * @see BaseJDBCTestCase#getConnection()
      */
     private Connection conn;
     
