@@ -2936,4 +2936,108 @@ ij(USER2)> lock table user1.t100 in share mode;
 ERROR: Failed with SQLSTATE 28506
 ij(USER2)> commit;
 ij(USER2)> autocommit on;
-ij(USER2)> 
+ij(USER2)> -- Simple test case for DERBY-1583: column privilege checking should not
+-- assume column descriptors have non-null table references.
+set connection mamta1;
+ij(MAMTA1)> create table t11TriggerRevokeTest (c111 int not null primary key, c12 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t11TriggerRevokeTest values (1, 101), (2, 202), (3, 303);
+3 rows inserted/updated/deleted
+ij(MAMTA1)> grant TRIGGER on t11TriggerRevokeTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> create table t12TriggerRevokeTest (c121 int, c122 int, c123 int);
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t12TriggerRevokeTest values (10, 1010, 2010),(20,1020,2020);
+2 rows inserted/updated/deleted
+ij(MAMTA1)> grant UPDATE(c122, c121) on t12TriggerRevokeTest to mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest
+for each statement mode db2sql
+        update mamta1.t12TriggerRevokeTest set c122 = 99;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> select * from t11TriggerRevokeTest;
+C111       |C12        
+-----------------------
+1          |101        
+2          |202        
+3          |303        
+3 rows selected
+ij(MAMTA1)> select * from t12TriggerRevokeTest;
+C121       |C122       |C123       
+-----------------------------------
+10         |1010       |2010       
+20         |1020       |2020       
+2 rows selected
+ij(MAMTA1)> -- This should fire the trigger, changing the c122 values to 99
+insert into t11TriggerRevokeTest values(4, 404);
+1 row inserted/updated/deleted
+ij(MAMTA1)> select * from t11TriggerRevokeTest;
+C111       |C12        
+-----------------------
+1          |101        
+2          |202        
+3          |303        
+4          |404        
+4 rows selected
+ij(MAMTA1)> select * from t12TriggerRevokeTest;
+C121       |C122       |C123       
+-----------------------------------
+10         |99         |2010       
+20         |99         |2020       
+2 rows selected
+ij(MAMTA1)> -- revoking the privilege should drop the trigger
+revoke TRIGGER on t11TriggerRevokeTest from mamta2;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> update t12TriggerRevokeTest set c122 = 42;
+2 rows inserted/updated/deleted
+ij(MAMTA1)> -- now when we insert the trigger should NOT be fired, c122 values should
+-- be unchanged and so should be 42
+insert into t11TriggerRevokeTest values (5,505);
+1 row inserted/updated/deleted
+ij(MAMTA1)> select * from t11TriggerRevokeTest;
+C111       |C12        
+-----------------------
+1          |101        
+2          |202        
+3          |303        
+4          |404        
+5          |505        
+5 rows selected
+ij(MAMTA1)> select * from t12TriggerRevokeTest;
+C121       |C122       |C123       
+-----------------------------------
+10         |42         |2010       
+20         |42         |2020       
+2 rows selected
+ij(MAMTA1)> -- Simple test case for DERBY-1724, which is a different manifestation
+-- of DERBY-1583
+set connection mamta1;
+ij(MAMTA1)> create table t1001 (c varchar(1));
+0 rows inserted/updated/deleted
+ij(MAMTA1)> insert into t1001 values 'a', 'b', 'c';
+3 rows inserted/updated/deleted
+ij(MAMTA1)> autocommit off;
+ij(MAMTA1)> grant select on t1001 to mamta3;
+0 rows inserted/updated/deleted
+ij(MAMTA1)> set connection mamta2;
+ij(MAMTA2)> create table ttt1 (i int);
+0 rows inserted/updated/deleted
+ij(MAMTA2)> insert into ttt1 values 1;
+1 row inserted/updated/deleted
+ij(MAMTA2)> grant all privileges on ttt1 to mamta1;
+0 rows inserted/updated/deleted
+ij(MAMTA2)> set connection mamta1;
+ij(MAMTA1)> select * from mamta2.ttt1;
+I          
+-----------
+1          
+1 row selected
+ij(MAMTA1)> insert into mamta2.ttt1 values 2;
+1 row inserted/updated/deleted
+ij(MAMTA1)> update mamta2.ttt1 set i = 888;
+2 rows inserted/updated/deleted
+ij(MAMTA1)> commit;
+ij(MAMTA1)> autocommit on;
+ij(MAMTA1)> 

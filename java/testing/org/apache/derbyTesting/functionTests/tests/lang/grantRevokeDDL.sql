@@ -1856,3 +1856,52 @@ lock table user1.t100 in exclusive mode;
 lock table user1.t100 in share mode;
 commit;
 autocommit on;
+
+-- Simple test case for DERBY-1583: column privilege checking should not
+-- assume column descriptors have non-null table references.
+
+set connection mamta1;
+create table t11TriggerRevokeTest (c111 int not null primary key, c12 int);
+insert into t11TriggerRevokeTest values (1, 101), (2, 202), (3, 303);
+grant TRIGGER on t11TriggerRevokeTest to mamta2;
+create table t12TriggerRevokeTest (c121 int, c122 int, c123 int);
+insert into t12TriggerRevokeTest values (10, 1010, 2010),(20,1020,2020);
+grant UPDATE(c122, c121) on t12TriggerRevokeTest to mamta2;
+set connection mamta2;
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest
+for each statement mode db2sql
+        update mamta1.t12TriggerRevokeTest set c122 = 99; 
+set connection mamta1;
+select * from t11TriggerRevokeTest;
+select * from t12TriggerRevokeTest;
+-- This should fire the trigger, changing the c122 values to 99
+insert into t11TriggerRevokeTest values(4, 404);
+select * from t11TriggerRevokeTest;
+select * from t12TriggerRevokeTest;
+-- revoking the privilege should drop the trigger
+revoke TRIGGER on t11TriggerRevokeTest from mamta2;
+update t12TriggerRevokeTest set c122 = 42;
+-- now when we insert the trigger should NOT be fired, c122 values should
+-- be unchanged and so should be 42
+insert into t11TriggerRevokeTest values (5,505);
+select * from t11TriggerRevokeTest;
+select * from t12TriggerRevokeTest;
+
+-- Simple test case for DERBY-1724, which is a different manifestation
+-- of DERBY-1583
+
+set connection mamta1;
+create table t1001 (c varchar(1));
+insert into t1001 values 'a', 'b', 'c';
+autocommit off;
+grant select on t1001 to mamta3; 
+set connection mamta2;
+create table ttt1 (i int);
+insert into ttt1 values 1;
+grant all privileges on ttt1 to mamta1;
+set connection mamta1;
+select * from mamta2.ttt1;
+insert into mamta2.ttt1 values 2;
+update mamta2.ttt1 set i = 888;
+commit;
+autocommit on;

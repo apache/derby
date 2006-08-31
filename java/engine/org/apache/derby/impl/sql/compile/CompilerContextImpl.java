@@ -726,7 +726,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * Add a column privilege to the list of used column privileges.
 	 *
-	 * @param column
+	 * @param column The column whose privileges we're interested in.
 	 */
 	public void addRequiredColumnPriv( ColumnDescriptor column)
 	{
@@ -738,7 +738,23 @@ public class CompilerContextImpl extends ContextImpl
 			|| currPrivType == Authorizer.EXECUTE_PRIV
 			|| column == null)
 			return;
+		/*
+		* Note that to look up the privileges for this column,
+		* we need to know what table the column is in. However,
+		* not all ColumnDescriptor objects are associated with
+		* a table object. Sometimes a ColumnDescriptor
+		* describes a column but doesn't specify the table. An
+		* example of this occurs in the set-clause of the
+		* UPDATE statement in SQL, where we may have a
+		* ColumnDescriptor which describes the expression that
+		* is being used in the UPDATE statement to provide the
+		* new value that will be computed by the UPDATE. In such a
+		* case, there is no column privilege to be added, so we
+		* just take an early return. DERBY-1583 has more details.
+		*/
 		TableDescriptor td = column.getTableDescriptor();
+		if (td == null)
+			return;
 		UUID tableUUID = td.getUUID();
 		StatementTablePermission key = new StatementTablePermission( tableUUID, currPrivType);
 		StatementColumnPermission tableColumnPrivileges

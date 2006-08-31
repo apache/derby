@@ -1,3 +1,4 @@
+WARNING 01J14: SQL authorization is being used without first enabling authentication.
 ij> -- alter table tests
 -- add column
 -- (add constraint & drop constraint to be added)
