@@ -30,7 +30,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.security.PrivilegedActionException;
 import java.sql.*;
 import java.util.*;
 import junit.framework.*;
@@ -107,7 +106,7 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
                         autoloadingCurrentDriver = true;
                 }
                 
-            } catch (PrivilegedActionException e) {
+            } catch (SecurityException e) {
                 // can't read property, assume not autoloading.
             }
                         

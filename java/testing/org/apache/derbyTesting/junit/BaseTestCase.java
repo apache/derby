@@ -139,7 +139,7 @@ public abstract class BaseTestCase
      */
     protected static void setSystemProperty(final String name, 
 					    final String value)
-	throws PrivilegedActionException {
+    {
 	
 	AccessController.doPrivileged
 	    (new java.security.PrivilegedAction(){
@@ -160,7 +160,7 @@ public abstract class BaseTestCase
      * @param name name of the property
      */
     protected static void removeSystemProperty(final String name)
-	throws PrivilegedActionException {
+	{
 	
 	AccessController.doPrivileged
 	    (new java.security.PrivilegedAction(){
@@ -181,7 +181,7 @@ public abstract class BaseTestCase
      * @param name name of the property
      */
     protected static String getSystemProperty(final String name)
-	throws PrivilegedActionException {
+	{
 
 	return (String )AccessController.doPrivileged
 	    (new java.security.PrivilegedAction(){
@@ -200,10 +200,9 @@ public abstract class BaseTestCase
      * file or a SQL script.
      * @param name Resource name, typically - org.apache.derbyTesing.something
      * @return URL to the resource, null if it does not exist.
-     * @throws PrivilegedActionException
      */
     protected static URL getTestResource(final String name)
-	throws PrivilegedActionException {
+	{
 
 	return (URL)AccessController.doPrivileged
 	    (new java.security.PrivilegedAction(){
