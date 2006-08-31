@@ -25,10 +25,22 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
+/**
+ * LangScripts runs SQL scripts (.sql files) in the lang package
+ * and compares the output to a canon file in the
+ * standard master package.
+ * <BR>
+ * Its suite() method returns a set of tests where each test is an instance of
+ * this class for an individual script wrapped in a clean database decorator.
+ * <BR>
+ * It can also be used as a command line program to run one or more
+ * language based SQL scripts as tests.
+ *
+ */
 public final class LangScripts extends ScriptTestCase {
 	
 	/**
-	 * Language SQL scripts that run under all configurations.
+	 * Language SQL scripts (.sql files) that run under all configurations.
 	 */
 	private static final String[] SQL_LANGUAGE_TESTS = {
 		"case",
@@ -36,7 +48,7 @@ public final class LangScripts extends ScriptTestCase {
 		};
 
     /**
-     * Language SQL scripts that run under Derby's clients configurations.
+     * Language SQL scripts (.sql files) that run under Derby's client configurations.
      */
     private static final String[] DERBY_TESTS = {
         "bit2",
@@ -44,7 +56,7 @@ public final class LangScripts extends ScriptTestCase {
         };
     
     /**
-     * Language SQL scripts that only run in embedded.
+     * Language SQL scripts (.sql files) that only run in embedded.
      */
     private static final String[] EMBEDDED_TESTS = {
         "arithmetic",
@@ -53,8 +65,9 @@ public final class LangScripts extends ScriptTestCase {
         };	
 
 	/**
-	 * Run a set of language SQL scripts passed in on the
-	 * command line.
+	 * Run a set of language SQL scripts (.sql files) passed in on the
+	 * command line. Note the .sql suffix must not be provided as
+     * part of the script name.
 	 * <code>
 	 * example
 	 * java org.apache.derbyTesting.functionTests.tests.lang.LangScripts case union
