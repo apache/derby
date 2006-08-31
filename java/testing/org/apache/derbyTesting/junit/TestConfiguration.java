@@ -36,12 +36,93 @@ import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
  * Class which holds information about the configuration of a Test.
  */
 public class TestConfiguration {
+    /**
+     * Default values for configurations
+     */
+    private final static String DEFAULT_DBNAME = "wombat";
+    private final static String DEFAULT_USER_NAME = "APP";
+    private final static String DEFAULT_USER_PASSWORD = "APP";
+    private final static int    DEFAULT_PORT = 1527;
+    private final static String DEFAULT_FRAMEWORK = "embedded";
+    private final static String DEFAULT_HOSTNAME = "localhost";
+            
+    /**
+     * Keys to use to look up values in properties files.
+     */
+    private final static String KEY_DBNAME = "databaseName";
+    private final static String KEY_FRAMEWORK = "framework";
+    private final static String KEY_USER_PASSWORD = "password";
+    private final static String KEY_USER_NAME = "user";
+    private final static String KEY_HOSTNAME = "hostName";
+    private final static String KEY_PORT = "port";
+    private final static String KEY_VERBOSE = "derby.tests.debug";    
+    private final static String KEY_SINGLE_LEG_XA = "derbyTesting.xa.single";
 
     /**
-     * Default Derby test configuration object.
+     * Possible values of system properties.
      */
-    private static final TestConfiguration DERBY_TEST_CONFIG = 
+    private final static String UNUSED = "file://unused/";
+
+
+    /**
+     * Default Derby test configuration object based
+     * upon system properties set by the old harness.
+     */
+    private static final TestConfiguration DERBY_HARNESS_CONFIG = 
         new TestConfiguration(getSystemProperties());
+    
+    /**
+     * Default configuration for standalone JUnit tests,
+     * an embedded configuration.
+     */
+    private static final TestConfiguration JUNIT_CONFIG
+        = new TestConfiguration();
+    
+    /**
+     * The default configuration.
+     */
+    private static final TestConfiguration DEFAULT_CONFIG;
+    
+    /**
+     * Are we running in the harness, assume so if framework
+     * was set so the 
+     */
+    private static final boolean runningInDerbyHarness;
+    
+    static {
+        boolean assumeHarness = false;
+        
+        // In the harness if the default configuration according
+        // to system properties is not embedded.
+        if (!DERBY_HARNESS_CONFIG.getJDBCClient().isEmbedded())
+            assumeHarness = true;
+        
+        // Assume harness if database name is not default
+        if (!DERBY_HARNESS_CONFIG.getDatabaseName().equals(DEFAULT_DBNAME))
+            assumeHarness = true;
+        
+        // Assume harness if user name is not default
+        if (!DERBY_HARNESS_CONFIG.getUserName().equals(DEFAULT_USER_NAME))
+            assumeHarness = true;
+        
+        // If derby.system.home set externally at startup assume
+        // running in harness
+        if (BaseTestCase.getSystemProperty("derby.system.home") != null)
+            assumeHarness = true;
+        
+        // for now always assume harness - still testing this code
+        assumeHarness = true;
+
+        DEFAULT_CONFIG = assumeHarness ? DERBY_HARNESS_CONFIG : JUNIT_CONFIG;
+        runningInDerbyHarness = assumeHarness;
+        
+        if (!assumeHarness) {
+            File dsh = new File("system");
+
+            BaseTestCase.setSystemProperty("derby.system.home",
+                    dsh.getAbsolutePath());
+        }
+     }
     
     /**
      * Current configuration is stored in a ThreadLocal to
@@ -50,7 +131,7 @@ public class TestConfiguration {
      */
     private static final ThreadLocal CURRENT_CONFIG = new ThreadLocal() {
         protected Object initialValue() {
-            return DERBY_TEST_CONFIG;
+            return DEFAULT_CONFIG;
         }
     };
    
@@ -390,6 +471,18 @@ public class TestConfiguration {
 	{
         return SecurityManagerSetup.isJars;
 	}
+    
+    /**
+     * Is this JUnit test being run by the old harness.
+     * Temp method to ease the switch over by allowing
+     * suites to alter their behaviour based upon the
+     * need to still run under the old harness.
+     * @return
+     */
+    public static boolean runningInDerbyHarness()
+    {
+        return runningInDerbyHarness;
+    }
 
     /**
      * Return if it has to run under single legged xa transaction
@@ -467,32 +560,6 @@ public class TestConfiguration {
     private boolean isVerbose;
     private final boolean singleLegXA;
     
-    /**
-     * Default values for configurations
-     */
-    private final static String DEFAULT_DBNAME = "wombat";
-    private final static String DEFAULT_USER_NAME = "APP";
-    private final static String DEFAULT_USER_PASSWORD = "APP";
-    private final static int    DEFAULT_PORT = 1527;
-    private final static String DEFAULT_FRAMEWORK = "embedded";
-    private final static String DEFAULT_HOSTNAME = "localhost";
-            
-    /**
-     * Keys to use to look up values in properties files.
-     */
-    private final static String KEY_DBNAME = "databaseName";
-    private final static String KEY_FRAMEWORK = "framework";
-    private final static String KEY_USER_PASSWORD = "password";
-    private final static String KEY_USER_NAME = "user";
-    private final static String KEY_HOSTNAME = "hostName";
-    private final static String KEY_PORT = "port";
-    private final static String KEY_VERBOSE = "derby.tests.debug";    
-    private final static String KEY_SINGLE_LEG_XA = "derbyTesting.xa.single";
-
-    /**
-     * Possible values of system properties.
-     */
-    private final static String UNUSED = "file://unused/";
 
     /**
      * Generate properties which can be set on a
@@ -505,7 +572,7 @@ public class TestConfiguration {
      */
     public static Properties getDefaultDataSourceProperties() {
         return getDataSourcePropertiesForDatabase(
-                DERBY_TEST_CONFIG.getDatabaseName());
+                getCurrent().getDatabaseName());
     }
     
     /**
@@ -523,9 +590,9 @@ public class TestConfiguration {
             (String databaseName) 
     {
         Properties attrs = new Properties();
-        if (!(DERBY_TEST_CONFIG.getJDBCClient() == JDBCClient.EMBEDDED)) {
-            attrs.setProperty("serverName", DERBY_TEST_CONFIG.getHostName());
-            attrs.setProperty("portNumber", Integer.toString(DERBY_TEST_CONFIG.getPort()));
+        if (!(getCurrent().getJDBCClient() == JDBCClient.EMBEDDED)) {
+            attrs.setProperty("serverName", getCurrent().getHostName());
+            attrs.setProperty("portNumber", Integer.toString(getCurrent().getPort()));
         }
         attrs.setProperty("databaseName", databaseName);
         attrs.setProperty("connectionAttributes", "create=true");
