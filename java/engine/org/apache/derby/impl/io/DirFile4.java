@@ -238,14 +238,14 @@ class DirFile4 extends DirFile
      *
      * @return an object that can be used for random access to the file.
      *
-     * @exception IllegalArgumentException if the mode argument is not equal to one of "r", "rw".
+     * @exception IllegalArgumentException if the mode argument is not equal to one of "r", "rw", "rws", or "rwd".
      * @exception FileNotFoundException if the file exists but is a directory rather than a regular
      *              file, or cannot be opened or created for any other reason .
      */
     public StorageRandomAccessFile getRandomAccessFile( String mode) throws FileNotFoundException
     {
         // Assume that modes "rws" and "rwd" are not supported.
-        if(!rwsOK && "rws".equals( mode) || "rwd".equals( mode))
+        if(!rwsOK && ("rws".equals( mode) || "rwd".equals( mode)))
             mode = "rw";
         return new DirRandomAccessFile4( (File) this, mode);
     } // end of getRandomAccessFile
