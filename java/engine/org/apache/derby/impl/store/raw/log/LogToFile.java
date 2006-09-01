@@ -2930,7 +2930,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     }
 						
 					if (checkpointInstant == LogCounter.INVALID_LOG_INSTANT &&
-										getMirrorControlFileName().exists())
+										privExists(getMirrorControlFileName()))
                     {
 						checkpointInstant =
                             readControlFile(
