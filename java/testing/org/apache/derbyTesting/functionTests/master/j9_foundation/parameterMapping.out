@@ -207,7 +207,7 @@ P2=cs.getDouble=38.0 was null false
 P3=cs.getDouble=77.0 was null false
 INOUT SMALLINT registerOutParameter(Types.DECIMAL) -- OK
 OUT SMALLINT registerOutParameter(Types.DECIMAL) -- OK
-SQLSTATE(22018): SQL Exception: Invalid character string format for type SMALLINT.
+SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type SMALLINT.
 INOUT SMALLINT registerOutParameter(Types.NUMERIC) -- OK
 OUT SMALLINT registerOutParameter(Types.NUMERIC) -- OK
 INOUT SMALLINT registerOutParameter(Types.BIT) -- OK
@@ -442,7 +442,7 @@ P2=cs.getDouble=41.0 was null false
 P3=cs.getDouble=88.0 was null false
 INOUT INTEGER registerOutParameter(Types.DECIMAL) -- OK
 OUT INTEGER registerOutParameter(Types.DECIMAL) -- OK
-SQLSTATE(22018): SQL Exception: Invalid character string format for type INTEGER.
+SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type INTEGER.
 INOUT INTEGER registerOutParameter(Types.NUMERIC) -- OK
 OUT INTEGER registerOutParameter(Types.NUMERIC) -- OK
 INOUT INTEGER registerOutParameter(Types.BIT) -- OK
@@ -677,7 +677,7 @@ P2=cs.getDouble=40.0 was null false
 P3=cs.getDouble=99.0 was null false
 INOUT BIGINT registerOutParameter(Types.DECIMAL) -- OK
 OUT BIGINT registerOutParameter(Types.DECIMAL) -- OK
-SQLSTATE(22018): SQL Exception: Invalid character string format for type BIGINT.
+SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type BIGINT.
 INOUT BIGINT registerOutParameter(Types.NUMERIC) -- OK
 OUT BIGINT registerOutParameter(Types.NUMERIC) -- OK
 INOUT BIGINT registerOutParameter(Types.BIT) -- OK
@@ -1566,6 +1566,10 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setObject(java.lang.String) as batch  (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. JDBC FAIL DECIMAL(10,5)
   setObject(java.lang.Boolean) getBigDecimal=1.00000 was null false JDBC MATCH(OK)
   setObject(java.lang.Boolean) as batch  (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. JDBC FAIL DECIMAL(10,5)
+  setObject(java.lang.Byte) getBigDecimal=2.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Byte) as batch  (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. JDBC FAIL DECIMAL(10,5)
+  setObject(java.lang.Short) getBigDecimal=11.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Short) as batch  (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. JDBC FAIL DECIMAL(10,5)
   setObject(java.lang.Integer) getBigDecimal=74.00000 was null false JDBC MATCH(OK)
   setObject(java.lang.Integer) as batch  (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. (22005):An attempt was made to get a data value of type 'java.lang.Object' from a data value of type 'DECIMAL'. JDBC FAIL DECIMAL(10,5)
   setObject(java.lang.Long) getBigDecimal=79.00000 was null false JDBC MATCH(OK)
@@ -1767,25 +1771,25 @@ For setXXX() methods that pass an object, a null and valid values are checked
 CREATE PROCEDURE PMP.TYPE_AS(IN P1 CHAR(60), INOUT P2 CHAR(60), OUT P3 CHAR(60)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.SimpleProcedureTest.pmap'
 INOUT CHAR(60) registerOutParameter(Types.TINYINT) -- OK
 OUT CHAR(60) registerOutParameter(Types.TINYINT) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type byte.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type byte.
 INOUT CHAR(60) registerOutParameter(Types.SMALLINT) -- OK
 OUT CHAR(60) registerOutParameter(Types.SMALLINT) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type short.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type short.
 INOUT CHAR(60) registerOutParameter(Types.INTEGER) -- OK
 OUT CHAR(60) registerOutParameter(Types.INTEGER) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type int.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type int.
 INOUT CHAR(60) registerOutParameter(Types.BIGINT) -- OK
 OUT CHAR(60) registerOutParameter(Types.BIGINT) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type long.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type long.
 INOUT CHAR(60) registerOutParameter(Types.REAL) -- OK
 OUT CHAR(60) registerOutParameter(Types.REAL) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type float.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type float.
 INOUT CHAR(60) registerOutParameter(Types.FLOAT) -- OK
 OUT CHAR(60) registerOutParameter(Types.FLOAT) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type double.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type double.
 INOUT CHAR(60) registerOutParameter(Types.DOUBLE) -- OK
 OUT CHAR(60) registerOutParameter(Types.DOUBLE) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type double.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type double.
 INOUT CHAR(60) registerOutParameter(Types.DECIMAL) -- OK
 OUT CHAR(60) registerOutParameter(Types.DECIMAL) -- OK
 P2=cs.getBigDecimal=32.0P2-PMAP                                                  was null false
@@ -1812,13 +1816,13 @@ INOUT CHAR(60) registerOutParameter(Types.VARBINARY) -- XCL25
 OUT CHAR(60) registerOutParameter(Types.VARBINARY) -- XCL25
 INOUT CHAR(60) registerOutParameter(Types.DATE) -- OK
 OUT CHAR(60) registerOutParameter(Types.DATE) -- OK
-P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+P2=SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT CHAR(60) registerOutParameter(Types.TIME) -- OK
 OUT CHAR(60) registerOutParameter(Types.TIME) -- OK
-P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+P2=SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT CHAR(60) registerOutParameter(Types.TIMESTAMP) -- OK
 OUT CHAR(60) registerOutParameter(Types.TIMESTAMP) -- OK
-P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+P2=SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT CHAR(60) registerOutParameter(Types.CLOB) -- XCL25
 OUT CHAR(60) registerOutParameter(Types.CLOB) -- XCL25
 INOUT CHAR(60) registerOutParameter(Types.BLOB) -- XCL25
@@ -1998,25 +2002,25 @@ For setXXX() methods that pass an object, a null and valid values are checked
 CREATE PROCEDURE PMP.TYPE_AS(IN P1 VARCHAR(60), INOUT P2 VARCHAR(60), OUT P3 VARCHAR(60)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL  EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.SimpleProcedureTest.pmap'
 INOUT VARCHAR(60) registerOutParameter(Types.TINYINT) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.TINYINT) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type byte.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type byte.
 INOUT VARCHAR(60) registerOutParameter(Types.SMALLINT) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.SMALLINT) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type short.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type short.
 INOUT VARCHAR(60) registerOutParameter(Types.INTEGER) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.INTEGER) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type int.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type int.
 INOUT VARCHAR(60) registerOutParameter(Types.BIGINT) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.BIGINT) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type long.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type long.
 INOUT VARCHAR(60) registerOutParameter(Types.REAL) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.REAL) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type float.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type float.
 INOUT VARCHAR(60) registerOutParameter(Types.FLOAT) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.FLOAT) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type double.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type double.
 INOUT VARCHAR(60) registerOutParameter(Types.DOUBLE) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.DOUBLE) -- OK
-P2=SQLSTATE(22018): SQL Exception: Invalid character string format for type double.
+P2=SQLSTATE(22018): java.sql.SQLException: Invalid character string format for type double.
 INOUT VARCHAR(60) registerOutParameter(Types.DECIMAL) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.DECIMAL) -- OK
 P2=cs.getBigDecimal=32.0P2-PMAP was null false
@@ -2043,13 +2047,13 @@ INOUT VARCHAR(60) registerOutParameter(Types.VARBINARY) -- XCL25
 OUT VARCHAR(60) registerOutParameter(Types.VARBINARY) -- XCL25
 INOUT VARCHAR(60) registerOutParameter(Types.DATE) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.DATE) -- OK
-P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+P2=SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT VARCHAR(60) registerOutParameter(Types.TIME) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.TIME) -- OK
-P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+P2=SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT VARCHAR(60) registerOutParameter(Types.TIMESTAMP) -- OK
 OUT VARCHAR(60) registerOutParameter(Types.TIMESTAMP) -- OK
-P2=SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+P2=SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT VARCHAR(60) registerOutParameter(Types.CLOB) -- XCL25
 OUT VARCHAR(60) registerOutParameter(Types.CLOB) -- XCL25
 INOUT VARCHAR(60) registerOutParameter(Types.BLOB) -- XCL25
@@ -2595,6 +2599,10 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setObject(java.lang.String) as batch  (22007):The syntax of the string representation of a datetime value is incorrect. JDBC FAIL DATE
   setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
   setObject(java.lang.Boolean) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Byte) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Byte) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Short) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Short) as batch IC JDBC MATCH (INVALID)
   setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
   setObject(java.lang.Integer) as batch IC JDBC MATCH (INVALID)
   setObject(java.lang.Long) IC JDBC MATCH (INVALID)
@@ -2638,13 +2646,13 @@ INOUT DATE registerOutParameter(Types.BIT) -- XCL25
 OUT DATE registerOutParameter(Types.BIT) -- XCL25
 INOUT DATE registerOutParameter(Types.CHAR) -- OK
 OUT DATE registerOutParameter(Types.CHAR) -- OK
-SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT DATE registerOutParameter(Types.VARCHAR) -- OK
 OUT DATE registerOutParameter(Types.VARCHAR) -- OK
-SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT DATE registerOutParameter(Types.LONGVARCHAR) -- OK
 OUT DATE registerOutParameter(Types.LONGVARCHAR) -- OK
-SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT DATE registerOutParameter(Types.VARBINARY) -- XCL25
 OUT DATE registerOutParameter(Types.VARBINARY) -- XCL25
 INOUT DATE registerOutParameter(Types.DATE) -- OK
@@ -2655,7 +2663,7 @@ INOUT DATE registerOutParameter(Types.TIME) -- XCL25
 OUT DATE registerOutParameter(Types.TIME) -- XCL25
 INOUT DATE registerOutParameter(Types.TIMESTAMP) -- OK
 OUT DATE registerOutParameter(Types.TIMESTAMP) -- OK
-P2=SQLSTATE(22005): SQL Exception: An attempt was made to get a data value of type 'java.sql.Time' from a data value of type 'DATE'.
+P2=SQLSTATE(22005): java.sql.SQLException: An attempt was made to get a data value of type 'java.sql.Time' from a data value of type 'DATE'.
 INOUT DATE registerOutParameter(Types.CLOB) -- XCL25
 OUT DATE registerOutParameter(Types.CLOB) -- XCL25
 INOUT DATE registerOutParameter(Types.BLOB) -- XCL25
@@ -2856,13 +2864,13 @@ INOUT TIME registerOutParameter(Types.BIT) -- XCL25
 OUT TIME registerOutParameter(Types.BIT) -- XCL25
 INOUT TIME registerOutParameter(Types.CHAR) -- OK
 OUT TIME registerOutParameter(Types.CHAR) -- OK
-SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT TIME registerOutParameter(Types.VARCHAR) -- OK
 OUT TIME registerOutParameter(Types.VARCHAR) -- OK
-SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT TIME registerOutParameter(Types.LONGVARCHAR) -- OK
 OUT TIME registerOutParameter(Types.LONGVARCHAR) -- OK
-SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT TIME registerOutParameter(Types.VARBINARY) -- XCL25
 OUT TIME registerOutParameter(Types.VARBINARY) -- XCL25
 INOUT TIME registerOutParameter(Types.DATE) -- XCL25
@@ -3075,13 +3083,13 @@ INOUT TIMESTAMP registerOutParameter(Types.BIT) -- XCL25
 OUT TIMESTAMP registerOutParameter(Types.BIT) -- XCL25
 INOUT TIMESTAMP registerOutParameter(Types.CHAR) -- OK
 OUT TIMESTAMP registerOutParameter(Types.CHAR) -- OK
-SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT TIMESTAMP registerOutParameter(Types.VARCHAR) -- OK
 OUT TIMESTAMP registerOutParameter(Types.VARCHAR) -- OK
-SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT TIMESTAMP registerOutParameter(Types.LONGVARCHAR) -- OK
 OUT TIMESTAMP registerOutParameter(Types.LONGVARCHAR) -- OK
-SQLSTATE(22007): SQL Exception: The syntax of the string representation of a datetime value is incorrect.
+SQLSTATE(22007): java.sql.SQLException: The syntax of the string representation of a datetime value is incorrect.
 INOUT TIMESTAMP registerOutParameter(Types.VARBINARY) -- XCL25
 OUT TIMESTAMP registerOutParameter(Types.VARBINARY) -- XCL25
 INOUT TIMESTAMP registerOutParameter(Types.DATE) -- OK
@@ -3421,10 +3429,6 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setObject(java.lang.String) as batch IC JDBC MATCH (INVALID)
   setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
   setObject(java.lang.Boolean) as batch IC JDBC MATCH (INVALID)
-  setObject(java.lang.Byte) IC JDBC MATCH (INVALID)
-  setObject(java.lang.Byte) as batch IC JDBC MATCH (INVALID)
-  setObject(java.lang.Short) IC JDBC MATCH (INVALID)
-  setObject(java.lang.Short) as batch IC JDBC MATCH (INVALID)
   setObject(java.lang.Byte) IC JDBC MATCH (INVALID)
   setObject(java.lang.Byte) as batch IC JDBC MATCH (INVALID)
   setObject(java.lang.Short) IC JDBC MATCH (INVALID)
