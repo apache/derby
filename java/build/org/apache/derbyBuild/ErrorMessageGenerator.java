@@ -284,7 +284,7 @@ public class ErrorMessageGenerator
         ditaWriter.println("<?xml version=" + dq + "1.0" + dq +
             " encoding=" + dq + "utf-8" + dq + "?>");
         ditaWriter.println("<!DOCTYPE reference PUBLIC " + dq + 
-            "-//IBM//DTD DITA Reference//EN" + dq);
+            "-//OASIS//DTD DITA Reference//EN" + dq);
         ditaWriter.println(dq + "../dtd/reference.dtd" + dq + ">");
         ditaWriter.println("<reference id=" + dq + "rrefexcept71493" + dq +
             " xml:lang=" + dq + "en-us" + dq + ">");
@@ -473,12 +473,11 @@ public class ErrorMessageGenerator
         // Generate the header for this table
         ditaWriter.println("<table><title>Class " + currentCode + ": " + 
             currentComment + "</title>");
-        ditaWriter.println("<tgroup cols=" + dq + "3" + dq + 
+        ditaWriter.println("<tgroup cols=" + dq + "2" + dq + 
             "><colspec colname=" + dq + "col1" + dq + " colwidth=" + dq +
             "1*" + dq + "/><colspec colname=" + dq + "col2" + dq);
         ditaWriter.println("colwidth=" + dq + "7.5*" + dq +
-            "/><colspec colname=" + dq + "col3" + dq + " colwidth=" +
-            dq + "1*" + dq + "/>");
+            "/>");
         ditaWriter.println("<thead>");
         ditaWriter.println("<row valign=" + dq + "bottom" + dq + ">");
         ditaWriter.println("<entry colname=" + dq + "col1" + dq +
