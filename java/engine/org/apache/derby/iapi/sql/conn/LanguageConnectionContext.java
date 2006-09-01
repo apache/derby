@@ -143,7 +143,13 @@ public interface LanguageConnectionContext extends Context {
 	 * Add the activation to those known about by this connection.
 	 *
 	 */
-	void addActivation(Activation a);
+	void addActivation(Activation a)
+		throws StandardException;
+
+	/**
+	 * Make a note that some activations are marked unused
+	 */
+	void notifyUnusedActivation();
 
 	/**
 	 * Remove the activation from those known about by this connection.

@@ -35,7 +35,8 @@ public interface GeneratedByteCode {
 		Called by the class manager just after
 		creating the instance of the new class.
 	*/
-	public void initFromContext(Context context);
+	public void initFromContext(Context context)
+		throws StandardException;
 
 	/**
 		Set the Generated Class. Call by the class manager just after

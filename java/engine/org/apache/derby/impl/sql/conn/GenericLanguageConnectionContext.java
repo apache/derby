@@ -116,6 +116,7 @@ public class GenericLanguageConnectionContext
 	 */
 
 	private final Vector acts;
+	private volatile boolean unusedActs=false;
 	protected int bindCount;
 	private boolean ddWriteMode;
 	private boolean runTimeStatisticsSetting ;
@@ -429,8 +430,31 @@ public class GenericLanguageConnectionContext
 	/**
 	 * Add the activation to those known about by this connection.
 	 */
-	public void addActivation(Activation a) {
+	public void addActivation(Activation a) 
+		throws StandardException {
 		acts.addElement(a);
+
+		// DERBY-418. Activations which are marked unused,
+		// are closed here. Activations Vector is iterated 
+		// to identify and close unused activations, only if 
+		// unusedActs flag is set to true and if the total 
+		// size exceeds 20.
+		if( (unusedActs) && (acts.size() > 20) ) {
+			unusedActs = false;
+			for (int i = acts.size() - 1; i >= 0; i--) {
+
+				// it maybe the case that a Activation's reset() ends up
+				// closing one or more activation leaving our index beyond
+				// the end of the array
+				if (i >= acts.size())
+					continue;
+
+				Activation a1 = (Activation) acts.elementAt(i);
+				if (!a1.isInUse()) {
+					a1.close();
+				}
+			}
+		}
 
 		if (SanityManager.DEBUG) {
 
@@ -440,6 +464,13 @@ public class GenericLanguageConnectionContext
 					System.out.println("memoryLeakTrace:GenericLanguageContext:activations " + acts.size());
 			}
 		}
+	}
+
+	/**
+	 * Make a note that some activations are marked unused
+	 */
+	public void notifyUnusedActivation() {
+	    unusedActs = true;
 	}
 
 	/**

@@ -125,7 +125,10 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	protected int numSubqueries;
 
 	private boolean singleExecution;
-	private boolean inUse;
+
+	// This flag is declared volatile to ensure it is 
+	// visible when it has been modified by the finalizer thread.
+	private volatile boolean inUse;
 
 	private java.sql.ResultSet targetVTI;
 	private SQLWarning warnings;
@@ -192,7 +195,8 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		super();
 	}
 
-	public final void initFromContext(Context context) {
+	public final void initFromContext(Context context) 
+		throws StandardException {
 
 		if (SanityManager.DEBUG)
 		{
@@ -786,7 +790,10 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 */
 	public final void markUnused()
 	{
-		inUse = false;
+		if(isInUse()) {
+			inUse = false;
+			lcc.notifyUnusedActivation();
+		}
 	}
 
 	/**
