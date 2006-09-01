@@ -177,7 +177,7 @@ isSearchable(10): true
 isCurrency(10): true
 isNullable(10): 1
 isSigned(10): true
-getColumnDisplaySize(10): 13
+getColumnDisplaySize(10): 12
 getColumnLabel(10): DC
 getColumnName(10): DC
 getTableName(10): T

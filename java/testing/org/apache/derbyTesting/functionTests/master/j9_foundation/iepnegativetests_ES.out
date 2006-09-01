@@ -17,17 +17,17 @@ ERROR XIE0I: Se ha producido una excepci EnC:>243< n de E/S al grabar datos en e
 ij> --export table not found
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: La tabla 'IEP.NOTABLE' no existe.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: La tabla 'IEP.NOTABLE' no existe.' al evaluar una expresi EnC:>243< n.
 ERROR 42X05: La tabla 'IEP.NOTABLE' no existe.
 ij> ---export schema is not valid
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: El esquema 'XXXX' no existe.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: El esquema 'XXXX' no existe.' al evaluar una expresi EnC:>243< n.
 ERROR 42Y07: El esquema 'XXXX' no existe.
 ij> --export query is invalid (syntax error)
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select from t1', 
                                     'extinout/t1.dat' , null, null, null) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Error de sintaxis: Encountered "from" at line 1, column 8.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: Error de sintaxis: Encountered "from" at line 1, column 8.' al evaluar una expresi EnC:>243< n.
 ERROR 42X01: Error de sintaxis: Encountered "from" at line 1, column 8.
 ij> --export codeset is invalid
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.t1', 
@@ -35,7 +35,7 @@ call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.t1',
 ERROR XIE0I: Se ha producido una excepci EnC:>243< n de E/S al grabar datos en el archivo.
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: El esquema 'XXXX' no existe.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: El esquema 'XXXX' no existe.' al evaluar una expresi EnC:>243< n.
 ERROR 42Y07: El esquema 'XXXX' no existe.
 ij> --export delimiter errror cases
 --period can not be used as character ot column delimiter
@@ -96,7 +96,7 @@ ij> --import error cases
 --import can not find input file
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extin/nodir/t1.dat' , 
                                  null, null, null, 0) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
 ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE04: Archivo de datos no encontrado: extin/nodir/t1.dat
@@ -110,7 +110,7 @@ call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' ,
 ERROR XIE0M: La tabla 'XXXX.T1' no existe. 
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, null, 'INCORRECTCODESET', 0) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
 ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
 ERROR XJ001: Excepci EnC:>243< n de Java: 'java.io.UnsupportedEncodingException: INCORRECTCODESET'.
@@ -119,20 +119,20 @@ ij> --check import with invalid delimiter usage
 --and the that should become a invalid delimiter 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  '', ';', null, 0) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
 ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: Un delimitador no es v EnC:>225< lido o se ha utilizado m EnC:>225< s de una vez.
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, '', null, 0) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
 ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: Un delimitador no es v EnC:>225< lido o se ha utilizado m EnC:>225< s de una vez.
 ij> --same delimter can not be used as character and column delimters
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  ';', ';', null, 1) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.
 ERROR XJ001: Excepci EnC:>243< n de Java: ': java.lang.reflect.InvocationTargetException'.
 ERROR XIE0J: Un delimitador no es v EnC:>225< lido o se ha utilizado m EnC:>225< s de una vez.
@@ -241,12 +241,12 @@ ij> --import data column indexes count > insert columns count
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'C1, C2, C3,C4', '1,2', 
                                  'extinout/t3.dat' , 
                                  null, null, null, 0) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: El n EnC:>250< mero de valores asignado no coincide con el n EnC:>250< mero de columnas especificadas o impl EnC:>237< citas.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: El n EnC:>250< mero de valores asignado no coincide con el n EnC:>250< mero de columnas especificadas o impl EnC:>237< citas.' al evaluar una expresi EnC:>243< n.
 ERROR 42802: El n EnC:>250< mero de valores asignado no coincide con el n EnC:>250< mero de columnas especificadas o impl EnC:>237< citas.
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24', 
                                  'extinout/t3.dat' , 
  EnC:>9<  EnC:>9<  EnC:>9<  EnC:>9<  null, null, null, 0) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: La columna 'COLUMN11' no est EnC:>225<  en ninguna tabla de la lista FROM o aparece en una especificaci EnC:>243< n de uni EnC:>243< n y est EnC:>225<  fuera del  EnC:>225< mbito de la especificaci EnC:>243< n de uni EnC:>243< n o bien aparece en una cl EnC:>225< usula HAVING y no est EnC:>225<  en la lista GROUP BY. Si se trata de una sentencia CREATE o ALTER TABLE entonces 'COLUMN11' no es una columna de la tabla destino.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: La columna 'COLUMN11' no est EnC:>225<  en ninguna tabla de la lista FROM o aparece en una especificaci EnC:>243< n de uni EnC:>243< n y est EnC:>225<  fuera del  EnC:>225< mbito de la especificaci EnC:>243< n de uni EnC:>243< n o bien aparece en una cl EnC:>225< usula HAVING y no est EnC:>225<  en la lista GROUP BY. Si se trata de una sentencia CREATE o ALTER TABLE entonces 'COLUMN11' no es una columna de la tabla destino.' al evaluar una expresi EnC:>243< n.
 ERROR 42X04: La columna 'COLUMN11' no est EnC:>225<  en ninguna tabla de la lista FROM o aparece en una especificaci EnC:>243< n de uni EnC:>243< n y est EnC:>225<  fuera del  EnC:>225< mbito de la especificaci EnC:>243< n de uni EnC:>243< n o bien aparece en una cl EnC:>225< usula HAVING y no est EnC:>225<  en la lista GROUP BY. Si se trata de una sentencia CREATE o ALTER TABLE entonces 'COLUMN11' no es una columna de la tabla destino.
 ij> --repeat the above type cases with empty file and minor variation to paramters
 delete from t3 ;
@@ -272,7 +272,7 @@ ij> --import data column indexes count > insert columns count
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '1,2', 
                                  'extinout/t3.dat' , 
  EnC:>9<  EnC:>9<  EnC:>9<  EnC:>9<     ';', '^', 'utf-16', 1) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: El n EnC:>250< mero de valores asignado no coincide con el n EnC:>250< mero de columnas especificadas o impl EnC:>237< citas.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: El n EnC:>250< mero de valores asignado no coincide con el n EnC:>250< mero de columnas especificadas o impl EnC:>237< citas.' al evaluar una expresi EnC:>243< n.
 ERROR 42802: El n EnC:>250< mero de valores asignado no coincide con el n EnC:>250< mero de columnas especificadas o impl EnC:>237< citas.
 ij> --specify column indexes that are not there in the file that is being  imported
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24', 
@@ -282,7 +282,7 @@ call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24',
 ij> --import to a system table shoud fail
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SYS', 'SYSTABLES' , 'extinout/t3.dat' , 
                                       ';', '^', 'utf-16', 1) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: 'SYS.SYSTABLES' es una tabla del sistema. Los usuarios no tienen permitido modificar el contenido de esta tabla.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: 'SYS.SYSTABLES' es una tabla del sistema. Los usuarios no tienen permitido modificar el contenido de esta tabla.' al evaluar una expresi EnC:>243< n.
 ERROR 42Y25: 'SYS.SYSTABLES' es una tabla del sistema. Los usuarios no tienen permitido modificar el contenido de esta tabla.
 ij> ---not supported by db2 cloudscape import/export
 create table ntype(a int , ct CLOB(1024));
@@ -323,7 +323,7 @@ ij(C2)> --following import should fail with lock time out
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.waitTimeout', '5');
 0 rows inserted/updated/deleted
 ij(C2)> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'PARENT', 'extinout/parent.del',null, null, null,1);
-ERROR 38000: Se he generado la excepci EnC:>243< n 'SQL Exception: La tabla 'IEP.PARENT' no se puede bloquear en modalidad 'EXCLUSIVE'.' al evaluar una expresi EnC:>243< n.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: La tabla 'IEP.PARENT' no se puede bloquear en modalidad 'EXCLUSIVE'.' al evaluar una expresi EnC:>243< n.
 ERROR X0X02: La tabla 'IEP.PARENT' no se puede bloquear en modalidad 'EXCLUSIVE'.
 ERROR 40XL1: No se ha podido obtener un bloqueo dentro del tiempo solicitado
 ij(C2)> disconnect c1;
