@@ -154,7 +154,6 @@ public class JDBC {
 	 * way until everything can be dropped.
 	 * 
 	 * TODO: Drop Functions
-	 * TODO: Drop Synonyms
 	 * 
 	 * @param dmd DatabaseMetaData object for database
 	 * @param schema Name of the schema
@@ -182,7 +181,14 @@ public class JDBC {
 				new String[] {"TABLE"});
 		
 		dropUsingDMD(s, rs, schema, "TABLE_NAME", "TABLE");
-		
+
+        // Synonyms - need work around for DERBY-1790 where
+        // passing a table type of SYNONYM fails.
+        rs = dmd.getTables((String) null, schema, (String) null,
+                new String[] {"AA_DERBY-1790-SYNONYM"});
+        
+        dropUsingDMD(s, rs, schema, "TABLE_NAME", "SYNONYM");
+        
 		// Finally drop the schema if it is not APP
 		if (!schema.equals("APP")) {
 			s.execute("DROP SCHEMA " + JDBC.escape(schema) + " RESTRICT");
@@ -217,8 +223,8 @@ public class JDBC {
 		int batchCount = 0;
 		while (rs.next())
 		{
-			String view = rs.getString(mdColumn);
-			s.addBatch(dropLeadIn + JDBC.escape(schema, view));
+            String objectName = rs.getString(mdColumn);
+			s.addBatch(dropLeadIn + JDBC.escape(schema, objectName));
 			batchCount++;
 		}
 		rs.close();
