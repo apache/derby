@@ -153,7 +153,7 @@ public class JDBC {
 	 * TODO: Handle dependencies by looping in some intelligent
 	 * way until everything can be dropped.
 	 * 
-	 * TODO: Drop Functions
+
 	 * 
 	 * @param dmd DatabaseMetaData object for database
 	 * @param schema Name of the schema
@@ -164,8 +164,20 @@ public class JDBC {
 		Connection conn = dmd.getConnection();
 		Assert.assertFalse(conn.getAutoCommit());
 		Statement s = dmd.getConnection().createStatement();
-		// Procedures first
-		ResultSet rs = dmd.getProcedures((String) null,
+        
+        // Functions - not supported by JDBC meta data until JDBC 4
+        PreparedStatement psf = conn.prepareStatement(
+                "SELECT ALIAS FROM SYS.SYSALIASES A, SYS.SYSSCHEMAS S" +
+                " WHERE A.SCHEMAID = S.SCHEMAID " +
+                " AND A.ALIASTYPE = 'F' " +
+                " AND S.SCHEMANAME = ?");
+        psf.setString(1, schema);
+        ResultSet rs = psf.executeQuery();
+        dropUsingDMD(s, rs, schema, "ALIAS", "FUNCTION");        
+        psf.close();
+  
+		// Procedures
+		rs = dmd.getProcedures((String) null,
 				schema, (String) null);
 		
 		dropUsingDMD(s, rs, schema, "PROCEDURE_NAME", "PROCEDURE");

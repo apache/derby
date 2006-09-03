@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.derbyTesting.functionTests.tests.lang.TimeHandlingTest;
+
 
 import junit.framework.Test;
 
@@ -31,6 +33,21 @@ import junit.framework.Test;
  * Test decorator that cleans a database on setUp and
  * tearDown to provide a test with a consistent empty
  * database as a starting point.
+ * <P>
+ * Tests can extend to provide a decorator that defines
+ * some schema items and then have CleanDatabaseTestSetup
+ * automatically clean them up by implementing the decorateSQL method.. 
+ * As an example:
+ * <code>
+        return new CleanDatabaseTestSetup(suite) {
+            protected void decorateSQL(Statement s) throws SQLException {
+
+                s.execute("CREATE TABLE T (I INT)");
+                s.execute("CREATE INDEX TI ON T(I)")
+
+            }
+        };
+ * </code>
  * 
  */
 public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
@@ -43,23 +60,49 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
     }
 
     /**
-     * Clean the default database using the default connection.
+     * Clean the default database using the default connection
+     * and calls the decorateSQL to allow sub-classes to
+     * initialize their schema requirments.
      */
     protected void setUp() throws Exception {
         Connection conn = getConnection();
         conn.setAutoCommit(false);
-        CleanDatabaseTestSetup.cleanDatabase(conn);
+        CleanDatabaseTestSetup.cleanDatabase(conn);  
+        
+        Statement s = conn.createStatement();
+        decorateSQL(s);
+
+        s.close();
+        conn.commit();
         conn.close();
+    }
+    
+    /**
+     * Sub-classes can override this method to execute
+     * SQL statements executed at setUp time once the
+     * database has been cleaned.
+     * Once this method returns the statement will be closed,
+     * commit called and the connection closed. The connection
+     * returned by s.getConnection() is the default connection
+     * and is in auto-commit false mode.
+     * <BR>
+     * This implementation does nothing. Sub-classes need not call it.
+     * @throws SQLException
+     */
+    protected void decorateSQL(Statement s) throws SQLException
+    {
+        // nothing in the default case.
     }
 
     /**
      * Clean the default database using the default connection.
      */
     protected void tearDown() throws Exception {
-        setUp();
+        Connection conn = getConnection();
+        conn.setAutoCommit(false);
+        CleanDatabaseTestSetup.cleanDatabase(conn);       
         super.tearDown();
     }
-
 
     /**
      * Clean a complete database
