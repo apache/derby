@@ -223,8 +223,11 @@ public class testProperties
                     try {
                         currentThread.wait(1000);
 						waitTime += 1000;
-						if (waitTime >= timeToWait)
+						if (waitTime >= timeToWait) {
+                            System.out.println(
+                                "Giving up on wait, waited: " + waitTime);
 							throw e;
+                        }
                     } catch (InterruptedException ie) {
                     }
 				}
@@ -266,7 +269,7 @@ public class testProperties
 			propFile.close();
 			//test start no parameters - Pickup 1528 from derby.properties
 			derbyServerCmd("start",null);	
-			waitForStart("1528",15000);
+			waitForStart("1528",60000);
 			System.out.println("Successfully Connected");
 			//shutdown - also picks up from derby.properties
 			derbyServerCmd("shutdown",null);
@@ -274,13 +277,13 @@ public class testProperties
 			//test start with system property. Overrides derby.properties
 			derbyServerCmd("start","-Dderby.drda.portNumber=1529");
 
-			waitForStart("1529",15000);	
+			waitForStart("1529",60000);	
 			System.out.println("Successfully Connected");
 			//shutdown - also picks up from System Properties
 			derbyServerCmd("shutdown","1529");
 			System.out.println("Testing command line option. Port 1530");
 			derbyServerCmd("start","1530");
-			waitForStart("1530",15000);		
+			waitForStart("1530",60000);		
 			System.out.println("Successfully Connected");
 			//shutdown - with command line option
 			derbyServerCmd("shutdown","1530");
@@ -294,7 +297,7 @@ public class testProperties
 			//Shutdown the server started by test
 			derbyServerCmd("shutdown","1527");
             execCmdDumpResults(startServerCmd, false);
-			waitForStart("1527",15000);
+			waitForStart("1527",60000);
 			//check that default properties are used
 			listProperties("1527");
 			
