@@ -506,8 +506,8 @@ public class testSecMec extends dataSourcePermissions_net
      * then client will do an automatic switching (upgrade) of
      * security mechanism to use. The logic is as follows :
      * if password is available, and if the JVM in which the client is running 
-     * supports EUSRIDPWD mechanism, in that case the security mechanism is 
-     * upgraded to EUSRIDPWD.
+     * supports EUSRIDPWD mechanism, in that case also, USRIDPWD security mechanism is 
+     * used. 
      * if password is available, and if the JVM in which the client is running 
      * does not support EUSRIDPWD mechanism, in that case the client will then
      * default to USRIDPWD.
@@ -550,7 +550,7 @@ public class testSecMec extends dataSourcePermissions_net
 	 b) Connection request specifies a password or not
 	 c) Connection request specifies securityMechanism or not. the valid
 	 values are 4(USRIDONL), 3(USRIDPWD), 9(EUSRIDPWD) and 8(USRSSBPWD).
-	 d) support eusridpwd means whether this jvm supports encrypted userid/
+	 d) support eusridpwd means whether this client jvm supports encrypted userid/
 	 password security mechanism or not.  A value of Y means it supports
 	 and N means no.
 	 The next three columns specify what the client sends to the server
@@ -572,9 +572,9 @@ public class testSecMec extends dataSourcePermissions_net
 	 =================================================================
      |SecMec not specified on connection request                    
 	 =================================================================
-	 |Y    |Y     |-       |Y         |Y        Y       9            |
+	 |Y    |Y     |-       |Y         |Y        Y       3            |
 	 |----------------------------------------------------------------
-	 |     |Y     |-       |Y         |Y        Y       9            |
+	 |     |Y     |-       |Y         |Y        Y       3            |
 	 -----------------------------------------------------------------
 	 |Y    |      |-       |Y         |Y        N       4            |
 	 -----------------------------------------------------------------

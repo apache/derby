@@ -277,10 +277,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * possibilities. USRIDPWD, EUSRIDPWD and USRSSBPWD require a password, USRIDONL
      * is the only security mechanism which does not require password.
      * 1. if password is not available, then security mechanism possible is USRIDONL
-     * 2. if password is available, if client supports EUSRIDPWD, then EUSRIDPWD is 
-     * returned
-     * 3. if password is available, if client does not support EUSRIDPWD, then
-     * USRIDPWD is returned.
+     * 2. if password is available,then USRIDPWD is returned.
      *
      * @param password password argument 
      * @return upgraded security mechanism if possible
@@ -291,14 +288,16 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         if ( password == null )
             return propertyDefault_securityMechanism;
 
-        // if password is available, then a security mechanism is picked in
-        // following order if support is available.
-        // 1. EUSRIDPWD
-        // 2. USRIDPWD
         // when we have support for more security mechanisms on server 
         // and client, we should update this upgrade logic to pick 
         // secure security mechanisms before trying out the USRIDPWD
         
+        /*
+        // -----------------------
+        // PLEASE NOTE: 
+        // When DERBY-1517, DERBY-1755 is fixed, there might be a way to use EUSRIDPWD 
+        // when both client and server vm's have support for it. Hence the below
+        // if statement is commented out.
         if (SUPPORTS_EUSRIDPWD)
             return (short)NetConfiguration.SECMEC_EUSRIDPWD;
         else 
@@ -312,7 +311,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
             // exception, as described in DERBY-926).
             // 
             // return (short)NetConfiguration.SECMEC_USRSSBPWD;
-            return (short)NetConfiguration.SECMEC_USRIDPWD;
+         // ----------------------
+         */
+         return (short)NetConfiguration.SECMEC_USRIDPWD;
 
     }
 
