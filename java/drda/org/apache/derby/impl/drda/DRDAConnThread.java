@@ -948,6 +948,7 @@ class DRDAConnThread extends Thread {
 							curStmt.rsSuspend();
 					} catch (SQLException e)
 					{
+						skipRemainder(true);
 						writer.clearDSSesBackToMark(writerMark);
 						if (SanityManager.DEBUG) 
 						{
