@@ -56,10 +56,10 @@ public interface JDBC40Translation {
     public static final int FUNCTION_NULLABLE_UNKNOWN  = 2;
 
     // constants from java.sql.Types
-    public static final int NCHAR = -8;
+    public static final int NCHAR = -15;
     public static final int NVARCHAR = -9;
-    public static final int LONGNVARCHAR = -10;
-    public static final int NCLOB = 2007;
-    public static final int ROWID = 2008;
+    public static final int LONGNVARCHAR = -16;
+    public static final int NCLOB = 2011;
+    public static final int ROWID = -8;
     public static final int SQLXML = 2009;
 }
