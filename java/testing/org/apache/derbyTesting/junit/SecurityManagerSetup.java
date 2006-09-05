@@ -54,6 +54,7 @@ public final class SecurityManagerSetup extends TestSetup {
 		// Determine what the set of properties
 		// describing the environment is.
 		externalSecurityManagerInstalled = determineClasspath();
+        
 	}
 	
 	private final String decoratorPolicyResource;
@@ -182,7 +183,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * Looks for three items:
 	 * 
 	 * Location of derbyTesting.jar via this class
-	 * Location of derby.jar via org.apache.derby.jdbc.EmbeddedDataSource
+	 * Location of derby.jar via org.apache.derby.jdbc.EmbeddedSimpleDataSource
 	 * Location of derbyclient.jar via org.apache.derby.jdbc.ClientDataSource
 	 * 
 	 * Two options are supported, either all are in jar files or
@@ -243,6 +244,19 @@ public final class SecurityManagerSetup extends TestSetup {
 		
 		return false;
 	}
+    
+    /**
+     * Return the policy file system properties for use
+     * by the old test harness. This ensures a consistent
+     * approach to setting the properties. There are the
+     * properties used to define the jar file location in
+     * any policy files.
+     * @return
+     */
+    public static Properties getPolicyFilePropertiesForOldHarness()
+    {
+        return classPathSet;
+    }
 	
 	/**
 	 * Strip of the last token which will be the jar name.

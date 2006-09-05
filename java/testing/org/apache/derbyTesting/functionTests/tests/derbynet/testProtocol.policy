@@ -7,7 +7,7 @@ grant codeBase "${derbyTesting.codejar}/derbynet.jar" {
   permission java.io.FilePermission "${derby.system.home}${/}*", "write";  
 };
 
-grant codeBase "${derbyTesting.codejar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
   permission java.net.SocketPermission "localhost", "connect,resolve";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";

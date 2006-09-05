@@ -21,12 +21,15 @@
 
 package org.apache.derbyTesting.functionTests.harness;
 
+import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.StringTokenizer;
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.derby.impl.tools.sysinfo.ZipInfoProperties;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
 /**
@@ -347,10 +350,12 @@ public abstract class jvm {
 		if (serverCodeBase == null)
 			serverCodeBase = findCodeBase(isJar);
    
+        
 		if (serverCodeBase == null)
 		{
 			String ws = guessWSHome();
 			serverCodeBase = ws + DEFAULT_CODEBASE;
+                 
 		}
 		
 		File pf = new File(policyFile);
@@ -367,12 +372,19 @@ public abstract class jvm {
 		
 		D.addElement("java.security.manager");
 		D.addElement("java.security.policy=" + pf.getAbsolutePath());
+ 
+        Properties jusetup =
+            SecurityManagerSetup.getPolicyFilePropertiesForOldHarness();
+        // Take the definitions from the way JUnit tests
+        // set them up. This then supports the jar files being
+        // in different locations.
+        for (Enumeration p = jusetup.keys(); p.hasMoreElements(); )
+        {
+            String key = (String) p.nextElement();
+            D.addElement(key + "=" + jusetup.getProperty(key));
+        }
 		
-		String codebaseType = isJar[0] ? "derbyTesting.codejar" : "derbyTesting.codeclasses";
-		String unusedType = isJar[0] ? "derbyTesting.codeclasses" : "derbyTesting.codejar";
 
-		// URL of the codebase
-		D.addElement(codebaseType + "=" + cb.toURL());
 		// file path to the codebase
 		D.addElement("derbyTesting.codedir=" + cb.getAbsolutePath());
 		String hostName = (System.getProperty("hostName"));
@@ -381,10 +393,7 @@ public abstract class jvm {
 		D.addElement("derbyTesting.serverhost=" + hostName);
 		// in the case of testing with a remote host, this is irrelevant, 
 		// when testing 'normal' it is also localhost:
-		D.addElement("derbyTesting.clienthost=" + hostName);	 
-		
-		// add an invalid path to the unused type 
-		D.addElement(unusedType + "=file://unused/");
+		D.addElement("derbyTesting.clienthost=" + hostName);	 	
 		
 		return D;
 		

@@ -70,7 +70,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
 //
 // Permissions for the network client (derbyclient.jar)
 //
-grant codeBase "${derbyTesting.codejar}derbyclient.jar" {
+grant codeBase "${derbyTesting.clientjar}derbyclient.jar" {
   permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
   permission java.net.SocketPermission "localhost", "connect,resolve";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
@@ -98,7 +98,7 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar" {
 // We are liberal here, it's not a goal to make the test harness
 // or tests secure.
 //
-grant codeBase "${derbyTesting.codejar}derbyTesting.jar" {
+grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
