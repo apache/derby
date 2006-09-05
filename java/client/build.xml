@@ -61,7 +61,7 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.client.src.dir}"
-      excludes="**/*40.java,**/RowId.java" 
+      excludes="**/*40.java" 
       destdir="${out.dir}">
       <classpath>
           <pathelement path="${jce1_2_1}"/>
@@ -85,7 +85,7 @@
       proceed="${proceed}"
       verbose="${verbose}"
       srcdir="${derby.client.src.dir}"
-      includes="**/*40.java,**/RowId.java" 
+      includes="**/*40.java" 
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${jce1_2_1}"/>

@@ -32,7 +32,6 @@ import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.EmbedConnection30;
 import org.apache.derby.impl.jdbc.EmbedPreparedStatement40;
 import org.apache.derby.impl.jdbc.EmbedCallableStatement40;
-import org.apache.derby.impl.jdbc.EmbedRowId;
 import org.apache.derby.impl.jdbc.EmbedConnection40;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.jdbc.EmbedResultSet40;
@@ -132,10 +131,6 @@ public class Driver40 extends Driver30 {
     public EmbedResultSet newEmbedResultSet(EmbedConnection conn, ResultSet results, boolean forMetaData, org.apache.derby.impl.jdbc.EmbedStatement statement,boolean isAtomic) throws SQLException {
         return new EmbedResultSet40(conn, results, forMetaData, statement,
             isAtomic);
-    }
-    
-    public EmbedRowId newEmbedRowId() throws SQLException {
-        return new EmbedRowId();
     }
     
     /**

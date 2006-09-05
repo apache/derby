@@ -21,7 +21,6 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derby.impl.jdbc.EmbedRowId;
 
 import junit.framework.*;
 
@@ -153,46 +152,6 @@ public class RowIdNotImplementedTest
         meta = null;
     }
 
-    public void testRowIdEquals() {
-        RowId rowId = getRowId();
-        try {
-            rowId.equals(rowId);
-            fail("RowId.equals should not be implemented");
-        } catch (UnsupportedOperationException uoe) {
-            // Do nothing, we are fine.
-        }
-    }
-    
-    public void testRowIdGetBytes() {
-        RowId rowId = getRowId();
-        try {
-            rowId.getBytes();
-            fail("RowId.getBytes should not be implemented");
-        } catch (UnsupportedOperationException uoe) {
-            // Do nothing, we are fine.
-        }
-    }
-
-    public void testRowIdToString() {
-        RowId rowId = getRowId();
-        try {
-            rowId.toString();
-            fail("RowId.toString should not be implemented");
-        } catch (UnsupportedOperationException uoe) {
-            // Do nothing, we are fine.
-        }
-    }
-
-    public void testRowIdHashCode() {
-        RowId rowId = getRowId();
-        try {
-            rowId.hashCode();
-            fail("RowId.hashCode should not be implemented");
-        } catch (UnsupportedOperationException uoe) {
-            // Do nothing, we are fine.
-        }
-    }
-
     /**
      * Create a callable statement.
      *
@@ -215,14 +174,6 @@ public class RowIdNotImplementedTest
         throws SQLException {
         // Create a very simple resultset.
         return createStatement().executeQuery("values 1");
-    }
-    
-    /**
-     * Create a <code>RowId</code>-object.
-     */
-    public java.sql.RowId getRowId() {
-        EmbedRowId embRowId = new EmbedRowId();
-        return (java.sql.RowId)embRowId;
     }
     
     /**

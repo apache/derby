@@ -58,7 +58,6 @@
 	  <exclude name="${derby.dir}/impl/jdbc/*20.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*30.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*40.java"/>
-          <exclude name="${derby.dir}/impl/jdbc/EmbedRowId.java"/>
    </javac>
     <copy file="metadata.properties" tofile="${out.dir}/org/apache/derby/impl/jdbc/metadata.properties"/>
     <javac
@@ -184,7 +183,6 @@
             <pathelement path="${java16compile.classpath}"/>
         </classpath>
         <include name="${derby.dir}/impl/jdbc/*40.java"/>
-        <include name="${derby.dir}/impl/jdbc/EmbedRowId.java"/>
     </javac>
 </target> 
 </project>
