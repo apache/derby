@@ -490,7 +490,7 @@ public class ConditionalNode extends ValueNode
 	}
         
 	/**
-	 * @{inheritDoc}
+	 * {@inheritDoc}
 	 */
 	protected boolean isEquivalent(ValueNode o) throws StandardException
 	{

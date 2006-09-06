@@ -172,9 +172,9 @@ public class BaseColumnNode extends ValueNode
 		return Qualifier.SCAN_INVARIANT;
 	}
         
-        /**
-         * @inheritDoc
-         */
+    /**
+     * {@inheritDoc}
+     */
 	protected boolean isEquivalent(ValueNode o)
 	{
 		if (isSameNodeType(o)) 
