@@ -927,4 +927,35 @@ create table atmcn_5 (a integer not null, b integer not null unique);
 0 rows inserted/updated/deleted
 ij> alter table atmcn_5 alter column b null;
 ERROR 42Z20: Column 'B' cannot be made nullable. It is part of a primary key or unique constraint, which cannot have any nullable columns.
+ij> -- tests for ALTER TABLE ALTER COLUMN DEFAULT
+create table atmod_1 (a integer, b varchar(10));
+0 rows inserted/updated/deleted
+ij> insert into atmod_1 values (1, 'one');
+1 row inserted/updated/deleted
+ij> alter table atmod_1 alter column a default -1;
+0 rows inserted/updated/deleted
+ij> insert into atmod_1 values (default, 'minus one');
+1 row inserted/updated/deleted
+ij> insert into atmod_1 (b) values ('b');
+1 row inserted/updated/deleted
+ij> select * from atmod_1;
+A          |B         
+----------------------
+1          |one       
+-1         |minus one 
+-1         |b         
+ij> alter table atmod_1 alter a default 42;
+0 rows inserted/updated/deleted
+ij> insert into atmod_1 values(3, 'three');
+1 row inserted/updated/deleted
+ij> insert into atmod_1 values (default, 'forty two');
+1 row inserted/updated/deleted
+ij> select * from atmod_1;
+A          |B         
+----------------------
+1          |one       
+-1         |minus one 
+-1         |b         
+3          |three     
+42         |forty two 
 ij> 

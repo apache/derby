@@ -581,3 +581,16 @@ alter table atmcn_4 alter a null;
 -- show that a column which has a UNIQUE constraint cannot be modified NULL:
 create table atmcn_5 (a integer not null, b integer not null unique);
 alter table atmcn_5 alter column b null;
+
+-- tests for ALTER TABLE ALTER COLUMN DEFAULT
+create table atmod_1 (a integer, b varchar(10));
+insert into atmod_1 values (1, 'one');
+alter table atmod_1 alter column a default -1;
+insert into atmod_1 values (default, 'minus one');
+insert into atmod_1 (b) values ('b');
+select * from atmod_1;
+alter table atmod_1 alter a default 42;
+insert into atmod_1 values(3, 'three');
+insert into atmod_1 values (default, 'forty two');
+select * from atmod_1;
+
