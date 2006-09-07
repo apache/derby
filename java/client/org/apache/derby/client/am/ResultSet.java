@@ -4392,7 +4392,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             //using quotes around the column name to preserve case sensitivity
             try {
-                insertSQL.append("\"" + resultSetMetaData_.getColumnName(column) + "\"");
+                insertSQL.append(quoteSqlIdentifier(
+                        resultSetMetaData_.getColumnName(column)));
             } catch ( SQLException sqle ) {
                 throw new SqlException(sqle);
             }
@@ -4425,7 +4426,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     updateString += ",";
                 }
                 try {
-                    updateString += "\"" + resultSetMetaData_.getColumnName(column) + "\" = ? ";
+                    updateString += quoteSqlIdentifier(
+                            resultSetMetaData_.getColumnName(column)) + 
+                            " = ? ";
                 } catch ( SQLException sqle ) {
                     throw new SqlException(sqle);
                 }
@@ -4489,14 +4492,27 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         //dervied column like select 2 from t1, has null schema and table name
         if (resultSetMetaData_.sqlxSchema_[baseTableColumn] != null && !resultSetMetaData_.sqlxSchema_[baseTableColumn].equals("")) {
-            tableName += "\"" + resultSetMetaData_.sqlxSchema_[baseTableColumn] + "\".";
+            tableName += quoteSqlIdentifier(
+                    resultSetMetaData_.sqlxSchema_[baseTableColumn]) + ".";
         }
         if (resultSetMetaData_.sqlxBasename_[baseTableColumn] != null) {
-            tableName += "\"" + resultSetMetaData_.sqlxBasename_[baseTableColumn] + "\"";
+            tableName += quoteSqlIdentifier(
+                    resultSetMetaData_.sqlxBasename_[baseTableColumn]);
         }
         return tableName;
     }
 
+    private String quoteSqlIdentifier(String orgValue) {
+        int i = 0, start = 0;
+        String retValue = "";
+        while ((i = orgValue.indexOf("\"", start) + 1) > 0) {
+            retValue += orgValue.substring(start, i) + "\"";
+            start = i;
+        }
+        retValue += orgValue.substring(start, orgValue.length());
+        return "\"" + retValue + "\"";
+    }
+    
     private String getServerCursorName() throws SqlException {
         return statement_.section_.getServerCursorName();
     }

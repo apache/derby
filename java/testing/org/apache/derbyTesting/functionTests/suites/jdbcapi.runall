@@ -22,3 +22,4 @@ jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/Stream.java
 jdbcapi/SURTest_ij.sql
 jdbcapi/_Suite.junit
+jdbcapi/UpdatableResultSetTest.junit

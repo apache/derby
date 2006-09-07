@@ -3629,8 +3629,8 @@ public abstract class EmbedResultSet extends ConnectionChild
                     }
                     // using quotes around the column name 
                     // to preserve case sensitivity
-                    insertSQL.append("\"" + 
-                            rd.getColumnDescriptor(i).getName() + "\"");
+                    insertSQL.append(quoteSqlIdentifier(
+                            rd.getColumnDescriptor(i).getName()));
                     if (columnGotUpdated[i-1]) { 
                         valuesSQL.append("?");
                     } else {
@@ -3677,6 +3677,8 @@ public abstract class EmbedResultSet extends ConnectionChild
             } catch (StandardException t) {
                 throw closeOnTransactionError(t);
             } finally {
+                if (statementContext != null)
+                    lcc.popStatementContext(statementContext, null);
                 restoreContextStack();
             }
         }
@@ -3721,12 +3723,14 @@ public abstract class EmbedResultSet extends ConnectionChild
                     if (foundOneColumnAlready)
                         updateWhereCurrentOfSQL.append(",");
                     //using quotes around the column name to preserve case sensitivity
-                    updateWhereCurrentOfSQL.append("\"" + rd.getColumnDescriptor(i).getName() + "\"=?");
+                    updateWhereCurrentOfSQL.append(quoteSqlIdentifier(
+                            rd.getColumnDescriptor(i).getName()) + "=?");
                     foundOneColumnAlready = true;
                 }
             }
             //using quotes around the cursor name to preserve case sensitivity
-            updateWhereCurrentOfSQL.append(" WHERE CURRENT OF \"" + getCursorName() + "\"");
+            updateWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
+                    quoteSqlIdentifier(getCursorName()));
             lcc = getEmbedConnection().getLanguageConnection();
 
             // Context used for preparing, don't set any timeout (use 0)
@@ -3783,18 +3787,23 @@ public abstract class EmbedResultSet extends ConnectionChild
             checkNotOnInsertRow();
 
             setupContextStack();
+            
+            LanguageConnectionContext lcc = null;
+            StatementContext statementContext = null;
+            
             //now construct the delete where current of sql
             try {
                 StringBuffer deleteWhereCurrentOfSQL = new StringBuffer("DELETE FROM ");
                 CursorActivation activation = getEmbedConnection().getLanguageConnection().lookupCursorActivation(getCursorName());
                 deleteWhereCurrentOfSQL.append(getFullBaseTableName(activation.getPreparedStatement().getTargetTable()));//get the underlying (schema.)table name
                 //using quotes around the cursor name to preserve case sensitivity
-                deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF \"" + getCursorName() + "\"");
+                deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
+                        quoteSqlIdentifier(getCursorName()));
 
-                LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
-
+                lcc = getEmbedConnection().getLanguageConnection();
+                
                 // Context used for preparing, don't set any timeout (use 0)
-                StatementContext statementContext = lcc.pushStatementContext(isAtomic, false, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
+                statementContext = lcc.pushStatementContext(isAtomic, false, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
                 org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
                 // Get activation, so that we can get the warning from it
                 Activation act = ps.getActivation(lcc, false);
@@ -3815,6 +3824,8 @@ public abstract class EmbedResultSet extends ConnectionChild
             } catch (StandardException t) {
                     throw closeOnTransactionError(t);
             } finally {
+                if (statementContext != null)
+                    lcc.popStatementContext(statementContext, null);
                 restoreContextStack();
                 initializeUpdateRowModifiers();
             }
@@ -3824,12 +3835,23 @@ public abstract class EmbedResultSet extends ConnectionChild
 	private String getFullBaseTableName(ExecCursorTableReference targetTable) {
 		//using quotes to preserve case sensitivity
 		if (targetTable.getSchemaName() != null)
-			return "\"" + targetTable.getSchemaName() + "\".\""
-					+ targetTable.getBaseName() + "\"";
+			return quoteSqlIdentifier(targetTable.getSchemaName()) + "." + 
+					quoteSqlIdentifier(targetTable.getBaseName());
 		else
-			return "\"" + targetTable.getBaseName() + "\"";
+			return quoteSqlIdentifier(targetTable.getBaseName());
 	}
 
+    private String quoteSqlIdentifier(String orgValue) {
+        int i = 0, start = 0;
+        String retValue = "";
+        while ((i = orgValue.indexOf("\"", start) + 1) > 0) {
+            retValue += orgValue.substring(start, i) + "\"";
+            start = i;
+        }
+        retValue += orgValue.substring(start, orgValue.length());
+        return "\"" + retValue + "\"";
+    }
+    
 	/**
 	 * JDBC 2.0
 	 * 
