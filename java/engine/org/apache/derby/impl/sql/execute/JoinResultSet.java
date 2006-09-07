@@ -42,7 +42,7 @@ import org.apache.derby.iapi.types.RowLocation;
  *
  * @author ames
  */
-public abstract class JoinResultSet extends NoPutResultSetImpl
+abstract class JoinResultSet extends NoPutResultSetImpl
 	implements CursorResultSet
 {
 	/* Run time statistics variables */
@@ -63,7 +63,6 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
 	public	  NoPutResultSet rightResultSet;
 	protected int		  rightNumCols;
     protected GeneratedMethod restriction;
-    protected GeneratedMethod closeCleanup;
 	public	  boolean oneRowRightSide;
 	public	  boolean notExistsRightSide;  //right side is NOT EXISTS
 	
@@ -73,7 +72,7 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
      * class interface
      *
      */
-    public JoinResultSet(NoPutResultSet leftResultSet,
+    JoinResultSet(NoPutResultSet leftResultSet,
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
@@ -84,8 +83,7 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
     {
 		super(activation, resultSetNumber, optimizerEstimatedRowCount, 
 			  optimizerEstimatedCost);
@@ -96,7 +94,6 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
         this.restriction = restriction;
 		this.oneRowRightSide = oneRowRightSide;
 		this.notExistsRightSide = notExistsRightSide;
-        this.closeCleanup = closeCleanup;
 		constructorTime += getElapsedMillis(beginTime);
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
     }
@@ -204,10 +201,6 @@ public abstract class JoinResultSet extends NoPutResultSetImpl
 
 		if ( isOpen )
 	    {
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
-
 	        leftResultSet.close();
 			if (isRightOpen)
 			{

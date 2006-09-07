@@ -64,7 +64,7 @@ import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
  *
  * @author jeff
  */
-public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
+class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
 
     // set in constructor and not altered during
@@ -74,7 +74,6 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	private GeneratedMethod resultRowAllocator;
 	private GeneratedMethod restriction;
     private long baseConglomId;
-    private GeneratedMethod closeCleanup;
 	public FormatableBitSet accessedHeapCols;
 	private FormatableBitSet accessedIndexCols;
 	//caching accessed columns (heap+index) beetle 3865
@@ -109,7 +108,7 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
     //
     // class interface
     //
-    public IndexRowToBaseRowResultSet(
+    IndexRowToBaseRowResultSet(
 					long conglomId,
 					int scociItem,
 					Activation a,
@@ -123,8 +122,7 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 					GeneratedMethod restriction,
 					boolean forUpdate,
 					double optimizerEstimatedRowCount,
-					double optimizerEstimatedCost,
-					GeneratedMethod closeCleanup) 
+					double optimizerEstimatedCost) 
 		throws StandardException
 	{
 		super(a, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
@@ -141,7 +139,6 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		/* RESOLVE - once we push Qualifiers into the store we
 		 * need to clear their Orderable cache on each open/reopen.
 		 */
-        this.closeCleanup = closeCleanup;
 
 		// retrieve the valid column list from
 		// the saved objects, if it exists
@@ -480,7 +477,6 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 					clearCurrentRow();
 					baseRowLocation = null;
 
-					currentRow = null;
 				}
 				else
 				{
@@ -492,7 +488,6 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 
 				retval = currentRow;
 		    } else {
-				currentRow = null;
 				clearCurrentRow();
 				baseRowLocation = null;
 
@@ -521,10 +516,7 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 	    	clearCurrentRow();
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
-			currentRow = null;
+
 			if (closeBaseCCHere)
 			{
                 // This check should only be needed in the error case where
@@ -647,7 +639,6 @@ public class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 			setCurrentRow(sourceRow);
 		} else {
 			clearCurrentRow();
-			currentRow = null;
 		}
 		return currentRow;
 	}

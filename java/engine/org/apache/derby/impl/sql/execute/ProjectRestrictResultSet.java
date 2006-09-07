@@ -54,7 +54,7 @@ import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
  *
  * @author ames
  */
-public class ProjectRestrictResultSet extends NoPutResultSetImpl
+class ProjectRestrictResultSet extends NoPutResultSetImpl
 	implements CursorResultSet 
 {
 	/* Run time statistics variables */
@@ -69,7 +69,6 @@ public class ProjectRestrictResultSet extends NoPutResultSetImpl
 	public boolean doesProjection;
     private GeneratedMethod projection;
 	private int[]			projectMapping;
-    private GeneratedMethod closeCleanup;
 	private boolean runTimeStatsOn;
 	private ExecRow			mappedResultRow;
 	public boolean reuseResult;
@@ -81,7 +80,7 @@ public class ProjectRestrictResultSet extends NoPutResultSetImpl
     //
     // class interface
     //
-    public ProjectRestrictResultSet(NoPutResultSet s,
+    ProjectRestrictResultSet(NoPutResultSet s,
 					Activation a,
 					GeneratedMethod r,
 					GeneratedMethod p,
@@ -91,8 +90,7 @@ public class ProjectRestrictResultSet extends NoPutResultSetImpl
 					boolean reuseResult,
 					boolean doesProjection,
 				    double optimizerEstimatedRowCount,
-					double optimizerEstimatedCost,
-					GeneratedMethod c) 
+					double optimizerEstimatedCost) 
 		throws StandardException
 	{
 		super(a, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
@@ -110,7 +108,6 @@ public class ProjectRestrictResultSet extends NoPutResultSetImpl
 		projectMapping = ((ReferencedColumnsDescriptorImpl) a.getPreparedStatement().getSavedObject(mapRefItem)).getReferencedColumnPositions();
 		this.reuseResult = reuseResult;
 		this.doesProjection = doesProjection;
-        closeCleanup = c;
 
 		// Allocate a result row if all of the columns are mapped from the source
 		if (projection == null)
@@ -367,11 +364,7 @@ public class ProjectRestrictResultSet extends NoPutResultSetImpl
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 	    	clearCurrentRow();
-			if (closeCleanup != null) 
-			{
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
-			currentRow = null;
+
 	        source.close();
 
 			super.close();

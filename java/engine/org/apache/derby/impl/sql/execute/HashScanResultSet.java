@@ -109,7 +109,6 @@ public class HashScanResultSet extends NoPutResultSetImpl
 	private int initialCapacity;
 	private float loadFactor;
 	private int maxCapacity;
-	private GeneratedMethod closeCleanup;
 	public String tableName;
 	public String userSuppliedOptimizerOverrides;
 	public String indexName;
@@ -140,7 +139,7 @@ public class HashScanResultSet extends NoPutResultSetImpl
     //
     // class interface
     //
-    public HashScanResultSet(long conglomId,
+    HashScanResultSet(long conglomId,
 		StaticCompiledOpenConglomInfo scoci, Activation activation, 
 		GeneratedMethod resultRowAllocator, 
 		int resultSetNumber,
@@ -164,8 +163,7 @@ public class HashScanResultSet extends NoPutResultSetImpl
 		int isolationLevel,
 		boolean skipNullKeyColumns,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup)
+		double optimizerEstimatedCost)
 			throws StandardException
     {
 		super(activation,
@@ -286,8 +284,6 @@ public class HashScanResultSet extends NoPutResultSetImpl
 
                 "Invalid isolation level - " + isolationLevel);
         }
-
-        this.closeCleanup = closeCleanup;
 
 		runTimeStatisticsOn = 
             getLanguageConnectionContext().getRunTimeStatisticsMode();
@@ -621,11 +617,7 @@ public class HashScanResultSet extends NoPutResultSetImpl
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 		    clearCurrentRow();
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
 
-			currentRow = null;
 			if (hashtableBuilt)
 			{
 				// This is where we get the scan properties for a subquery

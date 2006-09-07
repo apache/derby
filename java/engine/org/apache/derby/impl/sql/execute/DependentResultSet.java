@@ -58,7 +58,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
  * rows that needs to be deleted on dependent tables. Using the row location 
  * we got from the index , base row is fetched.
 */
-public class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
+class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
 {
 
 
@@ -103,7 +103,6 @@ public class DependentResultSet extends NoPutResultSetImpl implements CursorResu
 	protected GeneratedMethod stopKeyGetter;
 	protected int stopSearchOperator;
 	protected Qualifier[][] qualifiers;
-	protected GeneratedMethod closeCleanup;
 	public String tableName;
 	public String userSuppliedOptimizerOverrides;
 	public String indexName;
@@ -112,7 +111,6 @@ public class DependentResultSet extends NoPutResultSetImpl implements CursorResu
 	public int rowsPerRead;
 	public boolean forUpdate;
 	private boolean sameStartStopPosition;
-	private boolean nextDone;
 	public int isolationLevel;
 	public int lockMode;
 
@@ -125,12 +123,11 @@ public class DependentResultSet extends NoPutResultSetImpl implements CursorResu
 	public boolean coarserLock;
 	public boolean oneRowScan;
 	protected long	rowsThisScan;
-	private long estimatedRowCount;
 
 	//
     // class interface
     //
-	public DependentResultSet(
+	DependentResultSet(
 		long conglomId,
 		StaticCompiledOpenConglomInfo scoci, 
 		Activation activation, 
@@ -153,7 +150,6 @@ public class DependentResultSet extends NoPutResultSetImpl implements CursorResu
 		boolean oneRowScan,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup,
 		String parentResultSetId, 
 		long fkIndexConglomId,
 		int fkColArrayItem,
@@ -227,8 +223,6 @@ public class DependentResultSet extends NoPutResultSetImpl implements CursorResu
 		//internally for delete cascades, isolation should be set to
 		//REPEATABLE READ irrespective what the user level isolation level is.
 		this.isolationLevel = TransactionController.ISOLATION_REPEATABLE_READ;
-
-		this.closeCleanup = closeCleanup;
 
 		runTimeStatisticsOn = (activation != null &&
 							   activation.getLanguageConnectionContext().getRunTimeStatisticsMode());

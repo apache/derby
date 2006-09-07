@@ -119,8 +119,6 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 
 	private int maxRows;
 
-    private GeneratedMethod closeCleanup;
-
     private boolean keepAfterCommit;
 
 	/* The hash table will contain a different number of extra columns depending
@@ -172,8 +170,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 							  Activation activation, int resultSetNumber,
 							  int sourceRowWidth,
 							  double optimizerEstimatedRowCount,
-							  double optimizerEstimatedCost,
-							  GeneratedMethod c) throws StandardException
+							  double optimizerEstimatedCost) throws StandardException
 	{
 		super(activation, resultSetNumber, 
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
@@ -187,7 +184,6 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 				"maxRows not expected to be -1");
 		}
 
-        closeCleanup = c;
 		constructorTime += getElapsedMillis(beginTime);
 
 		positionInHashTable = new SQLInteger();
@@ -862,10 +858,6 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		beginTime = getCurrentTimeMillis();
 	    if ( isOpen )
 	    {
-			if (closeCleanup != null) 
-			{
-				closeCleanup.invoke(activation); // let activation tidy up
-			} 
 			currentRow = null;
 	        source.close();
 

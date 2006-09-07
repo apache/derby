@@ -54,7 +54,7 @@ import java.util.Properties;
  *
  * @author jerry (broken out from SortResultSet)
  */
-public class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
+class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 {
 	private ColumnOrdering[] order;
 	private int maxRowSize;
@@ -84,7 +84,7 @@ public class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 	 *
 	 * @exception StandardException Thrown on error
 	 */
-    public DistinctScalarAggregateResultSet(NoPutResultSet s,
+    DistinctScalarAggregateResultSet(NoPutResultSet s,
 					boolean isInSortedOrder,
 					int	aggregateItem,
 					int	orderingItem,
@@ -94,14 +94,13 @@ public class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 					int resultSetNumber,
 					boolean singleInputRow,
 				    double optimizerEstimatedRowCount,
-				    double optimizerEstimatedCost,
-					GeneratedMethod c) throws StandardException 
+				    double optimizerEstimatedCost) throws StandardException 
 	{
 		super(s, isInSortedOrder, aggregateItem, a, ra,
 			  resultSetNumber, 
 			  singleInputRow,
 			  optimizerEstimatedRowCount,
-			  optimizerEstimatedCost, c);
+			  optimizerEstimatedCost);
 
 		order = (ColumnOrdering[])
 					((FormatableArrayHolder)

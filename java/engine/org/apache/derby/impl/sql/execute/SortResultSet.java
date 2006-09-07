@@ -111,7 +111,7 @@ import java.util.Enumeration;
  *
  * @author ames, rewrite for aggregates by jamie, aggregate removal by jerry
  */
-public class SortResultSet extends NoPutResultSetImpl
+class SortResultSet extends NoPutResultSetImpl
 	implements CursorResultSet 
 {
 
@@ -123,7 +123,6 @@ public class SortResultSet extends NoPutResultSetImpl
     // set in constructor and not altered during
     // life of object.
     public NoPutResultSet source;
-    private GeneratedMethod closeCleanup;
 	private GeneratedMethod rowAllocator;
 	private ColumnOrdering[] order;
 	private ColumnOrdering[] savedOrder;
@@ -182,8 +181,7 @@ public class SortResultSet extends NoPutResultSetImpl
 					int maxRowSize,
 					int resultSetNumber,
 				    double optimizerEstimatedRowCount,
-				    double optimizerEstimatedCost,
-					GeneratedMethod c) throws StandardException 
+				    double optimizerEstimatedCost) throws StandardException 
 	{
 		super(a, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
 		this.distinct = distinct;
@@ -192,7 +190,6 @@ public class SortResultSet extends NoPutResultSetImpl
         originalSource = s;
 		rowAllocator = ra;
 		this.maxRowSize = maxRowSize;
-        closeCleanup = c;
 		sortTemplateRow = (ExecRow) rowAllocator.invoke(activation);
 		order = (ColumnOrdering[])
 					((FormatableArrayHolder)
@@ -450,11 +447,7 @@ public class SortResultSet extends NoPutResultSetImpl
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 		    clearCurrentRow();
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
 
-			currentRow = null;
 			sortResultRow = null;
 			closeSource();
 

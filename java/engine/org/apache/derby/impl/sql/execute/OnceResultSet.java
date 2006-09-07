@@ -265,7 +265,6 @@ public class OnceResultSet extends NoPutResultSetImpl
 			// block, to ensure that it is executed?
 		    clearCurrentRow();
 
-			currentRow = null;
 	        source.close();
 
 			super.close();

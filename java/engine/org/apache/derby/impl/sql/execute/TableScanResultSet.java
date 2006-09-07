@@ -72,7 +72,7 @@ import java.util.Hashtable;
  *
  * @author ames
  */
-public class TableScanResultSet extends NoPutResultSetImpl
+class TableScanResultSet extends NoPutResultSetImpl
 	implements CursorResultSet, Cloneable
 {
     protected ScanController scanController;
@@ -94,7 +94,6 @@ public class TableScanResultSet extends NoPutResultSetImpl
 	protected GeneratedMethod stopKeyGetter;
 	protected int stopSearchOperator;
 	public    Qualifier[][] qualifiers;
-	protected GeneratedMethod closeCleanup;
 	public String tableName;
 	public String userSuppliedOptimizerOverrides;
 	public String indexName;
@@ -157,7 +156,7 @@ public class TableScanResultSet extends NoPutResultSetImpl
     //
     // class interface
     //
-    public TableScanResultSet(long conglomId,
+    TableScanResultSet(long conglomId,
 		StaticCompiledOpenConglomInfo scoci, 
 		Activation activation, 
 		GeneratedMethod resultRowAllocator, 
@@ -179,8 +178,7 @@ public class TableScanResultSet extends NoPutResultSetImpl
 		int rowsPerRead,
 		boolean oneRowScan,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup)
+		double optimizerEstimatedCost)
 			throws StandardException
     {
 		super(activation,
@@ -323,8 +321,6 @@ public class TableScanResultSet extends NoPutResultSetImpl
 
                 "Invalid isolation level - " + isolationLevel);
         }
-
-		this.closeCleanup = closeCleanup;
 
 		runTimeStatisticsOn = (activation != null &&
 							   activation.getLanguageConnectionContext().getRunTimeStatisticsMode());
@@ -796,16 +792,7 @@ public class TableScanResultSet extends NoPutResultSetImpl
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 		    clearCurrentRow();
-			if (closeCleanup != null) {
-				try {
-					closeCleanup.invoke(activation); // let activation tidy up
-				} catch (StandardException se) {
-					if (SanityManager.DEBUG)
-						SanityManager.THROWASSERT(se);
-				}
-			}
-
-			currentRow = null;
+;
 			if (scanController != null)
 			{
 				// This is where we get the positioner info for inner tables

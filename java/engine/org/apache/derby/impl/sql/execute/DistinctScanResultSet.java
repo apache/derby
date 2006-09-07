@@ -68,7 +68,7 @@ import java.util.Vector;
  *
  * @author jerry
  */
-public class DistinctScanResultSet extends HashScanResultSet
+class DistinctScanResultSet extends HashScanResultSet
 {
 
 	Enumeration element = null;
@@ -77,7 +77,7 @@ public class DistinctScanResultSet extends HashScanResultSet
     //
     // class interface
     //
-    public DistinctScanResultSet(long conglomId, 
+    DistinctScanResultSet(long conglomId, 
 		StaticCompiledOpenConglomInfo scoci, Activation activation, 
 		GeneratedMethod resultRowAllocator, 
 		int resultSetNumber,
@@ -91,8 +91,7 @@ public class DistinctScanResultSet extends HashScanResultSet
 		boolean tableLocked,
 		int isolationLevel,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup)
+		double optimizerEstimatedCost)
 			throws StandardException
     {
 		super(conglomId, scoci, activation, resultRowAllocator, resultSetNumber,
@@ -108,7 +107,7 @@ public class DistinctScanResultSet extends HashScanResultSet
 			  false,				  // forUpdate
 			  colRefItem, lockMode, tableLocked, isolationLevel,
 			  false,
-			  optimizerEstimatedRowCount, optimizerEstimatedCost, closeCleanup);
+			  optimizerEstimatedRowCount, optimizerEstimatedCost);
 
 		// Tell super class to eliminate duplicates
 		eliminateDuplicates = true;

@@ -56,7 +56,7 @@ import java.util.Properties;
  *
  * @author jamie
  */
-public class LastIndexKeyResultSet extends NoPutResultSetImpl
+class LastIndexKeyResultSet extends NoPutResultSetImpl
 {
 	protected	ExecRow		candidate;
 
@@ -69,7 +69,6 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 	protected GeneratedMethod stopKeyGetter;
 	protected int stopSearchOperator;
 	protected Qualifier[][] qualifiers;
-	protected GeneratedMethod closeCleanup;
 	public String tableName;
 	public String userSuppliedOptimizerOverrides;
 	public String indexName;
@@ -110,7 +109,6 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 	 * @param optimizerEstimatedRowCount	Estimated total # of rows by
 	 * 										optimizer
 	 * @param optimizerEstimatedCost		Estimated total cost by optimizer
-	 * @param closeCleanup		any cleanup the activation needs to do on close.
 	 *
 	 * @exception StandardException thrown when unable to create the
 	 * 				result set
@@ -129,8 +127,7 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 		boolean tableLocked,
 		int isolationLevel,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup
+		double optimizerEstimatedCost
 	) throws StandardException
 	{
 		super(activation,
@@ -218,8 +215,6 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
                 "Invalid isolation level - " + isolationLevel);
         }
 
-		this.closeCleanup = closeCleanup;
-
 		runTimeStatisticsOn = getLanguageConnectionContext().getRunTimeStatisticsMode();
 
 		/* Only call row allocators once */
@@ -287,7 +282,6 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 		}
 		else
 		{
-			currentRow = null;
 		    clearCurrentRow();
 		}
 			
@@ -304,7 +298,6 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 	{
 		if (returnedRow || !isOpen)
 		{
-			currentRow = null;
 		    clearCurrentRow();
 		} 
 		else
@@ -325,12 +318,7 @@ public class LastIndexKeyResultSet extends NoPutResultSetImpl
 		if (isOpen)
 	    {
 			isOpen = false;
-			currentRow = null;
 		    clearCurrentRow();
-			if (closeCleanup != null) 
-			{
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
 
 			super.close();
 	    }

@@ -49,7 +49,7 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
  * result set) MUST be unique for this to work correctly.
  *
  */
-public class MergeJoinResultSet extends JoinResultSet
+class MergeJoinResultSet extends JoinResultSet
 {
 	private static final int GREATER_THAN = 1;
 	private static final int EQUAL = 0;
@@ -77,7 +77,7 @@ public class MergeJoinResultSet extends JoinResultSet
 	 * @param optimizerEstimatedCost		self-explanatory
 	 * @param closeCleanup					self-explanatory
      */
-    public MergeJoinResultSet(NoPutResultSet leftResultSet,
+    MergeJoinResultSet(NoPutResultSet leftResultSet,
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
@@ -94,7 +94,7 @@ public class MergeJoinResultSet extends JoinResultSet
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,
 			  activation, restriction, resultSetNumber, 
 			  oneRowRightSide, notExistsRightSide, optimizerEstimatedRowCount, 
-			  optimizerEstimatedCost, null, closeCleanup);
+			  optimizerEstimatedCost, null);
 
 		this.leftGreaterThanRight = leftGreaterThanRight;
     }

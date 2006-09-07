@@ -61,7 +61,6 @@ class RowResultSet extends NoPutResultSetImpl
 	private boolean canCacheRow;
 	private boolean next;
 	private GeneratedMethod row;
-	protected GeneratedMethod closeCleanup;
 	private ExecRow		cachedRow;
 
     //
@@ -74,15 +73,13 @@ class RowResultSet extends NoPutResultSetImpl
 		boolean 		canCacheRow,
 		int 			resultSetNumber,
 		double 			optimizerEstimatedRowCount,
-		double 			optimizerEstimatedCost,
-		GeneratedMethod closeCleanup
+		double 			optimizerEstimatedCost
 	)
 	{
 		super(activation, resultSetNumber, 
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
 
         this.row = row;
-		this.closeCleanup = closeCleanup;
 		this.canCacheRow = canCacheRow;
 		constructorTime += getElapsedMillis(beginTime);
     }
@@ -97,8 +94,7 @@ class RowResultSet extends NoPutResultSetImpl
 		boolean 		canCacheRow,
 		int 			resultSetNumber,
 		double 			optimizerEstimatedRowCount,
-		double 			optimizerEstimatedCost,
-		GeneratedMethod closeCleanup
+		double 			optimizerEstimatedCost
 	)
 	{
 		super(activation, resultSetNumber, 
@@ -106,7 +102,6 @@ class RowResultSet extends NoPutResultSetImpl
 
 		beginTime = getCurrentTimeMillis();
         this.cachedRow = constantRow;
-		this.closeCleanup = closeCleanup;
 		this.canCacheRow = canCacheRow;
 		constructorTime += getElapsedMillis(beginTime);
     }
@@ -178,9 +173,6 @@ class RowResultSet extends NoPutResultSetImpl
 	{
 		beginTime = getCurrentTimeMillis();
 		if (isOpen) {
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
 
 			// we don't want to keep around a pointer to the
 			// row ... so it can be thrown away.

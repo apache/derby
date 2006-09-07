@@ -210,7 +210,6 @@ public class AnyResultSet extends NoPutResultSetImpl
 			// block, to ensure that it is executed?
 		    clearCurrentRow();
 
-			currentRow = null;
 	        source.close();
 
 			super.close();

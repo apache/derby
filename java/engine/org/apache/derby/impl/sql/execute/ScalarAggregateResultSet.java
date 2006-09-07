@@ -63,7 +63,7 @@ import java.util.Enumeration;
  *
  * @author jerry (broken out from SortResultSet)
  */
-public class ScalarAggregateResultSet extends GenericAggregateResultSet
+class ScalarAggregateResultSet extends GenericAggregateResultSet
 	implements CursorResultSet 
 {
 
@@ -97,7 +97,7 @@ public class ScalarAggregateResultSet extends GenericAggregateResultSet
 	 *
 	 * @exception StandardException Thrown on error
 	 */
-    public ScalarAggregateResultSet(NoPutResultSet s,
+    ScalarAggregateResultSet(NoPutResultSet s,
 					boolean isInSortedOrder,
 					int	aggregateItem,
 					Activation a,
@@ -105,10 +105,9 @@ public class ScalarAggregateResultSet extends GenericAggregateResultSet
 					int resultSetNumber,
 					boolean singleInputRow,
 				    double optimizerEstimatedRowCount,
-				    double optimizerEstimatedCost,
-					GeneratedMethod c) throws StandardException 
+				    double optimizerEstimatedCost) throws StandardException 
 	{
-		super(s, aggregateItem, a, ra, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost, c);
+		super(s, aggregateItem, a, ra, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
 		this.isInSortedOrder = isInSortedOrder;
 		// source expected to be non-null, mystery stress test bug
 		// - sometimes get NullPointerException in openCore().
@@ -282,12 +281,8 @@ public class ScalarAggregateResultSet extends GenericAggregateResultSet
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 		    clearCurrentRow();
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
 
 	        countOfRows = 0;
-			currentRow = null;
 			sourceExecIndexRow = null;
 			source.close();
 

@@ -48,7 +48,7 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
  * the right when there is no matching row in the right
  * result set.
  */
-public class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
+class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
 {
 	protected GeneratedMethod emptyRowFun;
 	/* Was this originally a right outer join? */
@@ -270,7 +270,7 @@ public class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
      * class interface
      *
      */
-    public NestedLoopLeftOuterJoinResultSet(
+    NestedLoopLeftOuterJoinResultSet(
 						NoPutResultSet leftResultSet,
 						int leftNumCols,
 						NoPutResultSet rightResultSet,
@@ -284,14 +284,13 @@ public class NestedLoopLeftOuterJoinResultSet extends NestedLoopJoinResultSet
 					    boolean notExistsRightSide,
  					    double optimizerEstimatedRowCount,
 						double optimizerEstimatedCost,
-						String userSuppliedOptimizerOverrides,
-						GeneratedMethod closeCleanup)
+						String userSuppliedOptimizerOverrides)
     {
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,
 			  activation, restriction, resultSetNumber, 
 			  oneRowRightSide, notExistsRightSide,
 			  optimizerEstimatedRowCount, optimizerEstimatedCost, 
-			  userSuppliedOptimizerOverrides, closeCleanup);
+			  userSuppliedOptimizerOverrides);
 		this.emptyRowFun = emptyRowFun;
 		this.wasRightOuterJoin = wasRightOuterJoin;
     }

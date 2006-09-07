@@ -68,7 +68,7 @@ import java.util.Enumeration;
  *
  * @author jerry (broken out from SortResultSet)
  */
-public class GroupedAggregateResultSet extends GenericAggregateResultSet
+class GroupedAggregateResultSet extends GenericAggregateResultSet
 	implements CursorResultSet {
 
 	/* Run time statistics variables */
@@ -124,7 +124,7 @@ public class GroupedAggregateResultSet extends GenericAggregateResultSet
 	 *
 	 * @exception StandardException Thrown on error
 	 */
-    public GroupedAggregateResultSet(NoPutResultSet s,
+    GroupedAggregateResultSet(NoPutResultSet s,
 					boolean isInSortedOrder,
 					int	aggregateItem,
 					int	orderingItem,
@@ -133,10 +133,9 @@ public class GroupedAggregateResultSet extends GenericAggregateResultSet
 					int maxRowSize,
 					int resultSetNumber,
 				    double optimizerEstimatedRowCount,
-				    double optimizerEstimatedCost,
-					GeneratedMethod c) throws StandardException 
+				    double optimizerEstimatedCost) throws StandardException 
 	{
-		super(s, aggregateItem, a, ra, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost, c);
+		super(s, aggregateItem, a, ra, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
 		this.isInSortedOrder = isInSortedOrder;
 		sortTemplateRow = getExecutionFactory().getIndexableRow((ExecRow) rowAllocator.invoke(activation));
 		order = (ColumnOrdering[])
@@ -476,11 +475,7 @@ public class GroupedAggregateResultSet extends GenericAggregateResultSet
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 		    clearCurrentRow();
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
 
-			currentRow = null;
 			sortResultRow = null;
 			sourceExecIndexRow = null;
 			closeSource();

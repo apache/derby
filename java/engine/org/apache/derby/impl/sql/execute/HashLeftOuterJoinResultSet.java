@@ -44,9 +44,9 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
  * Simple subclass of nested loop left outer join, differentiated
  * to ease RunTimeStatistics output generation.
  */
-public class HashLeftOuterJoinResultSet extends NestedLoopLeftOuterJoinResultSet
+class HashLeftOuterJoinResultSet extends NestedLoopLeftOuterJoinResultSet
 {
-    public HashLeftOuterJoinResultSet(
+    HashLeftOuterJoinResultSet(
 						NoPutResultSet leftResultSet,
 						int leftNumCols,
 						NoPutResultSet rightResultSet,
@@ -60,14 +60,13 @@ public class HashLeftOuterJoinResultSet extends NestedLoopLeftOuterJoinResultSet
 					    boolean notExistsRightSide,
  					    double optimizerEstimatedRowCount,
 						double optimizerEstimatedCost,
-						String userSuppliedOptimizerOverrides,
-						GeneratedMethod closeCleanup)
+						String userSuppliedOptimizerOverrides)
     {
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,
 			  activation, restriction, resultSetNumber, 
 			  emptyRowFun, wasRightOuterJoin,
 			  oneRowRightSide, notExistsRightSide,
 			  optimizerEstimatedRowCount, optimizerEstimatedCost, 
-			  userSuppliedOptimizerOverrides, closeCleanup);
+			  userSuppliedOptimizerOverrides);
     }
 }

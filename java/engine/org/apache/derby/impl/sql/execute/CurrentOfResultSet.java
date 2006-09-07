@@ -229,7 +229,6 @@ public class CurrentOfResultSet extends NoPutResultSetImpl
 			// block, to ensure that it is executed?
 	    	clearCurrentRow();
 	        next = false;
-			currentRow = null;
 
 			super.close();
 	    }

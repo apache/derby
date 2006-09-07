@@ -54,7 +54,7 @@ import org.apache.derby.iapi.reference.SQLState;
  * result set for the entire statement.
  */
 
-public class NormalizeResultSet extends NoPutResultSetImpl
+class NormalizeResultSet extends NoPutResultSetImpl
 	implements CursorResultSet
 {
 	/*
@@ -71,8 +71,6 @@ public class NormalizeResultSet extends NoPutResultSetImpl
 	 * the activation
 	 */
 	private ResultDescription resultDescription;
-
-    private GeneratedMethod closeCleanup;
 
 	/* info for caching DTSs */
 	private DataTypeDescriptor[] desiredTypes;
@@ -94,8 +92,7 @@ public class NormalizeResultSet extends NoPutResultSetImpl
 							  int erdNumber,
 	 					      double optimizerEstimatedRowCount,
 							  double optimizerEstimatedCost,
-							  boolean forUpdate,
-							  GeneratedMethod c) throws StandardException
+							  boolean forUpdate) throws StandardException
 	{
 		super(activation, resultSetNumber, optimizerEstimatedRowCount, 
 			  optimizerEstimatedCost);
@@ -133,7 +130,6 @@ public class NormalizeResultSet extends NoPutResultSetImpl
 	*/
 		startCol = (forUpdate) ? ((numCols - 1)/ 2) + 1 : 1;
 		normalizedRow = activation.getExecutionFactory().getValueRow(numCols);
-        closeCleanup = c;
 		constructorTime += getElapsedMillis(beginTime);
 	}
 
@@ -227,9 +223,6 @@ public class NormalizeResultSet extends NoPutResultSetImpl
 		beginTime = getCurrentTimeMillis();
 	    if ( isOpen )
 	    {
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
 			currentRow = null;
 	        source.close();
 

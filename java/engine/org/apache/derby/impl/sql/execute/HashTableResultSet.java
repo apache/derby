@@ -67,7 +67,7 @@ import java.util.Vector;
  *
  * @author jerry
  */
-public class HashTableResultSet extends NoPutResultSetImpl
+class HashTableResultSet extends NoPutResultSetImpl
 	implements CursorResultSet 
 {
 	/* Run time statistics variables */
@@ -83,7 +83,6 @@ public class HashTableResultSet extends NoPutResultSetImpl
 	public Qualifier[][] nextQualifiers;
     private GeneratedMethod projection;
 	private int[]			projectMapping;
-    private GeneratedMethod closeCleanup;
 	private boolean runTimeStatsOn;
 	private ExecRow			mappedResultRow;
 	public boolean reuseResult;
@@ -111,7 +110,7 @@ public class HashTableResultSet extends NoPutResultSetImpl
     //
     // class interface
     //
-    public HashTableResultSet(NoPutResultSet s,
+    HashTableResultSet(NoPutResultSet s,
 					Activation a,
 					GeneratedMethod str,
 					Qualifier[][] nextQualifiers,
@@ -126,8 +125,7 @@ public class HashTableResultSet extends NoPutResultSetImpl
 					float loadFactor,
 					boolean skipNullKeyColumns,
 				    double optimizerEstimatedRowCount,
-					double optimizerEstimatedCost,
-					GeneratedMethod c) 
+					double optimizerEstimatedCost) 
 		throws StandardException
 	{
 		super(a, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
@@ -157,7 +155,6 @@ public class HashTableResultSet extends NoPutResultSetImpl
 		this.initialCapacity = initialCapacity;
 		this.loadFactor = loadFactor;
 		this.skipNullKeyColumns = skipNullKeyColumns;
-        closeCleanup = c;
 
 		// Allocate a result row if all of the columns are mapped from the source
 		if (projection == null)
@@ -517,10 +514,7 @@ public class HashTableResultSet extends NoPutResultSetImpl
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 	    	clearCurrentRow();
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
-			currentRow = null;
+
 	        source.close();
 
 			super.close();

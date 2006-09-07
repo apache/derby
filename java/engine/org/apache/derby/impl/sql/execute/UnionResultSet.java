@@ -49,7 +49,7 @@ import org.apache.derby.iapi.types.RowLocation;
  *
  * @author ames
  */
-public class UnionResultSet extends NoPutResultSetImpl
+class UnionResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
 
 	/* Run time statistics variables */
@@ -63,7 +63,7 @@ public class UnionResultSet extends NoPutResultSetImpl
 	// these are set in the constructor and never altered
     public NoPutResultSet source1;
     public NoPutResultSet source2;
-    protected GeneratedMethod closeCleanup;
+
 
     //
     // class interface
@@ -76,15 +76,13 @@ public class UnionResultSet extends NoPutResultSetImpl
 						  Activation activation, 
 						  int resultSetNumber, 
 					      double optimizerEstimatedRowCount,
-						  double optimizerEstimatedCost,
-						  GeneratedMethod closeCleanup) 
+						  double optimizerEstimatedCost) 
 	{
 		
 		super(activation, resultSetNumber, 
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
         this.source1 = source1;
         this.source2 = source2;
-		this.closeCleanup = closeCleanup;
 		constructorTime += getElapsedMillis(beginTime);
     }
 
@@ -181,16 +179,13 @@ public class UnionResultSet extends NoPutResultSetImpl
 	{
 		beginTime = getCurrentTimeMillis();
 		if ( isOpen ) {
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
 
 			// we don't want to keep around a pointer to the
 			// row ... so it can be thrown away.
 			// REVISIT: does this need to be in a finally
 			// block, to ensure that it is executed?
 	    	clearCurrentRow();
-			currentRow = null;
+
 	        switch (whichSource) {
 	            case 1 : source1.close();
 	                     break;

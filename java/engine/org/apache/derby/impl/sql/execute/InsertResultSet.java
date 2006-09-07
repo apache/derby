@@ -2353,8 +2353,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 							LanguageProperties.BULK_FETCH_DEFAULT_INT,	// rows per read
 							false,					// not a 1 row per scan
 							0d,						// estimated rows
-							0d, 					// estimated cost
-							(GeneratedMethod)null);	// close cleanup
+							0d 					// estimated cost
+							);
 			tableScan.openCore();
 		}
 		else

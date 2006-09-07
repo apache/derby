@@ -64,7 +64,7 @@ import java.sql.ResultSetMetaData;
 
 /**
  */
-public class VTIResultSet extends NoPutResultSetImpl
+class VTIResultSet extends NoPutResultSetImpl
 	implements CursorResultSet, VTIEnvironment {
 
 	/* Run time statistics variables */
@@ -75,7 +75,6 @@ public class VTIResultSet extends NoPutResultSetImpl
 	private ClassInspector classInspector;
     private GeneratedMethod row;
     private GeneratedMethod constructor;
-    protected GeneratedMethod closeCleanup;
 	private PreparedStatement userPS;
 	private ResultSet userVTI;
 	private ExecRow allocatedRow;
@@ -112,8 +111,7 @@ public class VTIResultSet extends NoPutResultSetImpl
 				 boolean isTarget,
 				 int scanIsolationLevel,
 			     double optimizerEstimatedRowCount,
-				 double optimizerEstimatedCost,
-				 GeneratedMethod closeCleanup) 
+				 double optimizerEstimatedCost) 
 		throws StandardException
 	{
 		super(activation, resultSetNumber, 
@@ -137,7 +135,6 @@ public class VTIResultSet extends NoPutResultSetImpl
 		compileTimeConstants = (FormatableHashtable) (activation.getPreparedStatement().
 								getSavedObject(ctcNumber));
 
-		this.closeCleanup = closeCleanup;
 		constructorTime += getElapsedMillis(beginTime);
     }
 
@@ -353,9 +350,6 @@ public class VTIResultSet extends NoPutResultSetImpl
 	{
 		beginTime = getCurrentTimeMillis();
 		if (isOpen) {
-			if (closeCleanup != null) {
-				closeCleanup.invoke(activation); // let activation tidy up
-			}
 
 			// we don't want to keep around a pointer to the
 			// row ... so it can be thrown away.

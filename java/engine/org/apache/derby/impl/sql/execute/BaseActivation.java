@@ -1473,8 +1473,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 										true,
 										rsNum,
 										0,
-										0,
-										null);
+										0);
 			}
 			RowResultSet[] rrs = new RowResultSet[numRows];
 			UnionResultSet[] urs = new UnionResultSet[numRows - 1];
@@ -1487,8 +1486,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 										true,
 										rsNum,
 										1,
-										0,
-										null);
+										0);
 				if (i > 0)
 				{
 					urs[i - 1] = new UnionResultSet (
@@ -1497,8 +1495,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 										this,
 										rsNum,
 										i + 1,
-										0,
-										null);
+										0);
 				}
 			}
 

@@ -243,8 +243,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			reuseResult,
 			doesProjection,
 		    optimizerEstimatedRowCount,
-			optimizerEstimatedCost,
-			closeCleanup);
+			optimizerEstimatedCost);
 	}
 
 	/**
@@ -279,8 +278,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			loadFactor,
 			true,		// Skip rows with 1 or more null key columns
 		    optimizerEstimatedRowCount,
-			optimizerEstimatedCost,
-			closeCleanup);
+			optimizerEstimatedCost);
 	}
 
 	/**
@@ -308,8 +306,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			maxRowSize,
 			resultSetNumber, 
 		    optimizerEstimatedRowCount,
-			optimizerEstimatedCost,
-			closeCleanup);
+			optimizerEstimatedCost);
 	}
 
 	/**
@@ -333,7 +330,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 						source, isInSortedOrder, aggregateItem, source.getActivation(),
 						rowAllocator, resultSetNumber, singleInputRow,
 						optimizerEstimatedRowCount,
-						optimizerEstimatedCost, closeCleanup);
+						optimizerEstimatedCost);
 	}
 
 	/**
@@ -357,7 +354,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 						source, isInSortedOrder, aggregateItem, orderItem, source.getActivation(),
 						rowAllocator, maxRowSize, resultSetNumber, singleInputRow,
 						optimizerEstimatedRowCount,
-						optimizerEstimatedCost, closeCleanup);
+						optimizerEstimatedCost);
 	}
 
 	/**
@@ -379,7 +376,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new GroupedAggregateResultSet(
 						source, isInSortedOrder, aggregateItem, orderItem, source.getActivation(),
 						rowAllocator, maxRowSize, resultSetNumber, optimizerEstimatedRowCount,
-						optimizerEstimatedCost, closeCleanup);
+						optimizerEstimatedCost);
 	}
 
 	/**
@@ -401,7 +398,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new DistinctGroupedAggregateResultSet(
 						source, isInSortedOrder, aggregateItem, orderItem, source.getActivation(),
 						rowAllocator, maxRowSize, resultSetNumber, optimizerEstimatedRowCount,
-						optimizerEstimatedCost, closeCleanup);
+						optimizerEstimatedCost);
 	}
 											
 
@@ -455,8 +452,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	{
 		return new RowResultSet(activation, row, canCacheRow, resultSetNumber, 
 							    optimizerEstimatedRowCount,
-								optimizerEstimatedCost,
-								closeCleanup);
+								optimizerEstimatedCost);
 	}
 
 	/**
@@ -489,8 +485,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								isTarget,
 								scanIsolationLevel,
 							    optimizerEstimatedRowCount,
-								optimizerEstimatedCost,
-								closeCleanup);
+								optimizerEstimatedCost);
 	}
 
 	/**
@@ -561,8 +556,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								isolationLevel,
 								true,		// Skip rows with 1 or more null key columns
 								optimizerEstimatedRowCount,
-								optimizerEstimatedCost,
-								closeCleanup);
+								optimizerEstimatedCost);
 	}
 
 	/**
@@ -608,8 +602,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								tableLocked,
 								isolationLevel,
 								optimizerEstimatedRowCount,
-								optimizerEstimatedCost,
-								closeCleanup);
+								optimizerEstimatedCost);
 	}
 
 	/**
@@ -672,8 +665,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								1,	// rowsPerRead is 1 if not a bulkTableScan
 								oneRowScan,
 								optimizerEstimatedRowCount,
-								optimizerEstimatedCost,
-								closeCleanup);
+								optimizerEstimatedCost);
 	}
 
 	/**
@@ -744,8 +736,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								rowsPerRead,
 								oneRowScan,
 								optimizerEstimatedRowCount,
-								optimizerEstimatedCost,
-								closeCleanup);
+								optimizerEstimatedCost);
 	}
 
 	/**
@@ -783,8 +774,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								restriction,
 								forUpdate,
 							    optimizerEstimatedRowCount,
-								optimizerEstimatedCost,
-								closeCleanup);
+								optimizerEstimatedCost);
 	}
 
 	/**
@@ -814,8 +804,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 										   notExistsRightSide, 
 										   optimizerEstimatedRowCount,
 										   optimizerEstimatedCost,
-										   userSuppliedOptimizerOverrides,
-										   closeCleanup);
+										   userSuppliedOptimizerOverrides);
 	}
 
 	/**
@@ -845,8 +834,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 										   notExistsRightSide, 
 										   optimizerEstimatedRowCount,
 										   optimizerEstimatedCost,
-										   userSuppliedOptimizerOverrides,
-										   closeCleanup);
+										   userSuppliedOptimizerOverrides);
 	}
 
 	/**
@@ -880,8 +868,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 										   notExistsRightSide,
 										   optimizerEstimatedRowCount,
 										   optimizerEstimatedCost,
-										   userSuppliedOptimizerOverrides,
-										   closeCleanup);
+										   userSuppliedOptimizerOverrides);
 	}
 
 	/**
@@ -915,8 +902,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 										   notExistsRightSide,
 										   optimizerEstimatedRowCount,
 										   optimizerEstimatedCost,
-										   userSuppliedOptimizerOverrides,
-										   closeCleanup);
+										   userSuppliedOptimizerOverrides);
 	}
 
 	/**
@@ -945,8 +931,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new MaterializedResultSet(source, source.getActivation(), 
 									  resultSetNumber, 
 									  optimizerEstimatedRowCount,
-									  optimizerEstimatedCost,
-									  closeCleanup);
+									  optimizerEstimatedCost);
 	}
 
 	/**
@@ -972,8 +957,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									  resultSetNumber, 
 									  sourceRowWidth,
 									  optimizerEstimatedRowCount,
-									  optimizerEstimatedCost,
-									  closeCleanup);
+									  optimizerEstimatedCost);
 		}
 		else
 		{
@@ -997,8 +981,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new NormalizeResultSet(source, source.getActivation(), 
 									  resultSetNumber, erdNumber, 
 									  optimizerEstimatedRowCount,
-									  optimizerEstimatedCost, forUpdate,
-									  closeCleanup);
+									  optimizerEstimatedCost, forUpdate);
 	}
 
 	/**
@@ -1049,8 +1032,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 				                  leftResultSet.getActivation(),
 								  resultSetNumber, 
 								  optimizerEstimatedRowCount,
-								  optimizerEstimatedCost,
-								  closeCleanup);
+								  optimizerEstimatedCost);
 	}
 
     public NoPutResultSet getSetOpResultSet( NoPutResultSet leftSource,
@@ -1074,7 +1056,6 @@ public class GenericResultSetFactory implements ResultSetFactory
                                    optimizerEstimatedCost,
                                    opType,
                                    all,
-                                   closeCleanup,
                                    intermediateOrderByColumnsSavedObject,
                                    intermediateOrderByDirectionSavedObject);
     }
@@ -1143,8 +1124,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 					tableLocked,
 					isolationLevel,
 					optimizerEstimatedRowCount,
-					optimizerEstimatedCost,
-					closeCleanup);
+					optimizerEstimatedCost);
 	}
 
 
@@ -1213,7 +1193,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 								oneRowScan,
 								optimizerEstimatedRowCount,
 								optimizerEstimatedCost,
-								closeCleanup,
 								parentResultSetId,
 								fkIndexConglomId,
 								fkColArrayItem,

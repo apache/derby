@@ -56,7 +56,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  * Return rows from temp table on subsequent scans.
  */
 
-public class MaterializedResultSet extends NoPutResultSetImpl
+class MaterializedResultSet extends NoPutResultSetImpl
 	implements CursorResultSet
 {
 	/*
@@ -79,9 +79,6 @@ public class MaterializedResultSet extends NoPutResultSetImpl
 	public	  long						createTCTime;
 	public	  long						fetchTCTime;
 
-
-    private GeneratedMethod closeCleanup;
-
 	/**
 	 * Constructor for a MaterializedResultSet
 	 *
@@ -96,8 +93,7 @@ public class MaterializedResultSet extends NoPutResultSetImpl
 	public MaterializedResultSet(NoPutResultSet source,
 							  Activation activation, int resultSetNumber,
 							  double optimizerEstimatedRowCount,
-							  double optimizerEstimatedCost,
-							  GeneratedMethod c) throws StandardException
+							  double optimizerEstimatedCost) throws StandardException
 	{
 		super(activation, resultSetNumber, 
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
@@ -106,7 +102,6 @@ public class MaterializedResultSet extends NoPutResultSetImpl
         // Get the current transaction controller
         tc = activation.getTransactionController();
 
-        closeCleanup = c;
 		constructorTime += getElapsedMillis(beginTime);
 	}
 
@@ -309,10 +304,6 @@ public class MaterializedResultSet extends NoPutResultSetImpl
 		beginTime = getCurrentTimeMillis();
 	    if ( isOpen )
 	    {
-			if (closeCleanup != null) 
-			{
-				closeCleanup.invoke(activation); // let activation tidy up
-			} 
 			currentRow = null;
 	        source.close();
 

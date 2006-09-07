@@ -66,7 +66,7 @@ import java.util.Enumeration;
  *
  * @author jerry (broken out from SortResultSet)
  */
-public class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
+class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 {
 
     /**
@@ -88,7 +88,7 @@ public class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 	 *
 	 * @exception StandardException Thrown on error
 	 */
-    public DistinctGroupedAggregateResultSet(NoPutResultSet s,
+    DistinctGroupedAggregateResultSet(NoPutResultSet s,
 					boolean isInSortedOrder,
 					int	aggregateItem,
 					int	orderingItem,
@@ -97,11 +97,10 @@ public class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 					int maxRowSize,
 					int resultSetNumber,
 				    double optimizerEstimatedRowCount,
-				    double optimizerEstimatedCost,
-					GeneratedMethod c) throws StandardException 
+				    double optimizerEstimatedCost) throws StandardException 
 	{
 		super(s, isInSortedOrder, aggregateItem, orderingItem,
-			  a, ra, maxRowSize, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost, c);
+			  a, ra, maxRowSize, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
     }
 
 

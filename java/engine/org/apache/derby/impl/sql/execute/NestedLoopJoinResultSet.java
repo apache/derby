@@ -45,7 +45,7 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
  * Takes 2 NoPutResultSets and a join filter and returns
  * the join's rows satisfying the filter as a result set.
  */
-public class NestedLoopJoinResultSet extends JoinResultSet
+class NestedLoopJoinResultSet extends JoinResultSet
 {
 	private boolean returnedRowMatchingRightSide = false;
 	private ExecRow rightTemplate;
@@ -277,7 +277,7 @@ public class NestedLoopJoinResultSet extends JoinResultSet
      * class interface
      *
      */
-    public NestedLoopJoinResultSet(NoPutResultSet leftResultSet,
+    NestedLoopJoinResultSet(NoPutResultSet leftResultSet,
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
@@ -288,13 +288,12 @@ public class NestedLoopJoinResultSet extends JoinResultSet
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
     {
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,
 			  activation, restriction, resultSetNumber, 
 			  oneRowRightSide, notExistsRightSide, optimizerEstimatedRowCount, 
-			  optimizerEstimatedCost, userSuppliedOptimizerOverrides, closeCleanup);
+			  optimizerEstimatedCost, userSuppliedOptimizerOverrides);
 		if (notExistsRightSide)
 			rightTemplate = getExecutionFactory().getValueRow(rightNumCols);
     }

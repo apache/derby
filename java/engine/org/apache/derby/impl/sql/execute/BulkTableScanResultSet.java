@@ -67,7 +67,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  *
  * @author jamie
  */
-public class BulkTableScanResultSet extends TableScanResultSet
+class BulkTableScanResultSet extends TableScanResultSet
 	implements CursorResultSet
 {
 	private DataValueDescriptor[][] rowArray;
@@ -84,7 +84,7 @@ public class BulkTableScanResultSet extends TableScanResultSet
 	 *
 	 * @exception StandardException thrown on failure to open
 	 */
-    public BulkTableScanResultSet(long conglomId,
+    BulkTableScanResultSet(long conglomId,
 		StaticCompiledOpenConglomInfo scoci, Activation activation, 
 		GeneratedMethod resultRowAllocator, 
 		int resultSetNumber,
@@ -105,8 +105,7 @@ public class BulkTableScanResultSet extends TableScanResultSet
 		int rowsPerRead,
 		boolean oneRowScan,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup)
+		double optimizerEstimatedCost)
 			throws StandardException
     {
 		super(conglomId,
@@ -133,8 +132,7 @@ public class BulkTableScanResultSet extends TableScanResultSet
 			rowsPerRead,
 			oneRowScan,
 			optimizerEstimatedRowCount,
-			optimizerEstimatedCost,
-			closeCleanup);
+			optimizerEstimatedCost);
 
 		if (SanityManager.DEBUG)
 		{

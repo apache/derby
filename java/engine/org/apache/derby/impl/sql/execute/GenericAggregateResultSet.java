@@ -75,7 +75,6 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 	protected GeneratedMethod			rowAllocator;
 	protected AggregatorInfoList	aggInfoList;	
 	public NoPutResultSet source;
-    protected GeneratedMethod closeCleanup;
 	protected	NoPutResultSet	originalSource; // used for run time stats only
 
 	/**
@@ -97,15 +96,13 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		GeneratedMethod	ra,
 		int 			resultSetNumber,
 		double 			optimizerEstimatedRowCount,
-		double 			optimizerEstimatedCost,
-		GeneratedMethod c
+		double 			optimizerEstimatedCost
 	) 
 		throws StandardException 
 	{
 		super(a, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
 		source = s;
 		originalSource = s;
-		closeCleanup = c;
 
 
 		rowAllocator = ra;

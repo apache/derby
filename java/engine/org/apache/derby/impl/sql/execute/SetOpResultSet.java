@@ -45,12 +45,11 @@ import org.apache.derby.impl.sql.compile.IntersectOrExceptNode;
  * the INTERSECT or EXCEPT of the two input result sets. This also projects out the tag, the last column
  * of the input rows.
  */
-public class SetOpResultSet extends NoPutResultSetImpl
+class SetOpResultSet extends NoPutResultSetImpl
     implements CursorResultSet
 {
     private final NoPutResultSet leftSource;
     private final NoPutResultSet rightSource;
-    private final GeneratedMethod closeCleanup;
     private final Activation activation;
     private final int opType;
     private final boolean all;
@@ -78,7 +77,6 @@ public class SetOpResultSet extends NoPutResultSetImpl
                     double optimizerEstimatedCost,
                     int opType,
                     boolean all,
-                    GeneratedMethod closeCleanup,
                     int intermediateOrderByColumnsSavedObject,
                     int intermediateOrderByDirectionSavedObject)
     {
@@ -90,7 +88,7 @@ public class SetOpResultSet extends NoPutResultSetImpl
         this.resultSetNumber = resultSetNumber;
         this.opType = opType;
         this.all = all;
-        this.closeCleanup = closeCleanup;
+
         ExecPreparedStatement eps = activation.getPreparedStatement();
         intermediateOrderByColumns = (int[]) eps.getSavedObject(intermediateOrderByColumnsSavedObject);
         intermediateOrderByDirection = (int[]) eps.getSavedObject(intermediateOrderByDirectionSavedObject);
@@ -261,10 +259,7 @@ public class SetOpResultSet extends NoPutResultSetImpl
 		beginTime = getCurrentTimeMillis();
 		if ( isOpen )
         {
-			if (closeCleanup != null)
-				closeCleanup.invoke(activation); // let activation tidy up
 	    	clearCurrentRow();
-			currentRow = null;
             prevCols = null;
             leftSource.close();
             rightSource.close();
