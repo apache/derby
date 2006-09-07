@@ -64,6 +64,7 @@ lang/forbitdata.java
 lang/forupdate.sql
 lang/functions.sql
 lang/grantRevokeDDL.sql
+lang/grantRevokeDDL2.sql
 lang/grantRevoke.java
 lang/groupBy.sql
 lang/holdCursorIJ.sql

@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * This class represents a REVOKE statement.
  */
-public class RevokeNode extends MiscellaneousStatementNode
+public class RevokeNode extends DDLStatementNode
 {
     private PrivilegeNode privileges;
     private List grantees;

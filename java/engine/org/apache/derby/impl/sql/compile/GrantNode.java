@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * This class represents a GRANT statement.
  */
-public class GrantNode extends MiscellaneousStatementNode
+public class GrantNode extends DDLStatementNode
 {
 	private PrivilegeNode privileges;
 	private List grantees;

@@ -759,5 +759,23 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 
 		rs[0] = st1.executeQuery(query.toString());
 	}
+
+	public static void grantSelect() throws SQLException
+	{
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("grant select on t1 to user2");
+		ps.execute();
+		ps.close();
+		conn.close();
+	}
+
+	public static void revokeSelect() throws SQLException
+	{
+		Connection conn = DriverManager.getConnection("jdbc:default:connection");
+		PreparedStatement ps = conn.prepareStatement("revoke select on t1 from user2");
+		ps.execute();
+		ps.close();
+		conn.close();
+	}
 }
 
