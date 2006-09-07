@@ -61,6 +61,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(LangScripts.suite());
         suite.addTest(GroupByExpressionTest.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
+        suite.addTest(TimeHandlingTest.suite());
 		
 		// Tests that are compiled using 1.4 target need to
 		// be added this way, otherwise creating the suite

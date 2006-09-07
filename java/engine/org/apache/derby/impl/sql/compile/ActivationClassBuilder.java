@@ -419,7 +419,7 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	/*
 		The first time a current datetime is needed, create the class
 		level support for it. The first half of the logic is in our parent
-		class. Then we add logic here to tidy up for ResultSet management.
+		class.
 	 */
 	protected LocalField getCurrentSetup()
 	{
@@ -433,22 +433,6 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 
 		executeMethod.getField(lf);
 		executeMethod.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null, "forget", "void", 0);
-
-		// 4) a resultSetClosed method is set up to be passed to
-		//    the outermost result set, if it is an open/close result set,
-		//    so that cdt can be told to forget when a result set closes:
-		//	  GeneratedMethod rscm; // the name is just a generated name, simpler.
-		//    void rscm() {
-		//		cdt.forget();
-		//	  }
-		MethodBuilder mb = newExprFun();
-		mb.getField(lf); // the instance
-		mb.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null, "forget", "void", 0);
-		mb.pushNull("java.lang.Object");
-		mb.methodReturn();
-		mb.complete();
-		
-		resultSetClosedMethod = mb;
 
 		return lf;
 	}

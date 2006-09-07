@@ -1050,19 +1050,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	void closeMethodArgument(ExpressionClassBuilder acb,
 									MethodBuilder mb)
 	{
-		/*
-			For supporting current datetime, we may have a method
-			that needs to be called when the statement's result set 
-			is closed.
-		 */
-		if (statementResultSet)
-		{
-			acb.pushResultSetClosedMethodFieldAccess(mb);
-		}
-		else
-		{
+
 			mb.pushNull(ClassName.GeneratedMethod);
-		}
 	}
 
 	/**

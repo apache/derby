@@ -110,8 +110,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 
 	//protected final JavaFactory javaFac;
 
-	protected MethodBuilder resultSetClosedMethod;
-
 	private String currentRowScanResultSetName;
 
 
@@ -717,24 +715,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 		//
 		mb.pushThis();
 		mb.callMethod(getEF);
-	}
-
-	/**
-		This utility method returns the resultSetClosed method reference that the
-		activation wants called when a result set closes, to let it clean up.
-		This will be null if none was needed.
-
-		REMIND: because ObjectManager returns exceptions on its invoke() method
-		and close() is not supposed to return exceptions, we may want to
-		move this to be something done on open() instead of on close().
-		Otherwise, we have to do try/catch/THROWASSERT in the close code,
-		which looks unfriendly.
-	 */
-	void pushResultSetClosedMethodFieldAccess(MethodBuilder mb) {
-		if (resultSetClosedMethod != null)
-			pushMethodReference(mb, resultSetClosedMethod);
-		else
-			mb.pushNull(ClassName.GeneratedMethod);
 	}
 
 	/**

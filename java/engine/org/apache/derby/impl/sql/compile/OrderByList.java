@@ -408,7 +408,7 @@ public class OrderByList extends OrderedColumnList
 			date/time request, then a method will have been generated.
 			Otherwise, a simple null is passed in to the result set method.
 		 */
-		acb.pushResultSetClosedMethodFieldAccess(mb);
+        mb.pushNull(ClassName.GeneratedMethod);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getSortResultSet",
 							ClassName.NoPutResultSet, 10);
