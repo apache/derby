@@ -28,12 +28,17 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
+import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
+import org.apache.derby.iapi.reference.SQLState;
 
 import java.util.List;
 import java.util.Iterator;
@@ -59,17 +64,123 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 	private TableDescriptor td;
 	private boolean[] actionAllowed;
 	private FormatableBitSet[] columnBitSets;
+	private List descriptorList;
 	
 	/**
 	 * @param actionAllowed actionAllowed[action] is true if action is in the privilege set.
 	 */
 	public TablePrivilegeInfo( TableDescriptor td,
 							   boolean[] actionAllowed,
-							   FormatableBitSet[] columnBitSets)
+							   FormatableBitSet[] columnBitSets,
+							   List descriptorList)
 	{
 		this.actionAllowed = actionAllowed;
 		this.columnBitSets = columnBitSets;
 		this.td = td;
+		this.descriptorList = descriptorList;
+	}
+	
+	/**
+	 * Determines whether a user is the owner of an object
+	 * (table, function, or procedure). Note that the database 
+	 * creator can access database objects without needing to be 
+	 * their owner.
+	 *
+	 * @param user					authorizationId of current user
+	 * @param td       		        table descriptor being checked against
+	 * @param sd					SchemaDescriptor
+	 * @param dd					DataDictionary
+	 * @param lcc                   LanguageConnectionContext
+	 * @param grant                 grant if true; revoke if false
+	 *
+	 * @exception StandardException if user does not own the object
+	 */
+	protected void checkOwnership( String user,
+								   TableDescriptor td,
+								   SchemaDescriptor sd,
+								   DataDictionary dd,
+								   LanguageConnectionContext lcc,
+								   boolean grant)
+		throws StandardException
+	{
+		super.checkOwnership(user, td, sd, dd);
+		
+		// additional check specific to this subclass
+		if (grant)
+		{
+			checkPrivileges(user, td, sd, dd, lcc);
+		}
+	}
+	
+	/**
+	 * Determines if the privilege is grantable by this grantor
+	 * for the given view.
+	 * 
+	 * Note that the database owner can access database objects 
+	 * without needing to be their owner.  This method should only 
+	 * be called if it is a GRANT.
+	 * 
+	 * @param user					authorizationId of current user
+	 * @param td		            TableDescriptor to be checked against
+	 * @param sd					SchemaDescriptor
+	 * @param dd					DataDictionary
+	 * @param lcc                   LanguageConnectionContext
+	 *
+	 * @exception StandardException if user does not have permission to grant
+	 */
+	private void checkPrivileges( String user,
+								   TableDescriptor td,
+								   SchemaDescriptor sd,
+								   DataDictionary dd,
+								   LanguageConnectionContext lcc)
+		throws StandardException
+	{
+		if (user.equals(dd.getAuthorizationDBA())) return;
+		
+		//  check view specific
+		if (td.getTableType() == TableDescriptor.VIEW_TYPE) 
+		{
+			if (descriptorList != null )
+			{			    		   
+				TransactionController tc = lcc.getTransactionExecute();
+				int siz = descriptorList.size();
+				for (int i=0; i < siz; i++)
+				{
+					TupleDescriptor p;
+					SchemaDescriptor s = null;
+
+					p = (TupleDescriptor)descriptorList.get(i);
+					if (p instanceof TableDescriptor)
+					{
+						TableDescriptor t = (TableDescriptor)p;
+						s = t.getSchemaDescriptor();
+			    	}
+					else if (p instanceof ViewDescriptor)
+					{
+						ViewDescriptor v = (ViewDescriptor)p;	
+						s = dd.getSchemaDescriptor(v.getCompSchemaId(), tc);
+					}
+			    	else if (p instanceof AliasDescriptor)
+			    	{
+			    		AliasDescriptor a = (AliasDescriptor)p;
+						s = dd.getSchemaDescriptor( a.getSchemaUUID(), tc);
+			    	}
+								
+					if (s != null && !user.equals(s.getAuthorizationId()) ) 
+					{
+						throw StandardException.newException(
+				    			   SQLState.AUTH_NO_OBJECT_PERMISSION,
+				    			   user,
+				    			   "grant",
+				    			   sd.getSchemaName(),
+								   td.getName());		  
+					}
+			    			   
+			    	// FUTURE: if object is not own by grantor then check if 
+			    	//         the grantor have grant option.
+				}
+			}
+		}
 	}
 	
 	/**
@@ -90,9 +201,10 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 		DataDictionary dd = lcc.getDataDictionary();
 		String currentUser = lcc.getAuthorizationId();
 		TransactionController tc = lcc.getTransactionExecute();
-
+		SchemaDescriptor sd = td.getSchemaDescriptor();
+		
 		// Check that the current user has permission to grant the privileges.
-		checkOwnership( currentUser, td, td.getSchemaDescriptor(), dd);
+		checkOwnership( currentUser, td, sd, dd, lcc, grant);
 		
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 

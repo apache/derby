@@ -9968,7 +9968,7 @@ public final class	DataDictionaryImpl
     throws StandardException
 	{
         TablePermsDescriptor key = new TablePermsDescriptor( this, tablePermsUUID);
-        return (TablePermsDescriptor) getPermissions( key);
+        return getUncachedTablePermsDescriptor( key );
 	}
 
     private Object getPermissions( PermissionsDescriptor key) throws StandardException
@@ -9987,7 +9987,7 @@ public final class	DataDictionaryImpl
     throws StandardException
 	{
     	ColPermsDescriptor key = new ColPermsDescriptor( this, colPermsUUID);
-        return (ColPermsDescriptor) getPermissions( key);
+        return getUncachedColPermsDescriptor( key );
 	}
 
     /**
@@ -10092,7 +10092,7 @@ public final class	DataDictionaryImpl
     throws StandardException
 	{
     	RoutinePermsDescriptor key = new RoutinePermsDescriptor( this, routinePermsUUID);
-        return (RoutinePermsDescriptor) getPermissions( key);    	
+        return getUncachedRoutinePermsDescriptor( key );   	
 	}
 
     /**

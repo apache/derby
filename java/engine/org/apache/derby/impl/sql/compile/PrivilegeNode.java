@@ -98,12 +98,12 @@ public class PrivilegeNode extends QueryTreeNode
      *               If the object of this privilege is not in the list then this statement is registered
      *               as dependent on the object.
      * @param grantees The list of grantees
-     *
+     * @param isGrant grant if true; revoke if false
      * @return the bound node
      *
      * @exception StandardException	Standard error policy.
      */
-	public QueryTreeNode bind( HashMap dependencies, List grantees ) throws StandardException
+	public QueryTreeNode bind( HashMap dependencies, List grantees, boolean isGrant ) throws StandardException
 	{
         Provider dependencyProvider = null;
         SchemaDescriptor sd = null;
@@ -134,7 +134,7 @@ public class PrivilegeNode extends QueryTreeNode
 				throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED,
 						 td.getQualifiedName());
 
-            specificPrivileges.bind( td);
+            specificPrivileges.bind( td, isGrant);
             dependencyProvider = td;
             break;
 

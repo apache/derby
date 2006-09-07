@@ -1372,6 +1372,7 @@ public interface SQLState {
 	String AUTH_NO_ACCESS_NOT_OWNER                                    = "2850D";
 	String AUTH_NOT_DATABASE_OWNER                                     = "2850E";
 	String AUTH_GRANT_REVOKE_NOT_ALLOWED                               = "2850F";
+	String AUTH_NO_OBJECT_PERMISSION                                   = "2850G";
 
 	/*
 	** Dependency manager

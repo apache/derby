@@ -705,31 +705,30 @@ create view v33 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamt
 ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> -- connect as mamta2 and give select privilege on v22 to mamta3
 set connection mamta2;
-ij(MAMTA2)> grant select on v22 to mamta3;
-0 rows inserted/updated/deleted
+ij(MAMTA2)> -- should fail
+grant select on v22 to mamta3;
+ERROR: Failed with SQLSTATE 2850G
 ij(MAMTA2)> set connection mamta3;
-ij(MAMTA3)> -- mamta3 has the required privileges now, so following should work
+ij(MAMTA3)> -- should fail
 create view v31 as select * from mamta2.v22;
-0 rows inserted/updated/deleted
-ij(MAMTA3)> -- following will pass because mamta3 has direct access to v22 and public access to t11
+ERROR: Failed with SQLSTATE 28508
+ij(MAMTA3)> -- following will fail because mamta3 has no access to v22
 create view v32 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamta1.t11 t11;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> -- following will still fail because mamta3 doesn't have access to mamta1.t12.c121
 create view v33 as select v22.c111 as a, t12.c121 as b from mamta2.v22 v22, mamta1.t12 t12;
 ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> -- connect as mamta2 and give select privilege on v23 to mamta3
 set connection mamta2;
 ij(MAMTA2)> grant select on v23 to mamta3;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 2850G
 ij(MAMTA2)> set connection mamta3;
-ij(MAMTA3)> -- although mamta3 doesn't have direct access to mamta1.t12, it can look at it through view mamta2.v23 since mamta3 has select privilege
--- on mamta2.v23
+ij(MAMTA3)> -- should fail
 create view v34 as select * from mamta2.v23;
-0 rows inserted/updated/deleted
-ij(MAMTA3)> -- following should work fine because mamta3 has access to all the
--- objects in it's schema
+ERROR: Failed with SQLSTATE 28508
+ij(MAMTA3)> -- should fail
 create view v35 as select * from v34;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 42X05
 ij(MAMTA3)> -- Write some views based on a routine
 set connection mamta1;
 ij(MAMTA1)> drop function f_abs1;
@@ -974,21 +973,18 @@ ij(MAMTA3)> -- mamta3 has not been granted select privileges on mamta2.v21ViewTe
 select * from mamta2.v21ViewTest;
 ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> set connection mamta2;
-ij(MAMTA2)> -- give select privileges on the view to mamta3
+ij(MAMTA2)> -- give select privileges on the view to mamta3, should fail
 grant select on v21ViewTest to mamta3;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 2850G
 ij(MAMTA2)> set connection mamta3;
-ij(MAMTA3)> -- select from mamta2.v21ViewTest will pass this time for mamta3 because mamta3 has select privilege on mamta2.v21ViewTest
+ij(MAMTA3)> -- select from mamta2.v21ViewTest will fail for mamta3 because mamta3 has no select privilege on mamta2.v21ViewTest
 select * from mamta2.v21ViewTest;
-C111       |C122
-----------------
-1          |1   
-2          |1   
-2 rows selected
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> set connection satConnection;
 ij(SATCONNECTION)> -- have the dba take away select privilege on mamta2.v21ViewTest from mamta3
 revoke select on mamta2.v21ViewTest from mamta3;
 0 rows inserted/updated/deleted
+WARNING 01006: Privilege not revoked from MAMTA3.
 ij(SATCONNECTION)> set connection mamta3;
 ij(MAMTA3)> -- select from mamta2.v21ViewTest will fail this time for mamta3 because dba took away the select privilege on mamta2.v21ViewTest
 select * from mamta2.v21ViewTest;
@@ -1198,8 +1194,9 @@ ij(MAMTA1)> grant select on t11TriggerTest to mamta2;
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> create view v21ViewTest as select * from mamta1.t11TriggerTest;
 0 rows inserted/updated/deleted
-ij(MAMTA2)> grant select on v21ViewTest to mamta3;
-0 rows inserted/updated/deleted
+ij(MAMTA2)> -- should fail
+grant select on v21ViewTest to mamta3;
+ERROR: Failed with SQLSTATE 2850G
 ij(MAMTA2)> select * from v21ViewTest;
 C111       |C112       
 -----------------------
@@ -1215,10 +1212,10 @@ ij(MAMTA3)> drop table t32TriggerTest;
 ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t32TriggerTest (c321 int);
 0 rows inserted/updated/deleted
-ij(MAMTA3)> -- following should pass because all the privileges are in place
+ij(MAMTA3)> -- following should fail because not all the privileges are in place
 create trigger tr31t31TriggerTest after insert on t31TriggerTest for each statement mode db2sql
 	insert into t32TriggerTest values (select c111 from mamta2.v21ViewTest where c112=1);
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> insert into t31TriggerTest values(1);
 1 row inserted/updated/deleted
 ij(MAMTA3)> select * from t31TriggerTest;
@@ -1229,8 +1226,7 @@ C311
 ij(MAMTA3)> select * from t32TriggerTest;
 C321       
 -----------
-1          
-1 row selected
+0 rows selected
 ij(MAMTA3)> set connection mamta1;
 ij(MAMTA1)> -- This will drop the dependent view 
 revoke select on t11TriggerTest from mamta2;
@@ -1245,17 +1241,17 @@ ij(MAMTA3)> -- During some runs of this test, the trigger continues to fire even
 --  After DERBY-1613 is fixed, we should consistently get error from insert below because the
 --  insert trigger can't find the view it uses.
 insert into t31TriggerTest values(1);
-ERROR: Failed with SQLSTATE 42X05
+1 row inserted/updated/deleted
 ij(MAMTA3)> select * from t31TriggerTest;
 C311       
 -----------
 1          
-1 row selected
+1          
+2 rows selected
 ij(MAMTA3)> select * from t32TriggerTest;
 C321       
 -----------
-1          
-1 row selected
+0 rows selected
 ij(MAMTA3)> -- cleanup
 set connection mamta3;
 ij(MAMTA3)> drop table t31TriggerTest;
@@ -1458,40 +1454,31 @@ C111       |C122
 1          |1   
 2          |1   
 2 rows selected
-ij(MAMTA2)> -- grant permission to mamta3 so mamta3 can create a view based on v21ViewTest
+ij(MAMTA2)> -- grant permission to mamta3, should fail
 grant select on v21ViewTest to mamta3;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 2850G
 ij(MAMTA2)> set connection mamta3;
 ij(MAMTA3)> create view v31ViewTest as select * from mamta2.v21ViewTest;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> select * from v31ViewTest;
-C111       |C122
-----------------
-1          |1   
-2          |1   
-2 rows selected
+ERROR: Failed with SQLSTATE 42X05
 ij(MAMTA3)> set connection mamta1;
-ij(MAMTA1)> -- can't revoke the privilege because the view that relies on this privilege has another view defined on it and since Derby does not
---   support cascade view drop, we can't automatically drop view relying on the privilege below
+ij(MAMTA1)> -- revoke the privilege from mamta2, should be ok, previous view is not created. 
 revoke select on t11ViewTest from mamta2;
-ERROR: Failed with SQLSTATE X0Y23
+0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
-ij(MAMTA2)> -- view is still around, it couldn't be dropped automatically as a result of the revoke because there is another view dependent on the
---   view below. Need to drop that dependent view first in order for revoke to drop following view automatically 
+ij(MAMTA2)> -- this view is not created, should fail
 select * from v21ViewTest;
-C111       |C122
-----------------
-1          |1   
-2          |1   
-2 rows selected
+ERROR: Failed with SQLSTATE 42X05
 ij(MAMTA2)> set connection mamta3;
 ij(MAMTA3)> -- drop the dependent view
 drop view v31ViewTest;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE X0X05
 ij(MAMTA3)> set connection mamta1;
 ij(MAMTA1)> -- revoke privilege will succeed this time and will drop the dependent view on that privilege
 revoke select on t11ViewTest from mamta2;
 0 rows inserted/updated/deleted
+WARNING 01006: Privilege not revoked from MAMTA2.
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- view doesn't exist anymore
 select * from v21ViewTest;
@@ -2218,26 +2205,20 @@ C211
 1          
 1 row selected
 ij(MAMTA3)> grant select on v21ViewTest to mamta2;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 2850G
 ij(MAMTA3)> set connection mamta2;
 ij(MAMTA2)> -- Although mamta2 has SELECT privileges on mamta3.v21ViewTest, mamta2 doesn't have
 --    SELECT privileges on table mamta1.t12RoutineTest accessed by the routine
 --    (which is underneath the view) and hence select from view will fail
 select * from mamta3.v21ViewTest;
-C211       
------------
-ERROR: Failed with SQLSTATE 38000
 ERROR: Failed with SQLSTATE 28508
 ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> grant select  on t12RoutineTest to mamta2;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
-ij(MAMTA2)> -- now the view select will succeed
+ij(MAMTA2)> -- should fail
 select * from mamta3.v21ViewTest;
-C211       
------------
-1          
-1 row selected
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA2)> -- In this test, the trigger is accessing a view. Any user that has insert privilege
 --  on trigger table will be able to make an insert even if that user doesn't have
 --  privileges on objects referenced by the trigger.
@@ -2258,7 +2239,7 @@ ERROR: Failed with SQLSTATE X0X05
 ij(MAMTA2)> create view v21ViewTest as select * from mamta1.t11TriggerTest;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> grant select on v21ViewTest to mamta4;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 2850G
 ij(MAMTA2)> set connection mamta3;
 ij(MAMTA3)> drop table t31TriggerTest;
 ERROR: Failed with SQLSTATE 42Y55
@@ -2275,7 +2256,7 @@ ij(MAMTA4)> drop trigger tr41t41;
 ERROR: Failed with SQLSTATE 42X94
 ij(MAMTA4)> create trigger tr41t41 after insert on t41TriggerTest for each statement mode db2sql
         insert into mamta3.t31TriggerTest (select * from mamta2.v21ViewTest);
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA4)> insert into t41TriggerTest values(1);
 1 row inserted/updated/deleted
 ij(MAMTA4)> insert into t41TriggerTest values(2);
@@ -2304,11 +2285,7 @@ ij(MAMTA2)> set connection mamta3;
 ij(MAMTA3)> select * from t31TriggerTest;
 C311       
 -----------
-1          
-2          
-1          
-2          
-4 rows selected
+0 rows selected
 ij(MAMTA3)> -- will fail because no permissions on mamta4.t41TriggerTest
 insert into mamta4.t41TriggerTest values(1);
 ERROR: Failed with SQLSTATE 28506
@@ -2935,6 +2912,34 @@ ERROR: Failed with SQLSTATE 28506
 ij(USER2)> lock table user1.t100 in share mode;
 ERROR: Failed with SQLSTATE 28506
 ij(USER2)> commit;
+ij(USER2)> autocommit on;
+ij(USER2)> -- DERBY-1686
+set connection user1;
+ij(USER1)> create table t1 (i int);
+0 rows inserted/updated/deleted
+ij(USER1)> insert into t1 values 1,2,3;
+3 rows inserted/updated/deleted
+ij(USER1)> grant select on t1 to user2;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> create view v1 as select * from user1.t1;
+0 rows inserted/updated/deleted
+ij(USER2)> -- attempt to grant this view to others, should fail since user2
+-- does not have grant privilege on object user1.t1
+grant select on user1.t1 to user3;
+ERROR: Failed with SQLSTATE 2850C
+ij(USER2)> -- expect error
+grant select on v1 to user3;
+ERROR: Failed with SQLSTATE 2850G
+ij(USER2)> -- cleanup
+set connection user2;
+ij(USER2)> drop view v1;
+0 rows inserted/updated/deleted
+ij(USER2)> set connection user1;
+ij(USER1)> drop table t1;
+0 rows inserted/updated/deleted
+ij(USER1)> autocommit on;
+ij(USER1)> set connection user2;
 ij(USER2)> autocommit on;
 ij(USER2)> -- Simple test case for DERBY-1583: column privilege checking should not
 -- assume column descriptors have non-null table references.

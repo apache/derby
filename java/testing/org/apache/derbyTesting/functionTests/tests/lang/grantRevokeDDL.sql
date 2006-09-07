@@ -468,11 +468,12 @@ create view v33 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamt
 
 -- connect as mamta2 and give select privilege on v22 to mamta3
 set connection mamta2;
+-- should fail
 grant select on v22 to mamta3;
 set connection mamta3;
--- mamta3 has the required privileges now, so following should work
+-- should fail
 create view v31 as select * from mamta2.v22;
--- following will pass because mamta3 has direct access to v22 and public access to t11
+-- following will fail because mamta3 has no access to v22
 create view v32 as select v22.c111 as a, t11.c111 as b from mamta2.v22 v22, mamta1.t11 t11;
 -- following will still fail because mamta3 doesn't have access to mamta1.t12.c121
 create view v33 as select v22.c111 as a, t12.c121 as b from mamta2.v22 v22, mamta1.t12 t12;
@@ -481,11 +482,9 @@ create view v33 as select v22.c111 as a, t12.c121 as b from mamta2.v22 v22, mamt
 set connection mamta2;
 grant select on v23 to mamta3;
 set connection mamta3;
--- although mamta3 doesn't have direct access to mamta1.t12, it can look at it through view mamta2.v23 since mamta3 has select privilege
--- on mamta2.v23
+-- should fail
 create view v34 as select * from mamta2.v23;
--- following should work fine because mamta3 has access to all the
--- objects in it's schema
+-- should fail
 create view v35 as select * from v34;
 
 -- Write some views based on a routine
@@ -636,10 +635,10 @@ set connection mamta3;
 -- mamta3 has not been granted select privileges on mamta2.v21ViewTest
 select * from mamta2.v21ViewTest;
 set connection mamta2;
--- give select privileges on the view to mamta3
+-- give select privileges on the view to mamta3, should fail
 grant select on v21ViewTest to mamta3;
 set connection mamta3;
--- select from mamta2.v21ViewTest will pass this time for mamta3 because mamta3 has select privilege on mamta2.v21ViewTest
+-- select from mamta2.v21ViewTest will fail for mamta3 because mamta3 has no select privilege on mamta2.v21ViewTest
 select * from mamta2.v21ViewTest;
 set connection satConnection;
 -- have the dba take away select privilege on mamta2.v21ViewTest from mamta3
@@ -787,6 +786,7 @@ insert into t11TriggerTest values(2,2);
 grant select on t11TriggerTest to mamta2;
 set connection mamta2;
 create view v21ViewTest as select * from mamta1.t11TriggerTest;
+-- should fail
 grant select on v21ViewTest to mamta3;
 select * from v21ViewTest;
 set connection mamta3;
@@ -794,7 +794,7 @@ drop table t31TriggerTest;
 create table t31TriggerTest (c311 int); 
 drop table t32TriggerTest;
 create table t32TriggerTest (c321 int); 
--- following should pass because all the privileges are in place
+-- following should fail because not all the privileges are in place
 create trigger tr31t31TriggerTest after insert on t31TriggerTest for each statement mode db2sql
 	insert into t32TriggerTest values (select c111 from mamta2.v21ViewTest where c112=1);
 insert into t31TriggerTest values(1);
@@ -948,18 +948,16 @@ grant select on t12ViewTest to mamta2;
 set connection mamta2;
 create view v21ViewTest as select t1.c111, t2.c122 from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2;
 select * from v21ViewTest;
--- grant permission to mamta3 so mamta3 can create a view based on v21ViewTest
+-- grant permission to mamta3, should fail
 grant select on v21ViewTest to mamta3;
 set connection mamta3;
 create view v31ViewTest as select * from mamta2.v21ViewTest;
 select * from v31ViewTest;
 set connection mamta1;
--- can't revoke the privilege because the view that relies on this privilege has another view defined on it and since Derby does not
---   support cascade view drop, we can't automatically drop view relying on the privilege below
+-- revoke the privilege from mamta2, should be ok, previous view is not created. 
 revoke select on t11ViewTest from mamta2;
 set connection mamta2;
--- view is still around, it couldn't be dropped automatically as a result of the revoke because there is another view dependent on the
---   view below. Need to drop that dependent view first in order for revoke to drop following view automatically 
+-- this view is not created, should fail
 select * from v21ViewTest;
 set connection mamta3;
 -- drop the dependent view
@@ -1423,7 +1421,7 @@ select * from mamta3.v21ViewTest;
 set connection mamta1;
 grant select  on t12RoutineTest to mamta2;
 set connection mamta2;
--- now the view select will succeed
+-- should fail
 select * from mamta3.v21ViewTest; 
 
 -- In this test, the trigger is accessing a view. Any user that has insert privilege
@@ -1855,6 +1853,27 @@ set connection user2;
 lock table user1.t100 in exclusive mode;
 lock table user1.t100 in share mode;
 commit;
+autocommit on;
+
+-- DERBY-1686
+set connection user1;
+create table t1 (i int);
+insert into t1 values 1,2,3;
+grant select on t1 to user2;
+set connection user2;
+create view v1 as select * from user1.t1;
+-- attempt to grant this view to others, should fail since user2
+-- does not have grant privilege on object user1.t1
+grant select on user1.t1 to user3;
+-- expect error
+grant select on v1 to user3;
+-- cleanup
+set connection user2;
+drop view v1;
+set connection user1;
+drop table t1;
+autocommit on;
+set connection user2;
 autocommit on;
 
 -- Simple test case for DERBY-1583: column privilege checking should not
