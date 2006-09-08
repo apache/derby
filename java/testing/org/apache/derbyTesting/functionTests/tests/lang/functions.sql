@@ -303,6 +303,10 @@ select cast (FLOOR(d) as DECIMAL(6,3)) AS FLOOR FROM SYSFUN_MATH_TEST;
 
 select cast (SYSFUN.ACOS(d) as DECIMAL(6,3)) AS SYSFUN_ACOS FROM SYSFUN_MATH_TEST;
 
+CREATE VIEW VSMT AS SELECT SIN(d) sd, PI() pi FROM SYSFUN_MATH_TEST;
+select cast (sd as DECIMAL(6,3)), cast (pi as DECIMAL(6,3)) from VSMT;
+drop view VSMT;
+
 drop table SYSFUN_MATH_TEST;
 
 drop function SYSFUN.ACOS;

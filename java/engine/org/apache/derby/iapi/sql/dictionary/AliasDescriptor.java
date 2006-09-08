@@ -320,4 +320,13 @@ public final class AliasDescriptor
 	{
 		return specificName;
 	}
+    
+    /**
+     * Functions are persistent unless they are in the SYSFUN schema.
+     *
+     */
+    public boolean isPersistent()
+    {
+        return !getSchemaUUID().toString().equals(SchemaDescriptor.SYSFUN_SCHEMA_UUID);
+    }
 }

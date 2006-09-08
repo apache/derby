@@ -700,6 +700,16 @@ SYSFUN_&
 NULL    
 0.836   
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
+ij> CREATE VIEW VSMT AS SELECT SIN(d) sd, PI() pi FROM SYSFUN_MATH_TEST;
+0 rows inserted/updated/deleted
+ij> select cast (sd as DECIMAL(6,3)), cast (pi as DECIMAL(6,3)) from VSMT;
+1       |2       
+-----------------
+NULL    |3.141   
+0.620   |3.141   
+0.973   |3.141   
+ij> drop view VSMT;
+0 rows inserted/updated/deleted
 ij> drop table SYSFUN_MATH_TEST;
 0 rows inserted/updated/deleted
 ij> drop function SYSFUN.ACOS;
