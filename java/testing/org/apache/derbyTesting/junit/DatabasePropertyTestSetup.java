@@ -29,6 +29,8 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
+
 /**
  * Test decorator to set a set of database properties on setUp
  * and restore them to the previous values on tearDown.
@@ -75,15 +77,21 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         CallableStatement setDBP =  conn.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, NULL)");
     	// Clear all the system properties set by the new set
-    	// that will not be reset by the old set.
-       	for (Enumeration e = newValues.propertyNames(); e.hasMoreElements();)
-       	{
-       		String key = (String) e.nextElement();
-       		if (oldValues.getProperty(key) == null)
-            {
-                 setDBP.setString(1, key);
-                 setDBP.executeUpdate();
-             }
+    	// that will not be reset by the old set. Ignore any 
+        // invalid property values.
+        try {
+        	for (Enumeration e = newValues.propertyNames(); e.hasMoreElements();)
+        	{
+        		String key = (String) e.nextElement();
+        		if (oldValues.getProperty(key) == null)
+        		{
+        			setDBP.setString(1, key);
+        			setDBP.executeUpdate();
+        		}
+        	}
+        } catch (SQLException sqle) {
+        	if(!sqle.getSQLState().equals(SQLStateConstants.PROPERTY_UNSUPPORTED_CHANGE))
+        		throw sqle;
         }
     	// and then reset nay old values which will cause the commit.
     	setProperties(oldValues);

@@ -62,6 +62,11 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(GroupByExpressionTest.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
         suite.addTest(TimeHandlingTest.suite());
+        
+        // This test internally sets derby.database.sqlAuthorization to true
+        // This property is not resettable and hence may affect other tests 
+        // using it and sharing the same database.
+        suite.addTest(SQLAuthorizationPropTest.suite());
 		
 		// Tests that are compiled using 1.4 target need to
 		// be added this way, otherwise creating the suite

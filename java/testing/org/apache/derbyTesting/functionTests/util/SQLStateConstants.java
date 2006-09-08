@@ -343,4 +343,8 @@ public class SQLStateConstants
     //isWrapperFor returns false is passed as a parameter to the 
     //unwrap method.
     public static final String UNABLE_TO_UNWRAP = "XJ128";
+    
+    public static final String LANG_GRANT_REVOKE_WITH_LEGACY_ACCESS = "42Z60";
+    public static final String SHUTDOWN_DATABASE = "08006";
+    public static final String PROPERTY_UNSUPPORTED_CHANGE = "XCY02";
 }
