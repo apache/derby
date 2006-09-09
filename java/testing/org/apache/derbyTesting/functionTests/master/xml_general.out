@@ -498,6 +498,14 @@ ij> values xmlexists('//lets' passing by ref xmlparse(document '<lets> try this 
 1    
 -----
 true 
+ij> values xmlexists('//lets/@doit' passing by ref xmlparse(document '<lets doit="true"> try this </lets>' preserve whitespace));
+1    
+-----
+true 
+ij> values xmlexists('//lets/@dot' passing by ref xmlparse(document '<lets doit="true"> try this </lets>' preserve whitespace));
+1    
+-----
+false
 ij> select xmlserialize(x1 as clob) from t5 where xmlexists('//*' passing by ref x1);
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
@@ -1126,6 +1134,99 @@ from t1 where i = 6;
 I          |2    
 -----------------
 6          |true 
+ij> -- DERBY-1759: Serialization of attribute nodes.
+-- Add a test row to t1.
+insert into t1 values (10,
+  xmlparse(document
+    '<threeatts first="1" second="two" third="le 3 trois"/>'
+    preserve whitespace
+  ));
+1 row inserted/updated/deleted
+ij> -- Echo t1 rows for reference.
+select i, xmlserialize(x as char(75)) from t1;
+I          |2                                                                          
+---------------------------------------------------------------------------------------
+1          |<update2> document was inserted as part of an UPDATE </update2>            
+2          |NULL                                                                       
+4          |NULL                                                                       
+3          |NULL                                                                       
+5          |<hmm/>                                                                     
+6          |<half> <masted> bass </masted> boosted. </half>                            
+7          |<umm> decl check </umm>                                                    
+7          |<lets> <try> this out </try> </lets>                                       
+9          |<here><is><my height="4.4">attribute</my></is></here>                      
+10         |<threeatts first="1" second="two" third="le 3 trois"/>                     
+ij> -- This should fail because XML serialization dictates that
+-- we throw an error if an attempt is made to serialize a
+-- sequence that has one or more top-level attributes nodes.
+select
+  xmlserialize(
+    xmlquery(
+      '//@*' passing by ref x empty on empty
+    )
+  as char(50))
+from t1
+where xmlexists('//@*' passing by ref x);
+1                                                 
+--------------------------------------------------
+ERROR 2200W: XQuery serialization error: Attempted to serialize one or more top-level Attribute nodes.
+ij> -- Demonstrate that Xalan "string" function only returns
+-- string value of first attribute and thus cannot be
+-- used to retrieve a sequence of att values.
+select
+  xmlserialize(
+    xmlquery(
+      'string(//@*)'
+      passing by ref x empty on empty
+    )
+  as char(50))
+from t1
+where xmlexists('//@*' passing by ref x);
+1                                                 
+--------------------------------------------------
+4.4                                               
+1                                                 
+ij> -- Xalan doesn't have a function that allows retrieval of a
+-- sequence of attribute values.  One can only retrieve a
+-- sequence of attribute *nodes*, but since those can't be
+-- serialized (because of SQL/XML rules) the user has no
+-- way to get them.  The following is a very (VERY) ugly
+-- two-part workaround that one could use until something
+-- better is available.  First, get the max number of
+-- attributes in the table.
+select
+  max(
+    cast(
+      xmlserialize(
+        xmlquery('count(//@*)' passing by ref x empty on empty)
+      as char(50))
+    as int)
+  )
+from t1;
+1          
+-----------
+3          
+WARNING 01003: Null values were eliminated from the argument of a column function.
+ij> -- Then use XPath position syntax to retrieve the attributes
+-- and concatenate them.  We need one call to string(//@[i])
+-- for every for every i between 1 and the value found in the
+-- preceding query.  In this case we know the max is three,
+-- so use that.
+select
+  xmlserialize(
+    xmlquery(
+      'concat(string(//@*[1]), " ",
+        string(//@*[2]), " ",
+        string(//@*[3]))'
+      passing by ref x empty on empty
+    )
+  as char(50))
+from t1
+where xmlexists('//@*' passing by ref x);
+1                                                 
+--------------------------------------------------
+4.4                                               
+1 two le 3 trois                                  
 ij> -- clean up.
 drop table t0;
 0 rows inserted/updated/deleted

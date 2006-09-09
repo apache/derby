@@ -210,6 +210,8 @@ select i, xmlexists('//let' passing by ref x) from t1;
 select i, xmlexists('//lets' passing by ref x) from t1;
 values xmlexists('//let' passing by ref xmlparse(document '<lets> try this </lets>' preserve whitespace));
 values xmlexists('//lets' passing by ref xmlparse(document '<lets> try this </lets>' preserve whitespace));
+values xmlexists('//lets/@doit' passing by ref xmlparse(document '<lets doit="true"> try this </lets>' preserve whitespace));
+values xmlexists('//lets/@dot' passing by ref xmlparse(document '<lets doit="true"> try this </lets>' preserve whitespace));
 select xmlserialize(x1 as clob) from t5 where xmlexists('//*' passing by ref x1);
 select xmlserialize(x2 as clob) from t5 where xmlexists('//*' passing by ref x2);
 select xmlserialize(x1 as clob), xmlexists('//*' passing by ref xmlparse(document '<badboy/>' preserve whitespace)) from t5;
@@ -622,6 +624,78 @@ select i,
     xmlquery('.' passing by ref x empty on empty)
   )
 from t1 where i = 6;
+
+-- DERBY-1759: Serialization of attribute nodes.
+
+-- Add a test row to t1.
+insert into t1 values (10,
+  xmlparse(document
+    '<threeatts first="1" second="two" third="le 3 trois"/>'
+    preserve whitespace
+  ));
+
+-- Echo t1 rows for reference.
+select i, xmlserialize(x as char(75)) from t1;
+
+-- This should fail because XML serialization dictates that
+-- we throw an error if an attempt is made to serialize a
+-- sequence that has one or more top-level attributes nodes.
+select
+  xmlserialize(
+    xmlquery(
+      '//@*' passing by ref x empty on empty
+    )
+  as char(50))
+from t1
+where xmlexists('//@*' passing by ref x);
+
+-- Demonstrate that Xalan "string" function only returns
+-- string value of first attribute and thus cannot be
+-- used to retrieve a sequence of att values.
+select
+  xmlserialize(
+    xmlquery(
+      'string(//@*)'
+      passing by ref x empty on empty
+    )
+  as char(50))
+from t1
+where xmlexists('//@*' passing by ref x);
+
+-- Xalan doesn't have a function that allows retrieval of a
+-- sequence of attribute values.  One can only retrieve a
+-- sequence of attribute *nodes*, but since those can't be
+-- serialized (because of SQL/XML rules) the user has no
+-- way to get them.  The following is a very (VERY) ugly
+-- two-part workaround that one could use until something
+-- better is available.  First, get the max number of
+-- attributes in the table.
+select
+  max(
+    cast(
+      xmlserialize(
+        xmlquery('count(//@*)' passing by ref x empty on empty)
+      as char(50))
+    as int)
+  )
+from t1; 
+
+-- Then use XPath position syntax to retrieve the attributes
+-- and concatenate them.  We need one call to string(//@[i])
+-- for every for every i between 1 and the value found in the
+-- preceding query.  In this case we know the max is three,
+-- so use that.
+select
+  xmlserialize(
+    xmlquery(
+      'concat(string(//@*[1]), " ",
+        string(//@*[2]), " ",
+        string(//@*[3]))'
+      passing by ref x empty on empty
+    )
+  as char(50))
+from t1
+where xmlexists('//@*' passing by ref x);
 
 -- clean up.
 drop table t0;

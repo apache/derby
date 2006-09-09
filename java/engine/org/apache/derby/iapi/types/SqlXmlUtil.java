@@ -32,6 +32,7 @@ import java.io.StringReader;
 
 // -- JDBC 3.0 JAXP API classes.
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -297,23 +298,43 @@ public class SqlXmlUtil
         ArrayList aList = new ArrayList();
         aList.add(dBuilder.parse(
             new InputSource(new StringReader(xmlAsText))));
-        return serializeToString(aList);
+
+        /* The second argument in the following call is for
+         * catching cases where we have a top-level (parentless)
+         * attribute node--but since we just created the list
+         * with a single Document node, we already we know we
+         * don't have a top-level attribute node in the list,
+         * so we don't have to worry.  Hence the "null" here.
+         */
+        return serializeToString(aList, null);
     }
 
     /**
      * Take an array list (sequence) of XML nodes and/or string values
      * and serialize that entire list according to SQL/XML serialization
-     * rules.  We do that by going through each item in the array
-     * list and either serializing it (if it's a Node) or else
-     * just echoing the value to the serializer (if it's a Text
-     * node or an atomic value).
+     * rules, which ultimately point to XML serialization rules as
+     * defined by w3c.  As part of that serialization process we have
+     * to first "normalize" the sequence.  We do that by iterating through
+     * the list and performing the steps for "sequence normalization" as
+     * defined here:
+     *
+     * http://www.w3.org/TR/xslt-xquery-serialization/#serdm
+     *
+     * This method primarily focuses on taking the steps for normalization;
+     * for the rest of the serialization work, we just make calls on the
+     * DOMSerializer class provided by Xalan.
      *
      * @param items List of items to serialize
-     * @return Single string holding the concatenation of the serialized
-     *  form of all items in the list
+     * @param xmlVal XMLDataValue into which the serialized string
+     *  returned by this method is ultimately going to be stored.
+     *  This is used for keeping track of XML values that represent
+     *  sequences having top-level (parentless) attribute nodes.
+     * @return Single string holding the serialized version of the
+     *  normalized sequence created from the items in the received
+     *  list.
      */
-    protected String serializeToString(ArrayList items)
-        throws java.io.IOException
+    protected String serializeToString(ArrayList items,
+        XMLDataValue xmlVal) throws java.io.IOException
     {
         if ((items == null) || (items.size() == 0))
         // nothing to do; return empty sequence.
@@ -334,26 +355,121 @@ public class SqlXmlUtil
         int sz = items.size();
         Object obj = null;
 
+        /* Step 1: Empty sequence.  If we have an empty sequence then we
+         * won't ever enter the for loop and the call to sWriter.toString()
+         * at the end of this method will return an empty string, as
+         * required.  Otherwise, for a non-empty sequence our "items"
+         * list already corresponds to "S1".
+         */
+
         // Iterate through the list and serialize each item.
+        boolean lastItemWasString = false;
         for (int i = 0; i < sz; i++)
         {
             obj = items.get(i);
-            if (obj instanceof String)
             // if it's a string, then this corresponds to some atomic
             // value, so just echo the string as it is.
+            if (obj instanceof String)
+            {
+                /* Step 2: Atomic values.  If "obj" is a string then it
+                 * corresponds to some atomic value whose "lexical
+                 * representation" is obj.  So we just take that.
+                 */
+
+                if (lastItemWasString)
+                {
+                    /* Step 3: Adjacent strings.  If we have multiple adjacent
+                     * strings then concatenate them with a single space
+                     * between them.
+                     */
+                    sWriter.write(" ");
+                }
+
+                /* Step 4: Create a Text node from the adjacent strings.
+                 * Since we're just going to serialize the Text node back
+                 * into a string, we short-cut this step by skipping the
+                 * creation of the Text node and just writing the string
+                 * out directly to our serialized stream.
+                 */
                 sWriter.write((String)obj);
+                lastItemWasString = true;
+            }
+            else if (obj instanceof Attr)
+            {
+                /* Step 7a: Attribute nodes.  If there is an Attribute node
+                 * node in the sequence then we have to throw a serialization
+                 * error.  NOTE: The rules say we also have to throw an error
+                 * for Namespace nodes, but JAXP doesn't define a "Namespace"
+                 * object per se; it just defines namespace prefixes and URIs
+                 * on other Nodes.  So we just check for attributes.  If we
+                 * find one then we take note of the fact that the result has
+                 * a parentless attribute node and later, if the user calls
+                 * XMLSERIALIZE on the received XMLDataValue we'll throw the
+                 * error as required.  Note that we currently only get here
+                 * for the XMLQUERY operator, which means we're serializing
+                 * a result sequence returned from Xalan and we're going to
+                 * store the serialized version into a Derby XML value.  In
+                 * that case the serialization is an internal operation--and
+                 * since the user didn't ask for it, we don't want to throw
+                 * the serialization error here.  If we did, then whenever an
+                 * XMLQUERY operation returned a result sequence with a top-
+                 * level attribute in it, the user would see a serialization
+                 * error. That's not correct since it is technically okay for
+                 * the XMLQUERY operation to return a sequence with an attribute
+                 * node; it's just not okay for a user to explicitly try to
+                 * serialize that sequence. So instead of throwing the error
+                 * here, we just take note of the fact that the sequence has
+                 * a top-level attribute.  Then later, IF the user makes an
+                 * explicit call to serialize the sequence, we'll throw the
+                 * appropriate error (see XML.XMLSerialize()).
+                 */
+                if (xmlVal != null)
+                    xmlVal.markAsHavingTopLevelAttr();
+                dSer.serialize((Node)obj);
+                lastItemWasString = false;
+            }
             else
             { // We have a Node, so try to serialize it.
                 Node n = (Node)obj;
                 if (n instanceof Text)
-                // Xalan doesn't allow a "serialize" call on Text nodes,
-                // so we just go ahead and echo the value of the text.
+                {
+                    /* Step 6: Combine adjacent text nodes into a single
+                     * text node.  Since we're just going to serialize the
+                     * Text node back into a string, we short-cut this step
+                     * by skipping the creation of a new Text node and just
+                     * writing the text value out directly to our serialized
+                     * stream.  Step 6 also says that empty text nodes should
+                     * be dropped--but if the text node is empty, the call
+                     * to getNodeValue() will return an empty string and
+                     * thus we've effectively "dropped" the text node from
+                     * the serialized result.  Note: it'd be cleaner to just
+                     * call "serialize()" on the Text node like we do for
+                     * all other Nodes, but Xalan doesn't allow that.  So
+                     * use the getNodeValue() method instead.
+                     */
                     sWriter.write(n.getNodeValue());
+                }
                 else
+                {
+                    /* Steps 5 and 7b: Copy all non-attribute, non-text
+                     * nodes to the "normalized sequence" and then serialize
+                     * that normalized sequence.  We short-cut this by
+                     * just letting Xalan do the serialization for every
+                     * Node in the current list of items that wasn't
+                     * "serialized" as an atomic value, attribute, or
+                     * text node.
+                     */
                     dSer.serialize(n);
+                }
+
+                lastItemWasString = false;
             }
         }
 
+        /* At this point sWriter holds the serialized version of the
+         * normalized sequence that corresponds to the received list
+         * of items.  So that's what we return.
+         */
         sWriter.flush();
         return sWriter.toString();
     }

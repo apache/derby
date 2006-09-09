@@ -130,6 +130,15 @@ public class XML
      */
     private static String xmlReqCheck = null;
 
+    /*
+     * Whether or not this XML value corresponds to a sequence
+     * that has one or more top-level ("parentless") attribute
+     * nodes.  If so then we have to throw an error if the user
+     * attempts to serialize this value, per XML serialization
+     * rules.
+     */
+    private boolean containsTopLevelAttr;
+
     /**
      * Default constructor.
      */
@@ -137,32 +146,26 @@ public class XML
     {
         xmlStringValue = null;
         xType = -1;
+        containsTopLevelAttr = false;
     }
 
     /**
      * Private constructor used for the getClone() method.
-     * Takes a SQLChar and clones it.
+     *
      * @param val A SQLChar instance to clone and use for
      *  this XML value.
+     * @param xmlType Qualified XML type for "val"
+     * @param seqWithAttr Whether or not "val" corresponds to
+     *  sequence with one or more top-level attribute nodes.
+     * @return A new instance of XML whose fields are clones
+     *  of the values received.
      */
-    private XML(SQLChar val)
-    {
-        xmlStringValue = (val == null ? null : (SQLChar)val.getClone());
-        xType = -1;
-    }
-
-    /**
-     * Private constructor used for the getClone() method.
-     * Takes a SQLChar and clones it and also takes a
-     * qualified XML type and stores that as this XML
-     * object's qualified type.
-     * @param val A SQLChar instance to clone and use for
-     *  this XML value.
-     */
-    private XML(SQLChar val, int xmlType)
+    private XML(SQLChar val, int xmlType, boolean seqWithAttr)
     {
         xmlStringValue = (val == null ? null : (SQLChar)val.getClone());
         setXType(xmlType);
+        if (seqWithAttr)
+            markAsHavingTopLevelAttr();
     }
 
     /* ****
@@ -174,7 +177,7 @@ public class XML
      */
     public DataValueDescriptor getClone()
     {
-        return new XML(xmlStringValue, getXType());
+        return new XML(xmlStringValue, getXType(), hasTopLevelAttr());
     }
 
     /**
@@ -284,7 +287,11 @@ public class XML
          * brings us to this method).
          */
         if (theValue instanceof XMLDataValue)
+        {
             setXType(((XMLDataValue)theValue).getXType());
+            if (((XMLDataValue)theValue).hasTopLevelAttr())
+                markAsHavingTopLevelAttr();
+        }
     }
 
     /** 
@@ -636,6 +643,22 @@ public class XML
             return result;
         }
 
+        /* XML serialization rules say that sequence "normalization"
+         * must occur before serialization, and normalization dictates
+         * that a serialization error must be thrown if the XML value
+         * is a sequence with a top-level attribute.  We normalized
+         * (and serialized) this XML value when it was first created,
+         * and at that time we took note of whether or not there is
+         * a top-level attribute.  So throw the error here if needed.
+         * See SqlXmlUtil.serializeToString() for more on sequence
+         * normalization.
+         */
+        if (this.hasTopLevelAttr())
+        {
+            throw StandardException.newException(
+                SQLState.LANG_XQUERY_SERIALIZATION_ERROR);
+        }
+
         // Get the XML value as a string.  For this UTF-8 impl,
         // we already have it as a UTF-8 string, so just use
         // that.
@@ -749,11 +772,10 @@ public class XML
             ArrayList itemRefs = sqlxUtil.evalXQExpression(
                 this, true, xType);
 
-            String strResult = sqlxUtil.serializeToString(itemRefs);
             if (result == null)
-                result = new XML(new SQLChar(strResult));
-            else
-                result.setValue(new SQLChar(strResult));
+                result = new XML();
+            String strResult = sqlxUtil.serializeToString(itemRefs, result);
+            result.setValue(new SQLChar(strResult));
 
             // Now that we've set the result value, make sure
             // to indicate what kind of XML value we have.
@@ -795,6 +817,17 @@ public class XML
     public void setXType(int xtype)
     {
         this.xType = xtype;
+
+        /* If the target type is XML_DOC_ANY then this XML value
+         * holds a single well-formed Document.  So we know that
+         * we do NOT have any top-level attribute nodes.  Note: if
+         * xtype is SEQUENCE we don't set "containsTopLevelAttr"
+         * here; assumption is that the caller of this method will
+         * then set the field as appropriate.  Ex. see "setFrom()"
+         * in this class.
+         */
+        if (xtype == XML_DOC_ANY)
+            containsTopLevelAttr = false;
     }
 
     /**
@@ -803,6 +836,24 @@ public class XML
     public int getXType()
     {
         return xType;
+    }
+
+    /**
+     * Take note of the fact this XML value represents an XML
+     * sequence that has one or more top-level attribute nodes.
+     */
+    public void markAsHavingTopLevelAttr()
+    {
+        this.containsTopLevelAttr = true;
+    }
+
+    /**
+     * Return whether or not this XML value represents a sequence
+     * that has one or more top-level attribute nodes.
+     */
+    public boolean hasTopLevelAttr()
+    {
+        return containsTopLevelAttr;
     }
 
     /**

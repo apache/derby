@@ -115,4 +115,16 @@ public interface XMLDataValue extends DataValueDescriptor
      * Retrieve this XML value's qualified type.
      */
     public int getXType();
+
+    /**
+     * Take note of the fact this XML value represents an XML
+     * sequence that has one or more top-level attribute nodes.
+     */
+    public void markAsHavingTopLevelAttr();
+
+    /**
+     * Return whether or not this XML value represents a sequence
+     * that has one or more top-level attribute nodes.
+     */
+    public boolean hasTopLevelAttr();
 }
