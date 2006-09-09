@@ -15,7 +15,6 @@
 #           regardless of framework
 # excluding largedata/LobLimits.java to run with the network server because currently lobs are materialized and this test tests for 2G lobs.
 # 			see DERBY-326 and DERBY-550 issues
-# excluding jdbcapi/UpdatableResultSetTest.java - Test fails with JCC
 jdbcapi/resultsetStream.java
 lang/errorStream.java
 lang/scrollCursors2.java
@@ -46,4 +45,3 @@ jdbcapi/ResultSetCloseTest.junit
 # DERBY-1691: when run against JCC, exceptions in blobclob4BLOB can appear in
 # different places in the output.
 jdbcapi/blobclob4BLOB.java
-jdbcapi/UpdatableResultSetTest.junit

@@ -77,6 +77,18 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
         conn.close();
     }
     
+    /** Create a test suite with all tests in this class. */
+    public static Test suite() {
+        TestSuite ts = new TestSuite();
+
+        // Test will fail with JCC.
+        if (usingDerbyNet()) {
+            return ts;
+        }
+
+        ts.addTestSuite(UpdatableResultSetTest.class);
+        return ts;
+    }
     
     /**
      * Tests insertRow with table name containing quotes

@@ -52,6 +52,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(ProcedureTest.suite());
 		suite.addTest(SURQueryMixTest.suite());
 		suite.addTest(SURTest.suite());
+		suite.addTest(UpdatableResultSetTest.suite());
 		suite.addTest(UpdateXXXTest.suite());
 		suite.addTestSuite(URCoveringIndexTest.class);
         suite.addTest(ResultSetCloseTest.suite());
