@@ -110,6 +110,7 @@ public class TestProto {
 	private static final int CHECK_SQLCARD = 54;
 	private static final int MORE_DATA = 55;
 	private static final int COMPLETE_TEST = 56;
+    private static final int READ_SECMEC_SECCHKCD = 57;
 
 	private static final String MULTIVAL_START = "MULTIVALSTART";
 	private static final String MULTIVAL_SEP = "SEP";
@@ -324,6 +325,7 @@ public class TestProto {
 		commandTable.put("checksqlcard", new Integer(CHECK_SQLCARD));
 		commandTable.put("moredata", new Integer(MORE_DATA));
 		commandTable.put("completetest", new Integer(COMPLETE_TEST));
+        commandTable.put("readsecmecandsecchkcd", new Integer(READ_SECMEC_SECCHKCD));
 		
 		Integer key;
 		for (Enumeration e = codePointNameTable.keys(); e.hasMoreElements(); )
@@ -468,6 +470,9 @@ public class TestProto {
 				val = reader.readByte();
 				checkIntOrCP(val);
 				break;
+            case READ_SECMEC_SECCHKCD:
+                readSecMecAndSECCHKCD();
+                break;
 			case READ_BYTES:
 				byte[] byteArray = reader.readBytes();
 				byte[] reqArray = getBytes();
@@ -884,6 +889,47 @@ public class TestProto {
 		if (codepoint != reqCP)
 			cpError(codepoint, reqCP);
 	}
+    
+    /**
+     * Handle the case of testing the reading of SECMEC and SECCHKCD, 
+     * where on an invalid SECMEC value for ACCSEC, the server can send 
+     * valid supported SECMEC values. One of the valid supported value can be 
+     * EUSRIDPWD (secmec value of 9) depending on if the server JVM 
+     * can actually support it or not.
+     * @exception   IOException, DRDAProtocolException  error reading file or protocol
+     */
+    private void readSecMecAndSECCHKCD() throws IOException, DRDAProtocolException
+    {
+        int codepoint;
+        boolean notDone = true;
+        int val = -1;
+        do
+        {
+            codepoint = reader.readLengthAndCodePoint();
+            switch(codepoint)
+            {
+              case CodePoint.SECMEC:
+              {
+                  System.out.print("SECMEC=");
+                  val = reader.readNetworkShort();
+                  System.out.print(val+" ");
+              }
+              break;
+              case CodePoint.SECCHKCD:
+              {
+                  System.out.print("SECCHKCD=");
+                  val = reader.readByte();
+                  System.out.println(val);
+                  notDone = false;
+              }
+              break;
+              default:
+                  notDone=false;
+            }
+        }while(notDone);
+    }
+
+    
 	/**
 	 * Codepoint error
  	 *

@@ -1688,8 +1688,10 @@ class DRDAConnThread extends Thread {
                                 securityMechanism != CodePoint.SECMEC_USRIDONL)
                         {
                             // These are the only other mechanisms we understand
-                            if ((securityMechanism !=
-                                        CodePoint.SECMEC_EUSRIDPWD) &&
+                            if (((securityMechanism != CodePoint.SECMEC_EUSRIDPWD) ||
+                                 (securityMechanism == CodePoint.SECMEC_EUSRIDPWD && 
+                                   !server.supportsEUSRIDPWD())
+                                 ) &&
                                 (securityMechanism !=
                                         CodePoint.SECMEC_USRSSBPWD))
                                 //securityCheckCode = CodePoint.SECCHKCD_NOTSUPPORTED;
@@ -2671,7 +2673,10 @@ class DRDAConnThread extends Thread {
                 // mechanisms for value of one SECMEC codepoint (JIRA 926)
                 // these are the ones we know about
                 writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDPWD);
-                writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_EUSRIDPWD);
+                // include EUSRIDPWD in the list of supported secmec only if 
+                // server can truely support it in the jvm that is running in
+                if ( server.supportsEUSRIDPWD())
+                    writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_EUSRIDPWD);
                 writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRIDONL);
                 writer.writeScalar2Bytes(CodePoint.SECMEC, CodePoint.SECMEC_USRSSBPWD);
             }

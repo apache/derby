@@ -297,8 +297,32 @@ public final class NetworkServerControlImpl {
 	// databases it has booted.
 	private boolean shutdownDatabasesOnShutdown = false;
 	
+    // Sun JCE does not have support for EUSRIDPWD, whereas
+    // most versions of IBM JCE have support for this.  Hence
+    // find out if the server can support EUSRIDPWD.
+    private static boolean SUPPORTS_EUSRIDPWD = false;
 
-	// constructor
+    static
+    {
+        try
+        {
+            // The DecryptionManager class will instantiate objects of the required 
+            // security algorithms that are needed for EUSRIDPWD
+            // An exception will be thrown if support is not available
+            // in the JCE implementation in the JVM in which the server
+            // is started.
+            new DecryptionManager();
+            SUPPORTS_EUSRIDPWD = true;
+        }catch(Exception e)
+        {
+            // if an exception is thrown, ignore exception.
+            // set SUPPORTS_EUSRIDPWD to false indicating that the server 
+            // does not have support for EUSRIDPWD security mechanism
+            SUPPORTS_EUSRIDPWD = false;
+        }
+    }
+
+    // constructor
 	public NetworkServerControlImpl() throws Exception
 	{
 		init();
@@ -2578,6 +2602,17 @@ public final class NetworkServerControlImpl {
         return null;
     }
    
+    /**
+     * EUSRIDPWD support depends on the availability of the
+     * algorithm in the JCE implementation in the classpath 
+     * of the server. At runtime, information about this 
+     * capability is figured out.  
+     * @return whether EUSRIDPWD is supported or not
+     */
+    boolean supportsEUSRIDPWD()
+    {
+        return SUPPORTS_EUSRIDPWD;
+    }
 	/**
 	 * Get integer property values
 	 *
@@ -2925,7 +2960,12 @@ public final class NetworkServerControlImpl {
     {
        allowOnlySecurityMechanism = getSecMecValue(s);
        
-       if (allowOnlySecurityMechanism == INVALID_OR_NOTSET_SECURITYMECHANISM)
+       // if server vm cannot support EUSRIDPWD, then do not allow 
+       // derby.drda.securityMechanism to be set to EUSRIDPWD security
+       // mechanism
+       if ((allowOnlySecurityMechanism == INVALID_OR_NOTSET_SECURITYMECHANISM) ||
+              (allowOnlySecurityMechanism == CodePoint.SECMEC_EUSRIDPWD &&
+              !SUPPORTS_EUSRIDPWD))
            consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
                        {s, Property.DRDA_PROP_SECURITYMECHANISM});
     }

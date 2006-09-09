@@ -236,6 +236,11 @@ public class testSecMec extends dataSourcePermissions_net
 		                System.out.println("EXPECTED EXCEPTION "+ e.getMessage());
 		                continue;
 		            }
+                    // if server jvm does not support EUSRIDPWD, an exception
+                    // will be raised when server is started with 
+                    // derby.drda.securityMechanism=ENCRYPTED_USER_AND_PASSWORD_SECURITY
+                    System.out.println("EXCEPTION " +e.getMessage());
+                    continue;
 		        }
 		        
 		        // Wait for the NetworkServer to start.  As part of DERBY-1793

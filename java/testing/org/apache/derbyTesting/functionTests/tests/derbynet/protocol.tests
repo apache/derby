@@ -139,11 +139,7 @@ flush
 skipDss		// don't care about the EXCSATRM so just skip
 readReplyDss
 readLengthAndCodePoint ACCSECRD // ACCSECRD
-readScalar2Bytes SECMEC 3// SECMEC
-readScalar2Bytes SECMEC 9// SECMEC
-readScalar2Bytes SECMEC 4// SECMEC
-readScalar2Bytes SECMEC 8// SECMEC
-readScalar1Byte SECCHKCD 1// SECMEC
+readSecMecAndSECCHKCD // read secmec values and secchkcd
 endTest
 //
 DISPLAY "Test trying too big on SECMEC"
@@ -230,8 +226,7 @@ flush
 skipDss		// don't care about the EXCSATRM so just skip
 readReplyDss
 readLengthAndCodePoint ACCSECRD // ACCSECRD
-readScalar2Bytes SECMEC 9 // SECMEC encrypted userid password
-readScalar1Byte SECCHKCD MULTIVALSTART 10 SEP 14 MULTIVALEND // can not start decryption manager for all jdks except ibm14
+readSecMecAndSECCHKCD
 endTest
 //
 DISPLAY "Test specifying unencrypted security mechanism with a security token"
@@ -296,11 +291,7 @@ flush
 skipDss		// don't care about the EXCSATRM so just skip
 readReplyDss
 readLengthAndCodePoint ACCSECRD // ACCSECRD
-readScalar2Bytes SECMEC 3// SECMEC
-readScalar2Bytes SECMEC 9// SECMEC
-readScalar2Bytes SECMEC 4// SECMEC
-readScalar2Bytes SECMEC 8// SECMEC
-readScalar1Byte SECCHKCD 1// SECMEC
+readSecMecAndSECCHKCD
 // ok send one we support
 createDssRequest
 startDdm ACCSEC

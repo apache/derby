@@ -23,6 +23,7 @@ PASSED
 ACCSEC doesn't follow EXCSAT
 PASSED
 Test trying security mechanism we don't support
+SECMEC=3 SECMEC=4 SECMEC=8 SECCHKCD=1
 PASSED
 Test trying too big on SECMEC
 PASSED
@@ -33,12 +34,14 @@ PASSED
 Test missing RDBNAM on ACCSEC
 PASSED
 Test specifying encrypted security mechanism without a security token
+SECMEC=3 SECMEC=4 SECMEC=8 SECCHKCD=1
 PASSED
 Test specifying unencrypted security mechanism with a security token
 PASSED
 Test SECCHK not following after ACCSEC
 PASSED
 Test doing two tries for security mechanism
+SECMEC=3 SECMEC=4 SECMEC=8 SECCHKCD=1
 PASSED
 Test missing SECMEC on SECCHK
 PASSED
