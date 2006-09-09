@@ -47,7 +47,6 @@ final class ClientThread extends Thread {
 		{
 
 			Socket clientSocket = null;
-			Session clientSession = null;
 
 
 			for (;;)
@@ -84,31 +83,8 @@ final class ClientThread extends Thread {
 							Integer.toString(connNum));
 
 				//create a new Session for this session
-				// Note that we always re-fetch the tracing
-				// configuration from the parent, because it
-				// may have changed (there are administrative
-				// commands which allow dynamic tracing
-				// reconfiguration).
-				clientSession = new Session(connNum, clientSocket, 
-					parent.getTraceDirectory(),
-					parent.getTraceAll());
+				parent.addSession(connNum, clientSocket);
 
-				//add to Session list
-				parent.addToSessionTable(new Integer(connNum), clientSession);
-
-				//create a new thread for this connection if we need one
-				//and if we are allowed
-				if (parent.getFreeThreads() == 0 && 
-					(parent.getMaxThreads() == 0  || 
-					parent.getThreadList().size() < parent.getMaxThreads()))
-				{
-					DRDAConnThread thread = new DRDAConnThread(clientSession, 
-						parent, timeSlice, parent.getLogConnections());
-					parent.getThreadList().addElement(thread);
-					thread.start();
-				}
-				else //wait for a free thread
-					parent.runQueueAdd(clientSession);
 				}catch (Exception e) {
 					if (e instanceof InterruptedException)
 						return;

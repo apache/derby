@@ -3372,14 +3372,58 @@ public final class NetworkServerControlImpl {
 
 
 	/**
-	 * Add To Session Table - for use by ClientThread, add a new Session to the sessionTable.
+	 * Add a session - for use by <code>ClientThread</code>. Put the session
+	 * into the session table and the run queue. Start a new
+	 * <code>DRDAConnThread</code> if there are more sessions waiting than
+	 * there are free threads, and the maximum number of threads is not
+	 * exceeded.
 	 *
-	 * @param i	Connection number to register
-	 * @param s	Session to add to the sessionTable
+	 * @param connectionNumber number of connection
+	 * @param clientSocket the socket to read from and write to
 	 */
-	protected void addToSessionTable(Integer i, Session s)
-	{
-		sessionTable.put(i, s);
+	void addSession(int connectionNumber, Socket clientSocket)
+			throws IOException {
+
+		// Note that we always re-fetch the tracing configuration because it
+		// may have changed (there are administrative commands which allow
+		// dynamic tracing reconfiguration).
+		Session session = new Session(connectionNumber, clientSocket,
+									  getTraceDirectory(), getTraceAll());
+
+		sessionTable.put(new Integer(connectionNumber), session);
+
+		// Synchronize on runQueue to prevent other threads from updating
+		// runQueue or freeThreads. Hold the monitor's lock until a thread is
+		// started or the session is added to the queue. If we release the lock
+		// earlier, we might start too few threads (DERBY-1817).
+		synchronized (runQueue) {
+			DRDAConnThread thread = null;
+
+			// try to start a new thread if we don't have enough free threads
+			// to service all sessions in the run queue
+			if (freeThreads <= runQueue.size()) {
+				// Synchronize on threadsSync to ensure that the value of
+				// maxThreads doesn't change until the new thread is added to
+				// threadList.
+				synchronized (threadsSync) {
+					// only start a new thread if we have no maximum number of
+					// threads or the maximum number of threads is not exceeded
+					if ((maxThreads == 0) ||
+							(threadList.size() < maxThreads)) {
+						thread = new DRDAConnThread(session, this,
+													getTimeSlice(),
+													getLogConnections());
+						threadList.add(thread);
+						thread.start();
+					}
+				}
+			}
+
+			// add the session to the run queue if we didn't start a new thread
+			if (thread == null) {
+				runQueueAdd(session);
+			}
+		}
 	}
 
 	/**
