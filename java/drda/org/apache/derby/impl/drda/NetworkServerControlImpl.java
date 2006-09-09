@@ -297,11 +297,19 @@ public final class NetworkServerControlImpl {
 	// databases it has booted.
 	private boolean shutdownDatabasesOnShutdown = false;
 	
-    // Sun JCE does not have support for EUSRIDPWD, whereas
-    // most versions of IBM JCE have support for this.  Hence
-    // find out if the server can support EUSRIDPWD.
+    /**
+     * Can EUSRIDPWD security mechanism be used with 
+     * the current JVM
+     */
     private static boolean SUPPORTS_EUSRIDPWD = false;
 
+    /*
+     * DRDA Specification for the EUSRIDPWD security mechanism
+     * requires DH algorithm support with a 32-byte prime to be
+     * used. Not all JCE implementations have support for this.
+     * Hence here we need to find out if EUSRIDPWD can be used
+     * with the current JVM.
+     */ 
     static
     {
         try
@@ -2603,16 +2611,16 @@ public final class NetworkServerControlImpl {
     }
    
     /**
-     * EUSRIDPWD support depends on the availability of the
-     * algorithm in the JCE implementation in the classpath 
-     * of the server. At runtime, information about this 
-     * capability is figured out.  
-     * @return whether EUSRIDPWD is supported or not
-     */
+     * This method returns whether EUSRIDPWD security mechanism
+     * is supported or not. See class static block for more
+     * info.
+     * @return true if EUSRIDPWD is supported, false otherwise
+     */ 
     boolean supportsEUSRIDPWD()
     {
         return SUPPORTS_EUSRIDPWD;
     }
+    
 	/**
 	 * Get integer property values
 	 *
