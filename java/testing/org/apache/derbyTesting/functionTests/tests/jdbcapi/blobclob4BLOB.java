@@ -255,13 +255,13 @@ public class blobclob4BLOB {
         catch (SQLException e)
         {
 			TestUtil.dumpSQLExceptions(e);
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
         catch (Throwable e)
         {
 			System.out.println("xFAIL -- unexpected exception:" + e.toString());
 //            e.fillInStackTrace();
-            if (debug) e.printStackTrace();
+            if (debug) e.printStackTrace(System.out);
 		}
 		System.out.println("Test blobclob finished\n");
     }
@@ -369,11 +369,11 @@ public class blobclob4BLOB {
         }
 		catch (SQLException e) {
 			TestUtil.dumpSQLExceptions(e);
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
         //System.out.println("prepareCLOBMAIN finished");
     }
@@ -442,11 +442,11 @@ public class blobclob4BLOB {
         }
 		catch (SQLException e) {
 			TestUtil.dumpSQLExceptions(e);
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
         System.out.println("prepareSearchClobTable finished");
     }
@@ -509,7 +509,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
 
     }
@@ -588,7 +588,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -636,7 +636,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -694,7 +694,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -750,7 +750,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-            if (debug) e.printStackTrace();
+            if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -819,7 +819,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-            if (debug) e.printStackTrace();
+            if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -885,7 +885,7 @@ public class blobclob4BLOB {
         }
         catch (Throwable e) {
             System.out.println("FAIL -- unexpected exception:" + e.toString());
-            if (debug) e.printStackTrace();
+            if (debug) e.printStackTrace(System.out);
         }
         
     }
@@ -954,7 +954,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1004,7 +1004,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1055,7 +1055,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1110,7 +1110,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1174,11 +1174,11 @@ public class blobclob4BLOB {
         }
 		catch (SQLException e) {
 			TestUtil.dumpSQLExceptions(e);
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1222,7 +1222,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1327,7 +1327,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1374,7 +1374,7 @@ public class blobclob4BLOB {
 		catch (Throwable e) {
 			System.out.println("52: Throwable");
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1398,7 +1398,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1444,7 +1444,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
 		System.out.println("end clobTest54");
     }
@@ -1567,7 +1567,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1627,11 +1627,11 @@ public class blobclob4BLOB {
         }
 		catch (SQLException e) {
 			TestUtil.dumpSQLExceptions(e);
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -1789,7 +1789,7 @@ public class blobclob4BLOB {
 
 		} catch (SQLException e) {
 			TestUtil.dumpSQLExceptions(e);
-			e.printStackTrace();
+			e.printStackTrace(System.out);
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
@@ -1972,7 +1972,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2027,7 +2027,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2089,7 +2089,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2174,7 +2174,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2284,7 +2284,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2335,7 +2335,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2402,7 +2402,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2436,7 +2436,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2518,7 +2518,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2574,7 +2574,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2821,7 +2821,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2882,7 +2882,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2919,7 +2919,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -2968,7 +2968,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-            if (debug) e.printStackTrace();
+            if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3049,7 +3049,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3091,7 +3091,7 @@ public class blobclob4BLOB {
 		catch (Throwable e)
         {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3156,7 +3156,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3185,7 +3185,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3309,7 +3309,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3361,7 +3361,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3430,7 +3430,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
     
@@ -3492,7 +3492,7 @@ public class blobclob4BLOB {
         }
         catch (Throwable e) {
             System.out.println("FAIL -- unexpected exception:" + e.toString());
-            if (debug) e.printStackTrace();
+            if (debug) e.printStackTrace(System.out);
         }
         
     }
@@ -3592,7 +3592,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3632,7 +3632,7 @@ public class blobclob4BLOB {
  		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
         System.out.println("blobTest52 finished");
     }
@@ -3657,7 +3657,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3708,7 +3708,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
         System.out.println("blobTest54 finished");
     }
@@ -3833,7 +3833,7 @@ public class blobclob4BLOB {
 			else 
 			{
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 			}
 		}
     }
@@ -3898,7 +3898,7 @@ public class blobclob4BLOB {
 		catch (Throwable e) {
 			System.out.println("blobTest7 FAIL -- unexpected exception:" + e.toString());
             e.fillInStackTrace();
-            if (debug) e.printStackTrace();
+            if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -3957,7 +3957,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -4027,7 +4027,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -4091,7 +4091,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -4176,7 +4176,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
 
     }
@@ -4271,7 +4271,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -4326,7 +4326,7 @@ public class blobclob4BLOB {
 		}
 		catch (Throwable e) {
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-			if (debug) e.printStackTrace();
+			if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -4695,13 +4695,13 @@ public class blobclob4BLOB {
 			else
 			{
 				System.out.println("FAIL -- unexpected exception:" + obe.toString());
-				if (debug) obe.printStackTrace();
+				if (debug) obe.printStackTrace(System.out);
 			}
 		}
 		catch (Exception e)
 		{
 			System.out.println("FAIL -- unexpected exception:" + e.toString());
-	        if (debug) e.printStackTrace();
+	        if (debug) e.printStackTrace(System.out);
 		}
     }
 
@@ -4782,7 +4782,7 @@ public class blobclob4BLOB {
 	
 				
 			TestUtil.dumpSQLExceptions(e, expected);
-			e.printStackTrace();
+			e.printStackTrace(System.out);
 		}
     }
 
