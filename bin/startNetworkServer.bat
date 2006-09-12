@@ -17,7 +17,7 @@
 @REM specific language governing permissions and limitations
 @REM under the License.
 
-CALL %~dp0derby_common.bat
+CALL %~dp0derby_common.bat %*
 
 if "%_USE_CLASSPATH%"=="no" goto runNoClasspath
 if not "%CLASSPATH%"=="" goto runWithClasspath
