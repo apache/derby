@@ -1856,7 +1856,7 @@ public final class NetworkServerControlImpl {
 	 *
 	 * @param clientSession	session needing work
 	 */
-	protected void runQueueAdd(Session clientSession)
+	private void runQueueAdd(Session clientSession)
 	{
 		synchronized(runQueue)
 		{
@@ -3094,7 +3094,7 @@ public final class NetworkServerControlImpl {
 	 *
 	 * @return value of maximum number of threads
 	 */
-	protected int getMaxThreads()
+	private int getMaxThreads()
 	{
 		synchronized(threadsSync) {
 			return maxThreads;
@@ -3378,11 +3378,19 @@ public final class NetworkServerControlImpl {
 	 * there are free threads, and the maximum number of threads is not
 	 * exceeded.
 	 *
-	 * @param connectionNumber number of connection
+	 * <p><code>addSession()</code> should only be called from one thread at a
+	 * time.
+	 *
 	 * @param clientSocket the socket to read from and write to
 	 */
-	void addSession(int connectionNumber, Socket clientSocket)
-			throws IOException {
+	void addSession(Socket clientSocket) throws Exception {
+
+		int connectionNumber = ++connNum;
+
+		if (getLogConnections()) {
+			consolePropertyMessage("DRDA_ConnNumber.I",
+								   Integer.toString(connectionNumber));
+		}
 
 		// Note that we always re-fetch the tracing configuration because it
 		// may have changed (there are administrative commands which allow
@@ -3430,41 +3438,13 @@ public final class NetworkServerControlImpl {
 	}
 
 	/**
-	 * Get New Conn Num - for use by ClientThread, generate a new connection number for the attempted Session.
+	 * Remove a thread from the thread list. Should be called when a
+	 * <code>DRDAConnThread</code> has been closed.
 	 *
-	 * @return	a new connection number
+	 * @param thread the closed thread
 	 */
-	protected int getNewConnNum()
-	{
-		return ++connNum;
-	}
-
-
-	/**
-	 * Get Free Threads - for use by ClientThread, get the number of 
-	 * free threads in order to determine if
-	 * a new thread can be run.
-	 *
-	 * @return	the number of free threads
-	 */
-	protected int getFreeThreads()
-	{
-		synchronized(runQueue)
-		{
-			return freeThreads;
-		}
-	}
-
-	/**
-	 * Get Thread List - for use by ClientThread, get the thread list 
-	 * Vector so that a newly spawned thread
-	 * can be run and added to the ThreadList from the ClientThread 
-	 *
-	 * @return	the threadList Vector
-	 */
-	protected Vector getThreadList()
-	{
-		return threadList;
+	void removeThread(DRDAConnThread thread) {
+		threadList.remove(thread);
 	}
 	
 	protected Object getShutdownSync() { return shutdownSync; } 

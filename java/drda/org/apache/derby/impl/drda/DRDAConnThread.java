@@ -292,7 +292,7 @@ class DRDAConnThread extends Thread {
 		}
 		if (SanityManager.DEBUG)
 			trace("Ending connection thread");
-		server.getThreadList().removeElement(this);
+		server.removeThread(this);
 
 	}
 	/**

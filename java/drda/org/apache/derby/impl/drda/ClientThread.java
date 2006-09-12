@@ -76,14 +76,9 @@ final class ClientThread extends Thread {
 					} else throw e1;
 	                		break;
 				} // end priv try/catch block
-				
-				connNum = parent.getNewConnNum();
-                                if (parent.getLogConnections())
-                                    parent.consolePropertyMessage("DRDA_ConnNumber.I", 
-							Integer.toString(connNum));
 
 				//create a new Session for this session
-				parent.addSession(connNum, clientSocket);
+				parent.addSession(clientSocket);
 
 				}catch (Exception e) {
 					if (e instanceof InterruptedException)
