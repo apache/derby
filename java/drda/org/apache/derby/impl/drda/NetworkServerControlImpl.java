@@ -3392,37 +3392,40 @@ public final class NetworkServerControlImpl {
 
 		sessionTable.put(new Integer(connectionNumber), session);
 
-		// Synchronize on runQueue to prevent other threads from updating
-		// runQueue or freeThreads. Hold the monitor's lock until a thread is
-		// started or the session is added to the queue. If we release the lock
-		// earlier, we might start too few threads (DERBY-1817).
+		// Check whether there are enough free threads to service all the
+		// threads in the run queue in addition to the newly added session.
+		boolean enoughThreads;
 		synchronized (runQueue) {
-			DRDAConnThread thread = null;
+			enoughThreads = (runQueue.size() < freeThreads);
+		}
+		// No need to hold the synchronization on runQueue any longer than
+		// this. Since no other threads can make runQueue grow, and no other
+		// threads will reduce the number of free threads without removing
+		// sessions from runQueue, (runQueue.size() < freeThreads) cannot go
+		// from true to false until addSession() returns.
 
-			// try to start a new thread if we don't have enough free threads
-			// to service all sessions in the run queue
-			if (freeThreads <= runQueue.size()) {
-				// Synchronize on threadsSync to ensure that the value of
-				// maxThreads doesn't change until the new thread is added to
-				// threadList.
-				synchronized (threadsSync) {
-					// only start a new thread if we have no maximum number of
-					// threads or the maximum number of threads is not exceeded
-					if ((maxThreads == 0) ||
-							(threadList.size() < maxThreads)) {
-						thread = new DRDAConnThread(session, this,
-													getTimeSlice(),
-													getLogConnections());
-						threadList.add(thread);
-						thread.start();
-					}
+		DRDAConnThread thread = null;
+
+		// try to start a new thread if we don't have enough free threads
+		if (!enoughThreads) {
+			// Synchronize on threadsSync to ensure that the value of
+			// maxThreads doesn't change until the new thread is added to
+			// threadList.
+			synchronized (threadsSync) {
+				// only start a new thread if we have no maximum number of
+				// threads or the maximum number of threads is not exceeded
+				if ((maxThreads == 0) || (threadList.size() < maxThreads)) {
+					thread = new DRDAConnThread(session, this, getTimeSlice(),
+												getLogConnections());
+					threadList.add(thread);
+					thread.start();
 				}
 			}
+		}
 
-			// add the session to the run queue if we didn't start a new thread
-			if (thread == null) {
-				runQueueAdd(session);
-			}
+		// add the session to the run queue if we didn't start a new thread
+		if (thread == null) {
+			runQueueAdd(session);
 		}
 	}
 
