@@ -160,3 +160,8 @@ if $cygwin; then
     ;;
   esac
 fi
+
+# Readjust classpath for MKS
+if [ `expr index $SHELL sh.exe` -gt 0 ]; then
+  LOCALCLASSPATH=`echo $LOCALCLASSPATH | sed -E 's/([\d\w]*):([\d\w]*)/\1;\2/g'`
+fi
