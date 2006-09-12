@@ -302,7 +302,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         if (databaseEncrypted) {
             // let log factory know if the database is encrypted . 
-            logFactory.setDatabaseEncrypted();
+            logFactory.setDatabaseEncrypted(false);
             // let data factory know if the database is encrypted. 
             dataFactory.setDatabaseEncrypted();
         }
@@ -1398,7 +1398,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * when the input debug flag is set, an expception 
      * is throw when run in the debug mode.
      */
-    private void crashOnDebugFlag(String debugFlag) 
+    private void crashOnDebugFlag(String debugFlag, 
+                                  boolean reEncrypt) 
         throws StandardException
     {
         if (SanityManager.DEBUG)
@@ -1407,11 +1408,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // exception to simulate error cases.
             if (SanityManager.DEBUG_ON(debugFlag))
             {
-                StandardException se= StandardException.newException(
-                       SQLState.LOG_IO_ERROR, 
-                       new IOException(debugFlag));
-                markCorrupt(se);
-                throw se;
+               StandardException se = StandardException.newException(
+                                      (reEncrypt ? SQLState.DATABASE_REENCRYPTION_FAILED :
+                                      SQLState.DATABASE_ENCRYPTION_FAILED),
+                                      debugFlag);
+               markCorrupt(se);
+               throw se;
             }
         }
     }
@@ -1488,178 +1490,202 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                    this,
                     ContextService.getFactory().getCurrentContextManager(),
                     AccessFactoryGlobals.USER_TRANS_NAME);
-        boolean error = true;
-        try {
+
+        try 
+		{
+			
             dataFactory.encryptAllContainers(transaction);
-            error = false;
-        }finally {
+
+            // all the containers are (re) encrypted, now mark the database as
+            // encrypted if a plain database is getting configured for encryption
+            // or update the encryption the properties, in the 
+            // service.properties ..etc.
+
             
-            // if (re) encryption failed, abort the transaction.
-            if (error) { 
-                transaction.abort();
+            if (SanityManager.DEBUG) {
+                crashOnDebugFlag(TEST_REENCRYPT_CRASH_BEFORE_COMMT, reEncrypt);
             }
-            else {
 
-                // (re) encryption of all the containers is complete 
-                // update the encryption properties in the 
-                // service.properties ..etc.
-
-                if (SanityManager.DEBUG) {
-                    crashOnDebugFlag(TEST_REENCRYPT_CRASH_BEFORE_COMMT);
-                }
+            // check if the checkpoint is currently in the last log file, 
+            // otherwise force a checkpoint and then do a log switch, 
+            // after setting up a new encryption key
+            if (!logFactory.isCheckpointInLastLogFile()) 
+            {
+                // perfrom a checkpoint, this is a reference checkpoint 
+                // to find if the re(encryption) is complete. 
+                logFactory.checkpoint(this, dataFactory, xactFactory, true);
+            }
                 
-                // let the log factory and data factory know that 
-                // database is encrypted.
-                if (!reEncrypt) {
-                    // mark in the raw store that the database is 
-                    // encrypted. 
-                    encryptDatabase = false;
-                    databaseEncrypted = true;
-                    dataFactory.setDatabaseEncrypted();
-                    logFactory.setDatabaseEncrypted();
 
+            encryptDatabase = false;
 
-                } else {
-                    // switch the encryption/decryption engine to the new ones.
-                    decryptionEngine = newDecryptionEngine;  
-                    encryptionEngine = newEncryptionEngine;
-                    currentCipherFactory = newCipherFactory;
-                }
+            // let the log factory know that database is 
+            // (re) encrypted and ask it to flush the log, 
+            // before enabling encryption of the log with 
+            // the new key.
+            logFactory.setDatabaseEncrypted(true);
+            
+            // let the log factory and data factory know that 
+            // database is encrypted.
+            if (!reEncrypt) {
+                // mark in the raw store that the database is 
+                // encrypted. 
+                databaseEncrypted = true;
+                dataFactory.setDatabaseEncrypted();
+            } else {
+                // switch the encryption/decryption engine to the new ones.
+                decryptionEngine = newDecryptionEngine;  
+                encryptionEngine = newEncryptionEngine;
+                currentCipherFactory = newCipherFactory;
+            }
 
-  
-                // make the log factory ready to encrypt
-                // the transaction log with the new encryption 
-                // key by switching to a new log file. 
-                // If re-encryption is aborted for any reason, 
-                // this new log file will be deleted, during
-                // recovery.
+            
+            // make the log factory ready to encrypt
+            // the transaction log with the new encryption 
+            // key by switching to a new log file. 
+            // If re-encryption is aborted for any reason, 
+            // this new log file will be deleted, during
+            // recovery.
 
-                logFactory.startNewLogFile();
+            logFactory.startNewLogFile();
 
-                // mark that re-encryption is in progress in the 
-                // service.properties, so that (re) encryption 
-                // changes that can not be undone using the transaction 
-                // log can be un-done before recovery starts.
-                // (like the changes to service.properties and 
-                // any log files the can not be understood by the
-                // old encryption key), incase engine crashes
-                // after this point. 
+            // mark that re-encryption is in progress in the 
+            // service.properties, so that (re) encryption 
+            // changes that can not be undone using the transaction 
+            // log can be un-done before recovery starts.
+            // (like the changes to service.properties and 
+            // any log files the can not be understood by the
+            // old encryption key), incase engine crashes
+            // after this point. 
 
-                // if the crash occurs before this point, recovery
-                // will rollback the changes using the transaction 
-                // log.
+            // if the crash occurs before this point, recovery
+            // will rollback the changes using the transaction 
+            // log.
 
-                properties.put(RawStoreFactory.DB_ENCRYPTION_STATUS,
-                               String.valueOf(
+            properties.put(RawStoreFactory.DB_ENCRYPTION_STATUS,
+                           String.valueOf(
                                RawStoreFactory.DB_ENCRYPTION_IN_PROGRESS));
 
-                if (reEncrypt) 
-                {
-                    // incase re-encryption, save the old 
-                    // encryption related properties, before
-                    // doing updates with new values.
+            if (reEncrypt) 
+            {
+                // incase re-encryption, save the old 
+                // encryption related properties, before
+                // doing updates with new values.
 
-                    if (externalKeyEncryption) 
-                    {
-                        // save the current copy of verify key file.
-                        StorageFile verifyKeyFile = 
-                            storageFactory.newStorageFile(
+                if (externalKeyEncryption) 
+                {
+                    // save the current copy of verify key file.
+                    StorageFile verifyKeyFile = 
+                        storageFactory.newStorageFile(
                                  Attribute.CRYPTO_EXTERNAL_KEY_VERIFY_FILE);
-                        StorageFile oldVerifyKeyFile = 
-                          storageFactory.newStorageFile(
+                    StorageFile oldVerifyKeyFile = 
+                        storageFactory.newStorageFile(
                           RawStoreFactory.CRYPTO_OLD_EXTERNAL_KEY_VERIFY_FILE);
 
-                        if(!privCopyFile(verifyKeyFile, oldVerifyKeyFile))
-                            throw StandardException.
-                              newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
-                                           verifyKeyFile, oldVerifyKeyFile); 
+                    if(!privCopyFile(verifyKeyFile, oldVerifyKeyFile))
+                        throw StandardException.
+                            newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+                                         verifyKeyFile, oldVerifyKeyFile); 
 
-                        // update the verify key file with the new key info.
-                        currentCipherFactory.verifyKey(reEncrypt, 
-                                                       storageFactory, 
-                                                       properties);
-                    } else 
-                    {
-                        // save the current generated encryption key 
-                        String keyString = 
-                            properties.getProperty(
-                                           RawStoreFactory.ENCRYPTED_KEY);
-                        if (keyString != null)
-                            properties.put(RawStoreFactory.OLD_ENCRYPTED_KEY,
-                                           keyString);
-                    }
+                    // update the verify key file with the new key info.
+                    currentCipherFactory.verifyKey(reEncrypt, 
+                                                   storageFactory, 
+                                                   properties);
                 } else 
                 {
-                    // save the encryption block size;
-                    properties.put(RawStoreFactory.ENCRYPTION_BLOCKSIZE,
-                                   String.valueOf(encryptionBlockSize));
+                    // save the current generated encryption key 
+                    String keyString = 
+                        properties.getProperty(
+                                               RawStoreFactory.ENCRYPTED_KEY);
+                    if (keyString != null)
+                        properties.put(RawStoreFactory.OLD_ENCRYPTED_KEY,
+                                       keyString);
                 }
+            } else 
+            {
+                // save the encryption block size;
+                properties.put(RawStoreFactory.ENCRYPTION_BLOCKSIZE,
+                               String.valueOf(encryptionBlockSize));
+            }
 
-                // save the new encryption properties into service.properties
-                currentCipherFactory.saveProperties(properties) ;
+            // save the new encryption properties into service.properties
+            currentCipherFactory.saveProperties(properties) ;
  
-                if (SanityManager.DEBUG) {
-                    crashOnDebugFlag(
-                                 TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY);
-                }
+            if (SanityManager.DEBUG) {
+                crashOnDebugFlag(
+                                 TEST_REENCRYPT_CRASH_AFTER_SWITCH_TO_NEWKEY,
+                                 reEncrypt);
+            }
 
-                // commit the transaction that is used to 
-                // (re) encrypt the database. Note that 
-                // this will be logged with newly generated 
-                // encryption key in the new log file created 
-                // above.
-                transaction.commit();
+            // commit the transaction that is used to 
+            // (re) encrypt the database. Note that 
+            // this will be logged with newly generated 
+            // encryption key in the new log file created 
+            // above.
+            transaction.commit();
 
-                if (SanityManager.DEBUG) {
-                    crashOnDebugFlag(TEST_REENCRYPT_CRASH_AFTER_COMMT);
-                }
+            if (SanityManager.DEBUG) {
+                crashOnDebugFlag(TEST_REENCRYPT_CRASH_AFTER_COMMT, 
+                                 reEncrypt);
+            }
 
-                // force the checkpoint with new encryption key.
-                logFactory.checkpoint(this, dataFactory, xactFactory, true);
+            // force the checkpoint with new encryption key.
+            logFactory.checkpoint(this, dataFactory, xactFactory, true);
 
-                if (SanityManager.DEBUG) {
-                    crashOnDebugFlag(TEST_REENCRYPT_CRASH_AFTER_CHECKPOINT);
-                }
+            if (SanityManager.DEBUG) {
+                crashOnDebugFlag(TEST_REENCRYPT_CRASH_AFTER_CHECKPOINT, 
+                                 reEncrypt);
+            }
 
-                // once the checkpont makes it to the log, re-encrption 
-                // is complete. only cleanup is remaining ; update the 
-                // re-encryption status flag to cleanup. 
-                properties.put(RawStoreFactory.DB_ENCRYPTION_STATUS,
-                               String.valueOf(
+            // once the checkpont makes it to the log, re-encrption 
+            // is complete. only cleanup is remaining ; update the 
+            // re-encryption status flag to cleanup. 
+            properties.put(RawStoreFactory.DB_ENCRYPTION_STATUS,
+                           String.valueOf(
                                RawStoreFactory.DB_ENCRYPTION_IN_CLEANUP));
 
-                // database is (re)encrypted successfuly, 
-                // remove the old version of the container files.
-                dataFactory.removeOldVersionOfContainers(false);
+            // database is (re)encrypted successfuly, 
+            // remove the old version of the container files.
+            dataFactory.removeOldVersionOfContainers(false);
                 
-                if (reEncrypt) 
+            if (reEncrypt) 
+            {
+                if (externalKeyEncryption)
                 {
-                    if (externalKeyEncryption)
-                    {
-                        // remove the saved copy of the verify.key file
-                        StorageFile oldVerifyKeyFile = 
+                    // remove the saved copy of the verify.key file
+                    StorageFile oldVerifyKeyFile = 
                         storageFactory.newStorageFile(
-                        RawStoreFactory.CRYPTO_OLD_EXTERNAL_KEY_VERIFY_FILE);
-                        if (!privDelete(oldVerifyKeyFile))
-                            throw StandardException.newException(
+                          RawStoreFactory.CRYPTO_OLD_EXTERNAL_KEY_VERIFY_FILE);
+                    if (!privDelete(oldVerifyKeyFile))
+                        throw StandardException.newException(
                                     SQLState.UNABLE_TO_DELETE_FILE, 
                                     oldVerifyKeyFile);
-                    } else 
-                    {
-                        // remove the old encryption key property.
-                        properties.remove(RawStoreFactory.OLD_ENCRYPTED_KEY);
-                    }
+                } else 
+                {
+                    // remove the old encryption key property.
+                    properties.remove(RawStoreFactory.OLD_ENCRYPTED_KEY);
                 }
+            }
 
-                // (re) encrypion is done,  remove the (re) 
-                // encryption status property. 
-                properties.remove(RawStoreFactory.DB_ENCRYPTION_STATUS);
+            // (re) encrypion is done,  remove the (re) 
+            // encryption status property. 
 
-            }                
+            properties.remove(RawStoreFactory.DB_ENCRYPTION_STATUS);
 
+            // close the transaction. 
+            transaction.close(); 
+
+        } catch (StandardException se) {
+
+            throw StandardException.newException(
+                      (reEncrypt ? SQLState.DATABASE_REENCRYPTION_FAILED :
+                      SQLState.DATABASE_ENCRYPTION_FAILED),
+                      se,
+                      se.getMessage()); 
+        } finally {
+            // clear the new encryption engines.
             newDecryptionEngine = null;   
             newEncryptionEngine = null;
-            transaction.close(); 
         }
     }
 
@@ -1741,7 +1767,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 
             if (SanityManager.DEBUG) {
                 crashOnDebugFlag(
-                   TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_LOGFILE_DELETE);
+                   TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_LOGFILE_DELETE, 
+                   reEncryption);
             }
 
             // Note : If a crash occurs at this point, then on reboot 
@@ -1825,7 +1852,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             if (SanityManager.DEBUG) {
                 crashOnDebugFlag(
-                    TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY);
+                    TEST_REENCRYPT_CRASH_AFTER_RECOVERY_UNDO_REVERTING_KEY, 
+                    reEncryption);
             }
 
         } // end of UNDO
@@ -1839,7 +1867,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         
         if (SanityManager.DEBUG) {
                 crashOnDebugFlag(
-                   TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP);
+                   TEST_REENCRYPT_CRASH_BEFORE_RECOVERY_FINAL_CLEANUP, 
+                   reEncryption);
         }
 
         // either the (re) encryption was complete , 
