@@ -77,9 +77,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK);
         clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
         clientMessageIds.add(SQLState.INVALID_RESULTSET_TYPE);
-        clientMessageIds.add(SQLState.INVALID_RESULTSET_CONCURRENCY);
         clientMessageIds.add(SQLState.SCROLL_SENSITIVE_NOT_SUPPORTED);
-        clientMessageIds.add(SQLState.INSENSITIVE_UPDATABLE_NOT_SUPPORTED);
         clientMessageIds.add(SQLState.UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER );
         clientMessageIds.add(SQLState.NUMBER_OF_ROWS_TOO_LARGE_FOR_INT);
         clientMessageIds.add(SQLState.NOGETCONN_ON_CLOSED_POOLED_CONNECTION);
