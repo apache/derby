@@ -1,36 +1,36 @@
 Test GetPropertyInfoTest starting
-databaseName: EncryptedDB
-encryptionProvider: null
-encryptionAlgorithm: null
-encryptionKeyLength: null
-encryptionKey: null
-territory: null
-user: null
-logDevice: null
-rollForwardRecoveryFrom: null
-createFrom: null
-restoreFrom: null
-bootPassword: 
-password: 
-shutdown: false
-create: true
-dataEncryption: true
-upgrade: false
-databaseName: 
-encryptionProvider: null
-encryptionAlgorithm: null
-encryptionKeyLength: null
-encryptionKey: null
-territory: null
-user: null
-logDevice: null
-rollForwardRecoveryFrom: null
-createFrom: null
-restoreFrom: null
-bootPassword: ****
-password: 
-shutdown: false
-create: true
-dataEncryption: true
-upgrade: false
+databaseName - value: EncryptedDB - description: database identity - required false
+encryptionProvider - value: null - description: cryptographic service provider - required false - choices null 
+encryptionAlgorithm - value: null - description: cryptographic algorithm - required false - choices null 
+encryptionKeyLength - value: null - description: cryptographic key length - required false - choices null 
+encryptionKey - value: null - description: external cryptographic key - required false - choices null 
+territory - value: null - description: territory for the database - required false - choices null 
+user - value: null - description: user name - required false - choices null 
+logDevice - value: null - description: log directory path - required false - choices null 
+rollForwardRecoveryFrom - value: null - description: backup path for rollforward recovery - required false - choices null 
+createFrom - value: null - description: J029 :  - required false - choices null 
+restoreFrom - value: null - description: J030 :  - required false - choices null 
+bootPassword - value:  - description: secret cryptographic key - required false - choices null 
+password - value:  - description: user password - required false - choices null 
+shutdown - value: false - description: shut down Derby - required false     - choices [0] : false     - choices [1] : true
+create - value: true - description: create database - required false     - choices [0] : false     - choices [1] : true
+dataEncryption - value: true - description: encrypt database on disk - required false     - choices [0] : false     - choices [1] : true
+upgrade - value: false - description: upgrade database - required false     - choices [0] : false     - choices [1] : true
+databaseName - value:  - description: database identity - required false     - choices [0] : EncryptedDB
+encryptionProvider - value: null - description: cryptographic service provider - required false - choices null 
+encryptionAlgorithm - value: null - description: cryptographic algorithm - required false - choices null 
+encryptionKeyLength - value: null - description: cryptographic key length - required false - choices null 
+encryptionKey - value: null - description: external cryptographic key - required false - choices null 
+territory - value: null - description: territory for the database - required false - choices null 
+user - value: null - description: user name - required false - choices null 
+logDevice - value: null - description: log directory path - required false - choices null 
+rollForwardRecoveryFrom - value: null - description: backup path for rollforward recovery - required false - choices null 
+createFrom - value: null - description: J029 :  - required false - choices null 
+restoreFrom - value: null - description: J030 :  - required false - choices null 
+bootPassword - value: **** - description: secret cryptographic key - required false - choices null 
+password - value:  - description: user password - required false - choices null 
+shutdown - value: false - description: shut down Derby - required false     - choices [0] : false     - choices [1] : true
+create - value: true - description: create database - required false     - choices [0] : false     - choices [1] : true
+dataEncryption - value: true - description: encrypt database on disk - required false     - choices [0] : false     - choices [1] : true
+upgrade - value: false - description: upgrade database - required false     - choices [0] : false     - choices [1] : true
 Test GetPropertyInfoTest finished

@@ -187,7 +187,11 @@ public class DirStorageFactory extends BaseStorageFactory
             else if( home != null && dataDirectory.startsWith( home))
                 databaseRoot = dataDirectoryFile;
             else
+            {
                 databaseRoot = new File( home, dataDirectory);
+                if (home != null)
+                    dataDirectory = home + getSeparator() +  dataDirectory;
+            }
             canonicalName = databaseRoot.getCanonicalPath();
             createTempDir();
             separatedDataDirectory = dataDirectory + getSeparator();

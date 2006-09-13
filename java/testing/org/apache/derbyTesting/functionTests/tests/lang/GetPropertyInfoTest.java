@@ -73,7 +73,22 @@ public class GetPropertyInfoTest
 
 				for (int j = 0; j < attributes.length; j++)
 				{
-					System.out.println(attributes[j].name + ": " + attributes[j].value);
+					System.out.print(attributes[j].name + " - value: " + attributes[j].value);
+					// Also check on the other PropertyInfo fields
+					String[] choices = attributes[j].choices;
+					System.out.print(" - description: " 
+						+ attributes[j].description +
+						" - required " + attributes[j].required);
+					if (choices != null)
+					{
+						for (int k = 0; k < choices.length; k++)
+						{
+							System.out.print("     - choices [" + k + "] : " + choices[k]);
+						}
+						System.out.print("\n");
+					}
+					else
+						System.out.print(" - choices null \n");
 				}
 
 				// Now set bootPassword and call getPropertyInfo again.  
@@ -121,8 +136,24 @@ public class GetPropertyInfoTest
 
 				for (int j = 0; j < attributes.length; j++)
 				{
-					System.out.println(attributes[j].name + ": " + attributes[j].value);
+					System.out.print(attributes[j].name + " - value: " + attributes[j].value);
+					// Also check on the other PropertyInfo fields
+					String[] choices = attributes[j].choices;
+					System.out.print(" - description: " 
+						+ attributes[j].description +
+						" - required " + attributes[j].required);
+					if (choices != null)
+					{
+						for (int k = 0; k < choices.length; k++)
+						{
+							System.out.print("     - choices [" + k + "] : " + choices[k]);
+						}
+						System.out.print("\n");
+					}
+					else
+						System.out.print(" - choices null \n");
 				}
+
 				// Now set database name and call getPropertyInfo again.  
 				// This time attribute length should be zero, sice we pass all
 				// minimum required properties. 

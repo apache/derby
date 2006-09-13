@@ -53,14 +53,9 @@ public class DirStorageFactory4 extends DirStorageFactory
      */
     StorageFile newPersistentFile( String path)
     {
-        String dir = dataDirectory;
-        if (canonicalName != null && path != null && home != null && 
-                !path.startsWith(home)) {
-            dir = canonicalName;
-        }
         if( path == null)
-            return new DirFile4(dir, rwsOK);
-        return new DirFile4(dir, path, rwsOK);
+            return new DirFile4(dataDirectory, rwsOK);
+        return new DirFile4(dataDirectory, path, rwsOK);
     }
 
     /**
