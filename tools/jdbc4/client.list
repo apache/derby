@@ -1,0 +1,17 @@
+org\apache\derby\client\ClientPooledConnection40.java
+org\apache\derby\client\ClientXAConnection40.java
+org\apache\derby\client\am\CallableStatement40.java
+org\apache\derby\client\am\ColumnMetaData40.java
+org\apache\derby\client\am\FailedProperties40.java
+org\apache\derby\client\am\LogicalConnection40.java
+org\apache\derby\client\am\ParameterMetaData40.java
+org\apache\derby\client\am\PreparedStatement40.java
+org\apache\derby\client\am\SQLExceptionFactory40.java
+org\apache\derby\client\am\Statement40.java
+org\apache\derby\client\net\ClientJDBCObjectFactoryImpl40.java
+org\apache\derby\client\net\NetConnection40.java
+org\apache\derby\client\net\NetDatabaseMetaData40.java
+org\apache\derby\client\net\NetResultSet40.java
+org\apache\derby\jdbc\ClientConnectionPoolDataSource40.java
+org\apache\derby\jdbc\ClientDataSource40.java
+org\apache\derby\jdbc\ClientXADataSource40.java

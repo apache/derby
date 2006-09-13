@@ -162,9 +162,8 @@ if $cygwin; then
 fi
 
 # Readjust classpath for MKS
-if [ ! `expr index` = "index" ]; then 
-  if [ `expr index $SHELL sh.exe` -gt 0 ]; then
-    LOCALCLASSPATH=`echo $LOCALCLASSPATH | sed -E 's/([\d\w]*):([\d\w]*)/\1;\2/g
+# expr match 
+if [ \( "`expr $SHELL : '.*sh.exe$'`" -gt 0 \) -a \( "$cygwin" = "false" \) ]; then
+  LOCALCLASSPATH=`echo $LOCALCLASSPATH | sed -E 's/([\d\w]*):([\d\w]*)/\1;\2/g
 '`
-  fi
 fi

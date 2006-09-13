@@ -1,0 +1,134 @@
+#!/bin/sh
+
+if [ -n "$update_jdbc4_debug" ]; then
+  set -x
+fi
+
+# Check location
+if [ ! -d ../../java/engine ]; then
+  echo "Could not locate the source code for the Derby engine."
+  echo "Please run this script from inside the tools/jdbc4 directory."
+  exit 1
+fi
+
+THISDIR=`pwd`
+SRCDIR=`cd ../.. && pwd`
+
+# Check environment variables
+if [ -z "$DERBY_HOME" ]; then
+  echo "Please set DERBY_HOME to the location of your Derby installation."
+  exit 1
+fi
+
+if [ ! -f "$DERBY_HOME/lib/derby.jar" -a -f "$DERBY_HOME/lib/derbyclient.jar" ]; then
+  echo "Could not find the Derby jars in \$DERBY_HOME/lib"
+  exit 1
+fi
+
+case "`uname`" in 
+  CYGWIN*) cygwin=true ;;
+  Darwin*) darwin=true ;;
+esac
+
+if [ -z "$JAVA_HOME" ]; then
+  if [ -n "$darwin" ]; then
+    JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
+  fi else if [ -d /usr/j2se -a -x /usr/j2se/bin/javac ]; then
+    JAVA_HOME=/usr/j2se
+  fi
+fi
+
+if [ ! -x "$JAVA_HOME/bin/javac" ]; then
+  echo "Could not find a Java compiler at \$JAVA_HOME/bin/javac."
+  echo "Check the setting of the JAVA_HOME environment variable."
+  exit 1
+fi
+
+# Check that the JVM version is 1.6.0  
+"$JAVA_HOME/bin/java" -version 2> java.version
+VERSION=`head -1 java.version | sed 's/java version "//g' | sed 's/[-_].*$//g'`
+if [ `expr $VERSION : 1.6.0` -eq 0 ]; then
+  echo "The JVM in \$JAVA_HOME is not version 1.6.0"
+  echo "To use this script to compile the JDBC 4.0 Derby classes,"
+  echo "you need a 1.6.0 level VM"
+  exit 1
+fi
+
+# Set up LOCALCLASSPATH, for cygwin or mks, use ;
+CPS=:
+if [ -n "$cygwin" ]; then
+  CPS=';'
+fi
+if [ ! `expr index` = "index" ]; then  # for MKS
+  if [ `expr index $SHELL sh.exe` -gt 0 ]; then
+    CPS=';'
+  fi
+fi
+LOCALCLASSPATH="$DERBY_HOME/lib/derby.jar$CPS$DERBY_HOME/lib/derbyclient.jar"
+
+# compile the client classes
+echo "Compiling the client classes for JDBC 4.0"
+for i in `cat client.list`
+do
+  FILE=`echo $i | tr '\\' '/'`
+  CLASSES="$FILE $CLASSES"
+done
+
+cd $SRCDIR/java/client
+mkdir -p "$DERBY_HOME/jdbc4classes/client"
+"$JAVA_HOME/bin/javac" -d "$DERBY_HOME/jdbc4classes/client" \
+                       -cp "$LOCALCLASSPATH" \
+                       -sourcepath "$SRCDIR/java/client$CPS$SRCDIR/java/shared" \
+                        $CLASSES
+
+if [ $? -gt 0 ]; then
+  echo "There was an error compiling the client classes. Exiting."
+  cd "$THISDIR"
+  exit 1
+fi
+
+cd $THISDIR
+
+echo "Updating derbyclient.jar"
+jar uf "$DERBY_HOME/lib/derbyclient.jar" -C "$DERBY_HOME/jdbc4classes/client" org
+
+if [ $? -gt 0 ]; then
+  echo "Error updating derbyclient.jar. It may no longer be usable."
+  exit 1
+fi
+
+# compile the engine classes
+echo "Compiling the engine classes for JDBC 4.0"
+unset CLASSES
+for i in `cat engine.list`
+do
+  FILE=`echo $i | tr '\\' '/'`
+  CLASSES="$FILE $CLASSES"
+done
+
+cd "$SRCDIR/java/engine"  
+mkdir -p "$DERBY_HOME/jdbc4classes/engine"
+"$JAVA_HOME/bin/javac" -d "$DERBY_HOME/jdbc4classes/engine" \
+                       -cp "$LOCALCLASSPATH" \
+                       -sourcepath "$SRCDIR/java/engine$CPS$SRCDIR/java/shared" \
+                        $CLASSES
+
+if [ $? -gt 0 ]; then
+  echo "There was an error compiling the engine classes. Exiting."
+  cd "$THISDIR"
+  exit 1
+fi
+
+cd "$THISDIR"
+
+echo "Updating derby.jar"
+jar uf "$DERBY_HOME/lib/derby.jar" -C "$DERBY_HOME/jdbc4classes/engine" org
+
+if [ $? -gt 0 ]; then
+  echo "Error updating derby.jar. It may no longer be usable."
+  exit 1
+fi
+
+# cleanup
+rm -r "$DERBY_HOME/jdbc4classes"
+rm "$THISDIR/java.version"
