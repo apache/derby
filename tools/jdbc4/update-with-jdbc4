@@ -70,7 +70,7 @@ LOCALCLASSPATH="$DERBY_HOME/lib/derby.jar$CPS$DERBY_HOME/lib/derbyclient.jar"
 echo "Compiling the client classes for JDBC 4.0"
 for i in `cat client.list`
 do
-  FILE=`echo $i | tr '\\' '/'`
+  FILE=`echo $i | tr '\\' '/' | sed 's/.$//g'`
   CLASSES="$FILE $CLASSES"
 done
 
@@ -102,7 +102,7 @@ echo "Compiling the engine classes for JDBC 4.0"
 unset CLASSES
 for i in `cat engine.list`
 do
-  FILE=`echo $i | tr '\\' '/'`
+  FILE=`echo $i | tr '\\' '/' | sed 's/.$//g'`
   CLASSES="$FILE $CLASSES"
 done
 
