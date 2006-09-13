@@ -151,14 +151,14 @@ public class XML
 
     /**
      * Private constructor used for the getClone() method.
+     * Returns a new instance of XML whose fields are clones
+     * of the values received.
      *
      * @param val A SQLChar instance to clone and use for
      *  this XML value.
      * @param xmlType Qualified XML type for "val"
      * @param seqWithAttr Whether or not "val" corresponds to
      *  sequence with one or more top-level attribute nodes.
-     * @return A new instance of XML whose fields are clones
-     *  of the values received.
      */
     private XML(SQLChar val, int xmlType, boolean seqWithAttr)
     {
