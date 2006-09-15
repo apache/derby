@@ -1,0 +1,255 @@
+ij> connect 'grantRevokeDDL2;create=true' user 'user1' as user1;
+WARNING 01J14: SQL authorization is being used without first enabling authentication.
+ij> connect 'grantRevokeDDL2;create=true' user 'user2' as user2;
+WARNING 01J01: Database 'grantRevokeDDL2' not created, connection made to existing database instead.
+WARNING 01J14: SQL authorization is being used without first enabling authentication.
+ij(USER2)> connect 'grantRevokeDDL2;create=true' user 'user3' as user3;
+WARNING 01J01: Database 'grantRevokeDDL2' not created, connection made to existing database instead.
+WARNING 01J14: SQL authorization is being used without first enabling authentication.
+ij(USER3)> -- DERBY-1729
+-- test grant and revoke in Java stored procedure with triggers.
+-- Java stored procedure that contains grant or revoke statement 
+-- requires MODIFIES SQL DATA to execute.
+-- Since only 2 of the 8 Java stored procedures(which contains
+-- grant or revoke statement) are declared with MODIFIES SQL DATA, 
+-- the rest are expected to fail in this test.
+-- setup the environment
+set connection user1;
+ij(USER1)> -- table used in the procedures
+drop table t1;
+ERROR: Failed with SQLSTATE 42Y07
+ij(USER1)> create table t1 (i int primary key, b char(15));
+0 rows inserted/updated/deleted
+ij(USER1)> insert into t1 values (1, 'XYZ');
+1 row inserted/updated/deleted
+ij(USER1)> insert into t1 values (2, 'XYZ');
+1 row inserted/updated/deleted
+ij(USER1)> insert into t1 values (3, 'XYZ');
+1 row inserted/updated/deleted
+ij(USER1)> insert into t1 values (4, 'XYZ');
+1 row inserted/updated/deleted
+ij(USER1)> insert into t1 values (5, 'XYZ');
+1 row inserted/updated/deleted
+ij(USER1)> insert into t1 values (6, 'XYZ');
+1 row inserted/updated/deleted
+ij(USER1)> insert into t1 values (7, 'XYZ');
+1 row inserted/updated/deleted
+ij(USER1)> insert into t1 values (8, 'XYZ');
+1 row inserted/updated/deleted
+ij(USER1)> -- table used in this test
+drop table t2;
+ERROR: Failed with SQLSTATE 42Y55
+ij(USER1)> create table t2 (x integer, y integer);
+0 rows inserted/updated/deleted
+ij(USER1)> create procedure grant_select_proc1() 
+       parameter style java
+       dynamic result sets 0 language java 
+       NO SQL
+       external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.grantSelect';
+0 rows inserted/updated/deleted
+ij(USER1)> create procedure grant_select_proc2() 
+       parameter style java
+       dynamic result sets 0 language java 
+       CONTAINS SQL
+       external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.grantSelect';
+0 rows inserted/updated/deleted
+ij(USER1)> create procedure grant_select_proc3() 
+       parameter style java
+       dynamic result sets 0 language java 
+       READS SQL DATA 
+       external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.grantSelect';
+0 rows inserted/updated/deleted
+ij(USER1)> create procedure grant_select_proc4() 
+       parameter style java
+       dynamic result sets 0 language java 
+       MODIFIES SQL DATA  
+       external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.grantSelect';
+0 rows inserted/updated/deleted
+ij(USER1)> create procedure revoke_select_proc1() 
+       parameter style java
+       dynamic result sets 0 language java 
+       NO SQL  
+       external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.revokeSelect';
+0 rows inserted/updated/deleted
+ij(USER1)> create procedure revoke_select_proc2() 
+       parameter style java
+       dynamic result sets 0 language java 
+       CONTAINS SQL  
+       external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.revokeSelect';
+0 rows inserted/updated/deleted
+ij(USER1)> create procedure revoke_select_proc3() 
+       parameter style java
+       dynamic result sets 0 language java 
+       READS SQL DATA 
+       external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.revokeSelect';
+0 rows inserted/updated/deleted
+ij(USER1)> create procedure revoke_select_proc4() 
+       parameter style java
+       dynamic result sets 0 language java 
+       MODIFIES SQL DATA 
+       external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.revokeSelect';
+0 rows inserted/updated/deleted
+ij(USER1)> -- tests
+create trigger grant_select_trig AFTER delete on t1 
+	for each STATEMENT mode db2sql call grant_select_proc1();
+0 rows inserted/updated/deleted
+ij(USER1)> -- should fail
+delete from t1 where i = 1;
+ERROR: Failed with SQLSTATE 38001
+ij(USER1)> -- check delete failed
+select * from t1 where i = 1;
+I          |B              
+---------------------------
+1          |XYZ            
+1 row selected
+ij(USER1)> drop trigger grant_select_trig;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- should fail
+select * from user1.t1 where i = 1;
+ERROR: Failed with SQLSTATE 28508
+ij(USER2)> set connection user1;
+ij(USER1)> create trigger grant_select_trig AFTER delete on t1 
+	for each STATEMENT mode db2sql call grant_select_proc2();
+0 rows inserted/updated/deleted
+ij(USER1)> -- should fail
+delete from t1 where i = 2;
+ERROR: Failed with SQLSTATE 38002
+ij(USER1)> -- check delete failed
+select * from t1 where i = 2;
+I          |B              
+---------------------------
+2          |XYZ            
+1 row selected
+ij(USER1)> drop trigger grant_select_trig;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- should fail
+select * from user1.t1 where i = 1;
+ERROR: Failed with SQLSTATE 28508
+ij(USER2)> set connection user1;
+ij(USER1)> create trigger grant_select_trig AFTER delete on t1 
+	for each STATEMENT mode db2sql call grant_select_proc3();
+0 rows inserted/updated/deleted
+ij(USER1)> -- should fail
+delete from t1 where i = 3;
+ERROR: Failed with SQLSTATE 38002
+ij(USER1)> -- check delete failed
+select * from t1 where i = 3;
+I          |B              
+---------------------------
+3          |XYZ            
+1 row selected
+ij(USER1)> drop trigger grant_select_trig;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- should fail
+select * from user1.t1 where i = 1;
+ERROR: Failed with SQLSTATE 28508
+ij(USER2)> set connection user1;
+ij(USER1)> create trigger grant_select_trig AFTER delete on t1 
+	for each STATEMENT mode db2sql call grant_select_proc4();
+0 rows inserted/updated/deleted
+ij(USER1)> -- ok
+delete from t1 where i = 4;
+1 row inserted/updated/deleted
+ij(USER1)> -- check delete
+select * from t1 where i = 4;
+I          |B              
+---------------------------
+0 rows selected
+ij(USER1)> drop trigger grant_select_trig;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- should be successful
+select * from user1.t1 where i = 1;
+I          |B              
+---------------------------
+1          |XYZ            
+1 row selected
+ij(USER2)> set connection user1;
+ij(USER1)> create trigger revoke_select_trig AFTER delete on t1 
+	for each STATEMENT mode db2sql call revoke_select_proc1();
+0 rows inserted/updated/deleted
+ij(USER1)> -- should fail
+delete from t1 where i = 5;
+ERROR: Failed with SQLSTATE 38001
+ij(USER1)> -- check delete failed
+select * from t1 where i = 5;
+I          |B              
+---------------------------
+5          |XYZ            
+1 row selected
+ij(USER1)> drop trigger revoke_select_trig;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- should be successful
+select * from user1.t1 where i = 1;
+I          |B              
+---------------------------
+1          |XYZ            
+1 row selected
+ij(USER2)> set connection user1;
+ij(USER1)> create trigger revoke_select_trig AFTER delete on t1 
+	for each STATEMENT mode db2sql call revoke_select_proc2();
+0 rows inserted/updated/deleted
+ij(USER1)> -- should fail
+delete from t1 where i = 6;
+ERROR: Failed with SQLSTATE 38002
+ij(USER1)> -- check delete failed
+select * from t1 where i = 6;
+I          |B              
+---------------------------
+6          |XYZ            
+1 row selected
+ij(USER1)> drop trigger revoke_select_trig;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- should be successful
+select * from user1.t1 where i = 1;
+I          |B              
+---------------------------
+1          |XYZ            
+1 row selected
+ij(USER2)> set connection user1;
+ij(USER1)> create trigger revoke_select_trig AFTER delete on t1 
+	for each STATEMENT mode db2sql call revoke_select_proc3();
+0 rows inserted/updated/deleted
+ij(USER1)> -- should fail
+delete from t1 where i = 7;
+ERROR: Failed with SQLSTATE 38002
+ij(USER1)> -- check delete failed
+select * from t1 where i = 7;
+I          |B              
+---------------------------
+7          |XYZ            
+1 row selected
+ij(USER1)> drop trigger revoke_select_trig;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- should be successful
+select * from user1.t1 where i = 1;
+I          |B              
+---------------------------
+1          |XYZ            
+1 row selected
+ij(USER2)> set connection user1;
+ij(USER1)> create trigger revoke_select_trig AFTER delete on t1 
+	for each STATEMENT mode db2sql call revoke_select_proc4();
+0 rows inserted/updated/deleted
+ij(USER1)> -- ok
+delete from t1 where i = 8;
+1 row inserted/updated/deleted
+ij(USER1)> -- check delete 
+select * from t1 where i = 8;
+I          |B              
+---------------------------
+0 rows selected
+ij(USER1)> drop trigger revoke_select_trig;
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- should fail
+select * from user1.t1 where i = 1;
+ERROR: Failed with SQLSTATE 28508
+ij(USER2)> set connection user1;
+ij(USER1)> 
