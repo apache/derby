@@ -60,9 +60,9 @@
     <mkdir dir="${crlf.dir}"/>
     <mkdir dir="${lf.dir}"/>
     <fixcrlf srcdir="${basedir}" destdir="${crlf.dir}" eol="crlf"
-             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"/>
+             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
     <fixcrlf srcdir="${basedir}" destdir="${lf.dir}" eol="lf"
-             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"/>
+             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
 
   </target>
 
@@ -72,7 +72,7 @@
     <zip destfile="${release.dir}/${derby.bin}.zip"
          compress="true">
       <!-- top-level -->
-      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
                   prefix="${derby.bin}/"/>
       <zipfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
@@ -121,7 +121,7 @@
     <tar destfile="${release.dir}/${derby.bin}.tar.gz"
          compression="gzip" longfile="gnu">
       <!-- top-level -->
-      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
                   prefix="${derby.bin}/"/>
       <tarfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
@@ -170,7 +170,7 @@
   <target name="lib.zip" depends="init">
     <zip destfile="${release.dir}/${derby.lib}.zip"
 	     compress="true">
-      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
       			  prefix="${derby.lib}/"/>
       <zipfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
@@ -184,7 +184,7 @@
   <target name="lib.tgz">
     <tar destfile="${release.dir}/${derby.lib}.tar.gz"
 	     compression="gzip">
-      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
       			  prefix="${derby.lib}/"/>
       <tarfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
@@ -201,7 +201,7 @@
   <target name="lib-debug.zip" depends="init">
     <zip destfile="${release.dir}/${derby.lib-debug}.zip"
 	     compress="true">
-      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
       			  prefix="${derby.lib-debug}/"/>
       <zipfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
@@ -215,7 +215,7 @@
   <target name="lib-debug.tgz">
     <tar destfile="${release.dir}/${derby.lib-debug}.tar.gz"
 	     compression="gzip">
-      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE"
+      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
       			  prefix="${derby.lib-debug}/"/>
       <tarfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
@@ -232,7 +232,7 @@
   <target name="src.zip" depends="init">
     <zip destfile="${release.dir}/${derby.src}.zip">
       <zipfileset dir="${basedir}" prefix="${derby.src}"
-                  includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
+                  includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
          excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
     </zip>
   </target>
@@ -240,7 +240,7 @@
     <tar destfile="${release.dir}/${derby.src}.tar.gz"
          compression="gzip" longfile="gnu">
       <tarfileset dir="${basedir}" prefix="${derby.src}"
-                  includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
+                  includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
          excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
     </tar>
   </target>
