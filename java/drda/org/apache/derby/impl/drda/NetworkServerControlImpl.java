@@ -743,9 +743,14 @@ public final class NetworkServerControlImpl {
 					// exception), so we need to clean up first.
 
 						// Close and remove sessions on runQueue.
-						for (int i = 0; i < runQueue.size(); i++)
-							((Session)runQueue.get(i)).close();
-						runQueue.clear();
+						synchronized (runQueue) {
+							for (int i = 0; i < runQueue.size(); i++) {
+								Session s = (Session) runQueue.get(i);
+								s.close();
+								removeFromSessionTable(s.getConnNum());
+							}
+							runQueue.clear();
+						}
 
 						// Close and remove DRDAConnThreads on threadList.
 						for (int i = 0; i < threadList.size(); i++)

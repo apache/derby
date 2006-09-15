@@ -7491,46 +7491,46 @@ class DRDAConnThread extends Thread {
 	 */
 	private void handleException(Exception e)
 	{
-		String dbname = null;
-		if (database != null)
-			dbname = database.dbName;
-		
-		// protocol error - write error message and close session
-		if (e instanceof DRDAProtocolException)
-		{
-			try
-			{
-				DRDAProtocolException de = (DRDAProtocolException) e;
-				println2Log(dbname,session.drdaID, 
-							e.getMessage());
+		try {
+			if (e instanceof DRDAProtocolException) {
+				// protocol error - write error message
+				sendProtocolException((DRDAProtocolException) e);
+			} else {
+				// something unexpected happened
+				sendUnexpectedException(e);
 				server.consoleExceptionPrintTrace(e);
-				reader.clearBuffer();
-				de.write(writer);
-				finalizeChain();
-				closeSession();
-				close();
 			}
-			catch (DRDAProtocolException ioe)
-			{
-				// There may be an IO exception in the write.
-				println2Log(dbname,session.drdaID, 
-							e.getMessage());
-				server.consoleExceptionPrintTrace(ioe);
-				closeSession();
-				close();
-			}
-		}
-		else
-		{
-			// something unexpected happened so let's kill this thread
-			sendUnexpectedException(e);
-
-			server.consoleExceptionPrintTrace(e);
+		} finally {
+			// always close the session and stop the thread after handling
+			// these exceptions
 			closeSession();
 			close();
 		}
 	}
 	
+	/**
+	 * Notice the client about a protocol error.
+	 *
+	 * @param de <code>DRDAProtocolException</code> to be sent
+	 */
+	private void sendProtocolException(DRDAProtocolException de) {
+		String dbname = null;
+		if (database != null) {
+			dbname = database.dbName;
+		}
+
+		try {
+			println2Log(dbname, session.drdaID, de.getMessage());
+			server.consoleExceptionPrintTrace(de);
+			reader.clearBuffer();
+			de.write(writer);
+			finalizeChain();
+		} catch (DRDAProtocolException ioe) {
+			// There may be an IO exception in the write.
+			println2Log(dbname, session.drdaID, de.getMessage());
+			server.consoleExceptionPrintTrace(ioe);
+		}
+	}
 
 	/**
 	 * Send unpexpected error to the client
