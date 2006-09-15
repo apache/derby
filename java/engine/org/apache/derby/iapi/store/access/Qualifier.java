@@ -26,7 +26,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 
 /**
-
+  <p>
   A structure which is used to "qualify" a column.  Specifies
   that the column value in a given column identified by column
   id is to be compared via a specific operator to a particular
@@ -45,36 +45,32 @@ import org.apache.derby.iapi.error.StandardException;
   <blockquote><pre>
   if (qualifier.negateCompareResult())
   {
-      <blockquote><pre>
       compare_result = 
       row[(qualifier.getColumnId())].compare(
-      <blockquote><pre>
         qualifier.getOperator(), 
         qualifier.getOrderable(),
         qualifier.getOrderedNulls(), 
         qualifier.getUnknownRV()) 
-      </blockquote></pre>
       if (qualifier.negateCompareResult())
       {
-          <blockquote><pre>
           compare_result = !(compare_result);
-          </blockquote></pre>
       }
-      </blockquote></pre>
   }
   </blockquote></pre>
-
+  <p>
   Qualifiers are often passed through interfaces as a set of Qualifiers,
   rather than one at a time, for example see the qualifier argument in 
-  @see TransactionController#openScan 
-
+  TransactionController.openScan(). 
+  <p>
   To make this consistent the following protocols are to be used when passing
   around sets of Qualifiers.
-
+  <p>
   A single dimensional array is to be used to pass around a set of AND'd 
   qualifiers.  Thus qualifier[] argument is to be treated as:
+  <blockquote><pre>
       qualifier[0] AND qualifer[1] ... AND qualifier[qualifer.length - 1]
-
+  </blockquote></pre>
+  <p>
   A two dimensional array is to be used to pass around a AND's and OR's in
   conjunctive normal form.  The top slot of the 2 dimensional array is optimized
   for the more frequent where no OR's are present.  The first array slot is 
@@ -83,48 +79,50 @@ import org.apache.derby.iapi.error.StandardException;
   of OR's.  Thus the 2 dimensional array qual[][] argument is to be treated as 
   the following, note if qual.length = 1 then only the first array is valid and
   it is and an array of AND clauses:
-
-  (qual[0][0]               AND qual[0][0] ... AND qual[0][qual[0].length - 1])
+  <blockquote><pre>
+  (qual[0][0] AND qual[0][0] ... AND qual[0][qual[0].length - 1])
   AND
-  (qual[1][0]               OR  qual[1][1] ... OR  qual[1][qual[1].length - 1])
+  (qual[1][0] OR  qual[1][1] ... OR  qual[1][qual[1].length - 1])
   AND
-  (qual[2][0]               OR  qual[2][1] ... OR  qual[2][qual[2].length - 1])
+  (qual[2][0] OR  qual[2][1] ... OR  qual[2][qual[2].length - 1])
   ...
-  AND
-  (qual[qual.length - 1][0] OR  qual[1][1] ... OR  qual[1][2])
-
+  AND (qual[qual.length - 1][0] OR  qual[1][1] ... OR  qual[1][2])
+  </blockquote></pre>
+  <p>
   If any of the array's qual[0].length ... qual[qual.length -1] are 0 length
   they will be evaluated as TRUE; but they must be not NULL.  See Example 4 for
   encoding of (a or b) that takes advantage of this.
-
+  <p>
   Note that any of the arrays qual[0].length ... qual[qual.length -1] may also
   be of length 1, thus no guarantee is made the presence of OR
   predicates if qual.length > 1. See example 1a.
-
+  <p>
   The following give pseudo-code examples of building Qualifier arrays:
-
-  </blockquote><pre>
+  <p>
   Example 1: "a AND b AND c"
+  <blockquote><pre>
     qualifier = new Qualifier[1][3]; // 3 AND clauses
 
     qualifier[0][0] = a
     qualifier[0][1] = b
     qualifier[0][2] = c
-
+  </blockquote></pre>
+  <p>
   Example 1a "a AND b AND c" - less efficient than example 1 but legal
+  <blockquote><pre>
     qualifier = new Qualifier[3]; // 3 AND clauses
-	qualifier[0] = new Qualifier[1];
-	qualifier[1] = new Qualifier[1];
-	qualifier[2] = new Qualifier[1];
+    qualifier[0] = new Qualifier[1];
+    qualifier[1] = new Qualifier[1];
+    qualifier[2] = new Qualifier[1];
 	
-	qualifier[0][0] = a
-	qualifier[1][0] = b
-	qualifier[2][0] = c
-
-
+    qualifier[0][0] = a
+    qualifier[1][0] = b
+    qualifier[2][0] = c
+  </blockquote></pre>
+  <p>
   Example 2: "(f) AND (a OR b) AND (c OR d OR e)"
-
     Would be represented by an array that looks like the following:
+  <blockquote><pre>
     qualifier = new Qualifier[3]; // 3 and clauses
     qualifier[0] = new Qualifier[1]; // to be intitialized to f
     qualifier[1] = new Qualifier[2]; // to be initialized to (a OR b)
@@ -136,8 +134,11 @@ import org.apache.derby.iapi.error.StandardException;
     qualifier[2][0] = c
     qualifier[2][1] = d
     qualifier[2][2] = e
-
+  </blockquote></pre>
+  <p>
   Example 3: "(a OR b) AND (c OR d) AND (e OR f)" 
+  <blockquote><pre>
+    qualifier = new Qualifier[3]; // 3 and clauses
     qualifier = new Qualifier[4]; // 4 and clauses
     qualifier[0] = new Qualifier[1]; // to be intitialized to TRUE
     qualifier[1] = new Qualifier[2]; // to be initialized to (a OR b)
@@ -151,18 +152,20 @@ import org.apache.derby.iapi.error.StandardException;
     qualifier[2][1] = d
     qualifier[3][0] = e
     qualifier[3][1] = f
-
+  </blockquote></pre>
+  <p>
   Example 4: "(a OR b)" 
+  <blockquote><pre>
     qualifier = new Qualifier[2]; // 2 and clauses
     qualifier[0] = new Qualifier[0]; // 0 length array is TRUE
     qualifier[1] = new Qualifier[2]; // to be initialized to (a OR b)
 
     qualifier[1][0] = a
     qualifier[1][1] = b
-
   </blockquote></pre>
 
   @see ScanController
+  @see TransactionController#openScan 
   @see DataValueDescriptor#compare
 **/
 
