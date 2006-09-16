@@ -1069,10 +1069,20 @@ public class ColumnReference extends ValueNode
 		rcExpr = rc.getExpression();
 		colNum[0] = getColumnNumber();
 
-		while ((rcExpr != null) && (rcExpr instanceof ColumnReference))
+		/* We have to make sure we enter this loop if rc is redundant,
+		 * so that we can navigate down to the actual source result
+		 * set (DERBY-1777). If rc *is* redundant, then rcExpr is not
+		 * guaranteed to be a ColumnReference, so we have to check
+		 * for that case inside the loop.
+		 */
+		while ((rcExpr != null) &&
+			(rc.isRedundant() || (rcExpr instanceof ColumnReference)))
 		{
-			colNum[0] = ((ColumnReference)rcExpr).getColumnNumber();
-			rc = ((ColumnReference)rcExpr).getSource();
+			if (rcExpr instanceof ColumnReference)
+			{
+				colNum[0] = ((ColumnReference)rcExpr).getColumnNumber();
+				rc = ((ColumnReference)rcExpr).getSource();
+			}
 
 			/* If "rc" is redundant then that means it points to another
 			 * ResultColumn that in turn points to the source expression.

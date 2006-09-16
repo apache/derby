@@ -107,6 +107,12 @@ create view vz3 (z1, z2, z3, z4) as
     (select c1, c, c2, 28 from tc) xx1
       union select 'i','j','j',i from t2;
 
+create view vz4 (z1, z2, z3, z4) as
+  select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
+    (select c1, c, c2, 28 from tc) xx1
+      union select 'i','j','j',i from t2
+      union select c1, c2, c3, c from tc;
+
 -- Both sides of predicate reference aggregates.
 select x1.c1 from
   (select count(*) from t1 union select count(*) from t2) x1 (c1),
@@ -266,6 +272,16 @@ select x1.z4 from
   (select distinct j from t2 union select j from t1) x2 (c2)
 where x1.z4 = x2.c2;
 
+-- Same as previous query but with a different nested
+-- view (vz4) that has double-nested unions in it.
+-- This is a test case for DERBY-1777.
+select x1.z4, x2.c2 from
+  (select z1, z4, z3 from vz4
+    union select '1', i+1, '3' from t1
+  ) x1 (z1, z4, z3),
+  (select distinct j from t2 union select j from t1) x2 (c2)
+where x1.z4 = x2.c2;
+
 -- Queries with Select->Union->Select chains having differently-
 -- ordered result column lists with some non-column reference
 -- expressions.  In all of these queries we specify LEFT join
@@ -379,6 +395,7 @@ on x1.z4 = x2.c2;
 drop view vz;
 drop view vz2;
 drop view vz3;
+drop view vz4;
 drop table tc;
 
 -- Now bump up the size of tables T3 and T4 to the point where
