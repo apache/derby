@@ -725,7 +725,6 @@ public class FromBaseTable extends FromTable
 				}
 				constraintSpecified = true;
 
-				/* Validate constraint name - NULL means table scan */
 				if (! StringUtil.SQLToUpperCase(value).equals("NULL"))
 				{
 					consDesc = 
@@ -816,9 +815,9 @@ public class FromBaseTable extends FromTable
 			}
 		}
 
-		/* If user specified a constraint name, then replace it in the 
-		 * properties list with the underlying index name to simplify
-		 * the code in the optimizer.
+		/* If user specified a non-null constraint name(DERBY-1707), then  
+		 * replace it in the properties list with the underlying index name to 
+		 * simplify the code in the optimizer.
 		 * NOTE: The code to get from the constraint name, for a constraint
 		 * with a backing index, to the index name is convoluted.  Given
 		 * the constraint name, we can get the conglomerate id from the
@@ -826,7 +825,7 @@ public class FromBaseTable extends FromTable
 		 * the ConglomerateDescriptor from the DataDictionary and, finally,
 		 * we get the index name (conglomerate name) from the ConglomerateDescriptor.
 		 */
-		if (constraintSpecified)
+		if (constraintSpecified && consDesc != null)
 		{
 			ConglomerateDescriptor cd = 
 				dDictionary.getConglomerateDescriptor(

@@ -356,6 +356,58 @@ Columns accessed from heap = {0, 1, 2}
 	None
 		qualifiers:
 None
+ij> select * from t1 --derby-properties constraint = null
+;
+C1 |C2 |C3         
+-----
+1 |1 |1          
+2 |2 |2          
+3 |3 |3          
+4 |4 |4          
+ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+-----
+Statement Name: 
+	SQL_CURLH000C1
+Statement Text: 
+	select * from t1 --derby-properties constraint = null
+Parse Time: 0
+Bind Time: 0
+Optimize Time: 0
+Generate Time: 0
+Compile Time: 0
+Execute Time: 0
+Begin Compilation Timestamp : null
+End Compilation Timestamp : null
+Begin Execution Timestamp : null
+End Execution Timestamp : null
+Statement Execution Plan Text: 
+User supplied optimizer overrides on T1 are { constraint=NULL }
+Index Scan ResultSet for T1 using index T1_C1C2C3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
+Number of opens = 1
+Rows seen = 4
+Rows filtered = 0
+Fetch Size = 16
+	constructor time (milliseconds) = 0
+	open time (milliseconds) = 0
+	next time (milliseconds) = 0
+	close time (milliseconds) = 0
+	next time in milliseconds/row = 0
+scan information: 
+	Bit set of columns fetched={0, 1, 2}
+	Number of columns fetched=3
+	Number of deleted rows visited=0
+	Number of pages visited=1
+	Number of rows qualified=4
+	Number of rows visited=4
+	Scan type=btree
+	Tree height=1
+	start position: 
+	None
+	stop position: 
+	None
+	qualifiers:
+None
 ij> -- constraint which includes columns in for update of list
 select * from t1 --derby-properties constraint = cons1 
 for update;

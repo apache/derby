@@ -107,6 +107,10 @@ select * from t1 exposedname --derby-properties index = t1_c1
 for update of c2, c1;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
+select * from t1 --derby-properties constraint = null
+;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
 -- constraint which includes columns in for update of list
 select * from t1 --derby-properties constraint = cons1 
 for update;
