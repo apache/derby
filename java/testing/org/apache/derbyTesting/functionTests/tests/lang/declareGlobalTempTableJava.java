@@ -68,6 +68,10 @@ public class declareGlobalTempTableJava {
 			con1.setAutoCommit(false);
 			con2.setAutoCommit(false);
 
+			/* Test this before other tests because this test requires
+			 that session schema has not been created yet */
+			passed = testDERBY1706(con1, s) && passed;
+
 			/* Test various schema and grammar related cases */
 			passed = testSchemaNameAndGrammar(con1, s) && passed;
 
@@ -88,6 +92,49 @@ public class declareGlobalTempTableJava {
 			System.out.println("PASS");
 
 		System.out.println("Test declaredGlobalTempTable finished");
+	}
+
+	/**
+	 * Test switching to session schema (it doesn't yet exist because
+	 * no create schema session has been issued yet) & then try to create 
+	 * first persistent object in it. This used to cause null pointer 
+	 * exception (DERBY-1706).
+	 *
+	 * @param conn	The Connection
+	 * @param s		A Statement on the Connection
+	 *
+	 * @return	true if it succeeds, false if it doesn't
+	 *
+	 * @exception SQLException	Thrown if some unexpected error happens
+	 */
+
+	static boolean testDERBY1706(Connection con1, Statement s)
+					throws SQLException {
+		boolean passed = true;
+
+		try
+		{
+			System.out.print("TEST-DERBY1706 : Create a persistent object");
+			System.out.print(" in SESSION schema w/o first creating the");
+			System.out.println(" schema");
+
+			s.executeUpdate("set schema SESSION");
+			s.executeUpdate("create table DERBY1706(c11 int)");
+			s.executeUpdate("drop table DERBY1706");
+			s.executeUpdate("set schema APP");
+			s.executeUpdate("drop schema SESSION restrict");
+
+			con1.commit();
+			System.out.println("TEST-DERBY1706 PASSED");
+		} catch (Throwable e)
+		{
+			System.out.println("Unexpected message: " + e.getMessage());
+			con1.rollback();
+			passed = false; //we shouldn't have reached here. Set passed to false to indicate failure
+			System.out.println("TEST-DERBY1706 FAILED");
+		}
+
+		return passed;
 	}
 
 	/**

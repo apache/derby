@@ -1,4 +1,6 @@
 Test declaredGlobalTempTableJava starting
+TEST-DERBY1706 : Create a persistent object in SESSION schema w/o first creating the schema
+TEST-DERBY1706 PASSED
 TEST1 : global temporary tables can only be in SESSION schema
 Expected message: The qualifier for a declared global temporary table name must be SESSION.
 TEST1 PASSED

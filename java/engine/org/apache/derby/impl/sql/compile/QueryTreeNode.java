@@ -1506,7 +1506,12 @@ public abstract class QueryTreeNode implements Visitable
 			getLanguageConnectionContext().getTransactionCompile(), raiseError);
 
 		if (isCurrent || isCompilation) {
-			if (sdCatalog != null)
+			//if we are dealing with a SESSION schema and it is not physically
+			//created yet, then it's uuid is going to be null. DERBY-1706
+			//Without the getUUID null check below, following will give NPE
+			//set schema session; -- session schema has not been created yet
+			//create table t1(c11 int);
+			if (sdCatalog != null && sdCatalog.getUUID() != null)
 			{
 				// different UUID for default (current) schema than in catalog,
 				// so reset default schema.
