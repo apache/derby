@@ -752,11 +752,12 @@ public final class NetworkServerControlImpl {
 							runQueue.clear();
 						}
 
-						// Close and remove DRDAConnThreads on threadList.
-						for (int i = 0; i < threadList.size(); i++)
-							((DRDAConnThread)threadList.get(i)).close();
-						threadList.clear();
-						freeThreads = 0;
+						// DERBY-1326: There could be active threads that
+						// contain old/invalid sessions. These sessions won't
+						// be cleaned up until there is some activity on
+						// them. We could optimize this by going through
+						// sessionTable and closing the sessions' socket
+						// streams.
 
 						// Unload driver, then restart the server.
 						cloudscapeDriver = null;	// so it gets collected.
