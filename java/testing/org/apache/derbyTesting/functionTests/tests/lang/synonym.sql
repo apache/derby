@@ -258,3 +258,141 @@ drop table testSchema.testtab;
 drop view view1;
 drop table table1;
 
+-- DERBY-1784
+create schema test1;
+create schema test2;
+create table test1.t1 ( id bigint not null );
+insert into test1.t1 values 1;
+create synonym test2.t1 for test1.t1;
+set schema test1;
+select t1.id from t1;
+set schema test2;
+select id from t1;
+select id from test2.t1;
+select t1.id from t1;
+select t1.id from test2.t1;
+select test2.t1.id from t1;
+select test2.t1.id from test2.t1;
+drop synonym t1;
+drop table test1.t1;
+
+set schema app;
+create table A (id integer);
+insert into A values 29;
+create synonym B for A;
+select a.id from a;
+select b.id from b;
+select b.id from b as b;
+select b.id from (select b.id from b) as b;
+select b.id from (select b.id from b as b) as b;
+drop synonym B;
+drop table A;
+
+create table t1 (i int, j int);
+create view v1 as select * from t1;
+insert into t1 values (1, 10);
+create synonym s1 for t1;
+create synonym sv1 for v1;
+-- should fail
+select t1.i from s1;
+select v1.i from sv1;
+select sv1.i from sv1 as w1;
+select s1.j from s1 where s1.k = 1;
+select s1.j from s1 where w1.i = 1;
+select * from s1 where w1.i = 1;
+select s1.j from s1 as w1 where w1.i = 1;
+select w1.j from s1 as w1 where s1.i = 1;
+select s1.j from s1 where t1.i = 1;
+select s1.j from s1 group by t1.j;
+select s1.j from s1 group by s1.j having t1.j > 0;
+insert into s1 (t1.i) values 100;
+update s1 set t1.i=1;
+delete from s1 where t1.i=100;
+
+-- ok
+select s1.i from s1;
+select s1.i from s1 as s1;
+select s1.i from s1 where i = 1;
+select s1.i from s1 where s1.i = 1;
+select s1.i from s1 as s1 where i = 1;
+select w1.i from s1 as w1 where w1.i = 1;
+select sv1.i from sv1;
+select sv1.i from sv1 as sv1;
+select sv1.i from sv1 where i = 1;
+select sv1.i from sv1 where sv1.i = 1;
+select sv1.i from sv1 as sv1 where i = 1;
+select wv1.i from sv1 as wv1 where wv1.i = 1;
+
+select s1.i, s1.i from s1;
+select sv1.i, sv1.i from sv1;
+select * from s1;
+select * from s1 where i = 1;
+select * from s1 where s1.i = 1;
+select * from s1 as s1;
+select * from s1 as w1;
+select * from sv1;
+select * from sv1 as sv1;
+select * from sv1 as w1;
+select * from sv1 where i = 1;
+select * from sv1 where sv1.i = 1;
+select s1.i from (select s1.i from s1) as s1;
+select sv1.i from (select sv1.i from sv1) as sv1;
+
+create table t2 (i int, j int);
+insert into t2 values (1, 100), (1, 100), (2, 200);
+create view v2 as select * from t2;
+create synonym s2 for t2;
+create synonym sv2 for v2;
+select s2.j from s2 group by s2.j order by s2.j;
+select s2.j from s2 group by s2.j having s2.j > 100 order by s2.j;
+select s1.i, s1.j from (select s1.i, s2.j from s1,s2 where s1.i=s2.i) as s1;
+select sv2.j from sv2 group by sv2.j order by sv2.j;
+select sv2.j from sv2 group by sv2.j having sv2.j > 100 order by sv2.j;
+select sv1.i, sv1.j from (select sv1.i, sv2.j from sv1,sv2 where sv1.i=sv2.i) as sv1;
+select max(s2.i) from s2;
+select max(sv2.i) from sv2;
+select * from s1 inner join s2 on (s1.i = s2.i);
+select * from sv1 inner join sv2 on (sv1.i = sv2.i);
+select s1.* from s1;
+select sv1.* from sv1;
+
+create table t3 (i int, j int);
+insert into t3 values (10, 0), (11, 0), (12, 0);
+create synonym s3 for t3;
+insert into s1 (s1.i, s1.j) values (2, 20);
+insert into app.s1 (s1.i, s1.j) values (3, 30);
+insert into app.s1 (app.s1.i, s1.j) values (4, 40);
+insert into app.s1 (app.s1.i, app.s1.j) values (5, 50);
+update s1 set s1.j = 1;
+update app.s1 set s1.j = 2;
+update app.s1 set app.s1.j = 3;
+update s1 set s1.j = 4 where s1.i = 3;
+update app.s1 set app.s1.j = 5 where app.s1.i = 4;
+delete from s1 where s1.i = 4;
+delete from app.s1 where app.s1.i = 5;
+update app.s1 set s1.j = s1.i, s1.i = s1.j;
+select * from s1;
+update app.s1 set s1.j = s1.i, s1.i = s1.j;
+select * from s1;
+delete from s1;
+
+-- should fail
+insert into s1 (s1.i) select s1.i from s3;
+
+-- ok
+insert into s1 (s1.i) select s3.i from s3;
+insert into s1 select * from s3;
+select * from s1;
+
+-- clean up  
+drop synonym s3;
+drop synonym sv2;
+drop synonym s2;
+drop synonym s1;
+drop synonym sv1;
+drop view v2;
+drop view v1;
+drop table t3;
+drop table t2;
+drop table t1;
+

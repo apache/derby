@@ -128,7 +128,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	protected int[][] fkColArrays; 
 	protected Hashtable graphHashTable; 
                           // Hash Table which maitains the querytreenode graph 
-
+	protected TableName synonymTableName;
+	
 	/**
 	 * Initializer for a DMLModStatementNode -- delegate to DMLStatementNode
 	 *
@@ -229,6 +230,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				TableName synonymTab = resolveTableToSynonym(targetTableName);
 				if (synonymTab == null)
 					throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, targetTableName);
+				synonymTableName = targetTableName;
 				targetTableName = synonymTab;
 				sdtc = getSchemaDescriptor(targetTableName.getSchemaName());
 
@@ -1567,6 +1569,50 @@ abstract class DMLModStatementNode extends DMLStatementNode
 								   dependentScan);
 	}
 
+	/**
+	 * Normalize synonym column references to have the name of the base table. 
+	 *
+	 * @param rcl	           The result column list of the target table
+	 * @param targetTableName  The target tablename
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void normalizeSynonymColumns( 
+    ResultColumnList    rcl, 
+    TableName           targetTableName)
+		throws StandardException
+	{
+		if (synonymTableName == null) 
+            return;
+		
+		String synTableName = synonymTableName.getTableName();
+		
+		int	count = rcl.size();
+		for (int i = 0; i < count; i++)
+		{
+			ResultColumn    column    = (ResultColumn) rcl.elementAt(i);
+			ColumnReference	reference = column.getReference();
+
+			if ( reference != null )
+			{
+				String crTableName = reference.getTableName();
+				if ( crTableName != null )
+				{
+					if ( synTableName.equals( crTableName ) )
+					{
+						reference.setTableNameNode( targetTableName );
+					}
+					else
+					{
+						throw StandardException.newException(
+                                SQLState.LANG_TABLE_NAME_MISMATCH, 
+                                synTableName, 
+                                crTableName);
+					}
+				}
+			}
+		}
+	}
 }
 
 

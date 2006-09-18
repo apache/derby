@@ -118,6 +118,9 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	protected static final short ADD_PLAN = 1;
 	protected static final short LOAD_PLAN = 2;
 
+	/** the original unbound table name */
+	protected TableName origTableName;
+	
 	/**
 	 * Initializer for a table in a FROM list.
 	 *
@@ -1491,5 +1494,29 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	public boolean needsSpecialRCLBinding()
 	{
 		return false;
+	}
+	
+	/**
+	 * Sets the original or unbound table name for this FromTable.  
+	 * 
+	 * @param tableName the unbound table name
+	 *
+	 */
+	public void setOrigTableName(TableName tableName) 
+	{
+		this.origTableName = tableName;
+	}
+	
+	/**
+	 * Gets the original or unbound table name for this FromTable.  
+	 * The tableName field can be changed due to synonym resolution.
+	 * Use this method to retrieve the actual unbound tablename.
+	 * 
+	 * @return TableName the original or unbound tablename
+	 *
+	 */
+	public TableName getOrigTableName() 
+	{
+		return this.origTableName;
 	}
 }

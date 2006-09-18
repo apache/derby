@@ -230,6 +230,7 @@ public class FromBaseTable extends FromTable
 			resultColumns = (ResultColumnList) arg3;
 		}
 
+		setOrigTableName(this.tableName);
 		templateColumns = resultColumns;
 	}
 
@@ -2217,7 +2218,8 @@ public class FromBaseTable extends FromTable
 				fsq = (FromTable) getNodeFactory().getNode(
 					C_NodeTypes.FROM_SUBQUERY,
 					rsn, 
-					(correlationName != null) ? correlationName : tableName.getTableName(), 
+					(correlationName != null) ? 
+                        correlationName : getOrigTableName().getTableName(), 
 					resultColumns,
 					tableProperties,
 					getContextManager());
@@ -2230,6 +2232,7 @@ public class FromBaseTable extends FromTable
 				//privileges. This marking will make sure that we do not collect
 				//any privilege requirement for it.
 				fsq.disablePrivilegeCollection();
+				fsq.setOrigTableName(this.getOrigTableName());
 				return fsq.bindNonVTITables(dataDictionary, fromListParam);
 			}
 			finally
@@ -2389,6 +2392,7 @@ public class FromBaseTable extends FromTable
 			TableName synonymTab = resolveTableToSynonym(tableName);
 			if (synonymTab == null)
 				throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, tableName);
+			
 			tableName = synonymTab;
 			sd = getSchemaDescriptor(tableName.getSchemaName());
 
@@ -2466,14 +2470,7 @@ public class FromBaseTable extends FromTable
 		** If there is a correlation name, use that instead of the
 		** table name.
 		*/
-		if (correlationName != null)
-		{
-			exposedTableName = makeTableName(null, correlationName);
-		}
-		else
-		{
-			exposedTableName = tableName;
-		}
+        exposedTableName = getExposedTableName();
 
         if(exposedTableName.getSchemaName() == null && correlationName == null)
             exposedTableName.bind(this.getDataDictionary());
@@ -3426,20 +3423,36 @@ public class FromBaseTable extends FromTable
 	}
 
 	/**
-	 * Return the exposed name for this table, which is the name that
-	 * can be used to refer to this table in the rest of the query.
+	 * Get the exposed name for this table, which is the name that can
+	 * be used to refer to it in the rest of the query.
 	 *
-	 * @return	The exposed name for this table.
+	 * @return	The exposed name of this table.
+	 *
 	 */
-
-	public String getExposedName()
+	public String getExposedName() 
 	{
 		if (correlationName != null)
 			return correlationName;
 		else
-			return tableName.getFullTableName();
+			return getOrigTableName().getFullTableName();
 	}
-
+	
+	/**
+	 * Get the exposed table name for this table, which is the name that can
+	 * be used to refer to it in the rest of the query.
+	 *
+	 * @return	TableName The exposed name of this table.
+	 *
+	 * @exception StandardException  Thrown on error
+	 */
+	private TableName getExposedTableName() throws StandardException  
+	{
+		if (correlationName != null)
+			return makeTableName(null, correlationName);
+		else
+			return getOrigTableName();
+	}
+	
 	/**
 	 * Return the table name for this table.
 	 *
@@ -3466,7 +3479,8 @@ public class FromBaseTable extends FromTable
 	public ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
-		return getResultColumnsForList(allTableName, resultColumns, tableName);
+		return getResultColumnsForList(allTableName, resultColumns, 
+				getOrigTableName());
 	}
 
 	/**
@@ -3491,14 +3505,7 @@ public class FromBaseTable extends FromTable
 		 * The exposed name becomes the qualifier for each column
 		 * in the expanded list.
 		 */
-		if (correlationName == null)
-		{
-			exposedName = tableName;
-		}
-		else
-		{
-			exposedName = makeTableName(null, correlationName);
-		}
+		exposedName = getExposedTableName();
 
 		/* Add all of the columns in the table */
 		rcList = (ResultColumnList) getNodeFactory().getNode(
@@ -3567,14 +3574,7 @@ public class FromBaseTable extends FromTable
 		 * The exposed name becomes the qualifier for each column
 		 * in the expanded list.
 		 */
-		if (correlationName == null)
-		{
-			exposedName = tableName;
-		}
-		else
-		{
-			exposedName = makeTableName(null, correlationName);
-		}
+		exposedName = getExposedTableName();
 
 		/* Add all of the columns in the table */
 		ResultColumnList newRcl = (ResultColumnList) getNodeFactory().getNode(

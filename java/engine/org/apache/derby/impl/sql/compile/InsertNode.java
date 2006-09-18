@@ -264,6 +264,14 @@ public final class InsertNode extends DMLModStatementNode
 		 */
 		if (targetColumnList != null)
 		{
+			/*
+			 * Normalize synonym qualifers for column references.
+			 */
+			if (synonymTableName != null)
+			{
+				normalizeSynonymColumns ( targetColumnList, targetTableName );
+			}
+			
 			/* Bind the target column list */
 			getCompilerContext().pushCurrentPrivType( getPrivType());
 			if (targetTableDescriptor != null)
@@ -861,4 +869,5 @@ public final class InsertNode extends DMLModStatementNode
 			cc.createDependency(cds[index]);
 		}
 	}
+	
 } // end of class InsertNode

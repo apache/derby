@@ -208,7 +208,10 @@ public final class UpdateNode extends DMLModStatementNode
 		{
 			TableName synonymTab = resolveTableToSynonym(this.targetTableName);
 			if (synonymTab != null)
-				this.targetTableName = synonymTab;
+			{
+				this.synonymTableName = targetTableName;
+				this.targetTableName  = synonymTab;
+			}
 		}
 
 		bindTables(dataDictionary);
@@ -342,6 +345,10 @@ public final class UpdateNode extends DMLModStatementNode
 		SanityManager.ASSERT(resultFromList.size() == 1,
 			"More than one table in result from list in an update.");
 
+		/* Normalize the SET clause's result column list for synonym */
+		if (synonymTableName != null)
+			normalizeSynonymColumns( resultSet.resultColumns, targetTable );
+		
 		/* Bind the original result columns by column name */
 		normalizeCorrelatedColumns( resultSet.resultColumns, targetTable );
 
@@ -1094,6 +1101,38 @@ public final class UpdateNode extends DMLModStatementNode
 			 */
 			column.clearTableName();
 		}
+	}
+	
+	/**
+	 * Normalize synonym column references to have the name of the base table. 
+	 *
+	 * @param rcl	    The result column list of the target table
+	 * @param fromTable The table name to set the column refs to
+	 * 
+	 * @exception StandardException		Thrown on error
+	 */
+	private	void normalizeSynonymColumns(
+    ResultColumnList    rcl, 
+    FromTable           fromTable)
+		throws StandardException
+	{
+		if (fromTable.getCorrelationName() != null) 
+        { 
+            return; 
+        }
+		
+		TableName tableNameNode;
+		if (fromTable instanceof CurrentOfNode)
+		{ 
+			tableNameNode = 
+                ((CurrentOfNode) fromTable).getBaseCursorTargetTableName(); 
+		}
+		else 
+		{ 
+			tableNameNode = makeTableName(null, fromTable.getBaseTableName()); 
+		}
+		
+		super.normalizeSynonymColumns(rcl, tableNameNode);
 	}
 	
 } // end of UpdateNode
