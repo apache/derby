@@ -107,6 +107,10 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 		// Verify if REFERENCES_PRIV is granted to columns referenced
 		getCompilerContext().pushCurrentPrivType(getPrivType());
 
+		// Indicate that this statement has a dependency on the
+		// table which is referenced by this foreign key:
+		getCompilerContext().createDependency(td);
+
 		// If references clause doesn't have columnlist, get primary key info
 		if (refRcl.size()==0 && (td.getPrimaryKey() != null))
 		{

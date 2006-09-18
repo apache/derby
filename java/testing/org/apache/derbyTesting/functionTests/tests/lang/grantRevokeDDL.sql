@@ -1924,3 +1924,27 @@ insert into mamta2.ttt1 values 2;
 update mamta2.ttt1 set i = 888;
 commit;
 autocommit on;
+
+-- Simple test case for DERBY-1589. The problem here involves dependency
+-- management between the FOREIGN KEY clause in the CREATE TABLE statement
+-- and the underlying table that the FK refers to. The statement must
+-- declare a dependency on the referenced table so that changes to the table
+-- cause invalidation of the statement's compiled plan. The test case below
+-- sets up such a situation by dropping the referenced table and recreating
+-- it and then re-issuing a statement with identical text to one which
+-- was issued earlier.
+
+set connection mamta1;
+create table d1589t11ConstraintTest (c111 int not null, c112 int not null, primary key (c111, c112));
+grant references on d1589t11ConstraintTest to mamta3;
+set connection mamta3;
+drop table d1589t31ConstraintTest;
+create table d1589t31ConstraintTest (c311 int, c312 int, foreign key(c311, c312) references mamta1.d1589t11ConstraintTest);
+drop table d1589t31ConstraintTest;
+set connection mamta1;
+drop table d1589t11ConstraintTest;
+create table d1589t11ConstraintTest (c111 int not null, c112 int not null, primary key (c111, c112));
+grant references(c111) on d1589t11ConstraintTest to mamta3;
+grant references(c112) on d1589t11ConstraintTest to PUBLIC;
+set connection mamta3;
+create table d1589t31ConstraintTest (c311 int, c312 int, foreign key(c311, c312) references mamta1.d1589t11ConstraintTest); 
