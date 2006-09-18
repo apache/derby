@@ -78,10 +78,6 @@ public class checkDataSource
 	// Only embedded supports SimpleDataSource (JSR169).  
 	// These tests are exempted from other frameworks
 	private boolean testSimpleDataSource = TestUtil.isEmbeddedFramework();
-	
-    // DERBY-1326 - Network server may abandon sessions when Derby system is shutdown
-    // and this causes intermittent hangs in the client
-	private static boolean hangAfterSystemShutdown = TestUtil.isDerbyNetClientFramework();
 
 	/**
      * A hashtable of opened connections.  This is used when checking to
@@ -279,14 +275,10 @@ public class checkDataSource
 
 		testPoolReset("XADataSource", dsx.getXAConnection());
 
-
-		// DERBY-1326 - hang in client after Derby system shutdown
-		if(! hangAfterSystemShutdown) {
-			try {
-				TestUtil.getConnection("","shutdown=true");
-			} catch (SQLException sqle) {
-				JDBCDisplayUtil.ShowSQLException(System.out, sqle);
-			}
+		try {
+			TestUtil.getConnection("","shutdown=true");
+		} catch (SQLException sqle) {
+			JDBCDisplayUtil.ShowSQLException(System.out, sqle);
 		}
 
 		dmc = ij.startJBMS();

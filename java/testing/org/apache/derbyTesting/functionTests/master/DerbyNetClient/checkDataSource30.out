@@ -100,6 +100,7 @@ IDENTITY_VAL_LOCAL=1
 IDENTITY_VAL_LOCAL=2
 IDENTITY_VAL_LOCAL=3
 End testPoolReset XADataSource
+ERROR XJ015: DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ015, SQLERRMC: Derby system shutdown.
 Running JDBC 3.0 connection checks on DriverManager 
   holdability     true
 JDBC 3.0 savepoint SQL Exception: (XJ010) Cannot issue savepoint when autoCommit is on.

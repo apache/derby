@@ -85,6 +85,7 @@ IDENTITY_VAL_LOCAL=1
 IDENTITY_VAL_LOCAL=2
 IDENTITY_VAL_LOCAL=3
 End testPoolReset XADataSource
+ERROR XJ015: DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ015, SQLERRMC: Derby system shutdown.
 Running connection checks on DriverManager 
   isolation level 2
   auto commit     true
