@@ -25,6 +25,9 @@ if [ ! -f "$DERBY_HOME/lib/derby.jar" -a -f "$DERBY_HOME/lib/derbyclient.jar" ];
   exit 1
 fi
 
+cygwin=false
+darwin=false
+mks=false
 case "`uname`" in 
   CYGWIN*) cygwin=true ;;
   Darwin*) darwin=true ;;
@@ -33,7 +36,7 @@ esac
 if [ -z "$JAVA_HOME" ]; then
   if [ -n "$darwin" ]; then
     JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
-  fi else if [ -d /usr/j2se -a -x /usr/j2se/bin/javac ]; then
+  elif [ -d /usr/j2se -a -x /usr/j2se/bin/javac ]; then
     JAVA_HOME=/usr/j2se
   fi
 fi
@@ -56,29 +59,47 @@ fi
 
 # Set up LOCALCLASSPATH, for cygwin or mks, use ;
 CPS=:
-if [ -n "$cygwin" ]; then
-  CPS=';'
-fi
-if [ ! `expr index` = "index" ]; then  # for MKS
-  if [ `expr index $SHELL sh.exe` -gt 0 ]; then
+if [ \( "`expr $SHELL : '.*sh.exe$'`" -gt 0 \) -a \( "$cygwin" = "false" \) ]; then
     CPS=';'
-  fi
+    mks=true
 fi
 LOCALCLASSPATH="$DERBY_HOME/lib/derby.jar$CPS$DERBY_HOME/lib/derbyclient.jar"
+
+# adjust paths for cygwin
+DERBY_HOME_NML=$DERBY_HOME
+if $cygwin; then
+  if [ "$OS" = "Windows_NT" ] && cygpath -m .>/dev/null 2>/dev/null ; then
+    format=mixed
+  else
+    format=windows
+  fi
+  DERBY_HOME_NML=`cygpath --$format "$DERBY_HOME_NML"`
+  JAVA_HOME=`cygpath --$format "$JAVA_HOME"`
+  LOCALCLASSPATH=`cygpath --path --$format "$LOCALCLASSPATH"`
+  SRCDIR=`cygpath --path --$format "$SRCDIR"`
+  # now set CPS to ; for later use
+  CPS=';'
+fi
 
 # compile the client classes
 echo "Compiling the client classes for JDBC 4.0"
 for i in `cat client.list`
 do
-  FILE=`echo $i | tr '\\' '/' | sed 's/.$//g'`
+  FILE=`echo $i | tr '\\' '/'` 
+  if [ ! \( "$cygwin" = "true" \) -o \( "$mks" = "true" \) ]; then
+    FILE=`echo $FILE | sed 's/.$//g'`
+  fi
+  if $mks; then
+    FILE=$i
+  fi
   CLASSES="$FILE $CLASSES"
 done
 
 cd $SRCDIR/java/client
 mkdir -p "$DERBY_HOME/jdbc4classes/client"
-"$JAVA_HOME/bin/javac" -d "$DERBY_HOME/jdbc4classes/client" \
+"$JAVA_HOME/bin/javac" -d "$DERBY_HOME_NML/jdbc4classes/client" \
                        -cp "$LOCALCLASSPATH" \
-                       -sourcepath "$SRCDIR/java/client$CPS$SRCDIR/java/shared" \
+                       -sourcepath "$SRCDIR/java/client$CPS$SRCDIR/java/shared$CPS$SRCDIR/java/engine" \
                         $CLASSES
 
 if [ $? -gt 0 ]; then
@@ -90,7 +111,7 @@ fi
 cd $THISDIR
 
 echo "Updating derbyclient.jar"
-jar uf "$DERBY_HOME/lib/derbyclient.jar" -C "$DERBY_HOME/jdbc4classes/client" org
+"$JAVA_HOME/bin/jar" uf "$DERBY_HOME_NML/lib/derbyclient.jar" -C "$DERBY_HOME_NML/jdbc4classes/client" org
 
 if [ $? -gt 0 ]; then
   echo "Error updating derbyclient.jar. It may no longer be usable."
@@ -102,16 +123,31 @@ echo "Compiling the engine classes for JDBC 4.0"
 unset CLASSES
 for i in `cat engine.list`
 do
-  FILE=`echo $i | tr '\\' '/' | sed 's/.$//g'`
+  FILE=`echo $i | tr '\\' '/'` 
+  if [ ! "$cygwin" = "true" ]; then
+    FILE=`echo $FILE | sed 's/.$//g'`
+  fi
+  if $mks; then
+    FILE=$i
+  fi
   CLASSES="$FILE $CLASSES"
 done
 
 cd "$SRCDIR/java/engine"  
 mkdir -p "$DERBY_HOME/jdbc4classes/engine"
-"$JAVA_HOME/bin/javac" -d "$DERBY_HOME/jdbc4classes/engine" \
+"$JAVA_HOME/bin/javac" -d "$DERBY_HOME_NML/jdbc4classes/engine" \
                        -cp "$LOCALCLASSPATH" \
                        -sourcepath "$SRCDIR/java/engine$CPS$SRCDIR/java/shared" \
                         $CLASSES
+
+# patch up modules.properties do the driver will load
+cd "$DERBY_HOME/jdbc4classes/engine"
+"$JAVA_HOME/bin/jar" xf "$DERBY_HOME_NML/lib/derby.jar" org/apache/derby/modules.properties
+if $cygwin; then
+  cat "$THISDIR/modules.patch" >> "$DERBY_HOME/jdbc4classes/engine/org/apache/derby/modules.properties"
+elif [ ! "$cygwin" = "true" ]; then
+  cat "$THISDIR/modules.patch" | sed 's/.$//g' >> "$DERBY_HOME/jdbc4classes/engine/org/apache/derby/modules.properties"
+fi
 
 if [ $? -gt 0 ]; then
   echo "There was an error compiling the engine classes. Exiting."
@@ -122,7 +158,7 @@ fi
 cd "$THISDIR"
 
 echo "Updating derby.jar"
-jar uf "$DERBY_HOME/lib/derby.jar" -C "$DERBY_HOME/jdbc4classes/engine" org
+"$JAVA_HOME/bin/jar" uf "$DERBY_HOME_NML/lib/derby.jar" -C "$DERBY_HOME_NML/jdbc4classes/engine" org
 
 if [ $? -gt 0 ]; then
   echo "Error updating derby.jar. It may no longer be usable."

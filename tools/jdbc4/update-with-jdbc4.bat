@@ -1,3 +1,4 @@
+@echo off
 @REM Licensed to the Apache Software Foundation (ASF) under one
 @REM or more contributor license agreements.  See the NOTICE file
 @REM distributed with this work for additional information
@@ -31,6 +32,7 @@ goto end
 
 :setLocalClasspath
 set LOCALCLASSPATH=%DERBY_HOME%\lib\derby.jar;%DERBY_HOME%\lib\derbyclient.jar
+@rmdir /s /q %DERBY_HOME%\jdbc4classes
 
 :checkJava
 set _JAVACMD=%JAVACMD%
@@ -46,25 +48,31 @@ if "%_JAVACMD%" == "" set _JAVACMD=javac.exe
 if "%_JARCMD%" == "" set _JAVACMD=jar.exe
 
 :endcheck
-echo "Building Derby client classes for JDBC 4.0"
+echo Building Derby client classes for JDBC 4.0...
 mkdir %DERBY_HOME%\jdbc4classes\client
 cd %SRCDIR%\java\client
 FOR /F %%G in (%THISDIR%client.list) do %_JAVACMD% -d %DERBY_HOME%\jdbc4classes\client -classpath %LOCALCLASSPATH% -sourcepath "%CLIENTDIR%;%ENGINEDIR%;%SHAREDDIR%" %%G
 
-echo "Updating %DERBY_HOME%\lib\derbyclient.jar"
+echo Updating %DERBY_HOME%\lib\derbyclient.jar
 %_JARCMD% uf %DERBY_HOME%\lib\derbyclient.jar -C %DERBY_HOME%\jdbc4classes\client org
 
-echo "Building Derby engine classes for JDBC 4.0"
+echo Building Derby engine classes for JDBC 4.0
 mkdir %DERBY_HOME%\jdbc4classes\engine
+@rem stop the compiler from trying to recompile EmbedDatabaseMetaData
+cd %DERBY_HOME%\jdbc4classes\engine
+%_JARCMD% xf %DERBY_HOME%\lib\derby.jar org\apache\derby\impl\jdbc\EmbedDatabaseMetaData.class
+%_JARCMD% xf %DERBY_HOME%\lib\derby.jar org\apache\derby\modules.properties
 cd %SRCDIR%\java\engine
 FOR /F %%G in (%THISDIR%engine.list) do %_JAVACMD% -d %DERBY_HOME%\jdbc4classes\engine -classpath %LOCALCLASSPATH% -sourcepath "%ENGINEDIR%;%SHAREDDIR%" %%G
+copy /b %DERBY_HOME%\jdbc4classes\engine\org\apache\derby\modules.properties+%THISDIR%\modules.patch %DERBY_HOME%\jdbc4classes\engine\org\apache\derby\modules.properties
+del /q %DERBY_HOME%\jdbc4classes\engine\org\apache\derby\impl\jdbc\EmbedDatabaseMetaData.class
 
-echo "Updating %DERBY_HOME%\lib\derby.jar"
+echo Updating %DERBY_HOME%\lib\derby.jar
 %_JARCMD% uf %DERBY_HOME%\lib\derby.jar -C %DERBY_HOME%\jdbc4classes\engine org
 
 cd %THISDIR%
 
-echo "Cleaning up"
-@erase /s /q %DERBY_HOME%/jdbc4classes
-echo "Done."
+echo Cleaning up
+@rmdir /s /q %DERBY_HOME%\jdbc4classes
+echo Done.
 :end
