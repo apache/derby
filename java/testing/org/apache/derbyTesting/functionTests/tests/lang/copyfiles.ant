@@ -97,6 +97,7 @@ fk_nonSPS_derby.properties
 floattypes.sql
 floattypes_app.properties
 forupdate.sql
+forupdate_sed.properties
 functions.sql
 functions_app.properties
 GetPropertyInfoTest_app.properties
