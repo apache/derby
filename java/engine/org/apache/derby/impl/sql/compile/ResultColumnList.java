@@ -110,6 +110,25 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 	int			orderBySelect = 0; // the number of result columns pulled up
                                	   // from ORDERBY list
+    /*
+     * A comment on 'orderBySelect'. When we encounter a SELECT .. ORDER BY
+     * statement, the columns (or expressions) in the ORDER BY clause may
+     * or may not have been explicitly mentioned in the SELECT column list.
+     * If the columns were NOT explicitly mentioned in the SELECT column
+     * list, then the parsing of the ORDER BY clause implicitly generates
+     * them into the result column list, because we'll need to have those
+     * columns present at execution time in order to sort by them. Those
+     * generated columns are added to the *end* of the ResultColumnList, and
+     * we keep track of the *number* of those columns in 'orderBySelect',
+     * so we can tell whether we are looking at a generated column by seeing
+     * whether its position in the ResultColumnList is in the last
+     * 'orderBySelect' number of columns. If the SELECT .. ORDER BY
+     * statement uses the "*" token to select all the columns from a table,
+     * then during ORDER BY parsing we redundantly generate the columns
+     * mentioned in the ORDER BY clause into the ResultColumnlist, but then
+     * later in getOrderByColumn we determine that these are duplicates and
+     * we take them back out again.
+     */
 
 	/*
 	** Is this ResultColumnList for a FromBaseTable for an index
@@ -397,7 +416,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 	/**
 	 * For order by, get a ResultColumn that matches the specified 
-	 * columnName and ensure that there is only one match.
+	 * columnName.
 	 *
 	 * @param columnName	The ResultColumn to get from the list
 	 * @param tableName	The table name on the OrderByColumn, if any
@@ -405,7 +424,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *						exposed name of tableName, if tableName != null.
 	 *
 	 * @return	the column that matches that name.
-	 * @exception StandardException thrown on duplicate
+	 * @exception StandardException thrown on ambiguity
 	 */
 	public ResultColumn getOrderByColumn(String columnName, TableName tableName, int tableNumber)
 		throws StandardException
@@ -436,7 +455,21 @@ public class ResultColumnList extends QueryTreeNodeVector
 			}
 
 			/* We finally got past the qualifiers, now see if the column
-			 * names are equal.
+			 * names are equal. If they are, then we appear to have found
+			* our order by column. If we find our order by column multiple
+			* times, make sure that they are truly duplicates, otherwise
+			* we have an ambiguous situation. For example, the query
+			*   SELECT b+c AS a, d+e AS a FROM t ORDER BY a
+			* is ambiguous because we don't know which "a" is meant. But
+			*   SELECT t.a, t.* FROM t ORDER BY a
+			* is not ambiguous, even though column "a" is selected twice.
+			* If we find our ORDER BY column at the end of the
+			* SELECT column list, in the last 'orderBySelect' number
+			* of columns, then this column was not explicitly mentioned
+			* by the user in their SELECT column list, but was implicitly 
+			* added by the parsing of the ORDER BY clause, and it
+			* should be removed from the ResultColumnList and returned
+			* to the caller.
 			 */
 			if (columnName.equals( resultColumn.getName()) )
 			{
@@ -444,11 +477,11 @@ public class ResultColumnList extends QueryTreeNodeVector
 				{
 					retVal = resultColumn;
 				}
-				else if (index < size - orderBySelect)
+				else if (! retVal.isEquivalent(resultColumn))
 				{
 					throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_FOR_ORDER_BY, columnName);
 				}
-				else
+				else if (index >= size - orderBySelect)
 				{// remove the column due to pullup of orderby item
 					removeElement(resultColumn);
 					decOrderBySelect();
@@ -462,13 +495,13 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 	/**
 	 * For order by, get a ResultColumn that matches the specified 
-	 * columnName and ensure that there is only one match before the bind process.
+	 * columnName.
 	 *
 	 * @param columnName	The ResultColumn to get from the list
 	 * @param tableName	The table name on the OrderByColumn, if any
 	 *
 	 * @return	the column that matches that name.
-	 * @exception StandardException thrown on duplicate
+	 * @exception StandardException thrown on ambiguity
 	 */
 	public ResultColumn getOrderByColumn(String columnName, TableName tableName)
 		throws StandardException
@@ -505,11 +538,11 @@ public class ResultColumnList extends QueryTreeNodeVector
 				{
 					retVal = resultColumn;
 				}
-				else if (index < size - orderBySelect)
+				else if (! retVal.isEquivalent(resultColumn))
 				{
 					throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_FOR_ORDER_BY, columnName);
 				}
-				else
+				else if (index >= size - orderBySelect)
 				{// remove the column due to pullup of orderby item
 					removeElement(resultColumn);
 					decOrderBySelect();

@@ -1314,4 +1314,110 @@ ij> drop table ta;
 0 rows inserted/updated/deleted
 ij> drop table tb;
 0 rows inserted/updated/deleted
+ij> -- some investigation of the handling of non-unique columns in the result set
+-- related to DERBY-147. The idea with this tests is that it should be
+-- acceptable to mention a column in the SELECT statement multiple times and
+-- then order by it, so long as the multiple columns truly are equivalent.
+-- There are a few cases where there truly is an ambiguity, and in those
+-- cases we reject the ORDER BY clause.
+create table derby147 (a int, b int, c int, d int);
+0 rows inserted/updated/deleted
+ij> insert into derby147 values (1, 2, 3, 4);
+1 row inserted/updated/deleted
+ij> insert into derby147 values (6, 6, 6, 6);
+1 row inserted/updated/deleted
+ij> select t.* from derby147 t;
+A          |B          |C          |D          
+-----------------------------------------------
+1          |2          |3          |4          
+6          |6          |6          |6          
+ij> select t.a,t.b,t.* from derby147 t order by b;
+A          |B          |A          |B          |C          |D          
+-----------------------------------------------------------------------
+1          |2          |1          |2          |3          |4          
+6          |6          |6          |6          |6          |6          
+ij> select t.a,t.b,t.b,t.c from derby147 t;
+A          |B          |B          |C          
+-----------------------------------------------
+1          |2          |2          |3          
+6          |6          |6          |6          
+ij> select t.a,t.b,t.b,t.c from derby147 t order by t.b;
+A          |B          |B          |C          
+-----------------------------------------------
+1          |2          |2          |3          
+6          |6          |6          |6          
+ij> -- This one truly is ambiguous, because the two columns named "e" are
+-- NOT equivalent. So it should fail:
+select a+b as e, c+d as e from derby147 order by e;
+ERROR 42X79: Column name 'E' appears more than once in the result of the query expression.
+ij> create table derby147_a (a int, b int, c int, d int);
+0 rows inserted/updated/deleted
+ij> insert into derby147_a values (1,2,3,4), (40, 30, 20, 10), (1,50,3,50);
+3 rows inserted/updated/deleted
+ij> create table derby147_b (a int, b int);
+0 rows inserted/updated/deleted
+ij> insert into derby147_b values (4, 4), (10, 10), (2, 50);
+3 rows inserted/updated/deleted
+ij> -- The columns named "a" are NOT equivalent.
+select t1.a,t2.a from derby147_a t1, derby147_b t2 where t1.d=t2.b order by a;
+ERROR 42X79: Column name 'A' appears more than once in the result of the query expression.
+ij> select t1.a,t2.a from derby147_a t1, derby147_b t2 where t1.d=t2.b order by t2.a;
+A          |A          
+-----------------------
+1          |2          
+1          |4          
+40         |10         
+ij> select a,a,b,c,d,a from derby147_a order by a;
+A          |A          |B          |C          |D          |A          
+-----------------------------------------------------------------------
+1          |1          |50         |3          |50         |1          
+1          |1          |2          |3          |4          |1          
+40         |40         |30         |20         |10         |40         
+ij> select c+d as a, t1.a, t1.b+t1.c as a from derby147_a t1 order by 3, 2 desc;
+A          |A          |A          
+-----------------------------------
+7          |1          |5          
+30         |40         |50         
+53         |1          |53         
+ij> -- The columns named "a" are NOT equivalent.
+select c+d as a, t1.a, t1.b+t1.c as a from derby147_a t1 order by a, a desc;
+ERROR 42X79: Column name 'A' appears more than once in the result of the query expression.
+ij> select a, c+d as a from derby147_a;
+A          |A          
+-----------------------
+1          |7          
+40         |30         
+1          |53         
+ij> -- The columns named "a" are NOT equivalent.
+select a, c+d as a from derby147_a order by a;
+ERROR 42X79: Column name 'A' appears more than once in the result of the query expression.
+ij> select c+d as a, t1.a, t1.b+t1.c as b_plus_c from derby147_a t1 order by c+d;
+A          |A          |B_PLUS_C   
+-----------------------------------
+7          |1          |5          
+30         |40         |50         
+53         |1          |53         
+ij> -- The columns named "a" are NOT equivalent.
+select c+d as a, t1.a, t1.b+t1.c as a from derby147_a t1 order by d-4, a;
+ERROR 42X79: Column name 'A' appears more than once in the result of the query expression.
+ij> select * from derby147_a order by c+2 desc, b asc, a desc;
+A          |B          |C          |D          
+-----------------------------------------------
+40         |30         |20         |10         
+1          |2          |3          |4          
+1          |50         |3          |50         
+ij> -- If you introduce a coorelation name for a table, use the correlation
+-- name in the order by:
+select a, b from derby147_a t order by derby147_a.b;
+ERROR 42X04: Column 'DERBY147_A.B' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'DERBY147_A.B' is not a column in the target table.
+ij> -- pull expressions from the ORDER BY clause into the implicit area of
+-- the SELECT column list, and ensure they don't end up in the result. This
+-- statement causes a SanityManager assertion, filed as DERBY-1861
+-- select * from derby147_b order by b, a+2;
+-- Verify that correlation names match the table names properly:
+select t.a, sum(t.a) from derby147_a t group by t.a order by t.a;
+A          |2          
+-----------------------
+1          |2          
+40         |40         
 ij> 

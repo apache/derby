@@ -455,3 +455,49 @@ select t1.id,t2.c1 from ta as t1 join tb as t2 on t1.id = t2.id order by t2.c1,t
 
 drop table ta;
 drop table tb;
+
+-- some investigation of the handling of non-unique columns in the result set
+-- related to DERBY-147. The idea with this tests is that it should be
+-- acceptable to mention a column in the SELECT statement multiple times and
+-- then order by it, so long as the multiple columns truly are equivalent.
+-- There are a few cases where there truly is an ambiguity, and in those
+-- cases we reject the ORDER BY clause.
+
+create table derby147 (a int, b int, c int, d int);
+insert into derby147 values (1, 2, 3, 4);
+insert into derby147 values (6, 6, 6, 6);
+select t.* from derby147 t;
+select t.a,t.b,t.* from derby147 t order by b;
+select t.a,t.b,t.b,t.c from derby147 t;
+select t.a,t.b,t.b,t.c from derby147 t order by t.b;
+-- This one truly is ambiguous, because the two columns named "e" are
+-- NOT equivalent. So it should fail:
+select a+b as e, c+d as e from derby147 order by e;
+
+create table derby147_a (a int, b int, c int, d int);
+insert into derby147_a values (1,2,3,4), (40, 30, 20, 10), (1,50,3,50);
+create table derby147_b (a int, b int);
+insert into derby147_b values (4, 4), (10, 10), (2, 50);
+-- The columns named "a" are NOT equivalent.
+select t1.a,t2.a from derby147_a t1, derby147_b t2 where t1.d=t2.b order by a;
+select t1.a,t2.a from derby147_a t1, derby147_b t2 where t1.d=t2.b order by t2.a;
+select a,a,b,c,d,a from derby147_a order by a;
+select c+d as a, t1.a, t1.b+t1.c as a from derby147_a t1 order by 3, 2 desc;
+-- The columns named "a" are NOT equivalent.
+select c+d as a, t1.a, t1.b+t1.c as a from derby147_a t1 order by a, a desc;
+select a, c+d as a from derby147_a;
+-- The columns named "a" are NOT equivalent.
+select a, c+d as a from derby147_a order by a;
+select c+d as a, t1.a, t1.b+t1.c as b_plus_c from derby147_a t1 order by c+d;
+-- The columns named "a" are NOT equivalent.
+select c+d as a, t1.a, t1.b+t1.c as a from derby147_a t1 order by d-4, a;
+select * from derby147_a order by c+2 desc, b asc, a desc;
+-- If you introduce a coorelation name for a table, use the correlation
+-- name in the order by:
+select a, b from derby147_a t order by derby147_a.b;
+-- pull expressions from the ORDER BY clause into the implicit area of
+-- the SELECT column list, and ensure they don't end up in the result. This
+-- statement causes a SanityManager assertion, filed as DERBY-1861
+-- select * from derby147_b order by b, a+2;
+-- Verify that correlation names match the table names properly:
+select t.a, sum(t.a) from derby147_a t group by t.a order by t.a;
