@@ -76,8 +76,10 @@ public class testSecMec extends dataSourcePermissions_net
 		networkServer = new NetworkServerControl(InetAddress.getByName("localhost"),NETWORKSERVER_PORT);
 		networkServer.start(null);
 
-		// Wait for the NetworkServer to start.
-		if (!isServerStarted(networkServer, 60))
+        // Wait for the NetworkServer to start.  As part of DERBY-1793
+        // changed the wait from 60 to 120, which increased the maximum
+        // to 120 pings with a wait of 500 ms between each ping.  
+		if (!isServerStarted(networkServer, 120))
 			System.exit(-1);
 
 		// Now, go ahead and run the test.
