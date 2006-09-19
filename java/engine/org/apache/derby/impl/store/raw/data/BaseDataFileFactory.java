@@ -235,6 +235,9 @@ public final class BaseDataFileFactory
     private File            backupRoot;
     private String[]        bfilelist;
 
+	// Creates RAFContainer instances tailored to the running VM
+	private RAFContainerFactory rafContainerFactory = new RAFContainerFactory();
+
 	/*
 	** Constructor
 	*/
@@ -1455,7 +1458,7 @@ public final class BaseDataFileFactory
     Cacheable newContainerObject()
     {
         if( supportsRandomAccess)
-            return new RAFContainer(this);
+            return rafContainerFactory.newRAFContainer(this);
         else
             return new InputStreamContainer( this);
     } 

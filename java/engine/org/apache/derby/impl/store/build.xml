@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 
-<project default="compile_impl_store" basedir="../../../../../../..">
+<project default="compile_impl_store_14" basedir="../../../../../../..">
 
 <!-- Set Properties -->
   <!-- User settings -->
@@ -53,6 +53,27 @@
         <pathelement path="${java13compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/store/**"/>
+      <exclude name="${derby.dir}/impl/store/raw/data/RAFContainer4.java"/>
+    </javac>
+  </target>
+  <target name="compile_impl_store_14" depends="compile_impl_store">
+      <javac
+        source="1.4"
+        target="1.4"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/impl/store/raw/data/RAFContainer4.java"/>
     </javac>
   </target>
 </project>

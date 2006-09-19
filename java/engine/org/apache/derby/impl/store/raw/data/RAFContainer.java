@@ -252,7 +252,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		// RESOLVE: leaveStub false
 	}
 
-	final void closeContainer() {
+	void closeContainer() {
 
 		if (fileData != null) {
 			try {
@@ -472,7 +472,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
      * page.
      * @return byte array of the the page data as it should be on the disk.
      */
-    private byte[] updatePageArray(long pageNumber, 
+    protected byte[] updatePageArray(long pageNumber, 
                                    byte[] pageData, 
                                    byte[] encryptionBuf, 
                                    boolean encryptWithNewEngine) 
