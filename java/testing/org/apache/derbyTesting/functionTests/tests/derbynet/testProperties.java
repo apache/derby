@@ -56,6 +56,15 @@ public class testProperties
 	private static jvm jvm;
 	private static Vector vCmd;
     private static  BufferedOutputStream bos = null;
+    
+    /**
+     * For each new exec process done as part of this test, set 
+     * timeout for ProcessStreamResult after which the thread that 
+     * handles the streams for the process exits.  Timeout is in minutes. 
+     * Note: timeout handling will only come into effect when 
+     * ProcessStreamResult#Wait() is called
+     */
+    private static String timeoutMinutes = "2";
 
     //Command to start server specifying system properties without values
     private static String[] startServerCmd =
@@ -115,8 +124,8 @@ public class testProperties
 	 * Execute the given command and optionally wait and dump the results to standard out
 	 *
 	 * @param args	command and arguments
-	 * @param wait  true =wait for completion and dump output, false don't wait and
-     * ignore the output.
+	 * @param wait  true =wait for either completion or timeout time and dump output, 
+     * false don't wait and ignore the output.
 	 * @exception Exception
 	 */
 
@@ -138,13 +147,16 @@ public class testProperties
         }
 		// Start a process to run the command
 		Process pr = execCmd(args);
-        prout = new ProcessStreamResult(pr.getInputStream(), _bos, null);
-        prerr = new ProcessStreamResult(pr.getErrorStream(), _bos, null);
+        
+        // Note, the timeout handling will only come into effect when we make
+        // the Wait() call on ProcessStreamResult. 
+        prout = new ProcessStreamResult(pr.getInputStream(), _bos, timeoutMinutes);
+        prerr = new ProcessStreamResult(pr.getErrorStream(), _bos, timeoutMinutes);
         
         if (!wait)
             return;
 
-		// wait until all the results have been processed
+		// wait until all the results have been processed or if we timed out
 		prout.Wait();
 		prerr.Wait();
         _bos.flush();
