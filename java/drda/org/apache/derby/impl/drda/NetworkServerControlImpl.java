@@ -368,7 +368,7 @@ public final class NetworkServerControlImpl {
 		att_extnam = ATT_SRVNAM + " " + java.lang.Thread.currentThread().getName();
 		
 		att_srvclsnm = myPVH.getProductName();
-		versionString = myPVH.getVersionBuildString(false);
+		versionString = myPVH.getVersionBuildString(true);
 		
 		String majorStr = String.valueOf(myPVH.getMajorVersion());
 		String minorStr = String.valueOf(myPVH.getMinorVersion());
@@ -392,7 +392,7 @@ public final class NetworkServerControlImpl {
 		prdId += minorStr;
 		
 		prdId += drdaMaintStr;
-		att_srvrlslv = prdId + "/" + myPVH.getVersionBuildString(false);
+		att_srvrlslv = prdId + "/" + myPVH.getVersionBuildString(true);
                 // Precompute this to save some cycles
                 prdIdBytes_ = prdId.getBytes(DEFAULT_ENCODING);
  

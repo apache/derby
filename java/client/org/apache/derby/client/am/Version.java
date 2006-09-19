@@ -39,7 +39,7 @@ public abstract class Version {
 
     // for DatabaseMetaData.getDriverVersion()
     public static String getDriverVersion() {
-        return Configuration.dncProductVersionHolder__.getVersionBuildString(false);
+        return Configuration.dncProductVersionHolder__.getVersionBuildString(true);
     }
 
 

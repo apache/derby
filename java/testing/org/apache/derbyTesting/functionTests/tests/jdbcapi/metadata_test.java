@@ -552,9 +552,6 @@ public abstract class metadata_test {
 			System.out.println("getDatabaseProductName(): " + met.getDatabaseProductName());
 
 			String v = met.getDatabaseProductVersion();
-			int l = v.indexOf('(');
-			if (l<0) l = v.length();
-			v = v.substring(0,l);
 			System.out.println("getDatabaseProductVersion(): " + v);
 			System.out.println("getDriverVersion(): " +
 							   met.getDriverVersion());
