@@ -439,18 +439,21 @@ public class OptimizerImpl implements Optimizer
 					firstLookOrder[i] = bestJoinOrder[i];
 				permuteState = JUMPING;
 
-				// If we were in the middle of a join order when this
-				// happened, then reset the join order before jumping.
-				// The call to rewindJoinOrder() here will put joinPosition
-				// back to 0.  But that said, we'll then end up incrementing 
-				// joinPosition before we start looking for the next join
-				// order (see below), which means we need to set it to -1
-				// here so that it gets incremented to "0" and then
-				// processing can continue as normal from there.  Note:
-				// we don't need to set reloadBestPlan to true here
-				// because we only get here if we have *not* found a
-				// best plan yet.
-				if (joinPosition > 0)
+				/* If we already assigned at least one position in the
+				 * join order when this happened (i.e. if joinPosition
+				 * is greater than *or equal* to zero; DERBY-1777), then 
+				 * reset the join order before jumping.  The call to
+				 * rewindJoinOrder() here will put joinPosition back
+				 * to 0.  But that said, we'll then end up incrementing
+				 * joinPosition before we start looking for the next
+				 * join order (see below), which means we need to set
+				 * it to -1 here so that it gets incremented to "0" and
+				 * then processing can continue as normal from there.  
+				 * Note: we don't need to set reloadBestPlan to true
+				 * here because we only get here if we have *not* found
+				 * a best plan yet.
+				 */
+				if (joinPosition >= 0)
 				{
 					rewindJoinOrder();
 					joinPosition = -1;
@@ -1594,6 +1597,18 @@ public class OptimizerImpl implements Optimizer
 				optimizableList.getOptimizable(
 					proposedJoinOrder[joinPosition - 1]).
 						getBestAccessPath().getCostEstimate();
+		}
+
+		/* At this point outerCost should be non-null (DERBY-1777).
+		 * Do the assertion here so that we catch it right away;
+		 * otherwise we'd end up with an NPE somewhere further
+		 * down the tree and it'd be harder to figure out where
+		 * it came from.
+		 */
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT(outerCost != null,
+				"outerCost is not expected to be null");
 		}
 
 		Optimizable optimizable = optimizableList.getOptimizable(proposedJoinOrder[joinPosition]);
