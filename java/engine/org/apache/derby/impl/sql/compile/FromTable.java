@@ -112,6 +112,9 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
   //Used by replication enabled databases where the target-only view failure is detected
   //using this boolean
   private boolean allColumnsProjected;
+  
+	/** the original unbound table name */
+	protected TableName origTableName;
 
   public boolean areAllColumnsProjected() {
     return allColumnsProjected;
@@ -134,6 +137,11 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		tableNumber = -1;
 		optimizerToBestPlanMap = null;
 	}
+
+	/**
+	 * Get this table's correlation name, if any.
+	 */
+	public	String	getCorrelationName() { return correlationName; }
 
 	/*
 	 *  Optimizable interface
@@ -1485,5 +1493,28 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 	public boolean needsSpecialRCLBinding()
 	{
 		return false;
+	}
+	/**
+	 * Sets the original or unbound table name for this FromTable.  
+	 * 
+	 * @param tableName the unbound table name
+	 *
+	 */
+	public void setOrigTableName(TableName tableName) 
+	{
+		this.origTableName = tableName;
+	}
+	
+	/**
+	 * Gets the original or unbound table name for this FromTable.  
+	 * The tableName field can be changed due to synonym resolution.
+	 * Use this method to retrieve the actual unbound tablename.
+	 * 
+	 * @return TableName the original or unbound tablename
+	 *
+	 */
+	public TableName getOrigTableName() 
+	{
+		return this.origTableName;
 	}
 }

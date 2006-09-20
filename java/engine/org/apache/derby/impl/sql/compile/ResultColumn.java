@@ -1745,6 +1745,10 @@ public class ResultColumn extends ValueNode
     public TableName getTableNameObject() {
         return null;
     }
+
+	/* Get the wrapped reference if any */
+	public	ColumnReference	getReference() { return reference; }
+	
 	/**
 	 * Get the source BaseColumnNode for this result column. The
 	 * BaseColumnNode cannot be found unless the ResultColumn is bound

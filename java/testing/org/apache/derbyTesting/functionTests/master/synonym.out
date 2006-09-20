@@ -408,4 +408,375 @@ ij> drop view view1;
 0 rows inserted/updated/deleted
 ij> drop table table1;
 0 rows inserted/updated/deleted
+ij> -- DERBY-1784
+create schema test1;
+0 rows inserted/updated/deleted
+ij> create schema test2;
+0 rows inserted/updated/deleted
+ij> create table test1.t1 ( id bigint not null );
+0 rows inserted/updated/deleted
+ij> insert into test1.t1 values 1;
+1 row inserted/updated/deleted
+ij> create synonym test2.t1 for test1.t1;
+0 rows inserted/updated/deleted
+ij> set schema test1;
+0 rows inserted/updated/deleted
+ij> select t1.id from t1;
+ID                  
+--------------------
+1                   
+ij> set schema test2;
+0 rows inserted/updated/deleted
+ij> select id from t1;
+ID                  
+--------------------
+1                   
+ij> select id from test2.t1;
+ID                  
+--------------------
+1                   
+ij> select t1.id from t1;
+ID                  
+--------------------
+1                   
+ij> select t1.id from test2.t1;
+ID                  
+--------------------
+1                   
+ij> select test2.t1.id from t1;
+ID                  
+--------------------
+1                   
+ij> select test2.t1.id from test2.t1;
+ID                  
+--------------------
+1                   
+ij> drop synonym t1;
+0 rows inserted/updated/deleted
+ij> drop table test1.t1;
+0 rows inserted/updated/deleted
+ij> set schema app;
+0 rows inserted/updated/deleted
+ij> create table A (id integer);
+0 rows inserted/updated/deleted
+ij> insert into A values 29;
+1 row inserted/updated/deleted
+ij> create synonym B for A;
+0 rows inserted/updated/deleted
+ij> select a.id from a;
+ID         
+-----------
+29         
+ij> select b.id from b;
+ID         
+-----------
+29         
+ij> select b.id from b as b;
+ID         
+-----------
+29         
+ij> select b.id from (select b.id from b) as b;
+ID         
+-----------
+29         
+ij> select b.id from (select b.id from b as b) as b;
+ID         
+-----------
+29         
+ij> drop synonym B;
+0 rows inserted/updated/deleted
+ij> drop table A;
+0 rows inserted/updated/deleted
+ij> create table t1 (i int, j int);
+0 rows inserted/updated/deleted
+ij> create view v1 as select * from t1;
+0 rows inserted/updated/deleted
+ij> insert into t1 values (1, 10);
+1 row inserted/updated/deleted
+ij> create synonym s1 for t1;
+0 rows inserted/updated/deleted
+ij> create synonym sv1 for v1;
+0 rows inserted/updated/deleted
+ij> -- should fail
+select t1.i from s1;
+ERROR 42X04: Column 'T1.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.I' is not a column in the target table.
+ij> select v1.i from sv1;
+ERROR 42X04: Column 'V1.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'V1.I' is not a column in the target table.
+ij> select sv1.i from sv1 as w1;
+ERROR 42X04: Column 'SV1.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'SV1.I' is not a column in the target table.
+ij> select s1.j from s1 where s1.k = 1;
+ERROR 42X04: Column 'S1.K' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S1.K' is not a column in the target table.
+ij> select s1.j from s1 where w1.i = 1;
+ERROR 42X04: Column 'W1.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'W1.I' is not a column in the target table.
+ij> select * from s1 where w1.i = 1;
+ERROR 42X04: Column 'W1.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'W1.I' is not a column in the target table.
+ij> select s1.j from s1 as w1 where w1.i = 1;
+ERROR 42X04: Column 'S1.J' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S1.J' is not a column in the target table.
+ij> select w1.j from s1 as w1 where s1.i = 1;
+ERROR 42X04: Column 'S1.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S1.I' is not a column in the target table.
+ij> select s1.j from s1 where t1.i = 1;
+ERROR 42X04: Column 'T1.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.I' is not a column in the target table.
+ij> select s1.j from s1 group by t1.j;
+ERROR 42X04: Column 'T1.J' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.J' is not a column in the target table.
+ij> select s1.j from s1 group by s1.j having t1.j > 0;
+ERROR 42X04: Column 'T1.J' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.J' is not a column in the target table.
+ij> insert into s1 (t1.i) values 100;
+ERROR 42X55: Table name 'T1' should be the same as 'S1'.
+ij> update s1 set t1.i=1;
+ERROR 42X55: Table name 'T1' should be the same as 'S1'.
+ij> delete from s1 where t1.i=100;
+ERROR 42X04: Column 'T1.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.I' is not a column in the target table.
+ij> -- ok
+select s1.i from s1;
+I          
+-----------
+1          
+ij> select s1.i from s1 as s1;
+I          
+-----------
+1          
+ij> select s1.i from s1 where i = 1;
+I          
+-----------
+1          
+ij> select s1.i from s1 where s1.i = 1;
+I          
+-----------
+1          
+ij> select s1.i from s1 as s1 where i = 1;
+I          
+-----------
+1          
+ij> select w1.i from s1 as w1 where w1.i = 1;
+I          
+-----------
+1          
+ij> select sv1.i from sv1;
+I          
+-----------
+1          
+ij> select sv1.i from sv1 as sv1;
+I          
+-----------
+1          
+ij> select sv1.i from sv1 where i = 1;
+I          
+-----------
+1          
+ij> select sv1.i from sv1 where sv1.i = 1;
+I          
+-----------
+1          
+ij> select sv1.i from sv1 as sv1 where i = 1;
+I          
+-----------
+1          
+ij> select wv1.i from sv1 as wv1 where wv1.i = 1;
+I          
+-----------
+1          
+ij> select s1.i, s1.i from s1;
+I          |I          
+-----------------------
+1          |1          
+ij> select sv1.i, sv1.i from sv1;
+I          |I          
+-----------------------
+1          |1          
+ij> select * from s1;
+I          |J          
+-----------------------
+1          |10         
+ij> select * from s1 where i = 1;
+I          |J          
+-----------------------
+1          |10         
+ij> select * from s1 where s1.i = 1;
+I          |J          
+-----------------------
+1          |10         
+ij> select * from s1 as s1;
+I          |J          
+-----------------------
+1          |10         
+ij> select * from s1 as w1;
+I          |J          
+-----------------------
+1          |10         
+ij> select * from sv1;
+I          |J          
+-----------------------
+1          |10         
+ij> select * from sv1 as sv1;
+I          |J          
+-----------------------
+1          |10         
+ij> select * from sv1 as w1;
+I          |J          
+-----------------------
+1          |10         
+ij> select * from sv1 where i = 1;
+I          |J          
+-----------------------
+1          |10         
+ij> select * from sv1 where sv1.i = 1;
+I          |J          
+-----------------------
+1          |10         
+ij> select s1.i from (select s1.i from s1) as s1;
+I          
+-----------
+1          
+ij> select sv1.i from (select sv1.i from sv1) as sv1;
+I          
+-----------
+1          
+ij> create table t2 (i int, j int);
+0 rows inserted/updated/deleted
+ij> insert into t2 values (1, 100), (1, 100), (2, 200);
+3 rows inserted/updated/deleted
+ij> create view v2 as select * from t2;
+0 rows inserted/updated/deleted
+ij> create synonym s2 for t2;
+0 rows inserted/updated/deleted
+ij> create synonym sv2 for v2;
+0 rows inserted/updated/deleted
+ij> select s2.j from s2 group by s2.j order by s2.j;
+J          
+-----------
+100        
+200        
+ij> select s2.j from s2 group by s2.j having s2.j > 100 order by s2.j;
+J          
+-----------
+200        
+ij> select s1.i, s1.j from (select s1.i, s2.j from s1,s2 where s1.i=s2.i) as s1;
+I          |J          
+-----------------------
+1          |100        
+1          |100        
+ij> select sv2.j from sv2 group by sv2.j order by sv2.j;
+J          
+-----------
+100        
+200        
+ij> select sv2.j from sv2 group by sv2.j having sv2.j > 100 order by sv2.j;
+J          
+-----------
+200        
+ij> select sv1.i, sv1.j from (select sv1.i, sv2.j from sv1,sv2 where sv1.i=sv2.i) as sv1;
+I          |J          
+-----------------------
+1          |100        
+1          |100        
+ij> select max(s2.i) from s2;
+1          
+-----------
+2          
+ij> select max(sv2.i) from sv2;
+1          
+-----------
+2          
+ij> select * from s1 inner join s2 on (s1.i = s2.i);
+I          |J          |I          |J          
+-----------------------------------------------
+1          |10         |1          |100        
+1          |10         |1          |100        
+ij> select * from sv1 inner join sv2 on (sv1.i = sv2.i);
+I          |J          |I          |J          
+-----------------------------------------------
+1          |10         |1          |100        
+1          |10         |1          |100        
+ij> select s1.* from s1;
+I          |J          
+-----------------------
+1          |10         
+ij> select sv1.* from sv1;
+I          |J          
+-----------------------
+1          |10         
+ij> create table t3 (i int, j int);
+0 rows inserted/updated/deleted
+ij> insert into t3 values (10, 0), (11, 0), (12, 0);
+3 rows inserted/updated/deleted
+ij> create synonym s3 for t3;
+0 rows inserted/updated/deleted
+ij> insert into s1 (s1.i, s1.j) values (2, 20);
+1 row inserted/updated/deleted
+ij> insert into app.s1 (s1.i, s1.j) values (3, 30);
+1 row inserted/updated/deleted
+ij> insert into app.s1 (app.s1.i, s1.j) values (4, 40);
+1 row inserted/updated/deleted
+ij> insert into app.s1 (app.s1.i, app.s1.j) values (5, 50);
+1 row inserted/updated/deleted
+ij> update s1 set s1.j = 1;
+5 rows inserted/updated/deleted
+ij> update app.s1 set s1.j = 2;
+5 rows inserted/updated/deleted
+ij> update app.s1 set app.s1.j = 3;
+5 rows inserted/updated/deleted
+ij> update s1 set s1.j = 4 where s1.i = 3;
+1 row inserted/updated/deleted
+ij> update app.s1 set app.s1.j = 5 where app.s1.i = 4;
+1 row inserted/updated/deleted
+ij> delete from s1 where s1.i = 4;
+1 row inserted/updated/deleted
+ij> delete from app.s1 where app.s1.i = 5;
+1 row inserted/updated/deleted
+ij> update app.s1 set s1.j = s1.i, s1.i = s1.j;
+3 rows inserted/updated/deleted
+ij> select * from s1;
+I          |J          
+-----------------------
+3          |1          
+3          |2          
+4          |3          
+ij> update app.s1 set s1.j = s1.i, s1.i = s1.j;
+3 rows inserted/updated/deleted
+ij> select * from s1;
+I          |J          
+-----------------------
+1          |3          
+2          |3          
+3          |4          
+ij> delete from s1;
+3 rows inserted/updated/deleted
+ij> -- should fail
+insert into s1 (s1.i) select s1.i from s3;
+ERROR 42X04: Column 'S1.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S1.I' is not a column in the target table.
+ij> -- ok
+insert into s1 (s1.i) select s3.i from s3;
+3 rows inserted/updated/deleted
+ij> insert into s1 select * from s3;
+3 rows inserted/updated/deleted
+ij> select * from s1;
+I          |J          
+-----------------------
+10         |NULL       
+11         |NULL       
+12         |NULL       
+10         |0          
+11         |0          
+12         |0          
+ij> -- clean up  
+drop synonym s3;
+0 rows inserted/updated/deleted
+ij> drop synonym sv2;
+0 rows inserted/updated/deleted
+ij> drop synonym s2;
+0 rows inserted/updated/deleted
+ij> drop synonym s1;
+0 rows inserted/updated/deleted
+ij> drop synonym sv1;
+0 rows inserted/updated/deleted
+ij> drop view v2;
+0 rows inserted/updated/deleted
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
 ij> 

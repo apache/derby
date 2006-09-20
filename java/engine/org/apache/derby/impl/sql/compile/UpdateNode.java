@@ -205,7 +205,10 @@ public final class UpdateNode extends DMLModStatementNode
 		{
 			TableName synonymTab = resolveTableToSynonym(this.targetTableName);
 			if (synonymTab != null)
-				this.targetTableName = synonymTab;
+			{
+				this.synonymTableName = targetTableName;
+				this.targetTableName  = synonymTab;
+			}
 		}
 
 		bindTables(dataDictionary);
@@ -339,7 +342,13 @@ public final class UpdateNode extends DMLModStatementNode
 		SanityManager.ASSERT(resultFromList.size() == 1,
 			"More than one table in result from list in an update.");
 
+		/* Normalize the SET clause's result column list for synonym */
+		if (synonymTableName != null)
+			normalizeSynonymColumns( resultSet.resultColumns, targetTable );
+		
 		/* Bind the original result columns by column name */
+		normalizeCorrelatedColumns( resultSet.resultColumns, targetTable );
+
  		resultSet.bindResultColumns(targetTableDescriptor,
 									targetVTI,
  									resultSet.resultColumns, this,
@@ -495,17 +504,12 @@ public final class UpdateNode extends DMLModStatementNode
 			/* Append to the ResultColumnList */
         resultColumnList.addResultColumn(rowLocationColumn);
 
-		/* The last thing that we do to the generated RCL is to clear
-		 * the table name out from each RC.  The table name is
-		 * unnecessary for an update.  More importantly, though, it
-		 * creates a problem in the degenerate case with a positioned
-		 * update.  The user must specify the base table name for a
-		 * positioned update.  If a correlation name was specified for
-		 * the cursor, then a match for the ColumnReference would not
-		 * be found if we didn't null out the name.  (Aren't you
-		 * glad you asked?)
+		/*
+		 * The last thing that we do to the generated RCL is to clear
+		 * the table name out from each RC. See comment on 
+		 * checkTableNameAndScrubResultColumns().
 		 */
-		resultColumnList.clearTableNames();
+		checkTableNameAndScrubResultColumns(resultColumnList);
 
 		/* Set the new result column list in the result set */
 		resultSet.setResultColumns(resultColumnList);
@@ -999,4 +1003,124 @@ public final class UpdateNode extends DMLModStatementNode
 
 		return	columnMap;
 	}
+
+	/*
+	 * Force correlated column references in the SET clause to have the
+	 * name of the base table. This dances around the problem alluded to
+	 * in scrubResultColumn().
+	 */
+	private	void	normalizeCorrelatedColumns( ResultColumnList rcl, FromTable fromTable )
+		throws StandardException
+	{
+		String		correlationName = fromTable.getCorrelationName();
+
+		if ( correlationName == null ) { return; }
+
+		TableName	tableNameNode;
+
+		if ( fromTable instanceof CurrentOfNode )
+		{ tableNameNode = ((CurrentOfNode) fromTable).getBaseCursorTargetTableName(); }
+		else { tableNameNode = makeTableName( null, fromTable.getBaseTableName() ); }
+		
+		int			count = rcl.size();
+
+		for ( int i = 0; i < count; i++ )
+		{
+			ResultColumn	column = (ResultColumn) rcl.elementAt( i );
+			ColumnReference	reference = column.getReference();
+
+			if ( (reference != null) && correlationName.equals( reference.getTableName() ) )
+			{
+				reference.setTableNameNode( tableNameNode );
+			}
+		}
+		
+	}
+
+	/**
+	 * Check table name and then clear it from the result set columns.
+	 * 
+	 * @exception StandardExcepion if invalid column/table is specified.
+	 */
+	private void checkTableNameAndScrubResultColumns(ResultColumnList rcl) 
+			throws StandardException
+	{
+		int columnCount = rcl.size();
+		int tableCount = ((SelectNode)resultSet).fromList.size();
+
+		for ( int i = 0; i < columnCount; i++ )
+		{
+			boolean foundMatchingTable = false;			
+			ResultColumn	column = (ResultColumn) rcl.elementAt( i );
+
+			if (column.getTableName() != null) {
+				for (int j = 0; j < tableCount; j++) {
+					FromTable fromTable = (FromTable) ((SelectNode)resultSet).
+							fromList.elementAt(j);
+					final String tableName;
+					if ( fromTable instanceof CurrentOfNode ) { 
+						tableName = ((CurrentOfNode)fromTable).
+								getBaseCursorTargetTableName().getTableName();
+					} else { 
+						tableName = fromTable.getBaseTableName();
+					}
+
+					if (column.getTableName().equals(tableName)) {
+						foundMatchingTable = true;
+						break;
+					}
+				}
+
+				if (!foundMatchingTable) {
+					throw StandardException.newException(
+							SQLState.LANG_COLUMN_NOT_FOUND, 
+							column.getTableName() + "." + column.getName());
+				}
+			}
+
+			/* The table name is
+			 * unnecessary for an update.  More importantly, though, it
+			 * creates a problem in the degenerate case with a positioned
+			 * update.  The user must specify the base table name for a
+			 * positioned update.  If a correlation name was specified for
+			 * the cursor, then a match for the ColumnReference would not
+			 * be found if we didn't null out the name.  (Aren't you
+			 * glad you asked?)
+			 */
+			column.clearTableName();
+		}
+	}
+	
+	/**
+	 * Normalize synonym column references to have the name of the base table. 
+	 *
+	 * @param rcl	    The result column list of the target table
+	 * @param fromTable The table name to set the column refs to
+	 * 
+	 * @exception StandardException		Thrown on error
+	 */
+	private	void normalizeSynonymColumns(
+    ResultColumnList    rcl, 
+    FromTable           fromTable)
+		throws StandardException
+	{
+		if (fromTable.getCorrelationName() != null) 
+        { 
+            return; 
+        }
+		
+		TableName tableNameNode;
+		if (fromTable instanceof CurrentOfNode)
+		{ 
+			tableNameNode = 
+                ((CurrentOfNode) fromTable).getBaseCursorTargetTableName(); 
+		}
+		else 
+		{ 
+			tableNameNode = makeTableName(null, fromTable.getBaseTableName()); 
+		}
+		
+		super.normalizeSynonymColumns(rcl, tableNameNode);
+	}
+	
 } // end of UpdateNode

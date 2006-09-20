@@ -125,6 +125,7 @@ lang/subquery.sql
 lang/subquery2.sql
 lang/subqueryFlattening.sql
 lang/supersimple.sql
+lang/synonym.sql
 lang/syscat.sql
 lang/tempRestrictions.sql
 lang/timestampArith.java

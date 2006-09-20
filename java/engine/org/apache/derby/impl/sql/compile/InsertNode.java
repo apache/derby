@@ -260,6 +260,14 @@ public final class InsertNode extends DMLModStatementNode
 		 */
 		if (targetColumnList != null)
 		{
+			/*
+			 * Normalize synonym qualifers for column references.
+			 */
+			if (synonymTableName != null)
+			{
+				normalizeSynonymColumns ( targetColumnList, targetTableName );
+			}
+			
 			/* Bind the target column list */
 			if (targetTableDescriptor != null)
 			{
