@@ -30,8 +30,10 @@ import org.apache.derby.impl.sql.execute.BaseActivation;
 import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -63,6 +65,36 @@ public class DropViewNode extends DDLStatementNode
 		return "DROP VIEW";
 	}
 
+ 	/**
+ 	 *  Bind the drop view node
+ 	 *
+ 	 * @return	The bound query tree
+ 	 *
+ 	 * @exception StandardException		Thrown on error
+ 	 */
+	
+	public QueryTreeNode bind() throws StandardException
+	{
+		DataDictionary dd = getDataDictionary();
+		CompilerContext cc = getCompilerContext();
+				
+		TableDescriptor td = dd.getTableDescriptor(getRelativeName(), 
+					getSchemaDescriptor());
+	
+		/* 
+		 * Statement is dependent on the TableDescriptor 
+		 * If td is null, let execution throw the error like
+		 * it is before.
+		 */
+		if (td != null)
+		{
+			cc.createDependency(td);
+		}
+			
+		return this;
+	}
+		
+	
 	// inherit generate() method from DDLStatementNode
 
 

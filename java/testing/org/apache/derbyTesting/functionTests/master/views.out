@@ -340,4 +340,32 @@ ij> drop table orgtable;
 0 rows inserted/updated/deleted
 ij> -- reset autocommit
 autocommit on;
+ij> -- DERBY-1304
+-- view not getting dropped 
+-- The second drop view statement fails before the patch
+CREATE SCHEMA TEST_SCHEMA;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE TEST_SCHEMA.T1 (TABLE_COLUMN LONG VARCHAR);
+0 rows inserted/updated/deleted
+ij> CREATE VIEW TEST_SCHEMA.V1 AS SELECT TABLE_COLUMN AS VIEW_COLUMN FROM TEST_SCHEMA.T1;
+0 rows inserted/updated/deleted
+ij> DROP VIEW TEST_SCHEMA.V1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE TEST_SCHEMA.T1;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA TEST_SCHEMA RESTRICT;
+0 rows inserted/updated/deleted
+ij> -- reiterate
+CREATE SCHEMA TEST_SCHEMA;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE TEST_SCHEMA.T1 (TABLE_COLUMN LONG VARCHAR);
+0 rows inserted/updated/deleted
+ij> CREATE VIEW TEST_SCHEMA.V1 AS SELECT TABLE_COLUMN AS VIEW_COLUMN FROM TEST_SCHEMA.T1;
+0 rows inserted/updated/deleted
+ij> DROP VIEW TEST_SCHEMA.V1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE TEST_SCHEMA.T1;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA TEST_SCHEMA RESTRICT;
+0 rows inserted/updated/deleted
 ij> 
