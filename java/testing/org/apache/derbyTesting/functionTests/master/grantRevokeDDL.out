@@ -40,19 +40,19 @@ ij(BARCONNECTION)> set connection satConnection;
 ij(SATCONNECTION)> -- Revoke table permissions not granted already. This should raise warnings.
 revoke trigger on satheesh.tsat from foo;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from FOO.
+WARNING 01006: Privilege not revoked from user FOO.
 ij(SATCONNECTION)> revoke references on satheesh.tsat from foo;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from FOO.
+WARNING 01006: Privilege not revoked from user FOO.
 ij(SATCONNECTION)> -- This should raise warnings for bar
 revoke insert on satheesh.tsat from foo, bar;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from BAR.
+WARNING 01006: Privilege not revoked from user BAR.
 ij(SATCONNECTION)> -- This should raise warnings for both foo and bar
 revoke insert on satheesh.tsat from foo, bar;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from FOO.
-WARNING 01006: Privilege not revoked from BAR.
+WARNING 01006: Privilege not revoked from user FOO.
+WARNING 01006: Privilege not revoked from user BAR.
 ij(SATCONNECTION)> grant insert on satheesh.tsat to foo;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Following revokes should revoke permissions
@@ -87,7 +87,7 @@ LANGUAGE JAVA PARAMETER STYLE JAVA;
 ij(SATCONNECTION)> -- Revoke routine permission not granted already. This should raise a warning.
 revoke execute on function F_ABS(int) from bar RESTRICT;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from BAR.
+WARNING 01006: Privilege not revoked from user BAR.
 ij(SATCONNECTION)> grant execute on function F_ABS to foo;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> grant execute on function F_ABS(int) to bar;
@@ -412,10 +412,10 @@ ij(SWIPERCONNECTION)> set schema swiper;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> revoke select on swiperTab from satheesh;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from SATHEESH.
+WARNING 01006: Privilege not revoked from user SATHEESH.
 ij(SWIPERCONNECTION)> revoke insert on swiperTab from satheesh;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from SATHEESH.
+WARNING 01006: Privilege not revoked from user SATHEESH.
 ij(SWIPERCONNECTION)> set connection satConnection;
 ij(SATCONNECTION)> -- Should still work, as satheesh is DBA
 select * from swiper.swiperTab;
@@ -435,7 +435,7 @@ ij(SATCONNECTION)> grant select on swiper.swiperTab to sam;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> revoke insert on swiper.swiperTab from satheesh;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from SATHEESH.
+WARNING 01006: Privilege not revoked from user SATHEESH.
 ij(SATCONNECTION)> -- Test system routines. Some don't need explicit grant and others do
 -- allowing for only DBA use by default
 set connection satConnection;
@@ -573,7 +573,7 @@ ij(MAMTA4)> insert into mamta1.t11 values(4);
 ij(MAMTA4)> set connection mamta1;
 ij(MAMTA1)> revoke all privileges on t11 from PUBLIC;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from PUBLIC.
+WARNING 01006: Privilege not revoked from user PUBLIC.
 ij(MAMTA1)> select * from mamta1.t11;
 C111       
 -----------
@@ -630,7 +630,7 @@ C111       |C112       |C113       |C114
 1 row selected
 ij(MAMTA1)> revoke select on t11 from mamta2, mamta3, mamta4;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from MAMTA4.
+WARNING 01006: Privilege not revoked from user MAMTA4.
 ij(MAMTA1)> revoke update(c111, c112) on t11 from mamta2, mamta3, mamta4;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> drop table t11;
@@ -984,7 +984,7 @@ ij(MAMTA3)> set connection satConnection;
 ij(SATCONNECTION)> -- have the dba take away select privilege on mamta2.v21ViewTest from mamta3
 revoke select on mamta2.v21ViewTest from mamta3;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from MAMTA3.
+WARNING 01006: Privilege not revoked from user MAMTA3.
 ij(SATCONNECTION)> set connection mamta3;
 ij(MAMTA3)> -- select from mamta2.v21ViewTest will fail this time for mamta3 because dba took away the select privilege on mamta2.v21ViewTest
 select * from mamta2.v21ViewTest;
@@ -1478,7 +1478,7 @@ ij(MAMTA3)> set connection mamta1;
 ij(MAMTA1)> -- revoke privilege will succeed this time and will drop the dependent view on that privilege
 revoke select on t11ViewTest from mamta2;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from MAMTA2.
+WARNING 01006: Privilege not revoked from user MAMTA2.
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- view doesn't exist anymore
 select * from v21ViewTest;
