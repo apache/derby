@@ -75,7 +75,6 @@ class MergeJoinResultSet extends JoinResultSet
 	 * @param oneRowRightSide	ignored
 	 * @param optimizerEstimatedRowCount	self-explanatory
 	 * @param optimizerEstimatedCost		self-explanatory
-	 * @param closeCleanup					self-explanatory
      */
     MergeJoinResultSet(NoPutResultSet leftResultSet,
 								   int leftNumCols,
@@ -88,8 +87,7 @@ class MergeJoinResultSet extends JoinResultSet
 								   boolean oneRowRightSide,
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
-								   double optimizerEstimatedCost,
-								   GeneratedMethod closeCleanup)
+								   double optimizerEstimatedCost)
     {
 		super(leftResultSet, leftNumCols, rightResultSet, rightNumCols,
 			  activation, restriction, resultSetNumber, 

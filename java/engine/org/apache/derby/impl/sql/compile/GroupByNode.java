@@ -934,7 +934,6 @@ public class GroupByNode extends SingleChildResultSetNode
 		 *			from the sort
 		 *  arg7: row size
 		 *  arg8: resultSetNumber
-		 *  arg11: closeCleanup
 		 */
 		String resultSet = (addDistinctAggregate) ? "getDistinctGroupedAggregateResultSet" : "getGroupedAggregateResultSet";
     

@@ -324,7 +324,6 @@ public class DistinctNode extends SingleChildResultSetNode
 		 *			from the sort
 		 *  arg6: row size
 		 *  arg7: resultSetNumber
-		 *  arg8: closeCleanup
 		 */
 
 		acb.pushGetResultSetFactoryExpression(mb);

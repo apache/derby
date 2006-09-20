@@ -3143,7 +3143,6 @@ public class FromBaseTable extends FromTable
 		**		isolationLevel,
 		**		optimizerEstimatedRowCount,
 		**		optimizerEstimatedRowCost,
-		**		closeCleanupMethod
 		**	);
 		*/
 

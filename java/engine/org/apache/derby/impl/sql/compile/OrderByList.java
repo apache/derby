@@ -371,7 +371,6 @@ public class OrderByList extends OrderedColumnList
 		 *  arg7: resultSetNumber
 		 *  arg8: estimated row count
 		 *  arg9: estimated cost
-		 *  arg10: closeCleanup
 		 */
 
 		acb.pushGetResultSetFactoryExpression(mb);
