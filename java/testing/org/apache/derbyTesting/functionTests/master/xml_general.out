@@ -172,9 +172,9 @@ ij> -- Test XMLPARSE operator.
 insert into t1 values (1, xmlparse(document '<hmm/>' strip whitespace));
 ERROR 42Z74: XML feature not supported: 'STRIP WHITESPACE'.
 ij> insert into t1 values (1, xmlparse(document '<hmm/>'));
-ERROR 42Z72: XML syntax error; missing keyword(s): 'PRESERVE WHITESPACE'.
+ERROR 42Z72: Missing SQL/XML keyword(s) 'PRESERVE WHITESPACE' at line 1, column 53.
 ij> insert into t1 values (1, xmlparse('<hmm/>' preserve whitespace));
-ERROR 42Z72: XML syntax error; missing keyword(s): 'DOCUMENT'.
+ERROR 42Z72: Missing SQL/XML keyword(s) 'DOCUMENT' at line 1, column 36.
 ij> insert into t1 values (1, xmlparse(content '<hmm/>' preserve whitespace));
 ERROR 42Z74: XML feature not supported: 'CONTENT'.
 ij> select xmlparse(document xmlparse(document '<hein/>' preserve whitespace) preserve whitespace) from t1;
@@ -257,9 +257,9 @@ ij> insert into t4 values 'no good';
 1 row inserted/updated/deleted
 ij> -- These should fail.
 select xmlserialize(x) from t1;
-ERROR 42Z72: XML syntax error; missing keyword(s): 'AS'.
+ERROR 42Z72: Missing SQL/XML keyword(s) 'AS' at line 2, column 22.
 ij> select xmlserialize(x as) from t1;
-ERROR 42Z72: XML syntax error; missing keyword(s): 'AS'.
+ERROR 42X01: Syntax error: Encountered "" at line 1, column 25.
 ij> select xmlserialize(x as int) from t1;
 ERROR 42Z73: Invalid target type for XMLSERIALIZE: 'INTEGER'.
 ij> select xmlserialize(x as varchar(20) for bit data) from t1;

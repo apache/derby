@@ -4218,7 +4218,9 @@ xmlDocOrContent() throws StandardException :
 		(getToken(1).kind != CONTENT) })
 	{
 		throw StandardException.newException(
-			SQLState.LANG_XML_KEYWORD_MISSING, "DOCUMENT");
+			SQLState.LANG_XML_KEYWORD_MISSING, "DOCUMENT",
+			new Integer(getToken(1).beginLine),
+			new Integer(getToken(1).beginColumn));
 	}
 |
 	LOOKAHEAD({ getToken(1).kind == CONTENT }) <CONTENT>
@@ -6749,7 +6751,9 @@ boolean
 		(getToken(1).kind != PRESERVE) })
 	{
 		throw StandardException.newException(
-			SQLState.LANG_XML_KEYWORD_MISSING, "PRESERVE WHITESPACE");
+			SQLState.LANG_XML_KEYWORD_MISSING, "PRESERVE WHITESPACE",
+			new Integer(getToken(1).beginLine),
+			new Integer(getToken(1).beginColumn));
 	}
 |
 	<STRIP> <WHITESPACE>
@@ -6810,10 +6814,12 @@ DataTypeDescriptor xmlSerializeTargetType() throws StandardException :
 	DataTypeDescriptor targetType;
 }
 {
-	LOOKAHEAD({ (getToken(1).kind != AS) || (getToken(2).kind == RIGHT_PAREN) })
+	LOOKAHEAD({ (getToken(1).kind != AS) })
 	{
 		throw StandardException.newException(
-			SQLState.LANG_XML_KEYWORD_MISSING, "AS");
+			SQLState.LANG_XML_KEYWORD_MISSING, "AS",
+			new Integer(getToken(1).beginLine),
+			new Integer(getToken(1).beginColumn));
 	}
 |
 	<AS> targetType = dataTypeDDL()
