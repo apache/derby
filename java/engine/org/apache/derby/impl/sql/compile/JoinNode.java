@@ -1652,8 +1652,6 @@ public class JoinNode extends TableOperatorNode
 			mb.push(PropertyUtil.sortProperties(joinOrderStrategyProperties));
 		else
 			mb.pushNull("java.lang.String");
-		
-		closeMethodArgument(acb, mb);
 
 		return numArgs;
 
@@ -1701,7 +1699,7 @@ public class JoinNode extends TableOperatorNode
 	 */
 	protected int getNumJoinArguments()
 	{
-		return 12;
+		return 11;
 	}
 
 	/**

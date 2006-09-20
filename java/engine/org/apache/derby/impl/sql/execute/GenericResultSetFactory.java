@@ -233,8 +233,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		boolean reuseResult,
 		boolean doesProjection,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup)
+		double optimizerEstimatedCost)
 			throws StandardException
 	{
 		return new ProjectRestrictResultSet(source, source.getActivation(), 
@@ -262,8 +261,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		int	initialCapacity,
 		float loadFactor,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup)
+		double optimizerEstimatedCost)
 			throws StandardException
 	{
 		return new HashTableResultSet(source, source.getActivation(), 
@@ -293,8 +291,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		int maxRowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup)
+		double optimizerEstimatedCost)
 			throws StandardException
 	{
 		return new SortResultSet(source, 
@@ -322,8 +319,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		int resultSetNumber, 
 		boolean singleInputRow,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) 
+		double optimizerEstimatedCost) 
 			throws StandardException
 	{
 		return new ScalarAggregateResultSet(
@@ -346,8 +342,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		int resultSetNumber, 
 		boolean singleInputRow,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) 
+		double optimizerEstimatedCost) 
 			throws StandardException
 	{
 		return new DistinctScalarAggregateResultSet(
@@ -369,8 +364,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		int maxRowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) 
+		double optimizerEstimatedCost) 
 			throws StandardException
 	{
 		return new GroupedAggregateResultSet(
@@ -391,8 +385,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		int maxRowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) 
+		double optimizerEstimatedCost) 
 			throws StandardException
 	{
 		return new DistinctGroupedAggregateResultSet(
@@ -447,8 +440,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									 boolean canCacheRow,
 									 int resultSetNumber,
 									 double optimizerEstimatedRowCount,
-									 double optimizerEstimatedCost,
-								     GeneratedMethod closeCleanup)
+									 double optimizerEstimatedCost)
 	{
 		return new RowResultSet(activation, row, canCacheRow, resultSetNumber, 
 							    optimizerEstimatedRowCount,
@@ -471,8 +463,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									 boolean isTarget,
 									 int scanIsolationLevel,
 									 double optimizerEstimatedRowCount,
-									 double optimizerEstimatedCost,
-								     GeneratedMethod closeCleanup)
+									 double optimizerEstimatedCost)
 		throws StandardException
 	{
 		return new VTIResultSet(activation, row, resultSetNumber, 
@@ -521,8 +512,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									boolean tableLocked,
 									int isolationLevel,
 									double optimizerEstimatedRowCount,
-									double optimizerEstimatedCost,
-									GeneratedMethod closeCleanup)
+									double optimizerEstimatedCost)
 			throws StandardException
 	{
         StaticCompiledOpenConglomInfo scoci = (StaticCompiledOpenConglomInfo)(activation.getPreparedStatement().
@@ -580,8 +570,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									boolean tableLocked,
 									int isolationLevel,
 									double optimizerEstimatedRowCount,
-									double optimizerEstimatedCost,
-									GeneratedMethod closeCleanup)
+									double optimizerEstimatedCost)
 			throws StandardException
 	{
         StaticCompiledOpenConglomInfo scoci = (StaticCompiledOpenConglomInfo)(activation.getPreparedStatement().
@@ -634,8 +623,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									int isolationLevel,
 									boolean oneRowScan,
 									double optimizerEstimatedRowCount,
-									double optimizerEstimatedCost,
-									GeneratedMethod closeCleanup)
+									double optimizerEstimatedCost)
 			throws StandardException
 	{
         StaticCompiledOpenConglomInfo scoci = (StaticCompiledOpenConglomInfo)(activation.getPreparedStatement().
@@ -698,8 +686,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									int rowsPerRead,
 									boolean oneRowScan,
 									double optimizerEstimatedRowCount,
-									double optimizerEstimatedCost,
-									GeneratedMethod closeCleanup)
+									double optimizerEstimatedCost)
 			throws StandardException
 	{
 		//Prior to Cloudscape 10.0 release, holdability was false by default. Programmers had to explicitly
@@ -756,8 +743,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								GeneratedMethod restriction,
 								boolean forUpdate,
 								double optimizerEstimatedRowCount,
-								double optimizerEstimatedCost,
-								GeneratedMethod closeCleanup)
+								double optimizerEstimatedCost)
 			throws StandardException
 	{
 		return new IndexRowToBaseRowResultSet(
@@ -792,8 +778,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
 			throws StandardException
 	{
 		return new NestedLoopJoinResultSet(leftResultSet, leftNumCols,
@@ -822,8 +807,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
 			throws StandardException
 	{
 		return new HashJoinResultSet(leftResultSet, leftNumCols,
@@ -854,8 +838,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
 			throws StandardException
 	{
 		return new NestedLoopLeftOuterJoinResultSet(leftResultSet, leftNumCols,
@@ -888,8 +871,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
 			throws StandardException
 	{
 		return new HashLeftOuterJoinResultSet(leftResultSet, leftNumCols,
@@ -924,8 +906,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	public NoPutResultSet getMaterializedResultSet(NoPutResultSet source,
 							int resultSetNumber,
 						    double optimizerEstimatedRowCount,
-							double optimizerEstimatedCost,
-								   GeneratedMethod closeCleanup)
+							double optimizerEstimatedCost)
 		throws StandardException
 	{
 		return new MaterializedResultSet(source, source.getActivation(), 
@@ -943,8 +924,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 							int sourceRowWidth,
 							boolean scrollable,
 						    double optimizerEstimatedRowCount,
-							double optimizerEstimatedCost,
-								   GeneratedMethod closeCleanup)
+							double optimizerEstimatedCost)
 		throws StandardException
 	{
 		/* ResultSet tree is dependent on whether or not this is
@@ -974,8 +954,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 							int erdNumber,
 						    double optimizerEstimatedRowCount,
 							double optimizerEstimatedCost,
-							boolean forUpdate,					
-							GeneratedMethod closeCleanup)
+							boolean forUpdate)
 		throws StandardException
 	{
 		return new NormalizeResultSet(source, source.getActivation(), 
@@ -1024,8 +1003,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   NoPutResultSet rightResultSet,
 								   int resultSetNumber,
 								   double optimizerEstimatedRowCount,
-								   double optimizerEstimatedCost,
-								   GeneratedMethod closeCleanup)
+								   double optimizerEstimatedCost)
 			throws StandardException
 	{
 		return new UnionResultSet(leftResultSet, rightResultSet, 
@@ -1043,8 +1021,7 @@ public class GenericResultSetFactory implements ResultSetFactory
                                              double optimizerEstimatedCost,
                                              int opType,
                                              boolean all,
-                                             GeneratedMethod closeCleanup,
-                                             int intermediateOrderByColumnsSavedObject,
+                                            int intermediateOrderByColumnsSavedObject,
                                              int intermediateOrderByDirectionSavedObject)
         throws StandardException
     {
@@ -1086,7 +1063,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 	 * @param optimizerEstimatedRowCount	Estimated total # of rows by
 	 * 										optimizer
 	 * @param optimizerEstimatedCost		Estimated total cost by optimizer
-	 * @param closeCleanup		any cleanup the activation needs to do on close.
 	 *
 	 * @return the scan operation as a result set.
  	 *
@@ -1107,8 +1083,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		boolean				tableLocked,
 		int					isolationLevel,
 		double				optimizerEstimatedRowCount,
-		double 				optimizerEstimatedCost,
-		GeneratedMethod 	closeCleanup
+		double 				optimizerEstimatedCost
 	) throws StandardException
 	{
 		return new LastIndexKeyResultSet(
@@ -1159,7 +1134,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 									boolean oneRowScan,
 									double optimizerEstimatedRowCount,
 									double optimizerEstimatedCost,
-									GeneratedMethod closeCleanup,
 									String parentResultSetId,
 									long fkIndexConglomId,
 									int fkColArrayItem,

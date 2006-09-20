@@ -1041,20 +1041,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	}
 
 	/**
-		This utility method is used by result set nodes that can be
-		statement nodes to determine what their final argument is;
-		if they are the statement result set, and there is a current
-		date/time request, then a method will have been generated.
-		Otherwise, a simple null is passed in to the result set method.
-	 */
-	void closeMethodArgument(ExpressionClassBuilder acb,
-									MethodBuilder mb)
-	{
-
-			mb.pushNull(ClassName.GeneratedMethod);
-	}
-
-	/**
 	 * This ResultSet is the source for an Insert.  The target RCL
 	 * is in a different order and/or a superset of this RCL.  In most cases
 	 * we will reorder and/or add defaults to the current RCL so that is
@@ -1519,10 +1505,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 		mb.push(getCostEstimate().rowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
 		mb.push(false);
-		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getNormalizeResultSet",
-					ClassName.NoPutResultSet, 7);
+					ClassName.NoPutResultSet, 6);
 	}
 
 	/**

@@ -3168,10 +3168,9 @@ public class FromBaseTable extends FromTable
 		mb.push(getCompilerContext().getScanIsolationLevel());
 		mb.push(costEstimate.singleScanRowCount());
 		mb.push(costEstimate.getEstimatedCost());
-		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getLastIndexKeyResultSet",
-					ClassName.NoPutResultSet, 14);
+					ClassName.NoPutResultSet, 13);
 
 
 	}
@@ -3264,11 +3263,9 @@ public class FromBaseTable extends FromTable
 		mb.push(getCompilerContext().getScanIsolationLevel());
 		mb.push(costEstimate.singleScanRowCount());
 		mb.push(costEstimate.getEstimatedCost());
-		closeMethodArgument(acb, mb);
-
 		
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getDistinctScanResultSet",
-							ClassName.NoPutResultSet, 17);
+							ClassName.NoPutResultSet, 16);
 	}
 
 
@@ -3383,8 +3380,6 @@ public class FromBaseTable extends FromTable
 											getCompilerContext().getScanIsolationLevel(),
 											ap.getOptimizer().getMaxMemoryPerTable()
 											);
-
-		closeMethodArgument(acb, mb);
 
 		return nargs;
 	}

@@ -366,7 +366,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 						tableLocked,
 						isolationLevel);
 
-		return 29;
+		return 28;
 	}
 
 	/**

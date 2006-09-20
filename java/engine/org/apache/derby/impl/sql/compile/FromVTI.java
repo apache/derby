@@ -1172,7 +1172,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 		acb.pushGetResultSetFactoryExpression(mb);
 		int nargs = getScanArguments(acb, mb);
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getVTIResultSet", ClassName.NoPutResultSet, nargs);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getVTIResultSet",ClassName.NoPutResultSet, nargs);
 	}
 
 	private int getScanArguments(ActivationClassBuilder acb,
@@ -1264,10 +1264,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		// estimated cost
 		mb.push(costEstimate.getEstimatedCost());
 
-		// let the superclass deal with statement level argument
-		closeMethodArgument(acb, mb);
-
-		return 15;
+		return 14;
 	}
 
 	private void generateConstructor(ActivationClassBuilder acb,

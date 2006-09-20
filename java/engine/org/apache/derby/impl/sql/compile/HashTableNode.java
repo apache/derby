@@ -404,9 +404,9 @@ public class HashTableNode extends SingleChildResultSetNode
 		mb.push(loadFactor);
 		mb.push(costEstimate.singleScanRowCount());
 		mb.push(costEstimate.getEstimatedCost());
-		closeMethodArgument(acb, mb);
 
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getHashTableResultSet", ClassName.NoPutResultSet, 15);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getHashTableResultSet",
+                ClassName.NoPutResultSet, 14);
 	}
 
 	/**

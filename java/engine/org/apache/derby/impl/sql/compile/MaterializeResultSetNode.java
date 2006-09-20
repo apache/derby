@@ -119,9 +119,8 @@ public class MaterializeResultSetNode extends SingleChildResultSetNode
 		mb.push(resultSetNumber);
 		mb.push(costEstimate.rowCount());
 		mb.push(costEstimate.getEstimatedCost());
-		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getMaterializedResultSet",
-						ClassName.NoPutResultSet, 5);
+						ClassName.NoPutResultSet, 4);
 	}
 }

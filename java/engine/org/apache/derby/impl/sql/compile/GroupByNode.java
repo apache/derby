@@ -905,7 +905,6 @@ public class GroupByNode extends SingleChildResultSetNode
 		 *  arg7: row size
 		 *  arg8: resultSetNumber
 		 *  arg9: Whether or not to perform min optimization.
-		 *  arg12: closeCleanup
 		 */
 		String resultSet = (addDistinctAggregate) ? "getDistinctScalarAggregateResultSet" : "getScalarAggregateResultSet";
 
@@ -913,9 +912,8 @@ public class GroupByNode extends SingleChildResultSetNode
 		mb.push(costEstimate.rowCount());
 		mb.push(costEstimate.getEstimatedCost());
 
-		closeMethodArgument(acb, mb);
-
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet, ClassName.NoPutResultSet, 11);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet,
+                ClassName.NoPutResultSet, 10);
 	}
 
 	/**
@@ -943,9 +941,8 @@ public class GroupByNode extends SingleChildResultSetNode
 		mb.push(costEstimate.rowCount());
 		mb.push(costEstimate.getEstimatedCost());
 
-		closeMethodArgument(acb, mb);
-
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet, ClassName.NoPutResultSet, 10);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet,
+                ClassName.NoPutResultSet, 9);
 
 	}
 

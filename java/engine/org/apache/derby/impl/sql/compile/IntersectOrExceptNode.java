@@ -361,14 +361,13 @@ public class IntersectOrExceptNode extends SetOperatorNode
         mb.push( costEstimate.getEstimatedCost());
         mb.push( getOpType());
         mb.push( all);
-        closeMethodArgument(acb, mb);
         mb.push( getCompilerContext().addSavedObject( intermediateOrderByColumns));
         mb.push( getCompilerContext().addSavedObject( intermediateOrderByDirection));
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE,
                       (String) null,
                       "getSetOpResultSet",
-                      ClassName.NoPutResultSet, 11);
+                      ClassName.NoPutResultSet, 10);
 	} // end of generate
 
 	/**

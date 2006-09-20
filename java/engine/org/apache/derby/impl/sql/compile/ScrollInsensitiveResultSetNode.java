@@ -118,9 +118,8 @@ public class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 
 		mb.push(costEstimate.rowCount());
 		mb.push(costEstimate.getEstimatedCost());
-		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getScrollInsensitiveResultSet",
-						ClassName.NoPutResultSet, 8);
+						ClassName.NoPutResultSet, 7);
 	}
 }

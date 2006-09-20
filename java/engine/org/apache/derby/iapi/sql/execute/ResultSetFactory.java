@@ -293,7 +293,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the project restrict operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -306,8 +305,7 @@ public interface ResultSetFactory {
 		boolean reuseResult,
 		boolean doesProjection,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) throws StandardException;
+		double optimizerEstimatedCost) throws StandardException;
 
 	/**
 		A hash table result set builds a hash table on its source,
@@ -340,7 +338,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the project restrict operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -357,8 +354,7 @@ public interface ResultSetFactory {
 		int	initialCapacity,
 		float loadFactor,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup)
+		double optimizerEstimatedCost)
 			 throws StandardException;
 
 	/**
@@ -385,7 +381,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the distinct operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -398,8 +393,7 @@ public interface ResultSetFactory {
 		int rowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) 
+		double optimizerEstimatedCost) 
 			throws StandardException;
 
 	/**
@@ -419,7 +413,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the scalar aggregation operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -433,8 +426,7 @@ public interface ResultSetFactory {
 		int resultSetNumber, 
 		boolean singleInputRow,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) 
+		double optimizerEstimatedCost) 
 			throws StandardException;
 
 	/**
@@ -457,7 +449,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the scalar aggregation operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -471,8 +462,7 @@ public interface ResultSetFactory {
 		int resultSetNumber, 
 		boolean singleInputRow,
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) 
+		double optimizerEstimatedCost) 
 			throws StandardException;
 
 	/**
@@ -491,7 +481,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the scalar aggregation operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -504,8 +493,7 @@ public interface ResultSetFactory {
 		int rowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) 
+		double optimizerEstimatedCost) 
 			throws StandardException;
 
 	/**
@@ -527,7 +515,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the scalar aggregation operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -540,8 +527,7 @@ public interface ResultSetFactory {
 		int rowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost,
-		GeneratedMethod closeCleanup) 
+		double optimizerEstimatedCost) 
 			throws StandardException;
 
 	/**
@@ -623,7 +609,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the row as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -632,8 +617,7 @@ public interface ResultSetFactory {
 							  boolean canCacheRow,
 							  int resultSetNumber,
 							  double optimizerEstimatedRowCount,
-							  double optimizerEstimatedCost,
-							  GeneratedMethod closeCleanup)
+							  double optimizerEstimatedCost)
 		throws StandardException;
 
 	/**
@@ -657,7 +641,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the row as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -673,8 +656,7 @@ public interface ResultSetFactory {
 									 boolean isTarget,
 									 int scanIsolationLevel,
 									 double optimizerEstimatedRowCount,
-									 double optimizerEstimatedCost,
-								     GeneratedMethod closeCleanup)
+									 double optimizerEstimatedCost)
 		 throws StandardException;
 
 	/**
@@ -734,7 +716,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the table scan operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -767,8 +748,7 @@ public interface ResultSetFactory {
 								boolean tableLocked,
 								int isolationLevel,
 								double optimizerEstimatedRowCount,
-								double optimizerEstimatedCost,
-								GeneratedMethod closeCleanup)
+								double optimizerEstimatedCost)
 			throws StandardException;
 
 	/**
@@ -802,7 +782,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the table scan operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -823,8 +802,7 @@ public interface ResultSetFactory {
 								boolean tableLocked,
 								int isolationLevel,
 								double optimizerEstimatedRowCount,
-								double optimizerEstimatedCost,
-								GeneratedMethod closeCleanup)
+								double optimizerEstimatedCost)
 			throws StandardException;
 
 	/**
@@ -885,7 +863,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 
 		@return the table scan operation as a result set.
 		@exception StandardException thrown when unable to create the
@@ -915,8 +892,7 @@ public interface ResultSetFactory {
 								int isolationLevel,
 								boolean oneRowScan,
 								double optimizerEstimatedRowCount,
-								double optimizerEstimatedCost,
-								GeneratedMethod closeCleanup)
+								double optimizerEstimatedCost)
 			throws StandardException;
 
 	/**
@@ -978,7 +954,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 
 		@return the table scan operation as a result set.
 		@exception StandardException thrown when unable to create the
@@ -1009,8 +984,7 @@ public interface ResultSetFactory {
 								int rowsPerRead,
 								boolean oneRowScan,
 								double optimizerEstimatedRowCount,
-								double optimizerEstimatedCost,
-								GeneratedMethod closeCleanup)
+								double optimizerEstimatedCost)
 			throws StandardException;
 	/**
 		An index row to base row result set gets an index row from its source
@@ -1042,7 +1016,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 
 		@return the index row to base row operation as a result set.
 		@exception StandardException thrown when unable to create the
@@ -1061,8 +1034,7 @@ public interface ResultSetFactory {
 								GeneratedMethod restriction,
 								boolean forUpdate,
 								double optimizerEstimatedRowCount,
-								double optimizerEstimatedCost,
-								GeneratedMethod closeCleanup)
+								double optimizerEstimatedCost)
 			throws StandardException;
 
 	/**
@@ -1095,7 +1067,6 @@ public interface ResultSetFactory {
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
 		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the nested loop join operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -1110,8 +1081,7 @@ public interface ResultSetFactory {
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
 			throws StandardException;
 
 	/**
@@ -1137,7 +1107,6 @@ public interface ResultSetFactory {
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
 		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the nested loop join operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -1152,8 +1121,7 @@ public interface ResultSetFactory {
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
 			throws StandardException;
 
 
@@ -1189,7 +1157,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
 		@return the nested loop join operation as a result set.
 		@exception StandardException thrown when unable to create the
@@ -1207,8 +1174,7 @@ public interface ResultSetFactory {
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
 			throws StandardException;
 
 	/**
@@ -1237,7 +1203,6 @@ public interface ResultSetFactory {
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
 		@param userSuppliedOptimizerOverrides		Overrides specified by the user on the sql
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the nested loop join operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -1254,8 +1219,7 @@ public interface ResultSetFactory {
 								   boolean notExistsRightSide,
 								   double optimizerEstimatedRowCount,
 								   double optimizerEstimatedCost,
-								   String userSuppliedOptimizerOverrides,
-								   GeneratedMethod closeCleanup)
+								   String userSuppliedOptimizerOverrides)
 			throws StandardException;
 
 	/**
@@ -1268,7 +1232,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the materialization operation as a result set.
 
 	 	@exception StandardException		Thrown on failure
@@ -1276,8 +1239,7 @@ public interface ResultSetFactory {
 	NoPutResultSet getMaterializedResultSet(NoPutResultSet source, 
 											int resultSetNumber,
 											double optimizerEstimatedRowCount,
-											double optimizerEstimatedCost,
-										   GeneratedMethod closeCleanup) 
+											double optimizerEstimatedCost) 
 		throws StandardException;
 
 	/**
@@ -1293,7 +1255,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the materialization operation as a result set.
 
 	 	@exception StandardException		Thrown on failure
@@ -1303,8 +1264,7 @@ public interface ResultSetFactory {
 											int sourceRowWidth,
 											boolean scrollable,
 											double optimizerEstimatedRowCount,
-											double optimizerEstimatedCost,
-										   GeneratedMethod closeCleanup) 
+											double optimizerEstimatedCost) 
 		throws StandardException;
 
 	/**
@@ -1317,7 +1277,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@return the normalization operation as a result set.
 
 	 	@exception StandardException		Thrown on failure
@@ -1326,8 +1285,7 @@ public interface ResultSetFactory {
 										 int resultSetNumber, int erdNumber,
 										 double optimizerEstimatedRowCount,
 										 double optimizerEstimatedCost,
-										 boolean forUpdate,
-										 GeneratedMethod closeCleanup) 
+										 boolean forUpdate) 
 		throws StandardException;
 
 	/**
@@ -1356,7 +1314,6 @@ public interface ResultSetFactory {
 	 * @param source2	The second ResultSet whose rows go into the
 	 *			union
 	 *	@param resultSetNumber	The resultSetNumber for the ResultSet
-	 *	@param closeCleanup	any cleanup the activation needs to do on close.
 	 *	@param optimizerEstimatedRowCount	Estimated total # of rows by
 	 *										optimizer
 	 *	@param optimizerEstimatedCost		Estimated total cost by optimizer
@@ -1370,8 +1327,7 @@ public interface ResultSetFactory {
 					NoPutResultSet source2,
 					int resultSetNumber,
 					double optimizerEstimatedRowCount,
-					double optimizerEstimatedCost,
-					GeneratedMethod closeCleanup)
+					double optimizerEstimatedCost)
 					throws StandardException;
 
 
@@ -1388,7 +1344,6 @@ public interface ResultSetFactory {
      * @param opType IntersectOrExceptNode.INTERSECT_OP or EXCEPT_OP
      * @param all true if the operation is an INTERSECT ALL or an EXCEPT ALL,
      *            false if the operation is an INTERSECT DISCTINCT or an EXCEPT DISCTINCT
-     * @param closeCleanup a method to be called by close
      * @param intermediateOrderByColumnsSavedObject The saved object index for the array of order by columns for the
      *        ordering of the left and right sources. That is, both the left and right sources have an order by
      *        clause of the form ORDER BY intermediateOrderByColumns[0],intermediateOrderByColumns[1],...
@@ -1408,7 +1363,6 @@ public interface ResultSetFactory {
                                       double optimizerEstimatedCost,
                                       int opType,
                                       boolean all,
-                                      GeneratedMethod closeCleanup,
                                       int intermediateOrderByColumnsSavedObject,
                                       int intermediateOrderByDirectionSavedObject)
         throws StandardException;
@@ -1446,7 +1400,6 @@ public interface ResultSetFactory {
 	 * @param optimizerEstimatedRowCount	Estimated total # of rows by
 	 * 										optimizer
 	 * @param optimizerEstimatedCost		Estimated total cost by optimizer
-	 * @param closeCleanup		any cleanup the activation needs to do on close.
 	 *
 	 * @return the scan operation as a result set.
  	 *
@@ -1467,8 +1420,7 @@ public interface ResultSetFactory {
 		boolean				tableLocked,
 		int					isolationLevel,
 		double				optimizerEstimatedRowCount,
-		double 				optimizerEstimatedCost,
-		GeneratedMethod 	closeCleanup
+		double 				optimizerEstimatedCost
 	) throws StandardException;
 
 
@@ -1526,7 +1478,6 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
-		@param closeCleanup	any cleanup the activation needs to do on close.
 		@param parentResultSetId  Id to access the materlized temporary result
                             	  set from the refence stored in the activation.
 		@param fkIndexConglomId foreign key index conglomerate id.
@@ -1563,7 +1514,6 @@ public interface ResultSetFactory {
 									boolean oneRowScan,
 									double optimizerEstimatedRowCount,
 									double optimizerEstimatedCost,
-									GeneratedMethod closeCleanup,
 									String parentResultSetId,
 									long fkIndexConglomId,
 									int fkColArrayItem,
