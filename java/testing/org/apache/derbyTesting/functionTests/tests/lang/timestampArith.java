@@ -80,7 +80,7 @@ public class timestampArith
         Calendar cal = Calendar.getInstance();
         // Make sure that we are not so close to midnight that TODAY might be yesterday before
         // we are finished using it.
-        while( cal.get( Calendar.HOUR) == 23 && cal.get( Calendar.MINUTE) == 58)
+        while( cal.get( Calendar.HOUR) == 23 && cal.get( Calendar.MINUTE) >= 58)
         {
             try
             {
