@@ -697,6 +697,30 @@ select
 from t1
 where xmlexists('//@*' passing by ref x);
 
+-- DERBY-1718
+-- create trigger fails when SPS contains XML related op.
+create table t9 (i int, x xml);
+create table t10 (i int, x xml);
+
+insert into t9 values (1, xmlparse(document '<name> john </name>' preserve whitespace));
+create trigger tx after insert on t9 for each statement mode db2sql
+   insert into t10 values (1, xmlparse(document '<name> jane </name>' preserve whitespace));
+insert into t9 values (2, xmlparse(document '<name> ally </name>' preserve whitespace));
+select i, xmlserialize(x as varchar(20)) from t9;
+select i, xmlserialize(x as varchar(20)) from t10;
+insert into t9 select * from t9;
+select i, xmlserialize(x as varchar(20)) from t9;
+select i, xmlserialize(x as varchar(20)) from t10;
+drop trigger tx;
+delete from t9;
+delete from t10;
+insert into t9 values (1, xmlparse(document '<name> john </name>' preserve whitespace));
+create trigger tx after insert on t9 for each statement mode db2sql
+   insert into t10 values (1, (select xmlquery('.' passing by ref x returning sequence empty on empty) from t9 where i = 1));
+insert into t9 values (2, xmlparse(document '<name> ally </name>' preserve whitespace));
+select i, xmlserialize(x as varchar(20)) from t9;
+select i, xmlserialize(x as varchar(20)) from t10;  
+drop trigger tx;
 -- clean up.
 drop table t0;
 drop table t1;
@@ -707,3 +731,5 @@ drop table t5;
 drop table t6;
 drop table t7;
 drop table t8;
+drop table t9;
+drop table t10;

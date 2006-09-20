@@ -491,6 +491,12 @@ public interface StoredFormatIds {
                 (MIN_ID_2 + 456);
         
         /**
+         	class org.apache.derby.iapi.types.SqlXmlUtil
+        */
+        static public final int SQL_XML_UTIL_V01_ID =
+                (MIN_ID_2 + 464);
+        
+        /**
             class org.apache.derby.iapi.types.JSQLType
          */
         static public final int JSQLTYPEIMPL_ID =
@@ -1853,7 +1859,7 @@ public interface StoredFormatIds {
          * Make sure this is updated when a new module is added
          */
         public static final int MAX_ID_2 =
-                (MIN_ID_2 + 463);
+                (MIN_ID_2 + 464);
 
         // DO NOT USE 4 BYTE IDS ANYMORE
         static public final int MAX_ID_4 =

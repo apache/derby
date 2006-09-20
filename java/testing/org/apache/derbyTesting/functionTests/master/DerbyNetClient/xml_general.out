@@ -1200,6 +1200,66 @@ where xmlexists('//@*' passing by ref x);
 -----
 4.4                                               
 1 two le 3 trois                                  
+ij> -- DERBY-1718
+----- create trigger fails when SPS contains XML related op.
+create table t9 (i int, x xml);
+0 rows inserted/updated/deleted
+ij> create table t10 (i int, x xml);
+0 rows inserted/updated/deleted
+ij> insert into t9 values (1, xmlparse(document '<name> john </name>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> create trigger tx after insert on t9 for each statement mode db2sql
+   insert into t10 values (1, xmlparse(document '<name> jane </name>' preserve whitespace));
+0 rows inserted/updated/deleted
+ij> insert into t9 values (2, xmlparse(document '<name> ally </name>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> select i, xmlserialize(x as varchar(20)) from t9;
+I |2                   
+-----
+1 |<name> john </name> 
+2 |<name> ally </name> 
+ij> select i, xmlserialize(x as varchar(20)) from t10;
+I |2                   
+-----
+1 |<name> jane </name> 
+ij> insert into t9 select * from t9;
+2 rows inserted/updated/deleted
+ij> select i, xmlserialize(x as varchar(20)) from t9;
+I |2                   
+-----
+1 |<name> john </name> 
+2 |<name> ally </name> 
+1 |<name> john </name> 
+2 |<name> ally </name> 
+ij> select i, xmlserialize(x as varchar(20)) from t10;
+I |2                   
+-----
+1 |<name> jane </name> 
+1 |<name> jane </name> 
+ij> drop trigger tx;
+0 rows inserted/updated/deleted
+ij> delete from t9;
+4 rows inserted/updated/deleted
+ij> delete from t10;
+2 rows inserted/updated/deleted
+ij> insert into t9 values (1, xmlparse(document '<name> john </name>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> create trigger tx after insert on t9 for each statement mode db2sql
+   insert into t10 values (1, (select xmlquery('.' passing by ref x returning sequence empty on empty) from t9 where i = 1));
+0 rows inserted/updated/deleted
+ij> insert into t9 values (2, xmlparse(document '<name> ally </name>' preserve whitespace));
+1 row inserted/updated/deleted
+ij> select i, xmlserialize(x as varchar(20)) from t9;
+I |2                   
+-----
+1 |<name> john </name> 
+2 |<name> ally </name> 
+ij> select i, xmlserialize(x as varchar(20)) from t10;
+I |2                   
+-----
+1 |<name> john </name> 
+ij> drop trigger tx;
+0 rows inserted/updated/deleted
 ij> -- clean up.
 drop table t0;
 0 rows inserted/updated/deleted
@@ -1218,5 +1278,9 @@ ij> drop table t6;
 ij> drop table t7;
 0 rows inserted/updated/deleted
 ij> drop table t8;
+0 rows inserted/updated/deleted
+ij> drop table t9;
+0 rows inserted/updated/deleted
+ij> drop table t10;
 0 rows inserted/updated/deleted
 ij> 

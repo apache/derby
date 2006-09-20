@@ -23,11 +23,16 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.util.Properties;
 import java.util.ArrayList;
 
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectInput;
 import java.io.StringReader;
 
 // -- JDBC 3.0 JAXP API classes.
@@ -109,7 +114,7 @@ import org.apache.xalan.templates.OutputProperties;
  *       _if_ s/he is trying to access or operate on XML values.
  */
 
-public class SqlXmlUtil 
+public class SqlXmlUtil implements Formatable
 {
     // Used to parse a string into an XML value (DOM); checks
     // the well-formedness of the string while parsing.
@@ -124,6 +129,12 @@ public class SqlXmlUtil
     private XPath query;
     private XPathContext xpContext;
 
+    // Used to recompile the XPath expression when this formatable
+    // object is reconstructed.  e.g.:  SPS 
+    private String queryExpr;
+    private String opName;
+    private boolean recompileQuery;
+    
     /**
      * Constructor: Initializes objects required for parsing
      * and serializing XML values.  Since most XML operations
@@ -256,6 +267,10 @@ public class SqlXmlUtil
             query = new XPath(queryExpr, null,
                 new PrefixResolverDefault(dBuilder.newDocument()),
                 XPath.SELECT);
+            
+            this.queryExpr = queryExpr;
+            this.opName = opName;
+            this.recompileQuery = false;
 
         } catch (Throwable te) {
 
@@ -510,6 +525,12 @@ public class SqlXmlUtil
     protected ArrayList evalXQExpression(XMLDataValue xmlContext,
         boolean returnResults, int [] resultXType) throws Exception
     {
+        // if this object is in an SPS, we need to recompile the query
+        if (recompileQuery)
+        {
+        	compileXQExpr(queryExpr, opName);
+        }
+
         // Make sure we have a compiled query.
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(
@@ -668,6 +689,58 @@ public class SqlXmlUtil
         // Load the serializer with the correct properties.
         serializer = SerializerFactory.getSerializer(props);
         return;
+    }
+
+    /* ****
+     * Formatable interface implementation
+     * */
+
+    /** 
+     * @see java.io.Externalizable#writeExternal 
+     * 
+     * @exception IOException on error
+     */
+    public void writeExternal(ObjectOutput out) 
+        throws IOException
+    {
+        // query may be null
+        if (query == null)
+        {
+            out.writeBoolean(false);
+        }
+        else
+        {
+            out.writeBoolean(true);
+            out.writeObject(queryExpr);
+            out.writeObject(opName);
+        }
+    }
+
+    /** 
+     * @see java.io.Externalizable#readExternal 
+     *
+     * @exception IOException on error
+     * @exception ClassNotFoundException on error
+     */
+    public void readExternal(ObjectInput in) 
+        throws IOException, ClassNotFoundException
+    {
+        if (in.readBoolean())
+        {
+            queryExpr = (String)in.readObject();
+            opName = (String)in.readObject();
+            recompileQuery = true;
+	    }
+    }
+
+    /**
+     * Get the formatID which corresponds to this class.
+     *
+     * @return	the formatID of this class
+     */
+    public int getTypeFormatId()
+    { 
+        return StoredFormatIds.SQL_XML_UTIL_V01_ID;
     }
 
     /*
