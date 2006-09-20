@@ -577,7 +577,7 @@ public class XML
          * will continue to run as normal.
          */ 
             throw StandardException.newException(
-                SQLState.LANG_INVALID_XML_DOCUMENT, t);
+                SQLState.LANG_INVALID_XML_DOCUMENT, t, t.getMessage());
 
         }
 
@@ -730,7 +730,8 @@ public class XML
          * fail but Derby will continue to run as normal. 
          */
             throw StandardException.newException(
-                SQLState.LANG_XML_QUERY_ERROR, xe, "XMLEXISTS");
+                SQLState.LANG_XML_QUERY_ERROR, xe,
+                "XMLEXISTS", xe.getMessage());
         }
     }
 
@@ -803,7 +804,8 @@ public class XML
          * fail but Derby will continue to run as normal. 
          */
             throw StandardException.newException(
-                SQLState.LANG_XML_QUERY_ERROR, xe, "XMLQUERY");
+                SQLState.LANG_XML_QUERY_ERROR, xe,
+                "XMLQUERY", xe.getMessage());
         }
     }
 

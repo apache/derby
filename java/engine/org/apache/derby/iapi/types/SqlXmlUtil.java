@@ -233,7 +233,7 @@ public class SqlXmlUtil implements Formatable
              * run as normal.
              */ 
             throw StandardException.newException(
-                SQLState.LANG_UNEXPECTED_XML_EXCEPTION, t);
+                SQLState.LANG_UNEXPECTED_XML_EXCEPTION, t, t.getMessage());
 
         }
 
@@ -290,7 +290,7 @@ public class SqlXmlUtil implements Formatable
              * continue to run as normal. 
              */
             throw StandardException.newException(
-                SQLState.LANG_XML_QUERY_ERROR, te, opName);
+                SQLState.LANG_XML_QUERY_ERROR, te, opName, te.getMessage());
 
         }
     }

@@ -180,7 +180,7 @@ ERROR 42X25: The 'XMLParse' function is not allowed on the 'XML' type.
 ij> select i from t1 where xmlparse(document '<hein/>' preserve whitespace);
 ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'XML' expression.  It must be a BOOLEAN expression.
 ij> insert into t1 values (1, xmlparse(document '<oops>' preserve whitespace));
-ERROR 2200M: Failed to parse XMLPARSE operand; see next exception for details. SQLSTATE: XJ001: Java exception: 'XML document structures must start and end within the same entity.: xxxFILTERED-SAX-EXCEPTIONxxx'.
+ERROR 2200M: Invalid XML DOCUMENT: XML document structures must start and end within the same entity. SQLSTATE: XJ001: Java exception: 'XML document structures must start and end within the same entity.: xxxFILTERED-SAX-EXCEPTIONxxx'.
 ij> prepare ps1 as 'insert into t1(x) values XMLPARSE(document ? preserve whitespace)';
 ij> -- These should work.
 insert into t1 values (5, xmlparse(document '<hmm/>' preserve whitespace));
@@ -304,7 +304,7 @@ NULL
 ij> -- These should succeed at the XMLEXISTS level, but fail with
 ----- parse/truncation errors.
 select xmlserialize(xmlparse(document vc preserve whitespace) as char(10)) from t4;
-ERROR 2200M: Failed to parse XMLPARSE operand; see next exception for details. SQLSTATE: XJ001: Java exception: 'Content is not allowed in prolog.: xxxFILTERED-SAX-EXCEPTIONxxx'.
+ERROR 2200M: Invalid XML DOCUMENT: Content is not allowed in prolog. SQLSTATE: XJ001: Java exception: 'Content is not allowed in prolog.: xxxFILTERED-SAX-EXCEPTIONxxx'.
 ij> select xmlserialize(x as char) from t1;
 ERROR 22001: A truncation error was encountered trying to shrink CHAR '<update2> document was inserted as part of an UPDATE </updat&' to length 1.
 ij> select xmlserialize(x as clob(10)) from t1;
@@ -334,7 +334,7 @@ ij> -- Test XMLPARSE/XMLSERIALIZE combinations.
 select xmlserialize(xmlparse(document '<hmm>' preserve whitespace) as clob) from t2;
 1                                                                                                                               
 -----
-ERROR 2200M: Failed to parse XMLPARSE operand; see next exception for details. SQLSTATE: XJ001: Java exception: 'XML document structures must start and end within the same entity.: xxxFILTERED-SAX-EXCEPTIONxxx'.
+ERROR 2200M: Invalid XML DOCUMENT: XML document structures must start and end within the same entity. SQLSTATE: XJ001: Java exception: 'XML document structures must start and end within the same entity.: xxxFILTERED-SAX-EXCEPTIONxxx'.
 ij> select xmlserialize(xmlparse(document x preserve whitespace) as char(100)) from t1;
 ERROR 42X25: The 'XMLParse' function is not allowed on the 'XML' type.
 ij> -- These should succeed.
@@ -649,7 +649,7 @@ select i,
     xmlquery('data(//@*)' passing by ref x returning sequence empty on empty)
   as char(70))
 from t1;
-ERROR 10000: Encountered error while evaluating XML query expression for XMLQUERY operator; see next exception for details. SQLSTATE: XJ001: Java exception: 'Could not find function: data: javax.xml.transform.TransformerException'.
+ERROR 10000: Encountered error while evaluating XML query expression for XMLQUERY operator: Could not find function: data SQLSTATE: XJ001: Java exception: 'Could not find function: data: javax.xml.transform.TransformerException'.
 ij> -- These should all succeed.  Since it's Xalan that's actually doing
 ----- the query evaluation we don't need to test very many queries; we
 ----- just want to make sure we get the correct results when there is
