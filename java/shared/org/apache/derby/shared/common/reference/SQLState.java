@@ -127,6 +127,7 @@ package org.apache.derby.shared.common.reference;
 		<LI> 46000  for SQLJ errors (for now, leave this range empty) </LI>
 		<LI> 38000  SQL3 ranges  </LI>
 		<LI> XD00x  Dependency mgr </LI>
+		<LI> XMLxx  Misc XML errors not covered by SQL standard </LI>
 	  <LI> 
 	  </UL>
 
@@ -984,9 +985,7 @@ public interface SQLState {
 	String LANG_INVALID_XML_QUERY_EXPRESSION                           = "42Z75";
 	String LANG_MULTIPLE_XML_CONTEXT_ITEMS                             = "42Z76";
 	String LANG_INVALID_CONTEXT_ITEM_TYPE                              = "42Z77";
-	String LANG_MISSING_XML_CLASSES                                    = "42Z78";
 	String LANG_XMLPARSE_UNKNOWN_PARAM_TYPE                            = "42Z79";
-	String LANG_UNEXPECTED_XML_EXCEPTION                               = "42Z7Z";
 
 	String LANG_SERIALIZABLE										   = "42Z80.U";
 	String LANG_READ_COMMITTED										   = "42Z81.U";
@@ -1513,6 +1512,11 @@ public interface SQLState {
     String NET_READER_LENGTH_TOO_SMALL                              = "XN018.S";
     String NET_XARETVAL_ERROR                                       = "XN019.S";
     
+    // XML - Derby-specific XML errors not covered by
+    // SQL standard.
+    String LANG_MISSING_XML_CLASSES                                 = "XML00";
+    String LANG_UNEXPECTED_XML_EXCEPTION                            = "XML01";
+
     // Used by server for scrollable updatable insensitive result sets
     // to transmit updated state to client. Internal, not seen by user.
     // Has no message in messages.properties as it is never printed.
