@@ -703,7 +703,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
      * using the SHA-1 algorithm, and is sent to the application server.
      *
      * The application server generates a password substitute using the same
-     * algorithm and compares it with the application requester’s password
+     * algorithm and compares it with the application requester's password
      * substitute. If equal, the user is authenticated.
      *
      * The SECTKN parameter is used to flow the client and server encryption

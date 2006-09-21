@@ -1144,7 +1144,7 @@ public class SystemProcedures  {
 	 * SYSCS_IMPORT_TABLE(IN SCHEMANAME  VARCHAR(128), 
 	 * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
 	 * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
-	 * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT)
+	 * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT)
 	 * @exception  StandardException  Standard exception policy.
      **/
 	public static void SYSCS_IMPORT_TABLE(
@@ -1177,11 +1177,11 @@ public class SystemProcedures  {
 	 * specified columns in the file.
      * <p>
      * Will be called as 
-	 * SYSCS_IMPORT_DATA (IN SCHEMANAME  VARCHAR(128), IN TABLENAME    VARCHAR(128),  
+	 * SYSCS_IMPORT_DATA (IN SCHEMANAME VARCHAR(128), IN TABLENAME VARCHAR(128),
 	 *                    IN INSERTCOLUMNLIST VARCHAR(32762), IN COLUMNINDEXES VARCHAR(32762),
-	 *                    IN FILENAME VARCHAR(32762), IN COLUMNDELIMITER CHAR(1),  
-	 *                    IN CHARACTERDELIMITER  CHAR(1) ,  IN CODESET VARCHAR(128) , 
-     *                    IN  REPLACE SMALLINT)
+	 *                    IN FILENAME VARCHAR(32762), IN COLUMNDELIMITER CHAR(1), 
+	 *                    IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
+	 *                    IN REPLACE SMALLINT)
 	 *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -1218,7 +1218,7 @@ public class SystemProcedures  {
      * Perform bulk insert using the specificed vti .
      * <p>
      * Will be called as 
-	 * SYSCS_BULK_INSERT (IN SCHEMANAME VARCHAR(128), IN TABLENAME    VARCHAR(128),  
+	 * SYSCS_BULK_INSERT (IN SCHEMANAME VARCHAR(128), IN TABLENAME VARCHAR(128), 
 	 *                    IN VTINAME VARCHAR(32762), IN VTIARG VARCHAR(32762))
 	 *
 	 * @exception  StandardException  Standard exception policy.

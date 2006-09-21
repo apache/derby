@@ -40,7 +40,7 @@ import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
  * <ol>
  * <li>long getAutoincStart()</li>
  * <li>java.lang.String getColumnName()</li>
- * <li>DefaultDescriptor getDefaultDescriptor(DataDictionary dd)</li>
+ * <li>DefaultDescriptor getDefaultDescriptor(DataDictionary dd)</li>
  * <li>DefaultInfo getDefaultInfo</li>
  * <li>UUID getDefaultUUID</li>
  * <li>DataValueDescriptor getDefaultValue</li>
