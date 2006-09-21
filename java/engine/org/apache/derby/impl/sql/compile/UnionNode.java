@@ -246,7 +246,7 @@ public class UnionNode extends SetOperatorNode
 		// current plans using "this" node as the key.  If needed, we'll
 		// then make the call to revert the plans in OptimizerImpl's
 		// getNextDecoratedPermutation() method.
-		addOrLoadBestPlanMapping(true, this);
+		updateBestPlanMap(ADD_PLAN, this);
 
 		leftResultSet = optimizeSource(
 							optimizer,

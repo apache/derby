@@ -180,7 +180,7 @@ public class JoinNode extends TableOperatorNode
 		// current plans using "this" node as the key.  If needed, we'll
 		// then make the call to revert the plans in OptimizerImpl's
 		// getNextDecoratedPermutation() method.
-		addOrLoadBestPlanMapping(true, this);
+		updateBestPlanMap(ADD_PLAN, this);
 
 		/*
 		** RESOLVE: Most types of Optimizables only implement estimateCost(),

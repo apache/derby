@@ -303,7 +303,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		// current plans using "this" node as the key.  If needed, we'll
 		// then make the call to revert the plans in OptimizerImpl's
 		// getNextDecoratedPermutation() method.
-		addOrLoadBestPlanMapping(true, this);
+		updateBestPlanMap(ADD_PLAN, this);
 
 		/* If the childResult is instanceof Optimizable, then we optimizeIt.
 		 * Otherwise, we are going into a new query block.  If the new query

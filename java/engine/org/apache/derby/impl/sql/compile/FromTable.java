@@ -100,13 +100,17 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
     
 	private boolean considerSortAvoidancePath;
 
-	// Set of optimizer->trulyTheBestAccessPath mappings used to keep track
-	// of which of this Optimizable's "trulyTheBestAccessPath" was the best
-	// with respect to a specific outer query; the outer query is represented
-	// by an instance of Optimizer.  Each outer query could potentially have
-	// a different idea of what this Optimizable's "best access path" is, so
-	// we have to keep track of them all.
-	HashMap optimizerToBestPlanMap;
+	/**
+	 Set of object->trulyTheBestAccessPath mappings used to keep track
+	 of which of this Optimizable's "trulyTheBestAccessPath" was the best
+	 with respect to a specific outer query or ancestor node.  In the case
+	 of an outer query, the object key will be an instance of OptimizerImpl.
+	 In the case of an ancestor node, the object key will be that node itself.
+	 Each ancestor node or outer query could potentially have a different
+	 idea of what this Optimizable's "best access path" is, so we have to
+	 keep track of them all.
+	*/
+	private HashMap bestPlanMap;
 
   //this flag tells you if all the columns from this table are projected using * from it.
   //Used by replication enabled databases where the target-only view failure is detected
@@ -124,6 +128,11 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
     allColumnsProjected = flag;
   }
 
+	/** Operations that can be performed on bestPlanMap. */
+	protected static final short REMOVE_PLAN = 0;
+	protected static final short ADD_PLAN = 1;
+	protected static final short LOAD_PLAN = 2;
+
 	/**
 	 * Initializer for a table in a FROM list.
 	 *
@@ -135,7 +144,7 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		this.correlationName = (String) correlationName;
 		this.tableProperties = (Properties) tableProperties;
 		tableNumber = -1;
-		optimizerToBestPlanMap = null;
+		bestPlanMap = null;
 	}
 
 	/**
@@ -170,7 +179,7 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		// current plans using "this" node as the key.  If needed, we'll
 		// then make the call to revert the plans in OptimizerImpl's
 		// getNextDecoratedPermutation() method.
-		addOrLoadBestPlanMapping(true, this);
+		updateBestPlanMap(ADD_PLAN, this);
 
 		CostEstimate singleScanCost = estimateCost(predList,
 												(ConglomerateDescriptor) null,
@@ -520,25 +529,37 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		return absolutePosition;
 	}
 
-	/** @see Optimizable#addOrLoadBestPlanMapping */
-	public void addOrLoadBestPlanMapping(boolean doAdd,
+	/** @see Optimizable#updateBestPlanMap */
+	public void updateBestPlanMap(short action,
 		Object planKey) throws StandardException
 	{
+		if (action == REMOVE_PLAN)
+		{
+			if (bestPlanMap != null)
+			{
+				bestPlanMap.remove(planKey);
+				if (bestPlanMap.size() == 0)
+					bestPlanMap = null;
+			}
+
+			return;
+		}
+
 		AccessPath bestPath = getTrulyTheBestAccessPath();
 		AccessPathImpl ap = null;
-		if (doAdd)
+		if (action == ADD_PLAN)
 		{
 			// If we get to this method before ever optimizing this node, then
 			// there will be no best path--so there's nothing to do.
 			if (bestPath == null)
 				return;
 
-			// If the optimizerToBestPlanMap already exists, search for an
+			// If the bestPlanMap already exists, search for an
 			// AccessPath for the received key and use that if we can.
-			if (optimizerToBestPlanMap == null)
-				optimizerToBestPlanMap = new HashMap();
+			if (bestPlanMap == null)
+				bestPlanMap = new HashMap();
 			else
-				ap = (AccessPathImpl)optimizerToBestPlanMap.get(planKey);
+				ap = (AccessPathImpl)bestPlanMap.get(planKey);
 
 			// If we don't already have an AccessPath for the key,
 			// create a new one.  If the key is an OptimizerImpl then
@@ -553,7 +574,7 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 			}
 
 			ap.copy(bestPath);
-			optimizerToBestPlanMap.put(planKey, ap);
+			bestPlanMap.put(planKey, ap);
 			return;
 		}
 
@@ -563,10 +584,10 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		// If we don't have any plans saved, then there's nothing to load.
 		// This can happen if the key is an OptimizerImpl that tried some
 		// join order for which there was no valid plan.
-		if (optimizerToBestPlanMap == null)
+		if (bestPlanMap == null)
 			return;
 
-		ap = (AccessPathImpl)optimizerToBestPlanMap.get(planKey);
+		ap = (AccessPathImpl)bestPlanMap.get(planKey);
 
 		// It might be the case that there is no plan stored for
 		// the key, in which case there's nothing to load.
@@ -608,23 +629,23 @@ public abstract class FromTable extends ResultSetNode implements Optimizable
 		// Since we just set trulyTheBestAccessPath for the current
 		// join order of the received optimizer, take note of what
 		// that path is, in case we need to "revert" back to this
-		// path later.  See Optimizable.addOrLoadBestPlanMapping().
+		// path later.  See Optimizable.updateBestPlanMap().
 		// Note: Since this call descends all the way down to base
 		// tables, it can be relatively expensive when we have deeply
 		// nested subqueries.  So in an attempt to save some work, we
 		// skip the call if this node is a ProjectRestrictNode whose
 		// child is an Optimizable--in that case the ProjectRestrictNode
 		// will in turn call "rememberAsBest" on its child and so
-		// the required call to addOrLoadBestPlanMapping() will be
+		// the required call to updateBestPlanMap() will be
 		// made at that time.  If we did it here, too, then we would
 		// just end up duplicating the work.
 		if (!(this instanceof ProjectRestrictNode))
-			addOrLoadBestPlanMapping(true, optimizer);
+			updateBestPlanMap(ADD_PLAN, optimizer);
 		else
 		{
 			ProjectRestrictNode prn = (ProjectRestrictNode)this;
 			if (!(prn.getChildResult() instanceof Optimizable))
-				addOrLoadBestPlanMapping(true, optimizer);
+				updateBestPlanMap(ADD_PLAN, optimizer);
 		}
 		 
 		/* also store the name of the access path; i.e index name/constraint
