@@ -46,7 +46,7 @@ class RAFContainerFactory {
      * <p>
      * MT: Immutable, initialized by constructor.
      *
-     * @see newRAFContainer(BaseDataFileFactory factory)
+     * @see #newRAFContainer(BaseDataFileFactory factory)
      */
     protected final Constructor rafContainerConstructor;
 
