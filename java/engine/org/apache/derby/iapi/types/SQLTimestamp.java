@@ -169,6 +169,7 @@ public final class SQLTimestamp extends DataType
     {
         if( cal == null)
             cal = new GregorianCalendar();
+        cal.clear();
 		cal.set(Calendar.YEAR, SQLDate.getYear(encodedDate) );
 		cal.set(Calendar.MONTH, SQLDate.getMonth(encodedDate)-1);
 		cal.set(Calendar.DATE, SQLDate.getDay(encodedDate) );
@@ -197,13 +198,14 @@ public final class SQLTimestamp extends DataType
     {
         if( cal == null)
             cal = new GregorianCalendar();
+        cal.clear();
 		cal.set(Calendar.YEAR, 1970);
 		cal.set(Calendar.MONTH, Calendar.JANUARY);
 		cal.set(Calendar.DATE, 1);
 		cal.set(Calendar.HOUR_OF_DAY, SQLTime.getHour(encodedTime));
 		cal.set(Calendar.MINUTE, SQLTime.getMinute(encodedTime));
 		cal.set(Calendar.SECOND, SQLTime.getSecond(encodedTime));
-		cal.set(Calendar.MILLISECOND, (int)(nanos/1E06));
+		cal.set(Calendar.MILLISECOND, (int)(nanos/1000000));
 		return new Time(cal.getTime().getTime());
 	}
 
@@ -889,7 +891,7 @@ public final class SQLTimestamp extends DataType
         return newTimestamp(cal);
     }
 
-    protected Timestamp newTimestamp(Calendar currentCal)
+    private Timestamp newTimestamp(Calendar currentCal)
     {
         if( currentCal == null)
             currentCal = new GregorianCalendar();
@@ -901,6 +903,7 @@ public final class SQLTimestamp extends DataType
 
     private void setCalendar( Calendar cal)
     {
+        cal.clear();
 		cal.set(Calendar.YEAR, SQLDate.getYear(encodedDate));
 		/* Note calendar month is zero based so we subtract 1*/
 		cal.set(Calendar.MONTH, (SQLDate.getMonth(encodedDate)-1));

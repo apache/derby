@@ -139,30 +139,42 @@ public final class SQLTime extends DataType
     }
 
 	/**
-		@exception StandardException thrown on failure
+     * Convert a SQL TIME to a JDBC java.sql.Timestamp.
+     * 
+     * Behaviour is to set the date portion of the Timestamp
+     * to the actual current date, which may not match the
+     * SQL CURRENT DATE, which remains fixed for the lifetime
+     * of a SQL statement. JDBC drivers (especially network client drivers)
+     * could not be expected to fetch the CURRENT_DATE SQL value
+     * on every query that involved a TIME value, so the current
+     * date as seen by the JDBC client was picked as the logical behaviour.
+     * See DERBY-1811.
 	 */
-	public Timestamp getTimestamp( Calendar cal) throws StandardException
+	public Timestamp getTimestamp( Calendar cal)
 	{
 		if (isNull())
 			return null;
 		else
 		{
             if( cal == null)
-                cal = new GregorianCalendar();
-			/*
-			** HACK FOR SYMANTEC: in symantec 1.8, the call
-			** to today.getTime().getTime() will blow up 
-			** in GregorianCalendar because year <= 0.
-			** This is a bug in some sort of optimization that
-			** symantic is doing (not related to the JIT).  If 
-			** we do a reference to that field everythings works 
-			** fine, hence this extraneous get(Calendar.YEAR).
-			*/
-			cal.get(Calendar.YEAR);
+            {
+                // Calendar initialized to current date and time.
+                cal = new GregorianCalendar(); 
+            }
+            else
+            {
+                cal.clear();
+                // Set Calendar to current date and time.
+                cal.setTime(new Date(System.currentTimeMillis()));
+            }
+
 			cal.set(Calendar.HOUR_OF_DAY, getHour(encodedTime));
 			cal.set(Calendar.MINUTE, getMinute(encodedTime));
 			cal.set(Calendar.SECOND, getSecond(encodedTime));
+            
+            // Derby's resolution for the TIME type is only seconds.
 			cal.set(Calendar.MILLISECOND, 0);
+            
 			return new Timestamp(cal.getTime().getTime());
 		}
 	}
@@ -797,13 +809,10 @@ public final class SQLTime extends DataType
 		if (isNull())
 			return null;
 
-        return newTime(cal);
-    }
-
-    protected Time newTime(java.util.Calendar cal)
-    {
         if( cal == null)
             cal = new GregorianCalendar();
+        
+        cal.clear();
 		cal.set(Calendar.YEAR, 1970);
 		cal.set(Calendar.MONTH, Calendar.JANUARY);
 		cal.set(Calendar.DATE, 1);

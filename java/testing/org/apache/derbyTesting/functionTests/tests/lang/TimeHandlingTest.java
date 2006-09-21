@@ -20,6 +20,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,6 +30,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
+import java.util.Random;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -115,13 +117,117 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Simple set up, just get a Calendar.
+     * Simple set up, just get a Calendar
+     * and ensure the table T_ALL is empty.
+     * @throws SQLException 
+     * @throws UnsupportedEncodingException 
      */
-    protected void setUp()
+    protected void setUp() throws UnsupportedEncodingException, SQLException
     {
         cal = Calendar.getInstance();
+        runSQLCommands("DELETE FROM TIME_ALL;");
     }
     
+    /**
+     * Test inserting and selecting of TIME values.
+     * A set of random TIME values are inserted along with an
+     * identifer that encodes the time value. The values are then
+     * fetched and compared to a value calculated from the identifier.
+     * The returned values are fetched using checkTimeValue thus inheriting
+     * all the checks within that method.
+     * @throws SQLException
+     * @throws UnsupportedEncodingException 
+     */
+    public void testInertTime() throws SQLException, UnsupportedEncodingException
+    {
+        getConnection().setAutoCommit(false);
+        // Insert a set of time values, 
+
+
+        Random r = new Random();
+
+        // Insert 500 TIME values using a PreparedStatement,
+        // but randomly selecting the way the value is inserted
+        // between:
+        //  java.sql.Time object
+        //  String representation hh:mm:ss from Time.toString()
+        //  String representation hh.mm.ss
+        
+        // prime number used to select the way the
+        // selected value is inserted.
+        final int itk = 71;
+
+        PreparedStatement ps = prepareStatement(
+           "INSERT INTO TIME_ALL(ID, C_T) VALUES (?, ?)");
+ 
+        for (int i = 0; i < 500; i++) {
+            
+            // Just some big range from zero upwards
+            int id = r.nextInt(1000000);
+            ps.setInt(1, id);
+            
+            Time ct = getCodedTime(id);
+           
+            switch ((id % itk) % 3)
+            {
+            case 0: // Insert using Time object
+                ps.setTime(2, ct);
+                break;
+            case 1: // Insert using String provided by Time.toString() (hh:mm:ss)
+                ps.setString(2, ct.toString());
+                break;
+            case 2: // Insert using String format (hh.mm.ss)
+                ps.setString(2, ct.toString().replace(':', '.'));
+                break;
+            default:
+               fail("not reached");
+               
+             }
+            ps.executeUpdate();
+        }
+        ps.close();
+        commit();
+        
+        Statement s = createStatement();
+        
+        ResultSet rs = s.executeQuery("SELECT ID, C_T FROM TIME_ALL");
+        int rowCount = 0;
+        while (rs.next())
+        {
+            int id = rs.getInt(1);
+            Time t = checkTimeValue(rs, 2);          
+            assertTimeEqual(getCodedTime(id), t);
+            rowCount++;
+        }
+        rs.close();
+        s.close(); 
+        commit();
+        
+        assertEquals(rowCount, 500);
+    }
+
+    /**
+     * Return a time simply encoded from an integer identifier
+     * and a set of fixed encoding keys, each a prime number.
+     * This allows a random value to be inserted into a table
+     * as a TIME and an INTEGER and thus checked for consistency
+     * on a SELECT.
+     * @param id
+     * @return
+     */
+    private Time getCodedTime(int id)
+    {
+        final int hk = 17;
+        final int mk = 41;
+        final int sk = 67;
+
+        int hour = (id % hk) % 24;
+        int min = (id % mk) % 60;
+        int sec = (id % sk) % 60;
+        
+        return getTime19700101(hour, min ,sec);
+    }
+
     /**
      * Tests for CURRENT TIME and CURRENT_TIME.
      * A set of tests that ensure the CURRENT TIME maintains
@@ -523,6 +629,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         
         long now = System.currentTimeMillis();
         Timestamp tsv = rs.getTimestamp(column);
+        long now2 = System.currentTimeMillis();
         assertNotNull(tsv);
         assertFalse(rs.wasNull());
         
@@ -530,9 +637,13 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         assertTimeEqual(tv, tsv);
         
         // DERBY-1811, DERBY-889 being fixed could add tests
-        // here to check the returned date portion is the current date
-        // using the value from 'now'.
-        
+        // Check the returned date portion is the current date
+        // using the value from 'now' and 'now2'. Double check
+        // just in case this test runs at midnight.
+        if (!(isDateEqual(now, tsv) || isDateEqual(now2, tsv)))
+        {
+            fail("TIME to java.sql.Timestamp does not contain current date " + tsv);
+        }
         
         String sv = rs.getString(column);
         assertNotNull(sv);
@@ -687,7 +798,33 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         }
         
         return tsv;
-    }  
+    }
+
+    /**
+     * Create a Time object that has its date components
+     * set to 1970/01/01 and its time to match the time
+     * represented by h, m and s. This matches Derby by
+     * setting the milli-second component to zero.
+     * <BR>
+     * Note that the Time(long) constructor for java.sql.Time
+     * does *not* set the date component to 1970/01/01.
+     * This is a requirement for JDBC java.sql.Time values though
+     */
+    private Time getTime19700101(int hour, int min, int sec)
+    {
+        cal.clear();
+        cal.set(1970, Calendar.JANUARY, 1);
+        cal.set(Calendar.MILLISECOND, 0);
+        
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, min);
+        cal.set(Calendar.SECOND, sec);
+        
+        Time to =  new Time(cal.getTime().getTime());
+        assertTime1970(to);
+        return to;
+    }
+    
     /**
      * Create a Time object that has its date components
      * set to 1970/01/01 and its time to match the time
@@ -762,15 +899,15 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Assert the time portion of a java.sql.Timestamp
-     * is equal to the value of a java.sql.Time.
+     * Assert the SQL time portion of two SQL JDBC type
+     * types are equal.
      * @param tv
      * @param tsv
      */
-    private void assertTimeEqual(Time tv, Timestamp tsv)
+    private void assertTimeEqual(java.util.Date tv1, java.util.Date tv2)
     {
         cal.clear();
-        cal.setTime(tv);
+        cal.setTime(tv1);
                 
         int hour = cal.get(Calendar.HOUR_OF_DAY);
         int min = cal.get(Calendar.MINUTE);
@@ -779,10 +916,31 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
                         
         // Check the time portion is set to the same as tv
         cal.clear();
-        cal.setTime(tsv);
+        cal.setTime(tv2);
         assertEquals(hour, cal.get(Calendar.HOUR_OF_DAY));
         assertEquals(min, cal.get(Calendar.MINUTE));
         assertEquals(sec, cal.get(Calendar.SECOND));
         assertEquals(ms, cal.get(Calendar.MILLISECOND));
+    }
+    
+    /**
+     * Check if the date portion of a Timestamp value
+     * is equal to the date portion of a time value
+     * represented in milli-seconds since 1970.
+     */
+    private boolean isDateEqual(long d, Timestamp tsv)
+    {
+        cal.clear();
+        cal.setTime(new java.util.Date(d));
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+        int month = cal.get(Calendar.MONTH);
+        int year = cal.get(Calendar.YEAR);
+        
+        cal.clear();
+        cal.setTime(tsv);
+        
+        return day == cal.get(Calendar.DAY_OF_MONTH)
+           && month == cal.get(Calendar.MONTH)
+           && year == cal.get(Calendar.YEAR);   
     }
 }
