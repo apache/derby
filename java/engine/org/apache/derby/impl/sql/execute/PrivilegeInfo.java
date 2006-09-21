@@ -52,7 +52,7 @@ public abstract class PrivilegeInfo
 
 	/**
 	 * Determines whether a user is the owner of an object
-	 * (table, function, or procedure). Note that DBA can access
+	 * (table, function, or procedure). Note that Database Owner can access
 	 * database objects without needing to be their owner
 	 *
 	 * @param user					authorizationId of current user
@@ -69,7 +69,7 @@ public abstract class PrivilegeInfo
 		throws StandardException
 	{
 		if (!user.equals(sd.getAuthorizationId()) &&
-				!user.equals(dd.getAuthorizationDBA()))
+				!user.equals(dd.getAuthorizationDatabaseOwner()))
 			throw StandardException.newException(SQLState.AUTH_NOT_OWNER,
 									  user,
 									  objectDescriptor.getDescriptorType(),

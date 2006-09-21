@@ -303,7 +303,7 @@ public	class DD_Version implements	Formatable
 	  *
 	  * @param	tc	transaction controller
 	  * @param	fromMajorVersionNumber	version of the on-disk database
-	  * @param	aid						AuthorizationID of current user to be made DBA
+	  * @param	aid	 AuthorizationID of current user to be made Database Owner
 	  *
 	  *	@exception StandardException  Standard Cloudscape error policy.
 	  */
@@ -364,7 +364,7 @@ public	class DD_Version implements	Formatable
                 bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
 
 			if (SanityManager.DEBUG)
-				SanityManager.ASSERT((aid != null), "Failed to get new DBA authorization");
+				SanityManager.ASSERT((aid != null), "Failed to get new Database Owner authorization");
 
 			// Add new system catalogs created for grant and revoke
 			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSTABLEPERMS_CATALOG_NUM);

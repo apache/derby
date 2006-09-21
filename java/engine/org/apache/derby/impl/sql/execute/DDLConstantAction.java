@@ -247,10 +247,10 @@ public abstract class DDLConstantAction extends GenericConstantAction
 		DataDictionary dd = lcc.getDataDictionary();
 		DependencyManager dm = dd.getDependencyManager();
 		
-		//If a dba is creating this constraint, then no need to collect any 
-		//privilege dependencies because a dba can access any objects without 
-		//any restrictions
-		if (!(lcc.getAuthorizationId().equals(dd.getAuthorizationDBA())))
+		//If the Database Owner is creating this constraint, then no need to 
+		//collect any privilege dependencies because the Database Owner can   
+		//access any objects without any restrictions
+		if (!(lcc.getAuthorizationId().equals(dd.getAuthorizationDatabaseOwner())))
 		{
 			PermissionsDescriptor permDesc;
 			//Now, it is time to add into dependency system, constraint's 
@@ -378,10 +378,10 @@ public abstract class DDLConstantAction extends GenericConstantAction
 		DataDictionary dd = lcc.getDataDictionary();
 		DependencyManager dm = dd.getDependencyManager();
 		
-		//If a dba is creating this view/triiger, then no need to collect any 
-		//privilege dependencies because a dba can access any objects without 
-		//any restrictions
-		if (!(lcc.getAuthorizationId().equals(dd.getAuthorizationDBA())))
+		//If the Database Owner is creating this view/triiger, then no need to  
+		//collect any privilege dependencies because the Database Owner can  
+		//access any objects without any restrictions
+		if (!(lcc.getAuthorizationId().equals(dd.getAuthorizationDatabaseOwner())))
 		{
 			PermissionsDescriptor permDesc;
 			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();

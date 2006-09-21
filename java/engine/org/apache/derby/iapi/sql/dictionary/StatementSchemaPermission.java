@@ -68,9 +68,10 @@ public class StatementSchemaPermission extends StatementPermission
 		}
 		else
 		{
-			// Non-DBA Users can only create schemas that match their authid
-			// Also allow only DBA to set authid to another user
-			// Note that for DBA, check interface wouldn't be called at all
+			// Non-Database Owner Users can only create schemas that match 
+			// their authid. Also allow only Database Owner to set authid to 
+			// another user. Note that for Database Owner, check interface 
+			// wouldn't be called at all
 			if (!schemaName.equals(authid) || (aid != null && !aid.equals(authid)))
 				throw StandardException.newException(
 					SQLState.AUTH_NOT_DATABASE_OWNER, authid, schemaName);

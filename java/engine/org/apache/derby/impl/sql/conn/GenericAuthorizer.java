@@ -148,9 +148,10 @@ implements Authorizer
             List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
             DataDictionary dd = lcc.getDataDictionary();
 
-            // DBA can access any object. Ignore requiredPermissionsList for DBA
+            // Database Owner can access any object. Ignore 
+            // requiredPermissionsList for Database Owner
             if( requiredPermissionsList != null && ! requiredPermissionsList.isEmpty() && 
-				!authorizationId.equals(dd.getAuthorizationDBA()))
+				!authorizationId.equals(dd.getAuthorizationDatabaseOwner()))
             {
                 for( Iterator iter = requiredPermissionsList.iterator();
                      iter.hasNext();)

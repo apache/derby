@@ -327,7 +327,7 @@ public final class	DataDictionaryImpl
 	/** Dictionary version of the currently running engine */
 	private DD_Version  softwareVersion;
 
-	private String authorizationDBA;
+	private String authorizationDatabaseOwner;
 	private boolean usesSqlAuthorization;
 
 	/*
@@ -656,7 +656,7 @@ public final class	DataDictionaryImpl
 	
 			if (create) {
 				String userName = IdUtil.getUserNameFromURLProps(startParams);
-				authorizationDBA = IdUtil.getUserAuthorizationId(userName);
+				authorizationDatabaseOwner = IdUtil.getUserAuthorizationId(userName);
 			
 				// create any required tables.
 				createDictionaryTables(startParams, bootingTC, ddg);
@@ -693,7 +693,7 @@ public final class	DataDictionaryImpl
 				loadDictionaryTables(bootingTC, ddg, startParams);
 				SchemaDescriptor sd = locateSchemaRow(SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME,
 								 bootingTC);
-				authorizationDBA = sd.getAuthorizationId();
+				authorizationDatabaseOwner = sd.getAuthorizationId();
 				String sqlAuth = PropertyUtil.getDatabaseProperty(bootingTC,
 										Property.SQL_AUTHORIZATION_PROPERTY);
 				if (Boolean.valueOf(sqlAuth).booleanValue())
@@ -705,7 +705,7 @@ public final class	DataDictionaryImpl
 			}
 					
 			if (SanityManager.DEBUG)
-				SanityManager.ASSERT((authorizationDBA != null), "Failed to get DBA authorization");
+				SanityManager.ASSERT((authorizationDatabaseOwner != null), "Failed to get Database Owner authorization");
 
 			/* Commit & destroy the create database */
 			bootingTC.commit();
@@ -1177,13 +1177,13 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
-	 * Get authorizationID of DBA
+	 * Get authorizationID of Database Owner
 	 *
 	 * @return	authorizationID
 	 */
-	public String getAuthorizationDBA()
+	public String getAuthorizationDatabaseOwner()
 	{
-		return authorizationDBA;
+		return authorizationDatabaseOwner;
 	}
 
 	/**
@@ -5570,7 +5570,7 @@ public final class	DataDictionaryImpl
 	 * while upgrading pre-10.2 databases to 10.2 or later versions. From 10.2,
 	 * all system schemas would be owned by database owner's authorizationId.
 	 *
-	 * @param aid							AuthorizationID of DBA
+	 * @param aid							AuthorizationID of Database Owner
 	 * @param tc							TransactionController to use
 	 *
 	 * @exception StandardException		Thrown on failure
@@ -6434,7 +6434,7 @@ public final class	DataDictionaryImpl
             new SchemaDescriptor(
                 this, 
                 convertIdToLower ? schema_name.toLowerCase() : schema_name, 
-                authorizationDBA,
+                authorizationDatabaseOwner,
                 uuidFactory.recreateUUID(schema_uuid),
                 true);
 
@@ -8325,7 +8325,7 @@ public final class	DataDictionaryImpl
         return new SchemaDescriptor(
                 this,
                 name,
-                authorizationDBA,
+                authorizationDatabaseOwner,
                 uuidFactory.recreateUUID(uuid),
                 true);
     }
@@ -8334,7 +8334,7 @@ public final class	DataDictionaryImpl
     {
         return new SchemaDescriptor(this,
                                         name,
-                						authorizationDBA,
+                                        authorizationDatabaseOwner,
                                         (UUID) null,
                                         false);
     }
@@ -9688,7 +9688,7 @@ public final class	DataDictionaryImpl
 	UUID routineUUID,
 	TransactionController tc) throws StandardException
 	{
-		createRoutinePermPublicDescriptor(routineUUID, tc, authorizationDBA);
+		createRoutinePermPublicDescriptor(routineUUID, tc, authorizationDatabaseOwner);
 	}
 
 	/**

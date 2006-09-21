@@ -135,7 +135,7 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 								   LanguageConnectionContext lcc)
 		throws StandardException
 	{
-		if (user.equals(dd.getAuthorizationDBA())) return;
+		if (user.equals(dd.getAuthorizationDatabaseOwner())) return;
 		
 		//  check view specific
 		if (td.getTableType() == TableDescriptor.VIEW_TYPE) 

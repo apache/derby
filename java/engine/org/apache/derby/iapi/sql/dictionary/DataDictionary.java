@@ -259,11 +259,11 @@ public interface DataDictionary
 	public DataDescriptorGenerator	getDataDescriptorGenerator();
 
 	/**
-	 * Get authorizationID of DBA
+	 * Get authorizationID of Database Owner
 	 *
 	 * @return	authorizationID
 	 */
-	public String getAuthorizationDBA();
+	public String getAuthorizationDatabaseOwner();
 
 	/**
 	 * Get authorization model in force, SqlStandard or legacy mode
