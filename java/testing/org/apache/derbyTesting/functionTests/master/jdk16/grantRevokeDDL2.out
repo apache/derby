@@ -308,7 +308,7 @@ ERROR: Failed with SQLSTATE 42X01
 ij(USER1)> -- revoking privilege that has not been granted, expect warning
 revoke select,insert,update,delete,trigger,references on t1 from user2;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from USER2.
+WARNING 01006: Privilege not revoked from user USER2.
 ij(USER1)> -- syntax errors, expect errors
 grant select on t1 from user2;
 ERROR: Failed with SQLSTATE 42X01
@@ -481,10 +481,10 @@ ij(USER3)> set connection user1;
 ij(USER1)> -- expect warnings
 revoke update(c2) on t1 from user3;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from USER3.
+WARNING 01006: Privilege not revoked from user USER3.
 ij(USER1)> revoke select(c2) on t1 from user3;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from USER3.
+WARNING 01006: Privilege not revoked from user USER3.
 ij(USER1)> set connection user2;
 ij(USER2)> -- ok
 update user1.t1 set c2 = 'user2';
@@ -576,10 +576,10 @@ grant select, update on t3 to user2;
 ij(USER1)> -- expect warning
 revoke select(c1) on t3 from user2;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from USER2.
+WARNING 01006: Privilege not revoked from user USER2.
 ij(USER1)> revoke update(c2) on t3 from user2;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from USER2.
+WARNING 01006: Privilege not revoked from user USER2.
 ij(USER1)> set connection user2;
 ij(USER2)> select * from user1.t3;
 C1         |C2        |C3         
