@@ -34,7 +34,6 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 
@@ -116,7 +115,7 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 		// Shutdown the database for derby.database.sqlAuthorization property 
 		// to take effect. This was set by DatabasePropertyTestSetup decorator.
 		try{ 
-			TestUtil.getConnection("wombat", "shutdown=true");
+			getDefaultConnection("shutdown=true");
 			fail("FAIL: Failed to shutdown database");
 		} catch (SQLException sqle) {
 			assertSQLState(SQLStateConstants.SHUTDOWN_DATABASE, sqle);
