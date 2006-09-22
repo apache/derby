@@ -249,10 +249,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 			if (!isForUpdate()) { //language resultset not updatable
 				concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
 				SQLWarning w = StandardException.newWarning(SQLState.QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
-				if (topWarning == null)
-					topWarning = w;
-				else
-					topWarning.setNextWarning(w);
+				addWarning(w);
 			} else
 					concurrencyOfThisResultSet = JDBC20Translation.CONCUR_UPDATABLE;
 		}
