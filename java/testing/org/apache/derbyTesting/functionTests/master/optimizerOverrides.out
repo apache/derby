@@ -1792,26 +1792,4 @@ ij> drop table t1;
 ij> drop table temp1;
 0 rows inserted/updated/deleted
 ij> commit;
-ij> -- Test that SYSCS_BULK_INSERT works (DERBY-1660)
-create table warehouse(t1 int);
-0 rows inserted/updated/deleted
-ij> -- bulk insert 10 rows
-call  SYSCS_UTIL.SYSCS_BULK_INSERT('APP','WAREHOUSE','org.apache.derbyTesting.functionTests.tests.lang.WarehouseVTI','10');
-0 rows inserted/updated/deleted
-ij> select * from warehouse order by t1;
-T1         
------------
-1          
-2          
-3          
-4          
-5          
-6          
-7          
-8          
-9          
-10         
-ij> -- cleanup
-drop table warehouse;
-0 rows inserted/updated/deleted
 ij> 
