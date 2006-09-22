@@ -57,6 +57,7 @@ import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 /* can't import these due to name overlap:
 import java.sql.ResultSet;
@@ -77,6 +78,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -145,6 +148,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 
   
 	private final ResultDescription resultDescription;
+	
+	/**
+	 * A map which maps a column name to a column number.
+	 * Entries only added when accessing columns with the name.
+	 */
+	private Map columnNameMap;
 
     // max rows limit for this result set
     private int maxRows;
@@ -260,6 +269,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 			getLanguageConnectionFactory().getExecutionFactory();
 		final int columnCount = getMetaData().getColumnCount();
 		this.currentRow = factory.getValueRow(columnCount);
+		this.columnNameMap = null;
 		currentRow.setRowArray(null);
 
 		// Only incur the cost of allocating and maintaining
@@ -4225,29 +4235,41 @@ public abstract class EmbedResultSet extends ConnectionChild
 		// n.b. if we went through the JDBC interface,
 		// there is a caching implementation in the JDBC doc
 		// (appendix C). But we go through our own info, for now.
-		// REVISIT: we might want to cache our own info...
-		
 
 		if (columnName == null)
 			throw newSQLException(SQLState.NULL_COLUMN_NAME);
-
-		ResultDescription rd = resultDescription;
-
-    	// 1 or 0 based? assume 1 (probably wrong)
-        // Changing the order in which columns are found from 1 till column count.
-        // This is necessary in cases where the column names are the same but are in different cases.
-        // This is because in updateXXX and getXXX methods column names are case insensitive
-        // and in that case the first column should be returned.
-        
-        int columnCount = rd.getColumnCount();
-
-        for(int i = 1 ; i<= columnCount;i++) {
-    		String name = rd.getColumnDescriptor(i).getName();
-    		if (StringUtil.SQLEqualsIgnoreCase(columnName, name)) {
-    			return i;
-    		}
-    	}
-    	throw newSQLException(SQLState.COLUMN_NOT_FOUND, columnName);
+		
+		final Map workMap; 
+		                   
+		synchronized (this) {
+			if (columnNameMap==null) {
+				// updateXXX and getXXX methods are case insensitive and the 
+				// first column should be returned. The loop goes backward to 
+				// create a map which preserves this property.
+				columnNameMap = new HashMap();
+				for (int i = resultDescription.getColumnCount(); i>=1; i--) {
+					
+					final String key = StringUtil.
+						SQLToUpperCase(resultDescription.
+							getColumnDescriptor(i).getName());
+					
+					final Integer value = ReuseFactory.getInteger(i);
+					
+					columnNameMap.put(key, value);
+				}
+			}
+			workMap = columnNameMap;
+		}
+		
+		Integer val = (Integer) workMap.get(columnName);
+		if (val==null) {
+			val = (Integer) workMap.get(StringUtil.SQLToUpperCase(columnName));
+		}
+		if (val==null) {
+			throw newSQLException(SQLState.COLUMN_NOT_FOUND, columnName);
+		} else {
+			return val.intValue();
+		}
 	}
 
 
