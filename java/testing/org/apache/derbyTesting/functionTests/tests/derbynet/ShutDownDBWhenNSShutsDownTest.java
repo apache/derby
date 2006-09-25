@@ -54,6 +54,46 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test that a shutdown of the engine does not take down the network
+     * server. Before DERBY-1326 was fixed, shutting down the engine would
+     * leave the network server in an inconsistent state which could make
+     * clients hang infinitely.
+     */
+    public void testEngineShutdownDoesNotTakeDownNS() throws Exception {
+        Connection[] conns = new Connection[20];
+
+        // first make sure there are 20 active worker threads on the server
+        for (int i = 0; i < conns.length; i++) {
+            conns[i] = openDefaultConnection();
+        }
+
+        // then close them, leaving 20 free worker threads ready to pick up new
+        // sessions
+        for (int i = 0; i < conns.length; i++) {
+            conns[i].close();
+        }
+
+        // Give the free threads a little time to close their sessions. This is
+        // done to ensure that there are free threads waiting for new sessions,
+        // which makes the DERBY-1326 hang more reliably reproducible.
+        Thread.sleep(500);
+
+        // shut down the engine
+        try {
+            getConnection("", "shutdown=true");
+            fail("shutdown didn't raise exception");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ015", sqle);
+        }
+
+        // see if it is still possible to connect to the server (before
+        // DERBY-1326, this would hang)
+        for (int i = 0; i < 20; i++) {
+            openDefaultConnection().close();
+        }
+    }
+
+    /**
      * Test that the NetworkServer shuts down the databases it has booted when
      * started from the command line, and that it does not shut down the
      * databases it has booted when started from the API.
