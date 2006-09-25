@@ -233,7 +233,7 @@
     <zip destfile="${release.dir}/${derby.src}.zip">
       <zipfileset dir="${basedir}" prefix="${derby.src}"
                   includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
-         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
+         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
     </zip>
   </target>
   <target name="src.tgz">
@@ -241,7 +241,7 @@
          compression="gzip" longfile="gnu">
       <tarfileset dir="${basedir}" prefix="${derby.src}"
                   includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
-         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
+         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
     </tar>
   </target>
 
