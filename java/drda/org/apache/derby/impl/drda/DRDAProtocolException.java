@@ -323,7 +323,7 @@ class DRDAProtocolException extends Exception
 		int svrcod, String rdbnam, String srvdgn)
 	{
         if ( SanityManager.DEBUG )
-            System.out.println("agentError in " + agent);
+            agent.trace("agentError in " + agent);
 		Object[] oa = {new Integer(svrcod), rdbnam, srvdgn};
 		return new DRDAProtocolException(DRDA_AgentError,
 										agent,

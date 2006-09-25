@@ -153,21 +153,8 @@ public class testSecMec extends dataSourcePermissions_net
 	private static int NETWORKSERVER_PORT;
 
 	private static NetworkServerControl networkServer = null;
-
-    private testSecMec(SwitchablePrintStream consoleLogStream,
-		       PrintStream originalStream,
-		       FileOutputStream shutdownLogStream,
-		       SwitchablePrintStream consoleErrLogStream, 
-		       PrintStream originalErrStream,
-		       FileOutputStream shutdownErrLogStream){
-	
-	super(consoleLogStream,
-	      originalStream,
-	      shutdownLogStream,
-	      consoleErrLogStream,
-	      originalErrStream,
-	      shutdownErrLogStream);
-    }
+    
+    private static FileOutputStream serverOutput;
 
 	public static void main(String[] args) throws Exception {
 		// Load harness properties.
@@ -189,24 +176,9 @@ public class testSecMec extends dataSourcePermissions_net
 			e.printStackTrace();
 		}
 		
-		PrintStream originalStream = System.out;
-		FileOutputStream shutdownLogStream = 
-		    new FileOutputStream("testSecMec." + 
-					 System.getProperty("framework","") + "." + 
-					 "shutdown.std.log");
-		SwitchablePrintStream consoleLogStream = 
-		    new SwitchablePrintStream( originalStream );
-		
-		PrintStream originalErrStream = System.err;
-		FileOutputStream shutdownErrLogStream = 
-		    new FileOutputStream("testSecMec." + 
-					 System.getProperty("framework","") + "." + 
-					 "shutdown.err.log");
-		SwitchablePrintStream consoleErrLogStream = 
-		    new SwitchablePrintStream( originalErrStream );
-
-		System.setOut( consoleLogStream );
-		System.setErr( consoleErrLogStream );
+		String fileName = System.getProperty( "derby.system.home", "")
+				+ "serverConsoleOutput.log";
+		serverOutput = new FileOutputStream(fileName);
            
         // Start server with a specific value for derby.drda.securityMechanism
         // and run tests. Note connections will be successful or not depending on
@@ -227,7 +199,7 @@ public class testSecMec extends dataSourcePermissions_net
 		        try
 		        {
 		            networkServer = new NetworkServerControl(InetAddress.getByName(hostName),NETWORKSERVER_PORT);
-		            networkServer.start(null);
+		            networkServer.start(new PrintWriter(serverOutput));
 		        }catch(Exception e)
 		        {
 		            if ( derby_drda_securityMechanism[i].equals("INVALID_VALUE")||
@@ -257,12 +229,7 @@ public class testSecMec extends dataSourcePermissions_net
 		    // Now, go ahead and run the test.
 		    try {
 		        testSecMec tester = 
-		            new testSecMec(consoleLogStream,
-		                    originalStream,
-		                    shutdownLogStream,
-		                    consoleErrLogStream,
-		                    originalErrStream,
-		                    shutdownErrLogStream);
+		            new testSecMec();
                 // Now run the test, note connections will be successful or 
                 // throw an exception depending on derby.drda.securityMechanism 
                 // property specified on the server
@@ -281,17 +248,11 @@ public class testSecMec extends dataSourcePermissions_net
 		    // Shutdown the server.
 		    if (hostName.equals("localhost"))
 		    {
-		        consoleLogStream.switchOutput( shutdownLogStream );
-		        consoleErrLogStream.switchOutput( shutdownErrLogStream );
-		        
+                
 		        networkServer.shutdown();
-		        consoleLogStream.flush();
 		        // how do we do this with the new api?
 		        //networkServer.join();
 		        Thread.sleep(5000);
-		        
-		        consoleLogStream.switchOutput( originalStream );
-		        consoleErrLogStream.switchOutput( originalErrStream );
 		        
 		    }
 
@@ -299,11 +260,7 @@ public class testSecMec extends dataSourcePermissions_net
 		}
 		System.out.println("Completed testSecMec");
 
-		originalStream.close();
-		shutdownLogStream.close();
-
-		originalErrStream.close();
-		shutdownErrLogStream.close();
+		serverOutput.close();
 	}
     
 	// Indicates userid/encrypted password security mechanism.

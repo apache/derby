@@ -24,9 +24,11 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -49,6 +51,8 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class TestConnectionMethods {
     Connection conn = null;
+    
+    private FileOutputStream serverOutput;
     
     /**
      * Constructor for an object that is used for running test of the
@@ -322,6 +326,9 @@ public class TestConnectionMethods {
         try {
             NetworkServerControl networkServer = new NetworkServerControl();
             networkServer.shutdown();
+            if (serverOutput != null) {
+                serverOutput.close();
+            }
         } catch(Exception e) {
             System.out.println("INFO: Network server shutdown returned: " + e);
         }
@@ -346,10 +353,14 @@ public class TestConnectionMethods {
         }
 
         try {
+            String fileName = System.getProperty( "derby.system.home", "")
+                    + "serverConsoleOutput.log";
+            serverOutput = new FileOutputStream(fileName);
+
             NetworkServerControl networkServer = 
                      new NetworkServerControl(InetAddress.getByName(serverName), 
                                               serverPort);
-            networkServer.start(null);
+            networkServer.start(new PrintWriter(serverOutput));
 
             // Wait for the network server to start
             boolean started = false;

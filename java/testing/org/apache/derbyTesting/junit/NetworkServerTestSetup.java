@@ -19,8 +19,12 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.FileNotFoundException;
 import java.net.InetAddress;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
@@ -38,6 +42,8 @@ import org.apache.derby.drda.NetworkServerControl;
  */
 final public class NetworkServerTestSetup extends TestSetup {
 
+    private FileOutputStream serverOutput;
+    
     /**
      * Decorator this test with the NetworkServerTestSetup
      */
@@ -54,10 +60,27 @@ final public class NetworkServerTestSetup extends TestSetup {
         
         if (!config.getJDBCClient().isEmbedded()) {
             BaseTestCase.println("Starting network server:");
+
+            
+            serverOutput = (FileOutputStream)
+            AccessController.doPrivileged(new PrivilegedAction() {
+                public Object run() {
+                    String fileName = System.getProperty("derby.system.home") + 
+                            "serverConsoleOutput.log";
+                    FileOutputStream fos = null;
+                    try {
+                        fos = (new FileOutputStream(fileName));
+                    } catch (FileNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
+                    return fos;
+                }
+            });
+
             networkServerController = new NetworkServerControl
                 (InetAddress.getByName(config.getHostName()), config.getPort());
             
-            networkServerController.start(null);
+            networkServerController.start(new PrintWriter(serverOutput));
             
             final long startTime = System.currentTimeMillis();
             while (true) {
@@ -81,6 +104,7 @@ final public class NetworkServerTestSetup extends TestSetup {
     protected void tearDown() throws Exception {
         if (networkServerController != null) {
             networkServerController.shutdown();
+            serverOutput.close();
         }
     }
     
