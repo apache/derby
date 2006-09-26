@@ -74,6 +74,13 @@ grant codeBase "${derbyTesting.clientjar}derbyclient.jar" {
   permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
   permission java.net.SocketPermission "localhost", "connect,resolve";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
+
+  // DERBY-1883: Since some classes that are included in both derby.jar and
+  // derbyclient.jar read properties, derbyclient.jar needs permission to read
+  // derby.* properties to avoid failures when it is listed before derby.jar in
+  // the classpath.
+  permission java.util.PropertyPermission "derby.*", "read";
+
 };
 
 //
