@@ -807,7 +807,7 @@ public class CompilerContextImpl extends ContextImpl
 	 *
 	 * @see CompilerContext#addRequiredSchemaPriv
 	 */
-	public void addRequiredSchemaPriv(String schemaName, String aid, boolean privType)
+	public void addRequiredSchemaPriv(String schemaName, String aid, int privType)
 	{
 		if( requiredSchemaPrivileges == null || schemaName == null)
 			return;

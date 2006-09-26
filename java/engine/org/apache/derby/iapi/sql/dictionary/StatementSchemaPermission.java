@@ -27,6 +27,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * This class describes a schema permission required by a statement.
@@ -34,11 +35,21 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 public class StatementSchemaPermission extends StatementPermission
 {
+	/**
+	 * The schema name 
+	 */
 	private String schemaName;
-	private String aid;
-	private boolean privType;
+	/**
+	 * Authorization id
+	 */
+	private String aid;  
+	/**	 
+	 * One of Authorizer.CREATE_SCHEMA_PRIV, MODIFY_SCHEMA_PRIV,  
+	 * DROP_SCHEMA_PRIV, etc.
+	 */ 
+	private int privType;  
 
-	public StatementSchemaPermission(String schemaName, String aid, boolean privType)
+	public StatementSchemaPermission(String schemaName, String aid, int privType)
 	{
 		this.schemaName = schemaName;
 		this.aid 	= aid;
@@ -55,26 +66,39 @@ public class StatementSchemaPermission extends StatementPermission
 		DataDictionary dd =	lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
 	
-		if (privType == Authorizer.MODIFY_SCHEMA_PRIV)
+		switch ( privType )
 		{
-			SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, false);
-			// If schema hasn't been created already, no need to check
-			if (sd == null)
-				return;
+			case Authorizer.MODIFY_SCHEMA_PRIV:
+			case Authorizer.DROP_SCHEMA_PRIV:
+				SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, false);
+				// If schema hasn't been created already, no need to check
+				// for drop schema, an exception will be thrown if the schema 
+				// does not exists.
+				if (sd == null)
+					return;
 
-			if (!authid.equals(sd.getAuthorizationId()))
-				throw StandardException.newException(
-					SQLState.AUTH_NO_ACCESS_NOT_OWNER, authid, schemaName);
-		}
-		else
-		{
-			// Non-Database Owner Users can only create schemas that match 
-			// their authid. Also allow only Database Owner to set authid to 
-			// another user. Note that for Database Owner, check interface 
-			// wouldn't be called at all
-			if (!schemaName.equals(authid) || (aid != null && !aid.equals(authid)))
-				throw StandardException.newException(
-					SQLState.AUTH_NOT_DATABASE_OWNER, authid, schemaName);
+				if (!authid.equals(sd.getAuthorizationId()))
+					throw StandardException.newException(
+						SQLState.AUTH_NO_ACCESS_NOT_OWNER, authid, schemaName);
+				break;
+			
+			case Authorizer.CREATE_SCHEMA_PRIV:
+				// Non-DBA Users can only create schemas that match their authid
+				// Also allow only DBA to set authid to another user
+				// Note that for DBA, check interface wouldn't be called at all
+				if ( !schemaName.equals(authid) || 
+						(aid != null && !aid.equals(authid)) )
+					throw StandardException.newException(
+						SQLState.AUTH_NOT_DATABASE_OWNER, authid, schemaName);
+				break;
+			
+			default:
+				if (SanityManager.DEBUG)
+				{
+					SanityManager.THROWASSERT(
+							"Unexpected value (" + privType + ") for privType");
+				}
+				break;
 		}
 	}
 

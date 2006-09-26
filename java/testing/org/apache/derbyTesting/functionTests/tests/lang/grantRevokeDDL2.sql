@@ -423,6 +423,11 @@ CREATE SCHEMA w3 AUTHORIZATION user2;
 CREATE SCHEMA AUTHORIZATION user6;
 CREATE SCHEMA myschema;
 
+-- DERBY-1858
+set connection user5;
+-- expect error
+DROP SCHEMA w3 RESTRICT;
+
 -- -------------------------------------------------------------------
 -- views
 -- -------------------------------------------------------------------
@@ -979,10 +984,10 @@ create table ttt1 (i int);
 set connection user1;
 drop table user4.ttt1;
 
--- set connection user2;
+set connection user2;
 -- DERBY-1858
 -- expect error
--- drop schema user4 restrict;
+drop schema user4 restrict;
 
 set connection user1;
 -- ok

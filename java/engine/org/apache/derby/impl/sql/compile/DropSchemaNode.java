@@ -21,6 +21,8 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
@@ -71,6 +73,18 @@ public class DropSchemaNode extends DDLStatementNode
                     SQLState.LANG_CANNOT_DROP_SYSTEM_SCHEMAS, this.schemaName));
 		}
 		
+        /* 
+        ** In SQL authorization mode, the current authorization identifier
+        ** must be either the owner of the schema or the database owner 
+        ** in order for the schema object to be dropped.
+        */
+        if (isPrivilegeCollectionRequired())
+        {
+            getCompilerContext().addRequiredSchemaPriv(schemaName, 
+                lcc.getAuthorizationId(), 
+                Authorizer.DROP_SCHEMA_PRIV);
+        }
+        
 		return this;
 	}
 

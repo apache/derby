@@ -663,7 +663,12 @@ ij(USER1)> CREATE SCHEMA AUTHORIZATION user6;
 0 rows inserted/updated/deleted
 ij(USER1)> CREATE SCHEMA myschema;
 0 rows inserted/updated/deleted
-ij(USER1)> -- -------------------------------------------------------------------
+ij(USER1)> -- DERBY-1858
+set connection user5;
+ij(USER5)> -- expect error
+DROP SCHEMA w3 RESTRICT;
+ERROR: Failed with SQLSTATE 2850D
+ij(USER5)> -- -------------------------------------------------------------------
 -- views
 -- -------------------------------------------------------------------
 set connection user1;
@@ -1497,11 +1502,12 @@ ij(USER4)> create table ttt1 (i int);
 ij(USER4)> set connection user1;
 ij(USER1)> drop table user4.ttt1;
 0 rows inserted/updated/deleted
-ij(USER1)> -- set connection user2;
--- DERBY-1858
+ij(USER1)> set connection user2;
+ij(USER2)> -- DERBY-1858
 -- expect error
--- drop schema user4 restrict;
-set connection user1;
+drop schema user4 restrict;
+ERROR: Failed with SQLSTATE 2850D
+ij(USER2)> set connection user1;
 ij(USER1)> -- ok
 drop schema user4 restrict;
 0 rows inserted/updated/deleted
