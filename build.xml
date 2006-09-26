@@ -875,8 +875,8 @@
                <fileset dir="${derby.jar.dir}/${plugin.tmp.dir}" includes="plugin*.xml"/>
        </copy>
 
-       <copy todir="${derby.jar.dir}/${plugin.tmp.dir}" file="LICENSE"/>
-       <copy todir="${derby.jar.dir}/${plugin.tmp.dir}" file="NOTICE"/>
+       <copy todir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}" file="LICENSE"/>
+       <copy todir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}" file="NOTICE"/>
 
        <delete file="${derby.jar.dir}/${plugin.tmp.dir}/plugintmp.properties"/>
        <delete file="${derby.jar.dir}/${plugin.tmp.dir}/plugin.xml"/>
