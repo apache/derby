@@ -343,6 +343,17 @@ public class OptimizerImpl implements Optimizer
 			timeOptimizationStarted = System.currentTimeMillis();
 			timeExceeded = false;
 		}
+
+		/* If user specified the optimizer override for a fixed
+		 * join order, then desiredJoinOrderFound could be true
+		 * when we get here.  We have to reset it to false in
+		 * prep for the next round of optimization.  Otherwise
+		 * we'd end up quitting the optimization before ever
+		 * finding a plan for this round, and that could, among
+		 * other things, lead to a never-ending optimization
+		 * phase in certain situations.  DERBY-1866.
+		 */
+		desiredJoinOrderFound = false;
 	}
 
     public int getMaxMemoryPerTable()
@@ -1236,9 +1247,13 @@ public class OptimizerImpl implements Optimizer
 		** RESOLVE - We do not push predicates with subqueries not materializable.
 		*/
 
-		int		numPreds = predicateList.size();
-		JBitSet	predMap = new JBitSet(numTablesInQuery);
-		OptimizablePredicate pred;
+		int		                numPreds        = predicateList.size();
+		JBitSet	                predMap         = new JBitSet(numTablesInQuery);
+		JBitSet                 curTableNums    = null;
+		BaseTableNumbersVisitor btnVis          = null;
+		boolean                 pushPredNow     = false;
+		int                     tNum;
+		Predicate               pred;
 
 		/* Walk the OptimizablePredicateList.  For each OptimizablePredicate,
 		 * see if it can be assigned to the Optimizable at the current join
@@ -1249,7 +1264,7 @@ public class OptimizerImpl implements Optimizer
 		 */
 		for (int predCtr = numPreds - 1; predCtr >= 0; predCtr--)
 		{
-			pred = predicateList.getOptPredicate(predCtr);
+			pred = (Predicate)predicateList.getOptPredicate(predCtr);
 
 			/* Skip over non-pushable predicates */
 			if (! isPushable(pred))
@@ -1281,12 +1296,108 @@ public class OptimizerImpl implements Optimizer
 			*/
 			predMap.and(nonCorrelatedTableMap);
 
+			/* At this point what we've done is figure out what FromTables
+			 * the predicate references (using the predicate's "referenced
+			 * map") and then: 1) unset the table numbers for any FromTables
+			 * that have already been optimized, 2) unset the table number
+			 * for curTable, which we are about to optimize, and 3) cleared
+			 * out any remaining table numbers which do NOT directly
+			 * correspond to UN-optimized FromTables in this OptimizerImpl's
+			 * optimizableList.
+			 *
+			 * Note: the optimizables in this OptImpl's optimizableList are
+			 * called "non-correlated".
+			 *
+			 * So at this point predMap holds a list of tableNumbers which
+			 * correspond to "non-correlated" FromTables that are referenced
+			 * by the predicate but that have NOT yet been optimized.  If any
+			 * such FromTable exists then we canNOT push the predicate yet.  
+			 * We can only push the predicate if every FromTable that it
+			 * references either 1) has already been optimized, or 2) is
+			 * about to be optimized (i.e. the FromTable is curTable itself).
+			 * We can check for this condition by seeing if predMap is empty,
+			 * which is what the following line does.
+			 */
+			pushPredNow = (predMap.getFirstSetBit() == -1);
+
+			/* If the predicate is scoped, there's more work to do. A
+			 * scoped predicate's "referenced map" may not be in sync
+			 * with its actual column references.  Or put another way,
+			 * the predicate's referenced map may not actually represent
+			 * the tables that are referenced by the predicate.  For
+			 * example, assume the query tree is something like:
+			 *
+			 *      SelectNode0
+			 *     (PRN0, PRN1)
+			 *       |     |
+			 *       T1 UnionNode
+			 *           /   |
+			 *         PRN2  PRN3
+			 *          |     |
+			 *  SelectNode1   SelectNode2
+			 *   (PRN4, PRN5)    (PRN6)
+			 *     |     |         |
+			 *     T2    T3        T4
+			 *
+			 * Assume further that we have an equijoin predicate between
+			 * T1 and the Union node, and that the column reference that
+			 * points to the Union ultimately maps to T3.  The predicate
+			 * will then be scoped to PRN2 and PRN3 and the newly-scoped
+			 * predicates will get passed to the optimizers for SelectNode1
+			 * and SelectNode2--which brings us here.  Assume for this
+			 * example that we're here for SelectNode1 and that "curTable"
+			 * is PRN4.  Since the predicate has been scoped to SelectNode1,
+			 * its referenced map will hold the table numbers for T1 and
+			 * PRN2--it will NOT hold the table number for PRN5, even
+			 * though PRN5 (T3) is the actual target for the predicate.
+			 * Given that, the above logic will determine that the predicate
+			 * should be pushed to curTable (PRN4)--but that's not correct.
+			 * We said at the start that the predicate ultimately maps to
+			 * T3--so we should NOT be pushing it to T2.  And hence the
+			 * need for some additional logic.  DERBY-1866.
+			 */
+			if (pushPredNow && pred.isScopedForPush() && (numOptimizables > 1))
+			{
+				if (btnVis == null)
+				{
+					curTableNums = new JBitSet(numTablesInQuery);
+					btnVis       = new BaseTableNumbersVisitor(curTableNums);
+				}
+
+				/* What we want to do is find out if the scoped predicate
+				 * is really supposed to be pushed to curTable.  We do
+				 * that by getting the base table numbers referenced by
+				 * curTable along with curTable's own table number.  Then
+				 * we get the base table numbers referenced by the scoped
+				 * predicate. If the two sets have at least one table
+				 * number in common, then we know that the predicate
+				 * should be pushed to curTable.  In the above example
+				 * predMap will end up holding the base table number
+				 * for T3, and thus this check will fail when curTable
+				 * is PRN4 but will pass when it is PRN5, which is what
+				 * we want.
+				 */
+				tNum = ((FromTable)curTable).getTableNumber();
+				curTableNums.clearAll();
+				btnVis.setTableMap(curTableNums);
+				((FromTable)curTable).accept(btnVis);
+				if (tNum >= 0)
+					curTableNums.set(tNum);
+
+				btnVis.setTableMap(predMap);
+				pred.accept(btnVis);
+
+				predMap.and(curTableNums);
+				if ((predMap.getFirstSetBit() == -1))
+					pushPredNow = false;
+			}
+
 			/*
 			** Finally, push the predicate down to the Optimizable at the
 			** end of the current proposed join order, if it can be evaluated
 			** there.
 			*/
-			if (predMap.getFirstSetBit() == -1)
+			if (pushPredNow)
 			{
 				/* Push the predicate and remove it from the list */
 				if (curTable.pushOptPredicate(pred))
