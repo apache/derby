@@ -41,12 +41,19 @@ import java.sql.ResultSet;
  * and properties of the columns in a ResultSet.
  *
  * <p>
- * We take the (cloudscape) ResultDescription and examine it, to return
+ * We take the (Derby) ResultDescription and examine it, to return
  * the appropriate information.
 
    <P>
    This class can be used outside of this package to convert a
    ResultDescription into a ResultSetMetaData object.
+   <P>
+   EmbedResultSetMetaData objects are shared across multiple threads
+   by being stored in the ResultDescription for a compiled plan.
+   If the required api for ResultSetMetaData ever changes so
+   that it has a close() method, a getConnection() method or
+   any other Connection or ResultSet specific method then
+   this sharing must be removed.
  *
  * @author ames
  */
@@ -71,8 +78,8 @@ public class EmbedResultSetMetaData
      *
      * @return the number
      */
-	public int getColumnCount()	{
-		return columnInfo == null ? 0 : columnInfo.length;
+	public final int getColumnCount()	{
+		return columnInfo.length;
 	}
 
     /**
@@ -83,8 +90,8 @@ public class EmbedResultSetMetaData
 	 * @exception SQLException thrown on failure
      *
      */
-	public boolean isAutoIncrement(int column) throws SQLException	{
-
+	public final boolean isAutoIncrement(int column) throws SQLException	{
+        validColumnNumber(column);
 		ResultColumnDescriptor rcd = columnInfo[column - 1];
 		return rcd.isAutoincrement();
 	}
@@ -96,7 +103,7 @@ public class EmbedResultSetMetaData
      * @return true if so
 	 * @exception SQLException thrown on failure
      */
-	public boolean isCaseSensitive(int column) throws SQLException	{
+	public final boolean isCaseSensitive(int column) throws SQLException	{
 	  return DataTypeUtilities.isCaseSensitive(getColumnTypeDescriptor(column));
 	}
 
@@ -108,7 +115,7 @@ public class EmbedResultSetMetaData
      * @return true if so
 	 * @exception SQLException thrown on failure
      */
-	public boolean isSearchable(int column) throws SQLException	{
+	public final boolean isSearchable(int column) throws SQLException	{
 		validColumnNumber(column);
 
 		// we have no restrictions yet, so this is always true
@@ -123,7 +130,7 @@ public class EmbedResultSetMetaData
      * @return true if so
 	 * @exception SQLException thrown on failure
      */
-	public boolean isCurrency(int column) throws SQLException	{
+	public final boolean isCurrency(int column) throws SQLException	{
 
 		return DataTypeUtilities.isCurrency(getColumnTypeDescriptor(column));
 	}
@@ -135,7 +142,7 @@ public class EmbedResultSetMetaData
      * @return columnNoNulls, columnNullable or columnNullableUnknown
 	 * @exception SQLException thrown on failure
      */
-	public int isNullable(int column) throws SQLException	{
+	public final int isNullable(int column) throws SQLException	{
 		return DataTypeUtilities.isNullable(getColumnTypeDescriptor(column));
 	}
 
@@ -146,7 +153,7 @@ public class EmbedResultSetMetaData
      * @return true if so
 	 * @exception SQLException thrown on failure
      */
-	public boolean isSigned(int column) throws SQLException	{
+	public final boolean isSigned(int column) throws SQLException	{
 		return DataTypeUtilities.isSigned(getColumnTypeDescriptor(column));
 	}
 
@@ -158,7 +165,7 @@ public class EmbedResultSetMetaData
      * @return max width
 	 * @exception SQLException thrown on failure
      */
-	public int getColumnDisplaySize(int column) throws SQLException	{
+	public final int getColumnDisplaySize(int column) throws SQLException	{
 		return DataTypeUtilities.getColumnDisplaySize(getColumnTypeDescriptor(column));
 	}
 
@@ -170,7 +177,7 @@ public class EmbedResultSetMetaData
      * @return true if so
 	 * @exception SQLException thrown on failure
      */
-	public String getColumnLabel(int column) throws SQLException {
+	public final String getColumnLabel(int column) throws SQLException {
 		ResultColumnDescriptor cd = columnInfo[column - 1];
 		String s = cd.getName();
 
@@ -186,7 +193,7 @@ public class EmbedResultSetMetaData
      * @return column name
 	 * @exception SQLException thrown on failure
      */
-	public String getColumnName(int column) throws SQLException	{
+	public final String getColumnName(int column) throws SQLException	{
 		ResultColumnDescriptor cd = columnInfo[column - 1];
 		String s = cd.getName();
 		// database returns null when no column name to differentiate from empty name
@@ -202,7 +209,7 @@ public class EmbedResultSetMetaData
      * @return schema name or "" if not applicable
 	 * @exception SQLException thrown on failure
      */
-	public String getSchemaName(int column) throws SQLException	{
+	public final String getSchemaName(int column) throws SQLException	{
 		ResultColumnDescriptor cd = columnInfo[column - 1];
 
 		String s = cd.getSourceSchemaName();
@@ -217,7 +224,7 @@ public class EmbedResultSetMetaData
      * @return precision
 	 * @exception SQLException thrown on failure
      */
-	public int getPrecision(int column) throws SQLException	{
+	public final int getPrecision(int column) throws SQLException	{
 		return DataTypeUtilities.getDigitPrecision(getColumnTypeDescriptor(column));
 	}
 
@@ -229,7 +236,7 @@ public class EmbedResultSetMetaData
      * @return scale
 	 * @exception SQLException thrown on failure
      */
-	public int getScale(int column) throws SQLException	{
+	public final int getScale(int column) throws SQLException	{
 		DataTypeDescriptor dtd = getColumnTypeDescriptor(column);
 		// REMIND -- check it is valid to ask for scale
 		return dtd.getScale();
@@ -241,7 +248,7 @@ public class EmbedResultSetMetaData
      * @return table name or "" if not applicable
 	 * @exception SQLException thrown on failure
      */
-	public String getTableName(int column) throws SQLException {
+	public final String getTableName(int column) throws SQLException {
 		ResultColumnDescriptor cd = columnInfo[column - 1];
 		String s = cd.getSourceTableName();
 
@@ -256,7 +263,7 @@ public class EmbedResultSetMetaData
      * @return column name or "" if not applicable.
 	 * @exception SQLException thrown on failure
      */
-	public String getCatalogName(int column) throws SQLException {
+	public final String getCatalogName(int column) throws SQLException {
 		validColumnNumber(column);
 		return "";
 	}
@@ -269,7 +276,7 @@ public class EmbedResultSetMetaData
      * @see Types
 	 * @exception SQLException thrown on failure
      */
-	public int getColumnType(int column) throws SQLException {
+	public final int getColumnType(int column) throws SQLException {
 		DataTypeDescriptor dtd = getColumnTypeDescriptor(column);
 		return dtd.getTypeId().getJDBCTypeId();
 	}
@@ -281,7 +288,7 @@ public class EmbedResultSetMetaData
      * @return type name
 	 * @exception SQLException thrown on failure
      */
-	public String getColumnTypeName(int column) throws SQLException	{
+	public final String getColumnTypeName(int column) throws SQLException	{
 		DataTypeDescriptor dtd = getColumnTypeDescriptor(column);
 		return dtd.getTypeId().getSQLTypeName();
 	}
@@ -293,7 +300,7 @@ public class EmbedResultSetMetaData
      * @return true if so
 	 * @exception SQLException thrown on failure
      */
-	public boolean isReadOnly(int column) throws SQLException {
+	public final boolean isReadOnly(int column) throws SQLException {
 		validColumnNumber(column);
 
 		// we just don't know if it is a base table column or not
@@ -307,7 +314,7 @@ public class EmbedResultSetMetaData
      * @return true if so
 	 * @exception SQLException thrown on failure
      */
-	public boolean isWritable(int column) throws SQLException {
+	public final boolean isWritable(int column) throws SQLException {
 		validColumnNumber(column);
 		return columnInfo[column - 1].updatableByCursor();
 	}
@@ -319,7 +326,7 @@ public class EmbedResultSetMetaData
      * @return true if so
 	 * @exception SQLException thrown on failure
      */
-	public boolean isDefinitelyWritable(int column) throws SQLException	{
+	public final boolean isDefinitelyWritable(int column) throws SQLException	{
 		validColumnNumber(column);
 
 		// we just don't know if it is a base table column or not
@@ -337,7 +344,7 @@ public class EmbedResultSetMetaData
                       SQLState.COLUMN_NOT_FOUND, new Integer(column));
 	}
 
-	public DataTypeDescriptor getColumnTypeDescriptor(int column) throws SQLException 
+	private DataTypeDescriptor getColumnTypeDescriptor(int column) throws SQLException 
 	{
 		validColumnNumber(column);
 
@@ -362,7 +369,7 @@ public class EmbedResultSetMetaData
 	 *
 	 * @exception SQLException Feature not inplemented for now.
      */
-    public String getColumnClassName(int column) throws SQLException {
+    public final String getColumnClassName(int column) throws SQLException {
 		
 		return getColumnTypeDescriptor(column).getTypeId().getResultSetMetaDataTypeName();
 	}

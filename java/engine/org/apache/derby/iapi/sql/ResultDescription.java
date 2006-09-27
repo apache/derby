@@ -74,7 +74,8 @@ public interface ResultDescription
 	 * 5, then columns 5 to getColumnCount() are removed.
 	 * The new ResultDescription points to the same
 	 * ColumnDescriptors (this method performs a shallow
-	 * copy.
+	 * copy. The saved JDBC ResultSetMetaData will
+     * not be copied.
 	 *
 	 * @param truncateFrom the starting column to remove,
 	 * 1-based.
@@ -82,4 +83,41 @@ public interface ResultDescription
 	 * @return a new ResultDescription
 	 */
 	public ResultDescription truncateColumns(int truncateFrom);
+    
+    /**
+     * Set the JDBC ResultSetMetaData for this ResultDescription.
+     * A ResultSetMetaData object can be saved in the statement
+     * plan using this method. This only works while
+     * the ResultSetMetaData api does not contain a getConnection()
+     * method or a close method.
+     * <BR>
+     * If this object already has a saved meta data object
+     * this call will do nothing.
+     * Due to synchronization the saved ResultSetMetaData
+     * obejct may not be the one passed in, ie. if two
+     * threads call this concurrently, only one will be saved.
+     * It is assumed the JDBC layer passes in a ResultSetMetaData
+     * object based upon this.
+     */
+    public void setMetaData(java.sql.ResultSetMetaData rsmd);
+    
+    /**
+     * Get the saved JDBC ResultSetMetaData. Will return
+     * null if setMetaData() has not been called on this
+     * object. The caller then should manufacture a
+     * ResultSetMetaData object and pass it into setMetaData.
+     */
+    public java.sql.ResultSetMetaData getMetaData();
+    
+    /**
+     * Return the position of the column matching the
+     * passed in names following the JDBC rules for
+     * ResultSet.getXXX and updateXXX.
+     * Rules are the matching is case insensitive
+     * and the insensitive name matches the first
+     * column found that matches (starting at postion 1).
+     * @param name
+     * @return Position of the column (1-based), -1 if no match.
+     */
+    public int findColumnInsenstive(String name);
 }

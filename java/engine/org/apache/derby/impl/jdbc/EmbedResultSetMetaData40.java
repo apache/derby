@@ -24,7 +24,16 @@ import java.sql.SQLException;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-
+/**
+ * ResultSetMetaData implementation for JDBC 4.
+   <P>
+   EmbedResultSetMetaData40 objects are shared across multiple threads
+   by being stored in the ResultDescription for a compiled plan.
+   If the required api for ResultSetMetaData ever changes so
+   that it has a close() method, a getConnection() method or
+   any other Connection or ResultSet specific method then
+   this sharing must be removed.
+ */
 public class EmbedResultSetMetaData40 extends EmbedResultSetMetaData {
     
     public EmbedResultSetMetaData40(ResultColumnDescriptor[] columnInfo) {

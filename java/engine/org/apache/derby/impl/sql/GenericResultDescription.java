@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql;
 
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
 
@@ -29,10 +30,17 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.util.ReuseFactory;
+import org.apache.derby.iapi.util.StringUtil;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
+import java.sql.ResultSetMetaData;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * GenericResultDescription: basic implementation of result
  * description, used in conjunction with the other 
@@ -61,6 +69,18 @@ public final class GenericResultDescription
 
 	private ResultColumnDescriptor[] columns;
 	private String statementType;
+    
+    /**
+     * Saved JDBC ResultSetMetaData object.
+     * @see ResultDescription#setMetaData(java.sql.ResultSetMetaData)
+     */
+    private transient ResultSetMetaData metaData;
+    
+    /**
+     * A map which maps a column name to a column number.
+     * Entries only added when accessing columns with the name.
+     */
+    private Map columnNameMap;
 	
 	/**
 	 * Niladic constructor for Formatable
@@ -257,5 +277,64 @@ public final class GenericResultDescription
 			return "";
 		}
 	}
+
+    /**
+     * Set the meta data if it has not already been set.
+     */
+    public synchronized void setMetaData(ResultSetMetaData rsmd) {
+        if (metaData == null)
+            metaData = rsmd;
+    }
+
+    /**
+     * Get the saved meta data.
+     */
+    public synchronized ResultSetMetaData getMetaData() {
+        return metaData;
+    }
+
+    /**
+     * Find a column name based upon the JDBC rules for
+     * getXXX and setXXX. Name matching is case-insensitive,
+     * matching the first name (1-based) if there are multiple
+     * columns that map to the same name.
+     */
+    public int findColumnInsenstive(String columnName) {
+        
+        final Map workMap; 
+        
+        synchronized (this) {
+            if (columnNameMap==null) {
+                // updateXXX and getXXX methods are case insensitive and the 
+                // first column should be returned. The loop goes backward to 
+                // create a map which preserves this property.
+                Map map = new HashMap();
+                for (int i = getColumnCount(); i>=1; i--) {
+                    
+                    final String key = StringUtil.
+                        SQLToUpperCase(
+                            getColumnDescriptor(i).getName());
+                    
+                    final Integer value = ReuseFactory.getInteger(i);
+                    
+                    map.put(key, value);
+                }
+                
+                // Ensure this map can never change.
+                columnNameMap = Collections.unmodifiableMap(map);
+            }
+            workMap = columnNameMap;
+        }
+        
+        Integer val = (Integer) workMap.get(columnName);
+        if (val==null) {
+            val = (Integer) workMap.get(StringUtil.SQLToUpperCase(columnName));
+        }
+        if (val==null) {
+            return -1;
+        } else {
+            return val.intValue();
+        }
+    }
 }
 

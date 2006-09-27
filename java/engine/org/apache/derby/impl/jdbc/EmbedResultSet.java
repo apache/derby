@@ -129,7 +129,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 	// immutable state
 	private ResultSet theResults;
 	private boolean forMetaData;
-	private ResultSetMetaData rMetaData;
 	private SQLWarning topWarning;
 
 	/**
@@ -148,12 +147,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 
   
 	private final ResultDescription resultDescription;
-	
-	/**
-	 * A map which maps a column name to a column number.
-	 * Entries only added when accessing columns with the name.
-	 */
-	private Map columnNameMap;
 
     // max rows limit for this result set
     private int maxRows;
@@ -269,7 +262,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 			getLanguageConnectionFactory().getExecutionFactory();
 		final int columnCount = getMetaData().getColumnCount();
 		this.currentRow = factory.getValueRow(columnCount);
-		this.columnNameMap = null;
 		currentRow.setRowArray(null);
 
 		// Only incur the cost of allocating and maintaining
@@ -642,7 +634,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 			// the idea is to release resources, so:
 			currentRow.setRowArray(null);
-			rMetaData = null; // let it go, we can make a new one
 
 			// we hang on to theResults and messenger
 			// in case more calls come in on this resultSet
@@ -1612,21 +1603,21 @@ public abstract class EmbedResultSet extends ConnectionChild
      * @return the description of a ResultSet's columns
 	 * @exception SQLException thrown on failure.
      */
-    public ResultSetMetaData getMetaData() throws SQLException {
+    public final ResultSetMetaData getMetaData() throws SQLException {
 
 	  checkIfClosed("getMetaData");	// checking result set closure does not depend
-								// on the underlying connection.  Do this
-								// outside of the connection synchronization.
+								// on the underlying connection.
 
-	  synchronized (getConnectionSynchronization()) {
-
+      ResultSetMetaData rMetaData =
+          resultDescription.getMetaData();
 
 		if (rMetaData == null) {
-			// cache this object and keep returning it
-			rMetaData = newEmbedResultSetMetaData(resultDescription);
+			// save this object at the plan level
+			rMetaData = factory.newEmbedResultSetMetaData(
+                    resultDescription.getColumnInfo());
+            resultDescription.setMetaData(rMetaData);
 		}
 		return rMetaData;
-	  }
 	}
     
     /**
@@ -4238,50 +4229,15 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		if (columnName == null)
 			throw newSQLException(SQLState.NULL_COLUMN_NAME);
+        
+        int position = resultDescription.findColumnInsenstive(columnName);
 		
-		final Map workMap; 
-		                   
-		synchronized (this) {
-			if (columnNameMap==null) {
-				// updateXXX and getXXX methods are case insensitive and the 
-				// first column should be returned. The loop goes backward to 
-				// create a map which preserves this property.
-				columnNameMap = new HashMap();
-				for (int i = resultDescription.getColumnCount(); i>=1; i--) {
-					
-					final String key = StringUtil.
-						SQLToUpperCase(resultDescription.
-							getColumnDescriptor(i).getName());
-					
-					final Integer value = ReuseFactory.getInteger(i);
-					
-					columnNameMap.put(key, value);
-				}
-			}
-			workMap = columnNameMap;
-		}
-		
-		Integer val = (Integer) workMap.get(columnName);
-		if (val==null) {
-			val = (Integer) workMap.get(StringUtil.SQLToUpperCase(columnName));
-		}
-		if (val==null) {
+		if (position == -1) {
 			throw newSQLException(SQLState.COLUMN_NOT_FOUND, columnName);
 		} else {
-			return val.intValue();
+			return position;
 		}
 	}
-
-
-
-	//
-	// methods to be overridden in subimplementations
-	// that want to stay within their subimplementation.
-	//
-	protected EmbedResultSetMetaData newEmbedResultSetMetaData(ResultDescription resultDesc) {
-		return factory.newEmbedResultSetMetaData(resultDesc.getColumnInfo());
-	}
-
 	/**
 	 * Documented behaviour for streams is that they are implicitly closed on
 	 * the next get*() method call.

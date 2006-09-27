@@ -201,7 +201,6 @@ public final class GenericColumnDescriptor
 		return;
 	}	
 
-	public void djdrcd() {}
 	/**
 	 * Read this object from a stream of stored objects.
 	 *
