@@ -30,8 +30,8 @@ import java.io.BufferedOutputStream;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.harness.jvm;
-import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.functionTests.util.ExecProcUtil;
 import org.apache.derby.tools.ij;
 
 /**
@@ -59,51 +59,7 @@ public class maxthreads
 	private static  NetworkServerControl server;
 	private static String host;
 	private static int port = 1527;
-	/**
-	 * Execute the given command and dump the results to standard out
-	 *
-	 * @param args	command and arguments
-	 * @exception Exception
-	 */
-
-	private static void execCmdDumpResults (String[] args) throws Exception
-	{
-        // We need the process inputstream and errorstream
-        ProcessStreamResult prout = null;
-        ProcessStreamResult prerr = null;
-            
-        StringBuffer sb = new StringBuffer();
-            
-        for (int i = 0; i < args.length; i++)
-        {
-            sb.append(args[i] + " ");                    
-        }
-        System.out.println(sb.toString());
-		int totalSize = vCmd.size() + args.length;
-		String serverCmd[] = new String[totalSize];
-		int i;
-		for (i = 0; i < vCmd.size(); i++)
-		{
-			serverCmd[i] = (String)vCmd.elementAt(i);
-		//	System.out.println("serverCmd["+i+"]: "+serverCmd[i]);
-		}
-		int j = 0;
-		for (; i < totalSize; i++)
-		{
-			serverCmd[i] = args[j++];
-		//	System.out.println("serverCmd["+i+"]: "+serverCmd[i]);
-		}
- 
-		// Start a process to run the command
-		Process pr = Runtime.getRuntime().exec(serverCmd);
-        prout = new ProcessStreamResult(pr.getInputStream(), bos, null);
-        prerr = new ProcessStreamResult(pr.getErrorStream(), bos, null);
-
-		// wait until all the results have been processed
-		prout.Wait();
-		prerr.Wait();
-
-	}
+   
 	private static void checkMaxThreads( int value)
 		throws Exception
 	{
@@ -139,22 +95,22 @@ public class maxthreads
 			 ************************************************************/
 			System.out.println("Testing maxthreads");
 			//test maxthreads 0
-			execCmdDumpResults(maxthreadsCmd1);	
+			ExecProcUtil.execCmdDumpResults(maxthreadsCmd1,vCmd,bos);	
 			checkMaxThreads(0);
 			//test maxthreads -1 
-			execCmdDumpResults(maxthreadsCmd2);	
+			ExecProcUtil.execCmdDumpResults(maxthreadsCmd2,vCmd,bos);	
 			checkMaxThreads(0);	//default is currently 0
 			//test maxthreads -12 - should error
-			execCmdDumpResults(maxthreadsCmd3);	
+			ExecProcUtil.execCmdDumpResults(maxthreadsCmd3,vCmd,bos);	
 			checkMaxThreads(0);
 			//test maxthreads 2147483647 - should work
-			execCmdDumpResults(maxthreadsCmd4);	
+			ExecProcUtil.execCmdDumpResults(maxthreadsCmd4,vCmd,bos);	
 			checkMaxThreads(2147483647);
 			//test maxthreads 9000 - should work
-			execCmdDumpResults(maxthreadsCmd5);	
+			ExecProcUtil.execCmdDumpResults(maxthreadsCmd5,vCmd,bos);	
 			checkMaxThreads(9000);
 			//test maxthreads with invalid value (NumberFormatException)
-			execCmdDumpResults(maxthreadsCmd6);	
+			ExecProcUtil.execCmdDumpResults(maxthreadsCmd6,vCmd,bos);	
 			// try the same values using the callable interface
 			//test maxthreads 0
 			server.setMaxThreads(0);

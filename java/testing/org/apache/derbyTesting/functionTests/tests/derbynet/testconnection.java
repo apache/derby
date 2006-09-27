@@ -65,6 +65,15 @@ public class testconnection
     private static  BufferedOutputStream bos = null;
     
     /**
+     * For each new exec process done as part of this test, set 
+     * timeout for ProcessStreamResult after which the thread that 
+     * handles the streams for the process exits.  Timeout is in minutes. 
+     * Note: timeout handling will only come into effect when 
+     * ProcessStreamResult#Wait() is called
+     */
+    private static String timeoutMinutes = "2";
+    
+    /**
 	 * Execute the given command and dump the results to standard out
 	 *
 	 * @param args	command and arguments
@@ -144,8 +153,8 @@ public class testconnection
  
 		// Start a process to run the command
 		Process pr = Runtime.getRuntime().exec(serverCmd);
-        prout = new ProcessStreamResult(pr.getInputStream(), bos, null);
-        prerr = new ProcessStreamResult(pr.getErrorStream(), bos, null);
+        prout = new ProcessStreamResult(pr.getInputStream(), bos, timeoutMinutes);
+        prerr = new ProcessStreamResult(pr.getErrorStream(), bos, timeoutMinutes);
 
 		// wait until all the results have been processed
 		prout.Wait();

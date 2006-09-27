@@ -30,8 +30,8 @@ import java.io.BufferedOutputStream;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.harness.jvm;
-import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.functionTests.util.ExecProcUtil;
 import org.apache.derby.tools.ij;
 
 /**
@@ -59,51 +59,7 @@ public class timeslice
 	private static  NetworkServerControl server;
 	private static String host;
 	private static int port = 1527;
-	/**
-	 * Execute the given command and dump the results to standard out
-	 *
-	 * @param args	command and arguments
-	 * @exception Exception
-	 */
-
-	private static void execCmdDumpResults (String[] args) throws Exception
-	{
-        // We need the process inputstream and errorstream
-        ProcessStreamResult prout = null;
-        ProcessStreamResult prerr = null;
-            
-        StringBuffer sb = new StringBuffer();
-            
-        for (int i = 0; i < args.length; i++)
-        {
-            sb.append(args[i] + " ");                    
-        }
-        System.out.println(sb.toString());
-		int totalSize = vCmd.size() + args.length;
-		String serverCmd[] = new String[totalSize];
-		int i;
-		for (i = 0; i < vCmd.size(); i++)
-		{
-			serverCmd[i] = (String)vCmd.elementAt(i);
-		//	System.out.println("serverCmd["+i+"]: "+serverCmd[i]);
-		}
-		int j = 0;
-		for (; i < totalSize; i++)
-		{
-			serverCmd[i] = args[j++];
-		//	System.out.println("serverCmd["+i+"]: "+serverCmd[i]);
-		}
- 
-		// Start a process to run the command
-		Process pr = Runtime.getRuntime().exec(serverCmd);
-        prout = new ProcessStreamResult(pr.getInputStream(), bos, null);
-        prerr = new ProcessStreamResult(pr.getErrorStream(), bos, null);
-
-		// wait until all the results have been processed
-		prout.Wait();
-		prerr.Wait();
-
-	}
+    
 	private static void checkTimeSlice( int value)
 		throws Exception
 	{
@@ -135,22 +91,22 @@ public class timeslice
 			 ************************************************************/
 			System.out.println("Testing timeslice");
 			//test timeslice 0
-			execCmdDumpResults(timesliceCmd1);	
+			ExecProcUtil.execCmdDumpResults(timesliceCmd1,vCmd,bos);	
 			checkTimeSlice(0);
 			//test timeslice -1 
-			execCmdDumpResults(timesliceCmd2);	
+			ExecProcUtil.execCmdDumpResults(timesliceCmd2,vCmd,bos);	
 			checkTimeSlice(0);	//default is currently 0
 			//test timeslice -12 - should error
-			execCmdDumpResults(timesliceCmd3);	
+			ExecProcUtil.execCmdDumpResults(timesliceCmd3,vCmd,bos);	
 			checkTimeSlice(0);
 			//test timeslice 2147483647 - should work
-			execCmdDumpResults(timesliceCmd4);	
+			ExecProcUtil.execCmdDumpResults(timesliceCmd4,vCmd,bos);	
 			checkTimeSlice(2147483647);
 			//test timeslice 9000 - should work
-			execCmdDumpResults(timesliceCmd5);	
+			ExecProcUtil.execCmdDumpResults(timesliceCmd5,vCmd,bos);	
 			checkTimeSlice(9000);
 			//test timeslice with invlaid value - NumberFormatException
-			execCmdDumpResults(timesliceCmd6);
+			ExecProcUtil.execCmdDumpResults(timesliceCmd6,vCmd,bos);
 			//test callable interface
 			//test timeslice 0
 			server.setTimeSlice(0);

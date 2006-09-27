@@ -38,4 +38,4 @@ ij(CONNECTION5)> connect 'jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/"./my-db
 ij(CONNECTION6)> -- with no user
 connect 'jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/wombat;create=true:retrieveMessagesFromServerOnGetMessage=true;';
 ERROR (no SQLState): null userid not supported
-ij(CONNECTION6)> 
+ij(CONNECTION6)> End test

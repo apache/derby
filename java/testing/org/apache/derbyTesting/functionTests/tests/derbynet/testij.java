@@ -33,9 +33,9 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 
 import org.apache.derbyTesting.functionTests.harness.jvm;
-import org.apache.derbyTesting.functionTests.harness.ProcessStreamResult;
 import org.apache.derbyTesting.functionTests.harness.Sed;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.functionTests.util.ExecProcUtil;
 
 import org.apache.derby.drda.NetworkServerControl;
 
@@ -55,7 +55,7 @@ public class testij
 	private static String clientSqlFile="testclientij.sql";
 	private static String altExtinDir;
 	private static boolean useAltExtinDir=false;
-	
+    
 	private static void execCmd (String[] args) throws Exception
 	{
 		int totalSize = vCmd.size() + args.length;
@@ -76,55 +76,6 @@ public class testij
 		// Start a process to run the command
 		Process pr = Runtime.getRuntime().exec(serverCmd);
 		pr.waitFor();		// make sure this is executed first
-	}
-	/**
-	 * Execute the given command and dump the results to standard out
-	 *
-	 * @param args	command and arguments
-	 * @exception Exception
-	 */
-
-	private static void execCmdDumpResults (String[] args) throws Exception
-	{
-        // We need the process inputstream and errorstream
-        ProcessStreamResult prout = null;
-        ProcessStreamResult prerr = null;
-        BufferedOutputStream bos = null;
-            
-        StringBuffer sb = new StringBuffer();
-            
-        for (int i = 0; i < args.length; i++)
-        {
-            sb.append(args[i] + " ");                    
-        }
-        System.out.println(sb.toString());
-		int totalSize = vCmd.size() + args.length;
-		String serverCmd[] = new String[totalSize];
-		int i;
-		for (i = 0; i < vCmd.size(); i++)
-		{
-			serverCmd[i] = (String)vCmd.elementAt(i);
-		//	System.out.println("serverCmd["+i+"]: "+serverCmd[i]);
-		}
-		int j = 0;
-		for (; i < totalSize; i++)
-		{
-			serverCmd[i] = args[j++];
-		//	System.out.println("serverCmd["+i+"]: "+serverCmd[i]);
-		}
- 
-		// Start a process to run the command
-		Process pr = Runtime.getRuntime().exec(serverCmd);
-        bos = new BufferedOutputStream(System.out, 1024);
-        prout = new ProcessStreamResult(pr.getInputStream(), bos, null);
-        prerr = new ProcessStreamResult(pr.getErrorStream(), bos, null);
-
-		// wait until all the results have been processed
-		prout.Wait();
-		prerr.Wait();
-
-		bos.close();
-
 	}
 	
     public static void massageSqlFile (String hostName, String fileName) throws Exception {
@@ -173,6 +124,7 @@ public class testij
 		sep =  System.getProperty("file.separator");
 		try
 		{
+            BufferedOutputStream bos = new BufferedOutputStream(System.out, 1024);
 			/************************************************************
 			 *  Test comments in front of select's doesn't cause problems
 			 ************************************************************/
@@ -189,16 +141,16 @@ public class testij
 				if (!hostName.equals("localhost")) 
 					massageSqlFile(hostName,jccSqlFile);
 				if (useAltExtinDir)	
-					execCmdDumpResults(new String[]{IjCmd,(altExtinDir + sep + SqlDir + sep + jccSqlFile)});
-				execCmdDumpResults(new String[]{IjCmd,(SqlDir + sep + jccSqlFile)});
+					ExecProcUtil.execCmdDumpResults(new String[]{IjCmd,(altExtinDir + sep + SqlDir + sep + jccSqlFile)},vCmd,bos);
+				ExecProcUtil.execCmdDumpResults(new String[]{IjCmd,(SqlDir + sep + jccSqlFile)},vCmd,bos);
 			} else {   // Derby Client
 				// use clientSqlFile
 				if(!hostName.equals("localhost")) {
 					massageSqlFile(hostName,clientSqlFile);
 				if (useAltExtinDir)	
-					execCmdDumpResults(new String[]{IjCmd,(altExtinDir + sep + SqlDir + sep + clientSqlFile)});
+					ExecProcUtil.execCmdDumpResults(new String[]{IjCmd,(altExtinDir + sep + SqlDir + sep + clientSqlFile)},vCmd,bos);
 				}
-				execCmdDumpResults(new String[]{IjCmd,(SqlDir + sep + clientSqlFile)});
+				ExecProcUtil.execCmdDumpResults(new String[]{IjCmd,(SqlDir + sep + clientSqlFile)},vCmd,bos);
 			}
 			System.out.println("End test");
 		}
