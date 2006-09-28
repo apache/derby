@@ -27,120 +27,6 @@
 autocommit off;
 
 set isolation serializable;
--- the method refers to a method in performance suite that takes a Connection.
---create function WISCInsert(rowcount int, tableName varchar(20)) returns int language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.lang.WiscVTI';
-CREATE PROCEDURE WISCINSERT(rowcount int, tableName varchar(20)) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.WiscVTI.WISCInsertWOConnection';
-
-create table TENKTUP1 (
-		unique1 int not null,
-		unique2 int not null,
-		two int,
-		four int,
-		ten int,
-		twenty int,
-		onePercent int,
-		tenPercent int,
-		twentyPercent int,
-		fiftyPercent int,
-		unique3 int,
-		evenOnePercent int,
-		oddOnePercent int,
-		stringu1 char(52) not null,
-		stringu2 char(52) not null,
-		string4 char(52)
-	);
-
---insert 10000 rows into TENKTUP1 
-call WISCINSERT( 10000, 'TENKTUP1'); 
-
-create unique index TK1UNIQUE1 on TENKTUP1(unique1);
-create unique index TK1UNIQUE2 on TENKTUP1(unique2);
-create index TK1TWO on TENKTUP1(two);
-create index TK1FOUR on TENKTUP1(four);
-create index TK1TEN on TENKTUP1(ten);
-create index TK1TWENTY on TENKTUP1(twenty);
-create index TK1ONEPERCENT on TENKTUP1(onePercent);
-create index TK1TWENTYPERCENT on TENKTUP1(twentyPercent);
-create index TK1EVENONEPERCENT on TENKTUP1(evenOnePercent);
-create index TK1ODDONEPERCENT on TENKTUP1(oddOnePercent);
-create unique index TK1STRINGU1 on TENKTUP1(stringu1);
-create unique index TK1STRINGU2 on TENKTUP1(stringu2);
-create index TK1STRING4 on TENKTUP1(string4);
-
-create table TENKTUP2 (
-		unique1 int not null,
-		unique2 int not null,
-		two int,
-		four int,
-		ten int,
-		twenty int,
-		onePercent int,
-		tenPercent int,
-		twentyPercent int,
-		fiftyPercent int,
-		unique3 int,
-		evenOnePercent int,
-		oddOnePercent int,
-		stringu1 char(52),
-		stringu2 char(52),
-		string4 char(52)
-	);
-
--- insert 10000 rows into TENKTUP2
-call WISCInsert( 10000, 'TENKTUP2'); 
-
-create unique index TK2UNIQUE1 on TENKTUP2(unique1);
-create unique index TK2UNIQUE2 on TENKTUP2(unique2);
-
-create table ONEKTUP (
-		unique1 int not null,
-		unique2 int not null,
-		two int,
-		four int,
-		ten int,
-		twenty int,
-		onePercent int,
-		tenPercent int,
-		twentyPercent int,
-		fiftyPercent int,
-		unique3 int,
-		evenOnePercent int,
-		oddOnePercent int,
-		stringu1 char(52),
-		stringu2 char(52),
-		string4 char(52)
-	);
-
--- insert 1000 rows into ONEKTUP
-call WISCInsert( 1000, 'ONEKTUP'); 
-
-create unique index ONEKUNIQUE1 on ONEKTUP(unique1);
-create unique index ONEKUNIQUE2 on ONEKTUP(unique2);
-
-create table BPRIME (
-		unique1 int,
-		unique2 int,
-		two int,
-		four int,
-		ten int,
-		twenty int,
-		onePercent int,
-		tenPercent int,
-		twentyPercent int,
-		fiftyPercent int,
-		unique3 int,
-		evenOnePercent int,
-		oddOnePercent int,
-		stringu1 char(52),
-		stringu2 char(52),
-		string4 char(52)
-	);
-
-insert into BPRIME
-select * from TENKTUP2
-where TENKTUP2.unique2 < 1000;
-
-commit;
 
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 maximumdisplaywidth 8000;
@@ -3569,3 +3455,9 @@ get cursor c as
 close c;
 -- 27, join on onePercent--1 row
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+-- cleanup
+drop table TENKTUP1;
+drop table TENKTUP2;
+drop table ONEKTUP;
+drop table BPRIME;

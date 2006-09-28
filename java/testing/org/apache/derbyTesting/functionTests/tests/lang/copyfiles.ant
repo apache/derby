@@ -240,7 +240,7 @@ updatableResultSet_app.properties
 updatableResultSet_sed.properties
 valuesclause.sql
 views.sql
-wisconsin.sql
+wisc_setup.sql
 wisconsin_app.properties
 wisconsin_derby.properties
 wisconsin_sed.properties
