@@ -44,17 +44,17 @@ Matched rows selected with clob of size(104857600) =1
 START ClobTest #7insert Clob of size = 104857600
 EXPECTED EXCEPTION - stream has trailing spaces,but stream  length is 1 less than actual length of stream
 EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ========================================
 START ClobTest #7insert Clob of size = 104857600
 EXPECTED EXCEPTION - stream has trailing spaces,but stream  length is 1 greater than actual length of stream
 EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ========================================
 START ClobTest #9.1 insert Clob of size = 104857601
 NEGATIVE TEST - Expected Exception: truncation of non-blanks not allowed
 EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
-EXPECTED SQL Exception: (XJ001) Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 104857600.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 104857600.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ========================================
 START ClobTest #9.2  - SELECT CLOB of size = 104857600
 Matched rows selected with clob of size(104857600) =0
@@ -63,12 +63,12 @@ Matched rows selected with clob of size(104857600) =0
 START ClobTest #10 insert Clob of size = 104857601
 NEGATIVE TEST - Expected Exception: truncation of non-blanks not allowed and stream length is one greater than actual length of the stream 
 EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
-EXPECTED SQL Exception: (XJ001) Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 104857600.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'A truncation error was encountered trying to shrink CLOB 'XXXX' to length 104857600.: org.apache.derby.iapi.services.io.DerbyIOException'.
 ========================================
 START ClobTest #11 insert Clob of size = 104857601
 NEGATIVE TEST - Expected Exception: truncation of non-blanks not allowed and stream length is one less than actual length of the stream 
 EXPECTED SQL Exception: (XSDA4) An unexpected exception was thrown
-EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: java.io.IOException'.
+EXPECTED SQL Exception: (XJ001) Java exception: 'Input stream did not have exact amount of data as the requested length.: org.apache.derby.iapi.services.io.DerbyIOException'.
 Rows deleted =2
 ========================================
 START ClobTest #12.1  -insertClob of size = 104857600
@@ -84,7 +84,7 @@ START ClobTest #13 (setClob with 4Gb clobinsertClob of size = 4294967296
  Rows inserted with clob of size (4294967296) =0
 ========================================
 DERBY DOES NOT SUPPORT INSERT OF 4GB CLOB 
-EXPECTED SQL Exception: (22003) The resulting value is outside the range for the data type CLOB(2147483647).
+EXPECTED SQL Exception: (22003) The resulting value is outside the range for the data type CLOB.
 ========================================
 START BlobTest #1insertBlob of size = 2147483647
  Rows inserted with blob of size (2147483647) =2
