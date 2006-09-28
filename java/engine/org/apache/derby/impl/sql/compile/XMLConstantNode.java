@@ -51,18 +51,6 @@ public final class XMLConstantNode extends ConstantNode
     }
 
     /**
-     * Return the value from this XMLConstantNode as a string.
-     *
-     * @return The value of this XMLConstantNode as a string.
-     *
-     * @exception StandardException Thrown on error
-     */
-    public String getString() throws StandardException
-    {
-        return value.getString();
-    }
-
-    /**
      * Return an Object representing the bind time value of this
      * expression tree.  If the expression tree does not evaluate to
      * a constant at bind time then we return null.
@@ -93,6 +81,6 @@ public final class XMLConstantNode extends ConstantNode
     {
         // The generated java is the expression:
         // "#getString()"
-        mb.push(getString());
+        mb.push(value.getString());
     }
 }

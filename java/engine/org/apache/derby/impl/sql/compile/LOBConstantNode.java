@@ -109,32 +109,6 @@ public final class LOBConstantNode extends ConstantNode
 	}
 
 	/**
-	 * Return the value from this LOBConstantNode
-	 *
-	 * @return	The value of this LOBConstantNode.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-
-	public String	getString() throws StandardException
-	{
-		return value.getString();
-	}
-
-	/**
-	 * Return the length
-	 *
-	 * @return	The length of the value this node represents
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-
-	//public int	getLength() throws StandardException
-	//{
-	//	return value.getLength();
-	//}
-
-	/**
 	 * Return an Object representing the bind time value of this
 	 * expression tree.  If the expression tree does not evaluate to
 	 * a constant at bind time then we return null.
@@ -164,6 +138,6 @@ public final class LOBConstantNode extends ConstantNode
 	{
 		// The generated java is the expression:
 		// "#getString()"
-		mb.push(getString());
+		mb.push(value.getString());
 	}
 }

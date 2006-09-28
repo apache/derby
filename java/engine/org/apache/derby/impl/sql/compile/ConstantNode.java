@@ -65,7 +65,7 @@ import java.util.Vector;
  */
 abstract class ConstantNode extends ValueNode
 {
-	protected	DataValueDescriptor	value;
+	DataValueDescriptor	value;
 
 	/*
 	** In case generateExpression() is called twice (something
@@ -255,7 +255,7 @@ abstract class ConstantNode extends ValueNode
 	 * Return whether or not this node represents a typed null constant.
 	 *
 	 */
-	public boolean isNull()
+	boolean isNull()
 	{
 		return (value == null || value.isNull());
 	}

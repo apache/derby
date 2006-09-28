@@ -191,58 +191,6 @@ public class UserTypeConstantNode extends ConstantNode {
 	}
 
 	/**
-	 * Return the value of this user defined type as a Storable
-	 *
-	 * @return	the value of this constant as a UserType
-	 * @exception StandardException thrown on failure
-	 */
-    public	DataValueDescriptor	getStorableValue()
-			throws StandardException
-	{
-        if( value instanceof DataValueDescriptor)
-            return ((DataValueDescriptor) value).getClone();
-        
-		DataValueFactory			dvf = getDataValueFactory();
-		TypeId			typeID = getTypeId();
-		String						typeName = typeID.getSQLTypeName();
-
-		if ( typeName.equals( TypeId.DATE_NAME ) )
-		{
-			return	new SQLDate((Date) value);
-		}
-		else if ( typeName.equals( TypeId.TIME_NAME ) )
-		{
-			return	new SQLTime( (Time) value);
-		}
-		else if ( typeName.equals( TypeId.TIMESTAMP_NAME ) )
-		{
-			return	new SQLTimestamp( (Timestamp) value);
-		}
-		else
-		{
-			return	dvf.getDataValue( value, (UserDataValue) null );
-		}
-	}
-
-	/**
-	 * Sets the object value of this user defined type
-	 *
-	 * @param	newValue	the value of this constant. can't use setValue() for this.
-	 */
-    public	void	setObjectValue( Object newValue ) { value = newValue; }
-
-	/**
-	 * Return the length
-	 *
-	 * @return	The length of the value this node represents
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	//public int	getLength() throws StandardException {
-	//	return TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN;
-	//}
-
-	/**
 	 * Return an Object representing the bind time value of this
 	 * expression tree.  If the expression tree does not evaluate to
 	 * a constant at bind time then we return null.
