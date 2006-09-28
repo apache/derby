@@ -471,8 +471,8 @@ EXPECTED SQLSTATE(null): Invalid position 0 or length 5
 EXPECTED SQLSTATE(null): Invalid position 1 or length -76
 EXPECTED SQLSTATE(null): Invalid position 1 or length -1
 EXPECTED SQLSTATE(null): Invalid position 0 or length 0
-FAIL -- unexpected exception:java.lang.StringIndexOutOfBoundsException: String index out of range: -1
-java.lang.StringIndexOutOfBoundsException: String index out of range: -1
+FAIL -- unexpected exception:java.lang.StringIndexOutOfBoundsException (--Sed-ed ExceptionString--)
+java.lang.StringIndexOutOfBoundsException (--Sed-ed ExceptionString--)
 START: clobTest7
 clobTest7 finished
 START: clobTest8
