@@ -452,3 +452,31 @@ drop table noindexes;
 drop table indexes;
 drop table oldconglom;
 drop table newconglom;
+
+-- test case for derby-1854 
+-- perform compress on a table that has same column 
+-- as a primary key and a foreign key.  
+
+create table users (
+ user_id int not null,
+ user_login varchar(255) not null,
+ primary key (user_id));
+
+create table admins (
+ user_id int not null,
+ primary key (user_id),
+ constraint admin_uid_fk foreign key (user_id) references users (user_id));
+ 
+insert into users values(1, 'test1');
+insert into admins values (1);
+call syscs_util.syscs_compress_table('APP', 'ADMINS', 0);
+-- do consistency check on the tables.
+values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'USERS');
+values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'ADMINS');
+select * from admins; 
+select * from users;
+insert into users values(2, 'test2');
+insert into admins values (2);
+drop table admins;
+drop table users;
+-- end derby-1854 test case. 

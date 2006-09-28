@@ -1082,4 +1082,50 @@ ij> drop table oldconglom;
 0 rows inserted/updated/deleted
 ij> drop table newconglom;
 0 rows inserted/updated/deleted
+ij> -- test case for derby-1854 
+-- perform compress on a table that has same column 
+-- as a primary key and a foreign key.  
+create table users (
+ user_id int not null,
+ user_login varchar(255) not null,
+ primary key (user_id));
+0 rows inserted/updated/deleted
+ij> create table admins (
+ user_id int not null,
+ primary key (user_id),
+ constraint admin_uid_fk foreign key (user_id) references users (user_id));
+0 rows inserted/updated/deleted
+ij> insert into users values(1, 'test1');
+1 row inserted/updated/deleted
+ij> insert into admins values (1);
+1 row inserted/updated/deleted
+ij> call syscs_util.syscs_compress_table('APP', 'ADMINS', 0);
+0 rows inserted/updated/deleted
+ij> -- do consistency check on the tables.
+values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'USERS');
+1          
+-----------
+1          
+ij> values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'ADMINS');
+1          
+-----------
+1          
+ij> select * from admins;
+USER_ID    
+-----------
+1          
+ij> select * from users;
+USER_ID    |USER_LOGIN                                                                                                                                                                                                                                                     
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |test1                                                                                                                                                                                                                                                          
+ij> insert into users values(2, 'test2');
+1 row inserted/updated/deleted
+ij> insert into admins values (2);
+1 row inserted/updated/deleted
+ij> drop table admins;
+0 rows inserted/updated/deleted
+ij> drop table users;
+0 rows inserted/updated/deleted
+ij> -- end derby-1854 test case. 
+;
 ij> 

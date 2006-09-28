@@ -5294,8 +5294,11 @@ public	class	DataDictionaryImpl
 
 	/**
 	 * Update the conglomerateNumber for an array of ConglomerateDescriptors.
-	 * In case of more than one ConglomerateDescriptor, they are for duplicate
-	 * indexes sharing one conglomerate.
+	 * In case of more than one ConglomerateDescriptor, each descriptor 
+	 * should be updated separately, conglomerate id is not same for all 
+	 * the descriptors. Even when indexes are sharing the same 
+	 * conglomerate(conglomerate number), conglomerate ids are unique.
+	 *
 	 * This is useful, in 1.3, when doing a bulkInsert into an 
 	 * empty table where we insert into a new conglomerate.
 	 * (This will go away in 1.4.)
@@ -5314,38 +5317,35 @@ public	class	DataDictionaryImpl
 		throws StandardException
 	{
 		ExecIndexRow				keyRow1 = null;
-		ExecRow[]    				rows = new ExecRow[cds.length];
+		ExecRow     				row;
 		DataValueDescriptor			conglomIDOrderable;
 		TabInfo						ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 		SYSCONGLOMERATESRowFactory  rf = (SYSCONGLOMERATESRowFactory) ti.getCatalogRowFactory();
-
-		/* Use conglomIDOrderable in both start 
-		 * and stop position for index 1 scan. 
-		 */
-		conglomIDOrderable = getValueAsDVD(cds[0].getUUID());
-
-		/* Set up the start/stop position for the scan */
-		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
-		keyRow1.setColumn(1, conglomIDOrderable);
+		boolean[] bArray = {false, false, false};
 
 		for (int i = 0; i < cds.length; i++)
 		{
+			/* Use conglomIDOrderable in both start 
+			 * and stop position for index 1 scan. 
+			 */
+			conglomIDOrderable = getValueAsDVD(cds[i].getUUID());
+
+			/* Set up the start/stop position for the scan */
+			keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
+			keyRow1.setColumn(1, conglomIDOrderable);
+
 			cds[i].setConglomerateNumber(conglomerateNumber);
 			// build the row to be stuffed into SYSCONGLOMERATES. 
-			rows[i] = rf.makeRow(cds[i], null);
+			row = rf.makeRow(cds[i], null);
+
+			// update row in catalog (no indexes)
+			ti.updateRow(keyRow1, row,
+						 SYSCONGLOMERATESRowFactory.SYSCONGLOMERATES_INDEX1_ID,
+						 bArray,
+						 (int[])null,
+						 tc);
 		}
 
-		// update row in catalog (no indexes)
-		boolean[] bArray = new boolean[3];
-		for (int index = 0; index < 3; index++)
-		{
-			bArray[index] = false;
-		}
-		ti.updateRow(keyRow1, rows,
-					 SYSCONGLOMERATESRowFactory.SYSCONGLOMERATES_INDEX1_ID,
-					 bArray,
-					 (int[])null,
-					 tc);
 	}
 
 	
