@@ -5,24 +5,20 @@ ij> create table t2 (a int, b int, c int);
 0 rows inserted/updated/deleted
 ij> insert into t2 values (1,1,1), (2,2,2);
 2 rows inserted/updated/deleted
-ij> -- group by position
+ij> -- group by constant. should compile but fail because
+-- it is not a valid grouping expression.
 select * from t1 group by 1;
-ERROR 42X01: Syntax error: Encountered "1" at line 2, column 27.
+ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.  
 ij> -- column in group by list not in from list
 select a as d from t1 group by d;
 ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> -- column in group by list not in select list
 select a as b from t1 group by b;
-ERROR 42Y36: Column reference 'A' is invalid.  For a SELECT list with a GROUP BY, the list may only contain grouping columns and valid aggregate expressions.  
+ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.  
 ij> select a from t1 group by b;
-ERROR 42Y36: Column reference 'A' is invalid.  For a SELECT list with a GROUP BY, the list may only contain grouping columns and valid aggregate expressions.  
+ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.  
 ij> select a, char(b) from t1 group by a;
-ERROR 42Y36: Column reference 'B' is invalid.  For a SELECT list with a GROUP BY, the list may only contain grouping columns and valid aggregate expressions.  
-ij> -- columns in group by list must be unique
-select a, b from t1 group by a, a;
-ERROR 42Y19: 'A' appears multiple times in the GROUP BY list. Columns in the GROUP BY list must be unambiguous.
-ij> select a, b from t1 group by a, t1.a;
-ERROR 42Y19: 'A' appears multiple times in the GROUP BY list. Columns in the GROUP BY list must be unambiguous.
+ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.  
 ij> -- cursor with group by is not updatable
 get cursor c1 as 'select a from t1 group by a for update';
 ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
@@ -31,7 +27,7 @@ select a, (select a from t2) from t1 group by a;
 ERROR 21000: Scalar subquery is only allowed to return a single row.
 ij> -- correlation on outer table
 select t2.a, (select b from t1 where t1.b = t2.b) from t1 t2 group by t2.a;
-ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain grouping columns and valid aggregate expressions.  
+ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.  
 ij> -- having clause
 -- cannot contain column references which are not grouping columns
 select a from t1 group by a having c = 1;
@@ -40,7 +36,7 @@ ij> select a from t1 o group by a having a = (select a from t1 where b = b.o);
 ERROR 42X04: Column 'B.O' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'B.O' is not a column in the target table.
 ij> -- ?s in group by
 select a from t1 group by ?;
-ERROR 42X01: Syntax error: Encountered "?" at line 2, column 27.
+ERROR 42X01: Syntax error: ?.
 ij> -- group by on long varchar type
 create table unmapped(c1 long varchar);
 0 rows inserted/updated/deleted
