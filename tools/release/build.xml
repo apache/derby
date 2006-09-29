@@ -83,7 +83,8 @@
       <!-- top-level -->
       <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
                   prefix="${derby.bin}/"/>
-      <zipfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
+      <zipfileset dir="${basedir}" includes="index.html" 
+                  filemode="755" prefix="${derby.bin}/"/>
       <!-- bin -->
       <zipfileset dir="${basedir}/bin" prefix="${derby.bin}/bin" includes="*"/>
       <!-- demo -->
@@ -132,7 +133,8 @@
       <!-- top-level -->
       <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
                   prefix="${derby.bin}/"/>
-      <tarfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
+      <tarfileset dir="${basedir}" includes="index.html" 
+                  filemode="755" prefix="${derby.bin}/"/>
       <!-- bin -->
       <tarfileset dir="${basedir}/bin" prefix="${derby.bin}/bin" includes="*"/>
       <!-- demo -->
