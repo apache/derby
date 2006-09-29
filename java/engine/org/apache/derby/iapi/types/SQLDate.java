@@ -594,20 +594,25 @@ public final class SQLDate extends DataType
 	** SQL Operators
 	*/
 
+    NumberDataValue nullValueInt() {
+        return new SQLInteger();
+    }
+
+    
 	/**
 	 * @see DateTimeDataValue#getYear
 	 * 
 	 * @exception StandardException		Thrown on error
 	 */
 	public NumberDataValue getYear(NumberDataValue result)
-							throws StandardException
+        throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getYear called on a null");
-		}
-		return SQLDate.setSource(getYear(encodedDate), result);
-	}
+        if (isNull()) {
+            return nullValueInt();
+        } else {    
+            return SQLDate.setSource(getYear(encodedDate), result);
+        }
+    }
 
 	/**
 	 * @see DateTimeDataValue#getMonth
@@ -617,11 +622,11 @@ public final class SQLDate extends DataType
 	public NumberDataValue getMonth(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getMonth called on a null");
-		}
-		return SQLDate.setSource(getMonth(encodedDate), result);
+        if (isNull()) {
+            return nullValueInt();
+        } else {
+            return SQLDate.setSource(getMonth(encodedDate), result);
+        }
 	}
 
 	/**
@@ -632,11 +637,11 @@ public final class SQLDate extends DataType
 	public NumberDataValue getDate(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getDate called on a null");
-		}
-		return SQLDate.setSource(getDay(encodedDate), result);
+        if (isNull()) {
+            return nullValueInt();
+        } else {
+            return SQLDate.setSource(getDay(encodedDate), result);
+        }
 	}
 
 	/**
@@ -647,10 +652,6 @@ public final class SQLDate extends DataType
 	public NumberDataValue getHours(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getHours called on null.");
-		}
 		throw StandardException.newException(SQLState.LANG_UNARY_FUNCTION_BAD_TYPE, 
 						"getHours", "Date");
 	}
@@ -663,10 +664,6 @@ public final class SQLDate extends DataType
 	public NumberDataValue getMinutes(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getMinutes called on null.");
-		}
 		throw StandardException.newException(SQLState.LANG_UNARY_FUNCTION_BAD_TYPE, 
 						"getMinutes", "Date");
 	}
@@ -679,10 +676,6 @@ public final class SQLDate extends DataType
 	public NumberDataValue getSeconds(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getSeconds called on null.");
-		}
 		throw StandardException.newException(SQLState.LANG_UNARY_FUNCTION_BAD_TYPE, 
 						"getSeconds", "Date");
 	}

@@ -1210,4 +1210,73 @@ ij> select timestamp(s) from t;
 --------------------------
 ERROR 22008: 'aaaaaaaaaaaaaa' is an invalid argument to the timestamp function.
 ij> rollback;
+ij> --- Null values in datetime scalar functions
+create table nulls (t time, d date, ts timestamp);
+0 rows inserted/updated/deleted
+ij> insert into nulls values (null,null,null);
+1 row inserted/updated/deleted
+ij> commit;
+ij> select year(t) from nulls;
+ERROR 42X25: The 'EXTRACT YEAR' function is not allowed on the 'TIME' type.
+ij> select month(t) from nulls;
+ERROR 42X25: The 'EXTRACT MONTH' function is not allowed on the 'TIME' type.
+ij> select day(t) from nulls;
+ERROR 42X25: The 'EXTRACT DAY' function is not allowed on the 'TIME' type.
+ij> select hour(t) from nulls;
+1          
+-----------
+NULL       
+ij> select minute(t) from nulls;
+1          
+-----------
+NULL       
+ij> select second(t) from nulls;
+1          
+-----------
+NULL       
+ij> select year(d) from nulls;
+1          
+-----------
+NULL       
+ij> select month(d) from nulls;
+1          
+-----------
+NULL       
+ij> select day(d) from nulls;
+1          
+-----------
+NULL       
+ij> select hour(d) from nulls;
+ERROR 42X25: The 'EXTRACT HOUR' function is not allowed on the 'DATE' type.
+ij> select minute(d) from nulls;
+ERROR 42X25: The 'EXTRACT MINUTE' function is not allowed on the 'DATE' type.
+ij> select second(d) from nulls;
+ERROR 42X25: The 'EXTRACT SECOND' function is not allowed on the 'DATE' type.
+ij> select year(ts) from nulls;
+1          
+-----------
+NULL       
+ij> select month(ts) from nulls;
+1          
+-----------
+NULL       
+ij> select day(ts) from nulls;
+1          
+-----------
+NULL       
+ij> select hour(ts) from nulls;
+1          
+-----------
+NULL       
+ij> select minute(ts) from nulls;
+1          
+-----------
+NULL       
+ij> select second(ts) from nulls;
+1                     
+----------------------
+NULL                  
+ij> drop table nulls;
+0 rows inserted/updated/deleted
+ij> commit;
 ij> 

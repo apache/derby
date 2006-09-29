@@ -686,3 +686,29 @@ rollback;
 insert into t(s) values('aaaaaaaaaaaaaa');
 select timestamp(s) from t;
 rollback;
+
+--- Null values in datetime scalar functions
+
+create table nulls (t time, d date, ts timestamp);
+insert into nulls values (null,null,null);
+commit;
+select year(t) from nulls;
+select month(t) from nulls;
+select day(t) from nulls;
+select hour(t) from nulls;
+select minute(t) from nulls;
+select second(t) from nulls;
+select year(d) from nulls;
+select month(d) from nulls;
+select day(d) from nulls;
+select hour(d) from nulls;
+select minute(d) from nulls;
+select second(d) from nulls;
+select year(ts) from nulls;
+select month(ts) from nulls;
+select day(ts) from nulls;
+select hour(ts) from nulls;
+select minute(ts) from nulls;
+select second(ts) from nulls;
+drop table nulls;
+commit;

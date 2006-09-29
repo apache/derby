@@ -729,6 +729,13 @@ public final class SQLTimestamp extends DataType
 	** SQL Operators
 	*/
 
+    NumberDataValue nullValueInt() {
+        return new SQLInteger();
+    }
+
+    NumberDataValue nullValueDouble() {
+        return new SQLDouble();
+    }
 
 	/**
 	 * @see DateTimeDataValue#getYear
@@ -738,11 +745,11 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getYear(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getYear called on a null");
-		}
-		return SQLDate.setSource(SQLDate.getYear(encodedDate), result);
+        if (isNull()) {
+            return nullValueInt();
+        } else {    
+            return SQLDate.setSource(SQLDate.getYear(encodedDate), result);
+        }
 	}
 
 	/**
@@ -753,11 +760,11 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getMonth(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getMonth called on a null");
-		}
-		return SQLDate.setSource(SQLDate.getMonth(encodedDate), result);
+        if (isNull()) {
+            return nullValueInt();
+        } else {    
+            return SQLDate.setSource(SQLDate.getMonth(encodedDate), result);
+        }
 	}
 
 	/**
@@ -768,11 +775,11 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getDate(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getDate called on a null");
-		}
-		return SQLDate.setSource(SQLDate.getDay(encodedDate), result);
+        if (isNull()) {
+            return nullValueInt();
+        } else {    
+            return SQLDate.setSource(SQLDate.getDay(encodedDate), result);
+        }
 	}
 
 	/**
@@ -783,11 +790,11 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getHours(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getHours called on a null");
-		}
-		return SQLDate.setSource(SQLTime.getHour(encodedTime), result);
+        if (isNull()) {
+            return nullValueInt();
+        } else {    
+            return SQLDate.setSource(SQLTime.getHour(encodedTime), result);
+        }
 	}
 
 	/**
@@ -798,11 +805,11 @@ public final class SQLTimestamp extends DataType
 	public NumberDataValue getMinutes(NumberDataValue result)
 							throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(!isNull(), "getMinute called on a null");
-		}
-		return SQLDate.setSource(SQLTime.getMinute(encodedTime), result);
+        if (isNull()) {
+            return nullValueInt();
+        } else {    
+            return SQLDate.setSource(SQLTime.getMinute(encodedTime), result);
+        }
 	}
 
 	/**
@@ -815,11 +822,14 @@ public final class SQLTimestamp extends DataType
 	{
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(!isNull(), "getSeconds called on a null");
 			SanityManager.ASSERT(source == null || source instanceof SQLDouble,
 		"getSeconds for a timestamp was given a source other than a SQLDouble");
 		}
 		NumberDataValue result;
+
+        if (isNull()) {
+            return nullValueDouble();
+        }
 
 		if (source != null)
 			result = source;
