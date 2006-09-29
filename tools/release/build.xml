@@ -43,7 +43,7 @@
   <property name="src.dirs.includes" value="frameworks/**,java/**,plugins/**,bin/**,maven/**"/>
   <property name="src.includes" value="${src.top.includes},${src.tools.includes},${src.dirs.includes}"/>
 
-  <property name="src.excludes" value="tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**,tools/testing/derby/**"/>
+  <property name="src.excludes" value="tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**,tools/testing/derby/**,**/derby.log"/>
 
 <!-- Targets -->
 
