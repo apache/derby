@@ -36,6 +36,15 @@
   <property file="${properties.dir}/release.properties"/>
   <property file="${properties.dir}/packaging.properties"/>
 
+
+  <!-- Files to be included with and excluded from the source distribution -->
+  <property name="src.top.includes" value="BUILDING.txt,README,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,index.html,published_api_overview.html"/>
+  <property name="src.tools.includes" value="tools/ant/**,tools/j2ee/**,tools/jar/**,tools/java/**,tools/javadoc/**,tools/jdbc4/**,tools/testing/**,tools/release/build.xml"/>
+  <property name="src.dirs.includes" value="frameworks/**,java/**,plugins/**,bin/**,maven/**"/>
+  <property name="src.includes" value="${src.top.includes},${src.tools.includes},${src.dirs.includes}"/>
+
+  <property name="src.excludes" value="tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**,tools/testing/derby/**"/>
+
 <!-- Targets -->
 
   <target name="release" depends="clean,bin,lib,lib-debug,src"/>
@@ -232,16 +241,16 @@
   <target name="src.zip" depends="init">
     <zip destfile="${release.dir}/${derby.src}.zip">
       <zipfileset dir="${basedir}" prefix="${derby.src}"
-                  includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
-         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
+         includes="${src.includes}"
+         excludes="${src.excludes}"/>
     </zip>
   </target>
   <target name="src.tgz">
     <tar destfile="${release.dir}/${derby.src}.tar.gz"
          compression="gzip" longfile="gnu">
       <tarfileset dir="${basedir}" prefix="${derby.src}"
-                  includes="BUILDING,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,frameworks/**,java/**,plugins/**,tools/**"
-         excludes="tools/release/**,tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb**"/>
+         includes="${src.includes}"
+         excludes="${src.excludes}"/>
     </tar>
   </target>
 
