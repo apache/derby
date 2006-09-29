@@ -64,6 +64,7 @@ public class _Suite extends BaseTestCase  {
 		if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169())
 		{
 			suite.addTest(ScrollResultSetTest.suite());
+			suite.addTest(LobStreamsTest.suite());
 		}
         
         if (TestConfiguration.runningInDerbyHarness())

@@ -1,7 +1,6 @@
 junitTests/derbyNet/CompatibilityTest.java
 jdbcapi/xaSimplePositive.sql
 jdbcapi/xaStateTran.sql
-jdbcapi/lobStreams.java
 jdbcapi/XATest.java
 jdbcapi/checkDataSource.java
 derbynet/ByteArrayCombinerStreamTest.junit
