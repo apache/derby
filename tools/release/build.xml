@@ -205,10 +205,10 @@
       			  prefix="${derby.lib-debug}/"/>
       <zipfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
-      <zipfileset dir="${basedir}/jars/sane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
-      <zipfileset dir="${basedir}/java/testing" prefix="${derby.bin}/test" 
+      <zipfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/test" includes="derbyTesting.jar"/>
+      <zipfileset dir="${basedir}/java/testing" prefix="${derby.lib-debug}/test" 
                   includes="README.htm"/>
-      <zipfileset dir="${basedir}/tools/java" prefix="${derby.bin}/test" 
+      <zipfileset dir="${basedir}/tools/java" prefix="${derby.lib-debug}/test" 
                   includes="jakarta-oro-2.0.8.jar"/>
     </zip>
   </target>
@@ -219,10 +219,10 @@
       			  prefix="${derby.lib-debug}/"/>
       <tarfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
-      <tarfileset dir="${basedir}/jars/sane" prefix="${derby.bin}/test" includes="derbyTesting.jar"/>
-      <tarfileset dir="${basedir}/java/testing" prefix="${derby.bin}/test" 
+      <tarfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/test" includes="derbyTesting.jar"/>
+      <tarfileset dir="${basedir}/java/testing" prefix="${derby.lib-debug}/test" 
                   includes="README.htm"/>
-      <tarfileset dir="${basedir}/tools/java" prefix="${derby.bin}/test" 
+      <tarfileset dir="${basedir}/tools/java" prefix="${derby.lib-debug}/test" 
                   includes="jakarta-oro-2.0.8.jar"/>
     </tar>
   </target>
