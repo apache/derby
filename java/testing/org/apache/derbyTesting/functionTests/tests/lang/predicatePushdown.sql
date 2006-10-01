@@ -113,6 +113,56 @@ create view vz4 (z1, z2, z3, z4) as
       union select 'i','j','j',i from t2
       union select c1, c2, c3, c from tc;
 
+-- For DERBY-1866.  The problem for DERBY-1866 was that,
+-- when pushing predicates to subqueries beneath UNIONs,
+-- the predicates were always being pushed to the *first*
+-- table in the FROM list, regardless of whether or not
+-- that was actually the correct table.  For the test
+-- query that uses this view (see below) the predicate
+-- is supposed to be pushed to TC, so in order to repro
+-- the DERBY-1866 failure we want to make sure that TC
+-- is *not* the first table in the FROM list.  Thus we
+-- use the optimizer override to fix the join order so
+-- that TC is the second table.
+create view vz5a (z1, z2, z3, z4) as
+  select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
+    (select c1, c2, c3, c
+      from --DERBY-PROPERTIES joinOrder=FIXED
+        t2, tc
+      where tc.c = t2.i) xx1
+  union select 'i','j','j',i from t2;
+
+-- Same as above but target FromTable in subquery is
+-- itself another subquery.
+create view vz5b (z1, z2, z3, z4) as
+  select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
+    (select c1, c2, c3, c
+      from --DERBY-PROPERTIES joinOrder=FIXED
+        t2, (select distinct * from tc) tc
+      where tc.c = t2.i) xx1
+  union select 'i','j','j',i from t2;
+
+-- Same as above but target FromTable in subquery is
+-- another union node between two subqueries.
+create view vz5c (z1, z2, z3, z4) as
+  select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
+    (select c1, c2, c3, c
+      from --DERBY-PROPERTIES joinOrder=FIXED
+        t2, (select * from tc union select * from tc) tc
+      where tc.c = t2.i) xx1
+  union select 'i','j','j',i from t2;
+
+-- Same as above but target FromTable in subquery is
+-- another full query with unions and subqueries.
+create view vz5d (z1, z2, z3, z4) as
+  select distinct xx1.c1, xx1.c2, 'bokibob' bb, xx1.c from
+    (select c1, c2, c3, c
+      from --DERBY-PROPERTIES joinOrder=FIXED
+        t2, (select * from tc
+         union select z1 c1, z2 c2, z3 c3, z4 c from vz5b) tc
+      where tc.c = t2.i) xx1
+  union select 'i','j','j',i from t2;
+
 -- Both sides of predicate reference aggregates.
 select x1.c1 from
   (select count(*) from t1 union select count(*) from t2) x1 (c1),
@@ -282,6 +332,62 @@ select x1.z4, x2.c2 from
   (select distinct j from t2 union select j from t1) x2 (c2)
 where x1.z4 = x2.c2;
 
+-- Push outer where predicate down into a UNION having a
+-- a Select child with more than one table in its FROM
+-- list.  The predicate should be pushed to the correct
+-- table in the Select's FROM list.  Prior to the fix for
+-- DERBY-1866 the predicate was always being pushed to
+-- the *first* table, regardless of whether or not that
+-- was actually the correct table.  Thus the predicate
+-- "t1.i = vz5.z4" was getting pushed to table T2 even
+-- though it doesn't apply there.  The result was an
+-- ASSERT failure in sane mode and an IndexOutOfBounds
+-- exception in insane mode.  NOTE: Use of NESTEDLOOP
+-- join strategy ensures the predicate will be pushed
+-- (otherwise optimizer might choose to do a hash join
+-- and we wouldn't be testing what we want to test).
+select t1.i, vz5a.* from
+  t1
+   left outer join
+     vz5a --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+   on
+    t1.i = vz5a.z4;
+
+-- Same query as above, but without the optimizer override.
+-- In this case there was another error where optimizer
+-- state involving the "joinOrder" override (see the
+-- definition of vz5a) was not properly reset, which could
+-- lead to an infinite loop.  This problem was fixed as
+-- part of DERBY-1866, as well.
+select t1.i, vz5a.* from
+  t1
+   left outer join
+     vz5a
+   on
+    t1.i = vz5a.z4;
+
+-- More tests for DERBY-1866 using more complicated views.
+select t1.i, vz5b.* from
+  t1
+   left outer join
+     vz5b --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+   on
+    t1.i = vz5b.z4;
+
+select t1.i, vz5c.* from
+  t1
+   left outer join
+     vz5c --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+   on
+    t1.i = vz5c.z4;
+
+select t1.i, vz5d.* from
+  t1
+   left outer join
+     vz5d --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+   on
+    t1.i = vz5d.z4;
+
 -- Queries with Select->Union->Select chains having differently-
 -- ordered result column lists with some non-column reference
 -- expressions.  In all of these queries we specify LEFT join
@@ -386,6 +492,10 @@ drop view vz;
 drop view vz2;
 drop view vz3;
 drop view vz4;
+drop view vz5a;
+drop view vz5d;
+drop view vz5b;
+drop view vz5c;
 drop table tc;
 
 -- Now bump up the size of tables T3 and T4 to the point where
