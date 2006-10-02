@@ -2260,7 +2260,7 @@ public class FromBaseTable extends FromTable
 			if (derivedRCL != null)
 			{
 				 resultColumns.propagateDCLInfo(derivedRCL, 
-											    tableName.getFullTableName());
+											    origTableName.getFullTableName());
 			}
 
 			/* Assign the tableNumber */
@@ -2287,7 +2287,8 @@ public class FromBaseTable extends FromTable
 	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
-		String ourSchemaName = tableName.getSchemaName();
+		// ourSchemaName can be null if correlation name is specified.
+		String ourSchemaName = getOrigTableName().getSchemaName();
 		String fullName = (schemaName != null) ? (schemaName + '.' + name) : name;
 
 		/* If an exact string match is required then:
@@ -2334,10 +2335,14 @@ public class FromBaseTable extends FromTable
 		}
 
 		// Schema name only on column
+		// e.g.:  select w1.i from t1 w1 order by test2.w1.i;  (incorrect)
 		if (schemaName != null && ourSchemaName == null)
 		{
-			// Compare column's schema name with table descriptor's
-			if (! schemaName.equals(tableDescriptor.getSchemaDescriptor().getSchemaName()))
+			// Compare column's schema name with table descriptor's if it is
+			// not a synonym since a synonym can be declared in a different
+			// schema.
+			if (tableName.equals(origTableName) && 
+					! schemaName.equals(tableDescriptor.getSchemaDescriptor().getSchemaName()))
 			{
 				return null;
 			}
@@ -2349,7 +2354,7 @@ public class FromBaseTable extends FromTable
 			}
 
 			// Make sure exposed name is not a correlation name
-			if (! getExposedName().equals(tableName.getTableName()))
+			if (! getExposedName().equals(getOrigTableName().getTableName()))
 			{
 				return null;
 			}
@@ -2360,7 +2365,7 @@ public class FromBaseTable extends FromTable
 		/* Schema name only specified on table. Compare full exposed name
 		 * against table's schema name || "." || column's table name.
 		 */
-		if (! getExposedName().equals(tableName.getSchemaName() + "." + name))
+		if (! getExposedName().equals(getOrigTableName().getSchemaName() + "." + name))
 		{
 			return null;
 		}
@@ -2372,7 +2377,9 @@ public class FromBaseTable extends FromTable
 	/**
 	  *	Bind the table descriptor for this table.
 	  *
-	  *
+	  * If the tableName is a synonym, it will be resolved here.
+	  * The original table name is retained in origTableName.
+	  * 
 	  * @exception StandardException		Thrown on error
 	  */
 	private	TableDescriptor	bindTableDescriptor()
@@ -2382,11 +2389,7 @@ public class FromBaseTable extends FromTable
 		SchemaDescriptor sd = getSchemaDescriptor(schemaName);
 
 		tableDescriptor = getTableDescriptor(tableName.getTableName(), sd);
-		if (tableDescriptor != null)
-		{
-			this.tableDescriptor = tableDescriptor;
-		}
-		else
+		if (tableDescriptor == null)
 		{
 			// Check if the reference is for a synonym.
 			TableName synonymTab = resolveTableToSynonym(tableName);

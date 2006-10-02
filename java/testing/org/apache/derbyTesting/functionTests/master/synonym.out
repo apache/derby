@@ -443,6 +443,33 @@ ij> select t1.id from test2.t1;
 ID                  
 --------------------
 1                   
+ij> -- DERBY-1894 
+-- ORDER BY clause with column qualifed by a synonym name where it is declared in 
+-- a different schema than the underlying table.
+select t1.id from t1 order by id;
+ID                  
+--------------------
+1                   
+ij> select t1.id from t1 order by t1.id;
+ID                  
+--------------------
+1                   
+ij> select t1.id as c1 from t1 order by c1;
+C1                  
+--------------------
+1                   
+ij> select t1.id from t1 where t1.id > 0 order by t1.id;
+ID                  
+--------------------
+1                   
+ij> select t1.id from t1 where t1.id > 0 group by t1.id;
+ID                  
+--------------------
+1                   
+ij> select t1.id from t1 where t1.id > 0 group by t1.id having t1.id > 0 order by t1.id;
+ID                  
+--------------------
+1                   
 ij> select test2.t1.id from t1;
 ID                  
 --------------------
@@ -451,7 +478,104 @@ ij> select test2.t1.id from test2.t1;
 ID                  
 --------------------
 1                   
+ij> select test2.t1.id from test2.t1 where t1.id > 0;
+ID                  
+--------------------
+1                   
+ij> select test2.t1.id from test2.t1 where t1.id > 0 order by t1.id;
+ID                  
+--------------------
+1                   
+ij> select test2.t1.id from test2.t1 order by id;
+ID                  
+--------------------
+1                   
+ij> select test2.t1.id from test2.t1 order by t1.id;
+ID                  
+--------------------
+1                   
+ij> select test2.t1.id from test2.t1 where t1.id > 0 order by test2.t1.id;
+ID                  
+--------------------
+1                   
+ij> select test2.t1.id from test2.t1 where t1.id > 0 group by test2.t1.id;
+ID                  
+--------------------
+1                   
+ij> select test2.t1.id from test2.t1 where t1.id > 0 group by test2.t1.id having test2.t1.id > 0 order by test2.t1.id;
+ID                  
+--------------------
+1                   
+ij> select w1.id from t1 w1 order by id;
+ID                  
+--------------------
+1                   
+ij> select w1.id from t1 w1 order by w1.id;
+ID                  
+--------------------
+1                   
+ij> select t1.id as idcolumn1, t1.id as idcolumn2 from t1 order by idcolumn1, idcolumn2;
+IDCOLUMN1           |IDCOLUMN2           
+-----------------------------------------
+1                   |1                   
+ij> select t1.id as idcolumn1, t1.id as idcolumn2 from t1 order by t1.idcolumn1, t1.idcolumn2;
+IDCOLUMN1           |IDCOLUMN2           
+-----------------------------------------
+1                   |1                   
+ij> select t1.id from (select t1.id from t1) t1 order by t1.id;
+ID                  
+--------------------
+1                   
+ij> select t1.id from (select t1.id from t1 a, t1 b where a.id=b.id) t1 order by t1.id;
+ERROR 42X04: Column 'T1.ID' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.ID' is not a column in the target table.
+ij> create table t2 (id bigint not null, name varchar(20));
+0 rows inserted/updated/deleted
+ij> create synonym s1 for test2.t1;
+0 rows inserted/updated/deleted
+ij> create synonym s2 for test2.t2;
+0 rows inserted/updated/deleted
+ij> insert into s2 values (1, 'John');
+1 row inserted/updated/deleted
+ij> insert into s2 values (2, 'Yip');
+1 row inserted/updated/deleted
+ij> insert into s2 values (3, 'Jane');
+1 row inserted/updated/deleted
+ij> select s1.id, s2.name from s1, s2 where s1.id=s2.id order by s1.id, s2.name;
+ID                  |NAME                
+-----------------------------------------
+1                   |John                
+ij> select s2.name from s2 where s2.id in (select s1.id from s1) order by s2.id;
+NAME                
+--------------------
+John                
+ij> select s2.name from s2 where exists (select s1.id from s1) order by s2.id;
+NAME                
+--------------------
+John                
+Yip                 
+Jane                
+ij> select s2.name from s2 where exists (select s1.id from s1 where s1.id=s2.id) order by s2.id;
+NAME                
+--------------------
+John                
+ij> -- should fail
+select w1.id from t1 w1 order by test2.w1.id;
+ERROR 42X10: 'TEST2.W1' is not an exposed table name in the scope in which it appears.
+ij> select w1.id from t1 w1 order by test1.w1.id;
+ERROR 42X10: 'TEST1.W1' is not an exposed table name in the scope in which it appears.
+ij> select t1.id as idcolumn1, t1.id as idcolumn2 from t1 group by idcolumn1, idcolumn2 order by idcolumn1, idcolumn2;
+ERROR 42X04: Column 'IDCOLUMN1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'IDCOLUMN1' is not a column in the target table.
+ij> select t1.id as idcolumn1, t1.id as idcolumn2 from t1 group by t1.idcolumn1, t1.idcolumn2 order by t1.idcolumn1, t1.idcolumn2;
+ERROR 42X04: Column 'T1.IDCOLUMN1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.IDCOLUMN1' is not a column in the target table.
+ij> select t1.id as c1 from t1 where c1 > 0 order by c1;
+ERROR 42X04: Column 'C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C1' is not a column in the target table.
+ij> drop synonym s1;
+0 rows inserted/updated/deleted
+ij> drop synonym s2;
+0 rows inserted/updated/deleted
 ij> drop synonym t1;
+0 rows inserted/updated/deleted
+ij> drop table test2.t2;
 0 rows inserted/updated/deleted
 ij> drop table test1.t1;
 0 rows inserted/updated/deleted
