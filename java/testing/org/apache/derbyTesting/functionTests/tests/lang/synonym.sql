@@ -271,9 +271,53 @@ select id from t1;
 select id from test2.t1;
 select t1.id from t1;
 select t1.id from test2.t1;
+-- DERBY-1894 
+-- ORDER BY clause with column qualifed by a synonym name where it is declared in 
+-- a different schema than the underlying table.
+select t1.id from t1 order by id;
+select t1.id from t1 order by t1.id;
+select t1.id as c1 from t1 order by c1;
+select t1.id from t1 where t1.id > 0 order by t1.id;
+select t1.id from t1 where t1.id > 0 group by t1.id;
+select t1.id from t1 where t1.id > 0 group by t1.id having t1.id > 0 order by t1.id;
 select test2.t1.id from t1;
 select test2.t1.id from test2.t1;
+select test2.t1.id from test2.t1 where t1.id > 0;
+select test2.t1.id from test2.t1 where t1.id > 0 order by t1.id;
+select test2.t1.id from test2.t1 order by id;
+select test2.t1.id from test2.t1 order by t1.id;
+select test2.t1.id from test2.t1 where t1.id > 0 order by test2.t1.id;
+select test2.t1.id from test2.t1 where t1.id > 0 group by test2.t1.id;
+select test2.t1.id from test2.t1 where t1.id > 0 group by test2.t1.id having test2.t1.id > 0 order by test2.t1.id;
+select w1.id from t1 w1 order by id;
+select w1.id from t1 w1 order by w1.id;
+select t1.id as idcolumn1, t1.id as idcolumn2 from t1 order by idcolumn1, idcolumn2;
+select t1.id as idcolumn1, t1.id as idcolumn2 from t1 order by t1.idcolumn1, t1.idcolumn2;
+select t1.id from (select t1.id from t1) t1 order by t1.id;
+select t1.id from (select t1.id from t1 a, t1 b where a.id=b.id) t1 order by t1.id;
+
+create table t2 (id bigint not null, name varchar(20));
+create synonym s1 for test2.t1;
+create synonym s2 for test2.t2;
+insert into s2 values (1, 'John');
+insert into s2 values (2, 'Yip');
+insert into s2 values (3, 'Jane');
+select s1.id, s2.name from s1, s2 where s1.id=s2.id order by s1.id, s2.name;
+select s2.name from s2 where s2.id in (select s1.id from s1) order by s2.id;
+select s2.name from s2 where exists (select s1.id from s1) order by s2.id;
+select s2.name from s2 where exists (select s1.id from s1 where s1.id=s2.id) order by s2.id;
+
+-- should fail
+select w1.id from t1 w1 order by test2.w1.id;
+select w1.id from t1 w1 order by test1.w1.id;
+select t1.id as idcolumn1, t1.id as idcolumn2 from t1 group by idcolumn1, idcolumn2 order by idcolumn1, idcolumn2;
+select t1.id as idcolumn1, t1.id as idcolumn2 from t1 group by t1.idcolumn1, t1.idcolumn2 order by t1.idcolumn1, t1.idcolumn2;
+select t1.id as c1 from t1 where c1 > 0 order by c1;
+
+drop synonym s1;
+drop synonym s2;
 drop synonym t1;
+drop table test2.t2;
 drop table test1.t1;
 
 set schema app;
