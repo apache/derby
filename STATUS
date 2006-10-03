@@ -28,8 +28,11 @@ Project info
 
 Releases from trunk:
 
- * 10.2.0.0 : In development 
- * 10.1.1.0 : Released 8/3/2005
+ * 10.3.0.0 : In development 
+ * 10.2.1.6 : Pending
+ * 10.1.3.1 : Released 06/30/2006
+ * 10.1.2.1 : Released 11/18/2005
+ * 10.1.1.0 : Released 08/3/2005
  * 10.0.2.1 : Released 12/06/2004
 
 PENDING ISSUES
@@ -40,179 +43,149 @@ None.
 RESOLVED ISSUES SINCE LAST STATUS
 =================================
 
+[RESULT] [VOTE] Bryan Pendleton as committer
 
-[VOTE] to sunset support for jdk1.3 and to support jdbc4.0 in release 10.2.
+  See email thread: "[VOTE] Bryan Pendleton as committer".
+  Vote ended February 10, 2006. Passed as follows:
 
-  See email thread: "[VOTE] Policy for supported platforms". Vote
-  ended on August 12, 2005.
-  Passed with +1 support votes from Lance Andersen, Rick Hillegas,
-  Shreyas Kaushik, and Francois Orsini.
-
-[VOTE] to re-enable the ANSI BOOLEAN datatype
-
-  See email thread: "[VOTE] Support the ANSI-SQL standard BOOLEAN
-  datatype." Initiated on August 10, 2005. Vote declared over on
-  October 27, 2005.
-  Passed with +1 votes from Lance Andersen, Satheesh Bandaram,
-  Jeremy Boynes, Rick Hillegas, Shreyas Kaushik, Jeffrey Lichtman,
-  Amit Modi, Francois Orsini, Suresh Thalamati, David Van Couvering.
-  Kathey Marsden voted -1 if the proposal meant that jdbc clients
-  would mis-report BOOLEAN column types as SMALLINT. However, the
-  implementation will address this concern and clients will see
-  these columns correctly typed as BOOLEAN.
-
-[VOTE] Require JUnit jar to build Derby
-
-  See email thread "VOTE: Require JUnit jar to build Derby, was: JUnit
-  license, was: subversion etiquette" Voted called on 9/19/2005 and
-  ended on 9/23/2005.
-  Passed with +1 votes from Jeremy Boynes, Bernt Johnsen, Oyvind
-  Bakksjo, Dyre Tjeldvoll, Lance Andersen, Rick Hillegas, Dan Debrunner.
-  One 0 vote from Andrew McIntyre.
-
-[VOTE] Apache Derby Logo
-  See email thread "VOTE: Apache Derby Logo".  Vote called on December
-  2, 2005 and ended on December 7, 2005.
-
-  The logo chosen is 
-    http://issues.apache.org/jira/secure/attachment/12321022/derby_logo_only.jpg
-    http://issues.apache.org/jira/secure/attachment/12321023/derby_with_text.jpg
-    http://issues.apache.org/jira/secure/attachment/12321055/roger_full_showcase.jpg 
-  submitted by Roger Dudler, with 61% of the vote
-
-  Vote Details:
-
-
-  - http://issues.apache.org/jira/secure/attachment/12320870/DerbyLogo_Hat_option1.jpg
-      Francois Orsini (1)
-
-  - http://issues.apache.org/jira/secure/attachment/12320873/DerbyLogo_text.jpg
-    Lars Klausen, Henrik Johannson (2)
-
-  - http://issues.apache.org/jira/secure/attachment/12310614/andrew-derbyknight1.jpg
-      Ryan Bobko  (1)
-
-  - http://issues.apache.org/jira/secure/attachment/20155/derby4.jpg
-      Susan Cline, Rajesh Kartha (2)
-
-  - http://issues.apache.org/jira/secure/attachment/12321022/derby_logo_only.jpg
-    http://issues.apache.org/jira/secure/attachment/12321023/derby_with_text.jpg
-    http://issues.apache.org/jira/secure/attachment/12321055/roger_full_showcase.jpg 
-      Rick Hillegas, Jeff Lichtman, Samer Kanjo, David Van Couvering, 
-      Arthur Alexander, Craig Russell, Olav Sandstaa, Brett Dobbs, 
-      Jean Andersen, Ian Leslie, Myrna van Lunteren, Lance Andersen, 
-      Kathy Saunders, Jeremy Boynes, Tomohito Nakayama, Neal Dewing, 
-      Tony Seebregts, Grant Hutchison, Ramandeep Kaur,
-      Brett Knight (20)
-
-
-   - None of the above:
-      Brian Smith, Oyvind Bakksjo, Bernt Johnsen, John Embretsen, 
-      Michelle Caisse, Andrew McIntyre, Mamta Samtoor (7)
-
-      TOTAL VOTES: 33
-
-[VOTE] Rick Hillegas as committer - January 17, 2006
-
-Rick Hillegas was voted in as a committer for Derby
-
-+1:
-Lance Andersen
-Jeffrey Lichtman
-Francois Orsini
-Craig Russell (DB PMC)
-Jean Anderson (committer, DB PMC)
-David Van Couvering (committer, DB PMC)
-Tomohito Nakayama (committer, DB PMC)
-Jeremy Boynes (committer)
-Andrew McIntyre (committer)
-V Narayanan
-Daniel Debrunner (committer, DB PMC)
-Bernt Johnsen (committer)
-Olav Sandstaa
-Knut Anders Hatlen
-ystein Grvlen
-John Embretsen
-Andreas Korneliussen
-Kristian Waagan
-Dag Wanvik
-Ole Solberg
-Satheesh Bandaram (committer)
-Mike Matrigali (committer)
-Suresh Thalamati
-Mamta Samtoor
-Manjula Kutty
-yvind Bakksjo (committer)
++1
 Kathey Marsden (committer)
+Andrew McIntyre (committer)
+Lance Andersen
+Suresh  Thalmati
+Deepa Remesh
+Army
+Sunitha Kambhampati
+Jeffrey Lichtman
+David W. Van Couvering (committer, DB PMC)
+Mamta Satoor
+Rick Hillegas (committer)
+Manjula G Kutty
+Rajesh Kartha
+Myrna Van Lunteren
+Jean T. Andersen (committer, DB PMC)
+Satheesh Bandaram (committer)
+Dag H. Wanvik
+V. Narayanan (committer)
+Daniel John Debrunner (committer, DB PMC)
+Knut Anders Hatlen
+Bernt M. Johnsen (commmitter)
+?ystein Gr?vlen
+Kristian Waagan
+John Embretsen
+Fernanda Pizzorno
+Tomohito Nakayama (committer, DB PMC)
+Ole Solberg
+Mike Matrigali (committer)
+Olav.Sandstaa
+Thomas Fischer (DB PMC)
 
 0:
 none
 
--1:
+-1
 none
 
-[VOTE] Knut Anders Hatlen as committer - February 15, 2006
+[VOTE] [RESULT] Suresh Thalamati as Derby committer
 
-Knut Anders Hatlen was voted in as a committer for Derby
+  See email thread: "[VOTE] Suresh Thalamati as Derby committer".
+  Vote ended on May 31, 2006. Passed as follows:
+
++1
+David Van Couvering (committer, PMC)
+Myrna van Lunteren
+Rick Hillegas (committer)
+Bryan Pendleton (committer)
+Army
+Sunitha Kambhampati
+Deepa Ramesh
+Manjula Kutty
+Satheesh Bandaram (committer)
+Craig Russell (PMC)
+Olav Sandstaa
+Bernt Johnsen (committer)
+Kathey Marsden (committer)
+Andrew McIntyre (committer, PMC)
+derby@mylevita.com
+V. Narayanan
+Mamta Samtoor
+Kristian Waagan
+Knut Anders Hatlen (committer)
+Tomohito Nakayama (committer, PMC)
+Susan Cline
+Rajesh Karta
+Stanley Bradbury
+Andreas Kornelliusen
+Anurag Shekhar
+Dan Debrunner (committer, PMC)
+Jeremy Boynes (committer)
+Øystein Grøvlen
+Mike Matrigali (committer)
+Dag Wanvik
+
+-1 None
+
+[VOTE][RESULT] Andreas Kornelliusen as committer for Derby
+
+  See email thread: "[VOTE] Andreas Kornelliusen as committer for Derby".
+  Vote ended May 31, 2006. Passed as follows:
 
 +1:
+David Van Couvering (committer, PMC)
 Rick Hillegas (committer)
-Lance Andersen
-Dyre Tjeldvoll
-David Van Couvering (committer, PMC member)
-Kathey Marsden (committer)
-Bryan Pendleton (committer - just barely :) )
-James Eacret
-Suresh Thalamati
-Satheesh Bandaram (committer)
-Myrna van Lunteren
-Andreas Korneliussen
-Dag Wanvik
-Deepa Ramesh
-Mamta Samtoor
 V. Narayanan
-Bernt Johnsen (committer)
-Ole Solberg
-Andrew McIntyre (committer)
-Fernanda Pizzorno
-John Embretsen
-Olav Sandstaa
+Knut Anders Hatlen (committer)
+Bryan Pendleton (committer)
+Tomohito Nakayama (committer, PMC)
+Susan Cline
+Myrna van Lunteren
+Satheesh Bandaram (committer)
 Kristian Waagan
-Oystein Grovlen
-Jean Anderson (committer, PMC member)
-Tomohito Nakayama (committer, PMC member)
-Dan Debrunner (committer, PMC member)
+Olav Sandstaa
+Anurag Shekhar
+Suresh Thalamati
+Jean Anderson (committer, PMC)
+Andrew McIntyre (committer, PMC)
+Dan Debrunner (committer, PMC)
+Manjula Kutty
+Jeremy Boynes (committer)
+Bernt Johnsen (committer)
+Øystein Grøvlen
+Kathey Marsden (committer)
+Rajesh Kartha
+Mike Matrigali (committer)
+Craig Russell (PMC)
+Dag Wanvik
 
 -1:
 None
 
+[VOTE] Approve coding conventions for the Derby project
+
+  See email thread: "[VOTE] Approve coding conventions for the Derby project". Vote
+  ended on August 16, 2006. Passed with following results:
+
+  +1 from David Van Couvering (Committer), Bryan Pendleton (Committer)
+  Craig Russell, Kristian Waagan, Knut Anders Hatlen (Committer)
+  Narayan, Dag Wanvik, Andreas Korneliussen (Committer), Kathey Marsden (Committer),
+  Olav Sandstaa
+
+  -0 from Rick Hillegas (Committer), Mike Matrigali (Committer),
+  Bernt  Johnson (Committer)
+
+  -0.25 from Suresh Thalamati (Committer)
 
 
 
 OTHER NEWS
 ==========
 
-A 10.1 bugfix release, 10.1.2.x is in the works. Subsequent 
-Derby 10.1 releases are tracked in the 10.1 STATUS file:
-
-http://svn.apache.org/repos/asf/db/derby/code/branches/10.1/STATUS
-
-
-A wiki for Derby has been set up on the big Apache Wiki farm:
-
-http://wiki.apache.org/db-derby/
-
-
-The Derby Logo contest has been restarted. New submissions for logos can be
-attached to JIRA entry Derby-297.
-
-http://issues.apache.org/jira/browse/DERBY-297
 
 
 RELEASE STATUS
 ==============
 
-Derby 10.2.0.0 is currently in the alpha stages.
+Derby 10.3.0.0 is open for development.
 
 No currently outstanding issues.
 
@@ -239,4 +212,8 @@ Committers      tmnk      Tomohito Nakayama (CLA on file)
 Committers      bernt     Bernt M. Johnsen (CLA on file)
 Committers      oyvind    Øyvind Bakksjø (CLA on file)
 Committers      davidvc   David Van Couvering (CLA on file)
-
+Committers      rhillegas Rick Hillegas (CLA on file)
+Committers      kahatlen  Knut Anders Hatlen (CLA on file)
+Committers      bryanpendleton  Bryan Pendleton (CLA on file)
+Committers      andreask  Andreas Korneliussen (CLA on file)
+Committers      suresht   Suresh Thalamati (CLA on file)
