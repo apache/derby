@@ -86,6 +86,11 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         stmt2.close();
     }
 
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        con = null;
+    }
+
     /**
      * Tests the BlobOutputStream.write(byte  b[], int off, int len) method
      **/

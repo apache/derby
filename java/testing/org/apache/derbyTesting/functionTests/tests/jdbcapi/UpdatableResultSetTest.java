@@ -72,9 +72,11 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
         stmt.close();
     }
 
-    protected void tearDown() throws SQLException {
+    protected void tearDown() throws Exception {
         conn.rollback();
         conn.close();
+        super.tearDown();
+        conn = null;
     }
     
     /** Create a test suite with all tests in this class. */
