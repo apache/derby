@@ -498,12 +498,16 @@ final class GenericStatementContext
 
 		/*
 		** If it isn't a StandardException, then assume
-		** xact severity.  It is probably an unexpected
+		** session severity.  It is probably an unexpected
 		** java error somewhere in the language.
-		*/
+        ** Store layer treats JVM error as session severity, 
+        ** hence to be consistent and to avoid getting rawstore
+        ** protocol violation errors, we treat java errors here
+        ** to be of session severity.  
+        */
 		int severity = (error instanceof StandardException) ?
 			((StandardException) error).getSeverity() :
-			ExceptionSeverity.STATEMENT_SEVERITY;
+			ExceptionSeverity.SESSION_SEVERITY;
 
 
 		/**
@@ -592,8 +596,14 @@ final class GenericStatementContext
 	 */
 	public boolean isLastHandler(int severity)
 	{
-		return inUse && !rollbackParentContext && ((severity == ExceptionSeverity.STATEMENT_SEVERITY) ||
-						(severity == ExceptionSeverity.NO_APPLICABLE_SEVERITY));
+        // For JVM errors, severity gets mapped to 
+        // ExceptionSeverity.NO_APPLICABLE_SEVERITY
+        // in ContextManager.cleanupOnError. It is necessary to 
+        // let outer contexts take corrective action for jvm errors, so 
+        // return false as this will not be the last handler for such 
+        // errors.
+		return inUse && !rollbackParentContext && 
+            ( severity == ExceptionSeverity.STATEMENT_SEVERITY );
 	}
 
 	/**
