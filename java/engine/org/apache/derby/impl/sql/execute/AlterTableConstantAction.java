@@ -648,6 +648,16 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								columnInfo[ix].defaultInfo.getDefaultText(),
 								lcc);
 		}	
+
+		// Update SYSCOLPERMS table which tracks the permissions granted
+		// at columns level. The sytem table has a bit map of all the columns
+		// in the user table to help determine which columns have the 
+		// permission granted on them. Since we are adding a new column,
+		// that bit map needs to be expanded and initialize the bit for it
+		// to 0 since at the time of ADD COLUMN, no permissions have been
+		// granted on that new column.
+		//
+		dd.updateSYSCOLPERMSforAddColumnToUserTable(td.getUUID(), tc);
 	}
 
 	/**

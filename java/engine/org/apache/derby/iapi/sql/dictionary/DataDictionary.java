@@ -539,6 +539,26 @@ public interface DataDictionary
 	public void	dropAllTableAndColPermDescriptors(UUID tableID, TransactionController tc)
 						throws StandardException;
 
+
+	/**
+	 * Need to update SYSCOLPERMS for a given table because a new column has 
+	 * been added to that table. SYSCOLPERMS has a column called "COLUMNS"
+	 * which is a bit map for all the columns in a given user table. Since
+	 * ALTER TABLE .. ADD COLUMN .. has added one more column, we need to
+	 * expand "COLUMNS" for that new column
+	 *
+	 * Currently, this code gets called during execution phase of
+	 * ALTER TABLE .. ADD COLUMN .. 
+	 *
+	 * @param tableID	The UUID of the table to which a column has been added
+	 * @param tc		TransactionController for the transaction
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void	updateSYSCOLPERMSforAddColumnToUserTable(UUID tableID, TransactionController tc)
+	throws StandardException;
+	
+	
 	/**
 	 * Drops all routine permission descriptors for the given routine.
 	 *

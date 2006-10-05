@@ -1948,3 +1948,33 @@ grant references(c111) on d1589t11ConstraintTest to mamta3;
 grant references(c112) on d1589t11ConstraintTest to PUBLIC;
 set connection mamta3;
 create table d1589t31ConstraintTest (c311 int, c312 int, foreign key(c311, c312) references mamta1.d1589t11ConstraintTest); 
+
+-- DERBY-1847 SELECT statement asserts with XJ001 when attempted to select a newly added column
+-- Grant access on 2 columns and then add another column to the table. The select on the new column
+-- by another user should complain about no permissions granted on that new column.
+set connection mamta2;
+create table t1Derby1847 (c1 int, c2 int); 
+grant select(c1,c2) on t1Derby1847 to mamta3; 
+alter table t1Derby1847 add c3 int; 
+set connection mamta3;
+-- should fail because mamta3 doesn't have any permission on this column in table mamta2.t1Derby1847
+select c3 from mamta2.t1Derby1847; 
+set connection mamta2;
+grant select on t1Derby1847 to mamta3; 
+set connection mamta3;
+-- should work now because mamta3 got select permission on new column in table mamta2.t1Derby1847 through table level select permission
+select c3 from mamta2.t1Derby1847; 
+set connection mamta2;
+revoke select on t1Derby1847 from mamta3; 
+set connection mamta3;
+-- should fail because mamta3 lost it's select permission on new column in table mamta2.t1Derby1847
+select c3 from mamta2.t1Derby1847; 
+set connection mamta2;
+grant select(c3) on t1Derby1847 to mamta3; 
+set connection mamta3;
+-- should work now because mamta3 got select permission on new column in table mamta2.t1Derby1847 through column level select permission
+select c3 from mamta2.t1Derby1847; 
+set connection mamta2;
+drop table t1Derby1847; 
+set connection mamta3;
+select c3 from mamta2.t1Derby1847; 

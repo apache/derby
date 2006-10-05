@@ -64,12 +64,13 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
     private static final int GRANTOR_COL_NUM = 3;
     private static final int TABLEID_COL_NUM = 4;
     private static final int TYPE_COL_NUM = 5;
-    private static final int COLUMNS_COL_NUM = 6;
+    protected static final int COLUMNS_COL_NUM = 6;
     private static final int COLUMN_COUNT = 6;
 
     static final int GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM = 0;
     static final int COLPERMSID_INDEX_NUM = 1;
     static final int TABLEID_INDEX_NUM = 2;
+    protected static final int TOTAL_NUM_OF_INDEXES = 3;
 	private static final int[][] indexColumnPositions = 
 	{ 
 		{ GRANTEE_COL_NUM, TABLEID_COL_NUM, TYPE_COL_NUM, GRANTOR_COL_NUM},

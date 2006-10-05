@@ -2440,6 +2440,84 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
+	 * Need to update SYSCOLPERMS for a given table because a new column has 
+	 * been added to that table. SYSCOLPERMS has a column called "COLUMNS"
+	 * which is a bit map for all the columns in a given user table. Since
+	 * ALTER TABLE .. ADD COLUMN .. has added one more column, we need to
+	 * expand "COLUMNS" for that new column
+	 *
+	 * Currently, this code gets called during execution phase of
+	 * ALTER TABLE .. ADD COLUMN .. 
+	 *
+	 * @param tableID	The UUID of the table to which a column has been added
+	 * @param tc		TransactionController for the transaction
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void	updateSYSCOLPERMSforAddColumnToUserTable(UUID tableID, TransactionController tc)
+	throws StandardException
+	{
+		// In Derby authorization mode, permission catalogs may not be present
+		if (!usesSqlAuthorization)
+			return;
+
+		/* This method has 2 steps to it. First get all the ColPermsDescriptor   
+		for given tableid. And next step is to go back to SYSCOLPERMS to find
+		unique row corresponding to each of ColPermsDescriptor and update the
+		"COLUMNS" column in SYSCOLPERMS. The reason for this 2 step process is
+		that SYSCOLPERMS has a non-unique row on "TABLEID" column and hence   
+		we can't get a unique handle on each of the affected row in SYSCOLPERMS
+		using just the "TABLEID" column */
+
+		// First get all the ColPermsDescriptor for the given tableid from   
+		//SYSCOLPERMS using getDescriptorViaIndex(). 
+		List permissionDescriptorsList;//all ColPermsDescriptor for given tableid
+		DataValueDescriptor		tableIDOrderable = getValueAsDVD(tableID);
+		TabInfoImpl	ti = getNonCoreTI(SYSCOLPERMS_CATALOG_NUM);
+		SYSCOLPERMSRowFactory rf = (SYSCOLPERMSRowFactory) ti.getCatalogRowFactory();
+		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
+		keyRow.setColumn(1, tableIDOrderable);
+		permissionDescriptorsList = newSList();
+		getDescriptorViaIndex(
+			SYSCOLPERMSRowFactory.TABLEID_INDEX_NUM,
+			keyRow,
+			(ScanQualifier [][]) null,
+			ti,
+			(TupleDescriptor) null,
+			permissionDescriptorsList,
+			false);
+
+		/* Next, using each of the ColPermDescriptor's uuid, get the unique row 
+		in SYSCOLPERMS and expand the "COLUMNS" column in SYSCOLPERMS to 
+		accomodate the newly added column to the tableid*/
+		ColPermsDescriptor colPermsDescriptor;
+		ExecRow curRow;
+		ExecIndexRow uuidKey;
+		// Not updating any indexes on SYSCOLPERMS
+		boolean[] bArray = new boolean[SYSCOLPERMSRowFactory.TOTAL_NUM_OF_INDEXES];
+		int[] colsToUpdate = {SYSCOLPERMSRowFactory.COLUMNS_COL_NUM};
+		for (Iterator iterator = permissionDescriptorsList.iterator(); iterator.hasNext(); )
+		{
+			colPermsDescriptor = (ColPermsDescriptor) iterator.next();
+			removePermEntryInCache(colPermsDescriptor);
+			uuidKey = rf.buildIndexKeyRow(rf.COLPERMSID_INDEX_NUM, colPermsDescriptor);
+			curRow=ti.getRow(tc, uuidKey, rf.COLPERMSID_INDEX_NUM);
+	        FormatableBitSet columns = (FormatableBitSet) curRow.getColumn( 
+					  SYSCOLPERMSRowFactory.COLUMNS_COL_NUM).getObject();
+	        int currentLength = columns.getLength();
+	        columns.grow(currentLength+1);
+	        curRow.setColumn(SYSCOLPERMSRowFactory.COLUMNS_COL_NUM,
+					  dvf.getDataValue((Object) columns));
+			ti.updateRow(keyRow, curRow,
+					SYSCOLPERMSRowFactory.TABLEID_INDEX_NUM,
+					 bArray, 
+					 colsToUpdate,
+					 tc);
+		}
+	}
+
+	
+	/**
 	 * Remove PermissionsDescriptor from permissions cache if present
 	 */
 	private void removePermEntryInCache(PermissionsDescriptor perm)
@@ -2528,7 +2606,6 @@ public final class	DataDictionaryImpl
 	{
 		ExecRow curRow;
 		PermissionsDescriptor perm;
-		ExecIndexRow newKey;
 		TabInfoImpl	ti = getNonCoreTI(SYSTABLEPERMS_CATALOG_NUM);
 		SYSTABLEPERMSRowFactory rf = (SYSTABLEPERMSRowFactory) ti.getCatalogRowFactory();
 
@@ -2560,7 +2637,6 @@ public final class	DataDictionaryImpl
 	{
 		ExecRow curRow;
 		PermissionsDescriptor perm;
-		ExecIndexRow newKey;
 		TabInfoImpl	ti = getNonCoreTI(SYSCOLPERMS_CATALOG_NUM);
 		SYSCOLPERMSRowFactory rf = (SYSCOLPERMSRowFactory) ti.getCatalogRowFactory();
 
@@ -10223,9 +10299,7 @@ public final class	DataDictionaryImpl
         // Remove cached permissions data. The cache may hold permissions data for this key even if
         // the row in the permissions table is new. In that case the cache may have an entry indicating no
         // permissions
-        Cacheable cacheEntry = getPermissionsCache().findCached( perm);
-        if( cacheEntry != null)
-            getPermissionsCache().remove( cacheEntry);
+		removePermEntryInCache(perm);
 
         //If we are dealing with grant, then the caller does not need to send 
         //any invalidation actions to anyone and hence return false
