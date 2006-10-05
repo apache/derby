@@ -663,6 +663,67 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	/**
 	 * Workhorse for dropping a column from a table.
 	 *
+	 * This routine drops a column from a table, taking care
+	 * to properly handle the various related schema objects.
+	 * 
+	 * The syntax which gets you here is:
+	 * 
+	 *   ALTER TABLE tbl DROP [COLUMN] col [CASCADE|RESTRICT]
+	 * 
+	 * The keyword COLUMN is optional, and if you don't
+	 * specify CASCADE or RESTRICT, the default is CASCADE
+	 * (the default is chosen in the parser, not here).
+	 * 
+	 * If you specify RESTRICT, then the column drop should be
+	 * rejected if it would cause a dependent schema object
+	 * to become invalid.
+	 * 
+	 * If you specify CASCADE, then the column drop should
+	 * additionally drop other schema objects which have
+	 * become invalid.
+	 * 
+	 * You may not drop the last (only) column in a table.
+	 * 
+	 * Schema objects of interest include:
+	 *  - views
+	 *  - triggers
+	 *  - constraints
+	 *    - check constraints
+	 *    - primary key constraints
+	 *    - foreign key constraints
+	 *    - unique key constraints
+	 *    - not null constraints
+	 *  - privileges
+	 *  - indexes
+	 *  - default values
+	 * 
+	 * Dropping a column may also change the column position
+	 * numbers of other columns in the table, which may require
+	 * fixup of schema objects (such as triggers and column
+	 * privileges) which refer to columns by column position number.
+	 * 
+	 * Currently, column privileges are not repaired when
+	 * dropping a column. This is bug DERBY-1909, and for the
+	 * time being we simply reject DROP COLUMN if it is specified
+	 * when sqlAuthorization is true (that check occurs in the
+	 * parser, not here). When DERBY-1909 is fixed:
+	 *  - Update this comment
+	 *  - Remove the check in dropColumnDefinition() in the parser
+	 *  - consolidate all the tests in altertableDropColumn.sql
+	 *    back into altertable.sql and remove the separate
+	 *    altertableDropColumn files
+	 * 
+	 * Indexes are a bit interesting. The official SQL spec
+	 * doesn't talk about indexes; they are considered to be
+	 * an imlementation-specific performance optimization.
+	 * The current Derby behavior is that:
+	 *  - CASCADE/RESTRICT doesn't matter for indexes
+	 *  - when a column is dropped, it is removed from any indexes
+	 *    which contain it.
+	 *  - if that column was the only column in the index, the
+	 *    entire index is dropped. 
+	 *
+         * @param   activation          the current activation
 	 * @param   ix 			the index of the column specfication in the ALTER 
 	 *						statement-- currently we allow only one.
 	 * @exception StandardException 	thrown on failure.
@@ -711,7 +772,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		toDrop.set(columnPosition);
 		td.setReferencedColumnMap(toDrop);
 
-		dm.invalidateFor(td, DependencyManager.DROP_COLUMN, lcc);
+		dm.invalidateFor(td, 
+                        (cascade ? DependencyManager.DROP_COLUMN
+                                 : DependencyManager.DROP_COLUMN_RESTRICT),
+                        lcc);
 					
 		// If column has a default we drop the default and any dependencies
 		if (columnDescriptor.getDefaultInfo() != null)
@@ -812,13 +876,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 			if (! cascade)
 			{
-				if (numRefCols > 1 || cd.getConstraintType() == DataDictionary.PRIMARYKEY_CONSTRAINT)
-				{
-					throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
+				// Reject the DROP COLUMN, because there exists a constraint
+				// which references this column.
+				//
+				throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
 										dm.getActionString(DependencyManager.DROP_COLUMN),
 										columnInfo[ix].name, "CONSTRAINT",
 										cd.getConstraintName() );
-				}
 			}
 
 			if (cd instanceof ReferencedKeyConstraintDescriptor)
@@ -865,6 +929,18 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			dm.invalidateFor(cd, DependencyManager.DROP_CONSTRAINT, lcc);
 			dm.clearDependencies(lcc, cd);
 		}
+
+                /*
+                 * The work we've done above, specifically the possible
+                 * dropping of primary key, foreign key, and unique constraints
+                 * and their underlying indexes, may have affected the table
+                 * descriptor. By re-reading the table descriptor here, we
+                 * ensure that the compressTable code is working with an
+                 * accurate table descriptor. Without this line, we may get
+                 * conglomerate-not-found errors and the like due to our
+                 * stale table descriptor.
+                 */
+		td = dd.getTableDescriptor(tableId);
 
 		compressTable(activation);
 

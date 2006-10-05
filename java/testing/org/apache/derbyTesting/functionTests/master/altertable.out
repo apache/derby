@@ -958,4 +958,11 @@ A          |B
 -1         |b         
 3          |three     
 42         |forty two 
+ij> -- Demonstrate that ALTER TABLE DROP COLUMN doesnt work in sqlAuthorization
+-- mode. This is because of bug DERBY-1909, which involves how to fix up
+-- the GRANTed column permissions following a DROP COLUMN.
+create table atdc_1 (a integer, b integer);
+0 rows inserted/updated/deleted
+ij> alter table atdc_1 drop column b;
+ERROR 0A000: Feature not implemented: ALTER TABLE DROP COLUMN (sqlAuthorization=true).
 ij> 

@@ -396,6 +396,7 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
           case C_NodeTypes.MODIFY_COLUMN_TYPE_NODE:
 		  case C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE:
 		  case C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NOT_NULL_NODE:
+		  case C_NodeTypes.DROP_COLUMN_NODE:
 			return C_NodeNames.MODIFY_COLUMN_NODE_NAME;
 
 		  case C_NodeTypes.NON_STATIC_METHOD_CALL_NODE:

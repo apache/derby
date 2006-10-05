@@ -142,7 +142,7 @@ public interface C_NodeTypes
 	static final int USER_NODE = 110; // // special function USER
 	static final int IS_NODE = 111;
 	static final int LOCK_TABLE_NODE = 112;
-	// 113
+	static final int DROP_COLUMN_NODE = 113;
 	static final int ALTER_TABLE_NODE = 114;
 	static final int AGGREGATE_NODE = 115;
 	static final int COLUMN_DEFINITION_NODE = 116;

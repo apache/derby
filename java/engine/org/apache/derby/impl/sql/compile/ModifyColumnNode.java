@@ -241,6 +241,8 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 			return ColumnInfo.MODIFY_COLUMN_CONSTRAINT;
 		case C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NOT_NULL_NODE:
 			return ColumnInfo.MODIFY_COLUMN_CONSTRAINT_NOT_NULL;
+		case C_NodeTypes.DROP_COLUMN_NODE:
+			return ColumnInfo.DROP;
 		default:
 			if (SanityManager.DEBUG)
 			{

@@ -324,6 +324,7 @@ public interface DependencyManager {
 	//  issued, this invalidation action will be sent to all
 	//  it's dependents.
 	public static final int REVOKE_PRIVILEGE_RESTRICT = 45;
+	public static final int DROP_COLUMN_RESTRICT = 46;
 
     /**
      * Extensions to this interface may use action codes > MAX_ACTION_CODE without fear of

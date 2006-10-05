@@ -248,6 +248,7 @@ public final class ViewDescriptor extends TupleDescriptor
 			 */
 		    case DependencyManager.CREATE_INDEX:
 		    case DependencyManager.DROP_INDEX:
+		    case DependencyManager.DROP_COLUMN:
 		    case DependencyManager.CREATE_CONSTRAINT:
 		    case DependencyManager.ALTER_TABLE:
 		    case DependencyManager.CREATE_TRIGGER:
@@ -282,6 +283,11 @@ public final class ViewDescriptor extends TupleDescriptor
 		    //show throw an exception.
 			//In Derby, at this point, REVOKE_PRIVILEGE_RESTRICT gets sent
 		    //when execute privilege on a routine is getting revoked.
+		    // DROP_COLUMN_RESTRICT is similar. Any case which arrives
+		    // at this default: statement causes the exception to be
+		    // thrown, indicating that the DDL modification should be
+		    // rejected because a view is dependent on the underlying
+		    // object (table, column, privilege, etc.)
 		    default:
 
 				DependencyManager dm;
@@ -330,12 +336,18 @@ public final class ViewDescriptor extends TupleDescriptor
 			//types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
 			//make the ViewDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
+		    case DependencyManager.DROP_COLUMN:
 				dropViewWork(getDataDictionary(), 
 						getDataDictionary().getDependencyManager(), lcc,
 						lcc.getTransactionExecute(), 
 						getDataDictionary().getTableDescriptor(uuid).getSchemaDescriptor(),
 						getDataDictionary().getTableDescriptor(uuid), false);
-			    return;
+
+                                lcc.getLastActivation().addWarning(
+                                    StandardException.newWarning(
+                                        SQLState.LANG_VIEW_DROPPED,
+                                        this.getObjectName() ));
+                                return;
 
 		    default:
 

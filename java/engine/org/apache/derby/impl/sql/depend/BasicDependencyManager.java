@@ -853,6 +853,9 @@ public class BasicDependencyManager implements DependencyManager {
 			case DROP_COLUMN:
 				return "DROP COLUMN";
 
+			case DROP_COLUMN_RESTRICT:
+				return "DROP COLUMN RESTRICT";
+
 		    case DROP_STATISTICS:
 				return "DROP STATISTICS";
 

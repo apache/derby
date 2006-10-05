@@ -11804,13 +11804,12 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 		return lockGranularity;
 	}
 |
-	LOOKAHEAD( {getToken(1).kind == DROP
-                && (getToken(2).kind == CONSTRAINT
-                        || getToken(2).kind == PRIMARY
-                        || getToken(2).kind == FOREIGN
-                        || getToken(2).kind == UNIQUE
-                        || getToken(2).kind == CHECK)} )
-	tableElement = dropTableConstraintDefinition()
+	<DROP>
+	(
+		tableElement = dropColumnDefinition(behavior)
+		|
+		tableElement = dropTableConstraintDefinition()
+	)
 	{
 		changeType[0] = DDLStatementNode.DROP_TYPE;
 		tableElementList.addTableElement(tableElement);
@@ -11821,6 +11820,46 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 	{
 		changeType[0] = DDLStatementNode.LOCKING_TYPE;
 		return lockGranularity;
+	}
+}
+
+/*
+ * Handle
+ *
+ *    ALTER TABLE tablename DROP [ COLUMN ] columnname [ CASCADE | RESTRICT ]
+ */
+TableElementNode
+dropColumnDefinition(int []behavior) throws StandardException :
+{
+	String columnName;
+	TableElementNode tableElement;
+}
+{
+	[ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+				 dropColumnReferentialAction(behavior)
+	{
+		if( getLanguageConnectionContext().usesSqlAuthorization())
+                    throw StandardException.newException(
+                        SQLState.NOT_IMPLEMENTED,
+                        "ALTER TABLE DROP COLUMN (sqlAuthorization=true)");
+		return (TableElementNode) nodeFactory.getNode(
+						C_NodeTypes.DROP_COLUMN_NODE,
+						columnName, null,
+						null, null,
+						getContextManager());
+	}
+}
+void
+dropColumnReferentialAction(int []behavior) :
+{
+	int refBehavior = StatementType.DROP_CASCADE;
+}
+{
+	[ <CASCADE> {refBehavior = StatementType.DROP_CASCADE;}   
+	  | <RESTRICT> {refBehavior = StatementType.DROP_RESTRICT;} 
+    ]
+	{
+		behavior[0] = refBehavior;
 	}
 }
 
@@ -11943,9 +11982,9 @@ dropTableConstraintDefinition() throws StandardException :
 	TableName		 constraintName;
 }
 {
-	LOOKAHEAD( {getToken(2).kind == CONSTRAINT} )
+	LOOKAHEAD( {getToken(1).kind == CONSTRAINT} )
 	/* changed constraintName() to qualifiedName() for compaction */
-	<DROP> <CONSTRAINT> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+	<CONSTRAINT> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
@@ -11960,8 +11999,8 @@ dropTableConstraintDefinition() throws StandardException :
 						);
 	}
 |
-	LOOKAHEAD( {getToken(2).kind == PRIMARY} )
-	<DROP> <PRIMARY> <KEY>
+	LOOKAHEAD( {getToken(1).kind == PRIMARY} )
+	<PRIMARY> <KEY>
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
@@ -11976,8 +12015,8 @@ dropTableConstraintDefinition() throws StandardException :
 						);
 	}
 |
-	LOOKAHEAD( {getToken(2).kind == FOREIGN} )
-        <DROP> <FOREIGN> <KEY> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+	LOOKAHEAD( {getToken(1).kind == FOREIGN} )
+        <FOREIGN> <KEY> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
@@ -11993,8 +12032,8 @@ dropTableConstraintDefinition() throws StandardException :
 						);
 	}
 |
-	LOOKAHEAD( {getToken(2).kind == UNIQUE} )
-        <DROP> <UNIQUE> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+	LOOKAHEAD( {getToken(1).kind == UNIQUE} )
+        <UNIQUE> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
@@ -12010,7 +12049,7 @@ dropTableConstraintDefinition() throws StandardException :
 						);
 	}
 |
-        <DROP> <CHECK> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+        <CHECK> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,

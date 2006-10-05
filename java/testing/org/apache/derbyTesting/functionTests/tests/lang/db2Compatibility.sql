@@ -208,7 +208,7 @@ DROP TABLE testCS;
 -- ALTER RENAME TABLE/COLUMN
 -- beetle 5205
 create table table tt (a int, b int, c int);
-alter table tt drop column b;
+-- alter table tt drop column b; This is now supported by Derby
 alter table tt rename to ttnew;
 alter table tt rename c to d;
 rename column tt.c to tt.d;

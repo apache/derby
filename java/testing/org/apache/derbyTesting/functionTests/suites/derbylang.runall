@@ -11,6 +11,7 @@ lang/aggbuiltin.sql
 lang/aggregate.sql
 lang/aggregateOptimization.sql
 lang/altertable.sql
+lang/altertableDropColumn.sql
 lang/arithmetic.sql
 lang/authorize.sql
 lang/autoincrement.sql

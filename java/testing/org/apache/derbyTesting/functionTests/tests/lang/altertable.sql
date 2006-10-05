@@ -594,3 +594,9 @@ insert into atmod_1 values(3, 'three');
 insert into atmod_1 values (default, 'forty two');
 select * from atmod_1;
 
+
+-- Demonstrate that ALTER TABLE DROP COLUMN doesnt work in sqlAuthorization
+-- mode. This is because of bug DERBY-1909, which involves how to fix up
+-- the GRANTed column permissions following a DROP COLUMN.
+create table atdc_1 (a integer, b integer);
+alter table atdc_1 drop column b;

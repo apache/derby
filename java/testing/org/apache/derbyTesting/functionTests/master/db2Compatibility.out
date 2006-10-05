@@ -270,10 +270,9 @@ ij> -- RENAME/DROP COLUMN
 -- beetle 5205
 create table table tt (a int, b int, c int);
 ERROR 42X01: Syntax error: Encountered "table" at line 4, column 14.
-ij> alter table tt drop column b;
-ERROR 42X01: Syntax error: Encountered "drop" at line 1, column 16.
-ij> alter table tt rename to ttnew;
-ERROR 42X01: Syntax error: Encountered "rename" at line 1, column 16.
+ij> -- alter table tt drop column b; This is now supported by Derby
+alter table tt rename to ttnew;
+ERROR 42X01: Syntax error: Encountered "rename" at line 2, column 16.
 ij> alter table tt rename c to d;
 ERROR 42X01: Syntax error: Encountered "rename" at line 1, column 16.
 ij> rename column tt.c to tt.d;
