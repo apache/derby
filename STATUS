@@ -29,7 +29,7 @@ Project info
 Releases from trunk:
 
  * 10.3.0.0 : In development 
- * 10.2.1.6 : Pending
+ * 10.2.1.6 : Released 10/05/2006
  * 10.1.3.1 : Released 06/30/2006
  * 10.1.2.1 : Released 11/18/2005
  * 10.1.1.0 : Released 08/3/2005
@@ -175,6 +175,32 @@ None
 
   -0.25 from Suresh Thalamati (Committer)
 
+
+[VOTE] 10.2.1.6 release
+
+  See email thread: "[VOTE] 10.2.1.6 release". Vote
+  ended on October 5, 2006. Passed with following results:
+
++1:
+Laura Stewart
+Jean Andersen (committer, pmc)
+Andrew McIntyre (committer, pmc)
+Rick Hillegas (committer, pmc)
+Knut Anders Hatlen (committer, pmc)
+Mike Matrigali (committer, pmc)
+Army Brown
+Bryan Pendleton (committer, pmc)
+Yip Ng
+Vemund Ostgaard
+Henri van de Scheur
+John Embretsen
+Manjula G. Kutty
+Myrna van Lunteren
+Suresh Thalamati (committer)
+Rajesh Kartha
+Ole Solberg
+
+No 0s, no -1s. 
 
 
 OTHER NEWS
