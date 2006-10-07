@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to you under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<html>
+<head>
+  <title>LocalCalendar</title>
+  <style type="text/css">
+      body { 
+        background  :   #ccffff;
+      }
+      
+      .day-header {
+        font-size   :   22px;
+        font-weight :   bold;
+      }
+      div.login {
+        background  :   transparent;
+        visibility  :   visible;
+      }
+      div.main {
+        visibility  :   hidden;
+      }
+      
+      .input-box {
+        background  :   transparent;
+        border      :   0px;
+      }
+      
+      .input-box:hover {
+        background  :   #ffffff;
+      }
+      
+      .input-box:focus {
+        background  :   #ffffff;
+      }
+  </style>
+  <applet code="CalendarController" 
+      archive="localcal.jar,gdata-calendar-1.0.jar,gdata-client-1.0.jar,derby.jar"
+      height="1" width="1"
+      id="calapplet"></applet>
+  <script type="text/javascript" src="localcal.js"></script>
+
+</head>
+<body id="body">
+  <div id="login-div" class="login">
+  <h1 id="loginHeader">My Week of Events</h1>
+  <h3>Please login to Google Calendar</h3>
+  <form class="login-form" name="loginForm" >
+      <table>
+          <tr>
+              <td><strong>Google Id: </strong></td>
+              <td><input type="text" name="user" size="40"/></td>
+              <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+              <td><strong>Password: </strong></td>
+              <td><input type="password" name="password"/></td>
+              <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+              <td><input type="button" onclick="derbycal.login()" 
+              value="Login"</td>
+          </tr>
+          <tr><td>&nbsp;</td></tr>
+          <tr>
+              <td id="loggingIn" style="{visibility : hidden;}">
+                    <strong>Logging In...</strong>
+             </td>
+         </tr>
+             <td><input type="button" value="Work Offline" 
+                  onclick="derbycal.startOffline(); return false;"
+                  id="workOfflineButton"/>
+             </td>
+          </tr>
+      </table>
+  </form>
+  </div>
+  <div id="main-div" class="main">
+      <h1>My Week of Events</h1>
+      <hr>
+      <table>
+          <tr>
+              <form name="offlineForm">
+                  <td><input type="button" value="Go Offline" 
+                      onclick="derbycal.goOffline(); return false;"
+                  name="offlineButton"/></td>
+                  <td><input type="button" value="Go Online" disabled="true" 
+                      onclick="derbycal.goOnline(); return false;"
+                  name="onlineButton" id="onlineButton"/></td>
+                  <td id="goingOnline" style="{visibility : hidden}">
+                      <strong>&nbsp;&nbsp;&nbsp;Resynchronizing with Google Calendar...</strong>
+                  </td>
+              </form>
+          </tr>
+      </table>
+      <hr>
+                
+      <form class="new-event-form" name="newEventForm">
+          <table>
+              <tr>
+                  <td>
+                      <select name="eventDay" value="Sunday">
+                          <option value="Sunday">Sunday</option>
+                          <option value="Monday">Monday</option>
+                          <option value="Tuesday">Tuesday</option>
+                          <option value="Wednesday">Wednesday</option>
+                          <option value="Thursday">Thursday</option>
+                          <option value="Friday">Friday</option>
+                          <option value="Saturday">Saturday</option>                  
+                      </select>
+                  </td>
+                  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>What:</strong></td>
+                  <td><input type="text" size="70" name="eventTitle"></input></td>
+                  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                  <td><input type="button" 
+                      onclick="derbycal.postNewEvent(); return false;"
+                      value="Add Event"
+                  </td>
+                  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                  <td>
+                      <input type="reset" value="Clear"/>
+                  </td>
+              </tr>
+              <tr><td><br>&nbsp;</td></tr>
+              <tr>
+                  <td><input type="button" onclick="derbycal.refreshCalendar();return false;"
+                  value="Refresh Calendar"</input></td>
+              </tr>
+          </table> 
+      </form>
+      <hr>
+      <table id="Sunday" class="day-table">
+          <tr><td class="day-header">Sunday</td></tr>
+      </table>
+      <hr>
+      <table id="Monday" class="day-table">
+          <tr><td class="day-header">Monday</td></tr>
+      </table>
+      <hr>
+      <table id="Tuesday" class="day-table">
+          <tr><td class="day-header">Tuesday</td></tr>
+      </table>
+      <hr>
+      <table id="Wednesday" class="day-table">
+          <tr><td class="day-header">Wednesday</td></tr>
+      </table>
+      <hr>
+      <table id="Thursday" class="day-table">
+          <tr><td class="day-header">Thursday</td></tr>
+      </table>
+      <hr>
+      <table id="Friday" class="day-table">
+          <tr><td class="day-header">Friday</td></tr>
+      </table>
+      <hr>
+      <table id="Saturday" class="day-table">
+          <tr><td class="day-header">Saturday</td></tr>
+      </table>
+      <hr>
+    </div>
+</body>
+</html>

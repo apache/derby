@@ -1,0 +1,269 @@
+LocalCalendar is an example application which allows you to manage
+Google Calendar entries while disconnected from the network and
+then synchronize those changes back to Google Calendar when you
+get back online.
+
+The intention of this application is to provide code that demonstrates
+some of the key aspects of an offline architecture, including use
+of Apache Derby for local storage, the value of a transactional
+system, synchronization and conflict resolution, and crash recovery.
+
+
+1. WHAT YOU WILL NEED 
+
+1.1 MOZILLA FIREFOX 1.5
+  http://www.mozilla.com/firefox/
+  NOTE: I have *not* tested this on IE or other browsers, and I am
+    pretty sure it doesn't work.  You need Firefox to run the application
+    in this tutorial.
+
+1.2 JAVA DEVELOPMENT KIT 1.5 (or greater)
+  http://java.sun.com/javase/downloads/index.jsp
+
+1.3 SUN JAVA PLUGIN 1.5 (or greater) FOR FIREFOX
+  The version of the plugin should be no less than the version of
+  your JDK
+
+  If you don't already have this installed, I am pretty sure when you
+  install the JDK this gets set up for you automatically.  To test
+  this go to the location "about:plugins" in your Firefox browser
+  window.  It should list the Java 1.5 plugin.
+
+  To be doubly sure, go to http://java.com and click on
+  "Verify Installation"
+
+  If it does *not* appear to be installed, then for Windows you can
+  go to
+    http://java.com, and click on Download Now
+
+  For other platforms, go to
+    http://www.java.com/en/download/manual.jsp
+
+  and choose the appropriate platform and follow instructions for
+  install and verification.
+
+
+1.4 APACHE ANT 1.6 or greater
+  http://ant.apache.org
+
+1.5 APACHE DERBY 10.1.3 or greater
+  http://db.apache.org/derby/derby_downloads.html
+
+  All you need is derby.jar.  Place a copy of derby.jar in the lib directory.
+
+1.6 A GOOGLE CALENDAR ACCOUNT
+  You need to get an account at http://calendar.google.com.  The
+  email address and password you use to sign up are what you use
+  to log on to LocalCalendar.
+
+1.7 GOOGLE CALENDAR DATA API JAVA CLIENT
+  http://code.google.com/apis/gdata/download/gdata.java.zip
+
+  Extract the jar files you find inside this zip file and place them
+  in the lib directory.
+
+  for more info on this API, see
+    http://code.google.com/apis/gdata/calendar.html
+
+1.8 JSON FOR JAVA
+  This is used to map data sets between Java and JavaScript.
+
+  Download http://www.json.org/java/json.zip.  This is a source
+  zip file.  Extract this into the src directory.  It will be built
+  as part of the overall build of LocalCalendar and added to localcal.jar
+
+
+
+2. SIGNING THE JAR FILES
+
+LocalCalendar runs as an applet, but the code will be performing
+operations that normally aren't allowed inside the applet sandbox.
+For this reason you need to create a key and then use this key
+to sign the jar files.
+
+2.1 Creating the key
+Using the keytool utility that is part of the JDK, run the following
+command:
+
+  keytool -genkey -alias <your-alias>
+
+and follow the prompts.  <your-alias> can be whatever alias you want
+to use, such as your username.
+
+2.2 Signing the jar files
+
+Using the jarsigner utility that is part of the JDK, run the following
+commands
+
+  jarsigner lib/derby.jar <alias>
+  jarsigner lib/gdata-calendar-1.0.jar <alias>
+  jarsigner lib/gdata-client-1.0.jar <alias>
+
+
+3. BUILDING
+
+3.1 SET KEYSTORE PROPERTIES IN BUILD.XML
+Edit build.xml and set the keystore.alias and keystore.password
+values to match the ones you used above when signing the jar files.
+This is used to automatically sign the LocalCalendar jar file each
+time we build it.
+
+3.2 SET THE CALENDAR ID
+
+The calendar id uniquely identifies the calendar you want
+to work with.  Currently it is set to a test calendar that is
+owned by David Van Couvering.  You are free to use this, it is
+available to all, but you can also create your own calendar.  Here
+are the steps:
+
+3.2.1 Create a calendar
+Make sure it is set to be publicly available to all.  If you want
+to make it private, read the instructions for Google Calendar and
+the Google Calendar API for how to do this.
+
+3.2.2 Get the id
+On the left hand pane of your Google Calendar page is the list of
+calendars you have created.  Click on the down-arrow for the
+one you want to use in LocalCalendar and choose "Calendar Settings"
+
+On the settings page, click on the orange [XML] box for calendar
+address.  You'll get a long URI of the form
+
+http://www.google.com/calendar/feeds/<id>@group.calendar.google.com/public/basic
+
+(unless you're using your default calendar, in which case it will be
+of the form
+
+http://www.google.com/calendar/feeds/<your-email-address>/public/basic)
+
+Your calendar id is either <id>@group.calendar.google.com or
+<your-email-address>.  
+
+3.2.3 Set the id in LocalCalendar
+Set the variable derbycal.calid in src/localcal.js to be your
+calendar id.
+
+3.3 SET THE DATE RANGE IN LOCALCALENDAR
+The date range used by LocalCalendar is currently hardcoded.  If you're
+interested, please feel free to make this dynamically settable by the
+user.  But I didn't get around to doing that.
+
+To change the date range, edit src/localcal.js and modify the
+array derbycal.days to match the dates you're interested in.
+
+3.4 CHANGE THE TITLE
+If you want, you can change the title to match what your calendar
+is about.  Edit src/index.html and change the <h1> tag with the
+id "loginHeader" and also the <h1> tag just underneat the <div>
+with id "main-div".
+
+3.4 BUILD
+To build, simply run "ant" in the top-level directory.  This will
+build the source, create and sign a jar file, and put this as well
+as all other needed resources into the dist directory.
+
+
+4 RUNNING LOCALCALENDAR
+
+Bring up Firefox and point it to <path-to-localcal>/dist/index.html.
+
+LocalCalendar shows a week's worth of events.  Each event is an 
+all-day event.  I didn't try to mess around with event times, this
+was more HTML and JavaScript than I was willing to write.
+
+To play around with LocalCalendar's capabilities, try the following.
+To find bugs, try almost anything else :)
+
+4.1 BASIC ONLINE OPERATION
+
+- Start LocalCalendar
+
+- Log in to Google Calendar using your id/password
+Notice that the app turns green and shows the events from your
+calendar once you're online.  Green means online.  Blue means
+offline.  The power of DHTML.
+
+- If you view the Java Console, it will tell you where output
+  is being logged.  To watch this go by as you're working, do
+  a running tail of the log file (e.g. tail -f <logfile>).  The
+  default location is <java user.dir>/localcal.log
+
+- Add an event by choosing a day, entering a title, and clicking 
+  the [Add Event] button
+
+- Delete an event by clicking the red X next to it
+
+- Update an event by selecting it and modifying it.  When you exit
+  the field it is updated automatically
+
+- In a separate tab or window log on to Google Calendar.  Notice your
+  modifications are reflected in Google Calendar.
+
+
+4.2 OFFLINE OPERATION
+
+- Unplug your network or disable your network
+
+- Try to access Google Calendar and notice that it's not available.
+  Bummer.
+
+- Make a change to LocalCalendar.  LocalCalendar automatically detects
+  the network is down and goes offline.  The change is still stored
+  locally and is reflected in your application.
+
+- Make a couple more changes
+
+- Re-enable your network
+
+- Try Google Calendar, and notice it's available again (whew!)
+
+- In LocalCalendar, click [Go Online].  LocalCalendar synchronizes
+  its changes with Google Calendar, and then turns green.  
+
+- Refresh Google Calendar and notice your changes in LocalCalendar
+  are now reflected (yay!)
+
+
+4.2 CRASH RECOVERY
+This demonstrates the power of Derby's automatic crash recovery
+and consistent durability
+
+- Click [Go Offline] 
+
+- Make some offline changes
+
+- Kill Firefox (yipes!)
+
+- Restart Firefox and open Local Calendar.  Log in to Google
+  Calendar.
+
+- Notice that LocalCalendar automatically detects that you have
+  made changes and synchronizes with Google Calendar after you 
+  log in.
+
+4.3 CONFLICT DETECTION
+Google Calendar has conflict detection.  When you get an entry
+from Google Calendar, it includes a version id, and you send that
+version id when you update.  If the version ids don't match, Google
+Calendar will reject the update.
+
+- Click [Go Offline]
+
+- Make an update to an existing entry
+
+- Go to Google Calendar
+
+- Update the same entry
+
+- Click [Go Online]
+
+- You should get a popup saying there was a conflict during
+  synchronization
+
+- Look at the log file and you'll see the detailed error
+  information
+
+
+ARCHITECTURE
+
+<Coming Soon>

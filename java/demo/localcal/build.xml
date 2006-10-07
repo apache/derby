@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to you under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<project default="all" basedir=".">
+  <property name="classes.dir" value="classes"/>
+  <property name="src.dir" value="src"/>
+  <property name="dist.dir" value="dist"/>
+  <property name="lib.dir" value="lib"/>
+  
+  <!-- CHANGE THIS TO YOUR ALIAS NAME -->
+  <property name="keystore.alias" value="davidvc"/>
+  <!-- CHANGE THIS TO YOUR PASSWORD -->
+  <property name="keystore.password" value="secret"/>
+
+  <target name="all" depends="compile, jar, dist"/>
+  
+  <target name="clean">
+    <delete dir="${classes.dir}"/>
+    <mkdir dir="${classes.dir}"/>
+    <delete dir="${dist.dir}"/>
+    <mkdir dir="${dist.dir}"/>
+  </target>
+  
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <javac
+      srcdir="${src.dir}"
+      destdir="${classes.dir}">
+      <classpath>
+        <pathelement path="${classes.dir}"/>
+        <pathelement path="${lib.dir}/derby.jar"/>
+        <pathelement path="${lib.dir}/gdata-calendar-1.0.jar"/>
+        <pathelement path="${lib.dir}/gdata-client-1.0.jar"/>
+      </classpath>
+    </javac>
+  </target>
+  
+  <target name="jar">
+    <jar basedir="${classes.dir}" destfile="${lib.dir}/localcal.jar"/>
+    <signjar jar="${lib.dir}/localcal.jar" alias="${keystore.alias}"
+      storepass="${keystore.password}"/>
+  </target>
+
+  <target name="dist">
+    <mkdir dir="${dist.dir}"/>
+    <copy todir="${dist.dir}">
+      <fileset dir="${lib.dir}"/>
+    </copy>
+    <copy file="${src.dir}/index.html" todir="${dist.dir}"/>
+    <copy file="${src.dir}/localcal.js" todir="${dist.dir}"/>
+    <copy todir="${dist.dir}/images">
+      <fileset dir="${src.dir}/images"/>
+    </copy>
+  </target>
+</project>
