@@ -2999,6 +2999,7 @@ public class parameterMapping {
 				if ("22018".equals(sqle.getSQLState())||
 					"XCL12".equals(sqle.getSQLState())||
 					"22007".equals(sqle.getSQLState())||
+                    "22005".equals(sqle.getSQLState())||
 					(sqle.getMessage().indexOf("Invalid data conversion") != -1) ||
 					(sqle.getMessage().indexOf("Illegal Conversion") != -1))
 					System.out.println(" IC (Expected)"); 

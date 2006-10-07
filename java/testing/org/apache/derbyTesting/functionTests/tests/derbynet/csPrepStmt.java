@@ -139,7 +139,25 @@ public class csPrepStmt
 
 			// test different data types for input parameters of a PreparedStatement
 			System.out.println("test different data types for input parameters of a Prepared Statement");
-			ps = conn.prepareStatement("create table t2(ti smallint, si smallint,i int, bi bigint, r real, f float, d double precision, n5_2 numeric(5,2), dec10_3 decimal(10,3), ch20 char(20),vc varchar(20), lvc long varchar,b20 char(23) for bit data, vb varchar(23) for bit data, lvb long varchar for bit data,  dt date, tm time, ts timestamp not null)");
+			ps = conn.prepareStatement("create table t2(" + 
+                                       "ti smallint," + 
+                                       "si smallint," + 
+                                       "i int," + 
+                                       "bi bigint," + 
+                                       "r real," + 
+                                       "f float," + 
+                                       "d double precision," + 
+                                       "n5_2 numeric(5,2)," + 
+                                       "dec10_3 decimal(10,3)," + 
+                                       "ch20 char(20)," + 
+                                       "vc varchar(20), " + 
+                                       "lvc long varchar," + 
+                                       "b20 char(23) for bit data, " + 
+                                       "vb varchar(23) for bit data, " + 
+                                       "lvb long varchar for bit data,  " + 
+                                       "dt date, " + 
+                                       "tm time, " + 
+                                       "ts timestamp not null)");
 			uc = ps.executeUpdate();
 			System.out.println("Update count is: " + uc);
 
@@ -213,12 +231,12 @@ public class csPrepStmt
 			ps.setNull(10, java.sql.Types.DECIMAL);
 			ps.setNull(11, java.sql.Types.CHAR);
 			ps.setNull(12, java.sql.Types.VARCHAR);
-			ps.setNull(13, java.sql.Types.LONGVARCHAR);
+			ps.setNull(13, java.sql.Types.LONGVARBINARY);
 			ps.setNull(14, java.sql.Types.BINARY);
 			ps.setNull(15, java.sql.Types.VARBINARY);
-			ps.setNull(16, java.sql.Types.LONGVARBINARY);
-			ps.setNull(17, java.sql.Types.DATE);
-			ps.setNull(18, java.sql.Types.TIME);
+			ps.setNull(16, java.sql.Types.TIMESTAMP);
+			ps.setNull(17, java.sql.Types.TIMESTAMP);
+			ps.setNull(18, java.sql.Types.DATE);
 		   
 			ps.setTimestamp(18, Timestamp.valueOf("2002-04-12 11:44:31.000000000")); //slightly after
 			hasResultSet = ps.execute();

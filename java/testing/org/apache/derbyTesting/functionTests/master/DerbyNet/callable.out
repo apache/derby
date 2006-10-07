@@ -31,7 +31,6 @@ cstmt.getBigDecimal(2): 0.000000000000001
 cstmt.getBigDecimal(3): null
 get the CallableStatement object
 execute the procedure with LONGVARBINARY
-execute the procedure with BLOB
 Select lvbc from Longvarbinary_Tab
 done testing long varbinary
 CallableStatement Test Ends

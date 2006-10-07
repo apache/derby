@@ -297,10 +297,7 @@ public class callable
 		cstmt.setObject(1,bytearr,java.sql.Types.LONGVARBINARY);
 		System.out.println("execute the procedure with LONGVARBINARY");
 		cstmt.executeUpdate();
-		cstmt.setObject(1,bytearr,java.sql.Types.BLOB);
-		System.out.println("execute the procedure with BLOB");
-		cstmt.executeUpdate();
-
+        
 		Statement stmt = conn.createStatement();
 		String Longvarbinary_Query="Select lvbc from Longvarbinary_Tab";
 		System.out.println(Longvarbinary_Query);

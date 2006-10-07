@@ -23,11 +23,13 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.jdbc.ClientDriver;
 
@@ -402,6 +404,18 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setNull", parameterIndex, jdbcType);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex) ;
+                
+                if( ! PossibleTypes.getPossibleTypesForNull( paramType ).checkType( jdbcType )){
+                    
+                    //This exception mimic embedded behavior.
+                    //see http://issues.apache.org/jira/browse/DERBY-1610#action_12432568
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      jdbcType,
+                                                      paramType );
+                }
+                
                 setNullX(parameterIndex, jdbcType);
             }
         }
@@ -450,6 +464,17 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setBoolean", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ) {
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.BOOLEAN,
+                                                      paramType);
+                    
+                }
+                
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIT;
                 setInput(parameterIndex, new Short((short) (x ? 1 : 0)));
@@ -468,6 +493,17 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setByte", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType( paramType ) ){
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.TINYINT,
+                                                      paramType);
+                    
+                }
+                
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TINYINT;
                 setInput(parameterIndex, new Short(x));
@@ -486,6 +522,18 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setShort", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.SMALLINT,
+                                                      paramType);
+                                                  
+
+                }
+                
                 setShortX(parameterIndex, x);
             }
         }
@@ -510,6 +558,16 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setInt", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.INTEGER,
+                                                      paramType);
+                }
+                
                 setIntX(parameterIndex, x);
             }
         }
@@ -534,6 +592,16 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setLong", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.INTEGER,
+                                                      paramType);
+                }
+                
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIGINT;
                 setInput(parameterIndex, new Long(x));
@@ -552,6 +620,17 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setFloat", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.FLOAT,
+                                                      paramType);
+
+                }
+                
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.REAL;
                 setInput(parameterIndex, new Float(x));
@@ -570,6 +649,17 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setDouble", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.DOUBLE,
+                                                      paramType);
+                    
+                }
+                
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DOUBLE;
                 setInput(parameterIndex, new Double(x));
@@ -588,6 +678,17 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setBigDecimal", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType( paramType ) ){
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.BIGINT,
+                                                      paramType);
+                    
+                }
+
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DECIMAL;
                 if (x == null) {
@@ -611,6 +712,17 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_DATE.checkType(paramType) ){
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_ ,
+                                                      java.sql.Types.DATE,
+                                                      paramType);
+                    
+                }
+                
                 checkForClosedStatement();
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DATE;
@@ -668,6 +780,16 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setTime", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_TIME.checkType( paramType ) ){
+                    
+                    PossibleTypes.throw22005Exception( agent_.logWriter_,
+                                                       java.sql.Types.TIME,
+                                                       paramType );
+                }
+                
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIME;
                 if (x == null) {
@@ -725,6 +847,17 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setTimestamp", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_TIMESTAMP.checkType( paramType ) ) {
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.TIMESTAMP,
+                                                      paramType);
+                    
+                }
+                
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIMESTAMP;
 
@@ -788,6 +921,15 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setString", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_STRING.checkType( paramType ) ){
+                    PossibleTypes.throw22005Exception(agent_.logWriter_ ,
+                                                      java.sql.Types.VARCHAR,
+                                                      paramType);
+                }
+                
                 setStringX(parameterIndex, x);
             }
         }
@@ -815,6 +957,16 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setBytes", parameterIndex, x);
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                
+                if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_BYTES.checkType( paramType ) ){
+                    
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.VARBINARY,
+                                                      paramType );
+                }
+                
                 setBytesX(parameterIndex, x);
             }
         }
@@ -854,6 +1006,15 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterIndex, "<input stream>", new Long(length));
                 }
+                
+                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+
+                if ( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_BINARYSTREAM.checkType( paramType ) ){
+                    PossibleTypes.throw22005Exception(agent_.logWriter_,
+                                                      java.sql.Types.VARBINARY,
+                                                      paramType );
+                }                                         
+                
                  if(length > Integer.MAX_VALUE) {
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
@@ -923,10 +1084,14 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterIndex, "<input stream>", new Long(length));
                 }
+                
+                checkTypeForSetAsciiStream(getParameterMetaData().getParameterType(parameterIndex),
+                                           agent_.logWriter_);
+
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
                 if (x == null) {
-                    setNull(parameterIndex, java.sql.Types.CLOB);
+                    setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
                     return;
                 }
                 if(length > Integer.MAX_VALUE) {
@@ -957,7 +1122,51 @@ public class PreparedStatement extends Statement
                                int length) throws SQLException {
         setAsciiStream(parameterIndex,x,(long)length);
     }
+    
 
+    private static void checkTypeForSetAsciiStream( final int paramType,
+                                                    LogWriter logWriter )
+        throws SqlException {
+        
+        if ( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_ASCIISTREAM.checkType( paramType ) ) {
+            
+            PossibleTypes.throw22005Exception(logWriter,
+                                              java.sql.Types.LONGVARCHAR,
+                                              paramType);
+            
+            
+        }
+    }
+    
+    
+    private static void checkTypeForSetBlob(final int paramType,
+                                            LogWriter logWriter )
+        throws SqlException {
+        
+        if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_BLOB.checkType( paramType ) ){
+            
+            PossibleTypes.throw22005Exception(logWriter,
+                                              java.sql.Types.BLOB,
+                                              paramType);
+        }
+    }
+    
+    
+    private static void checkTypeForSetClob( int paramType,
+                                             LogWriter logWriter )
+        throws SqlException {
+        
+        if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_CLOB.checkType( paramType ) ){
+                    
+            PossibleTypes.throw22005Exception(logWriter,
+                                              java.sql.Types.CLOB,
+                                              paramType);
+                    
+        }
+        
+    }
+    
+    
     /**
      * Sets the specified parameter to the given input stream. Deprecated
      * in JDBC 3.0 and this method will always just throw a feature not
@@ -1003,11 +1212,15 @@ public class PreparedStatement extends Statement
                         parameterIndex, x);
             }
             try {
+                
+                checkTypeForSetCharacterStream(getParameterMetaData().getParameterType(parameterIndex),
+                                               agent_.logWriter_);
+                
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex -1] =
                     java.sql.Types.CLOB;
                 if (x == null) {
-                    setNull(parameterIndex, java.sql.Types.CLOB);
+                    setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
                     return;
                 }
                 setInput(parameterIndex, new Clob(agent_, x));
@@ -1038,10 +1251,14 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterIndex, x, new Long(length));
                 }
+
+                checkTypeForSetCharacterStream(getParameterMetaData().getParameterType(parameterIndex),
+                                               agent_.logWriter_);
+                
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
                 if (x == null) {
-                    setNull(parameterIndex, java.sql.Types.CLOB);
+                    setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
                     return;
                 }
                 if(length > Integer.MAX_VALUE) {
@@ -1075,6 +1292,21 @@ public class PreparedStatement extends Statement
                                    int length) throws SQLException {
         setCharacterStream(parameterIndex,x,(long)length);
     }
+    
+
+    private static void checkTypeForSetCharacterStream(final int paramType,
+                                                       LogWriter logWriter)
+    throws SqlException{
+        
+        if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_CHARACTERSTREAM.checkType( paramType ) ){
+            
+            PossibleTypes.throw22005Exception(logWriter,
+                                              java.sql.Types.LONGVARCHAR,
+                                              paramType);
+            
+        }
+    }
+
 
     public void setBlob(int parameterIndex, java.sql.Blob x) throws SQLException {
         try
@@ -1083,6 +1315,10 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex, x);
                 }
+                
+                checkTypeForSetBlob(getParameterMetaData().getParameterType(parameterIndex),
+                                    agent_.logWriter_);
+                    
                 setBlobX(parameterIndex, x);
             }
         }
@@ -1110,6 +1346,10 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setClob", parameterIndex, x);
                 }
+                
+                checkTypeForSetClob(getParameterMetaData().getParameterType(parameterIndex),
+                                    agent_.logWriter_);
+                
                 setClobX(parameterIndex, x);
             }
         }
@@ -2354,10 +2594,14 @@ public class PreparedStatement extends Statement
                         parameterIndex, x);
             }
             try {
+
+                checkTypeForSetAsciiStream(getParameterMetaData().getParameterType( parameterIndex),
+                                           agent_.logWriter_);
+
                 parameterIndex = checkSetterPreconditions(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
                 if (x == null) {
-                    setNull(parameterIndex, java.sql.Types.CLOB);
+                    setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
                     return;
                 }
                 setInput(parameterIndex, new Clob(agent_, x, "US-ASCII"));
@@ -2414,7 +2658,12 @@ public class PreparedStatement extends Statement
                 agent_.logWriter_.traceEntry(this, "setClob",
                         parameterIndex, reader);
             }
+            
             try {
+                
+                checkTypeForSetClob(getParameterMetaData().getParameterType(parameterIndex),
+                                agent_.logWriter_);
+                
                 checkForClosedStatement();
             } catch (SqlException se) {
                 throw se.getSQLException();
@@ -2480,7 +2729,11 @@ public class PreparedStatement extends Statement
                 agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex,
                         inputStream);
             }
+
             try {
+                checkTypeForSetBlob(getParameterMetaData().getParameterType(parameterIndex),
+                                    agent_.logWriter_);
+                
                 setBinaryStreamX(parameterIndex, inputStream, -1);
             } catch (SqlException se) {
                 throw se.getSQLException();
@@ -2545,5 +2798,418 @@ public class PreparedStatement extends Statement
                     sqle.getSQLException());
             }
         }
-
+    
+    /**
+     * PossibleTypes is information which is set of types.
+     * A given type is evaluated as *possible* at checkType method if same type was found in the set.
+     */
+    private static class PossibleTypes{
+        
+        final private int[] possibleTypes;
+        
+        private PossibleTypes(int[] types){
+            possibleTypes = types;
+            Arrays.sort(possibleTypes);
+        }
+        
+        /**
+         * This is possibleTypes of variable which can be set by set method for generic scalar.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.BIGINT,
+                java.sql.Types.LONGVARCHAR ,
+                java.sql.Types.CHAR,
+                java.sql.Types.DECIMAL,
+                java.sql.Types.INTEGER,
+                java.sql.Types.SMALLINT,
+                java.sql.Types.REAL,
+                java.sql.Types.DOUBLE,
+                java.sql.Types.VARCHAR } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setDate method.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_DATE = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.DATE,
+                java.sql.Types.TIMESTAMP } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setTime method.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_TIME = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.TIME } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setTimestamp method.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_TIMESTAMP = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.DATE,
+                java.sql.Types.TIME,
+                java.sql.Types.TIMESTAMP } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setString method.
+         */
+        final private static PossibleTypes POSSIBLE_TYPES_IN_SET_STRING = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.BIGINT,
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.DECIMAL,
+                java.sql.Types.INTEGER,
+                java.sql.Types.SMALLINT,
+                java.sql.Types.REAL,
+                java.sql.Types.DOUBLE,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.DATE,
+                java.sql.Types.TIME,
+                java.sql.Types.TIMESTAMP,
+                java.sql.Types.CLOB } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setBytes method.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_BYTES = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.LONGVARBINARY,
+                java.sql.Types.VARBINARY,
+                java.sql.Types.BINARY,
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.BLOB } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setBinaryStream method.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_BINARYSTREAM = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.LONGVARBINARY,
+                java.sql.Types.VARBINARY,
+                java.sql.Types.BINARY,
+                java.sql.Types.BLOB } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setAsciiStream method.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_ASCIISTREAM = 
+            new PossibleTypes( new int[]{ 
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.CLOB } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setCharacterStream method.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_CHARACTERSTREAM = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.CLOB } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setBlob method.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_BLOB = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.BLOB } );
+        
+        /**
+         * This is possibleTypes of variable which can be set by setClob method.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_IN_SET_CLOB = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.CLOB } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to generic scalar typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_GENERIC_SCALAR_NULL = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.BIT,
+                java.sql.Types.TINYINT,
+                java.sql.Types.BIGINT,
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.NUMERIC,
+                java.sql.Types.DECIMAL,
+                java.sql.Types.INTEGER,
+                java.sql.Types.SMALLINT,
+                java.sql.Types.FLOAT,
+                java.sql.Types.REAL,
+                java.sql.Types.DOUBLE,
+                java.sql.Types.VARCHAR } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to generic character typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_GENERIC_CHARACTERS_NULL = 
+            new PossibleTypes( new int[] {
+                java.sql.Types.BIT,
+                java.sql.Types.TINYINT,
+                java.sql.Types.BIGINT,
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.NUMERIC,
+                java.sql.Types.DECIMAL,
+                java.sql.Types.INTEGER,
+                java.sql.Types.SMALLINT,
+                java.sql.Types.FLOAT,
+                java.sql.Types.REAL,
+                java.sql.Types.DOUBLE,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.DATE,
+                java.sql.Types.TIME,
+                java.sql.Types.TIMESTAMP } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to VARBINARY typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_VARBINARY_NULL = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.VARBINARY,
+                java.sql.Types.BINARY,
+                java.sql.Types.LONGVARBINARY } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to BINARY typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_BINARY_NULL = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.VARBINARY,
+                java.sql.Types.BINARY,
+                java.sql.Types.LONGVARBINARY } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to LONGVARBINARY typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_LONGVARBINARY_NULL = 
+            new PossibleTypes( new int[] {
+                java.sql.Types.VARBINARY,
+                java.sql.Types.BINARY,
+                java.sql.Types.LONGVARBINARY } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to DATE typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_DATE_NULL = 
+            new PossibleTypes( new int[] {
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.DATE,
+                java.sql.Types.TIMESTAMP } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to TIME typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_TIME_NULL = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.TIME,
+                java.sql.Types.TIMESTAMP } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to TIMESTAMP typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_TIMESTAMP_NULL = 
+            new PossibleTypes( new int[] {
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.DATE,
+                java.sql.Types.TIMESTAMP } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to CLOB typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_CLOB_NULL = 
+            new PossibleTypes( new int[] { 
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.CHAR,
+                java.sql.Types.VARCHAR,
+                java.sql.Types.CLOB } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to BLOB typed variable.
+         */
+        final public static PossibleTypes POSSIBLE_TYPES_FOR_BLOB_NULL = 
+            new PossibleTypes( new int[] {
+                java.sql.Types.BLOB } );
+        
+        /**
+         * This is possibleTypes of null value which can be assigned to other typed variable.
+         */
+        final public static PossibleTypes DEFAULT_POSSIBLE_TYPES_FOR_NULL = 
+            new PossibleTypes( new int[] {
+                java.sql.Types.BIT,
+                java.sql.Types.TINYINT,
+                java.sql.Types.BIGINT,
+                java.sql.Types.LONGVARBINARY,
+                java.sql.Types.VARBINARY,
+                java.sql.Types.BINARY,
+                java.sql.Types.LONGVARCHAR,
+                java.sql.Types.NULL,
+                java.sql.Types.CHAR,
+                java.sql.Types.NUMERIC,
+                java.sql.Types.DECIMAL,
+                java.sql.Types.INTEGER,
+                java.sql.Types.SMALLINT,
+                java.sql.Types.FLOAT,
+                java.sql.Types.REAL,
+                java.sql.Types.DOUBLE, 
+                java.sql.Types.VARCHAR,
+                java.sql.Types.BOOLEAN,
+                java.sql.Types.DATALINK,
+                java.sql.Types.DATE,
+                java.sql.Types.TIME,
+                java.sql.Types.TIMESTAMP,
+                java.sql.Types.OTHER,
+                java.sql.Types.JAVA_OBJECT,
+                java.sql.Types.DISTINCT,
+                java.sql.Types.STRUCT,
+                java.sql.Types.ARRAY,
+                java.sql.Types.BLOB,
+                java.sql.Types.CLOB,
+                java.sql.Types.REF } );
+        
+        /**
+         * This method return true if the type is possible.
+         */
+        boolean checkType(int type){
+            
+            if(SanityManager.DEBUG){
+                
+                for(int i = 0;
+                    i < possibleTypes.length - 1;
+                    i ++){
+                    
+                    SanityManager.ASSERT(possibleTypes[i] < possibleTypes[i + 1]);
+                    
+                }
+            }
+            
+            return Arrays.binarySearch( possibleTypes,
+                                        type ) >= 0;
+            
+        }
+        
+        /*
+        static SqlException throwLangDataTypeSetException( LogWriter logWriter, 
+                                                           int valType,
+                                                           int paramType)
+    
+            throws SqlException{
+            
+            throw new SqlException( logWriter,
+                                    new ClientMessageId(SQLState.LANG_DATA_TYPE_SET_MISMATCH) ,
+                                    new Object[]{ 
+                                        Types.getTypeString(valType),
+                                        Types.getTypeString(paramType) 
+                                    },
+                                    (Throwable) null);
+        }
+        */
+        
+        static SqlException throw22005Exception( LogWriter logWriter, 
+                                                 int valType,
+                                                 int paramType)
+            
+            throws SqlException{
+            
+            throw new SqlException( logWriter,
+                                    new ClientMessageId(SQLState.LANG_DATA_TYPE_GET_MISMATCH) ,
+                                    new Object[]{ 
+                                        Types.getTypeString(valType),
+                                        Types.getTypeString(paramType) 
+                                    },
+                                    (Throwable) null);
+        }
+        
+        
+        /**
+         * This method return possibleTypes of null value in variable typed as typeOfVariable.
+         */
+        static PossibleTypes getPossibleTypesForNull(int typeOfVariable){
+            
+            switch(typeOfVariable){
+                
+            case java.sql.Types.SMALLINT:
+                return POSSIBLE_TYPES_FOR_GENERIC_SCALAR_NULL;
+                
+            case java.sql.Types.INTEGER:
+                return POSSIBLE_TYPES_FOR_GENERIC_SCALAR_NULL;
+                
+            case java.sql.Types.BIGINT:
+                return POSSIBLE_TYPES_FOR_GENERIC_SCALAR_NULL;
+                
+            case java.sql.Types.REAL:
+                return POSSIBLE_TYPES_FOR_GENERIC_SCALAR_NULL;
+                
+            case java.sql.Types.FLOAT:
+                return POSSIBLE_TYPES_FOR_GENERIC_SCALAR_NULL;
+                
+            case java.sql.Types.DOUBLE:
+                return POSSIBLE_TYPES_FOR_GENERIC_SCALAR_NULL;
+                
+            case java.sql.Types.DECIMAL:
+                return POSSIBLE_TYPES_FOR_GENERIC_SCALAR_NULL;
+                
+            case java.sql.Types.CHAR:
+                return POSSIBLE_TYPES_FOR_GENERIC_CHARACTERS_NULL;
+                
+            case java.sql.Types.VARCHAR:
+                return POSSIBLE_TYPES_FOR_GENERIC_CHARACTERS_NULL;
+                
+            case java.sql.Types.LONGVARCHAR:
+                return POSSIBLE_TYPES_FOR_GENERIC_CHARACTERS_NULL;
+                
+            case java.sql.Types.VARBINARY:
+                return POSSIBLE_TYPES_FOR_VARBINARY_NULL;
+                
+            case java.sql.Types.BINARY:
+                return POSSIBLE_TYPES_FOR_BINARY_NULL;
+                
+            case java.sql.Types.LONGVARBINARY:
+                return POSSIBLE_TYPES_FOR_LONGVARBINARY_NULL;
+                
+            case java.sql.Types.DATE:
+                return POSSIBLE_TYPES_FOR_DATE_NULL;
+                
+            case java.sql.Types.TIME:
+                return POSSIBLE_TYPES_FOR_TIME_NULL;
+                
+            case java.sql.Types.TIMESTAMP:
+                return POSSIBLE_TYPES_FOR_TIMESTAMP_NULL;
+                
+            case java.sql.Types.CLOB:
+                return POSSIBLE_TYPES_FOR_CLOB_NULL;
+                
+            case java.sql.Types.BLOB:
+                return POSSIBLE_TYPES_FOR_BLOB_NULL;
+                
+            }
+        
+            // as default, accept all type...
+            return DEFAULT_POSSIBLE_TYPES_FOR_NULL;
+        }
+        
+    }
 }

@@ -464,7 +464,7 @@ EXPECTED SQL Exception: An attempt was made to get a data value of type 'java.sq
 START: clobTest53
 clobTest53 finished
 START: clobTest54
-EXPECTED SQLSTATE(22018): Invalid character string format for type INTEGER.
+EXPECTED SQLSTATE(22005): An attempt was made to get a data value of type 'CLOB' from a data value of type 'INTEGER'.
 end clobTest54
 START: clobTest6
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
@@ -775,7 +775,7 @@ blobTest52 finished
 START: blobTest53
 blobTest53 finished
 START: blobTest54
-EXPECTED SQLSTATE(XCL12): An attempt was made to put a data value of type 'byte[]' into a data value of type 'INTEGER'.
+EXPECTED SQLSTATE(22005): An attempt was made to get a data value of type 'BLOB' from a data value of type 'INTEGER'.
 blobTest54 finished
 START: blobTest6
 EXPECTED SQLSTATE(XJ070): Negative or zero position argument '0' passed in a Blob or Clob method.
