@@ -48,20 +48,15 @@ public class VerifySignatures extends BaseJDBCTestCase {
      */
     private final static Class[] JDBC_INTERFACES = {
         java.sql.Array.class,
-        java.sql.BaseQuery.class,
         java.sql.Blob.class,
         java.sql.CallableStatement.class,
         java.sql.Clob.class,
-        java.sql.ConflictingRow.class,
         java.sql.Connection.class,
         java.sql.DatabaseMetaData.class,
-        java.sql.DataSet.class,
-        java.sql.DataSetResolver.class,
         java.sql.Driver.class,
         java.sql.NClob.class,
         java.sql.ParameterMetaData.class,
         java.sql.PreparedStatement.class,
-        java.sql.QueryObjectGenerator.class,
         java.sql.Ref.class,
         java.sql.ResultSet.class,
         java.sql.ResultSetMetaData.class,
@@ -453,12 +448,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
 
             // Interfaces that Derby doesn't implement:
             jdbcInterfaces.remove(java.sql.Array.class);
-            jdbcInterfaces.remove(java.sql.BaseQuery.class);
-            jdbcInterfaces.remove(java.sql.ConflictingRow.class);
-            jdbcInterfaces.remove(java.sql.DataSet.class);
-            jdbcInterfaces.remove(java.sql.DataSetResolver.class);
             jdbcInterfaces.remove(java.sql.NClob.class);
-            jdbcInterfaces.remove(java.sql.QueryObjectGenerator.class);
             jdbcInterfaces.remove(java.sql.Ref.class);
             jdbcInterfaces.remove(java.sql.SQLData.class);
             jdbcInterfaces.remove(java.sql.SQLInput.class);

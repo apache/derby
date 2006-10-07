@@ -86,12 +86,6 @@ public class TestDbMetaData {
                  "should return false");
         }
 
-        if (met.providesQueryObjectGenerator()) {
-            System.out.println
-                ("FAIL: providesQueryObjectGenerator() should " +
-                 "return false");
-        }
-
         checkEmptyRS(met.getClientInfoProperties());
 
 		// Make sure the constants provided in JDBC40Translation is correct

@@ -22,7 +22,6 @@
 package org.apache.derby.client.am;
 
 import java.sql.Array;
-import java.sql.BaseQuery;
 import java.sql.Blob;
 import java.sql.SQLClientInfoException;
 import java.sql.Clob;
@@ -77,18 +76,6 @@ public class LogicalConnection40
         return physicalConnection_.createNClob();
     }
 
-    public <T extends BaseQuery>T createQueryObject(Class<T> ifc)
-        throws SQLException {
-		checkForNullPhysicalConnection();
-		return physicalConnection_.createQueryObject( ifc );
-    }
-    
-    public <T extends BaseQuery>T createQueryObject(Class<T> ifc, java.sql.Connection conn)
-        throws SQLException {
-		checkForNullPhysicalConnection();
-		return physicalConnection_.createQueryObject( ifc, conn );
-    }
-    
     public SQLXML createSQLXML()
         throws SQLException {
 		checkForNullPhysicalConnection();

@@ -120,19 +120,6 @@ public class ConnectionTest
         }
     }
 
-    /**
-     * Simply test that the method is implemented.
-     * [TODO] Write a better test when some (believed to be) JDK bugs have
-     *        been resolved. Currently fails during query execution with 
-     *        JDK 1.6.0_b85 because of some security manager problems. May be 
-     *        fixed in a couple of beta releases.
-     */
-    public void testCreateQueryObjectIsImplemented()
-        throws SQLException {
-        getConnection().createQueryObject(TestQuery.class);
-        getConnection().createQueryObject(TestQuery.class, getConnection());
-    }
-
     public void testCreateSQLXMLNotImplemented()
         throws SQLException {
         try {
