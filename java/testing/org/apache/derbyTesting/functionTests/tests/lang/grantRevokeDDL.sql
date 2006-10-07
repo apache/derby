@@ -1978,3 +1978,52 @@ set connection mamta2;
 drop table t1Derby1847; 
 set connection mamta3;
 select c3 from mamta2.t1Derby1847; 
+
+-- DERBY-1716
+-- Revoking select privilege from a user times out when that user still have
+-- a cursor open before the patch.
+set connection user1;
+drop table t1;
+create table t1 (c varchar(1));
+insert into t1 values 'a', 'b', 'c';
+grant select on t1 to user2;
+set connection user2;
+autocommit off;
+GET CURSOR crs1 AS 'select * from user1.t1';
+next crs1;
+set connection user1;
+-- should succeed without blocking
+revoke select on t1 from user2;
+set connection user2;
+-- still ok to fetch.
+next crs1;
+next crs1;
+close crs1;
+commit;
+-- should fail since select privilege got revoked
+GET CURSOR crs1 AS 'select * from user1.t1';
+next crs1;
+close crs1;
+autocommit on;
+-- repeat the scenario
+set connection user1;
+grant select on t1 to user2;
+set connection user2;
+autocommit off;
+GET CURSOR crs1 AS 'select * from user1.t1';
+next crs1;
+set connection user1;
+-- should succeed without blocking
+revoke select on t1 from user2;
+set connection user2;
+-- still ok to fetch.
+next crs1;
+next crs1;
+close crs1;
+commit;
+-- should fail since select privilege got revoked
+GET CURSOR crs1 AS 'select * from user1.t1';
+next crs1;
+close crs1;
+autocommit on;
+set connection user1;

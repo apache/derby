@@ -150,17 +150,61 @@ implements Authorizer
 
             // Database Owner can access any object. Ignore 
             // requiredPermissionsList for Database Owner
-            if( requiredPermissionsList != null && ! requiredPermissionsList.isEmpty() && 
+            if( requiredPermissionsList != null    && 
+                !requiredPermissionsList.isEmpty() && 
 				!authorizationId.equals(dd.getAuthorizationDatabaseOwner()))
             {
-                for( Iterator iter = requiredPermissionsList.iterator();
-                     iter.hasNext();)
+                int ddMode = dd.startReading(lcc);
+                
+                 /*
+                  * The system may need to read the permission descriptor(s) 
+                  * from the system table(s) if they are not available in the 
+                  * permission cache.  So start an internal read-only nested 
+                  * transaction for this.
+                  * 
+                  * The reason to use a nested transaction here is to not hold
+                  * locks on system tables on a user transaction.  e.g.:  when
+                  * attempting to revoke an user, the statement may time out
+                  * since the user-to-be-revoked transaction may have acquired 
+                  * shared locks on the permission system tables; hence, this
+                  * may not be desirable.  
+                  * 
+                  * All locks acquired by StatementPermission object's check()
+                  * method will be released when the system ends the nested 
+                  * transaction.
+                  * 
+                  * In Derby, the locks from read nested transactions come from
+                  * the same space as the parent transaction; hence, they do not
+                  * conflict with parent locks.
+                  */  
+                lcc.beginNestedTransaction(true);
+            	
+                try 
                 {
-                    ((StatementPermission) iter.next()).check( lcc, authorizationId, false);
-                }                    
+                    try 
+                    {
+                    	// perform the permission checking
+                        for (Iterator iter = requiredPermissionsList.iterator(); 
+                            iter.hasNext();) 
+                        {
+                            ((StatementPermission) iter.next()).check(lcc, 
+                                authorizationId, false);
+                        }
+                    } 
+                    finally 
+                    {
+                        dd.doneReading(ddMode, lcc);
+                    }
+                } 
+                finally 
+                {
+                	// make sure we commit; otherwise, we will end up with 
+                	// mismatch nested level in the language connection context.
+                    lcc.commitNestedTransaction();
+                }
             }
-		}
-	}
+        }
+    }
 
 	private static StandardException externalRoutineException(int operation, int sqlAllowed) {
 
@@ -282,4 +326,5 @@ implements Authorizer
 		if (userAccessLevel == NO_ACCESS)
 			throw StandardException.newException(SQLState.AUTH_DATABASE_CONNECTION_REFUSED);
 	}
+	
 }
