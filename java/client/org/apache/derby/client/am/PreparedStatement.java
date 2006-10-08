@@ -405,7 +405,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setNull", parameterIndex, jdbcType);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex) ;
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex) ;
                 
                 if( ! PossibleTypes.getPossibleTypesForNull( paramType ).checkType( jdbcType )){
                     
@@ -465,7 +465,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setBoolean", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ) {
                     
@@ -494,7 +494,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setByte", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType( paramType ) ){
                     
@@ -523,7 +523,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setShort", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -559,7 +559,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setInt", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -593,7 +593,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setLong", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -621,7 +621,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setFloat", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -650,7 +650,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setDouble", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -679,7 +679,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setBigDecimal", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType( paramType ) ){
                     
@@ -713,7 +713,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_DATE.checkType(paramType) ){
                     
@@ -781,7 +781,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setTime", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_TIME.checkType( paramType ) ){
                     
@@ -848,7 +848,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setTimestamp", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_TIMESTAMP.checkType( paramType ) ) {
                     
@@ -922,7 +922,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setString", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_STRING.checkType( paramType ) ){
                     PossibleTypes.throw22005Exception(agent_.logWriter_ ,
@@ -958,7 +958,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setBytes", parameterIndex, x);
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_BYTES.checkType( paramType ) ){
                     
@@ -1007,7 +1007,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setBinaryStream", parameterIndex, "<input stream>", new Long(length));
                 }
                 
-                final int paramType = getParameterMetaData().getParameterType(parameterIndex);
+                final int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if ( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_BINARYSTREAM.checkType( paramType ) ){
                     PossibleTypes.throw22005Exception(agent_.logWriter_,
@@ -1085,7 +1085,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterIndex, "<input stream>", new Long(length));
                 }
                 
-                checkTypeForSetAsciiStream(getParameterMetaData().getParameterType(parameterIndex),
+                checkTypeForSetAsciiStream(getColumnMetaDataX().getColumnType(parameterIndex),
                                            agent_.logWriter_);
 
                 parameterIndex = checkSetterPreconditions(parameterIndex);
@@ -1213,7 +1213,7 @@ public class PreparedStatement extends Statement
             }
             try {
                 
-                checkTypeForSetCharacterStream(getParameterMetaData().getParameterType(parameterIndex),
+                checkTypeForSetCharacterStream(getColumnMetaDataX().getColumnType(parameterIndex),
                                                agent_.logWriter_);
                 
                 parameterIndex = checkSetterPreconditions(parameterIndex);
@@ -1252,7 +1252,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterIndex, x, new Long(length));
                 }
 
-                checkTypeForSetCharacterStream(getParameterMetaData().getParameterType(parameterIndex),
+                checkTypeForSetCharacterStream(getColumnMetaDataX().getColumnType(parameterIndex),
                                                agent_.logWriter_);
                 
                 parameterIndex = checkSetterPreconditions(parameterIndex);
@@ -1316,7 +1316,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setBlob", parameterIndex, x);
                 }
                 
-                checkTypeForSetBlob(getParameterMetaData().getParameterType(parameterIndex),
+                checkTypeForSetBlob(getColumnMetaDataX().getColumnType(parameterIndex),
                                     agent_.logWriter_);
                     
                 setBlobX(parameterIndex, x);
@@ -1347,7 +1347,7 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setClob", parameterIndex, x);
                 }
                 
-                checkTypeForSetClob(getParameterMetaData().getParameterType(parameterIndex),
+                checkTypeForSetClob(getColumnMetaDataX().getColumnType(parameterIndex),
                                     agent_.logWriter_);
                 
                 setClobX(parameterIndex, x);
@@ -1772,13 +1772,18 @@ public class PreparedStatement extends Statement
     private ParameterMetaData getParameterMetaDataX() throws SqlException {
         super.checkForClosedStatement();
         ParameterMetaData pm = ClientDriver.getFactory().newParameterMetaData
-                (parameterMetaData_ != null
-                ? parameterMetaData_
-                : ClientDriver.getFactory().newColumnMetaData(agent_.logWriter_, 0));
+            ( getColumnMetaDataX() );
         if (escapedProcedureCallWithResult_) {
             pm.escapedProcedureCallWithResult_ = true;
         }
         return pm;
+    }
+
+    private ColumnMetaData getColumnMetaDataX() {
+        return 
+            parameterMetaData_ != null ?
+            parameterMetaData_ : 
+            ClientDriver.getFactory().newColumnMetaData(agent_.logWriter_, 0);
     }
 
     // ------------------------ box car and callback methods --------------------------------
@@ -2595,7 +2600,7 @@ public class PreparedStatement extends Statement
             }
             try {
 
-                checkTypeForSetAsciiStream(getParameterMetaData().getParameterType( parameterIndex),
+                checkTypeForSetAsciiStream(getColumnMetaDataX().getColumnType( parameterIndex),
                                            agent_.logWriter_);
 
                 parameterIndex = checkSetterPreconditions(parameterIndex);
@@ -2661,7 +2666,7 @@ public class PreparedStatement extends Statement
             
             try {
                 
-                checkTypeForSetClob(getParameterMetaData().getParameterType(parameterIndex),
+                checkTypeForSetClob(getColumnMetaDataX().getColumnType(parameterIndex),
                                 agent_.logWriter_);
                 
                 checkForClosedStatement();
@@ -2731,7 +2736,7 @@ public class PreparedStatement extends Statement
             }
 
             try {
-                checkTypeForSetBlob(getParameterMetaData().getParameterType(parameterIndex),
+                checkTypeForSetBlob(getColumnMetaDataX().getColumnType(parameterIndex),
                                     agent_.logWriter_);
                 
                 setBinaryStreamX(parameterIndex, inputStream, -1);
