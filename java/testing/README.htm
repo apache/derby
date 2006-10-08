@@ -204,9 +204,9 @@ file, or <a
  href="http://apache.roweboat.net/jakarta/oro/source/jakarta-oro-2.0.8.tar.gz">tar</a>.gz)</font></p>
       </li>
       <li>
-        <p style="margin-bottom: 0in;"><font size="2">derbyTesting.jar</font></p>
-        <p style="margin-bottom: 0in;">&nbsp;&nbsp;&nbsp;&nbsp; <font
- size="2">test files and classes</font></p>
+        <p style="margin-bottom: 0in;"><font size="2">derbyTesting.jar<br>
+        </font>&nbsp;&nbsp;&nbsp;&nbsp; <font size="2">test files and
+classes</font></p>
       </li>
       <li>
         <p style="margin-bottom: 0in;"><font size="2">derby.jar<br>
@@ -216,6 +216,11 @@ classes</font></p>
       <li>
         <p style="margin-bottom: 0in;"><font size="2">derbytools.jar<br>
         </font>&nbsp;&nbsp;&nbsp; <font size="2">derby tools classes
+for tools like ij and dblook</font></p>
+      </li>
+      <li>
+        <p style="margin-bottom: 0in;"><font size="2">derbyrun.jar<br>
+        </font>&nbsp;&nbsp;&nbsp; <font size="2">executable jar file
 for tools like ij and dblook</font></p>
       </li>
       <li>
@@ -261,7 +266,7 @@ variable and that the set CLASSPATH command below has carriage returns
 for formatting reasons):<br>
 set jardir=/local/derbyjar<br>
 set
-CLASSPATH="$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbynet.jar:$jardir/derbyclient.jar:<br>
+CLASSPATH="$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbyrun.jar:$jardir/derbynet.jar:$jardir/derbyclient.jar:<br>
 $jardir/derbyTesting.jar:/local/derby/tools/java/jakarta-oro-2.0.8.jar:<br>
 $jardir/derbyLocale_de_DE.jar:$jardir/derbyLocale_es.jar:$jardir/derbyLocale_fr.jar:<br>
 $jardir/derbyLocale_it.jar:$jardir/derbyLocale_ja_JP.jar:$jardir/derbyLocale_ko_KR.jar:<br>
