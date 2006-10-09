@@ -42,8 +42,7 @@ derbycal.days = [
     ["Wednesday",   "2006-10-04"],
     ["Thursday",    "2006-10-05"],
     ["Friday",      "2006-10-06"],
-    ["Saturday",    "2006-10-07"],
-    ["Sunday",      "2006-10-08"]
+    ["Saturday",    "2006-10-07"]
 ];
 
 derbycal.startDate = derbycal.days[0][1];
