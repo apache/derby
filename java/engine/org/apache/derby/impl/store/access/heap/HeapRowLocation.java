@@ -104,7 +104,7 @@ public class HeapRowLocation extends DataType implements RowLocation
 	}
 
 	public DataValueDescriptor getNewNull() {
-		return null;
+        return new HeapRowLocation();
 	}
 	public void setValue(Object o) {
 	}
