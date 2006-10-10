@@ -128,9 +128,13 @@ public class j9_foundation extends jvm {
     }
 	public String getDintro() { return "-D"; }
 
-	protected void setSecurityProps()
-	{
-		System.out.println("Note: J9 (foundation) tests do not run with security manager");		
-	}
+// Having the following method overload the one in jvm.java causes problems when running
+// the junit tests - they *do* successfully run with securityManager.
+// Foundation class tests actually run ok with security manager - except when useprocess
+// is false. This is caused by a bug in the jvm. See also DERBY-885 and DERBY-1785.
+//	protected void setSecurityProps()
+//	{
+//		System.out.println("Note: J9 (foundation) tests do not run with security manager");		
+//	}
 
 }
