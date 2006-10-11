@@ -631,6 +631,13 @@ public class DerbyNetAutoStart
             System.out.println( "  Connection close failed:");
             System.out.println( "    " + sqle.getMessage());
         }
+        // DERBY-803: Give the server threads time to finish their close
+        // operations before we shut down the engine. Otherwise, we might get
+        // some (harmless) error messages printed to the console. See also
+        // DERBY-1020.
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ex) {}
         try
         {
             DriverManager.getConnection( "jdbc:derby:;shutdown=true");
