@@ -414,7 +414,7 @@ public class PreparedStatement extends Statement
                 checkForSupportedDataType(jdbcType);
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult(parameterIndex) ) ;
+                    getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.getPossibleTypesForNull( paramType ).checkType( jdbcType )){
                     
@@ -436,7 +436,6 @@ public class PreparedStatement extends Statement
 
     // also used by DBMD methods
     void setNullX(int parameterIndex, int jdbcType) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = jdbcType;
 
         if (!parameterMetaData_.nullable_[parameterIndex - 1]) {
@@ -466,7 +465,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ) {
                     
@@ -476,7 +475,6 @@ public class PreparedStatement extends Statement
                     
                 }
                 
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIT;
                 setInput(parameterIndex, new Short((short) (x ? 1 : 0)));
             }
@@ -496,7 +494,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType( paramType ) ){
                     
@@ -506,7 +504,6 @@ public class PreparedStatement extends Statement
                     
                 }
                 
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TINYINT;
                 setInput(parameterIndex, new Short(x));
             }
@@ -526,7 +523,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -548,7 +545,6 @@ public class PreparedStatement extends Statement
 
     // also used by DBMD methods
     void setShortX(int parameterIndex, short x) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.SMALLINT;
         setInput(parameterIndex, new Short(x));
 
@@ -563,7 +559,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -583,7 +579,6 @@ public class PreparedStatement extends Statement
 
     // also used by DBMD methods
     void setIntX(int parameterIndex, int x) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.INTEGER;
         setInput(parameterIndex, new Integer(x));
     }
@@ -598,7 +593,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -607,7 +602,6 @@ public class PreparedStatement extends Statement
                                                       paramType);
                 }
                 
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIGINT;
                 setInput(parameterIndex, new Long(x));
             }
@@ -627,7 +621,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -637,7 +631,6 @@ public class PreparedStatement extends Statement
 
                 }
                 
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.REAL;
                 setInput(parameterIndex, new Float(x));
             }
@@ -657,7 +650,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType(paramType) ){
                     
@@ -667,7 +660,6 @@ public class PreparedStatement extends Statement
                     
                 }
                 
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DOUBLE;
                 setInput(parameterIndex, new Double(x));
             }
@@ -687,7 +679,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_GENERIC_SCALAR.checkType( paramType ) ){
                     
@@ -697,7 +689,6 @@ public class PreparedStatement extends Statement
                     
                 }
 
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DECIMAL;
                 if (x == null) {
                     setNull(parameterIndex, java.sql.Types.DECIMAL);
@@ -722,7 +713,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_DATE.checkType(paramType) ){
                     
@@ -733,7 +724,6 @@ public class PreparedStatement extends Statement
                 }
                 
                 checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DATE;
                 if (x == null) {
                     setNull(parameterIndex, java.sql.Types.DATE);
@@ -791,7 +781,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_TIME.checkType( paramType ) ){
                     
@@ -800,7 +790,6 @@ public class PreparedStatement extends Statement
                                                        paramType );
                 }
                 
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIME;
                 if (x == null) {
                     setNull(parameterIndex, java.sql.Types.TIME);
@@ -859,7 +848,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_TIMESTAMP.checkType( paramType ) ) {
                     
@@ -869,7 +858,6 @@ public class PreparedStatement extends Statement
                     
                 }
                 
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIMESTAMP;
 
                 if (x == null) {
@@ -934,7 +922,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_STRING.checkType( paramType ) ){
                     PossibleTypes.throw22005Exception(agent_.logWriter_ ,
@@ -953,7 +941,6 @@ public class PreparedStatement extends Statement
 
     // also used by DBMD methods
     void setStringX(int parameterIndex, String x) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.LONGVARCHAR;
         if (x == null) {
             setNullX(parameterIndex, java.sql.Types.LONGVARCHAR);
@@ -971,7 +958,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 final int paramType = 
-                    getColumnMetaDataX().getColumnType( checkForEscapedCallWithResult( parameterIndex ) );
+                    getColumnMetaDataX().getColumnType(parameterIndex);
                 
                 if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_BYTES.checkType( paramType ) ){
                     
@@ -991,7 +978,6 @@ public class PreparedStatement extends Statement
 
     // also used by BLOB
     public void setBytesX(int parameterIndex, byte[] x) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.LONGVARBINARY;
         if (x == null) {
             setNullX(parameterIndex, java.sql.Types.LONGVARBINARY);
@@ -1054,7 +1040,6 @@ public class PreparedStatement extends Statement
     protected void setBinaryStreamX(int parameterIndex,
                                  java.io.InputStream x,
                                  int length) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BLOB;
         if (x == null) {
             setNullX(parameterIndex, java.sql.Types.BLOB);
@@ -1094,7 +1079,6 @@ public class PreparedStatement extends Statement
                 
                 checkTypeForSetAsciiStream(parameterIndex);
 
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
                 if (x == null) {
                     setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
@@ -1132,8 +1116,7 @@ public class PreparedStatement extends Statement
 
     private void checkTypeForSetAsciiStream(int parameterIndex)
             throws SqlException, SQLException {
-        int paramType = getColumnMetaDataX().getColumnType(
-            checkForEscapedCallWithResult(parameterIndex));
+        int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
         if ( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_ASCIISTREAM.checkType( paramType ) ) {
             
             PossibleTypes.throw22005Exception(agent_.logWriter_,
@@ -1146,8 +1129,7 @@ public class PreparedStatement extends Statement
     
     private void checkTypeForSetBinaryStream(int parameterIndex)
             throws SqlException, SQLException {
-        int paramType = getColumnMetaDataX().getColumnType(
-            checkForEscapedCallWithResult(parameterIndex));
+        int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
         if (!PossibleTypes.POSSIBLE_TYPES_IN_SET_BINARYSTREAM.
                 checkType(paramType)) {
             PossibleTypes.throw22005Exception(agent_.logWriter_,
@@ -1158,8 +1140,7 @@ public class PreparedStatement extends Statement
     
     private void checkTypeForSetCharacterStream(int parameterIndex)
             throws SqlException, SQLException {
-        int paramType = getColumnMetaDataX().getColumnType(
-            checkForEscapedCallWithResult(parameterIndex));
+        int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
         if (!PossibleTypes.POSSIBLE_TYPES_IN_SET_CHARACTERSTREAM.
                 checkType(paramType)) {
             PossibleTypes.throw22005Exception(agent_.logWriter_,
@@ -1170,8 +1151,7 @@ public class PreparedStatement extends Statement
 
     private void checkTypeForSetBlob(int parameterIndex)
             throws SqlException, SQLException {
-        int paramType = getColumnMetaDataX().getColumnType(
-            checkForEscapedCallWithResult(parameterIndex));
+        int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
         if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_BLOB.checkType( paramType ) ){
             
             PossibleTypes.throw22005Exception(agent_.logWriter_,
@@ -1183,8 +1163,7 @@ public class PreparedStatement extends Statement
     
     private void checkTypeForSetClob(int parameterIndex)
             throws SqlException, SQLException {
-        int paramType = getColumnMetaDataX().getColumnType(
-            checkForEscapedCallWithResult(parameterIndex));
+        int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
         if( ! PossibleTypes.POSSIBLE_TYPES_IN_SET_CLOB.checkType( paramType ) ){
                     
             PossibleTypes.throw22005Exception(agent_.logWriter_,
@@ -1242,7 +1221,6 @@ public class PreparedStatement extends Statement
             }
             try {
                 checkTypeForSetCharacterStream(parameterIndex);
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex -1] =
                     java.sql.Types.CLOB;
                 if (x == null) {
@@ -1278,7 +1256,6 @@ public class PreparedStatement extends Statement
                     agent_.logWriter_.traceEntry(this, "setCharacterStream", parameterIndex, x, new Long(length));
                 }
                 checkTypeForSetCharacterStream(parameterIndex);
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
                 if (x == null) {
                     setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
@@ -1336,7 +1313,6 @@ public class PreparedStatement extends Statement
 
     // also used by Blob
     public void setBlobX(int parameterIndex, java.sql.Blob x) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BLOB;
         if (x == null) {
             setNullX(parameterIndex, java.sql.Types.BLOB);
@@ -1364,7 +1340,6 @@ public class PreparedStatement extends Statement
 
     // also used by Clob
     void setClobX(int parameterIndex, java.sql.Clob x) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
         if (x == null) {
             this.setNullX(parameterIndex, Types.CLOB);
@@ -1381,7 +1356,6 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setArray", parameterIndex, x);
                 }
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
             }
@@ -1399,7 +1373,6 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setRef", parameterIndex, x);
                 }
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 throw new SqlException(agent_.logWriter_, 
                     new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
             }
@@ -1509,7 +1482,6 @@ public class PreparedStatement extends Statement
                             Object x,
                             int targetJdbcType,
                             int scale) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         checkForValidScale(scale);
 
         // JDBC 4.0 requires us to throw SQLFeatureNotSupportedException for
@@ -1779,9 +1751,6 @@ public class PreparedStatement extends Statement
     private ParameterMetaData getParameterMetaDataX() throws SqlException {
         ParameterMetaData pm = ClientDriver.getFactory().newParameterMetaData
             ( getColumnMetaDataX() );
-        if (escapedProcedureCallWithResult_) {
-            pm.escapedProcedureCallWithResult_ = true;
-        }
         return pm;
     }
 
@@ -2450,19 +2419,6 @@ public class PreparedStatement extends Statement
         }
     }
 
-
-    private int checkForEscapedCallWithResult(int parameterIndex) throws SqlException {
-        if (escapedProcedureCallWithResult_) {
-            if (parameterIndex == 1) {
-                throw new SqlException(agent_.logWriter_,
-                    new ClientMessageId(SQLState.LANG_RETURN_OUTPUT_PARAM_CANNOT_BE_SET));
-            } else {
-                parameterIndex--;
-            }
-        }
-        return parameterIndex;
-    }
-
     void checkForValidScale(int scale) throws SqlException {
         if (scale < 0 || scale > 31) {
             throw new SqlException(agent_.logWriter_, 
@@ -2600,7 +2556,6 @@ public class PreparedStatement extends Statement
             }
             try {
                 checkTypeForSetAsciiStream(parameterIndex);
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.CLOB;
                 if (x == null) {
                     setNull(parameterIndex, java.sql.Types.LONGVARCHAR);

@@ -141,7 +141,6 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     int timeout_ = 0; // for query timeout in seconds
     int maxRows_ = 0;
     int maxFieldSize_ = 0; // zero means that there is no limit to the size of a column.
-    boolean escapedProcedureCallWithResult_ = false;
 
     // When this is false we skip autocommit for this PreparedStatement.
     // This is needed when the PreparedStatement object is used internally by
@@ -250,7 +249,6 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         doWriteTimeout = false;
         maxRows_ = 0;
         maxFieldSize_ = 0;
-        escapedProcedureCallWithResult_ = false;
         isCatalogQuery_ = false;
         isAutoCommittableStatement_ = true;
 

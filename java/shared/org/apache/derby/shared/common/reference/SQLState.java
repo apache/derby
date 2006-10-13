@@ -1445,10 +1445,8 @@ public interface SQLState {
     
     
     String WASNULL_INVALID = "XJ088.S";
-    String INVALID_PARAM_USE_GETINT  = "XJ089.S";
     String CALENDAR_IS_NULL = "XJ090.S";
     String PARAM_NOT_OUT_OR_INOUT = "XJ091.S";
-    String RETURN_PARAM_MUST_BE_INT  = "XJ092.S";
     String BLOB_TOO_LARGE_FOR_CLIENT  = "XJ093.S";
     String OBJECT_ALREADY_CLOSED = "XJ094.S";
     String ERROR_PRIVILEGED_ACTION = "XJ095.S";

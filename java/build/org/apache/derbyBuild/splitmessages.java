@@ -69,7 +69,6 @@ public class splitmessages {
         clientMessageIds.add(SQLState.LANG_INVALID_COLUMN_POSITION);
         clientMessageIds.add(SQLState.INVALID_COLUMN_NAME);
         clientMessageIds.add(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
-        clientMessageIds.add(SQLState.LANG_RETURN_OUTPUT_PARAM_CANNOT_BE_SET);
         clientMessageIds.add(SQLState.LANG_NULL_INTO_NON_NULL);
         clientMessageIds.add(SQLState.JDBC_METHOD_NOT_IMPLEMENTED);
         clientMessageIds.add(SQLState.JDBC_METHOD_NOT_SUPPORTED_BY_SERVER);

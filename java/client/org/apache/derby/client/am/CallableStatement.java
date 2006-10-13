@@ -162,7 +162,6 @@ public class CallableStatement extends PreparedStatement
     }
 
     private int guessScaleForDecimalOrNumeric(int parameterIndex) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
         // Types.DECIMAL with no supplied scale will use the scale supplied by the setter method if input BigDecimal is not null
         if (parameterMetaData_.types_[parameterIndex - 1] == Types.DECIMAL &&
                 parameters_[parameterIndex - 1] != null) {
@@ -189,11 +188,6 @@ public class CallableStatement extends PreparedStatement
     }
 
     private void registerOutParameterX(int parameterIndex, int jdbcType, int scale) throws SqlException {
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex, jdbcType);
-        // if the parameter is the return clause of the call statement
-        if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-            return;
-        }
         super.checkForValidParameterIndex(parameterIndex);
         checkForValidScale(scale);
         outputRegistered_ = true; // this variable is only used by Batch
@@ -245,16 +239,7 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getBoolean", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 boolean result;
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    result = agent_.crossConverters_.getBooleanFromInt(returnValueFromProcedure_);
-                    this.wasNull_ = this.WAS_NOT_NULL;
-                    if (agent_.loggingEnabled()) {
-                        agent_.logWriter_.traceExit(this, "getBoolean", result);
-                    }
-                    return result;
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? false : singletonRowData_.getBoolean(parameterIndex);
@@ -278,16 +263,7 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getByte", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 byte result;
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    result = agent_.crossConverters_.getByteFromInt(returnValueFromProcedure_);
-                    this.wasNull_ = this.WAS_NOT_NULL;
-                    if (agent_.loggingEnabled()) {
-                        agent_.logWriter_.traceExit(this, "getByte", result);
-                    }
-                    return result;
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? 0 : singletonRowData_.getByte(parameterIndex);
@@ -311,16 +287,7 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getShort", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 short result;
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    result = agent_.crossConverters_.getShortFromInt(returnValueFromProcedure_);
-                    this.wasNull_ = this.WAS_NOT_NULL;
-                    if (agent_.loggingEnabled()) {
-                        agent_.logWriter_.traceExit(this, "getShort", result);
-                    }
-                    return result;
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? 0 : singletonRowData_.getShort(parameterIndex);
@@ -359,11 +326,6 @@ public class CallableStatement extends PreparedStatement
     // also used by SQLCA
     int getIntX(int parameterIndex) throws SqlException {
         super.checkForClosedStatement();
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-        if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-            this.wasNull_ = this.WAS_NOT_NULL;
-            return returnValueFromProcedure_;
-        }
         checkGetterPreconditions(parameterIndex);
         setWasNull(parameterIndex);
         return wasNullX() ? 0 : singletonRowData_.getInt(parameterIndex);
@@ -377,16 +339,7 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getLong", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 long result;
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    result = (long) returnValueFromProcedure_;
-                    this.wasNull_ = this.WAS_NOT_NULL;
-                    if (agent_.loggingEnabled()) {
-                        agent_.logWriter_.traceExit(this, "getLong", result);
-                    }
-                    return result;
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? 0 : singletonRowData_.getLong(parameterIndex);
@@ -410,16 +363,7 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getFloat", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 float result;
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    result = (float) returnValueFromProcedure_;
-                    this.wasNull_ = this.WAS_NOT_NULL;
-                    if (agent_.loggingEnabled()) {
-                        agent_.logWriter_.traceExit(this, "getFloat", result);
-                    }
-                    return result;
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? 0 : singletonRowData_.getFloat(parameterIndex);
@@ -443,16 +387,7 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getDouble", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 double result;
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    result = (double) returnValueFromProcedure_;
-                    this.wasNull_ = this.WAS_NOT_NULL;
-                    if (agent_.loggingEnabled()) {
-                        agent_.logWriter_.traceExit(this, "getDouble", result);
-                    }
-                    return result;
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? 0 : singletonRowData_.getDouble(parameterIndex);
@@ -477,16 +412,7 @@ public class CallableStatement extends PreparedStatement
                 }
                 super.checkForClosedStatement();
                 checkForValidScale(scale);
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 java.math.BigDecimal result;
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    result = java.math.BigDecimal.valueOf(returnValueFromProcedure_).setScale(scale);
-                    this.wasNull_ = this.WAS_NOT_NULL;
-                    if (agent_.loggingEnabled()) {
-                        agent_.logWriter_.traceDeprecatedExit(this, "getBigDecimal", result);
-                    }
-                    return result;
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? null : singletonRowData_.getBigDecimal(parameterIndex);
@@ -513,16 +439,7 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getBigDecimal", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 java.math.BigDecimal result;
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    result = java.math.BigDecimal.valueOf(returnValueFromProcedure_);
-                    this.wasNull_ = this.WAS_NOT_NULL;
-                    if (agent_.loggingEnabled()) {
-                        agent_.logWriter_.traceExit(this, "getBigDecimal", result);
-                    }
-                    return result;
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? null : singletonRowData_.getBigDecimal(parameterIndex);
@@ -546,11 +463,6 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getDate", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 java.sql.Date result = wasNullX() ? null : singletonRowData_.getDate(parameterIndex);
@@ -604,11 +516,6 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getTime", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 java.sql.Time result = wasNullX() ? null : singletonRowData_.getTime(parameterIndex);
@@ -661,11 +568,6 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getTimestamp", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 java.sql.Timestamp result = wasNullX() ? null : singletonRowData_.getTimestamp(parameterIndex);
@@ -735,11 +637,6 @@ public class CallableStatement extends PreparedStatement
     // also used by SQLCA
     String getStringX(int parameterIndex) throws SqlException {
         super.checkForClosedStatement();
-        parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-        if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-            this.wasNull_ = this.WAS_NOT_NULL;
-            return Integer.toString(returnValueFromProcedure_);
-        }
         checkGetterPreconditions(parameterIndex);
         setWasNull(parameterIndex);
         return wasNullX() ? null : singletonRowData_.getString(parameterIndex);
@@ -753,11 +650,6 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getBytes", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 byte[] result = wasNullX() ? null : singletonRowData_.getBytes(parameterIndex);
@@ -781,11 +673,6 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getBlob", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 java.sql.Blob result = wasNullX() ? null : singletonRowData_.getBlob(parameterIndex);
@@ -806,11 +693,6 @@ public class CallableStatement extends PreparedStatement
         {
             synchronized (connection_) {
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 java.sql.Clob result = wasNullX() ? null : singletonRowData_.getClob(parameterIndex);
@@ -834,11 +716,6 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getArray", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));                    
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 java.sql.Array result = wasNullX() ? null : singletonRowData_.getArray(parameterIndex);
@@ -866,11 +743,6 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getRef", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_PARAM_USE_GETINT));
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 java.sql.Ref result = wasNullX() ? null : singletonRowData_.getRef(parameterIndex);
@@ -898,16 +770,7 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getObject", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 Object result;
-                if (parameterIndex == 0 && escapedProcedureCallWithResult_) {
-                    result = new Integer(returnValueFromProcedure_);
-                    this.wasNull_ = this.WAS_NOT_NULL;
-                    if (agent_.loggingEnabled()) {
-                        agent_.logWriter_.traceExit(this, "getObject", result);
-                    }
-                    return result;
-                }
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 result = wasNullX() ? null : singletonRowData_.getObject(parameterIndex);
@@ -931,7 +794,6 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getObject", parameterIndex, map);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 Object result;
                 checkGetterPreconditions(parameterIndex);
                 if (true) {
@@ -1326,7 +1188,6 @@ public class CallableStatement extends PreparedStatement
                     agent_.logWriter_.traceEntry(this, "getCharacterStream", parameterIndex);
                 }
                 super.checkForClosedStatement();
-                parameterIndex = checkForEscapedCallWithResult(parameterIndex);
                 checkGetterPreconditions(parameterIndex);
                 setWasNull(parameterIndex);
                 Reader reader = null;
@@ -1352,25 +1213,6 @@ public class CallableStatement extends PreparedStatement
      */
     protected String getJdbcStatementInterfaceName() {
         return "java.sql.CallableStatement";
-    }
-
-    private int checkForEscapedCallWithResult(int parameterIndex) throws SqlException {
-        if (escapedProcedureCallWithResult_) {
-            parameterIndex--;
-        }
-        return parameterIndex;
-    }
-
-    private int checkForEscapedCallWithResult(int parameterIndex, int jdbcType) throws SqlException {
-        if (escapedProcedureCallWithResult_) {
-            if (parameterIndex == 1 && jdbcType != java.sql.Types.INTEGER) {
-                throw new SqlException(agent_.logWriter_, 
-                    new ClientMessageId(SQLState.RETURN_PARAM_MUST_BE_INT));
-            } else {
-                parameterIndex--;
-            }
-        }
-        return parameterIndex;
     }
 
     private void checkGetterPreconditions(int parameterIndex) throws SqlException {
