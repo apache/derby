@@ -168,7 +168,7 @@ public class CreateAliasNode extends DDLStatementNode
 						System.arraycopy(names, 0, dupNameCheck, 0, paramCount);
 						java.util.Arrays.sort(dupNameCheck);
 						for (int dnc = 1; dnc < dupNameCheck.length; dnc++) {
-							if (dupNameCheck[dnc].equals(dupNameCheck[dnc - 1]))
+							if (! dupNameCheck[dnc].equals("") && dupNameCheck[dnc].equals(dupNameCheck[dnc - 1]))
 								throw StandardException.newException(SQLState.LANG_DB2_DUPLICATE_NAMES, dupNameCheck[dnc], getFullName());
 						}
 					}

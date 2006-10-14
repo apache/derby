@@ -777,5 +777,9 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 		ps.close();
 		conn.close();
 	}
+    
+    public static void noname(int p1, String p2) {
+        System.out.println("noname(int,String) called");
+    }
 }
 

@@ -34,7 +34,7 @@ import java.io.ObjectOutput;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
- * Describe a r (procedure or function) alias.
+ * Describe a routine (procedure or function) alias.
  *
  * @see AliasInfo
  */
@@ -55,6 +55,11 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	private int parameterCount;
 
 	private TypeDescriptor[]	parameterTypes;
+        /**
+         * Name of each parameter. As of DERBY 10.3, parameter names
+         * are optional. If the parameter is unnamed, parameterNames[i]
+         * is a string of length 0
+         */
 	private String[]			parameterNames;
 	/**
 		IN, OUT, INOUT
@@ -171,6 +176,12 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	public int[] getParameterModes() {
 		return parameterModes;
 	}
+        /**
+         * Returns an array containing the names of the parameters.
+         * As of DERBY 10.3, parameter names are optional (see DERBY-183
+         * for more information). If the i-th parameter was unnamed,
+         * parameterNames[i] will contain a string of length 0.
+         */
 	public String[] getParameterNames() {
 		return parameterNames;
 	}

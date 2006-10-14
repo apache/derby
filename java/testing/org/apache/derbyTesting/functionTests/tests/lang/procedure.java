@@ -87,6 +87,8 @@ public class procedure
 			testSQLControl(conn);
 			testLiterals(conn);
             
+            testNoParameterNames(conn);
+            
             multipleRSTests(conn);
                         jira_491_492(conn);
             testImplicitClose(conn);
@@ -98,6 +100,18 @@ public class procedure
 		
 	}
 
+    public static void testNoParameterNames(Connection conn) throws SQLException {
+        System.out.println("testNoParameterNames");
+        
+        Statement s = conn.createStatement();
+        s.execute("CREATE PROCEDURE NONAME(IN INT, IN VARCHAR(10)) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.noname'");
+        s.execute("{call noname(1, 'foo')}");
+        s.execute("DROP PROCEDURE NONAME");
+        s.execute("CREATE PROCEDURE NONAME(IN INT, IN P2 VARCHAR(10)) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.noname'");
+        s.execute("{call noname(1, 'foo')}");
+        s.execute("DROP PROCEDURE NONAME");
+    }
+    
 	public static void testNegative(Connection conn) throws SQLException {
 
 		System.out.println("testNegative");

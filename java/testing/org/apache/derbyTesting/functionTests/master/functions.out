@@ -482,6 +482,23 @@ ij> DROP FUNCTION COUNT_ROWS;
 0 rows inserted/updated/deleted
 ij> DROP TABLE SV_TAB;
 0 rows inserted/updated/deleted
+ij> -- function definition without parameter names are valid
+CREATE FUNCTION NONAME1(INT, INT) RETURNS INT EXTERNAL NAME 'java.lang.Math.max' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION NONAME2(P1 INT, INT) RETURNS INT EXTERNAL NAME 'java.lang.Math.max' LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> VALUES NONAME1(99, -45);
+1          
+-----------
+99         
+ij> VALUES NONAME2(99, -45);
+1          
+-----------
+99         
+ij> DROP FUNCTION NONAME1;
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION NONAME2;
+0 rows inserted/updated/deleted
 ij> -- check MODIFIES SQL DATA not allowed with FUNCTION
 CREATE FUNCTION COUNT_ROWS(P1 VARCHAR(128), P2 VARCHAR(128)) RETURNS INT
 MODIFIES SQL DATA

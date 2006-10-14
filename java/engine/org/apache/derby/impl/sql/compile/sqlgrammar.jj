@@ -9833,12 +9833,15 @@ void
 procedureParameterDefinition(Vector[] list) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
-	String				parameterName;
+	String				parameterName = "";
 	Integer				inout;
 }
 {
 	inout = inoutParameter()
-	parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
+    // Two tokens of LOOKAHEAD are necessary because certain tokens can be both
+    // an identifier() and a dataTypeDDL().  The extra token of lookahead resolves
+    // this choice conflict. 
+	[ LOOKAHEAD(2) parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) ]
 	typeDescriptor = dataTypeDDL() 
 	{
 		list[0].addElement(parameterName);
@@ -9925,11 +9928,14 @@ void
 functionParameterDefinition(Vector[] list) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
-	String				parameterName;
+	String				parameterName = "";
 	Integer				inout;
 }
 {
-	parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
+    // Two tokens of LOOKAHEAD are necessary because certain tokens can be both
+    // an identifier() and a dataTypeDDL().  The extra token of lookahead resolves
+    // this choice conflict. 
+	[ LOOKAHEAD(2) parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) ]
 	typeDescriptor = dataTypeDDL() 
 	{
 		list[0].addElement(parameterName);
