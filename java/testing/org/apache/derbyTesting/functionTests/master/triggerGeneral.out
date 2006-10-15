@@ -1263,4 +1263,44 @@ ij> select * from t32TriggerTest;
 C321       
 -----------
 1          
-ij> 
+ij> -- DERBY-630 
+-- NPE in CREATE TRIGGER when compilation schema is other than APP.
+connect 'jdbc:derby:wombat;create=true;user=user1;password=pwd' as user1;
+WARNING 01J01: Database 'wombat' not created, connection made to existing database instead.
+ij(USER1)> create table ippo.t1 (i int);
+0 rows inserted/updated/deleted
+ij(USER1)> create table ippo.t2 (i int);
+0 rows inserted/updated/deleted
+ij(USER1)> create index ippo.idx2 on t2(i);
+0 rows inserted/updated/deleted
+ij(USER1)> create trigger ippo.tr1 after insert on ippo.t1 for each row mode db2sql 
+   insert into ippo.t2 values 1;
+0 rows inserted/updated/deleted
+ij(USER1)> insert into ippo.t1 values 1;
+1 row inserted/updated/deleted
+ij(USER1)> insert into ippo.t1 values 1;
+1 row inserted/updated/deleted
+ij(USER1)> select * from ippo.t2;
+I          
+-----------
+1          
+1          
+ij(USER1)> drop index ippo.idx2;
+0 rows inserted/updated/deleted
+ij(USER1)> insert into ippo.t1 values 1;
+1 row inserted/updated/deleted
+ij(USER1)> select * from ippo.t2;
+I          
+-----------
+1          
+1          
+1          
+ij(USER1)> drop trigger ippo.tr1;
+0 rows inserted/updated/deleted
+ij(USER1)> drop table ippo.t2;
+0 rows inserted/updated/deleted
+ij(USER1)> drop table ippo.t1;
+0 rows inserted/updated/deleted
+ij(USER1)> drop schema ippo restrict;
+0 rows inserted/updated/deleted
+ij(USER1)> 

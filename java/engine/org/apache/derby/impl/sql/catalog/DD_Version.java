@@ -148,6 +148,8 @@ public	class DD_Version implements	Formatable
 			return "10.1";
 		case DataDictionary.DD_VERSION_DERBY_10_2:
 			return "10.2";
+		case DataDictionary.DD_VERSION_DERBY_10_3:
+			return "10.3";
 		default:
 			return null;
 		}
@@ -282,6 +284,21 @@ public	class DD_Version implements	Formatable
 		}
 		*/
 
+		/*
+		 * Derby soft upgrade code
+		 */
+		if (lastSoftUpgradeVersion <= DataDictionary.DD_VERSION_DERBY_10_2)
+		{
+			if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_2)
+			{
+				modifySysTableNullability(tc,
+					DataDictionaryImpl.SYSSTATEMENTS_CATALOG_NUM);
+			
+				modifySysTableNullability(tc,
+					DataDictionaryImpl.SYSVIEWS_CATALOG_NUM);
+			}
+		}
+		
 		tc.setProperty(DataDictionary.SOFT_DATA_DICTIONARY_VERSION, this, true);
 	}
 
@@ -689,27 +706,50 @@ public	class DD_Version implements	Formatable
 	 * 
 	 * Modifies the nullability of the system table corresponding
 	 * to the received catalog number.
-	 * OLD Cloudscape 5.1 upgrade code
+	 * 
 	 * @param tc			TransactionController.
 	 * @param catalogNum	The catalog number corresponding
 	 *  to the table for which we will modify the nullability.
+	 *  
+	 *  OLD Cloudscape 5.1 upgrade code
 	 *  If this corresponds to SYSALIASES, then the nullability of
 	 *  the SYSALIASES.ALIASINFO column will be changed to true
 	 *  (Beetle 4430).  If this corresponds to SYSSTATEMENTS,
 	 *  the nullability of the SYSSTATEMENTS.LASTCOMPILED
 	 *  column will be changed to true.
 	 *
-	 * @exception StandardException
+	 *  Derby upgrade code
+	 *  If this corresponds to SYSSTATEMENTS, then the nullability of
+	 *  the SYSSTATEMENTS.COMPILATION_SCHEMAID column will 
+	 *  be changed to true.  If this corresponds to SYSVIEWS, the nullability
+	 *  of the SYSVIEWS.COMPILATION_SCHEMAID column will be changed to true.
+	 *  
+	 * @exception StandardException   Thrown on error
 	 */
-
-	/* OLD Cloudscape 5.1 upgrade code. See applySafeChanges().
-
 	private void modifySysTableNullability(TransactionController tc, int catalogNum)
-	throws StandardException
-	{
-
-		TabInfo ti = bootingDictionary.getNonCoreTIByNumber(catalogNum);
+		throws StandardException
+	{		
+		TabInfoImpl ti = bootingDictionary.getNonCoreTIByNumber(catalogNum);
 		CatalogRowFactory rowFactory = ti.getCatalogRowFactory();
+		
+		if (catalogNum == DataDictionaryImpl.SYSSTATEMENTS_CATALOG_NUM)
+		{
+			// SYSSTATEMENTS table ==> SYSSTATEMENTS_COMPILATION_SCHEMAID needs 
+			// to be modified.
+			bootingDictionary.upgrade_setNullability(rowFactory,
+				SYSSTATEMENTSRowFactory.SYSSTATEMENTS_COMPILATION_SCHEMAID, 
+				true, tc);
+		}
+		else if (catalogNum == DataDictionaryImpl.SYSVIEWS_CATALOG_NUM)
+		{
+			// SYSVIEWS table ==> SYSVIEWS_COMPILATION_SCHEMAID needs 
+			// to be modified.
+			bootingDictionary.upgrade_setNullability(rowFactory,
+				SYSVIEWSRowFactory.SYSVIEWS_COMPILATION_SCHEMAID, 
+				true, tc);
+		}
+		
+		/* OLD Cloudscape 5.1 upgrade code. See applySafeChanges(). 
 		if (catalogNum == DataDictionaryImpl.SYSALIASES_CATALOG_NUM) {
 		// SYSALIASES table ==> ALIASINFO needs to be modified.
 			bootingDictionary.upgrade_setNullability(rowFactory,
@@ -720,8 +760,10 @@ public	class DD_Version implements	Formatable
 			bootingDictionary.upgrade_setNullability(rowFactory,
 				SYSSTATEMENTSRowFactory.SYSSTATEMENTS_LASTCOMPILED, true, tc);
 		}
+		*/		
+		
 	}
-*/
+
 	/**
 		Check to see if a database has been upgraded to the required
 		level in order to use a language feature.

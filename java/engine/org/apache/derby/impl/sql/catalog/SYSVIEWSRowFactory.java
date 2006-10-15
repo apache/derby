@@ -319,7 +319,7 @@ public class SYSVIEWSRowFactory extends CatalogRowFactory
 							SYSVIEWS_COMPILATION_SCHEMAID,	// column number
 							0,					// precision
 							0,					// scale
-							false,				// nullability
+							true,				// nullability
 							"CHAR",				// dataType
 							true,				// built-in type
 							36					// maxLength

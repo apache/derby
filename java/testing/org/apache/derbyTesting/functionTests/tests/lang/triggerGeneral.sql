@@ -709,3 +709,23 @@ drop view v21ViewTest;
 insert into t31TriggerTest values(1);
 select * from t31TriggerTest;
 select * from t32TriggerTest;
+
+
+-- DERBY-630 
+-- NPE in CREATE TRIGGER when compilation schema is other than APP.
+connect 'jdbc:derby:wombat;create=true;user=user1;password=pwd' as user1;
+create table ippo.t1 (i int);
+create table ippo.t2 (i int);
+create index ippo.idx2 on t2(i);
+create trigger ippo.tr1 after insert on ippo.t1 for each row mode db2sql 
+   insert into ippo.t2 values 1;
+insert into ippo.t1 values 1;
+insert into ippo.t1 values 1;
+select * from ippo.t2;
+drop index ippo.idx2;
+insert into ippo.t1 values 1;
+select * from ippo.t2;
+drop trigger ippo.tr1;
+drop table ippo.t2;
+drop table ippo.t1;
+drop schema ippo restrict;

@@ -95,7 +95,7 @@
   </target> 
 	
   <target name="checkUpgradeAppProps">		
-  	<available file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties" property="haveUpgradeProps"/>
+  	<available file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_3_app.properties" property="haveUpgradeProps"/>
   </target>
  
   <target name="updateProperty" unless="haveUpgradeProps">
@@ -104,7 +104,7 @@
   </target>
 	
   <target name="setpropertydefault" unless="derbyTesting.jar.path">
-  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties"
+  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_3_app.properties"
                       comment="Need to find out the set of permissions required by upgrade test - DERBY-1135">
 		<entry key="jvmflags" value="-DderbyTesting.jar.path=${src.dir}/tools/testing/derby"/>
 		<entry key="noSecurityManager" value="true"/>
@@ -112,7 +112,7 @@
   </target>
 	
   <target name="setproperty" if="derbyTesting.jar.path">
-  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_2_app.properties"
+  	<propertyfile file="${out.dir}/${derby.testing.functest.dir}/tests/upgradeTests/Upgrade_10_1_10_3_app.properties"
                       comment="Need to find out the set of permissions required by upgrade test - DERBY-1135">
   		<entry key="jvmflags" value="-DderbyTesting.jar.path=${derbyTesting.jar.path}" />
 		<entry key="noSecurityManager" value="true"/>

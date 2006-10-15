@@ -199,11 +199,35 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 				def = dd.getSchemaDescriptor(def.getDescriptorName(), tc, 
 											 false);
 			}
-			spsCompSchemaId = def.getUUID();
-		}
-		if (SanityManager.DEBUG) { 
-			SanityManager.ASSERT(spsCompSchemaId != null,
-								 "spsCompSchemaId is null"); 
+			
+			/* 
+			** It is possible for spsCompSchemaId to be null.  For instance, 
+			** the current schema may not have been physically created yet but 
+			** it exists "virtually".  In this case, its UUID will have the 
+			** value of null meaning that it is not persistent.  e.g.:   
+			**
+			** CONNECT 'db;create=true' user 'ernie';
+			** CREATE TABLE bert.t1 (i INT);
+			** CREATE TRIGGER bert.tr1 AFTER INSERT ON bert.t1 
+			**    FOR EACH STATEMENT MODE DB2SQL 
+			**    SELECT * FROM SYS.SYSTABLES;
+			**
+			** Note that in the above case, the trigger action statement have a 
+			** null compilation schema.  A compilation schema with null value 
+			** indicates that the trigger action statement text does not have 
+			** any dependencies with the CURRENT SCHEMA.  This means:
+			**
+			** o  It is safe to compile this statement in any schema since 
+			**    there is no dependency with the CURRENT SCHEMA. i.e.: All 
+			**    relevent identifiers are qualified with a specific schema.
+			**
+			** o  The statement cache mechanism can utilize this piece of 
+			**    information to enable better statement plan sharing across 
+			**    connections in different schemas; thus, avoiding unnecessary 
+			**    statement compilation.
+			*/ 
+			if (def != null)
+				spsCompSchemaId = def.getUUID();
 		}
 
 		String tabName;

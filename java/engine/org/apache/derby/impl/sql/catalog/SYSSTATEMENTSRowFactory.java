@@ -187,7 +187,8 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 			typeStr = spsDescriptor.getTypeAsString();
 			initiallyCompilable = spsDescriptor.initiallyCompilable();
 			preparedStatement = spsDescriptor.getPreparedStatement(compileMe);
-			compUuidStr = spsDescriptor.getCompSchemaId().toString();
+			compUuidStr = (spsDescriptor.getCompSchemaId() != null)?
+					spsDescriptor.getCompSchemaId().toString():null;
 			usingText = spsDescriptor.getUsingText();
 		}
 
@@ -263,7 +264,7 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 		String						text;
 		String						usingText;
 		UUID						uuid;
-		UUID						compUuid;
+		UUID						compUuid = null;
 		String						uuidStr;
 		UUID						suuid;		// schema
 		String						suuidStr;	// schema
@@ -328,7 +329,8 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 		// 8th column is COMPILATIONSCHEMAID (UUID - char(36))
 		col = row.getColumn(8);
 		uuidStr = col.getString();
-		compUuid = getUUIDFactory().recreateUUID(uuidStr);
+		if (uuidStr != null)
+			compUuid = getUUIDFactory().recreateUUID(uuidStr);
 
 		// 9th column is TEXT (LONG VARCHAR)
 		col = row.getColumn(9);
@@ -472,7 +474,7 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 							SYSSTATEMENTS_COMPILATION_SCHEMAID,	// column number
 							0,					// precision
 							0,					// scale
-							false,				// nullability
+							true,				// nullability
 							"CHAR",				// dataType
 							true,				// built-in type
 							36					// maxLength

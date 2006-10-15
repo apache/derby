@@ -28,6 +28,7 @@ import java.util.Properties;
 import java.io.File;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -365,6 +366,7 @@ public class UpgradeTester {
 									oldMinorVersion) && passed;
             passed = caseTriggerVTI(conn, phase, oldMajorVersion, 
                     oldMinorVersion) && passed;
+			passed = caseCompilationSchema(phase, conn) && passed;
             passed = caseGrantRevoke(conn, phase, classLoader, false) && passed;
             // Test grant/revoke feature with sql authorization
             if(phase == PH_HARD_UPGRADE) {
@@ -373,7 +375,7 @@ public class UpgradeTester {
             	passed = caseGrantRevoke(conn, phase, classLoader, true) && passed;
             	checkSysSchemas(conn);
             	checkRoutinePermissions(conn);
-            }        	
+            }        
 			runMetadataTest(classLoader, conn);
 			conn.close();
 			shutdownDatabase(classLoader);
@@ -502,7 +504,58 @@ public class UpgradeTester {
 		System.out.println("complete caseVersionCheck - passed " + passed);
 		return passed;
 	}
-	
+
+	/**
+	 * Verify the compilation schema is nullable after upgrade
+	 * @param phase upgrade test phase
+	 * @param conn Connection
+	 * @throws SQLException
+	 */
+	private boolean caseCompilationSchema(int phase, Connection conn) 
+														throws SQLException
+	{
+		boolean passed = false;
+		DatabaseMetaData dmd;
+		ResultSet rs;
+		String isNullable;
+
+		if (conn == null)
+			return false;
+
+		dmd = conn.getMetaData();
+		
+		switch (phase)
+		{
+			case PH_CREATE:
+			case PH_POST_SOFT_UPGRADE:
+			case PH_POST_HARD_UPGRADE:
+				passed = true;
+				break;
+
+			case PH_SOFT_UPGRADE:
+			case PH_HARD_UPGRADE:
+				rs = dmd.getColumns(null, "SYS", "SYSSTATEMENTS", "COMPILATIONSCHEMAID");
+				rs.next();
+				isNullable = rs.getString("IS_NULLABLE");
+				System.out.println ("SYS.SYSSTATEMENTS.COMPILATIONSCHEMAID IS_NULLABLE=" + isNullable);
+				passed = ("YES".equals(isNullable));
+
+				rs = dmd.getColumns(null, "SYS", "SYSVIEWS", "COMPILATIONSCHEMAID");
+				rs.next();
+				isNullable = rs.getString("IS_NULLABLE");
+				System.out.println("SYS.SYSVIEWS.COMPILATIONSCHEMAID IS_NULLABLE=" + isNullable);
+				passed = ("YES".equals(isNullable)) && passed;
+				break;
+			
+			default:
+				passed = false;
+				break;
+		}
+
+		System.out.println("complete caseCompilationSchema - passed " + passed);
+		return passed;
+	}
+
 	/**
 	 * In 10.2: We will write a ReusableRecordIdSequenceNumber in the 
 	 * header of a FileContaienr.
