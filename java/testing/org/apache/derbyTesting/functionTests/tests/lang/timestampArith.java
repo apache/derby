@@ -146,26 +146,7 @@ public class timestampArith
         new OneDiffTest( YEAR_INTERVAL, ts("2005-02-23 08:25:00"), ts( "2005-05-23 08:25:00"), 0, null, null),
         new OneDiffTest( YEAR_INTERVAL, ts("2005-02-23 08:25:00"), ts( "2006-02-23 08:25:00"), 1, null, null),
 
-        // timestamp - time, time - timestamp
-        new OneDiffTest( FRAC_SECOND_INTERVAL, ts( TODAY + " 10:00:00.123456"), tm( "10:00:00"), -123456000, null, null),
-        new OneDiffTest( FRAC_SECOND_INTERVAL, tm( "10:00:00"), ts( TODAY + " 10:00:00.123456"), 123456000, null, null),
-        new OneDiffTest( SECOND_INTERVAL, ts( TODAY + " 10:00:00.1"), tm( "10:00:01"), 0, null, null),
-        new OneDiffTest( SECOND_INTERVAL, tm( "10:00:01"), ts( TODAY + " 10:00:00"), -1, null, null),
-        new OneDiffTest( MINUTE_INTERVAL, ts( TODAY + " 10:02:00"), tm( "10:00:00"), -2, null, null),
-        new OneDiffTest( MINUTE_INTERVAL, tm( "11:00:00"), ts( TODAY + " 10:02:00"), -58, null, null),
-        new OneDiffTest( HOUR_INTERVAL, ts( TODAY + " 10:02:00"), tm( "10:00:00"), 0, null, null),
-        new OneDiffTest( HOUR_INTERVAL, tm( "10:00:00"), ts( TODAY + " 23:02:00"), 13, null, null),
-        new OneDiffTest( DAY_INTERVAL, ts( TODAY + " 00:00:00"), tm( "23:59:59"), 0, null, null),
-        new OneDiffTest( DAY_INTERVAL, tm( "23:59:59"), ts( TODAY + " 00:00:00"), 0, null, null),
-        new OneDiffTest( WEEK_INTERVAL, ts( TODAY + " 00:00:00"), tm( "23:59:59"), 0, null, null),
-        new OneDiffTest( WEEK_INTERVAL, tm( "23:59:59"), ts( TODAY + " 00:00:00"), 0, null, null),
-        new OneDiffTest( MONTH_INTERVAL, ts( TODAY + " 00:00:00"), tm( "23:59:59"), 0, null, null),
-        new OneDiffTest( MONTH_INTERVAL, tm( "23:59:59"), ts( TODAY + " 00:00:00"), 0, null, null),
-        new OneDiffTest( QUARTER_INTERVAL, ts( TODAY + " 00:00:00"), tm( "23:59:59"), 0, null, null),
-        new OneDiffTest( QUARTER_INTERVAL, tm( "23:59:59"), ts( TODAY + " 00:00:00"), 0, null, null),
-        new OneDiffTest( YEAR_INTERVAL, ts( TODAY + " 00:00:00"), tm( "23:59:59"), 0, null, null),
-        new OneDiffTest( YEAR_INTERVAL, tm( "23:59:59"), ts( TODAY + " 00:00:00"), 0, null, null),
-
+        
         // timestamp - date, date - timestamp
         new OneDiffTest( FRAC_SECOND_INTERVAL, ts( "2004-05-10 00:00:00.123456"), dt("2004-05-10"), -123456000,
                          null, null),
@@ -188,57 +169,28 @@ public class timestampArith
         new OneDiffTest( YEAR_INTERVAL, ts("2004-02-23 08:25:00"), dt( "2004-05-23"), 0, null, null),
         new OneDiffTest( YEAR_INTERVAL, dt( "2004-05-23"), ts("2003-02-23 08:25:00"), -1, null, null),
 
-        // date - time, time - date
-        new OneDiffTest( FRAC_SECOND_INTERVAL, dt( TODAY), tm("00:00:01"), ONE_BILLION, null, null),
-        new OneDiffTest( FRAC_SECOND_INTERVAL, tm("00:00:02"), dt( TODAY), -2*ONE_BILLION, null, null),
-        new OneDiffTest( SECOND_INTERVAL, dt( TODAY), tm("00:00:01"), 1, null, null),
-        new OneDiffTest( SECOND_INTERVAL, tm("00:00:02"), dt( TODAY), -2, null, null),
-        new OneDiffTest( MINUTE_INTERVAL, dt( TODAY), tm("12:34:56"), 12*60 + 34, null, null),
-        new OneDiffTest( MINUTE_INTERVAL, tm("12:34:56"), dt( TODAY), -(12*60 + 34), null, null),
-        new OneDiffTest( HOUR_INTERVAL, dt( TODAY), tm("12:34:56"), 12, null, null),
-        new OneDiffTest( HOUR_INTERVAL, tm("12:34:56"), dt( TODAY), -12, null, null),
-        new OneDiffTest( DAY_INTERVAL, dt( TOMORROW), tm( "00:00:00"), -1, null, null),
-        new OneDiffTest( DAY_INTERVAL, tm( "00:00:00"), dt( TOMORROW), 1, null, null),
-        new OneDiffTest( WEEK_INTERVAL, dt( TOMORROW), tm( "00:00:00"), 0, null, null),
-        new OneDiffTest( WEEK_INTERVAL, tm( "00:00:00"), dt( TOMORROW), 0, null, null),
-        new OneDiffTest( MONTH_INTERVAL, dt( YEAR_FROM_TOMORROW), tm( "12:00:00"), -12, null, null),
-        new OneDiffTest( MONTH_INTERVAL, tm( "12:00:00"), dt( YEAR_FROM_TOMORROW), 12, null, null),
-        new OneDiffTest( QUARTER_INTERVAL, dt( YEAR_FROM_TOMORROW), tm( "12:00:00"), -4, null, null),
-        new OneDiffTest( QUARTER_INTERVAL, tm( "12:00:00"), dt( YEAR_FROM_TOMORROW), 4, null, null),
-        new OneDiffTest( YEAR_INTERVAL, dt( YEAR_FROM_TOMORROW), tm( "12:00:00"), -1, null, null),
-        new OneDiffTest( YEAR_INTERVAL, tm( "12:00:00"), dt( YEAR_FROM_TOMORROW), 1, null, null),
-
         // Test add with all combinatons of interval types and datetime types
         new OneAddTest( FRAC_SECOND_INTERVAL, 1000, ts("2005-05-11 15:55:00"), ts("2005-05-11 15:55:00.000001"),
                         null, null),
         new OneAddTest( FRAC_SECOND_INTERVAL, -1000, dt("2005-05-11"), ts("2005-05-10 23:59:59.999999"),
                         null, null),
-        new OneAddTest( FRAC_SECOND_INTERVAL, ONE_BILLION, tm("23:59:59"), ts( TOMORROW + " 00:00:00"), null, null),
         new OneAddTest( SECOND_INTERVAL, 60, ts("2005-05-11 15:55:00"), ts("2005-05-11 15:56:00"), null, null),
         new OneAddTest( SECOND_INTERVAL, 60, dt("2005-05-11"), ts("2005-05-11 00:01:00"), null, null),
-        new OneAddTest( SECOND_INTERVAL, 60, tm("23:59:30"), ts( TOMORROW + " 00:00:30"), null, null),
         new OneAddTest( MINUTE_INTERVAL, -1, ts("2005-05-11 15:55:00"), ts("2005-05-11 15:54:00"), null, null),
         new OneAddTest( MINUTE_INTERVAL, 1, dt("2005-05-11"), ts("2005-05-11 00:01:00"), null, null),
-        new OneAddTest( MINUTE_INTERVAL, 1, tm("12:00:00"), ts( TODAY + " 12:01:00"), null, null),
         new OneAddTest( HOUR_INTERVAL, 2, ts("2005-05-11 15:55:00"), ts("2005-05-11 17:55:00"), null, null),
         new OneAddTest( HOUR_INTERVAL, -2, dt("2005-05-11"), ts("2005-05-10 22:00:00"), null, null),
-        new OneAddTest( HOUR_INTERVAL, 1, tm("12:00:00"), ts( TODAY + " 13:00:00"), null, null),
         new OneAddTest( DAY_INTERVAL, 1, ts("2005-05-11 15:55:00"), ts("2005-05-12 15:55:00"), null, null),
         new OneAddTest( DAY_INTERVAL, 1, dt("2005-05-11"), ts("2005-05-12 00:00:00"), null, null),
-        new OneAddTest( DAY_INTERVAL, -1, tm( "12:00:00"), ts( YESTERDAY + " 12:00:00"), null, null),
         new OneAddTest( WEEK_INTERVAL, 1, ts("2005-05-11 15:55:00"), ts("2005-05-18 15:55:00"), null, null),
         new OneAddTest( WEEK_INTERVAL, 1, dt("2005-05-11"), ts("2005-05-18 00:00:00"), null, null),
-        new OneAddTest( WEEK_INTERVAL, 1, tm("12:00:00"), ts( WEEK_FROM_TODAY + " 12:00:00"), null, null),
         new OneAddTest( MONTH_INTERVAL, 1, ts("2005-05-11 15:55:00"), ts("2005-06-11 15:55:00"), null, null),
         new OneAddTest( MONTH_INTERVAL, -1, dt("2005-03-29"), ts("2005-02-28 00:00:00"), null, null),
-        new OneAddTest( MONTH_INTERVAL, 12, tm( "12:00:00"), ts( YEAR_FROM_TODAY + " 12:00:00"), null, null),
         new OneAddTest( QUARTER_INTERVAL, 1, ts("2005-10-11 15:55:00"), ts("2006-01-11 15:55:00"), null, null),
         new OneAddTest( QUARTER_INTERVAL, -2, dt( "2005-05-05"), ts( "2004-11-05 00:00:00"), null, null),
-        new OneAddTest( QUARTER_INTERVAL, 4, tm( "12:00:00"), ts( YEAR_FROM_TODAY + " 12:00:00"), null, null),
         new OneAddTest( YEAR_INTERVAL, -10, ts("2005-10-11 15:55:00"), ts("1995-10-11 15:55:00"), null, null),
         new OneAddTest( YEAR_INTERVAL, 2, dt( "2005-05-05"), ts( "2007-05-05 00:00:00"), null, null),
-        new OneAddTest( YEAR_INTERVAL, 1, tm( "12:00:00"), ts( YEAR_FROM_TODAY + " 12:00:00"), null, null),
-
+        
         // String inputs
         new OneStringDiffTest( SECOND_INTERVAL, "2005-05-10 08:25:00", "2005-05-10 08:26:00", 60, null, null),
         new OneStringAddTest( DAY_INTERVAL, 1, "2005-05-11 15:55:00", ts("2005-05-12 15:55:00"), null, null),
@@ -319,12 +271,7 @@ public class timestampArith
     {
         return java.sql.Date.valueOf( s);
     }
-
-    private static java.sql.Time tm( String s)
-    {
-        return java.sql.Time.valueOf( s);
-    }
-
+    
     private static String dateTimeToLiteral( Object ts)
     {
         if( ts instanceof java.sql.Timestamp)

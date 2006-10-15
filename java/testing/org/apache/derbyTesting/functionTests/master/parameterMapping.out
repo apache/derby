@@ -3174,10 +3174,10 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setDate() as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
   setDate(null) getTimestamp=null was null true JDBC MATCH(OK)
   setDate(null) as batch getTimestamp=null was null true JDBC MATCH(OK)
-  setTime() getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
-  setTime() as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
-  setTime(null) getTimestamp=null was null true JDBC MATCH(OK)
-  setTime(null) as batch getTimestamp=null was null true JDBC MATCH(OK)
+  setTime()  (XCL12):An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'. JDBC FAIL TIMESTAMP
+  setTime() as batch  (XCL12):An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'. JDBC FAIL TIMESTAMP
+  setTime(null)  (XCL12):An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'. JDBC FAIL TIMESTAMP
+  setTime(null) as batch  (XCL12):An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'. JDBC FAIL TIMESTAMP
   setTimestamp() getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
   setTimestamp() as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
   setTimestamp(null) getTimestamp=null was null true JDBC MATCH(OK)
@@ -3228,8 +3228,8 @@ For setXXX() methods that pass an object, a null and valid values are checked
   setObject(byte[]) as batch IC JDBC MATCH (INVALID)
   setObject(java.sql.Date) getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
   setObject(java.sql.Date) as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
-  setObject(java.sql.Time) getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false CLOUD EXT (OK)
-  setObject(java.sql.Time) as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false CLOUD EXT (OK)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
   setObject(java.sql.Timestamp) getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
   setObject(java.sql.Timestamp) as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
   setObject(java.sql.Blob) IC JDBC MATCH (INVALID)

@@ -167,26 +167,26 @@ public class updatableResultSet {
 	//I have constructed following table based on if combination of datatype and updateXXX method would work or not.
 	public static final String[][]  updateXXXRulesTableForEmbedded = {
 
-  // Types.             u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u
-	//                    p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p
-	//                    d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d
-  //                    a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a
-  //                    t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t
-  //                    e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e
-  //                    S  I  L  B  F  D  S  A  C  B  B  B  C  D  T  T  B  B  N  A  R
-	//                    h  n  o  i  l  o  t  s  h  y  y  i  l  a  i  i  l  o  u  r  e
-	//                    o  t  n  g  o  u  r  c  a  t  t  n  o  t  m  m  o  o  l  r  f
-	//                    r     g  D  a  b  i  i  r  e  e  a  b  e  e  e  b  l  l  a
-	//                    t        e  t  l  n  i  c     s  r           s     e     y
-	//                             c     e  g  S  t        y           t     a
-	//                             i           t  e        S           a     n
-	//                             m           r  r        t           m
-	//                             a           e  S        r           p
-	//                             l           a  t        e
-	//                                         m  r        a
-	//                                            e        m
-	//                                            a
-	//                                            m
+        // Types.             u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u
+        //                    p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p
+        //                    d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d
+        //                    a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a
+        //                    t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t
+        //                    e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e
+        //                    S  I  L  B  F  D  S  A  C  B  B  B  C  D  T  T  B  B  N  A  R
+        //                    h  n  o  i  l  o  t  s  h  y  y  i  l  a  i  i  l  o  u  r  e
+        //                    o  t  n  g  o  u  r  c  a  t  t  n  o  t  m  m  o  o  l  r  f
+        //                    r     g  D  a  b  i  i  r  e  e  a  b  e  e  e  b  l  l  a
+        //                    t        e  t  l  n  i  c     s  r           s     e     y
+        //                             c     e  g  S  t        y           t     a
+        //                             i           t  e        S           a     n
+        //                             m           r  r        t           m
+        //                             a           e  S        r           p
+        //                             l           a  t        e
+        //                                         m  r        a
+        //                                            e        m
+        //                                            a
+        //                                            m
 /* 0 SMALLINT */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
 /* 1 INTEGER  */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
 /* 2 BIGINT   */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
@@ -202,7 +202,7 @@ public class updatableResultSet {
 /* 12 CLOB         */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
 /* 13 DATE         */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
 /* 14 TIME         */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
-/* 15 TIMESTAMP    */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
+/* 15 TIMESTAMP    */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "PASS", "ERROR", "ERROR", "PASS", "ERROR", "ERROR" },
 /* 16 BLOB         */   { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "PASS", "ERROR", "ERROR" },
 
 	};
@@ -210,26 +210,26 @@ public class updatableResultSet {
 	//I have constructed following table for network server based on if combination of datatype and updateXXX method would work or not.
 	public static final String[][]  updateXXXRulesTableForNetworkServer = {
 
-  // Types.             u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u
-	//                    p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p
-	//                    d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d
-  //                    a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a
-  //                    t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t
-  //                    e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e
-  //                    S  I  L  B  F  D  S  A  C  B  B  B  C  D  T  T  B  B  N  A  R
-	//                    h  n  o  i  l  o  t  s  h  y  y  i  l  a  i  i  l  o  u  r  e
-	//                    o  t  n  g  o  u  r  c  a  t  t  n  o  t  m  m  o  o  l  r  f
-	//                    r     g  D  a  b  i  i  r  e  e  a  b  e  e  e  b  l  l  a
-	//                    t        e  t  l  n  i  c     s  r           s     e     y
-	//                             c     e  g  S  t        y           t     a
-	//                             i           t  e        S           a     n
-	//                             m           r  r        t           m
-	//                             a           e  S        r           p
-	//                             l           a  t        e
-	//                                         m  r        a
-	//                                            e        m
-	//                                            a
-	//                                            m
+        // Types.             u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u  u
+        //                    p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p  p
+        //                    d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d  d
+        //                    a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a  a
+        //                    t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t  t
+        //                    e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e  e
+        //                    S  I  L  B  F  D  S  A  C  B  B  B  C  D  T  T  B  B  N  A  R
+        //                    h  n  o  i  l  o  t  s  h  y  y  i  l  a  i  i  l  o  u  r  e
+        //                    o  t  n  g  o  u  r  c  a  t  t  n  o  t  m  m  o  o  l  r  f
+        //                    r     g  D  a  b  i  i  r  e  e  a  b  e  e  e  b  l  l  a
+        //                    t        e  t  l  n  i  c     s  r           s     e     y
+        //                             c     e  g  S  t        y           t     a
+        //                             i           t  e        S           a     n
+        //                             m           r  r        t           m
+        //                             a           e  S        r           p
+        //                             l           a  t        e
+        //                                         m  r        a
+        //                                            e        m
+        //                                            a
+        //                                            m
 /* 0 SMALLINT */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
 /* 1 INTEGER  */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },
 /* 2 BIGINT   */        { "PASS", "PASS", "PASS", "PASS", "PASS", "PASS", "ERROR", "ERROR", "ERROR", "PASS", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "PASS", "PASS", "ERROR", "ERROR" },

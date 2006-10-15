@@ -673,30 +673,8 @@ public final class SQLTimestamp extends DataType
         }
 		/* encodedTime and nanos are already set to zero by restoreToNull() */
 	}
-
-	/**
-		@see DateTimeDataValue#setValue
-
-	 */
-	public void setValue(Time value, Calendar cal) throws StandardException
-	{
-		restoreToNull();
-		if (value != null)
-		{
-			/*
-			** Create a new timestamp with today's date,
-			** and 'value' time.  
-			**
-			** We create a new calendar to get today's date
-			*/
-			Calendar today = GregorianCalendar.getInstance();
-			encodedDate = SQLDate.computeEncodedDate(today);
-            if( cal == null)
-                cal = today;
-			encodedTime = computeEncodedTime(value, cal);
-		}
-	}
-
+    
+    
 	/**
 		@see DateTimeDataValue#setValue
 

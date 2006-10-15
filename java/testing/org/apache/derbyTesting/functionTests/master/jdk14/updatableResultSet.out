@@ -2016,7 +2016,9 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateDate
   Testing updateTime on SQL type TIMESTAMP
     Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'.
     Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'.
   Testing updateTimestamp on SQL type TIMESTAMP
     Using column position as first parameter to updateTimestamp
     Using column name as first parameter to updateTimestamp
@@ -2881,7 +2883,9 @@ Next datatype to test is TIMESTAMP
   updateObject with column position & Date object as parameters
   updateObject with column name & Date object as parameters
   updateObject with column position & Time object as parameters
+    Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'.
   updateObject with column name & Time object as parameters
+    Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'.
   updateObject with column position & TimeStamp object as parameters
   updateObject with column name & TimeStamp object as parameters
   updateObject with column position & Blob object as parameters
@@ -4582,7 +4586,9 @@ Next datatype to test is TIMESTAMP
     Using column name as first parameter to updateDate
   Testing updateTime on SQL type TIMESTAMP
     Using column position as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'.
     Using column name as first parameter to updateTime
+      Got expected exception : An attempt was made to put a data value of type 'java.sql.Time' into a data value of type 'TIMESTAMP'.
   Testing updateTimestamp on SQL type TIMESTAMP
     Using column position as first parameter to updateTimestamp
     Using column name as first parameter to updateTimestamp
