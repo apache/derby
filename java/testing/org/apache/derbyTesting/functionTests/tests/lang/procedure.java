@@ -110,6 +110,9 @@ public class procedure
         s.execute("CREATE PROCEDURE NONAME(IN INT, IN P2 VARCHAR(10)) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.noname'");
         s.execute("{call noname(1, 'foo')}");
         s.execute("DROP PROCEDURE NONAME");
+        s.execute("CREATE PROCEDURE NONAME(TIMESTAMP, IN P2 VARCHAR(10)) LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.noname2'");
+        s.execute("{call noname(current_timestamp, 'foo')}");
+        s.execute("DROP PROCEDURE NONAME");
     }
     
 	public static void testNegative(Connection conn) throws SQLException {

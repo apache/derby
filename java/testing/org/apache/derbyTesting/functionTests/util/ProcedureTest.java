@@ -781,5 +781,9 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
     public static void noname(int p1, String p2) {
         System.out.println("noname(int,String) called");
     }
+    
+    public static void noname2(Timestamp p1, String p2) {
+        System.out.println("noname(Timestamp,String) called");
+    }
 }
 
