@@ -334,7 +334,7 @@ public class OnlineCompress
             // the compress:
             //     index_col_map - map location of index cols in the base row, 
             //                     ie. index_col_map[0] is column offset of 1st
-            //                     key collumn in base row.  All offsets are 0 
+            //                     key column in base row.  All offsets are 0 
             //                     based.
             //     index_scan - open ScanController used to delete old index row
             //     index_cc   - open ConglomerateController used to insert new 
@@ -591,7 +591,7 @@ public class OnlineCompress
         // the compress:
         //     index_col_map - map location of index cols in the base row, ie.
         //                     index_col_map[0] is column offset of 1st key
-        //                     collumn in base row.  All offsets are 0 based.
+        //                     column in base row.  All offsets are 0 based.
         //     index_scan - open ScanController used to delete old index row
         //     index_cc   - open ConglomerateController used to insert new row
 

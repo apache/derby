@@ -518,3 +518,54 @@ insert into admins values (values identity_val_local());
 drop table admins;
 drop table users;
 -- end derby-1854 test case. 
+
+-- test case for derby-737 
+-- perform compress on a table that has some indexes with no statistics
+create table derby737table1 (c1 int, c2 int); 
+select * from sys.sysstatistics;
+-- create index on the table when the table is empty. No statistics will be
+--  generated for that index
+create index t1i1 on derby737table1(c1);
+select * from sys.sysstatistics;
+-- the insert above will not add a row into sys.sysstatistics for index t1i1
+insert into derby737table1 values(1,1);
+select * from sys.sysstatistics;
+-- now compress the table and as part of the compress, Derby should generate
+--  statistics for all the indexes provided the table is not empty
+call syscs_util.syscs_compress_table('APP','DERBY737TABLE1',1);
+-- Will find statistics for index t1i1 on derby737table1 because compress
+--  table created it.
+select * from sys.sysstatistics;
+drop table derby737table1;
+-- Next Test : Make sure that drop index will drop the existing statistics 
+create table derby737table2 (c1 int, c2 int); 
+insert into derby737table2 values(1,1),(2,2);
+select * from sys.sysstatistics;
+-- since there is data in derby737table2 when index is getting created, 
+--   statistics will be created for that index 
+create index t2i1 on derby737table2(c1);
+select * from sys.sysstatistics;
+-- deleting all the rows in table will not drop the index statistics
+delete from derby737table2;
+select * from sys.sysstatistics;
+-- dropping index will drop the index statistics, if they exist
+drop index t2i1;
+select * from sys.sysstatistics;
+-- Next Test : Male sure that compress table will drop the existing statistics
+--  and will not recreate them if the table is empty
+insert into derby737table2 values(1,1),(2,2);
+select * from sys.sysstatistics;
+-- since there is data in derby737table2 when index is getting created, 
+--   statistics will be created for that index 
+create index t2i1 on derby737table2(c1);
+select * from sys.sysstatistics;
+-- deleting all the rows in table will not drop the index statistics
+delete from derby737table2;
+select * from sys.sysstatistics;
+-- now compress the table and as part of the compress, Derby should drop
+--  statistics for all the indexes and should not recreate them if the
+--  user table is empty
+call syscs_util.syscs_compress_table('APP','DERBY737TABLE2',1);
+select * from sys.sysstatistics;
+
+--end derby-737 related test cases.
