@@ -96,7 +96,7 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar" {
   permission java.io.FilePermission "${user.dir}${/}-", "read";
   
   // ij needs permission to read the sql files in this jar
-  permission java.io.FilePermission "${derbyTesting.codedir}${/}derbyTesting.jar", "read";
+  permission java.io.FilePermission "${derbyTesting.testjarpath}", "read";
   
 };
 

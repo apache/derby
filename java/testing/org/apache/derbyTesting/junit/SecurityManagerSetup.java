@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.File;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -192,17 +193,20 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * <P>
 	 * Classpath:
 	 * <BR>
-	 * derbyTesting.codeclasses set to location of classes folder
+	 * derbyTesting.codeclasses set to URL of classes folder
 	 * <P>
 	 * Jar files:
 	 * <BR>
-	 * derbyTesting.codejar - location of derby.jar,
+	 * derbyTesting.codejar - URL of derby.jar,
 	 * derbynet.jar and derbytools.jar, all assumed to be in the
 	 * same location.
 	 * <BR>
-	 * derbyTesting.clientjar - location of derbyclient.jar (FUTURE)
+	 * derbyTesting.clientjar - URL of derbyclient.jar
 	 * <BR>
-	 * derbyTesting.testjar - location of derbyTesting.jar (FUTURE)
+	 * derbyTesting.testjar - URL of derbyTesting.jar
+     * <BR>
+     * derbyTesting.testjarpath - File system path to derbyTesting.jar
+     * if the jar has a URL with a file protocol.
 	 * 
 	 */
 	private static boolean determineClasspath()
@@ -223,6 +227,11 @@ public final class SecurityManagerSetup extends TestSetup {
 			return false;
 		}
 		classPathSet.setProperty("derbyTesting.testjar", stripJar(testing));
+        if (testing.getProtocol().equals("file")) {
+           File f = new File(testing.getPath());
+           classPathSet.setProperty("derbyTesting.testjarpath",
+                                               f.getAbsolutePath());
+        }
         isJars = true;
 		
 		URL derby = null;
