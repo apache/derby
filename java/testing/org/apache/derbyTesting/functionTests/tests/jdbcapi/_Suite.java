@@ -49,6 +49,7 @@ public class _Suite extends BaseTestCase  {
 
 		suite.addTest(ConcurrencyTest.suite());
 		suite.addTest(HoldabilityTest.suite());
+        suite.addTest(LobLengthTest.suite()); 
 		suite.addTest(ProcedureTest.suite());
 		suite.addTest(SURQueryMixTest.suite());
 		suite.addTest(SURTest.suite());
