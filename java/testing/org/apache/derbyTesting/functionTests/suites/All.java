@@ -38,13 +38,9 @@ public class All extends BaseTestCase {
 
         TestSuite suite = new TestSuite("All");
         
-        // All embedded tests
-        suite.addTest(Embedded.suite());
+        // All package tests
+        suite.addTest(AllPackages.suite());
         
-        // All Derby client tests
-        suite.addTest(Client.suite());
-
         return suite;
-        
     }
 }

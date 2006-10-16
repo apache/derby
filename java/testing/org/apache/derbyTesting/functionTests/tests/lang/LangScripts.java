@@ -24,6 +24,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * LangScripts runs SQL scripts (.sql files) in the lang package
@@ -48,7 +49,8 @@ public final class LangScripts extends ScriptTestCase {
 		};
 
     /**
-     * Language SQL scripts (.sql files) that run under Derby's client configurations.
+     * Language SQL scripts (.sql files) that run under Derby's client
+     * and emebdded configurations.
      */
     private static final String[] DERBY_TESTS = {
         "bit2",
@@ -82,15 +84,21 @@ public final class LangScripts extends ScriptTestCase {
 	 * Return the suite that runs all the langauge SQL scripts.
 	 */
 	public static Test suite() {
+        
         TestSuite suite = new TestSuite();
         suite.addTest(getSuite(SQL_LANGUAGE_TESTS));
+        suite.addTest(getSuite(DERBY_TESTS));
+        suite.addTest(getSuite(EMBEDDED_TESTS));
         
-        if (usingEmbedded() || usingDerbyNetClient())
-            suite.addTest(getSuite(DERBY_TESTS));
+        // Set up the scripts run with the network client
+        TestSuite clientTests = new TestSuite();
+        clientTests.addTest(getSuite(SQL_LANGUAGE_TESTS));
+        clientTests.addTest(getSuite(DERBY_TESTS));
+        Test client = TestConfiguration.derbyClientServerDecorator(clientTests);
         
-        if (usingEmbedded())
-            suite.addTest(getSuite(EMBEDDED_TESTS));
-        
+        // add those client tests into the top-level suite.
+        suite.addTest(client);
+
         return suite;
     }
     

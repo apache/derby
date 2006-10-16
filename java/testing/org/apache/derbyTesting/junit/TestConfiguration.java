@@ -29,6 +29,7 @@ import java.util.Properties;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 
@@ -110,8 +111,9 @@ public class TestConfiguration {
         if (BaseTestCase.getSystemProperty("derby.system.home") != null)
             assumeHarness = true;
         
-        // for now always assume harness - still testing this code
-        assumeHarness = true;
+        // If forced into single leg XA, assume harness
+        if (DERBY_HARNESS_CONFIG.isSingleLegXA())
+            assumeHarness = true;
 
         DEFAULT_CONFIG = assumeHarness ? DERBY_HARNESS_CONFIG : JUNIT_CONFIG;
         runningInDerbyHarness = assumeHarness;
@@ -165,33 +167,40 @@ public class TestConfiguration {
      * The previous TestConfiguration is restored at tearDown.
      * @param tests
      * @return
-     * @throws Exception 
      */
-    public static Test derbyClientServerDecorator(Class suite) throws Exception
+    public static Test derbyClientServerDecorator(Class suiteClass)
+    {           
+        return derbyClientServerDecorator(new TestSuite(suiteClass));
+    }
+    /**
+     * Return a decorator for the passed in tests that sets the
+     * configuration for the client to be Derby's JDBC client
+     * and to start the network server at setUp if it is not
+     * already started.
+     * <BR>
+     * The database configuration (name etc.) is based upon
+     * the previous configuration.
+     * <BR>
+     * The previous TestConfiguration is restored at tearDown.
+     * @param tests
+     * @return
+     */
+    public static Test derbyClientServerDecorator(Test suite)
     {
+        if (JDBC.vmSupportsJSR169())
+            return new TestSuite();
+            
         TestConfiguration config = TestConfiguration.getCurrent();
         
         TestConfiguration derbyClientConfig =
             new TestConfiguration(config, JDBCClient.DERBYNETCLIENT,
                     DEFAULT_HOSTNAME, DEFAULT_PORT);
-        
-        TestConfiguration.setCurrent(derbyClientConfig);
-        
-        Test test = addSuiteByReflection(suite);
-        
-        TestConfiguration.setCurrent(config);
-            
-        test = new NetworkServerTestSetup(test);
+                   
+        Test test = new NetworkServerTestSetup(suite);
             
         return new ChangeConfigurationSetup(derbyClientConfig, test);
 
     }
-    private static Test addSuiteByReflection(Class clz) throws Exception
-    {
-        Method sm = clz.getMethod("suite", null);
-              
-        return (Test) sm.invoke(null, null);
-    }  
     
     public static Test changeUserDecorator(Test test, String user, String password)
     {
