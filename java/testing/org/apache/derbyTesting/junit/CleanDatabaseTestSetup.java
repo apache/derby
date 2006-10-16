@@ -24,9 +24,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.derbyTesting.functionTests.tests.lang.TimeHandlingTest;
-
-
 import junit.framework.Test;
 
 /**
