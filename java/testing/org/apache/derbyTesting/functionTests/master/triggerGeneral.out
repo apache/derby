@@ -1303,4 +1303,85 @@ ij(USER1)> drop table ippo.t1;
 0 rows inserted/updated/deleted
 ij(USER1)> drop schema ippo restrict;
 0 rows inserted/updated/deleted
+ij(USER1)> -- DERBY-1953
+-- if neither FOR EACH STATEMENT or FOR EACH ROW is specified, FOR EACH STATEMENT is implicit.
+create table topt1 (i int);
+0 rows inserted/updated/deleted
+ij(USER1)> insert into topt1 values 1,2,3;
+3 rows inserted/updated/deleted
+ij(USER1)> create table topt2 (i int);
+0 rows inserted/updated/deleted
+ij(USER1)> -- expect error
+create trigger tropt after insert on topt1 for each mode db2sql insert into topt2 values 1;
+ERROR 42X01: Syntax error: Encountered "mode" at line 2, column 53.
+ij(USER1)> -- ok
+create trigger tropt after insert on topt1 insert into topt2 values 1;
+0 rows inserted/updated/deleted
+ij(USER1)> insert into topt1 values 4,5,6;
+3 rows inserted/updated/deleted
+ij(USER1)> -- expect 1 row
+select * from topt2;
+I          
+-----------
+1          
+ij(USER1)> drop trigger tropt;
+0 rows inserted/updated/deleted
+ij(USER1)> delete from topt2;
+1 row inserted/updated/deleted
+ij(USER1)> create trigger tropt after insert on topt1 referencing new_table as new_opt1 insert into topt2 select * from new_opt1;
+0 rows inserted/updated/deleted
+ij(USER1)> insert into topt1 values 7,8,9;
+3 rows inserted/updated/deleted
+ij(USER1)> -- expect 3 rows
+select * from topt2;
+I          
+-----------
+7          
+8          
+9          
+ij(USER1)> drop trigger tropt;
+0 rows inserted/updated/deleted
+ij(USER1)> delete from topt2;
+3 rows inserted/updated/deleted
+ij(USER1)> create trigger tropt after insert on topt1 referencing new_table as new_opt1 for each statement insert into topt2 select * from new_opt1;
+0 rows inserted/updated/deleted
+ij(USER1)> insert into topt1 values 10,11,12;
+3 rows inserted/updated/deleted
+ij(USER1)> -- expect 3 rows
+select * from topt2;
+I          
+-----------
+10         
+11         
+12         
+ij(USER1)> drop trigger tropt;
+0 rows inserted/updated/deleted
+ij(USER1)> delete from topt2;
+3 rows inserted/updated/deleted
+ij(USER1)> create trigger tropt after update on topt1 referencing old as oldrow for each row insert into topt2 values oldrow.i;
+0 rows inserted/updated/deleted
+ij(USER1)> update topt1 set i=100;
+12 rows inserted/updated/deleted
+ij(USER1)> -- expect 12 rows
+select * from topt2;
+I          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+10         
+11         
+12         
+ij(USER1)> drop trigger tropt;
+0 rows inserted/updated/deleted
+ij(USER1)> drop table topt2;
+0 rows inserted/updated/deleted
+ij(USER1)> drop table topt1;
+0 rows inserted/updated/deleted
 ij(USER1)> 

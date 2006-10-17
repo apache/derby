@@ -972,8 +972,11 @@ drop table t2;
 
 create table t1(i int);
 
--- Should fail
-create trigger trig1 after insert on t1 mode db2sql values (8);
+-- DERBY-1953:  The following statement will fail in DB2 LUW since it currently does 
+-- not allow the FOR EACH part to be optional but DB2 iSeries allows both FOR EACH and 
+-- MODE part to be optional.  So this test is commented out for reference since it is 
+-- not relevant after DERBY-1953 is applied (allow FOR EACH and MODE part to be optional).
+-- create trigger trig1 after insert on t1 mode db2sql values (8);
 
 -- Should pass
 create trigger trig1 after insert on t1 for each row mode db2sql values (8);

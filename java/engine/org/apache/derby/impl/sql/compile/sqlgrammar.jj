@@ -10018,7 +10018,7 @@ QueryTreeNode
 triggerDefinition() throws StandardException :
 {
 	Boolean				isBefore;
-	Boolean				isRow;
+	Boolean				isRow = Boolean.FALSE;  // STATEMENT implicit by default
 	TableName			tableName;
 	TableName			triggerName;
 	Token[]				tokenHolder = new Token[1];
@@ -10040,8 +10040,8 @@ triggerDefinition() throws StandardException :
 		triggerEvent = triggerEvent(triggerColumns)		// { INSERT | DELETE | UPDATE [ colList	] }
 		<ON> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		[ refClause = triggerReferencingClause() ]		// REFERENCING OLD/NEW AS 	
-		<FOR> <EACH> isRow = rowOrStatement()
-		<MODE> <DB2SQL>
+		[ <FOR> <EACH> isRow = rowOrStatement() ]
+		[ <MODE> <DB2SQL> ]
 		//we are not top level statement
 		actionNode = proceduralStatement(tokenHolder)
 		// the trigger body

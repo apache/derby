@@ -729,3 +729,37 @@ drop trigger ippo.tr1;
 drop table ippo.t2;
 drop table ippo.t1;
 drop schema ippo restrict;
+
+-- DERBY-1953
+-- if neither FOR EACH STATEMENT or FOR EACH ROW is specified, FOR EACH STATEMENT is implicit.
+create table topt1 (i int);
+insert into topt1 values 1,2,3;
+create table topt2 (i int);
+-- expect error
+create trigger tropt after insert on topt1 for each mode db2sql insert into topt2 values 1;
+-- ok
+create trigger tropt after insert on topt1 insert into topt2 values 1;
+insert into topt1 values 4,5,6;
+-- expect 1 row
+select * from topt2;
+drop trigger tropt;
+delete from topt2;
+create trigger tropt after insert on topt1 referencing new_table as new_opt1 insert into topt2 select * from new_opt1;
+insert into topt1 values 7,8,9;
+-- expect 3 rows
+select * from topt2;
+drop trigger tropt;
+delete from topt2;
+create trigger tropt after insert on topt1 referencing new_table as new_opt1 for each statement insert into topt2 select * from new_opt1;
+insert into topt1 values 10,11,12;
+-- expect 3 rows
+select * from topt2;
+drop trigger tropt;
+delete from topt2;
+create trigger tropt after update on topt1 referencing old as oldrow for each row insert into topt2 values oldrow.i;
+update topt1 set i=100;
+-- expect 12 rows
+select * from topt2;
+drop trigger tropt;
+drop table topt2;
+drop table topt1;
