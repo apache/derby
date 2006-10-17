@@ -57,7 +57,14 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(UpdateXXXTest.suite());
 		suite.addTest(URCoveringIndexTest.suite());
         suite.addTest(ResultSetCloseTest.suite());
-        suite.addTest(DataSourcePropertiesTest.suite());
+        
+        if (JDBC.vmSupportsJDBC3())
+        {
+            // Class requires javax.sql.PooledConnection
+            // even to load, even though the suite method
+            // is correctly implemented.
+            suite.addTest(DataSourcePropertiesTest.suite());
+        }
 		
 		// Tests that are compiled using 1.4 target need to
 		// be added this way, otherwise creating the suite
