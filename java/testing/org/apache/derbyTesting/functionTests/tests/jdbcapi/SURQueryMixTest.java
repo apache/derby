@@ -558,11 +558,4 @@ public class SURQueryMixTest extends SURBaseTest
         }
         return mainSuite;
     }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        con = null;
-    }
-    
-  
 }

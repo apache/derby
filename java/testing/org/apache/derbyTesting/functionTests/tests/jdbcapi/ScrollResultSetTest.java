@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
 
@@ -51,14 +52,15 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite();
                 
         // Requires holdability
         if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169()) {
-        	suite.addTestSuite(ScrollResultSetTest.class);
+            // Run embedded and client
+        	return TestConfiguration.defaultSuite(ScrollResultSetTest.class);
         }
         
-        return suite;
+        // empty suite, no holdability supported.
+        return new TestSuite();
     }
 
     /**

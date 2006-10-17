@@ -169,12 +169,26 @@ public class TestConfiguration {
      */
     public static Test defaultSuite(Class testClass)
     {
-        final TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite(suiteName(testClass));
         
         suite.addTest(embeddedSuite(testClass));            
         suite.addTest(clientServerSuite(testClass));
  
         return new CleanDatabaseTestSetup(suite);
+    }
+    
+    /**
+     * Generate a suite name from a class name, taking
+     * only the last element of the fully qualified class name.
+     */
+    private static String suiteName(Class testClass)
+    {
+        int lastDot = testClass.getName().lastIndexOf('.');
+        String suiteName = testClass.getName();
+        if (lastDot != -1)
+            suiteName = suiteName.substring(lastDot + 1, suiteName.length());
+        
+        return suiteName;
     }
     
     /**
@@ -184,7 +198,8 @@ public class TestConfiguration {
       */
     public static Test embeddedSuite(Class testClass)
     {
-        return new TestSuite(testClass);
+        return new TestSuite(testClass,
+                suiteName(testClass)+":embedded");
     }
     
     /**
@@ -196,7 +211,8 @@ public class TestConfiguration {
       */
     public static Test clientServerSuite(Class testClass)
     {           
-        TestSuite suite = new TestSuite(testClass);
+        TestSuite suite = new TestSuite(testClass,
+                suiteName(testClass)+":client");
         return clientServerDecorator(suite);
     }
     /**

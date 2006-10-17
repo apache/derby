@@ -56,16 +56,6 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
         conn.setAutoCommit(false);
         conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);   
     }
-
-    /**
-     * Set up the connection to the database.
-     */
-    public void setUp() throws  Exception {       
-        println("SetUp");
-        // temp save the connection in this class as con
-        // as well as the default connection in the parent
-        con = getConnection();
-    }
     
     /**
      * Verify the data of a tuple in the ResultSet, based on the data 
@@ -276,7 +266,6 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
         }
     }
     
-    protected Connection con = null; // Connection established in setUp()
     final int recordCount;
     
        

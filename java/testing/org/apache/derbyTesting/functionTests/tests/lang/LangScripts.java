@@ -85,13 +85,13 @@ public final class LangScripts extends ScriptTestCase {
 	 */
 	public static Test suite() {
         
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("LangScripts");
         suite.addTest(getSuite(SQL_LANGUAGE_TESTS));
         suite.addTest(getSuite(DERBY_TESTS));
         suite.addTest(getSuite(EMBEDDED_TESTS));
         
         // Set up the scripts run with the network client
-        TestSuite clientTests = new TestSuite();
+        TestSuite clientTests = new TestSuite("LangScripts:client");
         clientTests.addTest(getSuite(SQL_LANGUAGE_TESTS));
         clientTests.addTest(getSuite(DERBY_TESTS));
         Test client = TestConfiguration.clientServerDecorator(clientTests);
@@ -116,7 +116,7 @@ public final class LangScripts extends ScriptTestCase {
       */
 	private static Test getSuite(String[] list)
 	{
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("SQL scripts");
         for (int i = 0; i < list.length; i++)
             suite.addTest(
             		new CleanDatabaseTestSetup(

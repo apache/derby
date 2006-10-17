@@ -22,6 +22,7 @@ import junit.framework.*;
 import java.sql.*;
 
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests holdable resultsets.
@@ -34,16 +35,12 @@ public class HoldabilityTest extends SURBaseTest {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite();
                
         // DB2 client doesn't support this functionality
         if (usingDerbyNet())
-            return suite;
+            return new TestSuite();
         
-        suite.addTestSuite(HoldabilityTest.class);
-        
-        return new CleanDatabaseTestSetup(suite);
-
+        return TestConfiguration.defaultSuite(HoldabilityTest.class);
     }
 
     /**

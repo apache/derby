@@ -21,6 +21,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
 import java.sql.*;
@@ -81,15 +82,14 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
     
     /** Create a test suite with all tests in this class. */
     public static Test suite() {
-        TestSuite ts = new TestSuite();
 
         // Test will fail with JCC.
         if (usingDerbyNet()) {
-            return ts;
+            // empty suite
+            return new TestSuite();
         }
 
-        ts.addTestSuite(UpdatableResultSetTest.class);
-        return ts;
+        return TestConfiguration.defaultSuite(UpdatableResultSetTest.class);
     }
     
     /**

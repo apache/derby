@@ -21,6 +21,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
 import java.sql.*;
@@ -35,10 +36,15 @@ import java.sql.*;
  */
 public class URCoveringIndexTest extends BaseJDBCTestCase {
     
+    public static Test suite() {
+        return TestConfiguration.defaultSuite(URCoveringIndexTest.class);
+    }
+    
     /** Creates a new instance of SURBaseTest */
     public URCoveringIndexTest(String name) {
         super(name);
     }
+    
 
     /**
      * Set up the connection to the database.
