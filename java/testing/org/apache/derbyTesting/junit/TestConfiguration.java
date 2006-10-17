@@ -155,22 +155,49 @@ public class TestConfiguration {
     {
         CURRENT_CONFIG.set(config);
     }
+    
+    
     /**
-     * Return a decorator for the passed in tests that sets the
-     * configuration for the client to be Derby's JDBC client
-     * and to start the network server at setUp and shut it
-     * down at tearDown.
+     * Return a Test suite that contains all the text fixtures
+     * for the passed in class running in embedded and the
+     * default client server configuration.
      * <BR>
-     * The database configuration (name etc.) is based upon
-     * the previous configuration.
+     * The complete set of embedded and set of client server tests
+     * is decorated with a CleanDatabaseTestSetup.
      * <BR>
-     * The previous TestConfiguration is restored at tearDown.
-     * @param tests
-     * @return
+     * The client server configuration is setup using clientServerSuite
      */
-    public static Test derbyClientServerDecorator(Class suiteClass)
+    public static Test defaultSuite(Class testClass)
+    {
+        final TestSuite suite = new TestSuite();
+        
+        suite.addTest(embeddedSuite(testClass));            
+        suite.addTest(clientServerSuite(testClass));
+ 
+        return new CleanDatabaseTestSetup(suite);
+    }
+    
+    /**
+     * Create a suite for the passed test class that includes
+     * all the default fixtures from the class, wrapped
+     * in a single CleanDatabaseTestSetup.
+      */
+    public static Test embeddedSuite(Class testClass)
+    {
+        return new TestSuite(testClass);
+    }
+    
+    /**
+     * Create a suite for the passed test class that includes
+     * all the default fixtures from the class, wrapped in
+     * a derbyClientServerDecorator.
+     * 
+     * @param withCleanDB True if the 
+      */
+    public static Test clientServerSuite(Class testClass)
     {           
-        return derbyClientServerDecorator(new TestSuite(suiteClass));
+        TestSuite suite = new TestSuite(testClass);
+        return clientServerDecorator(suite);
     }
     /**
      * Return a decorator for the passed in tests that sets the
@@ -185,7 +212,7 @@ public class TestConfiguration {
      * @param tests
      * @return
      */
-    public static Test derbyClientServerDecorator(Test suite)
+    public static Test clientServerDecorator(Test suite)
     {
         if (JDBC.vmSupportsJSR169())
             return new TestSuite();

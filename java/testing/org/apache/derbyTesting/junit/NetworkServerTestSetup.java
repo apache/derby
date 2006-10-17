@@ -21,6 +21,7 @@ package org.apache.derbyTesting.junit;
 
 import java.io.FileNotFoundException;
 import java.net.InetAddress;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.security.AccessController;
@@ -58,18 +59,18 @@ final public class NetworkServerTestSetup extends TestSetup {
         
         TestConfiguration config = TestConfiguration.getCurrent();
         
-        if (!config.getJDBCClient().isEmbedded()) {
             BaseTestCase.println("Starting network server:");
 
             
             serverOutput = (FileOutputStream)
             AccessController.doPrivileged(new PrivilegedAction() {
                 public Object run() {
-                    String fileName = System.getProperty("derby.system.home") + 
-                            "serverConsoleOutput.log";
+                    File logs = new File("logs");
+                    logs.mkdir();
+                    File console = new File(logs, "serverConsoleOutput.log");
                     FileOutputStream fos = null;
                     try {
-                        fos = (new FileOutputStream(fileName));
+                        fos = new FileOutputStream(console.getPath(), true);
                     } catch (FileNotFoundException ex) {
                         ex.printStackTrace();
                     }
@@ -95,7 +96,6 @@ final public class NetworkServerTestSetup extends TestSetup {
                     }
                 }
             }
-        }
     }
 
     /**

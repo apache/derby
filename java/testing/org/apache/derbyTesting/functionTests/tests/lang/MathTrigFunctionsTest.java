@@ -26,6 +26,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
@@ -993,10 +994,13 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		super(name);
 	}
 
+    /**
+     * Runs the tests in the embedded and client server configuration
+     * as the JDBC escape function testing is relevant for both drivers.
+     * @return
+     */
 	public static Test suite() {
-		TestSuite suite = new TestSuite();
-		suite.addTestSuite(MathTrigFunctionsTest.class);
-		return suite;
+        return TestConfiguration.defaultSuite(MathTrigFunctionsTest.class);
 	}
 
 }

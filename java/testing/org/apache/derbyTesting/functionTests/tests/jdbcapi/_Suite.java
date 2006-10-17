@@ -68,9 +68,6 @@ public class _Suite extends BaseTestCase  {
 			suite.addTest(LobStreamsTest.suite());
 		}
         
-        if (TestConfiguration.runningInDerbyHarness())
-            return new NetworkServerTestSetup(suite);
-        
         return suite;
 	}
 }

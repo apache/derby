@@ -94,7 +94,7 @@ public final class LangScripts extends ScriptTestCase {
         TestSuite clientTests = new TestSuite();
         clientTests.addTest(getSuite(SQL_LANGUAGE_TESTS));
         clientTests.addTest(getSuite(DERBY_TESTS));
-        Test client = TestConfiguration.derbyClientServerDecorator(clientTests);
+        Test client = TestConfiguration.clientServerDecorator(clientTests);
         
         // add those client tests into the top-level suite.
         suite.addTest(client);

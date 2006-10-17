@@ -31,6 +31,7 @@ import java.io.ByteArrayInputStream;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This tests a fix for a defect (DERBY-121) where the server and
@@ -41,10 +42,6 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
  */
 
 public class LobLengthTest extends BaseJDBCTestCase {
-
-
-    /* Connection to be used in test */
-    private Connection conn = null; 
 
     /**
      * Creates a new instance of LobLengthTest
@@ -59,11 +56,7 @@ public class LobLengthTest extends BaseJDBCTestCase {
     
     public static Test suite() 
     {
-        final TestSuite suite = new TestSuite();
-        
-        suite.addTest(new LobLengthTest("testLongLobLengths"));
-
-        return suite;
+        return TestConfiguration.defaultSuite(LobLengthTest.class);
     }
 
 
@@ -73,11 +66,10 @@ public class LobLengthTest extends BaseJDBCTestCase {
      */
     public void setUp() throws Exception
     {
-        conn = getConnection();
-        conn.setAutoCommit(false);
+        getConnection().setAutoCommit(false);
 
         // Create a test table.
-        Statement st = conn.createStatement();
+        Statement st = createStatement();
         st.execute("create table lobTable100M(bl blob(100M))");
         st.close();
     }
@@ -88,12 +80,12 @@ public class LobLengthTest extends BaseJDBCTestCase {
      */
     public void tearDown() throws Exception 
     {
-        Statement st = conn.createStatement();
+        Statement st = createStatement();
         st.execute("drop table lobTable100M");
         st.close();
 
-        conn.commit();
-        conn.close();
+        commit();
+        super.tearDown();
     }
 
 
@@ -106,7 +98,7 @@ public class LobLengthTest extends BaseJDBCTestCase {
      */
     public void testLongLobLengths() throws Exception
     {
-        PreparedStatement pSt = conn.prepareStatement(
+        PreparedStatement pSt = prepareStatement(
             "insert into lobTable100M(bl) values (?)");
 
         // The error we're testing occurs when the server

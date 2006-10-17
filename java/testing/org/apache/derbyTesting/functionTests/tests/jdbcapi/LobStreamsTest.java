@@ -36,6 +36,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class LobStreamsTest extends BaseJDBCTestCase {
 
@@ -51,9 +52,6 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         streamSize[1] =  10000;
     }
 
-    private Connection con = null;
-
-
     /** Creates a new instance of LobStreamsTest */
     public LobStreamsTest(String name) {
         super(name);
@@ -63,10 +61,9 @@ public class LobStreamsTest extends BaseJDBCTestCase {
      * Set up the connection to the database.
      */
     public void setUp() throws Exception {
-        con = getConnection();
-        con.setAutoCommit(false);
+        getConnection().setAutoCommit(false);
 
-        Statement stmt1 = con.createStatement();
+        Statement stmt1 = createStatement();
         stmt1.execute("create table testBlobX1 (" +
                 "a integer, " +
                 "b blob(300K), " +
@@ -76,7 +73,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         byte[] b2 = new byte[1];
         b2[0] = (byte)64;
         String c2 = "c";
-        PreparedStatement stmt2 = con.prepareStatement(
+        PreparedStatement stmt2 = prepareStatement(
                 "INSERT INTO testBlobX1(a, b, c) " +
                 "VALUES (?, ?, ?)");
         stmt2.setInt(1, 1);
@@ -86,11 +83,6 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         stmt2.close();
     }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        con = null;
-    }
-
     /**
      * Tests the BlobOutputStream.write(byte  b[], int off, int len) method
      **/
@@ -98,7 +90,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         InputStream streamIn = new LoopingAlphabetStream(streamSize[0]);
         assertTrue("FAIL -- file not found", streamIn != null);
 
-        PreparedStatement stmt3 = con.prepareStatement(
+        PreparedStatement stmt3 = prepareStatement(
             "SELECT b FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
         rs3.next();
@@ -115,7 +107,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         outstream.close();
         streamIn.close();
 
-        PreparedStatement stmt4 = con.prepareStatement(
+        PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET b = ? WHERE a = 1");
         stmt4.setBlob(1,  blob);
         stmt4.executeUpdate();
@@ -147,7 +139,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
     public void testBlobWrite1Param() throws Exception {
         InputStream streamIn = new LoopingAlphabetStream(streamSize[1]);
 
-        PreparedStatement stmt3 = con.prepareStatement(
+        PreparedStatement stmt3 = prepareStatement(
             "SELECT b FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
         rs3.next();
@@ -163,7 +155,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         outstream.close();
         streamIn.close();
 
-        PreparedStatement stmt4 = con.prepareStatement(
+        PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET b = ? WHERE a = 1");
         stmt4.setBlob(1,  blob);
         stmt4.executeUpdate();
@@ -196,7 +188,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
     {
         InputStream streamIn = new LoopingAlphabetStream(streamSize[1]);
 
-        PreparedStatement stmt3 = con.prepareStatement(
+        PreparedStatement stmt3 = prepareStatement(
             "SELECT c FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
         rs3.next();
@@ -211,7 +203,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         outstream.close();
         streamIn.close();
 
-        PreparedStatement stmt4 = con.prepareStatement(
+        PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET c = ? WHERE a = 1");
         stmt4.setClob(1,  clob);
         stmt4.executeUpdate();
@@ -241,7 +233,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         InputStream streamIn = new LoopingAlphabetStream(streamSize[0]);
         assertTrue("FAIL -- file not found", streamIn != null);
 
-        PreparedStatement stmt3 = con.prepareStatement(
+        PreparedStatement stmt3 = prepareStatement(
             "SELECT c FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
         rs3.next();
@@ -258,7 +250,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         outstream.close();
         streamIn.close();
 
-        PreparedStatement stmt4 = con.prepareStatement(
+        PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET c = ? WHERE a = 1");
         stmt4.setClob(1,  clob);
         stmt4.executeUpdate();
@@ -291,7 +283,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
     {
         char[] testdata = unicodeTestString.toCharArray();
 
-        PreparedStatement stmt3 = con.prepareStatement(
+        PreparedStatement stmt3 = prepareStatement(
             "SELECT c FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
         rs3.next();
@@ -301,7 +293,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         clobWriter.write(testdata, 0, testdata.length);
         clobWriter.close();
 
-        PreparedStatement stmt4 = con.prepareStatement(
+        PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET c = ? WHERE a = 1");
         stmt4.setClob(1,  clob);
         stmt4.executeUpdate();
@@ -330,7 +322,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
      **/
     public void testClobCharacterWrite3ParamString() throws Exception
     {
-        PreparedStatement stmt3 = con.prepareStatement(
+        PreparedStatement stmt3 = prepareStatement(
             "SELECT c FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
         rs3.next();
@@ -340,7 +332,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         clobWriter.write(unicodeTestString, 0, unicodeTestString.length());
         clobWriter.close();
 
-        PreparedStatement stmt4 = con.prepareStatement(
+        PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET c = ? WHERE a = 1");
         stmt4.setClob(1,  clob);
         stmt4.executeUpdate();
@@ -369,7 +361,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
      **/
     public void testClobCharacterWrite1ParamString() throws Exception
     {
-        PreparedStatement stmt3 = con.prepareStatement(
+        PreparedStatement stmt3 = prepareStatement(
             "SELECT c FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
         rs3.next();
@@ -379,7 +371,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         clobWriter.write(unicodeTestString);
         clobWriter.close();
 
-        PreparedStatement stmt4 = con.prepareStatement(
+        PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET c = ? WHERE a = 1");
         stmt4.setClob(1,  clob);
         stmt4.executeUpdate();
@@ -410,7 +402,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
     {
         char testchar = 'a';
 
-        PreparedStatement stmt3 = con.prepareStatement(
+        PreparedStatement stmt3 = prepareStatement(
             "SELECT c FROM testBlobX1 WHERE a = 1");
         ResultSet rs3 = stmt3.executeQuery();
         rs3.next();
@@ -421,7 +413,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         clobWriter.write(testchar);
         clobWriter.close();
 
-        PreparedStatement stmt4 = con.prepareStatement(
+        PreparedStatement stmt4 = prepareStatement(
             "UPDATE testBlobX1 SET c = ? WHERE a = 1");
         stmt4.setClob(1,  clob);
         stmt4.executeUpdate();
@@ -444,26 +436,13 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         stmt3.close();
     }
 
+    /**
+     * Run with DerbyNetClient only.
+     * @return
+     */
     public static Test suite() {
-        final TestSuite suite = new TestSuite();
-
-        // Run with DerbyNetClient only
-        if (usingDerbyNetClient()) {
-            suite.addTest(new LobStreamsTest("testBlobWrite1Param"));
-            suite.addTest(new LobStreamsTest("testBlobWrite3Param"));
-            suite.addTest(new LobStreamsTest("testClobAsciiWrite1Param"));
-            suite.addTest(new LobStreamsTest("testClobAsciiWrite3Param"));
-            suite.addTest(new
-                    LobStreamsTest("testClobCharacterWrite1Char"));
-            suite.addTest(new
-                    LobStreamsTest("testClobCharacterWrite1ParamString"));
-            suite.addTest(new
-                    LobStreamsTest("testClobCharacterWrite3ParamChar"));
-            suite.addTest(new
-                    LobStreamsTest("testClobCharacterWrite3ParamString"));
-        }
-
-        return suite;
+                
+        return TestConfiguration.clientServerSuite(LobStreamsTest.class);
     }
 
 

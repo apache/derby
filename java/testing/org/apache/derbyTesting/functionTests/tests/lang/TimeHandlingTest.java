@@ -81,7 +81,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         suite.addTest(new TimeHandlingTest("derby889testInertTime"));
         suite.addTest(new TimeHandlingTest("derby889testCurrentTime"));
         
-        suite.addTest(TestConfiguration.derbyClientServerDecorator(TimeHandlingTest.class));
+        suite.addTest(TestConfiguration.clientServerSuite(TimeHandlingTest.class));
         
         return new CleanDatabaseTestSetup(suite) {
             protected void decorateSQL(Statement s) throws SQLException {
