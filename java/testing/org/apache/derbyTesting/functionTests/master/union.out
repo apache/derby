@@ -911,4 +911,40 @@ ij> drop table insert_test;
 0 rows inserted/updated/deleted
 ij> drop table insert_test2;
 0 rows inserted/updated/deleted
+ij> -- DERBY-1967
+-- NULLIF with UNION throws SQLSTATE 23502.
+create table a (f1 varchar(10));
+0 rows inserted/updated/deleted
+ij> create table b (f2 varchar(10));
+0 rows inserted/updated/deleted
+ij> insert into b values('test');
+1 row inserted/updated/deleted
+ij> -- this used to throw 23502
+select nullif('x','x') as f0, f1 from a
+   union all
+   select nullif('x','x') as f0, nullif('x','x') as f1 from b;
+F0  |F1        
+---------------
+NULL|NULL      
+ij> drop table a;
+0 rows inserted/updated/deleted
+ij> drop table b;
+0 rows inserted/updated/deleted
+ij> create table a (f1 int);
+0 rows inserted/updated/deleted
+ij> create table b (f2 int);
+0 rows inserted/updated/deleted
+ij> insert into b values(1);
+1 row inserted/updated/deleted
+ij> -- ok
+select nullif('x','x') as f0, f1 from a
+   union all
+   select nullif('x','x') as f0, nullif(1,1) as f1 from b;
+F0  |F1         
+----------------
+NULL|NULL       
+ij> drop table a;
+0 rows inserted/updated/deleted
+ij> drop table b;
+0 rows inserted/updated/deleted
 ij> 

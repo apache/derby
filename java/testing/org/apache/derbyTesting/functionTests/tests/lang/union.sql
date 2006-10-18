@@ -343,3 +343,25 @@ drop table t1;
 drop table t2;
 drop table insert_test;
 drop table insert_test2;
+
+-- DERBY-1967
+-- NULLIF with UNION throws SQLSTATE 23502.
+
+create table a (f1 varchar(10));
+create table b (f2 varchar(10));
+insert into b values('test');
+-- this used to throw 23502
+select nullif('x','x') as f0, f1 from a
+   union all
+   select nullif('x','x') as f0, nullif('x','x') as f1 from b; 
+drop table a;
+drop table b;
+create table a (f1 int);
+create table b (f2 int);
+insert into b values(1);
+-- ok
+select nullif('x','x') as f0, f1 from a
+   union all
+   select nullif('x','x') as f0, nullif(1,1) as f1 from b; 
+drop table a;
+drop table b;

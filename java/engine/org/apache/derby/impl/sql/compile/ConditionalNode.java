@@ -153,10 +153,20 @@ public class ConditionalNode extends ValueNode
 			//At bind phase, we should bind it to the type of V1 since now we know the
 			//type of V1  
 			BinaryComparisonOperatorNode bcon = (BinaryComparisonOperatorNode)testCondition;
+			
+			/* 
+			 * NULLIF(V1,V2) is equivalent to: 
+			 * 
+			 *    CASE WHEN V1=V2 THEN NULL ELSE V1 END
+			 * 
+			 * The untyped NULL should have a data type descriptor
+			 * that allows its value to be nullable.
+			 */
 			QueryTreeNode cast = getNodeFactory().getNode(
 						C_NodeTypes.CAST_NODE,
 						thenElseList.elementAt(0), 
-						bcon.getLeftOperand().getTypeServices(),
+						new DataTypeDescriptor(
+								bcon.getLeftOperand().getTypeServices(), true),
 						getContextManager());
 			thenElseList.setElementAt(cast,0);
 		}
