@@ -4547,10 +4547,14 @@ class DRDAConnThread extends Thread {
 							}
 						} else {
 							paramBytes = reader.getExtData(checkNullability);
-							if (paramBytes==null || !useSetBinaryStream) {
-								ps.setBytes(i+1, paramBytes);
+							
+                            if ( paramBytes==null ) {
+								ps.setBytes(i+1, 
+                                            null );
+                                
 							} else {
-								ps.setBinaryStream(i+1, new ByteArrayInputStream(paramBytes),
+								ps.setBinaryStream(i+1, 
+                                                   new ByteArrayInputStream(paramBytes),
 												   paramBytes.length);
 							}
 							if (SanityManager.DEBUG) {
