@@ -4,7 +4,6 @@ lang/holdCursorJava.java
 jdbcapi/checkDataSource30.java
 jdbcapi/parameterMetaDataJdbc30.java
 lang/procedureJdbc30.java
-jdbcapi/resultsetJdbc30.java
 jdbcapi/statementJdbc30.java
 jdbcapi/savepointJdbc30_JSR169.java
 jdbcapi/savepointJdbc30_XA.java
