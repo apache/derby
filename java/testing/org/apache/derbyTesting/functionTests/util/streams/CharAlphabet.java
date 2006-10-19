@@ -85,6 +85,13 @@ public class CharAlphabet {
                                 CharAlphabet.CJKSUBSET);
     }
 
+    /**
+     * Get a Tamil alphabet
+     */
+    public static CharAlphabet tamil() {
+        return new CharAlphabet("Tamil", CharAlphabet.TAMIL);
+    }
+
     /** Name of the alphabet. */
     private final String name;
     /** Characters in the alphabet. */
