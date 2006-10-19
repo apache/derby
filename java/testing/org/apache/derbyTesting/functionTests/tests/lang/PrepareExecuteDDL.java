@@ -156,7 +156,7 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 		if (isSelectStar)
 			;
 		
-		JDBC.assertDrainResults(rs);
+		JDBC.assertDrainResults(rs, -1);
 	}
 	
 	

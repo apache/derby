@@ -393,7 +393,10 @@ public abstract class BaseJDBCTestCase
     }
 
     /**
-     * Assert that SQLState is as expected.
+     * Assert that SQLState is as expected.  If the SQLState for
+     * the top-level exception doesn't match, look for nested
+     * exceptions and, if there are any, see if they have the
+     * desired SQLState.
      *
      * @param message message to print on failure.
      * @param expected the expected SQLState.
@@ -424,7 +427,46 @@ public abstract class BaseJDBCTestCase
             // Save the SQLException
             // e.initCause(exception);
 
-            throw e;
+            if (usingDerbyNetClient())
+            {
+                /* For chained exceptions the Derby Client just concatenates
+                 * them into the exception message.  So search the message
+                 * for the desired SQLSTATE.  This isn't ideal, but it
+                 * should work...
+                 */
+                if (exception.getMessage().
+                    indexOf("SQLSTATE: " + expected) == -1)
+                {
+                    throw e;
+                }
+            }
+            else if (usingDerbyNet())
+            {
+                /* For JCC the error message is a series of tokens representing
+                 * different things like SQLSTATE, SQLCODE, nested SQL error
+                 * message, and nested SQL state.  Based on observation it
+                 * appears that the last token in the message is the SQLSTATE
+                 * of the nested exception, and it's preceded by a colon.
+                 * So using that (hopefully consistent?) rule, try to find
+                 * the target SQLSTATE.
+                 */
+                String msg = exception.getMessage();
+                if (!msg.substring(msg.lastIndexOf(":")+1)
+                    .trim().equals(expected))
+                {
+                    throw e;
+                }
+            }
+            else
+            {
+                // Check nested exceptions to see if any of them is
+                // the one we're looking for.
+                exception = exception.getNextException();
+                if (exception != null)
+                    assertSQLState(message, expected, exception);
+                else
+                    throw e;
+            }
         }
     }
 
@@ -437,6 +479,7 @@ public abstract class BaseJDBCTestCase
     public static void assertSQLState(String expected, SQLException exception) {
         assertSQLState("Unexpected SQL state.", expected, exception);
     }
+
     /**
      * Assert that the query does not compile and throws
      * a SQLException with the expected state.
@@ -447,10 +490,146 @@ public abstract class BaseJDBCTestCase
     public void assertCompileError(String sqlState, String query) {
 
         try {
-            prepareStatement(query).close();
+            PreparedStatement pSt = prepareStatement(query);
+            if (usingDerbyNet())
+            {
+                /* For JCC the prepares are deferred until execution,
+                 * so we have to actually execute in order to see the
+                 * expected error.  Note that we don't need to worry
+                 * about binding the parameters (if any); the compile
+                 * error should occur before the execution-time error
+                 * about unbound parameters.
+                 */
+                pSt.execute();
+            }
             fail("expected compile error: " + sqlState);
         } catch (SQLException se) {
             assertSQLState(sqlState, se);
+        }
+    }
+
+    /**
+     * Assert that the query fails (either in compilation,
+     * execution, or retrieval of results--doesn't matter)
+     * and throws a SQLException with the expected state.
+     *
+     * Assumption is that 'query' does *not* have parameters
+     * that need binding and thus can be executed using a
+     * simple Statement.execute() call.
+     * 
+     * @param sqlstate expected sql state.
+     * @param st Statement object on which to execute.
+     * @param query the query to compile and execute.
+     */
+    public static void assertStatementError(String sqlState,
+        Statement st, String query)
+    {
+        try {
+            boolean haveRS = st.execute(query);
+            fetchAndDiscardAllResults(st, haveRS);
+            fail("Expected error '" + sqlState +
+                "' but no error was thrown.");
+        } catch (SQLException se) {
+            assertSQLState(sqlState, se);
+        }
+    }
+
+    /**
+     * Assert that execution of the received PreparedStatement
+     * object fails (either in execution or when retrieving
+     * results) and throws a SQLException with the expected
+     * state.
+     * 
+     * Assumption is that "pSt" is either a PreparedStatement
+     * or a CallableStatement that has already been prepared
+     * and whose parameters (if any) have already been bound.
+     * Thus the only thing left to do is to call "execute()"
+     * and look for the expected SQLException.
+     * 
+     * @param sqlstate expected sql state.
+     * @param pSt A PreparedStatement or CallableStatement on
+     *  which to call "execute()".
+     */
+    public static void assertStatementError(String sqlState,
+        PreparedStatement pSt)
+    {
+        try {
+            boolean haveRS = pSt.execute();
+            fetchAndDiscardAllResults(pSt, haveRS);
+            fail("Expected error '" + sqlState +
+                "' but no error was thrown.");
+        } catch (SQLException se) {
+            assertSQLState(sqlState, se);
+        }
+    }
+
+    /**
+     * Take a Statement object and a SQL query, execute it
+     * via the "executeUpdate()" method, and assert that the
+     * resultant row count matches the received row count.
+     *
+     * Assumption is that 'query' does *not* have parameters
+     * that need binding and that it can be executed using a
+     * simple Statement.executeUpdate() call.
+     * 
+     * @param st Statement object on which to execute.
+     * @param expectedRC Expected row count.
+     * @param query Query to execute.
+     */
+    public static void assertUpdateCount(Statement st,
+        int expectedRC, String query) throws SQLException
+    {
+        assertEquals("Update count does not match:",
+            expectedRC, st.executeUpdate(query));
+    }
+
+    /**
+     * Assert that a call to "executeUpdate()" on the received
+     * PreparedStatement object returns a row count that matches
+     * the received row count.
+     *
+     * Assumption is that "pSt" is either a PreparedStatement
+     * or a CallableStatement that has already been prepared
+     * and whose parameters (if any) have already been bound.
+     * Also assumes the statement's SQL is such that a call
+     * executeUpdate() is allowed.  Thus the only thing left
+     * to do is to call the "executeUpdate" method.
+     * 
+     * @param pSt The PreparedStatement on which to execute.
+     * @param expectedRC The expected row count.
+     */
+    public static void assertUpdateCount(PreparedStatement pSt,
+        int expectedRC) throws SQLException
+    {
+        assertEquals("Update count does not match:",
+            expectedRC, pSt.executeUpdate());
+    }
+
+    /**
+     * Take the received Statement--on which a query has been
+     * executed--and fetch all rows of all result sets (if any)
+     * returned from execution.  The rows themselves are
+     * discarded.  This is useful when we expect there to be
+     * an error when processing the results but do not know
+     * (or care) at what point the error occurs.
+     *
+     * @param st An already-executed statement from which
+     *  we get the result set to process (if there is one).
+     * @param haveRS Whether or not the the statement's
+     *  first result is a result set (as opposed to an
+     *  update count).
+     */
+    private static void fetchAndDiscardAllResults(Statement st,
+        boolean haveRS) throws SQLException
+    {
+        ResultSet rs = null;
+        while (haveRS || (st.getUpdateCount() != -1))
+        {
+            // If we have a result set, iterate through all
+            // of the rows.
+            if (haveRS)
+                JDBC.assertDrainResults(st.getResultSet(), -1);
+            haveRS = st.getMoreResults();
         }
     }
 

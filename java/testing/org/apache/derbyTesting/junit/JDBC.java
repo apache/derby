@@ -316,27 +316,188 @@ public class JDBC {
 	 * Drain a single ResultSet by reading all of its
 	 * rows and columns. Each column is accessed using
 	 * getString() and asserted that the returned value
-	 * matches the state of ResultSet.wasNull().
+	 * matches the state of ResultSet.wasNull().  If
+	 * the received row count is non-negative, this method
+	 * also asserts that the number of rows in the result
+	 * set matches the received row count.
 	 * Provides simple testing of the ResultSet when the contents
 	 * are not important.
 	 * @param rs
+	 * @param expectedRows If non-negative, indicates how
+	 *  many rows we expected to see in the result set.
 	 * @throws SQLException
 	 */
-	public static void assertDrainResults(ResultSet rs)
-	    throws SQLException
+	public static void assertDrainResults(ResultSet rs,
+	    int expectedRows) throws SQLException
 	{
 		ResultSetMetaData rsmd = rs.getMetaData();
 		
+		int rows = 0;
 		while (rs.next()) {
 			for (int col = 1; col <= rsmd.getColumnCount(); col++)
 			{
 				String s = rs.getString(col);
 				Assert.assertEquals(s == null, rs.wasNull());
 			}
+			rows++;
 		}
 		rs.close();
+
+		if (rows >= 0)
+			Assert.assertEquals("Unexpected row count:", expectedRows, rows); 
 	}
 	
+    /**
+     * Takes a result set and a two-dimensional array and asserts
+     * that the two have equivalent rows and columns.  The first
+     * row in the 2-d array is expected to be the names of the
+     * columns and thus is compared to the metadata column names.
+     * Subsequent rows in the array are then compared with the
+     * corresponding rows in the result set.
+     *
+     * Will throw an assertion failure if any of the following
+     * is true:
+     *
+     *  1. Expected vs actual number of columns doesn't match
+     *  2. Expected vs actual number of rows doesn't match
+     *  3. Any column in any row of the result set does not "equal"
+     *     the corresponding column in the expected 2-d array.  If
+     *     "allAsStrings" is true then the result set value will be
+     *     retrieved as a String and compared, via the ".equals()"
+     *     method, to the corresponding object in the array (with
+     *     the assumption being that the objects in the array are all
+     *     Strings).  Otherwise the result set value will be retrieved
+     *     and compared as an Object, which is useful when asserting
+     *     the JDBC types of the columns in addition to their values.
+     *
+     * @param rs The actual result set.
+     * @param expectedRows 2-Dimensional array of objects representing
+     *  the expected result set.
+     * @param allAsStrings Whether or not to fetch (and compare) all
+     *  values from the actual result set as Strings; if false the
+     *  values will be fetched and compared as Objects.
+     */
+    public static void assertFullResultSet(ResultSet rs,
+        Object [][] expectedRows, boolean allAsStrings)
+        throws SQLException
+    {
+        int rows;
+        boolean firstRow = true;
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        // Assert that we have the right number of columns.
+        Assert.assertEquals("Unexpected column count:",
+            expectedRows[0].length, rsmd.getColumnCount());
+
+        /* Assert each row of the result set.  First row of the result
+         * result set is the column names, so we have to make sure we
+         * don't call rs.next() in that case.
+         */
+        for (rows = 0; firstRow || rs.next(); rows++)
+        {
+            /* If we have more actual rows than expected rows, don't
+             * try to assert the row.  Instead just keep iterating
+             * to see exactly how many rows the actual result set has.
+             */
+            if (rows < expectedRows.length)
+            {
+                assertRowInResultSet(rs, rsmd, rows,
+                    expectedRows[rows], allAsStrings);
+            }
+
+            firstRow = false;
+        }
+
+        // And finally, assert the row count.
+        Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);
+    }
+
+    /**
+     * Assert that every column in the current row of the received
+     * result set matches the corresponding column in the received
+     * array.  If rowNum is zero then instead of using the current
+     * row of "rs", use the column names as retrieved from the result
+     * set metadata.
+     *
+     * @param rs Result set whose current row we'll check (if rowNum
+     *  is greater than zero).
+     * @param rsmd Metadata object for "rs".  Used for fetching column
+     *  names (if rowNum == 0).
+     * @param rowNum Row number (w.r.t expected rows) that we're
+     *  checking.
+     * @param expectedRow Array of objects representing the expected
+     *  values for the current row (if rowNum > 0) or else the expected
+     *  column names (if rowNum == 0).
+     * @param asStrings Whether or not to fetch and compare all values
+     *  from "rs" as Strings.
+     */
+    private static void assertRowInResultSet(ResultSet rs,
+        ResultSetMetaData rsmd, int rowNum, Object [] expectedRow,
+        boolean asStrings) throws SQLException
+    {
+        String s;
+        boolean ok;
+        Object obj = null;
+        for (int i = 0; i < expectedRow.length; i++)
+        {
+            /* First row is column names.  We didn't call rs.next()
+             * in this case, so we have to be sure we don't call
+             * "wasNull" either.  Otherwise we'll see errors in client-
+             * server mode (though embedded doesn't seem to mind).
+             */
+            if (rowNum == 0)
+            {
+                obj = rsmd.getColumnName(i+1);
+                ok = ((expectedRow[i] != null) && obj.equals(expectedRow[i]));
+            }
+            else
+            {
+                if (asStrings)
+                {
+                    /* Different clients can return different values for
+                     * boolean columns--namely, 0/1 vs false/true.  So in
+                     * order to keep things uniform, take boolean columns
+                     * and get the JDBC string version.  Note: since
+                     * Derby doesn't have a BOOLEAN type, we assume that
+                     * if the column's type is SMALLINT and the expected
+                     * value's string form is "true" or "false", then the
+                     * column is intended to be a mock boolean column.
+                     */
+                    if ((expectedRow[i] != null)
+                        && (rsmd.getColumnType(i+1) == Types.SMALLINT))
+                    {
+                        s = expectedRow[i].toString();
+                        if (s.equals("true") || s.equals("false"))
+                            obj = (rs.getShort(i+1) == 0) ? "false" : "true";
+                    }
+                    else
+                    {
+                        obj = rs.getString(i+1);
+
+                        // Trim the string before comparing.
+                        if (obj != null)
+                            obj = ((String)obj).trim();
+                    }
+                }
+                else
+                    obj = rs.getObject(i+1);
+
+                ok = (rs.wasNull() && (expectedRow[i] == null))
+                    || (!rs.wasNull()
+                        && (expectedRow[i] != null)
+                        && obj.equals(expectedRow[i]));
+            }
+
+            if (!ok)
+            {
+                Assert.fail("Column value mismatch @ column '" +
+                    rsmd.getColumnName(i+1) + "', row " + rowNum +
+                    ":\n    Expected: " + expectedRow[i] +
+                    "\n    Found:    " + obj);
+            }
+        }
+    }
+
 	/**
 	 * Escape a non-qualified name so that it is suitable
 	 * for use in a SQL query executed by JDBC.
