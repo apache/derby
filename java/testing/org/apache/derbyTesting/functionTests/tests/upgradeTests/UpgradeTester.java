@@ -380,6 +380,22 @@ public class UpgradeTester {
 			conn.close();
 			shutdownDatabase(classLoader);
 		}
+
+
+		// when this test is run from the codeline using classes, the 
+		// oldClassLoader class path contains the new derby engine 
+		// classes also, this causes derby booting errors when database 
+		// is encrypted (see DERBY-1898), until this test is modified to 
+		// run without adding the whole class directory to the old derby 
+		// classloader classpath, following two re-encryption test cases 
+		// are run , only when this test is run using jar files. 
+		if (isJar[0]) {
+			// test encryption of an un-encrypted database and 
+			// encryption of an encrypted database with a new key.
+			passed = caseEncryptUnEncryptedDb(classLoader, phase) && passed;
+			passed = caseEncryptDatabaseWithNewKey(classLoader, phase) && passed;
+		}
+
 		setNullClassLoader();
 		
 		System.out.println("END - " + (passed ? "PASS" : "FAIL") +
@@ -1081,22 +1097,214 @@ public class UpgradeTester {
     }
 	
 	/**
+	 * This method checks if a database can be configured for 
+	 * encryption on hard upgrade to 10.2, but not on 
+	 * soft-upgrade	to 10.2. Only in versions 10.2 or above 
+	 * an exisiting un-encrypted  database can be configure
+	 * for encryption.
+	 *
+	 * @param classLoader Class loader
+	 * @param phase Upgrade test phase
+	 * @throws Exception
+	 */
+	private boolean caseEncryptUnEncryptedDb(URLClassLoader classLoader, 
+											 int phase) throws Exception {
+		Properties prop = new Properties();
+
+		// create a new database for this test case, 
+		// this database is used to test encryption of an 
+		// already existing database during soft/upgrade 
+		// phases.
+ 
+		String enDbName = "wombat_en";
+		prop.setProperty("databaseName", enDbName);
+	
+		// check if the database at version 10.2 or above.
+		boolean  reEncryptionAllowed = (oldMajorVersion > 10 || 
+										(oldMajorVersion ==10 && 
+										 oldMinorVersion>=2));
+		boolean passed = true;
+		switch(phase) {
+			case PH_CREATE:
+				prop.setProperty("connectionAttributes", 
+								 "create=true");
+				break;	
+			case PH_SOFT_UPGRADE:
+				// set attributes to encrypt database.
+				prop.setProperty("connectionAttributes", 
+								 "dataEncryption=true;" + 
+								 "bootPassword=xyz1234abc");
+				break;
+			case PH_POST_SOFT_UPGRADE:
+				// set attributes required to boot an encrypted database.
+				if (reEncryptionAllowed)
+					prop.setProperty("connectionAttributes", 
+								 "bootPassword=xyz1234abc");
+				break;
+			case PH_HARD_UPGRADE:
+				if (reEncryptionAllowed) {
+					// if database is already encrypted in 
+					// softupgrade phase, just boot it.
+					prop.setProperty("connectionAttributes", 
+									 "upgrade=true;bootPassword=xyz1234abc");
+				} else {
+					// set attributes to encrypt the database, 
+					// on hard upgrade.
+					prop.setProperty("connectionAttributes", 
+									 "upgrade=true;dataEncryption=true;" + 
+									 "bootPassword=xyz1234abc");
+
+				}
+					//prop.setProperty("connectionAttributes", 
+					//		 "upgrade=true;bootPassword=xyz1234abc");				
+				break;
+			default:
+				return passed;
+		}
+
+		Connection conn = null;
+		try {
+			conn = getConnectionUsingDataSource(classLoader, prop);
+		} catch (SQLException sqle) {
+			if(phase != PH_SOFT_UPGRADE)
+				throw sqle ;
+			else {
+				// on soft upgrade to 10.2, one should not be able to
+				// configure an un-encrypted database for encryption.
+				// It should fail failed with sql states "XJ040" and "XCL47".
+				if(!reEncryptionAllowed) {
+					passed = isExpectedException(sqle, "XJ040");
+					SQLException nextSqle = sqle.getNextException();
+					passed = isExpectedException(nextSqle, "XCL47");
+				} else
+					throw sqle;
+			}
+		}
+
+		if (conn != null) {
+			conn.close();
+			shutdownDatabase(classLoader, enDbName, false);
+		}
+		return passed;
+	}
+	
+
+	/**
+	 * This method checks if a database can be encrypted with a 
+	 * new encryption key(using boot password method) 
+	 * on hard upgrade to 10.2, but not on soft-upgrade to 10.2.
+	 * Only ib versions 10.2 or above an exisiting encrypted 
+	 * database can be re-encrypted with a new key. 
+	 *
+	 * @param classLoader Class loader
+	 * @param phase Upgrade test phase
+	 * @throws Exception
+	 */
+	private boolean caseEncryptDatabaseWithNewKey(URLClassLoader classLoader,
+											   int phase) throws Exception{
+		Properties prop = new Properties();
+		
+		// create a new database for this test case, 
+		// this database is used to test re-encryption of an 
+		// encrypted database during soft/upgrade 
+		// phases.
+
+		String renDbName = "wombat_ren";
+		prop.setProperty("databaseName", renDbName);
+
+		// check if the database at version 10.2 or above
+		boolean reEncryptionAllowed = (oldMajorVersion > 10 || 
+									   (oldMajorVersion ==10 && 
+										oldMinorVersion>=2));
+		boolean passed = true;
+		String bootPwd = (reEncryptionAllowed ? "new1234abc" : "xyz1234abc");
+		switch(phase) {
+			case PH_CREATE:
+				// set attributes  to create an encrypted database.
+				prop.setProperty("connectionAttributes", 
+								 "create=true;" + 
+								 "dataEncryption=true;bootPassword=xyz1234abc");
+				break;
+			case PH_SOFT_UPGRADE:
+				// set attributes to rencrypt with a new password.
+				prop.setProperty("connectionAttributes", 
+								 "bootPassword=xyz1234abc;" + 
+								 "newBootPassword=new1234abc");
+				break;
+			case PH_POST_SOFT_UPGRADE:
+				prop.setProperty("connectionAttributes", 
+								 "bootPassword=" + bootPwd);
+				break;
+			case PH_HARD_UPGRADE:
+				prop.setProperty("connectionAttributes", 
+								 "upgrade=true;bootPassword=" + bootPwd + 
+								 ";newBootPassword=new1234xyz");
+				break;
+			default:
+				return passed;
+		}
+		
+		Connection conn = null;
+		try {
+			conn = getConnectionUsingDataSource(classLoader, prop);
+		} catch (SQLException sqle) {
+			if(phase != PH_SOFT_UPGRADE)
+				throw sqle ;
+			else {
+				// on soft upgrade to 10.2, one should not be able to
+				// re-encrypt an existing encrypted database with a new key or
+				// encrypt an un-encrypted database. It should have failed 
+				// with sql states "XJ040" and "XCL47".
+				if(!reEncryptionAllowed) {
+					passed = isExpectedException(sqle, "XJ040");
+					SQLException nextSqle = sqle.getNextException();
+					passed = isExpectedException(nextSqle, "XCL47");
+				} else
+					throw sqle;
+			}
+		}
+
+		if (conn != null) {
+			conn.close();
+			shutdownDatabase(classLoader, renDbName, false);
+		}
+		return passed;
+	}
+
+
+	/**
 	 * Shutdown the database
 	 * @param classLoader
 	 * @throws Exception
 	 */
 	private void shutdownDatabase(URLClassLoader classLoader) 
-											throws Exception {
+		throws Exception
+	{
+		shutdownDatabase(classLoader, dbName, true);
+	}
+
+
+	/**
+	 * Shutdown the database
+	 * @param classLoader
+	 * @param databaseName name of the database to shutdown.
+	 * @throws Exception
+	 */
+	private void shutdownDatabase(URLClassLoader classLoader,
+								  String databaseName, 
+								  boolean printMessage) 
+		throws Exception {
 		Properties prop = new Properties();
-		prop.setProperty("databaseName", dbName);
+		prop.setProperty("databaseName", databaseName);
 		prop.setProperty("connectionAttributes", "shutdown=true");
 		
 		try { 
 			getConnectionUsingDataSource(classLoader, prop);
 		} catch (SQLException sqle) {
 			if(sqle.getSQLState().equals("08006")) {
-				System.out.println("Expected exception during shutdown: " 
-									+ sqle.getMessage());
+				if (printMessage)
+					System.out.println("Expected exception during shutdown: " 
+									   + sqle.getMessage());
 			} else
 				throw sqle;
 		}
