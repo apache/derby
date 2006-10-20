@@ -220,13 +220,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		// log factory is booted by the data factory
 		logFactory =(LogFactory) Monitor.findServiceModule(this, getLogFactoryModule());
 
-
-		//save the service properties to a file if we are doing a restore from
+		// if this is a restore from backup, restore the jar files.
 		if(restoreFromBackup !=null)
 		{
-			//copy the jar files.etc from backup if they don't exist
 			restoreRemainingFromBackup(restoreFromBackup);
-			((UpdateServiceProperties)properties).saveServiceProperties();
 		}
 
 		// If the log is at another location, make sure  service.properties
@@ -264,14 +261,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		}
 
 		
-		//save the service properties to a file if we are doing a restore from
-		if(restoreFromBackup !=null)
+		// save the service properties to a file if we are doing a 
+		// restore from. This marks the end of restore from backup.
+		if (restoreFromBackup !=null)
 		{
-			//copy the jar files.etc from backup if they don't exist
-			restoreRemainingFromBackup(restoreFromBackup);
 			((UpdateServiceProperties)properties).saveServiceProperties();
 		}
-
 
 
 		/**
@@ -975,44 +970,50 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
 	
-	//copies the files from the backup that does not need
-	//any special handling like jars.
-	private void restoreRemainingFromBackup(String backupPath) throws StandardException
+	/*
+	 * Restore any remaining files from backup that are not 
+	 * restored by the individual factories.  
+	 *  1) copy jar files from backup..
+	 *  2) copy backup history file. 
+	 */
+	private void restoreRemainingFromBackup(String backupPath) 
+		throws StandardException 
 	{
-		/** 
-		 *copy the files from the backup except the ones that we already
-		 *copied in the boot methods(like log directory and data segments)
-		 *AND Service.properties file which we create last to
-		 *indicate the end of copy from backup.
-		 */
+	
+		// if they are any jar files in the backup copy, 
+		// copy them into the database directory, if they
+		// are not already there. 
 
-		File backuploc = new File(backupPath);
-		String[] fromList = privList(backuploc);
-		for(int i =0 ; i < fromList.length ; i++)
+		File backupJarDir = new File(backupPath, 
+									 FileResource.JAR_DIRECTORY_NAME);
+
+		StorageFile dbJarDir = 
+			storageFactory.newStorageFile(FileResource.JAR_DIRECTORY_NAME);
+		
+		if (!privExists(dbJarDir) && privExists(backupJarDir)) 
 		{
-			StorageFile toFile = storageFactory.newStorageFile( fromList[i]);
-			if(privExists(toFile) || 
-			   fromList[i].equals(PersistentService.PROPERTIES_NAME)){
-				continue;
-			}
-
-			File fromFile = new File(backuploc, fromList[i]);
-			if(privIsDirectory(fromFile))
-			{
-				if (!privCopyDirectory(fromFile, toFile)){
-					throw StandardException.newException(
+			if (!privCopyDirectory(backupJarDir, dbJarDir)) {
+				throw StandardException.newException(
                          SQLState.UNABLE_TO_COPY_FILE_FROM_BACKUP, 
-                         fromFile, toFile);
-				}
-			}else{
-				if (!privCopyFile(fromFile, toFile)){
-					throw StandardException.newException(
-                         SQLState.UNABLE_TO_COPY_FILE_FROM_BACKUP,
-                         fromFile, toFile);
-				}
+                         backupJarDir, dbJarDir);
 			}
 		}
+
+		// copy the backup history file from the backup. 
+		StorageFile dbHistoryFile = 
+			storageFactory.newStorageFile(BACKUP_HISTORY);
+		File backupHistoryFile = new File(backupPath, BACKUP_HISTORY);
+	
+		// if this is a roll-forward recovery, backup history file 
+		// will already there in the database and will be the latest 
+		// copy; if it exists, do not copy from backup.
+		if (!privExists(dbHistoryFile))
+			if (!privCopyFile(backupHistoryFile, dbHistoryFile))
+				throw StandardException. 
+					newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
+								 backupHistoryFile, dbHistoryFile);  
 	}
+
 
 	public void idle() throws StandardException {
 		dataFactory.idle();
