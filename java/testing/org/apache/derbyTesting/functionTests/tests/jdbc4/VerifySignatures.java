@@ -461,9 +461,6 @@ public class VerifySignatures extends BaseJDBCTestCase {
             jdbcInterfaces.remove(javax.sql.RowSetMetaData.class);
             jdbcInterfaces.remove(javax.sql.RowSetReader.class);
             jdbcInterfaces.remove(javax.sql.RowSetWriter.class);
-
-            // Derby implements RowId classes, but has no way to
-            // obtain an object of that type.
             jdbcInterfaces.remove(java.sql.RowId.class);
 
             // The event listener interfaces are implemented in
