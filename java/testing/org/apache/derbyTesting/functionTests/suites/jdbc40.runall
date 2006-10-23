@@ -1,11 +1,7 @@
-# Old Java style tests
 jdbc4/TestConnectionMethods.java
 jdbc4/TestDbMetaData.java
-jdbc4/TestJDBC40Exception.java
 jdbc4/TestPreparedStatementMethods.java
 jdbc4/TestResultSetMethods.java
-
-# JUnit tests
 jdbc4/AutoloadBooting.junit
 jdbc4/AutoloadTest.junit
 jdbc4/VerifySignatures.junit

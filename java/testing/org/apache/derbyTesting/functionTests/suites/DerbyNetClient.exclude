@@ -10,9 +10,8 @@
 lang/errorStream.java
 # lang/scrollCursors2.java
 #
-# Currently, we exclude jdbc4/TestDbMetaData.java and
-# jdbc4/TestJDBC40Exception.java from the jdbc40 suite.
-# Eventually, we hope they will run under the network client.
+# Currently, we exclude jdbc4/TestDbMetaData.java from the jdbc40 suite.
+# Eventually, we hope it will run under the network client.
 #
 jdbcapi/batchUpdate.java
 jdbcapi/statementJdbc20.java
@@ -20,7 +19,6 @@ jdbcapi/statementJdbc30.java
 jdbcapi/dataSourceReference.java
 largedata/LobLimits.java
 jdbc4/TestDbMetaData.java
-jdbc4/TestJDBC40Exception.java
 #
 # This test brings the network server up and down by itself
 # and so should not be run with a competing server.

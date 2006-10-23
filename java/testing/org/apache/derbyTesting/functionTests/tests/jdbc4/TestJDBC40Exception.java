@@ -22,7 +22,9 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
@@ -30,142 +32,148 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLTransientConnectionException;
 import java.sql.SQLTransactionRollbackException;
+import java.sql.Types;
 import junit.framework.Test;
-import junit.framework.TestResult;
 import junit.framework.TestSuite;
-import org.apache.derby.tools.ij;
-import org.apache.derbyTesting.functionTests.tests.derbynet.testconnection;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derby.iapi.reference.Property;
 
-public class TestJDBC40Exception {    
-    
-    private static final String EXCEPTION_TABLE1 = "EXCEPTION_TABLE1";
+public class TestJDBC40Exception extends BaseJDBCTestCase {
 
-	private	static	String[]	_startupArgs;
-	
-    public TestJDBC40Exception() {
-    }
+    /** Timeout value to restore to in tearDown(). */
+    private int oldTimeout;
     
-    /*
-     * Stub methods to be removed after 623 is fixed and test is 
-     * moved to use junit
-     */
-    private Connection getConnection () throws Exception {
-		// use the ij utility to read the property file and
-		// make the initial connection.
-		ij.getPropertyArg( _startupArgs );
-		
-		Connection	conn_main = ij.startJBMS();
-		
-        return conn_main;
-    }
-    
-    /*
-     * Stub methods to be removed after 623 is fixed and test is 
-     * moved to use junit
-     */
-    private void close (Connection conn) throws SQLException {
-        conn.close ();
+    public TestJDBC40Exception(String name) {
+        super(name);
     }
 
-    /*
-     * Stub methods to be removed after 623 is fixed and test is 
-     * moved to use junit
-     */    
-    private void execute (Connection conn, String sql) throws SQLException {
-        Statement stmt = conn.createStatement ();
-        stmt.execute (sql);
-        stmt.close ();
-    }
-    
     public static Test suite() {
         TestSuite testSuite = new TestSuite();
         testSuite.addTestSuite(TestJDBC40Exception.class);
         return testSuite;
     }
-    
-    
-    public void testException() throws Exception{
-        Connection conn = getConnection();
-        execute(conn,  "create table " + EXCEPTION_TABLE1 + "(id integer " +
-                "primary key, data varchar (5))");
-        execute(conn, "insert into " + EXCEPTION_TABLE1 + "(id, data)" +
-                "values (1, 'data1')");
-        close(conn);
-        checkDataException();
-        checkIntegrityConstraintViolationException();
-        checkSyntaxErrorException();
-        checkConnectionException();
-        checkTimeout();
-    }
-    
-    private void checkIntegrityConstraintViolationException() throws Exception {
-        Connection conn = getConnection();
-        try {
-            execute(conn, "insert into " + EXCEPTION_TABLE1 + "(id, data)" +
-                    "values (1, 'data1')");
-        } catch (SQLIntegrityConstraintViolationException e) {
-              if (!e.getSQLState().startsWith ("23"))
-                System.out.println ("Unexpected SQL State" + e.getSQLState());
-        }
-    }
-    
-    private void checkDataException() throws Exception{
-        Connection conn = getConnection();
-        try {
-            execute(conn, "insert into " + EXCEPTION_TABLE1 + "(id, data)" +
-                    "values (2, 'data1234556')");
-        } catch (SQLDataException e) {
-             if (!e.getSQLState().startsWith ("22"))
-                System.out.println ("Unexpected SQL State" + e.getSQLState());
-        }
-    }
-    
-    private void checkConnectionException() throws Exception {
-        Statement stmt = null;
-        Connection con = null;
-        try {
-            con = getConnection();
-            stmt = con.createStatement();
-            con.close();
-            stmt.execute("select * from exception1");
-        } catch (SQLTransientConnectionException cone) {
-            if (!cone.getSQLState().startsWith ("08"))
-                System.out.println ("Unexpected SQL State" + cone.getSQLState());
-        }
-    }
-    
-    private void checkSyntaxErrorException() throws Exception{
-        Connection conn = getConnection();
-        try {
-            execute(conn, "insert into " + EXCEPTION_TABLE1 + "(id, data)" +
-                    "values ('2', 'data1')");
-        } catch (SQLSyntaxErrorException e) {
-            if (!e.getSQLState().startsWith ("42"))
-                System.out.println ("Unexpected SQL State" + e.getSQLState());
-        }
-    }
-    
-    private void checkTimeout() throws Exception {
-        Connection con1 = getConnection();
-        Connection con2 = getConnection();
-        try {
-            con1.setAutoCommit(false);
-            con2.setAutoCommit(false);
-            con1.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-            con2.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-            execute(con1, "select * from " + EXCEPTION_TABLE1 + " for update");
-            execute(con2, "select * from " + EXCEPTION_TABLE1 + " for update");
-        } catch (SQLTransactionRollbackException e) {
-              if (!e.getSQLState().startsWith ("40"))
-                System.out.println ("Unexpected SQL State" + e.getSQLState());
-        }
-    }
-    
-    
-    public static void main(String [] args) throws Exception {    
-        TestJDBC40Exception test = new TestJDBC40Exception ();
 
-		_startupArgs = args;
-        test.testException ();
+    protected void setUp() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table EXCEPTION_TABLE1 (id integer " +
+                  "primary key, data varchar (5))");
+        s.execute("insert into EXCEPTION_TABLE1 (id, data)" +
+                  "values (1, 'data1')");
+        // lower waitTimeout, otherwise testTimeout takes forever
+        oldTimeout = getWaitTimeout();
+        setWaitTimeout(2);
+        s.close();
+    }
+
+    protected void tearDown() throws Exception {
+        createStatement().execute("drop table EXCEPTION_TABLE1");
+        setWaitTimeout(oldTimeout);
+        super.tearDown();
+    }
+
+    /**
+     * Set the value of the waitTimeout property.
+     *
+     * @param timeout time in seconds to wait for a lock
+     * @exception SQLException if a database error occurs
+     */
+    private void setWaitTimeout(int timeout) throws SQLException {
+        PreparedStatement ps = prepareStatement(
+            "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" +
+            "'derby.locks.waitTimeout', ?)");
+        ps.setInt(1, timeout);
+        ps.execute();
+        ps.close();
+    }
+
+    /**
+     * Get the value of the waitTimeout property. If no timeout is set, use
+     * org.apache.derby.iapi.reference.Property.WAIT_TIMEOUT_DEFAULT.
+     *
+     * @return the current timeout in seconds
+     * @exception SQLException if a database error occurs
+     */
+    private int getWaitTimeout() throws SQLException {
+        CallableStatement cs = prepareCall(
+            "{ ? = CALL SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY(" +
+            "'derby.locks.waitTimeout') }");
+        cs.registerOutParameter(1, Types.VARCHAR);
+        cs.execute();
+        int timeout = cs.getInt(1);
+        if (cs.wasNull()) {
+            timeout = Property.WAIT_TIMEOUT_DEFAULT;
+        }
+        cs.close();
+        return timeout;
+    }
+    
+    public void testIntegrityConstraintViolationException()
+            throws SQLException {
+        try {
+            createStatement().execute(
+                "insert into EXCEPTION_TABLE1 (id, data) values (1, 'data1')");
+            fail("Statement didn't fail.");
+        } catch (SQLIntegrityConstraintViolationException e) {
+            assertTrue("Unexpected SQL State: " + e.getSQLState(),
+                       e.getSQLState().startsWith("23"));
+        }
+    }
+    
+    public void testDataException() throws SQLException {
+        try {
+            createStatement().execute(
+                "insert into EXCEPTION_TABLE1 (id, data)" +
+                "values (2, 'data1234556')");
+            fail("Statement didn't fail.");
+        } catch (SQLDataException e) {
+            assertTrue("Unexpected SQL State: " + e.getSQLState(),
+                       e.getSQLState().startsWith("22"));
+        }
+    }
+    
+    public void testConnectionException() throws SQLException {
+        Statement stmt = createStatement();
+        getConnection().close();
+        try {
+            stmt.execute("select * from exception1");
+            fail("Statement didn't fail.");
+        } catch (SQLTransientConnectionException cone) {
+            assertTrue("Unexpected SQL State: " + cone.getSQLState(),
+                       cone.getSQLState().startsWith("08"));
+        }
+    }
+    
+    public void testSyntaxErrorException() throws SQLException {
+        try {
+            createStatement().execute("insert into EXCEPTION_TABLE1 " +
+                                      "(id, data) values ('2', 'data1')");
+            fail("Statement didn't fail.");
+        } catch (SQLSyntaxErrorException e) {
+            assertTrue("Unexpected SQL State: " + e.getSQLState(),
+                       e.getSQLState().startsWith("42"));
+        }
+    }
+
+    public void testTimeout() throws SQLException {
+        Connection con1 = openDefaultConnection();
+        Connection con2 = openDefaultConnection();
+        con1.setAutoCommit(false);
+        con2.setAutoCommit(false);
+        con1.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        con2.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        con1.createStatement().execute(
+            "select * from EXCEPTION_TABLE1 for update");
+        try {
+            con2.createStatement().execute(
+                "select * from EXCEPTION_TABLE1 for update");
+            fail("Statement didn't fail.");
+        } catch (SQLTransactionRollbackException e) {
+            assertTrue("Unexpected SQL State: " + e.getSQLState(),
+                       e.getSQLState().startsWith("40"));
+        }
+        con1.rollback();
+        con1.close();
+        con2.rollback();
+        con2.close();
     }
 }

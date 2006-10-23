@@ -64,6 +64,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(RowIdNotImplementedTest.suite());
 		suite.addTest(StatementEventsTest.suite());
 		suite.addTest(StatementTest.suite());
+		suite.addTest(TestJDBC40Exception.suite());
 		suite.addTestSuite(UnsupportedVetter.class);		
 		suite.addTest(XA40Test.suite());
         
