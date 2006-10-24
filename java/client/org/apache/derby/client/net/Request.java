@@ -253,13 +253,13 @@ public class Request {
 
     // We need to reuse the agent's sql exception accumulation mechanism
     // for this write exception, pad if the length is too big, and truncation if the length is too small
-    final void writeEncryptedScalarStream(boolean chained,
-										  boolean chainedWithSameCorrelator,
-										  int codePoint,
-										  int length,
-										  java.io.InputStream in,
-										  boolean writeNullByte,
-										  int parameterIndex) throws DisconnectException, SqlException {
+    final private void writeEncryptedScalarStream(boolean chained,
+                                                  boolean chainedWithSameCorrelator,
+                                                  int codePoint,
+                                                  int length,
+                                                  java.io.InputStream in,
+                                                  boolean writeNullByte,
+                                                  int parameterIndex) throws DisconnectException, SqlException {
         
 
 			
@@ -417,13 +417,13 @@ public class Request {
 	
 	// We need to reuse the agent's sql exception accumulation mechanism
     // for this write exception, pad if the length is too big, and truncation if the length is too small
-	final void writePlainScalarStream(boolean chained,
-									  boolean chainedWithSameCorrelator,
-									  int codePoint,
-									  int length,
-									  java.io.InputStream in,
-									  boolean writeNullByte,
-									  int parameterIndex) throws DisconnectException, SqlException {
+	final private void writePlainScalarStream(boolean chained,
+                                              boolean chainedWithSameCorrelator,
+                                              int codePoint,
+                                              int length,
+                                              java.io.InputStream in,
+                                              boolean writeNullByte,
+                                              int parameterIndex) throws DisconnectException, SqlException {
 		int leftToRead = length;
 		int extendedLengthByteCount = prepScalarStream(chained,
 													   chainedWithSameCorrelator,
