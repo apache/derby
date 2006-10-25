@@ -209,13 +209,14 @@ installed on your system or if you are on MacOS X.
 
 2.2.5 Download and install JUnit 3.8.*
 
-(1) JUnit is needed for some of Derby's tests. Download a JUnit 3.8.*
-    zip file from www.junit.org.
-    Note that Derby has been successfully built with JUnit 3.8.1
-    and we expect that other 3.8.* versions will work with our
-    build process. The 4.* series of JUnit releases may not work
-    until we fix the Derby build to accomodate the 1.5 extensions
-    to java.
+(1) JUnit is needed for some of Derby's tests. Download a JUnit 3.8.1
+    from
+
+      http://prdownloads.sourceforge.net/junit/junit3.8.1.zip?download
+
+    Note that http://junit.org only has the latest version of JUnit
+    which may not work until we fix the Derby build to accomodate 
+    the 1.5 extensions to java.
 
 (2) Unzip the JUnit zip file and place junit.jar from the zip file into
     ${derby.source}/tools/java.
