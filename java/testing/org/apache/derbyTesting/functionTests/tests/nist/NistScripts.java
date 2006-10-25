@@ -170,7 +170,7 @@ public final class NistScripts extends ScriptTestCase {
 	 * Return the suite that runs the NIST SQL scripts.
 	 */
 	public static Test suite() {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("NIST");
         
         String suiteUser = null;
         TestSuite userSuite = null; 
@@ -189,7 +189,7 @@ public final class NistScripts extends ScriptTestCase {
             
             // Add the new user suite with the change user decorator to
             // the main suite but continue to add tests to the user suite.
-            userSuite = new TestSuite(); 
+            userSuite = new TestSuite("NIST user="+testUser); 
             String password = testUser.concat("PWD");
             suite.addTest(
                     TestConfiguration.changeUserDecorator(userSuite, testUser, password));
@@ -202,7 +202,7 @@ public final class NistScripts extends ScriptTestCase {
     }
     
 	/*
-	 * A single JUnit test that runs a single language SQL script.
+	 * A single JUnit test that runs a single Nist SQL script.
 	 */
 	private NistScripts(String nistScript){
 		super(nistScript);
