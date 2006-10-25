@@ -4111,9 +4111,10 @@ class DRDAConnThread extends Thread {
 		PreparedStatement ps = stmt.getPreparedStatement();
 		int codePoint;
 		EngineParameterMetaData pmeta = null;
-		Vector paramDrdaTypes = new Vector();
-		Vector paramLens = new Vector();
-		ArrayList paramExtPositions = null;
+
+		// Clear params without releasing storage
+		stmt.clearDrdaParams();
+
 		int numVars = 0;
 		boolean rtnParam = false;
 
@@ -4135,17 +4136,17 @@ class DRDAConnThread extends Thread {
 						reader.readByte();		// id
 						for (int j = 0; j < numVarsInGrp; j++)
 						{
-							paramDrdaTypes.addElement(new Byte(reader.readByte()));
+							final byte t = reader.readByte();
 							if (SanityManager.DEBUG) 
 								trace("drdaType is: "+ "0x" +
-       								  Integer.toHexString(((Byte ) paramDrdaTypes.lastElement()).byteValue()));
+       								  Integer.toHexString(t));
 							int drdaLength = reader.readNetworkShort();
 							if (SanityManager.DEBUG) 
 								trace("drdaLength is: "+drdaLength);
-							paramLens.addElement(new Integer(drdaLength));
+							stmt.addDrdaParam(t, drdaLength);
 						}
 					}
-					numVars = paramDrdaTypes.size();
+					numVars = stmt.getDrdaParamCount();
 					if (SanityManager.DEBUG)
 						trace("numVars = " + numVars);
 					if (ps == null)		// it is a CallableStatement under construction
@@ -4197,7 +4198,7 @@ class DRDAConnThread extends Thread {
 					for (int i = 0; i < numVars; i++)
 					{
 					
-						if ((((Byte)paramDrdaTypes.elementAt(i)).byteValue() & 0x1) == 0x1)	// nullable
+						if ((stmt.getParamDRDAType(i+1) & 0x1) == 0x1)	// nullable
 						{
 							int nullData = reader.readUnsignedByte();
 							if ((nullData & 0xFF) == FdocaConstants.NULL_DATA)
@@ -4214,15 +4215,8 @@ class DRDAConnThread extends Thread {
 						}
 
 						// not null, read and set it
-						paramExtPositions = readAndSetParams(i, stmt,
-															 ((Byte)paramDrdaTypes.elementAt(i)).byteValue(),
-															 pmeta,
-															 paramExtPositions,
-															 ((Integer)(paramLens.elementAt(i))).intValue());
+						readAndSetParams(i, stmt, pmeta);
 					}
-					stmt.cliParamExtPositions = paramExtPositions;
-					stmt.cliParamDrdaTypes = paramDrdaTypes;
-					stmt.cliParamLens = paramLens;	
 					break;
 				case CodePoint.EXTDTA:
 					readAndSetAllExtParams(stmt, false);
@@ -4244,27 +4238,25 @@ class DRDAConnThread extends Thread {
 	}
 
 	/**
-	 * Read different types of input parameters and set them in PreparedStatement
+	 * Read different types of input parameters and set them in
+	 * PreparedStatement
 	 * @param i			index of the parameter
-	 * @param stmt       drda statement
-	 * @param drdaType	drda type of the parameter
+	 * @param stmt      drda statement
 	 * @param pmeta		parameter meta data
-	 * @param paramExtPositions  ArrayList of parameters with extdta
-	 * @param paramLenNumBytes Number of bytes for encoding LOB Length
 	 *
-	 * @return updated paramExtPositions
 	 * @throws DRDAProtocolException
      * @throws SQLException
 	 */
-	private ArrayList readAndSetParams(int i, DRDAStatement stmt, int
-									   drdaType, EngineParameterMetaData pmeta,
-									   ArrayList paramExtPositions,
-									   int paramLenNumBytes)
+	private void readAndSetParams(int i,
+								  DRDAStatement stmt,
+								  EngineParameterMetaData pmeta)
 				throws DRDAProtocolException, SQLException
 	{
 		PreparedStatement ps = stmt.getPreparedStatement();
+
 		// mask out null indicator
-		drdaType = ((drdaType | 0x01) & 0x000000ff);
+		final int drdaType = ((stmt.getParamDRDAType(i+1) | 0x01) & 0xff);
+		final int paramLenNumBytes = stmt.getParamLen(i+1);
 
 		if (ps instanceof CallableStatement)
 		{
@@ -4425,9 +4417,7 @@ class DRDAConnThread extends Thread {
 				 long length = readLobLength(paramLenNumBytes);
 				 if (length != 0) //can be -1 for CLI if "data at exec" mode, see clifp/exec test
 				 {
-					if (paramExtPositions == null)
-						 paramExtPositions = new ArrayList();
-				 	paramExtPositions.add(new Integer(i));
+					stmt.addExtPosition(i);
 				 }
 				 else   /* empty */
 				 {
@@ -4446,7 +4436,6 @@ class DRDAConnThread extends Thread {
 				ps.setObject(i+1, paramVal);
 			}
 		}
-		return paramExtPositions;
 	}
 
 	private long readLobLength(int extLenIndicator) 
@@ -4475,15 +4464,15 @@ class DRDAConnThread extends Thread {
 	private void readAndSetAllExtParams(final DRDAStatement stmt, final boolean streamLOB) 
 		throws SQLException, DRDAProtocolException
 	{
-		int numExt = stmt.cliParamExtPositions.size();
-		for (int i = 0; i < stmt.cliParamExtPositions.size(); i++)
+		final int numExt = stmt.getExtPositionCount();
+		for (int i = 0; i < numExt; i++)
 					{
-						int paramPos = ((Integer) (stmt.cliParamExtPositions).get(i)).intValue();
+						int paramPos = stmt.getExtPosition(i);
 						final boolean doStreamLOB = (streamLOB && i == numExt -1);
 						readAndSetExtParam(paramPos,
 										   stmt,
-										   ((Byte)stmt.cliParamDrdaTypes.elementAt(paramPos)).intValue(),
-										   ((Integer)(stmt.cliParamLens.elementAt(paramPos))).intValue(),
+										   stmt.getParamDRDAType(paramPos+1),
+										   stmt.getParamLen(paramPos+1),
 										   doStreamLOB);
 						// Each extdta in it's own dss
 						if (i < numExt -1)
@@ -6452,7 +6441,7 @@ class DRDAConnThread extends Thread {
 		else	// it's for a CallableStatement
 		{
 			hasdata = stmt.hasOutputParams();
-			numCols = stmt.getNumParams();
+			numCols = stmt.getDrdaParamCount();
 		}
 
 

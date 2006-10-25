@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.lang.reflect.Array;
 
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
@@ -98,10 +99,130 @@ class DRDAStatement
 	private ArrayList resultSetKeyList;  // ordered list of hash keys
 	private int numResultSets = 0;  
 
-	// State for parameter data
-	protected  Vector cliParamDrdaTypes = new Vector();
-	protected Vector cliParamLens = new Vector();
-	protected ArrayList cliParamExtPositions = null;
+	/** This class is used to keep track of the statement's parameters
+	 * as they are received from the client. It uses arrays to track
+	 * the DRDA type, the length in bytes and the externalness of each
+	 * parameter. Arrays of int/byte are used rather than ArrayLists
+	 * of Integer/Byte in order to re-use the same storage each time
+	 * the statement is executed. */
+	private static class DrdaParamState {
+		private int typeLstEnd_ = 0;
+		private byte[] typeLst_ = new byte[10];
+		private int[]  lenLst_ = new int[10];
+		private int extLstEnd_ = 0;
+		private int[]  extLst_ = new int[10];
+
+		private static Object growArray(Object array) {
+			final int oldLen = Array.getLength(array);
+			Object tmp =
+				Array.newInstance(array.getClass().getComponentType(),
+								  Math.max(oldLen,1)*2);
+			System.arraycopy(array, 0, tmp, 0, oldLen);
+			return tmp;
+		}
+
+		/**
+		 * <code>clear</code> resets the arrays so that new parameters
+		 * will be added at the beginning. No initialization or
+		 * releasing of storage takes place unless the trim argument
+		 * is true.
+		 *
+		 * @param trim - if true; release excess storage
+		 */
+		protected void clear(boolean trim) {
+			typeLstEnd_ = 0;
+			extLstEnd_ = 0;
+			if (trim && typeLst_.length > 10) {
+				typeLst_ = new byte[10];
+				lenLst_ = new int[10];
+				extLst_ = new int[10];
+			}
+		}
+
+		/**
+		 * <code>addDrdaParam</code> adds a new parameter with its
+		 * DRDA type and byte length. The arrays are automatically
+		 * grown if needed.
+		 *
+		 * @param t a <code>byte</code> value, the DRDA type of the
+		 * parameter being added
+		 * @param s an <code>int</code> value, the length in bytes of
+		 * the parameter being added
+		 */
+		protected void addDrdaParam(byte t, int s) {
+			if (typeLstEnd_ >= typeLst_.length) {
+				typeLst_ = (byte[])growArray(typeLst_);
+				lenLst_ = (int[])growArray(lenLst_);
+			}
+			typeLst_[typeLstEnd_] = t;
+			lenLst_[typeLstEnd_] = s;
+			++typeLstEnd_;
+		}
+
+		/**
+		 * <code>getDrdaParamCount</code> return the number of
+		 * parameters added so far (since last clear).
+		 *
+		 * @return an <code>int</code> value, the number of parameters
+		 */
+		protected int  getDrdaParamCount() { return typeLstEnd_; }
+
+		/**
+		 * <code>getDrdaType</code> returns a byte that represents the
+		 * DRDA type of the ith parameter.
+		 *
+		 * @param i an <code>int</code> value, a parameter position
+		 * (zero-based)
+		 * @return a <code>byte</code> value, the DRDA type
+		 */
+		protected byte getDrdaType(int i) { return typeLst_[i]; }
+
+		/**
+		 * <code>getDrdaLen</code> returns the length in bytes of the
+		 * ith parameter.
+		 *
+		 * @param i an <code>int</code> value, a parameter position
+		 * (zero-based)
+		 * @return an <code>int</code> value
+		 */
+		protected int getDrdaLen(int i) { return lenLst_[i]; }
+
+		/**
+		 * <code>addExtPos</code> marks parameter i as external. The
+		 * array is grown as needed.
+		 *
+		 * @param p an <code>int</code> value, a parameter position
+		 * (zero-based)
+		 */
+		protected void addExtPos(int p) {
+			if (extLstEnd_ >= extLst_.length) {
+				extLst_ = (int[])growArray(extLst_);
+			}
+			extLst_[extLstEnd_] = p;
+			++extLstEnd_;
+		}
+
+		/**
+		 * <code>getExtPosCount</code> returns the number of
+		 * parameters marked as external so far (since last clear).
+		 *
+		 * @return an <code>int</code> value, the number of external
+		 * parameters.
+		 */
+		protected int getExtPosCount() { return extLstEnd_; }
+
+		/**
+		 * <code>getExtPos</code> returns the actual parameter position
+		 * of the ith external parameter.
+		 *
+		 * @param i an <code>int</code> value, index into the list of
+		 * external parameters, zero-based
+		 * @return an <code>int</code> value, the parameter position
+		 * of the ith external parameter (zero-based)
+		 */
+		protected int getExtPos(int i) { return extLst_[i]; }
+	}
+	private DrdaParamState drdaParamState_ = new DrdaParamState();
 
 	// Query options  sent on EXCSQLSTT
 	// These the default for ResultSets created for this statement.
@@ -974,10 +1095,8 @@ class DRDAStatement
 		rslsetflg = null;
 		procName = null;
 		outputTypes = null;
-		cliParamDrdaTypes = null;
-		cliParamLens = null;
-		cliParamExtPositions = null;
-
+		// Clear parameters and release excess storage
+		drdaParamState_.clear(true);
 	}
 	
 	/**
@@ -1015,9 +1134,8 @@ class DRDAStatement
 		resultSetKeyList = null;
 		numResultSets = 0;
 		
-		cliParamDrdaTypes = new Vector();
-		cliParamLens = new Vector();
-		cliParamExtPositions = null;
+		// Clear parameters without releasing storage
+		drdaParamState_.clear(false);
 		
 		nbrrow = 0;
 		qryrowset = 0;	
@@ -1104,42 +1222,76 @@ class DRDAStatement
 		
 	}
 
-	
+	/** Clears the parameter state (type, length and ext information)
+	 * stored in this statement, but does not release any
+	 * storage. This reduces the cost of re-executing the statement
+	 * since no new storage needs to be allocated. */
+	protected void clearDrdaParams() {
+		drdaParamState_.clear(false);
+	}
+
+	/** Get the number of external parameters in this
+	 * statement. External means parameters that are transmitted in a
+	 * separate DSS in the DRDA protocol.
+	 * @return the number of external parameters
+	 */
+	protected int getExtPositionCount() {
+		return drdaParamState_.getExtPosCount();
+	}
+
+	/** Get the parameter position of the i'th external parameter
+	 * @param i - zero-based index into list of external parameters
+	 * @return the parameter position of the i'th external parameter
+	 */
+	protected int getExtPosition(int i) {
+		return drdaParamState_.getExtPos(i);
+	}
+
+	/** Mark the pos'th parameter as external
+	 * @param pos - zero-based index into list of external parameters
+	 */
+	protected void addExtPosition(int pos) {
+		drdaParamState_.addExtPos(pos);
+	}
+
+	/** Get the number of parameters, internal and external, that has
+	 * been added to this statement.
+	 * @return the number of parameters
+	 */
+	protected int getDrdaParamCount() {
+		return drdaParamState_.getDrdaParamCount();
+	}
+
+	/** Add another parameter to this statement.
+	 * @param t - type of the parameter
+	 * @param l - length in bytes of the parameter
+	 */
+	protected void addDrdaParam(byte t, int l) {
+		drdaParamState_.addDrdaParam(t, l);
+	}
+
 	/**
 	 * get parameter DRDAType
 	 *
 	 * @param index - starting with 1
 	 * @return  DRDA Type of column
 	 */
-	protected int getParamDRDAType(int index)
-	{
-		
-		return ((Byte)cliParamDrdaTypes.get(index -1)).intValue();
-	}
+ 	protected int getParamDRDAType(int index) {
+		return drdaParamState_.getDrdaType(index-1);
+ 	}
 
-
-	/**
-	 * set param  DRDAType
-	 *
-	 * @param index - starting with 1
-	 * @param type
-	 */
-	protected  void setParamDRDAType(int index, byte type)
-	{
-		cliParamDrdaTypes.addElement(new Byte(type));
-		
-	}
 	/**
 	 * returns drda length of parameter as sent by client.
-	 * @param index
+	 * @param index - starting with 1
 	 * @return data length
 
 	 */
-
 	protected int getParamLen(int index)
 	{
-		return ((Integer) cliParamLens.elementAt(index -1)).intValue();
+		return drdaParamState_.getDrdaLen(index-1);
 	}
+
+
 	/**
 	 *  get parameter precision or DB2 max (31)
 	 *
@@ -1179,30 +1331,6 @@ class DRDAStatement
 			return -1;
 	}
 
-	/**
-	 * save parameter len sent by client
-	 * @param index parameter index starting with 1
-	 * @param value  length of data value
-	 *
-	 */
-	protected void  setParamLen(int index, int value)
-	{
-		cliParamLens.add(index -1, new Integer(value));
-	}
-
-	/**
-	 * get the number of parameters for this statement
-	 * 
-	 * @return number of parameters
-	 */
-	protected int getNumParams()
-	{
-		if (cliParamDrdaTypes != null)
-			return cliParamDrdaTypes.size();
-		else
-			return 0;
-	}
-	   
 	/** 
 	 * get the number of result set columns for the current resultSet
 	 * 

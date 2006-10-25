@@ -26,6 +26,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
@@ -322,10 +323,12 @@ public class prepStmt
 			jira614Test_a(conn);
 			jira170Test(conn);
 			jira125Test(conn);
+			jira815Test(conn);
 			jira428Test(conn);
 			jira1454Test(conn);
                         jira1533Test_a(conn);
                         jira1533Test_b(conn);
+			conn.rollback();
 			conn.close();
 			// refresh conn before cleaning up
 			conn = ij.startJBMS();
@@ -1043,6 +1046,89 @@ public class prepStmt
         System.out.println("Iteration 1 successful: " + (nCols + 1) +
 			" parameter markers successfully prepared and executed.");
     }
+
+    /**
+     * The first patch for Jira-815 introduced a bug that resulted
+     * in a hang if a prepared statement was first executed with a
+     * lob value, and then re-executed with a null-value in place
+     * of the lob. This test case ensures that the same bug has
+     * not been re-introduced.
+     */
+    private static void jira815Test(Connection conn)
+		throws Exception
+    {
+		conn.setAutoCommit(false);
+		Statement st = conn.createStatement();
+		try {
+			st.execute("drop table tt1");
+		} catch (SQLException se) {}
+
+		st.execute("create table tt1  (CLICOL01 smallint not null)");
+		st.execute("alter table tt1 add clicol02 smallint");
+		st.execute("alter table tt1 add clicol03 int not null default 1");
+		st.execute("alter table tt1 add clicol04 int");
+		st.execute("alter table tt1 add clicol05 decimal(10,0) not null default 1");
+		st.execute("alter table tt1 add clicol51 blob(1G)");
+		st.execute("alter table tt1 add clicol52 blob(50)");
+		st.execute("alter table tt1 add clicol53 clob(2G) not null default ''");
+		st.execute("alter table tt1 add clicol54 clob(60)");
+		conn.commit();
+
+		PreparedStatement pSt =
+			conn.prepareStatement("insert into tt1 values (?,?,?,?,?,?,?,?,?)");
+		pSt.setShort(1, (short)500);
+		pSt.setShort(2, (short)501);
+		pSt.setInt(3, 496);
+		pSt.setInt(4, 497);
+		pSt.setDouble(5, 484);
+		pSt.setBytes(6, "404 bit".getBytes());
+		pSt.setBytes(7, "405 bit".getBytes());
+		pSt.setString(8, "408 bit");
+		pSt.setString(9, "409 bit");
+
+		System.out.println("Inserting first row...");
+		pSt.execute();
+		System.out.println("  -> Succeeded.");
+
+		pSt.setNull(2, Types.SMALLINT);
+		pSt.setNull(4, Types.DOUBLE);
+		pSt.setNull(7, Types.BLOB);
+		pSt.setNull(9, Types.CLOB);
+
+		System.out.println("\nInserting second row...");
+		pSt.execute();
+		System.out.println("  -> Succeeded.");
+
+		System.out.println("\nNow inserting 3rd row, using lobs from 1st row...");
+		ResultSet rs = st.executeQuery("select * from tt1");
+		if (rs.next()) {
+			pSt.setShort(1, rs.getShort(1));
+			pSt.setShort(2, rs.getShort(2));
+			pSt.setInt(3, rs.getInt(3));
+			pSt.setInt(4, rs.getInt(4));
+			pSt.setDouble(5, rs.getDouble(5));
+			pSt.setBlob(6, rs.getBlob(6));
+			pSt.setBlob(7, rs.getBlob(7));
+			pSt.setClob(8, rs.getClob(8));
+			pSt.setClob(9, rs.getClob(9));
+			pSt.execute();
+			System.out.println("  -> Succeeded.");
+		}
+
+		System.out.println("\nNow inserting 4th row, using lobs from 2nd row...");
+		if (rs.next()) {
+			pSt.setNull(2, Types.SMALLINT);
+			pSt.setNull(4, Types.DOUBLE);
+			pSt.setBlob(6, rs.getBlob(6));
+			pSt.setNull(7, Types.BLOB);
+			pSt.setClob(8, rs.getClob(8));
+			pSt.setNull(9, Types.CLOB);
+			pSt.execute();
+			System.out.println("  -> Succeeded.");
+		}
+		conn.commit();
+    }
+
     // Jira 1533 involves two different bugs regarding the handling of large
     // amounts of parameter data: first, the Network Server was incorrectly
     // handling the desegmentation of continued DSS segements, and second,
