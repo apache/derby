@@ -12,15 +12,12 @@ lang/aggregate.sql
 lang/aggregateOptimization.sql
 lang/altertable.sql
 lang/altertableDropColumn.sql
-lang/arithmetic.sql
 lang/authorize.sql
 lang/autoincrement.sql
 lang/bit.sql
-lang/bit2.sql
 lang/bug4356.java
 lang/bug5052rts.java
 lang/bug5054.java
-lang/case.sql
 lang/cast.sql
 lang/casting.java
 lang/checkConstraint.sql
@@ -32,7 +29,6 @@ lang/compressTable.sql
 lang/concateTests.java
 lang/connect.sql
 lang/consistencyChecker.sql
-lang/constantExpression.sql
 lang/currentSchema.sql
 lang/currentof.java
 lang/cursor.java
@@ -46,8 +42,6 @@ lang/deadlockMode.java
 lang/declareGlobalTempTableJava.java
 lang/declareGlobalTempTableJavaJDBC30.java
 lang/delete.sql
-lang/depend.sql
-lang/derived.sql
 lang/desc_index.sql
 lang/distinct.sql
 lang/distinctElimination.sql
@@ -144,7 +138,6 @@ lang/triggerRefClause.sql
 lang/triggerStream.java
 lang/unaryArithmeticDynamicParameter.java
 lang/ungroupedAggregatesNegative.sql
-lang/union.sql
 lang/unlimited.sql
 lang/updatableResultSet.java
 lang/update.sql
