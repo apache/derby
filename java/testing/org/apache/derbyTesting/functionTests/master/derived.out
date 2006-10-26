@@ -17,6 +17,7 @@ ij> --
 --
 -- this tests derived column lists and derived tables
 --
+
 create table s (a int, b int, c int, d int, e int, f int);
 0 rows inserted/updated/deleted
 ij> create table t (aa int, bb int, cc int, dd int, ee int, ff int);
@@ -26,6 +27,7 @@ ij> insert into s values (0,1,2,3,4,5);
 ij> insert into s values (10,11,12,13,14,15);
 1 row inserted/updated/deleted
 ij> -- tests without a derived table
+
 -- negative tests
 -- # of columns does not match
 select aa from s ss (aa);
@@ -88,6 +90,7 @@ AA         |BB         |CC         |DD         |EE         |FF
 ij> delete from t;
 2 rows inserted/updated/deleted
 ij> -- derived tables
+
 -- negative tests
 -- no correlation name
 select * from (select * from s);
@@ -118,6 +121,7 @@ ij> -- ambiguous column reference
 select a from (select * from s a, s b) ss;
 ERROR 42Y34: Column name 'A' matches more than one result column in table 'SS'.
 ij> -- positive tests
+
 -- simple derived table
 select a from (select a from s) a;
 A          

@@ -17,6 +17,7 @@ ij> --
 --
 -- Test the arithmetic operators
 --
+
 create table t (i int, j int);
 0 rows inserted/updated/deleted
 ij> insert into t values (null, null);
@@ -553,6 +554,7 @@ ij> -- + and - are of equal precedence, so they should be evaluated left to righ
 -- The result is the same regardless of order of evaluation, so test it
 -- by causing an overflow.  The first test should get an overflow, and the
 -- second one shouldn't.
+
 select 1 + 2147483647 - 2 from r;
 1          
 -----------
@@ -590,6 +592,7 @@ ij> -- The test the associativity of unary - with respect to binary *, we must
 -- use a trick.  The value -1073741824 is the minimum integer divided by 2.
 -- So, 1073741824 * 2 will overflow, but (-1073741824) * 2 will not (because
 -- of two's complement arithmetic.
+
 select -1073741824 * 2 from r;
 1          
 -----------

@@ -85,10 +85,6 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
             for (int lineNumber = 1;; lineNumber++) {
                 String testLine = testOutput.readLine();
 
-                // Skip blank lines.
-                if ("".equals(testLine))
-                    continue;
-
                 String canonLine = cannonReader.readLine();
 
                 if (canonLine == null && testLine == null)

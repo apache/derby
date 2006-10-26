@@ -17,6 +17,7 @@ ij> --
 --
 -- this test shows union functionality
 --
+
 -- create the tables
 create table t1 (i int, s smallint, d double precision, r real, c10 char(10),
 				c30 char(30), vc10 varchar(10), vc30 varchar(30));
@@ -256,6 +257,7 @@ NULL       |3
 NULL       |4          
 NULL       |NULL       
 ij> -- non-correlated subqueries
+
 -- positive tests
 select i from t1 where i = (values 1 union values 1);
 I          
@@ -491,6 +493,7 @@ ij> --
 --  type dominance
 --  correlated subqueries
 --  table constructors
+
 -- create the tables
 create table t1 (i int, s smallint, d double precision, r real, c10 char(10),
 				 c30 char(30), vc10 varchar(10), vc30 varchar(30));
@@ -516,6 +519,7 @@ ij> insert into t2 values (4, 4, 4e1, 4e1, '44444', '44444     44', '44444',
 	'44444      44');
 1 row inserted/updated/deleted
 ij> -- negative tests
+
 -- non matching number of columns
 select * from t1 union all select * from t1, t2;
 ERROR 42X58: The number of columns on the left and right sides of the UNION must be the same.
@@ -661,7 +665,9 @@ ij> -- incompatible types
 select date('9999-11-11') from t1 union all select time('11:11:11') from t2;
 ERROR 42X61: Types 'DATE' and 'TIME' are not UNION compatible.
 ij> -- non-correlated subqueries
+
 -- negative tests
+
 -- select * in subquery
 select i from t1 where i = (select * from t2 union all select 1 from t1);
 ERROR 42X38: 'SELECT *' only allowed in EXISTS and NOT EXISTS subqueries.
@@ -679,6 +685,7 @@ ij> -- both sides of union have same type, which is incompatible with LHS
 select i from t1 where i in (select date('1999-02-04') from t2 union all select date('1999-03-08') from t2);
 ERROR 42818: Comparisons between 'INTEGER' and 'DATE' are not supported.
 ij> -- positive tests
+
 -- expression subquery
 select i from t1 where i = (select i from t2 where 1 = 0 union all values 1);
 I          
@@ -929,6 +936,7 @@ ij> drop table insert_test2;
 0 rows inserted/updated/deleted
 ij> -- DERBY-1967
 -- NULLIF with UNION throws SQLSTATE 23502.
+
 create table a (f1 varchar(10));
 0 rows inserted/updated/deleted
 ij> create table b (f2 varchar(10));
