@@ -12,10 +12,9 @@ NIST suite should be documented.
 The following changes were made:
 - no use is made of the NIST testing harness. Instead, suiteable .sql files from
   the original sql directory have been placed in a separate (this) directory of
-  the Derby functionTests package. The sql scripts are executed by the Derby 
-  functionTests harness using the Derby interactive sql tool 'ij'. 
-  Expected output for Derby is placed in the location suitable for the Derby 
-  functionTests harness. (../../master/*).
+  the Derby functionTests package. The scripts are run using the NistScripts
+  JUnit test.
+  Expected output for Derby is placed in (../../master/*).
   
 - sections of the tests - i.e. selected test cases - not applicable to Derby 
   have been commented out, for instance all tests using TRIM.
@@ -47,8 +46,8 @@ The following changes were made:
 - exit commands removed from basetab.sql, schema1.sql and schema5.sql (possibly
   were not in original scripts)
 
-- SQL routine creation and call to check if the suite is running with a Java
-  SecurityManager added to dml160.sql
+- Constraint names have been added to various constraints to ensure consistent
+  output when running the tests.
 
 
 
