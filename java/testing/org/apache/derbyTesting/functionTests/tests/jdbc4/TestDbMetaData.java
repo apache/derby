@@ -25,96 +25,38 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.derby.tools.ij;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
-import org.apache.derby.shared.common.reference.JDBC40Translation;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Test of database metadata for new methods in JDBC 40.
  */
-public class TestDbMetaData { 
+public class TestDbMetaData extends BaseJDBCTestCase {
 
-	public static void main(String[] args) {
-		try
-		{
-			// use the ij utility to read the property file and
-			// make the initial connection.
-			ij.getPropertyArg(args);
-		
-			Connection	conn_main = ij.startJBMS();
+    private DatabaseMetaData meta;
 
-            runTests( conn_main );
-        }
-        catch (SQLException e) {
-            dumpSQLExceptions(e);
-        }
-        catch (Throwable e) {
-            System.out.println("FAIL -- unexpected exception:");
-            e.printStackTrace(System.out);
-        }
+    public TestDbMetaData(String name) {
+        super(name);
     }
 
-    // Run all the tests.
-    private static void runTests(Connection con) throws Exception {
-        testDatabaseMetaDataMethods(con);
-        testStoredProcEscapeSyntax(con);
-        testAutoCommitFailure(con);
-        con.close();
+    protected void setUp() throws SQLException {
+        meta = getConnection().getMetaData();
     }
 
-    // Simply call each new metadata method and print the result.
-    private static void testDatabaseMetaDataMethods(Connection con)
-        throws Exception
-    {
-        con.setAutoCommit(true); // make sure it is true
-        Statement s = con.createStatement();
-        DatabaseMetaData met = con.getMetaData();
+    protected void tearDown() throws Exception {
+        meta = null;
+        super.tearDown();
+    }
 
-        if (!met.supportsStoredFunctionsUsingCallSyntax()) {
-            System.out.println
-                ("FAIL: supportsStoredFunctionsUsingCallSyntax() " +
-                 "should return true");
-        }
-
-        if (met.autoCommitFailureClosesAllResultSets()) {
-            System.out.println
-                ("FAIL: autoCommitFailureClosesAllResultSets() " +
-                 "should return false");
-        }
-
-        checkEmptyRS(met.getClientInfoProperties());
-
-		// Make sure the constants provided in JDBC40Translation is correct
-  		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_UNKNOWN == 
- 							   DatabaseMetaData.functionColumnUnknown));
-		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_IN == 
-							   DatabaseMetaData.functionColumnIn));
-		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_INOUT == 
-							   DatabaseMetaData.functionColumnInOut));
-		System.out.println(""+(JDBC40Translation.FUNCTION_PARAMETER_OUT == 
-							   DatabaseMetaData.functionColumnOut));
-		System.out.println(""+(JDBC40Translation.FUNCTION_RETURN == 
-							   DatabaseMetaData.functionReturn));
-    
-		System.out.println(""+(JDBC40Translation.FUNCTION_NO_NULLS ==
-							   DatabaseMetaData.functionNoNulls));
-		System.out.println(""+(JDBC40Translation.FUNCTION_NULLABLE ==
-							   DatabaseMetaData.functionNullable));
-		System.out.println(""+(JDBC40Translation.FUNCTION_NULLABLE_UNKNOWN ==
-							   DatabaseMetaData.functionNullableUnknown));
-
-		// Since JDBC40Translation cannot be accessed in queries in
-		// metadata.properties, the query has to use
-		// DatabaseMetaData.procedureNullable. Hence it is necessary
-		// to verify that that value of
-		// DatabaseMetaData.functionNullable is the same.
-		System.out.println(""+(DatabaseMetaData.functionNullable == 
-							   DatabaseMetaData.procedureNullable));
-		
+    private static void createFunctions(Statement s) throws SQLException {
         // Create some functions in the default schema (app) to make
         // the output from getFunctions() and getFunctionColumns
         // more interesting
@@ -130,67 +72,293 @@ public class TestDbMetaData {
         s.execute("CREATE FUNCTION DUMMY4 ( X VARCHAR(128), Y INTEGER ) "+
                   "RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE "+
                   "JAVA EXTERNAL NAME 'java.some.func'");
+    }
 
-        // Any function in any schema in any catalog
-        dumpRS(met.getFunctions(null, null, null));
-        // Any function in any schema in "Dummy
-        // Catalog". Same as above since the catalog
-        // argument is ignored (is always null)
-        dumpRS(met.getFunctions("Dummy Catalog", null, null));
-        // Any function in a schema starting with "SYS"
-        dumpRS(met.getFunctions(null, "SYS%", null));
-        // All functions containing "GET" in any schema 
-        // (and any catalog)
-        dumpRS(met.getFunctions(null, null, "%GET%"));
-        // Any function that belongs to NO schema and 
-        // NO catalog (none)
-        checkEmptyRS(met.getFunctions("", "", null));
+    public static Test suite() {
+        TestSuite testSuite = new TestSuite();
+        testSuite.addTestSuite(TestDbMetaData.class);
+        return new CleanDatabaseTestSetup(testSuite) {
+                protected void decorateSQL(Statement s) throws SQLException {
+                    createFunctions(s);
+                }
+            };
+    }
 
-		// Test getFunctionColumns
-		// Dump parameters for all functions beigging with DUMMY
-		dumpRS(met.getFunctionColumns(null,null,"DUMMY%",null));
-		
-		// Dump return value for all DUMMY functions
-		dumpRS(met.getFunctionColumns(null,null,"DUMMY%",""));
+    public void testSupportsStoredFunctionsUsingCallSyntax()
+            throws SQLException {
+        assertTrue(meta.supportsStoredFunctionsUsingCallSyntax());
+    }
 
-        // Test the new getSchemas() with no schema qualifiers
-        dumpRS(met.getSchemas(null, null));
-        // Test the new getSchemas() with a schema wildcard qualifier
-        dumpRS(met.getSchemas(null, "SYS%"));
-        // Test the new getSchemas() with an exact match
-        dumpRS(met.getSchemas(null, "APP"));
-        // Make sure that getSchemas() returns an empty result
-        // set when a schema is passed with no match
-        checkEmptyRS(met.getSchemas(null, "BLAH"));
-        
-        t_wrapper(met);
-        
-        s.close();
+    public void testAutoCommitFailureClosesAllResultSets() throws SQLException {
+        assertFalse(meta.autoCommitFailureClosesAllResultSets());
+    }
+
+    public void testGetClientInfoProperties() throws SQLException {
+        ResultSet rs = meta.getClientInfoProperties();
+        JDBC.assertColumnNames(rs, new String[] {
+            "NAME", "MAX_LEN", "DEFAULT_VALUE", "DESCRIPTION" });
+        JDBC.assertDrainResults(rs, 0);
     }
 
     /**
-     * <p>
-     * Return true if we're running under the embedded client.
-     * </p>
+     * Since JDBC40Translation cannot be accessed in queries in
+     * metadata.properties, the query has to use
+     * DatabaseMetaData.procedureNullable. Hence it is necessary
+     * to verify that that value of
+     * DatabaseMetaData.functionNullable is the same.
      */
-    private	static	boolean	usingEmbeddedClient() {
-        return "embedded".equals( System.getProperty( "framework" ) );
+    public void testFunctionNullable() {
+        assertEquals(DatabaseMetaData.procedureNullable,
+                     DatabaseMetaData.functionNullable);
     }
-    
+
+    /** Check that the column names are as expected from getFunctions(). */
+    private void assertGetFunctionsRs(ResultSet rs) throws SQLException {
+        JDBC.assertColumnNames(rs, new String[] {
+            "FUNCTION_CAT", "FUNCTION_SCHEM", "FUNCTION_NAME", "REMARKS",
+            "SPECIFIC_NAME" });
+    }
+
+    /** Expected rows from getFunctions() when all functions match. */
+    private static final Object[][] ALL_FUNCTIONS = {
+        { null, "APP", "DUMMY1", "java.some.func", new GeneratedId() },
+        { null, "APP", "DUMMY2", "java.some.func", new GeneratedId() },
+        { null, "APP", "DUMMY3", "java.some.func", new GeneratedId() },
+        { null, "APP", "DUMMY4", "java.some.func", new GeneratedId() },
+        { null, "SYSCS_UTIL", "SYSCS_CHECK_TABLE",
+          "org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE",
+          new GeneratedId() },
+        { null, "SYSCS_UTIL", "SYSCS_GET_DATABASE_PROPERTY",
+          "org.apache.derby.catalog.SystemProcedures." +
+          "SYSCS_GET_DATABASE_PROPERTY", new GeneratedId() },
+        { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
+          "org.apache.derby.catalog.SystemProcedures." +
+          "SYSCS_GET_RUNTIMESTATISTICS", new GeneratedId() },
+    };
+
+    public void testGetFunctionsNullNullNull() throws SQLException {
+        // Any function in any schema in any catalog
+        ResultSet rs = meta.getFunctions(null, null, null);
+        assertGetFunctionsRs(rs);
+        JDBC.assertFullResultSet(rs, ALL_FUNCTIONS, false);
+    }
+
+    public void testGetFunctionsDummySchema() throws SQLException {
+        // Any function in any schema in "Dummy
+        // Catalog". Same as above since the catalog
+        // argument is ignored (is always null)
+        ResultSet rs = meta.getFunctions("Dummy Catalog", null, null);
+        assertGetFunctionsRs(rs);
+        JDBC.assertFullResultSet(rs, ALL_FUNCTIONS, false);
+    }
+
+    public void testGetFunctionsFromSysSchemas() throws SQLException {
+        // Any function in a schema starting with "SYS"
+        ResultSet rs = meta.getFunctions(null, "SYS%", null);
+        assertGetFunctionsRs(rs);
+        Object[][] sysFunctions = {
+            { null, "SYSCS_UTIL", "SYSCS_CHECK_TABLE",
+              "org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE",
+              new GeneratedId() },
+            { null, "SYSCS_UTIL", "SYSCS_GET_DATABASE_PROPERTY",
+              "org.apache.derby.catalog.SystemProcedures." +
+              "SYSCS_GET_DATABASE_PROPERTY", new GeneratedId() },
+            { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
+              "org.apache.derby.catalog.SystemProcedures." +
+              "SYSCS_GET_RUNTIMESTATISTICS", new GeneratedId() },
+        };
+        JDBC.assertFullResultSet(rs, sysFunctions, false);
+    }
+
+    public void testGetFunctionsContainingGET() throws SQLException {
+        // All functions containing "GET" in any schema 
+        // (and any catalog)
+        ResultSet rs = meta.getFunctions(null, null, "%GET%");
+        assertGetFunctionsRs(rs);
+        Object[][] getFunctions = {
+            { null, "SYSCS_UTIL", "SYSCS_GET_DATABASE_PROPERTY",
+              "org.apache.derby.catalog.SystemProcedures." +
+              "SYSCS_GET_DATABASE_PROPERTY", new GeneratedId() },
+            { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
+              "org.apache.derby.catalog.SystemProcedures." +
+              "SYSCS_GET_RUNTIMESTATISTICS", new GeneratedId() },
+        };
+        JDBC.assertFullResultSet(rs, getFunctions, false);
+    }
+
+    public void testGetFunctionsNoSchemaNoCatalog() throws SQLException {
+        // Any function that belongs to NO schema and 
+        // NO catalog (none)
+        ResultSet rs = meta.getFunctions("", "", null);
+        assertGetFunctionsRs(rs);
+        JDBC.assertDrainResults(rs, 0);
+    }
+
+    /** Check that the column names are as expected from
+     * getFunctionColumns(). */
+    private void assertGetFunctionColumnsRs(ResultSet rs) throws SQLException {
+        JDBC.assertColumnNames(rs, new String[] {
+            "FUNCTION_CAT", "FUNCTION_SCHEM", "FUNCTION_NAME", "COLUMN_NAME",
+            "COLUMN_TYPE", "DATA_TYPE", "TYPE_NAME", "PRECISION", "LENGTH",
+            "SCALE", "RADIX", "NULLABLE", "REMARKS", "CHAR_OCTET_LENGTH",
+            "ORDINAL_POSITION", "IS_NULLABLE", "SPECIFIC_NAME",
+            "METHOD_ID", "PARAMETER_ID"
+        });
+    }
+
+    public void testGetFunctionColumnsStartingWithDUMMY() throws SQLException {
+		// Test getFunctionColumns
+        // Dump parameters for all functions beginning with DUMMY
+        ResultSet rs = meta.getFunctionColumns(null, null, "DUMMY%", null);
+        assertGetFunctionColumnsRs(rs);
+        Object[][] expectedRows = {
+            { null, "APP", "DUMMY1", "", new Integer(4), new Integer(5),
+              "SMALLINT", new Integer(5), new Integer(2), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(0),
+              "YES", new GeneratedId(), new Integer(1), new Integer(-1) },
+            { null, "APP", "DUMMY1", "X", new Integer(1), new Integer(5),
+              "SMALLINT", new Integer(5), new Integer(2), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(1),
+              "YES", new GeneratedId(), new Integer(1), new Integer(0) },
+            { null, "APP", "DUMMY2", "", new Integer(4), new Integer(4),
+              "INTEGER", new Integer(10), new Integer(4), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(0),
+              "YES", new GeneratedId(), new Integer(2), new Integer(-1) },
+            { null, "APP", "DUMMY2", "X", new Integer(1), new Integer(4),
+              "INTEGER", new Integer(10), new Integer(4), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(1),
+              "YES", new GeneratedId(), new Integer(2), new Integer(0) },
+            { null, "APP", "DUMMY2", "Y", new Integer(1), new Integer(5),
+              "SMALLINT", new Integer(5), new Integer(2), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(2),
+              "YES", new GeneratedId(), new Integer(2), new Integer(1) },
+            { null, "APP", "DUMMY3", "", new Integer(4), new Integer(12),
+              "VARCHAR", new Integer(16), new Integer(32), null, null,
+              new Integer(1), null, 32, new Integer(0), "YES",
+              new GeneratedId(), new Integer(2), new Integer(-1) },
+            { null, "APP", "DUMMY3", "X", new Integer(1), new Integer(12),
+              "VARCHAR", new Integer(16), new Integer(32), null, null,
+              new Integer(1), null, 32, new Integer(1), "YES",
+              new GeneratedId(), new Integer(2), new Integer(0) },
+            { null, "APP", "DUMMY3", "Y", new Integer(1), new Integer(4),
+              "INTEGER", new Integer(10), new Integer(4), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(2),
+              "YES", new GeneratedId(), new Integer(2), new Integer(1) },
+            { null, "APP", "DUMMY4", "", new Integer(4), new Integer(4),
+              "INTEGER", new Integer(10), new Integer(4), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(0),
+              "YES", new GeneratedId(), new Integer(2), new Integer(-1) },
+            { null, "APP", "DUMMY4", "X", new Integer(1), new Integer(12),
+              "VARCHAR", new Integer(128), new Integer(256),
+              null, null, new Integer(1), null, 256, new Integer(1), "YES",
+              new GeneratedId(),
+              new Integer(2), new Integer(0) },
+            { null, "APP", "DUMMY4", "Y", new Integer(1), new Integer(4),
+              "INTEGER", new Integer(10), new Integer(4), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(2),
+              "YES", new GeneratedId(), new Integer(2), new Integer(1) },
+        };
+        JDBC.assertFullResultSet(rs, expectedRows, false);
+    }
+
+    public void testGetFunctionColumnsForDummyFunctions() throws SQLException {
+		// Dump return value for all DUMMY functions
+        ResultSet rs = meta.getFunctionColumns(null, null, "DUMMY%", "");
+        assertGetFunctionColumnsRs(rs);
+        Object[][] expectedRows = {
+            { null, "APP", "DUMMY1", "", new Integer(4), new Integer(5),
+              "SMALLINT", new Integer(5), new Integer(2), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(0),
+              "YES", new GeneratedId(), new Integer(1), new Integer(-1) },
+            { null, "APP", "DUMMY2", "", new Integer(4), new Integer(4),
+              "INTEGER", new Integer(10), new Integer(4), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(0),
+              "YES", new GeneratedId(), new Integer(2), new Integer(-1) },
+            { null, "APP", "DUMMY3", "", new Integer(4), new Integer(12),
+              "VARCHAR", new Integer(16), new Integer(32),
+              null, null, new Integer(1), null, 32, new Integer(0), "YES",
+              new GeneratedId(),
+              new Integer(2), new Integer(-1) },
+            { null, "APP", "DUMMY4", "", new Integer(4), new Integer(4),
+              "INTEGER", new Integer(10), new Integer(4), new Integer(0),
+              new Integer(10), new Integer(1), null, null, new Integer(0),
+              "YES", new GeneratedId(), new Integer(2), new Integer(-1) },
+        };
+        JDBC.assertFullResultSet(rs, expectedRows, false);
+    }
+
+    /** Check that the column names are as expected from getSchemas(). */
+    private void assertGetSchemasRs(ResultSet rs) throws SQLException {
+        JDBC.assertColumnNames(rs, new String[] {
+            "TABLE_SCHEM", "TABLE_CATALOG" });
+    }
+
+    public void testGetSchemasNullNull() throws SQLException {
+        // Test the new getSchemas() with no schema qualifiers
+        ResultSet rs = meta.getSchemas(null, null);
+        assertGetSchemasRs(rs);
+        Object[][] expectedRows = {
+            { "APP", null },
+            { "NULLID", null },
+            { "SQLJ", null },
+            { "SYS", null },
+            { "SYSCAT", null },
+            { "SYSCS_DIAG", null },
+            { "SYSCS_UTIL", null },
+            { "SYSFUN", null },
+            { "SYSIBM", null },
+            { "SYSPROC", null },
+            { "SYSSTAT", null },
+        };
+        JDBC.assertFullResultSet(rs, expectedRows, false);
+    }
+
+    public void testGetSchemasStartingWithSYS() throws SQLException {
+        // Test the new getSchemas() with a schema wildcard qualifier
+        ResultSet rs = meta.getSchemas(null, "SYS%");
+        assertGetSchemasRs(rs);
+        Object[][] expectedRows = {
+            { "SYS", null },
+            { "SYSCAT", null },
+            { "SYSCS_DIAG", null },
+            { "SYSCS_UTIL", null },
+            { "SYSFUN", null },
+            { "SYSIBM", null },
+            { "SYSPROC", null },
+            { "SYSSTAT", null },
+        };
+        JDBC.assertFullResultSet(rs, expectedRows, false);
+    }
+
+    public void testGetSchemasMatchingAPP() throws SQLException {
+        // Test the new getSchemas() with an exact match
+        ResultSet rs = meta.getSchemas(null, "APP");
+        assertGetSchemasRs(rs);
+        Object[][] expectedRows = {
+            { "APP", null },
+        };
+        JDBC.assertFullResultSet(rs, expectedRows, false);
+    }
+
+    public void testGetSchemasMatchingBLAH() throws SQLException {
+        // Make sure that getSchemas() returns an empty result
+        // set when a schema is passed with no match
+        ResultSet rs = meta.getSchemas(null, "BLAH");
+        assertGetSchemasRs(rs);
+        JDBC.assertDrainResults(rs, 0);
+    }
+
     /**
      * Test supportsStoredFunctionsUsingCallSyntax() by checking
      * whether calling a stored procedure using the escape syntax
      * succeeds.
      *
-     * @param con <code>Connection</code> object used in test
      * @exception SQLException if an unexpected database error occurs
      */
-    private static void testStoredProcEscapeSyntax(Connection con)
-        throws SQLException
-    {
-        con.setAutoCommit(false);
+    public void testStoredProcEscapeSyntax() throws SQLException {
+        getConnection().setAutoCommit(false);
         String call = "{CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)}";
-        Statement stmt = con.createStatement();
+        Statement stmt = createStatement();
 
         boolean success;
         try {
@@ -200,15 +368,11 @@ public class TestDbMetaData {
             success = false;
         }
 
-        DatabaseMetaData dmd = con.getMetaData();
-        boolean supported = dmd.supportsStoredFunctionsUsingCallSyntax();
-        if (success != supported) {
-            System.out.println("supportsStoredFunctionsUsingCallSyntax() " +
-                               "returned " + supported + ", but executing " +
-                               call + (success ? " succeeded." : " failed."));
-        }
+        assertEquals("supportsStoredFunctionsUsingCallSyntax() returned " +
+                     "value which doesn't match actual behaviour.",
+                     success, meta.supportsStoredFunctionsUsingCallSyntax());
+
         stmt.close();
-        con.rollback();
     }
 
     /**
@@ -216,15 +380,10 @@ public class TestDbMetaData {
      * a failure in auto-commit mode will close all result sets, even
      * holdable ones.
      *
-     * @param con <code>Connection</code> object used in test
      * @exception SQLException if an unexpected database error occurs
      */
-    private static void testAutoCommitFailure(Connection con)
-        throws SQLException
-    {
-        DatabaseMetaData dmd = con.getMetaData();
-        boolean shouldBeClosed = dmd.autoCommitFailureClosesAllResultSets();
-
+    public void testAutoCommitFailure() throws SQLException {
+        Connection con = getConnection();
         con.setAutoCommit(true);
 
         Statement s1 =
@@ -238,148 +397,56 @@ public class TestDbMetaData {
             String query =
                 "SELECT dummy, nonexistent, phony FROM imaginarytable34521";
             s2.execute(query);
-            System.out.println("\"" + query + "\" is expected to fail, " +
-                               "but it didn't.");
+            fail("Query didn't fail.");
         } catch (SQLException e) {
             // should fail, but we don't care how
         }
 
-        boolean isClosed = resultSet.isClosed();
-        if (isClosed != shouldBeClosed) {
-            System.out.println("autoCommitFailureClosesAllResultSets() " +
-                               "returned " + shouldBeClosed +
-                               ", but ResultSet is " +
-                               (isClosed ? "closed." : "not closed."));
-        }
+        assertEquals("autoCommitFailureClosesAllResultSets() returned value " +
+                     "which doesn't match actual behaviour.",
+                     resultSet.isClosed(),
+                     meta.autoCommitFailureClosesAllResultSets());
+
         resultSet.close();
         s1.close();
         s2.close();
     }
 
-	static private void dumpSQLExceptions (SQLException se) {
-		System.out.println("FAIL -- unexpected exception");
-		while (se != null) {
-			System.out.print("SQLSTATE("+se.getSQLState()+"):");
-			se.printStackTrace(System.out);
-			se = se.getNextException();
-		}
-	}
+    public void testIsWrapperForPositive() throws SQLException {
+        assertTrue("DatabaseMetaData should be wrapper for itself.",
+                   meta.isWrapperFor(DatabaseMetaData.class));
+    }
 
-	static void dumpRS(ResultSet s) throws SQLException {
-		ResultSetMetaData rsmd = s.getMetaData ();
+    public void testIsWrapperForNegative() throws SQLException {
+        assertFalse("DatabaseMetaData should not wrap PreparedStatement.",
+                    meta.isWrapperFor(PreparedStatement.class));
+    }
 
-		// Get the number of columns in the result set
-		int numCols = rsmd.getColumnCount ();
+    public void testGetWrapperPositive() throws SQLException {
+        DatabaseMetaData dmd = meta.unwrap(DatabaseMetaData.class);
+        assertSame("Unwrap should return same object.", meta, dmd);
+    }
 
-		if (numCols <= 0) {
-			System.out.println("(no columns!)");
-			return;
-		}
-		
-		// Display column headings
-		for (int i=1; i<=numCols; i++) {
-			if (i > 1) System.out.print(",");
-			System.out.print(rsmd.getColumnLabel(i));
-		}
-		System.out.println();
-	
-		// Display data, fetching until end of the result set
-		while (s.next()) {
-			// Loop through each column, getting the
-			// column data and displaying
-			for (int i=1; i<=numCols; i++) {
-				if (i > 1) System.out.print(",");
-				System.out.print(s.getString(i));
-			}
-			System.out.println();
-		}
-		s.close();
-	}
+    public void testGetWrapperNegative() {
+        try {
+            PreparedStatement ps = meta.unwrap(PreparedStatement.class);
+            fail("Unwrap should not return PreparedStatement.");
+        } catch (SQLException e) {
+            assertSQLState(SQLStateConstants.UNABLE_TO_UNWRAP, e);
+        }
+    }
 
-	/**
-	 * Checks for a ResultSet with no rows.
-	 *
-	 */
-	static void checkEmptyRS(ResultSet rs) throws Exception
-	{		
-		boolean passed = false;
-
-		try {
-			if ( rs == null )
-            {
-                throw new Exception("Metadata result set can not be null");
-            }
-            int numrows = 0;
-            while (rs.next())
-                numrows++;
-            // Zero rows is what we want.
-            if (numrows != 0) {
-                throw new Exception("Result set is not empty");
-            }
-		}
-		catch (SQLException e)
-		{
-			throw new Exception("Unexpected SQL Exception: " + e.getMessage(), e);
-		}
-	}
-        
-        
     /**
-     * Tests the wrapper methods isWrapperFor and unwrap. There are two cases
-     * to be tested
-     * Case 1: isWrapperFor returns true and we call unwrap
-     * Case 2: isWrapperFor returns false and we call unwrap
-     *
-     * @param dmd The DatabaseMetaData object on which the wrapper methods are 
-     *           called
+     * Helper class whose <code>equals()</code> method returns
+     * <code>true</code> for all strings on this format: SQL061021105830900
      */
-        
-    static void t_wrapper(DatabaseMetaData dmd) {
-        //test for the case when isWrapper returns true
-        //Begin test for Case 1
-        Class<DatabaseMetaData> wrap_class = DatabaseMetaData.class;
-        
-        //The if succeeds and we call the unwrap method on the conn object        
-        try {
-            if(dmd.isWrapperFor(wrap_class)) {
-                DatabaseMetaData dmd1 = 
-                        (DatabaseMetaData)dmd.unwrap(wrap_class);
-            }
-            else {
-                System.out.println("isWrapperFor wrongly returns false");
-            }
+    private static class GeneratedId {
+        public boolean equals(Object o) {
+            return o instanceof String &&
+                ((String) o).matches("SQL[0-9]{15}");
         }
-        catch(SQLException sqle) {
-            dumpSQLExceptions(sqle);
-        }
-        
-        //Begin the test for Case 2
-        //test for the case when isWrapper returns false
-        //using some class that will return false when 
-        //passed to isWrapperFor
-        
-        Class<PreparedStatement> wrap_class1 = PreparedStatement.class;
-        
-        try {
-            //returning false is the correct behaviour in this case
-            //Generate a message if it returns true
-            if(dmd.isWrapperFor(wrap_class1)) {
-                System.out.println("isWrapperFor wrongly returns true");
-            }
-            else {
-                PreparedStatement ps1 = (PreparedStatement)
-                                           dmd.unwrap(wrap_class1);
-                System.out.println("unwrap does not throw the expected " +
-                                   "exception");
-            }
-        }
-        catch (SQLException sqle) {
-            //calling unwrap in this case throws an 
-            //SQLException ensure that the SQLException 
-            //has the correct SQLState
-            if(!SQLStateConstants.UNABLE_TO_UNWRAP.equals(sqle.getSQLState())) {
-                sqle.printStackTrace();
-            }
+        public String toString() {
+            return "xxxxGENERATED-IDxxxx";
         }
     }
 }

@@ -51,6 +51,11 @@ public class JDBC40TranslationTest extends BaseTestCase {
                      JDBC40Translation.FUNCTION_PARAMETER_INOUT);
     }
 
+    public void testDatabaseMetaDataFUNCTION_PARAMETER_OUT() {
+        assertEquals(DatabaseMetaData.functionColumnOut,
+                     JDBC40Translation.FUNCTION_PARAMETER_OUT);
+    }
+
     public void testDatabaseMetaDataFUNCTION_RETURN() {
         assertEquals(DatabaseMetaData.functionReturn,
                      JDBC40Translation.FUNCTION_RETURN);

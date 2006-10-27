@@ -371,13 +371,13 @@ public class JDBC {
      * @param expectedColNames Array of expected column names.
      */
     public static void assertColumnNames(ResultSet rs,
-        String [] expectedColNames) throws Exception
+        String [] expectedColNames) throws SQLException
     {
         ResultSetMetaData rsmd = rs.getMetaData();
         int actualCols = rsmd.getColumnCount();
 
         Assert.assertEquals("Unexpected column count:",
-            rsmd.getColumnCount(), expectedColNames.length);
+            expectedColNames.length, rsmd.getColumnCount());
 
         for (int i = 0; i < actualCols; i++)
         {
@@ -455,9 +455,17 @@ public class JDBC {
      * array.  This means that the order of the columns in the result
      * set must match the order of the values in expectedRow.
      *
+     * <p>
      * If the expected value for a given row/column is a SQL NULL,
      * then the corresponding value in the array should be a Java
      * null.
+     *
+     * <p>
+     * If a given row/column could have different values (for instance,
+     * because it contains a timestamp), the expected value of that
+     * row/column could be an object whose <code>equals()</code> method
+     * returns <code>true</code> for all acceptable values. (This does
+     * not work if one of the acceptable values is <code>null</code>.)
      *
      * @param rs Result set whose current row we'll check.
      * @param rowNum Row number (w.r.t expected rows) that we're
@@ -523,7 +531,7 @@ public class JDBC {
             ok = (rs.wasNull() && (expectedRow[i] == null))
                 || (!rs.wasNull()
                     && (expectedRow[i] != null)
-                    && obj.equals(expectedRow[i]));
+                    && expectedRow[i].equals(obj));
 
             if (!ok)
             {
