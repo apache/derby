@@ -6,9 +6,13 @@ ij> -- SQL Test Suite, V6.0, Schema Definition, schem10.std
 -- ***************************************************************
 -- ****** THIS FILE SHOULD BE RUN UNDER AUTHORIZATION ID SCHANZLE 
 -- ***************************************************************
+
 -- This file defines base tables used in the CDR tests.
+
 -- This is a standard schema definition.
+
 -- Constraints:  column vs. column
+
    create schema SCHANZLE;
 0 rows inserted/updated/deleted
 ij> set schema SCHANZLE;

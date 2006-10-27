@@ -57,7 +57,7 @@
     PTYPE    CHAR(6),
     BUDGET   DECIMAL(9),
     CITY     CHAR(15),
-    UNIQUE (PNUM));
+    CONSTRAINT PROJ3_UNIQUE UNIQUE (PNUM));
 
 
   CREATE TABLE WORKS3
@@ -90,20 +90,21 @@
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
-                CHECK (GRADE > 0 AND GRADE < 20));
+                CONSTRAINT STAFF5_GRADE CHECK (GRADE > 0 AND GRADE < 20));
 
 
         CREATE TABLE STAFF6 (EMPNUM    CHAR(3) NOT NULL,
                 EMPNAME  CHAR(20),
-                GRADE DECIMAL(4) CHECK (GRADE > 0 AND GRADE < 20),
+                GRADE DECIMAL(4)
+                CONSTRAINT STAFF6_GRADE CHECK (GRADE > 0 AND GRADE < 20),
                 CITY   CHAR(15));
 
         CREATE TABLE STAFF7 (EMPNUM    CHAR(3) NOT NULL,
                 EMPNAME  CHAR(20),
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
-                PRIMARY KEY (EMPNUM),
-                CHECK (GRADE BETWEEN 1 AND 20));
+                CONSTRAINT STAFF7_PK  PRIMARY KEY (EMPNUM),
+                CONSTRAINT STAFF7_GRADE CHECK (GRADE BETWEEN 1 AND 20));
 
 
         CREATE TABLE STAFF8 (EMPNUM    CHAR(3) NOT NULL,
@@ -111,14 +112,15 @@
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
-                CHECK (EMPNAME IS NOT NULL));
+                CONSTRAINT STAFF8_EMPNAME CHECK (EMPNAME IS NOT NULL));
 
 
-        CREATE TABLE STAFF9 (EMPNUM    CHAR(3) NOT NULL PRIMARY KEY,
+        CREATE TABLE STAFF9 (EMPNUM    CHAR(3) NOT NULL
+                CONSTRAINT STAFF9_PK PRIMARY KEY,
                 EMPNAME  CHAR(20),
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
-                CHECK (EMPNAME NOT LIKE 'T%'));
+                CONSTRAINT STAFF9_EMPNAME CHECK (EMPNAME NOT LIKE 'T%'));
 
 
         CREATE TABLE STAFF10 (EMPNUM    CHAR(3) NOT NULL,
@@ -126,13 +128,14 @@
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
-                CHECK (GRADE NOT IN (5,22)));
+                CONSTRAINT STAFF10_GRADE CHECK (GRADE NOT IN (5,22)));
 
 
         CREATE TABLE STAFF11 (EMPNUM    CHAR(3) NOT NULL PRIMARY KEY,
                 EMPNAME  CHAR(20),
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
+                CONSTRAINT STAFF11_GRADE_EMPNAME
                 CHECK (GRADE NOT IN (5,22) 
                             AND EMPNAME NOT LIKE 'T%'));
 
@@ -142,6 +145,7 @@
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
+                CONSTRAINT STAFF12_GRADE_EMPNAME
                 CHECK (NOT GRADE IN (5,22) 
                             AND NOT EMPNAME LIKE 'T%'));
 
@@ -151,7 +155,7 @@
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
-                CHECK (NOT EMPNAME IS NULL));
+                CONSTRAINT STAFF13_EMPNAME CHECK (NOT EMPNAME IS NULL));
 
         CREATE TABLE STAFF15 (EMPNUM    CHAR(3),
                 EMPNAME  CHAR(20) NOT NULL,

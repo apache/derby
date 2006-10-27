@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  DML130  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml130.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION FLATER
    set schema FLATER;
 0 rows inserted/updated/deleted
@@ -14,13 +16,16 @@ FLATER
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:0678 Data type semantics with NULL / NOT NULL!
+
    CREATE TABLE CH1 (
   CH1A CHARACTER (10) NOT NULL,
   CH1B CHARACTER NOT NULL,
   CH1C CHAR (10) NOT NULL);
 0 rows inserted/updated/deleted
 ij> -- PASS:0678 If table is created?
+
    COMMIT WORK;
 ij> CREATE TABLE NUM1 (
   NUM1C1 NUMERIC (3, 2) NOT NULL,
@@ -28,10 +33,12 @@ ij> CREATE TABLE NUM1 (
   NUM1C3 NUMERIC NOT NULL);
 0 rows inserted/updated/deleted
 ij> -- PASS:0678 If table is created?
+
    COMMIT WORK;
 ij> INSERT INTO CH1 VALUES ('FOO', '', '0123456789');
 1 row inserted/updated/deleted
 ij> -- PASS:0678 If 1 row is inserted?
+
    SELECT CH1A, CH1B, CH1C
   FROM CH1;
 CH1A      |&|CH1C      
@@ -39,17 +46,21 @@ CH1A      |&|CH1C
 FOO       | |0123456789
 ij> -- PASS:0678 If 1 row selected and CH1A = 'FOO       '?
 -- PASS:0678 AND CH1B = ' ' and CH1C = '0123456789'?
+
 -- NOTE:0678 One subtest deleted.
+
    INSERT INTO CH1 VALUES ('FOO',
   'F', 'LITTLETOOLONG');
 ERROR 22001: A truncation error was encountered trying to shrink CHAR 'LITTLETOOLONG' to length 10.
 ij> -- PASS:0678 If ERROR, string data, right truncation, 0 rows selected?
+
    DELETE FROM CH1;
 1 row inserted/updated/deleted
 ij> INSERT INTO CH1 VALUES ('FOO',
   'F', 'BLANKS       ');
 1 row inserted/updated/deleted
 ij> -- PASS:0678 If 1 row is inserted?
+
    SELECT CH1A, CH1B, CH1C
   FROM CH1;
 CH1A      |&|CH1C      
@@ -57,34 +68,41 @@ CH1A      |&|CH1C
 FOO       |F|BLANKS    
 ij> -- PASS:0678 If 1 row selected and CH1A = 'FOO       '?
 -- PASS:0678 AND CH1B = 'F' and CH1C = 'BLANKS    '?
+
    INSERT INTO NUM1 VALUES (9.99, -99, 9);
 1 row inserted/updated/deleted
 ij> -- PASS:0678 If 1 row is inserted?
+
    SELECT NUM1C1 * 100, NUM1C2, NUM1C3
   FROM NUM1;
 1               |NU&|NUM1C3
 ---------------------------
 999.00          |-99|9     
 ij> -- PASS:0678 If 1 row selected and values are 999, -99, 9?
+
    DELETE FROM NUM1;
 1 row inserted/updated/deleted
 ij> INSERT INTO NUM1 VALUES (-10, 0, 0);
 ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(3,2).
 ij> -- PASS:0678 If ERROR, string data, numeric value out of range?
 -- PASS:0678 AND 0 rows inserted?
+
    INSERT INTO NUM1 VALUES (0, 100, 0);
 ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(2,0).
 ij> -- PASS:0678 If ERROR, string data, numeric value out of range?
 -- PASS:0678 AND 0 rows inserted?
+
    INSERT INTO NUM1 VALUES (0, 0, 0.1);
 1 row inserted/updated/deleted
 ij> -- PASS:0678 If 1 row is inserted?
+
    SELECT NUM1C1 * 100, NUM1C2, NUM1C3
   FROM NUM1;
 1               |NU&|NUM1C3
 ---------------------------
 0.00            |0  |0     
 ij> -- PASS:0678 If 1 row selected and values are 0, 0, 0?
+
    ROLLBACK WORK;
 ij> --O   DROP TABLE NUM1 CASCADE;
    DROP TABLE NUM1 ;
@@ -95,7 +113,9 @@ ij> --O   DROP TABLE CH1 CASCADE;
 0 rows inserted/updated/deleted
 ij> COMMIT WORK;
 ij> -- END TEST >>> 0678 <<< END TEST
+
 -- *********************************************
+
 --O-- TEST:0679 INFO_SCHEM:  Table data types!
 --O
 --O   CREATE TABLE LOTSA_TYPES (

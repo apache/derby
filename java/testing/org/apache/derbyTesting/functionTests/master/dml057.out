@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML057
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml057.sql
 -- 59-byte ID
 -- TEd Version #
+ 
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,17 +14,23 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0248 FIPS sizing - binary precision of FLOAT >= 20!
 -- FIPS sizing TEST
+
      DELETE FROM JJ;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO JJ
             VALUES(0.1048575);
 1 row inserted/updated/deleted
 ij> -- PASS:0248 If 1 row is inserted?
+
      SELECT FLOATTEST
           FROM JJ;
 FLOATTEST             
@@ -30,6 +38,7 @@ FLOATTEST
 0.1048575             
 ij> -- PASS:0248 If FLOATTEST = 0.1048575 ?
 -- PASS:0248 OR  is between 0.1048574 and 0.1048576 ?
+
 --O     SELECT COUNT(*) FROM JJ
      SELECT * FROM JJ
        WHERE FLOATTEST > 0.1048574 AND FLOATTEST < 0.1048576;
@@ -37,14 +46,17 @@ FLOATTEST
 ----------------------
 0.1048575             
 ij> -- PASS:0248 If count = 1?
+
      DELETE FROM JJ;
 1 row inserted/updated/deleted
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO JJ
             VALUES(-0.1048575);
 1 row inserted/updated/deleted
 ij> -- PASS:0248 If 1 row is inserted?
+
      SELECT FLOATTEST
           FROM JJ;
 FLOATTEST             
@@ -52,6 +64,7 @@ FLOATTEST
 -0.1048575            
 ij> -- PASS:0248 If FLOATTEST = -0.1048575 ?
 -- PASS:0248 OR  is between -0.1048576 and -0.1048574 ?
+
 --O     SELECT COUNT(*) FROM JJ
      SELECT * FROM JJ
        WHERE FLOATTEST > -0.1048576 AND FLOATTEST < -0.1048574;
@@ -59,20 +72,27 @@ FLOATTEST
 ----------------------
 -0.1048575            
 ij> -- PASS:0248 If count = 1?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0248 <<< END TEST
+
 -- *****************************************************************
+
 -- TEST:0249 FIPS sizing - binary precision of REAL >= 20!
 -- FIPS sizing TEST
+
      DELETE FROM GG;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO GG
             VALUES(0.1048575);
 1 row inserted/updated/deleted
 ij> -- PASS:0249 If 1 row is inserted?
+
      SELECT REALTEST
           FROM GG;
 REALTEST     
@@ -80,6 +100,7 @@ REALTEST
 0.1048575    
 ij> -- PASS:0249 If REALTEST =  0.1048575 ?
 -- PASS:0249 OR  is between 0.1048574 and 0.1048576 ?
+
 --O     SELECT COUNT(*) FROM GG
      SELECT * FROM GG
        WHERE REALTEST > 0.1048574 AND REALTEST < 0.1048576;
@@ -87,14 +108,17 @@ REALTEST
 -------------
 0.1048575    
 ij> -- PASS:0249 If count = 1?
+
      DELETE FROM GG;
 1 row inserted/updated/deleted
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO GG
             VALUES(-0.1048575);
 1 row inserted/updated/deleted
 ij> -- PASS:0249 If 1 row is inserted?
+
      SELECT REALTEST
           FROM GG;
 REALTEST     
@@ -102,6 +126,7 @@ REALTEST
 -0.1048575   
 ij> -- PASS:0249 If REALTEST =  -0.1048575 ?
 -- PASS:0249 OR  is between -0.1048576 and -0.1048574 ?
+
 --O     SELECT COUNT(*) FROM GG
      SELECT * FROM GG
        WHERE REALTEST > -0.1048576 AND REALTEST < -0.1048574;
@@ -109,20 +134,27 @@ REALTEST
 -------------
 -0.1048575   
 ij> -- PASS:0249 If count = 1?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0249 <<< END TEST
+
 -- ***************************************************************
+
 -- TEST:0250 FIPS sizing - bin. precision of DOUBLE >= 30!
 -- FIPS sizing TEST
+
      DELETE FROM II;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO II
             VALUES(0.1073741823);
 1 row inserted/updated/deleted
 ij> -- PASS:0250 If 1 row is inserted?
+
      SELECT DOUBLETEST
           FROM II;
 DOUBLETEST            
@@ -130,6 +162,7 @@ DOUBLETEST
 0.1073741823          
 ij> -- PASS:0250 If DOUBLETEST = 0.1073741823 ?
 -- PASS:0250 OR  is between  0.1073741822 and 0.1073741824 ?
+
 --O     SELECT COUNT(*) FROM II
      SELECT * FROM II
        WHERE DOUBLETEST > 0.1073741822 AND DOUBLETEST < 0.1073741824;
@@ -137,14 +170,17 @@ DOUBLETEST
 ----------------------
 0.1073741823          
 ij> -- PASS:0250 If count = 1?
+
      DELETE FROM II;
 1 row inserted/updated/deleted
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO II
             VALUES(-0.1073741823);
 1 row inserted/updated/deleted
 ij> -- PASS:0250 If 1 row is inserted?
+
      SELECT DOUBLETEST
           FROM II;
 DOUBLETEST            
@@ -152,6 +188,7 @@ DOUBLETEST
 -0.1073741823         
 ij> -- PASS:0250 If DOUBLETEST = -0.1073741823 ?
 -- PASS:0250 OR  is between  -0.1073741824 and -0.1073741822 ?
+
 --O     SELECT COUNT(*) FROM II
      SELECT * FROM II
        WHERE DOUBLETEST > -0.1073741824 AND DOUBLETEST < -0.1073741822;
@@ -159,6 +196,7 @@ DOUBLETEST
 ----------------------
 -0.1073741823         
 ij> -- PASS:0250 If count = 1?
+
 -- restore 
      ROLLBACK WORK;
 ij> -- END TEST >>> 0250 <<< END TEST

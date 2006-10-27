@@ -105,7 +105,8 @@
    -- CREATE TABLE T0512 (C1 INT NOT NULL, C2 INT NOT NULL, C3 INT NOT NULL,
    --   UNIQUE (C1,C2), UNIQUE (C3), UNIQUE (C2,C1))
    CREATE TABLE T0512 (C1 INT NOT NULL, C2 INT NOT NULL, C3 INT NOT NULL,
-   UNIQUE (C1,C2), UNIQUE (C3), UNIQUE (C2,C1));
+   CONSTRAINT T0512_C1C2 UNIQUE (C1,C2), UNIQUE (C3),
+   CONSTRAINT T0512_C2C1 UNIQUE (C2,C1));
    --0 PASS: if there was an error for a duplicate unique constraint
 
    -- Check for erratum which allowed recursive view definitions.

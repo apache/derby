@@ -3,9 +3,11 @@ ij> -- ***************************************************************
 -- ****** THIS FILE SHOULD BE RUN UNDER AUTHORIZATION ID FLATER **
 -- ***************************************************************
 -- MODULE  FLATTAB  
+
 -- SQL Test Suite, V6.0, Interactive SQL, flattab.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION FLATER
    set schema FLATER;
 0 rows inserted/updated/deleted
@@ -15,12 +17,16 @@ ij> --0   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 FLATER                                                                                                                          
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- This routine initializes the contents of tables:
 --      BASE_VS1, USIG and U_SIG
 -- This routine may be run at any time to re-initialize tables.
+
    DELETE FROM BASE_VS1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO BASE_VS1 VALUES (0,1);
 1 row inserted/updated/deleted
 ij> INSERT INTO BASE_VS1 VALUES (1,0);
@@ -34,14 +40,17 @@ ij> SELECT COUNT(*) FROM BASE_VS1;
 -----------
 4          
 ij> -- PASS:Setup If count = 4?
+
    DELETE FROM USIG;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO USIG VALUES (0,2);
 1 row inserted/updated/deleted
 ij> INSERT INTO USIG VALUES (1,3);
 1 row inserted/updated/deleted
 ij> DELETE FROM U_SIG;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO U_SIG VALUES (4,6);
 1 row inserted/updated/deleted
 ij> INSERT INTO U_SIG VALUES (5,7);
@@ -51,12 +60,15 @@ ij> SELECT COUNT(*) FROM USIG;
 -----------
 2          
 ij> -- PASS:Setup If count = 2?
+
    SELECT COUNT(*) FROM U_SIG;
 1          
 -----------
 2          
 ij> -- PASS:Setup If count = 2?
+
    COMMIT WORK;
 ij> -- *************************************************////END-OF-MODULE
+
 ;
 ij> 

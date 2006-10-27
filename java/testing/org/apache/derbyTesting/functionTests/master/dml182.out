@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  DML182  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml182.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION FLATER
    set schema FLATER;
 0 rows inserted/updated/deleted
@@ -14,7 +16,9 @@ FLATER
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:0895 FIPS sizing, columns in list >= 15!
+
    CREATE TABLE ID_CODES (
      CODE1 INT NOT NULL,
      CODE2 INT NOT NULL,
@@ -36,6 +40,7 @@ ij> -- date_time print
        CODE11, CODE12, CODE13, CODE14, CODE15));
 0 rows inserted/updated/deleted
 ij> -- PASS:0895 If table created successfully?
+
    COMMIT WORK;
 ij> CREATE TABLE ORDERS (
      CODE1 INT,
@@ -61,6 +66,7 @@ ij> CREATE TABLE ORDERS (
      REFERENCES ID_CODES);
 0 rows inserted/updated/deleted
 ij> -- PASS:0895 If table created successfully?
+
    COMMIT WORK;
 ij> CREATE VIEW ID_ORDERS (CODE1, CODE2, CODE3, CODE4, 
 	CODE5, CODE6, CODE7, CODE8, CODE9, CODE10,
@@ -76,6 +82,7 @@ ij> CREATE VIEW ID_ORDERS (CODE1, CODE2, CODE3, CODE4,
          a.CODE11=ORDERS.CODE11 and a.CODE12=ORDERS.CODE12 and a.CODE13=ORDERS.CODE13 and a.CODE14=ORDERS.CODE14 and a.CODE15=ORDERS.CODE15);
 0 rows inserted/updated/deleted
 ij> -- PASS:0895 If view created successfully
+
    COMMIT WORK;
 ij> INSERT INTO ID_CODES VALUES (
      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
@@ -99,6 +106,7 @@ ij> INSERT INTO ORDERS VALUES (
      9.95);
 1 row inserted/updated/deleted
 ij> -- PASS:0895 If 5 rows inserted successfully in previous 5 inserts?
+
    SELECT CODE1, CODE2, CODE3, CODE4, CODE5,
        CODE6, CODE7, CODE8, CODE9, CODE10,
        CODE11, CODE12, CODE13, CODE14, CODE15,
@@ -119,6 +127,7 @@ ij> -- PASS:0895 If 2 rows are returned?
 --                 =========
 -- PASS:0895 If    24.95 (+ or - 0.01)  ?
 -- PASS:0895 If     9.95 (+ or - 0.01)  ?
+
    COMMIT WORK;
 ij> --O   DROP TABLE ORDERS CASCADE;
    drop view id_orders;
@@ -126,11 +135,13 @@ ij> --O   DROP TABLE ORDERS CASCADE;
 ij> DROP TABLE ORDERS ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0895 If table dropped successfully?
+
    COMMIT WORK;
 ij> --O   DROP TABLE ID_CODES CASCADE;
    DROP TABLE ID_CODES ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0895 If table dropped successfully?
+
    COMMIT WORK;
 ij> -- END TEST >>> 0895 <<< END TEST
 -- *********************************************

@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  DML158  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml158.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -14,7 +16,9 @@ HU
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:0857 <join condition> set function, outer reference! Error
+
    DELETE FROM WORKS
      WHERE EXISTS 
      (SELECT * FROM PROJ JOIN STAFF
@@ -23,6 +27,7 @@ ij> -- date_time print
       AND PNUM = WORKS.PNUM);
 ERROR 42972: An ON clause associated with a JOIN operator is not valid.
 ij> -- PASS:0857 If ERROR OR SQLSTATE = 42X04
+
    SELECT EMPNUM, PNUM FROM WORKS
        ORDER BY EMPNUM, PNUM;
 EM&|PN&
@@ -54,6 +59,7 @@ ij> -- PASS:0857 If 12 rows are returned in the following order?
 -- PASS:0857 If    E4        P2  ?
 -- PASS:0857 If    E4        P4  ?
 -- PASS:0857 If    E4        P5  ?
+
    ROLLBACK WORK;
 ij> SELECT EMPNUM, SUM (HOURS) FROM WORKS OWORKS
        GROUP BY EMPNUM
@@ -75,6 +81,7 @@ ij> -- PASS:0857 If 2 rows are returned in the following order?
 --               ======    ==========
 -- PASS:0857 If  E1        184       ?
 -- PASS:0857 If  E4        140       ?
+
    SELECT EMPNUM, SUM (HOURS) FROM WORKS OWORKS
        GROUP BY EMPNUM
        HAVING EMPNUM IN (
@@ -95,6 +102,7 @@ ij> -- PASS:0857 If 2 rows are returned in the following order?
 --               ======    ==========
 -- PASS:0857 If  E1        184       ?
 -- PASS:0857 If  E4        140       ?
+
    COMMIT WORK;
 ij> -- END TEST >>> 0857 <<< END TEST
 -- *********************************************

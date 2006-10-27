@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  YTS798  
+
 -- SQL Test Suite, V6.0, Interactive SQL, yts798.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION CTS1              
    set schema CTS1;
 0 rows inserted/updated/deleted
@@ -38,7 +40,9 @@ ij> INSERT INTO TW VALUES ('h',4);
 ij> INSERT INTO TW VALUES ('i',5);
 1 row inserted/updated/deleted
 ij> -- date_time print
+
 -- TEST:7559 <scalar subquery> in <select list> of single-row select!
+
    SELECT DISTINCT A,
             (SELECT D FROM TW
              WHERE E = X.A)
@@ -52,6 +56,7 @@ ij> -- date_time print
                       AND A = E);
 ERROR 21000: Scalar subquery is only allowed to return a single row.
 ij> -- PASS:7559 If ERROR - cardinality violation?
+
    SELECT DISTINCT A,
               (SELECT D FROM TW
                WHERE E = X.A)
@@ -62,6 +67,7 @@ A          |2
 ----------------
 1          |g   
 ij> -- PASS:7559 If A = 1 and D = 'g'?
+
    SELECT DISTINCT A,
              (SELECT D FROM TW
               WHERE E = X.A)
@@ -72,6 +78,7 @@ A          |2
 ----------------
 3          |NULL
 ij> -- PASS:7559 If A = 3 and D = NULL?
+
    ROLLBACK WORK;
 ij> -- END TEST >>> 7559 <<< END TEST
 -- *********************************************

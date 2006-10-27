@@ -1,4 +1,3 @@
-WARNING 01J01: Database 'wombat' not created, connection made to existing database instead.
 ij> -- SQL Test Suite, V6.0, Schema Definition, schema4.std
 -- 59-byte ID
 -- TEd Version #
@@ -6,7 +5,9 @@ ij> -- SQL Test Suite, V6.0, Schema Definition, schema4.std
 -- ******************************************************************
 -- ****** THIS FILE SHOULD BE RUN UNDER AUTHORIZATION ID SULLIVAN1
 -- ******************************************************************
+
 -- This is a standard schema definition.
+
 --O   CREATE SCHEMA AUTHORIZATION SULLIVAN1
    CREATE SCHEMA SULLIVAN1;
 0 rows inserted/updated/deleted
@@ -21,8 +22,10 @@ ij> CREATE VIEW MUL_SCH
 0 rows inserted/updated/deleted
 ij> --O    GRANT ALL PRIVILEGES ON AUTH_TABLE TO HU
 --O    GRANT SELECT ON MUL_SCH TO HU
+
 -- The following tables are used to run concurrency program pairs
 --    e.g MPA001 and MPB001 use the tables with prefix MP1_ 
+
  CREATE TABLE MP1_MM2 (NUMTEST NUMERIC(10));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE MP1_NN (NUMTEST NUMERIC(9));
@@ -58,6 +61,7 @@ ij> CREATE TABLE MP5_AA_INDEX (ANUM NUMERIC(4) NOT NULL UNIQUE);
 ij> CREATE TABLE MP5_TT (TESTTYPE CHAR(3), KOUNT DECIMAL(4));
 0 rows inserted/updated/deleted
 ij> -- The following tables are used to run interactive concurrency program pairs.
+
  CREATE TABLE TTT (ANUM NUMERIC(4) NOT NULL UNIQUE, AUTHOR CHAR(1));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE TT (DOLLARS NUMERIC(4), ANUM NUMERIC(4));
@@ -68,6 +72,7 @@ ij> --O this is a dup of a table in a different schema...
  CREATE TABLE BB (BNUM NUMERIC(4));
 0 rows inserted/updated/deleted
 ij> --O this is a dup of a table in a different schema...
+
 --  Test GRANT UPDATE for additional columns beyond those WITH GRANT OPTION.
 --  expect error message!
 --  In SCHEMA1 for USER HU is the following grant:
@@ -77,6 +82,8 @@ ij> --O this is a dup of a table in a different schema...
 --O   GRANT SELECT,UPDATE ON HU.STAFF3
 --O           TO SULLIVAN1
 --O           WITH GRANT OPTION
+
+
  CREATE TABLE MP6_MM2 (NUMTEST NUMERIC(10));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE MP6_NN (NUMTEST NUMERIC(9));

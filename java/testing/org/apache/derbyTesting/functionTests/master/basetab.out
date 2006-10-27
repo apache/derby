@@ -19,30 +19,40 @@ ij> -- ***************************************************************
 -- ****** THIS FILE SHOULD BE RUN UNDER AUTHORIZATION ID HU ******
 -- ***************************************************************
 -- MODULE BASETAB
+
 -- SQL Test Suite, V6.0, Interactive SQL, basetab.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
+
 --0   SELECT USER FROM HU.ECCO;
    VALUES USER;
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 --   This routine initializes the contents of tables:
 --        STAFF, PROJ, WORKS, STAFF3, VTABLE, and UPUNIQ
 --   This routine may be run at any time to re-initialize tables.
+
    DELETE FROM HU.ECCO;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO HU.ECCO VALUES ('NL');
 1 row inserted/updated/deleted
 ij> DELETE FROM HU.STAFF;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> DELETE FROM HU.PROJ;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> DELETE FROM HU.WORKS;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO HU.STAFF VALUES ('E1','Alice',12,'Deale');
 1 row inserted/updated/deleted
 ij> INSERT INTO HU.STAFF VALUES ('E2','Betty',10,'Vienna');
@@ -101,6 +111,7 @@ P4 |SDP                 |Design|20000     |Deale
 P5 |IRM                 |Test  |10000     |Vienna         
 P6 |PAYR                |Design|50000     |Deale          
 ij> -- PASS:Setup if count = 6?
+
 --O      SELECT COUNT(*) FROM HU.STAFF;
       SELECT * FROM HU.STAFF;
 EM&|EMPNAME             |GRADE|CITY           
@@ -111,6 +122,7 @@ E3 |Carmen              |13   |Vienna
 E4 |Don                 |12   |Deale          
 E5 |Ed                  |13   |Akron          
 ij> -- PASS:Setup if count = 5?
+
 --O      SELECT COUNT(*) FROM HU.WORKS;
       SELECT * FROM HU.WORKS;
 EM&|PN&|HOURS 
@@ -128,12 +140,17 @@ E4 |P2 |20
 E4 |P4 |40    
 E4 |P5 |80    
 ij> -- PASS:Setup if count = 12?
+
+
       DELETE FROM HU.STAFF3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> DELETE FROM HU.VTABLE;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> DELETE FROM HU.UPUNIQ;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO HU.STAFF3
               SELECT * 
               FROM HU.STAFF;
@@ -169,8 +186,10 @@ E3 |Carmen              |13   |Vienna
 E4 |Don                 |12   |Deale          
 E5 |Ed                  |13   |Akron          
 ij> -- PASS:Setup if count = 5?
+
 --O      SELECT COUNT(*) FROM HU.VTABLE;
 -- PASS:Setup if count = 4?
+
 --O      SELECT COUNT(*) FROM HU.UPUNIQ;
       SELECT * FROM HU.UPUNIQ;
 NUM&|COL2

@@ -1,7 +1,9 @@
 ij> -- MODULE DML037
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml037.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -11,15 +13,22 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- NO_TEST:0202 Host variable names same as column name!
+
 -- Testing host identifier
+
 -- ***********************************************************
+
 -- TEST:0234 SQL-style comments with SQL statements!
 -- OPTIONAL TEST
+
     DELETE  -- we empty the table  
         FROM TEXT240;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO TEXT240   -- This is the test for the rules  
             VALUES         -- for the placement            
        ('SQL-STYLE COMMENTS') -- of
@@ -27,12 +36,14 @@ ij> INSERT INTO TEXT240   -- This is the test for the rules
       ;
 1 row inserted/updated/deleted
 ij> -- PASS:0234 If 1 row is inserted?
+
     SELECT * 
             FROM TEXT240;
 TEXXT                                                                                                                           
 --------------------------------------------------------------------------------------------------------------------------------
 SQL-STYLE COMMENTS                                                                                                             &
 ij> -- PASS:0234 If TEXXT = 'SQL-STYLE COMMENTS'?
+     
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0234 <<< END TEST

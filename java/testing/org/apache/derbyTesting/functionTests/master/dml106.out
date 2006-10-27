@@ -1,14 +1,17 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  DML106  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml106.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION FLATER
    set schema FLATER;
 0 rows inserted/updated/deleted
 ij> --N temporarily changed authorization to HU, to simplify schema name usage until
 --N we have permissions; table USIG requires explicit schema name FLATER until
 --N this is changed back
+
 --0   SELECT USER FROM HU.ECCO;
   VALUES USER;
 1                                                                                                                               
@@ -17,28 +20,34 @@ FLATER
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:0599 UNION in views (feature 8) (static)!
+
    CREATE VIEW UUSIG (U1) AS
   SELECT C1 FROM USIG UNION SELECT C_1 FROM USIG;
 0 rows inserted/updated/deleted
 ij> -- PASS:0599 If view is created?
+
    COMMIT WORK;
 ij> SELECT COUNT(*) FROM UUSIG;
 1          
 -----------
 4          
 ij> -- PASS:0599 If count = 4?
+
    SELECT COUNT(DISTINCT U1) FROM UUSIG;
 1          
 -----------
 4          
 ij> -- PASS:0599 If count = 4?
+
    SELECT COUNT(*) FROM UUSIG WHERE U1 < 0
   OR U1 > 3 OR U1 IS NULL;
 1          
 -----------
 0          
 ij> -- PASS:0599 If count = 0?
+
    COMMIT WORK;
 ij> CREATE VIEW ABOVE_AVERAGE (COLUMN_1, COLUMN_2, COLUMN_3) AS
       SELECT PNUM, BUDGET, CITY
@@ -51,6 +60,7 @@ ij> CREATE VIEW ABOVE_AVERAGE (COLUMN_1, COLUMN_2, COLUMN_3) AS
         WHERE CITY > 'Deale';
 0 rows inserted/updated/deleted
 ij> -- PASS:0599 If view is created?
+
    COMMIT WORK;
 ij> SELECT * FROM ABOVE_AVERAGE ORDER BY COLUMN_1;
 CO&|COLUMN_2  |COLUMN_3       
@@ -64,6 +74,7 @@ ij> -- PASS:0599 If 4 rows selected with ordered rows and column values: ?
 -- PASS:0599    P2   30000  Vienna ?
 -- PASS:0599    P3   30000  Tampa  ?
 -- PASS:0599    P6   50000  Deale  ?
+
    COMMIT WORK;
 ij> CREATE VIEW STAFF_DUP AS
       SELECT EMPNUM, EMPNAME, GRADE, CITY
@@ -72,6 +83,7 @@ ij> CREATE VIEW STAFF_DUP AS
       SELECT * FROM HU.STAFF3;
 0 rows inserted/updated/deleted
 ij> -- PASS:0599 If view is created?
+
    COMMIT WORK;
 ij> SELECT * FROM STAFF_DUP ORDER BY CITY;
 EM&|EMPNAME             |GRADE|CITY           
@@ -89,11 +101,13 @@ E2 |Betty               |10   |Vienna
 ij> -- PASS:0599 If 10 rows selected ?
 -- PASS:0599 If first row contains EMPNUM/CITY values E5 / Akron ?
 -- PASS:0599 If second row contains EMPNUM/CITY values E5 / Akron ?
+
    SELECT COUNT(*) FROM STAFF_DUP;
 1          
 -----------
 10         
 ij> -- PASS:0599 If count = 10 ?
+
    COMMIT WORK;
 ij> CREATE VIEW FOUR_CITIES (C1, C2, C3) AS
       SELECT 'P', CITY, 666
@@ -113,6 +127,7 @@ ij> CREATE VIEW FOUR_CITIES (C1, C2, C3) AS
         WHERE CITY = 'Vienna';
 0 rows inserted/updated/deleted
 ij> -- PASS:0599 If view is created?
+
    COMMIT WORK;
 ij> SELECT C2, C1, C3 FROM FOUR_CITIES ORDER BY C3, C2;
 C2             |&|C3         
@@ -132,21 +147,25 @@ ij> -- PASS:0599 If 7 rows selected with ordered rows and column values ?
 -- PASS:0599    Vienna  P      666  ?
 -- PASS:0599    Deale   S      777  ?
 -- PASS:0599    Vienna  S      777  ?
+
    SELECT COUNT (*) FROM FOUR_CITIES;
 1          
 -----------
 7          
 ij> -- PASS:0599 If count = 7 ?
+
    SELECT COUNT(*) FROM FOUR_CITIES WHERE C3 > 0;
 1          
 -----------
 4          
 ij> -- PASS:0599 If count = 4 ?
+
    SELECT COUNT(*) FROM FOUR_CITIES WHERE C2 = 'Vienna';
 1          
 -----------
 3          
 ij> -- PASS:0599 If count = 3 ?
+
    COMMIT WORK;
 ij> --0   DROP VIEW ABOVE_AVERAGE CASCADE;
    DROP VIEW ABOVE_AVERAGE ;
@@ -165,46 +184,57 @@ ij> --0   DROP VIEW UUSIG CASCADE;
 0 rows inserted/updated/deleted
 ij> COMMIT WORK;
 ij> -- END TEST >>> 0599 <<< END TEST
+
 -- *********************************************
+
 -- TEST:0601 DATETIME data types (feature 5) (static)!
+
    CREATE TABLE TEMPUS (TDATE DATE, TTIME TIME,
 --0  TTIMESTAMP TIMESTAMP, TINT1 INTERVAL YEAR TO MONTH,
   TTIMESTAMP TIMESTAMP);
 0 rows inserted/updated/deleted
 ij> --0  TINT2 INTERVAL DAY TO SECOND);
 -- PASS:0601 If table is created?
+
    COMMIT WORK;
 ij> INSERT INTO TEMPUS VALUES (
   DATE( '1993-08-24'),
   TIME( '16:03:00'),
-  TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx)
+  TIMESTAMP( '1993-08-24 16:03:00')
 --0  , INTERVAL -'1-6' YEAR TO MONTH,
 --0  INTERVAL '13 0:10' DAY TO SECOND);
   );
 1 row inserted/updated/deleted
 ij> -- PASS:0601 If 1 row is inserted?
+
    SELECT DAY( TDATE)
   FROM TEMPUS;
 1          
 -----------
 24         
 ij> -- PASS:0601 If 1 row selected and value is 24?
+
 --0   SELECT COUNT(*) FROM TEMPUS
---0  WHERE (TTIMESTAMP - TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx))
+--0  WHERE (TTIMESTAMP - TIMESTAMP( '1995-02-24 16:03:00'))
 --0  YEAR TO MONTH = TINT1;
 -- PASS:0601 If count = 1?
+
 --0   SELECT COUNT(*) FROM TEMPUS
 --0  WHERE (TTIMESTAMP, TINT1) OVERLAPS
---0  (TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx), INTERVAL '1-6' YEAR TO MONTH);
+--0  (TIMESTAMP( '1995-02-24 16:03:00'), INTERVAL '1-6' YEAR TO MONTH);
 -- PASS:0601 If count = 0?
+
    ROLLBACK WORK;
 ij> --0   DROP TABLE TEMPUS CASCADE;
    DROP TABLE TEMPUS ;
 0 rows inserted/updated/deleted
 ij> COMMIT WORK;
 ij> -- END TEST >>> 0601 <<< END TEST
+
 -- *********************************************
+
 -- TEST:0611 FIPS sizing, DATETIME data types (static)!
+
    CREATE TABLE TSFIPS (
   FIPS1 TIME,
   FIPS2 TIMESTAMP
@@ -213,48 +243,58 @@ ij> -- END TEST >>> 0601 <<< END TEST
   );
 0 rows inserted/updated/deleted
 ij> -- PASS:0611 If table is created?
+
    COMMIT WORK;
 ij> INSERT INTO TSFIPS VALUES (
   TIME( '16:03:00'),
-  TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx')
+  TIMESTAMP( '1996-08-24 16:03:00.999999')
 --0  ,INTERVAL -'99-6' YEAR (2) TO MONTH,
 --0  INTERVAL '99 0:10:00.999999' DAY (2) TO SECOND (6));
   );
 1 row inserted/updated/deleted
 ij> -- PASS:0611 If 1 row is inserted?
+
    SELECT SECOND( FIPS2)
   * 1000000 - 999990 FROM TSFIPS;
 1                     
 ----------------------
 9.0                   
 ij> -- PASS:0611 If 1 row selected and value is 9?
+
 --0   SELECT YEAR( FIPS3),
 --0  MONTH( FIPS3)
 --0  FROM TSFIPS;
 -- PASS:0611 If 1 row selected and values are -99 and -6?
+
 --0   SELECT DAY( FIPS4),
 --0  SECOND( FIPS4) * 1000000 - 999990
 --0  FROM TSFIPS;
 -- PASS:0611 If 1 row selected and values are 99 and 9?
+
    ROLLBACK WORK;
 ij> --0   DROP TABLE TSFIPS CASCADE;
    DROP TABLE TSFIPS ;
 0 rows inserted/updated/deleted
 ij> COMMIT WORK;
 ij> -- END TEST >>> 0611 <<< END TEST
+
 -- *********************************************
+
 -- TEST:0613 <datetime value function> (static)!
+
    CREATE TABLE TSSMALL (
   SMALLD DATE,
   SMALLT TIME,
   SMALLTS TIMESTAMP);
 0 rows inserted/updated/deleted
 ij> -- PASS:0613 If table is created?
+
    COMMIT WORK;
 ij> INSERT INTO TSSMALL VALUES (
   CURRENT_DATE, CURRENT_TIME, CURRENT_TIMESTAMP);
 1 row inserted/updated/deleted
 ij> -- PASS:0613 If 1 row is inserted?
+
    SELECT COUNT(*)
 FROM TSSMALL WHERE
 YEAR( SMALLD) = YEAR( SMALLTS);
@@ -262,6 +302,7 @@ YEAR( SMALLD) = YEAR( SMALLTS);
 -----------
 1          
 ij> -- PASS:0613 If count = 1?
+
    SELECT COUNT(*)
 FROM TSSMALL WHERE
 MONTH( SMALLD) = MONTH( SMALLTS);
@@ -269,6 +310,7 @@ MONTH( SMALLD) = MONTH( SMALLTS);
 -----------
 1          
 ij> -- PASS:0613 If count = 1?
+
    SELECT COUNT(*)
 FROM TSSMALL WHERE
 DAY( SMALLD) = DAY( SMALLTS);
@@ -276,6 +318,7 @@ DAY( SMALLD) = DAY( SMALLTS);
 -----------
 1          
 ij> -- PASS:0613 If count = 1?
+
    SELECT COUNT(*)
 FROM TSSMALL WHERE
 HOUR( SMALLT) = HOUR( SMALLTS);
@@ -283,6 +326,7 @@ HOUR( SMALLT) = HOUR( SMALLTS);
 -----------
 1          
 ij> -- PASS:0613 If count = 1?
+
    SELECT COUNT(*)
 FROM TSSMALL WHERE
 MINUTE( SMALLT) = MINUTE( SMALLTS);
@@ -290,6 +334,7 @@ MINUTE( SMALLT) = MINUTE( SMALLTS);
 -----------
 1          
 ij> -- PASS:0613 If count = 1?
+
    SELECT COUNT(*)
 FROM TSSMALL WHERE
 SECOND( SMALLT) -
@@ -300,37 +345,46 @@ SECOND( SMALLTS) < 1;
 -----------
 1          
 ij> -- PASS:0613 If count = 1?
+
    ROLLBACK WORK;
 ij> --0   DROP TABLE TSSMALL CASCADE;
    DROP TABLE TSSMALL ;
 0 rows inserted/updated/deleted
 ij> COMMIT WORK;
 ij> -- END TEST >>> 0613 <<< END TEST
+
 -- *********************************************
+
 -- TEST:0615 DATETIME-related SQLSTATE codes (static)!
+
    CREATE TABLE TSERR (
 --0  BADINT INTERVAL YEAR (2) TO MONTH,
   BADDATE DATE);
 0 rows inserted/updated/deleted
 ij> -- PASS:0615 If table is created?
+
    COMMIT WORK;
 ij> --0   INSERT INTO TSERR VALUES (
 --0  INTERVAL '0-11' YEAR TO MONTH,
 --0  DATE( '9999-01-01') + INTERVAL '1-00' YEAR TO MONTH);
 -- PASS:0615 If ERROR, datetime field overflow, 0 rows inserted?
+
    INSERT INTO TSERR VALUES (
 --0  INTERVAL '9999-11' YEAR TO MONTH,
   DATE( '1984-01-01'));
 1 row inserted/updated/deleted
 ij> -- PASS:0615 If ERROR, interval field overflow, 0 rows inserted?
+
 --0   INSERT INTO TSERR VALUES (
 --0  INTERVAL '1-11' YEAR TO MONTH,
 --0  CAST ('DATE ''1993-02-30''' AS DATE));
 -- PASS:0615 If ERROR, invalid datetime format, 0 rows inserted?
+
 --0   INSERT INTO TSERR VALUES (
 --0  INTERVAL '1-11' YEAR TO MONTH,
 --0  CAST ('1993-02-30' AS DATE));
 -- PASS:0615 If ERROR, invalid datetime format, 0 rows inserted?
+
    ROLLBACK WORK;
 ij> --0   DROP TABLE TSERR CASCADE;
    DROP TABLE TSERR ;

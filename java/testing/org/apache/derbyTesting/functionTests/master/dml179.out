@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  DML179  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml179.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION FLATER
    set schema FLATER;
 0 rows inserted/updated/deleted
@@ -14,7 +16,9 @@ FLATER
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:0892 FIPS sizing, rowlen >= 8000, statement var >= 4000!
+
    CREATE TABLE T0892 (
      INTKEY NUMERIC (3) NOT NULL PRIMARY KEY,
      NAAM VARCHAR (1000),
@@ -27,6 +31,7 @@ ij> -- date_time print
      DESCRIPT3 VARCHAR (978));
 0 rows inserted/updated/deleted
 ij> -- PASS:0892 If table created successfully?
+
    COMMIT WORK;
 ij> INSERT INTO T0892 (INTKEY, NAAM, ADDRESS, KEYWORDS, DESCRIPT3) 
               VALUES (0,
@@ -91,6 +96,7 @@ ij> INSERT INTO T0892 (INTKEY, NAAM, ADDRESS, KEYWORDS, DESCRIPT3)
 'this is going to be overwritten');
 1 row inserted/updated/deleted
 ij> -- PASS:0892 If 1 row inserted successfully?
+
    UPDATE T0892
      SET FUNCTION1 =
 'Harry works in the Redundancy Automation Division of the ' ||
@@ -125,6 +131,7 @@ ij> -- PASS:0892 If 1 row inserted successfully?
   WHERE INTKEY = 0;
 1 row inserted/updated/deleted
 ij> -- PASS:0892 If update completed successfully?
+
    UPDATE T0892
      SET FUNCTION2 = FUNCTION1,
      DESCRIPT1 = FUNCTION1,
@@ -132,6 +139,7 @@ ij> -- PASS:0892 If update completed successfully?
      DESCRIPT3 = SUBSTR (FUNCTION1, 1, 978);
 1 row inserted/updated/deleted
 ij> -- PASS:0892 If update completed successfully?
+
    SELECT LENGTH (NAAM) +
                 LENGTH (ADDRESS) +
                 LENGTH (KEYWORDS) +
@@ -146,11 +154,13 @@ ij> -- PASS:0892 If update completed successfully?
 -----------
 8000       
 ij> -- PASS:0892 If LENGTH = 8000?
+
    COMMIT WORK;
 ij> --O   DROP TABLE T0892 CASCADE;
    DROP TABLE T0892 ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0892 If table dropped successfully?
+
    COMMIT WORK;
 ij> -- END TEST >>> 0892 <<< END TEST
 -- *********************************************

@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML026
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml026.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,37 +14,48 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0118 Monadic arithmetic operator +!
+
       SELECT +MAX(DISTINCT HOURS)
               FROM WORKS;
 1     
 ------
 80    
 ij> -- PASS:0118 If +MAX(DISTINCT HOURS) = 80?
+
 -- END TEST >>> 0118 <<< END TEST
 -- *********************************************************
+
 -- TEST:0119 Monadic arithmetic operator -!
+
       SELECT -MAX(DISTINCT HOURS)
               FROM WORKS;
 1     
 ------
 -80   
 ij> -- PASS:0119 If -MAX(DISTINCT HOURS) = -80?
+
 -- END TEST >>> 0119 <<< END TEST
 -- *********************************************************
+
 -- TEST:0120 Value expression with NULL primary IS NULL!
+
 -- setup
      INSERT INTO WORKS1
             SELECT * 
                  FROM WORKS;
 12 rows inserted/updated/deleted
 ij> -- PASS:0120 If 12 rows are inserted ?
+
 -- setup
      INSERT INTO WORKS1
             VALUES('E9','P1',NULL);
 1 row inserted/updated/deleted
 ij> -- PASS:0120 If 1 row is inserted?
+
       SELECT EMPNUM
            FROM WORKS1
            WHERE HOURS IS NULL;
@@ -50,7 +63,9 @@ EM&
 ---
 E9 
 ij> -- PASS:0120 If EMPNUM = 'E9'?
+
 -- NOTE:0120 we insert into WORKS from WORKS1
+
 -- setup
      INSERT INTO WORKS
             SELECT EMPNUM,'P9',20+HOURS
@@ -58,6 +73,7 @@ ij> -- PASS:0120 If EMPNUM = 'E9'?
                  WHERE EMPNUM='E9';
 1 row inserted/updated/deleted
 ij> -- PASS:0120 If 1 row is inserted?
+
 --O      SELECT COUNT(*)
       SELECT *
            FROM WORKS
@@ -66,6 +82,7 @@ EM&|PN&|HOURS
 --------------
 E9 |P9 |NULL  
 ij> -- PASS:0120 If count = 1      ?
+
 --O      SELECT COUNT(*)
       SELECT *
               FROM WORKS
@@ -74,11 +91,14 @@ EM&|PN&|HOURS
 --------------
 E9 |P9 |NULL  
 ij> -- PASS:0120 If count = 1 ?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0120 <<< END TEST
 -- **********************************************************
+
 -- TEST:0121 Dyadic operators +, -, *, /!
+
 --O      SELECT COUNT(*)
       SELECT *
            FROM VTABLE;
@@ -89,6 +109,7 @@ COL1       |COL2       |COL3       |COL4       |COL5
 100        |200        |300        |400        |500.01   
 1000       |-2000      |3000       |NULL       |4000.00  
 ij> -- PASS:0121 If count = 4 ?
+
       SELECT +COL1+COL2 - COL3*COL4/COL1
               FROM VTABLE
               WHERE COL1=10;
@@ -96,9 +117,12 @@ ij> -- PASS:0121 If count = 4 ?
 -----------
 -90        
 ij> -- PASS:0121 If answer is -90?
+
 -- END TEST >>> 0121 <<< END TEST
 -- *********************************************************
+
 -- TEST:0122 Divisor shall not be zero!
+
       SELECT COL2/COL1+COL3
               FROM VTABLE
               WHERE COL4=3;
@@ -106,9 +130,12 @@ ij> -- PASS:0121 If answer is -90?
 -----------
 ERROR 22012: Attempt to divide by zero.
 ij> -- PASS:0122 If ERROR Number not Divisible by Zero?
+
 -- END TEST >>> 0122 <<< END TEST
 -- **********************************************************
+
 -- TEST:0123 Evaluation order of expression!
+
       SELECT (-COL2+COL1)*COL3 - COL3/COL1
               FROM VTABLE
               WHERE COL4 IS NULL;
@@ -116,6 +143,7 @@ ij> -- PASS:0122 If ERROR Number not Divisible by Zero?
 -----------
 8999997    
 ij> -- PASS:0123 If Answer is 8999997 (plus or minus 0.5)?
+
 -- END TEST >>> 0123 <<< END TEST
 -- *************************************************////END-OF-MODULE
 ;

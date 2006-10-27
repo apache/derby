@@ -5,7 +5,9 @@ ij> -- SQL Test Suite, V6.0, Schema Definition, schema5.std
 -- *******************************************************************
 -- ****** THIS FILE SHOULD BE RUN UNDER AUTHORIZATION ID FLATER ******
 -- *******************************************************************
+
 -- This is a standard schema definition.
+
 --0 CREATE SCHEMA AUTHORIZATION FLATER
  CREATE SCHEMA FLATER;
 0 rows inserted/updated/deleted
@@ -17,6 +19,7 @@ ij> -- VIEW FR1 tests forward references in schema definitions.  This view
    -- is the Right Thing and ought to be required, but I speak only for
    -- myself.
    -- CREATE VIEW FR1 AS SELECT * FROM DV1
+
    CREATE TABLE CONCATBUF (ZZ CHAR(240));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE USIG (C1 INT, C_1 INT);
@@ -70,30 +73,38 @@ ij> --0   GRANT ALL PRIVILEGES ON TINY TO SCHANZLE
 --0   GRANT ALL PRIVILEGES ON BASE_WCOV TO SCHANZLE
 --0   GRANT ALL PRIVILEGES ON WCOV TO SCHANZLE
 --0   GRANT ALL PRIVILEGES ON VS1 TO SCHANZLE
+
+
    -- Test granting of privileges that we don't have to start with.
    -- We have GRANT OPTION, but we should not be able to grant unrestricted
    -- update on STAFF3 since our own update is restricted to two columns.
    -- Do not change SCHEMA1 to grant unrestricted update.
    -- * expect error message *
 --0   GRANT SELECT, UPDATE ON HU.STAFF3 TO SCHANZLE
+
    -- Same thing for views.
    -- * expect error message *
 --0   GRANT SELECT, UPDATE ON HU.VSTAFF3 TO SCHANZLE
+
    -- See whether GRANT ALL PRIVILEGES gives you GRANT OPTION.
    -- It should not.  GRANT OPTION is not technically a privilege.
    -- * expect error message *
 --0   GRANT SELECT ON CUGINI.BADG1 TO SCHANZLE
+
    -- See whether GRANT OPTION on a view gives you GRANT OPTION
    -- on the base table.
    -- * expect error message *
 --0   GRANT SELECT ON CUGINI.BADG2 TO SCHANZLE
+
    -- Delimited identifiers.
    CREATE VIEW "SULLIVAN.SELECT" ("sullivan.select") AS
      SELECT C1 FROM BASE_VS1;
 0 rows inserted/updated/deleted
 ij> --0   GRANT ALL PRIVILEGES ON "SULLIVAN.SELECT" TO SCHANZLE
+   
    -- Please be aware of the following errata; they are not being
    -- tested here.
+
    -- Check for erratum which allowed duplicate
    --   <unique constraint definition>s
    -- Reference ISO/IEC JTC1/SC21 N6789 section 11.7 SR7
@@ -103,9 +114,11 @@ ij> --0   GRANT ALL PRIVILEGES ON "SULLIVAN.SELECT" TO SCHANZLE
    -- CREATE TABLE T0512 (C1 INT NOT NULL, C2 INT NOT NULL, C3 INT NOT NULL,
    --   UNIQUE (C1,C2), UNIQUE (C3), UNIQUE (C2,C1))
    CREATE TABLE T0512 (C1 INT NOT NULL, C2 INT NOT NULL, C3 INT NOT NULL,
-   UNIQUE (C1,C2), UNIQUE (C3), UNIQUE (C2,C1));
-ERROR 42Z93: Constraints 'xxxxGENERATED-IDxxxx' and 'xxxxGENERATED-IDxxxx' have the same set of columns, which is not allowed. 
+   CONSTRAINT T0512_C1C2 UNIQUE (C1,C2), UNIQUE (C3),
+   CONSTRAINT T0512_C2C1 UNIQUE (C2,C1));
+ERROR 42Z93: Constraints 'T0512_C2C1' and 'T0512_C1C2' have the same set of columns, which is not allowed. 
 ij> --0 PASS: if there was an error for a duplicate unique constraint
+
    -- Check for erratum which allowed recursive view definitions.
    -- Reference ISO/IEC JTC1/SC21 N6789 section 11.19 <view definition> SR4
    --   and Annex E #6
@@ -117,6 +130,8 @@ ij> --0 PASS: if there was an error for a duplicate unique constraint
    SELECT T0513.C2, BASE_VS1.C1 FROM T0513, BASE_VS1;
 ERROR 42X05: Table/View 'T0513' does not exist.
 ij> --0 PASS: if an error is returned that the view is circular
+
 -- ************* End of Schema *************
+
 disconnect;
 ij> 

@@ -1,7 +1,9 @@
 ij> -- MODULE DML025
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml025.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -11,7 +13,9 @@ ij> --0   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0114 Set functions without GROUP BY returns 1 row!
      SELECT SUM(HOURS),AVG(HOURS),MIN(HOURS),MAX(HOURS)                 
           FROM    WORKS                                                      
@@ -21,8 +25,10 @@ ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
 184        |30.6666      |12    |80    
 ij> -- PASS:0114 If SUM(HOURS) = 184 and AVG(HOURS) is 30 to 31?
 -- PASS:0114 If MIN(HOURS) = 12 and MAX(HOURS) = 80 ?
+
 -- END TEST >>> 0114 <<< END TEST
 -- ***********************************************************
+
 -- TEST:0115 GROUP BY col, set function: 0 groups returns empty table!
      SELECT PNUM,AVG(HOURS),MIN(HOURS),MAX(HOURS)                        
           FROM    WORKS                                                        
@@ -31,8 +37,10 @@ ij> -- PASS:0114 If SUM(HOURS) = 184 and AVG(HOURS) is 30 to 31?
 PN&|2            |3     |4     
 -------------------------------
 ij> -- PASS:0115 If 0 rows are selected ?
+
 -- END TEST >>> 0115 <<< END TEST
 -- ***********************************************************
+
 -- TEST:0116 GROUP BY set functions: zero groups returns empty table!
      SELECT SUM(HOURS),AVG(HOURS),MIN(HOURS),MAX(HOURS)
           FROM    WORKS                                                      
@@ -41,8 +49,10 @@ ij> -- PASS:0115 If 0 rows are selected ?
 1          |2            |3     |4     
 ---------------------------------------
 ij> -- PASS:0116 If 0 rows are selected?
+
 -- END TEST >>> 0116 <<< END TEST
 -- ***************************************************************
+
 -- TEST:0117 GROUP BY column, set functions with several groups!
      SELECT PNUM,AVG(HOURS),MIN(HOURS),MAX(HOURS)                       
           FROM    WORKS                                                      
@@ -58,6 +68,7 @@ P5 |46.0000      |12    |80
 P6 |12.0000      |12    |12    
 ij> -- PASS:0117 If 6 rows are selected and first PNUM = 'P1'?
 -- PASS:0117 and first MAX(HOURS) = 40?
+
 -- END TEST >>> 0117 <<< END TEST
 -- *************************************************////END-OF-MODULE
 ;

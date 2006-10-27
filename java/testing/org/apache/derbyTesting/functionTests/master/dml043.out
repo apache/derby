@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML043
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml043.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,9 +14,12 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0214 FIPS sizing -- 2000-byte row!
 -- FIPS sizing TEST
+
 -- setup
      INSERT INTO T2000(STR110,STR200,STR216)
             VALUES
@@ -23,16 +28,19 @@ ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
                 'STR66666666666666666666666666666666666666666666666');
 1 row inserted/updated/deleted
 ij> -- PASS:0214 If 1 row is inserted?
+
       UPDATE T2000
            SET STR140 =
            'STR44444444444444444444444444444444444444444444444';
 1 row inserted/updated/deleted
 ij> -- PASS:0214 If 1 row is updated?
+
       UPDATE T2000
            SET STR180 =
            'STR88888888888888888888888888888888888888888888888';
 1 row inserted/updated/deleted
 ij> -- PASS:0214 If 1 row is updated?
+
       SELECT STR110,STR180,STR216
            FROM T2000;
 STR110                                                                                                        |STR180                                                                                                                          |STR216                                                                                                                          
@@ -42,6 +50,7 @@ ij> -- PASS:0214 If STR180 = ?
 -- PASS:0214   'STR88888888888888888888888888888888888888888888888'?
 -- PASS:0214 If STR216 = ?
 -- PASS:0214   'STR66666666666666666666666666666666666666666666666'?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0214 <<< END TEST

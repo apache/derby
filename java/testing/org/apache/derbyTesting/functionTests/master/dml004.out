@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML004
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml004.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,7 +14,9 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0008 SQLCODE 100:SELECT on empty table !
      SELECT EMPNUM,HOURS
           FROM WORKS
@@ -21,14 +25,18 @@ ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
 EM&|HOURS 
 ----------
 ij> -- PASS:0008 If 0 rows selected, SQLCODE = 100, end of data?
+
 -- END TEST >>> 0008 <<< END TEST
 -- ****************************************************************
+
 -- TEST:0009 SELECT NULL value!
+
 -- setup
      INSERT INTO WORKS
             VALUES('E9','P9',NULL);
 1 row inserted/updated/deleted
 ij> -- PASS:0009 If 1 row is inserted?
+
      SELECT EMPNUM
           FROM WORKS
           WHERE HOURS IS NULL;
@@ -36,6 +44,7 @@ EM&
 ---
 E9 
 ij> -- PASS:0009 If EMPNUM = 'E9'?
+
           SELECT EMPNUM, HOURS
                FROM WORKS
                WHERE PNUM = 'P9'
@@ -44,17 +53,26 @@ EM&|HOURS
 ----------
 E9 |NULL  
 ij> -- PASS:0009 If EMPNUM = 'E9' and HOURS is NULL?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0009 <<< END TEST
 -- ******************************************************************
+
 -- NO_TEST:0161 FETCH NULL value without indicator, SQLCODE < 0!
+
 -- Testing Indicators
+
 -- **********************************************************
+
 -- NO_TEST:0162 FETCH NULL value with indicator syntax!
+
 -- Testing indicators
+
 -- ****************************************************************
+
 -- NO_TEST:0010 FETCH truncated CHAR column with indicator!
+
 -- Testing indicators
 -- *************************************************////END-OF-MODULE
 ;

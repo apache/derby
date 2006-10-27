@@ -5,11 +5,15 @@ ij> -- SQL Test Suite, V6.0, Schema Definition, schema8.smi
 -- ***************************************************************
 -- ****** THIS FILE SHOULD BE RUN UNDER AUTHORIZATION ID SUN *****
 -- ***************************************************************
+
 -- This file defines the base tables used in most of the CDR tests.
+
 -- This non-standard schema definition is provided so that
 -- implementations which require semicolons to terminate statements,
 -- but which are otherwise conforming, can still execute the
 -- remaining tests.
+
+
   CREATE SCHEMA
 --O      AUTHORIZATION SUN;
       SUN;
@@ -19,6 +23,7 @@ ij> set schema SUN;
 ij> CREATE TABLE SUN.ECCO (C1 CHAR(2));
 0 rows inserted/updated/deleted
 ij> --O  CREATE TABLE ECCO (C1 CHAR(2));
+
   CREATE TABLE STAFF
    (EMPNUM   CHAR(3) NOT NULL,
     EMPNAME  CHAR(20),
@@ -50,7 +55,7 @@ ij> CREATE TABLE PROJ3
     PTYPE    CHAR(6),
     BUDGET   DECIMAL(9),
     CITY     CHAR(15),
-    UNIQUE (PNUM));
+    CONSTRAINT PROJ3_UNIQUE UNIQUE (PNUM));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE WORKS3
    (EMPNUM   CHAR(3) NOT NULL,
@@ -79,44 +84,47 @@ ij> CREATE TABLE STAFF5 (EMPNUM    CHAR(3) NOT NULL,
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
-                CHECK (GRADE > 0 AND GRADE < 20));
+                CONSTRAINT STAFF5_GRADE CHECK (GRADE > 0 AND GRADE < 20));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE STAFF6 (EMPNUM    CHAR(3) NOT NULL,
                 EMPNAME  CHAR(20),
-                GRADE DECIMAL(4) CHECK (GRADE > 0 AND GRADE < 20),
+                GRADE DECIMAL(4)
+                CONSTRAINT STAFF6_GRADE CHECK (GRADE > 0 AND GRADE < 20),
                 CITY   CHAR(15));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE STAFF7 (EMPNUM    CHAR(3) NOT NULL,
                 EMPNAME  CHAR(20),
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
-                PRIMARY KEY (EMPNUM),
-                CHECK (GRADE BETWEEN 1 AND 20));
+                CONSTRAINT STAFF7_PK  PRIMARY KEY (EMPNUM),
+                CONSTRAINT STAFF7_GRADE CHECK (GRADE BETWEEN 1 AND 20));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE STAFF8 (EMPNUM    CHAR(3) NOT NULL,
                 EMPNAME  CHAR(20),
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
-                CHECK (EMPNAME IS NOT NULL));
+                CONSTRAINT STAFF8_EMPNAME CHECK (EMPNAME IS NOT NULL));
 0 rows inserted/updated/deleted
-ij> CREATE TABLE STAFF9 (EMPNUM    CHAR(3) NOT NULL PRIMARY KEY,
+ij> CREATE TABLE STAFF9 (EMPNUM    CHAR(3) NOT NULL
+                CONSTRAINT STAFF9_PK PRIMARY KEY,
                 EMPNAME  CHAR(20),
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
-                CHECK (EMPNAME NOT LIKE 'T%'));
+                CONSTRAINT STAFF9_EMPNAME CHECK (EMPNAME NOT LIKE 'T%'));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE STAFF10 (EMPNUM    CHAR(3) NOT NULL,
                 EMPNAME  CHAR(20),
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
-                CHECK (GRADE NOT IN (5,22)));
+                CONSTRAINT STAFF10_GRADE CHECK (GRADE NOT IN (5,22)));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE STAFF11 (EMPNUM    CHAR(3) NOT NULL PRIMARY KEY,
                 EMPNAME  CHAR(20),
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
+                CONSTRAINT STAFF11_GRADE_EMPNAME
                 CHECK (GRADE NOT IN (5,22) 
                             AND EMPNAME NOT LIKE 'T%'));
 0 rows inserted/updated/deleted
@@ -125,6 +133,7 @@ ij> CREATE TABLE STAFF12 (EMPNUM    CHAR(3) NOT NULL,
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
+                CONSTRAINT STAFF12_GRADE_EMPNAME
                 CHECK (NOT GRADE IN (5,22) 
                             AND NOT EMPNAME LIKE 'T%'));
 0 rows inserted/updated/deleted
@@ -133,7 +142,7 @@ ij> CREATE TABLE STAFF13 (EMPNUM    CHAR(3) NOT NULL,
                 GRADE DECIMAL(4),
                 CITY   CHAR(15),
                 PRIMARY KEY (EMPNUM),
-                CHECK (NOT EMPNAME IS NULL));
+                CONSTRAINT STAFF13_EMPNAME CHECK (NOT EMPNAME IS NULL));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE STAFF15 (EMPNUM    CHAR(3),
                 EMPNAME  CHAR(20) NOT NULL,
@@ -367,6 +376,7 @@ ij> CREATE TABLE EXPERIENCE
 0 rows inserted/updated/deleted
 ij> -- The following tables, STAFF_M and PROJ_M reference each other.
      -- Table STAFF_M has a "forward reference" to PROJ_M.
+                              
      CREATE TABLE STAFF_M
         (EMPNUM   CHAR(3) NOT NULL,
          EMPNAME  CHAR(20),
@@ -390,6 +400,7 @@ ij> ALTER TABLE STAFF_M ADD FOREIGN KEY (PRI_WK)
           REFERENCES PROJ_M (PNUM);
 0 rows inserted/updated/deleted
 ij> --   The following table is self-referencing.
+
         CREATE TABLE STAFF_C
            (EMPNUM   CHAR(3) NOT NULL,
             EMPNAME  CHAR(20),
@@ -425,21 +436,26 @@ ij> --O   CREATE TABLE CHAR_DEFAULT
 --O               (SEX_CODE  CHAR(1)  DEFAULT 'F',
 --O                NICKNAME  CHAR(20) DEFAULT 'No nickname given',
 --O                INSURANCE1 CHAR(5)  DEFAULT 'basic');
+
 --O   CREATE TABLE EXACT_DEF
 --O               (BODY_TEMP NUMERIC(4,1) DEFAULT 98.6,
 --O                MAX_NUM   NUMERIC(5)   DEFAULT -55555,
 --O                MIN_NUM   DEC(6,6)     DEFAULT .000001);
+
 --O   CREATE TABLE APPROX_DEF
 --O               (X_COUNT   REAL DEFAULT 1.78E12,
 --O                Y_COUNT   REAL DEFAULT -9.99E10,
 --O                Z_COUNT   REAL DEFAULT 3.45E-11,
 --O                ZZ_COUNT  REAL DEFAULT -7.6777E-7);
+
 --O   CREATE TABLE SIZE_TAB
 --O               (COL1 CHAR(75)  DEFAULT 
 --O'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789012',
 --O                COL2 INTEGER   DEFAULT -999888777,
 --O                COL3 DEC(15,6) DEFAULT 987654321.123456,
 --O                COL4 REAL      DEFAULT -1.048576E22);   
+
+
    CREATE TABLE COMMODITY
          (C_NUM INTEGER NOT NULL,
           C_NAME CHAR(7) NOT NULL UNIQUE,
@@ -486,11 +502,13 @@ ij> CREATE TABLE T6 (COL1 CHAR(20), COL2 CHAR(20),
       REFERENCES T6118REF (COL1, COL2, COL4, COL3, COL5, COL6));
 0 rows inserted/updated/deleted
 ij> -- ********************** create view statements *****************
+
   CREATE VIEW TESTREPORT AS
     SELECT TESTNO, RESULT, TESTTYPE
     FROM HU.TESTREPORT;
 0 rows inserted/updated/deleted
 ij> --O    FROM TESTREPORT;
+
 --O   CREATE VIEW DOLLARS_PER_POUND (COMMODITY, UNIT_PRICE, FROM_DATE, TO_DATE)
 --O      AS SELECT COMMODITY.C_NAME, 
 --O                SUM(TOT_PRICE * DOLLAR_EQUIV) / SUM(UNITS * POUND_EQUIV),
@@ -501,13 +519,16 @@ ij> --O    FROM TESTREPORT;
 --O            AND C_TRANSACTION.MEASURE  = MEASURE_TABLE.MEASURE
 --O         GROUP BY COMMODITY.C_NAME
 --O         HAVING SUM(TOT_PRICE * DOLLAR_EQUIV) > 10000;
+
 -- View COST_PER_UNIT for OPTIONAL test 0403
 -- Remove view from schema if it causes errors.
+
 --O   CREATE VIEW COST_PER_UNIT
 --O     (COMMODITY, UNIT_PRICE, CURRENCY, MEASURE)
 --O      AS SELECT COMMODITY, UNIT_PRICE * POUND_EQUIV / DOLLAR_EQUIV,
 --O                CURRENCY, MEASURE
 --O            FROM DOLLARS_PER_POUND, CURRENCY_TABLE, MEASURE_TABLE;
+
         CREATE VIEW STAFF6_WITH_GRADES AS
                           SELECT EMPNUM,EMPNAME,GRADE,CITY
                           FROM STAFF6
@@ -515,23 +536,34 @@ ij> --O    FROM TESTREPORT;
   ;
 0 rows inserted/updated/deleted
 ij> --O                          WITH CHECK OPTION;
+
 -- ************** grant statements follow *************
 --O       GRANT SELECT ON SUN.ECCO TO PUBLIC;
+        
 --O        GRANT INSERT ON TESTREPORT
 --O             TO PUBLIC;
+
 --O        GRANT REFERENCES ON ACR_SCH_P TO SULLIVAN
 --O              WITH GRANT OPTION;
+        
 --O        GRANT ALL PRIVILEGES ON PROJ_P
 --O             TO SULLIVAN;
+
 --O        GRANT ALL PRIVILEGES ON T6118REF TO FLATER;
+
 --O        GRANT ALL PRIVILEGES ON T118 TO FLATER;
+
 --O        GRANT ALL PRIVILEGES ON T6 TO FLATER;
+
 --  Test GRANT without grant permission below.
 --  "WITH GRANT OPTION" purposefully omitted from SUN's GRANT. 
 --  Do not insert text "WITH GRANT OPTION"
+
 --O        GRANT REFERENCES ON STAFF_P
 --O             TO SULLIVAN;
+
 --O        GRANT REFERENCES (C_NUM) ON COMMODITY TO SCHANZLE;
+
 -- ************* End of Schema *************
 ;
 ij> 

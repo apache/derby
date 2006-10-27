@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML015
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml015.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,16 +14,23 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- NO_TEST:0060 COMMIT work closes CURSORs!
+
 -- Testing cursors
+  
 -- ************************************************************
+
 -- TEST:0061 COMMIT work keeps changes to database!
+
      INSERT INTO TEMP_S
            SELECT EMPNUM, GRADE, CITY
                 FROM STAFF;
 5 rows inserted/updated/deleted
 ij> -- PASS:0061 If 5 rows are inserted?
+
      COMMIT WORK;
 ij> -- verify previous COMMIT keeps changes
      ROLLBACK WORK;
@@ -36,14 +45,18 @@ E3  |13   |Vienna
 E4  |12   |Deale          
 E5  |13   |Akron          
 ij> -- PASS:0061 If count = 5?
+
 -- END TEST >>> 0061 <<< END TEST
 -- ************************************************************
+
 -- TEST:0062 ROLLBACK work cancels changes to database!
 -- NOTE:0062 uses data created by TEST 0061
+
      DELETE FROM TEMP_S
            WHERE EMPNUM = 'E5';
 1 row inserted/updated/deleted
 ij> -- PASS:0062 If 1 row is deleted?
+
 --O        SELECT COUNT(*)
         SELECT *
              FROM TEMP_S;
@@ -54,6 +67,7 @@ E2  |10   |Vienna
 E3  |13   |Vienna         
 E4  |12   |Deale          
 ij> -- PASS:0062 If count = 4?
+
 -- restore
      ROLLBACK WORK;
 ij> --O     SELECT COUNT(*)
@@ -67,13 +81,16 @@ E3  |13   |Vienna
 E4  |12   |Deale          
 E5  |13   |Akron          
 ij> -- PASS:0062 If count = 5?
+
 -- restore
      DELETE FROM TEMP_S;
 5 rows inserted/updated/deleted
 ij> COMMIT WORK;
 ij> -- END TEST >>> 0062 <<< END TEST
 -- ***********************************************************
+
 -- NO_TEST:0063 ROLLBACK work closes CURSORs!
+
 -- Testing cursors
 -- *************************************************////END-OF-MODULE
 ;

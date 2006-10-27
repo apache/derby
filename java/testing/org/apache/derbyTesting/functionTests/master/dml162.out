@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  DML162  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml162.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION FLATER
    set schema FLATER;
 0 rows inserted/updated/deleted
@@ -14,7 +16,9 @@ FLATER
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:0863 <joined table> directly contained in cursor,view!
+
    CREATE VIEW BLIVET (CITY, PNUM, EMPNUM, EMPNAME, GRADE,
       HOURS, PNAME, PTYPE, BUDGET) AS
 --0      HU.STAFF NATURAL JOIN HU.WORKS NATURAL JOIN HU.PROJ;
@@ -23,6 +27,7 @@ ij> -- date_time print
 	  ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0863 If view created successfully?
+
    COMMIT WORK;
 ij> SELECT COUNT(*) 
      FROM BLIVET WHERE EMPNUM = 'E1';
@@ -30,12 +35,14 @@ ij> SELECT COUNT(*)
 -----------
 3          
 ij> -- PASS:0863 If COUNT = 3?
+
    SELECT COUNT(*) 
      FROM BLIVET WHERE EMPNUM <> 'E1';
 1          
 -----------
 3          
 ij> -- PASS:0863 If COUNT = 3?
+
    SELECT * FROM HU.STAFF LEFT OUTER JOIN HU.WORKS
       ON (HU.STAFF.EMPNUM=HU.WORKS.EMPNUM);
 EMP&|EMPNAME             |GRADE|CITY           |EMP&|PNUM|HOURS 
@@ -54,6 +61,7 @@ E4  |Don                 |12   |Deale          |E4  |P4  |40
 E4  |Don                 |12   |Deale          |E4  |P5  |80    
 E5  |Ed                  |13   |Akron          |NULL|NULL|NULL  
 ij> -- PASS:0863 If 13 rows are returned?
+
    COMMIT WORK;
 ij> --0   DROP VIEW BLIVET CASCADE;
    DROP VIEW BLIVET ;

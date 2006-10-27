@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML035
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml035.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,8 +14,11 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0157 ORDER BY approximate numeric!
+
 -- setup
      INSERT INTO JJ VALUES(66.2);
 1 row inserted/updated/deleted
@@ -33,6 +38,7 @@ ij> -- PASS:0157 If 1 row is inserted?
      INSERT INTO JJ VALUES(-66.25);
 1 row inserted/updated/deleted
 ij> -- PASS:0157 If 1 row is inserted?
+
      SELECT FLOATTEST
           FROM JJ
           ORDER BY FLOATTEST DESC;
@@ -46,6 +52,7 @@ FLOATTEST
 -87.0                 
 ij> -- PASS:0157 If 6 rows are selected ?
 -- PASS:0157 If last FLOATTEST = -87 OR  is between -87.5 and -86.5 ?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0157 <<< END TEST

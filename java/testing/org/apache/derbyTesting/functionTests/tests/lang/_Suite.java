@@ -21,6 +21,7 @@
 */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import org.apache.derbyTesting.functionTests.tests.nist.NistScripts;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 
@@ -62,9 +63,13 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(GroupByExpressionTest.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
         suite.addTest(TimeHandlingTest.suite());
-        suite.addTest(VTITest.suite());        
+        suite.addTest(VTITest.suite());
         suite.addTest(XMLTypeAndOpsTest.suite());
         suite.addTest(XMLMissingClassesTest.suite());
+        
+        // Add the NIST suite in from the nist package since
+        // it is a SQL language related test.
+        suite.addTest(NistScripts.suite());
         
         // This test internally sets derby.database.sqlAuthorization to true
         // This property is not resettable and hence may affect other tests 

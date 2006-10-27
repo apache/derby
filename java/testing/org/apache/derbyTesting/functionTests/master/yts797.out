@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  YTS797  
+
 -- SQL Test Suite, V6.0, Interactive SQL, yts797.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION CTS1              
    set schema CTS1;
 0 rows inserted/updated/deleted
@@ -14,7 +16,9 @@ CTS1
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:7558 <scalar subquery> in SET of searched update!
+
    DELETE FROM TV;
 5 rows inserted/updated/deleted
 ij> INSERT INTO TV VALUES (1,'a');
@@ -49,6 +53,7 @@ ij> --O   UPDATE TV AS X
 ERROR 21000: Scalar subquery is only allowed to return a single row.
 ij> -- PASS:7558 If ERROR - cardinality violation?
 --N new error messages are temporarily valid, till we implement this kind of update properly
+
 --O   UPDATE TV AS X
    UPDATE TV  
      SET B =
@@ -58,6 +63,7 @@ ij> -- PASS:7558 If ERROR - cardinality violation?
               AND TV.A = Y.A);
 5 rows inserted/updated/deleted
 ij> -- PASS:7558 If UPDATE completed successfully?
+
    SELECT B 
      FROM CTS1.TV
      WHERE A = 1;
@@ -65,6 +71,7 @@ B
 ----
 g   
 ij> -- PASS:7558 If B = 'g'?
+
    SELECT B 
      FROM CTS1.TV
      WHERE A = 2;
@@ -72,6 +79,7 @@ B
 ----
 NULL
 ij> -- PASS:7558 If B = NULL?
+
    SELECT B 
      FROM CTS1.TV
      WHERE A = 3;
@@ -79,6 +87,7 @@ B
 ----
 NULL
 ij> -- PASS:7558 If B = NULL?
+
    SELECT B 
      FROM CTS1.TV
      WHERE A = 4;
@@ -86,6 +95,7 @@ B
 ----
 h   
 ij> -- PASS:7558 If B = 'h'?
+
    SELECT B 
      FROM CTS1.TV
      WHERE A = 5;
@@ -93,6 +103,7 @@ B
 ----
 i   
 ij> -- PASS:7558 If B = 'i'?
+
    ROLLBACK WORK;
 ij> -- END TEST >>> 7558 <<< END TEST
 -- *********************************************

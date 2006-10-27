@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  DML173  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml173.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION FLATER
    set schema FLATER;
 0 rows inserted/updated/deleted
@@ -14,13 +16,16 @@ FLATER
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:0885 FIPS sizing, VARCHAR (1000)!
+
    CREATE TABLE CONTACTS (
      NAME CHAR (20),
      DESCRIPTION VARCHAR (1000),
      KEYWORDS VARCHAR (1000));
 0 rows inserted/updated/deleted
 ij> -- PASS:0885 If table created successfully?
+
    COMMIT WORK;
 ij> INSERT INTO CONTACTS VALUES ('Harry',
 --O original lines lack the '||' operator
@@ -84,6 +89,7 @@ ij> INSERT INTO CONTACTS VALUES ('Harry',
 'warehouse security integrity feedback');
 1 row inserted/updated/deleted
 ij> -- PASS:0885 If 1 row inserted successfully?
+
 --O   SELECT COUNT(*) 
    SELECT  name
      FROM CONTACTS
@@ -151,6 +157,7 @@ NAME
 --------------------
 Harry               
 ij> -- PASS:0885 If COUNT = 1?
+
 --O   SELECT COUNT(*) 
    SELECT  name
      FROM CONTACTS
@@ -160,6 +167,7 @@ NAME
 --------------------
 Harry               
 ij> -- PASS:0885 If COUNT = 1?
+
    COMMIT WORK;
 ij> --O   DROP TABLE CONTACTS CASCADE;
    DROP TABLE CONTACTS ;

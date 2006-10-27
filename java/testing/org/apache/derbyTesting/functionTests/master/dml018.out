@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML018
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml018.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,7 +14,9 @@ ij> --0   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0069 HAVING COUNT with WHERE, GROUP BY!
      SELECT PNUM
           FROM WORKS
@@ -25,8 +29,10 @@ P2
 P4 
 P5 
 ij> -- PASS:0069 If 3 rows are selected with PNUMs = 'P2', 'P4', 'P5'?
+
 -- END TEST >>> 0069 <<< END TEST
 -- ***********************************************************
+   
 -- TEST:0070 HAVING COUNT with GROUP BY!
      SELECT PNUM
           FROM WORKS
@@ -36,8 +42,10 @@ PN&
 ---
 P2 
 ij> -- PASS:0070 If PNUM = 'P2'?
+
 -- END TEST >>> 0070 <<< END TEST
 -- ***********************************************************
+
 -- TEST:0071 HAVING MIN, MAX with GROUP BY 3 columns!
      SELECT EMPNUM, PNUM, HOURS
           FROM WORKS
@@ -55,8 +63,10 @@ E4 |P4 |40
 ij> -- PASS:0071 If 7 rows are selected: EMPNUM/PNUMs are 'E1'/'P1',?
 -- PASS:0071      'E1'/'P2','E1'/'P4', 'E2'/'P1',?
 -- PASS:0071      'E3'/'P2', 'E4'/'P2', 'E4'/'P4'?
+
 -- END TEST >>> 0071 <<< END TEST
 -- *************************************************************
+
 -- TEST:0072 Nested HAVING IN with no outer reference!
      SELECT WORKS.PNUM
           FROM WORKS
@@ -73,8 +83,10 @@ P2
 P3 
 P6 
 ij> -- PASS:0072 If 3 rows are selected: WORKS.PNUMs are 'P2', 'P3', 'P6'?
+
 -- END TEST >>> 0072 <<< END TEST
 -- ***********************************************************
+
 -- TEST:0073 HAVING MIN with no GROUP BY!
      SELECT SUM(HOURS)
           FROM WORKS
@@ -83,6 +95,7 @@ ij> -- PASS:0072 If 3 rows are selected: WORKS.PNUMs are 'P2', 'P3', 'P6'?
 -----------
 464        
 ij> -- PASS:0073 If 1 row is selected with SUM(HOURS) = 464?
+
 -- END TEST >>> 0073 <<< END TEST
 -- *************************************************////END-OF-MODULE
 ;

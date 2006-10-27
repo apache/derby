@@ -5,8 +5,11 @@ ij> -- SQL Test Suite, V6.0, Schema Definition, schema1.std
 -- ***************************************************************
 -- ****** THIS FILE SHOULD BE RUN UNDER AUTHORIZATION ID HU ******
 -- ***************************************************************
+
 -- This file defines the base tables used in most of the tests.
+
 -- This is a standard schema definition.
+
   CREATE SCHEMA
 --O  AUTHORIZATION HU;
   HU;
@@ -21,7 +24,7 @@ ij> CREATE TABLE BASE_TESTREPORT
 ij> CREATE TABLE HU.ECCO (C1 CHAR(2));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE STAFF
-   (EMPNUM   CHAR(3) NOT NULL UNIQUE,
+   (EMPNUM   CHAR(3) NOT NULL CONSTRAINT STAFF_UNIQUE UNIQUE,
     EMPNAME  CHAR(20),
     GRADE    DECIMAL(4),
     CITY     CHAR(15));
@@ -154,6 +157,8 @@ ij> CREATE TABLE TEXT512  (TEXXT VARCHAR(512));
 ij> CREATE TABLE TEXT1024  (TEXXT VARCHAR(1024));
 0 rows inserted/updated/deleted
 ij> -- The following tables are used to test the limitations (12-14-88)
+
+
   CREATE TABLE T240(STR240 CHAR(240));
 0 rows inserted/updated/deleted
 ij> CREATE TABLE DEC15(COL1 DECIMAL(15,7));
@@ -245,6 +250,7 @@ ij> CREATE TABLE TOKENS
 ij> CREATE TABLE WHICH_SCHEMA1 (C1 CHAR (50));
 0 rows inserted/updated/deleted
 ij> -- ************* create view statements follow *************
+
    CREATE VIEW TESTREPORT AS
     SELECT TESTNO, RESULT, TESTTYPE
     FROM BASE_TESTREPORT;

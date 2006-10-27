@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE   XTS701
+
 -- SQL Test Suite, V6.0, Interactive SQL, xts701.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION CTS1              
    set schema CTS1;
 0 rows inserted/updated/deleted
@@ -14,20 +16,25 @@ CTS1
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:7004 Compound char. literal in <comparison predicate>!
+
    INSERT INTO T4
       VALUES
       ('This is the first compound character literal.',1,NULL,NULL);
 1 row inserted/updated/deleted
 ij> -- PASS:7004 If 1 row inserted successfully?
+
    INSERT INTO T4
          VALUES('Second character literal.',2,NULL,NULL);
 1 row inserted/updated/deleted
 ij> -- PASS:7004 If 1 row inserted successfully?
+
    INSERT INTO T4
          VALUES('Third character literal.',3,NULL,NULL);
 1 row inserted/updated/deleted
 ij> -- PASS:7004 If 1 row inserted successfully?
+
    SELECT NUM6
          FROM   T4
          WHERE  STR110 = 'This is the compound ' ||
@@ -35,6 +42,7 @@ ij> -- PASS:7004 If 1 row inserted successfully?
 NUM6   
 -------
 ij> -- PASS:7004 If 0 rows selected - no data condition?
+
    SELECT COUNT(*)
          FROM   T4
          WHERE  STR110 <> 'This is the first compound ' ||
@@ -43,6 +51,7 @@ ij> -- PASS:7004 If 0 rows selected - no data condition?
 -----------
 2          
 ij> -- PASS:7004 If COUNT = 2?
+
    SELECT NUM6
          FROM   T4
          WHERE  NUM6 = 2 AND 
@@ -52,6 +61,7 @@ NUM6
 -------
 2      
 ij> -- PASS:7004 If NUM6 = 2?
+
    SELECT NUM6
          FROM   T4
          WHERE  STR110 = 'Third character literal.' || --Comments here
@@ -60,6 +70,7 @@ ij> -- PASS:7004 If NUM6 = 2?
 NUM6   
 -------
 ij> -- PASS:7004 If 0 rows selected - no data condition?
+
    SELECT NUM6
          FROM   T4
          WHERE  STR110 = 'First fragment' ||
@@ -69,6 +80,7 @@ ij> -- PASS:7004 If 0 rows selected - no data condition?
 NUM6   
 -------
 ij> -- PASS:7004 If 0 rows selected - no data condition?
+
    SELECT NUM6
          FROM   T4
          WHERE  STR110 <= 'Second '    ||
@@ -80,6 +92,7 @@ NUM6
 -------
 2      
 ij> -- PASS:7004 If NUM6 = 2?
+
    SELECT COUNT(*)
          FROM   T4
          WHERE  STR110 < 'An indifferent' || --Comments
@@ -89,6 +102,7 @@ ij> -- PASS:7004 If NUM6 = 2?
 -----------
 0          
 ij> -- PASS:7004 If sum of this COUNT and the next COUNT = 3?
+
    SELECT COUNT(*)
          FROM   T4
          WHERE  STR110 >= 'An indifferent' || --Comments
@@ -98,6 +112,7 @@ ij> -- PASS:7004 If sum of this COUNT and the next COUNT = 3?
 -----------
 3          
 ij> -- PASS:7004 If sum of this COUNT and the previous COUNT = 3?
+
    SELECT NUM6
          FROM   T4
          WHERE  STR110 = 'Second '     || 
@@ -110,6 +125,7 @@ NUM6
 -------
 2      
 ij> -- PASS:7004 If NUM6 = 2?
+
    SELECT NUM6
          FROM   T4
          WHERE  NUM6 = 2 AND STR110 < 'Second '     || 
@@ -118,24 +134,31 @@ ij> -- PASS:7004 If NUM6 = 2?
 NUM6   
 -------
 ij> -- PASS:7004 If 0 rows selected - no data condition?
+
    ROLLBACK WORK;
 ij> -- END TEST >>> 7004 <<< END TEST
 -- *********************************************
+
 -- TEST:7005 Compound character literal as inserted value!
+
    INSERT INTO T4
      VALUES
 ('This is the first fragment of a compound character literal,' || --Comments
        ' and this is the second part.',11,NULL,'Compound '   || 
+          
       --Comments   
+                 
        'literal.');
 1 row inserted/updated/deleted
 ij> -- PASS:7005 If 1 row inserted successfully?
+
    INSERT INTO T4
          VALUES('This is a comp' || 
          'ound character literal,'   ||      
          ' in the second table row.',12,NULL,NULL);
 1 row inserted/updated/deleted
 ij> -- PASS:7005 If 1 row inserted successfully?
+
    INSERT INTO T4
          VALUES('This is ' || 
          'a comp'       || 
@@ -144,12 +167,14 @@ ij> -- PASS:7005 If 1 row inserted successfully?
          'acter lit' || -- Comments
          'eral, '  || 
      -- Comments        
+           
          'in the th' || 
          'ird ' || 
          'table ' || 
          'row.',13,NULL,NULL);
 1 row inserted/updated/deleted
 ij> -- PASS:7005 If 1 row inserted successfully?
+
    SELECT STR110, COL4 FROM T4 WHERE NUM6 = 11;
 STR110                                                                                                        |COL4                
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -157,12 +182,14 @@ This is the first fragment of a compound character literal, and this is the seco
 ij> -- PASS:7005 If STR110 = 'This is the first fragment of a compound
 --                character literal, and this is the second part.'?
 -- PASS:7005 If COL4 = 'Compound literal.'?
+
    SELECT STR110 FROM T4 WHERE  NUM6 = 12;
 STR110                                                                                                        
 --------------------------------------------------------------------------------------------------------------
 This is a compound character literal, in the second table row.                                                
 ij> -- PASS:7005 If STR110 = 'This is a compound character literal, in
 --                        the second table row.'?
+
    SELECT STR110
          FROM   T4
          WHERE  NUM6 = 13;
@@ -171,16 +198,23 @@ STR110
 This is a compound character literal, in the third table row.                                                 
 ij> -- PASS:7005 If STR110 = 'This is a compound character literal, in 
 --                        the third table row.'?
+
    ROLLBACK WORK;
 ij> -- END TEST >>> 7005 <<< END TEST
 -- *********************************************
+
 -- TEST:7006 Compound character literal in a <select list>!
+
    SELECT 'First fragment of a compound character literal, ' || 
  --Comment1   
+     
+     
  --Comment2
      'and second part.',
 'This is the first fragment of a compound character literal,' || --...
      ' this is the second,' || 
+     
+
      ' and this is the third part.'
 --O              FROM   CTS1.ECCO;
               FROM   ECCO;
@@ -192,6 +226,7 @@ ij> -- PASS:7006 If 1st value = 'First fragment of a compound character
 -- PASS:7006 If 2nd value = 'This is the first fragment of a compound 
 --                         character literal, this is the second, and
 --                         this is the third part.'?
+
    ROLLBACK WORK;
 ij> -- END TEST >>> 7006 <<< END TEST
 -- *********************************************

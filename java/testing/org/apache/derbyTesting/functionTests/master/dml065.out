@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML065
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml065.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,8 +14,11 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0284 INSERT, SELECT char. strings with blank!
+
   INSERT INTO STAFF(EMPNUM,EMPNAME)
          VALUES ('E6','Ed');
 1 row inserted/updated/deleted
@@ -33,6 +38,7 @@ E6 |Ed                  |NULL |NULL
 E7 |Ed                  |NULL |NULL           
 E8 |Ed                  |NULL |NULL           
 ij> -- PASS:0284 If count = 4?
+
 --O  SELECT COUNT(*) FROM STAFF
   SELECT * FROM STAFF
                   WHERE EMPNAME = 'Ed ';
@@ -43,6 +49,7 @@ E6 |Ed                  |NULL |NULL
 E7 |Ed                  |NULL |NULL           
 E8 |Ed                  |NULL |NULL           
 ij> -- PASS:0284 If count = 4?
+
 --O  SELECT COUNT(*) FROM STAFF
   SELECT * FROM STAFF
                   WHERE EMPNAME = 'Ed                ';
@@ -53,11 +60,16 @@ E6 |Ed                  |NULL |NULL
 E7 |Ed                  |NULL |NULL           
 E8 |Ed                  |NULL |NULL           
 ij> -- PASS:0284 If count = 4?
+
 -- restore
   ROLLBACK WORK;
 ij> -- END TEST >>> 0284 <<< END TEST
+
 -- *************************************************
+
+
 -- TEST:0285 INSERT, SELECT integer with various formats!
+
   INSERT INTO STAFF(EMPNUM,GRADE)
          VALUES ('E6',25);
 1 row inserted/updated/deleted
@@ -84,12 +96,18 @@ E7 |NULL                |25   |NULL
 E8 |NULL                |25   |NULL           
 E9 |NULL                |25   |NULL           
 ij> -- PASS:0285 If count = 4?
+
 -- restore
   ROLLBACK WORK;
 ij> -- END TEST >>> 0285 <<< END TEST
+
 -- *************************************************
+
+
 -- NO_TEST:0286 Compatibility of structures and host variables!
+
 -- Testing host identifiers
+
 -- *************************************************////END-OF-MODULE
 ;
 ij> 

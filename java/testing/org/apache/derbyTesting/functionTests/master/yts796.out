@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  YTS796  
+
 -- SQL Test Suite, V6.0, Interactive SQL, yts796.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION CTS1
    set schema CTS1;
 0 rows inserted/updated/deleted
@@ -14,7 +16,9 @@ CTS1
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:7530 <scalar subquery> as first operand in <comp pred>!
+
 --O   SELECT EMPNAME FROM STAFF WHERE
 --O    (SELECT EMPNUM FROM WORKS WHERE PNUM = 'P3')
    SELECT EMPNAME FROM HU.STAFF WHERE
@@ -24,6 +28,7 @@ EMPNAME
 --------------------
 Alice               
 ij> -- PASS:7530 If empname = 'Alice'?
+
 --O   SELECT EMPNAME FROM STAFF WHERE 
 --O     (SELECT EMPNUM FROM WORKS WHERE PNUM = 'P4')
    SELECT EMPNAME FROM HU.STAFF WHERE 
@@ -31,6 +36,7 @@ ij> -- PASS:7530 If empname = 'Alice'?
      = EMPNUM;
 ERROR 21000: Scalar subquery is only allowed to return a single row.
 ij> -- PASS:7530 If ERROR - cardinality violation?
+
    ROLLBACK WORK;
 ij> -- END TEST >>> 7530 <<< END TEST
 -- *********************************************

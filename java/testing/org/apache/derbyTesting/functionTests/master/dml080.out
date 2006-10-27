@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML080  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml080.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION SCHANZLE
    create schema SHANZLE;
 0 rows inserted/updated/deleted
@@ -14,7 +16,9 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 SCHANZLE                                                                                                                        
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- NOTE Direct support for SQLCODE or SQLSTATE is not required
 -- NOTE    in Interactive Direct SQL, as defined in FIPS 127-2.
 -- NOTE   ********************* instead ***************************
@@ -26,47 +30,67 @@ ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
 -- NOTE    "warning" or "no data", then the system shall display
 -- NOTE    a message indicating that the statement completed,
 -- NOTE    giving a textual description of the "warning" or "no data."
+
+
 -- TEST:0462 SQLCODE 100: DELETE with no data!
+
    DELETE FROM HU.STAFF 
          WHERE EMPNUM = 'E7';
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- PASS:0462 If SQLCODE = 100 or no data, 0 rows deleted?
+
    DELETE FROM HU.STAFF;
 5 rows inserted/updated/deleted
 ij> -- PASS:0462 If 5 rows deleted?
+
    DELETE FROM HU.STAFF;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- PASS:0462 If SQLCODE = 100 or no data, 0 rows deleted?
+
    DELETE FROM HU.STAFF
          WHERE EMPNUM = 'E1';
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- PASS:0462 If SQLCODE = 100 or no data, 0 rows deleted?
+
 -- restore 
    ROLLBACK WORK;
 ij> -- END TEST >>> 0462 <<< END TEST
 -- *********************************************
+
 -- TEST:0463 SQLCODE 100: UPDATE with no data!
+
    UPDATE HU.STAFF
          SET CITY = 'NOWHERE'
          WHERE EMPNAME = 'NOBODY';
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- PASS:0463 If SQLCODE = 100 or no data, 0 rows updated? 
+
    UPDATE HU.STAFF
          SET GRADE = 11;
 5 rows inserted/updated/deleted
 ij> -- PASS:0463 If 5 rows updated?
+
    DELETE FROM HU.STAFF;
 5 rows inserted/updated/deleted
 ij> -- PASS:0463 If 5 rows deleted?
+
    UPDATE HU.STAFF
          SET CITY = 'NOWHERE';
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- PASS:0463 If SQLCODE = 100 or no data, 0 rows updated?
+
    UPDATE HU.STAFF
          SET CITY = 'NOWHERE'
          WHERE EMPNAME = 'NOBODY';
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- PASS:0463 If SQLCODE = 100 or no data, 0 rows updated?
+
 -- restore
    ROLLBACK WORK;
 ij> -- END TEST >>> 0463 <<< END TEST

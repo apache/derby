@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML068 
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml068.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU 
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,13 +14,18 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0389 95-character graphic subset of ASCII!
 -- NOTE:  OPTIONAL test
 -- NOTE:0389 Collating sequence is implementor defined
+
      DELETE FROM AA;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO AA VALUES('@ at');
 1 row inserted/updated/deleted
@@ -145,6 +152,8 @@ ij> -- PASS:0389 If character in 1st position matches                 ?
 -- PASS:0389    description in positions 2-4                      ?
 -- PASS:0389 If ASCII, then ORDER is: space followed by characters?
 -- PASS:0389    !"#$%&'()*+,-./09:;<=>?@AZ[\]^_`az{|}~            ?
+
+
 --O     SELECT COUNT(*)
      SELECT *
           FROM AA;
@@ -190,6 +199,7 @@ zzzz
   sp                
 ZZZZ                
 ij> -- PASS:0389 If count = 39? 
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0389 <<< END TEST

@@ -40,10 +40,12 @@ ij> --O-- RERUN if USER value does not match preceding AUTHORIZATION comment
 --O
    DELETE FROM CTS1.ECCO;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO CTS1.ECCO VALUES ('NL');
 1 row inserted/updated/deleted
 ij> DELETE FROM STAFF;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO STAFF VALUES ('E1','Alice',12,'Deale');
 1 row inserted/updated/deleted
 ij> INSERT INTO STAFF VALUES ('E2','Betty',10,'Vienna');
@@ -56,6 +58,7 @@ ij> INSERT INTO STAFF VALUES ('E5','Ed',13,'Akron');
 1 row inserted/updated/deleted
 ij> DELETE FROM WORKS;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO WORKS VALUES  ('E1','P1',40);
 1 row inserted/updated/deleted
 ij> INSERT INTO WORKS VALUES  ('E1','P2',20);
@@ -82,6 +85,7 @@ ij> INSERT INTO WORKS VALUES  ('E4','P5',80);
 1 row inserted/updated/deleted
 ij> DELETE FROM VTABLE;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO VTABLE VALUES(10,+20,30,40,10.50);
 1 row inserted/updated/deleted
 ij> INSERT INTO VTABLE VALUES(0,1,2,3,4.25);
@@ -92,6 +96,7 @@ ij> INSERT INTO VTABLE VALUES(1000,-2000,3000,NULL,4000.00);
 1 row inserted/updated/deleted
 ij> DELETE FROM CTS1.STAFFb;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO CTS1.STAFFb VALUES (10000,'Fred',40,'P2','Vienna','M');
 1 row inserted/updated/deleted
 ij> INSERT INTO CTS1.STAFFb VALUES (10000,'Fred',40,'P2','Vienna','M');
@@ -118,6 +123,7 @@ ij> INSERT INTO CTS1.STAFFb VALUES (10000,'Ed',40,'P1','Deale','M');
 1 row inserted/updated/deleted
 ij> DELETE FROM CTS1.STAFFa;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO CTS1.STAFFa VALUES (40,10000,'E6',2,'Fred');
 1 row inserted/updated/deleted
 ij> INSERT INTO CTS1.STAFFa VALUES (40,10000,'E6',2,'Fred');
@@ -144,6 +150,7 @@ ij> INSERT INTO CTS1.STAFFa VALUES (15,7000,'E9',1,'Imogen');
 1 row inserted/updated/deleted
 ij> DELETE FROM STAFFc;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO STAFFc VALUES ('E1','Alice',12,'Deale',NULL);
 1 row inserted/updated/deleted
 ij> INSERT INTO STAFFc VALUES ('E2','Betty',10,'Vienna','E1');
@@ -160,6 +167,7 @@ ij> INSERT INTO STAFFc VALUES ('E7','Kingdom',18,'Gettysburg','E7');
 1 row inserted/updated/deleted
 ij> DELETE FROM STAFF_CTS2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO STAFF_CTS2 VALUES ('E1','Alice',12,'Deale');
 1 row inserted/updated/deleted
 ij> INSERT INTO STAFF_CTS2 VALUES ('E1','Alice',12,'Deale');
@@ -178,6 +186,7 @@ ij> INSERT INTO STAFF_CTS2 VALUES ('E6','Don',12,'Deale');
 1 row inserted/updated/deleted
 ij> DELETE FROM STAFF_CTS;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO STAFF_CTS VALUES ('P1','Deale',12,'Don');
 1 row inserted/updated/deleted
 ij> INSERT INTO STAFF_CTS VALUES ('P3','Vienna',10,'Betty');
@@ -190,6 +199,7 @@ ij> INSERT INTO STAFF_CTS VALUES ('P5','Prague',15,'Ed');
 1 row inserted/updated/deleted
 ij> DELETE FROM EMPLOYEES2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO EMPLOYEES2 VALUES ('Atherton',1);
 1 row inserted/updated/deleted
 ij> INSERT INTO EMPLOYEES2 VALUES ('Botham',2);
@@ -206,6 +216,7 @@ ij> INSERT INTO EMPLOYEES2 VALUES ('Gower',7);
 1 row inserted/updated/deleted
 ij> DELETE FROM A;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO A VALUES (1, 15);
 1 row inserted/updated/deleted
 ij> INSERT INTO A VALUES (3, 17);
@@ -238,6 +249,7 @@ ij> INSERT INTO A VALUES (1, 1);
 1 row inserted/updated/deleted
 ij> DELETE FROM TT;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO TT (TTA, TTC) VALUES (1, 99);
 1 row inserted/updated/deleted
 ij> INSERT INTO TT (TTA, TTB) VALUES (2, 98);
@@ -250,6 +262,7 @@ ij> INSERT INTO TT VALUES (5, 42, 26);
 1 row inserted/updated/deleted
 ij> DELETE FROM TU;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO TU VALUES ('ab', 3);
 1 row inserted/updated/deleted
 ij> INSERT INTO TU (TUE) VALUES (5);
@@ -263,6 +276,7 @@ ij> INSERT INTO TU VALUES ('ef', 12);
 ij> INSERT INTO TU VALUES ('gh', 11);
 1 row inserted/updated/deleted
 ij> --O   DELETE FROM TT2;
+
 --O   INSERT INTO TT2 VALUES (1,INTERVAL '17-3' YEAR TO MONTH,13);
 --O
 --O   INSERT INTO TT2 (TTA,TTB) VALUES (2,INTERVAL '5-6' YEAR TO MONTH);
@@ -275,6 +289,7 @@ ij> --O   DELETE FROM TT2;
 --O
    DELETE FROM TV;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO TV VALUES (1,'a');
 1 row inserted/updated/deleted
 ij> INSERT INTO TV VALUES (2,'b');
@@ -287,6 +302,7 @@ ij> INSERT INTO TV VALUES (5,'e');
 1 row inserted/updated/deleted
 ij> DELETE FROM TW;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO TW VALUES ('b',2);
 1 row inserted/updated/deleted
 ij> INSERT INTO TW VALUES ('g',1);
@@ -299,6 +315,7 @@ ij> INSERT INTO TW VALUES ('i',5);
 1 row inserted/updated/deleted
 ij> DELETE FROM TX;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO TX (TX1, TX3) VALUES (1, 'Susan');
 1 row inserted/updated/deleted
 ij> INSERT INTO TX (TX1, TX2) VALUES (2, 'lemon');
@@ -311,6 +328,7 @@ ij> INSERT INTO TX VALUES (5, 'peach', 'Matthew');
 1 row inserted/updated/deleted
 ij> DELETE FROM TEST12849B;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO TEST12849B VALUES (1);
 1 row inserted/updated/deleted
 ij> INSERT INTO TEST12849B VALUES (2);
@@ -321,6 +339,7 @@ ij> INSERT INTO TEST12849B VALUES (4);
 1 row inserted/updated/deleted
 ij> DELETE FROM TABX760;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO TABX760 VALUES (10,'SPYROS',25000);
 1 row inserted/updated/deleted
 ij> INSERT INTO TABX760 VALUES (11,'ALEXIS',18000);
@@ -347,29 +366,31 @@ ij> --O   DELETE FROM TABCS;
 --O
 --O   INSERT INTO CTS1.TTIME3 VALUES (
 --O     1,TIME( '23:05:00'),TIME( '12:15:00-11:45'),
---O     TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:05'));
+--O     TIMESTAMP( '1995-07-07 08:15:00+03:05'));
 --O
 --O   INSERT INTO CTS1.TTIME3 VALUES(
 --O     2,TIME( '05:10:00'),TIME( '00:07:00+08:39'), 
---O     TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:05'));
+--O     TIMESTAMP( '2000-10-09 03:03:00+04:05'));
 --O
 --O   INSERT INTO CTS1.TTIME3 VALUES (
 --O     3,TIME( '12:11:00'),TIME( '23:19:00+10:32'), 
---O     TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:16'));
+--O     TIMESTAMP( '1997-01-16 12:17:00-12:16'));
 --O
 --O   INSERT INTO CTS1.TTIME3 VALUES (
 --O     4,TIME( '05:10:00'),TIME( '00:07:00+08:39'), 
---O     TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:05'));
+--O     TIMESTAMP( '2000-10-09 03:03:00+04:05'));
 --O
 --O   INSERT INTO CTS1.TTIME3 VALUES (
 --O     5,TIME( '17:39:00'),TIME( '08:28:00-11:45'), 
---O     TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:05'));
+--O     TIMESTAMP( '1994-12-31 20:00:00+04:05'));
 --O
 --O   INSERT INTO CTS1.TTIME3 VALUES (
 --O     6,TIME( '17:39:00'),TIME( '08:28:00-11:45'), 
---O     TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:05'));
+--O     TIMESTAMP( '1994-12-31 20:00:00+04:05'));
+
    DELETE FROM CL_STANDARD;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO CL_STANDARD VALUES (1000,'NICKOS',4000,'ATHENS');
 1 row inserted/updated/deleted
 ij> INSERT INTO CL_STANDARD VALUES (1001,'MARIA',4001,'RHODES');
@@ -382,6 +403,7 @@ ij> INSERT INTO CL_STANDARD VALUES (1004,'MORRIS',4004,'PARGA');
 1 row inserted/updated/deleted
 ij> DELETE FROM TABLE728a;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO TABLE728a VALUES ('NICKOS','GEORGE');
 1 row inserted/updated/deleted
 ij> INSERT INTO TABLE728a VALUES ('HARRY','TANIA');
@@ -402,6 +424,7 @@ ij> --O   DELETE FROM TAB734;
 --O
    DELETE FROM CL_DATA_TYPE;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO CL_DATA_TYPE VALUES ('GEORGE',1,10,100);
 1 row inserted/updated/deleted
 ij> INSERT INTO CL_DATA_TYPE VALUES ('NICK',2,20,200);

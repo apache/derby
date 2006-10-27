@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  DML104  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml104.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION FLATER            
    set schema FLATER;
 0 rows inserted/updated/deleted
@@ -14,15 +16,19 @@ FLATER
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:0591 NATURAL JOIN (feature 4) (static)!
+
    CREATE TABLE GROUPS1
   (EMPNUM INT, GRP INT);
 0 rows inserted/updated/deleted
 ij> -- PASS:0591 If table is created?
+
    CREATE TABLE NAMES1
   (EMPNUM INT, NAME CHAR(5));
 0 rows inserted/updated/deleted
 ij> -- PASS:0591 If table is created?
+
   SELECT * FROM NAMES1 JOIN GROUPS1 ON (NAMES1.EMPNUM=GROUPS1.EMPNUM);
 EMPNUM     |NAME |EMPNUM     |GRP        
 -----------------------------------------
@@ -31,34 +37,44 @@ ij> CREATE VIEW NAMGRP1 (EMPNUM, NAME, NEMPNUM, GRP) AS
   SELECT * FROM NAMES1 JOIN GROUPS1 ON (NAMES1.EMPNUM=GROUPS1.EMPNUM);
 0 rows inserted/updated/deleted
 ij> -- PASS:0591 If view is created?
+
    COMMIT WORK;
 ij> INSERT INTO GROUPS1 VALUES (0, 10);
 1 row inserted/updated/deleted
 ij> -- PASS:0591 If 1 row is inserted?
+
    INSERT INTO GROUPS1 VALUES (1, 20);
 1 row inserted/updated/deleted
 ij> -- PASS:0591 If 1 row is inserted?
+
    INSERT INTO GROUPS1 VALUES (2, 30);
 1 row inserted/updated/deleted
 ij> -- PASS:0591 If 1 row is inserted?
+
    INSERT INTO GROUPS1 VALUES (3, 40);
 1 row inserted/updated/deleted
 ij> -- PASS:0591 If 1 row is inserted?
+
    INSERT INTO NAMES1 VALUES (5, 'HARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0591 If 1 row is inserted?
+
    INSERT INTO NAMES1 VALUES (1, 'MARY');
 1 row inserted/updated/deleted
 ij> -- PASS:0591 If 1 row is inserted?
+
    INSERT INTO NAMES1 VALUES (7, 'LARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0591 If 1 row is inserted?
+
    INSERT INTO NAMES1 VALUES (0, 'KERI');
 1 row inserted/updated/deleted
 ij> -- PASS:0591 If 1 row is inserted?
+
    INSERT INTO NAMES1 VALUES (9, 'BARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0591 If 1 row is inserted?
+
    SELECT EMPNUM
   FROM NAMGRP1
   WHERE NAME = 'KERI'
@@ -67,6 +83,7 @@ EMPNUM
 -----------
 0          
 ij> -- PASS:0591 If 1 row is selected and EMPNUM = 0?
+
    SELECT EMPNUM
   FROM NAMGRP1
   WHERE NAME = 'MARY'
@@ -75,6 +92,7 @@ EMPNUM
 -----------
 1          
 ij> -- PASS:0591 If 1 row is selected and EMPNUM = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP1
   WHERE (NAME <> 'MARY'
@@ -90,6 +108,7 @@ ij> -- PASS:0591 If 1 row is selected and EMPNUM = 1?
 -----------
 0          
 ij> -- PASS:0591 If count = 0?
+
    ROLLBACK WORK;
 ij> --O   DROP TABLE NAMES1 CASCADE;
    DROP VIEW NAMGRP1 ;
@@ -97,59 +116,76 @@ ij> --O   DROP TABLE NAMES1 CASCADE;
 ij> DROP TABLE NAMES1 ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0591 If table and view are dropped?
+
 --O   DROP TABLE GROUPS1 CASCADE;
    DROP TABLE GROUPS1 ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0591 If table is dropped?
+
    COMMIT WORK;
 ij> -- END TEST >>> 0591 <<< END TEST
 -- *********************************************
+
 -- TEST:0592 INNER JOIN (feature 4) (static)!
+
    CREATE TABLE GROUPS2
   (EMPNUM SMALLINT, GRP INT);
 0 rows inserted/updated/deleted
 ij> -- PASS:0592 If table is created?
+
    CREATE TABLE NAMES2
   (EMPNUM INT, NAME CHAR(5));
 0 rows inserted/updated/deleted
 ij> -- PASS:0592 If table is created?
+
    CREATE VIEW NAMGRP2 (EMPNUM, NAME, NEMPNUM, GRP) AS
   SELECT * FROM NAMES2 INNER JOIN GROUPS2 ON (NAMES2.EMPNUM=GROUPS2.EMPNUM);
 0 rows inserted/updated/deleted
 ij> -- PASS:0592 If view is created?
+
    CREATE VIEW NMGRP2 (EMPNUM, NAME, NEMPNUM, GRP) AS
   SELECT * FROM NAMES2 JOIN GROUPS2 
     ON (NAMES2.EMPNUM=GROUPS2.EMPNUM) WHERE NAMES2.EMPNUM > 0;
 0 rows inserted/updated/deleted
 ij> -- PASS:0592 If view is created?
+
    COMMIT WORK;
 ij> INSERT INTO GROUPS2 VALUES (0, 10);
 1 row inserted/updated/deleted
 ij> -- PASS:0592 If 1 row is inserted?
+
    INSERT INTO GROUPS2 VALUES (1, 20);
 1 row inserted/updated/deleted
 ij> -- PASS:0592 If 1 row is inserted?
+
    INSERT INTO GROUPS2 VALUES (2, 30);
 1 row inserted/updated/deleted
 ij> -- PASS:0592 If 1 row is inserted?
+
    INSERT INTO GROUPS2 VALUES (3, 40);
 1 row inserted/updated/deleted
 ij> -- PASS:0592 If 1 row is inserted?
+
    INSERT INTO NAMES2 VALUES (5, 'HARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0592 If 1 row is inserted?
+
    INSERT INTO NAMES2 VALUES (1, 'MARY');
 1 row inserted/updated/deleted
 ij> -- PASS:0592 If 1 row is inserted?
+
    INSERT INTO NAMES2 VALUES (7, 'LARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0592 If 1 row is inserted?
+
    INSERT INTO NAMES2 VALUES (0, 'KERI');
 1 row inserted/updated/deleted
 ij> -- PASS:0592 If 1 row is inserted?
+
    INSERT INTO NAMES2 VALUES (9, 'BARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0592 If 1 row is inserted?
+
    SELECT EMPNUM
   FROM NAMGRP2
   WHERE NAME = 'KERI'
@@ -158,6 +194,7 @@ EMPNUM
 -----------
 0          
 ij> -- PASS:0592 If 1 row is selected and EMPNUM = 0?
+
    SELECT EMPNUM
   FROM NAMGRP2
   WHERE NAME = 'MARY'
@@ -166,6 +203,7 @@ EMPNUM
 -----------
 1          
 ij> -- PASS:0592 If 1 row is selected and EMPNUM = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP2
   WHERE NAME <> 'MARY'
@@ -181,6 +219,7 @@ ij> -- PASS:0592 If 1 row is selected and EMPNUM = 1?
 -----------
 0          
 ij> -- PASS:0592 If count = 0?
+
    SELECT EMPNUM
   FROM NMGRP2
   WHERE NAME = 'MARY'
@@ -189,6 +228,7 @@ EMPNUM
 -----------
 1          
 ij> -- PASS:0592 If 1 row is selected and EMPNUM = 1?
+
    SELECT COUNT(*)
   FROM NMGRP2
   WHERE NAME <> 'MARY'
@@ -201,6 +241,7 @@ ij> -- PASS:0592 If 1 row is selected and EMPNUM = 1?
 -----------
 0          
 ij> -- PASS:0592 If count = 0?
+
    ROLLBACK WORK;
 ij> --O   DROP TABLE NAMES2 CASCADE;
    DROP VIEW NMGRP2 ;
@@ -210,60 +251,77 @@ ij> DROP VIEW NAMGRP2 ;
 ij> DROP TABLE NAMES2 ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0592 If table and 2 views are dropped?
+
 --O   DROP TABLE GROUPS2 CASCADE;
    DROP TABLE GROUPS2 ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0592 If table is dropped?
+
    COMMIT WORK;
 ij> -- END TEST >>> 0592 <<< END TEST
 -- *********************************************
+
 -- TEST:0593 LEFT OUTER JOIN (feature 4) (static)!
+
    CREATE TABLE GROUPS3
   (EMPNUM INT, GRP INT);
 0 rows inserted/updated/deleted
 ij> -- PASS:0593 If table is created?
+
    CREATE TABLE NAMES3
   (EMPNUM INT, NAME CHAR(5));
 0 rows inserted/updated/deleted
 ij> -- PASS:0593 If table is created?
+
    CREATE VIEW NAMGRP3 (EMPNUM, NAME, NEMPNUM, GRP) AS
   SELECT * FROM NAMES3 LEFT OUTER JOIN GROUPS3 ON (NAMES3.EMPNUM=GROUPS3.EMPNUM);
 0 rows inserted/updated/deleted
 ij> -- PASS:0593 If view is created?
+
    CREATE VIEW NMGRP3 (NAME, GRP) AS
   SELECT NAME, GRP FROM NAMES3 LEFT OUTER JOIN GROUPS3
   ON NAMES3.EMPNUM < GROUPS3.EMPNUM
   WHERE NAME <> 'KERI';
 0 rows inserted/updated/deleted
 ij> -- PASS:0593 If view is created?
+
    COMMIT WORK;
 ij> INSERT INTO GROUPS3 VALUES (0, 10);
 1 row inserted/updated/deleted
 ij> -- PASS:0593 If 1 row is inserted?
+
    INSERT INTO GROUPS3 VALUES (1, 20);
 1 row inserted/updated/deleted
 ij> -- PASS:0593 If 1 row is inserted?
+
    INSERT INTO GROUPS3 VALUES (2, 30);
 1 row inserted/updated/deleted
 ij> -- PASS:0593 If 1 row is inserted?
+
    INSERT INTO GROUPS3 VALUES (3, 40);
 1 row inserted/updated/deleted
 ij> -- PASS:0593 If 1 row is inserted?
+
    INSERT INTO NAMES3 VALUES (5, 'HARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0593 If 1 row is inserted?
+
    INSERT INTO NAMES3 VALUES (1, 'MARY');
 1 row inserted/updated/deleted
 ij> -- PASS:0593 If 1 row is inserted?
+
    INSERT INTO NAMES3 VALUES (7, 'LARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0593 If 1 row is inserted?
+
    INSERT INTO NAMES3 VALUES (0, 'KERI');
 1 row inserted/updated/deleted
 ij> -- PASS:0593 If 1 row is inserted?
+
    INSERT INTO NAMES3 VALUES (9, 'BARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0593 If 1 row is inserted?
+
    SELECT COUNT(*)
   FROM NAMGRP3
   WHERE EMPNUM = 0
@@ -273,6 +331,7 @@ ij> -- PASS:0593 If 1 row is inserted?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP3
   WHERE EMPNUM = 1
@@ -282,6 +341,7 @@ ij> -- PASS:0593 If count = 1?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP3
   WHERE EMPNUM = 5
@@ -291,6 +351,7 @@ ij> -- PASS:0593 If count = 1?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP3
   WHERE EMPNUM = 7
@@ -300,6 +361,7 @@ ij> -- PASS:0593 If count = 1?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP3
   WHERE EMPNUM = 9
@@ -309,12 +371,14 @@ ij> -- PASS:0593 If count = 1?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP3;
 1          
 -----------
 5          
 ij> -- PASS:0593 If count = 5?
+
    SELECT COUNT(*)
   FROM NMGRP3
   WHERE NAME = 'HARRY'
@@ -323,6 +387,7 @@ ij> -- PASS:0593 If count = 5?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NMGRP3
   WHERE NAME = 'MARY'
@@ -331,6 +396,7 @@ ij> -- PASS:0593 If count = 1?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NMGRP3
   WHERE NAME = 'MARY'
@@ -339,6 +405,7 @@ ij> -- PASS:0593 If count = 1?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NMGRP3
   WHERE NAME = 'BARRY'
@@ -347,6 +414,7 @@ ij> -- PASS:0593 If count = 1?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NMGRP3
   WHERE NAME = 'LARRY'
@@ -355,12 +423,14 @@ ij> -- PASS:0593 If count = 1?
 -----------
 1          
 ij> -- PASS:0593 If count = 1?
+
    SELECT COUNT(*)
   FROM NMGRP3;
 1          
 -----------
 5          
 ij> -- PASS:0593 If count = 5?
+
    ROLLBACK WORK;
 ij> --O   DROP TABLE NAMES3 CASCADE;
    DROP VIEW NMGRP3 ;
@@ -370,54 +440,70 @@ ij> DROP VIEW NAMGRP3 ;
 ij> DROP TABLE NAMES3 ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0593 If table and 2 views are dropped?
+
 --O   DROP TABLE GROUPS3 CASCADE;
    DROP TABLE GROUPS3 ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0593 If table is dropped?
+
    COMMIT WORK;
 ij> -- END TEST >>> 0593 <<< END TEST
 -- *********************************************
+
 -- TEST:0594 RIGHT OUTER JOIN (feature 4) (static)!
+
    CREATE TABLE GROUPS4
   (EMPNUM INT, GRP INT);
 0 rows inserted/updated/deleted
 ij> -- PASS:0594 If table is created?
+
    CREATE TABLE NAMES4
   (EMPNUM DECIMAL (4, 2), NAME CHAR(5));
 0 rows inserted/updated/deleted
 ij> -- PASS:0594 If table is created?
+
    CREATE VIEW NAMGRP4 (NEMPNUM, NAME, EMPNUM, GRP) AS
   SELECT * FROM NAMES4 RIGHT OUTER JOIN GROUPS4 ON (NAMES4.EMPNUM=GROUPS4.EMPNUM);
 0 rows inserted/updated/deleted
 ij> -- PASS:0594 If view is created?
+
    COMMIT WORK;
 ij> INSERT INTO GROUPS4 VALUES (0, 10);
 1 row inserted/updated/deleted
 ij> -- PASS:0594 If 1 row is inserted?
+
    INSERT INTO GROUPS4 VALUES (1, 20);
 1 row inserted/updated/deleted
 ij> -- PASS:0594 If 1 row is inserted?
+
    INSERT INTO GROUPS4 VALUES (2, 30);
 1 row inserted/updated/deleted
 ij> -- PASS:0594 If 1 row is inserted?
+
    INSERT INTO GROUPS4 VALUES (3, 40);
 1 row inserted/updated/deleted
 ij> -- PASS:0594 If 1 row is inserted?
+
    INSERT INTO NAMES4 VALUES (5.0, 'HARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0594 If 1 row is inserted?
+
    INSERT INTO NAMES4 VALUES (1.0, 'MARY');
 1 row inserted/updated/deleted
 ij> -- PASS:0594 If 1 row is inserted?
+
    INSERT INTO NAMES4 VALUES (7.0, 'LARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0594 If 1 row is inserted?
+
    INSERT INTO NAMES4 VALUES (0.0, 'KERI');
 1 row inserted/updated/deleted
 ij> -- PASS:0594 If 1 row is inserted?
+
    INSERT INTO NAMES4 VALUES (9.0, 'BARRY');
 1 row inserted/updated/deleted
 ij> -- PASS:0594 If 1 row is inserted?
+
    SELECT COUNT(*)
   FROM NAMGRP4
   WHERE EMPNUM = 0
@@ -427,6 +513,7 @@ ij> -- PASS:0594 If 1 row is inserted?
 -----------
 1          
 ij> -- PASS:0594 If count = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP4
   WHERE EMPNUM = 1
@@ -436,6 +523,7 @@ ij> -- PASS:0594 If count = 1?
 -----------
 1          
 ij> -- PASS:0594 If count = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP4
   WHERE EMPNUM = 2
@@ -445,6 +533,7 @@ ij> -- PASS:0594 If count = 1?
 -----------
 1          
 ij> -- PASS:0594 If count = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP4
   WHERE EMPNUM = 3
@@ -454,12 +543,14 @@ ij> -- PASS:0594 If count = 1?
 -----------
 1          
 ij> -- PASS:0594 If count = 1?
+
    SELECT COUNT(*)
   FROM NAMGRP4;
 1          
 -----------
 4          
 ij> -- PASS:0594 If count = 4?
+
    ROLLBACK WORK;
 ij> --O   DROP TABLE NAMES4 CASCADE;
    DROP VIEW NAMGRP4 ;
@@ -467,10 +558,12 @@ ij> --O   DROP TABLE NAMES4 CASCADE;
 ij> DROP TABLE NAMES4 ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0594 If table and view are dropped?
+
 --O   DROP TABLE GROUPS4 CASCADE;
    DROP TABLE GROUPS4 ;
 0 rows inserted/updated/deleted
 ij> -- PASS:0594 If table is dropped?
+
    COMMIT WORK;
 ij> -- END TEST >>> 0594 <<< END TEST
 -- *************************************************////END-OF-MODULE

@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE  DML160  
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml160.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION FLATER
    set schema FLATER;
 0 rows inserted/updated/deleted
@@ -14,7 +16,9 @@ FLATER
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
    ROLLBACK WORK;
 ij> -- date_time print
+
 -- TEST:0859 <joined table> contained in <select list>!
+
    SELECT EMPNUM, (SELECT COUNT(*) FROM HU.WORKS JOIN HU.PROJ
      ON HU.WORKS.PNUM = HU.PROJ.PNUM
      AND BUDGET > AVG (OSTAFF.GRADE) * 1000
@@ -29,10 +33,13 @@ ij> -- PASS:0859 If 5 rows are returned in the following order?
 -- PASS:0859 If    E3       1  ?
 -- PASS:0859 If    E4       2  ?
 -- PASS:0859 If    E1       4  ?  
+
    COMMIT WORK;
 ij> -- END TEST >>> 0859 <<< END TEST
 -- *********************************************
+
 -- TEST:0860 Domains over various data types!
+
 --O   CREATE DOMAIN EPOCH_NOT_NORM AS DECIMAL (5, 2);
 --O-- PASS:0860 If domain created successfully?
 --O
@@ -56,8 +63,8 @@ ij> -- END TEST >>> 0859 <<< END TEST
 --O   COMMIT WORK;
 --O
 --O   CREATE DOMAIN TIDETIMESTAMP AS TIMESTAMP WITH TIME ZONE
---O    CHECK (VALUE BETWEEN TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00')
---O    AND TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00'));
+--O    CHECK (VALUE BETWEEN TIMESTAMP( '1994-01-01 00:00:00+00:00')
+--O    AND TIMESTAMP( '2025-12-31 23:59:59+00:00'));
 --O-- PASS:0860 If domain created successfully?
 --O
 --O   COMMIT WORK;
@@ -198,23 +205,23 @@ ij> -- END TEST >>> 0859 <<< END TEST
 --O-- PASS:0860 If COUNT = 4?
 --O
 --O   INSERT INTO PENDING VALUES (
---O     300, TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00'),
---O          TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00'), 0);
+--O     300, TIMESTAMP( '1995-12-15 00:00:00-05:00'),
+--O          TIMESTAMP( '1995-12-17 00:00:00-05:00'), 0);
 --O-- PASS:0860 If 1 row inserted successfully?
 --O
 --O   INSERT INTO PENDING VALUES (
---O     101, TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00'),
---O          TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00'), 1);
+--O     101, TIMESTAMP( '2025-12-30 19:00:00-05:00'),
+--O          TIMESTAMP( '2025-12-31 19:00:00-05:00'), 1);
 --O-- PASS:0860 If ERROR - integrity constraint violation?
 --O
 --O   INSERT INTO PENDING VALUES (
---O     101, TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00'),
---O          TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00'), 1);
+--O     101, TIMESTAMP( '2025-12-30 19:00:00-05:00'),
+--O          TIMESTAMP( '2025-12-31 18:59:59-05:00'), 1);
 --O-- PASS:0860 If 1 row inserted successfully?
 --O
 --O   INSERT INTO PENDING VALUES (
---O     102, TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00'),
---O       TIMESTAMP( 'xxxxxxFILTERED-TIMESTAMPxxxxx:00'), 2);
+--O     102, TIMESTAMP( '1993-12-31 19:00:00-05:00'),
+--O       TIMESTAMP( '1994-01-02 00:00:00-05:00'), 2);
 --O-- PASS:0860 If 1 row inserted successfully?
 --O
 --O   SELECT YEAR( CHECK_DATES)
@@ -272,36 +279,6 @@ ij> -- END TEST >>> 0859 <<< END TEST
 --O-- END TEST >>> 0860 <<< END TEST
 --O-- *********************************************
 --O-- *************************************************////END-OF-MODULE
--- Simple addition to check the test has a security manager installed.
-run resource '/org/apache/derbyTesting/functionTests/util/testRoutines.sql';
-ij> --
---   Licensed to the Apache Software Foundation (ASF) under one or more
---   contributor license agreements.  See the NOTICE file distributed with
---   this work for additional information regarding copyright ownership.
---   The ASF licenses this file to You under the Apache License, Version 2.0
---   (the "License"); you may not use this file except in compliance with
---   the License.  You may obtain a copy of the License at
---
---      http://www.apache.org/licenses/LICENSE-2.0
---
---   Unless required by applicable law or agreed to in writing, software
---   distributed under the License is distributed on an "AS IS" BASIS,
---   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
---   See the License for the specific language governing permissions and
---   limitations under the License.
---
--- Changed to create individual procedures so that this will work with JSR169. 
--- Direct call to 'installRoutines' uses nested connection
-CREATE PROCEDURE TESTROUTINE.SET_SYSTEM_PROPERTY(IN PROPERTY_KEY VARCHAR(32000), IN PROPERTY_VALUE VARCHAR(32000)) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.setSystemProperty' language java parameter style java;
-0 rows inserted/updated/deleted
-ij> CREATE PROCEDURE TESTROUTINE.SLEEP(IN SLEEP_TIME_MS BIGINT) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.sleep' language java parameter style java;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION TESTROUTINE.HAS_SECURITY_MANAGER() RETURNS INT NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.hasSecurityManager' language java parameter style java;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION TESTROUTINE.READ_FILE(FILE_NAME VARCHAR(60), ENCODING VARCHAR(60)) RETURNS VARCHAR(32000) NO SQL EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestRoutines.readFile' language java parameter style java;
-0 rows inserted/updated/deleted
-ij> values TESTROUTINE.HAS_SECURITY_MANAGER();
-1          
------------
-1          
+
+;
 ij> 

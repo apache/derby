@@ -1,7 +1,9 @@
 ij> -- MODULE DML051
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml051.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -11,7 +13,9 @@ ij> --0   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0227 BETWEEN predicate with character string values!
       SELECT PNUM
            FROM   PROJ
@@ -20,6 +24,7 @@ PN&
 ---
 P2 
 ij> -- PASS:0227 If PNUM = 'P2'?
+
       SELECT PNUM
            FROM   PROJ
            WHERE PNAME >= 'A' AND PNAME <= 'F';
@@ -27,8 +32,10 @@ PN&
 ---
 P2 
 ij> -- PASS:0227 If PNUM = 'P2'?
+
 -- END TEST >>> 0227 <<< END TEST
 -- ***********************************************************
+
 -- TEST:0228 NOT BETWEEN predicate with character string values!
       SELECT CITY
            FROM   STAFF
@@ -37,6 +44,7 @@ CITY
 ---------------
 Akron          
 ij> -- PASS:0228 If CITY = 'Akron'?
+
       SELECT CITY
            FROM   STAFF
            WHERE  NOT( EMPNAME BETWEEN 'A' AND 'E' );
@@ -44,6 +52,7 @@ CITY
 ---------------
 Akron          
 ij> -- PASS:0228 If CITY = 'Akron'?
+
 -- END TEST >>> 0228 <<< END TEST
 -- *************************************************////END-OF-MODULE
 ;

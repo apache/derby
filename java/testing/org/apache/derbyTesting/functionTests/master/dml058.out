@@ -1,8 +1,10 @@
 ij> AUTOCOMMIT OFF;
 ij> -- MODULE DML058
+
 -- SQL Test Suite, V6.0, Interactive SQL, dml058.sql
 -- 59-byte ID
 -- TEd Version #
+
 -- AUTHORIZATION HU
    set schema HU;
 0 rows inserted/updated/deleted
@@ -12,17 +14,23 @@ ij> --O   SELECT USER FROM HU.ECCO;
 --------------------------------------------------------------------------------------------------------------------------------
 HU                                                                                                                              
 ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
+
 -- date_time print
+
 -- TEST:0251 COMMIT keeps changes of current transaction!
+
      DELETE FROM STAFF1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO STAFF1
             SELECT *
                  FROM STAFF;
 5 rows inserted/updated/deleted
 ij> -- PASS:0251 If 5 rows are inserted?
+
 --O     SELECT COUNT(*) 
      SELECT * 
           FROM STAFF1;
@@ -34,19 +42,23 @@ E3 |Carmen              |13   |Vienna
 E4 |Don                 |12   |Deale          
 E5 |Ed                  |13   |Akron          
 ij> -- PASS:0251 If count = 5?
+
      INSERT INTO STAFF1
             VALUES('E9','Tom',50,'London');
 1 row inserted/updated/deleted
 ij> -- PASS:0251 If 1 row is inserted?
+  
      UPDATE STAFF1
             SET GRADE = 40 
             WHERE EMPNUM = 'E2';
 1 row inserted/updated/deleted
 ij> -- PASS:0251 If 1 row is updated?
+
      COMMIT WORK;
 ij> DELETE FROM STAFF1;
 6 rows inserted/updated/deleted
 ij> -- PASS:0251 If 6 rows are deleted?
+
 -- verify
      ROLLBACK WORK;
 ij> -- verify previous commit
@@ -61,36 +73,46 @@ E3 |Carmen              |13   |Vienna
 E5 |Ed                  |13   |Akron          
 E9 |Tom                 |50   |London         
 ij> -- PASS:0251 If count = 4?
+
 -- restore
      DELETE FROM STAFF1;
 6 rows inserted/updated/deleted
 ij> COMMIT WORK;
 ij> -- END TEST >>> 0251 <<< END TEST
+
 -- ***************************************************************
+
 -- TEST:0252 ROLLBACK cancels changes of current transaction!
+
      DELETE FROM STAFF1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO STAFF1
             SELECT *
                  FROM STAFF;
 5 rows inserted/updated/deleted
 ij> -- PASS:0252 If 5 rows are inserted?
+
      COMMIT WORK;
 ij> INSERT INTO STAFF1
             VALUES('E10','Tom',50,'London');
 1 row inserted/updated/deleted
 ij> -- PASS:0252 If 1 row is inserted?
+
      UPDATE STAFF1
             SET GRADE = 40
             WHERE EMPNUM = 'E1';
 1 row inserted/updated/deleted
 ij> -- PASS:0252 If 1 row is updated?
+
      DELETE FROM STAFF1
             WHERE EMPNUM = 'E2';
 1 row inserted/updated/deleted
 ij> -- PASS:0252 If 1 row is deleted?
+
      ROLLBACK WORK;
 ij> -- verify     
      SELECT SUM(GRADE)
@@ -99,13 +121,17 @@ ij> -- verify
 ---------
 60       
 ij> -- PASS:0252 If SUM(GRADE) = 60?
+
 -- restore
      DELETE FROM STAFF1;
 5 rows inserted/updated/deleted
 ij> COMMIT WORK;
 ij> -- END TEST >>> 0252 <<< END TEST
+
 -- ****************************************************************
+
 -- TEST:0253 TEST0124 workaround (key = key+1)!
+
      SELECT NUMKEY
           FROM UPUNIQ
           ORDER BY NUMKEY DESC;
@@ -118,60 +144,76 @@ NUM&
 2   
 1   
 ij> -- PASS:0253 If 6 rows are selected and first NUMKEY = 8 ?
+
      UPDATE UPUNIQ
           SET NUMKEY = 8 + 1
           WHERE NUMKEY = 8;
 1 row inserted/updated/deleted
 ij> -- PASS:0253 If 1 row is updated?
+
      UPDATE UPUNIQ
           SET NUMKEY = 6 + 1
           WHERE NUMKEY = 6;
 1 row inserted/updated/deleted
 ij> -- PASS:0253 If 1 row is updated?
+
      UPDATE UPUNIQ
           SET NUMKEY = 4 + 1
           WHERE NUMKEY = 4;
 1 row inserted/updated/deleted
 ij> -- PASS:0253 If 1 row is updated?
+
      UPDATE UPUNIQ
           SET NUMKEY = 3 + 1
           WHERE NUMKEY = 3;
 1 row inserted/updated/deleted
 ij> -- PASS:0253 If 1 row is updated?
+
      UPDATE UPUNIQ
           SET NUMKEY = 2 + 1 
           WHERE NUMKEY = 2;
 1 row inserted/updated/deleted
 ij> -- PASS:0253 If 1 row is updated?
+
      UPDATE UPUNIQ
           SET NUMKEY = 1 + 1
           WHERE NUMKEY = 1;
 1 row inserted/updated/deleted
 ij> -- PASS:0253 If 1 row is updated?
+
+
      SELECT MAX(NUMKEY), MIN(NUMKEY)
           FROM UPUNIQ;
 1   |2   
 ---------
 9   |2   
 ij> -- PASS:0253 If MAX(NUMKEY) = 9 AND MIN(NUMKEY) = 2?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0253 <<< END TEST
+
 -- **************************************************************
+
 -- TEST:0254 Column name in SET clause!
+
      DELETE FROM PROJ1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO PROJ1
             SELECT *
                  FROM PROJ;
 6 rows inserted/updated/deleted
 ij> -- PASS:0254 If 6 rows are inserted?
+
      UPDATE PROJ1
           SET CITY = PTYPE;
 6 rows inserted/updated/deleted
 ij> -- PASS:0254 If 6 rows are updated?
+
      SELECT CITY
           FROM PROJ1
           WHERE PNUM = 'P1';
@@ -179,19 +221,27 @@ CITY
 ---------------
 Design         
 ij> -- PASS:0254 If CITY = 'Design'?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0254 <<< END TEST
+
 -- **************************************************************
+
+
 -- TEST:0255 Key word USER for INSERT, UPDATE!
+
      DELETE FROM T4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO T4
           VALUES(USER,100,'good','luck');
 1 row inserted/updated/deleted
 ij> -- PASS:0255 If 1 row is inserted?
+
      SELECT STR110 
           FROM T4
           WHERE NUM6 = 100;
@@ -199,16 +249,19 @@ STR110
 --------------------------------------------------------------------------------------------------------------
 HU                                                                                                            
 ij> -- PASS:0255 If STR110 = 'HU'?
+
 -- setup
      INSERT INTO T4
           VALUES('Hello',101,'good','luck');
 1 row inserted/updated/deleted
 ij> -- PASS:0255 If 1 row is inserted?
+
      UPDATE T4
           SET STR110 = USER
           WHERE NUM6 = 101;
 1 row inserted/updated/deleted
 ij> -- PASS:0255 If 1 row is updated?
+
      SELECT STR110 
           FROM T4
           WHERE NUM6 = 101;
@@ -216,19 +269,26 @@ STR110
 --------------------------------------------------------------------------------------------------------------
 HU                                                                                                            
 ij> -- PASS:0255 If STR110 = 'HU'?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0255 <<< END TEST
+
 -- ***************************************************************
+
 -- TEST:0256 Key word USER in WHERE clause!
+
      DELETE FROM T4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> -- Making sure the table is empty
+
 -- setup
      INSERT INTO T4
             VALUES('HU',100,'good','luck');
 1 row inserted/updated/deleted
 ij> -- PASS:0256 If 1 row is inserted?
+
      SELECT STR110 
           FROM T4
           WHERE STR110 = USER;
@@ -236,15 +296,18 @@ STR110
 --------------------------------------------------------------------------------------------------------------
 HU                                                                                                            
 ij> -- PASS:0256 If STR110 = 'HU'?
+
 -- setup
      INSERT INTO T4
             VALUES('Hello',101,'good','luck');
 1 row inserted/updated/deleted
 ij> -- PASS:0256 If 1 row is inserted?
+
      DELETE FROM T4
             WHERE STR110 = USER;
 1 row inserted/updated/deleted
 ij> -- PASS:0256 If 1 row is deleted?
+
      SELECT COUNT(*)
           FROM T4
           WHERE STR110 LIKE '%HU%';
@@ -252,6 +315,7 @@ ij> -- PASS:0256 If 1 row is deleted?
 -----------
 0          
 ij> -- PASS:0256 If count = 0?
+
 -- restore
      ROLLBACK WORK;
 ij> -- END TEST >>> 0256 <<< END TEST
