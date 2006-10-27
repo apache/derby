@@ -15,7 +15,7 @@
   limitations under the License.
 -->
 <body>
-JDBC driver and data source implementations.
+<h2> JDBC driver and data source implementations. </h2>
 <P>
 Client/Remote driver and data sources, used to connect to the network server
 <UL>
@@ -38,4 +38,414 @@ Derby's JDBC api is defined by its entry point classes, the drivers and data sou
 and the standard JDBC api definitions of the <code>java.sql</code> and <code>javax.sql</code> classes.
 Derby does not provide non-standard extensions to standard JDBC classes such as <code>Connection</code>,
 to encourage portable JDBC applications.
+<h2> Derby's implementation notes for JDBC</h2>
+The JDBC specification is sometimes unclear or contradictory. This section covers how Derby
+implements some JDBC features and methods where the specification might be unclear.
+The JDBC specicification is in theory a single document however clarifications or additional information can also be found in the Javadoc for java.sql and javax.sql, and in the offical JDBC tutorial book.
+<UL>
+<LI> [JDBC3] Downloadable from <A href="http://java.sun.com/products/jdbc/index.jsp">http://java.sun.com/products/jdbc/index.jsp</A>
+<LI> [JAVADOC14] downloadable from <A href="http://java.sun.com/products/jdbc/index.jsp">http://java.sun.com/products/jdbc/index.jsp</A>
+<LI> [TUTORIAL3] JDBC API Tutorial and Reference, Third Edition. ISBN 0321173848 <A href="http://java.sun.com/developer/Books/jdbc/Fisher/index.html">http://java.sun.com/developer/Books/jdbc/Fisher/index.html</A>
+</UL>
+<TABLE border="1">
+<TR>
+<TD colspan="3" align="center">
+<B>JDBC Implementation notes by JDBC class</B>
+</TD>
+</TR>
+<TR>
+<TD><a href="#implblob">java.sql.Blob</A>
+<TD><a href="#implclob">java.sql.Clob</A>
+<TD><a href="#implconnection">java.sql.Connection</A>
+</TR>
+<TR>
+<TD><a href="#implpreparedstatement">java.sql.PreparedStatement</A>
+<TD><a href="#implresultset">java.sql.ResultSet</A>
+<TD>
+</TR>
+<TR>
+<TD colspan="3" align="center">
+<B>JDBC Implementation notes by SQL type</B>
+</TD>
+</TR>
+<TR>
+<TR>
+<TD><a href="#implsqldate">SQL DATE and JDBC</A>
+<TD><a href="#implsqltime">SQL TIME and JDBC</A>
+<TD><a href="#implsqltimestamp">SQL TIMESTAMP and JDBC</A>
+</TR>
+</TABLE>
+<hr>
+<a name="implblob"/a>
+<h3>java.sql.Blob</h3>
+<h4>Clarification for getBytes(int pos, int length)</h4>
+If the pos (position) argument is greater than the length of the BLOB then an exception is thrown.
+This matches the semantics of the SQL SUBSTR function.
+<h4>Clarification for position(byte pattern, int start) and position(Blob pattern, int start)</h4>
+If the pattern argument has length zero, then the value of start argument will be returned.
+This matches the semantics of the SQL LOCATE function.
+<hr>
+<a name="implclob"/a>
+<h3>java.sql.Clob</h3>
+<h4>Clarification for getSubString(int pos, int length)</h4>
+If the pos (position) argument is greater than the length of the CLOB then an exception is thrown.
+This matches the semantics of the SQL SUBSTR function.
+<h4>Clarification for position(String searchstr, int start) and position(Clob searchstr, int start)</h4>
+If the searchstr argument has length zero (the empty string), then the value of start argument
+will be returned. This matches the semantics of the SQL LOCATE function.
+<hr>
+<a name="implconnection"/a>
+<h3>java.sql.Connection</h3>
+<h4>Clarification for createStatement(), prepareStatement() and prepareCall()</h4>
+CONCUR_UPDATABLE concurrency is supported for FORWARD ONLY ResultSet types only.
+<hr>
+<a name="implpreparedstatement"/a>
+<h3>java.sql.PreparedStatement</h3>
+<h4>Clarification for  setAsciiStream(),setBinaryStream(),setCharacterStream()</h4>
+In Derby, the stream must have the exact amount of data as the length argument,
+otherwise an exception with the following message
+'Input Stream did not have exact amount of data as the requested length' is thrown.
+<BR>
+[TUTORIAL3]
+<P>
+Stream parameter values are not re-used. [JDBC3] says in the last paragraph of 13.2.2 that parameters are re-used but nothing
+special about streams. However javadoc for java.sql.PreparedStatement.clearParamters() says
+'In general, parameter values remain in force for repeated use of a statement'.
+Maybe 'in general' can be interpreted to mean 'except for streams'.
+Stream parameter values are not re-used and if a stream is re-used,
+the statement execution will fail with
+'Stream has already been read and end-of-file reached and cannot be re-used.'.
+<hr>
+<a name="implresultset"/a>
+<h3>java.sql.ResultSet</h3>
+<h4>Extension for getXXX()</h4>
+Support for data conversion using the getXXX() methods matches Table B-6 of [JDBC3] with this extension:
+<UL>
+<LI> If the value column is null, then generally any getXXX method can be used to fetch the null value
+and a null or a representation of zero will be returned and a subsequent call to wasNull() will return true.
+It is not recommended that applications take advantage of this liberal conversion of SQL NULL
+values, use of a getXXX() method that works against NULL and non-NULL values is strongly recommended.
+</UL>
+<h4> Clarification for deleteRow()</h4>
+After deleteRow, ResultSet will be positioned right before the next row for FORWARD ONLY updatable ResultSets.
+<h4> Clarification for updateRow()</h4>
+After updateRow, ResultSet will be positioned right before the next row for FORWARD ONLY updatable ResultSets.
+<h4>Clarification for getAsciiStream()</h4>
+getAsciiStream() is not recommended to use in Derby,
+because Derby handles characters as unicode internally ,
+there is no advantage in using this method.
+<P>
+An ASCII character is defined as an eight bit character (range 0x00 to 0xff),
+see CHAR() function definition by [JDBC3] in appendix C.2.
+<P>
+For character types (Types.CHAR, Types.VARCHAR & Types.LONGVARCHAR),
+each character in the value is translated to one byte in the ASCII stream:
+<UL>
+<LI> Unicode characters in the range 0x0000 to 0x00ff,
+are translated to a byte with the matching value (0x00 to 0xff).
+<LI> Unicode caracters in the range (0x0100 to 0xffff) are translated to 0x3f, ('?', question mark character).
+</UL>
+<BR>
+For binary types (Types.BINARY, Types.VARBINARY, and Types.LONGVARBINARY) getAsciiStream()
+returns a stream with identical contents to that returned by getBinaryStream() on the same column.
+<h4>Extension for getAsciiStream()</h4>
+<UL>
+<LI>Types.CLOB columns getAsciiStream() returns a stream with identical contents to that returned by getClob().getAsciiStream() on the same column if the CLOB value is not NULL. If the CLOB value is NULL then null is returned.
+<LI>Types.BLOB columns getAsciiStream() returns a stream with identical contents to that returned by getBlob().getBinaryStream() on the same column if the BLOB value is not NULL. If the BLOB value is NULL then null is returned.
+</UL>
+<h4>Extension for getBinaryStream()</h4>
+On Types.BLOB columns returns a stream with identical contents to that returned by
+getBlob().getBinaryStream() on the same column if the BLOB value is not NULL.
+If the BLOB value is NULL then null is returned.
+<h4>Clarification for getCharacterStream()</h4>
+For binary types (Types.BINARY, Types.VARBINARY, and Types.LONGVARBINARY, Types.BLOB)
+the value is converted to a stream of characters as though it is
+encoded using UTF-16BE.
+<h4>Extensions for getCharacterStream()</h4>
+<UL>
+<LI>On Types.CLOB columns returns a reader with identical contents to that returned by getClob().getCharacterStream() on the same column if the CLOB value is not NULL. If the CLOB value is NULL then null is returned.
+<LI>On Types.BLOB columns supported with conversion as a binary type.
+</UL>
+<h4>Clarification for getString()</h4>
+For binary types (Types.BINARY, Types.VARBINARY, and Types.LONGVARBINARY, Types.BLOB) getString()
+returns String containing a two character hexadecimal representation for every byte in a
+non-null value.  The two characters are in the range '0' - '9' and 'a' - 'f'.
+For NULL values, null is returned.
+<BR>
+<EM>Note, that this String does not match the contents of the stream returned by getAsciiStream()
+or getCharacterStream() on the same column.</EM>
+<h4>Extensions for getString()</h4>
+<UL>
+<LI>On Types.CLOB columns returns a String representing the contents of the CLOB value
+if it is not NULL. If the CLOB value is NULL then null is returned.
+<LI>On Types.BLOB columns supported with conversion as a binary type.
+</UL>
+<h4>getUnicodeStream()</h4>
+Not implemented, deprecated by [JDBC3].
+<h4>Binary column example</h4>
+If a binary column has been set with the Java byte array containing fours bytes,
+byte[] data = {0x34, 0x87, 0xc2, 0x1f} then:
+<UL>
+<LI>getBinaryStream() returns a java.io.InputStream containing four bytes - 0x34, 0x87, 0xc2, 0x1f
+<LI>getAsciiStream() returns a java.io.InputStream containing four bytes -  0x34, 0x87, 0xc2, 0x1f  [ same as getBinaryStream() ]
+<LI>getCharacterStream() returns a java.io.Reader containing two characters - 0x3487, 0xc21f
+<LI>getString() returns a String with eight characters "3487c21f"
+</UL>
+<hr>
+<a name="implsqldate"/a>
+<h3>Derby's SQL DATE interactions with JDBC</h3>
+<p>Derby&rsquo;s SQL DATE type represents a date in the form yyyy-mm-dd with no associated time zone information.</p>
+<h4>java.sql.Date</h4>
+<p>A JDBC Date (java.sql.Date) by definition represents a point in time on a given date in a given time zone.</p>
+<p>[JDBC3] intends that the point in time for a java.sql.Date object is 00:00 (midnight), but this is not enforced by the class.</p>
+<p>JDBC drivers are required to return java.sql.Date objects that are normalized to 00:00 according to the required time zone.</p>
+<p>Applications are expected to pass in java.sql.Date instances that are normalized to 00:00 (see section 18.1.1 of [TUTORIAL3]).</p>
+<h4>Conversion of a JDBC java.sql.Date to a Derby DATE value</h4>
+<ol>
+<li>
+<p>setDate() without a Calendar object or passing null for a Calendar object:</p>
+<ul>
+<li>
+<p>The yyyy-mm-dd values will be calculated from the milli-seconds value of the java.sql.Date instance using a Calendar object set to the time zone of the virtual machine.</p>
+</li>
+<li>
+<p>This yyyy-mm-dd value will match the output of java.sql.Date.toString().</p>
+</li>
+</ul>
+</li>
+
+<li>
+<p>setDate() with a Calendar object:</p>
+<ul>
+<li>
+<p>The yyyy-mm-dd values will be calculated from the milliseconds value of the java.sql.Date instance using the passed in Calendar.</p>
+</li>
+<li>
+<p>The code for this is<br>cal.setTimeInMillis(value.getTime());<br>yyyy = cal.get(Calendar.YEAR);<br>mm = cal.get(Calendar.MONTH) + 1;<br>dd = cal.get(Calendar.DAY_OF_MONTH);</p>
+</li>
+<li>
+
+<p>This yyyy-mm-dd value may not match the output of java.sql.Date.toString() for the value, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>Derby does not require that the application&rsquo;s java.sql.Date value is normalized to 00:00 according to the required time zone.</p>
+<p>In both cases no time zone information is stored with the SQL DATE value.</p>
+<h4>Conversion of a Derby DATE value to a JDBC java.sql.Date</h4>
+<ol>
+<li>
+<p>getDate() without a Calendar object or passing null for a Calendar object:</p>
+
+<ul>
+<li>
+<p>A java.sql.Date instance is returned with a millisecond value corresponding to 00:00 on yyyy-mm-dd according to the time zone of the java virtual machine</p>
+</li>
+<li>
+<p>The toString() method of the returned value will return &lsquo;yyyy-mm-dd&rsquo;</p>
+</li>
+</ul>
+</li>
+<li>
+<p>getDate() with a Calendar object:</p>
+<ul>
+<li>
+
+<p>A java.sql.Date instance is returned with a millisecond value corresponding to 00:00 on yyyy-mm-dd according to the time zone of the Calendar</p>
+</li>
+<li>
+<p>The toString() method of the returned value may not return &lsquo;yyyy-mm-dd&rsquo;, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4>Conversion of a string type to a JDBC java.sql.Date</h4>
+<p>Three different date formats are built into Derby.</p>
+
+<div style="margin-left: 2em">
+<ol>
+<li>
+<p>(ISO/JIS) yyyy-mm-dd e.g. &ldquo;1980-03-21&rdquo;,</p>
+</li>
+<li>
+<p>(IBM USA) mm/dd/yyyy e.g. &ldquo;03/21/1980&rdquo;, and</p>
+</li>
+<li>
+<p>(IBM European) dd.mm.yyyy e.g. &ldquo;21.03.1980&rdquo;.</p>
+
+</li>
+</ol>
+</div>
+<p>If the format of the string matches one of the built in formats then a conversion to a java.sql.Date matches that of a SQL DATE value with value yyyy-mm-dd.</p>
+<p>If the string does not match any of the built in formats Derby attempts to use the Java locale specific parser to interpret the string as a date.</p>
+<hr>
+<a name="implsqltime"/a>
+<h3>Derby's SQL TIME interactions with JDBC</h3>
+<p>Derby&rsquo;s SQL TIME type represents a time of day in the form hh:mm:ss with no associated time zone information.</p>
+<h4>java.sql.Time</h4>
+<p>A JDBC Time (java.sql.Time) by definition represents a point in time on an unspecified day in a given time zone.</p>
+
+<p>Java.sql.Time extends java.util.date, so it includes a date. [JDBC3] intends that the date stored in a java.sql.Time be Jan 1 1970, but this is not enforced by the class.</p>
+<p>JDBC drivers are required to return java.sql.Time objects that are normalized to Jan. 1 1970 according to the required time zone.</p>
+<p>Applications are expected to pass in java.sql.Time instances that are normalized to Jan. 1 1970.</p>
+<a name="N101A6"></a><a name="Conversion+of+a+JDBC+java.sql.Time+to+a+Derby+TIME+value"></a>
+<h4>Conversion of a JDBC java.sql.Time to a Derby TIME value</h4>
+<ol>
+<li>
+<p>setTime() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+<p>The hh:mm:ss values will be calculated from the milli-seconds value of the java.sql.Time instance using a Calendar object set to the time zone of the virtual machine.</p>
+
+</li>
+<li>
+<p>This hh:mm:ss value will match the output of java.sql.Date.toString().</p>
+</li>
+</ul>
+</li>
+<li>
+<p>setTime() with a Calendar object</p>
+<ul>
+<li>
+<p>The hh:mm:ss values will be calculated from the milliseconds value of the java.sql.Date instance using the passed in Calendar.</p>
+</li>
+<li>
+<p>The code for this is<br>cal.setTimeInMillis(value.getTime());<br>hh = cal.get(Calendar.HOUR);<br>mm = cal.get(Calendar.MINUTE);<br>ss = cal.get(Calendar.SECOND);</p>
+
+</li>
+<li>
+<p>This hh:mm:dd value may not match the output of java.sql.Date.toString() for the value, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>Derby does not require that the application&rsquo;s java.sql.Time value be normalized to Jan 1 1970 according to the required time zone.</p>
+<p>In both cases no time zone information is stored with the SQL TIME value.</p>
+<a name="N101CE"></a><a name="Conversion+of+a+Derby+TIME+value+to+a+JDBC+java.sql.Time"></a>
+<h4>Conversion of a Derby TIME value to a JDBC java.sql.Time</h4>
+<ol>
+
+<li>
+<p>getTime() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+<p>A java.sql.Time instance is returned with a millisecond value corresponding to hh:mm:ss on Jan. 1 1970 according to the time zone of the java virtual machine</p>
+</li>
+<li>
+<p>The toString() method of the returned value will return &lsquo;hh:mm:ss&rsquo;.</p>
+</li>
+</ul>
+</li>
+<li>
+
+<p>getTime() with a Calendar object</p>
+<ul>
+<li>
+<p>A java.sql.Time instance is returned with a millisecond value corresponding to hh:mm:ss on Jan. 1 1970 according to the time zone of the Calendar</p>
+</li>
+<li>
+<p>The toString() method of the returned value may not return &lsquo;hh:mm:ss&rsquo;, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4>Conversion of a string type to a JDBC java.sql.Time</h4>
+<p>Three different time formats are built into Derby:</p>
+<div style="margin-left: 2em">
+<ol>
+<li>
+<p>(ISO/EUR) hh.mm.ss e.g. &ldquo;13.52.03&rdquo;,</p>
+</li>
+<li>
+<p>(IBM USA) hh:mm [AM|PM] e.g. &ldquo;1:52 PM&rdquo;, and</p>
+
+</li>
+<li>
+<p>(JIS) hh:mm:ss e.g. &ldquo;13:52:03&rdquo;.</p>
+</li>
+</ol>
+</div>
+<p>If the format of the string matches one of the built in formats then a conversion to a java.sql.Time matches that of a SQL TIME value with value hh:mm:ss.</p>
+<p>If the string does not match any of the built in formats Derby attempts to use the Java locale specific parser to interpret the string as a date.</p>
+<hr>
+<a name="implsqltimestamp"/a>
+<h3>Derby's SQL TIMESTAMP interactions with JDBC</h3>
+<p>Derby&rsquo;s SQL TIMESTAMP type represents a time of day in the form yyyy-mm-dd hh:mm:ss.fffffffff (nanosecond granularity) with no associated time zone information.</p>
+<h4>java.sql.Timestamp</h4>
+<p>A JDBC Timestamp (java.sql.Timestamp) by definition represents a point in time, with nanosecond resolution, in a given time zone.</p>
+<h4>Conversion of a JDBC java.sql.Timestamp to a Derby TIMESTAMP value</h4>
+<ol>
+<li>
+<p>setTimestamp() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+<p>The year, month, day, hour, minute, and second values will be calculated from the milli-seconds value of the java.sql.Timestamp instance using a Calendar object set to the time zone of the virtual machine. The nanosecond value will be calculated from the nanoseconds value of the java.sql.Timestamp.</p>
+</li>
+
+<li>
+<p>The timestamp component values will match the output of java.sql.Timestamp.toString().</p>
+</li>
+</ul>
+</li>
+<li>
+<p>setTime() with a Calendar object</p>
+<ul>
+<li>
+<p>The year, month, day, hour, minute, and second values will be calculated from the milliseconds value of the java.sql.Date instance using the passed in Calendar. The nanosecond value will be calculated from the nanoseconds value of the java.sql.Timestamp.</p>
+</li>
+<li>
+<p>The code for this is<br>cal.setTimeInMillis(value.getTime());<br>year = cal.get(Calendar.YEAR);<br>month = cal.get(Calendar.MONTH) + 1;<br>day = cal.get(Calendar.DAY_OF_MONTH);<br>hour = cal.get(Calendar.HOUR);<br>minute = cal.get(Calendar.MINUTE);<br>second = cal.get(Calendar.SECOND);<br>nanos = value.getNanos();</p>
+
+</li>
+<li>
+<p>This stored timestamp component value may not match the output of java.sql.Timestamp.toString() for the value, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4>Conversion of a Derby TIMESTAMP value to a JDBC java.sql.Timestamp</h4>
+<ol>
+<li>
+<p>getTimestamp() without a Calendar object or passing null for a Calendar object</p>
+<ul>
+<li>
+
+<p>A java.sql.Timestamp instance is returned with a nanosecond value corresponding to yyyy-mm-dd hh:mm:ss.fffffffff according to the time zone of the java virtual machine</p>
+</li>
+<li>
+<p>The toString() method of the returned value will return &lsquo;yyyy-mm-dd hh:mm:ss.fffffffff&rsquo;.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>getTime() with a Calendar object</p>
+<ul>
+<li>
+<p>A java.sql.Time instance is returned with a nanosecond value corresponding to yyyy-mm-dd hh:mm:ss.fffffffff according to the time zone of the Calendar</p>
+
+</li>
+<li>
+<p>The toString() method of the returned value may not return &lsquo;yyyy-mm-dd hh:mm:ss.fffffffff&rsquo;, since this method always uses the time zone of the virtual machine.</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4>Conversion of a string type to a JDBC java.sql.Timestamp</h4>
+<p>Two different timestamp formats are built into Derby:</p>
+<div style="margin-left: 2em">
+<ol>
+
+<li>
+<p>(ISO) yyyy-mm-dd hh:mm:ss[.ffffff]e.g. &ldquo;1980-10-25 13:01:23.123456&rdquo;, and</p>
+</li>
+<li>
+<p>(IBM) yyyy-mm-dd-hh.mm.ss[.ffffff]e.g. &ldquo;1980-10-25-13.01.23.123456&rdquo;.</p>
+</li>
+</ol>
+</div>
+<p>Note that only microsecond resolution is supported in converting strings to timestamps.</p>
+<p>If the format of the string matches one of the built in formats then a conversion to a java.sql.Timestamp matches that of a SQL TIMESTAMP value with value yyyy-mm-dd hh:mm:ss.ffffff.</p>
+
+<p>If the string does not match any of the built in formats Derby attempts to use the Java locale specific parser to interpret the string as a date.</p>
+<hr>
 </body>
