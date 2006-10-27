@@ -197,6 +197,36 @@ public class JDBC {
 				new String[] {"TABLE"});
 		
 		dropUsingDMD(s, rs, schema, "TABLE_NAME", "TABLE");
+        
+        // At this point there may be tables left due to
+        // foreign key constraints leading to a dependency loop.
+        // Drop any constraints that remain and then drop the tables.
+        // If there are no tables then this should be a quick no-op.
+        rs = dmd.getExportedKeys((String) null, schema, (String) null);
+        while (rs.next())
+        {
+            short keyPosition = rs.getShort("KEY_SEQ");
+            if (keyPosition != 1)
+                continue;
+            String fkName = rs.getString("FK_NAME");
+            // No name, probably can't happen but couldn't drop it anyway.
+            if (fkName == null)
+                continue;
+            String fkSchema = rs.getString("FKTABLE_SCHEM");
+            String fkTable = rs.getString("FKTABLE_NAME");
+            
+            String ddl = "ALTER TABLE " +
+                JDBC.escape(fkSchema, fkTable) +
+                " DROP FOREIGN KEY " +
+                JDBC.escape(fkName);
+            s.executeUpdate(ddl);
+        }
+        conn.commit();
+                
+        // Tables (again)
+        rs = dmd.getTables((String) null, schema, (String) null,
+                new String[] {"TABLE"});        
+        dropUsingDMD(s, rs, schema, "TABLE_NAME", "TABLE");
 
         // Synonyms - need work around for DERBY-1790 where
         // passing a table type of SYNONYM fails.
@@ -207,7 +237,7 @@ public class JDBC {
                 
 		// Finally drop the schema if it is not APP
 		if (!schema.equals("APP")) {
-			s.execute("DROP SCHEMA " + JDBC.escape(schema) + " RESTRICT");
+			s.executeUpdate("DROP SCHEMA " + JDBC.escape(schema) + " RESTRICT");
 		}
 		conn.commit();
 		s.close();

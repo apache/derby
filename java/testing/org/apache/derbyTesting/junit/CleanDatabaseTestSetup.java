@@ -109,28 +109,44 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
      public static void cleanDatabase(Connection conn) throws SQLException {
         DatabaseMetaData dmd = conn.getMetaData();
 
-        // Fetch all the user schemas into a list
-        List schemas = new ArrayList();
-        ResultSet rs = dmd.getSchemas();
-        while (rs.next()) {
-
-            String schema = rs.getString("TABLE_SCHEM");
-            if (schema.startsWith("SYS"))
-                continue;
-            if (schema.equals("SQLJ"))
-                continue;
-            if (schema.equals("NULLID"))
-                continue;
-
-            schemas.add(schema);
+        SQLException sqle = null;
+        // Loop a number of arbitary times to catch cases
+        // where objects are dependent on objects in
+        // different schemas.
+        for (int count = 0; count < 5; count++) {
+            // Fetch all the user schemas into a list
+            List schemas = new ArrayList();
+            ResultSet rs = dmd.getSchemas();
+            while (rs.next()) {
+    
+                String schema = rs.getString("TABLE_SCHEM");
+                if (schema.startsWith("SYS"))
+                    continue;
+                if (schema.equals("SQLJ"))
+                    continue;
+                if (schema.equals("NULLID"))
+                    continue;
+    
+                schemas.add(schema);
+            }
+            rs.close();
+    
+            // DROP all the user schemas.
+            sqle = null;
+            for (Iterator i = schemas.iterator(); i.hasNext();) {
+                String schema = (String) i.next();
+                try {
+                    JDBC.dropSchema(dmd, schema);
+                } catch (SQLException e) {
+                    sqle = null;
+                }
+            }
+            // No errors means all the schemas we wanted to
+            // drop were dropped, so nothing more to do.
+            if (sqle == null)
+                return;
         }
-        rs.close();
-
-        // DROP all the user schemas.
-        for (Iterator i = schemas.iterator(); i.hasNext();) {
-            String schema = (String) i.next();
-            JDBC.dropSchema(dmd, schema);
-        }
+        throw sqle;
     }
 
 }
