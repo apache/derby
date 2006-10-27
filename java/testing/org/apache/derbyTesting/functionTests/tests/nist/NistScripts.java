@@ -24,6 +24,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -198,7 +199,12 @@ public final class NistScripts extends ScriptTestCase {
             userSuite.addTest(test);
         }
         
-       return new CleanDatabaseTestSetup(getIJConfig(suite));
+        // Lock timeout settings that were set for the old harness when
+        // running nist.
+ 
+        return new CleanDatabaseTestSetup(
+           DatabasePropertyTestSetup.setLockTimeouts(getIJConfig(suite), 2, 4));
+
     }
     
 	/*
