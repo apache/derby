@@ -32,6 +32,8 @@ import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 
 import junit.framework.*;
 import java.sql.*;
@@ -2758,7 +2760,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         suite.addTest(TestConfiguration.clientServerDecorator(
                 derbynetExclude("BlobClob4BlobTest:client")));
 
-        return suite;
+        return new CleanDatabaseTestSetup(
+                DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4));
     }
 
     private static Test derbynetExclude(String name) {

@@ -40,6 +40,38 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
 	
 	private Properties newValues;
 	private Properties oldValues;
+    
+    /**
+     * Decorator to change the lock time outs.
+     * If either time is less than zero then that property is
+     * not modified by this decorator.
+     * The change is implemented by an instanceof DatabasePropertyTestSetup
+     * and thus is reset by the tearDown method.
+     * 
+     * @param test Test to decorate
+     * @param deadlockTime Time in seconds for derby.locks.deadlockTimeout.
+     * @param waitTime Time in seconds for derby.locks.waitTimeout
+     * @return
+     */
+    public static Test setLockTimeouts(Test test, int deadlockTime, int waitTime)
+    {
+        final Properties properties = new Properties();
+        if (deadlockTime >= 0)
+        {
+            properties.setProperty("derby.locks.deadlockTimeout",
+                Integer.toString(deadlockTime));
+        }
+        if (waitTime >= 0) {
+            properties.setProperty("derby.locks.waitTimeout",
+                Integer.toString(waitTime));
+        }
+        
+        // No change, no point to the decorator.
+        if (properties.isEmpty())
+            return test;
+
+        return new DatabasePropertyTestSetup(test, properties);
+    }
 	
 	/**
 	 * Create a test decorator that sets and restores the passed
