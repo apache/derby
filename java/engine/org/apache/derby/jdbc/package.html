@@ -97,7 +97,7 @@ will be returned. This matches the semantics of the SQL LOCATE function.
 <a name="implconnection"/a>
 <h3>java.sql.Connection</h3>
 <h4>Clarification for createStatement(), prepareStatement() and prepareCall()</h4>
-CONCUR_UPDATABLE concurrency is supported for FORWARD ONLY ResultSet types only.
+CONCUR_UPDATABLE concurrency is supported for TYPE_FORWARD_ONLY and TYPE_SCROLL_INSENSITIVE ResultSet types only.
 <hr>
 <a name="implpreparedstatement"/a>
 <h3>java.sql.PreparedStatement</h3>
@@ -127,9 +127,11 @@ It is not recommended that applications take advantage of this liberal conversio
 values, use of a getXXX() method that works against NULL and non-NULL values is strongly recommended.
 </UL>
 <h4> Clarification for deleteRow()</h4>
-After deleteRow, ResultSet will be positioned right before the next row for FORWARD ONLY updatable ResultSets.
+After deleteRow, ResultSet will be positioned right before the next row for TYPE_FORWARD_ONLY and TYPE_SCROLL_INSENSITIVE updatable ResultSets.
 <h4> Clarification for updateRow()</h4>
-After updateRow, ResultSet will be positioned right before the next row for FORWARD ONLY updatable ResultSets.
+After updateRow, ResultSet will be positioned right before the next
+row for TYPE_FORWARD_ONLY updatable ResultSets. The ResultSet remain
+on the current row for TYPE_SCROLL_INSENSITIVE updatable ResultSets.
 <h4>Clarification for getAsciiStream()</h4>
 getAsciiStream() is not recommended to use in Derby,
 because Derby handles characters as unicode internally ,
