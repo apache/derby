@@ -63,6 +63,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(MathTrigFunctionsTest.suite());
         suite.addTest(TimeHandlingTest.suite());
         suite.addTest(VTITest.suite());        
+        suite.addTest(XMLTypeAndOpsTest.suite());
+        suite.addTest(XMLMissingClassesTest.suite());
         
         // This test internally sets derby.database.sqlAuthorization to true
         // This property is not resettable and hence may affect other tests 
