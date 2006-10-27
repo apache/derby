@@ -20,6 +20,10 @@
 package org.apache.derbyTesting.junit;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import junit.framework.Assert;
 
@@ -200,7 +204,7 @@ public class JDBC {
                 new String[] {"AA_DERBY-1790-SYNONYM"});
         
         dropUsingDMD(s, rs, schema, "TABLE_NAME", "SYNONYM");
-        
+                
 		// Finally drop the schema if it is not APP
 		if (!schema.equals("APP")) {
 			s.execute("DROP SCHEMA " + JDBC.escape(schema) + " RESTRICT");
@@ -231,29 +235,44 @@ public class JDBC {
 	{
 		String dropLeadIn = "DROP " + dropType + " ";
 		
-		s.clearBatch();
-		int batchCount = 0;
+        // First collect the set of DROP SQL statements.
+        ArrayList ddl = new ArrayList();
 		while (rs.next())
 		{
             String objectName = rs.getString(mdColumn);
-			s.addBatch(dropLeadIn + JDBC.escape(schema, objectName));
-			batchCount++;
+            ddl.add(dropLeadIn + JDBC.escape(schema, objectName));
 		}
 		rs.close();
+                
+        // Execute them as a complete batch, hoping they will all succeed.
+        s.clearBatch();
+        int batchCount = 0;
+        for (Iterator i = ddl.iterator(); i.hasNext(); )
+        {
+            Object sql = i.next();
+            if (sql != null) {
+                s.addBatch(sql.toString());
+                batchCount++;
+            }
+        }
+
 		int[] results;
+        boolean hadError;
 		try {
 		    results = s.executeBatch();
 		    Assert.assertNotNull(results);
 		    Assert.assertEquals("Incorrect result length from executeBatch",
 		    		batchCount, results.length);
+            hadError = false;
 		} catch (BatchUpdateException batchException) {
 			results = batchException.getUpdateCounts();
 			Assert.assertNotNull(results);
 			Assert.assertTrue("Too many results in BatchUpdateException",
 					results.length <= batchCount);
+            hadError = true;
 		}
 		
-		boolean hadError = false;
+        // Remove any statements from the list that succeeded.
 		boolean didDrop = false;
 		for (int i = 0; i < results.length; i++)
 		{
@@ -266,11 +285,43 @@ public class JDBC {
 				didDrop = true;
 			else
 				Assert.fail("Negative executeBatch status");
+            
+            if (didDrop)
+                ddl.set(i, null);
 		}
-		
-		// Commit any work we did do.
-		s.getConnection().commit();
-		s.clearBatch();
+        s.clearBatch();
+        if (didDrop) {
+            // Commit any work we did do.
+            s.getConnection().commit();
+        }
+
+        // If we had failures drop them as individual statements
+        // until there are none left or none succeed. We need to
+        // do this because the batch processing stops at the first
+        // error. This copes with the simple case where there
+        // are objects of the same type that depend on each other
+        // and a different drop order will allow all or most
+        // to be dropped.
+        if (hadError) {
+            do {
+                hadError = false;
+                didDrop = false;
+                for (ListIterator i = ddl.listIterator(); i.hasNext();) {
+                    Object sql = i.next();
+                    if (sql != null) {
+                        try {
+                            s.executeUpdate(sql.toString());
+                            i.set(null);
+                            didDrop = true;
+                        } catch (SQLException e) {
+                            hadError = true;
+                        }
+                    }
+                }
+                if (didDrop)
+                    s.getConnection().commit();
+            } while (hadError && didDrop);
+        }
 	}
 	
 	/**
