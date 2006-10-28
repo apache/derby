@@ -23,6 +23,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -78,7 +79,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
     public static Test suite()
     {
         TestSuite suite = new TestSuite("XML Type and Operators Suite\n");
-        if (!JDBC.classpathMeetsXMLReqs())
+        if (!XML.classpathMeetsXMLReqs())
             return suite;
 
         // First wrap the tests in a TestSetup that sets up / tears down

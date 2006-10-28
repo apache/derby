@@ -23,6 +23,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -82,7 +83,7 @@ public final class XMLMissingClassesTest extends BaseJDBCTestCase {
     public static Test suite()
     {
         TestSuite suite = new TestSuite("XML Missing Classes Suite");
-        if (!JDBC.classpathHasXalanAndJAXP())
+        if (!XML.classpathHasXalanAndJAXP())
         {
             // Run this test in embedded and client modes.
             suite.addTest(TestConfiguration.defaultSuite(

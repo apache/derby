@@ -1,0 +1,231 @@
+/*
+ *
+ * Derby - Class org.apache.derbyTesting.functionTests.util.XML
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, 
+ * software distributed under the License is distributed on an 
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ * either express or implied. See the License for the specific 
+ * language governing permissions and limitations under the License.
+ */
+package org.apache.derbyTesting.junit;
+
+import java.io.PrintWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+import java.lang.reflect.Method;
+
+import java.util.StringTokenizer;
+import java.util.Properties;
+
+import junit.framework.Assert;
+
+/**
+ * XML utility methods for the JUnit tests.
+ *
+ */
+public class XML {
+    
+    /**
+     * Minimum version of Xalan required to run XML tests under
+     * Security Manager. In this case, we're saying that the
+     * minimum version is Xalan 2.5.0 (because there's a bug
+     * in earlier versions that causes problems with security
+     * manager).
+     */
+    private static int [] MIN_XALAN_VERSION = new int [] { 2, 5, 0 };
+
+    /**
+     * Determine whether or not the classpath with which we're
+     * running has the JAXP API classes required for use of
+     * the Derby XML operators.
+     */
+    private static final boolean HAVE_JAXP =
+        JDBC.haveClass("org.w3c.dom.Document");
+
+    /**
+     * Determine whether or not the classpath with which we're
+     * running has a version of Xalan in it.  Xalan is required
+     * for use of the Derby XML operators.  In particular we
+     * check for:
+     *
+     *  1. Xalan classes (version doesn't matter here)
+     *  2. The Xalan "EnvironmentCheck" class, which is included
+     *     as part of Xalan.  This allows us to check the specific
+     *     version of Xalan in use so that we can determine if
+     *     if we satisfy the minimum requirement.
+     */
+    private static final boolean HAVE_XALAN =
+            JDBC.haveClass("org.apache.xpath.XPath") &&
+            JDBC.haveClass("org.apache.xalan.xslt.EnvironmentCheck");
+
+    /**
+     * Determine if we have the minimum required version of Xalan
+     * for successful use of the XML operators.
+     */
+    private static final boolean HAVE_MIN_XALAN
+            = HAVE_XALAN && checkXalanVersion();
+
+    /**
+     * Return true if the classpath contains JAXP and
+     * Xalan classes (this method doesn't care about
+     * the particular version of Xalan).
+     */
+    public static boolean classpathHasXalanAndJAXP()
+    {
+        return HAVE_JAXP && HAVE_XALAN;
+    }
+
+    /**
+     * Return true if the classpath meets all of the requirements
+     * for use of the SQL/XML operators.  This means that all
+     * required classes exist in the classpath AND the version
+     * of Xalan that we found is at least MIN_XALAN_VERSION.
+     */
+    public static boolean classpathMeetsXMLReqs()
+    {
+        return HAVE_JAXP && HAVE_MIN_XALAN;
+    }
+
+    /**
+     * Determine whether or not the classpath with which we're
+     * running has a version of Xalan that meets the minimum
+     * Xalan version requirement.  We do that by using a Java
+     * utility that ships with Xalan--namely, "EnvironmentCheck"--
+     * and by parsing the info gathered by that method to find
+     * the Xalan version.  We use reflection when doing this
+     * so that this file will compile/execute even if XML classes
+     * are missing.
+     *
+     * Assumption is that we only get to this method if we already
+     * know that there *is* a version of Xalan in the classpath
+     * and that version includes the "EnvironmentCheck" class.
+     *
+     * Note that this method returns false if the call to Xalan's
+     * EnvironmentCheck.checkEnvironment() returns false for any
+     * reason.  As a specific example, that method will always
+     * return false when running with ibm131 because it cannot
+     * find the required methods on the SAX 2 classes (apparently
+     * the classes in ibm131 jdk don't have all of the methods
+     * required by Xalan).  Thus this method will always return
+     * "false" for ibm131.
+     */
+    private static boolean checkXalanVersion()
+    {
+        boolean haveMinXalanVersion = false;
+        try {
+
+            // These io objects allow us to retrieve information generated
+            // by the call to EnvironmenCheck.checkEnvironment()
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            PrintWriter pW = new PrintWriter(bos);
+
+            // Call the method using reflection.
+
+            Class cl = Class.forName("org.apache.xalan.xslt.EnvironmentCheck");
+            Method meth = cl.getMethod("checkEnvironment",
+                new Class[] { PrintWriter.class });
+
+            Boolean boolObj = (Boolean)meth.invoke(
+                cl.newInstance(), new Object [] { pW });
+
+            pW.flush();
+            bos.flush();
+
+            cl = null;
+            meth = null;
+            pW = null;
+
+            /* At this point 'bos' holds a list of properties with
+             * a bunch of environment information.  The specific
+             * property we're looking for is "version.xalan2_2",
+             * so get that property, parse the value, and see
+             * if the version is at least the minimum required.
+             */
+            if (boolObj.booleanValue())
+            {
+                // Load the properties gathered from checkEnvironment().
+                Properties props = new Properties();
+                props.load(new ByteArrayInputStream(bos.toByteArray()));
+                bos.close();
+
+                // Now pull out the one we need.
+                String ver = props.getProperty("version.xalan2_2");
+                haveMinXalanVersion = (ver != null);
+                if (haveMinXalanVersion)
+                {
+                    /* We found the property, so parse out the necessary
+                     * piece.  The value is of the form:
+                     *
+                     *   <productName> Major.minor.x
+                     *
+                     * Ex:
+                     *
+                     *   version.xalan2_2=Xalan Java 2.5.1 
+                     *   version.xalan2_2=XSLT4J Java 2.6.6
+                     */
+                    int i = 0;
+                    StringTokenizer tok = new StringTokenizer(ver, ". ");
+                    while (tok.hasMoreTokens())
+                    {
+                        String str = tok.nextToken().trim();
+                        if (Character.isDigit(str.charAt(0)))
+                        {
+                            int val = Integer.valueOf(str).intValue();
+                            if (val < MIN_XALAN_VERSION[i])
+                            {
+                                haveMinXalanVersion = false;
+                                break;
+                            }
+                            i++;
+                        }
+
+                        /* If we've checked all parts of the min version,
+                         * then we assume we're okay. Ex. "2.5.0.2"
+                         * is considered greater than "2.5.0".
+                         */
+                        if (i >= MIN_XALAN_VERSION.length)
+                            break;
+                    }
+
+                    /* If the value had fewer parts than the
+                     * mininum version, then it doesn't meet
+                     * the requirement.  Ex. "2.5" is considered
+                     * to be a lower version than "2.5.0".
+                     */
+                    if (i < MIN_XALAN_VERSION.length)
+                        haveMinXalanVersion = false;
+                }
+            }
+
+            /* Else the call to checkEnvironment() returned "false",
+             * which means it couldn't find all of the classes/methods
+             * required for Xalan to function.  So in that case we'll
+             * fall through and just return false, as well.
+             */
+
+        } catch (Throwable t) {
+
+            System.out.println("Unexpected exception while " +
+                "trying to find Xalan version:");
+            t.printStackTrace(System.err);
+
+            // If something went wrong, assume we don't have the
+            // necessary classes.
+            haveMinXalanVersion = false;
+
+        }
+
+        return haveMinXalanVersion;
+    }
+}
