@@ -636,4 +636,28 @@ select 10,avg(c) from t having 1 < 2;
 10         |2          
 ij> drop table t;
 0 rows inserted/updated/deleted
+ij> -- DERBY-2008
+-- test SUBSTR with 2 args with GROUP BY expression
+create table dt (vc varchar(30));
+0 rows inserted/updated/deleted
+ij> insert into dt values ('1928-09-21'), ('1903-12-08');
+2 rows inserted/updated/deleted
+ij> -- ok
+select substr(vc, 3) from dt group by substr(vc, 3);
+1                             
+------------------------------
+03-12-08                      
+28-09-21                      
+ij> select substr(vc, 3, 4) from dt group by substr(vc, 3, 4);
+1   
+----
+03-1
+28-0
+ij> -- expect errors
+select substr(vc, 3, 4) from dt group by substr(vc, 3);
+ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.  
+ij> select substr(vc, 3) from dt group by substr(vc, 3, 4);
+ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.  
+ij> drop table dt;
+0 rows inserted/updated/deleted
 ij> 

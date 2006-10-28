@@ -921,10 +921,18 @@ public class TernaryOperatorNode extends ValueNode
     	if (isSameNodeType(o)) 
 	{
 		TernaryOperatorNode other = (TernaryOperatorNode)o;
+		
+			/*
+			 * SUBSTR function can either have 2 or 3 arguments.  In the 
+			 * 2-args case, rightOperand will be null and thus needs 
+			 * additional handling in the equivalence check.
+			 */
     		return (other.methodName.equals(methodName)
 				&& other.receiver.isEquivalent(receiver)
     				&& other.leftOperand.isEquivalent(leftOperand)
-    				&& other.rightOperand.isEquivalent(rightOperand));
+    				&& ( (rightOperand == null && other.rightOperand == null) || 
+    				     (other.rightOperand != null && 
+    				    	other.rightOperand.isEquivalent(rightOperand)) ) );
         }
     	return false;
     }
