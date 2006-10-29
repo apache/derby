@@ -191,7 +191,7 @@ public final class NistScripts extends ScriptTestCase {
             // Add the new user suite with the change user decorator to
             // the main suite but continue to add tests to the user suite.
             userSuite = new TestSuite("NIST user="+testUser); 
-            String password = testUser.concat("PWD");
+            String password = testUser.concat("ni8s4T");
             suite.addTest(
                     TestConfiguration.changeUserDecorator(userSuite, testUser, password));
             suiteUser = testUser;
@@ -199,12 +199,18 @@ public final class NistScripts extends ScriptTestCase {
             userSuite.addTest(test);
         }
         
+        Test test = getIJConfig(suite);
+        
+        // Setup user authentication
+        test = DatabasePropertyTestSetup.builtinAuthentication(test,
+                new String[] {"HU","FLATER","SUN","CTS1","SULLIVAN1","SCHANZLE"},
+                "ni8s4T");
+        
         // Lock timeout settings that were set for the old harness when
         // running nist.
- 
-        return new CleanDatabaseTestSetup(
-           DatabasePropertyTestSetup.setLockTimeouts(getIJConfig(suite), 2, 4));
-
+        test = DatabasePropertyTestSetup.setLockTimeouts(test, 2, 4);
+        
+        return new CleanDatabaseTestSetup(test);
     }
     
 	/*

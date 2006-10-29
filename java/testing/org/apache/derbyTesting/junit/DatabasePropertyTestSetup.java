@@ -40,6 +40,7 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
 	
 	private Properties newValues;
 	private Properties oldValues;
+    private final boolean staticProperties;
     
     /**
      * Decorator to change the lock time outs.
@@ -70,7 +71,57 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         if (properties.isEmpty())
             return test;
 
-        return new DatabasePropertyTestSetup(test, properties);
+        return new DatabasePropertyTestSetup(test, properties, true);
+    }
+    
+    /**
+     * Decorate a test so that the database has authentication enabled
+     * using the BUILTIN provider and the set of users passed in.
+     * The password for each user is set to the user's name with 
+     * the value of passwordToken appended.
+     * <P>
+     * Assumption is that no authentication was enabled upon entry.
+     * <P>
+     * The authentication is removed by the decorator's tearDown method.
+     * @param test Test to be decorated.
+     * @param users Set of users for authentication.
+     * @return Decorated test.
+     */
+    public static Test builtinAuthentication(Test test, String[] users,
+            String passwordToken)
+    {
+        final Properties userProps = new Properties();
+        final Properties authProps = new Properties();
+        
+        authProps.setProperty("derby.connection.requireAuthentication", "true");
+        authProps.setProperty("derby.authentication.provider", "BUILTIN");
+        
+        for (int i = 0; i < users.length; i++)
+        {
+            String user = users[i];
+            userProps.setProperty("derby.user." + user, user.concat(passwordToken));
+        }
+        
+        // Need to setup the decorators carefully.
+        // Need execution in this order:
+        // 1) add user definitions (no authentication enabled)
+        // 2) switch to a valid user
+        // 3) enable authentication with database reboot
+        // 4) disable authentication with database reboot
+        // 5) switch back to previous user
+        // 6) remove user defintions.
+        //
+        // Combining steps 1,3 does not work as no shutdown request
+        // is possible for step 4 as no valid users would be defined!
+        //
+        // Note the decorators are executed in order from
+        // outer (added last) to inner.
+        
+        test = new DatabasePropertyTestSetup(test, authProps, true);
+        test = new ChangeUserSetup(test, users[0], users[0].concat(passwordToken));
+        test = new DatabasePropertyTestSetup(test, userProps, false);
+        
+        return test;
     }
 	
 	/**
@@ -83,9 +134,25 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
 	public DatabasePropertyTestSetup(Test test,
 			Properties newValues)
 	{
+        this(test, newValues, false);
+    }
+    
+    /**
+     * Create a test decorator that sets and restores the passed
+     * in properties. Assumption is that the contents of
+     * properties and values will not change during execution.
+     * @param test test to be decorated
+     * @param newValues properties to be set
+     * @param staticProperties True if database needs to be shutdown after
+     * setting properties in setUp() and tearDown method().
+     */
+    public DatabasePropertyTestSetup(Test test,
+            Properties newValues, boolean staticProperties)
+    {
 		super(test);
 		this.newValues = newValues;
 		this.oldValues = new Properties();
+        this.staticProperties = staticProperties;
 	}
 
 	/**
@@ -96,6 +163,15 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
     throws java.lang.Exception
     {
     	setProperties(newValues);
+        if (staticProperties) {
+            try {
+                TestConfiguration.getCurrent().getDefaultConnection(
+                        "shutdown=true");
+                fail("Database failed to shut down");
+            } catch (SQLException e) {
+                 BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
+            }
+        }
     }
 
     /**
@@ -130,6 +206,15 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         super.tearDown();
         newValues = null;
         oldValues = null;
+        if (staticProperties) {
+            try {
+                TestConfiguration.getCurrent().getDefaultConnection(
+                        "shutdown=true");
+                fail("Database failed to shut down");
+            } catch (SQLException e) {
+                BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
+            }
+        }
     }
     
     private void setProperties(Properties values) throws SQLException
