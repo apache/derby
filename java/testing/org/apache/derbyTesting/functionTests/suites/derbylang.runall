@@ -7,7 +7,6 @@ lang/CharUTF8.java
 lang/DB2IsolationLevels.sql
 lang/LOB.sql
 lang/LOBDB2compatibility.sql
-lang/aggbuiltin.sql
 lang/aggregate.sql
 lang/aggregateOptimization.sql
 lang/altertable.sql
@@ -24,7 +23,6 @@ lang/checkConstraint.sql
 lang/closed.java
 lang/coalesceTests.java
 lang/columnDefaults.sql
-lang/comparisons.sql
 lang/compressTable.sql
 lang/concateTests.java
 lang/connect.sql
@@ -41,7 +39,6 @@ lang/ddlTableLockMode.sql
 lang/deadlockMode.java
 lang/declareGlobalTempTableJava.java
 lang/declareGlobalTempTableJavaJDBC30.java
-lang/delete.sql
 lang/desc_index.sql
 lang/distinct.sql
 lang/distinctElimination.sql
@@ -69,7 +66,6 @@ lang/implicitConversions.sql
 lang/inbetween.sql
 lang/infostreams.sql
 lang/innerjoin.sql
-lang/insert.sql
 lang/intersect.sql
 lang/isolationLevels.sql
 lang/JitTest.java
@@ -111,8 +107,6 @@ lang/renameIndex.sql
 lang/renameTable.sql
 lang/reopenScan.sql
 lang/repeat.java
-lang/schemas.sql
-lang/select.sql
 lang/setOpPlan.sql
 lang/simpleThreadWrapper.java
 lang/specjPlans.sql
@@ -122,7 +116,6 @@ lang/stmtCache0.sql
 lang/stmtCache1.sql
 lang/stmtCache3.java
 lang/streams.java
-lang/stringtypes.sql
 lang/subquery.sql
 lang/subquery2.sql
 lang/subqueryFlattening.sql
@@ -140,9 +133,6 @@ lang/unaryArithmeticDynamicParameter.java
 lang/ungroupedAggregatesNegative.sql
 lang/unlimited.sql
 lang/updatableResultSet.java
-lang/update.sql
 lang/updateCursor.java
-lang/valuesclause.sql
-lang/views.sql
 lang/wisconsin.java
 lang/ShutdownDatabase.java
