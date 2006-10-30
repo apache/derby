@@ -81,7 +81,7 @@ public class prepStmtMetaData {
 			testMetaData(con, "drop schema myschema restrict", true);
 
 			// test create trigger - meta data should be null
-			//testMetaData(con, "create trigger mytrig after insert on ab for each row mode db2sql create table yy(a int)", true);
+			//testMetaData(con, "create trigger mytrig after insert on ab for each row create table yy(a int)", true);
 
 			// test drop trigger - meta data should be null
 			//testMetaData(con, "drop trigger mytrig", true);

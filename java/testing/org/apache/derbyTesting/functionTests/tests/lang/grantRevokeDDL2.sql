@@ -101,7 +101,7 @@ create procedure revoke_select_proc4()
 -- tests
 
 create trigger grant_select_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call grant_select_proc1();
+	for each STATEMENT call grant_select_proc1();
 -- should fail
 delete from t1 where i = 1;
 -- check delete failed
@@ -113,7 +113,7 @@ select * from user1.t1 where i = 1;
 
 set connection user1;
 create trigger grant_select_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call grant_select_proc2();
+	for each STATEMENT call grant_select_proc2();
 -- should fail
 delete from t1 where i = 2;
 -- check delete failed
@@ -125,7 +125,7 @@ select * from user1.t1 where i = 1;
 
 set connection user1;
 create trigger grant_select_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call grant_select_proc3();
+	for each STATEMENT call grant_select_proc3();
 -- should fail
 delete from t1 where i = 3;
 -- check delete failed
@@ -137,7 +137,7 @@ select * from user1.t1 where i = 1;
 
 set connection user1;
 create trigger grant_select_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call grant_select_proc4();
+	for each STATEMENT call grant_select_proc4();
 -- ok
 delete from t1 where i = 4;
 -- check delete
@@ -149,7 +149,7 @@ select * from user1.t1 where i = 1;
 
 set connection user1;
 create trigger revoke_select_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call revoke_select_proc1();
+	for each STATEMENT call revoke_select_proc1();
 -- should fail
 delete from t1 where i = 5;
 -- check delete failed
@@ -161,7 +161,7 @@ select * from user1.t1 where i = 1;
 
 set connection user1;
 create trigger revoke_select_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call revoke_select_proc2();
+	for each STATEMENT call revoke_select_proc2();
 -- should fail
 delete from t1 where i = 6;
 -- check delete failed
@@ -173,7 +173,7 @@ select * from user1.t1 where i = 1;
 
 set connection user1;
 create trigger revoke_select_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call revoke_select_proc3();
+	for each STATEMENT call revoke_select_proc3();
 -- should fail
 delete from t1 where i = 7;
 -- check delete failed
@@ -185,7 +185,7 @@ select * from user1.t1 where i = 1;
 
 set connection user1;
 create trigger revoke_select_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call revoke_select_proc4();
+	for each STATEMENT call revoke_select_proc4();
 -- ok
 delete from t1 where i = 8;
 -- check delete 
@@ -245,7 +245,7 @@ delete from user1.t1;
 -- test REFERENCES privilege, expect error
 create table t2 (c1 int primary key not null, c2 int references user1.t1);
 -- test TRIGGER privilege, expect error
-create trigger trigger1 after update on user1.t1 for each statement mode db2sql values integer('123');
+create trigger trigger1 after update on user1.t1 for each statement values integer('123');
 -- try to DROP user1.idx1 index, expect error
 drop index user1.idx1;
 -- try to DROP user1.t1 table, expect error
@@ -1104,9 +1104,9 @@ set connection user1;
 set connection user1;
 
 -- expect error
-create trigger tt0a after insert on t1 for each statement mode db2sql grant select on t1 to user2;
+create trigger tt0a after insert on t1 for each statement grant select on t1 to user2;
 -- expect error
-create trigger tt0b after insert on t1 for each statement mode db2sql revoke select on t1 from user2;
+create trigger tt0b after insert on t1 for each statement revoke select on t1 from user2;
 
 -- same schema in trigger action
 drop table t6;
@@ -1116,8 +1116,8 @@ set connection user2;
 drop table t7;
 create table t7 (c1 int, c2 int, c3 int);
 insert into t7 values (1,1,1);
-create trigger tt1 after insert on user1.t6 for each statement mode db2sql update user2.t7 set c2 = 888; 
-create trigger tt2 after insert on user1.t6 for each statement mode db2sql insert into user2.t7 values (2,2,2); 
+create trigger tt1 after insert on user1.t6 for each statement update user2.t7 set c2 = 888; 
+create trigger tt2 after insert on user1.t6 for each statement insert into user2.t7 values (2,2,2); 
 
 set connection user1;
 insert into t6 values (1, 10);
@@ -1135,8 +1135,8 @@ insert into user1.t9 values (10,10,10);
 grant trigger on t8 to user2;
 grant update(c2, c1), insert on t9 to user2;
 set connection user2;
-create trigger tt3 after insert on user1.t8 for each statement mode db2sql update user1.t9 set c2 = 888; 
-create trigger tt4 after insert on user1.t8 for each statement mode db2sql insert into user1.t9 values (2,2,2); 
+create trigger tt3 after insert on user1.t8 for each statement update user1.t9 set c2 = 888; 
+create trigger tt4 after insert on user1.t8 for each statement insert into user1.t9 values (2,2,2); 
 set connection user1;
 -- expect error
 insert into user1.t8 values (1, 10);
@@ -1154,9 +1154,9 @@ grant all privileges on t10 to user2;
 grant all privileges on t11 to user2;
 set connection user2;
 -- ok
-create trigger tt5 after update on user1.t10 for each statement mode db2sql insert into user1.t11 values 1;
-create trigger tt6 after update of i on user1.t10 for each statement mode db2sql insert into user1.t11 values 2;
-create trigger tt7 after update of j on user1.t10 for each statement mode db2sql insert into user1.t11 values 3;
+create trigger tt5 after update on user1.t10 for each statement insert into user1.t11 values 1;
+create trigger tt6 after update of i on user1.t10 for each statement insert into user1.t11 values 2;
+create trigger tt7 after update of j on user1.t10 for each statement insert into user1.t11 values 3;
 
 update user1.t10 set i=10;
 select * from user1.t10;
@@ -1175,7 +1175,7 @@ set connection user1;
 grant trigger on t10 to user2;
 
 set connection user2;
-create trigger tt8 after update of j on user1.t10 for each statement mode db2sql delete from user1.t11;
+create trigger tt8 after update of j on user1.t10 for each statement delete from user1.t11;
 
 update user1.t10 set j=100;
 select * from user1.t10;
@@ -1200,8 +1200,8 @@ create view v(i) as values 888;
 grant select on v to user5;
 
 set connection user5;
-create trigger tt9 after insert on user1.t10 for each statement mode db2sql insert into user1.t11 values (user1.F_ABS1(-5));
-create trigger tt10 after insert on user1.t10 for each statement mode db2sql insert into user1.t11 select * from user1.v;
+create trigger tt9 after insert on user1.t10 for each statement insert into user1.t11 values (user1.F_ABS1(-5));
+create trigger tt10 after insert on user1.t10 for each statement insert into user1.t11 select * from user1.v;
 
 insert into user1.t10 values (1,1);
 select * from user1.t10;

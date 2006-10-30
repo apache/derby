@@ -5266,7 +5266,7 @@ SET SCHEMA "APP"
 -- ----------------------------------------------
 -- DDL Statements for triggers
 -- ----------------------------------------------
-CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW MODE DB2SQL update bar.t1 set i = 4 where i = 2
+CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW update bar.t1 set i = 4 where i = 2
 ############## End File Contents ################
 File dblook.log was empty.
 ************
@@ -5397,7 +5397,7 @@ SET SCHEMA "APP" #
 -- ----------------------------------------------
 -- DDL Statements for triggers
 -- ----------------------------------------------
-CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW MODE DB2SQL update bar.t1 set i = 4 where i = 2 #
+CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW update bar.t1 set i = 4 where i = 2 #
 ************
 Msg Test 5
 ************

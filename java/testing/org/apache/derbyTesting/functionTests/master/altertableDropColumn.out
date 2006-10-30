@@ -351,7 +351,7 @@ ij> -- drop column restrict should fail because column is used in a trigger:
 create table atdc_6 (a integer, b integer);
 0 rows inserted/updated/deleted
 ij> create trigger atdc_6_trigger_1 after update of b on atdc_6
-	for each row mode db2sql values current_date;
+	for each row values current_date;
 0 rows inserted/updated/deleted
 ij> alter table atdc_6 drop column b restrict;
 ERROR X0Y25: Operation 'DROP COLUMN' cannot be performed on object 'B' because TRIGGER 'ATDC_6_TRIGGER_1' is dependent on that object.

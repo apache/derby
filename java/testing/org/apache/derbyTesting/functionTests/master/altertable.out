@@ -247,9 +247,9 @@ ij> create table tab5 (c1 int);
 0 rows inserted/updated/deleted
 ij> insert into tab4 values (1,2,3,4);
 1 row inserted/updated/deleted
-ij> create trigger tr1 after update of c2, c3, c4 on tab4 for each row mode db2sql insert into tab5 values (1);
+ij> create trigger tr1 after update of c2, c3, c4 on tab4 for each row insert into tab5 values (1);
 0 rows inserted/updated/deleted
-ij> create trigger tr2 after update of c3, c4 on tab4 for each row mode db2sql insert into tab5 values (2);
+ij> create trigger tr2 after update of c3, c4 on tab4 for each row insert into tab5 values (2);
 0 rows inserted/updated/deleted
 ij> -- tr1 is dropped, tr2 still OK
 drop trigger tr1;

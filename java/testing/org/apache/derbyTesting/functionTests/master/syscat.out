@@ -681,7 +681,7 @@ where conglomeratename = 'DECIMAL_TAB_IDX' order by conglomeratename;
 CONGLOMERATENAME                                                                                                                |DESCRIPTOR     
 ------------------------------------------------------------------------------------------------------------------------------------------------
 DECIMAL_TAB_IDX                                                                                                                 |BTREE (1)      
-ij> create trigger t1 after update on decimal_tab for each row mode db2sql values 1;
+ij> create trigger t1 after update on decimal_tab for each row values 1;
 0 rows inserted/updated/deleted
 ij> -- referenced columns.
 select triggername, referencedcolumns

@@ -175,9 +175,9 @@ declare global temporary table SESSION.xglobal (myx XML)
   not logged on commit preserve rows;
 ERROR 42962: Long column type column or parameter 'MYX' not permitted in declared global temporary tables or procedure definitions. 
 ij> -- XML cols can be used in a SET clause, if target value is XML.
-create trigger tr2 after insert on t1 for each row mode db2sql update t1 set x = 'hmm';
+create trigger tr2 after insert on t1 for each row update t1 set x = 'hmm';
 ERROR 42821: Columns of type 'XML' cannot hold values of type 'CHAR'. 
-ij> create trigger tr1 after insert on t1 for each row mode db2sql update t1 set x = null;
+ij> create trigger tr1 after insert on t1 for each row update t1 set x = null;
 0 rows inserted/updated/deleted
 ij> drop trigger tr1;
 0 rows inserted/updated/deleted
@@ -1223,7 +1223,7 @@ ij> create table t10 (i int, x xml);
 0 rows inserted/updated/deleted
 ij> insert into t9 values (1, xmlparse(document '<name> john </name>' preserve whitespace));
 1 row inserted/updated/deleted
-ij> create trigger tx after insert on t9 for each statement mode db2sql
+ij> create trigger tx after insert on t9 for each statement
    insert into t10 values (1, xmlparse(document '<name> jane </name>' preserve whitespace));
 0 rows inserted/updated/deleted
 ij> insert into t9 values (2, xmlparse(document '<name> ally </name>' preserve whitespace));
@@ -1259,7 +1259,7 @@ ij> delete from t10;
 2 rows inserted/updated/deleted
 ij> insert into t9 values (1, xmlparse(document '<name> john </name>' preserve whitespace));
 1 row inserted/updated/deleted
-ij> create trigger tx after insert on t9 for each statement mode db2sql
+ij> create trigger tx after insert on t9 for each statement
    insert into t10 values (1, (select xmlquery('.' passing by ref x returning sequence empty on empty) from t9 where i = 1));
 0 rows inserted/updated/deleted
 ij> insert into t9 values (2, xmlparse(document '<name> ally </name>' preserve whitespace));

@@ -3106,12 +3106,12 @@ public class updatableResultSet {
 		stmt.executeUpdate("create table table0WithTriggers (c1 int, c2 bigint)");
 		stmt.executeUpdate("create table deleteTriggerInsertIntoThisTable (c1 int)");
 		stmt.executeUpdate("create table updateTriggerInsertIntoThisTable (c1 int)");
-		stmt.executeUpdate("create trigger tr1 after delete on table0WithTriggers for each statement mode db2sql insert into deleteTriggerInsertIntoThisTable values (1)");
-		stmt.executeUpdate("create trigger tr2 after update on table0WithTriggers for each statement mode db2sql insert into updateTriggerInsertIntoThisTable values (1)");
+		stmt.executeUpdate("create trigger tr1 after delete on table0WithTriggers for each statement insert into deleteTriggerInsertIntoThisTable values (1)");
+		stmt.executeUpdate("create trigger tr2 after update on table0WithTriggers for each statement insert into updateTriggerInsertIntoThisTable values (1)");
 		stmt.executeUpdate("create table table1WithTriggers (c1 int, c2 bigint)");
-		stmt.executeUpdate("create trigger tr3 after delete on table1WithTriggers referencing old as old for each row mode db2sql delete from table1WithTriggers where c1=old.c1+1 or c1=old.c1-1");
+		stmt.executeUpdate("create trigger tr3 after delete on table1WithTriggers referencing old as old for each row delete from table1WithTriggers where c1=old.c1+1 or c1=old.c1-1");
 		stmt.executeUpdate("create table table2WithTriggers (c1 int, c2 bigint)");
-		stmt.executeUpdate("create trigger tr4 after update of c2 on table2WithTriggers for each statement mode db2sql update table2WithTriggers set c1=1");
+		stmt.executeUpdate("create trigger tr4 after update of c2 on table2WithTriggers for each statement update table2WithTriggers set c1=1");
 		stmt.executeUpdate("create table selfReferencingT1 (c1 char(2) not null, c2 char(2), constraint selfReferencingT1 primary key(c1), constraint manages1 foreign key(c2) references selfReferencingT1(c1) on delete cascade)");
 		stmt.executeUpdate("create table selfReferencingT2 (c1 char(2) not null, c2 char(2), constraint selfReferencingT2 primary key(c1), constraint manages2 foreign key(c2) references selfReferencingT2(c1) on update restrict)");
 

@@ -211,9 +211,9 @@ XID            |TYPE |MODE|TABLENAME                                            
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij> commit;
 ij> -- create some triggers.
-create trigger update_of_t after update on t for each row mode db2sql values 2;
+create trigger update_of_t after update on t for each row values 2;
 0 rows inserted/updated/deleted
-ij> create trigger insert_of_t after insert on t for each row mode db2sql values 3;
+ij> create trigger insert_of_t after insert on t for each row values 3;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- t has (1,1) (2,1) (3,2)

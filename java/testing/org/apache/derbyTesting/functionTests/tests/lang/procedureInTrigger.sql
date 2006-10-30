@@ -134,7 +134,7 @@ create procedure proc_using_non_existent_method()
 --- tests
 
 create trigger after_stmt_trig_no_sql AFTER insert on t2 
-	for each STATEMENT mode db2sql call proc_no_sql();
+	for each STATEMENT call proc_no_sql();
 --- insert 2 rows. check that trigger is fired - procedure should be called once
 insert into t2 values (1,2), (2,4);
 --- check inserts are successful
@@ -156,7 +156,7 @@ insert into t2 values (3,6);
 select * from t2;
 
 create trigger after_row_trig_no_sql AFTER delete on t2 
-	for each ROW mode db2sql call proc_no_sql();
+	for each ROW call proc_no_sql();
 --- delete all rows. check that trigger is fired - procedure should be called 2 times
 delete from t2;
 --- check delete is successful
@@ -166,7 +166,7 @@ drop trigger after_stmt_trig_no_sql;
 drop trigger after_row_trig_no_sql;
 
 create trigger before_stmt_trig_no_sql no cascade BEFORE insert on t2 
-	for each STATEMENT mode db2sql call proc_no_sql();
+	for each STATEMENT call proc_no_sql();
 --- insert 2 rows. check that trigger is fired - procedure should be called once
 insert into t2 values (1,2), (2,4);
 --- check inserts are successful
@@ -188,7 +188,7 @@ insert into t2 values (3,6);
 select * from t2;
 
 create trigger before_row_trig_no_sql no cascade BEFORE delete on t2 
-	for each ROW mode db2sql call proc_no_sql();
+	for each ROW call proc_no_sql();
 --- delete and check trigger fired. procedure called twice
 delete from t2;
 --- check delete is successful. t2 must be empty
@@ -199,14 +199,14 @@ drop trigger before_row_trig_no_sql;
 
 insert into t2 values (1,2), (2,4);
 create trigger after_row_trig_contains_sql AFTER update on t2 
-	for each ROW mode db2sql call proc_contains_sql();
+	for each ROW call proc_contains_sql();
 --- update 2 rows. check that trigger is fired - procedure should be called twice
 update t2 set x=x*2;
 --- check updates are successful
 select * from t2;
 
 create trigger before_stmt_trig_contains_sql no cascade BEFORE delete on t2 
-	for each STATEMENT mode db2sql call proc_contains_sql();
+	for each STATEMENT call proc_contains_sql();
 --- delete 2 rows. check that trigger is fired - procedure should be called once
 delete from t2;
 --- check delete is successful
@@ -218,7 +218,7 @@ drop trigger before_stmt_trig_contains_sql;
 --- create a row in t1 for use in select in the procedure
 insert into t1 values (1, 'one');
 create trigger after_stmt_trig_reads_sql AFTER insert on t2 
-	for each STATEMENT mode db2sql call proc_reads_sql(1);
+	for each STATEMENT call proc_reads_sql(1);
 --- insert 2 rows. check that trigger is fired - procedure should be called once
 insert into t2 values (1,2), (2,4);
 --- check inserts are successful
@@ -226,7 +226,7 @@ select * from t2;
 drop trigger after_stmt_trig_reads_sql;
 
 create trigger before_row_trig_reads_sql no cascade BEFORE delete on t2 
-	for each ROW mode db2sql call proc_reads_sql(1);
+	for each ROW call proc_reads_sql(1);
 --- delete 2 rows. check that trigger is fired - procedure should be called twice
 delete from t2;
 --- check delete is successful
@@ -236,7 +236,7 @@ drop trigger before_row_trig_reads_sql;
 --- empty t1
 delete from t1;
 create trigger after_stmt_trig_modifies_sql_insert_op AFTER insert on t2 
-	for each STATEMENT mode db2sql call proc_modifies_sql_insert_op(1, 'one');
+	for each STATEMENT call proc_modifies_sql_insert_op(1, 'one');
 --- insert 2 rows
 insert into t2 values (1,2), (2,4);
 --- check trigger is fired. insertRow should be called once
@@ -245,7 +245,7 @@ select * from t1;
 select * from t2;
 
 create trigger after_row_trig_modifies_sql_update_op AFTER update of x on t2 
-	for each ROW mode db2sql call proc_modifies_sql_update_op(2);
+	for each ROW call proc_modifies_sql_update_op(2);
 --- update all rows
 update t2 set x=x*2;
 --- check row trigger was fired. value of i should be 5
@@ -254,7 +254,7 @@ select * from t1;
 select * from t2;
 
 create trigger after_stmt_trig_modifies_sql_delete_op AFTER delete on t2 
-	for each STATEMENT mode db2sql call proc_modifies_sql_delete_op(5);
+	for each STATEMENT call proc_modifies_sql_delete_op(5);
 --- delete from t2
 delete from t2;
 --- check trigger is fired. table t1 should be empty
@@ -268,7 +268,7 @@ drop trigger after_stmt_trig_modifies_sql_delete_op;
 
 create trigger refer_new_row_trig AFTER insert on t2 
 	REFERENCING NEW as new
-	for each ROW mode db2sql call proc_modifies_sql_insert_op(new.x, 'new');
+	for each ROW call proc_modifies_sql_insert_op(new.x, 'new');
 --- insert a row
 insert into t2 values (25, 50);
 --- check trigger is fired. insertRow should be called once
@@ -278,7 +278,7 @@ select * from t2;
 
 create trigger refer_old_row_trig AFTER delete on t2 
 	REFERENCING OLD as old
-	for each ROW mode db2sql call proc_modifies_sql_delete_op(old.x);
+	for each ROW call proc_modifies_sql_delete_op(old.x);
 --- delete a row
 delete from t2 where x=25;
 --- check trigger is fired. deleteRow should be called once
@@ -292,12 +292,12 @@ drop trigger refer_old_row_trig;
 --- create a before trigger that calls a procedure that modifies sql data. 
 --- trigger creation should fail
 create trigger before_trig_modifies_sql no cascade BEFORE insert on t2 
-	for each STATEMENT mode db2sql call proc_modifies_sql_insert_op(1, 'one');
+	for each STATEMENT call proc_modifies_sql_insert_op(1, 'one');
 
 --- in a BEFORE trigger, call a procedure which actually modifies SQL data	
 --- trigger creation will pass but firing should fail
 create trigger bad_before_trig no cascade BEFORE insert on t2 
-	for each STATEMENT mode db2sql call proc_wrongly_defined_as_no_sql(50, 'fifty');
+	for each STATEMENT call proc_wrongly_defined_as_no_sql(50, 'fifty');
 --- try to insert 2 rows
 --- Bug DERBY-1629 -- in JDK 1.6 you only get 38001, not 38000
 insert into t2 values (1,2), (2,4);
@@ -309,7 +309,7 @@ drop trigger bad_before_trig;
 
 --- procedures which insert/update/delete into trigger table
 create trigger insert_trig AFTER update on t1 
-	for each STATEMENT mode db2sql call proc_modifies_sql_insert_op(1, 'one');
+	for each STATEMENT call proc_modifies_sql_insert_op(1, 'one');
 insert into t1 values(2, 'two');
 update t1 set i=i+1;
 --- Check that update and insert successful. t1 should have 2 rows
@@ -322,14 +322,14 @@ select * from t1;
 drop trigger insert_trig;
 
 create trigger update_trig AFTER insert on t1 
-	for each STATEMENT mode db2sql call proc_modifies_sql_update_op(2);
+	for each STATEMENT call proc_modifies_sql_update_op(2);
 insert into t1 values (4,'four');
 --- Check that insert successful and trigger fired. 
 select * from t1;
 drop trigger update_trig;
 
 create trigger delete_trig AFTER insert on t1 
-	for each STATEMENT mode db2sql call proc_modifies_sql_delete_op(3);
+	for each STATEMENT call proc_modifies_sql_delete_op(3);
 insert into t1 values (8,'eight');
 --- Check that insert was successful and trigger was fired
 select * from t1;
@@ -337,7 +337,7 @@ drop trigger delete_trig;
 
 --- Procedures with schema name
 create trigger call_proc_in_default_schema AFTER insert on t2 
-	for each STATEMENT mode db2sql call APP.proc_no_sql();
+	for each STATEMENT call APP.proc_no_sql();
 --- insert 2 rows. check that trigger is fired - procedure should be called once
 insert into t2 values (1,2), (2,4);
 --- check inserts are successful
@@ -345,7 +345,7 @@ select * from t2;
 drop trigger call_proc_in_default_schema;
 
 create trigger call_proc_in_default_schema no cascade BEFORE delete on t2 
-	for each ROW mode db2sql call APP.proc_no_sql();
+	for each ROW call APP.proc_no_sql();
 --- delete 2 rows. check that trigger is fired - procedure should be called twice
 delete from t2;
 --- check delete is successful
@@ -353,7 +353,7 @@ select * from t2;
 drop trigger call_proc_in_default_schema;
 
 create trigger call_proc_in_new_schema no cascade BEFORE insert on t2 
-	for each STATEMENT mode db2sql call new_schema.proc_in_new_schema();
+	for each STATEMENT call new_schema.proc_in_new_schema();
 --- insert 2 rows. check that trigger is fired - procedure should be called once
 insert into t2 values (1,2), (2,4);
 --- check inserts are successful
@@ -361,7 +361,7 @@ select * from t2;
 drop trigger call_proc_in_new_schema;
 
 create trigger call_proc_in_new_schema AFTER delete on t2 
-	for each ROW mode db2sql call new_schema.proc_in_new_schema();
+	for each ROW call new_schema.proc_in_new_schema();
 --- delete 2 rows. check that trigger is fired - procedure should be called twice
 delete from t2;
 --- check delete is successful
@@ -370,47 +370,47 @@ drop trigger call_proc_in_new_schema;
 
 --- non-existent procedure
 create trigger call_non_existent_proc1 AFTER insert on t2 
-	for each ROW mode db2sql call non_existent_proc();
+	for each ROW call non_existent_proc();
 select count(*) from SYS.SYSTRIGGERS where triggername='CALL_NON_EXISTENT_PROC1';
 
 create trigger call_proc_with_non_existent_proc2 AFTER insert on t2 
-	for each ROW mode db2sql call new_schema.non_existent_proc();
+	for each ROW call new_schema.non_existent_proc();
 select count(*) from SYS.SYSTRIGGERS where triggername='CALL_NON_EXISTENT_PROC2';
 
 create trigger call_proc_in_non_existent_schema AFTER insert on t2 
-	for each ROW mode db2sql call non_existent_schema.non_existent_proc();
+	for each ROW call non_existent_schema.non_existent_proc();
 select count(*) from SYS.SYSTRIGGERS where triggername='CALL_PROC_IN_NON_EXISTENT_SCHEMA';
 
 create trigger call_proc_using_non_existent_method AFTER insert on t2 
-	for each ROW mode db2sql call proc_using_non_existent_method();
+	for each ROW call proc_using_non_existent_method();
 select count(*) from SYS.SYSTRIGGERS where triggername='CALL_PROC_WITH_NON_EXISTENT_METHOD';
 
 create trigger call_non_existent_proc1 no cascade BEFORE insert on t2 
-	for each ROW mode db2sql call non_existent_proc();
+	for each ROW call non_existent_proc();
 select count(*) from SYS.SYSTRIGGERS where triggername='CALL_NON_EXISTENT_PROC1';
 
 create trigger call_proc_with_non_existent_proc2 no cascade BEFORE insert on t2 
-	for each ROW mode db2sql call new_schema.non_existent_proc();
+	for each ROW call new_schema.non_existent_proc();
 select count(*) from SYS.SYSTRIGGERS where triggername='CALL_NON_EXISTENT_PROC2';
 
 create trigger call_proc_in_non_existent_schema no cascade BEFORE insert on t2 
-	for each ROW mode db2sql call non_existent_schema.non_existent_proc();
+	for each ROW call non_existent_schema.non_existent_proc();
 select count(*) from SYS.SYSTRIGGERS where triggername='CALL_PROC_IN_NON_EXISTENT_SCHEMA';
 
 create trigger call_proc_using_non_existent_method no cascade BEFORE insert on t2 
-	for each ROW mode db2sql call proc_using_non_existent_method();
+	for each ROW call proc_using_non_existent_method();
 select count(*) from SYS.SYSTRIGGERS where triggername='CALL_PROC_WITH_NON_EXISTENT_METHOD';
 
 --- triggers must not allow dynamic parameters (?)
 create trigger update_trig AFTER insert on t1 
-	for each STATEMENT mode db2sql call proc_modifies_sql_update_op(?);
+	for each STATEMENT call proc_modifies_sql_update_op(?);
 
 --- insert some rows into t2
 insert into t2 values (1,2), (2,4);
 
 --- use procedure with commit
 create trigger commit_trig AFTER delete on t2 
-	for each STATEMENT mode db2sql call commit_proc();
+	for each STATEMENT call commit_proc();
 --- should fail 
 delete from t2;
 --- check delete failed
@@ -418,7 +418,7 @@ select * from t2;
 drop trigger commit_trig;
 
 create trigger commit_trig no cascade BEFORE delete on t2 
-	for each STATEMENT mode db2sql call commit_proc();
+	for each STATEMENT call commit_proc();
 --- should fail 
 delete from t2;
 --- check delete failed
@@ -427,7 +427,7 @@ drop trigger commit_trig;
 
 --- use procedure with rollback
 create trigger rollback_trig AFTER delete on t2 
-	for each STATEMENT mode db2sql call rollback_proc();
+	for each STATEMENT call rollback_proc();
 --- should fail 
 delete from t2;
 --- check delete failed
@@ -435,7 +435,7 @@ select * from t2;
 drop trigger rollback_trig;
 
 create trigger rollback_trig no cascade BEFORE delete on t2 
-	for each STATEMENT mode db2sql call rollback_proc();
+	for each STATEMENT call rollback_proc();
 --- should fail 
 delete from t2;
 --- check delete failed
@@ -444,7 +444,7 @@ drop trigger rollback_trig;
 
 --- use procedure which changes isolation level
 create trigger set_isolation_trig AFTER delete on t2 
-	for each STATEMENT mode db2sql call set_isolation_proc();
+	for each STATEMENT call set_isolation_proc();
 --- should fail 
 delete from t2;
 --- check delete failed
@@ -452,7 +452,7 @@ select * from t2;
 drop trigger set_isolation_trig;
 
 create trigger set_isolation_trig no cascade BEFORE delete on t2 
-	for each STATEMENT mode db2sql call set_isolation_proc();
+	for each STATEMENT call set_isolation_proc();
 --- should fail 
 delete from t2;
 --- check delete failed
@@ -461,7 +461,7 @@ drop trigger set_isolation_trig;
 
 --- call procedure that selects from same trigger table
 create trigger select_from_trig_table AFTER insert on t1
-	for each STATEMENT mode db2sql call proc_reads_sql(1);
+	for each STATEMENT call proc_reads_sql(1);
 --- insert 2 rows. check that trigger is fired - procedure should be called once
 insert into t1 values (10, 'ten');
 --- check inserts are successful
@@ -469,7 +469,7 @@ select * from t1;
 drop trigger select_from_trig_table;
 
 create trigger select_from_trig_table no cascade before delete on t1
-	for each STATEMENT mode db2sql call proc_reads_sql(1);
+	for each STATEMENT call proc_reads_sql(1);
 --- delete a row. check that trigger is fired - procedure should be called once
 delete from t1 where i=10;
 --- check delete is successful
@@ -478,7 +478,7 @@ drop trigger select_from_trig_table;
 
 --- use procedures which alter/drop trigger table and some other table
 create trigger alter_table_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call alter_table_proc();
+	for each STATEMENT call alter_table_proc();
 --- should fail
 delete from t1;
 --- check delete failed
@@ -486,7 +486,7 @@ select * from t1;
 drop trigger alter_table_trig;
 
 create trigger drop_table_trig AFTER delete on t2 
-	for each STATEMENT mode db2sql call drop_table_proc();
+	for each STATEMENT call drop_table_proc();
 --- should fail
 delete from t2;
 --- check delete failed
@@ -495,7 +495,7 @@ drop trigger drop_table_trig;
 
 --- use procedures which create/drop trigger on trigger table and some other table
 create trigger create_trigger_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call create_trigger_proc();
+	for each STATEMENT call create_trigger_proc();
 --- should fail
 delete from t1;
 --- check delete failed
@@ -505,10 +505,10 @@ select count(*) from SYS.SYSTRIGGERS where triggername='TEST_TRIG';
 drop trigger create_trigger_trig;
 
 --- create a trigger to test we cannot drop it from a procedure called by a trigger
-create trigger test_trig AFTER delete on t1 for each STATEMENT mode db2sql insert into  t1 values(20, 'twenty');
+create trigger test_trig AFTER delete on t1 for each STATEMENT insert into  t1 values(20, 'twenty');
 
 create trigger drop_trigger_trig AFTER delete on t2 
-	for each STATEMENT mode db2sql call drop_trigger_proc();
+	for each STATEMENT call drop_trigger_proc();
 --- should fail
 delete from t2;
 --- check delete failed
@@ -519,7 +519,7 @@ drop trigger drop_trigger_trig;
 
 --- use procedures which create/drop index on trigger table and some other table
 create trigger create_index_trig AFTER delete on t2 
-	for each STATEMENT mode db2sql call create_index_proc();
+	for each STATEMENT call create_index_proc();
 --- should fail
 delete from t2;
 --- check delete failed
@@ -532,7 +532,7 @@ drop trigger create_index_trig;
 create index ix on t1(i,b);
 
 create trigger drop_index_trig AFTER delete on t1 
-	for each STATEMENT mode db2sql call drop_index_proc();
+	for each STATEMENT call drop_index_proc();
 --- should fail
 delete from t1;
 --- check delete failed

@@ -229,7 +229,7 @@ create view foo1 as select * from app.test;
 -- Negative tests. Disable use of schemas starting with SYS
 set schema app;
 create table t1 (c1 int);
-create trigger sysblah.trig1 after update of c1 on t1 for each row mode db2sql insert into t1 values 1;
+create trigger sysblah.trig1 after update of c1 on t1 for each row insert into t1 values 1;
 create procedure sysblah.dummy() language java external name 'NotReallyThere.NoMethod' parameter style java;
 drop table t1;
 
@@ -527,7 +527,7 @@ execute PS5146_VIEW;
 select * from A5146.V;
 drop view A5146.V;
 
-prepare PS5146_TRIGGER as 'create trigger A5146.DT_TRIG AFTER INSERT ON B5146.DT FOR EACH STATEMENT MODE DB2SQL UPDATE  B5146.DT SET I = I + 1';
+prepare PS5146_TRIGGER as 'create trigger A5146.DT_TRIG AFTER INSERT ON B5146.DT FOR EACH STATEMENT UPDATE  B5146.DT SET I = I + 1';
 drop schema A5146 restrict;
 execute PS5146_TRIGGER;
 drop trigger A5146.DT_TRIG;
@@ -555,7 +555,7 @@ select * from ISC.V;
 drop view ISC.V;
 drop schema ISC restrict;
 
-prepare ISC_TRIGGER as 'create trigger ISC.DT_TRIG AFTER INSERT ON B5146.DT FOR EACH STATEMENT MODE DB2SQL UPDATE  B5146.DT SET I = I + 1';
+prepare ISC_TRIGGER as 'create trigger ISC.DT_TRIG AFTER INSERT ON B5146.DT FOR EACH STATEMENT UPDATE  B5146.DT SET I = I + 1';
 execute ISC_TRIGGER;
 insert into B5146.DT values 999;
 drop trigger ISC.DT_TRIG;

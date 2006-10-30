@@ -336,7 +336,7 @@ delete from alltypes;
 create table test1(a char(20)) ;
 create trigger trig_import after INSERT on alltypes
 referencing new as newrow
-for each  row mode db2sql
+for each  row
 insert into test1 values(newrow.chartype);
 
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALLTYPES' , 'extinout/alltypes.del' , 

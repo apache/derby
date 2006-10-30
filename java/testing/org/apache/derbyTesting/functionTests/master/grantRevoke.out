@@ -11,7 +11,7 @@ InsertPrivCheck: insert into "S2"."T1" values(0,0,0)
 UpdatePrivCheck: update S2.T1 set C1=0
 UpdatePrivCheck: update S2.T1 set C2=0
 UpdatePrivCheck: update S2.T1 set C3=0
-TriggerPrivCheck: create trigger "T1Trig" after insert on "S2"."T1" for each row mode db2sql values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "S2"."T1" for each row values 1
 SelectPrivCheck: select * from S2.T1
 SelectPrivCheck: select count(*) from "S2"."T1" where (C1 is null) or (C2 is null) or (C3 is null)
 DeletePrivCheck: delete from "S2"."T1"
@@ -19,7 +19,7 @@ InsertPrivCheck: insert into "S2"."T1" values(0,0,0)
 UpdatePrivCheck: update S2.T1 set C1=0
 UpdatePrivCheck: update S2.T1 set C2=0
 UpdatePrivCheck: update S2.T1 set C3=0
-TriggerPrivCheck: create trigger "T1Trig" after insert on "S2"."T1" for each row mode db2sql values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "S2"."T1" for each row values 1
 SelectPrivCheck: select * from S2.T1
 SelectPrivCheck: select count(*) from "S2"."T1" where (C1 is null) or (C2 is null) or (C3 is null)
 DeletePrivCheck: delete from "S2"."T1"
@@ -27,7 +27,7 @@ InsertPrivCheck: insert into "S2"."T1" values(0,0,0)
 UpdatePrivCheck: update S2.T1 set C1=0
 UpdatePrivCheck: update S2.T1 set C2=0
 UpdatePrivCheck: update S2.T1 set C3=0
-TriggerPrivCheck: create trigger "T1Trig" after insert on "S2"."T1" for each row mode db2sql values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "S2"."T1" for each row values 1
 SelectPrivCheck: select * from S1.T1
 SelectPrivCheck: select count(*) from "S1"."T1" where (C1 is null) or (C2 is null) or (C3 is null)
 SelectPrivCheck: select * from S2.T2
@@ -113,7 +113,7 @@ UpdatePrivCheck: update R2.T1 set C3=0
 UpdatePrivCheck: update R2.T1 set C3=0
 InsertPrivCheck: insert into "R2"."T1" values(0,0,0)
 DeletePrivCheck: delete from "R2"."T1"
-TriggerPrivCheck: create trigger "T1Trig" after insert on "R2"."T1" for each row mode db2sql values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "R2"."T1" for each row values 1
 Revoke test: single table privilege, one user
 SelectPrivCheck: select * from R2.T1
 SelectPrivCheck: select count(*) from "R2"."T1" where (C1 is null) or (C2 is null) or (C3 is null)
@@ -123,7 +123,7 @@ UpdatePrivCheck: update R2.T1 set C3=0
 UpdatePrivCheck: update R2.T1 set C3=0
 InsertPrivCheck: insert into "R2"."T1" values(0,0,0)
 DeletePrivCheck: delete from "R2"."T1"
-TriggerPrivCheck: create trigger "T1Trig" after insert on "R2"."T1" for each row mode db2sql values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "R2"."T1" for each row values 1
 SelectPrivCheck: select * from R1.T1
 SelectPrivCheck: select count(*) from "R1"."T1" where (C1 is null) or (C2 is null) or (C3 is null)
 SelectPrivCheck: select * from R1.T1
@@ -134,8 +134,8 @@ UpdatePrivCheck: update R1.T1 set C1=0
 UpdatePrivCheck: update R1.T1 set C2=0
 UpdatePrivCheck: update R1.T1 set C3=0
 UpdatePrivCheck: update R1.T1 set C3=0
-TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row mode db2sql values 1
-TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row mode db2sql values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row values 1
 Revoke test: multiple table permissions, multiple users
 SelectPrivCheck: select * from R1.T1
 SelectPrivCheck: select count(*) from "R1"."T1" where (C1 is null) or (C2 is null) or (C3 is null)
@@ -149,8 +149,8 @@ UpdatePrivCheck: update R1.T1 set C3=0
 UpdatePrivCheck: update R1.T1 set C1=0
 UpdatePrivCheck: update R1.T1 set C2=0
 UpdatePrivCheck: update R1.T1 set C3=0
-TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row mode db2sql values 1
-TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row mode db2sql values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row values 1
 Revoke test: table privilege implies column privileges
 UpdatePrivCheck: update R1.T1 set C1=0
 UpdatePrivCheck: update R1.T1 set C1=0
@@ -160,7 +160,7 @@ Revoke test: all privileges
 UpdatePrivCheck: update R1.T1 set C1=0
 UpdatePrivCheck: update R1.T1 set C2=0
 UpdatePrivCheck: update R1.T1 set C3=0
-TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row mode db2sql values 1
+TriggerPrivCheck: create trigger "T1Trig" after insert on "R1"."T1" for each row values 1
 ExecutePrivCheck: values "R1"."F1"()
 ExecutePrivCheck: values "R1"."F1"()
 ExecutePrivCheck: call "R1"."F1"()

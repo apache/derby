@@ -253,9 +253,9 @@ ij(SWIPERCONNECTION)> create table my_tsat (i int not null, c char(10), constrai
 ij(SWIPERCONNECTION)> -- Some TRIGGER privilege checks. See GrantRevoke.java for more tests
 set connection swiperConnection;
 ij(SWIPERCONNECTION)> -- Should fail
-create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+create trigger trig_sat1 after update on satheesh.tsat for each statement values 1;
 ERROR: Failed with SQLSTATE 28506
-ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement values 1;
 ERROR: Failed with SQLSTATE 28506
 ij(SWIPERCONNECTION)> -- Grant trigger privilege
 set connection satConnection;
@@ -263,9 +263,9 @@ ij(SATCONNECTION)> grant trigger on tsat to swiper;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Try now
 set connection swiperConnection;
-ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement values 1;
 0 rows inserted/updated/deleted
-ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement values 1;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> drop trigger trig_sat1;
 0 rows inserted/updated/deleted
@@ -276,18 +276,18 @@ set connection satConnection;
 ij(SATCONNECTION)> revoke trigger on tsat from swiper;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> set connection swiperConnection;
-ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement values 1;
 ERROR: Failed with SQLSTATE 28506
-ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement values 1;
 ERROR: Failed with SQLSTATE 28506
 ij(SWIPERCONNECTION)> -- Now grant access to public and try again
 set connection satConnection;
 ij(SATCONNECTION)> grant trigger on tsat to public;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> set connection swiperConnection;
-ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement values 1;
 0 rows inserted/updated/deleted
-ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement values 1;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> drop trigger trig_sat1;
 0 rows inserted/updated/deleted
@@ -1233,7 +1233,7 @@ ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t32TriggerTest (c321 int);
 0 rows inserted/updated/deleted
 ij(MAMTA3)> -- following should fail because not all the privileges are in place
-create trigger tr31t31TriggerTest after insert on t31TriggerTest for each statement mode db2sql
+create trigger tr31t31TriggerTest after insert on t31TriggerTest for each statement
 	insert into t32TriggerTest values (select c111 from mamta2.v21ViewTest where c112=1);
 ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> insert into t31TriggerTest values(1);
@@ -1932,7 +1932,7 @@ ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA2)> create table t22TriggerTest (c221 int);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- following should pass because all the privileges are in places
-create trigger tr21t21TriggerTest after insert on t21TriggerTest for each statement mode db2sql
+create trigger tr21t21TriggerTest after insert on t21TriggerTest for each statement
 	insert into t22TriggerTest values (select c111 from mamta1.t11TriggerTest where c112=1);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> insert into t21TriggerTest values(1);
@@ -1987,7 +1987,7 @@ ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> create table t21TriggerTest (c211 int);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- following should pass because all the privileges are in places
-create trigger tr21t21TriggerTest after insert on t21TriggerTest for each statement mode db2sql
+create trigger tr21t21TriggerTest after insert on t21TriggerTest for each statement
 	insert into mamta1.t12RoutineTest values (select c111 from mamta1.t11TriggerTest where c111=1);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- this insert's trigger will cause a new row in mamta1.t12RoutineTest
@@ -2014,7 +2014,7 @@ C121
 3 rows selected
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- following should fail because mamta2 doesn't have trigger permission on mamta1.t11TriggerTest
-create trigger tr11t11TriggerTest after insert on mamta1.t11TriggerTest for each statement mode db2sql
+create trigger tr11t11TriggerTest after insert on mamta1.t11TriggerTest for each statement
         insert into mamta1.t12RoutineTest values (1);
 ERROR: Failed with SQLSTATE 28506
 ij(MAMTA2)> set connection mamta1;
@@ -2022,7 +2022,7 @@ ij(MAMTA1)> grant trigger on t11TriggerTest to mamta2;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- following will pass now because mamta2 has trigger permission on mamta1.t11TriggerTest
-create trigger tr11t11TriggerTest after insert on mamta1.t11TriggerTest for each statement mode db2sql
+create trigger tr11t11TriggerTest after insert on mamta1.t11TriggerTest for each statement
         insert into mamta1.t12RoutineTest values (1);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- following will fail becuae mamta2 has TRIGGER privilege but not INSERT privilege on mamta1.t11TriggerTest
@@ -2085,7 +2085,7 @@ ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t31TriggerTest(c11 int);
 0 rows inserted/updated/deleted
 ij(MAMTA3)> -- following will pass because all the required privileges are in place for mamta3
-create trigger tr31t31 after insert on t31TriggerTest for each statement mode db2sql
+create trigger tr31t31 after insert on t31TriggerTest for each statement
         insert into mamta1.t13TriggerTest values (values mamta1.selectFromSpecificSchema(1));
 0 rows inserted/updated/deleted
 ij(MAMTA3)> -- following insert will cause a row to be inserted into mamta1.t13TriggerTest if the session user
@@ -2283,7 +2283,7 @@ ij(MAMTA4)> create table t41TriggerTest (c411 int);
 0 rows inserted/updated/deleted
 ij(MAMTA4)> drop trigger tr41t41;
 ERROR: Failed with SQLSTATE 42X94
-ij(MAMTA4)> create trigger tr41t41 after insert on t41TriggerTest for each statement mode db2sql
+ij(MAMTA4)> create trigger tr41t41 after insert on t41TriggerTest for each statement
         insert into mamta3.t31TriggerTest (select * from mamta2.v21ViewTest);
 ERROR: Failed with SQLSTATE 28508
 ij(MAMTA4)> insert into t41TriggerTest values(1);
@@ -2427,7 +2427,7 @@ ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA2)> create table t21TriggerRevokeTest (c211 int);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- following will pass because mamta2 has trigger permission on mamta1.t11TriggerRevokeTest
-create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement
         insert into t21TriggerRevokeTest values(99);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- no data in the table in which trigger is going to insert
@@ -2461,7 +2461,7 @@ C211
 99         
 1 row selected
 ij(MAMTA2)> -- following attempt to create insert trigger again will fail because trigger privilege has been revoked.
-create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement
         insert into t21TriggerRevokeTest values(99);
 ERROR: Failed with SQLSTATE 28506
 ij(MAMTA2)> set connection mamta1;
@@ -2469,7 +2469,7 @@ ij(MAMTA1)> grant trigger on t11TriggerRevokeTest to mamta2;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- following attempt to create insert trigger again will pass because mamta2 has got the necessary trigger privilege.
-create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement
         insert into t21TriggerRevokeTest values(99);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> select * from t21TriggerRevokeTest;
@@ -2522,7 +2522,7 @@ ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA2)> create table t21TriggerRevokeTest (c211 int);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- following will pass because mamta2 has trigger permission on mamta1.t11TriggerRevokeTest
-create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement
         insert into t21TriggerRevokeTest values(99);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- no data in the table in which trigger is going to insert
@@ -2558,7 +2558,7 @@ C211
 99         
 1 row selected
 ij(MAMTA2)> -- following attempt to create insert trigger again will pas because TRIGGER privilege was never revoked.
-create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement mode db2sql
+create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest for each statement
         insert into t21TriggerRevokeTest values(99);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> set connection mamta1;
@@ -2612,11 +2612,11 @@ ij(MAMTA2)> create table t21TriggerRevokeTest (c211 int);
 ij(MAMTA2)> insert into t21TriggerRevokeTest values(1);
 1 row inserted/updated/deleted
 ij(MAMTA2)> -- following will pass because mamta2 has required permissions on mamta1.t11TriggerRevokeTest
-create trigger tr211t21 after insert on t21TriggerRevokeTest for each statement mode db2sql
+create trigger tr211t21 after insert on t21TriggerRevokeTest for each statement
         insert into mamta1.t11TriggerRevokeTest values(99);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> -- following will pass because mamta2 has required permissions on mamta1.t11TriggerRevokeTest
-create trigger tr212t21 after insert on t21TriggerRevokeTest for each statement mode db2sql
+create trigger tr212t21 after insert on t21TriggerRevokeTest for each statement
         insert into mamta1.t12TriggerRevokeTest values(99);
 0 rows inserted/updated/deleted
 ij(MAMTA2)> insert into t21TriggerRevokeTest values(1);
@@ -2987,7 +2987,7 @@ ij(MAMTA1)> grant UPDATE(c122, c121) on t12TriggerRevokeTest to mamta2;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> create trigger tr11t11 after insert on mamta1.t11TriggerRevokeTest
-for each statement mode db2sql
+for each statement
         update mamta1.t12TriggerRevokeTest set c122 = 99;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> set connection mamta1;

@@ -119,8 +119,8 @@ declare global temporary table SESSION.xglobal (myx XML)
   not logged on commit preserve rows;
 
 -- XML cols can be used in a SET clause, if target value is XML.
-create trigger tr2 after insert on t1 for each row mode db2sql update t1 set x = 'hmm';
-create trigger tr1 after insert on t1 for each row mode db2sql update t1 set x = null;
+create trigger tr2 after insert on t1 for each row update t1 set x = 'hmm';
+create trigger tr1 after insert on t1 for each row update t1 set x = null;
 drop trigger tr1;
 
 -- Test XMLPARSE operator.
@@ -719,7 +719,7 @@ create table t9 (i int, x xml);
 create table t10 (i int, x xml);
 
 insert into t9 values (1, xmlparse(document '<name> john </name>' preserve whitespace));
-create trigger tx after insert on t9 for each statement mode db2sql
+create trigger tx after insert on t9 for each statement
    insert into t10 values (1, xmlparse(document '<name> jane </name>' preserve whitespace));
 insert into t9 values (2, xmlparse(document '<name> ally </name>' preserve whitespace));
 select i, xmlserialize(x as varchar(20)) from t9;
@@ -731,7 +731,7 @@ drop trigger tx;
 delete from t9;
 delete from t10;
 insert into t9 values (1, xmlparse(document '<name> john </name>' preserve whitespace));
-create trigger tx after insert on t9 for each statement mode db2sql
+create trigger tx after insert on t9 for each statement
    insert into t10 values (1, (select xmlquery('.' passing by ref x returning sequence empty on empty) from t9 where i = 1));
 insert into t9 values (2, xmlparse(document '<name> ally </name>' preserve whitespace));
 select i, xmlserialize(x as varchar(20)) from t9;

@@ -170,7 +170,7 @@ select * from atdc_vw_5a_2;
 -- drop column restrict should fail because column is used in a trigger:
 create table atdc_6 (a integer, b integer);
 create trigger atdc_6_trigger_1 after update of b on atdc_6
-	for each row mode db2sql values current_date;
+	for each row values current_date;
 alter table atdc_6 drop column b restrict;
 select triggername from sys.systriggers where triggername='ATDC_6_TRIGGER_1';
 alter table atdc_6 drop column b cascade;

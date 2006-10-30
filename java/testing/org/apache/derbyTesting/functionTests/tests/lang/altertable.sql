@@ -169,8 +169,8 @@ create view vw4 (c1) as select c4 from tab3 where c2 > 8;
 create table tab4 (c1 int, c2 int, c3 int, c4 int);
 create table tab5 (c1 int);
 insert into tab4 values (1,2,3,4);
-create trigger tr1 after update of c2, c3, c4 on tab4 for each row mode db2sql insert into tab5 values (1);
-create trigger tr2 after update of c3, c4 on tab4 for each row mode db2sql insert into tab5 values (2);
+create trigger tr1 after update of c2, c3, c4 on tab4 for each row insert into tab5 values (1);
+create trigger tr2 after update of c3, c4 on tab4 for each row insert into tab5 values (2);
 
 -- tr1 is dropped, tr2 still OK
 drop trigger tr1;

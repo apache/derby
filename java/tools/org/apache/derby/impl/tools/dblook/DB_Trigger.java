@@ -176,9 +176,6 @@ public class DB_Trigger {
 		else
 			sb.append("ROW ");
 
-		// DB2 requires the following keywords in order to work.
-		sb.append("MODE DB2SQL ");
-
 		// Finally, the trigger action.
 		sb.append(dblook.removeNewlines(aTrig.getString(8)));
 		return sb.toString();

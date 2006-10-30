@@ -145,7 +145,7 @@ create table t4(z int , op char(2));
 
 create trigger trig_delete after DELETE on t2
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t4 values(deletedrow.x , 'bd');
 
 insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
@@ -313,7 +313,7 @@ create table t4(z int , op char(2));
 
 create trigger trig_update after UPDATE on t2
 referencing old as updatedrow
-for each row mode db2sql
+for each row
 insert into t4 values(updatedrow.x , 'bu');
 
 insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
@@ -381,7 +381,7 @@ create table t1(a int not null unique, b int not null unique);
 create table t2(x int references t1(a) ON DELETE NO ACTION , y int);
 create trigger trig_delete after DELETE on t1
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 delete from t2 where x = deletedrow.a;
 
 insert into t1 values(1 , 2);
@@ -412,7 +412,7 @@ autocommit off ;
 create table t1(a int not null unique, b int not null unique);
 create table t2(x int references t1(a) ON UPDATE NO ACTION , y int);
 create trigger trig_update after UPDATE on t1
-referencing old as old for each  row mode db2sql
+referencing old as old for each  row
 update t2 set x = 2 where x = old.a;
 
 insert into t1 values(1 , 2);
@@ -456,7 +456,7 @@ create table t4(z int , op char(2));
 
 create trigger trig_delete after DELETE on t2
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t4 values(deletedrow.x , 'ad');
 
 insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
@@ -485,7 +485,7 @@ create table t4(z int , op char(2));
 
 create trigger trig_delete after DELETE on t2
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into t4 select x, 'ad' from deletedrows;
 
 insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
@@ -523,7 +523,7 @@ insert into emp values('e9', 'e8');
 
 create trigger trig_emp_delete after DELETE on emp
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into tempemp select empno, mgr,  'ad' from deletedrows;
 
 delete from emp where empno = 'e1';
@@ -554,7 +554,7 @@ insert into emp values('e9', 'e8');
 
 create trigger trig_emp_delete AFTER DELETE on emp
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into tempemp select empno, mgr,  'bd' from deletedrows;
 
 delete from emp where empno = 'e1';
@@ -595,7 +595,7 @@ create table t1temp(l int , m int, op char(2));
 
 create trigger trig_cyclic_del after DELETE on t1
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into t1temp  select a, b,  'ad' from deletedrows;
 
 select * from t1; 
@@ -646,7 +646,7 @@ create table t1temp(l int , m int, op char(2));
 
 create trigger trig_cyclic_del AFTER DELETE on t1
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into t1temp  select a, b,  'bd' from deletedrows;
 
 select * from t1; 
@@ -699,12 +699,12 @@ create table t1temp(l int , m int, op char(2));
 
 create trigger trig_cyclic_del1 after DELETE on t1
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t1temp values(deletedrow.a , deletedrow.b, 'ad');
 
 create trigger trig_cyclic_del2 AFTER DELETE on t1
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t1temp values(deletedrow.a , deletedrow.b, 'bd');
 
 select * from t1; 
@@ -745,12 +745,12 @@ insert into emp values('e9', 'e8');
 
 create trigger trig_emp_delete AFTER UPDATE on emp
 REFERENCING OLD_Table AS updatedrows
-for each statement mode db2sql 
+for each statement 
 insert into tempemp select empno, mgr,  'bu' from updatedrows;
 
 create trigger trig_emp_delete1 AFTER UPDATE on emp
 REFERENCING NEW_Table AS updatedrows
-for each statement mode db2sql 
+for each statement 
 insert into tempemp select empno, mgr,  'au' from updatedrows;
 
 delete from emp where empno = 'e1';
@@ -781,12 +781,12 @@ insert into emp values('e9', 'e8');
 
 create trigger trig_emp_delete after UPDATE on emp
 REFERENCING OLD AS updatedrow
-for each row mode db2sql
+for each row
 insert into tempemp values(updatedrow.empno, updatedrow.mgr, 'bu');
 
 create trigger trig_emp_delete1 AFTER UPDATE on emp
 REFERENCING NEW AS updatedrow
-for each  row mode db2sql
+for each  row
 insert into tempemp values(updatedrow.empno, updatedrow.mgr, 'au');
 
 delete from emp where empno = 'e1';
@@ -1180,12 +1180,12 @@ create table t3( y int references t2(x) ON DELETE CASCADE) ;
 
 create trigger trig_delete after DELETE on t1
 referencing old as deletedrow
-for each  row mode db2sql
+for each  row
 delete from t2; 
 
 create trigger trig_delete1 after DELETE on t2
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 delete from t3;
 
 insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) , (10,11,12), 
@@ -1222,12 +1222,12 @@ create table t3( y int references t2(x) ON DELETE NO ACTION) ;
 
 create trigger trig_delete after DELETE on t1
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 delete from t2; 
 
 create trigger trig_delete1 after DELETE on t2
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 delete from t3;
 
 insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) , (10,11,12), 
@@ -1316,7 +1316,7 @@ delete from t1 ;
 create table t4(c1 char (20));
 
 create trigger trig_delete after DELETE on t3
-for each statement mode db2sql
+for each statement
 insert into t4 values('ad');
 
 delete from t1 ;
@@ -1324,7 +1324,7 @@ select * from t4 ;
 drop trigger trig_delete;
 delete from t4 ;
 create trigger trig_delete after DELETE on t3
-for each statement mode db2sql
+for each statement
 insert into t4 values('bd');
 delete from t1 ;
 delete from t1 ;
@@ -1336,7 +1336,7 @@ drop table t4;
 create table t4(z int not null primary key , op char(2));
 create trigger trig_delete after DELETE on t3
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t4 values(deletedrow.c1 , 'bd');
 delete from t1 ;
 delete from t1 ;

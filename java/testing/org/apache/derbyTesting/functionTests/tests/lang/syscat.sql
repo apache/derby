@@ -165,7 +165,7 @@ select conglomeratename, descriptor
 from sys.sysconglomerates 
 where conglomeratename = 'DECIMAL_TAB_IDX' order by conglomeratename;
 
-create trigger t1 after update on decimal_tab for each row mode db2sql values 1;
+create trigger t1 after update on decimal_tab for each row values 1;
 
 -- referenced columns.
 select triggername, referencedcolumns

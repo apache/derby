@@ -86,4 +86,4 @@ create synonym syn1 for bar.t1;
 -- Triggers
 -- ----------------------------------------------
 
-create trigger trigOne after insert on bar.t1 for each row mode db2sql update bar.t1 set i = 4 where i = 2;
+create trigger trigOne after insert on bar.t1 for each row update bar.t1 set i = 4 where i = 2;

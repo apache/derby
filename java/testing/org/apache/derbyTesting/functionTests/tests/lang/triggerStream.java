@@ -96,17 +96,17 @@ public class triggerStream {
 		Statement stmt = conn.createStatement();
 		
 		stmt.execute("create trigger t11 NO CASCADE before update of x,y on x1 "
-				+ "for each statement mode db2sql values getAsciiColumn( 0, 2, 'a')");
+				+ "for each statement values getAsciiColumn( 0, 2, 'a')");
 		stmt.execute("create trigger t12 after update of x,y on x1 for each row"
-				+ " mode db2sql values getAsciiColumn( 1, 2, 'a')");
+				+ " values getAsciiColumn( 1, 2, 'a')");
 		stmt.execute("create trigger t13 after insert on x1 for each statement" 
-				+ " mode db2sql values getAsciiColumn( 1, 2, 'a')");
+				+ " values getAsciiColumn( 1, 2, 'a')");
 		stmt.execute("create trigger t14 NO CASCADE before insert on x1 for each row" 
-				+ " mode db2sql values getAsciiColumn( 1, 2, 'a')");
+				+ " values getAsciiColumn( 1, 2, 'a')");
 		stmt.execute("create trigger t15 NO CASCADE before delete on x1 "
-				+ "for each statement mode db2sql values getAsciiColumn( 0, 2, 'a')");
+				+ "for each statement values getAsciiColumn( 0, 2, 'a')");
 		stmt.execute("create trigger t16 after delete on x1 for each row "
-				+ "mode db2sql values getAsciiColumn( 0, 2, 'a')");
+				+ " values getAsciiColumn( 0, 2, 'a')");
 		
 		stmt.close();
 		
@@ -139,16 +139,16 @@ public class triggerStream {
 		
 		Statement stmt = conn.createStatement();
 		stmt.execute("create trigger t21 NO CASCADE before update of x,y on x2 "
-				+ "for each statement  mode db2sql values getBinaryColumn( 0, 2, 'a')");
+				+ "for each statement values getBinaryColumn( 0, 2, 'a')");
 		stmt.execute("create trigger t22 after update of x,y on x2 for each row"
-				+ " mode db2sql values getBinaryColumn( 1, 2, 'a')");
+				+ " values getBinaryColumn( 1, 2, 'a')");
 		stmt.execute("create trigger t23 after insert on x2 for each statement"
-				+ " mode db2sql values getBinaryColumn( 1, 2, 'a')");
+				+ " values getBinaryColumn( 1, 2, 'a')");
 		stmt.execute("create trigger t24 NO CASCADE before insert on x2 for each row"
-				+ " mode db2sql values getBinaryColumn( 1, 2, 'a')");
+				+ " values getBinaryColumn( 1, 2, 'a')");
 		stmt.execute("create trigger t25 NO CASCADE before delete on x2 for each statement"
-				+ " mode db2sql values getBinaryColumn( 1, 2, 'a')");
-		stmt.execute("create trigger t26 after delete on x2 for each row  mode db2sql"
+				+ " values getBinaryColumn( 1, 2, 'a')");
+		stmt.execute("create trigger t26 after delete on x2 for each row"
 				+ " values getBinaryColumn( 0, 2, 'a')");
 		stmt.close();
 		

@@ -352,7 +352,7 @@ ij> --create triggers such a way that the all deleted row
 --in t2 are inserted into t4
 create trigger trig_delete after DELETE on t2
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t4 values(deletedrow.x , 'bd');
 0 rows inserted/updated/deleted
 ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
@@ -795,7 +795,7 @@ ij> --create triggers such a way that the all deleted row
 --in t2 are inserted into t4
 create trigger trig_update after UPDATE on t2
 referencing old as updatedrow
-for each row mode db2sql
+for each row
 insert into t4 values(updatedrow.x , 'bu');
 0 rows inserted/updated/deleted
 ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
@@ -927,7 +927,7 @@ ij> create table t2(x int references t1(a) ON DELETE NO ACTION , y int);
 0 rows inserted/updated/deleted
 ij> create trigger trig_delete after DELETE on t1
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 delete from t2 where x = deletedrow.a;
 0 rows inserted/updated/deleted
 ij> insert into t1 values(1 , 2);
@@ -967,7 +967,7 @@ ij> create table t1(a int not null unique, b int not null unique);
 ij> create table t2(x int references t1(a) ON UPDATE NO ACTION , y int);
 0 rows inserted/updated/deleted
 ij> create trigger trig_update after UPDATE on t1
-referencing old as old for each  row mode db2sql
+referencing old as old for each  row
 update t2 set x = 2 where x = old.a;
 0 rows inserted/updated/deleted
 ij> insert into t1 values(1 , 2);
@@ -1040,7 +1040,7 @@ ij> --create triggers such a way that the all deleted row
 --in t2 are inserted into t4
 create trigger trig_delete after DELETE on t2
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t4 values(deletedrow.x , 'ad');
 0 rows inserted/updated/deleted
 ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
@@ -1087,7 +1087,7 @@ ij> --create triggers such a way that the all deleted row
 --in t2 are inserted into t4
 create trigger trig_delete after DELETE on t2
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into t4 select x, 'ad' from deletedrows;
 0 rows inserted/updated/deleted
 ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) ;
@@ -1147,7 +1147,7 @@ ij> insert into emp values('e9', 'e8');
 1 row inserted/updated/deleted
 ij> create trigger trig_emp_delete after DELETE on emp
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into tempemp select empno, mgr,  'ad' from deletedrows;
 0 rows inserted/updated/deleted
 ij> delete from emp where empno = 'e1';
@@ -1197,7 +1197,7 @@ ij> insert into emp values('e9', 'e8');
 1 row inserted/updated/deleted
 ij> create trigger trig_emp_delete AFTER DELETE on emp
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into tempemp select empno, mgr,  'bd' from deletedrows;
 0 rows inserted/updated/deleted
 ij> delete from emp where empno = 'e1';
@@ -1260,7 +1260,7 @@ ij> create table t1temp(l int , m int, op char(2));
 0 rows inserted/updated/deleted
 ij> create trigger trig_cyclic_del after DELETE on t1
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into t1temp  select a, b,  'ad' from deletedrows;
 0 rows inserted/updated/deleted
 ij> select * from t1;
@@ -1367,7 +1367,7 @@ ij> create table t1temp(l int , m int, op char(2));
 0 rows inserted/updated/deleted
 ij> create trigger trig_cyclic_del AFTER DELETE on t1
 REFERENCING OLD_Table AS deletedrows
-for each statement mode db2sql 
+for each statement 
 insert into t1temp  select a, b,  'bd' from deletedrows;
 0 rows inserted/updated/deleted
 ij> select * from t1;
@@ -1474,12 +1474,12 @@ ij> create table t1temp(l int , m int, op char(2));
 0 rows inserted/updated/deleted
 ij> create trigger trig_cyclic_del1 after DELETE on t1
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t1temp values(deletedrow.a , deletedrow.b, 'ad');
 0 rows inserted/updated/deleted
 ij> create trigger trig_cyclic_del2 AFTER DELETE on t1
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t1temp values(deletedrow.a , deletedrow.b, 'bd');
 0 rows inserted/updated/deleted
 ij> select * from t1;
@@ -1581,12 +1581,12 @@ ij> insert into emp values('e9', 'e8');
 1 row inserted/updated/deleted
 ij> create trigger trig_emp_delete AFTER UPDATE on emp
 REFERENCING OLD_Table AS updatedrows
-for each statement mode db2sql 
+for each statement 
 insert into tempemp select empno, mgr,  'bu' from updatedrows;
 0 rows inserted/updated/deleted
 ij> create trigger trig_emp_delete1 AFTER UPDATE on emp
 REFERENCING NEW_Table AS updatedrows
-for each statement mode db2sql 
+for each statement 
 insert into tempemp select empno, mgr,  'au' from updatedrows;
 0 rows inserted/updated/deleted
 ij> delete from emp where empno = 'e1';
@@ -1639,12 +1639,12 @@ ij> insert into emp values('e9', 'e8');
 1 row inserted/updated/deleted
 ij> create trigger trig_emp_delete after UPDATE on emp
 REFERENCING OLD AS updatedrow
-for each row mode db2sql
+for each row
 insert into tempemp values(updatedrow.empno, updatedrow.mgr, 'bu');
 0 rows inserted/updated/deleted
 ij> create trigger trig_emp_delete1 AFTER UPDATE on emp
 REFERENCING NEW AS updatedrow
-for each  row mode db2sql
+for each  row
 insert into tempemp values(updatedrow.empno, updatedrow.mgr, 'au');
 0 rows inserted/updated/deleted
 ij> delete from emp where empno = 'e1';
@@ -2483,12 +2483,12 @@ ij> create table t3( y int references t2(x) ON DELETE CASCADE) ;
 0 rows inserted/updated/deleted
 ij> create trigger trig_delete after DELETE on t1
 referencing old as deletedrow
-for each  row mode db2sql
+for each  row
 delete from t2;
 0 rows inserted/updated/deleted
 ij> create trigger trig_delete1 after DELETE on t2
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 delete from t3;
 0 rows inserted/updated/deleted
 ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) , (10,11,12), 
@@ -2544,12 +2544,12 @@ ij> create table t3( y int references t2(x) ON DELETE NO ACTION) ;
 0 rows inserted/updated/deleted
 ij> create trigger trig_delete after DELETE on t1
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 delete from t2;
 0 rows inserted/updated/deleted
 ij> create trigger trig_delete1 after DELETE on t2
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 delete from t3;
 0 rows inserted/updated/deleted
 ij> insert into t1 values (1, 2, 3), (4,5,6) , (7,8,9) , (10,11,12), 
@@ -2746,7 +2746,7 @@ ij> ---now create a statement trigger and see what happens on a empty delete.
 create table t4(c1 char (20));
 0 rows inserted/updated/deleted
 ij> create trigger trig_delete after DELETE on t3
-for each statement mode db2sql
+for each statement
 insert into t4 values('ad');
 0 rows inserted/updated/deleted
 ij> delete from t1 ;
@@ -2759,7 +2759,7 @@ ij> drop trigger trig_delete;
 ij> delete from t4 ;
 0 rows inserted/updated/deleted
 ij> create trigger trig_delete after DELETE on t3
-for each statement mode db2sql
+for each statement
 insert into t4 values('bd');
 0 rows inserted/updated/deleted
 ij> delete from t1 ;
@@ -2780,7 +2780,7 @@ ij> create table t4(z int not null primary key , op char(2));
 0 rows inserted/updated/deleted
 ij> create trigger trig_delete after DELETE on t3
 referencing old as deletedrow
-for each row mode db2sql
+for each row
 insert into t4 values(deletedrow.c1 , 'bd');
 0 rows inserted/updated/deleted
 ij> delete from t1 ;

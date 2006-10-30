@@ -29,32 +29,32 @@ create table x (x int, y int, z int);
 -- syntax
 
 -- mismatch: insert->old, delete->new
-create trigger t1 after insert on x referencing old as oldrow for each row mode db2sql values 1;
-create trigger t1 after insert on x referencing old_table as oldtab for each statement mode db2sql values 1;
-create trigger t1 after insert on x referencing old_table as oldtab for each statement mode db2sql values 1;
-create trigger t1 after delete on x referencing new as newrow for each row mode db2sql values 1;
-create trigger t1 after delete on x referencing new_table as newtab for each statement mode db2sql values 1;
-create trigger t1 after delete on x referencing new_table as newtab for each statement mode db2sql values 1;
+create trigger t1 after insert on x referencing old as oldrow for each row values 1;
+create trigger t1 after insert on x referencing old_table as oldtab for each statement values 1;
+create trigger t1 after insert on x referencing old_table as oldtab for each statement values 1;
+create trigger t1 after delete on x referencing new as newrow for each row values 1;
+create trigger t1 after delete on x referencing new_table as newtab for each statement values 1;
+create trigger t1 after delete on x referencing new_table as newtab for each statement values 1;
 
 -- same as above, bug using old/new
-create trigger t1 after insert on x referencing old as old for each row mode db2sql values old.x;
-create trigger t1 after insert on x referencing old_table as old for each statement mode db2sql select * from old;
-create trigger t1 after insert on x referencing old_table as old for each statement mode db2sql select * from old;
-create trigger t1 after delete on x referencing new as new for each row mode db2sql values new.x;
-create trigger t1 after delete on x referencing new_table as new for each statement mode db2sql select * from new;
-create trigger t1 after delete on x referencing new_table as new for each statement mode db2sql select * from new;
+create trigger t1 after insert on x referencing old as old for each row values old.x;
+create trigger t1 after insert on x referencing old_table as old for each statement select * from old;
+create trigger t1 after insert on x referencing old_table as old for each statement select * from old;
+create trigger t1 after delete on x referencing new as new for each row values new.x;
+create trigger t1 after delete on x referencing new_table as new for each statement select * from new;
+create trigger t1 after delete on x referencing new_table as new for each statement select * from new;
 
 -- cannot reference columns that don't exist, not bound as normal stmts
-create trigger t1 after delete on x referencing old as old for each row mode db2sql values old.badcol;
-create trigger t1 after delete on x referencing old as old for each row mode db2sql values old;
-create trigger t1 after delete on x referencing old as oldrow for each row mode db2sql values oldrow.badcol;
-create trigger t1 after delete on x referencing old as oldrow for each row mode db2sql values oldrow;
+create trigger t1 after delete on x referencing old as old for each row values old.badcol;
+create trigger t1 after delete on x referencing old as old for each row values old;
+create trigger t1 after delete on x referencing old as oldrow for each row values oldrow.badcol;
+create trigger t1 after delete on x referencing old as oldrow for each row values oldrow;
 
 -- lets try some basics with old/new table
 create table y (x int);
 insert into y values 1, 2, 666, 2, 2, 1;
 insert into x values (1, null, null), (2, null, null);
-create trigger t1 after delete on x referencing old as old for each row mode db2sql delete from y where x = old.x;
+create trigger t1 after delete on x referencing old as old for each row delete from y where x = old.x;
 autocommit off;
 
 delete from x;
@@ -64,7 +64,7 @@ rollback;
 drop trigger t1;
 commit;
 
-create trigger t1 after delete on x referencing old_table as old for each statement mode db2sql delete from y where x in (select x from old);
+create trigger t1 after delete on x referencing old_table as old for each statement delete from y where x in (select x from old);
 delete from x;
 select * from y;
 
@@ -92,7 +92,7 @@ create table allTypes2 (i int, tn smallint, s smallint, l bigint,
 				dt date, t time, ts timestamp,
 				b  CHAR(2) FOR BIT DATA, bv VARCHAR(2) FOR BIT DATA, lbv LONG VARCHAR FOR BIT DATA,
 				dc decimal(5,2), n numeric(8,4));
-create trigger t1 after insert on allTypes1 referencing new as newrowtab for each row mode db2sql
+create trigger t1 after insert on allTypes1 referencing new as newrowtab for each row
 	insert into allTypes2 
 	values (newrowtab.i, newrowtab.tn, newrowtab.s, newrowtab.l,
 		newrowtab.c, newrowtab.v, newrowtab.lvc,
@@ -135,7 +135,7 @@ drop table y;
 create table x (x int);
 create table removed (x int);
 -- create trigger t1 after update of x on x referencing old_table as old new_table as new
--- 	 for each statement mode db2sql
+-- 	 for each statement
 -- 	 insert into removed select * from old where x not in (select x from new where x < 10);
 insert into x values 1,3,4,5,6,9,666,667,668;
 update x set x = x+1;
@@ -147,7 +147,7 @@ commit;
 
 create table x (x int, y int);
 create table y (x int, y int);
-create trigger t1 after insert on x referencing new_table as newtab for each statement mode db2sql
+create trigger t1 after insert on x referencing new_table as newtab for each statement
 	insert into y select newtab.x, y+newtab.y from newtab;
 insert into x values (1,1);
 select * from y;
@@ -155,7 +155,7 @@ delete from y;
 drop trigger t1;
 
 -- how about a correlation of a transition variable
-create trigger t1 after insert on x referencing new_table as newtab for each statement mode db2sql
+create trigger t1 after insert on x referencing new_table as newtab for each statement
 	insert into y select newtab2.x, y+newtab2.y from newtab newtab2;
 insert into x values (1,1);
 select * from y;
@@ -171,17 +171,17 @@ drop table y;
 create table val (x int);
 create table x (b char(5) FOR BIT DATA);
 create table y (b char(5) FOR BIT DATA);
-create trigger t1 after insert on x referencing new as new for each row mode db2sql insert into y values (new.b || X'80');
+create trigger t1 after insert on x referencing new as new for each row insert into y values (new.b || X'80');
 insert into x values (X'E0');
 select * from y;
 
 drop trigger t1;
-create trigger t1 after insert on x referencing new as new for each row mode db2sql insert into y values new.b;
+create trigger t1 after insert on x referencing new as new for each row insert into y values new.b;
 insert into x values null;
 select * from y;
 
 drop trigger t1;
-create trigger t1 after insert on x referencing new as new for each row mode db2sql insert into val values length(new.b);
+create trigger t1 after insert on x referencing new as new for each row insert into val values length(new.b);
 insert into x values X'FFE0';
 select * from val;
 
@@ -199,14 +199,14 @@ create table t1 (col1 int not null primary key, col2 char(20));
 create table s_t1(col1 int not null primary key, chgType char(20));
 
 -- should work
-create trigger trig_delete_2 after delete on t1 referencing OLD_TABLE as OLD for each statement mode db2sql 
+create trigger trig_delete_2 after delete on t1 referencing OLD_TABLE as OLD for each statement 
 	insert into s_t1 (select col1, 'D'
 	from OLD  where OLD.col1 <> ALL
 	(select col1 from s_t1 where  OLD.col1 = s_t1.col1));
 
 drop trigger trig_delete_2;
 -- should work
-create trigger trig_delete_2 after delete on t1 referencing old_table as OLD for each statement mode db2sql 
+create trigger trig_delete_2 after delete on t1 referencing old_table as OLD for each statement 
 	insert into s_t1 (select col1, 'D'
 	from OLD where OLD.col1 <> ALL
 	(select s_t1.col1 from s_t1, OLD where  OLD.col1 = s_t1.col1));

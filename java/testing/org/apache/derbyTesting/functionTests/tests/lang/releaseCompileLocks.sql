@@ -177,9 +177,9 @@ select * from syscs_diag.lock_table;
 commit;
 
 -- create some triggers.
-create trigger update_of_t after update on t for each row mode db2sql values 2;
+create trigger update_of_t after update on t for each row values 2;
 
-create trigger insert_of_t after insert on t for each row mode db2sql values 3;
+create trigger insert_of_t after insert on t for each row values 3;
 
 commit;
 

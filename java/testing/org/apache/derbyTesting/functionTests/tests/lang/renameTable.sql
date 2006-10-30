@@ -91,7 +91,7 @@ autocommit on;
 create table t6 (c61 int default 1);
 create table t7(c71 int);
 -- bug 5684
-create trigger t7insert after insert on t7 referencing new as NEWROW for each row mode db2sql insert into t6 values(NEWROW.c71);
+create trigger t7insert after insert on t7 referencing new as NEWROW for each row insert into t6 values(NEWROW.c71);
 insert into t7 values(1);
 -- bug 5683. Should fail
 rename table t7 to t7r;

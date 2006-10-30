@@ -156,13 +156,13 @@ create view "V""3"(i) as values (8), (28), (78);
 -- Triggers
 -- ----------------------------------------------
 
-create trigger trigOne after insert on bar.t3 for each row mode db2sql update bar.t4 set j=8 where i=2;
-create trigger "Foo Bar".trig2 no cascade before delete on bar.t1 for each statement mode db2sql values (1), (2);
-create trigger "TrigThree" after update of i, c on bar."tWithKeys" for each row mode db2sql select c from bar."tWithKeys";
-create trigger bar.reftrig after delete on bar.t8 referencing old_table as oldtable for each statement mode db2sql select * from oldtable;
-create trigger """Quoted""Schema"""."""trig""One""" after insert on """Quoted""Schema"""."tee""""Hee" for each row mode db2sql values(8);
+create trigger trigOne after insert on bar.t3 for each row update bar.t4 set j=8 where i=2;
+create trigger "Foo Bar".trig2 no cascade before delete on bar.t1 for each statement values (1), (2);
+create trigger "TrigThree" after update of i, c on bar."tWithKeys" for each row select c from bar."tWithKeys";
+create trigger bar.reftrig after delete on bar.t8 referencing old_table as oldtable for each statement select * from oldtable;
+create trigger """Quoted""Schema"""."""trig""One""" after insert on """Quoted""Schema"""."tee""""Hee" for each row values(8);
 
 -- Test trigger with new AND old referencing names (beetle 5725).
 create table x (x int);
 create table removed (x int);
-create trigger trigFour after update of x on x referencing old_table as old new_table as new for each statement mode db2sql insert into removed select * from old where x not in (select x from new where x < 10);
+create trigger trigFour after update of x on x referencing old_table as old new_table as new for each statement insert into removed select * from old where x not in (select x from new where x < 10);

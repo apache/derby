@@ -177,12 +177,12 @@ create table xr.businessentity
 
 create trigger xr.be_uname_i after insert on xr.businessentity
 referencing new as n
-for each row mode db2sql
+for each row
 update xr.businessentity set uname = upper( n.name ) where name = n.name;
 
 create trigger xr.be_unane_u after update of name, uname on xr.businessentity
 referencing new as n
-for each row mode db2sql
+for each row
 update xr.businessentity set uname = upper( n.name )
   where name = n.name and uname <> upper( n.name );
 
@@ -312,12 +312,12 @@ create table xr.repositoryobjectversion (
 	
 create trigger xr.rov_uname_i after insert on xr.repositoryobjectversion
 referencing new as n
-for each row mode db2sql
+for each row
 update xr.repositoryobjectversion set uname = upper( n.name ) where name = n.name;
 
 create trigger xr.rov_unane_u after update of name, uname on xr.repositoryobjectversion
 referencing new as n
-for each row mode db2sql
+for each row
 update xr.repositoryobjectversion set uname = upper( n.name )
   where name = n.name and uname <> upper( n.name );
 create unique index xr.versionname on xr.repositoryobjectversion (resourceid, versionName);

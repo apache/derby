@@ -381,7 +381,7 @@ set schema app;
 0 rows inserted/updated/deleted
 ij> create table t1 (c1 int);
 0 rows inserted/updated/deleted
-ij> create trigger sysblah.trig1 after update of c1 on t1 for each row mode db2sql insert into t1 values 1;
+ij> create trigger sysblah.trig1 after update of c1 on t1 for each row insert into t1 values 1;
 ERROR 42X62: 'CREATE TRIGGER' is not allowed in the 'SYSBLAH' schema.
 ij> create procedure sysblah.dummy() language java external name 'NotReallyThere.NoMethod' parameter style java;
 ERROR 42X62: 'CREATE PROCEDURE' is not allowed in the 'SYSBLAH' schema.
@@ -853,7 +853,7 @@ I
 6415       
 ij> drop view A5146.V;
 0 rows inserted/updated/deleted
-ij> prepare PS5146_TRIGGER as 'create trigger A5146.DT_TRIG AFTER INSERT ON B5146.DT FOR EACH STATEMENT MODE DB2SQL UPDATE  B5146.DT SET I = I + 1';
+ij> prepare PS5146_TRIGGER as 'create trigger A5146.DT_TRIG AFTER INSERT ON B5146.DT FOR EACH STATEMENT UPDATE  B5146.DT SET I = I + 1';
 ij> drop schema A5146 restrict;
 0 rows inserted/updated/deleted
 ij> execute PS5146_TRIGGER;
@@ -896,7 +896,7 @@ ij> drop view ISC.V;
 0 rows inserted/updated/deleted
 ij> drop schema ISC restrict;
 0 rows inserted/updated/deleted
-ij> prepare ISC_TRIGGER as 'create trigger ISC.DT_TRIG AFTER INSERT ON B5146.DT FOR EACH STATEMENT MODE DB2SQL UPDATE  B5146.DT SET I = I + 1';
+ij> prepare ISC_TRIGGER as 'create trigger ISC.DT_TRIG AFTER INSERT ON B5146.DT FOR EACH STATEMENT UPDATE  B5146.DT SET I = I + 1';
 ij> execute ISC_TRIGGER;
 0 rows inserted/updated/deleted
 ij> insert into B5146.DT values 999;

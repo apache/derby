@@ -128,14 +128,14 @@ select * from table1;
 create table table2 (i int, j int);
 
 -- Should fail
-create trigger tins after insert on myTable referencing new_table as new for each statement mode db2sql insert into table2 select i,j from table1;
+create trigger tins after insert on myTable referencing new_table as new for each statement insert into table2 select i,j from table1;
 
 -- Should pass
-create trigger tins after insert on table1 referencing new_table as new for each statement mode db2sql insert into table2 select i,j from table1;
+create trigger tins after insert on table1 referencing new_table as new for each statement insert into table2 select i,j from table1;
 
 drop trigger tins;
 
-create trigger triggerins after insert on table2 referencing new_table as new for each statement mode db2sql insert into myTable select i,j from new;
+create trigger triggerins after insert on table2 referencing new_table as new for each statement insert into myTable select i,j from new;
 
 select * from myTable;
 insert into table2 values (5, 5);

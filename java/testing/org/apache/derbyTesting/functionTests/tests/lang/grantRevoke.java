@@ -1807,7 +1807,7 @@ public class grantRevoke
             sb.append("\".\"");
             sb.append(table);
             sb.append("\"");
-            sb.append(" for each row mode db2sql values 1");
+            sb.append(" for each row values 1");
 
             boolean savedAutoCommit = user.getConnection().getAutoCommit();
             String currentSchema = getUserCurrentSchema(user);			

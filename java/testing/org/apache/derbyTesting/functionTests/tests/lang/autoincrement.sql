@@ -220,7 +220,7 @@ drop table ai_test;
 create table t1 (c1 int generated always as identity, name char(32));
 create table t2 (c2 int generated always as identity, name char(32));
 
-create trigger insert_trigger after insert on t1 for each row mode db2sql
+create trigger insert_trigger after insert on t1 for each row
 	   insert into t2 (name) values ('Bob Finocchio');
 
 insert into t1 (name) values ('Phil White');
@@ -302,7 +302,7 @@ create table tab1 (s1 int generated always as identity,
 				   lvl int);
 create table tab3 (c1 int);
 
-create trigger tab1_after1 after insert on tab3 referencing new as newrow for each row mode db2sql insert into tab1 (lvl) values 1,2,3;
+create trigger tab1_after1 after insert on tab3 referencing new as newrow for each row insert into tab1 (lvl) values 1,2,3;
 
 insert into tab3 values null;
 select * from tab1;
@@ -310,7 +310,7 @@ select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementi
 
 create table tab2 (lvl int, s1  bigint generated always as identity);
 
-create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row mode db2sql insert into tab2 (lvl) values 1,2,3;
+create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row insert into tab2 (lvl) values 1,2,3;
 
 insert into tab3 values null;
 select * from tab2;
@@ -883,7 +883,7 @@ drop table t2;
 -- statement table and not for the table that got modified by the trigger
 create table t1 (c11 int generated always as identity (start with 101, increment by 3), c12 int);
 create table t2 (c21 int generated always as identity (start with 201, increment by 5), c22 int);
-create trigger t1tr1 after insert on t1 for each row mode db2sql insert into t2 (c22) values (1);
+create trigger t1tr1 after insert on t1 for each row insert into t2 (c22) values (1);
 values IDENTITY_VAL_LOCAL();
 insert into t1 (c12) values (1);
 -- IDENTITY_VAL_LOCAL will return 101 which got generated for table t1. 

@@ -554,7 +554,7 @@ S - Snack  </TD></TR>
 
 <UL><UL>after update on FLIGHTS <BR CLEAR="LEFT">
 referencing old as UPDATEDROW <BR CLEAR="LEFT">
-for each row mode DB2SQL <BR CLEAR="LEFT">
+for each row <BR CLEAR="LEFT">
 insert into FLIGHTS_HISTORY values ( <BR CLEAR="LEFT">
 UPDATEDROW.FLIGHT_ID, <BR CLEAR="LEFT">
 UPDATEDROW.SEGMENT_NUMBER, <BR CLEAR="LEFT">
@@ -574,7 +574,7 @@ UPDATEDROW.AIRCRAFT, <BR CLEAR="LEFT">
 
 
 <UL><UL>after delete on FLIGHTS <BR CLEAR="LEFT">
-for each statement mode DB2SQL <BR CLEAR="LEFT">
+for each statement <BR CLEAR="LEFT">
 insert into FLIGHTS_HISTORY (STATUS) values ('INSERTED FROM TRIG2'); 
 
 </BODY>

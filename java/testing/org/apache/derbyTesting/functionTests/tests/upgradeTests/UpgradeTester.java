@@ -801,6 +801,9 @@ public class UpgradeTester {
         
         Statement s = conn.createStatement();
 
+        boolean modeDb2SqlOptional = 
+            dbMajor>10 || (dbMajor == 10 &&  dbMinor > 2);
+
         switch (phase) {
         case PH_CREATE:
             s.execute("CREATE TABLE D438.T438(a int, b varchar(20), c int)");
@@ -810,12 +813,14 @@ public class UpgradeTester {
             s.execute(
                "create trigger D438.T438_ROW_1 after UPDATE on D438.T438 " +
                "referencing new as n old as o " + 
-               "for each row mode db2sql "+ 
+               "for each row "+ 
+               (modeDb2SqlOptional?"":"mode db2sql ") +
                "insert into D438.T438_T1(a, b) values (n.a, n.b || '_ROW')");
             s.executeUpdate(
                "create trigger D438.T438_STMT_1 after UPDATE on D438.T438 " +
                "referencing new_table as n " + 
-               "for each statement mode db2sql "+ 
+               "for each statement "+ 
+               (modeDb2SqlOptional?"":"mode db2sql ") +
                "insert into D438.T438_T1(a, b) select n.a, n.b || '_STMT' from n"); 
             
             conn.commit();
@@ -825,12 +830,14 @@ public class UpgradeTester {
             s.execute(
                "create trigger D438.T438_ROW_2 after UPDATE on D438.T438 " +
                "referencing new as n old as o " + 
-               "for each row mode db2sql "+ 
+               "for each row "+ 
+               (modeDb2SqlOptional?"":"mode db2sql ") +
                "insert into D438.T438_T2(a, c) values (n.a, n.c + 100)");
              s.executeUpdate(
                 "create trigger D438.T438_STMT_2 after UPDATE on D438.T438 " +
                 "referencing new_table as n " + 
-                "for each statement mode db2sql "+ 
+                "for each statement "+ 
+               (modeDb2SqlOptional?"":"mode db2sql ") +
                 "insert into D438.T438_T2(a, c) select n.a, n.c + 4000 from n"); 
                  
             conn.commit();

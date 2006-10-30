@@ -233,9 +233,9 @@ ij(SWIPERCONNECTION)> create table my_tsat (i int not null, c char(10), constrai
 ij(SWIPERCONNECTION)> -- Some TRIGGER privilege checks. See GrantRevoke.java for more tests
 set connection swiperConnection;
 ij(SWIPERCONNECTION)> -- Should fail
-create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+create trigger trig_sat1 after update on satheesh.tsat for each statement values 1;
 ERROR 28506: User 'SWIPER' does not have trigger permission on table 'SATHEESH'.'TSAT'.
-ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement values 1;
 ERROR 28506: User 'SWIPER' does not have trigger permission on table 'SATHEESH'.'TSAT'.
 ij(SWIPERCONNECTION)> -- Grant trigger privilege
 set connection satConnection;
@@ -243,9 +243,9 @@ ij(SATCONNECTION)> grant trigger on tsat to swiper;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> -- Try now
 set connection swiperConnection;
-ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement values 1;
 0 rows inserted/updated/deleted
-ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement values 1;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> drop trigger trig_sat1;
 0 rows inserted/updated/deleted
@@ -256,18 +256,18 @@ set connection satConnection;
 ij(SATCONNECTION)> revoke trigger on tsat from swiper;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> set connection swiperConnection;
-ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement values 1;
 ERROR 28506: User 'SWIPER' does not have trigger permission on table 'SATHEESH'.'TSAT'.
-ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement values 1;
 ERROR 28506: User 'SWIPER' does not have trigger permission on table 'SATHEESH'.'TSAT'.
 ij(SWIPERCONNECTION)> -- Now grant access to public and try again
 set connection satConnection;
 ij(SATCONNECTION)> grant trigger on tsat to public;
 0 rows inserted/updated/deleted
 ij(SATCONNECTION)> set connection swiperConnection;
-ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat1 after update on satheesh.tsat for each statement values 1;
 0 rows inserted/updated/deleted
-ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement mode db2sql values 1;
+ij(SWIPERCONNECTION)> create trigger trig_sat2 no cascade before delete on satheesh.tsat for each statement values 1;
 0 rows inserted/updated/deleted
 ij(SWIPERCONNECTION)> drop trigger trig_sat1;
 0 rows inserted/updated/deleted

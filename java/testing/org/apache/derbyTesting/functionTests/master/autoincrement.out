@@ -372,7 +372,7 @@ create table t1 (c1 int generated always as identity, name char(32));
 0 rows inserted/updated/deleted
 ij> create table t2 (c2 int generated always as identity, name char(32));
 0 rows inserted/updated/deleted
-ij> create trigger insert_trigger after insert on t1 for each row mode db2sql
+ij> create trigger insert_trigger after insert on t1 for each row
 	   insert into t2 (name) values ('Bob Finocchio');
 0 rows inserted/updated/deleted
 ij> insert into t1 (name) values ('Phil White');
@@ -505,7 +505,7 @@ create table tab1 (s1 int generated always as identity,
 0 rows inserted/updated/deleted
 ij> create table tab3 (c1 int);
 0 rows inserted/updated/deleted
-ij> create trigger tab1_after1 after insert on tab3 referencing new as newrow for each row mode db2sql insert into tab1 (lvl) values 1,2,3;
+ij> create trigger tab1_after1 after insert on tab3 referencing new as newrow for each row insert into tab1 (lvl) values 1,2,3;
 0 rows inserted/updated/deleted
 ij> insert into tab3 values null;
 1 row inserted/updated/deleted
@@ -521,7 +521,7 @@ TABLENAME                                                                       
 TAB1                                                                                                                            |4                   |1                   |1                   
 ij> create table tab2 (lvl int, s1  bigint generated always as identity);
 0 rows inserted/updated/deleted
-ij> create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row mode db2sql insert into tab2 (lvl) values 1,2,3;
+ij> create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row insert into tab2 (lvl) values 1,2,3;
 0 rows inserted/updated/deleted
 ij> insert into tab3 values null;
 1 row inserted/updated/deleted
@@ -1699,7 +1699,7 @@ create table t1 (c11 int generated always as identity (start with 101, increment
 0 rows inserted/updated/deleted
 ij(CONN2)> create table t2 (c21 int generated always as identity (start with 201, increment by 5), c22 int);
 0 rows inserted/updated/deleted
-ij(CONN2)> create trigger t1tr1 after insert on t1 for each row mode db2sql insert into t2 (c22) values (1);
+ij(CONN2)> create trigger t1tr1 after insert on t1 for each row insert into t2 (c22) values (1);
 0 rows inserted/updated/deleted
 ij(CONN2)> values IDENTITY_VAL_LOCAL();
 1                              

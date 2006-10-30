@@ -98,7 +98,7 @@ public class streams {
 			stmt.executeUpdate("create table t2 (id int, pid int, lvc long varchar, lvb long varchar for bit data)"),
 			0);
 		verifyCount(
-			stmt.executeUpdate("create trigger tr21 after insert on t2 for each statement mode db2sql values 1"),
+			stmt.executeUpdate("create trigger tr21 after insert on t2 for each statement values 1"),
 			0);
 		verifyCount(
 			stmt.executeUpdate("create table t3 (id int not null primary key, pid int, lvc long varchar, lvb long varchar for bit data, CONSTRAINT FK1 Foreign Key(pid) REFERENCES T3 (id))"),

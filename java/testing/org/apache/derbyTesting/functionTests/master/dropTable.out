@@ -265,7 +265,7 @@ create table t1(a int);
 0 rows inserted/updated/deleted
 ij> create table t2(a int);
 0 rows inserted/updated/deleted
-ij> create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
+ij> create trigger t1trig after insert on t1 for each row insert into t2 values(1);
 0 rows inserted/updated/deleted
 ij> -- this should work - trigger should be deleted
 drop table t1;
@@ -275,7 +275,7 @@ select * from t1;
 ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1(a int);
 0 rows inserted/updated/deleted
-ij> create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
+ij> create trigger t1trig after insert on t1 for each row insert into t2 values(1);
 0 rows inserted/updated/deleted
 ij> -- this should work - trigger should be deleted
 drop table t1;
@@ -285,7 +285,7 @@ select * from t1;
 ERROR 42X05: Table/View 'T1' does not exist.
 ij> create table t1(a int);
 0 rows inserted/updated/deleted
-ij> create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
+ij> create trigger t1trig after insert on t1 for each row insert into t2 values(1);
 0 rows inserted/updated/deleted
 ij> -- this should work - trigger should be deleted
 drop table t1;
@@ -302,7 +302,7 @@ create table t1(a int);
 0 rows inserted/updated/deleted
 ij> create table t2(a int);
 0 rows inserted/updated/deleted
-ij> create trigger t2trig after insert on t2 for each row mode db2sql insert into t1 values(1);
+ij> create trigger t2trig after insert on t2 for each row insert into t1 values(1);
 0 rows inserted/updated/deleted
 ij> -- this should work
 drop table t1;
@@ -316,7 +316,7 @@ ij> create table t1(a int);
 0 rows inserted/updated/deleted
 ij> create table t2(a int);
 0 rows inserted/updated/deleted
-ij> create trigger t2trig after insert on t2 for each row mode db2sql insert into t1 values(1);
+ij> create trigger t2trig after insert on t2 for each row insert into t1 values(1);
 0 rows inserted/updated/deleted
 ij> -- this should work
 drop table t1;
@@ -330,7 +330,7 @@ ij> create table t1(a int);
 0 rows inserted/updated/deleted
 ij> create table t2(a int);
 0 rows inserted/updated/deleted
-ij> create trigger t2trig after insert on t2 for each row mode db2sql insert into t1 values(1);
+ij> create trigger t2trig after insert on t2 for each row insert into t1 values(1);
 0 rows inserted/updated/deleted
 ij> -- this should work
 drop table t1;

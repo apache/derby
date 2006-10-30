@@ -179,21 +179,21 @@ remove t1stmt;
 --
 create table t1(a int);
 create table t2(a int);
-create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
+create trigger t1trig after insert on t1 for each row insert into t2 values(1);
 -- this should work - trigger should be deleted
 drop table t1;
 -- t1 shouldn't be found
 select * from t1;
 
 create table t1(a int);
-create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
+create trigger t1trig after insert on t1 for each row insert into t2 values(1);
 -- this should work - trigger should be deleted
 drop table t1;
 -- t1 shouldn't be found
 select * from t1;
 
 create table t1(a int);
-create trigger t1trig after insert on t1 for each row mode db2sql insert into t2 values(1);
+create trigger t1trig after insert on t1 for each row insert into t2 values(1);
 -- this should work - trigger should be deleted
 drop table t1;
 -- t1 shouldn't be found
@@ -205,7 +205,7 @@ drop table t2;
 --
 create table t1(a int);
 create table t2(a int);
-create trigger t2trig after insert on t2 for each row mode db2sql insert into t1 values(1);
+create trigger t2trig after insert on t2 for each row insert into t1 values(1);
 -- this should work
 drop table t1;
 -- the following should get an error when trying to recompile the trigger action
@@ -214,7 +214,7 @@ drop table t2;
 
 create table t1(a int);
 create table t2(a int);
-create trigger t2trig after insert on t2 for each row mode db2sql insert into t1 values(1);
+create trigger t2trig after insert on t2 for each row insert into t1 values(1);
 -- this should work
 drop table t1;
 -- the following should get an error when trying to recompile the trigger action
@@ -223,7 +223,7 @@ drop table t2;
 
 create table t1(a int);
 create table t2(a int);
-create trigger t2trig after insert on t2 for each row mode db2sql insert into t1 values(1);
+create trigger t2trig after insert on t2 for each row insert into t1 values(1);
 -- this should work
 drop table t1;
 -- the following should get an error when trying to recompile the trigger action
