@@ -61,9 +61,19 @@ public final class LangScripts extends ScriptTestCase {
      * Language SQL scripts (.sql files) that only run in embedded.
      */
     private static final String[] EMBEDDED_TESTS = {
+        "aggbuiltin",
         "arithmetic",
+        "comparisons",
+        "delete",
         "depend",
+        "insert",
+        "schemas",
+        "select",
+        "stringtypes",
         "union",
+        "update",
+        "valuesclause",
+        "views",
         };	
 
 	/**

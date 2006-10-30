@@ -16,6 +16,7 @@ ij> --
 --
 -- Note that bug 5704 occurs throughout this test
 -- Decimal results may be outside the range of valid types in Cloudscape
+
 -- ** insert avg.sql
 -- create an all types tables
 create table t (i int, s smallint, l bigint,
@@ -41,95 +42,96 @@ ij> insert into t (i) values (null);
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', x'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (1, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 200, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 222.22);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 2000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 222.22);
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
 ij> insert into t values (0, 100, 1000000,
 					  'goodbye', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'noone is here', 'jimmie noone was here',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  100.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 100.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-09-09'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:55:55'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:55:55'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'ffff', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'1111111111111111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> --------------------------------------
 -- NEGATIVE TESTS
 --------------------------------------
+
 -- cannot aggregate datatypes that don't support NumberDataValue
 select avg(c) from t;
 ERROR 42Y22: Aggregate AVG cannot operate on type CHAR.
@@ -183,11 +185,12 @@ ij> select avg(date('1999-06-06')) from t;
 ERROR 42Y22: Aggregate AVG cannot operate on type DATE.
 ij> select avg(time('12:30:30')) from t;
 ERROR 42Y22: Aggregate AVG cannot operate on type TIME.
-ij> select avg(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+ij> select avg(timestamp('1999-06-06 12:30:30')) from t;
 ERROR 42Y22: Aggregate AVG cannot operate on type TIMESTAMP.
 ij> ---------------------------
 -- NULL AGGREGATION
 ---------------------------
+
 -- scalar
 select avg(i) from empty;
 1          
@@ -564,6 +567,7 @@ create table empty (i int, s smallint, l bigint,
 				dc decimal(5,2));
 0 rows inserted/updated/deleted
 ij> -- bit maps to Byte[], so can't test for now
+
 -- populate tables
 insert into t (i) values (null);
 1 row inserted/updated/deleted
@@ -572,96 +576,97 @@ ij> insert into t (i) values (null);
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (1, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 200, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 222.22);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 2000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 222.22);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'goodbye', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'noone is here', 'jimmie noone was here',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  100.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 100.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-09-09'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:55:55'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:55:55'),
 					  X'12af', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'ffff', X'0000111100001111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'1111111111111111', X'1234', 111.11);
 1 row inserted/updated/deleted
 ij> ---------------------------
 -- NULL AGGREGATION
 ---------------------------
+
 -- scalar
 select count(i) from empty;
 1          
@@ -976,7 +981,7 @@ ij> select count(time('12:30:30')) from t;
 1          
 -----------
 17         
-ij> select count(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+ij> select count(timestamp('1999-06-06 12:30:30')) from t;
 1          
 -----------
 17         
@@ -1022,7 +1027,7 @@ ij> select count(time('12:30:30')) from t group by t;
 14         
 1          
 2          
-ij> select count(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t group by ts;
+ij> select count(timestamp('1999-06-06 12:30:30')) from t group by ts;
 1          
 -----------
 14         
@@ -1094,6 +1099,7 @@ ij> drop table empty;
 0 rows inserted/updated/deleted
 ij> -- ** insert countStar.sql
 -- Test the COUNT() aggregate
+
 -- create an all types tables
 create table t (i int, s smallint, l bigint,
 				c char(10), v varchar(50), lvc long varchar,
@@ -1116,96 +1122,97 @@ ij> insert into t (i) values (null);
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (1, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 200, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 2000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'goodbye', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'noone is here', 'jimmie noone was here',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  100.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 100.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-09-09'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:55:55'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:55:55'),
 					  X'12af', X'0000111100001111', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'ffff', X'0000111100001111', X'1234');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 'also duplicated',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'1111111111111111', X'ABCD');
 1 row inserted/updated/deleted
 ij> ---------------------------
 -- NULL AGGREGATION
 ---------------------------
+
 -- scalar
 select count(*) from empty;
 1          
@@ -1306,6 +1313,7 @@ ij> -- ** insert sum.sql
 --to all the type system to get it.  alternatively, 
 --need to cast/normalize/setWidth() the result to ensure 
 --right type.
+
 -- create an all types tables
 create table t (i int, s smallint, l bigint,
 				c char(10), v varchar(50), 
@@ -1321,6 +1329,7 @@ create table empty (i int, s smallint, l bigint,
 				b char(2) for bit data, bv varchar(8) for bit data, dc decimal(5,2));
 0 rows inserted/updated/deleted
 ij> -- bit maps to Byte[], so can't test for now
+
 -- populate tables
 insert into t (i) values (null);
 1 row inserted/updated/deleted
@@ -1329,97 +1338,99 @@ ij> insert into t (i) values (null);
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (1, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 200, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 222.22);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 2000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 222.22);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'goodbye', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'noone is here', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  100.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 100.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-09-09'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:55:55'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:55:55'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'ffff', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'1111111111111111', 111.11);
 1 row inserted/updated/deleted
 ij> -- bit maps to Byte[], so can't test for now
+
 --------------------------------------
 -- NEGATIVE TESTS
 --------------------------------------
+
 -- cannot aggregate datatypes that don't support NumberDataValue
 select sum(c) from t;
 ERROR 42Y22: Aggregate SUM cannot operate on type CHAR.
@@ -1465,11 +1476,12 @@ ij> select sum(date('1999-06-06')) from t;
 ERROR 42Y22: Aggregate SUM cannot operate on type DATE.
 ij> select sum(time('12:30:30')) from t;
 ERROR 42Y22: Aggregate SUM cannot operate on type TIME.
-ij> select sum(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+ij> select sum(timestamp('1999-06-06 12:30:30')) from t;
 ERROR 42Y22: Aggregate SUM cannot operate on type TIMESTAMP.
 ij> ---------------------------
 -- NULL AGGREGATION
 ---------------------------
+
 -- scalar
 select sum(i) from empty;
 1          
@@ -1738,6 +1750,7 @@ create table empty (i int, s smallint, l bigint,
 				b char(2) for bit data, bv varchar(8) for bit data, dc decimal(5,2));
 0 rows inserted/updated/deleted
 ij> -- bit maps to Byte[], so can't test for now
+
 -- populate tables
 insert into t (i) values (null);
 1 row inserted/updated/deleted
@@ -1746,96 +1759,97 @@ ij> insert into t (i) values (null);
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (1, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 200, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 222.22);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 2000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 222.22);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'goodbye', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'noone is here', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  100.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 100.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-09-09'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:55:55'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:55:55'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'ffff', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'1111111111111111', 111.11);
 1 row inserted/updated/deleted
 ij> --------------------------------------
 -- NEGATIVE TESTS
 --------------------------------------
+
 -- long varchar datatypes too
 create table t1 (c1 long varchar);
 0 rows inserted/updated/deleted
@@ -1846,6 +1860,7 @@ ij> drop table t1;
 ij> ---------------------------
 -- NULL AGGREGATION
 ---------------------------
+
 -- scalar
 select max(i) from empty;
 1          
@@ -1999,7 +2014,7 @@ WARNING 01003: Null values were eliminated from the argument of a column functio
 ij> select max(ts) from t;
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1992-01-01 12:55:55.0     
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(b) from t;
 1   
@@ -2082,8 +2097,8 @@ WARNING 01003: Null values were eliminated from the argument of a column functio
 ij> select max(ts) from t group by ts;
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1992-01-01 12:30:30.0     
+1992-01-01 12:55:55.0     
 NULL                      
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select max(b) from t group by b;
@@ -2136,10 +2151,10 @@ ij> select max(time('12:30:30')) from t;
 1       
 --------
 12:30:30
-ij> select max(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+ij> select max(timestamp('1999-06-06 12:30:30')) from t;
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1999-06-06 12:30:30.0     
 ij> select max(1) from t group by i;
 1          
 -----------
@@ -2182,12 +2197,12 @@ ij> select max(time('12:30:30')) from t group by t;
 12:30:30
 12:30:30
 12:30:30
-ij> select max(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t group by ts;
+ij> select max(timestamp('1999-06-06 12:30:30')) from t group by ts;
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
-xxxxxxFILTERED-TIMESTAMPxxxxx
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1999-06-06 12:30:30.0     
+1999-06-06 12:30:30.0     
+1999-06-06 12:30:30.0     
 ij> -- multicolumn grouping
 select max(i), max(dt), max(b) from t group by i, dt, b;
 1          |2         |3   
@@ -2275,96 +2290,97 @@ ij> insert into t (i) values (null);
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (1, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 200, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 222.22);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 2000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 222.22);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'goodbye', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'noone is here', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  100.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 100.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-09-09'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:55:55'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:55:55'),
 					  X'12af', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'ffff', X'0000111100001111', 111.11);
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'duplicate', 'this is duplicated', 
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'1111111111111111', 111.11);
 1 row inserted/updated/deleted
 ij> --------------------------------------
 -- NEGATIVE TESTS
 --------------------------------------
+
 -- long varchar datatypes too
 create table t1 (c1 long varchar);
 0 rows inserted/updated/deleted
@@ -2375,6 +2391,7 @@ ij> drop table t1;
 ij> ---------------------------
 -- NULL AGGREGATION
 ---------------------------
+
 -- scalar
 select min(i) from empty;
 1          
@@ -2528,7 +2545,7 @@ WARNING 01003: Null values were eliminated from the argument of a column functio
 ij> select min(ts) from t;
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1992-01-01 12:30:30.0     
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(b) from t;
 1   
@@ -2611,8 +2628,8 @@ WARNING 01003: Null values were eliminated from the argument of a column functio
 ij> select min(ts) from t group by ts;
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1992-01-01 12:30:30.0     
+1992-01-01 12:55:55.0     
 NULL                      
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select min(b) from t group by b;
@@ -2665,10 +2682,10 @@ ij> select min(time('12:30:30')) from t;
 1       
 --------
 12:30:30
-ij> select min(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t;
+ij> select min(timestamp('1999-06-06 12:30:30')) from t;
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1999-06-06 12:30:30.0     
 ij> select min(1) from t group by i;
 1          
 -----------
@@ -2711,12 +2728,12 @@ ij> select min(time('12:30:30')) from t group by t;
 12:30:30
 12:30:30
 12:30:30
-ij> select min(timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx)) from t group by ts;
+ij> select min(timestamp('1999-06-06 12:30:30')) from t group by ts;
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
-xxxxxxFILTERED-TIMESTAMPxxxxx
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1999-06-06 12:30:30.0     
+1999-06-06 12:30:30.0     
+1999-06-06 12:30:30.0     
 ij> -- multicolumn grouping
 select min(i), min(dt), min(b) from t group by i, dt, b;
 1          |2         |3   

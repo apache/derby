@@ -15,6 +15,7 @@ ij> --
 --   limitations under the License.
 --
 -- tests for views
+
 -- set autocommit off
 autocommit off;
 ij> -- create some tables
@@ -70,6 +71,7 @@ ij> insert into t2 values (1, 2, 3.0, 4.0);
 ij> insert into t2 values (8, 7, 6.0, 5.0);
 1 row inserted/updated/deleted
 ij> -- negative tests
+
 -- view with a parameter
 create view vneg as select * from t1 where i = ?;
 ERROR 42X98: Parameters are not allowed in a VIEW definition.

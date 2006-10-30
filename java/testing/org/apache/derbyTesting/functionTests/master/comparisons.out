@@ -17,7 +17,9 @@ ij> --
 --
 -- this test shows the current supported comparison operators
 --
+
 -- first, do comparisons on the int type
+
 -- create a table with couple of int columns
 create table inttab (c1 int, c2 int);
 0 rows inserted/updated/deleted
@@ -274,6 +276,7 @@ C1
 ij> -- create a table with a couple of smallint columns.  All smallint vs. smallint
 -- comparisons must be done between columns, because there are no smallint
 -- constants in the language
+
 create table smallinttab (c1 smallint, c2 smallint);
 0 rows inserted/updated/deleted
 ij> -- insert some values
@@ -750,6 +753,7 @@ C1
 1     
 32767 
 ij> -- create a table with a couple of bigint columns.  
+
 create table biginttab (c1 bigint, c2 bigint, c3 int, c4 smallint);
 0 rows inserted/updated/deleted
 ij> -- insert some values
@@ -1004,9 +1008,11 @@ C1
 9223372036854775807 
 -9223372036854775808
 ij> -- create a table with char columns of different lengths
+
 create table chartab (c1 char(1), c2 char(5));
 0 rows inserted/updated/deleted
 ij> -- insert some values
+
 insert into chartab values (' ', '     ');
 1 row inserted/updated/deleted
 ij> insert into chartab values ('a', 'a    ');
@@ -1019,9 +1025,11 @@ ij> -- select each one in turn
 select c1 from chartab where c1 = ' ';
 C1  
 ----
+    
 ij> select c2 from chartab where c2 = '     ';
 C2   
 -----
+     
 ij> select c1 from chartab where c1 = 'a';
 C1  
 ----
@@ -1042,18 +1050,23 @@ ij> -- now check for end-of-string blank semantics
 select c1 from chartab where c1 = '';
 C1  
 ----
+    
 ij> select c1 from chartab where c1 = '                      ';
 C1  
 ----
+    
 ij> select c2 from chartab where c2 = '';
 C2   
 -----
+     
 ij> select c2 from chartab where c2 = ' ';
 C2   
 -----
+     
 ij> select c2 from chartab where c2 = '                           ';
 C2   
 -----
+     
 ij> select c1 from chartab where c1 = 'a        ';
 C1  
 ----
@@ -1087,11 +1100,13 @@ NULL
 ij> select c1 from chartab where c1 is not null;
 C1  
 ----
+    
 a   
 b   
 ij> select c1 from chartab where not c1 is null;
 C1  
 ----
+    
 a   
 b   
 ij> -- Now test <>
@@ -1108,18 +1123,22 @@ bcdef
 ij> select c1 from chartab where c1 <> 'a';
 C1  
 ----
+    
 b   
 ij> select c2 from chartab where c2 <> 'a    ';
 C2   
 -----
+     
 bcdef
 ij> select c1 from chartab where c1 <> 'b';
 C1  
 ----
+    
 a   
 ij> select c2 from chartab where c2 <> 'bcdef';
 C2   
 -----
+     
 a    
 ij> select c1 from chartab where c1 != ' ';
 C1  
@@ -1134,18 +1153,22 @@ bcdef
 ij> select c1 from chartab where c1 != 'a';
 C1  
 ----
+    
 b   
 ij> select c2 from chartab where c2 != 'a    ';
 C2   
 -----
+     
 bcdef
 ij> select c1 from chartab where c1 != 'b';
 C1  
 ----
+    
 a   
 ij> select c2 from chartab where c2 != 'bcdef';
 C2   
 -----
+     
 a    
 ij> -- now check for end-of-string blank semantics
 select c1 from chartab where c1 <> '';
@@ -1176,22 +1199,27 @@ bcdef
 ij> select c1 from chartab where c1 <> 'a        ';
 C1  
 ----
+    
 b   
 ij> select c2 from chartab where c2 <> 'a ';
 C2   
 -----
+     
 bcdef
 ij> select c1 from chartab where c1 <> 'b             ';
 C1  
 ----
+    
 a   
 ij> select c2 from chartab where c2 <> 'bcdef                ';
 C2   
 -----
+     
 a    
 ij> select c2 from chartab where c2 <> 'bcde       ';
 C2   
 -----
+     
 a    
 bcdef
 ij> -- now check null <> null semantics
@@ -1209,16 +1237,20 @@ C2
 ij> select c1 from chartab where c1 < 'a';
 C1  
 ----
+    
 ij> select c2 from chartab where c2 < 'a    ';
 C2   
 -----
+     
 ij> select c1 from chartab where c1 < 'b';
 C1  
 ----
+    
 a   
 ij> select c2 from chartab where c2 < 'bcdef';
 C2   
 -----
+     
 a    
 ij> -- now check for end-of-string blank semantics
 select c1 from chartab where c1 < '';
@@ -1239,20 +1271,25 @@ C2
 ij> select c1 from chartab where c1 < 'a        ';
 C1  
 ----
+    
 ij> select c2 from chartab where c2 < 'a ';
 C2   
 -----
+     
 ij> select c1 from chartab where c1 < 'b             ';
 C1  
 ----
+    
 a   
 ij> select c2 from chartab where c2 < 'bcdef                ';
 C2   
 -----
+     
 a    
 ij> select c2 from chartab where c2 < 'bcde       ';
 C2   
 -----
+     
 a    
 ij> -- now check null < null semantics
 select c1, c2 from chartab where c1 < c2;
@@ -1336,64 +1373,80 @@ ij> -- Now test <=
 select c1 from chartab where c1 <= ' ';
 C1  
 ----
+    
 ij> select c2 from chartab where c2 <= '     ';
 C2   
 -----
+     
 ij> select c1 from chartab where c1 <= 'a';
 C1  
 ----
+    
 a   
 ij> select c2 from chartab where c2 <= 'a    ';
 C2   
 -----
+     
 a    
 ij> select c1 from chartab where c1 <= 'b';
 C1  
 ----
+    
 a   
 b   
 ij> select c2 from chartab where c2 <= 'bcdef';
 C2   
 -----
+     
 a    
 bcdef
 ij> -- now check for end-of-string blank semantics
 select c1 from chartab where c1 <= '';
 C1  
 ----
+    
 ij> select c1 from chartab where c1 <= '                      ';
 C1  
 ----
+    
 ij> select c2 from chartab where c2 <= '';
 C2   
 -----
+     
 ij> select c2 from chartab where c2 <= ' ';
 C2   
 -----
+     
 ij> select c2 from chartab where c2 <= '                           ';
 C2   
 -----
+     
 ij> select c1 from chartab where c1 <= 'a        ';
 C1  
 ----
+    
 a   
 ij> select c2 from chartab where c2 <= 'a ';
 C2   
 -----
+     
 a    
 ij> select c1 from chartab where c1 <= 'b             ';
 C1  
 ----
+    
 a   
 b   
 ij> select c2 from chartab where c2 <= 'bcdef                ';
 C2   
 -----
+     
 a    
 bcdef
 ij> select c2 from chartab where c2 <= 'bcde       ';
 C2   
 -----
+     
 a    
 ij> -- now check null <= null semantics
 select c1, c2 from chartab where c1 <= c2;
@@ -1406,11 +1459,13 @@ ij> -- Now test >=
 select c1 from chartab where c1 >= ' ';
 C1  
 ----
+    
 a   
 b   
 ij> select c2 from chartab where c2 >= '     ';
 C2   
 -----
+     
 a    
 bcdef
 ij> select c1 from chartab where c1 >= 'a';
@@ -1435,26 +1490,31 @@ ij> -- now check for end-of-string blank semantics
 select c1 from chartab where c1 >= '';
 C1  
 ----
+    
 a   
 b   
 ij> select c1 from chartab where c1 >= '                      ';
 C1  
 ----
+    
 a   
 b   
 ij> select c2 from chartab where c2 >= '';
 C2   
 -----
+     
 a    
 bcdef
 ij> select c2 from chartab where c2 >= ' ';
 C2   
 -----
+     
 a    
 bcdef
 ij> select c2 from chartab where c2 >= '                           ';
 C2   
 -----
+     
 a    
 bcdef
 ij> select c1 from chartab where c1 >= 'a        ';
@@ -1488,10 +1548,12 @@ a   |a
 ij> -- create a table with a few varchar columns.  All varchar vs. varchar
 -- comparisons must be done between columns, because there are no varchar
 -- constants in the language
+
 create table varchartab (c1 varchar(1), c2 varchar(1), c3 varchar(5),
 			 c4 varchar(5));
 0 rows inserted/updated/deleted
 ij> -- insert some values
+
 insert into varchartab values ('', '', '', '');
 1 row inserted/updated/deleted
 ij> insert into varchartab values ('a', 'a', 'a', 'a');
@@ -1510,20 +1572,26 @@ ij> -- select the ones where the columns are equal
 select c1 from varchartab where c1 = c2;
 C1  
 ----
+    
 a   
 b   
 ij> select c3 from varchartab where c3 = c4;
 C3   
 -----
+     
 a    
 bcdef
 ij> -- test varchar = char semantics.  Test with trailing blanks.
 select c1 from varchartab where c1 = '                 ';
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where c1 = '';
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where c1 = 'a ';
 C1  
 ----
@@ -1540,9 +1608,13 @@ C1
 ij> select c3 from varchartab where c3 = ' ';
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where c3 = '';
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where c3 = 'a    ';
 C3   
 -----
@@ -1559,9 +1631,13 @@ ij> -- test char = varchar semantics.  Test with trailing blanks.
 select c1 from varchartab where '                 ' = c1;
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where '' = c1;
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where 'a ' = c1;
 C1  
 ----
@@ -1578,9 +1654,13 @@ C1
 ij> select c3 from varchartab where ' ' = c3;
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where '' = c3;
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where 'a    ' = c3;
 C3   
 -----
@@ -1622,18 +1702,24 @@ b
 ij> select c1 from varchartab where c1 <> 'a ';
 C1  
 ----
+    
 b   
+    
 b   
 ij> select c1 from varchartab where c1 <> 'b                               ';
 C1  
 ----
+    
 a   
+    
 a   
 ij> select c1 from varchartab where c1 <> 'bb';
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c3 from varchartab where c3 <> ' ';
@@ -1653,19 +1739,25 @@ b
 ij> select c3 from varchartab where c3 <> 'a    ';
 C3   
 -----
+     
 bcdef
+     
 b    
 ij> select c3 from varchartab where c3 <> 'bcdef                   ';
 C3   
 -----
+     
 a    
+     
 a    
 b    
 ij> select c3 from varchartab where c3 <> 'bbbb';
 C3   
 -----
+     
 a    
 bcdef
+     
 a    
 b    
 ij> select c1 from varchartab where c1 != '                 ';
@@ -1685,18 +1777,24 @@ b
 ij> select c1 from varchartab where c1 != 'a ';
 C1  
 ----
+    
 b   
+    
 b   
 ij> select c1 from varchartab where c1 != 'b                               ';
 C1  
 ----
+    
 a   
+    
 a   
 ij> select c1 from varchartab where c1 != 'bb';
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c3 from varchartab where c3 != ' ';
@@ -1716,19 +1814,25 @@ b
 ij> select c3 from varchartab where c3 != 'a    ';
 C3   
 -----
+     
 bcdef
+     
 b    
 ij> select c3 from varchartab where c3 != 'bcdef                   ';
 C3   
 -----
+     
 a    
+     
 a    
 b    
 ij> select c3 from varchartab where c3 != 'bbbb';
 C3   
 -----
+     
 a    
 bcdef
+     
 a    
 b    
 ij> -- test char <> varchar semantics.  Test with trailing blanks.
@@ -1749,18 +1853,24 @@ b
 ij> select c1 from varchartab where 'a ' <> c1;
 C1  
 ----
+    
 b   
+    
 b   
 ij> select c1 from varchartab where 'b                               ' <> c1;
 C1  
 ----
+    
 a   
+    
 a   
 ij> select c1 from varchartab where 'bb' <> c1;
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c3 from varchartab where ' ' <> c3;
@@ -1780,19 +1890,25 @@ b
 ij> select c3 from varchartab where 'a    ' <> c3;
 C3   
 -----
+     
 bcdef
+     
 b    
 ij> select c3 from varchartab where 'bcdef                   ' <> c3;
 C3   
 -----
+     
 a    
+     
 a    
 b    
 ij> select c3 from varchartab where 'bbbb' <> c3;
 C3   
 -----
+     
 a    
 bcdef
+     
 a    
 b    
 ij> -- Now test <
@@ -1815,16 +1931,22 @@ C1
 ij> select c1 from varchartab where c1 < 'a ';
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where c1 < 'b                               ';
 C1  
 ----
+    
 a   
+    
 a   
 ij> select c1 from varchartab where c1 < 'bb';
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c3 from varchartab where c3 < ' ';
@@ -1836,16 +1958,22 @@ C3
 ij> select c3 from varchartab where c3 < 'a    ';
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where c3 < 'bcdef                   ';
 C3   
 -----
+     
 a    
+     
 a    
 b    
 ij> select c3 from varchartab where c3 < 'bbbb';
 C3   
 -----
+     
 a    
+     
 a    
 b    
 ij> -- test char < varchar semantics.  Test with trailing blanks.
@@ -1970,16 +2098,22 @@ C1
 ij> select c1 from varchartab where 'a ' > c1;
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where 'b                               ' > c1;
 C1  
 ----
+    
 a   
+    
 a   
 ij> select c1 from varchartab where 'bb' > c1;
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c3 from varchartab where ' ' > c3;
@@ -1991,28 +2125,36 @@ C3
 ij> select c3 from varchartab where 'a    ' > c3;
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where 'bcdef                   ' > c3;
 C3   
 -----
+     
 a    
+     
 a    
 b    
 ij> select c3 from varchartab where 'bbbb' > c3;
 C3   
 -----
+     
 a    
+     
 a    
 b    
 ij> -- Now test <=
 select c1 from varchartab where c1 <= c2;
 C1  
 ----
+    
 a   
 b   
 a   
 ij> select c3 from varchartab where c3 <= c4;
 C3   
 -----
+     
 a    
 bcdef
 a    
@@ -2021,65 +2163,89 @@ ij> -- test varchar <= char semantics.  Test with trailing blanks.
 select c1 from varchartab where c1 <= '                 ';
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where c1 <= '';
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where c1 <= 'a ';
 C1  
 ----
+    
 a   
+    
 a   
 ij> select c1 from varchartab where c1 <= 'b                               ';
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c1 from varchartab where c1 <= 'bb';
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c3 from varchartab where c3 <= ' ';
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where c3 <= '';
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where c3 <= 'a    ';
 C3   
 -----
+     
 a    
+     
 a    
 ij> select c3 from varchartab where c3 <= 'bcdef                   ';
 C3   
 -----
+     
 a    
 bcdef
+     
 a    
 b    
 ij> select c3 from varchartab where c3 <= 'bbbb';
 C3   
 -----
+     
 a    
+     
 a    
 b    
 ij> -- test char <= varchar semantics.  Test with trailing blanks.
 select c1 from varchartab where '                 ' <= c1;
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c1 from varchartab where '' <= c1;
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c1 from varchartab where 'a ' <= c1;
@@ -2100,15 +2266,19 @@ C1
 ij> select c3 from varchartab where ' ' <= c3;
 C3   
 -----
+     
 a    
 bcdef
+     
 a    
 b    
 ij> select c3 from varchartab where '' <= c3;
 C3   
 -----
+     
 a    
 bcdef
+     
 a    
 b    
 ij> select c3 from varchartab where 'a    ' <= c3;
@@ -2130,27 +2300,33 @@ ij> -- Now test >=
 select c1 from varchartab where c1 >= c2;
 C1  
 ----
+    
 a   
 b   
 b   
 ij> select c3 from varchartab where c3 >= c4;
 C3   
 -----
+     
 a    
 bcdef
 ij> -- test varchar >= char semantics.  Test with trailing blanks.
 select c1 from varchartab where c1 >= '                 ';
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c1 from varchartab where c1 >= '';
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c1 from varchartab where c1 >= 'a ';
@@ -2171,15 +2347,19 @@ C1
 ij> select c3 from varchartab where c3 >= ' ';
 C3   
 -----
+     
 a    
 bcdef
+     
 a    
 b    
 ij> select c3 from varchartab where c3 >= '';
 C3   
 -----
+     
 a    
 bcdef
+     
 a    
 b    
 ij> select c3 from varchartab where c3 >= 'a    ';
@@ -2201,50 +2381,70 @@ ij> -- test char >= varchar semantics.  Test with trailing blanks.
 select c1 from varchartab where '                 ' >= c1;
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where '' >= c1;
 C1  
 ----
+    
+    
 ij> select c1 from varchartab where 'a ' >= c1;
 C1  
 ----
+    
 a   
+    
 a   
 ij> select c1 from varchartab where 'b                               ' >= c1;
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c1 from varchartab where 'bb' >= c1;
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c3 from varchartab where ' ' >= c3;
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where '' >= c3;
 C3   
 -----
+     
+     
 ij> select c3 from varchartab where 'a    ' >= c3;
 C3   
 -----
+     
 a    
+     
 a    
 ij> select c3 from varchartab where 'bcdef                   ' >= c3;
 C3   
 -----
+     
 a    
 bcdef
+     
 a    
 b    
 ij> select c3 from varchartab where 'bbbb' >= c3;
 C3   
 -----
+     
 a    
+     
 a    
 b    
 ij> -- test is null semantics
@@ -2255,15 +2455,19 @@ NULL
 ij> select c1 from varchartab where c1 is not null;
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> select c1 from varchartab where not c1 is null;
 C1  
 ----
+    
 a   
 b   
+    
 a   
 b   
 ij> -- clean up

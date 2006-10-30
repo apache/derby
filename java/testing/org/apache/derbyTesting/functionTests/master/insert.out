@@ -14,10 +14,13 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
+
 --
 -- this test is for basic insert functionality
 --
+
 -- NOTE: drop, create, select from the same table doesn't work yet either.
+
 -- create the tables
 create table t1 (i int, j int);
 0 rows inserted/updated/deleted
@@ -366,7 +369,7 @@ ij> create table i4 (b char (1) for bit data,
 			ts timestamp);
 0 rows inserted/updated/deleted
 ij> insert into i3 values (X'11', X'22', X'25', '3', '4', '5', '1990-10-10', 
-			'11:11:11', 'xxxxxxFILTERED-TIMESTAMPxxxxx);
+			'11:11:11', '1990-11-11 11:11:11');
 1 row inserted/updated/deleted
 ij> insert into i3 values (null, null, null, null, null, null, null, null, null);
 1 row inserted/updated/deleted
@@ -375,7 +378,7 @@ ij> insert into i4 select * from i3;
 ij> select * from i4;
 B   |BV  |LBV                                                                                                                             |C         |CV        |LVC                                                                                                                             |DT        |T       |TS                        
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-11  |22  |25                                                                                                                              |3         |4         |5                                                                                                                               |1990-10-10|11:11:11|xxxxxxFILTERED-TIMESTAMPxxxxx
+11  |22  |25                                                                                                                              |3         |4         |5                                                                                                                               |1990-10-10|11:11:11|1990-11-11 11:11:11.0     
 NULL|NULL|NULL                                                                                                                            |NULL      |NULL      |NULL                                                                                                                            |NULL      |NULL    |NULL                      
 ij> delete from i4;
 2 rows inserted/updated/deleted
@@ -388,7 +391,7 @@ ij> create table tab2 (
 	ts timestamp);
 0 rows inserted/updated/deleted
 ij> insert into tab2 values ('3', '4', '5', '1990-10-10', 
-			'11:11:11', 'xxxxxxFILTERED-TIMESTAMPxxxxx);
+			'11:11:11', '1990-11-11 11:11:11');
 1 row inserted/updated/deleted
 ij> insert into tab2 values (null, null, null, null, null, null);
 1 row inserted/updated/deleted
@@ -397,7 +400,7 @@ ij> insert into i4 (c, cv, lvc, dt, t, ts) select c, cv, lvc, dt, t, ts from tab
 ij> select * from i4;
 B   |BV  |LBV                                                                                                                             |C         |CV        |LVC                                                                                                                             |DT        |T       |TS                        
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-NULL|NULL|NULL                                                                                                                            |3         |4         |5                                                                                                                               |1990-10-10|11:11:11|xxxxxxFILTERED-TIMESTAMPxxxxx
+NULL|NULL|NULL                                                                                                                            |3         |4         |5                                                                                                                               |1990-10-10|11:11:11|1990-11-11 11:11:11.0     
 NULL|NULL|NULL                                                                                                                            |NULL      |NULL      |NULL                                                                                                                            |NULL      |NULL    |NULL                      
 ij> -- drop the tables
 drop table t1;
@@ -421,6 +424,7 @@ ij> drop table tab1;
 ij> drop table tab2;
 0 rows inserted/updated/deleted
 ij> -- test bug 4293, extremely huge insert statement, not using FileImport.
+
 create table POLICY_STATEMENTS (c1 int, c2 int, c3 int, c4 long varchar, c5 long varchar, c6 int, c7 int, c8 int, c9 int, c10 int, c11 int);
 0 rows inserted/updated/deleted
 ij> INSERT INTO POLICY_STATEMENTS VALUES

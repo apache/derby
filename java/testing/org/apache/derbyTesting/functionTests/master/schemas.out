@@ -21,6 +21,7 @@ ij> --
 --
 -- Catalog names are not supported, and result in syntax errors when used.
 --
+
 create table myschem.t(c int);
 0 rows inserted/updated/deleted
 ij> insert into t values (1);
@@ -55,6 +56,7 @@ ij> -- Catalog names in column expressions cause syntax errors.  Rather than
 --							-	Jeff
 --
 -- select honk.blat.s.c from honk.blat.s;
+
 drop table xyzzy.t;
 ERROR 42Y07: Schema 'XYZZY' does not exist
 ij> -- catalog name not supported:
@@ -405,10 +407,10 @@ TEST                                                                            
 ij> -- create a table in test
 set schema test;
 0 rows inserted/updated/deleted
-ij> create table sampletab (c1 int check (c1 > 1), c2 char(20));
+ij> create table sampletab (c1 int constraint st_c1 check (c1 > 1), c2 char(20));
 0 rows inserted/updated/deleted
 ij> insert into sampletab values (1,'in schema: TEST');
-ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'TEST.SAMPLETAB'.
+ERROR 23513: The check constraint 'ST_C1' was violated while performing an INSERT or UPDATE on table 'TEST.SAMPLETAB'.
 ij> insert into sampletab values (2,'in schema: TEST');
 1 row inserted/updated/deleted
 ij> -- verify it
@@ -436,7 +438,7 @@ ij> -- switch schemas
 set schema APP;
 0 rows inserted/updated/deleted
 ij> -- create table with same name in APP
-create table sampletab (c1 int check(c1 > 1), c2 char(20));
+create table sampletab (c1 int constraint st_c1 check(c1 > 1), c2 char(20));
 0 rows inserted/updated/deleted
 ij> insert into sampletab values (2,'in schema: APP');
 1 row inserted/updated/deleted
@@ -624,6 +626,7 @@ NULL       |NULL  |NULL                          |NULL
 1          |1     |1                             |1                             
 1          |1     |1                             |1                             
 ij> -- test subqueries
+
 select * from test.s where exists (select test.s.* from test.t);
 I          |S     |C                             |VC                            
 --------------------------------------------------------------------------------
@@ -733,6 +736,7 @@ where i = (select i from test.t t2 where s = (select i from test.t t3 where s = 
 I          |S     |C                             |VC                            
 --------------------------------------------------------------------------------
 ij> -- correlated subqueries
+
 -- exists disallowed in select clause
 select (exists (select * from test.ttt 
 				where iii = (select 11 from test.tt where ii = i and ii <> 1)) )
@@ -741,6 +745,7 @@ from test.s
 order by a;
 ERROR 42X01: Syntax error: Encountered "exists" at line 4, column 9.
 ij> -- negative tests
+
 -- multiple matches at parent level
 select * from test.s, test.t where exists (select i from test.tt);
 ERROR 42X03: Column name 'I' is in more than one table in the FROM list.
@@ -760,6 +765,7 @@ ij> -- correlated column in a derived table
 select * from test.s, (select * from test.tt where test.s.i = ii) a;
 ERROR 42X04: Column 'TEST.S.I' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'TEST.S.I' is not a column in the target table.
 ij> -- positive tests
+
 -- skip levels to find match
 select * from test.s where exists (select * from test.ttt where iii = 
 								(select 11 from test.tt where ii = i and ii <> 1));
@@ -871,6 +877,7 @@ ij> -- check implicit schema creation for all CREATE statements that create sche
 -- TABLE,VIEW,PROCEDURE TRIGGER, STATEMENT
 -- Cloudscape requires that the INDEX schema matches the (existing) table schema so
 -- there is no implict schema creation for CREATE INDEX.
+
 prepare ISC_TABLE as 'create table ISC.I(i int)';
 ij> execute ISC_TABLE;
 0 rows inserted/updated/deleted

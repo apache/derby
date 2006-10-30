@@ -14,9 +14,11 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
+
 --
 -- this test is for the values clause functionality
 --
+
 -- create the tables
 create table t1 (i int, j int);
 0 rows inserted/updated/deleted
@@ -48,6 +50,7 @@ ij> -- empty values clause
 values();
 ERROR 42X01: Syntax error: Encountered ")" at line 2, column 8.
 ij> -- positive tests
+
 -- single value
 values 1;
 1          
@@ -134,7 +137,9 @@ K          |L
 NULL       |2          
 NULL       |4          
 ij> -- table constructor tests
+
 -- negative tests
+
 -- non-matching # of elements
 values 1, (2, 3), 4;
 ERROR 42X59: The number of columns in each VALUES constructor must be the same.
@@ -147,6 +152,7 @@ ij> -- all ? parameters in a column position
 prepare v1 as 'values (1, ?, 2), (3, ?, 4), (5, ?, 7)';
 ERROR 42Y10: A table constructor that is not in an INSERT statement has all ? parameters in one of its columns.  For each column, at least one of the rows must have a non-parameter.
 ij> -- positive tests
+
 values 1, 2, 3;
 1          
 -----------

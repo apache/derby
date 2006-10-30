@@ -248,7 +248,7 @@ select schemaname, authorizationid
 
 -- create a table in test
 set schema test;
-create table sampletab (c1 int check (c1 > 1), c2 char(20));
+create table sampletab (c1 int constraint st_c1 check (c1 > 1), c2 char(20));
 insert into sampletab values (1,'in schema: TEST');
 insert into sampletab values (2,'in schema: TEST');
 
@@ -270,7 +270,7 @@ alter table sampletab add column c3 int;
 set schema APP;
 
 -- create table with same name in APP
-create table sampletab (c1 int check(c1 > 1), c2 char(20));
+create table sampletab (c1 int constraint st_c1 check(c1 > 1), c2 char(20));
 insert into sampletab values (2,'in schema: APP');
 
 -- verify it

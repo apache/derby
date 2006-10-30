@@ -17,6 +17,8 @@ ij> --
 --
 -- this test shows the current supported select functionality
 --
+
+
 create table t(i int, s smallint);
 0 rows inserted/updated/deleted
 ij> insert into t (i,s) values (1956,475);
@@ -178,6 +180,7 @@ ij> drop schema content restrict;
 0 rows inserted/updated/deleted
 ij> -- This is to test quotes handling in tables.
 -- This tests patch for Derby 13
+
 create table "S1.T1" (id int not null primary key, d1 int);
 0 rows inserted/updated/deleted
 ij> create schema s1;

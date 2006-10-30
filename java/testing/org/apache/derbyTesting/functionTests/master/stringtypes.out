@@ -18,10 +18,13 @@ ij> --
 -- this test shows the current supported char, varchar, and long varchar
 -- functionality
 --
+
+
 -- create a table with null and non-null char columns of different lengths
 create table ct (c1 char, c2 char(5) not null, c3 char(30) default null);
 0 rows inserted/updated/deleted
 ij> -- insert some rows
+
 -- first, try values that fill each column with non-blanks
 insert into ct values ('1', '11111', '111111111111111111111111111111');
 1 row inserted/updated/deleted
@@ -66,6 +69,7 @@ ij> -- now create a table with varchar columns
 create table vt (c1 varchar(1), c2 varchar(5) not null, c3 varchar(30) default null);
 0 rows inserted/updated/deleted
 ij> -- insert some rows
+
 -- first, try values that fill each column with non-blanks
 insert into vt values ('1', '11111', '111111111111111111111111111111');
 1 row inserted/updated/deleted
@@ -403,6 +407,7 @@ ij> -- RESOLVE: Would like to do a test of non-terminated string (i.e. string
 --
 -- This test could be done from within a java program, but it would take
 -- a fair amount of work for the benefit.
+
 select * from vt;
 C1  |C2   |C3                            
 -----------------------------------------
@@ -427,6 +432,7 @@ ij> select {fn length(c1)}, length(c1) from trash;
 ij> drop table trash;
 0 rows inserted/updated/deleted
 ij> --- Test for really big literals. Throw an error for now. beetle 2758
+
 CREATE TABLE "LVC"
 (
 	"LV"     		long varchar

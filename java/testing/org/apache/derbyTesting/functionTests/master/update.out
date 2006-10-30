@@ -14,9 +14,13 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
+
 --
 -- this test is for basic update functionality
 --
+
+
+
 -- create the table
 create table t1 (int_col int, smallint_col smallint, char_30_col char(30),
 		 varchar_50_col varchar(50));
@@ -209,6 +213,7 @@ update t1 set int_col =
 	 where int_col = 1)
 where int_col = 37;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from t1;
 INT_COL    |SMALL&|CHAR_30_COL                   |VARCHAR_50_COL                                    
 ----------------------------------------------------------------------------------------------------
@@ -424,6 +429,7 @@ ij> drop table x;
 0 rows inserted/updated/deleted
 ij> -- bug 4318, possible deadlock if table first has IX, then X table lock; make
 -- sure you don't have IX table lock and X table lock at the same time
+
 create table tab1 (c1 int not null primary key, c2 int);
 0 rows inserted/updated/deleted
 ij> insert into tab1 values (1, 8);
@@ -457,6 +463,7 @@ ij> --------------------------------------------
 -- Test upgrade piece of the fix for bug171.
 --
 --------------------------------------------
+
 create table bug171_employee( empl_id int, bonus int );
 0 rows inserted/updated/deleted
 ij> create table bug171_bonuses( empl_id int, bonus int );
@@ -490,6 +497,7 @@ EMPL_ID    |BONUS
 ij> --
 -- The problem query. could not use correlation names in update.
 --
+
 update bug171_employee e
     set e.bonus =
     (
@@ -504,6 +512,7 @@ EMPL_ID    |BONUS
 2          |600        
 3          |900        
 ij> -- positioned update with correlation names
+
 autocommit off;
 ij> get cursor bug171_c1 as
 'select * from bug171_employee where empl_id = 1 for update';
@@ -530,6 +539,7 @@ ij> autocommit on;
 ij> --
 -- Cleanup
 --
+
 drop table bug171_employee;
 0 rows inserted/updated/deleted
 ij> drop table bug171_bonuses;
