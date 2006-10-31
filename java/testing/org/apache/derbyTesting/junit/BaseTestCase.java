@@ -69,7 +69,7 @@ public abstract class BaseTestCase
      * override runTest, instead use test methods
      * setUp, tearDown methods and decorators.
      */
-    public final void runBare() throws Throwable {
+    public void runBare() throws Throwable {
     	if (getTestConfiguration().defaultSecurityManagerSetup())
     		assertSecurityManager();
     	 
