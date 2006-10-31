@@ -79,7 +79,8 @@
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/largedata"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/master"/> 
-    <ant dir="${derby.testing.src.dir}/${derby.testing.suites.dir}"/> 
+    <ant dir="${derby.testing.src.dir}/${derby.testing.suites.dir}"/>
+    <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/oe"/> 
   </target>
 
 <!--             ============= End Targets ==============                -->
