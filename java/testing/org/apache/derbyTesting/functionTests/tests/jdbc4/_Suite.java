@@ -44,7 +44,7 @@ public class _Suite extends BaseTestCase  {
 
 	public static Test suite() throws SQLException {
 
-		TestSuite suite = new TestSuite();
+		TestSuite suite = new TestSuite("jdbc4");
 
         // These really need to run standalone.
 		//suite.addTestSuite(AutoloadBooting.class);
