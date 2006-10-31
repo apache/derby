@@ -50,5 +50,44 @@ class DropDatabaseSetup extends TestSetup {
         } catch (SQLException e) {
             BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
         }
+
+        String dbName = TestConfiguration.getCurrent().getDatabaseName();
+        dbName = dbName.replace('/', File.separatorChar);
+        
+        String dsh = BaseTestCase.getSystemProperty("derby.system.home");
+        if (dsh == null)
+            fail("not implemented");
+        else
+            dbName = dsh + File.separator + dbName;
+        
+        final File dbDir = new File(dbName);
+        AccessController.doPrivileged(new java.security.PrivilegedAction() {
+
+            public Object run() {
+                removeDBDir(dbDir);
+                return null;
+            }
+        });
     } 
+
+    private static void removeDBDir(File dbDir) {
+
+        String[] list = dbDir.list();
+
+        // Some JVMs return null for File.list() when the
+        // directory is empty.
+        if (list != null) {
+            for (int i = 0; i < list.length; i++) {
+                File entry = new File(dbDir, list[i]);
+
+                if (entry.isDirectory()) {
+                    removeDBDir(entry);
+                } else {
+                    assertTrue(entry.delete());
+                }
+            }
+        }
+
+        assertTrue(dbDir.delete());
+    }
 }

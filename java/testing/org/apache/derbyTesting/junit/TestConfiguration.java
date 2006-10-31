@@ -63,6 +63,12 @@ public class TestConfiguration {
      * Possible values of system properties.
      */
     private final static String UNUSED = "file://unused/";
+    
+    /**
+     * Simple count to provide a unique number for database
+     * names.
+     */
+    private static int uniqueDB;
 
 
     /**
@@ -250,6 +256,8 @@ public class TestConfiguration {
      * first connection request to the database and shutdown & deleted at
      * tearDown. The configuration differs only from the current configuration
      * by the database name.
+     * This decorator expects the database file to be local so it
+     * can be removed.
      * @param test Test to be decorated
      * @return decorated test.
      */
@@ -257,8 +265,15 @@ public class TestConfiguration {
     {
         TestConfiguration config = TestConfiguration.getCurrent();
 
-        // WORK IN PROGRESS - need to have unique name.
-        String dbName = "singleUse/wombat2";        
+        // Forward slash is ok, Derby treats database names
+        // as URLs and translates forward slash to the local
+        // separator.
+        String dbName = "singleUse/oneuse";
+        // Synchronize on the literal name which will be invariant
+        // since it is interned.
+        synchronized (dbName) {
+            dbName = dbName.concat(Integer.toHexString(uniqueDB++));
+        }
         TestConfiguration newDBconfig = 
             new TestConfiguration(config, dbName);
         return new ChangeConfigurationSetup(newDBconfig,
