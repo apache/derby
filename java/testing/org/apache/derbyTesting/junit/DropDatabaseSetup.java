@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class org.apache.derbyTesting.unit.DropDatabaseSetup
+ * Derby - Class org.apache.derbyTesting.junit.DropDatabaseSetup
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,7 +28,6 @@ import junit.framework.Test;
 
 /**
  * Shutdown and drop the current database at tearDown time.
- * Work in progress - currently just shuts the database down.
  *
  */
 class DropDatabaseSetup extends TestSetup {
