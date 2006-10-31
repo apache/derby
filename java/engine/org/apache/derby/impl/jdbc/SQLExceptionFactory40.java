@@ -49,8 +49,6 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
      * 40                          java.sql.SQLTransactionRollbackException
      * 42                          java.sql.SQLSyntaxErrorException
      * 
-     * This method sets the stack trace of the newly created exception to the
-     * root cause of the original Throwable.
      * Note the following divergence from JDBC3 behavior: When running
      * a JDBC3 client, we return EmbedSQLException. That exception class
      * overrides Throwable.toString() and strips off the Throwable's class name.
@@ -71,7 +69,7 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
 		//
 		t = wrapArgsForTransportAcrossDRDA( message, messageId, next, severity, t, args );
 
-		SQLException ex = new SQLException(message, sqlState, severity, t);
+        final SQLException ex;
         if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX)) {
             //none of the sqlstate supported by derby belongs to
             //NonTransientConnectionException
@@ -93,13 +91,12 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
             ex = new SQLSyntaxErrorException(message, sqlState, severity, t);
         } else if (sqlState.startsWith(SQLState.UNSUPPORTED_PREFIX)) {
             ex = new SQLFeatureNotSupportedException(message, sqlState, severity, t);
+        } else {
+            ex = new SQLException(message, sqlState, severity, t);
         }
         
         if (next != null) {
             ex.setNextException(next);
-        }
-        if (t != null) {
-            ex.setStackTrace (t.getStackTrace ());
         }
         return ex;
     }        
