@@ -33,6 +33,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
@@ -42,8 +43,8 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 	}
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite();
-		suite.addTestSuite(SQLAuthorizationPropTest.class);
+		TestSuite suite = new TestSuite(SQLAuthorizationPropTest.class,
+                "SQLAuthorizationPropTest");
 		
 		// Use DatabasePropertyTestSetup decorator to set the property
 		// required by this test. 
@@ -56,7 +57,10 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 	    // set to true. 
 	    suite.addTest(new SQLAuthorizationPropTest("resetSQLAuthProperty"));
 	    
-	    return suite;
+        // This test needs to run in a new single use database as upon entry
+        // the test expects SQL authorization to be off and then sets it
+        // which cannot be undone.
+	    return TestConfiguration.singleUseDatabaseDecorator(suite);
 	}
 	
     /**
@@ -148,6 +152,8 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
         testPropertyReset(setDBP, "some_value");
         // This should work
         testPropertyReset(setDBP, "true");
+        
+        setDBP.close();
 	}
 	
 	/**
@@ -159,7 +165,7 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 	 * @param value value of database property
 	 * @throws SQLException
 	 */
-	public void testPropertyReset(CallableStatement cs, String value) throws SQLException {
+	private void testPropertyReset(CallableStatement cs, String value) throws SQLException {
 
 		cs.setString(2, value);
         

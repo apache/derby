@@ -245,6 +245,26 @@ public class TestConfiguration {
 
     }
     
+    /**
+     * Decorate a test to use a new database that is created upon the
+     * first connection request to the database and shutdown & deleted at
+     * tearDown. The configuration differs only from the current configuration
+     * by the database name.
+     * @param test Test to be decorated
+     * @return decorated test.
+     */
+    public static Test singleUseDatabaseDecorator(Test test)
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+
+        // WORK IN PROGRESS - need to have unique name.
+        String dbName = "singleUse/wombat2";        
+        TestConfiguration newDBconfig = 
+            new TestConfiguration(config, dbName);
+        return new ChangeConfigurationSetup(newDBconfig,
+                new DropDatabaseSetup(test));
+    }
+    
     public static Test changeUserDecorator(Test test, String user, String password)
     {
         return new ChangeUserSetup(test, user, password);
@@ -306,7 +326,28 @@ public class TestConfiguration {
         
         this.url = copy.url;
     }
+    /**
+     * Obtain a new configuration identical to the passed in
+     * one except for the database name.
+     * @param copy Configuration to copy.
+     * @param dbName New database name
+      */
+    TestConfiguration(TestConfiguration copy, String dbName)
+    {
+        this.dbName = dbName;
+        this.userName = copy.userName;
+        this.userPassword = copy.userPassword;
 
+        this.isVerbose = copy.isVerbose;
+        this.singleLegXA = copy.singleLegXA;
+        this.port = copy.port;
+        
+        this.jdbcClient = copy.jdbcClient;
+        this.hostName = copy.hostName;
+        
+        this.url = createJDBCUrlWithDatabaseName(dbName);
+    }
+    
     /**
      * This constructor creates a TestConfiguration from a Properties object.
      *
