@@ -383,7 +383,7 @@
 <!-- =================================================================== -->
 <!--                 Remove all built objects (except jars)              -->
 <!-- =================================================================== -->
-  <target name="clobber" depends="clean,cleanstate,cleanparsers,cleancatalog,cleantoursdb"/>
+  <target name="clobber" depends="clean,cleanstate,cleanparsers,cleanmessages,cleancatalog,cleantoursdb"/>
 
 <!-- =================================================================== -->
 <!--                       Remove output tree                            -->
@@ -436,6 +436,15 @@
     <delete>
       <fileset dir="${derby.tools.dir}/impl/tools/ij"
             includes="ij.java,ijTokenManager.java,ijConstants.java,Token.java,mtGrammar.java,mtGrammarConstants.java,mtGrammarTokenManager.java,CharStream.java,SimpleCharStream.java,TokenMgrError.java"/>
+    </delete>
+  </target>
+
+<!-- =================================================================== -->
+<!--                     Remove generated message files                   -->
+<!-- =================================================================== -->
+  <target name="cleanmessages">
+    <delete>
+      <fileset dir="${derby.locales.dir}" includes="messages_en.properties"/>
     </delete>
   </target>
 
