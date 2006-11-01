@@ -28,10 +28,47 @@
   <!-- Product names and release info -->
   <property file="${properties.dir}/release.properties"/>
 
+<!-- Define the task which creates the engine's messages_en.properties -->
+  <taskdef
+    name="buildMessages"
+    classname="org.apache.derbyBuild.MessageBuilder"
+    classpath="${out.dir}"
+  />
+  <property name="messageDescriptors" value="${derby.locales.dir}/messages.xml"/>
+  <property name="englishMessages" value="${derby.locales.dir}/messages_en.properties"/>
+  <property name="docDirectory" value="${out.dir}/doc"/>
+  <property name="sqlstateTables" value="${docDirectory}/rrefexcept71493.dita"/>
+
 <!-- Targets -->
-  <target name="locales" depends="split"/>
+  <target name="locales" depends="init,buildMessages,split"/>
+
+  <!-- Initialization-->
+  <target name="init">
+
+    <uptodate
+      property="messagesUpToDate"
+      targetfile="${englishMessages}"
+    >
+      <srcfiles file="${messageDescriptors}"/>
+      <srcfiles dir="${derby.build.dir}" includes="*.java"/>
+    </uptodate>
+
+  </target>
+  <!-- Generate english messages from xml descriptors-->
+  <target name="buildMessages" unless="messagesUpToDate">
+
+    <mkdir dir="${docDirectory}" />
+
+    <buildMessages
+      xmlSourceFile="${messageDescriptors}"
+      propertiesTargetFile="${englishMessages}"
+      ditaTargetFile="${sqlstateTables}"
+    />
+
+  </target>
 
   <target name="split" depends="verifysplit">
+
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
       <param name="msgfile" value="messages_en"/>

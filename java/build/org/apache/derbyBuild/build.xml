@@ -53,6 +53,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${java14compile.classpath};${java.home}/../lib/tools.jar"/>
+        <pathelement path="${ant.home}/lib/ant.jar"/>
       </classpath>
       <include name="org/apache/derbyBuild/**"/>
     </javac>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at      
+
+http://www.apache.org/licenses/LICENSE-2.0  
+
+Unless required by applicable law or agreed to in writing, software  
+distributed under the License is distributed on an "AS IS" BASIS,  
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
+See the License for the specific language governing permissions and  
+limitations under the License.
+-->
+
+<!-- 
+This is the grammar which defines the structure of messages.xml.
+That file, in turn, is the source code used to generate the following
+additional files when Derby is built:
+
+ * English messages for Derby
+ * the English Reference Guide page which describes Derby SQLStates.
+
+Elements of the grammar have the following meanings:
+
+ * section - Used to group messages for inclusion (or not) in the Reference Guide.
+ * title - Used as table header in the Reference Guide.
+ * desc - Internal description of a section.
+ * documented - If this element is specified, then the section's messages turn up in the Reference Guide.
+ * name - Runtime handle, also the SQLState printed in the Reference Guide.
+ * text - Text of message with possible placeholders for arguments.
+ * arg - Human-readable argument name interpolated into message text in the Reference Guide.
+-->
+
+<!ELEMENT messages (section+)>
+<!ELEMENT section (desc, documented?, family+)>
+<!ELEMENT desc (#PCDATA)>
+<!ELEMENT documented EMPTY>
+<!ELEMENT family (title, msg+)>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT msg (name, text, arg*)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT text (#PCDATA)>
+<!ELEMENT arg (#PCDATA)>
