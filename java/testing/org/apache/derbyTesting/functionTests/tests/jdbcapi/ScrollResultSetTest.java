@@ -60,7 +60,8 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
         }
         
         // empty suite, no holdability supported.
-        return new TestSuite();
+        return new TestSuite(
+                "Empty ScrollResultSetTest suite, no support for holdability");
     }
 
     /**

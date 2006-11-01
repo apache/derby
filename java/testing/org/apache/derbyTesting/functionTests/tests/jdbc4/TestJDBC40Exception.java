@@ -48,8 +48,8 @@ public class TestJDBC40Exception extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite testSuite = new TestSuite();
-        testSuite.addTestSuite(TestJDBC40Exception.class);
+        TestSuite testSuite = new TestSuite(TestJDBC40Exception.class,
+                "TestJDBC40Exception suite");
         return testSuite;
     }
 

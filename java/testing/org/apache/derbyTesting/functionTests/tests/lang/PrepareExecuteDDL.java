@@ -82,7 +82,7 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 	 * Create a suite of tests, one per statement in DDL.
 	 */
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("PrepareExecuteDDL");
         for (int i = 0; i < DDL.length; i++)
         	suite.addTest(new PrepareExecuteDDL("testPrepareExcute", DDL[i]));
         return suite;

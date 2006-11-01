@@ -75,7 +75,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite testSuite = new TestSuite();
+        TestSuite testSuite = new TestSuite("TestDbMetaData suite");
         testSuite.addTestSuite(TestDbMetaData.class);
         return new CleanDatabaseTestSetup(testSuite) {
                 protected void decorateSQL(Statement s) throws SQLException {

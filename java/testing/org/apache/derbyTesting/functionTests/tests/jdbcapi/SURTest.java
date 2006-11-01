@@ -1583,7 +1583,7 @@ public class SURTest extends SURBaseTest {
      */
     public static Test suite() {
         
-        TestSuite mainSuite = new TestSuite();
+        TestSuite mainSuite = new TestSuite("SURTest");
         
         // DB2 client doesn't support this functionality
         if (usingDerbyNet())

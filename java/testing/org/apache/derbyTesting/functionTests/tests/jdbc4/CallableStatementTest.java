@@ -584,7 +584,8 @@ public class CallableStatementTest
      * Return suite with all tests of the class.
      */
     public static Test suite() {
-        TestSuite mainSuite = new TestSuite();
+        TestSuite mainSuite = new TestSuite(
+                "CallableStatementTest and SetObjectUnsupportedTest suite");
         TestSuite suite = new TestSuite(CallableStatementTest.class,
                                         "CallableStatementTest suite");
         mainSuite.addTest(new CallableStatementTestSetup(suite));

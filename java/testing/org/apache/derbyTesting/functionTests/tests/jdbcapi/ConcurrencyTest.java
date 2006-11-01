@@ -838,7 +838,7 @@ public class ConcurrencyTest extends SURBaseTest {
     // The default is to run all tests in the TestCase subclass.
     
     public static Test suite() {
-        final TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite("ConcurrencyTest");
         
         // This testcase does not require JDBC3/JSR169, since it does not
         // specify result set concurrency) in Connection.createStatement().

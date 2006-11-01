@@ -109,7 +109,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
                  DriverManager.getDriver(TestConfiguration.getCurrent().getJDBCUrl()).getClass(),
                  java.sql.Driver.class);
 
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("VerifySignatures suite");
 
         // all interfaces for which tests have been generated
         Set<Class> interfaces = new HashSet<Class>();

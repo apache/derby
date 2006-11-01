@@ -53,7 +53,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     public static Test suite() {
         
         
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("DataSourcePropertiesTest");
         
         // TODO: Run fixtures in J2ME and JDBC2 (with extensions)
         // that can be supported there. This disabling matches

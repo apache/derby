@@ -80,7 +80,7 @@ public	class	AutoloadTest	extends	BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("AutoloadTest suite");
         
         // need DriverManager at least and Derby drivers
         // no interest in testing DB2's client.

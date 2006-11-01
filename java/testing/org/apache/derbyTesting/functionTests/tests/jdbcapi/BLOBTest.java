@@ -427,7 +427,7 @@ final public class BLOBTest extends BaseJDBCTestCase
      */
     public static Test suite() 
     {
-        TestSuite mainSuite = new TestSuite(BLOBTest.class);
+        TestSuite mainSuite = new TestSuite(BLOBTest.class, "BLOBTest");
         return new BLOBDataModelSetup(mainSuite);
     }
 

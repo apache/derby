@@ -342,7 +342,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("GROUP BY expression tests");
         suite.addTestSuite(GroupByExpressionTest.class);
         
         TestSetup wrapper = new BaseJDBCTestSetup(suite) { 

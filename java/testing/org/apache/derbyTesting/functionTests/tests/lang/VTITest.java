@@ -37,7 +37,7 @@ import org.apache.derbyTesting.junit.JDBC;
 
      public static Test suite()
      {
-         TestSuite suite = new TestSuite();
+         TestSuite suite = new TestSuite("VTITest");
          // requires DriverManager support
          if (JDBC.vmSupportsJDBC2())
             suite.addTest(new VTITest("bulkInsertVtiTest"));

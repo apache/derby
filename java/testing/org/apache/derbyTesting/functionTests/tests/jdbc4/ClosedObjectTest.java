@@ -120,20 +120,21 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * @exception Exception if an error occurs while building the test suite
      */
     public static Test suite()  {
-        TestSuite topSuite = new TestSuite();
+        TestSuite topSuite = new TestSuite("ClosedObjectTest suite");
 
-        TestSuite dsSuite = new TestSuite();
+        TestSuite dsSuite = new TestSuite("ClosedObjectTest DataSource");
         DataSourceDecorator dsDecorator = new DataSourceDecorator(dsSuite);
         topSuite.addTest(dsDecorator);
         fillDataSourceSuite(dsSuite, dsDecorator);
 
-        TestSuite poolSuite = new TestSuite();
+        TestSuite poolSuite = new TestSuite(
+                "ClosedObjectTest ConnectionPoolDataSource");
         PoolDataSourceDecorator poolDecorator =
             new PoolDataSourceDecorator(poolSuite);
         topSuite.addTest(poolDecorator);
         fillDataSourceSuite(poolSuite, poolDecorator);
 
-        TestSuite xaSuite = new TestSuite();
+        TestSuite xaSuite = new TestSuite("ClosedObjectTest XA");
         XADataSourceDecorator xaDecorator = new XADataSourceDecorator(xaSuite);
         topSuite.addTest(xaDecorator);
         fillDataSourceSuite(xaSuite, xaDecorator);

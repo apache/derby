@@ -149,7 +149,8 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite(
+                "PreparedStatementTest and SetObjectUnsupportedTest suite");
         suite.addTestSuite(PreparedStatementTest.class);
         suite.addTest(SetObjectUnsupportedTest.suite(false));
         return new BaseJDBCTestSetup(suite) {

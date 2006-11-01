@@ -154,7 +154,7 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      * @return a test suite
      */
     public static Test suite() {
-        TestSuite suites = new TestSuite();
+        TestSuite suites = new TestSuite("StatementEventsTest suite");
         boolean[] truefalse = new boolean[] { true, false };
         for (boolean xa : truefalse) {
             for (boolean callable : truefalse) {

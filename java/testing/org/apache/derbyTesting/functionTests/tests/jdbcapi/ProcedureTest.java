@@ -679,7 +679,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @return test suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("ProcedureTest");
         
         // Need JDBC 2 DriverManager to run these tests
         if (JDBC.vmSupportsJDBC2()) {        	

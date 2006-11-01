@@ -538,7 +538,7 @@ public class SURQueryMixTest extends SURBaseTest
      */
     public static Test suite() 
     {   
-        TestSuite mainSuite = new TestSuite();
+        TestSuite mainSuite = new TestSuite("SURQueryMixTest suite");
         
         // DB2 client doesn't support this functionality
         if (usingDerbyNet())

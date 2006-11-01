@@ -88,7 +88,7 @@ public	class	AutoloadBooting	extends	BaseJDBCTestCase
      * Only run embedded.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("AutoloadBooting suite");
         
         if (usingEmbedded())
             suite.addTestSuite(AutoloadBooting.class);

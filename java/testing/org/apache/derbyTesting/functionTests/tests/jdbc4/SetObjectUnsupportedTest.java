@@ -177,7 +177,7 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
      * @return a test suite
      */
     static Test suite(boolean callable) {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("SetObjectUnsupportedTest suite");
         for (TypeInfo typeInfo : TYPES) {
             suite.addTest(new SetObjectUnsupportedTest
                           ("testUnsupportedSetObject", typeInfo, callable));
