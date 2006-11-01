@@ -439,7 +439,7 @@ public class JDBC {
 		}
 		rs.close();
 
-		if (rows >= 0)
+		if (expectedRows >= 0)
 			Assert.assertEquals("Unexpected row count:", expectedRows, rows); 
 	}
 	

@@ -41,6 +41,8 @@ public class TestConfiguration {
      * Default values for configurations
      */
     private final static String DEFAULT_DBNAME = "wombat";
+    private final static String DEFAULT_DBNAME_SQL = "dbsqlauth";
+    
     private final static String DEFAULT_USER_NAME = "APP";
     private final static String DEFAULT_USER_PASSWORD = "APP";
     private final static int    DEFAULT_PORT = 1527;
@@ -58,11 +60,6 @@ public class TestConfiguration {
     private final static String KEY_PORT = "port";
     private final static String KEY_VERBOSE = "derby.tests.debug";    
     private final static String KEY_SINGLE_LEG_XA = "derbyTesting.xa.single";
-
-    /**
-     * Possible values of system properties.
-     */
-    private final static String UNUSED = "file://unused/";
     
     /**
      * Simple count to provide a unique number for database
@@ -280,10 +277,60 @@ public class TestConfiguration {
                 new DropDatabaseSetup(test));
     }
     
+    /**
+     * Decorate a test changing the default user name and password.
+     * Typically used along with DatabasePropertyTestSetup.builtinAuthentication.
+     * The tearDown method resets the default user and password value to
+     * their previous settings.
+     * 
+     * @param test Test to decorate
+     * @param user New default user
+     * @param password New password
+     * @return decorated test
+     * 
+     * @see DatabasePropertyTestSetup#builtinAuthentication(Test, String[], String)
+     */
     public static Test changeUserDecorator(Test test, String user, String password)
     {
         return new ChangeUserSetup(test, user, password);
-    }    
+    }   
+    
+    /**
+     * Decorate a test to use the default database that has
+     * was created in SQL authorization mode.
+     * The tearDown reverts the configuration to the previous
+     * configuration.
+     * 
+     * Tests can use this in conjunction with
+     * DatabasePropertyTestSetup.builtinAuthentication
+     * to set up BUILTIN authentication and changeUserDecorator
+     * to switch users.
+     * 
+     * @param test Test to be decorated
+     * @return decorated test.
+     * 
+     * @see DatabasePropertyTestSetup#builtinAuthentication(Test, String[], String)
+     */
+    public static Test sqlAuthorizationDecorator(Test test)
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+        TestConfiguration newDBconfig = 
+            new TestConfiguration(config, DEFAULT_DBNAME_SQL);
+        
+        // Set the SQL authorization mode as a database property
+        // with a modified DatabasePropertyTestSetup that does not
+        // reset it.
+        final Properties sqlAuth = new Properties();
+        sqlAuth.setProperty("derby.database.sqlAuthorization", "true");
+        Test setSQLAuthMode = new DatabasePropertyTestSetup(test,
+                sqlAuth, true) {
+            protected void tearDown() {
+            }
+        };
+
+        return new ChangeConfigurationSetup(newDBconfig, setSQLAuthMode);
+    }
+    
     /**
      * Default embedded configuration
      *

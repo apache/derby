@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.*;
 
@@ -80,12 +81,15 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 	
 	/**
 	 * Create a suite of tests, one per statement in DDL.
+     * This test is for testing the embedded dependency system
+     * though possibly it could be used for testing in client
+     * as well.
 	 */
     public static Test suite() {
         TestSuite suite = new TestSuite("PrepareExecuteDDL");
         for (int i = 0; i < DDL.length; i++)
         	suite.addTest(new PrepareExecuteDDL("testPrepareExcute", DDL[i]));
-        return suite;
+        return TestConfiguration.sqlAuthorizationDecorator(suite);
     }
 	private final String ddl;
 	

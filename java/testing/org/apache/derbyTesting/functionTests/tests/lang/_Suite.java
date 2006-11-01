@@ -58,7 +58,7 @@ public class _Suite extends BaseTestCase  {
         // the nightly runs.
         // suite.addTest(largeCodeGen.suite());
 
-		// suite.addTest(PrepareExecuteDDL.suite());
+		suite.addTest(PrepareExecuteDDL.suite());
 		suite.addTest(LangScripts.suite());
         suite.addTest(GroupByExpressionTest.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
