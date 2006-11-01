@@ -53,7 +53,7 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="orderentry" 
+  <target name="orderentry"
           description="Build Order Entry system test kit">
     <javac
       source="1.4"
@@ -74,6 +74,10 @@
       </classpath>
       <include name="${derby.testing.system.dir}/oe/**/*.java"/>
     </javac>
+
+	 <copy todir="${out.dir}/${derby.testing.system.dir}/oe/schema">
+	    <fileset dir="${derby.testing.src.dir}/${derby.testing.system.dir}/oe/schema"/>
+	 </copy>
   </target>
 
 <!--             ============= End Targets ==============                -->
