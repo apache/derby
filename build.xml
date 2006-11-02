@@ -1595,4 +1595,69 @@
     <echo message=""/>
     <fail message="Exiting snapshot build..."/>
   </target>
+
+<!-- =================================================================== -->
+<!--                         Junit utility targets                       -->
+<!-- =================================================================== -->
+
+  <target name="junit-init">
+    <tstamp prefix="derby.junit"/>
+    <mkdir dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}/testout"/>
+  </target>
+
+  <target name="junit-clean">
+    <delete includeEmptyDirs="true">
+      <fileset dir="${basedir}" includes="junit*/**"/>
+    </delete>
+  </target>
+
+  <target name="junit-oneclass" depends="junit-init">
+    <junit printsummary="on"
+           fork="yes" forkmode="once"
+           showoutput="yes"
+           dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}/testout">
+      <formatter type="xml"/>
+      <test name="${derby.junit.testname}" todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
+      <classpath path="${out.dir};${junit}"/>
+    </junit>
+  </target>
+ 
+  <!-- only execute jdbc4 suite if we have a pointer to a 1.6 VM -->
+  <target name="junit-jdbc4" if="jdk16">
+    <junit printsummary="on"
+           fork="yes" forkmode="once"
+           jvm="${jdk16}/bin/java"
+           showoutput="yes"
+           dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}/testout">
+      <formatter type="xml"/>
+      <test name="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"
+            todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
+      <classpath path="${out.dir};${junit}"/>
+    </junit> 
+  </target>
+
+  <target name="junit-all" depends="junit-init,junit-jdbc4">
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.testname"
+             value="org.apache.derbyTesting.functionTests.tests.tools._Suite"/>
+    </antcall>
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.testname"
+             value="org.apache.derbyTesting.functionTests.tests.lang._Suite"/>
+    </antcall>
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.testname"
+             value="org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite"/>
+    </antcall>
+  </target>
+
+  <target name="junitreport" depends="junit-all"> 
+    <junitreport todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}">
+      <fileset dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
+    </junitreport>
+  </target>   
+
 </project>

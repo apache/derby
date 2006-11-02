@@ -216,6 +216,24 @@ public final class SecurityManagerSetup extends TestSetup {
 		if (System.getSecurityManager() != null) {		
 			return true;
 		}
+
+		//We need the junit classes to instantiate this class, so the
+		//following should not cause runtime errors.
+        URL junit = null;
+        junit = getURL(junit.framework.Test.class);
+        classPathSet.setProperty("derbyTesting.junit", junit == null ? "" : junit.toString());
+	
+        URL antjunit = null;
+        Class antjunitclass = null;
+        try {
+        	// Load indirectly so we don't need ant-junit.jar at compile time.
+            antjunitclass = Class.forName("org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner");
+            antjunit = getURL(antjunitclass);
+            classPathSet.setProperty("derbyTesting.antjunit", antjunit == null ? "" : antjunit.toString());
+        } catch (java.lang.ClassNotFoundException e) {
+        	// Not running in Ant, do nothing.
+            antjunit = null;
+        }
 		
 		URL testing = getURL(SecurityManagerSetup.class);
 		
@@ -250,7 +268,7 @@ public final class SecurityManagerSetup extends TestSetup {
 		}
 		
 		classPathSet.setProperty("derbyTesting.clientjar", stripJar(client));
-		
+	
 		return false;
 	}
     

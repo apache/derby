@@ -159,14 +159,17 @@ grant codeBase "${derbyTesting.codeclasses}" {
 // JUnit jar file tries to read junit.properties in the user's
 // home directory and seems to require permission to read the
 // property user.home as well.
-// Ideally these would be granted to junit.jar only but currently
-// the jar may be anyway on a file system. Could expand the test harness
-// to look for junit.jar on the classpath as it done for the Derby jars.
-// The exposure in making these properties grantable to all is somewhat low,
-// though reading the property user.home is a little troubling.
-grant {
+grant codeBase "${derbyTesting.junit}" {
     permission java.util.PropertyPermission "user.home", "read";
     permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
+};
+
+// Ant's junit runner requires setOut to redirect the System output streams
+// to the forked JVM used when running junit tests inside Ant. Ant requires
+// forking the JVM if you want to run tests in a different directory than the
+// current one.
+grant codeBase "${derbyTesting.antjunit}" {
+    permission java.lang.RuntimePermission "setIO";
 };
 
 // functionTests.tests.lang.RoutineSecurityTest requires this grant
