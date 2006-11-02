@@ -14,7 +14,6 @@
 # jdbcapi/SURTest.junit - fails with severe errors.
 # jdbcapi/UpdateXXXTest.junit - fails with NullPointerExceptions
 # jdbcapi/rsgetXXXcolumnNames.java - fails with an error indicating wombat already exists
-# jdbcapi/Stream.java - fails with an error indicating wombat already exists
 # 
 jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
@@ -27,4 +26,3 @@ jdbcapi/SURQueryMixTest.junit
 jdbcapi/SURTest.junit
 jdbcapi/UpdateXXXTest.junit
 jdbcapi/rsgetXXXcolumnNames.java
-jdbcapi/Stream.java

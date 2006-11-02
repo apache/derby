@@ -59,6 +59,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ResultSetCloseTest.suite());
 		suite.addTest(BlobClob4BlobTest.suite());
 		suite.addTest(CharacterStreamsTest.suite());
+		suite.addTest(StreamTest.suite());
         
         if (JDBC.vmSupportsJDBC3())
         {

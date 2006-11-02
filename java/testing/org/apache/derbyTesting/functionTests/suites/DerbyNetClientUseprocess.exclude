@@ -9,7 +9,6 @@
 # jdbcapi/checkDriver.java subtest createdbwithspaces fails, probably expecting different dir
 # jdbcapi/*sers* these tests log on to wombat with different permissions and users
 #    test could possibly be rewritten to use another database
-# jdbcapi/Stream.java fails ?? don't know why this fails
 # junitTests/derbyNet/CompatibilityTest.java - exits the suite
 # jdbcapi/xaSimplePositive.sql - needs more props, getting nullPointer accessing derby.log
 # jdbcapi/xaStateTran.sql - needs more props, getting nullPointer accessing derby.log
@@ -44,7 +43,6 @@ jdbcapi/users.sql
 jdbcapi/users2.sql
 jdbcapi/secureUsers.sql
 jdbcapi/secureUsers1.sql
-jdbcapi/Stream.java
 junitTests/derbyNet/CompatibilityTest.java
 jdbcapi/xaSimplePositive.sql
 jdbcapi/xaStateTran.sql
