@@ -138,19 +138,9 @@ public class StreamTest extends BaseJDBCTestCase {
             
         } catch(SQLException se) {
             assertSQLState(LANG_STREAM_RETRIEVED_ALREADY, se);
-        } finally {
-            if (st != null) {
-                st.close();
-            }
-            
-            if (rs != null) {
-                rs.close();
-            }
-            
-            if (is != null) {
-                is.close();
-            }
         }
+        rs.close();
+        st.close();
     }
     
     public void runGetReaderTwiceTest() throws SQLException, IOException {
@@ -170,19 +160,9 @@ public class StreamTest extends BaseJDBCTestCase {
             
         } catch(SQLException se) {
             assertSQLState(LANG_STREAM_RETRIEVED_ALREADY, se);
-        } finally {
-            if (st != null) {
-                st.close();
-            }
-            
-            if (rs != null) {
-                rs.close();
-            }
-            
-            if (reader != null) {
-                reader.close();
-            }
         }
+        rs.close();
+        st.close();
     }
     
     private static final String LANG_STREAM_RETRIEVED_ALREADY = "XCL18";
