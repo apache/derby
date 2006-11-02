@@ -49,7 +49,9 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
 
     // SETUP
 
-    /** Creates a test suite with all test cases. */
+    /** Creates a test suite with all test cases
+     * only running in embedded at the moment.
+     */
     public static Test suite() {
         
         
@@ -63,21 +65,17 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         
             // Add all methods starting with 'test'.
             //suite.addTestSuite(DataSourcePropertiesTest.class);
-            
-            if (usingEmbedded()) {
-           
-                // When using embedded, add all methods starting with 'embedded'.
-                Method[] methods = DataSourcePropertiesTest.class.getMethods();
-                for (int i = 0; i < methods.length; i++) {
-                    Method m = methods[i];
-                    if (m.getParameterTypes().length > 0 ||
-                            m.getReturnType().equals(Void.TYPE)) {
-                        continue;
-                    }
-                    String name = m.getName();
-                    if (name.startsWith("embedded")) {
-                        suite.addTest(new DataSourcePropertiesTest(name));
-                    }
+ 
+            Method[] methods = DataSourcePropertiesTest.class.getMethods();
+            for (int i = 0; i < methods.length; i++) {
+                Method m = methods[i];
+                if (m.getParameterTypes().length > 0 ||
+                        !m.getReturnType().equals(Void.TYPE)) {
+                    continue;
+                }
+                String name = m.getName();
+                if (name.startsWith("embedded")) {
+                    suite.addTest(new DataSourcePropertiesTest(name));
                 }
             }
         }

@@ -33,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import org.apache.derbyTesting.junit.TestConfiguration;
+
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -534,7 +537,8 @@ public class SURQueryMixTest extends SURBaseTest
     }
     
     /**
-     * The suite contains all testcases in this class running on different data models
+     * Run in client and embedded.
+     * @return
      */
     public static Test suite() 
     {   
@@ -543,8 +547,22 @@ public class SURQueryMixTest extends SURBaseTest
         // DB2 client doesn't support this functionality
         if (usingDerbyNet())
             return mainSuite;
-  
         
+        mainSuite.addTest(baseSuite("SURQueryMixTest:embedded"));
+        mainSuite.addTest(
+                TestConfiguration.clientServerDecorator(
+                        baseSuite("SURQueryMixTest:client")));
+        
+        return mainSuite;
+        
+    }
+  
+    /**
+     * The suite contains all testcases in this class running on different data models
+     */
+    private static Test baseSuite(String name) {
+        TestSuite mainSuite = new TestSuite(name);
+      
         // Iterate over all data models and decorate the tests:
         for (Iterator i = SURDataModelSetup.SURDataModel.values().iterator();
              i.hasNext();) {
