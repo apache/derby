@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -1576,18 +1577,29 @@ public class SURTest extends SURBaseTest {
         return "MYCURSOR";
     }
     
+    /**
+     * Run the base suite in embedded and client mode.
+     * @return
+     */
+    public static Test suite() {
+        TestSuite mainSuite = new TestSuite("SURTest");
+        // DB2 client doesn't support this functionality
+        if (usingDerbyNet())
+            return mainSuite;
+        
+        mainSuite.addTest(baseSuite("SURTest:embedded"));
+        mainSuite.addTest(
+                TestConfiguration.clientServerDecorator(baseSuite("SURTest:client")));
+        return mainSuite;      
+    }
     
     /**
      * The suite contains all testcases in this class running on different 
      * data models
      */
-    public static Test suite() {
+    private static Test baseSuite(String name) { 
         
-        TestSuite mainSuite = new TestSuite("SURTest");
-        
-        // DB2 client doesn't support this functionality
-        if (usingDerbyNet())
-            return mainSuite;
+        TestSuite mainSuite = new TestSuite(name);
         
         // Iterate over all data models and decorate the tests:
         for (Iterator i = SURDataModelSetup.SURDataModel.values().iterator();
