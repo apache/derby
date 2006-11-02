@@ -168,3 +168,10 @@ grant {
     permission java.util.PropertyPermission "user.home", "read";
     permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
 };
+
+// functionTests.tests.lang.RoutineSecurityTest requires this grant
+// to check to see if permissions are granted through generated code
+// through this mechanism.
+grant {
+    permission java.util.PropertyPermission "derbyRoutineSecurityTest.yes", "read";
+};

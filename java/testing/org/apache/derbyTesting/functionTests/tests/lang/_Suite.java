@@ -58,10 +58,13 @@ public class _Suite extends BaseTestCase  {
         // the nightly runs.
         // suite.addTest(largeCodeGen.suite());
 
-		suite.addTest(PrepareExecuteDDL.suite());
-		suite.addTest(LangScripts.suite());
+
         suite.addTest(GroupByExpressionTest.suite());
+		suite.addTest(LangScripts.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
+        suite.addTest(PrepareExecuteDDL.suite());
+        suite.addTest(RoutineSecurityTest.suite());
+        suite.addTest(SQLAuthorizationPropTest.suite());
         suite.addTest(TimeHandlingTest.suite());
         suite.addTest(VTITest.suite());
         suite.addTest(XMLTypeAndOpsTest.suite());
@@ -70,12 +73,7 @@ public class _Suite extends BaseTestCase  {
         // Add the NIST suite in from the nist package since
         // it is a SQL language related test.
         suite.addTest(NistScripts.suite());
-        
-        // This test internally sets derby.database.sqlAuthorization to true
-        // This property is not resettable and hence may affect other tests 
-        // using it and sharing the same database.
-        suite.addTest(SQLAuthorizationPropTest.suite());
-		
+        		
 		// Tests that are compiled using 1.4 target need to
 		// be added this way, otherwise creating the suite
 		// will throw an invalid class version error
