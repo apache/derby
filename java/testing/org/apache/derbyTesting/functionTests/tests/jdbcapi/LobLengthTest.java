@@ -26,10 +26,9 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.SQLException;
 
-import java.io.ByteArrayInputStream;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -110,9 +109,9 @@ public class LobLengthTest extends BaseJDBCTestCase {
         // length of the test data must be specified as
         // at least 2^24 bytes (hence the '16800000' in
         // the next line).
-        byte [] bA = new byte[16800000];
+        int lobSize = 16800000;
         pSt.setBinaryStream(1,
-            new java.io.ByteArrayInputStream(bA), bA.length);
+            new LoopingAlphabetStream(lobSize), lobSize);
 
         // Now try the insert; this is where the server processes
         // the lob length.
