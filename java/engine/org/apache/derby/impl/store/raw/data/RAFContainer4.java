@@ -132,7 +132,12 @@ class RAFContainer4 extends RAFContainer {
 
     synchronized void closeContainer() {
         if (SanityManager.DEBUG) {
-            SanityManager.ASSERT(iosInProgress == 0,
+            // Any IOs in progress to a container being dropped will be
+            // ignored, so we should not complain about starting a close
+            // while there are IOs in progress if it is being dropped
+            // anyway.
+            SanityManager.ASSERT( (iosInProgress == 0)
+                    || getCommittedDropState(),
                     "Container closed while IO operations are in progress. "
                     + " This should not happen.");
         }
