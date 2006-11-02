@@ -16,6 +16,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -83,14 +84,20 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullValues("ACOS");
 		executeNullFn("ACOS");
 		debug();
+        
+        PreparedStatement ps =
+            prepareStatement("VALUES ACOS(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn ACOS(?)}");
+         
 		for (int i = 0; i < testArcValues.length; i++) {
 			double expected = java.lang.StrictMath.acos(testArcValues[i]);
-			double rValue = executeValues("ACOS", testArcValues[i]);
+			double rValue = getValue(ps, testArcValues[i]);
 			debug("ACOS: input value: " + testArcValues[i]
 					+ " expected value: " + expected + " return value: "
 					+ rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("ACOS", testArcValues[i]);
+			double fValue = getValue(psFN, testArcValues[i]);
 			assertEquals(expected, fValue, 0.0);
 
 		}
@@ -98,16 +105,16 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.acos(randD);
-			double rVal = executeValues("ACOS", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("ACOS", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
 		/* test the case where the input value is out of range */
 		try {
-			executeValues("ACOS", 2.0);
+			getValue(ps, 2.0);
 			fail("ACOS: Out of range test failed, input value is: " + 2.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -119,7 +126,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 		/* test the case where the input value is out of range */
 		try {
-			executeFn("ACOS", 2.0);
+			getValue(psFN, 2.0);
 			fail("ACOS: Out of range test failed, input value is: " + 2.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -129,6 +136,8 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -153,14 +162,19 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullValues("ASIN");
 		executeNullFn("ASIN");
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES ASIN(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn ASIN(?)}");
+
 		for (int i = 0; i < testArcValues.length; i++) {
 			double expected = java.lang.StrictMath.asin(testArcValues[i]);
-			double rValue = executeValues("ASIN", testArcValues[i]);
+			double rValue = getValue(ps, testArcValues[i]);
 			debug("ASIN: input value: " + testArcValues[i]
 					+ " expected value: " + expected + " return value: "
 					+ rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("ASIN", testArcValues[i]);
+			double fValue = getValue(psFN, testArcValues[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -168,15 +182,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.asin(randD);
-			double rVal = executeValues("ASIN", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("ASIN", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
 		try {
-			executeValues("ASIN", 2.0);
+			getValue(ps, 2.0);
 			fail("ASIN: Out of range test failed, input value is: " + 2.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -186,7 +200,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
-			executeFn("ASIN", 2.0);
+			getValue(psFN, 2.0);
 			fail("ASIN: Out of range test failed, input value is: " + 2.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -196,6 +210,8 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -215,13 +231,18 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("ATAN");
 
 		debug();
-		for (int i = 0; i < testValues.length; i++) {
+        PreparedStatement ps =
+            prepareStatement("VALUES ATAN(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn ATAN(?)}");
+
+        for (int i = 0; i < testValues.length; i++) {
 			double expected = java.lang.StrictMath.atan(testValues[i]);
-			double rValue = executeValues("ATAN", testValues[i]);
+			double rValue = getValue(ps, testValues[i]);
 			debug("ATAN: input value: " + testValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("ATAN", testValues[i]);
+			double fValue = getValue(psFN, testValues[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -229,12 +250,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.atan(randD);
-			double rVal = executeValues("ATAN", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("ATAN", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
+        
+        ps.close();
+        psFN.close();
 
 	}
 
@@ -249,13 +273,18 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullValues("COS");
 		executeNullFn("COS");
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES COS(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn COS(?)}");
+        
 		for (int i = 0; i < testValues.length; i++) {
 			double expected = java.lang.StrictMath.cos(testValues[i]);
-			double rValue = executeValues("COS", testValues[i]);
+			double rValue = getValue(ps, testValues[i]);
 			debug("COS: input value: " + testValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("COS", testValues[i]);
+			double fValue = getValue(psFN, testValues[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -263,13 +292,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.cos(randD);
-			double rVal = executeValues("COS", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("COS", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -288,13 +319,17 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("SIN");
 
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES SIN(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn SIN(?)}");
 		for (int i = 0; i < testValues.length; i++) {
 			double expected = java.lang.StrictMath.sin(testValues[i]);
-			double rValue = executeValues("SIN", testValues[i]);
+			double rValue = getValue(ps, testValues[i]);
 			debug("SIN: input value: " + testValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("SIN", testValues[i]);
+			double fValue = getValue(psFN, testValues[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -302,13 +337,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.sin(randD);
-			double rVal = executeValues("SIN", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("SIN", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -328,13 +365,19 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("TAN");
 
 		debug();
+        
+        PreparedStatement ps =
+            prepareStatement("VALUES TAN(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn TAN(?)}");
+        
 		for (int i = 0; i < testValues.length; i++) {
 			double expected = java.lang.StrictMath.tan(testValues[i]);
-			double rValue = executeValues("TAN", testValues[i]);
+			double rValue = getValue(ps, testValues[i]);
 			debug("TAN: input value: " + testValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("TAN", testValues[i]);
+			double fValue = getValue(psFN, testValues[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -342,13 +385,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.tan(randD);
-			double rVal = executeValues("TAN", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("TAN", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -402,15 +447,20 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("DEGREES");
 
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES DEGREES(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn DEGREES(?)}");
+        
 		for (int i = 0; i < testRadians.length; i++) {
 			double expected = java.lang.StrictMath.toDegrees(testRadians[i]);
-			double rValue = executeValues("DEGREES", testRadians[i]);
+			double rValue = getValue(ps, testRadians[i]);
 			// rValue = executeValues("DEGREES", SMALL_NEG_DOUBLE);
 			debug("DEGREES: input value: " + testRadians[i]
 					+ " expected value: " + expected + " return value: "
 					+ rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("DEGREES", testRadians[i]);
+			double fValue = getValue(psFN, testRadians[i]);
 			assertEquals(expected, fValue, 0.0);
 
 		}
@@ -419,15 +469,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.toDegrees(randD);
-			double rVal = executeValues("DEGREES", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("DEGREES", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
 		try {
-			executeValues("DEGREES", SMALLEST_NEG_DERBY_DOUBLE);
+			getValue(ps, SMALLEST_NEG_DERBY_DOUBLE);
 			fail("DEGREES: Out of range test failed, input value is: "
 					+ SMALLEST_NEG_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
@@ -438,7 +488,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
-			executeFn("DEGREES", SMALLEST_NEG_DERBY_DOUBLE);
+			getValue(psFN, SMALLEST_NEG_DERBY_DOUBLE);
 			fail("DEGREES: Out of range test failed, input value is: "
 					+ SMALLEST_NEG_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
@@ -448,6 +498,9 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					SQLStateConstants.DATA_EXCEPTION_NUMERIC_VALUE_OUT_OF_RANGE,
 					sqlE);
 		}
+        
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -468,14 +521,19 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("RADIANS");
 
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES RADIANS(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn RADIANS(?)}");
+        
 		for (int i = 0; i < testArcValues.length; i++) {
 			double expected = java.lang.StrictMath.toRadians(testArcValues[i]);
-			double rValue = executeValues("RADIANS", testArcValues[i]);
+			double rValue = getValue(ps, testArcValues[i]);
 			debug("RADIANS: input value: " + testArcValues[i]
 					+ " expected value: " + expected + " return value: "
 					+ rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("RADIANS", testArcValues[i]);
+			double fValue = getValue(psFN, testArcValues[i]);
 			assertEquals(expected, fValue, 0.0);
 
 		}
@@ -484,15 +542,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.toRadians(randD);
-			double rVal = executeValues("RADIANS", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("RADIANS", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
 		try {
-			executeValues("RADIANS", SMALLEST_POS_DERBY_DOUBLE);
+			getValue(ps, SMALLEST_POS_DERBY_DOUBLE);
 			fail("RADIANS: Out of range test failed, input value is: "
 					+ SMALLEST_NEG_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
@@ -503,7 +561,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
-			executeFn("RADIANS", SMALLEST_POS_DERBY_DOUBLE);
+			getValue(psFN, SMALLEST_POS_DERBY_DOUBLE);
 			fail("RADIANS: Out of range test failed, input value is: "
 					+ SMALLEST_NEG_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
@@ -513,6 +571,8 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					SQLStateConstants.DATA_EXCEPTION_NUMERIC_VALUE_OUT_OF_RANGE,
 					sqlE);
 		}
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -530,13 +590,18 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("EXP");
 
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES EXP(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn EXP(?)}");
+        
 		for (int i = 0; i < testValuesTwo.length; i++) {
 			double expected = java.lang.StrictMath.exp(testValuesTwo[i]);
-			double rValue = executeValues("EXP", testValuesTwo[i]);
+			double rValue = getValue(ps, testValuesTwo[i]);
 			debug("EXP: input value: " + testValuesTwo[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("EXP", testValuesTwo[i]);
+			double fValue = getValue(psFN, testValuesTwo[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -544,15 +609,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.exp(randD);
-			double rVal = executeValues("EXP", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("EXP", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
 		try {
-			executeValues("EXP", LARGEST_POS_DERBY_DOUBLE);
+			getValue(ps, LARGEST_POS_DERBY_DOUBLE);
 			fail("EXP: Out of range test failed, input value is: "
 					+ LARGEST_POS_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
@@ -563,7 +628,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
-			executeFn("EXP", LARGEST_POS_DERBY_DOUBLE);
+			getValue(psFN, LARGEST_POS_DERBY_DOUBLE);
 			fail("EXP: Out of range test failed, input value is: "
 					+ LARGEST_POS_DERBY_DOUBLE);
 		} catch (SQLException sqlE) {
@@ -574,6 +639,8 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -593,15 +660,19 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("LOG10");
 
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES LOG10(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn LOG10(?)}");
 		for (int i = 0; i < logValues.length; i++) {
 			// ln 10 = y * (log base 10 (10))
 			// 2.3025850929940456840179914546844 = y * 1
 			double expected = java.lang.StrictMath.log(logValues[i]) / 2.3025850929940456840179914546844;
-			double rValue = executeValues("LOG10", logValues[i]);
+			double rValue = getValue(ps, logValues[i]);
 			debug("LOG10: input value: " + logValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("LOG10", logValues[i]);
+			double fValue = getValue(psFN, logValues[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -609,15 +680,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.log(randD) / 2.3025850929940456840179914546844;
-			double rVal = executeValues("LOG10", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("LOG10", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
 		try {
-			executeValues("LOG10", 0.0);
+			getValue(ps, 0.0);
 			fail("LOG10: Out of range test failed, input value is: " + 0.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -627,7 +698,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
-			executeValues("LOG10", -1.0);
+			getValue(ps, -1.0);
 			fail("LOG10: Out of range test failed, input value is: " + -1.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -638,7 +709,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		}
 
 		try {
-			executeFn("LOG10", 0.0);
+			getValue(psFN, 0.0);
 			fail("LOG10: Out of range test failed, input value is: " + 0.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -648,7 +719,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
-			executeFn("LOG10", -1.0);
+			getValue(psFN, -1.0);
 			fail("LOG10: Out of range test failed, input value is: " + -1.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -658,6 +729,8 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -675,13 +748,18 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("LOG");
 
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES LOG(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn LOG(?)}");
+        
 		for (int i = 0; i < logValues.length; i++) {
 			double expected = java.lang.StrictMath.log(logValues[i]);
-			double rValue = executeValues("LOG", logValues[i]);
+			double rValue = getValue(ps, logValues[i]);
 			debug("LOG: input value: " + logValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("LOG", logValues[i]);
+			double fValue = getValue(psFN, logValues[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -689,15 +767,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.log(randD);
-			double rVal = executeValues("LOG", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("LOG", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
 		try {
-			executeValues("LOG", 0.0);
+			getValue(ps, 0.0);
 			fail("LOG: Out of range test failed, input value is: " + 0.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -707,7 +785,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 		try {
-			executeFn("LOG", 0.0);
+			getValue(psFN, 0.0);
 			fail("LOG: Out of range test failed, input value is: " + 0.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -716,6 +794,9 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					SQLStateConstants.DATA_EXCEPTION_NUMERIC_VALUE_OUT_OF_RANGE,
 					sqlE);
 		}
+        
+        ps.close();
+        psFN.close();
 
 	}
 
@@ -732,11 +813,14 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 	public void testLn() throws SQLException {
 		executeNullValues("LN");
 		// Note: the syntax 'values {fn ln(value)}' is not supported
+        // because it is not defined by JDBC.
 		// Object fnVal = executeNullFn("LN");
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES LN(?)");
 		for (int i = 0; i < logValues.length; i++) {
 			double expected = java.lang.StrictMath.log(logValues[i]);
-			double rValue = executeValues("LN", logValues[i]);
+			double rValue = getValue(ps, logValues[i]);
 			debug("LOG: input value: " + logValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
@@ -746,12 +830,12 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.log(randD);
-			double rVal = executeValues("LN", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
 		}
 
 		try {
-			executeValues("LN", 0.0);
+			getValue(ps, 0.0);
 			fail("LOG: Out of range test failed, input value is: " + 0.0);
 		} catch (SQLException sqlE) {
 			// "ERROR 22003: The resulting value is outside the range for the
@@ -761,6 +845,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 					sqlE);
 		}
 
+        ps.close();
 	}
 
 	/**
@@ -786,12 +871,17 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullValues("CEIL");
 
 		// Note: the syntax 'values {fn CEIL(value)}' is not supported
+        // because it is not specified by JDBC
 		// Object fnVal = executeNullFn("CEIL");
 
+
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES CEIL(?)");
+        
 		for (int i = 0; i < testValues.length; i++) {
 			double expected = java.lang.StrictMath.ceil(testValues[i]);
-			double rValue = executeValues("CEIL", testValues[i]);
+			double rValue = getValue(ps, testValues[i]);
 			debug("CEIL: input value: " + testValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
@@ -801,10 +891,11 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.ceil(randD);
-			double rVal = executeValues("CEIL", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
 		}
 
+        ps.close();
 	}
 
 	/**
@@ -829,16 +920,21 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullValues("CEILING");
 
 		executeNullFn("CEILING");
+        
+        PreparedStatement ps =
+            prepareStatement("VALUES CEILING(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn CEILING(?)}");
 
 		debug();
 		for (int i = 0; i < testValues.length; i++) {
 			double expected = java.lang.StrictMath.ceil(testValues[i]);
-			double rValue = executeValues("CEILING", testValues[i]);
+			double rValue = getValue(ps, testValues[i]);
 			debug("CEILING: input value: " + testValues[i]
 					+ " expected value: " + expected + " return value: "
 					+ rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("CEILING", testValues[i]);
+			double fValue = getValue(psFN, testValues[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -846,13 +942,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.ceil(randD);
-			double rVal = executeValues("CEILING", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("CEILING", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
 
+        ps.close();
+        psFN.close();
 	}
 
 	/**
@@ -879,13 +977,18 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		executeNullFn("FLOOR");
 
 		debug();
+        PreparedStatement ps =
+            prepareStatement("VALUES FLOOR(?)");
+        PreparedStatement psFN =
+            prepareStatement("VALUES {fn FLOOR(?)}");
+        
 		for (int i = 0; i < testValues.length; i++) {
 			double expected = java.lang.StrictMath.floor(testValues[i]);
-			double rValue = executeValues("FLOOR", testValues[i]);
+			double rValue = getValue(ps, testValues[i]);
 			debug("FLOOR: input value: " + testValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
 			assertEquals(expected, rValue, 0.0);
-			double fValue = executeFn("FLOOR", testValues[i]);
+			double fValue = getValue(psFN, testValues[i]);
 			assertEquals(expected, fValue, 0.0);
 		}
 
@@ -893,12 +996,14 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
 			double expect = java.lang.StrictMath.floor(randD);
-			double rVal = executeValues("FLOOR", randD);
+			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
-			double fVal = executeFn("FLOOR", randD);
+			double fVal = getValue(psFN, randD);
 			assertEquals(expect, fVal, 0.0);
 
 		}
+        ps.close();
+        psFN.close();
 	}
 
 	private double executeValues(String functionName) throws SQLException {
@@ -926,17 +1031,29 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		stmt.close();
 		return rValue;
 	}
+    
+    /**
+     * Execute a prepared statement with a single double argument
+     * and return the double value from the single row returned.
+     */
+    private double getValue(PreparedStatement ps, double value)
+            throws SQLException {
+        ps.setDouble(1, value);
+        ResultSet rs = ps.executeQuery();
+        rs.next(); // we know a single value will be returned.
+        double rValue = rs.getDouble(1);
+        rs.close();
+        return rValue;
+    }
 
 	private void executeNullValues(String functionName) throws SQLException {
 		Statement stmt = createStatement();
 		ResultSet rs = stmt.executeQuery("values " + functionName + "(null)");
-		Object rValue = new Object();
-		while (rs.next()) {
-			rValue = rs.getObject(1);
-		}
+		rs.next(); // we know a single value will be returned.
+		assertNull(rs.getObject(1));
+		assertTrue(rs.wasNull());
 		rs.close();
 		stmt.close();
-		assertNull(rValue);
 	}
 
 	private double executeFn(String functionName) throws SQLException {
@@ -969,13 +1086,11 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		Statement stmt = createStatement();
 		ResultSet rs = stmt.executeQuery("values {fn  " + functionName
 				+ "(null)}");
-		Object rValue = new Object();
-		while (rs.next()) {
-			rValue = rs.getObject(1);
-		}
+        rs.next(); // we know a single value will be returned.
+        assertNull(rs.getObject(1));
+        assertTrue(rs.wasNull());
 		rs.close();
 		stmt.close();
-		assertNull(rValue);
 	}
 
 	private void debug(String message) {
