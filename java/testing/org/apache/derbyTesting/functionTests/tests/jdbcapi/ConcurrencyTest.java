@@ -30,6 +30,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Testing concurrency behaviour in derby when creating the resultsets with
@@ -837,8 +838,25 @@ public class ConcurrencyTest extends SURBaseTest {
     // By providing a static suite(), you can customize which tests to run.
     // The default is to run all tests in the TestCase subclass.
     
-    public static Test suite() {
+    /**
+     * Run in embedded and client.
+     */
+    public static Test suite()
+    {
         final TestSuite suite = new TestSuite("ConcurrencyTest");
+        suite.addTest(baseSuite("ConcurrencyTest:embedded", true));
+        
+        suite.addTest(
+                TestConfiguration.clientServerDecorator(
+                        baseSuite("ConcurrencyTest:client", false)));
+        
+        // Since this test relies on lock waiting, setting this property will
+        // make it go a lot faster:
+        return DatabasePropertyTestSetup.setLockTimeouts(suite, -1, 4);
+    }
+    
+    private static Test baseSuite(String name, boolean embedded) {
+        final TestSuite suite = new TestSuite(name);
         
         // This testcase does not require JDBC3/JSR169, since it does not
         // specify result set concurrency) in Connection.createStatement().
@@ -869,7 +887,7 @@ public class ConcurrencyTest extends SURBaseTest {
                 
                 // This testcase fails in DerbyNetClient framework due to 
                 // DERBY-1696
-                if (usingEmbedded()) {
+                if (embedded) {
                     suite.addTest
                         (new ConcurrencyTest("testUpdatePurgedTuple1"));
                 }
@@ -877,12 +895,7 @@ public class ConcurrencyTest extends SURBaseTest {
             }         
         }
         
-        // Since this test relies on lock waiting, setting this property will
-        // make it go a lot faster:
-        final Properties properties = new Properties();
-        properties.setProperty("derby.locks.waitTimeout", "4");
-        
-        return new DatabasePropertyTestSetup(suite, properties);
+        return suite;
     }
     
 }
