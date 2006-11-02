@@ -1,0 +1,36 @@
+This directory tree contains a demo application which shows how you
+can run user-written Java code inside the Derby database. 
+
+For instructions on how to build and run the demo application, cd to this
+directory and type the following command:
+
+   ant -projecthelp
+
+The demo shows you how to do the following:
+
+o Declare Java functions and procedures and run them inside the Derby
+   engine.
+
+o Load the Derby engine with jar files of user-written code.
+
+o Enforce data consistency by wiring functions into CREATE TABLE
+   statements.
+
+o Run a Java procedure from a TRIGGER.
+
+o Improve query performance by wiring filtering functions into the
+   WHERE clause.
+
+o Format query output by wiring functions into the SELECT list.
+
+o Re-use off-the-shelf packages to write your own custom data aggregator.
+
+For more detail, please consult the following sections of the Derby
+Developer's Guide:
+
+o "Loading classes from a database"
+
+o "Derby server-side programming"
+
+
+
