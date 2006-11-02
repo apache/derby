@@ -21,6 +21,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -50,13 +51,31 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
         super(name);
     }
     
+    /**
+     * Run in both embedded and client.
+     */
     public static Test suite() {
-        TestSuite suite = new TestSuite("UpdateXXXTest");
         
         // DB2 client doesn't support this functionality
         if (usingDerbyNet())
-            return suite;
+            return new TestSuite("empty");
         
+        TestSuite suite = baseSuite("UpdateXXXTest");
+        
+        suite.addTest(
+                TestConfiguration.clientServerDecorator(
+                        baseSuite("UpdateXXXTest:client")));
+                      
+        return suite;
+    }
+    
+    /**
+     * Base suite of tests that will run in both embedded and client.
+     * @param name Name for the suite.
+     */
+    private static TestSuite baseSuite(String name) {
+        TestSuite suite = new TestSuite(name);
+          
         suite.addTestSuite(UpdateXXXTest.class);
         
         // requires java.math.BigDecimal
@@ -65,7 +84,6 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
                       
         return suite;
     }
- 
 
     /**
      * The setup creates a Connection to the database, and also

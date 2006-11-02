@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.*;
 
@@ -115,19 +116,17 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
     
     /**
      * Create test suite for this test.
+     * Run in both embedded and client.
      */
     public static Test suite() {
-        
-        TestSuite suite = new TestSuite("ResultSetCloseTest");
-        
+                
         // DB2 client doesn't implement result set closing
         // correctly wrt ensuring all its methods subsequently
         // throw an exception.
         if (usingDerbyNet())
-            return suite;
+            return new TestSuite("empty");
         
-        suite.addTestSuite(ResultSetCloseTest.class);
-        return suite;
+        return TestConfiguration.defaultSuite(ResultSetCloseTest.class);
     }
     
 }
