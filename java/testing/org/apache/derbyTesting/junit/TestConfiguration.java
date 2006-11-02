@@ -165,7 +165,7 @@ public class TestConfiguration {
      * for the passed in class running in embedded and the
      * default client server configuration.
      * <BR>
-     * The complete set of embedded and set of client server tests
+     * Each set of embedded and set of client server tests
      * is decorated with a CleanDatabaseTestSetup.
      * <BR>
      * The client server configuration is setup using clientServerSuite
@@ -174,10 +174,10 @@ public class TestConfiguration {
     {
         final TestSuite suite = new TestSuite(suiteName(testClass));
         
-        suite.addTest(embeddedSuite(testClass));            
-        suite.addTest(clientServerSuite(testClass));
+        suite.addTest(new CleanDatabaseTestSetup(embeddedSuite(testClass)));            
+        suite.addTest(new CleanDatabaseTestSetup(clientServerSuite(testClass)));
  
-        return new CleanDatabaseTestSetup(suite);
+        return (suite);
     }
     
     /**
