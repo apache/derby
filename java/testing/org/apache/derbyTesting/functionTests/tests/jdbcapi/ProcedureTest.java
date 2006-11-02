@@ -33,6 +33,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests of stored procedures.
@@ -674,12 +675,28 @@ public class ProcedureTest extends BaseJDBCTestCase {
     // SETUP
 
     /**
-     * Creates the test suite and wraps it in a <code>TestSetup</code>
-     * instance which sets up and tears down the test environment.
+     * Runs the test fixtures in embedded and client.
      * @return test suite
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("ProcedureTest");
+
+        suite.addTest(baseSuite("ProcedureTest:embedded"));
+
+        suite.addTest(
+                TestConfiguration.clientServerDecorator(
+                        baseSuite("ProcedureTest:client")));    
+        return suite;
+    }
+
+    /**
+     * Creates the test suite and wraps it in a <code>TestSetup</code>
+     * instance which sets up and tears down the test environment.
+     * @return test suite
+     */
+    private static Test baseSuite(String name)
+    {
+        TestSuite suite = new TestSuite(name);
         
         // Need JDBC 2 DriverManager to run these tests
         if (JDBC.vmSupportsJDBC2()) {        	
@@ -721,49 +738,22 @@ public class ProcedureTest extends BaseJDBCTestCase {
                   "_prepared"));
         }
         }
-        Test test = new BaseJDBCTestSetup(suite) {
+        return new CleanDatabaseTestSetup(suite) {
             /**
              * Creates the tables and the stored procedures used in the test
              * cases.
              * @exception SQLException if a database error occurs
              */
-        	protected void setUp() throws SQLException {
-                Connection c = getConnection();
-                c.setAutoCommit(false);
-                Statement s = c.createStatement();
+            protected void decorateSQL(Statement s) throws SQLException
+            {
                 for (int i = 0; i < PROCEDURES.length; i++) {
-                    s.execute(PROCEDURES[i][1]);
+                    s.execute(PROCEDURES[i]);
                 }
                 for (int i = 0; i < TABLES.length; i++) {
                     s.execute(TABLES[i][1]);
                 }
-                s.close();
-                c.commit();
-                c.close();
-            }
-            /**
-             * Drops the stored procedures used in the tests.
-             * @exception SQLException if a database error occurs
-             */
-        	protected void tearDown() throws Exception {
-                Connection c = getConnection();
-                c.setAutoCommit(false);
-                Statement s = c.createStatement();
-                for (int i = 0; i < PROCEDURES.length; i++) {
-                    s.execute("DROP PROCEDURE " + PROCEDURES[i][0]);
-                }
-                for (int i = 0; i < TABLES.length; i++) {
-                    s.execute("DROP TABLE " + TABLES[i][0]);
-                }
-                s.close();
-                c.commit();
-                c.close();
-                
-                super.tearDown();
             }
         };
-        
-        return new CleanDatabaseTestSetup(test);
     }
 
     /**
@@ -788,32 +778,30 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * is the name of the procedure, second element is SQL which
      * creates it.
      */
-    private static final String[][] PROCEDURES = {
-        { "RETRIEVE_DYNAMIC_RESULTS",
+    private static final String[] PROCEDURES = {
+       
           "CREATE PROCEDURE RETRIEVE_DYNAMIC_RESULTS(number INT) " +
           "LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME '" +
           ProcedureTest.class.getName() + ".retrieveDynamicResults' " +
-          "DYNAMIC RESULT SETS 4"
-        },
-        { "RETRIEVE_CLOSED_RESULT",
+          "DYNAMIC RESULT SETS 4",
+
+
           "CREATE PROCEDURE RETRIEVE_CLOSED_RESULT() LANGUAGE JAVA " +
           "PARAMETER STYLE JAVA EXTERNAL NAME '" +
           ProcedureTest.class.getName() + ".retrieveClosedResult' " +
-          "DYNAMIC RESULT SETS 1"
-        },
-        { "RETRIEVE_EXTERNAL_RESULT",
+          "DYNAMIC RESULT SETS 1",
+
           "CREATE PROCEDURE RETRIEVE_EXTERNAL_RESULT(" +
           "DBNAME VARCHAR(128), DBUSER VARCHAR(128), DBPWD VARCHAR(128)) LANGUAGE JAVA " +
           "PARAMETER STYLE JAVA EXTERNAL NAME '" +
           ProcedureTest.class.getName() + ".retrieveExternalResult' " +
-          "DYNAMIC RESULT SETS 1"
-        },
-        { "PROC_WITH_SIDE_EFFECTS",
+          "DYNAMIC RESULT SETS 1",
+
           "CREATE PROCEDURE PROC_WITH_SIDE_EFFECTS(ret INT) LANGUAGE JAVA " +
           "PARAMETER STYLE JAVA EXTERNAL NAME '" +
           ProcedureTest.class.getName() + ".procWithSideEffects' " +
           "DYNAMIC RESULT SETS 2"
-        },
+
     };
 
     /**
