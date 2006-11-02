@@ -54,6 +54,7 @@
       </classpath>
       <include name="${derby.dir}/impl/store/**"/>
       <exclude name="${derby.dir}/impl/store/raw/data/RAFContainer4.java"/>
+      <exclude name="${derby.dir}/impl/store/raw/data/BaseDataFileFactoryJ4.java"/>
     </javac>
   </target>
   <target name="compile_impl_store_14" depends="compile_impl_store">
@@ -74,6 +75,7 @@
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/store/raw/data/RAFContainer4.java"/>
+      <include name="${derby.dir}/impl/store/raw/data/BaseDataFileFactoryJ4.java"/>
     </javac>
   </target>
 </project>

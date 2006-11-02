@@ -122,7 +122,7 @@ that file was made to inherit from this one.
 
 **/
 
-public final class BaseDataFileFactory
+public class BaseDataFileFactory
     implements DataFactory, CacheableFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
 {
 
@@ -234,9 +234,6 @@ public final class BaseDataFileFactory
     private String          backupPath;
     private File            backupRoot;
     private String[]        bfilelist;
-
-	// Creates RAFContainer instances tailored to the running VM
-	private RAFContainerFactory rafContainerFactory = new RAFContainerFactory();
 
 	/*
 	** Constructor
@@ -1443,25 +1440,33 @@ public final class BaseDataFileFactory
 	}
 
     /**
-     * Return the Class of the Containers to be produced by this factory.
+     * Produces new container objects.
      * <p>
      * Concrete implementations of a DataFactory must implement this routine
-     * to indicate what kind of containers are produced.  For instance
-     * the DataFileFactory produce RAFContainer's.
+     * to indicate what kind of containers are produced. This class produces
+     * file-based containers - RAFContainer objects for files that support
+     * random access and InputStreamContainer object for others, such as data
+     * files in JARs.
      * <p>
-     * It is expected that this class is called only once, and thus does
-     * not worry about the overhead of repeated Class.forName() lookups.
-     *
-	 * @return The Class object for the Container class.
+     * @return A new file container object.
      *
      **/
     Cacheable newContainerObject()
     {
         if( supportsRandomAccess)
-            return rafContainerFactory.newRAFContainer(this);
+            return newRAFContainer(this);
         else
             return new InputStreamContainer( this);
     } 
+
+    /**
+     * Creates a RAFContainer object.
+     * This method is overridden in BaseDataFileFactoryJ4 to produce
+     * RAFContainer4 objects instead of RAFContainer objects.
+     */
+    protected Cacheable newRAFContainer(BaseDataFileFactory factory) {
+        return new RAFContainer(factory);
+    }
 
 	/**
 	 *	This page is going from clean to dirty, this is a chance for the
