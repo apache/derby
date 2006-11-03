@@ -101,6 +101,12 @@ public final class SecurityManagerSetup extends TestSetup {
 	protected void setUp() throws PrivilegedActionException {
 		installSecurityManager(decoratorPolicyResource);
 	}
+    
+    protected void tearDown() throws Exception
+    {
+        if ("<NONE>".equals(decoratorPolicyResource))
+            BaseTestCase.setSystemProperty("java.security.policy", "");
+    }
 	
 	/**
 	 * Install a SecurityManager with the default test policy

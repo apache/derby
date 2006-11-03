@@ -819,6 +819,12 @@ public class TestConfiguration {
     		SecurityManagerSetup.noSecurityManager();
     		return false;
     	} else {
+            if ("<NONE>".equals(
+                    BaseTestCase.getSystemProperty("java.security.policy")))
+            {
+                // Explict setting of no security manager
+                return false;
+            }
     		SecurityManagerSetup.installSecurityManager();
     		return true;
     	}

@@ -467,6 +467,34 @@ public class JDBC {
                 expectedColNames[i], rsmd.getColumnName(i+1));
         }
     }
+    
+    /**
+     * Asserts a ResultSet returns a single row with a single
+     * column equal to the passed in String value. The value can
+     * be null to indicate SQL NULL. The comparision is make
+     * using assertFullResultSet in trimmed string mode.
+     */
+    public static void assertSingleValueResultSet(ResultSet rs,
+            String value) throws SQLException
+    {
+        String[] row = new String[] {value};
+        String[][] set = new String[][] {row};
+        assertFullResultSet(rs, set);
+    }
+    
+    /**
+     * assertFullResultSet() using trimmed string comparisions.
+     * Equal to
+     * <code>
+     * assertFullResultSet(rs, expectedRows, true)
+     * </code>
+     */
+    public static void assertFullResultSet(ResultSet rs,
+            String [][] expectedRows)
+            throws SQLException
+     {
+        assertFullResultSet(rs, expectedRows, true);
+     }
 
     /**
      * Takes a result set and a two-dimensional array and asserts
@@ -619,8 +647,8 @@ public class JDBC {
             {
                 Assert.fail("Column value mismatch @ column '" +
                     rsmd.getColumnName(i+1) + "', row " + rowNum +
-                    ":\n    Expected: " + expectedRow[i] +
-                    "\n    Found:    " + obj);
+                    ":\n    Expected: >" + expectedRow[i] +
+                    "<\n    Found:    >" + obj + "<");
             }
         }
     }
