@@ -1602,6 +1602,7 @@
 
   <target name="junit-init">
     <tstamp prefix="derby.junit"/>
+    <property name="derby.junit.jvm" value="java"/>
     <mkdir dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}/testout"/>
   </target>
 
@@ -1614,26 +1615,26 @@
   <target name="junit-oneclass" depends="junit-init">
     <junit printsummary="on"
            fork="yes" forkmode="once"
+           jvm="${derby.junit.jvm}"
            showoutput="yes"
            dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}/testout">
       <formatter type="xml"/>
       <test name="${derby.junit.testname}" todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
-      <classpath path="${out.dir};${junit}"/>
+      <classpath>
+        <pathelement path="${out.dir}"/>
+        <pathelement path="${junit}"/>
+      </classpath>
     </junit>
   </target>
  
   <!-- only execute jdbc4 suite if we have a pointer to a 1.6 VM -->
   <target name="junit-jdbc4" if="jdk16">
-    <junit printsummary="on"
-           fork="yes" forkmode="once"
-           jvm="${jdk16}/bin/java"
-           showoutput="yes"
-           dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}/testout">
-      <formatter type="xml"/>
-      <test name="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"
-            todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
-      <classpath path="${out.dir};${junit}"/>
-    </junit> 
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.jvm"
+             value="${jdk16}/bin/java"/>
+      <param name="derby.junit.testname"
+             value="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"/>
+    </antcall>
   </target>
 
   <target name="junit-all" depends="junit-init,junit-jdbc4">
