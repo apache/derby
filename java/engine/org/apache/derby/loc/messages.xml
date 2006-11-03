@@ -28,6 +28,11 @@ information:
   * Message text returned to the user
   * Human-readable names for message arguments
 
+For further guidance on writing messages with human-readable argument
+names, please see the following page on the Derby website:
+
+  http://db.apache.org/derby/manuals/messages.html
+
 This file is used to generate the following files when Derby is built:
 
   * messages_en.properties - the English message text shipped with Derby
