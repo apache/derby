@@ -973,11 +973,14 @@ public class OptimizerImpl implements Optimizer
 				/*
 				** When we pull an Optimizable we need to go through and
 				** load whatever best path we found for that Optimizable
-				** with respect to _this_ OptimizerImpl.  An Optimizable
-				** can have different "best paths" for different Optimizer
-				** Impls if there are subqueries beneath it; we need to make
-				** sure that when we pull it, it's holding the best path as
-				** as we determined it to be for _us_.
+				** with respect to this OptimizerImpl.  The reason is that
+				** we could be pulling the Optimizable for the last time
+				** (before returning false), in which case we want it (the
+				** Optimizable) to be holding the best access path that it
+				** had at the time we found bestJoinOrder.  This ensures
+				** that the access path which is generated and executed for
+				** the Optimizable matches the the access path decisions
+				** made by this OptimizerImpl for the best join order.
 				**
 				** NOTE: We we only reload the best plan if it's necessary
 				** to do so--i.e. if the best plans aren't already loaded.
