@@ -107,6 +107,43 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
      * @throws SQLException database error
      */
      public static void cleanDatabase(Connection conn) throws SQLException {
+         clearProperties(conn);
+         removeObjects(conn);
+
+     }
+     
+     /**
+      * Set of database properties that will be set to NULL (unset)
+      * as part of cleaning a database.
+      */
+     private static final String[] CLEAR_DB_PROPERTIES =
+     {
+         "derby.database.classpath",
+     };
+     
+     /**
+      * Clear all database properties.
+      */
+     private static void clearProperties(Connection conn) throws SQLException {
+
+         PreparedStatement ps = conn.prepareCall(
+           "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, NULL)");
+         
+         for (int i = 0; i < CLEAR_DB_PROPERTIES.length; i++)
+         {
+             ps.setString(1, CLEAR_DB_PROPERTIES[i]);
+             ps.executeUpdate();
+         }
+         ps.close();
+         conn.commit();
+     }
+     
+     
+     /**
+      * Remove all objects in all schemas from the database.
+      */
+     private static void removeObjects(Connection conn) throws SQLException {
+   
         DatabaseMetaData dmd = conn.getMetaData();
 
         SQLException sqle = null;
