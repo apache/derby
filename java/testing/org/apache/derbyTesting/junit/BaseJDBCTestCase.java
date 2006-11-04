@@ -200,22 +200,6 @@ public abstract class BaseJDBCTestCase
         initializeConnection(conn);
         return conn;        
     }
-    
-    /**
-     * Get a connection to the default database using the  specified connection
-     * attributes.
-     *  
-     * @param connAttrs connection attributes
-     * @return connection to default database.
-     * @throws SQLException
-     */
-    public Connection getDefaultConnection(String connAttrs)
-    	throws SQLException {
-    	Connection conn =  getTestConfiguration().
-								getDefaultConnection(connAttrs);
-    	initializeConnection(conn);
-    	return conn;
-    }
 
     /**
      * Get a connection to a database using the specified connection 

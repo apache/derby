@@ -47,8 +47,12 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                 SecurityManagerSetup.noSecurityManager(
                         new DatabaseClassLoadingTest("testSetClasspath")));
         
-        suite.addTest(SecurityManagerSetup.noSecurityManager(
+        // Need DriverManager to execute the add contact procedure
+        // as it uses server side jdbc.
+        if (JDBC.vmSupportsJDBC3()) {
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
                 new DatabaseClassLoadingTest("testAddContact")));
+        }
         
         suite.addTest(SecurityManagerSetup.noSecurityManager(
                 new DatabaseClassLoadingTest("testGetResource")));        
@@ -220,12 +224,6 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         // setting the change does see it!
         // 
         getConnection().close();
-        try {
-            TestConfiguration.getCurrent().getDefaultConnection(
-                    "shutdown=true");
-            fail("Database failed to shut down");
-        } catch (SQLException e) {
-            assertSQLState("Database shutdown", "08006", e);
-        }  
+        getTestConfiguration().shutdownDatabase(); 
     }
 }

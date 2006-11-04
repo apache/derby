@@ -47,11 +47,12 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
                 "SQLAuthorizationPropTest");
 		
 		// Use DatabasePropertyTestSetup decorator to set the property
-		// required by this test. 
+		// required by this test (and shutdown the database for the
+        // property to take effect.
 		Properties props = new Properties();
 	    props.setProperty("derby.database.sqlAuthorization", "true");
 	    Test test = new SQLAuthorizationPropTest("grantRevokeAfterSettingSQLAuthProperty");
-	    suite.addTest(new DatabasePropertyTestSetup (test, props));
+	    suite.addTest(new DatabasePropertyTestSetup (test, props, true));
 	    
 	    // This test has to be run after SQL authorization property has been 
 	    // set to true. 
@@ -116,14 +117,6 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void grantRevokeAfterSettingSQLAuthProperty() throws SQLException{
-		// Shutdown the database for derby.database.sqlAuthorization property 
-		// to take effect. This was set by DatabasePropertyTestSetup decorator.
-		try{ 
-			getDefaultConnection("shutdown=true");
-			fail("FAIL: Failed to shutdown database");
-		} catch (SQLException sqle) {
-			assertSQLState(SQLStateConstants.SHUTDOWN_DATABASE, sqle);
-		}
 		
 		Statement stmt = createStatement();
 		stmt.execute("grant select on GR_TAB to some_user");

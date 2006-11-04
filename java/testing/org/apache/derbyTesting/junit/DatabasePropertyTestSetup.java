@@ -164,13 +164,7 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
     {
     	setProperties(newValues);
         if (staticProperties) {
-            try {
-                TestConfiguration.getCurrent().getDefaultConnection(
-                        "shutdown=true");
-                fail("Database failed to shut down");
-            } catch (SQLException e) {
-                 BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
-            }
+            TestConfiguration.getCurrent().shutdownDatabase();
         }
     }
 
@@ -207,13 +201,7 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         newValues = null;
         oldValues = null;
         if (staticProperties) {
-            try {
-                TestConfiguration.getCurrent().getDefaultConnection(
-                        "shutdown=true");
-                fail("Database failed to shut down");
-            } catch (SQLException e) {
-                BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
-            }
+            TestConfiguration.getCurrent().shutdownDatabase();
         }
     }
     

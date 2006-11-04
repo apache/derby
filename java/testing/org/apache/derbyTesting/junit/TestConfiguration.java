@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -561,7 +562,7 @@ public class TestConfiguration {
      *
      * @return connection to default database.
      */
-    public Connection openDefaultConnection()
+    Connection openDefaultConnection()
         throws SQLException {
         return getDefaultConnection("create=true");
     }
@@ -575,7 +576,7 @@ public class TestConfiguration {
      *
      * @return connection to database.
      */
-    public Connection openConnection (String databaseName) throws SQLException {
+    Connection openConnection (String databaseName) throws SQLException {
         return getConnection(databaseName, "create=true");
     }
     
@@ -626,6 +627,21 @@ public class TestConfiguration {
             con = TestDataSourceFactory.getDataSource(attrs).getConnection();
         }
         return con;
+    }
+    
+    /**
+     * Shutdown the database for this configuration
+     * assuming it is booted.
+     *
+     */
+    public void shutdownDatabase()
+    {
+        try {
+            getDefaultConnection("shutdown=true");
+            Assert.fail("Database failed to shut down");
+        } catch (SQLException e) {
+             BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
+        }
     }
     
     /**

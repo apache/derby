@@ -42,13 +42,7 @@ class DropDatabaseSetup extends TestSetup {
     protected void tearDown() throws Exception {  
         super.tearDown();
         
-        try {
-            TestConfiguration.getCurrent().getDefaultConnection(
-                    "shutdown=true");
-            fail("Database failed to shut down");
-        } catch (SQLException e) {
-            BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
-        }
+        TestConfiguration.getCurrent().shutdownDatabase();
 
         String dbName = TestConfiguration.getCurrent().getDatabaseName();
         dbName = dbName.replace('/', File.separatorChar);
