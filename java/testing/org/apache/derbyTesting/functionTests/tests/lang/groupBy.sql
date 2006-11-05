@@ -360,15 +360,3 @@ select 10 from t having 1 < 2;
 -- ok, gives one row
 select 10,avg(c) from t having 1 < 2;
 drop table t;
-
--- DERBY-2008
--- test SUBSTR with 2 args with GROUP BY expression
-create table dt (vc varchar(30));
-insert into dt values ('1928-09-21'), ('1903-12-08');
--- ok
-select substr(vc, 3) from dt group by substr(vc, 3); 
-select substr(vc, 3, 4) from dt group by substr(vc, 3, 4); 
--- expect errors
-select substr(vc, 3, 4) from dt group by substr(vc, 3); 
-select substr(vc, 3) from dt group by substr(vc, 3, 4);
-drop table dt;

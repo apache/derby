@@ -282,7 +282,11 @@ abstract class ConstantNode extends ValueNode
 	{
 		if (isSameNodeType(o)) {
 			ConstantNode other = (ConstantNode)o;
-			return other.getValue().compare(getValue()) == 0;
+			
+			// value can be null which represents a SQL NULL value.
+			return ( (other.getValue() == null && getValue() == null) || 
+					 (other.getValue() != null && 
+							 other.getValue().compare(getValue()) == 0) );
 		}
 		return false;
 	}

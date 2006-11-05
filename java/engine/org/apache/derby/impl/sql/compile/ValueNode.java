@@ -1334,7 +1334,45 @@ public abstract class ValueNode extends QueryTreeNode
 	 * Tests if this node is equivalent to the specified ValueNode. Two 
 	 * ValueNodes are considered equivalent if they will evaluate to the same
 	 * value during query execution. 
+	 * <p> 
+	 * This method provides basic expression matching facility for the derived 
+	 * class of ValueNode and it is used by the language layer to compare the 
+	 * node structural form of the two expressions for equivalence at bind 
+	 * phase.  
+	 *  <p>
+	 * Note that it is not comparing the actual row values at runtime to produce 
+	 * a result; hence, when comparing SQL NULLs, they are considered to be 
+	 * equivalent and not unknown.  
+	 *  <p>
+	 * One usage case of this method in this context is to compare the select 
+	 * column expression against the group by expression to check if they are 
+	 * equivalent.  e.g.:
+	 *  <p>
+	 * SELECT c1+c2 FROM t1 GROUP BY c1+c2   
+	 *  <p>
+	 * In general, node equivalence is determined by the derived class of 
+	 * ValueNode.  But they generally abide to the rules below:
+	 *  <ul>
+	 * <li>The two ValueNodes must be of the same node type to be considered 
+	 *   equivalent.  e.g.:  CastNode vs. CastNode - equivalent (if their args 
+	 *   also match), ColumnReference vs CastNode - not equivalent.
+	 *   
+	 * <li>If node P contains other ValueNode(s) and so on, those node(s) must 
+	 *   also be of the same node type to be considered equivalent.
+	 *   
+	 * <li>If node P takes a parameter list, then the number of arguments and its 
+	 *   arguments for the two nodes must also match to be considered 
+	 *   equivalent.  e.g.:  CAST(c1 as INTEGER) vs CAST(c1 as SMALLINT), they 
+	 *   are not equivalent.
+	 *   
+	 * <li>When comparing SQL NULLs in this context, they are considered to be 
+	 *   equivalent.
 	 * 
+	 * <li>If this does not apply or it is determined that the two nodes are not 
+	 *   equivalent then the derived class of this method should return false; 
+	 *   otherwise, return true.
+	 * </ul>   
+	 *   
 	 * @param other the node to compare this ValueNode against.
 	 * @return <code>true</code> if the two nodes are equivalent, 
 	 * <code>false</code> otherwise.

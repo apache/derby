@@ -36,7 +36,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 public class GroupByExpressionTest extends BaseJDBCTestCase
 {
 
-    private static String[][] TABLES = { 
+	private static String[][] TABLES = { 
         {"test", "create table test (c1 int, c2 int, c3 int, c4 int)"},
         {"coal", "create table coal (vc1 varchar(2), vc2 varchar(2))"},
         {"alltypes", 
@@ -45,7 +45,12 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
             " d double precision, r real, " + 
             " dt date, t time, ts timestamp, " +
             " b char(2) for bit data, bv varchar(8) for bit data, " +
-            " lbv long varchar for bit data, dc decimal(5,2))"}};
+            " lbv long varchar for bit data, dc decimal(5,2))"},
+        {"t1", "create table t1 (c1 varchar(30))"},
+        {"t2", "create table t2 (c1 varchar(10))"},
+        {"t3", "create table t3 (c1 int, c2 int)"}
+    };
+
     private static String[][] FUNCTIONS = {
         {"r", "create function r() returns double external name " +
             "'java.lang.Math.random' language java parameter style java"}};
@@ -182,6 +187,81 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                         {"dupl", new Integer(14)},
                         {"good", new Integer(1)}});
 
+        // DERBY-2008 
+        // substr (2-args)
+        verifyQueryResults(
+                "substr-Q1",
+                "select substr(c1, 3) from t1 group by substr(c1, 3)",
+                new String[][] { {"03-12-08"},
+                                 {"28-09-21"} });
+        // substr (3-args)
+        verifyQueryResults(
+                "substr-Q2",
+                "select substr(c1, 3, 4) from t1 group by substr(c1, 3, 4)",
+                new String[][] { {"03-1"},
+                                 {"28-0"} });
+
+        // ltrim
+        verifyQueryResults(
+                "ltrim",
+                "select ltrim(c1) from t2 group by ltrim(c1)",
+                new String[][] { {"123 "},
+                                 {"abc "} });
+
+        // rtrim
+        verifyQueryResults(
+                "rtrim",
+                "select rtrim(c1) from t2 group by rtrim(c1)",
+                new String[][] { {"123"},
+                                 {"abc"} });
+
+        // locate (2-args)
+        verifyQueryResults(
+                "locate-Q1",
+                "select locate(c1, 'abc') from t2 group by locate(c1, 'abc')",
+                new int[][] { { 0 }, 
+                              { 1 } });
+
+        // locate (3-args)
+        verifyQueryResults(
+                "locate-Q2",
+                "select locate(c1, 'abc', 1) from t2 group by locate(c1, 'abc',1)",
+                new int[][] { { 0 }, 
+                              { 1 } });
+        
+        // cast with NULL
+        verifyQueryResults(
+                "cast-Q2",
+                "select (cast (NULL as INTEGER)) from t2 group by (cast (NULL as INTEGER))",
+                new Object[][] { { null } } );
+
+        // DERBY-2014
+        // nullif
+        verifyQueryResults(
+                "nullif-Q1",
+                "select nullif(c1,c1) from t3 group by nullif(c1,c1)",
+                new Object[][] { { null } } );
+
+        verifyQueryResults(
+                "nullif-Q2",
+                "select nullif(c1,c2) from t3 group by nullif(c1,c2)",
+                new Object[][] { { new Integer(5) }, 
+                                 { null } });
+
+        verifyQueryResults(
+                "nullif-Q3",
+                "select nullif(c1,10) from t3 group by nullif(c1,10)",
+                new Object[][] { { new Integer(1) },
+                                 { new Integer(2) },
+                                 { new Integer(3) },
+                                 { new Integer(5) },
+                                 { null } });
+
+        verifyQueryResults(
+                "nullif-Q4",
+                "select nullif(1,c1) from t3 group by nullif(1,c1)",
+                new Object[][] { { new Integer(1) }, 
+                                 { null } });
     }
     
     public void testExtractOperator() throws Exception
@@ -263,6 +343,34 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
         assertCompileError(
                 "42Y30",
                 "select substr(c, 3, 4) from alltypes group by substr(v, 3, 4)");
+
+        // DERBY-2008
+        // invalid grouping expression 
+        assertCompileError(
+                "42Y30",
+                "select substr(c1, 3, 4) from t1 group by substr(c1, 3)");
+        assertCompileError(
+                "42Y30",
+                "select substr(c1, 3) from t1 group by substr(c1, 3, 4)");
+        assertCompileError(
+                "42Y30",
+                "select locate(c1, 'abc') from t2 group by locate(c1, 'abc',3)");
+        assertCompileError(
+                "42Y30",
+                "select locate(c1, 'abc',2) from t2 group by locate(c1, 'abc')");
+        assertCompileError(
+                "42Y30",
+                "select locate(c1, 'abc',2) from t2 group by locate(c1, 'abc',3)");
+
+        // DERBY-2014
+        // invalid grouping expression
+        assertCompileError(
+                "42Y30",
+                "select nullif(c1,c2) from t3 group by nullif(c2,c1)");
+        assertCompileError(
+                "42Y30",
+                "select nullif(c1,100) from t3 group by nullif(c1,200)");
+
         // aggregates in group by list.
         assertCompileError(
                 "42Y26",
@@ -463,7 +571,11 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                     " date('1992-03-04'), time('12:30:42'), " + 
                     " timestamp('1992-03-04 12:30:42'), " +
                     " X'12af', X'1111111111111111', X'1234', 111.11) " );
-                
+
+                s.execute("insert into t1 values ('1928-09-21'), ('1903-12-08')");
+                s.execute("insert into t2 values '123 ', 'abc ', '123', 'abc'") ;
+                s.execute("insert into t3 values (1,1), (2,2), (2,2), (3,3), (null, null), (5,100)");
+
                 s.close();
                 c.commit();
                 c.close();
