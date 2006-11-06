@@ -588,7 +588,7 @@ public class TestConfiguration {
      * @return connection to database.
      * @throws SQLException
      */
-    public Connection getDefaultConnection(String connAttrs)
+    private Connection getDefaultConnection(String connAttrs)
         throws SQLException {
         return getConnection(getDatabaseName(), connAttrs);
     }
@@ -602,7 +602,7 @@ public class TestConfiguration {
      * @return connection to database.
      * @throws SQLException
      */
-    public Connection getConnection (String databaseName, String connAttrs) 
+    private Connection getConnection (String databaseName, String connAttrs) 
     	throws SQLException {
         Connection con = null;
         JDBCClient client =getJDBCClient();
@@ -644,6 +644,20 @@ public class TestConfiguration {
         }
     }
     
+    /**
+     * Shutdown the engine for this configuration
+     * assuming it is booted.
+     *
+     */
+    public void shutdownEngine()
+    {
+        try {
+            getConnection("", "shutdown=true");
+            Assert.fail("Engine failed to shut down");
+        } catch (SQLException e) {
+             BaseJDBCTestCase.assertSQLState("Engine shutdown", "XJ015", e);
+        }
+    }    
     /**
      * Set the verbosity, i.e., whether debug statements print.
      */

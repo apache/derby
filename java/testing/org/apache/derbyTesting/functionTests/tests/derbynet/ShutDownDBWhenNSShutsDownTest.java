@@ -24,6 +24,7 @@ import java.util.Properties;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derby.drda.NetworkServerControl;
 
 import junit.framework.*;
@@ -79,12 +80,7 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
         Thread.sleep(500);
 
         // shut down the engine
-        try {
-            getConnection("", "shutdown=true");
-            fail("shutdown didn't raise exception");
-        } catch (SQLException sqle) {
-            assertSQLState("XJ015", sqle);
-        }
+        TestConfiguration.getCurrent().shutdownEngine();
 
         // see if it is still possible to connect to the server (before
         // DERBY-1326, this would hang)
