@@ -37,7 +37,7 @@ import java.io.IOException;
 */
 
 
-public class PageKey
+public final class PageKey
 {
 	private final ContainerKey	container;
 	private final long	pageNumber;		// page number
