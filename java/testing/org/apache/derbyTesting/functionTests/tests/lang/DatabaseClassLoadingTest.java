@@ -39,23 +39,29 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     {
         final TestSuite suite = new TestSuite("DatabaseClassLoadingTest");
         
-        suite.addTest(new DatabaseClassLoadingTest("testWithNoInstalledJars"));
-        suite.addTest(
-                SecurityManagerSetup.noSecurityManager(
-                new DatabaseClassLoadingTest("testWithNoClasspath")));
-        suite.addTest(
-                SecurityManagerSetup.noSecurityManager(
-                        new DatabaseClassLoadingTest("testSetClasspath")));
-        
         // Need DriverManager to execute the add contact procedure
         // as it uses server side jdbc.
         if (JDBC.vmSupportsJDBC3()) {
+        
+        
+          suite.addTest(new DatabaseClassLoadingTest("testWithNoInstalledJars"));
+          suite.addTest(
+                SecurityManagerSetup.noSecurityManager(
+                new DatabaseClassLoadingTest("testWithNoClasspath")));
+          suite.addTest(
+                SecurityManagerSetup.noSecurityManager(
+                        new DatabaseClassLoadingTest("testSetClasspath")));
+        
+          
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                 new DatabaseClassLoadingTest("testAddContact")));
-        }
         
-        suite.addTest(SecurityManagerSetup.noSecurityManager(
-                new DatabaseClassLoadingTest("testGetResource")));        
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                new DatabaseClassLoadingTest("testGetResource")));
+           
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                   new DatabaseClassLoadingTest("testAlterTable")));
+        }
         
         return new CleanDatabaseTestSetup(suite) {
             protected void decorateSQL(Statement s) throws SQLException
@@ -204,6 +210,43 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
         
         ps.close();
+    }
+    
+    /**
+     * Alter the table to add a column, the add contact procedure
+     * should still work.
+     * @throws SQLException
+     */
+    public void testAlterTable() throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate("ALTER TABLE EMC.CONTACTS ADD COLUMN OK SMALLINT");
+        JDBC.assertFullResultSet(
+                s.executeQuery("SELECT id, e_mail, ok from EMC.CONTACTS ORDER BY 1"),
+                new String[][] {
+                    {"0", "now@classpathchange.com", null},
+                    {"1", "bill@ruletheworld.com", null},
+                    {"2", "penguin@antartic.com", null},
+                    });
+        
+        // well written application, INSERT used explicit column names
+        // ok defaults to NULL
+        CallableStatement cs = prepareCall("CALL EMC.ADDCONTACT(?, ?)");
+        cs.setInt(1, 3);
+        cs.setString(2, "big@blue.com");
+        cs.executeUpdate();
+        cs.close();
+
+        JDBC.assertFullResultSet(
+                s.executeQuery("SELECT id, e_mail, ok from EMC.CONTACTS ORDER BY 1"),
+                new String[][] {
+                    {"0", "now@classpathchange.com", null},
+                    {"1", "bill@ruletheworld.com", null},
+                    {"2", "penguin@antartic.com", null},
+                    {"3", "big@blue.com", null},
+                    });
+      
+        s.close();
     }
     
     private void setDBClasspath(String cp) throws SQLException

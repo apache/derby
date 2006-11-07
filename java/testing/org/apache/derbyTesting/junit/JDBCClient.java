@@ -19,6 +19,8 @@
  */
 package org.apache.derbyTesting.junit;
 
+import junit.framework.Assert;
+
 /**
  * Type-safe enumerator of valid JDBC clients.
  * Each JDBC client definition consists of the client name, the name of the
@@ -29,11 +31,52 @@ public final class JDBCClient {
     /**
      * The embedded JDBC client.
      */
-    static final JDBCClient EMBEDDED = new JDBCClient(
-            "Embedded", 
+    private static final JDBCClient EMBEDDED_30= new JDBCClient(
+            "Embedded_30", 
             "org.apache.derby.jdbc.EmbeddedDriver", 
             "org.apache.derby.jdbc.EmbeddedDataSource", 
+            "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource",
+            "org.apache.derby.jdbc.EmbeddedXADataSource",
             "jdbc:derby:");
+    
+    /**
+     * The embedded JDBC client for JDBC 4.0.
+     */
+    private static final JDBCClient EMBEDDED_40 = new JDBCClient(
+            "Embedded_40", 
+            "org.apache.derby.jdbc.EmbeddedDriver", 
+            "org.apache.derby.jdbc.EmbeddedDataSource40", 
+            "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40",
+            "org.apache.derby.jdbc.EmbeddedXADataSource40",
+            "jdbc:derby:");
+    
+    /**
+     * The embedded JDBC client for JSR 169
+     */
+    private static final JDBCClient EMBEDDED_169 = new JDBCClient(
+            "Embedded_169", 
+            null, // No driver
+            "org.apache.derby.jdbc.EmbeddedSimpleDataSource", 
+            null, // No connection pooling
+            null, // No XA
+            null); // No JDBC URLs
+    
+    /**
+     * Get the default embedded client for this JVM.
+     * @return
+     */
+    static JDBCClient getDefaultEmbedded()
+    {
+        if (JDBC.vmSupportsJDBC4())
+            return EMBEDDED_40;
+        if (JDBC.vmSupportsJDBC2())
+            return EMBEDDED_30;
+        if (JDBC.vmSupportsJSR169())
+            return EMBEDDED_169;
+        
+        Assert.fail("Unknown JVM environment");
+        return null;
+    }
     
     /**
      * The Derby network client.
@@ -41,7 +84,15 @@ public final class JDBCClient {
     static final JDBCClient DERBYNETCLIENT= new JDBCClient(
             "DerbyNetClient",
             "org.apache.derby.jdbc.ClientDriver",
+            JDBC.vmSupportsJDBC4() ?
+            "org.apache.derby.jdbc.ClientDataSource40" :
             "org.apache.derby.jdbc.ClientDataSource",
+            JDBC.vmSupportsJDBC4() ?
+            "org.apache.derby.jdbc.ClientConnectionPoolDataSource40" :
+            "org.apache.derby.jdbc.ClientConnectionPoolDataSource",
+            JDBC.vmSupportsJDBC4() ?
+            "org.apache.derby.jdbc.ClientXADataSource40" :
+            "org.apache.derby.jdbc.ClientXADataSource",
             "jdbc:derby://");
     
     /**
@@ -52,7 +103,7 @@ public final class JDBCClient {
     static final JDBCClient DB2CLIENT= new JDBCClient(
             "DerbyNet",
             "com.ibm.db2.jcc.DB2Driver",
-            null,
+            null, null, null,
             "jdbc:derby:net://");
     
     /**
@@ -60,7 +111,7 @@ public final class JDBCClient {
     */
     public boolean isEmbedded()
     {
-    	return getName().equals(EMBEDDED.getName());
+    	return getName().startsWith("Embedded");
     }
     /**
      * Is this Derby's network client.
@@ -106,6 +157,24 @@ public final class JDBCClient {
     }
 
     /**
+     * Get ConnectionPoolDataSource class name.
+     *
+     * @return class name for ConnectionPoolDataSource implementation.
+     */
+    public String getConnectionPoolDataSourceClassName() {
+        return poolDsClassName;
+    }
+
+    /**
+     * Get XADataSource class name.
+     *
+     * @return class name for XADataSource implementation.
+     */
+    public String getXADataSourceClassName() {
+        return xaDsClassName;
+    }
+
+    /**
      * Return the base JDBC url.
      * The JDBC base url specifies the protocol and possibly the subprotcol
      * in the JDBC connection string.
@@ -129,16 +198,23 @@ public final class JDBCClient {
      * Create a JDBC client definition.
      */
     private JDBCClient(String frameWork, String driverClassName,
-                       String dataSourceClassName, String urlBase) {
+                       String dataSourceClassName,
+                       String connectionPoolDataSourceClassName,
+                       String xaDataSourceClassName,
+                       String urlBase) {
         this.frameWork          = frameWork;
         this.driverClassName    = driverClassName;
         this.dsClassName        = dataSourceClassName;
+        this.poolDsClassName    = connectionPoolDataSourceClassName;
+        this.xaDsClassName      = xaDataSourceClassName;
         this.urlBase            = urlBase;
     }
     
     private final String frameWork;
     private final String driverClassName;
     private final String dsClassName;
+    private final String poolDsClassName;
+    private final String xaDsClassName;
     private final String urlBase;
     
 }

@@ -344,8 +344,9 @@ public class TestConfiguration {
         this.port = -1;
         this.singleLegXA = false;
         
-        this.jdbcClient = JDBCClient.EMBEDDED;
+        this.jdbcClient = JDBCClient.getDefaultEmbedded();
         url = createJDBCUrlWithDatabaseName(dbName);
+        initConnector();
  
     }
 
@@ -364,6 +365,7 @@ public class TestConfiguration {
         this.hostName = hostName;
         
         this.url = createJDBCUrlWithDatabaseName(dbName);
+        initConnector();
     }
 
     
@@ -388,6 +390,7 @@ public class TestConfiguration {
         this.hostName = copy.hostName;
         
         this.url = copy.url;
+        initConnector();
     }
     /**
      * Obtain a new configuration identical to the passed in
@@ -409,6 +412,7 @@ public class TestConfiguration {
         this.hostName = copy.hostName;
         
         this.url = createJDBCUrlWithDatabaseName(dbName);
+        initConnector();
     }
     
     /**
@@ -447,9 +451,10 @@ public class TestConfiguration {
         } else if ("DerbyNet".equals(framework)) {
             jdbcClient = JDBCClient.DB2CLIENT;
         } else {
-            jdbcClient = JDBCClient.EMBEDDED;
+            jdbcClient = JDBCClient.getDefaultEmbedded();
         }
         url = createJDBCUrlWithDatabaseName(dbName);
+        initConnector();
     }
 
     /**
@@ -474,11 +479,40 @@ public class TestConfiguration {
      * @return JDBC connection url, without attributes.
      */
     private String createJDBCUrlWithDatabaseName(String name) {
-        if (jdbcClient == JDBCClient.EMBEDDED) {
-            return jdbcClient.getUrlBase() + name;
-        } else {
-            return jdbcClient.getUrlBase() + hostName + ":" + port + "/" + name;
+        if (JDBC.vmSupportsJDBC2())
+        {
+           if (jdbcClient.isEmbedded()) {
+               return jdbcClient.getUrlBase() + name;
+           } else {
+               return jdbcClient.getUrlBase() + hostName + ":" + port + "/" + name;
+           }
         }
+        // No DriverManager support so no URL support.
+        return null;
+    }
+    
+    /**
+     * Initialize the connection factory.
+     * Defaults to the DriverManager implementation
+     * if running JDBC 2.0 or higher, otherwise a
+     * DataSource implementation for JSR 169.
+     *
+     */
+    private void initConnector()
+    {
+        if (JDBC.vmSupportsJDBC2())
+        {
+            try {
+                connector = (Connector) Class.forName(
+                  "org.apache.derbyTesting.junit.DriverManagerConnector").newInstance();
+            } catch (Exception e) {
+                Assert.fail(e.getMessage());
+            }
+            
+        } else {
+            connector = new DataSourceConnector();
+        }
+        connector.setConfiguration(this);
     }
 
     /**
@@ -564,7 +598,7 @@ public class TestConfiguration {
      */
     Connection openDefaultConnection()
         throws SQLException {
-        return getDefaultConnection("create=true");
+        return connector.openConnection();
     }
     
     /**
@@ -578,19 +612,6 @@ public class TestConfiguration {
      */
     Connection openConnection (String databaseName) throws SQLException {
         return getConnection(databaseName, "create=true");
-    }
-    
-    /**
-     * Get a connection to the default database using the  specified connection
-     * attributes.
-     * 
-     * @param connAttrs connection attributes
-     * @return connection to database.
-     * @throws SQLException
-     */
-    private Connection getDefaultConnection(String connAttrs)
-        throws SQLException {
-        return getConnection(getDatabaseName(), connAttrs);
     }
     
     /**
@@ -637,7 +658,7 @@ public class TestConfiguration {
     public void shutdownDatabase()
     {
         try {
-            getDefaultConnection("shutdown=true");
+            connector.shutDatabase();
             Assert.fail("Database failed to shut down");
         } catch (SQLException e) {
              BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
@@ -652,7 +673,7 @@ public class TestConfiguration {
     public void shutdownEngine()
     {
         try {
-            getConnection("", "shutdown=true");
+            connector.shutEngine();
             Assert.fail("Engine failed to shut down");
         } catch (SQLException e) {
              BaseJDBCTestCase.assertSQLState("Engine shutdown", "XJ015", e);
@@ -772,6 +793,12 @@ public class TestConfiguration {
     private boolean isVerbose;
     private final boolean singleLegXA;
     
+    /**
+     * Indirection for obtaining connections based upon
+     * this configuration.
+     */
+    private Connector connector;
+    
 
     /**
      * Generate properties which can be set on a
@@ -800,7 +827,7 @@ public class TestConfiguration {
     	(String databaseName, String connAttrs) 
     {
         Properties attrs = new Properties();
-        if (!(getCurrent().getJDBCClient() == JDBCClient.EMBEDDED)) {
+        if (!getCurrent().getJDBCClient().isEmbedded()) {
             attrs.setProperty("serverName", getCurrent().getHostName());
             attrs.setProperty("portNumber", Integer.toString(getCurrent().getPort()));
         }
