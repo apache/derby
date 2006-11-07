@@ -20,8 +20,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
@@ -71,7 +71,7 @@ public class XA40Test extends BaseJDBCTestCase {
      */
     public void setUp() 
         throws SQLException {
-        xads = TestDataSourceFactory.getXADataSource();
+        xads = J2EEDataSource.getXADataSource();
         xac = xads.getXAConnection();
         xar = xac.getXAResource();
         con = xac.getConnection();
@@ -182,14 +182,7 @@ public class XA40Test extends BaseJDBCTestCase {
      * Create test suite for XA40Test.
      */
     public static Test suite() {
-        // This test will fail in client/server mode until DERBY-2047 is fixed.
-        //return TestConfiguration.defaultSuite(XA40Test.class);
-
-        TestSuite suite = new TestSuite("XA40Test suite");
-        // Decorate test suite with a TestSetup class.
-        suite.addTest(new TestSuite(XA40Test.class));
-
-        return suite;
+        return TestConfiguration.defaultSuite(XA40Test.class);
     }
     
 } // End class XA40Test

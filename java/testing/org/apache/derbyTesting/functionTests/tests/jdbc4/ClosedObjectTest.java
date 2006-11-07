@@ -40,8 +40,9 @@ import javax.sql.XADataSource;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -115,9 +116,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("ClosedObjectTest suite");
         suite.addTest(baseSuite("ClosedObjectTest:embedded"));
-        // This test will fail in client/server mode until DERBY-2047 is fixed.
-        //suite.addTest(TestConfiguration.clientServerDecorator(
-        //    baseSuite("ClosedObjectTest:client")));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+            baseSuite("ClosedObjectTest:client")));
         return suite;
     }
 
@@ -717,9 +717,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         protected Connection newConnection_() throws SQLException {
-            DataSource ds = TestDataSourceFactory.getDataSource();
-            return ds.getConnection(TestConfiguration.getCurrent().getUserName(),
-                    TestConfiguration.getCurrent().getUserPassword());
+            DataSource ds = JDBCDataSource.getDataSource();
+            return ds.getConnection();
         }
     }
 
@@ -745,10 +744,9 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         protected Connection newConnection_() throws SQLException {
-            ConnectionPoolDataSource ds = TestDataSourceFactory.getConnectionPoolDataSource();
+            ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
             PooledConnection pc =
-                ds.getPooledConnection(TestConfiguration.getCurrent().getUserName(),
-                        TestConfiguration.getCurrent().getUserPassword());
+                ds.getPooledConnection();
             return pc.getConnection();
         }
     }
@@ -774,9 +772,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         protected Connection newConnection_() throws SQLException {
-            XADataSource ds = TestDataSourceFactory.getXADataSource();
-            XAConnection xac = ds.getXAConnection(TestConfiguration.getCurrent().getUserName(),
-                    TestConfiguration.getCurrent().getUserPassword());
+            XADataSource ds = J2EEDataSource.getXADataSource();
+            XAConnection xac = ds.getXAConnection();
             return xac.getConnection();
         }
     }

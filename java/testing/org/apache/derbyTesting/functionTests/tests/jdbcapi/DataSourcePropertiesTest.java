@@ -29,10 +29,11 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 
 /**
  * This class tests that properties of data sources are handled correctly.
@@ -124,7 +125,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     public void embeddedTestAttributesAsPasswordWithoutPassword_ds()
         throws Exception
     {
-        DataSource ds = TestDataSourceFactory.getDataSource();
+        DataSource ds = JDBCDataSource.getDataSource();
         setDataSourceProperty(ds, "password", "mypassword");
         setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
                               Boolean.TYPE);
@@ -141,7 +142,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         throws Exception
     {
         ConnectionPoolDataSource ds =
-            TestDataSourceFactory.getConnectionPoolDataSource();
+            J2EEDataSource.getConnectionPoolDataSource();
         setDataSourceProperty(ds, "password", "mypassword");
         setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
                               Boolean.TYPE);
@@ -159,7 +160,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     public void embeddedTestAttributesAsPasswordWithoutPassword_xa()
         throws Exception
     {
-        XADataSource ds = TestDataSourceFactory.getXADataSource();
+        XADataSource ds = J2EEDataSource.getXADataSource();
         setDataSourceProperty(ds, "password", "mypassword");
         setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
                               Boolean.TYPE);
@@ -176,7 +177,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     public void embeddedTestAttributesAsPasswordWithPassword_ds()
         throws Exception
     {
-        DataSource ds = TestDataSourceFactory.getDataSource();
+        DataSource ds = JDBCDataSource.getDataSource();
         setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
                               Boolean.TYPE);
         try {
@@ -197,7 +198,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         throws Exception
     {
         ConnectionPoolDataSource ds =
-            TestDataSourceFactory.getConnectionPoolDataSource();
+            J2EEDataSource.getConnectionPoolDataSource();
         setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
                               Boolean.TYPE);
         try {
@@ -218,7 +219,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     public void embeddedTestAttributesAsPasswordWithPassword_xa()
         throws Exception
     {
-        XADataSource ds = TestDataSourceFactory.getXADataSource();
+        XADataSource ds = J2EEDataSource.getXADataSource();
         setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
                               Boolean.TYPE);
         try {

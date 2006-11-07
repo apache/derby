@@ -23,8 +23,8 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import junit.framework.*;
 
-import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.*;
@@ -54,7 +54,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * Create a default DataSource
      */
     public void setUp() {
-        ds = TestDataSourceFactory.getDataSource();
+        ds = JDBCDataSource.getDataSource();
     }
     
     /**
@@ -119,9 +119,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * Return suite with all tests of the class.
      */
     public static Test suite() {
-        // This test will fail in client/server mode until DERBY-2047 is fixed.
-        //return TestConfiguration.defaultSuite(DataSourceTest.class);
-        return (new TestSuite(DataSourceTest.class,
-                              "DataSourceTest suite"));
+        return TestConfiguration.defaultSuite(DataSourceTest.class);
     }
 }

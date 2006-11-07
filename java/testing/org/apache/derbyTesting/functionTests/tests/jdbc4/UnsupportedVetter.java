@@ -31,8 +31,9 @@ import junit.framework.*;
 import java.net.URL;
 
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -402,7 +403,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		( HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
-		DataSource			ds = TestDataSourceFactory.getDataSource();
+		DataSource			ds = JDBCDataSource.getDataSource();
 		Connection			conn = ds.getConnection();
 
 		vetObject( ds, unsupportedList, notUnderstoodList );
@@ -417,7 +418,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		( HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
-		ConnectionPoolDataSource	ds = TestDataSourceFactory.getConnectionPoolDataSource();
+		ConnectionPoolDataSource	ds = J2EEDataSource.getConnectionPoolDataSource();
 		PooledConnection			pc = ds.getPooledConnection
 			(getTestConfiguration().getUserName(),
                     getTestConfiguration().getUserPassword());
@@ -436,7 +437,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		( HashSet<String> unsupportedList, HashSet<String> notUnderstoodList )
 		throws Exception
 	{
-		XADataSource				ds = TestDataSourceFactory.getXADataSource();
+		XADataSource				ds = J2EEDataSource.getXADataSource();
 		XAConnection				xaconn = ds.getXAConnection
 			(getTestConfiguration().getUserName(),
                     getTestConfiguration().getUserPassword());
@@ -1075,9 +1076,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	}
 	
     public static Test suite() {
-        // This test will fail in client/server mode until DERBY-2047 is fixed.
-        //return TestConfiguration.defaultSuite(UnsupportedVetter.class);
-        return new TestSuite(UnsupportedVetter.class, "UnsupportedVetter");
+        return TestConfiguration.defaultSuite(UnsupportedVetter.class);
     }
 }
 

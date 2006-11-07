@@ -32,8 +32,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -144,7 +145,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
     private static void collectClassesFromDataSource(Set<ClassInfo> classes)
         throws SQLException
     {
-        DataSource ds = TestDataSourceFactory.getDataSource();
+        DataSource ds = JDBCDataSource.getDataSource();
         addClass(classes, ds.getClass(), javax.sql.DataSource.class);
         collectClassesFromConnection(ds.getConnection
                                      (TestConfiguration.getCurrent().getUserName(),
@@ -164,7 +165,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
         collectClassesFromConnectionPoolDataSource(Set<ClassInfo> classes)
         throws SQLException
     {
-        ConnectionPoolDataSource cpds = TestDataSourceFactory.getConnectionPoolDataSource();
+        ConnectionPoolDataSource cpds = J2EEDataSource.getConnectionPoolDataSource();
         addClass(classes,
                  cpds.getClass(), javax.sql.ConnectionPoolDataSource.class);
 
@@ -189,7 +190,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
     private static void collectClassesFromXADataSource(Set<ClassInfo> classes)
         throws SQLException
     {
-        XADataSource xads = TestDataSourceFactory.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         addClass(classes, xads.getClass(), javax.sql.XADataSource.class);
 
         XAConnection xaconn = xads.getXAConnection(TestConfiguration.getCurrent().getUserName(),

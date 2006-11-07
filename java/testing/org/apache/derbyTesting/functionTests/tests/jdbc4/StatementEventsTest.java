@@ -25,8 +25,8 @@ import java.sql.*;
 import javax.sql.*;
 import junit.framework.*;
 
-import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.util.Enumeration;
@@ -117,11 +117,11 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      */
     public void setUp() throws SQLException {
         if (xa) {
-            XADataSource ds = TestDataSourceFactory.getXADataSource();
+            XADataSource ds = J2EEDataSource.getXADataSource();
             pooledConnection = ds.getXAConnection();
         } else {
             ConnectionPoolDataSource ds =
-                TestDataSourceFactory.getConnectionPoolDataSource();
+                J2EEDataSource.getConnectionPoolDataSource();
             pooledConnection = ds.getPooledConnection();
         }
         StatementEventListener listener = new StatementEventListener() {
@@ -175,9 +175,8 @@ public class StatementEventsTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("StatementEventsTest suite");
         suite.addTest(baseSuite("StatementEventsTest:embedded"));
-        // This test will fail in client/server mode until DERBY-2047 is fixed.
-        //suite.addTest(TestConfiguration.clientServerDecorator(
-        //    baseSuite("StatementEventsTest:client")));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+              baseSuite("StatementEventsTest:client")));
         return suite;
     }
 
