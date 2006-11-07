@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
 
@@ -81,10 +82,9 @@ public class XA40Test extends BaseJDBCTestCase {
     /**
      * Close default connection and XAConnection if necessary.
      *
-     * @throws SQLException if a database access exception occurs.
+     * @throws Exception if an exception occurs.
      */
-    public void tearDown() 
-        throws SQLException {
+    protected void tearDown() throws Exception {
         // Close default connection
         // Check if connection is open to avoid exception on rollback.
         if (con != null && !con.isClosed()) {
@@ -96,6 +96,11 @@ public class XA40Test extends BaseJDBCTestCase {
         if (xac != null) {
             xac.close();
         }
+        con = null;
+        xads = null;
+        xac = null;
+        xar = null;
+        super.tearDown();
     }
 
     
@@ -177,6 +182,9 @@ public class XA40Test extends BaseJDBCTestCase {
      * Create test suite for XA40Test.
      */
     public static Test suite() {
+        // This test will fail in client/server mode until DERBY-2047 is fixed.
+        //return TestConfiguration.defaultSuite(XA40Test.class);
+
         TestSuite suite = new TestSuite("XA40Test suite");
         // Decorate test suite with a TestSetup class.
         suite.addTest(new TestSuite(XA40Test.class));

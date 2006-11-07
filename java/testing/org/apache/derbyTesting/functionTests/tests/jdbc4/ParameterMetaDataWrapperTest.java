@@ -25,6 +25,7 @@ import javax.sql.*;
 import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests of the <code>java.sql.ParameterMetaData</code> JDBC40 API
@@ -67,6 +68,8 @@ public class ParameterMetaDataWrapperTest extends BaseJDBCTestCase {
         throws Exception {
         if(ps != null && !ps.isClosed())
             ps.close();
+        ps = null;
+        pmd = null;
         
         super.tearDown();
     }
@@ -97,7 +100,7 @@ public class ParameterMetaDataWrapperTest extends BaseJDBCTestCase {
      * Return suite with all tests of the class.
      */
     public static Test suite() {
-        return (new TestSuite(ParameterMetaDataWrapperTest.class,
-                              "ParameterMetaDataWrapperTest suite"));
+        return TestConfiguration.defaultSuite(
+            ParameterMetaDataWrapperTest.class);
     }
 }

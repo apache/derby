@@ -28,14 +28,12 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests that calling <code>setObject()</code> and <code>setNull()</code> with
  * <code>sqlTargetType</code> set to an unsupported type fails with
  * <code>SQLFeatureNotSupportedException</code>.
- *
- * <p> The test is run as part of <code>PreparedStatementTest</code>
- * and <code>CallableStatementTest</code>.
  */
 public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
     /** Name and id of the target type used in the test. */
@@ -168,6 +166,20 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
     };
 
     /**
+     * Create a suite with all tests.
+     */
+    public static Test suite() {
+        TestSuite suite = new TestSuite("SetObjectUnsupportedTest suite");
+        suite.addTest(baseSuite(false, "SetObjectUnsupportedTest:prepared"));
+        suite.addTest(baseSuite(true, "SetObjectUnsupportedTest:callable"));
+        TestSuite client = new TestSuite("SetObjectUnsupportedTest:client");
+        client.addTest(baseSuite(false, "SetObjectUnsupportedTest:prepared"));
+        client.addTest(baseSuite(true, "SetObjectUnsupportedTest:callable"));
+        suite.addTest(TestConfiguration.clientServerDecorator(client));
+        return suite;
+    }
+
+    /**
      * Build a test suite which tests <code>setObject()</code> with
      * each of the types in <code>TYPES</code>.
      *
@@ -176,8 +188,8 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
      * <code>PreparedStatement</code>
      * @return a test suite
      */
-    static Test suite(boolean callable) {
-        TestSuite suite = new TestSuite("SetObjectUnsupportedTest suite");
+    static Test baseSuite(boolean callable, String name) {
+        TestSuite suite = new TestSuite(name);
         for (TypeInfo typeInfo : TYPES) {
             suite.addTest(new SetObjectUnsupportedTest
                           ("testUnsupportedSetObject", typeInfo, callable));

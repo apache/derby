@@ -33,6 +33,7 @@ import java.net.URL;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * JUnit test which checks that only expected methods throw
@@ -1073,5 +1074,10 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		
 	}
 	
+    public static Test suite() {
+        // This test will fail in client/server mode until DERBY-2047 is fixed.
+        //return TestConfiguration.defaultSuite(UnsupportedVetter.class);
+        return new TestSuite(UnsupportedVetter.class, "UnsupportedVetter");
+    }
 }
 

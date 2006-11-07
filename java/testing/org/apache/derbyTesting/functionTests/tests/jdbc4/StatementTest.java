@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
 
@@ -70,6 +71,7 @@ public class StatementTest
         // Close default statement
         if (stmt != null) {
             stmt.close();
+            stmt = null;
         }
 
         super.tearDown();
@@ -284,7 +286,8 @@ public class StatementTest
         // Decorate test suite with a TestSetup class.
         suite.addTest(new StatementTestSetup(
                         new TestSuite(StatementTest.class)));
-
+        suite.addTest(TestConfiguration.clientServerDecorator(
+            new StatementTestSetup(new TestSuite(StatementTest.class))));
         return suite;
     }
     

@@ -56,17 +56,18 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(ClosedObjectTest.suite());
 		suite.addTest(ConnectionTest.suite());
 		suite.addTest(DataSourceTest.suite());
-		suite.addTestSuite(JDBC40TranslationTest.class);	
+		suite.addTest(JDBC40TranslationTest.suite());
 		suite.addTest(ParameterMetaDataWrapperTest.suite());
 		suite.addTest(PreparedStatementTest.suite());
 		suite.addTest(ResultSetMetaDataTest.suite());
 		suite.addTest(ResultSetTest.suite());
 		suite.addTest(RowIdNotImplementedTest.suite());
+		suite.addTest(SetObjectUnsupportedTest.suite());
 		suite.addTest(StatementEventsTest.suite());
 		suite.addTest(StatementTest.suite());
 		suite.addTest(TestDbMetaData.suite());
 		suite.addTest(TestJDBC40Exception.suite());
-		suite.addTestSuite(UnsupportedVetter.class);		
+		suite.addTest(UnsupportedVetter.suite());
 		suite.addTest(XA40Test.suite());
         
         // This test is a little strange in its suite

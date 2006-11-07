@@ -27,6 +27,7 @@ import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.io.*;
 import java.sql.*;
@@ -1313,19 +1314,23 @@ public class ResultSetTest
     }
 
     public static Test suite() {
-        TestSuite rsSuite =
-            new TestSuite(ResultSetTest.class, "ResultSetTest suite");
-        // Add client only tests
-        // NOTE: JCC is excluded
-        if (usingDerbyNetClient()) {
-            rsSuite.addTest(
-                    clientSuite("ResultSetTest client-only suite"));
-        }
-        // Add embedded only tests
-        if (usingEmbedded()) {
-            rsSuite.addTest(
-                    embeddedSuite("ResultSetTest embedded-only suite"));
-        }
+        TestSuite rsSuite = new TestSuite("ResultSetTest suite");
+
+        TestSuite embedded = new TestSuite("ResultSetTest:embedded");
+        embedded.addTestSuite(ResultSetTest.class);
+        embedded.addTest(embeddedSuite("ResultSetTest:embedded-only"));
+        rsSuite.addTest(decorateTestSuite(embedded));
+
+        TestSuite client = new TestSuite("ResultSetTest:client");
+        client.addTestSuite(ResultSetTest.class);
+        client.addTest(clientSuite("ResultSetTest:client-only"));
+        rsSuite.addTest(TestConfiguration.clientServerDecorator(
+            decorateTestSuite(client)));
+
+        return rsSuite;
+    }
+
+    private static Test decorateTestSuite(Test rsSuite) {
         // Wrap suite in a TestSetup-class.
         return new BaseJDBCTestSetup(rsSuite) {
                 protected void setUp()

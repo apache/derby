@@ -4,4 +4,3 @@ jdbc4/TestResultSetMethods.java
 jdbc4/AutoloadBooting.junit
 jdbc4/AutoloadTest.junit
 jdbc4/VerifySignatures.junit
-jdbc4/_Suite.junit

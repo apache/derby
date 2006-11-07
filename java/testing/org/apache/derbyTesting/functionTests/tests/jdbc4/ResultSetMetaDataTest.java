@@ -24,6 +24,7 @@ import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.*;
 import javax.sql.*;
@@ -67,6 +68,9 @@ public class ResultSetMetaDataTest extends BaseJDBCTestCase {
             rs.close();
         if(ps != null && !ps.isClosed())
             ps.close();
+        ps = null;
+        rs = null;
+        rsmd = null;
         
         super.tearDown();
 
@@ -98,7 +102,6 @@ public class ResultSetMetaDataTest extends BaseJDBCTestCase {
      * Return suite with all tests of the class.
      */
     public static Test suite() {
-        return (new TestSuite(ResultSetMetaDataTest.class,
-                              "ResultSetMetaDataTest suite"));
+        return TestConfiguration.defaultSuite(ResultSetMetaDataTest.class);
     }
 }

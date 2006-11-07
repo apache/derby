@@ -24,6 +24,8 @@ import java.sql.Types;
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
+import junit.framework.Test;
 
 /**
  * JUnit test which checks that the constants in JDBC40Translation are
@@ -34,6 +36,10 @@ public class JDBC40TranslationTest extends BaseTestCase {
 
     public JDBC40TranslationTest(String name) {
         super(name);
+    }
+
+    public static Test suite() {
+        return TestConfiguration.defaultSuite(JDBC40TranslationTest.class);
     }
 
     public void testDatabaseMetaDataFUNCTION_PARAMETER_UNKNOWN() {

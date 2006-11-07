@@ -22,9 +22,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
@@ -32,25 +30,20 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLTransientConnectionException;
 import java.sql.SQLTransactionRollbackException;
-import java.sql.Types;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derby.iapi.reference.Property;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class TestJDBC40Exception extends BaseJDBCTestCase {
 
-    /** Timeout value to restore to in tearDown(). */
-    private int oldTimeout;
-    
     public TestJDBC40Exception(String name) {
         super(name);
     }
 
     public static Test suite() {
-        TestSuite testSuite = new TestSuite(TestJDBC40Exception.class,
-                "TestJDBC40Exception suite");
-        return testSuite;
+        Test suite = TestConfiguration.defaultSuite(TestJDBC40Exception.class);
+        return DatabasePropertyTestSetup.setLockTimeouts(suite, -1, 2);
     }
 
     protected void setUp() throws SQLException {
@@ -59,54 +52,14 @@ public class TestJDBC40Exception extends BaseJDBCTestCase {
                   "primary key, data varchar (5))");
         s.execute("insert into EXCEPTION_TABLE1 (id, data)" +
                   "values (1, 'data1')");
-        // lower waitTimeout, otherwise testTimeout takes forever
-        oldTimeout = getWaitTimeout();
-        setWaitTimeout(2);
         s.close();
     }
 
     protected void tearDown() throws Exception {
         createStatement().execute("drop table EXCEPTION_TABLE1");
-        setWaitTimeout(oldTimeout);
         super.tearDown();
     }
 
-    /**
-     * Set the value of the waitTimeout property.
-     *
-     * @param timeout time in seconds to wait for a lock
-     * @exception SQLException if a database error occurs
-     */
-    private void setWaitTimeout(int timeout) throws SQLException {
-        PreparedStatement ps = prepareStatement(
-            "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" +
-            "'derby.locks.waitTimeout', ?)");
-        ps.setInt(1, timeout);
-        ps.execute();
-        ps.close();
-    }
-
-    /**
-     * Get the value of the waitTimeout property. If no timeout is set, use
-     * org.apache.derby.iapi.reference.Property.WAIT_TIMEOUT_DEFAULT.
-     *
-     * @return the current timeout in seconds
-     * @exception SQLException if a database error occurs
-     */
-    private int getWaitTimeout() throws SQLException {
-        CallableStatement cs = prepareCall(
-            "{ ? = CALL SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY(" +
-            "'derby.locks.waitTimeout') }");
-        cs.registerOutParameter(1, Types.VARCHAR);
-        cs.execute();
-        int timeout = cs.getInt(1);
-        if (cs.wasNull()) {
-            timeout = Property.WAIT_TIMEOUT_DEFAULT;
-        }
-        cs.close();
-        return timeout;
-    }
-    
     public void testIntegrityConstraintViolationException()
             throws SQLException {
         try {

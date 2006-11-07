@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
 
@@ -182,8 +183,7 @@ public class RowIdNotImplementedTest
      * @return test suite.
      */
     public static Test suite() {
-        return new TestSuite(RowIdNotImplementedTest.class,
-                             "RowIdNotImplementedTest suite");
+        return TestConfiguration.defaultSuite(RowIdNotImplementedTest.class);
     }
     
 } // End class RowIdNotImplementedTest

@@ -111,6 +111,16 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         }
     }
 
+    /** Creates a suite with all tests in the class. */
+    public static Test suite() {
+        TestSuite suite = new TestSuite("ClosedObjectTest suite");
+        suite.addTest(baseSuite("ClosedObjectTest:embedded"));
+        // This test will fail in client/server mode until DERBY-2047 is fixed.
+        //suite.addTest(TestConfiguration.clientServerDecorator(
+        //    baseSuite("ClosedObjectTest:client")));
+        return suite;
+    }
+
     /**
      * Creates the test suite and fills it with tests using
      * <code>DataSource</code>, <code>ConnectionPoolDataSource</code>
@@ -119,8 +129,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * @return a <code>Test</code> value
      * @exception Exception if an error occurs while building the test suite
      */
-    public static Test suite()  {
-        TestSuite topSuite = new TestSuite("ClosedObjectTest suite");
+    private static Test baseSuite(String name)  {
+        TestSuite topSuite = new TestSuite(name);
 
         TestSuite dsSuite = new TestSuite("ClosedObjectTest DataSource");
         DataSourceDecorator dsDecorator = new DataSourceDecorator(dsSuite);
@@ -282,6 +292,11 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
             decorator_ = decorator;
         }
 
+        /** Tears down the test environment. */
+        protected void tearDown() throws Exception {
+            object_ = null;
+        }
+
         /**
          * Returns the closed object.
          *
@@ -420,10 +435,12 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         /**
          * Tears down the test. Closes open resources.
          *
-         * @exception SQLException if an error occurs
+         * @exception Exception if an error occurs
          */
-        public void tearDown() throws SQLException {
+        public void tearDown() throws Exception {
             stmt_.close();
+            stmt_ = null;
+            super.tearDown();
         }
 
         /**
@@ -690,6 +707,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         public final void tearDown() throws SQLException {
             connection_.rollback();
             connection_.close();
+            connection_ = null;
         }
 
         /**

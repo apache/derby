@@ -27,6 +27,7 @@ import junit.framework.*;
 
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.util.Enumeration;
 
@@ -140,21 +141,27 @@ public class StatementEventsTest extends BaseJDBCTestCase {
     /**
      * Free resources used in the test.
      *
-     * @exception SQLException if a database error occurs
+     * @exception Exception if an error occurs
      */
-    public void tearDown() throws SQLException {
+    protected void tearDown() throws Exception {
         connection.close();
         pooledConnection.close();
+        connection = null;
+        pooledConnection = null;
+        closedStatement = null;
+        errorStatement = null;
+        super.tearDown();
     }
 
     /**
      * Return suite with all tests of the class for all combinations of
      * pooled/xa connection and prepared/callable statement.
      *
+     * @param name name of the test suite
      * @return a test suite
      */
-    public static Test suite() {
-        TestSuite suites = new TestSuite("StatementEventsTest suite");
+    private static Test baseSuite(String name) {
+        TestSuite suites = new TestSuite(name);
         boolean[] truefalse = new boolean[] { true, false };
         for (boolean xa : truefalse) {
             for (boolean callable : truefalse) {
@@ -162,6 +169,16 @@ public class StatementEventsTest extends BaseJDBCTestCase {
             }
         }
         return suites;
+    }
+
+    /** Create a test suite with all tests in the class. */
+    public static Test suite() {
+        TestSuite suite = new TestSuite("StatementEventsTest suite");
+        suite.addTest(baseSuite("StatementEventsTest:embedded"));
+        // This test will fail in client/server mode until DERBY-2047 is fixed.
+        //suite.addTest(TestConfiguration.clientServerDecorator(
+        //    baseSuite("StatementEventsTest:client")));
+        return suite;
     }
 
     /**

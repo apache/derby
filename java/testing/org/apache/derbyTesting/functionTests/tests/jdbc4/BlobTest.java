@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.*;
 import java.io.*;
@@ -389,8 +390,13 @@ public class BlobTest
      * Create test suite for this test.
      */
     public static Test suite() {
-        return new BlobClobTestSetup(new TestSuite(BlobTest.class,
-                                                   "BlobTest suite"));
+        TestSuite suite = new TestSuite("BlobTest suite");
+        suite.addTest(new BlobClobTestSetup(
+            new TestSuite(BlobTest.class, "BlobTest:embedded")));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+            new BlobClobTestSetup(new TestSuite(BlobTest.class,
+                                                "BlobTest:client"))));
+        return suite;
     }
 
 } // End class BlobTest

@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -584,13 +585,16 @@ public class CallableStatementTest
      * Return suite with all tests of the class.
      */
     public static Test suite() {
-        TestSuite mainSuite = new TestSuite(
-                "CallableStatementTest and SetObjectUnsupportedTest suite");
-        TestSuite suite = new TestSuite(CallableStatementTest.class,
-                                        "CallableStatementTest suite");
-        mainSuite.addTest(new CallableStatementTestSetup(suite));
-        mainSuite.addTest(SetObjectUnsupportedTest.suite(true));
-        return mainSuite;
+        TestSuite suite = new TestSuite("CallableStatementTest suite");
+        suite.addTest(baseSuite("CallableStatementTest:embedded"));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+            baseSuite("CallableStatementTest:client")));
+        return suite;
+    }
+
+    private static Test baseSuite(String name) {
+        TestSuite suite = new TestSuite(CallableStatementTest.class, name);
+        return new CallableStatementTestSetup(suite);
     }
     
 } // End class CallableStatementTest

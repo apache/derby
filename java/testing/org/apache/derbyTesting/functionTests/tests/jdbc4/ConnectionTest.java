@@ -25,6 +25,7 @@ import junit.framework.*;
 import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -294,19 +295,18 @@ public class ConnectionTest
      *  when appropriate.
      */
     public static Test suite() {
-        TestSuite connSuite = 
-            new TestSuite(ConnectionTest.class, "ConnectionTest suite");
-        // Add client only tests
-        // NOTE: JCC is excluded
-        if (usingDerbyNetClient()) {
-            connSuite.addTest(
-                    clientSuite("ConnectionTest client-only suite"));
-        }
-        // Add embedded only tests
-        if (usingEmbedded()) {
-            connSuite.addTest(
-                    embeddedSuite("ConnectionTest embedded-only suite"));
-        }
+        TestSuite connSuite = new TestSuite("ConnectionTest suite");
+
+        TestSuite embedded = new TestSuite("ConnectionTest:embedded");
+        embedded.addTestSuite(ConnectionTest.class);
+        embedded.addTest(embeddedSuite("ConnectionTest:embedded-only"));
+        connSuite.addTest(embedded);
+
+        TestSuite client = new TestSuite("ConnectionTest:client");
+        client.addTestSuite(ConnectionTest.class);
+        client.addTest(clientSuite("ConnectionTest:client-only"));
+        connSuite.addTest(TestConfiguration.clientServerDecorator(client));
+
         return connSuite;
     }
     

@@ -35,6 +35,7 @@ import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test of database metadata for new methods in JDBC 40.
@@ -74,14 +75,22 @@ public class TestDbMetaData extends BaseJDBCTestCase {
                   "JAVA EXTERNAL NAME 'java.some.func'");
     }
 
-    public static Test suite() {
-        TestSuite testSuite = new TestSuite("TestDbMetaData suite");
+    private static Test baseSuite(String name) {
+        TestSuite testSuite = new TestSuite(name);
         testSuite.addTestSuite(TestDbMetaData.class);
         return new CleanDatabaseTestSetup(testSuite) {
                 protected void decorateSQL(Statement s) throws SQLException {
                     createFunctions(s);
                 }
             };
+    }
+
+    public static Test suite() {
+        TestSuite suite = new TestSuite("TestDbMetaData suite");
+        suite.addTest(baseSuite("TestDbMetaData:embedded"));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+            baseSuite("TestDbMetaData:client")));
+        return suite;
     }
 
     public void testSupportsStoredFunctionsUsingCallSyntax()

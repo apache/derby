@@ -26,6 +26,7 @@ import junit.framework.*;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.io.*;
 import java.sql.*;
@@ -149,10 +150,16 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(
-                "PreparedStatementTest and SetObjectUnsupportedTest suite");
+        TestSuite suite = new TestSuite("PreparedStatementTest suite");
+        suite.addTest(baseSuite("PreparedStatementTest:embedded"));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+            baseSuite("PreparedStatementTest:client")));
+        return suite;
+    }
+
+    private static Test baseSuite(String name) {
+        TestSuite suite = new TestSuite(name);
         suite.addTestSuite(PreparedStatementTest.class);
-        suite.addTest(SetObjectUnsupportedTest.suite(false));
         return new BaseJDBCTestSetup(suite) {
                 public void setUp()
                         throws java.lang.Exception {
