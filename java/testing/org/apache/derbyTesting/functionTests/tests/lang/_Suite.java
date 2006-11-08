@@ -59,7 +59,7 @@ public class _Suite extends BaseTestCase  {
         // suite.addTest(largeCodeGen.suite());
 
 
-        //suite.addTest(DatabaseClassLoadingTest.suite());
+        suite.addTest(DatabaseClassLoadingTest.suite());
         suite.addTest(GroupByExpressionTest.suite());
 		suite.addTest(LangScripts.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
