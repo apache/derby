@@ -597,12 +597,10 @@ public class JDBC {
     private static void assertRowInResultSet(ResultSet rs, int rowNum,
         Object [] expectedRow, boolean asTrimmedStrings) throws SQLException
     {
-        String s;
-        boolean ok;
-        Object obj = null;
         ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 0; i < expectedRow.length; i++)
         {
+            Object obj;
             if (asTrimmedStrings)
             {
                 // Trim the expected value, if non-null.
@@ -621,24 +619,28 @@ public class JDBC {
                 if ((expectedRow[i] != null)
                     && (rsmd.getColumnType(i+1) == Types.SMALLINT))
                 {
-                    s = expectedRow[i].toString();
+                    String s = expectedRow[i].toString();
                     if (s.equals("true") || s.equals("false"))
                         obj = (rs.getShort(i+1) == 0) ? "false" : "true";
+                    else
+                        obj = rs.getString(i+1);
+                        
                 }
                 else
                 {
                     obj = rs.getString(i+1);
 
-                    // Trim the rs string.
-                    if (obj != null)
-                        obj = ((String)obj).trim();
                 }
+                
+                // Trim the rs string.
+                if (obj != null)
+                    obj = ((String)obj).trim();
 
             }
             else
                 obj = rs.getObject(i+1);
 
-            ok = (rs.wasNull() && (expectedRow[i] == null))
+            boolean ok = (rs.wasNull() && (expectedRow[i] == null))
                 || (!rs.wasNull()
                     && (expectedRow[i] != null)
                     && expectedRow[i].equals(obj));
