@@ -109,7 +109,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
      public static void cleanDatabase(Connection conn) throws SQLException {
          clearProperties(conn);
          removeObjects(conn);
-
+         compressObjects(conn);
      }
      
      /**
@@ -186,4 +186,35 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
         throw sqle;
     }
 
+     /**
+      * Set of objects that will be compressed as part of cleaning a database.
+      */
+     private static final String[] COMPRESS_DB_OBJECTS =
+     {
+         "SYS.SYSDEPENDS",
+     };
+     
+     /**
+      * Compress the objects in the database.
+      * 
+      * @param conn the db connection
+      * @throws SQLException database error
+      */
+     private static void compressObjects(Connection conn) throws SQLException {
+    	 
+    	 CallableStatement cs = conn.prepareCall
+    	     ("CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?, ?, 1, 1, 1)");
+    	 
+    	 for (int i = 0; i < COMPRESS_DB_OBJECTS.length; i++)
+    	 {
+    		 int delim = COMPRESS_DB_OBJECTS[i].indexOf(".");
+             cs.setString(1, COMPRESS_DB_OBJECTS[i].substring(0, delim) );
+             cs.setString(2, COMPRESS_DB_OBJECTS[i].substring(delim+1) );
+             cs.execute();
+    	 }
+    	 
+    	 cs.close();
+    	 conn.commit();
+     }
+    	   
 }
