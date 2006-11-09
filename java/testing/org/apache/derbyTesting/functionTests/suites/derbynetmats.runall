@@ -12,7 +12,6 @@ derbynet/getCurrentProperties.java
 derbynet/maxthreads.java
 derbynet/prepStmt.java
 derbynet/runtimeinfo.java
-derbynet/ShutDownDBWhenNSShutsDownTest.junit
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
 derbynet/testProtocol.java

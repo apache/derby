@@ -22,6 +22,7 @@ package org.apache.derbyTesting.junit;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * Connection factory using DriverManager.
@@ -79,8 +80,8 @@ public class DriverManagerConnector implements Connector {
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
             
-            url = url.concat(";create=true");
-            return DriverManager.getConnection(url, user, password);
+            return getConnectionByAttributes(url,
+                    "create", "true");          
         }
     }
 
@@ -89,24 +90,37 @@ public class DriverManagerConnector implements Connector {
      * with the user and password defined by the configuration.
      */
     public void shutDatabase() throws SQLException {
-        String url = config.getJDBCUrl();
-        url = url.concat(";shutdown=true");
-        DriverManager.getConnection(url,
-                config.getUserName(),
-                config.getUserPassword());
+        getConnectionByAttributes(config.getJDBCUrl(),
+                "shutdown", "true");
     }
 
     /**
      * Shutdown the engine using the attributes shutdown=true
      * and no database name with the user and password defined
      * by the configuration.
+     * Always shutsdown using the embedded URL thus this
+     * method will not work in a remote testing environment.
      */
     public void shutEngine() throws SQLException {
-        String url = config.getJDBCClient().getUrlBase();
-        url = url.concat(";shutdown=true");
-        DriverManager.getConnection("jdbc:derby:;shutdown",
-                config.getUserName(),
-                config.getUserPassword());        
+        
+        getConnectionByAttributes("jdbc:derby:", "shutdown", "true");        
+    }
+    
+    /**
+     * Open a connection using JDBC attributes with a JDBC URL.
+     * The attributes user and password are set from the configuration
+     * and then the passed in attribute is set.
+     */
+    private Connection getConnectionByAttributes(String url, String key, String value)
+        throws SQLException
+    {
+        Properties attributes = new Properties();
+        
+        attributes.setProperty("user", config.getUserName());
+        attributes.setProperty("password", config.getUserPassword());
+        attributes.setProperty(key, value);
+        
+        return DriverManager.getConnection(url, attributes);
     }
 
     /**

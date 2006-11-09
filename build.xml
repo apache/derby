@@ -1640,6 +1640,10 @@
   <target name="junit-all" depends="junit-init,junit-jdbc4">
     <antcall target="junit-oneclass">
       <param name="derby.junit.testname"
+             value="org.apache.derbyTesting.functionTests.tests.derbynet._Suite"/>
+    </antcall>
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.testname"
              value="org.apache.derbyTesting.functionTests.tests.tools._Suite"/>
     </antcall>
     <antcall target="junit-oneclass">

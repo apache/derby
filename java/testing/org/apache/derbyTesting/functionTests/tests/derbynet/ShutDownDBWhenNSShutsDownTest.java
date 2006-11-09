@@ -20,18 +20,19 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.util.Properties;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derby.drda.NetworkServerControl;
-
-import junit.framework.*;
-import java.sql.*;
-import java.io.PrintWriter;
 import java.io.File;
 import java.security.AccessController;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Derby-1274 - Network Server should shutdown the databases it has booted when
@@ -42,9 +43,30 @@ import java.security.AccessController;
  * when started from the API.
  */
 public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
+    
+    /**
+     * Only run the fixtures in network server mode as that's what they are testing.
+     * @return
+     */
+    public static Test suite() {
+        TestSuite suite = new TestSuite("ShutDownDBWhenNSShutsDownTest");
+        
+        suite.addTest(TestConfiguration.clientServerDecorator(
+           new ShutDownDBWhenNSShutsDownTest(
+                   "testEngineShutdownDoesNotTakeDownNSManualReload")));
 
-
-    NetworkServerControl server = null;
+        /* DERBY-2066
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                new ShutDownDBWhenNSShutsDownTest(
+                        "testEngineShutdownDoesNotTakeDownNSAutoReload")));
+        */
+        
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                new ShutDownDBWhenNSShutsDownTest(
+                        "testDatabasesShutDownWhenNSShutdownAPI")));
+      
+        return suite;
+    }
 
 
     /**
@@ -53,14 +75,38 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
     public ShutDownDBWhenNSShutsDownTest(String name) {
         super(name);
     }
-
+    
+    /**
+     * Test the scenario from scenarioEngineShutdownDoesNotTakeDownNS
+     * reloading the embedded driver after the network server has shutdown.
+     * @throws Exception
+     */
+    public void testEngineShutdownDoesNotTakeDownNSManualReload() throws Exception
+    {
+        scenarioEngineShutdownDoesNotTakeDownNS(true);
+    }
+ 
+    /**
+     * Test the scenario from scenarioEngineShutdownDoesNotTakeDownNS
+     * relying on the network server to reloading the embedded driver
+     * after the network server has shutdown.
+     * @throws Exception
+     */
+    public void testEngineShutdownDoesNotTakeDownNSAutoReload() throws Exception
+    {
+        scenarioEngineShutdownDoesNotTakeDownNS(false);
+    }
+    
     /**
      * Test that a shutdown of the engine does not take down the network
      * server. Before DERBY-1326 was fixed, shutting down the engine would
      * leave the network server in an inconsistent state which could make
      * clients hang infinitely.
      */
-    public void testEngineShutdownDoesNotTakeDownNS() throws Exception {
+    private void scenarioEngineShutdownDoesNotTakeDownNS(
+            boolean loadEmbeddedDriver) throws Exception {
+            
+        
         Connection[] conns = new Connection[20];
 
         // first make sure there are 20 active worker threads on the server
@@ -81,6 +127,9 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
 
         // shut down the engine
         TestConfiguration.getCurrent().shutdownEngine();
+        
+        if (loadEmbeddedDriver)
+            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
 
         // see if it is still possible to connect to the server (before
         // DERBY-1326, this would hang)
@@ -88,35 +137,32 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
             openDefaultConnection().close();
         }
     }
-
+    
+    /**
+     * Test that the NetworkServer does not shut down the
+     * databases it has booted when started from the API.
+     * This fixture must be run with a clientServerDecorator().
+     */
+    public void testDatabasesShutDownWhenNSShutdownAPI()
+            throws Exception
+    {
+        // Check that the databases will not be shutdown when the server is
+        // shut down.
+        shutdownServerCheckDBShutDown(false);
+    }
+    
     /**
      * Test that the NetworkServer shuts down the databases it has booted when
      * started from the command line, and that it does not shut down the
      * databases it has booted when started from the API.
      */
-    public void testDatabasesShutDownWhenNSShutdown()
+    public void XXtestDatabasesShutDownWhenNSShutdown()
             throws Exception
     {
-        server = new NetworkServerControl();
-        // The server was started from the command line when the test was
+         // The server was started from the command line when the test was
         // started. Check that the database will be shut down when the server
         // is shut down.
         shutdownServerCheckDBShutDown(true);
-
-        // Start the server form the API and test that the databases will not
-        // be shutdown when the server is shutdown
-        server.start(null);
-
-        // wait until the server accepts connections
-        int i = 0;
-        while (!pingServer() && i < 10 ) {
-            Thread.sleep(1000);
-            i++;
-        }
-
-        // Check that the databases will not be shutdown when the server is
-        // shut down.
-        shutdownServerCheckDBShutDown(false);
     }
 
     /**
@@ -137,13 +183,16 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
     {
         // connect to database
         createDatabase();
+        
+        NetworkServerControl server = NetworkServerTestSetup.getNetworkServerControl();
 
         // shut down the server
-        shutdownServer();
+        server.shutdown();
 
         // check if db.lck exists
         String fileName = getSystemProperty("derby.system.home") +
-                java.io.File.separator + "wombat" +
+                java.io.File.separator +
+                TestConfiguration.getCurrent().getDatabaseName() +
                 java.io.File.separator + "db.lck";
 
         boolean fileNotFound = false;
@@ -169,16 +218,6 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
         return b.booleanValue();
     }
 
-    private boolean pingServer() {
-		try {
-			server.ping();
-		}
-		catch (Exception e) {
-			return false;
-		}
-		return true;
-    }
-
     private void createDatabase() throws SQLException {
         Connection conn = getConnection();
         conn.setAutoCommit(false);
@@ -189,9 +228,4 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
         conn.commit();
         conn.close();
     }
-
-    private void shutdownServer() throws Exception {
-        server.shutdown();
-    }
-
 }

@@ -21,6 +21,7 @@ package org.apache.derbyTesting.junit;
 
 import java.io.FileNotFoundException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
@@ -34,8 +35,6 @@ import org.apache.derby.drda.NetworkServerControl;
  * Test decorator that starts the network server on startup
  * and stops it on teardown.
  * 
- * It does not start it if the test is configured to run in
- * embedded mode.
  *
  * Currently it will start the network server in the same VM
  * and it does not support starting it from a remote 
@@ -44,23 +43,34 @@ import org.apache.derby.drda.NetworkServerControl;
 final public class NetworkServerTestSetup extends TestSetup {
 
     private FileOutputStream serverOutput;
+    private final boolean asCommand;
     
     /**
      * Decorator this test with the NetworkServerTestSetup
      */
-    public NetworkServerTestSetup(Test test) {
+    public NetworkServerTestSetup(Test test, boolean asCommand) {
         super(test);
+        this.asCommand = asCommand;
     }
 
     /**
      * Start the network server.
      */
     protected void setUp() throws Exception {
+        BaseTestCase.println("Starting network server:");
         
-        TestConfiguration config = TestConfiguration.getCurrent();
+        networkServerController = getNetworkServerControl();
         
-            BaseTestCase.println("Starting network server:");
+        if (asCommand)
+            startWithCommand();
+        else
+            startWithAPI();
+        
+        waitForServerStart(networkServerController);
+    }
 
+    private void startWithAPI() throws Exception
+    {
             
             serverOutput = (FileOutputStream)
             AccessController.doPrivileged(new PrivilegedAction() {
@@ -77,33 +87,49 @@ final public class NetworkServerTestSetup extends TestSetup {
                     return fos;
                 }
             });
-
-            networkServerController = new NetworkServerControl
-                (InetAddress.getByName(config.getHostName()), config.getPort());
             
             networkServerController.start(new PrintWriter(serverOutput));
-            
-            final long startTime = System.currentTimeMillis();
-            while (true) {
-                Thread.sleep(SLEEP_TIME);
-                try {
-                    networkServerController.ping();
-                    break;
-                } catch (Exception e) {
-                    if (System.currentTimeMillis() - startTime > WAIT_TIME) {
-                        e.printStackTrace();
-                        fail("Timed out waiting for network server to start");
-                    }
-                }
+   
+    }
+    
+    private void startWithCommand() throws Exception
+    {
+        final TestConfiguration config = TestConfiguration.getCurrent();
+        
+        // start the server through the command line
+        // arguments using a new thread to do so.
+        new Thread(
+        new Runnable() {
+            public void run() {
+                org.apache.derby.drda.NetworkServerControl.main(
+                        new String[] {
+                                "start",
+                                "-h",
+                                config.getHostName(),
+                                "-p",
+                                Integer.toString(config.getPort())
+                        });                
             }
+            
+        }, "NetworkServerTestSetup command").start();
     }
 
     /**
-     * Stop the network server.
+     * Stop the network server if it still
+     * appears to be running.
      */
     protected void tearDown() throws Exception {
         if (networkServerController != null) {
-            networkServerController.shutdown();
+            boolean running = false;
+            try {
+                networkServerController.ping();
+                running = true;
+            } catch (Exception e) {
+            }
+      
+            if (running)
+                networkServerController.shutdown();
+ 
             serverOutput.close();
         }
     }
@@ -116,4 +142,41 @@ final public class NetworkServerTestSetup extends TestSetup {
     
     /** Sleep for 50 ms before pinging the network server (again) */
     private static final int SLEEP_TIME = 50;
+    
+    
+    /*
+     * Utility methods related to controlling network server.
+     */
+    
+    /**
+     * Return a new NetworkServerControl for the current configuration.
+     */
+    public static NetworkServerControl getNetworkServerControl()
+        throws Exception
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+        return new NetworkServerControl
+        (InetAddress.getByName(config.getHostName()), config.getPort());
+    }
+    
+    /**
+     * Ping the server until it has started. Asserts a failure
+     * if the server has not started within sixty seconds.
+     */
+    public static void waitForServerStart(NetworkServerControl networkServerController)
+        throws InterruptedException {
+        final long startTime = System.currentTimeMillis();
+        while (true) {
+            Thread.sleep(SLEEP_TIME);
+            try {
+                networkServerController.ping();
+                break;
+            } catch (Exception e) {
+                if (System.currentTimeMillis() - startTime > WAIT_TIME) {
+                    e.printStackTrace();
+                    fail("Timed out waiting for network server to start");
+                }
+            }
+        }
+    }
 }

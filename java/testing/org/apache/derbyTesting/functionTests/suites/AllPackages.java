@@ -51,6 +51,7 @@ public class AllPackages extends BaseTestCase {
 
         TestSuite suite = new TestSuite("AllPackages");
         
+        suite.addTest(org.apache.derbyTesting.functionTests.tests.derbynet._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.tools._Suite.suite());
