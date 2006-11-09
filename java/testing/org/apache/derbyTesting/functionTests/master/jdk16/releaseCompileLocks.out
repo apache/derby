@@ -47,7 +47,6 @@ from sys.systables where tablename = 'SYSCONGLOMERATES';
 Caught exception java.sql.SQLException: The external routine is not allowed to execute SQL statements.
 java.sql.SQLException: The external routine is not allowed to execute SQL statements.
 Caused by: java.sql.SQLException: The external routine is not allowed to execute SQL statements.
-	... 28 more
 1          
 ij> select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table
 order by 1;
@@ -67,7 +66,6 @@ from sys.systables where tablename = 'SYSCONGLOMERATES';
 Caught exception java.sql.SQLException: The external routine is not allowed to execute SQL statements.
 java.sql.SQLException: The external routine is not allowed to execute SQL statements.
 Caused by: java.sql.SQLException: The external routine is not allowed to execute SQL statements.
-	... 28 more
 1          
 ij> -- only two locks!
 select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table
