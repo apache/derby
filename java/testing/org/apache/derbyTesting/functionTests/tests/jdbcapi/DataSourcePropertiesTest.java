@@ -31,6 +31,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -80,39 +81,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
                 }
             }
         }
-        return suite;
-    }
-
-    // HELPER METHODS
-
-    /**
-     * Sets a property of a data source object.
-     *
-     * @param dataSource the data source
-     * @param name name of the property to set
-     * @param value property value
-     * @param type property type (useful for setting <code>null</code> or
-     * primitive types)
-     */
-    private void setDataSourceProperty(Object dataSource, String name,
-                                       Object value, Class type)
-        throws Exception
-    {
-        Method setter = dataSource.getClass().
-            getMethod(TestUtil.getSetterName(name), new Class[] { type });
-        setter.invoke(dataSource, new Object[] { value });
-    }
-
-    /**
-     * Sets a property of a data source object.
-     *
-     * @param dataSource the data source
-     * @param name name of the property to set
-     * @param value property value
-     */
-    private void setDataSourceProperty(Object dataSource, String name,
-                                       Object value) throws Exception {
-        setDataSourceProperty(dataSource, name, value, value.getClass());
+        return new CleanDatabaseTestSetup(suite);
     }
 
     // TEST METHODS
@@ -126,9 +95,8 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         throws Exception
     {
         DataSource ds = JDBCDataSource.getDataSource();
-        setDataSourceProperty(ds, "password", "mypassword");
-        setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
-                              Boolean.TYPE);
+        JDBCDataSource.setBeanProperty(ds, "password",  "mypassword");
+        JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         Connection c = ds.getConnection();
         c.close();
     }
@@ -143,10 +111,9 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     {
         ConnectionPoolDataSource ds =
             J2EEDataSource.getConnectionPoolDataSource();
-        setDataSourceProperty(ds, "password", "mypassword");
-        setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
-                              Boolean.TYPE);
-        // DERBY-1586 caused a malformed url error here
+        JDBCDataSource.setBeanProperty(ds, "password",  "mypassword");
+        JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
+       // DERBY-1586 caused a malformed url error here
         PooledConnection pc = ds.getPooledConnection();
         Connection c = pc.getConnection();
         c.close();
@@ -161,9 +128,8 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         throws Exception
     {
         XADataSource ds = J2EEDataSource.getXADataSource();
-        setDataSourceProperty(ds, "password", "mypassword");
-        setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
-                              Boolean.TYPE);
+        JDBCDataSource.setBeanProperty(ds, "password",  "mypassword");
+        JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         XAConnection xa = ds.getXAConnection();
         Connection c = xa.getConnection();
         c.close();
@@ -178,8 +144,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         throws Exception
     {
         DataSource ds = JDBCDataSource.getDataSource();
-        setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
-                              Boolean.TYPE);
+        JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         try {
             Connection c = ds.getConnection("username", "mypassword");
             fail("Expected getConnection to fail.");
@@ -199,8 +164,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     {
         ConnectionPoolDataSource ds =
             J2EEDataSource.getConnectionPoolDataSource();
-        setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
-                              Boolean.TYPE);
+        JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         try {
             PooledConnection pc =
                 ds.getPooledConnection("username", "mypassword");
@@ -220,8 +184,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
         throws Exception
     {
         XADataSource ds = J2EEDataSource.getXADataSource();
-        setDataSourceProperty(ds, "attributesAsPassword", Boolean.TRUE,
-                              Boolean.TYPE);
+        JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
         try {
             XAConnection xa = ds.getXAConnection("username", "mypassword");
             fail("Expected getXAConnection to fail.");

@@ -823,7 +823,7 @@ public class TestConfiguration {
      * @param connAttrs connection attributes
      * @return
      */
-    public static Properties getDataSourcePropertiesForDatabase
+    private static Properties getDataSourcePropertiesForDatabase
     	(String databaseName, String connAttrs) 
     {
         Properties attrs = new Properties();

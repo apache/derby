@@ -107,7 +107,14 @@ public class JDBCDataSource {
         }
     }
     
-    static void setBeanProperty(Object ds, String property, Object value)
+    /**
+     * Set a bean property for a data source. This code can be used
+     * on any data source type.
+     * @param ds DataSource to have property set
+     * @param property name of property.
+     * @param value Value, type is derived from value's class.
+     */
+    public static void setBeanProperty(Object ds, String property, Object value)
     {
         String setterName = getSetterName(property);
         
