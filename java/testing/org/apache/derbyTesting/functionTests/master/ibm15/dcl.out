@@ -289,7 +289,23 @@ ij> -- test reading a database from a jar file and loading
 -- first using the jar protocol and then the classpath option.
 connect 'jdbc:derby:jar:(ina.jar)db7' AS DB7;
 ij> run resource '/org/apache/derbyTesting/functionTests/tests/lang/dcl_readOnly.sql';
-ij> -- common tests for read-only jarred database
+ij> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+-- common tests for read-only jarred database
 select * from EMC.CONTACTS;
 ID         |E_MAIL                        |OK    
 -------------------------------------------------
@@ -358,7 +374,23 @@ ij> call setDBContextClassLoader('ina.jar');
 ij> disconnect;
 ij> connect 'jdbc:derby:classpath:db7' AS DB7CL;
 ij> run resource '/org/apache/derbyTesting/functionTests/tests/lang/dcl_readOnly.sql';
-ij> -- common tests for read-only jarred database
+ij> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+-- common tests for read-only jarred database
 select * from EMC.CONTACTS;
 ID         |E_MAIL                        |OK    
 -------------------------------------------------
