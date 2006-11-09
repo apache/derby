@@ -66,24 +66,15 @@ import org.apache.derby.iapi.services.context.ContextService;
 	@see Cacheable
 */
 public final class CachedItem {
-
-	private static final int VALID            = 0x00000001;
-	private static final int REMOVE_REQUESTED = 0x00000002;
-	private static final int SETTING_IDENTITY = 0x00000004;
-	private static final int REMOVE_OK        = 0x00000008;
-
-	private static final int RECENTLY_USED    = 0x00000010;
-
 	/*
 	** Fields
 	*/
 
-	/**
-		Does entry (the Cacheable) have an identity.
-
-		<BR> MT - single thread required : synchronization provided by cache manager.
-	*/
-	private int state;
+	private boolean valid_ = false;
+	private boolean removeRequested_ = false;
+	private boolean settingIdentity_ = false;
+	private boolean removeOk_ = false;
+	private boolean recentlyUsed_ = false;
 
 	/**
 		The current keep count on the entry.
@@ -121,7 +112,7 @@ public final class CachedItem {
 			SanityManager.ASSERT(!isValid());
 		}
 		keepCount = 1;
-		state |= SETTING_IDENTITY;
+		settingIdentity_ = true;
 	}
 
     public void unkeepForCreate( )
@@ -152,7 +143,7 @@ public final class CachedItem {
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(keepCount >= 0);
 		}
-		return unkept && ((state & REMOVE_REQUESTED) != 0);
+		return (unkept && removeRequested_);
 	}
 
 	/**
@@ -186,29 +177,24 @@ public final class CachedItem {
 		Set the state of the to-be removed flag.
 	*/
 	public synchronized void setRemoveState() {
-		state |= REMOVE_REQUESTED;
+		removeRequested_ = true;
 	}
 
 	/**
 		Does the cached object have a valid identity.
 	*/
 	public final synchronized boolean isValid() {
-		return (state & VALID) != 0;
+		return valid_;
 	}
 
 	/**
 		Set the valid state of the cached object.
 	*/
 	public synchronized void setValidState(boolean flag) {
-
-		if (flag)
-			state |= VALID;
-		else
-			state &= ~VALID;
-
-		state &= ~(REMOVE_REQUESTED | REMOVE_OK);
-
-		setUsed(flag);
+		valid_ = flag;
+		removeRequested_ = false;
+		removeOk_ = false;
+		recentlyUsed_ = flag;
 	}
 
 	/**
@@ -252,8 +238,7 @@ public final class CachedItem {
 	public synchronized void settingIdentityComplete() {
 		// notify all waiters that this item has finished setting its identity,
 		// successfully or not.
-		state &= ~SETTING_IDENTITY;
-				
+		settingIdentity_ = false;
 		notifyAll();
 	}
 
@@ -263,7 +248,7 @@ public final class CachedItem {
 
 	public synchronized Cacheable use() throws StandardException {
 
-		while ((state & SETTING_IDENTITY) != 0) {
+		while (settingIdentity_) {
 			try {
 				if (SanityManager.DEBUG) {
 					SanityManager.DEBUG("CacheTrace", 
@@ -278,8 +263,9 @@ public final class CachedItem {
 		}
 
 		// see if the setting of this identity failed ...
-		if (!isValid())
+		if (!valid_) {
 			return null;
+		}
 
 		if (SanityManager.DEBUG)
         {
@@ -299,7 +285,7 @@ public final class CachedItem {
 		if (!removeNow) {
 
 			synchronized (this) {
-				while ((state & REMOVE_OK) == 0) {
+				while (!removeOk_) {
 					try {
 						wait();
 					} catch (InterruptedException ie) {
@@ -315,11 +301,11 @@ public final class CachedItem {
 	public synchronized void notifyRemover() {
 
 		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT((state & REMOVE_REQUESTED) != 0);
+			SanityManager.ASSERT(removeRequested_);
 			SanityManager.ASSERT(isKept());
 		}
 
-		state |= REMOVE_OK;
+		removeOk_ = true;
 		notifyAll();
 	}
 
@@ -328,10 +314,7 @@ public final class CachedItem {
 	*/
 	public synchronized void setUsed(boolean flag)
 	{
-		if (flag)
-			state |= RECENTLY_USED;
-		else
-			state &= ~RECENTLY_USED;
+		recentlyUsed_ = flag;
 	}
 
 	/**
@@ -339,7 +322,7 @@ public final class CachedItem {
 		the clock hand?
 	*/
 	public synchronized boolean recentlyUsed() {
-		return (state & RECENTLY_USED) != 0;
+		return recentlyUsed_;
 	}
 }
 
