@@ -25,6 +25,7 @@ import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -152,55 +153,35 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("PreparedStatementTest suite");
         suite.addTest(baseSuite("PreparedStatementTest:embedded"));
+        suite.addTest(
+                TestConfiguration.connectionXADecorator(
+                        baseSuite("PreparedStatementTest:embedded XADataSource")));
+        
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("PreparedStatementTest:client")));
+
+        suite.addTest(
+                TestConfiguration.clientServerDecorator(
+                TestConfiguration.connectionXADecorator(
+                baseSuite("PreparedStatementTest:client XXXXADataSource"))));
+
         return suite;
     }
 
     private static Test baseSuite(String name) {
         TestSuite suite = new TestSuite(name);
         suite.addTestSuite(PreparedStatementTest.class);
-        return new BaseJDBCTestSetup(suite) {
-                public void setUp()
-                        throws java.lang.Exception {
-                        try {
-                            create();
-                        } catch (SQLException sqle) {
-                            if (sqle.getSQLState().equals("X0Y32")) {
-                                drop();
-                                create();
-                            } else {
-                                throw sqle;
-                            }
-                        }
-                }
+        return new CleanDatabaseTestSetup(suite) {
 
-                public void tearDown()
-                        throws java.lang.Exception {
-                    drop();
-                    super.tearDown();
-                }
-
-                private void create()
-                        throws SQLException {
-                    Statement stmt = getConnection().createStatement();
+            protected void decorateSQL(Statement stmt) throws SQLException
+            {
                     stmt.execute("create table " + BLOBTBL +
                             " (sno int, dBlob BLOB(1M))");
                     stmt.execute("create table " + CLOBTBL +
                             " (sno int, dClob CLOB(1M))");
                     stmt.execute("create table " + LONGVARCHAR  +
                             " (sno int, dLongVarchar LONG VARCHAR)");
-                    stmt.close();
-                }
-
-                private void drop()
-                        throws SQLException {
-                    Statement stmt = getConnection().createStatement();
-                    stmt.execute("drop table " + BLOBTBL);
-                    stmt.execute("drop table " + CLOBTBL);
-                    stmt.execute("drop table " + LONGVARCHAR);
-                    stmt.close();
-                }
+                 }
             };
     }
     

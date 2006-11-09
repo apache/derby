@@ -333,6 +333,37 @@ public class TestConfiguration {
     }
     
     /**
+     * Return a decorator that changes the configuration to obtain
+     * connections from an XADataSource using
+     * <code>
+     * getXAConnection().getConnection()
+     * </code>
+     * The connection is not connected to any global transaction,
+     * thus it is in local connection mode.
+     * The tearDown reverts the configuration to the previous
+     * configuration.
+     */
+    public static Test connectionXADecorator(Test test)
+    {
+        // Copy the current configuration by creating one
+        // with the same database name
+        TestConfiguration config = TestConfiguration.getCurrent();
+        TestConfiguration newConfig = 
+            new TestConfiguration(config, config.getDatabaseName());
+        
+        try {
+            newConfig.connector = (Connector) Class.forName(
+              "org.apache.derbyTesting.junit.XADataSourceConnector").newInstance();
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        
+        newConfig.connector.setConfiguration(newConfig);
+       
+        return new ChangeConfigurationSetup(newConfig, test);
+    }
+    
+    /**
      * Default embedded configuration
      *
      */
@@ -414,7 +445,7 @@ public class TestConfiguration {
         this.url = createJDBCUrlWithDatabaseName(dbName);
         initConnector();
     }
-    
+  
     /**
      * This constructor creates a TestConfiguration from a Properties object.
      *

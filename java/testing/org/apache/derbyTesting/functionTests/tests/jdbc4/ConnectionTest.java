@@ -300,11 +300,28 @@ public class ConnectionTest
         embedded.addTestSuite(ConnectionTest.class);
         embedded.addTest(embeddedSuite("ConnectionTest:embedded-only"));
         connSuite.addTest(embedded);
+        
+        // repeat the embedded tests obtaining a connection from
+        // an XA data source.
+        embedded = new TestSuite("ConnectionTest:embedded XADataSource");
+        embedded.addTestSuite(ConnectionTest.class);
+        embedded.addTest(embeddedSuite("ConnectionTest:embedded-only XADataSource"));
+        connSuite.addTest(TestConfiguration.connectionXADecorator(embedded));
+        
 
         TestSuite client = new TestSuite("ConnectionTest:client");
         client.addTestSuite(ConnectionTest.class);
         client.addTest(clientSuite("ConnectionTest:client-only"));
         connSuite.addTest(TestConfiguration.clientServerDecorator(client));
+
+        // repeat the client tests obtaining a connection from
+        // an XA data source.
+        client = new TestSuite("ConnectionTest:client XADataSource");
+        client.addTestSuite(ConnectionTest.class);
+        client.addTest(clientSuite("ConnectionTest:client-only XADataSource"));
+        connSuite.addTest(
+                TestConfiguration.clientServerDecorator(
+                        TestConfiguration.connectionXADecorator(client)));
 
         return connSuite;
     }
