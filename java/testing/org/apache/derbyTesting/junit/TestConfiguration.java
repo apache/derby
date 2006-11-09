@@ -60,7 +60,6 @@ public class TestConfiguration {
     private final static String KEY_HOSTNAME = "hostName";
     private final static String KEY_PORT = "port";
     private final static String KEY_VERBOSE = "derby.tests.debug";    
-    private final static String KEY_SINGLE_LEG_XA = "derbyTesting.xa.single";
     
     /**
      * Simple count to provide a unique number for database
@@ -113,10 +112,6 @@ public class TestConfiguration {
         // If derby.system.home set externally at startup assume
         // running in harness
         if (BaseTestCase.getSystemProperty("derby.system.home") != null)
-            assumeHarness = true;
-        
-        // If forced into single leg XA, assume harness
-        if (DERBY_HARNESS_CONFIG.isSingleLegXA())
             assumeHarness = true;
 
         DEFAULT_CONFIG = assumeHarness ? DERBY_HARNESS_CONFIG : JUNIT_CONFIG;
@@ -222,13 +217,13 @@ public class TestConfiguration {
     /**
      * Return a decorator for the passed in tests that sets the
      * configuration for the client to be Derby's JDBC client
-     * and to start the network server at setUp if it is not
-     * already started.
+     * and to start the network server at setUp.
      * <BR>
      * The database configuration (name etc.) is based upon
      * the previous configuration.
      * <BR>
-     * The previous TestConfiguration is restored at tearDown.
+     * The previous TestConfiguration is restored at tearDown and
+     * the network server is shutdown.
      * @param tests
      * @return
      */
@@ -243,7 +238,7 @@ public class TestConfiguration {
             new TestConfiguration(config, JDBCClient.DERBYNETCLIENT,
                     DEFAULT_HOSTNAME, DEFAULT_PORT);
                    
-        Test test = new NetworkServerTestSetup(suite);
+        Test test = new NetworkServerTestSetup(suite, false);
             
         return new ChangeConfigurationSetup(derbyClientConfig, test);
 
@@ -373,7 +368,6 @@ public class TestConfiguration {
         this.userPassword = DEFAULT_USER_PASSWORD;
         this.hostName = null;
         this.port = -1;
-        this.singleLegXA = false;
         
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
         url = createJDBCUrlWithDatabaseName(dbName);
@@ -389,7 +383,6 @@ public class TestConfiguration {
         this.userPassword = copy.userPassword;
 
         this.isVerbose = copy.isVerbose;
-        this.singleLegXA = copy.singleLegXA;
         this.port = port;
         
         this.jdbcClient = client;
@@ -414,7 +407,6 @@ public class TestConfiguration {
         this.userPassword = password;
 
         this.isVerbose = copy.isVerbose;
-        this.singleLegXA = copy.singleLegXA;
         this.port = copy.port;
         
         this.jdbcClient = copy.jdbcClient;
@@ -436,7 +428,6 @@ public class TestConfiguration {
         this.userPassword = copy.userPassword;
 
         this.isVerbose = copy.isVerbose;
-        this.singleLegXA = copy.singleLegXA;
         this.port = copy.port;
         
         this.jdbcClient = copy.jdbcClient;
@@ -461,8 +452,6 @@ public class TestConfiguration {
         hostName = props.getProperty(KEY_HOSTNAME, DEFAULT_HOSTNAME);
         isVerbose = Boolean.valueOf(props.getProperty(KEY_VERBOSE)).booleanValue();
         String portStr = props.getProperty(KEY_PORT);
-        singleLegXA = Boolean.valueOf(props.getProperty(KEY_SINGLE_LEG_XA)
-                            ).booleanValue();
         if (portStr != null) {
             try {
                 port = Integer.parseInt(portStr);
@@ -512,11 +501,13 @@ public class TestConfiguration {
     private String createJDBCUrlWithDatabaseName(String name) {
         if (JDBC.vmSupportsJDBC2())
         {
+            String url;
            if (jdbcClient.isEmbedded()) {
-               return jdbcClient.getUrlBase() + name;
+               url = jdbcClient.getUrlBase();
            } else {
-               return jdbcClient.getUrlBase() + hostName + ":" + port + "/" + name;
+               url = jdbcClient.getUrlBase() + hostName + ":" + port + "/";
            }
+           return url.concat(name);
         }
         // No DriverManager support so no URL support.
         return null;
@@ -660,18 +651,11 @@ public class TestConfiguration {
         JDBCClient client =getJDBCClient();
         if (JDBC.vmSupportsJDBC2()) {            
             loadJDBCDriver(client.getJDBCDriverName());
-            if (!isSingleLegXA()) {
+            {
                 con = DriverManager.getConnection(
                         getJDBCUrl(databaseName) + ";" + connAttrs,
                         getUserName(),
                         getUserPassword());
-            }
-            else {
-                Properties attrs = 
-                	getDataSourcePropertiesForDatabase(databaseName, connAttrs);
-                con = TestDataSourceFactory.getXADataSource(attrs).
-                        getXAConnection (getUserName(), 
-                        getUserPassword()).getConnection();
             }
         } else {
             //Use DataSource for JSR169
@@ -699,6 +683,8 @@ public class TestConfiguration {
     /**
      * Shutdown the engine for this configuration
      * assuming it is booted.
+     * This method can only be called when the engine
+     * is running embedded in this JVM.
      *
      */
     public void shutdownEngine()
@@ -746,14 +732,6 @@ public class TestConfiguration {
     public static boolean runningInDerbyHarness()
     {
         return runningInDerbyHarness;
-    }
-
-    /**
-     * Return if it has to run under single legged xa transaction
-     * @return singleLegXA
-     */
-    public boolean isSingleLegXA () {
-        return singleLegXA;
     }
     
     /**
@@ -822,7 +800,6 @@ public class TestConfiguration {
     private final String hostName;
     private final JDBCClient jdbcClient;
     private boolean isVerbose;
-    private final boolean singleLegXA;
     
     /**
      * Indirection for obtaining connections based upon
