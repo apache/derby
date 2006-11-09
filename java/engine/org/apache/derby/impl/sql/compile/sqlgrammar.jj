@@ -10802,7 +10802,8 @@ spsRenameStatement() throws StandardException :
 {
 	<RENAME> (
 		qtn = renameTableStatement() |
-		qtn = renameIndexStatement()
+		qtn = renameIndexStatement() |
+		qtn = renameColumnStatement()
 		)
 	{
 		return qtn;
@@ -10856,6 +10857,31 @@ ReuseFactory.getInteger(StatementType.RENAME_INDEX),
 
 		return qtn;
 
+	}
+}
+QueryTreeNode
+renameColumnStatement() throws StandardException :
+{
+	String newColumnName;
+        ColumnReference oldColumnReference;
+}
+{
+	<COLUMN> oldColumnReference = columnReference()
+		<TO> newColumnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+	{
+		if (oldColumnReference.getTableNameNode() == null)
+			throw StandardException.newException(
+				SQLState.LANG_OBJECT_DOES_NOT_EXIST,
+				"RENAME COLUMN",
+				oldColumnReference.getColumnName());
+		return (QueryTreeNode) nodeFactory.getNode(
+			C_NodeTypes.RENAME_NODE,
+			oldColumnReference.getTableNameNode(),
+			oldColumnReference.getColumnName(),
+			newColumnName,
+			Boolean.FALSE,
+			ReuseFactory.getInteger(StatementType.RENAME_COLUMN),
+				getContextManager());
 	}
 }
 

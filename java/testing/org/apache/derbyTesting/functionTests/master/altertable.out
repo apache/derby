@@ -981,4 +981,242 @@ create table atdc_1 (a integer, b integer);
 0 rows inserted/updated/deleted
 ij> alter table atdc_1 drop column b;
 ERROR 0A000: Feature not implemented: ALTER TABLE DROP COLUMN (sqlAuthorization=true).
+ij> -- Tests for renaming a column. These tests are in altertable.sql because
+-- renaming a column is closely linked, conseptually, to other table
+-- alterations. However, the actual syntax is:
+--    RENAME COLUMN t.c1 TO c2
+create table renc_1 (a int, b varchar(10), c timestamp, d double);
+0 rows inserted/updated/deleted
+ij> -- table doesn't exist, should fail:
+rename column renc_no_such.a to b;
+ERROR 42Y55: 'RENAME COLUMN' cannot be performed on 'RENC_NO_SUCH' because it does not exist.
+ij> -- table exists, but column doesn't exist
+rename column renc_1.no_such to e;
+ERROR 42X14: 'NO_SUCH' is not a column in table or VTI 'RENC_1'.
+ij> -- new column name already exists in table:
+rename column renc_1.a to c;
+ERROR X0Y32: Column 'C' already exists in Table/View 'RENC_1'.
+ij> -- can't rename a column to itself:
+rename column renc_1.b to b;
+ERROR X0Y32: Column 'B' already exists in Table/View 'RENC_1'.
+ij> -- new column name is a reserved word:
+rename column renc_1.a to select;
+ERROR 42X01: Syntax error: Encountered "select" at line 2, column 27.
+ij> -- attempt to rename a column in a system table. Should fali:
+rename column sys.sysconglomerates.isindex to is_an_index;
+ERROR 42X62: 'RENAME COLUMN' is not allowed in the 'SYS' schema.
+ij> -- attempt to rename a column in a view, should fail:
+create view renc_vw_1 (v1, v2) as select b, d from renc_1;
+0 rows inserted/updated/deleted
+ij> rename column renc_vw_1.v2 to v3;
+ERROR 42Y62: 'RENAME COLUMN' is not allowed on 'APP.RENC_VW_1' because it is a view.
+ij> describe renc_vw_1;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+V1                  |VARCHAR  |NULL|NULL|10    |NULL      |20        |YES     
+V2                  |DOUBLE   |NULL|2   |52    |NULL      |NULL      |YES     
+ij> -- attempt to rename a column in an index, should fail:
+create index renc_idx_1 on renc_1 (c, d);
+0 rows inserted/updated/deleted
+ij> show indexes from renc_1;
+TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
+----------------------------------------------------------------------------
+RENC_1              |C                   |true  |3   |A   |NULL    |NULL    
+RENC_1              |D                   |true  |3   |A   |NULL    |NULL    
+ij> rename column renc_idx_1.d to d_new;
+ERROR 42Y55: 'RENAME COLUMN' cannot be performed on 'RENC_IDX_1' because it does not exist.
+ij> show indexes from renc_1;
+TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
+----------------------------------------------------------------------------
+RENC_1              |C                   |true  |3   |A   |NULL    |NULL    
+RENC_1              |D                   |true  |3   |A   |NULL    |NULL    
+ij> -- A few syntax errors in the statement, to check for reasonable messages:
+rename column renc_1 to b;
+ERROR 42Y55: 'RENAME COLUMN' cannot be performed on 'RENC_1' because it does not exist.
+ij> rename column renc_1 rename a to b;
+ERROR 42X01: Syntax error: Encountered "rename" at line 1, column 22.
+ij> rename column renc_1.a;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 22.
+ij> rename column renc_1.a b;
+ERROR 42X01: Syntax error: Encountered "b" at line 1, column 24.
+ij> rename column renc_1.a to;
+ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 25.
+ij> rename column renc_1.a to b, c;
+ERROR 42X01: Syntax error: Encountered "," at line 1, column 28.
+ij> rename column renc_1.a to b and c to d;
+ERROR 42X01: Syntax error: Encountered "and" at line 1, column 29.
+ij> -- Rename a column which is the primary key of the table:
+create table renc_2(c1 int not null constraint renc_2_p1 primary key);
+0 rows inserted/updated/deleted
+ij> rename column renc_2.c1 to c2;
+0 rows inserted/updated/deleted
+ij> describe renc_2;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+C2                  |INTEGER  |0   |10  |10    |NULL      |NULL      |NO      
+ij> show indexes from renc_2;
+TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
+----------------------------------------------------------------------------
+RENC_2              |C2                  |false |3   |A   |NULL    |NULL    
+ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t 
+    where t.tableid = c.tableid and t.tablename = 'RENC_2';
+CONSTRAINTNAME                                                                                                                  |&
+----------------------------------------------------------------------------------------------------------------------------------
+RENC_2_P1                                                                                                                       |P
+ij> create table renc_3 (a integer not null, b integer not null, c int,
+            constraint renc_3_pk primary key(a, b));
+0 rows inserted/updated/deleted
+ij> rename column renc_3.b to newbie;
+0 rows inserted/updated/deleted
+ij> describe renc_3;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+A                   |INTEGER  |0   |10  |10    |NULL      |NULL      |NO      
+NEWBIE              |INTEGER  |0   |10  |10    |NULL      |NULL      |NO      
+C                   |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+ij> show indexes from renc_3;
+TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
+----------------------------------------------------------------------------
+RENC_3              |A                   |false |3   |A   |NULL    |NULL    
+RENC_3              |NEWBIE              |false |3   |A   |NULL    |NULL    
+ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t 
+    where t.tableid = c.tableid and t.tablename = 'RENC_3';
+CONSTRAINTNAME                                                                                                                  |&
+----------------------------------------------------------------------------------------------------------------------------------
+RENC_3_PK                                                                                                                       |P
+ij> create table renc_4 (c1 int not null unique, c2 double, c3 int,
+    c4 int not null constraint renc_4_c4_PK primary key, c5 int, c6 int,
+    constraint renc_4_t2ck check (c2+c3<100.0));
+0 rows inserted/updated/deleted
+ij> create table renc_5 (c1 int, c2 int, c3 int, c4 int, c5 int not null, c6 int,
+    constraint renc_5_t3fk foreign key (c2) references renc_4(c4),
+    constraint renc_5_unq unique(c5),
+    constraint renc_5_t3ck check (c2-c3<80));
+0 rows inserted/updated/deleted
+ij> -- Attempt to rename a column referenced by a foreign key constraint 
+-- should fail:
+rename column renc_4.c4 to another_c4;
+ERROR X0Y25: Operation 'RENAME' cannot be performed on object 'RENC_4_C4_PK' because CONSTRAINT 'RENC_5_T3FK' is dependent on that object.
+ij> -- Rename a column with a unique constraint should work:
+rename column renc_4.c1 to unq_c1;
+0 rows inserted/updated/deleted
+ij> rename column renc_5.c5 to unq_c5;
+0 rows inserted/updated/deleted
+ij> show indexes from renc_4;
+TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
+----------------------------------------------------------------------------
+RENC_4              |UNQ_C1              |false |3   |A   |NULL    |NULL    
+RENC_4              |C4                  |false |3   |A   |NULL    |NULL    
+ij> show indexes from renc_5;
+TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
+----------------------------------------------------------------------------
+RENC_5              |UNQ_C5              |false |3   |A   |NULL    |NULL    
+RENC_5              |C2                  |true  |3   |A   |NULL    |NULL    
+ij> -- Attempt to rename a column used in a check constraint should fail:
+rename column renc_4.c2 to some_other_name;
+ERROR 42Z97: Renaming column 'C2' will cause check constraint 'RENC_4_T2CK' to break.
+ij> -- Attempt to rename a column used in a trigger should fail:
+create trigger renc_5_tr1 after update of c2, c3, c6 on renc_4
+    for each row mode db2sql insert into renc_5 (c6) values (1);
+0 rows inserted/updated/deleted
+ij> -- This fails, because the tigger is dependent on it:
+rename column renc_4.c6 to some_name;
+ERROR X0Y25: Operation 'RENAME' cannot be performed on object 'RENC_4(C6)' because TRIGGER 'RENC_5_TR1' is dependent on that object.
+ij> -- This succeeds, because the trigger is not dependent on renc_5.c6. 
+-- DERBY-2041 requests that triggers should be marked as dependent on
+-- tables and columns in their body. If that improvement is made, this
+-- test will need to be changed, as the next rename would fail, and the
+-- insert after it would then succeed.
+rename column renc_5.c6 to new_name;
+0 rows inserted/updated/deleted
+ij> -- The update statement will fail, because column c6 no longer exists.
+-- See DERBY-2041 for a discussion of this topic.
+insert into renc_4 values(1, 2, 3, 4, 5, 6);
+1 row inserted/updated/deleted
+ij> update renc_4 set c6 = 92;
+ERROR 42X14: 'C6' is not a column in table or VTI 'APP.RENC_5'.
+ij> select * from renc_5;
+C1         |C2         |C3         |C4         |UNQ_C5     |NEW_NAME   
+-----------------------------------------------------------------------
+ij> -- Rename a column which has a granted privilege, show that the grant is
+-- properly processed and now applies to the new column:
+create table renc_6 (a int, b int, c int);
+0 rows inserted/updated/deleted
+ij> grant select (a, b) on renc_6 to bryan;
+0 rows inserted/updated/deleted
+ij> select p.grantee,p.type, p.columns from sys.syscolperms p, sys.systables t
+    where t.tableid=p.tableid and t.tablename='RENC_6';
+GRANTEE                                                                                                                         |&|COLUMNS        
+--------------------------------------------------------------------------------------------------------------------------------------------------
+BRYAN                                                                                                                           |s|{0, 1}         
+ij> rename column renc_6.b to bb_gun;
+0 rows inserted/updated/deleted
+ij> select p.grantee,p.type, p.columns from sys.syscolperms p, sys.systables t
+    where t.tableid=p.tableid and t.tablename='RENC_6';
+GRANTEE                                                                                                                         |&|COLUMNS        
+--------------------------------------------------------------------------------------------------------------------------------------------------
+BRYAN                                                                                                                           |s|{0, 1}         
+ij> -- Attempt to rename a column should fail when there is an open cursor on it:
+get cursor renc_c1 as 'select * from renc_6';
+ij> rename column renc_6.bb_gun to water_pistol;
+ERROR X0X95: Operation 'RENAME' cannot be performed on object 'RENC_6(BB_GUN)' because there is an open ResultSet dependent on that object.
+ij> close renc_c1;
+ij> -- Attempt to rename a column when there is an open prepared statement on it.
+-- The rename of the column will be successful; the open statement will get
+-- errors when it tries to re-execute.
+autocommit off;
+ij> prepare renc_p1 as 'select * from renc_6 where a = ?';
+ij> execute renc_p1 using 'values (30)';
+A          |BB_GUN     |C          
+-----------------------------------
+ij> rename column renc_6.a to abcdef;
+0 rows inserted/updated/deleted
+ij> execute renc_p1 using 'values (30)';
+ERROR 42X04: Column 'A' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'A' is not a column in the target table.
+ij> autocommit on;
+ij> -- Demonstrate that you cannot rename a column in a synonym, and demonstrate
+-- that renaming a column in the underlying table correctly renames it
+-- in the synonym too
+create table renc_7 (c1 varchar(50), c2 int);
+0 rows inserted/updated/deleted
+ij> create synonym renc_7_syn for renc_7;
+0 rows inserted/updated/deleted
+ij> insert into renc_7 values ('one', 1);
+1 row inserted/updated/deleted
+ij> rename column renc_7_syn.c2 to c2_syn;
+ERROR 42Y55: 'RENAME COLUMN' cannot be performed on 'RENC_7_SYN' because it does not exist.
+ij> describe renc_7;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+C1                  |VARCHAR  |NULL|NULL|50    |NULL      |100       |YES     
+C2                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+ij> rename column renc_7.c1 to c1_renamed;
+0 rows inserted/updated/deleted
+ij> select c1_renamed from renc_7_syn;
+C1_RENAMED                                        
+--------------------------------------------------
+one                                               
+ij> -- demonstrate that you can rename a column in a table in a different schema
+create schema renc_schema_1;
+0 rows inserted/updated/deleted
+ij> create schema renc_schema_2;
+0 rows inserted/updated/deleted
+ij> set schema renc_schema_2;
+0 rows inserted/updated/deleted
+ij> create table renc_8 (a int, b int, c int);
+0 rows inserted/updated/deleted
+ij> set schema renc_schema_1;
+0 rows inserted/updated/deleted
+ij> -- This should fail, as there is no table renc_8 in schema 1:
+rename column renc_8.b to bbb;
+ERROR 42Y55: 'RENAME COLUMN' cannot be performed on 'RENC_8' because it does not exist.
+ij> -- But this should work, and should find the table in the other schema
+rename column renc_schema_2.renc_8.b to b2;
+0 rows inserted/updated/deleted
+ij> describe renc_schema_2.renc_8;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+A                   |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+B2                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+C                   |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
 ij> 

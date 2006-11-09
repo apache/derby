@@ -292,7 +292,7 @@ ERROR 42X01: Syntax error: Encountered "rename" at line 2, column 16.
 ij> alter table tt rename c to d;
 ERROR 42X01: Syntax error: Encountered "rename" at line 1, column 16.
 ij> rename column tt.c to tt.d;
-ERROR 42X01: Syntax error: Encountered "column" at line 1, column 8.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 25.
 ij> drop table tt;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TT' because it does not exist.
 ij> -- CASCADE/RESTRICT on DROP CONSTRAINT
@@ -388,7 +388,7 @@ ij> -- RENAME COLUMN
 create table TT(col1 int, col2 int);
 0 rows inserted/updated/deleted
 ij> rename column TT.col2 to newcolumn2;
-ERROR 42X01: Syntax error: Encountered "column" at line 1, column 8.
+0 rows inserted/updated/deleted
 ij> drop table TT;
 0 rows inserted/updated/deleted
 ij> -- SET TRIGGERS

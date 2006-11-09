@@ -616,3 +616,132 @@ select * from atmod_1;
 -- the GRANTed column permissions following a DROP COLUMN.
 create table atdc_1 (a integer, b integer);
 alter table atdc_1 drop column b;
+
+-- Tests for renaming a column. These tests are in altertable.sql because
+-- renaming a column is closely linked, conseptually, to other table
+-- alterations. However, the actual syntax is:
+--    RENAME COLUMN t.c1 TO c2
+
+create table renc_1 (a int, b varchar(10), c timestamp, d double);
+-- table doesn't exist, should fail:
+rename column renc_no_such.a to b;
+-- table exists, but column doesn't exist
+rename column renc_1.no_such to e;
+-- new column name already exists in table:
+rename column renc_1.a to c;
+-- can't rename a column to itself:
+rename column renc_1.b to b;
+-- new column name is a reserved word:
+rename column renc_1.a to select;
+-- attempt to rename a column in a system table. Should fali:
+rename column sys.sysconglomerates.isindex to is_an_index;
+-- attempt to rename a column in a view, should fail:
+create view renc_vw_1 (v1, v2) as select b, d from renc_1;
+rename column renc_vw_1.v2 to v3;
+describe renc_vw_1;
+-- attempt to rename a column in an index, should fail:
+create index renc_idx_1 on renc_1 (c, d);
+show indexes from renc_1;
+rename column renc_idx_1.d to d_new;
+show indexes from renc_1;
+-- A few syntax errors in the statement, to check for reasonable messages:
+rename column renc_1 to b;
+rename column renc_1 rename a to b;
+rename column renc_1.a;
+rename column renc_1.a b;
+rename column renc_1.a to;
+rename column renc_1.a to b, c;
+rename column renc_1.a to b and c to d;
+-- Rename a column which is the primary key of the table:
+create table renc_2(c1 int not null constraint renc_2_p1 primary key);
+rename column renc_2.c1 to c2;
+describe renc_2;
+show indexes from renc_2;
+select c.constraintname, c.type from sys.sysconstraints c, sys.systables t 
+    where t.tableid = c.tableid and t.tablename = 'RENC_2';
+create table renc_3 (a integer not null, b integer not null, c int,
+            constraint renc_3_pk primary key(a, b));
+rename column renc_3.b to newbie;
+describe renc_3;
+show indexes from renc_3;
+select c.constraintname, c.type from sys.sysconstraints c, sys.systables t 
+    where t.tableid = c.tableid and t.tablename = 'RENC_3';
+create table renc_4 (c1 int not null unique, c2 double, c3 int,
+    c4 int not null constraint renc_4_c4_PK primary key, c5 int, c6 int,
+    constraint renc_4_t2ck check (c2+c3<100.0));
+create table renc_5 (c1 int, c2 int, c3 int, c4 int, c5 int not null, c6 int,
+    constraint renc_5_t3fk foreign key (c2) references renc_4(c4),
+    constraint renc_5_unq unique(c5),
+    constraint renc_5_t3ck check (c2-c3<80));
+-- Attempt to rename a column referenced by a foreign key constraint 
+-- should fail:
+rename column renc_4.c4 to another_c4;
+-- Rename a column with a unique constraint should work:
+rename column renc_4.c1 to unq_c1;
+rename column renc_5.c5 to unq_c5;
+show indexes from renc_4;
+show indexes from renc_5;
+-- Attempt to rename a column used in a check constraint should fail:
+rename column renc_4.c2 to some_other_name;
+-- Attempt to rename a column used in a trigger should fail:
+create trigger renc_5_tr1 after update of c2, c3, c6 on renc_4
+    for each row mode db2sql insert into renc_5 (c6) values (1);
+-- This fails, because the tigger is dependent on it:
+rename column renc_4.c6 to some_name;
+-- This succeeds, because the trigger is not dependent on renc_5.c6. 
+-- DERBY-2041 requests that triggers should be marked as dependent on
+-- tables and columns in their body. If that improvement is made, this
+-- test will need to be changed, as the next rename would fail, and the
+-- insert after it would then succeed.
+rename column renc_5.c6 to new_name;
+-- The update statement will fail, because column c6 no longer exists.
+-- See DERBY-2041 for a discussion of this topic.
+insert into renc_4 values(1, 2, 3, 4, 5, 6);
+update renc_4 set c6 = 92;
+select * from renc_5;
+-- Rename a column which has a granted privilege, show that the grant is
+-- properly processed and now applies to the new column:
+create table renc_6 (a int, b int, c int);
+grant select (a, b) on renc_6 to bryan;
+select p.grantee,p.type, p.columns from sys.syscolperms p, sys.systables t
+    where t.tableid=p.tableid and t.tablename='RENC_6';
+rename column renc_6.b to bb_gun;
+select p.grantee,p.type, p.columns from sys.syscolperms p, sys.systables t
+    where t.tableid=p.tableid and t.tablename='RENC_6';
+-- Attempt to rename a column should fail when there is an open cursor on it:
+get cursor renc_c1 as 'select * from renc_6';
+rename column renc_6.bb_gun to water_pistol;
+close renc_c1;
+-- Attempt to rename a column when there is an open prepared statement on it.
+-- The rename of the column will be successful; the open statement will get
+-- errors when it tries to re-execute.
+autocommit off;
+prepare renc_p1 as 'select * from renc_6 where a = ?';
+execute renc_p1 using 'values (30)';
+rename column renc_6.a to abcdef;
+execute renc_p1 using 'values (30)';
+autocommit on;
+
+-- Demonstrate that you cannot rename a column in a synonym, and demonstrate
+-- that renaming a column in the underlying table correctly renames it
+-- in the synonym too
+create table renc_7 (c1 varchar(50), c2 int);
+create synonym renc_7_syn for renc_7;
+insert into renc_7 values ('one', 1);
+rename column renc_7_syn.c2 to c2_syn;
+describe renc_7;
+rename column renc_7.c1 to c1_renamed;
+select c1_renamed from renc_7_syn;
+
+-- demonstrate that you can rename a column in a table in a different schema
+create schema renc_schema_1;
+create schema renc_schema_2;
+set schema renc_schema_2;
+create table renc_8 (a int, b int, c int);
+set schema renc_schema_1;
+-- This should fail, as there is no table renc_8 in schema 1:
+rename column renc_8.b to bbb;
+-- But this should work, and should find the table in the other schema
+rename column renc_schema_2.renc_8.b to b2;
+describe renc_schema_2.renc_8;
+
