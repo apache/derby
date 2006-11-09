@@ -34,7 +34,9 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   
   permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
   permission java.io.FilePermission "${derby.system.home}${/}derby.log", "read, write, delete";
-  permission java.io.FilePermission "${derby.system.home}", "read";
+  // [DERBY-2000] The write permission was added to allow creation of the
+  // derby.system.home directory when running tests under a security manager.
+  permission java.io.FilePermission "${derby.system.home}", "read, write";
   
   // all databases under derby.system.home 
   permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
