@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.services.reflect;
 
-import org.apache.derby.impl.sql.execute.JarUtil;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -41,7 +40,7 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
 
-public class JarLoader extends ClassLoader {
+class JarLoader extends ClassLoader {
 
 	private static final JarFile jarFileFactory;
 
