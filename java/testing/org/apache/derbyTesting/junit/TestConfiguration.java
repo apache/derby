@@ -32,8 +32,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.functionTests.util.TestDataSourceFactory;
-
 /**
  * Class which holds information about the configuration of a Test.
  */
@@ -624,48 +622,6 @@ public class TestConfiguration {
     }
     
     /**
-     * Open a connection to a database.
-     * If the database does not exist, it will be created.
-     * A default username and password will be used for the connection.
-     *
-     * @param databaseName database to connect to
-     *
-     * @return connection to database.
-     */
-    Connection openConnection (String databaseName) throws SQLException {
-        return getConnection(databaseName, "create=true");
-    }
-    
-    /**
-     * Get a connection to a database using the specified connection 
-     * attributes.
-     * 
-     * @param databaseName database to connect to
-     * @param connAttrs connection attributes
-     * @return connection to database.
-     * @throws SQLException
-     */
-    private Connection getConnection (String databaseName, String connAttrs) 
-    	throws SQLException {
-        Connection con = null;
-        JDBCClient client =getJDBCClient();
-        if (JDBC.vmSupportsJDBC2()) {            
-            loadJDBCDriver(client.getJDBCDriverName());
-            {
-                con = DriverManager.getConnection(
-                        getJDBCUrl(databaseName) + ";" + connAttrs,
-                        getUserName(),
-                        getUserPassword());
-            }
-        } else {
-            //Use DataSource for JSR169
-            Properties attrs = getDataSourcePropertiesForDatabase(databaseName, connAttrs);
-            con = TestDataSourceFactory.getDataSource(attrs).getConnection();
-        }
-        return con;
-    }
-    
-    /**
      * Shutdown the database for this configuration
      * assuming it is booted.
      *
@@ -806,65 +762,6 @@ public class TestConfiguration {
      * this configuration.
      */
     private Connector connector;
-    
-
-    /**
-     * Generate properties which can be set on a
-     * <code>DataSource</code> in order to connect to the default
-     * database. If the database does not exist, it will be created.
-     *
-     * @return a <code>Properties</code> object containing server
-     * name, port number, database name and other attributes needed to
-     * connect to the default database
-     */
-    public static Properties getDefaultDataSourceProperties() {
-        return getDataSourcePropertiesForDatabase(
-                getCurrent().getDatabaseName(), "create=true");
-    }
-    
-    /**
-     * Generate properties which can be set on a <code>DataSource</code> 
-     * in order to connect to a database using the specified connection 
-     * attributes.
-     * 
-     * @param databaseName database to connect to
-     * @param connAttrs connection attributes
-     * @return
-     */
-    private static Properties getDataSourcePropertiesForDatabase
-    	(String databaseName, String connAttrs) 
-    {
-        Properties attrs = new Properties();
-        if (!getCurrent().getJDBCClient().isEmbedded()) {
-            attrs.setProperty("serverName", getCurrent().getHostName());
-            attrs.setProperty("portNumber", Integer.toString(getCurrent().getPort()));
-        }
-        attrs.setProperty("databaseName", databaseName);
-        attrs.setProperty("connectionAttributes", connAttrs);
-        return attrs;
-    }
-
-    /**
-     * Load the specified JDBC driver
-     *
-     * @param driverClass name of the JDBC driver class.
-     * @throws SQLException if loading the driver fails.
-     */
-    private static void loadJDBCDriver(String driverClass) 
-        throws SQLException {
-        try {
-            Class.forName(driverClass).newInstance();
-        } catch (ClassNotFoundException cnfe) {
-            throw new SQLException("Failed to load JDBC driver '" + 
-                                    driverClass + "': " + cnfe.getMessage());
-        } catch (IllegalAccessException iae) {
-            throw new SQLException("Failed to load JDBC driver '" +
-                                    driverClass + "': " + iae.getMessage());
-        } catch (InstantiationException ie) {
-            throw new SQLException("Failed to load JDBC driver '" +
-                                    driverClass + "': " + ie.getMessage());
-        }
-    }
     
     /*
      * SecurityManager related configuration.

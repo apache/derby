@@ -194,13 +194,6 @@ public abstract class BaseJDBCTestCase
         return conn;
     }
     
-    public Connection openConnection(String databaseName) throws SQLException
-    {
-        Connection conn = getTestConfiguration().openConnection(databaseName);
-        initializeConnection(conn);
-        return conn;        
-    }
-    
     /**
      * Run a SQL script through ij discarding the output
      * using this object's default connection. Intended for
