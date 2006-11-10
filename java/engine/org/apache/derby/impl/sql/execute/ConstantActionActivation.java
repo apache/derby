@@ -31,6 +31,13 @@ import java.util.Vector;
 	A pre-compiled activation that supports a single ResultSet with
 	a single constant action. All the execution logic is contained
 	in the constant action.
+    <P>
+    At compile time for DDL statements this class will be picked
+    as the implementation of Activation. The language PreparedStatement
+    will contain the ConstantAction created at compiled time.
+    At execute time this class then fetches a language ResultSet using
+    ResultSetFactory.getDDLResultSet and executing the ResultSet
+    will invoke the execute on the ConstantAction.
 
  */
 public final class ConstantActionActivation extends BaseActivation
