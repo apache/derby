@@ -48,12 +48,8 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class JarUtil
+class JarUtil
 {
-	public static final String ADD_JAR_DDL = "ADD JAR";
-	public static final String DROP_JAR_DDL = "DROP JAR";
-	public static final String REPLACE_JAR_DDL = "REPLACE JAR";
-	public static final String READ_JAR = "READ JAR";
 	//
 	//State passed in by the caller
 	private UUID id; //For add null means create a new id.
@@ -68,7 +64,7 @@ public class JarUtil
 	
 	//
 	//State derived from the caller's context
-	public JarUtil(UUID id, String schemaName, String sqlName)
+	private JarUtil(UUID id, String schemaName, String sqlName)
 		 throws StandardException
 	{
 		this.id = id;
@@ -93,7 +89,7 @@ public class JarUtil
 
 	  @exception StandardException Opps
 	  */
-	static public long
+	static long
 	add(UUID id, String schemaName, String sqlName, String externalPath)
 		 throws StandardException
 	{
@@ -121,7 +117,7 @@ public class JarUtil
 	  @param is A stream for reading the content of the file to add.
 	  @exception StandardException Opps
 	  */
-	public long add(InputStream is) throws StandardException
+	private long add(InputStream is) throws StandardException
 	{
 		//
 		//Like create table we say we are writing before we read the dd
@@ -160,7 +156,7 @@ public class JarUtil
 
 	  @exception StandardException Opps
 	  */
-	static public void
+	static void
 	drop(UUID id, String schemaName, String sqlName,boolean purgeOnCommit)
 		 throws StandardException
 	{
@@ -179,7 +175,7 @@ public class JarUtil
 
 	  @exception StandardException Opps
 	  */
-	public void drop(boolean purgeOnCommit) throws StandardException
+	private void drop(boolean purgeOnCommit) throws StandardException
 	{
 		//
 		//Like create table we say we are writing before we read the dd
@@ -249,7 +245,7 @@ public class JarUtil
 
 	  @exception StandardException Opps
 	  */
-	static public long
+	static long
 	replace(UUID id,String schemaName, String sqlName,
 			String externalPath,boolean purgeOnCommit)
 		 throws StandardException
@@ -283,7 +279,7 @@ public class JarUtil
 	    means leave it around for use by replication.
 	  @exception StandardException Opps
 	  */
-	public long replace(InputStream is,boolean purgeOnCommit) throws StandardException
+	private long replace(InputStream is,boolean purgeOnCommit) throws StandardException
 	{
 		//
 		//Like create table we say we are writing before we read the dd
@@ -333,22 +329,6 @@ public class JarUtil
 	}
 
 	/**
-	  Get the FileInfoDescriptor for a jar file from the current connection's database or
-	  null if it does not exist.
-
-	  @param schemaName the name for the schema that holds the jar file.
-	  @param sqlName the sql name for the jar file.
-	  @return The FileInfoDescriptor.
-	  @exception StandardException Opps
-	  */
-	public static FileInfoDescriptor getInfo(String schemaName, String sqlName, String statementType)
-		 throws StandardException
-	{
-		JarUtil jUtil = new JarUtil(null,schemaName,sqlName);
-		return jUtil.getInfo();
-	}
-
-	/**
 	  Get the FileInfoDescriptor for the Jar file or null if it does not exist.
 	  @exception StandardException Ooops
 	  */
@@ -357,44 +337,6 @@ public class JarUtil
 	{
 		SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, null, true);
 		return dd.getFileInfoDescriptor(sd,sqlName);
-	}
-
-	// get the current version of the jar file as a File or InputStream
-	public static Object getAsObject(String schemaName, String sqlName)
-		 throws StandardException
-	{
-		JarUtil jUtil = new JarUtil(null,schemaName,sqlName);
-
-		FileInfoDescriptor fid = jUtil.getInfo();
-		if (fid == null)
-			throw StandardException.newException(SQLState.LANG_FILE_DOES_NOT_EXIST, sqlName,schemaName);
-
-		long generationId = fid.getGenerationId();
-
-		StorageFile f = jUtil.getAsFile(generationId);
-		if (f != null)
-			return f;
-
-		return jUtil.getAsStream(generationId);
-	}
-
-	private StorageFile getAsFile(long generationId) {
-		return fr.getAsFile(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()), generationId);
-	}
-
-	public static InputStream getAsStream(String schemaName, String sqlName,
-		long generationId) throws StandardException {
-		JarUtil jUtil = new JarUtil(null,schemaName,sqlName);
-
-		return jUtil.getAsStream(generationId);		
-	}
-
-	private InputStream getAsStream(long generationId) throws StandardException {
-		try {
-			return fr.getAsStream(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()), generationId);
-		} catch (IOException ioe) {
-            throw StandardException.newException(SQLState.LANG_FILE_ERROR, ioe, ioe.toString());    
-		}
 	}
 
 	private void notifyLoader(boolean reload) throws StandardException {
