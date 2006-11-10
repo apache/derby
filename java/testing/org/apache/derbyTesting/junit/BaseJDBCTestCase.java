@@ -26,6 +26,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.security.PrivilegedActionException;
+import java.net.URL;
 import java.sql.*;
 
 import junit.framework.AssertionFailedError;
@@ -213,6 +215,33 @@ public abstract class BaseJDBCTestCase
         // Use the same encoding as the input for the output.    
         return ij.runScript(getConnection(), script, encoding,
                 sink, encoding);       
+    }
+    
+    /**
+     * Run a SQL script through ij discarding the output
+     * using this object's default connection. Intended for
+     * setup scripts.
+     * @return Number of errors executing the script
+     * @throws UnsupportedEncodingException 
+     * @throws PrivilegedActionException
+     * @throws SQLException 
+     */
+    public int runScript(String resource,String encoding)
+        throws UnsupportedEncodingException, SQLException,
+        PrivilegedActionException,IOException
+    {
+        
+        URL sql = getTestResource(resource);
+        assertNotNull("SQL script missing: " + resource, sql);
+        InputStream sqlIn = openTestResource(sql);
+        Connection conn = getConnection();
+        int numErrors = runScript(sqlIn,encoding);
+        sqlIn.close();
+        
+        if (!conn.isClosed() && !conn.getAutoCommit())
+            conn.commit();
+        
+        return numErrors;
     }
     
     /**
