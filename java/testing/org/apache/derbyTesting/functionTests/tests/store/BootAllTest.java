@@ -160,6 +160,9 @@ public class BootAllTest  extends BaseJDBCTestCase {
         // We expect at least four databases to be booted,
         // but it could be more if other tests have left databases
         // around.
+        // DERBY-2069 the single use databases are not
+        // booted automatically, once DERBY-2069 is fixed
+        // the length can be compared to four.
         assertNotNull(returnedDatabases);
         assertTrue("Fewer databases booted than expected",
                 returnedDatabases.length >= 1);
