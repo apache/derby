@@ -30,7 +30,7 @@ import junit.framework.Test;
  * Shutdown and drop the current database at tearDown time.
  *
  */
-class DropDatabaseSetup extends TestSetup {
+class DropDatabaseSetup extends BaseJDBCTestSetup {
 
     DropDatabaseSetup(Test test) {
         super(test);
@@ -39,7 +39,11 @@ class DropDatabaseSetup extends TestSetup {
     /**
      * Drop the current database.
      */
-    protected void tearDown() throws Exception {  
+    protected void tearDown() throws Exception {
+        
+        // Ensure the database is booted
+        // since that is what shutdownDatabase() requires.
+        getConnection().close();
         super.tearDown();
         
         TestConfiguration.getCurrent().shutdownDatabase();
