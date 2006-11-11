@@ -57,34 +57,40 @@ class DropDatabaseSetup extends BaseJDBCTestSetup {
         else
             dbName = dsh + File.separator + dbName;
         
-        final File dbDir = new File(dbName);
+        removeDirectory(dbName);
+    } 
+    
+    static void removeDirectory(String path)
+    {
+        final File dir = new File(path);
         AccessController.doPrivileged(new java.security.PrivilegedAction() {
 
             public Object run() {
-                removeDBDir(dbDir);
+                removeDir(dir);
                 return null;
             }
         });
-    } 
+        
+    }
 
-    private static void removeDBDir(File dbDir) {
+    private static void removeDir(File dir) {
 
-        String[] list = dbDir.list();
+        String[] list = dir.list();
 
         // Some JVMs return null for File.list() when the
         // directory is empty.
         if (list != null) {
             for (int i = 0; i < list.length; i++) {
-                File entry = new File(dbDir, list[i]);
+                File entry = new File(dir, list[i]);
 
                 if (entry.isDirectory()) {
-                    removeDBDir(entry);
+                    removeDir(entry);
                 } else {
                     assertTrue(entry.delete());
                 }
             }
         }
 
-        assertTrue(dbDir.delete());
+        assertTrue(dir.delete());
     }
 }
