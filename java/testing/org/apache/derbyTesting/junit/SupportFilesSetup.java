@@ -169,7 +169,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static URL getReadOnlyURL(String name) throws MalformedURLException
     {
-        return getReadOnly(name).toURL();
+        return getURL(getReadOnly(name));
     }
     /**
      * Obtain the URL to the local copy of a read-write resource.
@@ -177,7 +177,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static URL getReadWriteURL(String name) throws MalformedURLException
     {
-        return getReadWrite(name).toURL();
+        return getURL(getReadWrite(name));
     }
     /**
      * Obtain the URL to the local copy of a write-only resource.
@@ -185,7 +185,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static URL getWriteOnlyURL(String name) throws MalformedURLException
     {
-        return getWriteOnly(name).toURL();
+        return getURL(getWriteOnly(name));
     }
     
     
@@ -218,5 +218,22 @@ public class SupportFilesSetup extends TestSetup {
     {
         File dir = new File(dirName);
         return new File(dir, name);
+    }
+    
+    private static URL getURL(final File file) throws MalformedURLException
+    {
+        try {
+            return (URL) AccessController.doPrivileged
+            (new java.security.PrivilegedExceptionAction(){
+
+                public Object run() throws MalformedURLException{
+                return file.toURL();
+
+                }
+            }
+             );
+        } catch (PrivilegedActionException e) {
+            throw (MalformedURLException) e.getException();
+        } 
     }
 }
