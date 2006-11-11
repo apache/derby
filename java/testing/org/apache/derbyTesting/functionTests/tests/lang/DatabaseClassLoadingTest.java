@@ -1,5 +1,6 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -13,8 +14,8 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test database class loading, executing routines from the
@@ -42,6 +43,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
         // Need DriverManager to execute the add contact procedure
         // as it uses server side jdbc.
+        Test test = suite;
         if (JDBC.vmSupportsJDBC3()) {
         
         
@@ -81,10 +83,21 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testInvalidJar")));           
            suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testRemoveJar")));           
+                   new DatabaseClassLoadingTest("testRemoveJar"))); 
+           
+           test = new SupportFilesSetup(suite,
+                   new String[] {
+                   "functionTests/tests/lang/dcl_emc1.jar",
+                   "functionTests/tests/lang/dcl_emcaddon.jar",
+                   "functionTests/tests/lang/dcl_emc2.jar",
+                   "functionTests/tests/lang/dcl_emc2s.jar",
+                   "functionTests/tests/lang/dcl_emc2sm.jar",
+                   "functionTests/tests/lang/dcl_emc2l.jar"
+                   });
+           
            }
         
-        return new CleanDatabaseTestSetup(suite) {
+        return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException
             {
                 s.executeUpdate("create schema emc");
@@ -141,11 +154,11 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     /**
      * Install the jar, but don't set the classpath.
      * @throws SQLException
+     * @throws MalformedURLException 
      */
-    public void testWithNoClasspath() throws SQLException
+    public void testWithNoClasspath() throws SQLException, MalformedURLException
     {       
         installJar("dcl_emc1.jar", "EMC.MAIL_APP");
-
         testWithNoInstalledJars();
     }
     
@@ -279,8 +292,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      * that the new class is used and then rollback
      * the old class should be used after the rollback.
      * @throws SQLException
+     * @throws MalformedURLException 
      */
-    public void testClassPathRollback() throws SQLException
+    public void testClassPathRollback() throws SQLException, MalformedURLException
     {        
         getConnection().setAutoCommit(false);
         replaceJar("dcl_emc2.jar", "EMC.MAIL_APP");
@@ -322,8 +336,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      * Replace the jar to later test the prepare from a different
      * connection picks up the new version.
      * @throws SQLException
+     * @throws MalformedURLException 
      */
-    public void testReplaceJar() throws SQLException
+    public void testReplaceJar() throws SQLException, MalformedURLException
     {
         replaceJar("dcl_emc2.jar", "EMC.MAIL_APP");
     }
@@ -363,8 +378,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     /**
      * now add another jar in to test two jars and
      * a quoted identifer for the jar names.
+     * @throws MalformedURLException 
      */
-    public void testSecondJar() throws SQLException {
+    public void testSecondJar() throws SQLException, MalformedURLException {
         
         installJar("dcl_emcaddon.jar", "\"emcAddOn\".\"MailAddOn\"");
 
@@ -396,8 +412,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         keytool -delete -alias emccto -keystore emcks -storepass ab987c
         </code>
      * @throws SQLException
+     * @throws MalformedURLException 
      */
-    public void testSignedJar() throws SQLException
+    public void testSignedJar() throws SQLException, MalformedURLException
     {
         // Statement to get the signers for a class loaded from a jar file
         PreparedStatement ps = prepareStatement("VALUES EMC.GETSIGNERS(?)");
@@ -431,8 +448,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      * 
      * rejects it.
      * @throws SQLException
+     * @throws MalformedURLException 
      */
-    public void testHackedJarReplacedClass() throws SQLException {
+    public void testHackedJarReplacedClass() throws SQLException, MalformedURLException {
 
         replaceJar("dcl_emc2sm.jar", "EMC.MAIL_APP");
         
@@ -451,8 +469,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     /**
      * replace with a hacked jar file, emc.class modified to 
      be an invalid class (no signing on this jar).
+     * @throws MalformedURLException 
      */
-    public void testInvalidJar() throws SQLException
+    public void testInvalidJar() throws SQLException, MalformedURLException
     {
         replaceJar("dcl_emc2l.jar", "EMC.MAIL_APP");
         
@@ -497,11 +516,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         cs.close();
     }
   
-    private void installJar(String resource, String jarName) throws SQLException
-    {
-        URL jar =
-            getTestResource(
-               "org/apache/derbyTesting/functionTests/tests/lang/" + resource);
+    private void installJar(String resource, String jarName) throws SQLException, MalformedURLException
+    {        
+        URL jar = SupportFilesSetup.getReadOnlyURL(resource);
         
         assertNotNull(resource, jar);
         
@@ -512,12 +529,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         cs.close();
     }
     
-    private void replaceJar(String resource, String jarName) throws SQLException
-    {
-        URL jar =
-            getTestResource(
-               "org/apache/derbyTesting/functionTests/tests/lang/" + resource);
-        
+    private void replaceJar(String resource, String jarName) throws SQLException, MalformedURLException
+    {        
+        URL jar = SupportFilesSetup.getReadOnlyURL(resource);
         assertNotNull(resource, jar);
         
         CallableStatement cs = prepareCall("CALL SQLJ.REPLACE_JAR(?, ?)");
