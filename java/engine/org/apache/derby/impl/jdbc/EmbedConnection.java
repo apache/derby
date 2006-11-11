@@ -1557,13 +1557,14 @@ public class EmbedConnection implements EngineConnection
 		// are exiting the system in the nested case.
 		if (SanityManager.DEBUG)
 		{
-			if ((tr.getCsf() != null) && (tr.getCsf().getCurrentContextManager() !=
-				tr.getContextManager()))
-			{
-				Util.THROWASSERT(this, 
+			if (tr.getCsf() != null) {
+				ContextManager cm1 = tr.getCsf().getCurrentContextManager();
+				ContextManager cm2 = tr.getContextManager();
+				// If the system has been shut down, cm1 can be null.
+				// Otherwise, cm1 and cm2 should be identical.
+				Util.ASSERT(this, (cm1 == cm2 || cm1 == null),
 					"Current Context Manager not the one was expected: " +
-					 tr.getCsf().getCurrentContextManager() + " " + 
-					 tr.getContextManager());
+					 cm1 + " " + cm2);
 			}
 		}
 
