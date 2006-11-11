@@ -386,4 +386,8 @@ ij> DROP TABLE TEST_SCHEMA.T1;
 0 rows inserted/updated/deleted
 ij> DROP SCHEMA TEST_SCHEMA RESTRICT;
 0 rows inserted/updated/deleted
+ij> -- DERBY-2018
+-- expect error
+CREATE VIEW v1(c1) AS VALUES NULL;
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
 ij> 

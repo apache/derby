@@ -276,6 +276,10 @@ public class CreateViewNode extends DDLStatementNode
 
 			// bind the query expression
 			queryExpr.bindResultColumns(fromList);
+			
+			// rejects any untyped nulls in the RCL
+			// e.g.:  CREATE VIEW v1 AS VALUES NULL
+			queryExpr.bindUntypedNullsToResultColumns(null);
 		}
 		finally
 		{
