@@ -40,13 +40,15 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.io.FileUtil;
-import org.apache.derby.io.StorageFile;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+
 
 class JarUtil
 {
@@ -97,7 +99,7 @@ class JarUtil
 		InputStream is = null;
 		
 		try {
-			is = FileUtil.getInputStream(externalPath, 0);
+			is = openJarURL(externalPath);
 			return jutil.add(is);
 		} catch (java.io.IOException fnfe) {
 			throw StandardException.newException(SQLState.SQLJ_INVALID_JAR, fnfe, externalPath);
@@ -255,7 +257,7 @@ class JarUtil
 		
 
 		try {
-			is = FileUtil.getInputStream(externalPath, 0);
+			is = openJarURL(externalPath);
 
 			return jutil.replace(is,purgeOnCommit);
 		} catch (java.io.IOException fnfe) {
@@ -343,4 +345,38 @@ class JarUtil
 		ClassFactory cf = lcc.getLanguageConnectionFactory().getClassFactory();
 		cf.notifyModifyJar(reload);
 	}
+
+    /**
+     * Open an input stream to read a URL or a file.
+     * URL is attempted first, if the string does not conform
+     * to a URL then an attempt to open it as a regular file
+     * is tried.
+     * <BR>
+     * Attempting the file first can throw a security execption
+     * when a valid URL is passed in.
+     * The security exception is due to not have the correct permissions
+     * to access the bogus file path. To avoid this the order was reversed
+     * to attempt the URL first and only attempt a file open if creating
+     * the URL throws a MalformedURLException.
+     */
+    private static InputStream openJarURL(final String externalPath)
+        throws IOException
+    {
+        try {
+            return (InputStream) AccessController.doPrivileged
+            (new java.security.PrivilegedExceptionAction(){
+                
+                public Object run() throws IOException {    
+                    try {
+                        return new URL(externalPath).openStream();
+                    } catch (MalformedURLException mfurle)
+                    {
+                        return new FileInputStream(externalPath);
+                    }
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            throw (IOException) e.getException();
+        }
+    }
 }
