@@ -755,7 +755,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static short STRONG_PASSWORD_SUBSTITUTE_SECURITY = (short) NetConfiguration.SECMEC_USRSSBPWD;
 
     /**
-     * sets the security mechanism
+     * Sets the security mechanism.
      * @param securityMechanism to set
      */
     synchronized public void setSecurityMechanism(short securityMechanism) {
@@ -763,9 +763,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     }
 
     /**
-     * return the security mechanism 
-     * if security mechanism has not been set explicitly on datasource
-     * then upgrade the security mechanism to a more secure one if possible
+     * Return the security mechanism.
+     * If security mechanism has not been set explicitly on datasource,
+     * then upgrade the security mechanism to a more secure one if possible.
      * @see #getUpgradedSecurityMechanism(String)
      * @return the security mechanism
      */
@@ -774,9 +774,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     }
 
     /**
-     * return the security mechanism for this datasource object 
-     * if security mechanism has not been set explicitly on datasource
-     * then upgrade the security mechanism to a more secure one if possible
+     * Return the security mechanism for this datasource object.
+     * If security mechanism has not been set explicitly on datasource,
+     * then upgrade the security mechanism to a more secure one if possible.
      * @param password  password of user
      * @see #getUpgradedSecurityMechanism(String)
      * @return the security mechanism
