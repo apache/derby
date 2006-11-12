@@ -48,9 +48,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
         
           suite.addTest(new DatabaseClassLoadingTest("testWithNoInstalledJars"));
-          suite.addTest(
-                SecurityManagerSetup.noSecurityManager(
-                new DatabaseClassLoadingTest("testWithNoClasspath")));
+          suite.addTest(new DatabaseClassLoadingTest("testWithNoClasspath"));
           suite.addTest(
                 SecurityManagerSetup.noSecurityManager(
                         new DatabaseClassLoadingTest("testSetClasspath")));

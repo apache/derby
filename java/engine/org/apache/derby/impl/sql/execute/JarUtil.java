@@ -39,7 +39,6 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.io.FileUtil;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -119,7 +118,7 @@ class JarUtil
 	  @param is A stream for reading the content of the file to add.
 	  @exception StandardException Opps
 	  */
-	private long add(InputStream is) throws StandardException
+	private long add(final InputStream is) throws StandardException
 	{
 		//
 		//Like create table we say we are writing before we read the dd
@@ -130,34 +129,40 @@ class JarUtil
 				StandardException.newException(SQLState.LANG_OBJECT_ALREADY_EXISTS_IN_OBJECT, 
 											   fid.getDescriptorType(), sqlName, fid.getSchemaDescriptor().getDescriptorType(), schemaName);
 
-		try {
-			notifyLoader(false);
-			dd.invalidateAllSPSPlans();
-			long generationId = fr.add(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()),is);
+        SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, null, true);
+        try {
+            notifyLoader(false);
+            dd.invalidateAllSPSPlans();
+            final String jarExternalName = JarDDL.mkExternalName(schemaName,
+                    sqlName, fr.getSeparatorChar());
 
-			SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, null, true);
+            long generationId = setJar(jarExternalName, is);
 
-			fid = ddg.newFileInfoDescriptor(id, sd,
-							sqlName, generationId);
-			dd.addDescriptor(fid, sd, DataDictionary.SYSFILES_CATALOG_NUM,
-							 false, lcc.getTransactionExecute());
-			return generationId;
-		} finally {
-			notifyLoader(true);
-		}
+            fid = ddg.newFileInfoDescriptor(id, sd, sqlName, generationId);
+            dd.addDescriptor(fid, sd, DataDictionary.SYSFILES_CATALOG_NUM,
+                    false, lcc.getTransactionExecute());
+            return generationId;
+        } finally {
+            notifyLoader(true);
+        }
 	}
 
 	/**
-	  Drop a jar file from the current connection's database.
-
-	  @param id The id for the jar file we drop. Ignored if null.
-	  @param schemaName the name for the schema that holds the jar file.
-	  @param sqlName the sql name for the jar file.
-	  @param purgeOnCommit True means purge the old jar file on commit. False
-	    means leave it around for use by replication.
-
-	  @exception StandardException Opps
-	  */
+     * Drop a jar file from the current connection's database.
+     * 
+     * @param id
+     *            The id for the jar file we drop. Ignored if null.
+     * @param schemaName
+     *            the name for the schema that holds the jar file.
+     * @param sqlName
+     *            the sql name for the jar file.
+     * @param purgeOnCommit
+     *            True means purge the old jar file on commit. False means leave
+     *            it around for use by replication.
+     * 
+     * @exception StandardException
+     *                Opps
+     */
 	static void
 	drop(UUID id, String schemaName, String sqlName,boolean purgeOnCommit)
 		 throws StandardException
@@ -307,11 +312,13 @@ class JarUtil
 			notifyLoader(false);
 			dd.invalidateAllSPSPlans();
 			dd.dropFileInfoDescriptor(fid);
+            final String jarExternalName =
+                JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar());
 
 			//
 			//Replace the file.
 			long generationId = 
-				fr.replace(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()),
+				fr.replace(jarExternalName,
 					fid.getGenerationId(), is, purgeOnCommit);
 
 			//
@@ -377,6 +384,28 @@ class JarUtil
             });
         } catch (PrivilegedActionException e) {
             throw (IOException) e.getException();
+        }
+    }
+    
+    /**
+     * Copy the jar from the externally obtained 
+     * input stream into the database
+     * @param jarExternalName Name of jar with database structure.
+     * @param contents Contents of jar file.
+     */
+    private long setJar(final String jarExternalName, final InputStream contents)
+            throws StandardException {
+        try {
+            return ((Long) AccessController
+                    .doPrivileged(new java.security.PrivilegedExceptionAction() {
+
+                        public Object run() throws StandardException {
+                            long generatedId = fr.add(jarExternalName, contents);
+                            return new Long(generatedId);
+                        }
+                    })).longValue();
+        } catch (PrivilegedActionException e) {
+            throw (StandardException) e.getException();
         }
     }
 }
