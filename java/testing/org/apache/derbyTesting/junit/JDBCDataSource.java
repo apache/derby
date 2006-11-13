@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.junit;
 
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -39,6 +40,21 @@ public class JDBCDataSource {
     public static javax.sql.DataSource getDataSource()
     {
         return getDataSource(TestConfiguration.getCurrent(), (HashMap) null);
+    }
+    
+    /**
+     * Return a DataSource corresponding to the current
+     * configuration except that the databse name is different.
+     */
+    public static javax.sql.DataSource getDataSource(String dbName)
+    {
+        // default DataSource
+        javax.sql.DataSource ds = getDataSource();
+        
+        // Override the database name
+        setBeanProperty(ds, "databaseName", dbName);
+        
+        return ds;
     }
     
     /**
@@ -137,5 +153,22 @@ public class JDBCDataSource {
     private static String getSetterName(String attribute) {
         return "set" + Character.toUpperCase(attribute.charAt(0))
                 + attribute.substring(1);
+    }
+    
+    /**
+     * Shutdown the database described by this data source.
+     * The shutdownDatabase property is cleared by this method.
+     */
+    public static void shutdownDatabase(javax.sql.DataSource ds)
+    {
+        setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        try {
+            ds.getConnection();
+            Assert.fail("Database failed to shut down");
+        } catch (SQLException e) {
+             BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
+        } finally {
+            setBeanProperty(ds, "shutdownDatabase", "");
+        }
     }
 }
