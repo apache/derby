@@ -43,6 +43,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.impl.sql.execute.ColumnInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.types.DefaultInfoImpl;
 
 /**
  * A ModifyColumnNode represents a modify column in an ALTER TABLE statement.
@@ -287,6 +288,23 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		{
 			return;
 		}
+
+		// If the statement is not setting the column's default, then
+		// recover the old default and re-use it. If the statement is
+		// changing the start value for the auto-increment, then recover
+		// the old increment-by value and re-use it. If the statement is
+		// changing the increment-by value, then recover the old start value
+		// and re-use it. This way, the column alteration only changes the
+		// aspects of the autoincrement settings that it intends to change,
+		// and does not lose the other aspecs.
+		if (defaultNode == null)
+			defaultInfo = (DefaultInfoImpl)cd.getDefaultInfo();
+		if (autoinc_create_or_modify_Start_Increment ==
+				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE)
+			autoincrementIncrement = cd.getAutoincInc();
+		if (autoinc_create_or_modify_Start_Increment ==
+				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE)
+			autoincrementStart = cd.getAutoincStart();
 
 		/* Fill in the DataTypeServices from the DataDictionary */
 		dataTypeServices = cd.getType();
