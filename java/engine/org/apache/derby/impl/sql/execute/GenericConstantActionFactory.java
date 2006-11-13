@@ -815,57 +815,51 @@ public class GenericConstantActionFactory
 	/**
 	 * Make the ConstantAction to Add a jar file to a database.
 	 *
-	 *	@param	id					The id for the jar file -
-	 *                              (null means create one)
 	 *	@param	schemaName			The SchemaName for the jar file.
 	 *	@param	sqlName			    The sqlName for the jar file.
 	 *  @param  externalPath            The name of the file that holds the jar.
 	 *  @exception StandardException Ooops
 	 */
-	public	ConstantAction getAddJarConstantAction(UUID id,
+	public	ConstantAction getAddJarConstantAction(
 														 String schemaName,
 														 String sqlName,
 														 String externalPath)
 		 throws StandardException
 	{
 		getAuthorizer().authorize(Authorizer.JAR_WRITE_OP);
-		return new AddJarConstantAction(id,schemaName,sqlName,externalPath);
+		return new AddJarConstantAction(schemaName,sqlName,externalPath);
 	}
 	/**
 	 * Make the ConstantAction to replace a jar file in a database.
 	 *
-	 *	@param	id					The id for the jar file -
-	 *                              (Ignored if null)
 	 *	@param	schemaName			The SchemaName for the jar file.
 	 *	@param	sqlName			    The sqlName for the jar file.
 	 *  @param  externalPath            The name of the file that holds the new jar.
 	 *  @exception StandardException Ooops
 	 */
-	public	ConstantAction getReplaceJarConstantAction(UUID id,
+	public	ConstantAction getReplaceJarConstantAction(
 														 String schemaName,
 														 String sqlName,
 														 String externalPath)
 		 throws StandardException
 	{
 		getAuthorizer().authorize(Authorizer.JAR_WRITE_OP);
-		return new ReplaceJarConstantAction(id,schemaName,sqlName,externalPath);
+		return new ReplaceJarConstantAction(schemaName,sqlName,externalPath);
 	}
 	/**
 	 * Make the ConstantAction to drop a jar file from a database.
 	 *
-	 *	@param	id					The id for the jar file -
-	 *                              (Ignored if null)
 	 *	@param	schemaName			The SchemaName for the jar file.
 	 *	@param	sqlName			    The sqlName for the jar file.
 	 *  @exception StandardException Ooops
 	 */
-	public	ConstantAction getDropJarConstantAction(UUID id,
+	public	ConstantAction getDropJarConstantAction(
 														  String schemaName,
 														  String sqlName)
 		 throws StandardException
 	{
 		getAuthorizer().authorize(Authorizer.JAR_WRITE_OP);
-		return new DropJarConstantAction(id,schemaName,sqlName);
+		return new DropJarConstantAction(schemaName,sqlName);
 	}
 
 	static protected Authorizer getAuthorizer()

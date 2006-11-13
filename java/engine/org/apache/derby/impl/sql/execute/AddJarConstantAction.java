@@ -33,8 +33,6 @@ import org.apache.derby.catalog.UUID;
  */
 class AddJarConstantAction extends DDLConstantAction
 {
-
-	private final UUID id;
 	private	final String schemaName;
 	private	final String sqlName;
 	private final String externalPath;
@@ -53,12 +51,11 @@ class AddJarConstantAction extends DDLConstantAction
 	 *	@param	sqlName			    The sqlName for the jar file.
 	 *  @param  externalPath            The name of the file that holds the jar.
 	 */
-	AddJarConstantAction(UUID id,
+	AddJarConstantAction(
 								 String schemaName,
 								 String sqlName,
 								 String externalPath)
 	{
-		this.id = id;
 		this.schemaName = schemaName;
 		this.sqlName = sqlName;
 		this.externalPath = externalPath;
@@ -92,7 +89,7 @@ class AddJarConstantAction extends DDLConstantAction
 	public void	executeConstantAction( Activation activation )
 						throws StandardException
 	{
-		JarUtil.add(id,schemaName,sqlName,externalPath);
+		JarUtil.add(schemaName,sqlName,externalPath);
 	}
 
 }

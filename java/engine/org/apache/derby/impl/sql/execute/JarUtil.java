@@ -53,7 +53,6 @@ class JarUtil
 {
 	//
 	//State passed in by the caller
-	private UUID id; //For add null means create a new id.
 	private String schemaName;
 	private String sqlName;
 
@@ -65,10 +64,9 @@ class JarUtil
 	
 	//
 	//State derived from the caller's context
-	private JarUtil(UUID id, String schemaName, String sqlName)
+	private JarUtil(String schemaName, String sqlName)
 		 throws StandardException
 	{
-		this.id = id;
 		this.schemaName = schemaName;
 		this.sqlName = sqlName;
 
@@ -91,10 +89,10 @@ class JarUtil
 	  @exception StandardException Opps
 	  */
 	static long
-	add(UUID id, String schemaName, String sqlName, String externalPath)
+	add(String schemaName, String sqlName, String externalPath)
 		 throws StandardException
 	{
-		JarUtil jutil = new JarUtil(id, schemaName, sqlName);
+		JarUtil jutil = new JarUtil(schemaName, sqlName);
 		InputStream is = null;
 		
 		try {
@@ -138,7 +136,7 @@ class JarUtil
 
             long generationId = setJar(jarExternalName, is);
 
-            fid = ddg.newFileInfoDescriptor(id, sd, sqlName, generationId);
+            fid = ddg.newFileInfoDescriptor(/*DJD*/null, sd, sqlName, generationId);
             dd.addDescriptor(fid, sd, DataDictionary.SYSFILES_CATALOG_NUM,
                     false, lcc.getTransactionExecute());
             return generationId;
@@ -164,11 +162,11 @@ class JarUtil
      *                Opps
      */
 	static void
-	drop(UUID id, String schemaName, String sqlName,boolean purgeOnCommit)
+	drop(String schemaName, String sqlName)
 		 throws StandardException
 	{
-		JarUtil jutil = new JarUtil(id, schemaName,sqlName);
-		jutil.drop(purgeOnCommit);
+		JarUtil jutil = new JarUtil(schemaName,sqlName);
+		jutil.drop();
 	}
 
 	/**
@@ -177,12 +175,10 @@ class JarUtil
 	  <P> The reason for dropping  the jar file in this private instance
 	  method is that it allows us to share set up logic with add and
 	  replace.
-	  @param purgeOnCommit True means purge the old jar file on commit. False
-	    means leave it around for use by replication.
 
 	  @exception StandardException Opps
 	  */
-	private void drop(boolean purgeOnCommit) throws StandardException
+	private void drop() throws StandardException
 	{
 		//
 		//Like create table we say we are writing before we read the dd
@@ -190,15 +186,6 @@ class JarUtil
 		FileInfoDescriptor fid = getInfo();
 		if (fid == null)
 			throw StandardException.newException(SQLState.LANG_FILE_DOES_NOT_EXIST, sqlName,schemaName);
-
-		if (SanityManager.DEBUG)
-		{
-			if (id != null && !fid.getUUID().equals(id))
-			{
-				SanityManager.THROWASSERT("Drop id mismatch want="+id+
-						" have "+fid.getUUID());
-			}
-		}
 
 		String dbcp_s = PropertyUtil.getServiceProperty(lcc.getTransactionExecute(),Property.DATABASE_CLASSPATH);
 		if (dbcp_s != null)
@@ -231,7 +218,7 @@ class JarUtil
 			dd.dropFileInfoDescriptor(fid);
 
 			fr.remove(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()),
-				fid.getGenerationId(), true /*purgeOnCommit*/);
+				fid.getGenerationId());
 		} finally {
 			notifyLoader(true);
 		}
@@ -242,29 +229,26 @@ class JarUtil
 	  external file. 
 
 
-	  @param id The id for the jar file we add. Ignored if null.
 	  @param schemaName the name for the schema that holds the jar file.
 	  @param sqlName the sql name for the jar file.
 	  @param externalPath the path for the jar file to add.
-	  @param purgeOnCommit True means purge the old jar file on commit. False
-	    means leave it around for use by replication.
 	  @return The new generationId for the jar file we replace.
 
 	  @exception StandardException Opps
 	  */
 	static long
-	replace(UUID id,String schemaName, String sqlName,
-			String externalPath,boolean purgeOnCommit)
+	replace(String schemaName, String sqlName,
+			String externalPath)
 		 throws StandardException
 	{
-		JarUtil jutil = new JarUtil(id,schemaName,sqlName);
+		JarUtil jutil = new JarUtil(schemaName,sqlName);
 		InputStream is = null;
 		
 
 		try {
 			is = openJarURL(externalPath);
 
-			return jutil.replace(is,purgeOnCommit);
+			return jutil.replace(is);
 		} catch (java.io.IOException fnfe) {
 			throw StandardException.newException(SQLState.SQLJ_INVALID_JAR, fnfe, externalPath);
 		}
@@ -286,7 +270,7 @@ class JarUtil
 	    means leave it around for use by replication.
 	  @exception StandardException Opps
 	  */
-	private long replace(InputStream is,boolean purgeOnCommit) throws StandardException
+	private long replace(InputStream is) throws StandardException
 	{
 		//
 		//Like create table we say we are writing before we read the dd
@@ -297,15 +281,6 @@ class JarUtil
 		FileInfoDescriptor fid = getInfo();
 		if (fid == null)
 			throw StandardException.newException(SQLState.LANG_FILE_DOES_NOT_EXIST, sqlName,schemaName);
-
-		if (SanityManager.DEBUG)
-		{
-			if (id != null && !fid.getUUID().equals(id))
-			{
-				SanityManager.THROWASSERT("Replace id mismatch want="+
-					id+" have "+fid.getUUID());
-			}
-		}
 
 		try {
 			// disable loads from this jar
@@ -319,7 +294,7 @@ class JarUtil
 			//Replace the file.
 			long generationId = 
 				fr.replace(jarExternalName,
-					fid.getGenerationId(), is, purgeOnCommit);
+					fid.getGenerationId(), is);
 
 			//
 			//Re-add the descriptor to the data dictionary.

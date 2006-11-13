@@ -35,8 +35,6 @@ import org.apache.derby.catalog.UUID;
  */
 class DropJarConstantAction extends DDLConstantAction
 {
-
-	private final UUID id;
 	private final String schemaName;
 	private final String sqlName;
 
@@ -49,15 +47,12 @@ class DropJarConstantAction extends DDLConstantAction
 	/**
 	 *	Make the ConstantAction to drop a jar file to database.
 	 *
-	 *	@param	id					The id for the jar file
 	 *	@param	schemaName			The SchemaName for the jar file.
 	 *	@param	sqlName			    The sqlName for the jar file.
 	 */
-	DropJarConstantAction(UUID id,
-								  String schemaName,
+	DropJarConstantAction(String schemaName,
 								  String sqlName)
 	{
-		this.id = id;
 		this.schemaName = schemaName;
 		this.sqlName = sqlName;
 	}
@@ -90,13 +85,6 @@ class DropJarConstantAction extends DDLConstantAction
 	public void	executeConstantAction( Activation activation )
 						throws StandardException
 	{
-		JarUtil.drop(null,schemaName,sqlName,
-					 purgeOnCommit());
+		JarUtil.drop(schemaName,sqlName);
 	}
-
-	//
-	// Replication can over-ride this to defer purging dropped jar
-	// files that remain in the stage.
-	protected boolean purgeOnCommit() { return true; }
-
 }

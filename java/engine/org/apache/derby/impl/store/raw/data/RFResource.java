@@ -46,9 +46,9 @@ import java.io.IOException;
 
 class RFResource implements FileResource {
 
-	protected final BaseDataFileFactory factory;
+	private final BaseDataFileFactory factory;
 
-	public RFResource(BaseDataFileFactory dataFactory) {
+	RFResource(BaseDataFileFactory dataFactory) {
 		this.factory = dataFactory;
 	}
 
@@ -148,7 +148,7 @@ class RFResource implements FileResource {
 	  @see FileResource#remove
 	  @exception StandardException Oops
 	  */
-	public void remove(String name, long currentGenerationId, boolean purgeOnCommit)
+	public void remove(String name, long currentGenerationId)
 		throws StandardException
 	{
 		if (factory.isReadOnly())
@@ -171,27 +171,24 @@ class RFResource implements FileResource {
 
         tran.blockBackup(true);
 
-		tran.logAndDo(new RemoveFileOperation(name, currentGenerationId, purgeOnCommit));
+		tran.logAndDo(new RemoveFileOperation(name, currentGenerationId, true));
 
-		if (purgeOnCommit) {
+		Serviceable s = new RemoveFile(getAsFile(name, currentGenerationId));
 
-			Serviceable s = new RemoveFile(getAsFile(name, currentGenerationId));
-
-			tran.addPostCommitWork(s);
-		}
+	    tran.addPostCommitWork(s);
 	}
 
 	/**
 	  @see FileResource#replace
 	  @exception StandardException Oops
 	  */
-	public long replace(String name, long currentGenerationId, InputStream source, boolean purgeOnCommit)
+	public long replace(String name, long currentGenerationId, InputStream source)
 		throws StandardException
 	{
 		if (factory.isReadOnly())
 			throw StandardException.newException(SQLState.FILE_READ_ONLY);
 
-		remove(name, currentGenerationId, purgeOnCommit);
+		remove(name, currentGenerationId);
 
 		long generationId = add(name, source);
 
@@ -207,14 +204,6 @@ class RFResource implements FileResource {
 		String versionedFileName = factory.getVersionedName(name, generationId);
 
 		return factory.storageFactory.newStorageFile( versionedFileName);
-	}
-
-	/**
-	  @see FileResource#getAsFile
-	  */
-	private StorageFile getAsFile(String name)
-	{
-		return factory.storageFactory.newStorageFile( name);
 	}
 
 	/**
