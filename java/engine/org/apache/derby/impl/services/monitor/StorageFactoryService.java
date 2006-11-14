@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.raw.data.DataFactory;
 
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageFactory;
@@ -881,19 +880,25 @@ final class StorageFactoryService implements PersistentService
                 {
                     try
                     {
-                        StorageFactory storageFactory = privGetStorageFactoryInstance( true, contents[index], null, null);
-                        try
-                        {
-                            StorageFile properties = storageFactory.newStorageFile( PersistentService.PROPERTIES_NAME);
-                            if (!properties.exists())
-                                continue;
-                            // convert to a canonical name while we are here.
-                            contents[index] = storageFactory.getCanonicalName();
-                            validIndex = true;
+                        String dirname = contents[index];
+                        StorageFile dir = rootStorageFactory.newStorageFile(dirname);
+                        if (!dir.isDirectory())
+                            continue;
+                        
+                        // Look to see if service.properties is in this
+                        // directory.
+                        StorageFile properties =
+                            rootStorageFactory.newStorageFile(dir,
+                                    PersistentService.PROPERTIES_NAME);
+                        
+                        if (!properties.exists())
+                            continue;
+                        
+                        // convert to a canonical name while we are here.
+                        contents[index] = dir.getCanonicalPath();
+                        validIndex = true;
 
-                            return this;
-                        }
-                        finally { storageFactory.shutdown(); }
+                        return this;
                     }
                     catch (Exception se) { continue; }
                 }
