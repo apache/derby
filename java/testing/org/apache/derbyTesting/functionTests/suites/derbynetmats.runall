@@ -41,5 +41,4 @@ store/holdCursorExternalSortJDBC30.sql
 store/holdCursorJDBC30.sql
 tools/importExport.java
 tools/ieptests.sql
-junitTests/derbyNet/OwnServerTests.junit
 derbynet/OutBufferedStream.java

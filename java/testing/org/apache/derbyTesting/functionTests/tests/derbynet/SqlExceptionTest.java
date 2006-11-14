@@ -20,6 +20,10 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -83,5 +87,10 @@ public class SqlExceptionTest extends BaseTestCase
         
         assertNotNull(javae.getNextException());
         assertEquals(javae.getNextException().getSQLState(), "08000");
+    }
+
+    public static Test suite() {
+        return new TestSuite(SqlExceptionTest.class,
+                             "SqlExceptionTest");
     }
 }

@@ -22,6 +22,9 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.apache.derby.client.am.ByteArrayCombinerStream;
 
 import java.io.*;
@@ -237,5 +240,10 @@ public class ByteArrayCombinerStreamTest
         assertEquals(data[3], (byte)combiner.read());
         assertEquals(data[4], (byte)combiner.read());
         assertEquals(-1, (byte)combiner.read());
+    }
+
+    public static Test suite() {
+        return new TestSuite(ByteArrayCombinerStreamTest.class,
+                             "ByteArrayCombinerStreamTest");
     }
 } // End class ByteArrayCombinerStreamTest

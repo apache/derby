@@ -702,7 +702,7 @@ class DDMWriter
 		    
 		    if( SanityManager.DEBUG ){
 		
-			if( PropertyUtil.getSystemProperty("derby.debug.suicideOfLayerBStreaming") != null )
+			if( PropertyUtil.getSystemBoolean("derby.debug.suicideOfLayerBStreaming") )
 			    throw new IOException();
 				}
 		    
