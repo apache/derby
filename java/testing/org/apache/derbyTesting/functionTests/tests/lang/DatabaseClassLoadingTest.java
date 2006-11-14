@@ -1,12 +1,25 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import javax.sql.DataSource;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -14,6 +27,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
@@ -33,7 +47,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     /**
      * Run the tests only in embedded since this is testing
      * server side behaviour. Due to DERBY-537 and DERBY-2040
-     * most of the tests are run without a secuirty manager.
+     * most of the tests are run without a security manager.
      * Ordering is important here so the fixtures are added
      * explicitly.
      */
@@ -76,13 +90,23 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testSignedJar")));
            
+           suite.addTest(new DatabaseClassLoadingTest("testCreateDatabaseJar"));
+           
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testHackedJarReplacedClass")));
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testInvalidJar")));           
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testRemoveJar"))); 
-           
+
+/*  SKIP due to DERBY-2083         
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                   new DatabaseClassLoadingTest("testDatabaseInJar"))); 
+
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                   new DatabaseClassLoadingTest("testDatabaseInClasspath"))); 
+*/
+
            test = new SupportFilesSetup(suite,
                    new String[] {
                    "functionTests/tests/lang/dcl_emc1.jar",
@@ -211,7 +235,12 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     
     public void testGetResource() throws SQLException
     {
-        PreparedStatement ps = prepareStatement("VALUES EMC.GETARTICLE(?)");
+        getResourceTests(getConnection());
+    }
+    
+    private static void getResourceTests(Connection conn) throws SQLException
+    {
+        PreparedStatement ps = conn.prepareStatement("VALUES EMC.GETARTICLE(?)");
         
         // Simple path should be prepended with the package name
         // of the class executing the code to find
@@ -425,7 +454,14 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         replaceJar("dcl_emc2s.jar", "EMC.MAIL_APP");
         
         ps.close();
-        ps = prepareStatement("VALUES EMC.GETSIGNERS(?)");
+        
+        signersTests(getConnection());
+        
+    }
+    
+    private static void signersTests(Connection conn) throws SQLException
+    {
+        PreparedStatement ps = conn.prepareStatement("VALUES EMC.GETSIGNERS(?)");
         ps.setString(1, "org.apache.derbyTesting.databaseclassloader.emc");    
         
         // now class is signed
@@ -513,6 +549,144 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
         cs.close();
     }
+    
+    /**
+     * Create a Jar of the current database.
+     * @throws Exception 
+     *
+     */
+    public void testCreateDatabaseJar() throws Exception
+    {
+        CallableStatement cs = prepareCall(
+                "CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()");
+        cs.executeUpdate();
+        cs.close();
+        
+        cs = prepareCall(
+                "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT(?)");
+        
+        final File backupDir = SupportFilesSetup.getReadWrite("dbreadonly");
+        
+        cs.setString(1, backupDir.getPath());
+        cs.executeUpdate();
+
+        cs.close();
+        
+        final String db = getTestConfiguration().getDatabaseName();
+        AccessController.doPrivileged
+        (new java.security.PrivilegedExceptionAction(){
+            
+            public Object run() throws Exception { 
+                createArchive("dclt.jar", new File(backupDir, db), "dbro");;
+              return null;
+            }
+        });
+        
+    }
+    
+    /**
+     * Test the jar'ed up database created by testCreateDatabaseJar
+     * accessing the database using the jar(path to archive)db form
+     * of database name.
+     */
+    public void testDatabaseInJar() throws SQLException
+    {
+        File jarFile = SupportFilesSetup.getReadOnly("dclt.jar");
+        String dbName = "jar:(" + jarFile.getAbsolutePath() + ")dbro";
+        
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        
+        readOnlyTest(ds);
+    }
+    
+    public void testDatabaseInClasspath() throws SQLException, MalformedURLException
+    {
+        String dbName = "classpath:dbro";
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        
+        try {
+            ds.getConnection();
+            fail("opened database before it was on classpath");
+        } catch (SQLException e)
+        {
+           assertSQLState("XJ004", e);
+        }
+        
+        URL jarURL = SupportFilesSetup.getReadOnlyURL("dclt.jar");
+        
+        setContextClassLoader(jarURL);
+        try {
+            readOnlyTest(ds);
+        } finally {
+            setContextClassLoader(null);
+        } 
+    }
+    
+    /**
+     * Run an number of statements against a jar'ed database to
+     * ensure it is read-only and that class loading works from
+     * jar files embedded in jar'ed up databases.
+     */
+    private static void readOnlyTest(DataSource ds) throws SQLException
+    {
+        try {
+            Connection conn = ds.getConnection();
+            Statement s = conn.createStatement();
+            
+            JDBC.assertFullResultSet(
+                    s.executeQuery("SELECT id, e_mail, ok from EMC.CONTACTS ORDER BY 1"),
+                    new String[][] {
+                        {"0", "now@classpathchange.com", null},
+                        {"1", "bill@ruletheworld.com", null},
+                        {"2", "penguin@antartic.com", null},
+                        {"3", "big@blue.com", null},
+                        {"4", "spammer@ripoff.com", "0"},
+                        {"5", "open@source.org", "1"},
+                        });
+            
+            JDBC.assertFullResultSet(
+                    s.executeQuery("SELECT id, e_mail, \"emcAddOn\".VALIDCONTACT(e_mail) from EMC.CONTACTS ORDER BY 1"),
+                    new String[][] {
+                        {"0", "now@classpathchange.com", "0"},
+                        {"1", "bill@ruletheworld.com", "0"},
+                        {"2", "penguin@antartic.com", "0"},
+                        {"3", "big@blue.com", "0"},
+                        {"4", "spammer@ripoff.com", "0"},
+                        {"5", "open@source.org", "1"},
+                        });
+                       
+            assertStatementError("25502", s,
+                    "INSERT INTO EMC.CONTACTS values(3, 'no@is_read_only.gov', NULL)");
+            assertStatementError("25502", s,
+                    "CALL EMC.ADDCONTACT(3, 'really@is_read_only.gov')");
+
+            // Disabled due to DERBY-522
+            // getResourceTests(conn);
+            
+            // Disabled due to DERBY-553
+            // signersTests(conn);
+            
+            // ensure that a read-only database automatically gets table locking
+            conn.setAutoCommit(false);
+            JDBC.assertDrainResults(
+                    s.executeQuery("select * from EMC.CONTACTS WITH RR"));
+            
+            JDBC.assertFullResultSet(
+                    s.executeQuery(
+                         "select TYPE, MODE, TABLENAME from syscs_diag.lock_table"),
+                    new String[][] {
+                        {"TABLE", "S", "CONTACTS"},
+                        });
+ 
+            s.close();
+            conn.rollback();
+            conn.setAutoCommit(true);
+            conn.close();
+        } finally {
+            JDBCDataSource.shutdownDatabase(ds);
+        }
+    }
+    
   
     private void installJar(String resource, String jarName) throws SQLException, MalformedURLException
     {        
@@ -558,5 +732,88 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         // 
         getConnection().close();
         getTestConfiguration().shutdownDatabase(); 
+    }
+    
+    /**
+     * jarname - jarname to use path - path to database dbname - database name
+     * in archive
+     */
+    private static void createArchive(String jarName, File dbDir, String dbName)
+            throws Exception {
+
+        assertTrue(dbDir.isDirectory());
+
+        // jar file paths in the JDBC URL are relative to the root
+        // derby.system.home or user.dir, so need to create the jar there.
+        File jarFile = SupportFilesSetup.getReadOnly(jarName);
+        
+        
+        ZipOutputStream zos = new ZipOutputStream(
+                new FileOutputStream(jarFile));
+
+        addEntries(zos, dbDir, dbName, dbDir.getPath().length());
+
+        zos.close();
+    }
+
+    static void addEntries(ZipOutputStream zos, File dir, String dbName, int old)
+            throws Exception {
+
+        String[] list = dir.list();
+
+        for (int i = 0; i < list.length; i++) {
+
+            File f = new File(dir, list[i]);
+            if (f.isDirectory()) {
+                addEntries(zos, f, dbName, old);
+            } else {
+                addFile(zos, f, dbName, old);
+            }
+
+        }
+    }
+
+    private static void addFile(ZipOutputStream zos, File f, String dbName, int old)
+            throws IOException {
+
+        String s = f.getPath().replace(File.separatorChar, '/');
+
+        s = s.substring(old);
+
+        s = dbName.concat(s);
+
+        // jar has forward slashes!
+        ZipEntry ze = new ZipEntry(s);
+        ze.setTime(f.lastModified());
+
+        zos.putNextEntry(ze);
+
+        byte[] buf = new byte[4096];
+        BufferedInputStream in = new BufferedInputStream(
+                (new FileInputStream(f)));
+        while (true) {
+            int read = in.read(buf);
+            if (read == -1) {
+                break;
+            }
+            zos.write(buf, 0, read);
+        }
+
+        in.close();
+        zos.closeEntry();
+    }
+    
+    private static void setContextClassLoader(final URL url)
+    {
+        AccessController.doPrivileged
+        (new java.security.PrivilegedAction(){
+            
+            public Object run()  { 
+                URLClassLoader cl = 
+                    url == null ? null : new URLClassLoader(new URL[] {url});
+                java.lang.Thread.currentThread().setContextClassLoader(cl);
+              return null;
+            }
+        });
     }
 }
