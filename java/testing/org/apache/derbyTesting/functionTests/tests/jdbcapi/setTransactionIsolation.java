@@ -78,7 +78,7 @@ public class setTransactionIsolation{
     Statement stmt = conn.createStatement();
 
 
-	String[] tabsToDrop = {"tab1", "t1", "t1copy", "t2"};
+	String[] tabsToDrop = {"tab1", "t1", "t1copy", "t2", "t3"};
 	for (int i = 0; i < tabsToDrop.length; i++)
 		dropTable(stmt,tabsToDrop[i]);
 
@@ -111,6 +111,10 @@ public class setTransactionIsolation{
 	stmt.executeUpdate("INSERT INTO T1 VALUES(1,'First Hello')");
 	stmt.executeUpdate("INSERT INTO T1 VALUES(2,'Second Hello')");
 	stmt.executeUpdate("INSERT INTO T1 VALUES(3,'Third Hello')");
+
+
+    stmt.executeUpdate("create table t3 (i integer)");
+
     System.out.println("done creating table and inserting data.");
 
     stmt.close();
@@ -128,7 +132,7 @@ public class setTransactionIsolation{
 		   conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 		   testIsolation(conn, false);
 		   testSetTransactionIsolationInHoldCursor(conn);
-
+           testSetTransactionIsolationCommits(conn);
 		} catch (SQLException sqle) {
 			System.out.print("FAIL:");
 			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(System.out, sqle);
@@ -211,6 +215,50 @@ public class setTransactionIsolation{
 			return;
 		}
 		System.out.println("FAIL: setTransactionIsolation() did not throw exception with open hold cursor");
+	}
+	
+	/**
+	 *   setTransactionIsolation commits?
+	 */
+	public static void testSetTransactionIsolationCommits(Connection conn) 
+	{
+        // In the current client implementation, the transaction will
+        // commit when setTransactionIsolation is called, while the
+        // embedded driver will not commit. See
+        // http://issues.apache.org/jira/browse/DERBY-2064
+		try {
+            conn.rollback();
+            conn.setAutoCommit(false);
+			conn.setTransactionIsolation(java.sql.Connection.TRANSACTION_SERIALIZABLE);
+            Statement s = conn.createStatement();
+            s.executeUpdate("delete from t3");
+            s.executeUpdate("insert into t3 values(1)");
+            conn.commit();
+            s.executeUpdate("insert into t3 values(2)");
+			conn.setTransactionIsolation(java.sql.Connection.TRANSACTION_SERIALIZABLE);
+            conn.rollback();
+            ResultSet rs = s.executeQuery("select count(*) from t3");
+            rs.next();
+            int count = rs.getInt(1);
+            switch (count) {
+            case 1:
+                System.out.println("count="+ count + 
+                                   ", setTransactionIsolation() does not commit");
+                break;
+            case 2:
+                System.out.println("count="+ count + 
+                                   ", setTransactionIsolation() commits");
+                break;
+            default:
+                System.out.println("FAIL: count="+ count + 
+                                   ", unexepected behaviour from testSetTransactionIsolationCommits");
+                break;
+            }
+            rs.close();
+            s.close();
+		} catch (SQLException se) {
+			System.out.println(se.getMessage());
+		}
 	}
 	
 	public static void testLevelsAndPrintStatistics(Connection con, String sql,
