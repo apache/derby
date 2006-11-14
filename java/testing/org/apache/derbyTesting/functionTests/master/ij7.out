@@ -17,7 +17,33 @@ ij> --
 -- This test will cover SHOW TABLES, SHOW SCHEMAS, etc.
 -- and the DESCRIBE command.
 connect 'jdbc:derby:wombat;create=true';
-ij> SET SCHEMA = APP;
+ij> -- first, set schema to sys and demonstrate that we can see the system tables.
+SET SCHEMA SYS;
+0 rows inserted/updated/deleted
+ij> SHOW TABLES;
+TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
+------------------------------------------------------------------------
+SYS                 |SYSALIASES                    |                    
+SYS                 |SYSCHECKS                     |                    
+SYS                 |SYSCOLPERMS                   |                    
+SYS                 |SYSCOLUMNS                    |                    
+SYS                 |SYSCONGLOMERATES              |                    
+SYS                 |SYSCONSTRAINTS                |                    
+SYS                 |SYSDEPENDS                    |                    
+SYS                 |SYSFILES                      |                    
+SYS                 |SYSFOREIGNKEYS                |                    
+SYS                 |SYSKEYS                       |                    
+SYS                 |SYSROUTINEPERMS               |                    
+SYS                 |SYSSCHEMAS                    |                    
+SYS                 |SYSSTATEMENTS                 |                    
+SYS                 |SYSSTATISTICS                 |                    
+SYS                 |SYSTABLEPERMS                 |                    
+SYS                 |SYSTABLES                     |                    
+SYS                 |SYSTRIGGERS                   |                    
+SYS                 |SYSVIEWS                      |                    
+SYSIBM              |SYSDUMMY1                     |                    
+19 rows selected
+ij> SET SCHEMA APP;
 0 rows inserted/updated/deleted
 ij> CREATE TABLE t1 (i int generated always as identity, d DECIMAL(5,2), test VARCHAR(20));
 0 rows inserted/updated/deleted
@@ -41,9 +67,28 @@ ij> -- first display all tables, then display tables in one schema
 SHOW TABLES;
 TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
 ------------------------------------------------------------------------
+SYS                 |SYSALIASES                    |                    
+SYS                 |SYSCHECKS                     |                    
+SYS                 |SYSCOLPERMS                   |                    
+SYS                 |SYSCOLUMNS                    |                    
+SYS                 |SYSCONGLOMERATES              |                    
+SYS                 |SYSCONSTRAINTS                |                    
+SYS                 |SYSDEPENDS                    |                    
+SYS                 |SYSFILES                      |                    
+SYS                 |SYSFOREIGNKEYS                |                    
+SYS                 |SYSKEYS                       |                    
+SYS                 |SYSROUTINEPERMS               |                    
+SYS                 |SYSSCHEMAS                    |                    
+SYS                 |SYSSTATEMENTS                 |                    
+SYS                 |SYSSTATISTICS                 |                    
+SYS                 |SYSTABLEPERMS                 |                    
+SYS                 |SYSTABLES                     |                    
+SYS                 |SYSTRIGGERS                   |                    
+SYS                 |SYSVIEWS                      |                    
+SYSIBM              |SYSDUMMY1                     |                    
 APP                 |T1                            |                    
 USER1               |T2                            |                    
-2 rows selected
+21 rows selected
 ij> SHOW TABLES IN APP;
 TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
 ------------------------------------------------------------------------

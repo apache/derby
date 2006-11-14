@@ -20,7 +20,11 @@
 
 connect 'jdbc:derby:wombat;create=true';
 
-SET SCHEMA = APP;
+-- first, set schema to sys and demonstrate that we can see the system tables.
+SET SCHEMA SYS;
+SHOW TABLES;
+
+SET SCHEMA APP;
 CREATE TABLE t1 (i int generated always as identity, d DECIMAL(5,2), test VARCHAR(20));
 
 CREATE SCHEMA USER1;

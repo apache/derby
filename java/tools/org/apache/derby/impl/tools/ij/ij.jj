@@ -1648,12 +1648,7 @@ throws SQLException
 		[ <IN> schema=identifier() ]
 	{
 		if(t!=null) {
-			// Only show non-system tables by default.
-			// If schema specified (i.e. SYS), also display system tables.
-			if(schema!=null)
-				types = new String[] { "TABLE", "SYSTEM TABLE" };
-			else
-				types = new String[] { "TABLE" };
+		    types = new String[] { "TABLE", "SYSTEM TABLE" };
 		}
 		else if(v!=null)
 			types = new String[] { "VIEW" };
