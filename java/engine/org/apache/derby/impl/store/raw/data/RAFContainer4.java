@@ -172,6 +172,14 @@ class RAFContainer4 extends RAFContainer {
             ioChannel = ourChannel;
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(!getCommittedDropState());
+                // If ioChannel == null and fileData supports getChannel()
+                // we have a problem. See this.openContainer(ContainerKey 
+                // newIdentity).
+                SanityManager.ASSERT(! ((ioChannel == null) &&
+                        super.fileData instanceof java.io.RandomAccessFile),
+                        "RAFContainer4: New style readPage attempted" +
+                        " with uninitialized ioChannel");
+
             }
         }
 
@@ -209,10 +217,6 @@ class RAFContainer4 extends RAFContainer {
         }
         else
         { // iochannel was not initialized, fall back to original method.
-            if(SanityManager.DEBUG) {
-                SanityManager.DEBUG_PRINT("RAFContainer4",
-                        "New style readPage attempted with uninitialized ioChannel");
-            }
             super.readPage(pageNumber, pageData);
         }
     }
@@ -236,6 +240,14 @@ class RAFContainer4 extends RAFContainer {
             if (getCommittedDropState())
                 return;
             ioChannel = ourChannel;
+            if (SanityManager.DEBUG) {
+                // If ioChannel == null and fileData supports getChannel()
+                // we have a problem
+                SanityManager.ASSERT(! ((ioChannel == null) &&
+                        super.fileData instanceof java.io.RandomAccessFile),
+                        "RAFContainer4: New style writePage attempted " +
+                        "with uninitialized ioChannel");
+            }
         }
         if(ioChannel != null) {
             ///////////////////////////////////////////////////
@@ -344,10 +356,6 @@ class RAFContainer4 extends RAFContainer {
             }
 
         } else { // iochannel was not initialized, fall back to original method.
-            if(SanityManager.DEBUG) {
-                SanityManager.DEBUG_PRINT("RAFContainer4",
-                        "New style writePage attempted with uninitialized ioChannel");
-            }
             super.writePage(pageNumber, pageData, syncPage);
         }
     }
