@@ -34,7 +34,6 @@ lang/cursorerrors.sql
 lang/datetime.sql
 lang/db2Compatibility.sql
 lang/dbManagerLimits.java
-lang/dcl.sql
 lang/ddlTableLockMode.sql
 lang/deadlockMode.java
 lang/declareGlobalTempTableJava.java
