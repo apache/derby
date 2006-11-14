@@ -166,6 +166,14 @@ grant codeBase "${derbyTesting.junit}" {
     permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
 };
 
+// Due to a problem running tests/derbynet/CompatibilityTest in the old test
+// harness, permission to read junit.properties is granted to all. This can be 
+// removed when CompatibilityTest is rewritten to conform to our current Junit
+// usage. See DERBY-2076.
+grant {
+    permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
+};
+
 // Ant's junit runner requires setOut to redirect the System output streams
 // to the forked JVM used when running junit tests inside Ant. Ant requires
 // forking the JVM if you want to run tests in a different directory than the
