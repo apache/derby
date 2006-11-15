@@ -146,6 +146,8 @@ public class VerifySignatures extends BaseJDBCTestCase {
         throws SQLException
     {
         DataSource ds = JDBCDataSource.getDataSource();
+        JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                                       "create=true");
         addClass(classes, ds.getClass(), javax.sql.DataSource.class);
         collectClassesFromConnection(ds.getConnection
                                      (TestConfiguration.getCurrent().getUserName(),
