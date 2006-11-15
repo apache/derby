@@ -65,6 +65,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(MathTrigFunctionsTest.suite());
         suite.addTest(PrepareExecuteDDL.suite());
         suite.addTest(RoutineSecurityTest.suite());
+        suite.addTest(RoutineTest.suite());
         suite.addTest(SQLAuthorizationPropTest.suite());
         suite.addTest(TimeHandlingTest.suite());
         suite.addTest(VTITest.suite());
