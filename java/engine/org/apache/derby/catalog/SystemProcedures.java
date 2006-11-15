@@ -924,12 +924,13 @@ public class SystemProcedures  {
     int     truncateEnd)
 		throws SQLException
     {
+ 
         org.apache.derby.iapi.db.OnlineCompress.compressTable(
             schema, 
             tablename, 
-            (purgeRows == 1),
-            (defragementRows == 1),
-            (truncateEnd == 1));
+            (purgeRows != 0),
+            (defragementRows != 0),
+            (truncateEnd != 0));
 
         return;
     }

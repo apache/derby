@@ -1296,5 +1296,32 @@ ij> select * from sys.sysstatistics;
 STATID                              |REFERENCEID                         |TABLEID                             |CREATIONTIMESTAMP         |&|VALID|COLCOUNT   |STATISTICS  
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ij> --end derby-737 related test cases.
-;
+-- DERBY-2057
+-- Use non-zero args other than 1s.
+rollback;
+ij> autocommit on;
+ij> call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','4096');
+0 rows inserted/updated/deleted
+ij> create table t1 (c1 char(254));
+0 rows inserted/updated/deleted
+ij> insert into t1 values 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z';
+26 rows inserted/updated/deleted
+ij> select conglomeratename, numallocatedpages, numfreepages from new org.apache.derby.diag.SpaceTable('T1') tab;
+CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   |NUMFREEPAGES        
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+T1                                                                                                                              |3                   |0                   
+ij> delete from t1;
+26 rows inserted/updated/deleted
+ij> select conglomeratename, numallocatedpages, numfreepages from new org.apache.derby.diag.SpaceTable('T1') tab;
+CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   |NUMFREEPAGES        
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+T1                                                                                                                              |1                   |2                   
+ij> call syscs_util.syscs_inplace_compress_table('APP','T1',2,2,2);
+0 rows inserted/updated/deleted
+ij> select conglomeratename, numallocatedpages, numfreepages from new org.apache.derby.diag.SpaceTable('T1') tab;
+CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   |NUMFREEPAGES        
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+T1                                                                                                                              |1                   |0                   
+ij> drop table t1;
+0 rows inserted/updated/deleted
 ij> 

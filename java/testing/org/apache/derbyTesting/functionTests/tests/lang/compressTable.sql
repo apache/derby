@@ -585,3 +585,17 @@ call syscs_util.syscs_compress_table('APP','DERBY737TABLE2',1);
 select * from sys.sysstatistics;
 
 --end derby-737 related test cases.
+
+-- DERBY-2057
+-- Use non-zero args other than 1s.
+rollback;
+autocommit on;
+call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storage.pageSize','4096');
+create table t1 (c1 char(254));
+insert into t1 values 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z';
+select conglomeratename, numallocatedpages, numfreepages from new org.apache.derby.diag.SpaceTable('T1') tab;
+delete from t1;
+select conglomeratename, numallocatedpages, numfreepages from new org.apache.derby.diag.SpaceTable('T1') tab;
+call syscs_util.syscs_inplace_compress_table('APP','T1',2,2,2);
+select conglomeratename, numallocatedpages, numfreepages from new org.apache.derby.diag.SpaceTable('T1') tab;
+drop table t1;
