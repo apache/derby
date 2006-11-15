@@ -336,124 +336,6 @@ ij> values {FN LENGTH('   xxxx                    ')};
 1          
 -----------
 7          
-ij> CREATE FUNCTION SV_RNNI(P1 INT) RETURNS VARCHAR(10) RETURNS NULL ON NULL INPUT EXTERNAL NAME 'java.lang.String.valueOf' LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION SV_CNI(P1 INT) RETURNS VARCHAR(10) CALLED ON NULL INPUT EXTERNAL NAME 'java.lang.String.valueOf' LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION SV_DEF(P1 INT) RETURNS VARCHAR(10) EXTERNAL NAME 'java.lang.String.valueOf' LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION MAX_RNNI(P1 INT, P2 INT) RETURNS INT RETURNS NULL ON NULL INPUT EXTERNAL NAME 'java.lang.Math.max' LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION MAX_CNI(P1 INT, P2 INT) RETURNS INT CALLED ON NULL INPUT EXTERNAL NAME 'java.lang.Math.max' LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION MAX_DEF(P1 INT, P2 INT) RETURNS INT EXTERNAL NAME 'java.lang.Math.max' LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> VALUES SV_RNNI(3);
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-3                                                                                                                               
-ij> VALUES SV_CNI(4);
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-4                                                                                                                               
-ij> VALUES SV_DEF(5);
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-5                                                                                                                               
-ij> create table SV_TAB(I INT);
-0 rows inserted/updated/deleted
-ij> insert into SV_TAB values(null);
-1 row inserted/updated/deleted
-ij> insert into SV_TAB values(7);
-1 row inserted/updated/deleted
-ij> select SV_RNNI(I) from SV_TAB where I = 7;
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-7                                                                                                                               
-ij> select SV_CNI(I) from SV_TAB where I = 7;
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-7                                                                                                                               
-ij> select SV_DEF(I) from SV_TAB where I = 7;
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-7                                                                                                                               
-ij> select SV_RNNI(I) from SV_TAB where I IS NULL;
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-NULL                                                                                                                            
-ij> select SV_CNI(I) from SV_TAB where I IS NULL;
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'int'.
-ij> select SV_DEF(I) from SV_TAB where I IS NULL;
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'int'.
-ij> VALUES MAX_RNNI(67, 12);
-1          
------------
-67         
-ij> VALUES MAX_RNNI(-3, -98);
-1          
------------
--3         
-ij> VALUES MAX_CNI(5, 3);
-1          
------------
-5          
-ij> VALUES MAX_DEF(99, -45);
-1          
------------
-99         
-ij> select MAX_RNNI(5, I) from SV_TAB where I = 7;
-1          
------------
-7          
-ij> select MAX_CNI(6, I) from SV_TAB where I = 7;
-1          
------------
-7          
-ij> select MAX_DEF(2, I) from SV_TAB where I = 7;
-1          
------------
-7          
-ij> select MAX_RNNI(I, 34) from SV_TAB where I = 7;
-1          
------------
-34         
-ij> select MAX_CNI(I, 24) from SV_TAB where I = 7;
-1          
------------
-24         
-ij> select MAX_DEF(I, 14) from SV_TAB where I = 7;
-1          
------------
-14         
-ij> select MAX_RNNI(5, I) from SV_TAB where I IS NULL;
-1          
------------
-NULL       
-ij> select MAX_CNI(6, I) from SV_TAB where I IS NULL;
-1          
------------
-ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'int'.
-ij> select MAX_DEF(2, I) from SV_TAB where I IS NULL;
-1          
------------
-ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'int'.
-ij> select MAX_RNNI(I, 34) from SV_TAB where I IS NULL;
-1          
------------
-NULL       
-ij> select MAX_CNI(I, 24) from SV_TAB where I IS NULL;
-1          
------------
-ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'int'.
-ij> select MAX_DEF(I, 14) from SV_TAB where I IS NULL;
-1          
------------
-ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'int'.
 ij> CREATE FUNCTION COUNT_ROWS(P1 VARCHAR(128), P2 VARCHAR(128)) RETURNS INT
 READS SQL DATA
 EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.countRows'
@@ -466,38 +348,29 @@ EXTERNAL NAME 'java.lang.Math.abs'
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
 ij> select FN_ABS(i) FROM SV_TAB;
-1          
------------
-NULL       
-7          
+ERROR 42X05: Table/View 'SV_TAB' does not exist.
 ij> select COUNT_ROWS(CURRENT SCHEMA, 'SV_TAB') from SV_TAB;
-1          
------------
-2          
-2          
+ERROR 42X05: Table/View 'SV_TAB' does not exist.
 ij> select FN_ABS(i), COUNT_ROWS(CURRENT SCHEMA, 'SV_TAB') from SV_TAB;
-1          |2          
------------------------
-NULL       |2          
-7          |2          
+ERROR 42X05: Table/View 'SV_TAB' does not exist.
 ij> DROP FUNCTION SV_RNNI;
-0 rows inserted/updated/deleted
+ERROR 42Y55: 'DROP FUNCTION' cannot be performed on 'SV_RNNI' because it does not exist.
 ij> DROP FUNCTION SV_CNI;
-0 rows inserted/updated/deleted
+ERROR 42Y55: 'DROP FUNCTION' cannot be performed on 'SV_CNI' because it does not exist.
 ij> DROP FUNCTION SV_DEF;
-0 rows inserted/updated/deleted
+ERROR 42Y55: 'DROP FUNCTION' cannot be performed on 'SV_DEF' because it does not exist.
 ij> DROP FUNCTION MAX_RNNI;
-0 rows inserted/updated/deleted
+ERROR 42Y55: 'DROP FUNCTION' cannot be performed on 'MAX_RNNI' because it does not exist.
 ij> DROP FUNCTION MAX_CNI;
-0 rows inserted/updated/deleted
+ERROR 42Y55: 'DROP FUNCTION' cannot be performed on 'MAX_CNI' because it does not exist.
 ij> DROP FUNCTION MAX_DEF;
-0 rows inserted/updated/deleted
+ERROR 42Y55: 'DROP FUNCTION' cannot be performed on 'MAX_DEF' because it does not exist.
 ij> DROP FUNCTION FN_ABS;
 0 rows inserted/updated/deleted
 ij> DROP FUNCTION COUNT_ROWS;
 0 rows inserted/updated/deleted
 ij> DROP TABLE SV_TAB;
-0 rows inserted/updated/deleted
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'SV_TAB' because it does not exist.
 ij> -- function definition without parameter names are valid
 CREATE FUNCTION NONAME1(INT, INT) RETURNS INT EXTERNAL NAME 'java.lang.Math.max' LANGUAGE JAVA PARAMETER STYLE JAVA;
 0 rows inserted/updated/deleted
@@ -559,69 +432,6 @@ ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_D;
 ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_E;
 0 rows inserted/updated/deleted
 ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_NS;
-0 rows inserted/updated/deleted
-ij> -- Test for DERBY-479 the commented out VALUES clauses
--- below cause linkage errors loading the generated class.;
-CREATE FUNCTION RN_COS(A DOUBLE) RETURNS DOUBLE
-EXTERNAL NAME 'java.lang.Math.cos(double)'
-RETURNS NULL ON NULL INPUT
-LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION RN_RADIANS(A DOUBLE) RETURNS DOUBLE
-EXTERNAL NAME 'java.lang.Math.toRadians(double)'
-RETURNS NULL ON NULL INPUT
-LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION CALL_COS(A DOUBLE) RETURNS DOUBLE
-EXTERNAL NAME 'java.lang.Math.cos(double)'
-CALLED ON NULL INPUT
-LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> CREATE FUNCTION CALL_RADIANS(A DOUBLE) RETURNS DOUBLE
-EXTERNAL NAME 'java.lang.Math.toRadians(double)'
-CALLED ON NULL INPUT
-LANGUAGE JAVA PARAMETER STYLE JAVA;
-0 rows inserted/updated/deleted
-ij> -- Test cases for DERBY-479
-VALUES CAST( RN_COS(RN_RADIANS(null)) AS DECIMAL(3,2));
-1    
------
-NULL 
-ij> VALUES CAST( RN_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
-1    
------
-0.00 
-ij> VALUES CAST( CALL_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
-1    
------
-0.00 
-ij> VALUES CAST( CALL_COS(CALL_RADIANS(null)) AS DECIMAL(3,2));
-1    
------
-ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
-ij> VALUES CAST( CALL_COS(RN_RADIANS(null)) AS DECIMAL(3,2));
-1    
------
-ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
-ij> VALUES CAST( CALL_COS(RN_RADIANS(90.0)) AS DECIMAL(3,2));
-1    
------
-0.00 
-ij> VALUES CAST( RN_COS(CALL_RADIANS(90.0)) AS DECIMAL(3,2));
-1    
------
-0.00 
-ij> VALUES CAST( RN_COS(CALL_RADIANS(null)) AS DECIMAL(3,2));
-1    
------
-ERROR 39004: A NULL value cannot be passed to a method which takes a parameter of primitive type 'double'.
-ij> DROP FUNCTION RN_COS;
-0 rows inserted/updated/deleted
-ij> DROP FUNCTION RN_RADIANS;
-0 rows inserted/updated/deleted
-ij> DROP FUNCTION CALL_COS;
-0 rows inserted/updated/deleted
-ij> DROP FUNCTION CALL_RADIANS;
 0 rows inserted/updated/deleted
 ij> -- SYSFUN functions (unqualifed functions are automatically resolved
 -- to the in-memory SYSFUN functions if the function does not exist
