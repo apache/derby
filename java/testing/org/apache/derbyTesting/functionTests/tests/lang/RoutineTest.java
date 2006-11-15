@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Types;
 
 import junit.framework.Test;
@@ -258,7 +259,94 @@ public class RoutineTest extends BaseJDBCTestCase {
         ps.setNull(1, Types.INTEGER);
         assertStatementError("39004", ps); // Can't pass NULL into primitive type
         ps.close();
+
+        errors = runSQLCommands(
+                "CREATE FUNCTION NOON_NOCALL(TIME) " +
+                   "RETURNS TIME " +
+                   "RETURNS NULL ON NULL INPUT " +
+                   "EXTERNAL NAME '" +
+                   RoutineTest.class.getName() + ".nullAtNoon'  " +
+                   "LANGUAGE JAVA PARAMETER STYLE JAVA; " +
+                "CREATE FUNCTION NOON_CALL(TIME) " +
+                   "RETURNS TIME " +
+                   "CALLED ON NULL INPUT " +
+                   "EXTERNAL NAME '" +
+                   RoutineTest.class.getName() + ".nullAtNoon'  " +
+                   "LANGUAGE JAVA PARAMETER STYLE JAVA; "
+                   
+        );  
+        assertEquals("errors running DDL", 0, errors);
         
+        // Function maps:
+        // NULL to 11:00:00 (if null can be passed)
+        // 11:00:00 to 11:30:00
+        // 12:00:00 to NULL
+        // any other time to itself
+        
+        Time noon = Time.valueOf("12:00:00"); // mapped to null by the function
+        Time tea = Time.valueOf("15:30:00");
+        
+        ps = prepareStatement("VALUES NOON_NOCALL(?)");
+        ps.setTime(1, tea);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), tea.toString());
+        ps.setTime(1, noon);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        ps.setTime(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        ps.close();
+
+        ps = prepareStatement("VALUES NOON_CALL(?)");
+        ps.setTime(1, tea);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), tea.toString());
+        ps.setTime(1, noon);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        ps.setTime(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:00:00");
+        ps.close();
+        
+        // All the nested calls in these cases take take the
+        // value 'tea' will return the same value.
+        
+        ps = prepareStatement("VALUES NOON_NOCALL(NOON_NOCALL(?))");
+        ps.setTime(1, tea);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), tea.toString());
+        ps.setTime(1, noon); // noon->NULL->NULL
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        ps.setTime(1, null); // NULL->NULL->NULL
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        ps.close();
+        
+        ps = prepareStatement("VALUES NOON_NOCALL(NOON_CALL(?))");
+        ps.setTime(1, tea);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), tea.toString());
+               
+        // DERBY-1030 RESULT SHOULD BE NULL
+        // noon->NULL by inner function
+        // NULL->NULL by outer due to RETURN NULL ON NULL INPUT
+        ps.setTime(1, noon); // noon->NULL->NULL
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:00:00");        
+        ps.setTime(1, null); // NULL->11:00:00->11:30:00
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:30:00");
+
+        ps.close();
+        
+        ps = prepareStatement("VALUES NOON_CALL(NOON_NOCALL(?))");
+        ps.setTime(1, tea);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), tea.toString());
+        ps.setTime(1, noon); // noon->NULL->11:00:00
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:00:00");
+        ps.setTime(1, null); // NULL->NULL->11:00:00
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:00:00");
+        ps.close();
+        
+        ps = prepareStatement("VALUES NOON_CALL(NOON_CALL(?))");
+        ps.setTime(1, tea);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), tea.toString());
+        ps.setTime(1, noon); // noon->NULL->11:00:00
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:00:00");
+        ps.setTime(1, null); // NULL->11:00:00->11:30:00
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:30:00");
+        ps.close();
     }
     
     /*
@@ -279,6 +367,18 @@ public class RoutineTest extends BaseJDBCTestCase {
     public static int same(int i)
     {
         return i;
+    }
+    
+    public static Time nullAtNoon(Time t) {
+        if (t == null)
+            return Time.valueOf("11:00:00");
+        String s = t.toString();
+        if ("11:00:00".equals(s))
+            return Time.valueOf("11:30:00");
+        if ("12:00:00".equals(s))
+           return null;
+        
+        return t;
     }
 }
 
