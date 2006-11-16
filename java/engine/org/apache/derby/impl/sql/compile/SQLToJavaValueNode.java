@@ -59,6 +59,16 @@ public class SQLToJavaValueNode extends JavaValueNode
 {
 	ValueNode	value;
 
+    /**
+     * If set then this SQL value is being passed into a SQL function
+     * declared RETURNS NULL ON NULL input. In this case this node
+     * performs NULL checking logic in addition simple translation
+     * from the SQL domain to the Java domain. Thus if this
+     * is set then this node can not be removed when it
+     * is paired with a JavaToSQLValueNode.
+     * This field is set at generate time of the
+     * enclosing StaticMethodCallNode.
+     */
 	LocalField	returnsNullOnNullState;
 
 	/**
@@ -326,7 +336,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	public void generateExpression(ExpressionClassBuilder acb,
 											MethodBuilder mb)
 									throws StandardException
-	{
+	{       
 		/* Compile the expression under us */
 		generateSQLValue( acb, mb );
 
@@ -344,7 +354,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateSQLValue(ExpressionClassBuilder acb,
+	private void generateSQLValue(ExpressionClassBuilder acb,
 											MethodBuilder mb)
 									throws StandardException
 	{
@@ -362,7 +372,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void generateJavaValue
+	private void generateJavaValue
 	(
 		ExpressionClassBuilder	acb,
 		MethodBuilder mbex

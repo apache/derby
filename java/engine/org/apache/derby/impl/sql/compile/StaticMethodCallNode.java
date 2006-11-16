@@ -120,6 +120,13 @@ public class StaticMethodCallNode extends MethodCallNode
 	private boolean		isSystemCode;
 	private boolean		alreadyBound;
 
+    /**
+     * Generated boolean field to hold the indicator
+     * for if any of the parameters to a
+     * RETURNS NULL ON NULL INPUT function are NULL.
+     * Only set if this node is calling such a function.
+     * Set at generation time.
+     */
 	private LocalField	returnsNullOnNullState;
 
 
