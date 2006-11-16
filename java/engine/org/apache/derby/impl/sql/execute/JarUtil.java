@@ -80,7 +80,6 @@ class JarUtil
 	/**
 	  Add a jar file to the current connection's database.
 
-	  @param id The id for the jar file we add. If null this makes up a new id.
 	  @param schemaName the name for the schema that holds the jar file.
 	  @param sqlName the sql name for the jar file.
 	  @param externalPath the path for the jar file to add.
@@ -148,15 +147,10 @@ class JarUtil
 	/**
      * Drop a jar file from the current connection's database.
      * 
-     * @param id
-     *            The id for the jar file we drop. Ignored if null.
      * @param schemaName
      *            the name for the schema that holds the jar file.
      * @param sqlName
      *            the sql name for the jar file.
-     * @param purgeOnCommit
-     *            True means purge the old jar file on commit. False means leave
-     *            it around for use by replication.
      * 
      * @exception StandardException
      *                Opps
@@ -266,8 +260,6 @@ class JarUtil
 	  method is that it allows us to share set up logic with add and
 	  drop.
 	  @param is An input stream for reading the new content of the jar file.
-	  @param purgeOnCommit True means purge the old jar file on commit. False
-	    means leave it around for use by replication.
 	  @exception StandardException Opps
 	  */
 	private long replace(InputStream is) throws StandardException
