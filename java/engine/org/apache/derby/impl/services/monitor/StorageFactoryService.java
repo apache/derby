@@ -849,6 +849,9 @@ final class StorageFactoryService implements PersistentService
 
         public boolean hasMoreElements()
         {
+            if (contents == null)
+                return false;
+            
             if (validIndex)
                 return true;
 
