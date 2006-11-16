@@ -75,8 +75,11 @@ import java.io.InputStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.PrintStream;
 
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -107,9 +110,9 @@ abstract class BaseMonitor
 	/* Fields */
 
 	/**
-		Hashtable of objects that implement PersistentService keyed by their getType() method.
+		Hash table of objects that implement PersistentService keyed by their getType() method.
 	*/
-	Hashtable serviceProviders;
+	private HashMap serviceProviders = new HashMap();
 
 	// Vector of class objects of implementations, found in the System, application
 	// and default (modules.properties) properties
@@ -390,7 +393,7 @@ abstract class BaseMonitor
 		}
 
 		// bootup all the service providers
-		bootServiceProviders();
+		determineSupportedServiceProviders();
 
 		// See if automatic booting of persistent services is required
 		boolean bootAll = Boolean.valueOf(PropertyUtil.getSystemProperty(Property.BOOT_ALL)).booleanValue();
@@ -1230,8 +1233,6 @@ nextModule:
         if (ps == null) {
             report("Class " + possibleModule.getName() + " cannot create instance, module ignored.");
         } else {
-            if (serviceProviders == null)
-                serviceProviders = new Hashtable(3, (float) 1.0);
             serviceProviders.put(ps.getType(), ps);
         }
         return true;
@@ -1400,30 +1401,26 @@ nextModule:
 	** its getType() method.
 	**
 	** Once all the implementations have loaded the service providers
-	** are booted. If they fail to boot then they aare discarded.
-	** E.g. a marimba service provider may detect that its not in
-	** a channel so it refuses to boot.
+	** are checked to see if they run in the current environment.
 	*/
 
 	/**
-		Boot all the service providers, ie. any module that implemented
-		PersistentService. Upon entry to this call is the hashtable has
-		PersistentService objects that have been created but not booted.
+     * Determine which of the set of service providers (PersistentService objects)
+     * are supported in the current environment. If a PersistentService
+     * implementation does not implement ModuleControl then it is assumed
+     * it does support the current environment. Otherwise the canSupport()
+     * method makes the determination. Any providers that are not supported
+     * are removed from the list.
 	*/
-	protected void bootServiceProviders() {
+	private void determineSupportedServiceProviders() {
 
-		if (serviceProviders == null) {
-			return;
-		}
+		for (Iterator i = serviceProviders.values().iterator(); i.hasNext(); ) {
 
-		for (Enumeration e = serviceProviders.keys(); e.hasMoreElements(); ) {
-
-			String serviceType = (String) e.nextElement();
-			Object provider = serviceProviders.get(serviceType);
+			Object provider = i.next();
 
 			// see if this provider can live in this environment
 			if (!BaseMonitor.canSupport(provider, (Properties) null)) {
-				serviceProviders.remove(serviceType);
+				i.remove();
 				continue;
 			}
 		}
@@ -1436,7 +1433,7 @@ nextModule:
 		are active and calls bootPersistentServices(PersistentService)
 		to boot all the services that that provider knows about.
 	*/
-	protected void bootPersistentServices() {
+	private void bootPersistentServices() {
 		Enumeration e = new ProviderEnumeration( applicationProperties);
 		while (e.hasMoreElements()) {
 			PersistentService provider = (PersistentService) e.nextElement();
@@ -2102,7 +2099,8 @@ nextModule:
 
     class ProviderEnumeration implements Enumeration
     {
-        private Enumeration serviceProvidersKeys = (serviceProviders == null) ? null : serviceProviders.keys();
+        private Enumeration serviceProvidersKeys = (serviceProviders == null) ? null :
+            Collections.enumeration(serviceProviders.keySet());
         private Properties startParams;
         private Enumeration paramEnumeration;
         private boolean enumeratedDirectoryProvider;
