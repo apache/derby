@@ -124,6 +124,15 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 */
 	String	getString() throws StandardException;
 
+    /**
+     * Gets the value in the data value descriptor as a trace string.
+     * If the value itself is not suitable for tracing purposes, a more
+     * suitable representation is returned. For instance, data values
+     * represented as streams are not materialized. Instead, information about
+     * the associated stream is given.
+     */
+    String getTraceString() throws StandardException;
+
 	/**
 	 * Gets the value in the data value descriptor as a boolean.
 	 * Throws an exception if the data value is not a boolean.

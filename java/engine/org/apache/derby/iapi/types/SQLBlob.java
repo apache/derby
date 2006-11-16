@@ -168,6 +168,25 @@ public class SQLBlob extends SQLBinary
     }
 
     /**
+     * Gets a trace representation of the BLOB for debugging.
+     *
+     * @return a trace representation of the BLOB.
+     */
+    public final String getTraceString() throws StandardException {
+        // Check if the value is SQL NULL.
+        if (isNull()) {
+            return "NULL";
+        }
+
+        // Check if we have a stream.
+        if (getStream() != null) {
+            return ("BLOB(" + getStream().toString() + ")");
+        }
+
+        return ("BLOB(" + getLength() + ")");
+    }
+
+    /**
 	   Return my format identifier.
            
 	   @see org.apache.derby.iapi.services.io.TypedFormat#getTypeFormatId
