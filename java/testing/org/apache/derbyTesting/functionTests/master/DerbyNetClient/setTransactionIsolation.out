@@ -673,3 +673,4 @@ con.getTransactionIsolation() =TRANSACTION_SERIALIZABLE:8
 insert into t1copy (select * from t1)
 A lock could not be obtained within the time requested
 EXPECTED EXCEPTION SQLSTATE:X0X03 Invalid transaction state - held cursor requires same isolation level
+count=2, setTransactionIsolation() commits

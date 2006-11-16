@@ -565,3 +565,4 @@ con.getTransactionIsolation() =TRANSACTION_SERIALIZABLE:8
 insert into t1copy (select * from t1)
 A lock could not be obtained within the time requested
 FAIL: setTransactionIsolation() did not throw exception with open hold cursor
+count=1, setTransactionIsolation() does not commit

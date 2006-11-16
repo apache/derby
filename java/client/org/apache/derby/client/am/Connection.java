@@ -872,6 +872,9 @@ public abstract class Connection implements java.sql.Connection,
                             holdability());
         }
         setTransactionIsolationStmt.executeUpdate("SET CURRENT ISOLATION = " + levelString);
+        // The server has now implicitely committed the
+        // transaction so we have to clean up locally.
+        completeLocalCommit();
 
         isolation_ = level;
 
