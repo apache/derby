@@ -795,7 +795,7 @@ public class StoredPage extends CachedPage
 		try 
         {
 			readPageHeader();
-			initSlotTable();
+			initSlotTable(newIdentity);
 		}
         catch (IOException ioe) 
         {
@@ -2165,10 +2165,15 @@ public class StoredPage extends CachedPage
      * BasePage.  Go through all the records on the page and set the 
      * freeSpace and firstFreeByte on page.
      * <p>
+     * @param newIdentity   The identity of the page we are trying to 
+     *                      initialize, since we are in the middle of trying
+     *                      to build the page existing info in the class is
+     *                      not set up yet (like getIdentity()). 
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-	private void initSlotTable() 
+	private void initSlotTable(
+    PageKey newIdentity)
         throws StandardException
 	{
 		int localSlotsInUse = slotsInUse;
@@ -2212,7 +2217,7 @@ public class StoredPage extends CachedPage
                 {
                     throw dataFactory.markCorrupt(
                         StandardException.newException(
-                            SQLState.DATA_CORRUPT_PAGE, getPageId()));
+                            SQLState.DATA_CORRUPT_PAGE, newIdentity));
 				}
 
 				if (recordOffset > lastRecordOffset) 
@@ -2276,7 +2281,7 @@ public class StoredPage extends CachedPage
 			// i/o methods on the byte array have thrown an IOException
             throw dataFactory.markCorrupt(
                 StandardException.newException(
-                    SQLState.DATA_CORRUPT_PAGE, ioe, getPageId()));
+                    SQLState.DATA_CORRUPT_PAGE, ioe, newIdentity));
 		}
 	}
 
