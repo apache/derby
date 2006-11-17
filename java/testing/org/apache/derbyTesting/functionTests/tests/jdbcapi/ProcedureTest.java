@@ -253,6 +253,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         } catch (SQLException sqle) {
             assertNoResultSetFromExecuteQuery(sqle);
         }
+        cs.close();
     }
 
     /**
