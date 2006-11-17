@@ -68,8 +68,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
         int sum = a + id + 17;
         println("Reading tuple:(" + id + "," + a  + "," + b + ",'" + 
                 rs.getString(4) + "')");
-        assertEquals("Expecting b==id+a+17, got: id=" + id + 
-                     ",a=" + a + ",b=" + b + ",c=" +rs.getString(4), b, sum);
+        assertEquals("Expecting b==id+a+17", b, sum);
     }
     
     /**
@@ -77,8 +76,6 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
      * updateRow()
      */
     protected void updateTuple(ResultSet rs) throws SQLException {
-        assertFalse("Cannot use updateRow() in autocommit mode", 
-                   rs.getStatement().getConnection().getAutoCommit());
         int id = rs.getInt(1);
         int a = rs.getInt(2);
         int b = rs.getInt(3);        
@@ -105,6 +102,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
         ps.setInt(1, newA);
         ps.setInt(2, newB);
         assertEquals("Expected one tuple to be updated", 1, ps.executeUpdate());
+        ps.close();
     }
     
     /**
@@ -121,8 +119,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
             verifyTuple(rs);
         }
         if (!ignoreCount) {
-            assertEquals("Expected  " + recordCount + " records", nRecords, 
-                         recordCount);
+            assertEquals("Record Count", recordCount, nRecords);
         }
     }
     
@@ -141,8 +138,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
             verifyTuple(rs);
         }
         if (!ignoreCount) {
-            assertEquals("Expected  " + recordCount + " records", nRecords, 
-                         recordCount);
+        	assertEquals("Record Count", recordCount, nRecords);
         }
     }
     
@@ -161,8 +157,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
             updateTuple(rs);
         }
         if (!ignoreCount) {
-            assertEquals("Expected  " + recordCount + " records", nRecords, 
-                         recordCount);
+            assertEquals("Record Count", recordCount, nRecords);
         }
         assertNotNull("rs.getCursorName()", rs.getCursorName());
     }
@@ -182,8 +177,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
             updateTuplePositioned(rs);
         }
         if (!ignoreCount) {
-            assertEquals("Expected  " + recordCount + " records", nRecords, 
-                         recordCount);
+        	assertEquals("Record Count", recordCount, nRecords);
         }
         assertNotNull("rs.getCursorName()", rs.getCursorName());
     }
@@ -202,8 +196,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
             updateTuple(rs);
         }
         if (!ignoreCount) {
-            assertEquals("Expected  " + recordCount + " records", nRecords, 
-                         recordCount);
+        	assertEquals("Record Count", recordCount, nRecords);
         }
         assertNotNull("rs.getCursorName()", rs.getCursorName());
     }
@@ -223,8 +216,7 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
             updateTuplePositioned(rs);
         }
         if (!ignoreCount) {
-            assertEquals("Expected  " + recordCount + " records", nRecords, 
-                         recordCount);
+        	assertEquals("Record Count", recordCount, nRecords);
         }
         assertNotNull("rs.getCursorName()", rs.getCursorName());
     }
