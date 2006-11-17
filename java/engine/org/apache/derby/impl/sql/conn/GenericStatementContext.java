@@ -64,8 +64,6 @@ import java.sql.SQLException;
 final class GenericStatementContext 
 	extends ContextImpl implements StatementContext
 {
-	private final TransactionController tc;
-
 	private boolean		setSavePoint;
 	private String		internalSavePointName;
 	private ResultSet	topResultSet;
@@ -103,11 +101,10 @@ final class GenericStatementContext
 	   constructor
 		@param tc transaction
 	*/
-	GenericStatementContext(LanguageConnectionContext lcc, TransactionController tc) 
+	GenericStatementContext(LanguageConnectionContext lcc) 
 	{
 		super(lcc.getContextManager(), org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT);
 		this.lcc = lcc;
-		this.tc = tc;
 
 		internalSavePointName = "ISSP" + hashCode();
 
@@ -254,8 +251,7 @@ final class GenericStatementContext
 		pleaseBeOnStack();
 		
 
-		// RESOLVE PLUGIN ???. For the plugin, there will be no transaction controller
-		if ( tc != null ) { tc.setSavePoint(internalSavePointName, null); }
+		lcc.getTransactionExecute().setSavePoint(internalSavePointName, null);
 		setSavePoint = true;
 	}
 
@@ -281,7 +277,7 @@ final class GenericStatementContext
 		if (inUse && setSavePoint)
 		{		
 			// RESOLVE PLUGIN ???. For the plugin, there will be no transaction controller
-			if ( tc != null ) { tc.setSavePoint(internalSavePointName, null); }
+			lcc.getTransactionExecute().setSavePoint(internalSavePointName, null);
 			// stage buffer management
 		}
 	}
@@ -309,7 +305,7 @@ final class GenericStatementContext
 		}
 
 		// RESOLVE PLUGIN ???. For the plugin, there will be no transaction controller
-		if ( tc != null ) { tc.releaseSavePoint(internalSavePointName, null); }
+		lcc.getTransactionExecute().releaseSavePoint(internalSavePointName, null);
 		setSavePoint = false;
 	}
 

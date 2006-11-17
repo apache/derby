@@ -151,12 +151,12 @@ public class GenericLanguageConnectionContext
 	that the various language code can find out what its
 	transaction is.
 	**/
-	protected TransactionController tran;
+	private final TransactionController tran;
 
 	/**
 	 * If non-null indicates that a nested user transaction is in progress.
 	 */
-	protected TransactionController childTransaction;
+	private TransactionController childTransaction;
 	
 	/**
 	 * queryNestingDepth is a counter used to keep track of how many calls 
@@ -234,8 +234,6 @@ public class GenericLanguageConnectionContext
 	private Vector stmtValidators;
 	private Vector triggerExecutionContexts;
 	private Vector triggerTables;
-
-	protected AccessFactory af;
 
 	// OptimizerTrace
 	private boolean optimizerTrace;
@@ -317,7 +315,6 @@ public class GenericLanguageConnectionContext
 		triggerExecutionContexts = new Vector();
 		triggerTables = new Vector();
 		
-		af = lcf.getAccessFactory();
 		statementCache = lcf.getStatementCache();
 	}
 
@@ -1448,24 +1445,6 @@ public class GenericLanguageConnectionContext
 	}
 
 	/**
-	 * Return true if any transaction is blocked, even if not by this one
-	 *
-	 */
-	public boolean anyoneBlocked()
-	{
-		return getTransactionExecute().anyoneBlocked();
-	}
-
-	/**
-		Sets the transaction controller to use with this language connection
-		context.
-
-		@param	tran	the transaction to use with this language connection context
-	 */
-	public void setTransaction( TransactionController tran ) { this.tran = tran; }
-
-
-	/**
 	 * Start a Nested User Transaction (NUT) with the store. If a NUT is 
 	 * already active simply increment a counter, queryNestingDepth, to keep
 	 * track of how many times we have tried to start a NUT.
@@ -1946,7 +1925,7 @@ public class GenericLanguageConnectionContext
 		*/
 		if (statementContext == null)
 		{
-			statementContext = statementContexts[0] = new GenericStatementContext(this, tran);
+			statementContext = statementContexts[0] = new GenericStatementContext(this);
 		}
 		else if (statementDepth > 0)
 		{
@@ -1960,7 +1939,7 @@ public class GenericLanguageConnectionContext
 				statementContext = statementContexts[1];
 
 				if (statementContext == null)
-					statementContext = statementContexts[1] = new GenericStatementContext(this, tran);
+					statementContext = statementContexts[1] = new GenericStatementContext(this);
 				else
 					statementContext.pushMe();
 
@@ -1969,7 +1948,7 @@ public class GenericLanguageConnectionContext
 			else
 			{
 				parentStatementContext = getStatementContext();
-				statementContext = new GenericStatementContext(this, tran);
+				statementContext = new GenericStatementContext(this);
 			}
 
 			inTrigger = parentStatementContext.inTrigger() || (outermostTrigger == parentStatementDepth);
@@ -2902,12 +2881,6 @@ public class GenericLanguageConnectionContext
 	public Authorizer getAuthorizer()
 	{
 		return authorizer;
-	}
-
-	/** @see LanguageConnectionContext#getAccessFactory */
-	public AccessFactory getAccessFactory()
-	{
-		return af;
 	}
 
 	/**

@@ -355,20 +355,6 @@ public interface LanguageConnectionContext extends Context {
 	void	languageSetSavePoint( String savepointName, Object kindOfSavepoint )  throws StandardException;
 
 	/**
-		Returns true if any transaction is blocked (even if not by this one)
-
-	 */
-	boolean anyoneBlocked();
-
-	/**
-		Sets the transaction controller to use with this language connection
-		context.
-
-		@param	tran	the transaction to use with this language connection context
-	 */
-	void setTransaction( TransactionController tran );
-
-	/**
 	 * Begin a nested transaction.
 	 *
 	 * @param readOnly The nested transaction would be read only if param value true
@@ -865,9 +851,6 @@ public interface LanguageConnectionContext extends Context {
 	 *	Get the current StatementContext.
 	 */
 	StatementContext getStatementContext();
-
-	/** Get the AccessFactory cached in this LanguageConnectionContext */
-	AccessFactory getAccessFactory();
 
     /**
 	 * Return a PreparedStatement object for the query.
