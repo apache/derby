@@ -21,9 +21,9 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import junit.extensions.TestSetup;
@@ -31,29 +31,29 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 public class GroupByExpressionTest extends BaseJDBCTestCase
 {
 
-	private static String[][] TABLES = { 
-        {"test", "create table test (c1 int, c2 int, c3 int, c4 int)"},
-        {"coal", "create table coal (vc1 varchar(2), vc2 varchar(2))"},
-        {"alltypes", 
+	private static String[] TABLES = { 
+        "create table test (c1 int, c2 int, c3 int, c4 int)",
+        "create table coal (vc1 varchar(2), vc2 varchar(2))",
+         
             "create table alltypes (i int, s smallint, l bigint, " +
             "c char(10), v varchar(50), lvc long varchar, " +
             " d double precision, r real, " + 
             " dt date, t time, ts timestamp, " +
             " b char(2) for bit data, bv varchar(8) for bit data, " +
-            " lbv long varchar for bit data, dc decimal(5,2))"},
-        {"t1", "create table t1 (c1 varchar(30))"},
-        {"t2", "create table t2 (c1 varchar(10))"},
-        {"t3", "create table t3 (c1 int, c2 int)"}
+            " lbv long varchar for bit data, dc decimal(5,2))",
+        "create table t1 (c1 varchar(30))",
+        "create table t2 (c1 varchar(10))",
+        "create table t3 (c1 int, c2 int)"
     };
 
-    private static String[][] FUNCTIONS = {
-        {"r", "create function r() returns double external name " +
-            "'java.lang.Math.random' language java parameter style java"}};
+    private static String[] FUNCTIONS = {
+        "create function r() returns double external name " +
+            "'java.lang.Math.random' language java parameter style java"};
     
     /** 
      * Basic test case. Checks functionality with simple arithmetic expressions
@@ -453,17 +453,14 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
         TestSuite suite = new TestSuite("GROUP BY expression tests");
         suite.addTestSuite(GroupByExpressionTest.class);
         
-        TestSetup wrapper = new BaseJDBCTestSetup(suite) { 
-            public void setUp() throws Exception
+        TestSetup wrapper = new CleanDatabaseTestSetup(suite) { 
+        	protected void decorateSQL(Statement s) throws SQLException
             { 
-                Connection c = getConnection();
-                c.setAutoCommit(false);
-                Statement s = c.createStatement();
                 for (int i = 0; i < TABLES.length; i++) {
-                    s.execute(TABLES[i][1]);
+                    s.execute(TABLES[i]);
                 }
                 for (int i = 0; i < FUNCTIONS.length; i++) {
-                    s.execute(FUNCTIONS[i][1]);
+                    s.execute(FUNCTIONS[i]);
                 }
                 
                 s.execute("insert into test values (1, 10, 100, 1000)");
@@ -577,25 +574,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 s.execute("insert into t3 values (1,1), (2,2), (2,2), (3,3), (null, null), (5,100)");
 
                 s.close();
-                c.commit();
-                c.close();
               }
-            protected void tearDown() throws Exception 
-            { 
-                Connection c = getConnection();
-                c.setAutoCommit(false);
-                Statement s = c.createStatement();
-                
-                for (int i = 0; i < TABLES.length; i++) {
-                    s.execute("drop table " + TABLES[i][0]);
-                }
-                for (int i = 0; i < FUNCTIONS.length; i++) {
-                    s.execute("drop function " + FUNCTIONS[i][0]);
-                }
-                
-                c.commit();
-                super.tearDown();
-            }
             }; 
         return wrapper;
     }
