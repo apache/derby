@@ -222,6 +222,7 @@ public class JDBC {
                 JDBC.escape(fkName);
             s.executeUpdate(ddl);
         }
+        rs.close();
         conn.commit();
                 
         // Tables (again)
