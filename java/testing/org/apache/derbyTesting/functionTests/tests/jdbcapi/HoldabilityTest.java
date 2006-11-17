@@ -46,7 +46,7 @@ public class HoldabilityTest extends SURBaseTest {
     /**
      * Sets up the connection, then create the data model
      */
-    public void setUp() 
+    protected void setUp() 
         throws Exception 
     {      
        // For the holdability tests, we recreate the model
@@ -60,21 +60,14 @@ public class HoldabilityTest extends SURBaseTest {
         commit();
     }
     
-    /**
-     * Drop the data model, and close the connection
-     * @throws Exception 
-     */
-    public void tearDown() throws Exception 
+    protected void tearDown() throws Exception
     {
-        try {            
-            rollback();
-            Statement dropStatement = createStatement();
-            dropStatement.execute("drop table t1");
-            dropStatement.close();
-        } catch (SQLException e) {
-            printStackTrace(e); // Want to propagate the real exception.
-        }
-        super.tearDown();
+    	// Commit any changes, they will be dropped
+    	// anyway by the next setUp to run or the
+    	// outer database cleaners. It's faster to
+    	// commit than rollback many changes.
+    	commit();
+    	super.tearDown();
     }
     
     /**
@@ -275,8 +268,7 @@ public class HoldabilityTest extends SURBaseTest {
         ResultSet rs = s.executeQuery(selectStatement);
         
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
-                       false);
+            fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
         commit(); // scan initialized
         
@@ -297,8 +289,7 @@ public class HoldabilityTest extends SURBaseTest {
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
-                       false);
+            fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }        
         for (int i=0; i<this.recordCount/2; i++) {
             rs.next();
@@ -326,8 +317,7 @@ public class HoldabilityTest extends SURBaseTest {
         ResultSet rs = s.executeQuery(selectStatement);
         
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
-                       false);
+            fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
       
         scrollForward(rs); // Scan is done
@@ -351,15 +341,14 @@ public class HoldabilityTest extends SURBaseTest {
         ResultSet rs = s.executeQuery(selectStatement);
         
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
-                       false);
+            fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
         rs.next();
         commit();
         try {
             rs.updateInt(2, -100);
             rs.updateRow();
-            assertTrue("Expected updateRow() to throw exception", false);
+            fail("Expected updateRow() to throw exception");
         } catch (SQLException e) {
             assertEquals("Unexpected SQLState",
                          INVALID_CURSOR_STATE_NO_CURRENT_ROW, e.getSQLState());
@@ -379,15 +368,14 @@ public class HoldabilityTest extends SURBaseTest {
         ResultSet rs = s.executeQuery(selectStatement);
         
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
-                       false);
+            fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
         rs.next();
         commit();
         try {
             rs.updateInt(2, -100);
             rs.updateRow();
-            assertTrue("Expected updateRow() to throw exception", false);
+            fail("Expected updateRow() to throw exception");
         } catch (SQLException e) {
             assertEquals("Unexpected SQLState",
                          INVALID_CURSOR_STATE_NO_CURRENT_ROW, e.getSQLState());
@@ -409,8 +397,7 @@ public class HoldabilityTest extends SURBaseTest {
         
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
-                       false);
+            fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
         commit(); // commit
         
@@ -433,8 +420,7 @@ public class HoldabilityTest extends SURBaseTest {
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
-                       false);
+            fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
         rs.next(); // Scan is in progress.
         
@@ -458,8 +444,7 @@ public class HoldabilityTest extends SURBaseTest {
                                           ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(selectStatement);
         if (rs.getConcurrency()==ResultSet.CONCUR_READ_ONLY) {
-            assertTrue("ResultSet concurrency downgraded to CONCUR_READ_ONLY",
-                       false);
+            fail("ResultSet concurrency downgraded to CONCUR_READ_ONLY");
         }
         
         scrollForward(rs); // scan is done
@@ -502,6 +487,7 @@ public class HoldabilityTest extends SURBaseTest {
             ps.addBatch();
         }
         ps.executeBatch();
+        ps.close();
         commit();
 
         rs.next();
@@ -534,6 +520,7 @@ public class HoldabilityTest extends SURBaseTest {
         while (rs.next()) {            
             verifyTuple(rs);
         }
+        rs.close();
     }
 
     /**
@@ -596,6 +583,7 @@ public class HoldabilityTest extends SURBaseTest {
             // This will fail if we managed to update reinserted tuple
             verifyTuple(rs); 
         }
+        rs.close();
     }
 
     /**
@@ -611,7 +599,6 @@ public class HoldabilityTest extends SURBaseTest {
     {
                // Use a new connection to compress the table        
         final Connection con2 = openDefaultConnection();
-        final String connId = con2.toString();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         
         final PreparedStatement ps2 = con2.prepareStatement
