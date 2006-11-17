@@ -118,6 +118,7 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
         // sessions
         for (int i = 0; i < conns.length; i++) {
             conns[i].close();
+            conns[i] = null;
         }
 
         // Give the free threads a little time to close their sessions. This is
