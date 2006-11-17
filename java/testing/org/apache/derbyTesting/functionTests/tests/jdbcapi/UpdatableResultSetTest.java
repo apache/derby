@@ -39,11 +39,15 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
     public UpdatableResultSetTest(String name) {
         super(name);
     }
-
-    private Connection conn = null;
     
+    /**
+     * Create require objects and data. No tearDown
+     * is needed because these are created in non-auto-commit
+     * mode and no commit is ever issued. Thus on the super's
+     * tearDown the rollback will revert everything.
+     */
     protected void setUp() throws SQLException {
-        conn = getConnection();
+        Connection conn = getConnection();
         conn.setAutoCommit(false);
         Statement stmt = conn.createStatement();
         
@@ -68,16 +72,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
         stmt.executeUpdate("create table \"my table\" (x int)");
         stmt.executeUpdate("insert into \"my table\" values (1), (2), (3) ");
         
-        
-        
         stmt.close();
-    }
-
-    protected void tearDown() throws Exception {
-        conn.rollback();
-        conn.close();
-        super.tearDown();
-        conn = null;
     }
     
     /** Create a test suite with all tests in this class. */
@@ -97,7 +92,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */
     public void testInsertRowOnQuotedTable() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         rs = stmt.executeQuery("select * from \"my \"\"quoted\"\" table\"");
         rs.next();
@@ -122,7 +117,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */
     public void testUpdateRowOnQuotedTable() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         rs = stmt.executeQuery("select * from \"my \"\"quoted\"\" table\"");
         rs.next();
@@ -145,7 +140,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */
     public void testDeleteRowOnQuotedTable() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         rs = stmt.executeQuery("select * from \"my \"\"quoted\"\" table\"");
         rs.next();
@@ -167,7 +162,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */    
     public void testInsertRowOnQuotedColumn() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         rs = stmt.executeQuery("select * from \"my quoted columns\"");
         rs.next();
@@ -192,7 +187,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */    
     public void testUpdateRowOnQuotedColumn() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         rs = stmt.executeQuery("select * from \"my quoted columns\"");
         rs.next();
@@ -215,7 +210,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */    
     public void testDeleteRowOnQuotedColumn() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         rs = stmt.executeQuery("select * from \"my quoted columns\"");
         rs.next();
@@ -237,7 +232,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */    
     public void testInsertRowOnQuotedSchema() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         rs = stmt.executeQuery("select * from \"my \"\"quoted\"\" schema\"." +
                 "\"my quoted schema\"");
@@ -263,7 +258,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */    
     public void testUpdateRowOnQuotedSchema() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         rs = stmt.executeQuery("select * from \"my \"\"quoted\"\" schema\"." +
                 "\"my quoted schema\"");
@@ -287,7 +282,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */    
     public void testDeleteRowOnQuotedSchema() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         rs = stmt.executeQuery("select * from \"my \"\"quoted\"\" schema\"." +
                 "\"my quoted schema\"");
@@ -310,7 +305,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */    
     public void testInsertRowOnQuotedCursor() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         stmt.setCursorName("my \"\"\"\"quoted\"\"\"\" cursor\"\"");
         rs = stmt.executeQuery("select * from \"my table\"");
@@ -335,7 +330,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */    
     public void testUpdateRowOnQuotedCursor() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         stmt.setCursorName("\"\"my quoted cursor");
         rs = stmt.executeQuery("select * from \"my table\"");
@@ -358,7 +353,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
      */    
     public void testDeleteRowOnQuotedCursor() throws SQLException {
         ResultSet rs = null;
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
                 ResultSet.CONCUR_UPDATABLE);
         stmt.setCursorName("\"\"my quoted cursor\"\"");
         rs = stmt.executeQuery("select * from \"my table\"");

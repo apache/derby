@@ -465,7 +465,8 @@ public class HoldabilityTest extends SURBaseTest {
                 // Delete all records except the first:
         Statement delStatement = createStatement();
         int deleted = delStatement.executeUpdate("delete from T1 where id>0");
-        int expectedDeleted = recordCount-1;    
+        int expectedDeleted = recordCount-1;
+        delStatement.close();
         
         assertEquals("Invalid number of records deleted", expectedDeleted, 
                      deleted);
@@ -609,13 +610,10 @@ public class HoldabilityTest extends SURBaseTest {
         ps2.setBoolean(4, defragment);
         ps2.setBoolean(5, truncate);
         
-        try { 
-            ps2.executeUpdate();
-            ps2.close();
-            con2.commit();
-        } finally {
-            con2.close();
-        }
+        ps2.executeUpdate();
+        ps2.close();
+        con2.commit();
+        con2.close();
     }
 
     private final static String selectStatement = "select * from t1";

@@ -132,10 +132,8 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
             ps.setString(10, "1");
             ps.executeUpdate();
             
-            rs = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
-                                     ResultSet.CONCUR_UPDATABLE).
-                executeQuery(SELECT_STMT);
-            rs.next();
+            ps.close();
+            stmt.close();
         } catch (SQLException e) {
             con.rollback();
             throw e;
@@ -150,14 +148,21 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void testUpdateString() 
         throws SQLException
     {
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
+        rs.next();
+
         for (int i = 1; i <= COLUMNS; i++) {
             rs.updateString(i, "2");
             assertEquals("Expected rs.getDouble(" + i + 
                          ") to match updated value", 2, (int) rs.getDouble(i));
         }
         rs.updateRow();
+        rs.close();
         checkColumnsAreUpdated();
         
+        s.close();
     }
 
     /**
@@ -168,13 +173,21 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void testUpdateInt() 
         throws SQLException
     {
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
+        rs.next();
+
         for (int i = 1; i <= COLUMNS; i++) {
             rs.updateInt(i, 2);
             assertEquals("Expected rs.getInt(" + i + 
                          ") to match updated value", 2, rs.getInt(i));
         }
         rs.updateRow();
+        rs.close();
         checkColumnsAreUpdated();
+        
+        s.close();
     }
 
     /**
@@ -185,13 +198,21 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void testUpdateLong() 
         throws SQLException
     {
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
+        rs.next();
+
         for (int i = 1; i <= COLUMNS; i++) {
             rs.updateLong(i, 2L);
             assertEquals("Expected rs.getLong(" + i + 
                          ") to match updated value", 2L, rs.getLong(i));
         }
         rs.updateRow();
+        rs.close();
         checkColumnsAreUpdated();
+        
+        s.close();
     }
 
     /**
@@ -202,13 +223,21 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void testUpdateShort() 
         throws SQLException
     {
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
+        rs.next();
+
         for (int i = 1; i <= COLUMNS; i++) {
             rs.updateShort(i, (short) 2);
             assertEquals("Expected rs.getShort(" + i + 
                          ") to match updated value", 2, (int) rs.getShort(i));
         }
         rs.updateRow();
+        rs.close();
         checkColumnsAreUpdated();
+        
+        s.close();
     }
     
     /**
@@ -219,13 +248,21 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void testUpdateFloat() 
         throws SQLException
     {
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
+        rs.next();
+
         for (int i = 1; i <= COLUMNS; i++) {
             rs.updateFloat(i, 2.0f);
             assertEquals("Expected rs.getFloat(" + i + 
                          ") to match updated value", 2, (int) rs.getFloat(i));
         }
         rs.updateRow();
+        rs.close();
         checkColumnsAreUpdated();
+        
+        s.close();
     }
     
     /**
@@ -236,13 +273,22 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void testUpdateDouble() 
         throws SQLException
     {
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
+        
+        rs.next();
+    	
         for (int i = 1; i <= COLUMNS; i++) {
             rs.updateDouble(i, 2.0);
             assertEquals("Expected rs.getDouble(" + i + 
                          ") to match updated value", 2, (int) rs.getDouble(i));
         }
         rs.updateRow();
+        rs.close();
         checkColumnsAreUpdated();
+        
+        s.close();
     }
 
     /**
@@ -253,6 +299,11 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void jdbc2testUpdateBigDecimal() 
         throws SQLException
     {
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
+        rs.next();
+
         for (int i = 1; i <= COLUMNS; i++) {
             rs.updateBigDecimal(i, BigDecimal.valueOf(2L));
             assertEquals("Expected rs.getBigDecimal(" + i + 
@@ -260,7 +311,10 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
                          rs.getBigDecimal(i).intValue());
         }
         rs.updateRow();
+        rs.close();
         checkColumnsAreUpdated();
+        
+        s.close();
     }
     
     /**
@@ -271,6 +325,11 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void testUpdateObjectWithNull() 
         throws SQLException
     {
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
+        rs.next();
+
         Object value = null;
         
         for (int i = 1; i <= COLUMNS; i++) {
@@ -281,7 +340,10 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
                        rs.wasNull());
         }
         rs.updateRow();
+        rs.close();
         checkColumnsAreNull();
+        
+        s.close();
     }
 
     /**
@@ -292,6 +354,11 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     public void testUpdateNull() 
         throws SQLException
     {
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
+        rs.next();
+
         for (int i = 1; i <= COLUMNS; i++) {
             rs.updateNull(i);
             assertNull("Expected rs.getObject(" + i + ") to be null", 
@@ -300,7 +367,10 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
                        rs.wasNull());
         }
         rs.updateRow();
+        rs.close();
         checkColumnsAreNull();
+        
+        s.close();
     }
 
     /**
@@ -311,11 +381,12 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     private void checkColumnsAreNull() 
         throws SQLException
     {
-        rs.close();
+
         
-        rs = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
-                                 ResultSet.CONCUR_READ_ONLY).
-            executeQuery(SELECT_STMT);
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                                 ResultSet.CONCUR_READ_ONLY);
+        
+        ResultSet rs = s.executeQuery(SELECT_STMT);
         
         rs.next();
         
@@ -326,6 +397,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
                        " to be true when data is SQL Null on column", 
                        rs.wasNull());
         }
+        s.close();
     }
 
     /**
@@ -337,11 +409,10 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
     private void checkColumnsAreUpdated() 
         throws SQLException
     {
-        rs.close();
+         Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+                                 ResultSet.CONCUR_READ_ONLY);
         
-        rs = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
-                                 ResultSet.CONCUR_READ_ONLY).
-            executeQuery(SELECT_STMT);
+        ResultSet rs = s.executeQuery(SELECT_STMT);
         
         rs.next();
         for (int i = 1; i <= COLUMNS; i++) {
@@ -355,10 +426,8 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
             assertEquals("Unexpected value from rs.getDouble( + " + i + ")",
                          expectedVal, actualVal);
         }
+        s.close();
     }
-    
-    /* Updatable ResultSet */
-    private ResultSet rs = null;
     
     /* Table name */
     private static final String TABLE_NAME = "MultiTypeTable";

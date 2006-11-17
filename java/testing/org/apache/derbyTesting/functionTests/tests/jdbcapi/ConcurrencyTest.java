@@ -677,26 +677,28 @@ public class ConcurrencyTest extends SURBaseTest {
         
         // Compressing the table in another transaction:
         Connection con2 = openDefaultConnection();
+        
+        con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        PreparedStatement ps2 = con2.prepareStatement
+            ("call SYSCS_UTIL.SYSCS_COMPRESS_TABLE(?, ?, ?)");
+        ps2.setString(1, "APP");
+        ps2.setString(2, "T1");
+        ps2.setInt(3, 0);
+        println("T2: call SYSCS_UTIL.SYSCS_COMPRESS_TABLE(APP, T1, 0)");
         try {
-            con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-            PreparedStatement ps2 = con2.prepareStatement
-                ("call SYSCS_UTIL.SYSCS_COMPRESS_TABLE(?, ?, ?)");
-            ps2.setString(1, "APP");
-            ps2.setString(2, "T1");
-            ps2.setInt(3, 0);
-            println("T2: call SYSCS_UTIL.SYSCS_COMPRESS_TABLE(APP, T1, 0)");
             ps2.executeUpdate(); // This will hang
-            assertTrue("Expected T2 to hang", false);
+            fail("Expected T2 to hang");
         } catch (SQLException e) {
             println("T2: Got exception:" + e.getMessage());
             
-            assertEquals("Unexpected SQL state", 
-                         LOCK_TIMEOUT_EXPRESSION_SQL_STATE,
-                         e.getSQLState());
-        } finally {
-            con2.rollback();
+            assertSQLState(LOCK_TIMEOUT_EXPRESSION_SQL_STATE, e);
+
         }
+        ps2.close();
+        con2.rollback();
         con2.close();
+        
+        s.close();
     }
     
     /**
@@ -717,19 +719,20 @@ public class ConcurrencyTest extends SURBaseTest {
                 rs.getInt(3) + ")");
         Connection con2 = openDefaultConnection();
         con2.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-        try {
-            PreparedStatement ps2 = con2.prepareStatement
+
+        PreparedStatement ps2 = con2.prepareStatement
                 ("delete from t1 where id=?");
-            ps2.setInt(1, firstKey);
+        ps2.setInt(1, firstKey);
+        try {
             ps2.executeUpdate();
-            assertTrue("expected record with id=" + firstKey + 
-                       " to be locked", false);
+            fail("expected record with id=" + firstKey + 
+                       " to be locked");
         } catch (SQLException e) {
-            assertEquals("Unexpected SQL state",  LOCK_TIMEOUT_SQL_STATE,
-                         e.getSQLState());
-        } finally {
-            con2.rollback();
+            assertSQLState(LOCK_TIMEOUT_SQL_STATE, e);
         }
+        
+        ps2.close();
+        con2.rollback();
         con2.close();
         s.close();
     }
@@ -770,6 +773,7 @@ public class ConcurrencyTest extends SURBaseTest {
         println("T1: delete records");
         assertEquals("Invalid number of records deleted", expectedDeleted, 
                      deleted);
+        delStatement.close();
         commit();
         println("T1: commit");
         
@@ -807,11 +811,12 @@ public class ConcurrencyTest extends SURBaseTest {
             ps2.executeUpdate();
             con2.commit();
             println("T3: commit");
-            assertTrue("Expected T3 to hang waiting for Table lock", false);
+            fail("Expected T3 to hang waiting for Table lock");
         } catch (SQLException e) {            
             println("T3: got expected exception");
             con2.rollback();            
         }
+        ps2.close();
         rs.first(); // Go to first tuple
         println("T1: Read first Tuple:(" + rs.getInt(1) + "," +
                 rs.getInt(2) + "," +
@@ -838,6 +843,7 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
         }
         con2.close();
+        s.close();
     }
     
     // By providing a static suite(), you can customize which tests to run.
