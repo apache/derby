@@ -543,6 +543,7 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
             
         }
+        con2.close();
     }
     
     /**
@@ -597,6 +598,7 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
             
         }
+        con2.close();
     }
     
     /**
@@ -651,6 +653,7 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(3) + ")");
             
         }
+        con2.close();
     }
     
     /**
@@ -693,6 +696,7 @@ public class ConcurrencyTest extends SURBaseTest {
         } finally {
             con2.rollback();
         }
+        con2.close();
     }
     
     /**
@@ -833,6 +837,7 @@ public class ConcurrencyTest extends SURBaseTest {
                     rs.getInt(2) + "," +
                     rs.getInt(3) + ")");
         }
+        con2.close();
     }
     
     // By providing a static suite(), you can customize which tests to run.
