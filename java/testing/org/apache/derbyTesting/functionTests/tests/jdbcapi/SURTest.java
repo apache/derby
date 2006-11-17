@@ -989,6 +989,7 @@ public class SURTest extends SURBaseTest {
         ps.setInt(2, primaryKey);
         assertEquals("Expected one row to be updated", 1,
                      ps.executeUpdate());
+        ps.close();
         rs.updateInt(1, primaryKey*10);
         rs.updateInt(2, -555);
         rs.updateInt(3, -777);
