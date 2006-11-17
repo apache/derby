@@ -19,11 +19,18 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
 
 import java.lang.reflect.Method;
+import java.security.PrivilegedActionException;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import java.util.StringTokenizer;
 import java.util.Properties;
@@ -32,7 +39,6 @@ import junit.framework.Assert;
 
 /**
  * XML utility methods for the JUnit tests.
- *
  */
 public class XML {
     
@@ -77,6 +83,13 @@ public class XML {
             = HAVE_XALAN && checkXalanVersion();
 
     /**
+     * The filepath for the directory that holds the XML "helper" files
+     * (i.e. the files to insert and their schema documents).
+     */
+    private static final String HELPER_FILE_LOCATION =
+        "org/apache/derbyTesting/functionTests/tests/lang/xmlTestFiles/";
+
+    /**
      * Return true if the classpath contains JAXP and
      * Xalan classes (this method doesn't care about
      * the particular version of Xalan).
@@ -95,6 +108,129 @@ public class XML {
     public static boolean classpathMeetsXMLReqs()
     {
         return HAVE_JAXP && HAVE_MIN_XALAN;
+    }
+
+    /**
+     * Insert the contents of a file into the received column of
+     * the received table using "setCharacterStream".  Expectation
+     * is that the file is in the directory indicated by 
+     * HELPER_FILE_LOCATION.
+     *
+     * @param conn Connection on which to perform the insert.
+     * @param tableName Table into which we want to insert.
+     * @param colName Column in tableName into which we want to insert.
+     * @param fName Name of the file whose content we want to insert.
+     * @param numRows Number of times we should insert the received
+     *  file's content.
+     */
+    public static void insertFile(Connection conn, String tableName,
+        String colName, String fName, int numRows)
+        throws IOException, SQLException, PrivilegedActionException
+    {
+        // First we have to figure out many chars long the file is.
+
+        fName = HELPER_FILE_LOCATION + fName;
+        java.net.URL xFile = BaseTestCase.getTestResource(fName);
+        Assert.assertNotNull("XML input file missing: " + fName, xFile);
+        
+        int charCount = 0;
+        char [] cA = new char[1024];
+        InputStreamReader reader =
+            new InputStreamReader(BaseTestCase.openTestResource(xFile));
+
+        for (int len = reader.read(cA, 0, cA.length); len != -1;
+            charCount += len, len = reader.read(cA, 0, cA.length));
+
+        reader.close();
+
+        // Now that we know the number of characters, we can insert
+        // using a stream.
+
+        PreparedStatement pSt = conn.prepareStatement(
+            "insert into " + tableName + "(" + colName + ") values " +
+            "(xmlparse(document cast (? as clob) preserve whitespace))");
+
+        for (int i = 0; i < numRows; i++)
+        {
+            reader = new InputStreamReader(
+                BaseTestCase.openTestResource(xFile));
+
+            pSt.setCharacterStream(1, reader, charCount);
+            pSt.execute();
+            reader.close();
+        }
+
+        pSt.close();
+    }
+
+    /**
+     * Insert an XML document into the received column of the received
+     * test table using setString.  This method parallels "insertFiles"
+     * above, except that it should be used for documents that require
+     * a Document Type Definition (DTD).  In that case the location of
+     * the DTD has to be modified _within_ the document so that it can
+     * be found in the running user directory.
+     *
+     * Expectation is that the file to be inserted is in the directory
+     * indicated by HELPER_FILE_LOCATION and that the DTD file has been
+     * copied to the user's running directory (via use of the util
+     * methods in SupportFilesSetup).
+     *
+     * @param conn Connection on which to perform the insert.
+     * @param tableName Table into which we want to insert.
+     * @param colName Column in tableName into which we want to insert.
+     * @param fName Name of the file whose content we want to insert.
+     * @param dtdName Name of the DTD file that the received file uses.
+     * @param numRows Number of times we should insert the received
+     *  file's content.
+     */
+    public static void insertDocWithDTD(Connection conn, String tableName,
+        String colName, String fName, String dtdName, int numRows)
+        throws IOException, SQLException, PrivilegedActionException
+    {
+        // Read the file into memory so we can update it.
+        fName = HELPER_FILE_LOCATION + fName;
+        java.net.URL xFile = BaseTestCase.getTestResource(fName);
+        Assert.assertNotNull("XML input file missing: " + fName, xFile);
+
+        int charCount = 0;
+        char [] cA = new char[1024];
+        StringBuffer sBuf = new StringBuffer();
+        InputStreamReader reader =
+            new InputStreamReader(BaseTestCase.openTestResource(xFile));
+
+        for (int len = reader.read(cA, 0, cA.length); len != -1;
+            charCount += len, len = reader.read(cA, 0, cA.length))
+        {
+            sBuf.append(cA, 0, len);
+        }
+
+        reader.close();
+
+        // Now replace the DTD location.
+
+        java.net.URL dtdURL = SupportFilesSetup.getReadOnlyURL(dtdName);
+        Assert.assertNotNull("DTD file missing: " + dtdName, dtdURL);
+
+        String docAsString = sBuf.toString();
+        int pos = docAsString.indexOf(dtdName);
+        if (pos != -1)
+            sBuf.replace(pos, pos+dtdName.length(), dtdURL.toExternalForm());
+
+        // Now (finally) do the insert using the in-memory document with
+        // the correct DTD location.
+        docAsString = sBuf.toString();
+        PreparedStatement pSt = conn.prepareStatement(
+            "insert into " + tableName + "(" + colName + ") values " +
+            "(xmlparse(document cast (? as clob) preserve whitespace))");
+
+        for (int i = 0; i < numRows; i++)
+        {
+            pSt.setString(1, docAsString);
+            pSt.execute();
+        }
+
+        pSt.close();
     }
 
     /**

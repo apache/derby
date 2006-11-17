@@ -82,22 +82,14 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         if (!XML.classpathMeetsXMLReqs())
             return suite;
 
-        // First wrap the tests in a TestSetup that sets up / tears down
-        // the "fixture", and run those wrapped tests in embedded mode.
+        /* "false" in the next line means that we will *not* clean the
+         * database before the embedded and client suites.  This ensures
+         * that we do not remove the objects created by XMLTestSetup.
+         */
+        suite.addTest(
+            TestConfiguration.defaultSuite(XMLTypeAndOpsTest.class, false));
 
-        TestSuite helperSuite = new TestSuite("XML Type And Ops -- Embedded\n");
-        helperSuite.addTestSuite(XMLTypeAndOpsTest.class);
-        suite.addTest(new XMLTestSetup(helperSuite));
-
-        // Then wrap the tests in another TestSetup that does the same
-        // thing, but this time run the wrapped tests in client mode.
-
-        helperSuite = new TestSuite("XML Type And Ops -- Derby Client\n");
-        helperSuite.addTest(TestConfiguration.clientServerSuite(
-            XMLTypeAndOpsTest.class));
-        suite.addTest(new XMLTestSetup(helperSuite));
-
-        return suite;
+        return (new XMLTestSetup(suite));
     }
 
     /**

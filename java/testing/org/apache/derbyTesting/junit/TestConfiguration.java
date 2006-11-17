@@ -166,11 +166,34 @@ public class TestConfiguration {
      */
     public static Test defaultSuite(Class testClass)
     {
-        final TestSuite suite = new TestSuite(suiteName(testClass));
-        
-        suite.addTest(new CleanDatabaseTestSetup(embeddedSuite(testClass)));            
-        suite.addTest(new CleanDatabaseTestSetup(clientServerSuite(testClass)));
- 
+        return defaultSuite(testClass, true);
+    }
+
+    /**
+     * Does the work of "defaultSuite" as defined above.  Takes
+     * a boolean argument to determine whether or not to "clean"
+     * the test database before each suite.  If the resultant
+     * suite is going to be wrapped inside a TestSetup that creates
+     * database objects to be used throughout the tests, then the
+     * cleanDB parameter should be "false" to prevent cleanup of the
+     * database objects that TestSetup created.  For example, see
+     * XMLBindingTest.suite().
+     */
+    public static Test defaultSuite(Class testClass, boolean cleanDB)
+    {
+         final TestSuite suite = new TestSuite(suiteName(testClass));
+         
+        if (cleanDB)
+        {
+            suite.addTest(new CleanDatabaseTestSetup(embeddedSuite(testClass)));
+            suite.addTest(new CleanDatabaseTestSetup(clientServerSuite(testClass)));
+        }
+        else
+        {
+            suite.addTest(embeddedSuite(testClass));
+            suite.addTest(clientServerSuite(testClass));
+        }
+
         return (suite);
     }
     
