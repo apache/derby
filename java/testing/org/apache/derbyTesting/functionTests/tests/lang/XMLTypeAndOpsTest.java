@@ -181,6 +181,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
 
         assertStatementError("42821", st,
             " insert into t1 values (1, ('hmm' || 'andstuff'))");
+        st.close();
     }
 
     /**
@@ -319,6 +320,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         assertStatementError("42X25", st, "select length(x) from t1");
         assertStatementError("42884", st,
             "select i from t1 where x like 'hmm'");
+        st.close();
     }
 
     /**
@@ -333,6 +335,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         assertStatementError("42818", st, "select i from t1 where x < x");
         assertStatementError("42818", st,
             "select i from t1 where x <> 'some char'");
+        st.close();
     }
 
     /**
@@ -405,6 +408,8 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         assertStatementError("42962", st,
             "declare global temporary table SESSION.xglobal (myx XML)"
             + "  not logged on commit preserve rows");
+        
+        st.close();
     }
 
     /**
