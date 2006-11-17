@@ -131,6 +131,8 @@ final public class NetworkServerTestSetup extends TestSetup {
                 networkServerController.shutdown();
  
             serverOutput.close();
+            networkServerController = null;
+            serverOutput = null;
         }
     }
     
