@@ -913,11 +913,17 @@ public abstract class Connection implements java.sql.Connection,
                                 holdability());
             }
             
+            boolean savedInUnitOfWork = inUnitOfWork_;
             rs = getTransactionIsolationStmt.executeQuery("values current isolation");
             rs.next();
             String isolationStr = rs.getString(1);
             isolation_ = translateIsolation(isolationStr);
             rs.close();	
+            // So... of we did not have an active transaction before
+            // the query, we pretend to still not have an open
+            // transaction. The result set is closed, so this should
+            // not be problematic. DERBY-2084
+            inUnitOfWork_ = savedInUnitOfWork;
         }
         catch(SQLException se) {
         	throw new SqlException(agent_.logWriter_, se.getMessage());
