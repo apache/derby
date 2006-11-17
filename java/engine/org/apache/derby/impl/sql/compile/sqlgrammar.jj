@@ -860,7 +860,7 @@ public class SQLParser
 	 *
 	 *	@exception	StandardException
 	 */
-	 private QueryTreeNode getDeleteNode(FromTable fromTable,
+	 private StatementNode getDeleteNode(FromTable fromTable,
 										 TableName tableName,
 										 ValueNode whereClause)
 		throws StandardException
@@ -868,12 +868,10 @@ public class SQLParser
 		FromList   fromList = (FromList) nodeFactory.getNode(
 								C_NodeTypes.FROM_LIST,
 								getContextManager());
-		QueryTreeNode retval;
-		SelectNode resultSet;
 
 		fromList.addFromTable(fromTable);
 
-		resultSet = (SelectNode) nodeFactory.getNode(
+		SelectNode resultSet = (SelectNode) nodeFactory.getNode(
 										C_NodeTypes.SELECT_NODE,
 										null,
 										null, 	/* AGGREGATE list */
@@ -882,8 +880,8 @@ public class SQLParser
 										null, /* GROUP BY list */
 										getContextManager());
 
-		retval =
-			(QueryTreeNode) nodeFactory.getNode(
+		StatementNode retval =
+			(StatementNode) nodeFactory.getNode(
 							C_NodeTypes.DELETE_NODE,
 							tableName,
 							resultSet,
@@ -900,7 +898,7 @@ public class SQLParser
 	 *
 	 *	@exception	StandardException
 	 */
-	 private QueryTreeNode getUpdateNode(FromTable fromTable,
+	 private StatementNode getUpdateNode(FromTable fromTable,
 										 TableName tableName,
 										 ResultColumnList setClause,
 										 ValueNode whereClause)
@@ -909,12 +907,10 @@ public class SQLParser
 		FromList   fromList = (FromList) nodeFactory.getNode(
 								C_NodeTypes.FROM_LIST,
 								getContextManager());
-		QueryTreeNode retval;
-		SelectNode resultSet;
 
 		fromList.addFromTable(fromTable);
 
-		resultSet = (SelectNode) nodeFactory.getNode(
+		SelectNode resultSet = (SelectNode) nodeFactory.getNode(
 										C_NodeTypes.SELECT_NODE,
 										setClause,
 										null, 	/* AGGREGATE list */
@@ -923,8 +919,8 @@ public class SQLParser
 										null, /* GROUP BY list */
 										getContextManager());
 
-		retval =
-			(QueryTreeNode) nodeFactory.getNode(
+		StatementNode retval =
+			(StatementNode) nodeFactory.getNode(
 							C_NodeTypes.UPDATE_NODE,
 							tableName,
 							resultSet,
@@ -1608,7 +1604,7 @@ public class SQLParser
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	QueryTreeNode
+	StatementNode
 	getCreateAliasNode(
 		Object aliasName,
 		String fullStaticMethodName,
@@ -1634,7 +1630,7 @@ public class SQLParser
 	/**
 		Create a node for the drop alias/procedure call.
 	*/
-	QueryTreeNode
+	StatementNode
 	dropAliasNode(Object aliasName, char type) throws StandardException
 	{
 
@@ -2693,10 +2689,10 @@ TOKEN :
 /*
  * <A NAME="Statement">Statement</A>
  */
-QueryTreeNode
+StatementNode
 Statement( String statementSQLText, Object[] paramDefaults) throws StandardException :
 {
-	QueryTreeNode	statementNode;
+	StatementNode	statementNode;
 
         initStatement(statementSQLText, paramDefaults);
 }
@@ -2707,10 +2703,10 @@ Statement( String statementSQLText, Object[] paramDefaults) throws StandardExcep
 	}
 }
 
-QueryTreeNode 
+StatementNode 
 proceduralStatement(Token[] tokenHolder) throws StandardException : 
 {
-	QueryTreeNode statementNode;
+	StatementNode statementNode;
 	tokenHolder[0] = getToken(1);
 }   
 { 	
@@ -2736,10 +2732,10 @@ proceduralStatement(Token[] tokenHolder) throws StandardException :
  * @param tokenHolder returns the token that starts
  * the statement.  If null, ignored.
  */
-QueryTreeNode
+StatementNode
 StatementPart(Token[] tokenHolder) throws StandardException :
 {
-	QueryTreeNode	statementNode;
+	StatementNode	statementNode;
 	//before starting new statements, initialize this variables. Otherwise, the left
 	//over values from previously failed sql will affect the next sql. 
         explicitNotNull = false;
@@ -2799,10 +2795,10 @@ StatementPart(Token[] tokenHolder) throws StandardException :
 /*
  * <A NAME="createStatements">spsCreateStatement</A>
  */
-QueryTreeNode
+StatementNode
 createStatements() throws StandardException :
 {
-	QueryTreeNode statementNode;
+	StatementNode statementNode;
 	Token beginToken;
 	int tokKind;
 }
@@ -2835,10 +2831,10 @@ createStatements() throws StandardException :
 /*
  * <A NAME="dropStatements">spsDropStatement</A>
  */
-QueryTreeNode
+StatementNode
 dropStatements() throws StandardException :
 {
-	QueryTreeNode statementNode;
+	StatementNode statementNode;
 }
 {
 	<DROP>
@@ -2858,10 +2854,10 @@ dropStatements() throws StandardException :
 /*
  * <A NAME="spsAlterStatement">spsAlterStatement</A>
  */
-QueryTreeNode
+StatementNode
 spsAlterStatement() throws StandardException :
 {
-	QueryTreeNode statementNode;
+	StatementNode statementNode;
 }
 {
 	<ALTER>
@@ -2876,10 +2872,10 @@ spsAlterStatement() throws StandardException :
 /*
  * <A NAME="spsSetStatement">spsSetStatement</A>
  */
-QueryTreeNode
+StatementNode
 spsSetStatement() throws StandardException :
 {
-	QueryTreeNode statementNode;
+	StatementNode statementNode;
 }
 {
         LOOKAHEAD ( { getToken(1).kind == SET && getToken(2).kind != CURRENT } )
@@ -2914,10 +2910,10 @@ spsSetStatement() throws StandardException :
  * and a preparable select (with FOR UPDATE)
  * instead of a direct select (without FOR UPDATE)
  */
-QueryTreeNode
+StatementNode
 preparableSQLDataStatement() throws StandardException :
 {
-	QueryTreeNode	dmlStatement;
+	StatementNode	dmlStatement;
 }
 {
 	/*
@@ -2959,10 +2955,10 @@ preparableSQLDataStatement() throws StandardException :
  *
  *	This may be a search or positioned delete statement.
  */
-QueryTreeNode
+StatementNode
 preparableDeleteStatement() throws StandardException :
 {
-	QueryTreeNode qtn;
+	StatementNode qtn;
 }
 {
 	<DELETE> qtn = deleteBody()
@@ -2971,7 +2967,7 @@ preparableDeleteStatement() throws StandardException :
 	}
 }
 
-QueryTreeNode
+StatementNode
 deleteBody() throws StandardException :
 {
 	JavaToSQLValueNode	javaToSQLNode = null;
@@ -3141,10 +3137,10 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 /*
  * <A NAME="insertStatement">insertStatement</A>
  */
-QueryTreeNode
+StatementNode
 insertStatement() throws StandardException :
 {
-	QueryTreeNode	insertNode;
+	StatementNode	insertNode;
 	QueryTreeNode	targetTable;
 }
 {
@@ -3172,7 +3168,7 @@ targetTable() throws StandardException :
 	LOOKAHEAD( { newInvocationFollows(1) } )
 	javaToSQLNode = newInvocation()
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return nodeFactory.getNode(
 								C_NodeTypes.FROM_VTI,
 								javaToSQLNode.getJavaValueNode(), 
 								correlationName,
@@ -3183,17 +3179,17 @@ targetTable() throws StandardException :
 |
 	tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		return (QueryTreeNode) tableName;
+		return tableName;
 	}
 }
 
 /*
  * <A NAME="preparableUpdateStatement">preparableUpdateStatement</A>
  */
-QueryTreeNode
+StatementNode
 preparableUpdateStatement() throws StandardException :
 {
-	QueryTreeNode qtn;
+	StatementNode qtn;
 }
 {
 	// NOTE: It only makes sense to have a property list if there is a
@@ -3222,7 +3218,7 @@ tableOrIndex() :
 	}
 }
 
-QueryTreeNode
+StatementNode
 updateBody() throws StandardException :
 {
 	ResultColumnList	columnList;
@@ -3308,10 +3304,10 @@ updateBody() throws StandardException :
 /*
  * <A NAME="callStatement">callStatement</A>
  */
-QueryTreeNode
+StatementNode
 callStatement() throws StandardException :
 {
-	QueryTreeNode retval;
+	StatementNode retval;
 }
 {
 	(
@@ -3326,14 +3322,14 @@ callStatement() throws StandardException :
 /*
  * <A NAME="bareCallStatement">baseCallStatement</A>
  */
-QueryTreeNode
+StatementNode
 bareCallStatement() throws StandardException :
 {
-	ParameterNode		returnParam = null;
+	ParameterNode		returnParam;
 
-	ValueNode			value = null;
+	ValueNode			value;
 
-	ResultSetNode		resultSetNode = null;
+	ResultSetNode		resultSetNode;
 }
 {
 	<CALL> value = primaryExpression( true )
@@ -3344,8 +3340,8 @@ bareCallStatement() throws StandardException :
 			throw StandardException.newException(SQLState.LANG_INVALID_CALL_STATEMENT);
 		}
 
-		QueryTreeNode callStatement =
-									(QueryTreeNode) nodeFactory.getNode(
+		StatementNode callStatement =
+									(StatementNode) nodeFactory.getNode(
 												C_NodeTypes.CALL_STATEMENT_NODE,
 												value,
 												getContextManager());
@@ -3380,8 +3376,8 @@ bareCallStatement() throws StandardException :
 		}
 
 		// wrap the row result set in a cursor node
-		QueryTreeNode cursorNode =
-					(QueryTreeNode) nodeFactory.getNode(
+		StatementNode cursorNode =
+					(StatementNode) nodeFactory.getNode(
 						C_NodeTypes.CURSOR_NODE,
 						"SELECT",
 						resultSetNode,
@@ -3437,7 +3433,7 @@ ValueNode primaryExpression( boolean inSelectClause ) throws StandardException :
 	1 - Boolean - ON ROLLBACK RETAIN LOCKS clause
 	2 - Boolean - ON ROLLBACK RETAIN CURSORS clause
  */
-QueryTreeNode
+StatementNode
 savepointStatement() throws StandardException :
 {
 	String			savepointName = null;
@@ -3463,7 +3459,7 @@ savepointStatement() throws StandardException :
 	}
 	)
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.SAVEPOINT_NODE,
 								savepointName,
 								ReuseFactory.getInteger(savepointStatementType),
@@ -3523,7 +3519,7 @@ LocksOrCursors() :
 	1 - Boolean - on commit behavior
 	2 - Boolean - on rollback behavior
  */
-QueryTreeNode
+StatementNode
 globalTemporaryTableDeclaration() throws StandardException :
 {
 	TableName			tableName;
@@ -3544,7 +3540,7 @@ globalTemporaryTableDeclaration() throws StandardException :
 		// if ON ROLLBACK behavior not explicitly specified in DECLARE command, resort to default ON ROLLBACK DELETE ROWS
 		if (declareTableClauses[2] == null)
 				declareTableClauses[2] = Boolean.TRUE;
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.CREATE_TABLE_NODE,
 								tableName,
 								tableElementList,
@@ -7913,7 +7909,7 @@ nullSpecification() throws StandardException :
 /*
  * <A NAME="insertColumnsAndSource">insertColumnsAndSource</A>
  */
-QueryTreeNode
+StatementNode
 insertColumnsAndSource(QueryTreeNode targetTable) 
 	throws StandardException :
 {
@@ -7934,7 +7930,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 	[ targetProperties = propertyList(false) <CHECK_PROPERTIES>]
 	queryExpression = queryExpression(null, NO_SET_OP)
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.INSERT_NODE,
 							targetTable,
 							columnList,
@@ -9467,7 +9463,7 @@ havingClause() throws StandardException :
 	}
 }
 
-QueryTreeNode
+StatementNode
 schemaDefinition() throws StandardException :
 {
 	String	schemaName = null;
@@ -9488,7 +9484,7 @@ schemaDefinition() throws StandardException :
 			if (schemaName.startsWith("SYS"))
 				throw StandardException.newException(SQLState.INVALID_SCHEMA_SYS, schemaName);
  
-			return (QueryTreeNode) nodeFactory.getNode(
+			return (StatementNode) nodeFactory.getNode(
 					C_NodeTypes.CREATE_SCHEMA_NODE,
 					schemaName,
 					authName,
@@ -9502,7 +9498,7 @@ schemaDefinition() throws StandardException :
 			if (authName.startsWith("SYS"))
 				throw StandardException.newException(SQLState.INVALID_SCHEMA_SYS, authName);
 
-			return (QueryTreeNode) nodeFactory.getNode(
+			return (StatementNode) nodeFactory.getNode(
 					C_NodeTypes.CREATE_SCHEMA_NODE,
 					authName,
 					authName,
@@ -9515,7 +9511,7 @@ schemaDefinition() throws StandardException :
 /*
  * <A NAME="tableDefinition">tableDefinition</A>
  */
-QueryTreeNode
+StatementNode
 tableDefinition() throws StandardException :
 {
 	char				lockGranularity = TableDescriptor.DEFAULT_LOCK_GRANULARITY;
@@ -9528,7 +9524,7 @@ tableDefinition() throws StandardException :
 	tableElementList = tableElementList()
 	[ properties = propertyList(false)<CHECK_PROPERTIES>]
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.CREATE_TABLE_NODE,
 								tableName,
 								tableElementList,
@@ -9634,7 +9630,7 @@ lockGranularity() throws StandardException :
 /*
  * <A NAME="indexDefinition">indexDefinition</A>
  */
-QueryTreeNode
+StatementNode
 indexDefinition() throws StandardException :
 {
 	Boolean		unique = Boolean.FALSE;
@@ -9680,7 +9676,7 @@ indexDefinition() throws StandardException :
 							tableName);
 			}
 		}
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.CREATE_INDEX_NODE,
 								unique,
 								DEFAULT_INDEX_TYPE,
@@ -9723,7 +9719,7 @@ unique() throws StandardException :
 	8 - TypeDescriptor - return type (always NULL for procedures)
 */
 
-QueryTreeNode
+StatementNode
 procedureDefinition() throws StandardException :
 {
 	TableName procedureName;
@@ -9897,7 +9893,7 @@ inoutParameter() :
 	8 - TypeDescriptor - return type
 */
 
-QueryTreeNode
+StatementNode
 functionDefinition() throws StandardException :
 {
 	TableName functionName;
@@ -9961,7 +9957,7 @@ functionParameterDefinition(Vector[] list) throws StandardException :
 	}
 }
 
-QueryTreeNode
+StatementNode
 viewDefinition(Token beginToken) throws StandardException :
 {
 	int					checkOptionType;
@@ -9986,7 +9982,7 @@ viewDefinition(Token beginToken) throws StandardException :
 			throw StandardException.newException(SQLState.LANG_NO_PARAMS_IN_VIEWS);
 		}
 
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.CREATE_VIEW_NODE,
 								tableName, 
 								resultColumns, 
@@ -10014,7 +10010,7 @@ viewColumnList() throws StandardException :
 	}
 }
 
-QueryTreeNode
+StatementNode
 triggerDefinition() throws StandardException :
 {
 	Boolean				isBefore;
@@ -10065,7 +10061,7 @@ triggerDefinition() throws StandardException :
 			throw StandardException.newException(SQLState.LANG_NO_PARAMS_IN_TRIGGER_ACTION);
 		}
 
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.CREATE_TRIGGER_NODE,
 								triggerName, 
 								tableName,
@@ -10088,7 +10084,7 @@ triggerDefinition() throws StandardException :
 	}
 }
 
-QueryTreeNode
+StatementNode
 synonymDefinition() throws StandardException :
 {
 	TableName synonymName;
@@ -10794,10 +10790,10 @@ checkConstraintDefinition(TableName constraintName, String columnName)
 /*
  * <A NAME="spsRenameStatement">spsRenameStatement</A>
  */
-QueryTreeNode
+StatementNode
 spsRenameStatement() throws StandardException :
 {
-	QueryTreeNode qtn;
+	StatementNode qtn;
 }
 {
 	<RENAME> (
@@ -10813,17 +10809,17 @@ spsRenameStatement() throws StandardException :
 /*
  * <A NAME="renameTableStatement">renameTableStatement</A>
  */
-QueryTreeNode
+StatementNode
 renameTableStatement() throws StandardException :
 {
-	QueryTreeNode qtn;
+	StatementNode qtn;
 	TableName tableName;
 	String newTableName;
 }
 {
 	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <TO> newTableName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.RENAME_NODE,
 								tableName,
 								null,
@@ -10837,7 +10833,7 @@ renameTableStatement() throws StandardException :
 /*
  * <A NAME="renameIndexStatement">renameIndexStatement</A>
  */
-QueryTreeNode
+StatementNode
 renameIndexStatement() throws StandardException :
 {
 	String oldIndexName;
@@ -10846,7 +10842,7 @@ renameIndexStatement() throws StandardException :
 {
 	<INDEX> oldIndexName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <TO> newIndexName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		QueryTreeNode qtn = nodeFactory.getNode(
+		StatementNode qtn = (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.RENAME_NODE,
 								null,
 								oldIndexName,
@@ -10859,7 +10855,7 @@ ReuseFactory.getInteger(StatementType.RENAME_INDEX),
 
 	}
 }
-QueryTreeNode
+StatementNode
 renameColumnStatement() throws StandardException :
 {
 	String newColumnName;
@@ -10874,7 +10870,7 @@ renameColumnStatement() throws StandardException :
 				SQLState.LANG_OBJECT_DOES_NOT_EXIST,
 				"RENAME COLUMN",
 				oldColumnReference.getColumnName());
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 			C_NodeTypes.RENAME_NODE,
 			oldColumnReference.getTableNameNode(),
 			oldColumnReference.getColumnName(),
@@ -10886,7 +10882,7 @@ renameColumnStatement() throws StandardException :
 }
 
 
-QueryTreeNode
+StatementNode
 lockStatement() throws StandardException :
 {
 	Boolean						exclusiveMode;
@@ -10895,7 +10891,7 @@ lockStatement() throws StandardException :
 {
 	<LOCK> <TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <IN> exclusiveMode = lockMode() <MODE>
 	{
-		return nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.LOCK_TABLE_NODE,
 								tableName,
 								exclusiveMode,
@@ -10919,7 +10915,7 @@ lockMode() :
 	}
 }
 
-QueryTreeNode
+StatementNode
 execStatement() throws StandardException :
 {
 	TableName	stmtName;
@@ -10927,7 +10923,7 @@ execStatement() throws StandardException :
 {
 	<EXECUTE> <STATEMENT> stmtName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.EXEC_SPS_NODE,
 								stmtName,
 								getContextManager());
@@ -11098,10 +11094,10 @@ simpleValueSpecification() throws StandardException :
 }
 
 
-QueryTreeNode
+StatementNode
 setSchemaStatement() throws StandardException :
 {
-	QueryTreeNode setSchema = null;
+	StatementNode setSchema;
 }
 {
 	setSchemaHeader() [<EQUALS_OPERATOR>] setSchema = setSchemaValues()
@@ -11127,7 +11123,7 @@ setSchemaHeader() throws StandardException :
 	<CURRENT> ( <SCHEMA>  | <SQLID> )
 }
 
-QueryTreeNode
+StatementNode
 setSchemaValues() throws StandardException :
 {
 	String schemaName;
@@ -11135,7 +11131,7 @@ setSchemaValues() throws StandardException :
 {
 	schemaName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.SET_SCHEMA_NODE,
 								schemaName,
 								null,
@@ -11144,7 +11140,7 @@ setSchemaValues() throws StandardException :
 |
 	<USER>
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.SET_SCHEMA_NODE,
 								null,
 								ReuseFactory.getInteger(StatementType.SET_SCHEMA_USER),
@@ -11152,7 +11148,7 @@ setSchemaValues() throws StandardException :
 	}
 |   dynamicParameterSpecification()
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.SET_SCHEMA_NODE,
 								null,
 								ReuseFactory.getInteger(StatementType.SET_SCHEMA_DYNAMIC),
@@ -11162,7 +11158,7 @@ setSchemaValues() throws StandardException :
 	{
 		/* Max length for schema name is Limits.MAX_IDENTIFIER_LENGTH */
 		checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.SET_SCHEMA_NODE,
 								schemaName,
 								null,
@@ -11176,7 +11172,7 @@ setSchemaValues() throws StandardException :
 // is for support only, so we can get messages in our preferred language
 // (usually English). I didn't want to create all the execution wiring
 // to do this, so this command executes in the parser
-QueryTreeNode
+StatementNode
 setMessageLocaleStatement() throws StandardException :
 {
 	String messageLocale;
@@ -11186,7 +11182,7 @@ setMessageLocaleStatement() throws StandardException :
 	{
 		getContextManager().setMessageLocale(messageLocale);
 
-		return nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 											C_NodeTypes.NOP_STATEMENT_NODE,
 											getContextManager());
 	}
@@ -11695,7 +11691,7 @@ columnConstraint(TableName constraintName,
 	}
 }
 
-QueryTreeNode
+StatementNode
 dropSchemaStatement() throws StandardException :
 {
 	String schemaName;
@@ -11703,7 +11699,7 @@ dropSchemaStatement() throws StandardException :
 {
 	<SCHEMA> schemaName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <RESTRICT>
 	{
-		QueryTreeNode stmt =  nodeFactory.getNode(
+		StatementNode stmt =  (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.DROP_SCHEMA_NODE,
 							schemaName,
 							new Integer(StatementType.DROP_RESTRICT),
@@ -11713,10 +11709,10 @@ dropSchemaStatement() throws StandardException :
 	}
 }
 
-QueryTreeNode
+StatementNode
 alterTableStatement() throws StandardException :
 {
-	QueryTreeNode		node;
+	StatementNode		node;
 	TableName			tableName;
 }
 {
@@ -11726,10 +11722,10 @@ alterTableStatement() throws StandardException :
 	}
 }
 
-QueryTreeNode
+StatementNode
 alterTableBody(TableName tableName) throws StandardException :
 {
-	QueryTreeNode qtn;
+	StatementNode qtn;
 	char				lockGranularity = '\0';
 	String               newTableName;
 	TableElementList	tableElementList =
@@ -11746,7 +11742,7 @@ alterTableBody(TableName tableName) throws StandardException :
 	<COMPRESS> [ tok = <SEQUENTIAL> ]
 	{		
 		checkInternalFeature("COMPRESS");
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.ALTER_TABLE_NODE,
 							tableName,
 							new Boolean(tok != null),
@@ -11755,7 +11751,7 @@ alterTableBody(TableName tableName) throws StandardException :
 |
 	lockGranularity = alterTableAction( tableElementList, changeType, behavior, sequential )
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.ALTER_TABLE_NODE,
 							tableName,
 							tableElementList,
@@ -11771,7 +11767,7 @@ alterTableBody(TableName tableName) throws StandardException :
  * <A NAME="alterTableRenameTableStatement">alterTableRenameTableStatement</A>
  */
 /*
-QueryTreeNode
+StatementNode
 alterTableRenameTableStatement(TableName tableName) throws StandardException :
 {
 	String newTableName;
@@ -11779,7 +11775,7 @@ alterTableRenameTableStatement(TableName tableName) throws StandardException :
 {
 	<TO> newTableName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.RENAME_NODE,
 							tableName,
 							null,
@@ -11795,7 +11791,7 @@ ReuseFactory.getInteger(StatementType.RENAME_TABLE),
  * <A NAME="alterTableRenameColumnStatement">alterTableRenameColumnStatement</A>
  */
 /*
-QueryTreeNode
+StatementNode
 alterTableRenameColumnStatement(TableName tableName) throws StandardException :
 {
 	String oldColumnName;
@@ -11804,7 +11800,7 @@ alterTableRenameColumnStatement(TableName tableName) throws StandardException :
 {
 	oldColumnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <TO> newColumnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.RENAME_NODE,
 							tableName,
 							oldColumnName,
@@ -12118,7 +12114,7 @@ dropTableConstraintDefinition() throws StandardException :
 /*
  * <A NAME="dropTableStatement">dropTableStatement</A>
  */
-QueryTreeNode
+StatementNode
 dropTableStatement() throws StandardException :
 {
 	TableName tableName;
@@ -12127,7 +12123,7 @@ dropTableStatement() throws StandardException :
 	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
 		// DB2 does not support a drop behaviour
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 											C_NodeTypes.DROP_TABLE_NODE,
 											tableName,
 											new Integer(StatementType.DROP_DEFAULT),
@@ -12138,7 +12134,7 @@ dropTableStatement() throws StandardException :
 /*
  * <A NAME="dropIndexStatement">dropIndexStatement</A>
  */
-QueryTreeNode
+StatementNode
 dropIndexStatement() throws StandardException :
 {
 	TableName indexName;
@@ -12146,7 +12142,7 @@ dropIndexStatement() throws StandardException :
 {
 	<INDEX> indexName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.DROP_INDEX_NODE,
 								indexName,
 								getContextManager());
@@ -12156,7 +12152,7 @@ dropIndexStatement() throws StandardException :
 /*
  * <A NAME="dropAliasStatement">dropAliasStatement</A>
  */
-QueryTreeNode
+StatementNode
 dropAliasStatement() throws StandardException :
 {
 	Object aliasName;
@@ -12178,7 +12174,7 @@ dropAliasStatement() throws StandardException :
 	}
 }
 
-QueryTreeNode
+StatementNode
 dropViewStatement() throws StandardException :
 {
 	TableName viewName;
@@ -12186,14 +12182,14 @@ dropViewStatement() throws StandardException :
 {
 	<VIEW> viewName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.DROP_VIEW_NODE,
 								viewName,
 								getContextManager());
 	}
 }
 
-QueryTreeNode
+StatementNode
 dropTriggerStatement() throws StandardException :
 {
 	TableName triggerName;
@@ -12201,7 +12197,7 @@ dropTriggerStatement() throws StandardException :
 {
 	<TRIGGER> triggerName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.DROP_TRIGGER_NODE,
 								triggerName,
 								getContextManager());
@@ -12209,7 +12205,7 @@ dropTriggerStatement() throws StandardException :
 }
 
 
-QueryTreeNode
+StatementNode
 truncateTableStatement() throws StandardException :
 {
 	TableName tableName;
@@ -12217,7 +12213,7 @@ truncateTableStatement() throws StandardException :
 {
 	<TRUNCATE> <TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
+		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.ALTER_TABLE_NODE,
 							tableName,
 							getContextManager());
@@ -12227,10 +12223,10 @@ truncateTableStatement() throws StandardException :
 /*
  * <A NAME="grantStatement">grantStatement</A>
  */
-QueryTreeNode
+StatementNode
 grantStatement() throws StandardException :
 {
-    QueryTreeNode node;
+    StatementNode node;
 }
 {
 	<GRANT>
@@ -12247,17 +12243,17 @@ grantStatement() throws StandardException :
 /*
  * <A NAME="tableGrantStatement">tableGrantStatement</A>
  */
-QueryTreeNode
+StatementNode
 tableGrantStatement() throws StandardException :
 {
-    PrivilegeNode privileges = null;
+    PrivilegeNode privileges;
     List grantees;
 }
 {
        privileges = tablePrivileges()
        <TO> grantees = granteeList()
     {
-        return nodeFactory.getNode( C_NodeTypes.GRANT_NODE,
+        return (StatementNode) nodeFactory.getNode( C_NodeTypes.GRANT_NODE,
                                     privileges, grantees,
                                     getContextManager());
     }
@@ -12306,11 +12302,11 @@ TablePrivilegesNode tableActions() throws StandardException :
 /*
  * <A NAME="routineGrantStatement">routineGrantStatement</A>
  */
-QueryTreeNode
+StatementNode
 routineGrantStatement() throws StandardException :
 {
     List grantees;
-    RoutineDesignator routine = null;
+    RoutineDesignator routine;
 }
 {
     <EXECUTE> <ON> routine = routineDesignator()
@@ -12321,7 +12317,7 @@ routineGrantStatement() throws StandardException :
                                ReuseFactory.getInteger( PrivilegeNode.ROUTINE_PRIVILEGES),
                                routine, null,
                                getContextManager());
-        return nodeFactory.getNode( C_NodeTypes.GRANT_NODE,
+        return (StatementNode) nodeFactory.getNode( C_NodeTypes.GRANT_NODE,
                                     routinePrivilege, grantees,
                                     getContextManager());
     }
@@ -12463,10 +12459,10 @@ grantee( List list)  throws StandardException :
 /*
  * <A NAME="revokeStatement">revokeStatement</A>
  */
-QueryTreeNode
+StatementNode
 revokeStatement() throws StandardException :
 {
-    QueryTreeNode node;
+    StatementNode node;
 }
 {
     <REVOKE>
@@ -12483,7 +12479,7 @@ revokeStatement() throws StandardException :
 /*
  * <A NAME="tableRevokeStatement">tableRevokeStatement</A>
  */
-QueryTreeNode
+StatementNode
 tableRevokeStatement() throws StandardException :
 {
     PrivilegeNode privileges = null;
@@ -12493,7 +12489,7 @@ tableRevokeStatement() throws StandardException :
        privileges = tablePrivileges()
        <FROM> grantees = granteeList()
     {
-        return nodeFactory.getNode( C_NodeTypes.REVOKE_NODE,
+        return (StatementNode) nodeFactory.getNode( C_NodeTypes.REVOKE_NODE,
                                     privileges, grantees,
                                     getContextManager());
     }
@@ -12502,7 +12498,7 @@ tableRevokeStatement() throws StandardException :
 /*
  * <A NAME="routineRevokeStatement">routineRevokeStatement</A>
  */
-QueryTreeNode
+StatementNode
 routineRevokeStatement() throws StandardException :
 {
     List grantees;
@@ -12517,7 +12513,7 @@ routineRevokeStatement() throws StandardException :
                                ReuseFactory.getInteger( PrivilegeNode.ROUTINE_PRIVILEGES),
                                routine, null,
                                getContextManager());
-        return nodeFactory.getNode( C_NodeTypes.REVOKE_NODE,
+        return (StatementNode) nodeFactory.getNode( C_NodeTypes.REVOKE_NODE,
                                     routinePrivilege, grantees,
                                     getContextManager());
     }
