@@ -209,6 +209,7 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
 		}
 		s.close();
 		JDBC.cleanup(connDDL);
+		connDDL = null;
         super.tearDown();
 		
 	}
