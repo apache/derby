@@ -2736,6 +2736,8 @@ public class updatableResultSet {
 				System.out.println("Next datatype to test is " + allSQLTypes[sqlType-1]);
 				for (int updateXXXName = 1;  updateXXXName <= allUpdateXXXNames.length; updateXXXName++) {
 					checkAgainstColumn = updateXXXName;
+					if(!HAVE_BIG_DECIMAL && (updateXXXName == 4))
+						continue;
 					System.out.println("  Testing " + allUpdateXXXNames[updateXXXName-1] + " on SQL type " + allSQLTypes[sqlType-1]);
 					for (int indexOrName = 1; indexOrName <= 2; indexOrName++) {
 						if (indexOrName == 1) //test by passing column position
