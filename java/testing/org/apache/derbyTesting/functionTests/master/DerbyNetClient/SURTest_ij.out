@@ -1,4 +1,4 @@
-CONNECTION0* - 	jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/SURTest;create=true
+CONNECTION0* - 	jdbc:derby:SURTest
 * = current connection
 ij> --
 -----   Licensed to the Apache Software Foundation (ASF) under one or more
