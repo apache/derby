@@ -1729,7 +1729,7 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 
 		<BR> MT - RESOLVE
 	*/
-	public PageKey getPageId() {
+	public final PageKey getPageId() {
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(identity != null);
 		}
