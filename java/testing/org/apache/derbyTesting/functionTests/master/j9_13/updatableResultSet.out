@@ -115,7 +115,7 @@ SQL State : XCL16
 Got expected exception ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 Negative Test15 - Can't call updateXXX methods on columns that do not correspond to a column in the table
 SQL State : XJ084
-Got expected exception Column does not correspond to a column in the base table. Cant issue {0} on this column.
+Got expected exception Column does not correspond to a column in the base table. Cannot issue 'updateInt' on this column.
 Negative Test16 - Call updateXXX method on out of the range column
 There are only 2 columns in the select list and we are trying to send updateXXX on column position 3
 SQL State : XCL14
