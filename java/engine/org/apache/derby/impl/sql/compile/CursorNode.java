@@ -214,12 +214,11 @@ public class CursorNode extends DMLStatementNode
 	 * etc. It also includes determining whether an UNSPECIFIED cursor
 	 * is updatable or not, and verifying that an UPDATE cursor actually is.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		DataDictionary				dataDictionary;
 
@@ -362,7 +361,6 @@ public class CursorNode extends DMLStatementNode
 				indexOfSessionTableNamesInSavedObjects = getCompilerContext().addSavedObject(sessionSchemaTableNames);
 		}
 
-		return this;
 	}
 
 	/**

@@ -88,14 +88,12 @@ public class RevokeNode extends DDLStatementNode
     /**
      * Bind this RevokeNode. Resolve all table, column, and routine references.
      *
-     * @return the bound RevokeNode
      *
      * @exception StandardException	Standard error policy.
      */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
         privileges = (PrivilegeNode) privileges.bind( new HashMap(), grantees, false);
-        return this;
     } // end of bind
 
 

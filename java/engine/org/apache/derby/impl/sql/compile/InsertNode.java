@@ -220,12 +220,11 @@ public final class InsertNode extends DMLModStatementNode
 	 * the collist and select column order/number are the
 	 * same as the layout of the table in the store. 
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		// We just need select privilege on the expressions
 		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
@@ -528,7 +527,6 @@ public final class InsertNode extends DMLModStatementNode
 		}
         
 		getCompilerContext().popCurrentPrivType();
-		return this;
 	}
 
 	int getPrivType()

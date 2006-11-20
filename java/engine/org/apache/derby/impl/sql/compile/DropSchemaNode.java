@@ -58,7 +58,7 @@ public class DropSchemaNode extends DDLStatementNode
 		this.dropBehavior = ((Integer) dropBehavior).intValue();
 	}
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		
         LanguageConnectionContext lcc = getLanguageConnectionContext();
@@ -84,8 +84,6 @@ public class DropSchemaNode extends DDLStatementNode
                 lcc.getAuthorizationId(), 
                 Authorizer.DROP_SCHEMA_PRIV);
         }
-        
-		return this;
 	}
 
 	/**

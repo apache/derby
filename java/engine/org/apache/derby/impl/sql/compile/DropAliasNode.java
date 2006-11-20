@@ -98,11 +98,10 @@ public class DropAliasNode extends DDLStatementNode
 	/**
 	 * Bind this DropMethodAliasNode.  
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		DataDictionary	dataDictionary = getDataDictionary();
 		String			aliasName = getRelativeName();
@@ -125,7 +124,6 @@ public class DropAliasNode extends DDLStatementNode
 			throw StandardException.newException(SQLState.LANG_CANNOT_DROP_SYSTEM_ALIASES, aliasName);
 		}
 
-		return this;
 	}
 
 	// inherit generate() method from DDLStatementNode

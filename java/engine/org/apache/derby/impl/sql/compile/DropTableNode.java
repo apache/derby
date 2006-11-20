@@ -103,12 +103,11 @@ public class DropTableNode extends DDLStatementNode
 	 * Bind this LockTableNode.  This means looking up the table,
 	 * verifying it exists and getting the heap conglomerate number.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
 
@@ -122,8 +121,6 @@ public class DropTableNode extends DDLStatementNode
 		/* Statement is dependent on the TableDescriptor and ConglomerateDescriptor */
 		cc.createDependency(td);
 		cc.createDependency(cd);
-
-		return this;
 	}
 
 	/**

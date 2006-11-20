@@ -107,12 +107,11 @@ public class LockTableNode extends MiscellaneousStatementNode
 	 * Bind this LockTableNode.  This means looking up the table,
 	 * verifying it exists and getting the heap conglomerate number.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
 		ConglomerateDescriptor	cd;
@@ -167,8 +166,6 @@ public class LockTableNode extends MiscellaneousStatementNode
 			cc.addRequiredTablePriv(lockTableDescriptor);
 			cc.popCurrentPrivType();
 		}
-
-		return this;
 	}
 
 	/**

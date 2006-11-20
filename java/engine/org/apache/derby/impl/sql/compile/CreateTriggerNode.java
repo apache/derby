@@ -215,11 +215,10 @@ public class CreateTriggerNode extends DDLStatementNode
 	 * Bind this CreateTriggerNode.  This means doing any static error
 	 * checking that can be done before actually creating the table.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		CompilerContext compilerContext = getCompilerContext();
 		DataDictionary	dd = getDataDictionary();
@@ -335,7 +334,6 @@ public class CreateTriggerNode extends DDLStatementNode
 		if (actionNode.referencesSessionSchema())
 			throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 
-		return this;
 	}
 
 	/**

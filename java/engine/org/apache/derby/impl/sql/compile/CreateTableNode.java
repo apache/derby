@@ -197,12 +197,11 @@ public class CreateTableNode extends DDLStatementNode
 	 * done before actually creating the base table or declaring the global temporary table.
 	 * For eg, verifying that the TableElementList does not contain any duplicate column names.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		DataDictionary	dataDictionary = getDataDictionary();
 		int numPrimaryKeys = 0;
@@ -289,8 +288,6 @@ public class CreateTableNode extends DDLStatementNode
 			 */
 			tableElementList.bindAndValidateCheckConstraints(fromList);
 		}
-
-		return this;
 	}
 
 	/**

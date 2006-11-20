@@ -224,12 +224,10 @@ public class RenameNode extends DDLStatementNode
 	 * verifying it's not a system table, verifying it's not view, verifying
 	 * the from index exists, verifying the to index doesn't exist.
 	 *
-	 * @return	The bound query tree
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
 		DataDictionary			dd = getDataDictionary();
@@ -308,8 +306,6 @@ public class RenameNode extends DDLStatementNode
 		/* Statement is dependent on the TableDescriptor and ConglomerateDescriptor */
 		cc.createDependency(td);
 		cc.createDependency(cd);
-
-		return this;
 	}
 
 	/**

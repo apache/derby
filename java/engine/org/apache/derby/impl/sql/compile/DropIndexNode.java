@@ -61,11 +61,10 @@ public class DropIndexNode extends DDLStatementNode
 	 * Bind this DropIndexNode.  This means looking up the index,
 	 * verifying it exists and getting the conglomerate number.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
 		DataDictionary			dd = getDataDictionary();
@@ -107,8 +106,6 @@ public class DropIndexNode extends DDLStatementNode
 		/* Statement is dependent on the TableDescriptor and ConglomerateDescriptor */
 		cc.createDependency(td);
 		cc.createDependency(cd);
-
-		return this;
 	}
 
 	// inherit generate() method from DDLStatementNode

@@ -68,12 +68,11 @@ public class DropViewNode extends DDLStatementNode
  	/**
  	 *  Bind the drop view node
  	 *
- 	 * @return	The bound query tree
  	 *
  	 * @exception StandardException		Thrown on error
  	 */
 	
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		DataDictionary dd = getDataDictionary();
 		CompilerContext cc = getCompilerContext();
@@ -90,8 +89,6 @@ public class DropViewNode extends DDLStatementNode
 		{
 			cc.createDependency(td);
 		}
-			
-		return this;
 	}
 		
 	

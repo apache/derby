@@ -208,11 +208,10 @@ public class AlterTableNode extends DDLStatementNode
 	 * For example, verifying that the user is not trying to add a 
 	 * non-nullable column.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		DataDictionary	dd = getDataDictionary();
 		int					numCheckConstraints = 0;
@@ -308,8 +307,6 @@ public class AlterTableNode extends DDLStatementNode
 		 * execution.
 		 */
 		getCompilerContext().createDependency(baseTable);
-
-		return this;
 	}
 
 	/**

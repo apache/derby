@@ -98,6 +98,33 @@ public abstract class StatementNode extends QueryTreeNode
 	}
 
 	public abstract String statementToString();
+	
+	/**
+	 * Perform the binding operation statement.  Binding consists of
+	 * permissions checking, view resolution, datatype resolution, and
+	 * creation of a dependency list (for determining whether a tree or
+	 * plan is still up to date).
+	 *
+	 * This bindStatement() method does nothing. 
+	 * Each StatementNode type that can appear
+	 * at the top of a tree can override this method with its
+	 * own bindStatement() method that does "something".
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+
+	public void bindStatement() throws StandardException
+	{
+	}
+	
+	// TEMP map QueryTreeNode.bind() onto bindStatement()
+	// for StatementNode. Part of incremental development
+	// in switching the api for a compiled statement to
+	// be StatementNode.
+	public final QueryTreeNode bind() throws StandardException {
+		bindStatement();
+		return this;
+	}
 
 	/**
 	 * create the outer shell class builder for the class we will

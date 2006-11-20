@@ -140,12 +140,11 @@ public class DeleteNode extends DMLModStatementNode
 	 * delete will also massage the tree so that the ResultSetNode has 
 	 * column containing the RowLocation of the base row.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		// We just need select privilege on the where clause tables
 		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
@@ -403,7 +402,6 @@ public class DeleteNode extends DMLModStatementNode
 		{
 			getCompilerContext().popCurrentPrivType();
 		}
-		return this;
 	} // end of bind
 
 	int getPrivType()

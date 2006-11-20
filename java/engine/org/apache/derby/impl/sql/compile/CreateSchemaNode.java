@@ -106,15 +106,12 @@ public class CreateSchemaNode extends DDLStatementNode
 	 * Bind this createSchemaNode. Main work is to create a StatementPermission
 	 * object to require CREATE_SCHEMA_PRIV at execution time.
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
-		super.bind();
-
 		CompilerContext cc = getCompilerContext();
 		if (isPrivilegeCollectionRequired())
 			cc.addRequiredSchemaPriv(name, aid, Authorizer.CREATE_SCHEMA_PRIV);
 
-		return this;
 	}
 	
 	public String statementToString()

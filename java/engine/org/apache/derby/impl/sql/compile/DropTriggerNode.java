@@ -51,11 +51,10 @@ public class DropTriggerNode extends DDLStatementNode
 	 * Bind this DropTriggerNode.  This means looking up the trigger,
 	 * verifying it exists and getting its table uuid.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
 		DataDictionary			dd = getDataDictionary();
@@ -76,8 +75,6 @@ public class DropTriggerNode extends DDLStatementNode
 		td = triggerDescriptor.getTableDescriptor();
 		cc.createDependency(td);
 		cc.createDependency(triggerDescriptor);
-			
-		return this;
 	}
 
 	// inherit generate() method from DDLStatementNode

@@ -150,12 +150,11 @@ public class CallStatementNode extends DMLStatementNode
 	 * Binding an update will also massage the tree so that
 	 * the ResultSetNode has a single column, the RID.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		DataDictionary dd = getDataDictionary();
 
@@ -176,7 +175,6 @@ public class CallStatementNode extends DMLStatementNode
   		checkReliability();
 
 		getCompilerContext().popCurrentPrivType();
-		return this;
 	}
 
 	/**

@@ -160,12 +160,10 @@ public class CreateIndexNode extends DDLStatementNode
 	 * For example, verifying that the column name list does not
 	 * contain any duplicate column names.
 	 *
-	 * @return	The bound query tree
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
 		DataDictionary			dd = getDataDictionary();
@@ -241,7 +239,6 @@ public class CreateIndexNode extends DDLStatementNode
 		/* Statement is dependent on the TableDescriptor */
 		getCompilerContext().createDependency(td);
 
-		return this;
 	}
 
 	/**

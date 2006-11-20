@@ -180,12 +180,11 @@ public final class UpdateNode extends DMLModStatementNode
 	 * value, followed by a column to contain the RowLocation of the
 	 * row to be updated.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		// We just need select privilege on the expressions
 		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
@@ -614,7 +613,6 @@ public final class UpdateNode extends DMLModStatementNode
 
 		getCompilerContext().popCurrentPrivType();		
 
-		return this;
 	} // end of bind()
 
 	int getPrivType()

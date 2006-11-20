@@ -353,7 +353,7 @@ abstract class DDLStatementNode extends StatementNode
 	  *
 	  *	@exception StandardException		Thrown on error
 	  */
-	public	void	bindName( DataDictionary	dataDictionary )
+	void	bindName( DataDictionary	dataDictionary )
 		                       throws StandardException
 	{
 		if (objectName != null)

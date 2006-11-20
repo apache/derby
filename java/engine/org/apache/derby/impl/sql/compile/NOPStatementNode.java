@@ -44,11 +44,10 @@ public class NOPStatementNode extends StatementNode
 	 * Bind this NOP statement.  This throws an exception, because NOP
 	 * statements by definition stop after parsing.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Always thrown to stop after parsing
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		/*
 		** Prevent this statement from getting to execution by throwing

@@ -460,7 +460,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public	ValueNode bindConstraints
+	ValueNode bindConstraints
 	(
 		DataDictionary		dataDictionary,
 		NodeFactory			nodeFactory,
@@ -531,7 +531,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public	void	bindCheckConstraint
+	void	bindCheckConstraint
 	(
 		NodeFactory			nodeFactory,
 		TableDescriptor		targetTableDescriptor,

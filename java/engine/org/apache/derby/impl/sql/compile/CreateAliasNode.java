@@ -240,17 +240,16 @@ public class CreateAliasNode extends DDLStatementNode
 	 * For example, verifying that the column name list does not
 	 * contain any duplicate column names.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		// Procedures and functions do not check class or method validity until
 		// runtime execution. Synonyms do need some validity checks.
 		if (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
-			return this;
+			return;
 
 		// Don't allow creating synonyms in SESSION schema. Causes confusion if
 		// a temporary table is created later with same name.
@@ -268,7 +267,6 @@ public class CreateAliasNode extends DDLStatementNode
 		if ((targetSD != null) && isSessionSchema(targetSD))
 			throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 
-		return this;
 	}
 
 	/**

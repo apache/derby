@@ -94,7 +94,7 @@ public class ExecSPSNode extends StatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		/*
 		** Grab the compiler context each time we bind just
@@ -132,7 +132,6 @@ public class ExecSPSNode extends StatementNode
 		*/
 		getCompilerContext().createDependency(spsd);
 
-		return this;
 	}
 
 	/**

@@ -88,14 +88,12 @@ public class GrantNode extends DDLStatementNode
 	/**
 	 * Bind this GrantNode. Resolve all table, column, and routine references.
 	 *
-	 * @return the bound GrantNode
 	 *
 	 * @exception StandardException	Standard error policy.
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		privileges = (PrivilegeNode) privileges.bind( new HashMap(), grantees, true);
-		return this;
 	} // end of bind
 
 

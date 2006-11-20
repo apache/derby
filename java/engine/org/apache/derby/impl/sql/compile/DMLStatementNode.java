@@ -146,7 +146,7 @@ abstract class DMLStatementNode extends StatementNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bind(DataDictionary dataDictionary)
+	QueryTreeNode bind(DataDictionary dataDictionary)
 					 throws StandardException
 	{
 		// We just need select privilege on most columns and tables

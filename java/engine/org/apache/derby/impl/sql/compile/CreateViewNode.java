@@ -167,11 +167,10 @@ public class CreateViewNode extends DDLStatementNode
 	 * For example, verifying that the ResultColumnList does not
 	 * contain any duplicate column names.
 	 *
-	 * @return	The bound query tree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public QueryTreeNode bind() throws StandardException
+	public void bindStatement() throws StandardException
 	{
 		CompilerContext				cc = getCompilerContext();
 		DataDictionary				dataDictionary = getDataDictionary();
@@ -224,8 +223,6 @@ public class CreateViewNode extends DDLStatementNode
 		// for each column, stuff system.column
 		colInfos = new ColumnInfo[queryExpression.getResultColumns().size()];
 		genColumnInfos(colInfos);
-
-		return this;
 	}
 
 	/**
