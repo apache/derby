@@ -2541,11 +2541,11 @@ ij> create index txts on t(ts);
 ij> insert into t values (CHAR('2000-01-07'), 
 		      CHAR('20:06:58'), 
 		      CHAR('xxxxxxFILTERED-TIMESTAMPxxxxx'));
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+1 row inserted/updated/deleted
 ij> insert into t values (CHAR('2000-1-06'), 
 		      CHAR('20:06:57'), 
 		      CHAR('2000-01-7 20:06:58.8000'));
-ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
+1 row inserted/updated/deleted
 ij> VALUES SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T');
 1          
 -----------

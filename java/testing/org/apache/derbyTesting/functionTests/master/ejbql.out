@@ -1742,8 +1742,8 @@ ij> values{ fn concat( '' , '' )};
 1              
 ---------------
 ij> values{ fn concat( CHAR(''), CHAR('') ) };
-1                             
-------------------------------
+1              
+---------------
 ij> values{ fn concat( 45, 67 )};
 ERROR 42846: Cannot convert types 'INTEGER' to 'VARCHAR'.
 ij> values{ fn concat( '45', 67 )};
@@ -1751,9 +1751,9 @@ ERROR 42846: Cannot convert types 'INTEGER' to 'VARCHAR'.
 ij> values{ fn concat( 45, '67' )};
 ERROR 42846: Cannot convert types 'INTEGER' to 'VARCHAR'.
 ij> values{ fn concat( CHAR('C'), CHAR('#') ) };
-1                             
-------------------------------
-C              #              
+1   
+----
+C#  
 ij> values{ fn concat( 'ABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=\    [];,./ \'' |',
                    'abcdefghijklmnopqrstuvwxyz~!@#$%^&*()_+|<>?:"{}     ''''''      ' ) };
 1                                                                                                                   

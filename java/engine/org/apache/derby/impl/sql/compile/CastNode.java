@@ -41,6 +41,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -235,6 +236,23 @@ public class CastNode extends ValueNode
 					if (opndType.getScale() > 0)
 						length += 1;               // 1 for the decimal .
 				 
+				}
+				/*
+				 * Derby-1132 : The length for the target type was calculated
+				 * incorrectly while Char & Varchar functions were used. Thus
+				 * adding the check for Char & Varchar and calculating the
+				 * length based on the operand type.
+				 */
+				else if(srcTypeId.isStringTypeId())
+				{
+					length = opndType.getMaximumWidth();
+			
+					// Truncate the target type width to the max width of the
+					// data type
+					if (this.targetCharType == Types.CHAR)
+						length = Math.min(length, Limits.DB2_CHAR_MAXWIDTH);
+					else if (this.targetCharType == Types.VARCHAR)
+						length = Math.min(length, Limits.DB2_VARCHAR_MAXWIDTH);
 				}
 				else 
 				{

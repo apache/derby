@@ -1515,30 +1515,30 @@ ij> insert into t1 values ('2003-09-10', '16:44:02', 'xxxxxxFILTERED-TIMESTAMPxx
 ij> insert into t1 values ('2005-09-10', '18.44.02', '2004-09-08-12.20.30.123456', 'cba', 'c');
 1 row inserted/updated/deleted
 ij> select char(c5), char(c6), char(c7), char(c8), char(c9) from t1;
-1         |2       |3                         |4              |5              
-------------------------------------------------------------------------------
-2003-09-10|16:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|abc            |abcde          
-2005-09-10|18:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|cba            |c              
+1         |2       |3                         |4    |5    
+----------------------------------------------------------
+2003-09-10|16:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|abc  |abcde
+2005-09-10|18:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|cba  |c    
 ij> select varchar(c5), varchar(c6), varchar(c7), varchar(c8), varchar(c9) from t1;
-1         |2       |3                         |4              |5              
-------------------------------------------------------------------------------
-2003-09-10|16:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|abc            |abcde          
-2005-09-10|18:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|cba            |c              
+1         |2       |3                         |4    |5    
+----------------------------------------------------------
+2003-09-10|16:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|abc  |abcde
+2005-09-10|18:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|cba  |c    
 ij> select char(c8, 10), varchar(c9, 9) from t1;
 1         |2        
 --------------------
 abc       |abcde    
 cba       |c        
 ij> select { fn concat(c8, char(c8)) } from t1;
-1                   
---------------------
-abc  abc            
-cba  cba            
+1         
+----------
+abc  abc  
+cba  cba  
 ij> select { fn concat(c8, varchar(c9)) } from t1;
-1                   
---------------------
-abc  abcde          
-cba  c              
+1         
+----------
+abc  abcde
+cba  c    
 ij> select { fn concat(varchar(c9, 20), char(c8, 8)) } from t1;
 1                           
 ----------------------------
