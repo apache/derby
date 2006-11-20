@@ -1,0 +1,42 @@
+ERROR 08001: No suitable driver
+ERROR XJ004: Database 'nevercreated' not found.
+ij(CONNONE)> -- assumes the connections connOne, connTwo are set up already
+-- and that connThree, connFour failed to be setup correctly (bad URLs)
+-- expect connOne to be active
+show connections;
+CONNONE* - 	jdbc:derby:wombat
+CONNTWO - 	jdbc:derby:lemming
+* = current connection
+ij(CONNONE)> set connection connOne;
+ij(CONNONE)> values 1;
+1          
+-----------
+1          
+ij(CONNONE)> set connection connTwo;
+ij(CONNTWO)> values 1;
+1          
+-----------
+1          
+ij(CONNTWO)> -- connThree doesn't exist, it failed at boot time
+set connection connThree;
+IJ ERROR: No connection exists with the name CONNTHREE
+ij(CONNTWO)> -- connFour doesn't exist, it failed at boot time
+set connection connFour;
+IJ ERROR: No connection exists with the name CONNFOUR
+ij(CONNTWO)> -- connTwo is still active
+show connections;
+CONNONE - 	jdbc:derby:wombat
+CONNTWO* - 	jdbc:derby:lemming
+* = current connection
+ij(CONNTWO)> -- no such connection to disconnect
+disconnect noName;
+IJ ERROR: No connection exists with the name NONAME
+ij(CONNTWO)> disconnect connOne;
+ij> -- connOne no longer exists
+set connection connOne;
+IJ ERROR: No connection exists with the name CONNONE
+ij> disconnect current;
+ij> -- see no more connections to use
+show connections;
+No connections available.
+ij> 

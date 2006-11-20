@@ -1,0 +1,2783 @@
+Test parameterMapping starting
+STILL TO RESOLVE -- Cloudscape getBoolean() allow conversion on strings to match JCC
+STILL TO RESOLVE -- Cloudscape getXXX() disable on LOBs.
+getXXX on : -6
+  skipping
+getXXX on : SMALLINT
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Integer was null false
+setNull() with all JDBC Types on SMALLINT
+  setNull(Types.TINYINT) getShort=0 was null true
+  setNull with batching support(Types.TINYINT) getShort=0 was null true
+  setNull(SMALLINT) getShort=0 was null true
+  setNull with batching support(SMALLINT) getShort=0 was null true
+  setNull(INTEGER) getShort=0 was null true
+  setNull with batching support(INTEGER) getShort=0 was null true
+  setNull(BIGINT) getShort=0 was null true
+  setNull with batching support(BIGINT) getShort=0 was null true
+  setNull(REAL) getShort=0 was null true
+  setNull with batching support(REAL) getShort=0 was null true
+  setNull(Types.FLOAT) getShort=0 was null true
+  setNull with batching support(Types.FLOAT) getShort=0 was null true
+  setNull(DOUBLE) getShort=0 was null true
+  setNull with batching support(DOUBLE) getShort=0 was null true
+  setNull(DECIMAL) getShort=0 was null true
+  setNull with batching support(DECIMAL) getShort=0 was null true
+  setNull(Types.NUMERIC) getShort=0 was null true
+  setNull with batching support(Types.NUMERIC) getShort=0 was null true
+  setNull(Types.BIT) getShort=0 was null true
+  setNull with batching support(Types.BIT) getShort=0 was null true
+  setNull(CHAR) getShort=0 was null true
+  setNull with batching support(CHAR) getShort=0 was null true
+  setNull(VARCHAR) getShort=0 was null true
+  setNull with batching support(VARCHAR) getShort=0 was null true
+  setNull(LONG VARCHAR) getShort=0 was null true
+  setNull with batching support(LONG VARCHAR) getShort=0 was null true
+  setNull(VARCHAR () FOR BIT DATA) getShort=0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getShort=0 was null true
+  setNull(DATE) getShort=0 was null true
+  setNull with batching support(DATE) getShort=0 was null true
+  setNull(TIME) getShort=0 was null true
+  setNull with batching support(TIME) getShort=0 was null true
+  setNull(TIMESTAMP) getShort=0 was null true
+  setNull with batching support(TIMESTAMP) getShort=0 was null true
+  setNull(CLOB) getShort=0 was null true
+  setNull with batching support(CLOB) getShort=0 was null true
+  setNull(BLOB) getShort=0 was null true
+  setNull with batching support(BLOB) getShort=0 was null true
+  setNull(Types.NULL) getShort=0 was null true
+  setNull with batching support(Types.NULL) getShort=0 was null true
+  setNull(235350345) getShort=0 was null true
+  setNull with batching support(235350345) getShort=0 was null true
+setXXX() with all JDBC Types on SMALLINT
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getShort=98 was null false JDBC MATCH(OK)
+  setByte() as batch getShort=98 was null false JDBC MATCH(OK)
+  setShort() getShort=98 was null false JDBC MATCH(OK)
+  setShort() as batch getShort=98 was null false JDBC MATCH(OK)
+  setInt() getShort=98 was null false JDBC MATCH(OK)
+  setInt() as batch getShort=98 was null false JDBC MATCH(OK)
+  setLong() getShort=98 was null false JDBC MATCH(OK)
+  setLong() as batch getShort=98 was null false JDBC MATCH(OK)
+  setFloat() getShort=98 was null false JDBC MATCH(OK)
+  setFloat() as batch getShort=98 was null false JDBC MATCH(OK)
+  setDouble() getShort=98 was null false JDBC MATCH(OK)
+  setDouble() as batch getShort=98 was null false JDBC MATCH(OK)
+  setBigDecimal() getShort=99 was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getShort=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getShort=0 was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getShort=0 was null true JDBC MATCH(OK)
+  setBoolean() getShort=1 was null false JDBC MATCH(OK)
+  setBoolean() as batch getShort=1 was null false JDBC MATCH(OK)
+  setString() getShort=97 was null false JDBC MATCH(OK)
+  setString() as batch getShort=97 was null false JDBC MATCH(OK)
+  setString(null) getShort=0 was null true JDBC MATCH(OK)
+  setString(null) as batch getShort=0 was null true JDBC MATCH(OK)
+ setString("Invalid Value")  IC (Expected)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getShort=0 was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetShort=0 was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getShort=0 was null true CLOUD EXT (OK)
+  setDate(null) as batch getShort=0 was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getShort=0 was null true CLOUD EXT (OK)
+  setTime(null) as batch getShort=0 was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getShort=0 was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getShort=0 was null true CLOUD EXT (OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getShort=0 was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getShort=0 was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getShort=0 was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getShort=0 was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getShort=0 was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getShort=0 was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getShort=0 was null true CLOUD EXT (OK)
+  setClob(null) as batch getShort=0 was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getShort=0 was null true CLOUD EXT (OK)
+  setBlob(null) as batch getShort=0 was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getShort=0 was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getShort=46 was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getShort=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getShort=72 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getShort=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getShort=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getShort=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getShort=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getShort=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getShort=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getShort=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getShort=76 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getShort=76 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getShort=12 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getShort=12 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
+getXXX on : INTEGER
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Integer was null false
+setNull() with all JDBC Types on INTEGER
+  setNull(Types.TINYINT) getInt=0 was null true
+  setNull with batching support(Types.TINYINT) getInt=0 was null true
+  setNull(SMALLINT) getInt=0 was null true
+  setNull with batching support(SMALLINT) getInt=0 was null true
+  setNull(INTEGER) getInt=0 was null true
+  setNull with batching support(INTEGER) getInt=0 was null true
+  setNull(BIGINT) getInt=0 was null true
+  setNull with batching support(BIGINT) getInt=0 was null true
+  setNull(REAL) getInt=0 was null true
+  setNull with batching support(REAL) getInt=0 was null true
+  setNull(Types.FLOAT) getInt=0 was null true
+  setNull with batching support(Types.FLOAT) getInt=0 was null true
+  setNull(DOUBLE) getInt=0 was null true
+  setNull with batching support(DOUBLE) getInt=0 was null true
+  setNull(DECIMAL) getInt=0 was null true
+  setNull with batching support(DECIMAL) getInt=0 was null true
+  setNull(Types.NUMERIC) getInt=0 was null true
+  setNull with batching support(Types.NUMERIC) getInt=0 was null true
+  setNull(Types.BIT) getInt=0 was null true
+  setNull with batching support(Types.BIT) getInt=0 was null true
+  setNull(CHAR) getInt=0 was null true
+  setNull with batching support(CHAR) getInt=0 was null true
+  setNull(VARCHAR) getInt=0 was null true
+  setNull with batching support(VARCHAR) getInt=0 was null true
+  setNull(LONG VARCHAR) getInt=0 was null true
+  setNull with batching support(LONG VARCHAR) getInt=0 was null true
+  setNull(VARCHAR () FOR BIT DATA) getInt=0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getInt=0 was null true
+  setNull(DATE) getInt=0 was null true
+  setNull with batching support(DATE) getInt=0 was null true
+  setNull(TIME) getInt=0 was null true
+  setNull with batching support(TIME) getInt=0 was null true
+  setNull(TIMESTAMP) getInt=0 was null true
+  setNull with batching support(TIMESTAMP) getInt=0 was null true
+  setNull(CLOB) getInt=0 was null true
+  setNull with batching support(CLOB) getInt=0 was null true
+  setNull(BLOB) getInt=0 was null true
+  setNull with batching support(BLOB) getInt=0 was null true
+  setNull(Types.NULL) getInt=0 was null true
+  setNull with batching support(Types.NULL) getInt=0 was null true
+  setNull(235350345) getInt=0 was null true
+  setNull with batching support(235350345) getInt=0 was null true
+setXXX() with all JDBC Types on INTEGER
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getInt=98 was null false JDBC MATCH(OK)
+  setByte() as batch getInt=98 was null false JDBC MATCH(OK)
+  setShort() getInt=98 was null false JDBC MATCH(OK)
+  setShort() as batch getInt=98 was null false JDBC MATCH(OK)
+  setInt() getInt=98 was null false JDBC MATCH(OK)
+  setInt() as batch getInt=98 was null false JDBC MATCH(OK)
+  setLong() getInt=98 was null false JDBC MATCH(OK)
+  setLong() as batch getInt=98 was null false JDBC MATCH(OK)
+  setFloat() getInt=98 was null false JDBC MATCH(OK)
+  setFloat() as batch getInt=98 was null false JDBC MATCH(OK)
+  setDouble() getInt=98 was null false JDBC MATCH(OK)
+  setDouble() as batch getInt=98 was null false JDBC MATCH(OK)
+  setBigDecimal() getInt=99 was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getInt=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getInt=0 was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getInt=0 was null true JDBC MATCH(OK)
+  setBoolean() getInt=1 was null false JDBC MATCH(OK)
+  setBoolean() as batch getInt=1 was null false JDBC MATCH(OK)
+  setString() getInt=97 was null false JDBC MATCH(OK)
+  setString() as batch getInt=97 was null false JDBC MATCH(OK)
+  setString(null) getInt=0 was null true JDBC MATCH(OK)
+  setString(null) as batch getInt=0 was null true JDBC MATCH(OK)
+ setString("Invalid Value")  IC (Expected)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getInt=0 was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetInt=0 was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getInt=0 was null true CLOUD EXT (OK)
+  setDate(null) as batch getInt=0 was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getInt=0 was null true CLOUD EXT (OK)
+  setTime(null) as batch getInt=0 was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getInt=0 was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getInt=0 was null true CLOUD EXT (OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getInt=0 was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getInt=0 was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getInt=0 was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getInt=0 was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getInt=0 was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getInt=0 was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getInt=0 was null true CLOUD EXT (OK)
+  setClob(null) as batch getInt=0 was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getInt=0 was null true CLOUD EXT (OK)
+  setBlob(null) as batch getInt=0 was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getInt=0 was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getInt=46 was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getInt=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getInt=72 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getInt=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getInt=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getInt=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getInt=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getInt=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getInt=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getInt=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getInt=76 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getInt=76 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getInt=12 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getInt=12 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
+getXXX on : BIGINT
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Long was null false
+setNull() with all JDBC Types on BIGINT
+  setNull(Types.TINYINT) getLong=0 was null true
+  setNull with batching support(Types.TINYINT) getLong=0 was null true
+  setNull(SMALLINT) getLong=0 was null true
+  setNull with batching support(SMALLINT) getLong=0 was null true
+  setNull(INTEGER) getLong=0 was null true
+  setNull with batching support(INTEGER) getLong=0 was null true
+  setNull(BIGINT) getLong=0 was null true
+  setNull with batching support(BIGINT) getLong=0 was null true
+  setNull(REAL) getLong=0 was null true
+  setNull with batching support(REAL) getLong=0 was null true
+  setNull(Types.FLOAT) getLong=0 was null true
+  setNull with batching support(Types.FLOAT) getLong=0 was null true
+  setNull(DOUBLE) getLong=0 was null true
+  setNull with batching support(DOUBLE) getLong=0 was null true
+  setNull(DECIMAL) getLong=0 was null true
+  setNull with batching support(DECIMAL) getLong=0 was null true
+  setNull(Types.NUMERIC) getLong=0 was null true
+  setNull with batching support(Types.NUMERIC) getLong=0 was null true
+  setNull(Types.BIT) getLong=0 was null true
+  setNull with batching support(Types.BIT) getLong=0 was null true
+  setNull(CHAR) getLong=0 was null true
+  setNull with batching support(CHAR) getLong=0 was null true
+  setNull(VARCHAR) getLong=0 was null true
+  setNull with batching support(VARCHAR) getLong=0 was null true
+  setNull(LONG VARCHAR) getLong=0 was null true
+  setNull with batching support(LONG VARCHAR) getLong=0 was null true
+  setNull(VARCHAR () FOR BIT DATA) getLong=0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getLong=0 was null true
+  setNull(DATE) getLong=0 was null true
+  setNull with batching support(DATE) getLong=0 was null true
+  setNull(TIME) getLong=0 was null true
+  setNull with batching support(TIME) getLong=0 was null true
+  setNull(TIMESTAMP) getLong=0 was null true
+  setNull with batching support(TIMESTAMP) getLong=0 was null true
+  setNull(CLOB) getLong=0 was null true
+  setNull with batching support(CLOB) getLong=0 was null true
+  setNull(BLOB) getLong=0 was null true
+  setNull with batching support(BLOB) getLong=0 was null true
+  setNull(Types.NULL) getLong=0 was null true
+  setNull with batching support(Types.NULL) getLong=0 was null true
+  setNull(235350345) getLong=0 was null true
+  setNull with batching support(235350345) getLong=0 was null true
+setXXX() with all JDBC Types on BIGINT
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getLong=98 was null false JDBC MATCH(OK)
+  setByte() as batch getLong=98 was null false JDBC MATCH(OK)
+  setShort() getLong=98 was null false JDBC MATCH(OK)
+  setShort() as batch getLong=98 was null false JDBC MATCH(OK)
+  setInt() getLong=98 was null false JDBC MATCH(OK)
+  setInt() as batch getLong=98 was null false JDBC MATCH(OK)
+  setLong() getLong=98 was null false JDBC MATCH(OK)
+  setLong() as batch getLong=98 was null false JDBC MATCH(OK)
+  setFloat() getLong=98 was null false JDBC MATCH(OK)
+  setFloat() as batch getLong=98 was null false JDBC MATCH(OK)
+  setDouble() getLong=98 was null false JDBC MATCH(OK)
+  setDouble() as batch getLong=98 was null false JDBC MATCH(OK)
+  setBigDecimal() getLong=99 was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getLong=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getLong=0 was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getLong=0 was null true JDBC MATCH(OK)
+  setBoolean() getLong=1 was null false JDBC MATCH(OK)
+  setBoolean() as batch getLong=1 was null false JDBC MATCH(OK)
+  setString() getLong=97 was null false JDBC MATCH(OK)
+  setString() as batch getLong=97 was null false JDBC MATCH(OK)
+  setString(null) getLong=0 was null true JDBC MATCH(OK)
+  setString(null) as batch getLong=0 was null true JDBC MATCH(OK)
+ setString("Invalid Value")  IC (Expected)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getLong=0 was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetLong=0 was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getLong=0 was null true CLOUD EXT (OK)
+  setDate(null) as batch getLong=0 was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getLong=0 was null true CLOUD EXT (OK)
+  setTime(null) as batch getLong=0 was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getLong=0 was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getLong=0 was null true CLOUD EXT (OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getLong=0 was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getLong=0 was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getLong=0 was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getLong=0 was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getLong=0 was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getLong=0 was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getLong=0 was null true CLOUD EXT (OK)
+  setClob(null) as batch getLong=0 was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getLong=0 was null true CLOUD EXT (OK)
+  setBlob(null) as batch getLong=0 was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getLong=0 was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getLong=46 was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getLong=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getLong=72 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getLong=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getLong=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getLong=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getLong=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getLong=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getLong=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getLong=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getLong=76 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getLong=76 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getLong=12 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getLong=12 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
+getXXX on : REAL
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32.0 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32.0 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Float was null false
+setNull() with all JDBC Types on REAL
+  setNull(Types.TINYINT) getFloat=0.0 was null true
+  setNull with batching support(Types.TINYINT) getFloat=0.0 was null true
+  setNull(SMALLINT) getFloat=0.0 was null true
+  setNull with batching support(SMALLINT) getFloat=0.0 was null true
+  setNull(INTEGER) getFloat=0.0 was null true
+  setNull with batching support(INTEGER) getFloat=0.0 was null true
+  setNull(BIGINT) getFloat=0.0 was null true
+  setNull with batching support(BIGINT) getFloat=0.0 was null true
+  setNull(REAL) getFloat=0.0 was null true
+  setNull with batching support(REAL) getFloat=0.0 was null true
+  setNull(Types.FLOAT) getFloat=0.0 was null true
+  setNull with batching support(Types.FLOAT) getFloat=0.0 was null true
+  setNull(DOUBLE) getFloat=0.0 was null true
+  setNull with batching support(DOUBLE) getFloat=0.0 was null true
+  setNull(DECIMAL) getFloat=0.0 was null true
+  setNull with batching support(DECIMAL) getFloat=0.0 was null true
+  setNull(Types.NUMERIC) getFloat=0.0 was null true
+  setNull with batching support(Types.NUMERIC) getFloat=0.0 was null true
+  setNull(Types.BIT) getFloat=0.0 was null true
+  setNull with batching support(Types.BIT) getFloat=0.0 was null true
+  setNull(CHAR) getFloat=0.0 was null true
+  setNull with batching support(CHAR) getFloat=0.0 was null true
+  setNull(VARCHAR) getFloat=0.0 was null true
+  setNull with batching support(VARCHAR) getFloat=0.0 was null true
+  setNull(LONG VARCHAR) getFloat=0.0 was null true
+  setNull with batching support(LONG VARCHAR) getFloat=0.0 was null true
+  setNull(VARCHAR () FOR BIT DATA) getFloat=0.0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getFloat=0.0 was null true
+  setNull(DATE) getFloat=0.0 was null true
+  setNull with batching support(DATE) getFloat=0.0 was null true
+  setNull(TIME) getFloat=0.0 was null true
+  setNull with batching support(TIME) getFloat=0.0 was null true
+  setNull(TIMESTAMP) getFloat=0.0 was null true
+  setNull with batching support(TIMESTAMP) getFloat=0.0 was null true
+  setNull(CLOB) getFloat=0.0 was null true
+  setNull with batching support(CLOB) getFloat=0.0 was null true
+  setNull(BLOB) getFloat=0.0 was null true
+  setNull with batching support(BLOB) getFloat=0.0 was null true
+  setNull(Types.NULL) getFloat=0.0 was null true
+  setNull with batching support(Types.NULL) getFloat=0.0 was null true
+  setNull(235350345) getFloat=0.0 was null true
+  setNull with batching support(235350345) getFloat=0.0 was null true
+setXXX() with all JDBC Types on REAL
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getFloat=98.0 was null false JDBC MATCH(OK)
+  setByte() as batch getFloat=98.0 was null false JDBC MATCH(OK)
+  setShort() getFloat=98.0 was null false JDBC MATCH(OK)
+  setShort() as batch getFloat=98.0 was null false JDBC MATCH(OK)
+  setInt() getFloat=98.0 was null false JDBC MATCH(OK)
+  setInt() as batch getFloat=98.0 was null false JDBC MATCH(OK)
+  setLong() getFloat=98.0 was null false JDBC MATCH(OK)
+  setLong() as batch getFloat=98.0 was null false JDBC MATCH(OK)
+  setFloat() getFloat=98.4 was null false JDBC MATCH(OK)
+  setFloat() as batch getFloat=98.4 was null false JDBC MATCH(OK)
+  setDouble() getFloat=98.5 was null false JDBC MATCH(OK)
+  setDouble() as batch getFloat=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getFloat=99.0 was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getFloat=99.0 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getFloat=0.0 was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getFloat=0.0 was null true JDBC MATCH(OK)
+  setBoolean() getFloat=1.0 was null false JDBC MATCH(OK)
+  setBoolean() as batch getFloat=1.0 was null false JDBC MATCH(OK)
+  setString() getFloat=97.0 was null false JDBC MATCH(OK)
+  setString() as batch getFloat=97.0 was null false JDBC MATCH(OK)
+  setString(null) getFloat=0.0 was null true JDBC MATCH(OK)
+  setString(null) as batch getFloat=0.0 was null true JDBC MATCH(OK)
+ setString("Invalid Value")  IC (Expected)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetFloat=0.0 was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setDate(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setTime(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setClob(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setBlob(null) as batch getFloat=0.0 was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getFloat=0.0 was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getFloat=46.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getFloat=46.0 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getFloat=72.0 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getFloat=72.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getFloat=1.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getFloat=1.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getFloat=74.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getFloat=74.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getFloat=79.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getFloat=79.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getFloat=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getFloat=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getFloat=12.33 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getFloat=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
+getXXX on : FLOAT
+FAIL - mismatch column type 8 expected 6
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32.0 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32.0 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Double was null false
+setNull() with all JDBC Types on FLOAT
+  setNull(Types.TINYINT) getDouble=0.0 was null true
+  setNull with batching support(Types.TINYINT) getDouble=0.0 was null true
+  setNull(SMALLINT) getDouble=0.0 was null true
+  setNull with batching support(SMALLINT) getDouble=0.0 was null true
+  setNull(INTEGER) getDouble=0.0 was null true
+  setNull with batching support(INTEGER) getDouble=0.0 was null true
+  setNull(BIGINT) getDouble=0.0 was null true
+  setNull with batching support(BIGINT) getDouble=0.0 was null true
+  setNull(REAL) getDouble=0.0 was null true
+  setNull with batching support(REAL) getDouble=0.0 was null true
+  setNull(Types.FLOAT) getDouble=0.0 was null true
+  setNull with batching support(Types.FLOAT) getDouble=0.0 was null true
+  setNull(DOUBLE) getDouble=0.0 was null true
+  setNull with batching support(DOUBLE) getDouble=0.0 was null true
+  setNull(DECIMAL) getDouble=0.0 was null true
+  setNull with batching support(DECIMAL) getDouble=0.0 was null true
+  setNull(Types.NUMERIC) getDouble=0.0 was null true
+  setNull with batching support(Types.NUMERIC) getDouble=0.0 was null true
+  setNull(Types.BIT) getDouble=0.0 was null true
+  setNull with batching support(Types.BIT) getDouble=0.0 was null true
+  setNull(CHAR) getDouble=0.0 was null true
+  setNull with batching support(CHAR) getDouble=0.0 was null true
+  setNull(VARCHAR) getDouble=0.0 was null true
+  setNull with batching support(VARCHAR) getDouble=0.0 was null true
+  setNull(LONG VARCHAR) getDouble=0.0 was null true
+  setNull with batching support(LONG VARCHAR) getDouble=0.0 was null true
+  setNull(VARCHAR () FOR BIT DATA) getDouble=0.0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getDouble=0.0 was null true
+  setNull(DATE) getDouble=0.0 was null true
+  setNull with batching support(DATE) getDouble=0.0 was null true
+  setNull(TIME) getDouble=0.0 was null true
+  setNull with batching support(TIME) getDouble=0.0 was null true
+  setNull(TIMESTAMP) getDouble=0.0 was null true
+  setNull with batching support(TIMESTAMP) getDouble=0.0 was null true
+  setNull(CLOB) getDouble=0.0 was null true
+  setNull with batching support(CLOB) getDouble=0.0 was null true
+  setNull(BLOB) getDouble=0.0 was null true
+  setNull with batching support(BLOB) getDouble=0.0 was null true
+  setNull(Types.NULL) getDouble=0.0 was null true
+  setNull with batching support(Types.NULL) getDouble=0.0 was null true
+  setNull(235350345) getDouble=0.0 was null true
+  setNull with batching support(235350345) getDouble=0.0 was null true
+setXXX() with all JDBC Types on FLOAT
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getDouble=98.0 was null false JDBC MATCH(OK)
+  setByte() as batch getDouble=98.0 was null false JDBC MATCH(OK)
+  setShort() getDouble=98.0 was null false JDBC MATCH(OK)
+  setShort() as batch getDouble=98.0 was null false JDBC MATCH(OK)
+  setInt() getDouble=98.0 was null false JDBC MATCH(OK)
+  setInt() as batch getDouble=98.0 was null false JDBC MATCH(OK)
+  setLong() getDouble=98.0 was null false JDBC MATCH(OK)
+  setLong() as batch getDouble=98.0 was null false JDBC MATCH(OK)
+  setFloat() getDouble=98.4 was null false JDBC MATCH(OK)
+  setFloat() as batch getDouble=98.4 was null false JDBC MATCH(OK)
+  setDouble() getDouble=98.5 was null false JDBC MATCH(OK)
+  setDouble() as batch getDouble=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getDouble=99.0 was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getDouble=99.0 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getDouble=0.0 was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getDouble=0.0 was null true JDBC MATCH(OK)
+  setBoolean() getDouble=1.0 was null false JDBC MATCH(OK)
+  setBoolean() as batch getDouble=1.0 was null false JDBC MATCH(OK)
+  setString() getDouble=97.0 was null false JDBC MATCH(OK)
+  setString() as batch getDouble=97.0 was null false JDBC MATCH(OK)
+  setString(null) getDouble=0.0 was null true JDBC MATCH(OK)
+  setString(null) as batch getDouble=0.0 was null true JDBC MATCH(OK)
+ setString("Invalid Value")  IC (Expected)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetDouble=0.0 was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setDate(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setTime(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setClob(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setBlob(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getDouble=46.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getDouble=46.0 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getDouble=72.0 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getDouble=72.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getDouble=1.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getDouble=1.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getDouble=74.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getDouble=74.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getDouble=79.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getDouble=79.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getDouble=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getDouble=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getDouble=12.33 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getDouble=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
+getXXX on : DOUBLE
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32.0 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32.0 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.lang.Double was null false
+setNull() with all JDBC Types on DOUBLE
+  setNull(Types.TINYINT) getDouble=0.0 was null true
+  setNull with batching support(Types.TINYINT) getDouble=0.0 was null true
+  setNull(SMALLINT) getDouble=0.0 was null true
+  setNull with batching support(SMALLINT) getDouble=0.0 was null true
+  setNull(INTEGER) getDouble=0.0 was null true
+  setNull with batching support(INTEGER) getDouble=0.0 was null true
+  setNull(BIGINT) getDouble=0.0 was null true
+  setNull with batching support(BIGINT) getDouble=0.0 was null true
+  setNull(REAL) getDouble=0.0 was null true
+  setNull with batching support(REAL) getDouble=0.0 was null true
+  setNull(Types.FLOAT) getDouble=0.0 was null true
+  setNull with batching support(Types.FLOAT) getDouble=0.0 was null true
+  setNull(DOUBLE) getDouble=0.0 was null true
+  setNull with batching support(DOUBLE) getDouble=0.0 was null true
+  setNull(DECIMAL) getDouble=0.0 was null true
+  setNull with batching support(DECIMAL) getDouble=0.0 was null true
+  setNull(Types.NUMERIC) getDouble=0.0 was null true
+  setNull with batching support(Types.NUMERIC) getDouble=0.0 was null true
+  setNull(Types.BIT) getDouble=0.0 was null true
+  setNull with batching support(Types.BIT) getDouble=0.0 was null true
+  setNull(CHAR) getDouble=0.0 was null true
+  setNull with batching support(CHAR) getDouble=0.0 was null true
+  setNull(VARCHAR) getDouble=0.0 was null true
+  setNull with batching support(VARCHAR) getDouble=0.0 was null true
+  setNull(LONG VARCHAR) getDouble=0.0 was null true
+  setNull with batching support(LONG VARCHAR) getDouble=0.0 was null true
+  setNull(VARCHAR () FOR BIT DATA) getDouble=0.0 was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getDouble=0.0 was null true
+  setNull(DATE) getDouble=0.0 was null true
+  setNull with batching support(DATE) getDouble=0.0 was null true
+  setNull(TIME) getDouble=0.0 was null true
+  setNull with batching support(TIME) getDouble=0.0 was null true
+  setNull(TIMESTAMP) getDouble=0.0 was null true
+  setNull with batching support(TIMESTAMP) getDouble=0.0 was null true
+  setNull(CLOB) getDouble=0.0 was null true
+  setNull with batching support(CLOB) getDouble=0.0 was null true
+  setNull(BLOB) getDouble=0.0 was null true
+  setNull with batching support(BLOB) getDouble=0.0 was null true
+  setNull(Types.NULL) getDouble=0.0 was null true
+  setNull with batching support(Types.NULL) getDouble=0.0 was null true
+  setNull(235350345) getDouble=0.0 was null true
+  setNull with batching support(235350345) getDouble=0.0 was null true
+setXXX() with all JDBC Types on DOUBLE
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getDouble=98.0 was null false JDBC MATCH(OK)
+  setByte() as batch getDouble=98.0 was null false JDBC MATCH(OK)
+  setShort() getDouble=98.0 was null false JDBC MATCH(OK)
+  setShort() as batch getDouble=98.0 was null false JDBC MATCH(OK)
+  setInt() getDouble=98.0 was null false JDBC MATCH(OK)
+  setInt() as batch getDouble=98.0 was null false JDBC MATCH(OK)
+  setLong() getDouble=98.0 was null false JDBC MATCH(OK)
+  setLong() as batch getDouble=98.0 was null false JDBC MATCH(OK)
+  setFloat() getDouble=98.4 was null false JDBC MATCH(OK)
+  setFloat() as batch getDouble=98.4 was null false JDBC MATCH(OK)
+  setDouble() getDouble=98.5 was null false JDBC MATCH(OK)
+  setDouble() as batch getDouble=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getDouble=99.0 was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getDouble=99.0 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getDouble=0.0 was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getDouble=0.0 was null true JDBC MATCH(OK)
+  setBoolean() getDouble=1.0 was null false JDBC MATCH(OK)
+  setBoolean() as batch getDouble=1.0 was null false JDBC MATCH(OK)
+  setString() getDouble=97.0 was null false JDBC MATCH(OK)
+  setString() as batch getDouble=97.0 was null false JDBC MATCH(OK)
+  setString(null) getDouble=0.0 was null true JDBC MATCH(OK)
+  setString(null) as batch getDouble=0.0 was null true JDBC MATCH(OK)
+ setString("Invalid Value")  IC (Expected)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetDouble=0.0 was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setDate(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setTime(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setClob(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setBlob(null) as batch getDouble=0.0 was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getDouble=0.0 was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getDouble=46.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getDouble=46.0 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getDouble=72.0 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getDouble=72.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getDouble=1.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getDouble=1.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getDouble=74.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getDouble=74.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getDouble=79.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getDouble=79.0 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getDouble=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getDouble=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getDouble=12.33 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getDouble=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
+getXXX on : DECIMAL(10,5)
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32.00000 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32.00000 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.math.BigDecimal was null false
+setNull() with all JDBC Types on DECIMAL(10,5)
+  setNull(Types.TINYINT) getBigDecimal=null was null true
+  setNull with batching support(Types.TINYINT) getBigDecimal=null was null true
+  setNull(SMALLINT) getBigDecimal=null was null true
+  setNull with batching support(SMALLINT) getBigDecimal=null was null true
+  setNull(INTEGER) getBigDecimal=null was null true
+  setNull with batching support(INTEGER) getBigDecimal=null was null true
+  setNull(BIGINT) getBigDecimal=null was null true
+  setNull with batching support(BIGINT) getBigDecimal=null was null true
+  setNull(REAL) getBigDecimal=null was null true
+  setNull with batching support(REAL) getBigDecimal=null was null true
+  setNull(Types.FLOAT) getBigDecimal=null was null true
+  setNull with batching support(Types.FLOAT) getBigDecimal=null was null true
+  setNull(DOUBLE) getBigDecimal=null was null true
+  setNull with batching support(DOUBLE) getBigDecimal=null was null true
+  setNull(DECIMAL) getBigDecimal=null was null true
+  setNull with batching support(DECIMAL) getBigDecimal=null was null true
+  setNull(Types.NUMERIC) getBigDecimal=null was null true
+  setNull with batching support(Types.NUMERIC) getBigDecimal=null was null true
+  setNull(Types.BIT) getBigDecimal=null was null true
+  setNull with batching support(Types.BIT) getBigDecimal=null was null true
+  setNull(CHAR) getBigDecimal=null was null true
+  setNull with batching support(CHAR) getBigDecimal=null was null true
+  setNull(VARCHAR) getBigDecimal=null was null true
+  setNull with batching support(VARCHAR) getBigDecimal=null was null true
+  setNull(LONG VARCHAR) getBigDecimal=null was null true
+  setNull with batching support(LONG VARCHAR) getBigDecimal=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getBigDecimal=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getBigDecimal=null was null true
+  setNull(DATE) getBigDecimal=null was null true
+  setNull with batching support(DATE) getBigDecimal=null was null true
+  setNull(TIME) getBigDecimal=null was null true
+  setNull with batching support(TIME) getBigDecimal=null was null true
+  setNull(TIMESTAMP) getBigDecimal=null was null true
+  setNull with batching support(TIMESTAMP) getBigDecimal=null was null true
+  setNull(CLOB) getBigDecimal=null was null true
+  setNull with batching support(CLOB) getBigDecimal=null was null true
+  setNull(BLOB) getBigDecimal=null was null true
+  setNull with batching support(BLOB) getBigDecimal=null was null true
+  setNull(Types.NULL) getBigDecimal=null was null true
+  setNull with batching support(Types.NULL) getBigDecimal=null was null true
+  setNull(235350345) getBigDecimal=null was null true
+  setNull with batching support(235350345) getBigDecimal=null was null true
+setXXX() with all JDBC Types on DECIMAL(10,5)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setByte() as batch getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setShort() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setShort() as batch getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setInt() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setInt() as batch getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setLong() getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setLong() as batch getBigDecimal=98.00000 was null false JDBC MATCH(OK)
+  setFloat() getBigDecimal=98.40000 was null false JDBC MATCH(OK)
+  setFloat() as batch getBigDecimal=98.40000 was null false JDBC MATCH(OK)
+  setDouble() getBigDecimal=98.50000 was null false JDBC MATCH(OK)
+  setDouble() as batch getBigDecimal=98.50000 was null false JDBC MATCH(OK)
+  setBigDecimal() getBigDecimal=99.00000 was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getBigDecimal=99.00000 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getBigDecimal=null was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getBigDecimal=null was null true JDBC MATCH(OK)
+  setBoolean() getBigDecimal=1.00000 was null false JDBC MATCH(OK)
+  setBoolean() as batch getBigDecimal=1.00000 was null false JDBC MATCH(OK)
+  setString() getBigDecimal=97.00000 was null false JDBC MATCH(OK)
+  setString() as batch getBigDecimal=97.00000 was null false JDBC MATCH(OK)
+  setString(null) getBigDecimal=null was null true JDBC MATCH(OK)
+  setString(null) as batch getBigDecimal=null was null true JDBC MATCH(OK)
+ setString("Invalid Value")  IC (Expected)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetBigDecimal=null was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setDate(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setTime(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setClob(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setBlob(null) as batch getBigDecimal=null was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getBigDecimal=null was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getBigDecimal=46.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getBigDecimal=46.00000 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getBigDecimal=72.00000 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getBigDecimal=72.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getBigDecimal=1.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getBigDecimal=1.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getBigDecimal=74.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getBigDecimal=74.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getBigDecimal=79.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getBigDecimal=79.00000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getBigDecimal=76.30000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getBigDecimal=76.30000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getBigDecimal=12.33000 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getBigDecimal=12.33000 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
+getXXX on : 2
+  skipping
+getXXX on : -7
+  skipping
+getXXX on : 0
+  skipping
+getXXX on : CHAR(60)
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=null was null true JDBC MATCH(OK)
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=null was null true JDBC MATCH(OK)
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32                                                           was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate= (?????):Invalid data conversion: Parameter instance 32                                                           is invalid for requested conversion to java.sql.Date. JDBC FAIL CHAR(60)
+  getTime= (?????):Invalid data conversion: Parameter instance 32                                                           is invalid for requested conversion to java.sql.Time. JDBC FAIL CHAR(60)
+  getTimestamp= (?????):Invalid data conversion: Parameter instance 32                                                           is invalid for requested conversion to java.sql.Timestamp. JDBC FAIL CHAR(60)
+  getAsciiStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getObject=CORRECT :java.lang.String was null false
+setNull() with all JDBC Types on CHAR(60)
+  setNull(Types.TINYINT) getString=null was null true
+  setNull with batching support(Types.TINYINT) getString=null was null true
+  setNull(SMALLINT) getString=null was null true
+  setNull with batching support(SMALLINT) getString=null was null true
+  setNull(INTEGER) getString=null was null true
+  setNull with batching support(INTEGER) getString=null was null true
+  setNull(BIGINT) getString=null was null true
+  setNull with batching support(BIGINT) getString=null was null true
+  setNull(REAL) getString=null was null true
+  setNull with batching support(REAL) getString=null was null true
+  setNull(Types.FLOAT) getString=null was null true
+  setNull with batching support(Types.FLOAT) getString=null was null true
+  setNull(DOUBLE) getString=null was null true
+  setNull with batching support(DOUBLE) getString=null was null true
+  setNull(DECIMAL) getString=null was null true
+  setNull with batching support(DECIMAL) getString=null was null true
+  setNull(Types.NUMERIC) getString=null was null true
+  setNull with batching support(Types.NUMERIC) getString=null was null true
+  setNull(Types.BIT) getString=null was null true
+  setNull with batching support(Types.BIT) getString=null was null true
+  setNull(CHAR) getString=null was null true
+  setNull with batching support(CHAR) getString=null was null true
+  setNull(VARCHAR) getString=null was null true
+  setNull with batching support(VARCHAR) getString=null was null true
+  setNull(LONG VARCHAR) getString=null was null true
+  setNull with batching support(LONG VARCHAR) getString=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getString=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getString=null was null true
+  setNull(DATE) getString=null was null true
+  setNull with batching support(DATE) getString=null was null true
+  setNull(TIME) getString=null was null true
+  setNull with batching support(TIME) getString=null was null true
+  setNull(TIMESTAMP) getString=null was null true
+  setNull with batching support(TIMESTAMP) getString=null was null true
+  setNull(CLOB) getString=null was null true
+  setNull with batching support(CLOB) getString=null was null true
+  setNull(BLOB) getString=null was null true
+  setNull with batching support(BLOB) getString=null was null true
+  setNull(Types.NULL) getString=null was null true
+  setNull with batching support(Types.NULL) getString=null was null true
+  setNull(235350345) getString=null was null true
+  setNull with batching support(235350345) getString=null was null true
+setXXX() with all JDBC Types on CHAR(60)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getString=98                                                           was null false JDBC MATCH(OK)
+  setByte() as batch getString=98                                                           was null false JDBC MATCH(OK)
+  setShort() getString=98                                                           was null false JDBC MATCH(OK)
+  setShort() as batch getString=98                                                           was null false JDBC MATCH(OK)
+  setInt() getString=98                                                           was null false JDBC MATCH(OK)
+  setInt() as batch getString=98                                                           was null false JDBC MATCH(OK)
+  setLong() getString=98                                                           was null false JDBC MATCH(OK)
+  setLong() as batch getString=98                                                           was null false JDBC MATCH(OK)
+  setFloat() getString=98.4                                                         was null false JDBC MATCH(OK)
+  setFloat() as batch getString=98.4                                                         was null false JDBC MATCH(OK)
+  setDouble() getString=98.5                                                         was null false JDBC MATCH(OK)
+  setDouble() as batch getString=98.5                                                         was null false JDBC MATCH(OK)
+  setBigDecimal() getString=99                                                           was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getString=99                                                           was null false JDBC MATCH(OK)
+  setBigDecimal(null) getString=null was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getString=null was null true JDBC MATCH(OK)
+  setBoolean() getString=1                                                            was null false JDBC MATCH(OK)
+  setBoolean() as batch getString=1                                                            was null false JDBC MATCH(OK)
+  setString() getString=97                                                           was null false JDBC MATCH(OK)
+  setString() as batch getString=97                                                           was null false JDBC MATCH(OK)
+  setString(null) getString=null was null true JDBC MATCH(OK)
+  setString(null) as batch getString=null was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getString=null was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetString=null was null true CLOUD EXT (OK)
+  setDate() getString=2004-02-14                                                   was null false JDBC MATCH(OK)
+  setDate() as batch getString=2004-02-14                                                   was null false JDBC MATCH(OK)
+  setDate(null) getString=null was null true JDBC MATCH(OK)
+  setDate(null) as batch getString=null was null true JDBC MATCH(OK)
+  setTime() getString=13:26:42                                                     was null false JDBC MATCH(OK)
+  setTime() as batch getString=13:26:42                                                     was null false JDBC MATCH(OK)
+  setTime(null) getString=null was null true JDBC MATCH(OK)
+  setTime(null) as batch getString=null was null true JDBC MATCH(OK)
+  setTimestamp() getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp() as batch getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp(null) getString=null was null true JDBC MATCH(OK)
+  setTimestamp(null) as batch getString=null was null true JDBC MATCH(OK)
+  setAsciiStream() getString=eg012d                                                       was null false JDBC MATCH(OK)
+  setAsciiStream() as batch getString=eg012d                                                       was null false JDBC MATCH(OK)
+  setAsciiStream(null) getString=null was null true JDBC MATCH(OK)
+  setAsciiStream(null) as batch getString=null was null true JDBC MATCH(OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getString=null was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getString=null was null true CLOUD EXT (OK)
+  setCharacterStream() getString=89                                                           was null false JDBC MATCH(OK)
+  setCharacterStream() as batch getString=89                                                           was null false JDBC MATCH(OK)
+  setCharacterStream(null) getString=null was null true JDBC MATCH(OK)
+  setCharacterStream(null) as batch getString=null was null true JDBC MATCH(OK)
+  setClob() getString=72                                                           was null false CLOUD EXT (OK)
+  setClob() as batch getString=72                                                           was null false CLOUD EXT (OK)
+  setClob(null) getString=null was null true CLOUD EXT (OK)
+  setClob(null) as batch getString=null was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getString=null was null true CLOUD EXT (OK)
+  setBlob(null) as batch getString=null was null true CLOUD EXT (OK)
+  setUnicodeStream() getString=EncodedString: > 33347 51966 50 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 < was null false CLOUD EXT (OK)
+  setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getString=46                                                           was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getString=46                                                           was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getString=72                                                           was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getString=72                                                           was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getString=1                                                            was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getString=1                                                            was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getString=74                                                           was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getString=74                                                           was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getString=79                                                           was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getString=79                                                           was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getString=76.3                                                         was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getString=76.3                                                         was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getString=12.33                                                        was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getString=12.33                                                        was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) getString=2004-02-14                                                   was null false JDBC MATCH(OK)
+  setObject(java.sql.Date) as batch getString=2004-02-14                                                   was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) getString=13:26:42                                                     was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) as batch getString=13:26:42                                                     was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) as batch getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+getXXX on : VARCHAR(60)
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=null was null true JDBC MATCH(OK)
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=null was null true JDBC MATCH(OK)
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=java.lang.StringIndexOutOfBoundsException JDBC FAIL VARCHAR(60)
+  getTime=java.lang.StringIndexOutOfBoundsException JDBC FAIL VARCHAR(60)
+  getTimestamp=java.lang.StringIndexOutOfBoundsException JDBC FAIL VARCHAR(60)
+  getAsciiStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getObject=CORRECT :java.lang.String was null false
+setNull() with all JDBC Types on VARCHAR(60)
+  setNull(Types.TINYINT) getString=null was null true
+  setNull with batching support(Types.TINYINT) getString=null was null true
+  setNull(SMALLINT) getString=null was null true
+  setNull with batching support(SMALLINT) getString=null was null true
+  setNull(INTEGER) getString=null was null true
+  setNull with batching support(INTEGER) getString=null was null true
+  setNull(BIGINT) getString=null was null true
+  setNull with batching support(BIGINT) getString=null was null true
+  setNull(REAL) getString=null was null true
+  setNull with batching support(REAL) getString=null was null true
+  setNull(Types.FLOAT) getString=null was null true
+  setNull with batching support(Types.FLOAT) getString=null was null true
+  setNull(DOUBLE) getString=null was null true
+  setNull with batching support(DOUBLE) getString=null was null true
+  setNull(DECIMAL) getString=null was null true
+  setNull with batching support(DECIMAL) getString=null was null true
+  setNull(Types.NUMERIC) getString=null was null true
+  setNull with batching support(Types.NUMERIC) getString=null was null true
+  setNull(Types.BIT) getString=null was null true
+  setNull with batching support(Types.BIT) getString=null was null true
+  setNull(CHAR) getString=null was null true
+  setNull with batching support(CHAR) getString=null was null true
+  setNull(VARCHAR) getString=null was null true
+  setNull with batching support(VARCHAR) getString=null was null true
+  setNull(LONG VARCHAR) getString=null was null true
+  setNull with batching support(LONG VARCHAR) getString=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getString=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getString=null was null true
+  setNull(DATE) getString=null was null true
+  setNull with batching support(DATE) getString=null was null true
+  setNull(TIME) getString=null was null true
+  setNull with batching support(TIME) getString=null was null true
+  setNull(TIMESTAMP) getString=null was null true
+  setNull with batching support(TIMESTAMP) getString=null was null true
+  setNull(CLOB) getString=null was null true
+  setNull with batching support(CLOB) getString=null was null true
+  setNull(BLOB) getString=null was null true
+  setNull with batching support(BLOB) getString=null was null true
+  setNull(Types.NULL) getString=null was null true
+  setNull with batching support(Types.NULL) getString=null was null true
+  setNull(235350345) getString=null was null true
+  setNull with batching support(235350345) getString=null was null true
+setXXX() with all JDBC Types on VARCHAR(60)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getString=98 was null false JDBC MATCH(OK)
+  setByte() as batch getString=98 was null false JDBC MATCH(OK)
+  setShort() getString=98 was null false JDBC MATCH(OK)
+  setShort() as batch getString=98 was null false JDBC MATCH(OK)
+  setInt() getString=98 was null false JDBC MATCH(OK)
+  setInt() as batch getString=98 was null false JDBC MATCH(OK)
+  setLong() getString=98 was null false JDBC MATCH(OK)
+  setLong() as batch getString=98 was null false JDBC MATCH(OK)
+  setFloat() getString=98.4 was null false JDBC MATCH(OK)
+  setFloat() as batch getString=98.4 was null false JDBC MATCH(OK)
+  setDouble() getString=98.5 was null false JDBC MATCH(OK)
+  setDouble() as batch getString=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getString=99 was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getString=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getString=null was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getString=null was null true JDBC MATCH(OK)
+  setBoolean() getString=1 was null false JDBC MATCH(OK)
+  setBoolean() as batch getString=1 was null false JDBC MATCH(OK)
+  setString() getString=97 was null false JDBC MATCH(OK)
+  setString() as batch getString=97 was null false JDBC MATCH(OK)
+  setString(null) getString=null was null true JDBC MATCH(OK)
+  setString(null) as batch getString=null was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getString=null was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetString=null was null true CLOUD EXT (OK)
+  setDate() getString=2004-02-14 was null false JDBC MATCH(OK)
+  setDate() as batch getString=2004-02-14 was null false JDBC MATCH(OK)
+  setDate(null) getString=null was null true JDBC MATCH(OK)
+  setDate(null) as batch getString=null was null true JDBC MATCH(OK)
+  setTime() getString=13:26:42 was null false JDBC MATCH(OK)
+  setTime() as batch getString=13:26:42 was null false JDBC MATCH(OK)
+  setTime(null) getString=null was null true JDBC MATCH(OK)
+  setTime(null) as batch getString=null was null true JDBC MATCH(OK)
+  setTimestamp() getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp() as batch getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp(null) getString=null was null true JDBC MATCH(OK)
+  setTimestamp(null) as batch getString=null was null true JDBC MATCH(OK)
+  setAsciiStream() getString=eg012d was null false JDBC MATCH(OK)
+  setAsciiStream() as batch getString=eg012d was null false JDBC MATCH(OK)
+  setAsciiStream(null) getString=null was null true JDBC MATCH(OK)
+  setAsciiStream(null) as batch getString=null was null true JDBC MATCH(OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getString=null was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getString=null was null true CLOUD EXT (OK)
+  setCharacterStream() getString=89 was null false JDBC MATCH(OK)
+  setCharacterStream() as batch getString=89 was null false JDBC MATCH(OK)
+  setCharacterStream(null) getString=null was null true JDBC MATCH(OK)
+  setCharacterStream(null) as batch getString=null was null true JDBC MATCH(OK)
+  setClob() getString=72 was null false CLOUD EXT (OK)
+  setClob() as batch getString=72 was null false CLOUD EXT (OK)
+  setClob(null) getString=null was null true CLOUD EXT (OK)
+  setClob(null) as batch getString=null was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getString=null was null true CLOUD EXT (OK)
+  setBlob(null) as batch getString=null was null true CLOUD EXT (OK)
+  setUnicodeStream() getString=EncodedString: > 33347 51966 50 < was null false CLOUD EXT (OK)
+  setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getString=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getString=72 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getString=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getString=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getString=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getString=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getString=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getString=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getString=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getString=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getString=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getString=12.33 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getString=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) getString=2004-02-14 was null false JDBC MATCH(OK)
+  setObject(java.sql.Date) as batch getString=2004-02-14 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) getString=13:26:42 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) as batch getString=13:26:42 was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) as batch getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+getXXX on : LONG VARCHAR
+ NULL VALUE
+  getByte=0 was null true JDBC MATCH(OK)
+  getShort=0 was null true JDBC MATCH(OK)
+  getInt=0 was null true JDBC MATCH(OK)
+  getLong=0 was null true JDBC MATCH(OK)
+  getFloat=0.0 was null true JDBC MATCH(OK)
+  getDouble=0.0 was null true JDBC MATCH(OK)
+  getBigDecimal=null was null true JDBC MATCH(OK)
+  getBoolean=false was null true JDBC MATCH(OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=null was null true JDBC MATCH(OK)
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=null was null true JDBC MATCH(OK)
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=32 was null false JDBC MATCH(OK)
+  getShort=32 was null false JDBC MATCH(OK)
+  getInt=32 was null false JDBC MATCH(OK)
+  getLong=32 was null false JDBC MATCH(OK)
+  getFloat=32.0 was null false JDBC MATCH(OK)
+  getDouble=32.0 was null false JDBC MATCH(OK)
+  getBigDecimal=32 was null false JDBC MATCH(OK)
+  getBoolean=true was null false JDBC MATCH(OK)
+  getString=32 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=java.lang.StringIndexOutOfBoundsException JDBC FAIL LONG VARCHAR
+  getTime=java.lang.StringIndexOutOfBoundsException JDBC FAIL LONG VARCHAR
+  getTimestamp=java.lang.StringIndexOutOfBoundsException JDBC FAIL LONG VARCHAR
+  getAsciiStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=0x33,0x32 was null false JDBC MATCH(OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getObject=CORRECT :java.lang.String was null false
+setNull() with all JDBC Types on LONG VARCHAR
+  setNull(Types.TINYINT) getString=null was null true
+  setNull with batching support(Types.TINYINT) getString=null was null true
+  setNull(SMALLINT) getString=null was null true
+  setNull with batching support(SMALLINT) getString=null was null true
+  setNull(INTEGER) getString=null was null true
+  setNull with batching support(INTEGER) getString=null was null true
+  setNull(BIGINT) getString=null was null true
+  setNull with batching support(BIGINT) getString=null was null true
+  setNull(REAL) getString=null was null true
+  setNull with batching support(REAL) getString=null was null true
+  setNull(Types.FLOAT) getString=null was null true
+  setNull with batching support(Types.FLOAT) getString=null was null true
+  setNull(DOUBLE) getString=null was null true
+  setNull with batching support(DOUBLE) getString=null was null true
+  setNull(DECIMAL) getString=null was null true
+  setNull with batching support(DECIMAL) getString=null was null true
+  setNull(Types.NUMERIC) getString=null was null true
+  setNull with batching support(Types.NUMERIC) getString=null was null true
+  setNull(Types.BIT) getString=null was null true
+  setNull with batching support(Types.BIT) getString=null was null true
+  setNull(CHAR) getString=null was null true
+  setNull with batching support(CHAR) getString=null was null true
+  setNull(VARCHAR) getString=null was null true
+  setNull with batching support(VARCHAR) getString=null was null true
+  setNull(LONG VARCHAR) getString=null was null true
+  setNull with batching support(LONG VARCHAR) getString=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getString=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getString=null was null true
+  setNull(DATE) getString=null was null true
+  setNull with batching support(DATE) getString=null was null true
+  setNull(TIME) getString=null was null true
+  setNull with batching support(TIME) getString=null was null true
+  setNull(TIMESTAMP) getString=null was null true
+  setNull with batching support(TIMESTAMP) getString=null was null true
+  setNull(CLOB) getString=null was null true
+  setNull with batching support(CLOB) getString=null was null true
+  setNull(BLOB) getString=null was null true
+  setNull with batching support(BLOB) getString=null was null true
+  setNull(Types.NULL) getString=null was null true
+  setNull with batching support(Types.NULL) getString=null was null true
+  setNull(235350345) getString=null was null true
+  setNull with batching support(235350345) getString=null was null true
+setXXX() with all JDBC Types on LONG VARCHAR
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() getString=98 was null false JDBC MATCH(OK)
+  setByte() as batch getString=98 was null false JDBC MATCH(OK)
+  setShort() getString=98 was null false JDBC MATCH(OK)
+  setShort() as batch getString=98 was null false JDBC MATCH(OK)
+  setInt() getString=98 was null false JDBC MATCH(OK)
+  setInt() as batch getString=98 was null false JDBC MATCH(OK)
+  setLong() getString=98 was null false JDBC MATCH(OK)
+  setLong() as batch getString=98 was null false JDBC MATCH(OK)
+  setFloat() getString=98.4 was null false JDBC MATCH(OK)
+  setFloat() as batch getString=98.4 was null false JDBC MATCH(OK)
+  setDouble() getString=98.5 was null false JDBC MATCH(OK)
+  setDouble() as batch getString=98.5 was null false JDBC MATCH(OK)
+  setBigDecimal() getString=99 was null false JDBC MATCH(OK)
+  setBigDecimal() as batch getString=99 was null false JDBC MATCH(OK)
+  setBigDecimal(null) getString=null was null true JDBC MATCH(OK)
+  setBigDecimal(null) as batch getString=null was null true JDBC MATCH(OK)
+  setBoolean() getString=1 was null false JDBC MATCH(OK)
+  setBoolean() as batch getString=1 was null false JDBC MATCH(OK)
+  setString() getString=97 was null false JDBC MATCH(OK)
+  setString() as batch getString=97 was null false JDBC MATCH(OK)
+  setString(null) getString=null was null true JDBC MATCH(OK)
+  setString(null) as batch getString=null was null true JDBC MATCH(OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getString=null was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetString=null was null true CLOUD EXT (OK)
+  setDate() getString=2004-02-14 was null false JDBC MATCH(OK)
+  setDate() as batch getString=2004-02-14 was null false JDBC MATCH(OK)
+  setDate(null) getString=null was null true JDBC MATCH(OK)
+  setDate(null) as batch getString=null was null true JDBC MATCH(OK)
+  setTime() getString=13:26:42 was null false JDBC MATCH(OK)
+  setTime() as batch getString=13:26:42 was null false JDBC MATCH(OK)
+  setTime(null) getString=null was null true JDBC MATCH(OK)
+  setTime(null) as batch getString=null was null true JDBC MATCH(OK)
+  setTimestamp() getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp() as batch getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp(null) getString=null was null true JDBC MATCH(OK)
+  setTimestamp(null) as batch getString=null was null true JDBC MATCH(OK)
+  setAsciiStream() getString=eg012d was null false JDBC MATCH(OK)
+  setAsciiStream() as batch getString=eg012d was null false JDBC MATCH(OK)
+  setAsciiStream(null) getString=null was null true JDBC MATCH(OK)
+  setAsciiStream(null) as batch getString=null was null true JDBC MATCH(OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getString=null was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getString=null was null true CLOUD EXT (OK)
+  setCharacterStream() getString=89 was null false JDBC MATCH(OK)
+  setCharacterStream() as batch getString=89 was null false JDBC MATCH(OK)
+  setCharacterStream(null) getString=null was null true JDBC MATCH(OK)
+  setCharacterStream(null) as batch getString=null was null true JDBC MATCH(OK)
+  setClob() getString=72 was null false CLOUD EXT (OK)
+  setClob() as batch getString=72 was null false CLOUD EXT (OK)
+  setClob(null) getString=null was null true CLOUD EXT (OK)
+  setClob(null) as batch getString=null was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getString=null was null true CLOUD EXT (OK)
+  setBlob(null) as batch getString=null was null true CLOUD EXT (OK)
+  setUnicodeStream() getString=EncodedString: > 33347 51966 50 < was null false CLOUD EXT (OK)
+  setUnicodeStream(null) getString=null was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getString=46 was null false JDBC MATCH(OK)
+  setObject(java.lang.String) as batch getString=46 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) getString=72 was null false JDBC MATCH(OK)
+  setObject(java.math.BigDecimal) as batch getString=72 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) getString=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Boolean) as batch getString=1 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) getString=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Integer) as batch getString=74 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) getString=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Long) as batch getString=79 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) getString=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Float) as batch getString=76.3 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) getString=12.33 was null false JDBC MATCH(OK)
+  setObject(java.lang.Double) as batch getString=12.33 was null false JDBC MATCH(OK)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) getString=2004-02-14 was null false JDBC MATCH(OK)
+  setObject(java.sql.Date) as batch getString=2004-02-14 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) getString=13:26:42 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) as batch getString=13:26:42 was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) as batch getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+getXXX on : CHAR(60) FOR BIT DATA
+  skipping
+getXXX on : VARCHAR(60) FOR BIT DATA
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true JDBC MATCH(OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=null was null true JDBC MATCH(OK)
+  getBinaryStream=null was null true JDBC MATCH(OK)
+  getCharacterStream=null was null true JDBC MATCH(OK)
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=0403fdc373 was null false JDBC MATCH(OK)
+  getBytes=0x4,0x3 was null false JDBC MATCH(OK)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=0x4,0x3 was null false JDBC MATCH(OK)
+  getBinaryStream=0x4,0x3 was null false JDBC MATCH(OK)
+  getCharacterStream=0x403,0xfdc3 was null false JDBC MATCH(OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getObject=CORRECT :[B was null false
+setNull() with all JDBC Types on VARCHAR(60) FOR BIT DATA
+  setNull(Types.TINYINT) getBytes=null was null true
+  setNull with batching support(Types.TINYINT) getBytes=null was null true
+  setNull(SMALLINT) getBytes=null was null true
+  setNull with batching support(SMALLINT) getBytes=null was null true
+  setNull(INTEGER) getBytes=null was null true
+  setNull with batching support(INTEGER) getBytes=null was null true
+  setNull(BIGINT) getBytes=null was null true
+  setNull with batching support(BIGINT) getBytes=null was null true
+  setNull(REAL) getBytes=null was null true
+  setNull with batching support(REAL) getBytes=null was null true
+  setNull(Types.FLOAT) getBytes=null was null true
+  setNull with batching support(Types.FLOAT) getBytes=null was null true
+  setNull(DOUBLE) getBytes=null was null true
+  setNull with batching support(DOUBLE) getBytes=null was null true
+  setNull(DECIMAL) getBytes=null was null true
+  setNull with batching support(DECIMAL) getBytes=null was null true
+  setNull(Types.NUMERIC) getBytes=null was null true
+  setNull with batching support(Types.NUMERIC) getBytes=null was null true
+  setNull(Types.BIT) getBytes=null was null true
+  setNull with batching support(Types.BIT) getBytes=null was null true
+  setNull(CHAR) getBytes=null was null true
+  setNull with batching support(CHAR) getBytes=null was null true
+  setNull(VARCHAR) getBytes=null was null true
+  setNull with batching support(VARCHAR) getBytes=null was null true
+  setNull(LONG VARCHAR) getBytes=null was null true
+  setNull with batching support(LONG VARCHAR) getBytes=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getBytes=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getBytes=null was null true
+  setNull(DATE) getBytes=null was null true
+  setNull with batching support(DATE) getBytes=null was null true
+  setNull(TIME) getBytes=null was null true
+  setNull with batching support(TIME) getBytes=null was null true
+  setNull(TIMESTAMP) getBytes=null was null true
+  setNull with batching support(TIMESTAMP) getBytes=null was null true
+  setNull(CLOB) getBytes=null was null true
+  setNull with batching support(CLOB) getBytes=null was null true
+  setNull(BLOB) getBytes=null was null true
+  setNull with batching support(BLOB) getBytes=null was null true
+  setNull(Types.NULL) getBytes=null was null true
+  setNull with batching support(Types.NULL) getBytes=null was null true
+  setNull(235350345) getBytes=null was null true
+  setNull with batching support(235350345) getBytes=null was null true
+setXXX() with all JDBC Types on VARCHAR(60) FOR BIT DATA
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setByte() as batch IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setShort() as batch IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setInt() as batch IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setLong() as batch IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setFloat() as batch IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setDouble() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal(null) getBytes=null was null true CLOUD EXT (OK)
+  setBigDecimal(null) as batch getBytes=null was null true CLOUD EXT (OK)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setBoolean() as batch IC JDBC MATCH (INVALID)
+  setString() IC JDBC MATCH (INVALID)
+  setString() as batch IC JDBC MATCH (INVALID)
+  setString(null) getBytes=null was null true CLOUD EXT (OK)
+  setString(null) as batch getBytes=null was null true CLOUD EXT (OK)
+ setString("Invalid Value")  IC (Expected)
+  setBytes() getBytes=0x4,0x3 was null false JDBC MATCH(OK)
+  setBytes() as batchgetBytes=0x4,0x3 was null false JDBC MATCH(OK)
+  setBytes(null) getBytes=null was null true JDBC MATCH(OK)
+  setBytes(null) as batchgetBytes=null was null true JDBC MATCH(OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getBytes=null was null true CLOUD EXT (OK)
+  setDate(null) as batch getBytes=null was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getBytes=null was null true CLOUD EXT (OK)
+  setTime(null) as batch getBytes=null was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getBytes=null was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getBytes=null was null true CLOUD EXT (OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getBytes=null was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getBytes=null was null true CLOUD EXT (OK)
+  setBinaryStream() getBytes=0x82,0x43 was null false JDBC MATCH(OK)
+  setBinaryStream() as batch getBytes=0x82,0x43 was null false JDBC MATCH(OK)
+  setBinaryStream(null) getBytes=null was null true JDBC MATCH(OK)
+  setBinaryStream(null) as batch getBytes=null was null true JDBC MATCH(OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getBytes=null was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getBytes=null was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getBytes=null was null true CLOUD EXT (OK)
+  setClob(null) as batch getBytes=null was null true CLOUD EXT (OK)
+  setBlob() getBytes=0x32,0x43 was null false CLOUD EXT (OK)
+  setBlob() as batch getBytes=0x32,0x43 was null false CLOUD EXT (OK)
+  setBlob(null) getBytes=null was null true CLOUD EXT (OK)
+  setBlob(null) as batch getBytes=null was null true CLOUD EXT (OK)
+  setUnicodeStream()  (?????):Illegal Conversion JDBC FAIL VARCHAR(60) FOR BIT DATA
+  setUnicodeStream(null) getBytes=null was null true JDBC MATCH(OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String)  (?????):Illegal Conversion JDBC FAIL VARCHAR(60) FOR BIT DATA
+  setObject(java.lang.String) as batch  (?????):Illegal Conversion JDBC FAIL VARCHAR(60) FOR BIT DATA
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) as batch IC JDBC MATCH (INVALID)
+  setObject(byte[]) getBytes=0x32,0x39 was null false JDBC MATCH(OK)
+  setObject(byte[]) as batch getBytes=0x32,0x39 was null false JDBC MATCH(OK)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
+getXXX on : LONG VARCHAR FOR BIT DATA
+  skipping
+getXXX on : DATE
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=2004-02-14 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=2004-02-14 was null false JDBC MATCH(OK)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.sql.Date was null false
+setNull() with all JDBC Types on DATE
+  setNull(Types.TINYINT) getDate=null was null true
+  setNull with batching support(Types.TINYINT) getDate=null was null true
+  setNull(SMALLINT) getDate=null was null true
+  setNull with batching support(SMALLINT) getDate=null was null true
+  setNull(INTEGER) getDate=null was null true
+  setNull with batching support(INTEGER) getDate=null was null true
+  setNull(BIGINT) getDate=null was null true
+  setNull with batching support(BIGINT) getDate=null was null true
+  setNull(REAL) getDate=null was null true
+  setNull with batching support(REAL) getDate=null was null true
+  setNull(Types.FLOAT) getDate=null was null true
+  setNull with batching support(Types.FLOAT) getDate=null was null true
+  setNull(DOUBLE) getDate=null was null true
+  setNull with batching support(DOUBLE) getDate=null was null true
+  setNull(DECIMAL) getDate=null was null true
+  setNull with batching support(DECIMAL) getDate=null was null true
+  setNull(Types.NUMERIC) getDate=null was null true
+  setNull with batching support(Types.NUMERIC) getDate=null was null true
+  setNull(Types.BIT) getDate=null was null true
+  setNull with batching support(Types.BIT) getDate=null was null true
+  setNull(CHAR) getDate=null was null true
+  setNull with batching support(CHAR) getDate=null was null true
+  setNull(VARCHAR) getDate=null was null true
+  setNull with batching support(VARCHAR) getDate=null was null true
+  setNull(LONG VARCHAR) getDate=null was null true
+  setNull with batching support(LONG VARCHAR) getDate=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getDate=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getDate=null was null true
+  setNull(DATE) getDate=null was null true
+  setNull with batching support(DATE) getDate=null was null true
+  setNull(TIME) getDate=null was null true
+  setNull with batching support(TIME) getDate=null was null true
+  setNull(TIMESTAMP) getDate=null was null true
+  setNull with batching support(TIMESTAMP) getDate=null was null true
+  setNull(CLOB) getDate=null was null true
+  setNull with batching support(CLOB) getDate=null was null true
+  setNull(BLOB) getDate=null was null true
+  setNull with batching support(BLOB) getDate=null was null true
+  setNull(Types.NULL) getDate=null was null true
+  setNull with batching support(Types.NULL) getDate=null was null true
+  setNull(235350345) getDate=null was null true
+  setNull with batching support(235350345) getDate=null was null true
+setXXX() with all JDBC Types on DATE
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setByte() as batch IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setShort() as batch IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setInt() as batch IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setLong() as batch IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setFloat() as batch IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setDouble() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal(null) getDate=null was null true CLOUD EXT (OK)
+  setBigDecimal(null) as batch getDate=null was null true CLOUD EXT (OK)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setBoolean() as batch IC JDBC MATCH (INVALID)
+  setString() null
+ JDBC FAIL DATE
+  setString() as batch null
+ JDBC FAIL DATE
+  setString(null) getDate=null was null true JDBC MATCH(OK)
+  setString(null) as batch getDate=null was null true JDBC MATCH(OK)
+ setString("Invalid Value") Date/Time must be JDBC format
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getDate=null was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetDate=null was null true CLOUD EXT (OK)
+  setDate() getDate=2004-02-14 was null false JDBC MATCH(OK)
+  setDate() as batch getDate=2004-02-14 was null false JDBC MATCH(OK)
+  setDate(null) getDate=null was null true JDBC MATCH(OK)
+  setDate(null) as batch getDate=null was null true JDBC MATCH(OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getDate=null was null true CLOUD EXT (OK)
+  setTime(null) as batch getDate=null was null true CLOUD EXT (OK)
+  setTimestamp() getDate=2004-02-23 was null false JDBC MATCH(OK)
+  setTimestamp() as batch getDate=2004-02-23 was null false JDBC MATCH(OK)
+  setTimestamp(null) getDate=null was null true JDBC MATCH(OK)
+  setTimestamp(null) as batch getDate=null was null true JDBC MATCH(OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getDate=null was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getDate=null was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getDate=null was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getDate=null was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getDate=null was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getDate=null was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getDate=null was null true CLOUD EXT (OK)
+  setClob(null) as batch getDate=null was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getDate=null was null true CLOUD EXT (OK)
+  setBlob(null) as batch getDate=null was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getDate=null was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) FAIL null
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) as batch IC JDBC MATCH (INVALID)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) getDate=2004-02-14 was null false JDBC MATCH(OK)
+  setObject(java.sql.Date) as batch getDate=2004-02-14 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) getDate=2004-02-23 was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) as batch getDate=2004-02-23 was null false JDBC MATCH(OK)
+getXXX on : TIME
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=13:26:42 was null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=13:26:42 was null false JDBC MATCH(OK)
+  getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.sql.Time was null false
+setNull() with all JDBC Types on TIME
+  setNull(Types.TINYINT) getTime=null was null true
+  setNull with batching support(Types.TINYINT) getTime=null was null true
+  setNull(SMALLINT) getTime=null was null true
+  setNull with batching support(SMALLINT) getTime=null was null true
+  setNull(INTEGER) getTime=null was null true
+  setNull with batching support(INTEGER) getTime=null was null true
+  setNull(BIGINT) getTime=null was null true
+  setNull with batching support(BIGINT) getTime=null was null true
+  setNull(REAL) getTime=null was null true
+  setNull with batching support(REAL) getTime=null was null true
+  setNull(Types.FLOAT) getTime=null was null true
+  setNull with batching support(Types.FLOAT) getTime=null was null true
+  setNull(DOUBLE) getTime=null was null true
+  setNull with batching support(DOUBLE) getTime=null was null true
+  setNull(DECIMAL) getTime=null was null true
+  setNull with batching support(DECIMAL) getTime=null was null true
+  setNull(Types.NUMERIC) getTime=null was null true
+  setNull with batching support(Types.NUMERIC) getTime=null was null true
+  setNull(Types.BIT) getTime=null was null true
+  setNull with batching support(Types.BIT) getTime=null was null true
+  setNull(CHAR) getTime=null was null true
+  setNull with batching support(CHAR) getTime=null was null true
+  setNull(VARCHAR) getTime=null was null true
+  setNull with batching support(VARCHAR) getTime=null was null true
+  setNull(LONG VARCHAR) getTime=null was null true
+  setNull with batching support(LONG VARCHAR) getTime=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getTime=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getTime=null was null true
+  setNull(DATE) getTime=null was null true
+  setNull with batching support(DATE) getTime=null was null true
+  setNull(TIME) getTime=null was null true
+  setNull with batching support(TIME) getTime=null was null true
+  setNull(TIMESTAMP) getTime=null was null true
+  setNull with batching support(TIMESTAMP) getTime=null was null true
+  setNull(CLOB) getTime=null was null true
+  setNull with batching support(CLOB) getTime=null was null true
+  setNull(BLOB) getTime=null was null true
+  setNull with batching support(BLOB) getTime=null was null true
+  setNull(Types.NULL) getTime=null was null true
+  setNull with batching support(Types.NULL) getTime=null was null true
+  setNull(235350345) getTime=null was null true
+  setNull with batching support(235350345) getTime=null was null true
+setXXX() with all JDBC Types on TIME
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setByte() as batch IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setShort() as batch IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setInt() as batch IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setLong() as batch IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setFloat() as batch IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setDouble() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal(null) getTime=null was null true CLOUD EXT (OK)
+  setBigDecimal(null) as batch getTime=null was null true CLOUD EXT (OK)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setBoolean() as batch IC JDBC MATCH (INVALID)
+  setString() null
+ JDBC FAIL TIME
+  setString() as batch null
+ JDBC FAIL TIME
+  setString(null) getTime=null was null true JDBC MATCH(OK)
+  setString(null) as batch getTime=null was null true JDBC MATCH(OK)
+ setString("Invalid Value") Date/Time must be JDBC format
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getTime=null was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetTime=null was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getTime=null was null true CLOUD EXT (OK)
+  setDate(null) as batch getTime=null was null true CLOUD EXT (OK)
+  setTime() getTime=13:26:42 was null false JDBC MATCH(OK)
+  setTime() as batch getTime=13:26:42 was null false JDBC MATCH(OK)
+  setTime(null) getTime=null was null true JDBC MATCH(OK)
+  setTime(null) as batch getTime=null was null true JDBC MATCH(OK)
+  setTimestamp() getTime=17:14:24 was null false JDBC MATCH(OK)
+  setTimestamp() as batch getTime=17:14:24 was null false JDBC MATCH(OK)
+  setTimestamp(null) getTime=null was null true JDBC MATCH(OK)
+  setTimestamp(null) as batch getTime=null was null true JDBC MATCH(OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getTime=null was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getTime=null was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getTime=null was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getTime=null was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getTime=null was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getTime=null was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getTime=null was null true CLOUD EXT (OK)
+  setClob(null) as batch getTime=null was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getTime=null was null true CLOUD EXT (OK)
+  setBlob(null) as batch getTime=null was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getTime=null was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) FAIL null
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) as batch IC JDBC MATCH (INVALID)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) getTime=13:26:42 was null false JDBC MATCH(OK)
+  setObject(java.sql.Time) as batch getTime=13:26:42 was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) getTime=17:14:24 was null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) as batch getTime=17:14:24 was null false JDBC MATCH(OK)
+getXXX on : TIMESTAMP
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true JDBC MATCH(OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true JDBC MATCH(OK)
+  getTime=null was null true JDBC MATCH(OK)
+  getTimestamp=null was null true JDBC MATCH(OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=2004-02-23 was null false JDBC MATCH(OK)
+  getTime=17:14:24 was null false JDBC MATCH(OK)
+  getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  getAsciiStream=IC JDBC MATCH (INVALID)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=IC JDBC MATCH (INVALID)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=IC JDBC MATCH (INVALID)
+  getObject=CORRECT :java.sql.Timestamp was null false
+setNull() with all JDBC Types on TIMESTAMP
+  setNull(Types.TINYINT) getTimestamp=null was null true
+  setNull with batching support(Types.TINYINT) getTimestamp=null was null true
+  setNull(SMALLINT) getTimestamp=null was null true
+  setNull with batching support(SMALLINT) getTimestamp=null was null true
+  setNull(INTEGER) getTimestamp=null was null true
+  setNull with batching support(INTEGER) getTimestamp=null was null true
+  setNull(BIGINT) getTimestamp=null was null true
+  setNull with batching support(BIGINT) getTimestamp=null was null true
+  setNull(REAL) getTimestamp=null was null true
+  setNull with batching support(REAL) getTimestamp=null was null true
+  setNull(Types.FLOAT) getTimestamp=null was null true
+  setNull with batching support(Types.FLOAT) getTimestamp=null was null true
+  setNull(DOUBLE) getTimestamp=null was null true
+  setNull with batching support(DOUBLE) getTimestamp=null was null true
+  setNull(DECIMAL) getTimestamp=null was null true
+  setNull with batching support(DECIMAL) getTimestamp=null was null true
+  setNull(Types.NUMERIC) getTimestamp=null was null true
+  setNull with batching support(Types.NUMERIC) getTimestamp=null was null true
+  setNull(Types.BIT) getTimestamp=null was null true
+  setNull with batching support(Types.BIT) getTimestamp=null was null true
+  setNull(CHAR) getTimestamp=null was null true
+  setNull with batching support(CHAR) getTimestamp=null was null true
+  setNull(VARCHAR) getTimestamp=null was null true
+  setNull with batching support(VARCHAR) getTimestamp=null was null true
+  setNull(LONG VARCHAR) getTimestamp=null was null true
+  setNull with batching support(LONG VARCHAR) getTimestamp=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getTimestamp=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getTimestamp=null was null true
+  setNull(DATE) getTimestamp=null was null true
+  setNull with batching support(DATE) getTimestamp=null was null true
+  setNull(TIME) getTimestamp=null was null true
+  setNull with batching support(TIME) getTimestamp=null was null true
+  setNull(TIMESTAMP) getTimestamp=null was null true
+  setNull with batching support(TIMESTAMP) getTimestamp=null was null true
+  setNull(CLOB) getTimestamp=null was null true
+  setNull with batching support(CLOB) getTimestamp=null was null true
+  setNull(BLOB) getTimestamp=null was null true
+  setNull with batching support(BLOB) getTimestamp=null was null true
+  setNull(Types.NULL) getTimestamp=null was null true
+  setNull with batching support(Types.NULL) getTimestamp=null was null true
+  setNull(235350345) getTimestamp=null was null true
+  setNull with batching support(235350345) getTimestamp=null was null true
+setXXX() with all JDBC Types on TIMESTAMP
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setByte() as batch IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setShort() as batch IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setInt() as batch IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setLong() as batch IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setFloat() as batch IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setDouble() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal(null) getTimestamp=null was null true CLOUD EXT (OK)
+  setBigDecimal(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setBoolean() as batch IC JDBC MATCH (INVALID)
+  setString() null
+ JDBC FAIL TIMESTAMP
+  setString() as batch null
+ JDBC FAIL TIMESTAMP
+  setString(null) getTimestamp=null was null true JDBC MATCH(OK)
+  setString(null) as batch getTimestamp=null was null true JDBC MATCH(OK)
+ setString("Invalid Value") Date/Time must be JDBC format
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getTimestamp=null was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetTimestamp=null was null true CLOUD EXT (OK)
+  setDate() getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setDate() as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setDate(null) getTimestamp=null was null true JDBC MATCH(OK)
+  setDate(null) as batch getTimestamp=null was null true JDBC MATCH(OK)
+  setTime()  (?????):Illegal Conversion JDBC FAIL TIMESTAMP
+  setTime() as batch  (?????):Illegal Conversion JDBC FAIL TIMESTAMP
+  setTime(null) getTimestamp=null was null true JDBC MATCH(OK)
+  setTime(null) as batch getTimestamp=null was null true JDBC MATCH(OK)
+  setTimestamp() getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp() as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setTimestamp(null) getTimestamp=null was null true JDBC MATCH(OK)
+  setTimestamp(null) as batch getTimestamp=null was null true JDBC MATCH(OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getTimestamp=null was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getTimestamp=null was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getTimestamp=null was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getTimestamp=null was null true CLOUD EXT (OK)
+  setClob(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getTimestamp=null was null true CLOUD EXT (OK)
+  setBlob(null) as batch getTimestamp=null was null true CLOUD EXT (OK)
+  setUnicodeStream() IC JDBC MATCH (INVALID)
+  setUnicodeStream(null) getTimestamp=null was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) FAIL null
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) as batch IC JDBC MATCH (INVALID)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setObject(java.sql.Date) as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+  setObject(java.sql.Timestamp) as batch getTimestamp=xxxxxxFILTERED-TIMESTAMPxxxxxwas null false JDBC MATCH(OK)
+getXXX on : CLOB(1k)
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true CLOUD EXT (OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=null was null true JDBC MATCH(OK)
+  getBlob=SPECIFIC CHECK OK
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=67 was null false CLOUD EXT (OK)
+  getBytes=IC JDBC MATCH (INVALID)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=0x36,0x37 was null false CLOUD EXT (OK)
+  getBinaryStream=IC JDBC MATCH (INVALID)
+  getCharacterStream=0x36,0x37 was null false CLOUD EXT (OK)
+  getClob=67 was null false JDBC MATCH(OK)
+  getBlob=IC JDBC MATCH (INVALID)
+  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getObject=CORRECT :java.sql.Clob was null false
+setNull() with all JDBC Types on CLOB(1k)
+  setNull(Types.TINYINT) getClob=null was null true
+  setNull with batching support(Types.TINYINT) getClob=null was null true
+  setNull(SMALLINT) getClob=null was null true
+  setNull with batching support(SMALLINT) getClob=null was null true
+  setNull(INTEGER) getClob=null was null true
+  setNull with batching support(INTEGER) getClob=null was null true
+  setNull(BIGINT) getClob=null was null true
+  setNull with batching support(BIGINT) getClob=null was null true
+  setNull(REAL) getClob=null was null true
+  setNull with batching support(REAL) getClob=null was null true
+  setNull(Types.FLOAT) getClob=null was null true
+  setNull with batching support(Types.FLOAT) getClob=null was null true
+  setNull(DOUBLE) getClob=null was null true
+  setNull with batching support(DOUBLE) getClob=null was null true
+  setNull(DECIMAL) getClob=null was null true
+  setNull with batching support(DECIMAL) getClob=null was null true
+  setNull(Types.NUMERIC) getClob=null was null true
+  setNull with batching support(Types.NUMERIC) getClob=null was null true
+  setNull(Types.BIT) getClob=null was null true
+  setNull with batching support(Types.BIT) getClob=null was null true
+  setNull(CHAR) getClob=null was null true
+  setNull with batching support(CHAR) getClob=null was null true
+  setNull(VARCHAR) getClob=null was null true
+  setNull with batching support(VARCHAR) getClob=null was null true
+  setNull(LONG VARCHAR) getClob=null was null true
+  setNull with batching support(LONG VARCHAR) getClob=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getClob=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getClob=null was null true
+  setNull(DATE) getClob=null was null true
+  setNull with batching support(DATE) getClob=null was null true
+  setNull(TIME) getClob=null was null true
+  setNull with batching support(TIME) getClob=null was null true
+  setNull(TIMESTAMP) getClob=null was null true
+  setNull with batching support(TIMESTAMP) getClob=null was null true
+  setNull(CLOB) getClob=null was null true
+  setNull with batching support(CLOB) getClob=null was null true
+  setNull(BLOB) getClob=null was null true
+  setNull with batching support(BLOB) getClob=null was null true
+  setNull(Types.NULL) getClob=null was null true
+  setNull with batching support(Types.NULL) getClob=null was null true
+  setNull(235350345) getClob=null was null true
+  setNull with batching support(235350345) getClob=null was null true
+setXXX() with all JDBC Types on CLOB(1k)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setByte() as batch IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setShort() as batch IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setInt() as batch IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setLong() as batch IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setFloat() as batch IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setDouble() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal(null) getClob=null was null true CLOUD EXT (OK)
+  setBigDecimal(null) as batch getClob=null was null true CLOUD EXT (OK)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setBoolean() as batch IC JDBC MATCH (INVALID)
+  setString() getClob=0x39,0x37 was null false CLOUD EXT (OK)
+  setString() as batch getClob=0x39,0x37 was null false CLOUD EXT (OK)
+  setString(null) getClob=null was null true CLOUD EXT (OK)
+  setString(null) as batch getClob=null was null true CLOUD EXT (OK)
+  setBytes() IC JDBC MATCH (INVALID)
+  setBytes() as batchIC JDBC MATCH (INVALID)
+  setBytes(null) getClob=null was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetClob=null was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getClob=null was null true CLOUD EXT (OK)
+  setDate(null) as batch getClob=null was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getClob=null was null true CLOUD EXT (OK)
+  setTime(null) as batch getClob=null was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getClob=null was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getClob=null was null true CLOUD EXT (OK)
+  setAsciiStream() getClob=0x65,0x67 was null false JDBC MATCH(OK)
+  setAsciiStream() as batch getClob=0x65,0x67 was null false JDBC MATCH(OK)
+  setAsciiStream(null) getClob=null was null true JDBC MATCH(OK)
+  setAsciiStream(null) as batch getClob=null was null true JDBC MATCH(OK)
+  setBinaryStream() IC JDBC MATCH (INVALID)
+  setBinaryStream() as batch IC JDBC MATCH (INVALID)
+  setBinaryStream(null) getClob=null was null true CLOUD EXT (OK)
+  setBinaryStream(null) as batch getClob=null was null true CLOUD EXT (OK)
+  setCharacterStream() getClob=0x38,0x39 was null false JDBC MATCH(OK)
+  setCharacterStream() as batch getClob=0x38,0x39 was null false JDBC MATCH(OK)
+  setCharacterStream(null) getClob=null was null true JDBC MATCH(OK)
+  setCharacterStream(null) as batch getClob=null was null true JDBC MATCH(OK)
+  setClob() getClob=0x37,0x32 was null false JDBC MATCH(OK)
+  setClob() as batch getClob=0x37,0x32 was null false JDBC MATCH(OK)
+  setClob(null) getClob=null was null true JDBC MATCH(OK)
+  setClob(null) as batch getClob=null was null true JDBC MATCH(OK)
+  setBlob() IC JDBC MATCH (INVALID)
+  setBlob() as batch IC JDBC MATCH (INVALID)
+  setBlob(null) getClob=null was null true CLOUD EXT (OK)
+  setBlob(null) as batch getClob=null was null true CLOUD EXT (OK)
+  setUnicodeStream() getClob=0x8243,0xcafe was null false CLOUD EXT (OK)
+  setUnicodeStream(null) getClob=null was null true CLOUD EXT (OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) getClob=0x34,0x36 was null false CLOUD EXT (OK)
+  setObject(java.lang.String) as batch getClob=0x34,0x36 was null false CLOUD EXT (OK)
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) as batch IC JDBC MATCH (INVALID)
+  setObject(byte[]) IC JDBC MATCH (INVALID)
+  setObject(byte[]) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
+getXXX on : BLOB(1k)
+ NULL VALUE
+  getByte=0 was null true CLOUD EXT (OK)
+  getShort=0 was null true CLOUD EXT (OK)
+  getInt=0 was null true CLOUD EXT (OK)
+  getLong=0 was null true CLOUD EXT (OK)
+  getFloat=0.0 was null true CLOUD EXT (OK)
+  getDouble=0.0 was null true CLOUD EXT (OK)
+  getBigDecimal=null was null true CLOUD EXT (OK)
+  getBoolean=false was null true CLOUD EXT (OK)
+  getString=null was null true CLOUD EXT (OK)
+  getBytes=null was null true CLOUD EXT (OK)
+  getDate=null was null true CLOUD EXT (OK)
+  getTime=null was null true CLOUD EXT (OK)
+  getTimestamp=null was null true CLOUD EXT (OK)
+  getAsciiStream=SPECIFIC CHECK OK
+  getBinaryStream=SPECIFIC CHECK OK
+  getCharacterStream=SPECIFIC CHECK OK
+  getClob=SPECIFIC CHECK OK
+  getBlob=null was null true JDBC MATCH(OK)
+  getUnicodeStream=null was null true CLOUD EXT (OK)
+  getObject=null was null true
+ VALID VALUE
+  getByte=IC JDBC MATCH (INVALID)
+  getShort=IC JDBC MATCH (INVALID)
+  getInt=IC JDBC MATCH (INVALID)
+  getLong=IC JDBC MATCH (INVALID)
+  getFloat=IC JDBC MATCH (INVALID)
+  getDouble=IC JDBC MATCH (INVALID)
+  getBigDecimal=IC JDBC MATCH (INVALID)
+  getBoolean=IC JDBC MATCH (INVALID)
+  getString=8243cafe0032 was null false CLOUD EXT (OK)
+  getBytes=0x82,0x43 was null false CLOUD EXT (OK)
+  getDate=IC JDBC MATCH (INVALID)
+  getTime=IC JDBC MATCH (INVALID)
+  getTimestamp=IC JDBC MATCH (INVALID)
+  getAsciiStream=0x82,0x43 was null false CLOUD EXT (OK)
+  getBinaryStream=0x82,0x43 was null false CLOUD EXT (OK)
+  getCharacterStream=0x8243,0xcafe was null false CLOUD EXT (OK)
+  getClob=IC JDBC MATCH (INVALID)
+  getBlob=0x82,0x43 was null false JDBC MATCH(OK)
+  getUnicodeStream=data was null false CLOUD EXT (OK)
+  getObject=CORRECT :java.sql.Blob was null false
+setNull() with all JDBC Types on BLOB(1k)
+  setNull(Types.TINYINT) getBlob=null was null true
+  setNull with batching support(Types.TINYINT) getBlob=null was null true
+  setNull(SMALLINT) getBlob=null was null true
+  setNull with batching support(SMALLINT) getBlob=null was null true
+  setNull(INTEGER) getBlob=null was null true
+  setNull with batching support(INTEGER) getBlob=null was null true
+  setNull(BIGINT) getBlob=null was null true
+  setNull with batching support(BIGINT) getBlob=null was null true
+  setNull(REAL) getBlob=null was null true
+  setNull with batching support(REAL) getBlob=null was null true
+  setNull(Types.FLOAT) getBlob=null was null true
+  setNull with batching support(Types.FLOAT) getBlob=null was null true
+  setNull(DOUBLE) getBlob=null was null true
+  setNull with batching support(DOUBLE) getBlob=null was null true
+  setNull(DECIMAL) getBlob=null was null true
+  setNull with batching support(DECIMAL) getBlob=null was null true
+  setNull(Types.NUMERIC) getBlob=null was null true
+  setNull with batching support(Types.NUMERIC) getBlob=null was null true
+  setNull(Types.BIT) getBlob=null was null true
+  setNull with batching support(Types.BIT) getBlob=null was null true
+  setNull(CHAR) getBlob=null was null true
+  setNull with batching support(CHAR) getBlob=null was null true
+  setNull(VARCHAR) getBlob=null was null true
+  setNull with batching support(VARCHAR) getBlob=null was null true
+  setNull(LONG VARCHAR) getBlob=null was null true
+  setNull with batching support(LONG VARCHAR) getBlob=null was null true
+  setNull(VARCHAR () FOR BIT DATA) getBlob=null was null true
+  setNull with batching support(VARCHAR () FOR BIT DATA) getBlob=null was null true
+  setNull(DATE) getBlob=null was null true
+  setNull with batching support(DATE) getBlob=null was null true
+  setNull(TIME) getBlob=null was null true
+  setNull with batching support(TIME) getBlob=null was null true
+  setNull(TIMESTAMP) getBlob=null was null true
+  setNull with batching support(TIMESTAMP) getBlob=null was null true
+  setNull(CLOB) getBlob=null was null true
+  setNull with batching support(CLOB) getBlob=null was null true
+  setNull(BLOB) getBlob=null was null true
+  setNull with batching support(BLOB) getBlob=null was null true
+  setNull(Types.NULL) getBlob=null was null true
+  setNull with batching support(Types.NULL) getBlob=null was null true
+  setNull(235350345) getBlob=null was null true
+  setNull with batching support(235350345) getBlob=null was null true
+setXXX() with all JDBC Types on BLOB(1k)
+For setXXX() methods that pass an object, a null and valid values are checked
+  setByte() IC JDBC MATCH (INVALID)
+  setByte() as batch IC JDBC MATCH (INVALID)
+  setShort() IC JDBC MATCH (INVALID)
+  setShort() as batch IC JDBC MATCH (INVALID)
+  setInt() IC JDBC MATCH (INVALID)
+  setInt() as batch IC JDBC MATCH (INVALID)
+  setLong() IC JDBC MATCH (INVALID)
+  setLong() as batch IC JDBC MATCH (INVALID)
+  setFloat() IC JDBC MATCH (INVALID)
+  setFloat() as batch IC JDBC MATCH (INVALID)
+  setDouble() IC JDBC MATCH (INVALID)
+  setDouble() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal() IC JDBC MATCH (INVALID)
+  setBigDecimal() as batch IC JDBC MATCH (INVALID)
+  setBigDecimal(null) getBlob=null was null true CLOUD EXT (OK)
+  setBigDecimal(null) as batch getBlob=null was null true CLOUD EXT (OK)
+  setBoolean() IC JDBC MATCH (INVALID)
+  setBoolean() as batch IC JDBC MATCH (INVALID)
+  setString() IC JDBC MATCH (INVALID)
+  setString() as batch IC JDBC MATCH (INVALID)
+  setString(null) getBlob=null was null true CLOUD EXT (OK)
+  setString(null) as batch getBlob=null was null true CLOUD EXT (OK)
+ setString("Invalid Value")  IC (Expected)
+  setBytes() getBlob=0x4,0x3 was null false CLOUD EXT (OK)
+  setBytes() as batchgetBlob=0x4,0x3 was null false CLOUD EXT (OK)
+  setBytes(null) getBlob=null was null true CLOUD EXT (OK)
+  setBytes(null) as batchgetBlob=null was null true CLOUD EXT (OK)
+  setDate() IC JDBC MATCH (INVALID)
+  setDate() as batch IC JDBC MATCH (INVALID)
+  setDate(null) getBlob=null was null true CLOUD EXT (OK)
+  setDate(null) as batch getBlob=null was null true CLOUD EXT (OK)
+  setTime() IC JDBC MATCH (INVALID)
+  setTime() as batch IC JDBC MATCH (INVALID)
+  setTime(null) getBlob=null was null true CLOUD EXT (OK)
+  setTime(null) as batch getBlob=null was null true CLOUD EXT (OK)
+  setTimestamp() IC JDBC MATCH (INVALID)
+  setTimestamp() as batch IC JDBC MATCH (INVALID)
+  setTimestamp(null) getBlob=null was null true CLOUD EXT (OK)
+  setTimestamp(null) as batch getBlob=null was null true CLOUD EXT (OK)
+  setAsciiStream() IC JDBC MATCH (INVALID)
+  setAsciiStream() as batch IC JDBC MATCH (INVALID)
+  setAsciiStream(null) getBlob=null was null true CLOUD EXT (OK)
+  setAsciiStream(null) as batch getBlob=null was null true CLOUD EXT (OK)
+  setBinaryStream() getBlob=0x82,0x43 was null false JDBC MATCH(OK)
+  setBinaryStream() as batch getBlob=0x82,0x43 was null false JDBC MATCH(OK)
+  setBinaryStream(null) getBlob=null was null true JDBC MATCH(OK)
+  setBinaryStream(null) as batch getBlob=null was null true JDBC MATCH(OK)
+  setCharacterStream() IC JDBC MATCH (INVALID)
+  setCharacterStream() as batch IC JDBC MATCH (INVALID)
+  setCharacterStream(null) getBlob=null was null true CLOUD EXT (OK)
+  setCharacterStream(null) as batch getBlob=null was null true CLOUD EXT (OK)
+  setClob() IC JDBC MATCH (INVALID)
+  setClob() as batch IC JDBC MATCH (INVALID)
+  setClob(null) getBlob=null was null true CLOUD EXT (OK)
+  setClob(null) as batch getBlob=null was null true CLOUD EXT (OK)
+  setBlob() getBlob=0x32,0x43 was null false JDBC MATCH(OK)
+  setBlob() as batch getBlob=0x32,0x43 was null false JDBC MATCH(OK)
+  setBlob(null) getBlob=null was null true JDBC MATCH(OK)
+  setBlob(null) as batch getBlob=null was null true JDBC MATCH(OK)
+  setUnicodeStream()  (?????):Illegal Conversion JDBC FAIL BLOB(1k)
+  setUnicodeStream(null) getBlob=null was null true JDBC MATCH(OK)
+  setObject(null)  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(null) as batch  OK Invalid data conversion: Parameter object type is invalid for requested conversion.
+  setObject(java.lang.String) IC JDBC MATCH (INVALID)
+  setObject(java.lang.String) as batch IC JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) IC JDBC MATCH (INVALID)
+  setObject(java.math.BigDecimal) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Boolean) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Integer) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Long) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Float) as batch IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) IC JDBC MATCH (INVALID)
+  setObject(java.lang.Double) as batch IC JDBC MATCH (INVALID)
+  setObject(byte[]) getBlob=0x32,0x39 was null false CLOUD EXT (OK)
+  setObject(byte[]) as batch getBlob=0x32,0x39 was null false CLOUD EXT (OK)
+  setObject(java.sql.Date) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Date) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Time) as batch IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) IC JDBC MATCH (INVALID)
+  setObject(java.sql.Timestamp) as batch IC JDBC MATCH (INVALID)
