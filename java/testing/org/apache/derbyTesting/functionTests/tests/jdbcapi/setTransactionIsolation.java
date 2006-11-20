@@ -185,6 +185,7 @@ public class setTransactionIsolation{
 			// setTransactionIsolation should fail because we have 
 			// a holdable cursor open
 			conn.setTransactionIsolation(java.sql.Connection.TRANSACTION_SERIALIZABLE);
+			rs.next(); // to fix DERBY-1108. Else the GC for ibm15 will clean up the ResultSet Object
 		} catch (SQLException se)
 		{
 			System.out.println("EXPECTED EXCEPTION SQLSTATE:" + 
