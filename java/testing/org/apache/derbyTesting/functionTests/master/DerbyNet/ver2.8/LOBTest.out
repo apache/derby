@@ -42,7 +42,7 @@ select col_1 from bit_table
 	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->Object'   	: byte[]
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
@@ -65,7 +65,7 @@ select col_2 from bit_table
 	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->Object'   	: byte[]
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -88,7 +88,7 @@ select col_3 from bit_table
 	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->Object'   	: byte[]
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -604,7 +604,7 @@ select col_1 from bit_table
 	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->Object'   	: byte[]
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
@@ -627,7 +627,7 @@ select col_2 from bit_table
 	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->Object'   	: byte[]
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -650,7 +650,7 @@ select col_3 from bit_table
 	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->Object'   	: byte[]
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -1166,7 +1166,7 @@ select col_1 from blob_table
 	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->Object'   	: byte[]
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
@@ -1189,7 +1189,7 @@ select col_2 from blob_table
 	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->Object'   	: byte[]
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -1212,7 +1212,7 @@ select col_3 from blob_table
 	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->Object'   	: byte[]
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -1707,7 +1707,7 @@ select col_1 from blob_table
 	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->Object'   	: byte[]
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
@@ -1730,7 +1730,7 @@ select col_2 from blob_table
 	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->Object'   	: byte[]
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -1753,7 +1753,7 @@ select col_3 from blob_table
 	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->Object'   	: byte[]
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -2248,7 +2248,7 @@ select col_1 from blob_table
 	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->'101'    	: java.lang.Byte
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->Object'   	: byte[]
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance 101        is invalid for requested conversion to java.sql.Date.)
@@ -2271,7 +2271,7 @@ select col_2 from blob_table
 	2 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getBoolean           ->'true'    	: java.lang.Boolean
 	2 getByte              ->'102'    	: java.lang.Byte
-	2 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	2 getBytes             ->Object'   	: byte[]
 	2 getCharacterStream   ->Object'   	: java.io.Reader
 	2 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	2 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -2294,7 +2294,7 @@ select col_3 from blob_table
 	3 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getBoolean           ->'true'    	: java.lang.Boolean
 	3 getByte              ->'103'    	: java.lang.Byte
-	3 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	3 getBytes             ->Object'   	: byte[]
 	3 getCharacterStream   ->Object'   	: java.io.Reader
 	3 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	3 getDate              ->		EXCEPTION (String index out of range: 3)
@@ -2791,7 +2791,7 @@ select col_1 from clob_table
 	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte.)
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->Object'   	: byte[]
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date.)
@@ -3344,7 +3344,7 @@ select col_1 from clob_table
 	1 getBlob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getBoolean           ->'true'    	: java.lang.Boolean
 	1 getByte              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to byte.)
-	1 getBytes             ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
+	1 getBytes             ->Object'   	: byte[]
 	1 getCharacterStream   ->Object'   	: java.io.Reader
 	1 getClob              ->		EXCEPTION (Invalid data conversion: Wrong result column type for requested conversion.)
 	1 getDate              ->		EXCEPTION (Invalid data conversion: Parameter instance true       is invalid for requested conversion to java.sql.Date.)
