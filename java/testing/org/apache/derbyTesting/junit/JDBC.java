@@ -21,6 +21,7 @@ package org.apache.derbyTesting.junit;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -644,16 +645,41 @@ public class JDBC {
             boolean ok = (rs.wasNull() && (expectedRow[i] == null))
                 || (!rs.wasNull()
                     && (expectedRow[i] != null)
-                    && expectedRow[i].equals(obj));
-
+                    && (expectedRow[i].equals(obj)
+                        || (obj instanceof byte[] // Assumes byte arrays
+                            && Arrays.equals((byte[] )obj,
+                                             (byte[] )expectedRow[i]))));
             if (!ok)
             {
+                Object expected = expectedRow[i];
+                Object found = obj;
+                if (obj instanceof byte[]) {
+                    expected = bytesToString((byte[] )expectedRow[i]);
+                    found = bytesToString((byte[] )obj);
+                }
                 Assert.fail("Column value mismatch @ column '" +
                     rsmd.getColumnName(i+1) + "', row " + rowNum +
-                    ":\n    Expected: >" + expectedRow[i] +
-                    "<\n    Found:    >" + obj + "<");
+                    ":\n    Expected: >" + expected +
+                    "<\n    Found:    >" + found + "<");
             }
         }
+    }
+
+    /**
+     * Convert byte array to String.
+     * Each byte is converted to a hexadecimal string representation.
+     *
+     * @param ba Byte array to be converted.
+     * @return Hexadecimal string representation. Returns null on null input.
+     */
+    private static String bytesToString(byte[] ba)
+    {
+        if (ba == null) return null;
+        StringBuffer s = new StringBuffer();
+        for (int i = 0; i < ba.length; ++i) {
+            s.append(Integer.toHexString(ba[i] & 0x00ff));
+        }
+        return s.toString();
     }
 
 	/**
