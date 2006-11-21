@@ -316,12 +316,10 @@ abstract class DMLStatementNode extends StatementNode
 	 * Throws an exception if the tree is not bound, or if the binding
 	 * is out of date.
 	 *
-	 * @return	An optimized QueryTree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public QueryTreeNode optimize() throws StandardException
+	public void optimizeStatement() throws StandardException
 	{
 		resultSet = resultSet.preprocess(getCompilerContext().getNumTables(),
 										 null,
@@ -367,8 +365,6 @@ abstract class DMLStatementNode extends StatementNode
 				resultSet.setReferencedTableMap((JBitSet) siChild.getReferencedTableMap().clone());
 			}
 		}
-
-		return this;
 	}
 
 	/**

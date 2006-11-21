@@ -509,12 +509,11 @@ public class CursorNode extends DMLStatementNode
 	 * Throws an exception if the tree is not bound, or if the binding
 	 * is out of date.
 	 *
-	 * @return	An optimized QueryTree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode optimize() throws StandardException
+	public void optimizeStatement() throws StandardException
 	{
 		// Push the order by list down to the ResultSet
 		if (orderByList != null)
@@ -529,7 +528,7 @@ public class CursorNode extends DMLStatementNode
 			resultSet.pushOrderByList(orderByList);
 			orderByList = null;
 		}
-		return super.optimize();
+		super.optimizeStatement();
 	}
 
 	/**

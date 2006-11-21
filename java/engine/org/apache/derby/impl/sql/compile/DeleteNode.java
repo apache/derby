@@ -890,7 +890,7 @@ public class DeleteNode extends DMLModStatementNode
 	}
 
 
-	public QueryTreeNode optimize() throws StandardException
+	public void optimizeStatement() throws StandardException
 	{
 		if(cascadeDelete)
 		{
@@ -900,7 +900,7 @@ public class DeleteNode extends DMLModStatementNode
 			}
 		}
 
-		return super.optimize();
+		super.optimizeStatement();
 	}
 
     /**

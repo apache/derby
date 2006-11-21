@@ -189,12 +189,11 @@ public class CallStatementNode extends DMLStatementNode
 	 * Throws an exception if the tree is not bound, or if the binding
 	 * is out of date.
 	 *
-	 * @return	An optimized QueryTree
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode optimize() throws StandardException
+	public void optimizeStatement() throws StandardException
 	{
 		DataDictionary dd = getDataDictionary();
 
@@ -211,7 +210,6 @@ public class CallStatementNode extends DMLStatementNode
 								(SubqueryList) null,
 								(PredicateList) null);
 
-		return this;
 	}
 
 	/**

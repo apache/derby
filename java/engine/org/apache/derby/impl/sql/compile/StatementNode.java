@@ -125,6 +125,32 @@ public abstract class StatementNode extends QueryTreeNode
 		bindStatement();
 		return this;
 	}
+	
+	/**
+	 * Generates an optimized statement from a bound StatementNode.  Actually,
+	 * it annotates the tree in place rather than generating a new tree.
+	 *
+	 * For non-optimizable statements (for example, CREATE TABLE),
+	 * return the bound tree without doing anything.  For optimizable
+	 * statements, this method will be over-ridden in the statement's
+	 * root node (DMLStatementNode in all cases we know about so far).
+	 *
+	 * Throws an exception if the tree is not bound, or if the binding
+	 * is out of date.
+	 *
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void  optimizeStatement() throws StandardException
+	{
+		
+	}
+	// TEMP -RE_WORK for switching to StatementNode.
+	public final QueryTreeNode optimize() throws StandardException
+	{
+		optimizeStatement();
+		return this;
+	}
 
 	/**
 	 * create the outer shell class builder for the class we will

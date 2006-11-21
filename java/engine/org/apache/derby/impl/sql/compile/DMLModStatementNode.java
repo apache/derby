@@ -1343,16 +1343,13 @@ abstract class DMLModStatementNode extends DMLStatementNode
    * Throws an exception if the tree is not bound, or if the binding
    * is out of date.
    *
-   * @return      An optimized QueryTree
    *
    * @exception StandardException         Thrown on failure
    */
-	public QueryTreeNode optimize() throws StandardException
+	public void optimizeStatement() throws StandardException
 	{
-		ResultSetNode originalRSNode = getResultSetNode();
-
 		/* First optimize the query */
-		QueryTreeNode retval = super.optimize();
+		super.optimizeStatement();
 
 		/* In language we always set it to row lock, it's up to store to
 		 * upgrade it to table lock.  This makes sense for the default read
@@ -1360,8 +1357,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		 * Beetle 4133.
 		 */
 		lockMode = TransactionController.MODE_RECORD;
-
-		return retval;
 	}
 
 	/**
