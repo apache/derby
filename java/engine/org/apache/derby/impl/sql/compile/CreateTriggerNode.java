@@ -492,7 +492,7 @@ public class CreateTriggerNode extends DDLStatementNode
 				newText.append(originalActionText.substring(start));
 			}
 			actionText = newText.toString();
-			actionNode = (StatementNode)reparseTriggerText();
+			actionNode = parseStatement(actionText, true);
 		}
 
 		return regenNode;
@@ -543,29 +543,6 @@ public class CreateTriggerNode extends DDLStatementNode
 		return sorted;
 	}
 
-	/*
-	** Parse the text and return the tree.
-	*/
-	private QueryTreeNode reparseTriggerText() throws StandardException
-	{
-		/*
-		** Get a new compiler context, so the parsing of the text
-		** doesn't mess up anything in the current context 
-		*/
-		LanguageConnectionContext lcc = getLanguageConnectionContext();
-		CompilerContext newCC = lcc.pushCompilerContext();
-		newCC.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
-
-		try
-		{
-			return QueryTreeNode.parseQueryText(newCC, actionText, (Object[])null, lcc);
-		}
-
-		finally
-		{
-			lcc.popCompilerContext(newCC);
-		}
-	}
 	/*
 	** Make sure the given column name is found in the trigger
 	** target table.  Generate the appropriate SQL to get it.

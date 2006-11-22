@@ -56,7 +56,7 @@ public class ParserImpl implements Parser
 	static final int LARGE_TOKEN_SIZE = 128;
 
         /* Don't ever access these objects directly, call getParser(), and getTokenManager() */
-        protected Object cachedParser; 
+        private SQLParser cachedParser; 
 	protected Object cachedTokenManager;
 
 	protected CharStream charStream;
@@ -73,7 +73,7 @@ public class ParserImpl implements Parser
 		this.cc = cc;
 	}
 
-	public QueryTreeNode parseStatement(String statementSQLText) 
+	public StatementNode parseStatement(String statementSQLText) 
 		throws StandardException
 	{
 		return parseStatement(statementSQLText, (Object[])null);
@@ -96,10 +96,10 @@ public class ParserImpl implements Parser
 	    return tm;
 	}
 
-        /**
+     /**
 	 * new parser, appropriate for the ParserImpl object.
 	 */
-        protected Object getParser()
+     private SQLParser getParser()
         {
 	    SQLParserTokenManager tm = (SQLParserTokenManager) getTokenManager();
 	    /* returned a cached Parser if already exists, otherwise create */
@@ -126,7 +126,7 @@ public class ParserImpl implements Parser
 	 * @exception StandardException	Thrown on error
 	 */
 
-	public QueryTreeNode parseStatement(String statementSQLText, Object[] paramDefaults) 
+	public StatementNode parseStatement(String statementSQLText, Object[] paramDefaults) 
 		throws StandardException
 	{
 
@@ -148,7 +148,7 @@ public class ParserImpl implements Parser
 		/* Parse the statement, and return the QueryTree */
 		try
 		{
-		    return parseGoalProduction( statementSQLText, paramDefaults);
+		    return getParser().Statement(statementSQLText, paramDefaults);
 		}
 		catch (ParseException e)
 		{
@@ -159,26 +159,6 @@ public class ParserImpl implements Parser
 		    throw StandardException.newException(SQLState.LANG_LEXICAL_ERROR, e.getMessage());
 		}
 	}
-
-        /**
-	 * Parse the goal production, e.g. "statement" for the normal SQL parser.
-	 *
-	 * @param statementSQLText The Statement to parse
-	 * @param paramDefaults	parameter defaults.  Passed around as an array
-	 *						of objects, but is really an array of StorableDataValues
-         *
-	 * @return	A QueryTree representing the parsed statement
-	 *
-	 * @exception ParseException
-         * @exception TokenMgrError
-         */
-        protected QueryTreeNode parseGoalProduction( String statementSQLText,
-                                                   Object[] paramDefaults)
-            throws ParseException, TokenMgrError, StandardException
-        {
-	    SQLParser p = (SQLParser) getParser();
-	    return p.Statement( statementSQLText, paramDefaults);
-	} // End of parseGoalProduction
 
 	/**
 	 * Returns the current SQL text string that is being parsed.

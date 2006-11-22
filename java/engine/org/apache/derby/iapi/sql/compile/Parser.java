@@ -27,7 +27,7 @@ import org.apache.derby.iapi.error.StandardException;
  * but this is work in progress.
  * manish - Wed Mar 28 13:05:19 PST 2001
  */
-import	org.apache.derby.impl.sql.compile.QueryTreeNode;
+import org.apache.derby.impl.sql.compile.StatementNode;
 
 /**
  * The Parser interface is intended to work with Jack-generated parsers (now JavaCC).
@@ -57,12 +57,12 @@ public interface Parser
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public QueryTreeNode	parseStatement(String statementSQLText,
+	public StatementNode	parseStatement(String statementSQLText,
 		Object[] paramDefaults) 
 		throws StandardException;
 
 
-	public QueryTreeNode parseStatement(String statementSQLText)
+	public StatementNode parseStatement(String statementSQLText)
 		throws StandardException;
 
 	/**

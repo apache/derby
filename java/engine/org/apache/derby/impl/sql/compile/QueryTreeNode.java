@@ -824,44 +824,33 @@ public abstract class QueryTreeNode implements Visitable
 		}
 		return intVal;
 	}
-
+	
 	/**
-	 * Parse some query text and return a parse tree.
-	 *
-	 * @param compilerContext	The CompilerContext to use
-	 * @param queryText	Query text to parse.
-	 * @param paramDefaults		array of parameter defaults used to
-	 *							initialize parameter nodes, and ultimately
-	 *							for the optimization of statements with
-	 *							parameters.
-	 * @param lcc				Current LanguageConnectionContext
-	 *
-	 * @return	ResultSetNode	The parse tree.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public static QueryTreeNode
-	parseQueryText
-	(
-		CompilerContext		compilerContext,
-		String				queryText,
-		Object[]			paramDefaults,
-		LanguageConnectionContext lcc
-    )
-		 throws StandardException
+	** Parse the a SQL statement from the body
+	* of another SQL statement. Pushes and pops a
+	* separate CompilerContext to perform the compilation.
+	*/
+	StatementNode parseStatement(String sql, boolean internalSQL) throws StandardException
 	{
-		LanguageConnectionFactory	lcf;
-		Parser						p;
-		QueryTreeNode			    qtn;
+		/*
+		** Get a new compiler context, so the parsing of the text
+		** doesn't mess up anything in the current context 
+		*/
+		LanguageConnectionContext lcc = getLanguageConnectionContext();
+		CompilerContext newCC = lcc.pushCompilerContext();
+		if (internalSQL)
+		    newCC.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
 
-		p = compilerContext.getParser();
-		
-		/* Get a Statement to pass to the parser */
-		lcf = lcc.getLanguageConnectionFactory();
+		try
+		{
+			Parser p = newCC.getParser();
+			return p.parseStatement(sql);
+		}
 
-		/* Finally, we can call the parser */
-		qtn = (QueryTreeNode)p.parseStatement(queryText, paramDefaults);
-		return	qtn;
+		finally
+		{
+			lcc.popCompilerContext(newCC);
+		}
 	}
 
 	/**

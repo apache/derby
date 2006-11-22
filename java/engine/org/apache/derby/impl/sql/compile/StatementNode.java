@@ -26,6 +26,8 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -151,7 +153,7 @@ public abstract class StatementNode extends QueryTreeNode
 		optimizeStatement();
 		return this;
 	}
-
+	
 	/**
 	 * create the outer shell class builder for the class we will
 	 * be generating, generate the expression to stuff in it,

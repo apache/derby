@@ -2172,20 +2172,8 @@ public class FromBaseTable extends FromTable
 						"vd not expected to be null for " + tableName);
 				}
 	
-				/*
-				** Push a compiler context to parse the query text so that
-				** it won't clobber the current context.
-				*/
-				LanguageConnectionContext lcc = getLanguageConnectionContext();
-				CompilerContext newCC = lcc.pushCompilerContext();
-				cvn = (CreateViewNode) 
-                    QueryTreeNode.parseQueryText( 
-                        newCC,
-                        vd.getViewText(),
-                        (DataValueDescriptor[])null,	// default params
-                        lcc);
-
-				lcc.popCompilerContext(newCC);
+				cvn = (CreateViewNode)
+				          parseStatement(vd.getViewText(), false);
 
 				rsn = cvn.getParsedQueryExpression();
 	
