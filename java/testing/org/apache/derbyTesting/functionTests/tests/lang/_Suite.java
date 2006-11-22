@@ -21,6 +21,7 @@
 */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import org.apache.derbyTesting.functionTests.suites.XMLSuite;
 import org.apache.derbyTesting.functionTests.tests.nist.NistScripts;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.JDBC;
@@ -69,9 +70,11 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SQLAuthorizationPropTest.suite());
         suite.addTest(TimeHandlingTest.suite());
         suite.addTest(VTITest.suite());
-        suite.addTest(XMLTypeAndOpsTest.suite());
-        suite.addTest(XMLMissingClassesTest.suite());
-        
+
+        // Add the XML tests, which exist as a separate suite
+        // so that users can "run all XML tests" easily.
+        suite.addTest(XMLSuite.suite());
+         
         // Add the NIST suite in from the nist package since
         // it is a SQL language related test.
         suite.addTest(NistScripts.suite());

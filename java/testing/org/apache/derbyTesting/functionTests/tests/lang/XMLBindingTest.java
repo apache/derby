@@ -30,6 +30,7 @@ import java.sql.Statement;
 import java.sql.Types;
 
 import junit.framework.Test;
+import junit.extensions.TestSetup;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBC;
@@ -37,6 +38,7 @@ import org.apache.derbyTesting.junit.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -82,15 +84,25 @@ public class XMLBindingTest extends BaseJDBCTestCase {
             suite.addTest(
                 TestConfiguration.defaultSuite(XMLBindingTest.class, false));
 
-            XBindTestSetup wrapper = new XBindTestSetup(suite);
+            TestSetup wrapper = new XBindTestSetup(suite);
 
             /* XML parser needs to read "personal.dtd" for schema-based
              * insertion, so copy it to user directory.
              */
-            return new SupportFilesSetup(wrapper,
+            wrapper = new SupportFilesSetup(wrapper,
                 new String [] {
                     "functionTests/tests/lang/xmlTestFiles/personal.dtd"
                 });
+
+            /* RESOLVE: In order to run XMLBindingTest as part of a
+             * suite we currently have to disable the security manager
+             * to allow the JAXP parser to read DTD files.  Once we
+             * figure out how to give JAXP the correct permissions
+             * in the derby_tests policy file, we can then remove the
+             * "noSecurityManager()" decoration. See comments in
+             * DERBY-1758 for details.
+             */
+            return SecurityManagerSetup.noSecurityManager(wrapper);
         }
 
         return suite;
@@ -138,7 +150,7 @@ public class XMLBindingTest extends BaseJDBCTestCase {
         // into xTable.t1 as part of XBindTestSetup setup.  A "0"
         // means empty string; a "-1" means we inserted a null.
         int [] expectedCharCounts =
-            new int [] { 40869, 40375, 1199, 1187, 1218, 954, 22, -1, -1 };
+            new int [] { 39441, 37925, 1161, 1155, 1180, 922, 22, -1, -1 };
 
         int rowCount = 0;
         ResultSet rs = createStatement().executeQuery(
@@ -152,7 +164,17 @@ public class XMLBindingTest extends BaseJDBCTestCase {
             // Count the number of characters we read back.
             if (!rs.wasNull())
             {
-                for (charCount = 0; xResult.read() != -1; charCount++);
+                int ch = xResult.read();
+                for (charCount = 0; ch != -1; ch = xResult.read())
+                {
+                    /* Xalan serialization produces platform-specific line-
+                     * endings (DERBY-2106), which can throw off the character
+                     * count on Windows.  So if we see the Windows '\r' char
+                     * we do not count it.
+                     */
+                    if ((char)ch != '\r')
+                        charCount++;
+                }
                 xResult.close();
             }
             else

@@ -83,6 +83,17 @@ public final class SecurityManagerSetup extends TestSetup {
 		return new SecurityManagerSetup(test, "<NONE>");
 	}
 	
+    /**
+     * Same as noSecurityManager() above but takes a TestSetup
+     * instead of a BaseTestCase.
+     */
+    public static Test noSecurityManager(TestSetup tSetup)
+    {
+		if (externalSecurityManagerInstalled)
+			return new TestSuite();
+		return new SecurityManagerSetup(tSetup, "<NONE>");
+    }
+
 	/**
 	 * Install a SecurityManager with the default test policy
 	 * file:
