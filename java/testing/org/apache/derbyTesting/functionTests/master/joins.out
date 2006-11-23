@@ -386,6 +386,26 @@ A1         |B1         |C1         |C3         |D1         |D3
 -----------------------------------------------------------------------
 1          |1          |1          |1          |1          |2          
 7          |7          |8          |9          |1          |3          
+ij> -- JIRA 1089: demonstrate that a table with an identity column generated
+-- always can be used as the target of an insert-as-select join:
+create table j1089_source (source_id int);
+0 rows inserted/updated/deleted
+ij> insert into j1089_source values (0);
+1 row inserted/updated/deleted
+ij> create table j1089_dest (
+    dest_id int not null primary key generated always as identity,
+    source_id_1 int not null,
+    source_id_2 int not null);
+0 rows inserted/updated/deleted
+ij> insert into j1089_dest (source_id_1, source_id_2)
+    select s1.source_id, s2.source_id
+        from j1089_source as s1
+            join j1089_source as s2 on 1 = 1;
+1 row inserted/updated/deleted
+ij> select * from j1089_dest;
+DEST_ID    |SOURCE_ID_1|SOURCE_ID_2
+-----------------------------------
+1          |0          |0          
 ij> -----------------------------------
 -- clean up
 ----------------------------------
@@ -410,5 +430,9 @@ ij> drop table instab;
 ij> drop table x;
 0 rows inserted/updated/deleted
 ij> drop table y;
+0 rows inserted/updated/deleted
+ij> drop table j1089_source;
+0 rows inserted/updated/deleted
+ij> drop table j1089_dest;
 0 rows inserted/updated/deleted
 ij> 

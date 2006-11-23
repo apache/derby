@@ -2868,7 +2868,14 @@ public class ResultColumnList extends QueryTreeNodeVector
 		{
 			ResultColumn rc = (ResultColumn) elementAt(index);
 
-			rc.setExpression(rc.getExpression().remapColumnReferencesToExpressions());
+			// The expression may be null if this column is an identity
+			// column generated always. If the expression is not null, it
+			// is a ColumnReference; we call through to the ColumnReference
+			// to give it a chance to remap itself from the outer query
+			// node to this one.
+			if (rc.getExpression() != null)
+				rc.setExpression(
+					rc.getExpression().remapColumnReferencesToExpressions());
 		}
 	}
 

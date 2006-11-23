@@ -186,6 +186,21 @@ select a1,b1,c1,c3,d1,d3
   from D join ((B join C on b2=c2) right outer join A on a1=b1) 
     on d3=b3 and d1=a2;
 
+-- JIRA 1089: demonstrate that a table with an identity column generated
+-- always can be used as the target of an insert-as-select join:
+create table j1089_source (source_id int);
+insert into j1089_source values (0);
+create table j1089_dest (
+    dest_id int not null primary key generated always as identity,
+    source_id_1 int not null,
+    source_id_2 int not null);
+
+insert into j1089_dest (source_id_1, source_id_2)
+    select s1.source_id, s2.source_id
+        from j1089_source as s1
+            join j1089_source as s2 on 1 = 1;
+select * from j1089_dest;
+
 -----------------------------------
 -- clean up
 ----------------------------------
@@ -200,3 +215,5 @@ drop table t4;
 drop table instab;
 drop table x;
 drop table y;
+drop table j1089_source;
+drop table j1089_dest;
