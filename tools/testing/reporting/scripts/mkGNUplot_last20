@@ -1,0 +1,55 @@
+#!/bin/bash
+COUNT=$1
+# Assumes *full* data exists. This script only does 'head -${COUNT}' on the complete data files.
+# Should rename ${SUITE}_last20.data to something more general..
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+# We have one catalog per platform
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/testlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+# Get the set of platforms
+cd ${TESTLOGDIR}
+PLATFORMS=`ls`
+NOOFPLFS=`echo ${PLATFORMS} | wc -w`
+PLFNO=1
+
+# Get the list of revisions
+# Here we use all.
+REVISIONSFILE="${REVISIONLIST}"
+# REVISIONS=`cat ${REVISIONSFILE} | head -${COUNT} | gawk '{ print $1 }' | grep -v "^#"`
+# The 'head -${COUNT}' is a bit rough: includes # comment lines...
+STARTREV=`head -${COUNT} ${REVISIONSFILE} | gawk '{ print $1 }' | grep -v "^#" | tail -1`
+
+# DEBUG echo "PLATFORMS: ${PLATFORMS}, SUITES: ${SUITES}"
+for PLATFORM in ${PLATFORMS}
+do
+  echo "${PLATFORM} [${PLFNO}/${NOOFPLFS}]"
+  for SUITE in ${SUITES}
+  do
+    echo "    ${SUITE}"
+    # head -${COUNT} ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data > ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}_last20.data
+
+    echo -n "" > ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}_last20.data
+    while read LINE
+    do
+      LINEREV=`echo ${LINE} | gawk '{ print $2 }'`
+      if [ ${LINEREV} -lt ${STARTREV} ]
+      then
+        # echo "        break on ${LINEREV}"
+        break
+      fi
+      echo ${LINE} >> ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}_last20.data
+    done < ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data
+
+  done # SUITES
+  let " PLFNO = ${PLFNO} + 1 "
+done # PLATFORMS

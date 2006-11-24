@@ -1,0 +1,87 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+# We have one catalog per platform
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/testlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+# Get the set of platforms
+cd ${TESTLOGDIR}
+PLATFORMS=`ls`
+NOOFPLFS=`echo ${PLATFORMS} | wc -w`
+PLFNO=1
+
+# Get the list of revisions
+# Here we use all.
+REVISIONSFILE="${REVISIONLIST}"
+REVISIONS=`cat ${REVISIONSFILE} | gawk '{ print $1 }' | grep -v "^#"`
+
+for PLATFORM in ${PLATFORMS}
+do
+  echo "${PLATFORM} [${PLFNO}/${NOOFPLFS}]"
+  for SUITE in ${SUITES}
+  do
+    PREVREC=`head -1 ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data`
+    PREVREV=`echo ${PREVREC} | gawk '{ print $2 }'`
+    echo "    ${SUITE}: ${PREVREV}"
+    cp ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data \
+       ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data.prev
+    echo -n "" > ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data.new
+    for REVISION in ${REVISIONS}
+    do
+      # echo "        ${REVISION}"
+      # x       = ${revision}
+      # baseRev = platform.baseline.revision 
+      # echo "${REVISION} = ${PREVREV}"
+      if [ "${REVISION}" = "${PREVREV}" ]
+      then
+        # echo "${REVISION}/${PREVREV} Done."
+        break
+      fi
+      BASELINE=`head -1 ${PLATFORM}/baseline.csv  | gawk '{ print $2 }'`
+      # durBase = platform.baseRev(suite).duration 
+      BASETIME=`grep "^${SUITE} " ${PLATFORM}/${BASELINE}.csv | gawk '{ print $6 }'`
+      BASESECONDS=`grep "^${SUITE} " ${PLATFORM}/baseline.csv | gawk '{ print $3 }'`
+      # Jeez.... Shouldn't read this EVERY round...
+      REVDATE=`gawk '{ print $1 }' ${DERBYDIR}/UpdateLog/${REVISION}/UpdateTime`
+      if [ -e ${PLATFORM}/${REVISION}.csv ]
+        then
+        #  2: Number, 3: OK, 4: Failed, 5: Skipped
+        RES=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv`
+        # yDur    = platform.revision(suite).duration 
+        TIME=`echo ${RES} | grep "^${SUITE} " | gawk '{ print $6 }'`
+        SECONDS=`${TOOLDIR}/toSeconds ${TIME}`
+        # yPercent= (yDur/durBase)*100 
+        PERCENT=`${TOOLDIR}/calcPercent ${SECONDS} ${BASESECONDS}`
+        # echo "$x $yPercent" >> tmp.dur
+        # yNtests = platform.revision(suite).NumberOfTests
+        NTESTS=`echo ${RES} | grep "^${SUITE} " | gawk '{ print $2 }'`
+        # "$x $yNtests" >> tmp.Ntests
+        # yNok    = platform.revision(suite).NumberOK
+        NOK=`echo ${RES} | grep "^${SUITE} " | gawk '{ print $3 }'`
+        # "$x $yNok" >> tmp.Nok
+        # yNfail  = platform.revision(suite).NumberFail
+        NFAIL=`echo ${RES} | grep "^${SUITE} " | gawk '{ print $4 }'`
+        # "$x $yNfail" >> tmp.Nfail
+        CURRENT="${REVDATE} ${REVISION} ${PERCENT} ${NTESTS} ${NOK} ${NFAIL}"
+        echo ${CURRENT}
+        echo "${CURRENT}" >> ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data.new
+        # echo -n "."
+      else
+        echo "        No ${REVISION} for ${PLATFORM}"
+        # echo -n "-"
+      fi
+    done # REVISIONS
+    cat ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data.new ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data.prev > ${DERBYDIR}/testing/Full/plot/${PLATFORM}/${SUITE}.data
+    echo ""
+  done # SUITES
+  let " PLFNO = ${PLFNO} + 1 "
+done # PLATFORMS

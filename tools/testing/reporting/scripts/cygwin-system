@@ -1,0 +1,11 @@
+#!/bin/bash
+SYSINF="sysinf$$"
+systeminfo > ${SYSINF}
+# OSNAME=`grep "^OS Name:" ${SYSINF} | sed -e 's/OS Name://'`
+# OSVERSION=`grep "^OS Version:" ${SYSINF} | sed -e 's/OS Version://'`
+OSNAME=`grep "^OS Name:" ${SYSINF} | gawk '{ print $3" "$4" "$5" "$6 }'`
+OSVERSION=`grep "^OS Version:" ${SYSINF} |  gawk '{ print $3" "$4" "$5" "$6" "$7" "$8 }'`
+echo "${OSNAME} - ${OSVERSION}"
+rm ${SYSINF}
+
+uname -srvo

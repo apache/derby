@@ -1,0 +1,53 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+# Define DERBYDIR
+. ./env.sh
+
+INIT=$1
+
+echo "***** ${DERBYDIR} *********"
+
+if [ "${INIT}" == "INIT" ]
+then
+
+  # Build plot data
+  # ONLY initially, i.e. after a change of baseline or addition or removal of platform...
+  # NB: createBaselineFilesOnePlatform / createBaselineFiles must have been run to create
+  # baseline files for all platforms to be shown.
+  echo "-- mkGNUplot ----------------------------------------"
+  time ${TOOLDIR}/mkGNUplot
+
+else
+
+  # Update plot data:
+  echo "-- mkGNUplot.recent -----------------------------------"
+  time ${TOOLDIR}/mkGNUplot.recent
+
+fi
+
+# Create plots per platform
+echo "-- doplot ---------------------------------------------"
+time ${TOOLDIR}/doplot
+
+# Create summary plots over all platforms
+echo "-- doplot_all -----------------------------------------"
+time ${TOOLDIR}/doplot_all
+
+
+# Extract data for last 20 builds ( ~1 month)
+echo "-- mkGNUplot_last20 -----------------------------------"
+time ${TOOLDIR}/mkGNUplot_last20 40
+# NB: Now takes a param instead of using fixed 20 latest data sets.
+
+# Create plots per platform for ~last month
+echo "-- doplot _last20 -------------------------------------"
+time ${TOOLDIR}/doplot _last20
+
+# Create summary plots over all platforms for ~last month
+# time ${TOOLDIR}/doplot_all_lastMonth
+echo "-- doplot_all _last20 ---------------------------------"
+time ${TOOLDIR}/doplot_all _last20
+
+echo "***** ${DERBYDIR} *********"

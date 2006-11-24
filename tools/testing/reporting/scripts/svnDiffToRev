@@ -1,0 +1,20 @@
+#!/bin/bash
+TOOLDIR="${HOME}/bin/DerbyTools"
+. ${TOOLDIR}/env
+cd ${DERBYDIR}
+. ./env.sh
+
+cd ${derby_source}
+
+if [ "$1" = "" ]
+then
+  echo "Usage: $0 rev"
+  echo "       Do svn diff -r Rev-1:Rev"
+  exit
+fi
+
+prevRev=` expr $1 - 1 `
+
+svn log -r $prevRev:$1
+echo "svn diff -r $prevRev:$1"
+svn diff -r $prevRev:$1

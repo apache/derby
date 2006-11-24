@@ -1,0 +1,31 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+VAR=$1
+# Only accepts _last20
+
+GNUPLOT=/usr/local/bin/gnuplot
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/testlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+# Get the set of platforms
+cd ${DERBYDIR}/testing/Full/plot
+PLATFORMS=`ls ${DERBYDIR}/testing/testlog/`
+echo ${PLATFORMS}
+for  PLATFORM in ${PLATFORMS}
+do
+  echo "${PLATFORM}"
+  mkdir -p ${PLATFORM}
+  cd ${PLATFORM}
+  for SUITE in ${SUITES}
+  do
+    cp ${SUITE}${VAR}.data data.dat
+    $GNUPLOT < ${TOOLDIR}/gnuplot/duration.gp
+    mv plot.png ${SUITE}${VAR}.png
+    chmod go+r  ${SUITE}${VAR}.png
+  done
+  cd ../
+done

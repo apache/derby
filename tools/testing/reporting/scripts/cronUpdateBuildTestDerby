@@ -1,0 +1,21 @@
+#!/bin/bash
+echo "THIS IS SITE SPECIFIC! FIX!"
+exit
+
+export USER="testderby"
+export HOME="/home/${USER}"
+export DERBYDIR="${HOME}/Apache/Derbytrunk_JDK15"
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+/bin/echo "-------------------------------------------------" > ${HOME}/cron/updateBuildTestDerby.log
+/bin/echo "-------------------------------------------------" > ${HOME}/cron/updateBuildTestDerby.err
+/bin/date >> ${HOME}/cron/updateBuildTestDerby.log
+/bin/date >> ${HOME}/cron/updateBuildTestDerby.err
+
+. ${HOME}/.bashrc >> ${HOME}/cron/updateBuildTestDerby.log 2>>${HOME}/cron/updateBuildTestDerby.err
+
+${TOOLDIR}/updateBuildTestDerby "ZipJars"      >> ${HOME}/cron/updateBuildTestDerby.log 2>>${HOME}/cron/updateBuildTestDerby.err
+
+${TOOLDIR}/testSummariesDerby previous details >> ${HOME}/cron/updateBuildTestDerby.log 2>>${HOME}/cron/updateBuildTestDerby.err

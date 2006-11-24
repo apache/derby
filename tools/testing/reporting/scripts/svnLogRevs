@@ -1,0 +1,18 @@
+#!/bin/bash
+if [ "$1" == "" ]
+then
+  echo "Usage: $0 prevRev currRev"
+  echo "       Do svn log -r prevRev+1:currRev"
+  exit
+fi
+prevRev=`expr $1 + 1 `
+if [ "$2" == "" ]
+then
+  echo "Usage: $0 $1 currRev"
+  echo "       Do svn log -r prevRev+1:currRev"
+  exit
+fi
+currRev=$2
+
+echo "svn log -r $prevRev:$currRev"
+svn log -r $prevRev:$currRev

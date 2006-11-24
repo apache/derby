@@ -1,0 +1,5 @@
+#!/bin/bash
+BITS=`uname -p | grep -q 64 && echo 64 || echo 32`
+HEAD=`cat /etc/redhat-release`
+echo "${HEAD} ${BITS}bits"
+uname -srvo

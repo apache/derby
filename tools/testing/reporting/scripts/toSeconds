@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+HrMinSecString=$1
+# echo ${HrMinSecString}
+Hours=`echo ${HrMinSecString} | awk -F: '{print $1}'`
+Minutes=`echo ${HrMinSecString} | awk -F: '{print $2}'`
+Seconds=`echo ${HrMinSecString} | awk -F: '{print $3}'`
+# echo "${Hours} ${Minutes} ${Seconds} "
+# Force let to interpret as decimal (leading 0 otherwise means octal).
+Hours="10#${Hours}"
+Minutes="10#${Minutes}"
+Seconds="10#${Seconds}"
+# echo "${Hours} ${Minutes} ${Seconds} "
+let " Minutes =  ${Minutes} + ${Hours}*60 "
+let " Seconds =  ${Seconds} + ${Minutes}*60 "
+echo ${Seconds}

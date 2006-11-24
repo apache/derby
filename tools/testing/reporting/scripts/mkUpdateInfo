@@ -1,0 +1,32 @@
+#!/bin/bash
+if [ "$1" = ""  -o  "$2" = "" ]
+then
+  echo "Usage: $0 oldrevision/$1 revision/$2"
+  exit
+fi
+OLDREVISION=$1
+REVISION=$2
+#
+
+# You should NOT need to modify anything below.
+# NB: derby_source must be defined.
+#---------------------------------------------
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+echo "cd ${DERBYDIR}"
+cd ${DERBYDIR}
+
+          UPDATEINFO="UpdateInfo"
+          mkdir -p ${DERBYDIR}/testing/${UPDATEINFO}
+          echo "Changes from ${OLDREVISION} to ${REVISION}:" > ${DERBYDIR}/testing/${UPDATEINFO}/${REVISION}.txt
+               echo "${TOOLDIR}/svnLogRevs.new ${OLDREVISION} ${REVISION} >> ${DERBYDIR}/testing/${UPDATEINFO}/${REVISION}.txt"
+          ${TOOLDIR}/svnLogRevs.new ${OLDREVISION} ${REVISION} >> ${DERBYDIR}/testing/${UPDATEINFO}/${REVISION}.txt
+          echo "" >> ${DERBYDIR}/testing/${UPDATEINFO}/${REVISION}.txt
+          grep -v "sun.com" ${UPDATELOGDIR}/${REVISION}/update.out >> ${DERBYDIR}/testing/${UPDATEINFO}/${REVISION}.txt
+          chmod go+r ${DERBYDIR}/testing/${UPDATEINFO}/${REVISION}.txt
+
+          SRC="${DERBYDIR}/testing/${UPDATEINFO}/${REVISION}.txt"
+          DST="${PUBLISHDIR}/${UPDATEINFO}/${REVISION}.txt"
+          echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+          ### ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}

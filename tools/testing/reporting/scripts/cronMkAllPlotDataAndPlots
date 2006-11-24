@@ -1,0 +1,47 @@
+#!/bin/bash
+echo "THIS IS SITE SPECIFIC! FIX!"
+exit
+
+export USER="derbytester"
+export HOME="/home/${USER}"
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+/bin/echo "-------------------------------------------------" > ${HOME}/cron/MkAllPlotDataAndPlots.log
+/bin/echo "-------------------------------------------------" > ${HOME}/cron/MkAllPlotDataAndPlots.err
+/bin/echo -n "${HOST} " >> ${HOME}/cron/MkAllPlotDataAndPlots.log
+/bin/date >> ${HOME}/cron/MkAllPlotDataAndPlots.log
+/bin/date >> ${HOME}/cron/MkAllPlotDataAndPlots.err
+
+. ${HOME}/.bashrc >> ${HOME}/cron/MkAllPlotDataAndPlots.log 2>>${HOME}/cron/MkAllPlotDataAndPlots.err
+
+#----------
+# Built with JDK 1.5
+export DERBYDIR="${HOME}/Apache/Derby/trunk_JDK15"
+cd ${DERBYDIR}
+${TOOLDIR}/mkAllPlotDataAndPlots     >> ${HOME}/cron/MkAllPlotDataAndPlots.log 2>>${HOME}/cron/MkAllPlotDataAndPlots.err
+
+#----------
+# Built with JDK 1.5
+export DERBYDIR="${HOME}/Apache/Derby/tinderbox_trunk_JDK15"
+cd ${DERBYDIR}
+${TOOLDIR}/mkAllPlotDataAndPlots     >> ${HOME}/cron/MkAllPlotDataAndPlots.log 2>>${HOME}/cron/MkAllPlotDataAndPlots.err
+
+#----------
+# Built with JDK 1.5
+export DERBYDIR="${HOME}/Apache/Derby/10.1_JDK15"
+cd ${DERBYDIR}
+${TOOLDIR}/mkAllPlotDataAndPlots     >> ${HOME}/cron/MkAllPlotDataAndPlots.log 2>>${HOME}/cron/MkAllPlotDataAndPlots.err
+
+#----------
+# Built with JDK 1.6
+export DERBYDIR="${HOME}/Apache/Derby/trunk_JDK16"
+cd ${DERBYDIR}
+${TOOLDIR}/mkAllPlotDataAndPlots     >> ${HOME}/cron/MkAllPlotDataAndPlots.log 2>>${HOME}/cron/MkAllPlotDataAndPlots.err
+
+
+/bin/echo "-------------------------------------------------" >> ${HOME}/cron/MkAllPlotDataAndPlots.log
+/bin/echo "-------------------------------------------------" >> ${HOME}/cron/MkAllPlotDataAndPlots.err
+/bin/date >> ${HOME}/cron/MkAllPlotDataAndPlots.log
+/bin/date >> ${HOME}/cron/MkAllPlotDataAndPlots.err

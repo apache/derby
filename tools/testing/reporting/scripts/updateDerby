@@ -1,0 +1,155 @@
+#!/bin/bash
+#
+DESIREDREVISION=""
+if [ "$1" != "" ]
+then
+  DESIREDREVISION="-r $1"
+fi
+# You should NOT need to modify anything below.
+# NB: derby_source must be defined.
+# NB NB: Assumes a svn update IS done when run first time!
+#        If neccessary do a svn up -rXXXXXX to a previous revision first.
+#---------------------------------------------
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+SRCDIR=${derby_source}
+
+if [ ! -e ${SRCDIR} ]
+then
+    echo "${SRCDIR} does not exist."
+    exit
+fi
+SANDBOX=`basename ${DERBYDIR}`
+UPDATELOGDIR=${DERBYDIR}/UpdateLog
+UPDATEID=`date +%Y-%m-%d_%H-%M-%S`
+
+UPDATELOGDIRCUR=${UPDATELOGDIR}/${UPDATEID}
+mkdir -p ${UPDATELOGDIRCUR}
+if [ ! -e ${UPDATELOGDIRCUR} ]
+then
+    echo "${UPDATELOGDIRCUR} does not exist."
+    exit
+fi
+
+# First time...
+mkdir -p ${DERBYDIR}/testing
+
+SVNHOSTINFO=`uname -srpi`
+SVNHOST=`uname -n`
+SVNHOST=`host ${SVNHOST} | awk '{print $1}'`
+cd ${SRCDIR}
+
+rm -f ${UPDATELOGDIR}/updateOK
+
+svn --version > ${UPDATELOGDIRCUR}/svn--version
+
+LASTUPDATEREVISION=`head -1 ${REVISIONLIST}`
+OLDREVISION=`svn info | grep '^Revision:'`
+OLDREPOSITORY=`svn info | grep '^URL:'`
+
+echo "${SVNHOSTINFO}[${SVNHOST}]" > ${UPDATELOGDIRCUR}/status-u.out
+echo "${OLDREVISION} ${OLDREPOSITORY}" >> ${UPDATELOGDIRCUR}/status-u.out
+
+svn status -u >> ${UPDATELOGDIRCUR}/status-u.out 2> ${UPDATELOGDIRCUR}/status-u.err
+
+echo "${SVNHOSTINFO}[${SVNHOST}]" > ${UPDATELOGDIRCUR}/update.out
+
+STARTTIME=`date +%Y-%m-%d" "%H:%M:%S" "%Z`
+
+####################################
+# Do the update
+#
+svn update ${DESIREDREVISION} >> ${UPDATELOGDIRCUR}/update.out 2> ${UPDATELOGDIRCUR}/update.err
+#
+####################################
+
+REVISION=`svn info | grep '^Revision:'`
+REPOSITORY=`svn info | grep '^URL:'`
+
+REVISION=`echo ${REVISION} | gawk '{ print $2 }'`
+OLDREVISION=`echo ${OLDREVISION} | gawk '{ print $2 }'`
+
+echo "${REVISION} ${REPOSITORY}" >> ${UPDATELOGDIRCUR}/update.out
+svn status >> ${UPDATELOGDIRCUR}/update.out 2>> ${UPDATELOGDIRCUR}/update.err
+cp ${UPDATELOGDIRCUR}/update.out  ${UPDATELOGDIR}/update.out
+
+echo "LASTUPDATEREVISION: ${LASTUPDATEREVISION}, OLDREVISION: ${OLDREVISION}, REVISION: ${REVISION}"
+
+# java/testing/README.htm is NOT readable by 'o' by default....
+# I publish a web-link to it:
+chmod go+r java/testing/README.htm
+
+# Flag that update went OK:
+if [ -e ${UPDATELOGDIR}/${UPDATEID}/update.err ]
+then
+  LNSERR=`wc -l ${UPDATELOGDIR}/${UPDATEID}/update.err | gawk '{ print $1 }'`
+  echo "LNSERR: ${LNSERR}"
+  if [ "${LNSERR}" = "0" ]
+  then
+    ls -l ${UPDATELOGDIR}/${UPDATEID}/update.out
+    if [ -e ${UPDATELOGDIR}/${UPDATEID}/update.out ]
+    then
+      UPDATED=`grep "Updated to revision" ${UPDATELOGDIR}/${UPDATEID}/update.out | wc -l | gawk '{ print $1 }'`
+      UNCHANGED=`grep "At revision" ${UPDATELOGDIR}/${UPDATEID}/update.out | wc -l | gawk '{ print $1 }'`
+      echo "UPDATED: ${UPDATED}, UNCHANGED: ${UNCHANGED}."
+      if [ "${UPDATED}" = "1" -o "${UNCHANGED}" = "1" ]
+      then
+        echo "LASTUPDATEREVISION: ${LASTUPDATEREVISION}, OLDREVISION: ${OLDREVISION}, REVISION: ${REVISION}"
+        if [ "${UNCHANGED}" = "1" ]
+        then
+          echo "UNCHANGED is 1"
+          STATUS="unchanged from revision ${LASTUPDATEREVISION}/${OLDREVISION} to"
+          # echo "${TOOLDIR}/textMail \"Derby ${STATUS} ${REVISION}\" \"${MAILTOEXT}\" \"${UPDATELOGDIR}/update.out\""
+          # ${TOOLDIR}/textMail "Derby ${STATUS} ${REVISION}" "${MAILTOEXT}" "${UPDATELOGDIR}/update.out"
+          # Remove ...../${UPDATEID}/
+          rm -rf ${UPDATELOGDIR}/${UPDATEID}
+          echo "${STATUS} ${REVISION}"
+          exit
+        else
+          echo "UNCHANGED is not 1"
+          STATUS="updated to revision"
+          echo ${REVISION} > ${REVISIONLIST}.this
+          cp ${REVISIONLIST} ${REVISIONLIST}.prev
+          cat ${REVISIONLIST}.this ${REVISIONLIST}.prev > ${REVISIONLIST}
+          rm -f ${REVISIONLIST}.prev ${REVISIONLIST}.this
+          echo "touch ${UPDATELOGDIR}/updateOK"
+          touch ${UPDATELOGDIR}/updateOK
+
+          UPDATEINFO="UpdateInfo"
+          mkdir -p ${DERBYDIR}/${UPDATEINFO}
+          REVLO="${DERBYDIR}/${UPDATEINFO}/${REVISION}.txt"
+          echo "Changes from ${LASTUPDATEREVISION}/${OLDREVISION} to ${REVISION}:" > ${REVLO}
+          ${TOOLDIR}/svnLogRevs.new ${OLDREVISION} ${REVISION} >> ${REVLO}
+          echo " " >> ${REVLO}
+          cat ${UPDATELOGDIR}/${UPDATEID}/update.out >> ${REVLO}
+
+          LUREV="${DERBYDIR}/${UPDATEINFO}/LatestUpdateRevision.txt"
+          echo ${REVISION} > ${LUREV}
+          SRC="${REVLO} ${LUREV}"
+          chmod go+r ${SRC}
+
+          SCPUT=/usr/bin/scp # Do NOT block this one
+          DST="${PUBLISHDIR}/${UPDATEINFO}/"
+          echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+          ### UNCOMMENT TO PUBLISH. ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+          
+          # echo "${TOOLDIR}/textMail \"${SANDBOX} ${STATUS} ${REVISION}\" \"${MAILTOEXT}\" \"${UPDATELOGDIR}/update.out\""
+          # ${TOOLDIR}/textMail "Derby ${STATUS} ${REVISION}" "${MAILTOEXT}" "${UPDATELOGDIR}/update.out"
+          # Rename ...../${UPDATEID}/ to  ...../${REVISION}/
+          mv ${UPDATELOGDIR}/${UPDATEID} ${UPDATELOGDIR}/${REVISION}
+          echo ${STARTTIME} > ${UPDATELOGDIR}/${REVISION}/UpdateTime
+          echo "Changes from ${LASTUPDATEREVISION}/${OLDREVISION} to ${REVISION}."
+          exit
+        fi
+        echo "updateDerby 1"
+      fi
+      echo "updateDerby 2"
+    fi
+    echo "updateDerby 3"
+  fi
+  echo "updateDerby 4"
+fi
+echo "updateDerby 5"
+### UNCOMMENT TO SEND MAIL. ${TOOLDIR}/textMail "${SANDBOX} update failed" "${MAILTOINT}" "${UPDATELOGDIR}/update.out ${UPDATELOGDIRCUR}/update.err"
+### UNCOMMENT TO SEND MAIL.  ${TOOLDIR}/textMail "${SANDBOX} update failed" "${MAILTOEXT}" "${UPDATELOGDIR}/update.out ${UPDATELOGDIRCUR}/update.err"

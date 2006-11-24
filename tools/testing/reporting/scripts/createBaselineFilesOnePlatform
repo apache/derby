@@ -1,0 +1,59 @@
+#!/bin/bash
+REVISION=$1
+PLATFORM=$2
+
+if [ "${REVISION}" == "" ]
+then
+  echo "Usage: $0 <revision> <platform>"
+  exit
+fi
+if [ "${PLATFORM}" == "" ]
+then
+  echo "Usage: $0 ${REVISION} <platform>"
+  exit
+fi
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+# We have one catalog per platform
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/testlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+# Get the set of platforms
+cd ${TESTLOGDIR}
+echo "Available tested platforms:"
+ls 
+# We have one catalog per platform
+if [ ! -e ${PLATFORM} ]
+then
+  echo "${PLATFORM} does not exist"
+  exit
+fi
+
+  echo ""
+  echo ${PLATFORM}
+  # Create one file per platform
+  BASELINEFILE="${PLATFORM}/baseline.csv"
+  # if [ ! -e ${BASELINEFILE} ]
+  # then
+  #   echo "Could not find ${BASELINEFILE}"
+  #   exit
+  # fi
+  echo "# ${REVISION}" > ${BASELINEFILE}
+
+  for SUITE in ${SUITES}
+  do
+    TIME=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv | gawk '{ sub("\r$", ""); print }' | gawk '{ print $6 }'`
+                                                        # removes DOS endofline
+    SECONDS=`${TOOLDIR}/toSeconds ${TIME}`
+    echo "${SUITE} ${TIME} ${SECONDS}" >> ${BASELINEFILE}
+  done # SUITES
+

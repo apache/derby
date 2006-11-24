@@ -1,0 +1,108 @@
+#!/bin/bash
+# Must be positioned in ${DERBYDIR}.
+# env.sh and testenv.sh must exist in current directory.
+# Assumes Derby has been checked out to ${derby_source} (${DERBYDIR}/${BRANCH_DIR}, 
+# see ${derby_source}/tools/testing/reporting/TEMPLATES/env.sh)
+# Example: 
+#-1. TOPDIR=${HOME}/testingReportingScripts/outerWorld # Update the env.sh script in SANDBOX with this
+#    TESTSET=testset # Update the env.sh script in SANDBOX with this
+#    SANDBOX=trunkJDK16 # Update the env.sh script in SANDBOX with this
+#    DERBYDIR=${TOPDIR}/${TESTSET}/${SANDBOX}
+#    BRANCH_DIR=trunk # or 10.2, 10.1, .... the branch you want to check out
+# 0. mkdir -p ${TOPDIR}; chmod go+rx ${TOPDIR}
+# 1. mkdir -p ${TOPDIR}/${TESTSET}; chmod go+rx ${TOPDIR}/${TESTSET}
+# 2. mkdir ${DERBYDIR}; chmod go+rx ${DERBYDIR}
+# 3. cd ${DERBYDIR}
+# 4. Now checkout the Derby source (See http://db.apache.org/derby/derby_downloads.html).
+#    E.g. 'svn checkout https://svn.apache.org/repos/asf/db/derby/code/${BRANCH_DIR}'
+# 5. TEMPLATEDIR=${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/TEMPLATES
+# 6. cp ${TEMPLATEDIR}/env.sh ./
+# 7. cp ${TEMPLATEDIR}/testenv.sh ./
+# 8. Modify env.sh and testenv.sh as required.
+# 9. TOOLDIR=${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts
+#10. Run this script: ${TOOLDIR}/initDERBYDIR
+
+
+if [ ! -e env.sh ]
+then
+  echo "env.sh not found!"
+  echo "See ${derby_source}/tools/testing/reporting/TEMPLATES for templates."
+  exit
+fi
+
+
+# DEBUG 
+echo -n "We're in: "; pwd
+. ./env.sh
+# DEBUG 
+echo "DERBYDIR: ${DERBYDIR}"
+# DEBUG 
+echo "BRANCH_DIR: ${BRANCH_DIR}"
+# DEBUG 
+pwd
+
+# Example top level web page(s):
+if [ ! -e ../index.html ]
+then
+  cp ${TEMPLATEDIR}/index.html ../index.html 
+fi
+if [ ! -e ../index.shtml ]
+then
+  cp ${TEMPLATEDIR}/index.shtml ../index.shtml 
+fi
+echo ""
+
+##################################
+# Create dirs in ${TOPDIR}/${TESTSET}/${SANDBOX}
+
+rm -rf      BuildLog FailReports testing UpdateLog UpdateInfo builds
+mkdir -p    BuildLog FailReports testing UpdateLog UpdateInfo builds
+chmod go+rx BuildLog FailReports testing UpdateLog UpdateInfo builds
+rm -f                                                Failures
+ln -s ${BRANCH_DIR}/tools/testing/reporting/Failures Failures
+
+echo ""
+# DEBUG 
+ls -al .
+echo ""
+
+# Create dirs in ${TOPDIR}/${TESTSET}/${SANDBOX}/testing
+cd  testing
+mkdir -p    Full Limited Notes testlog
+chmod go+rx Full Limited Notes testlog
+ln -s ../builds builds # Until all scripts are fixed.
+ln -s ../UpdateInfo UpdateInfo # Until all scripts are fixed.
+# Must exist: edit to exclude if neccessary.
+touch ExcludeFromZip
+
+# Example minimal test suite list:
+echo "derbyall"                                          > testlist
+echo "org.apache.derbyTesting.functionTests.suites.All" >> testlist
+echo ""
+echo "testlist: "
+cat testlist
+echo ""
+echo "Add more suites as desired."
+ln -s testlist showtestlist
+echo "Create separate showtestlist if you want to report only for a subset."
+echo ""
+
+# Get back in ${TOPDIR}/${TESTSET}/${SANDBOX}
+cd ..
+echo "To have a complete build environment you should have"
+echo "  osgi.jar"
+echo "  junit.jar"
+echo "  jdbc2_0-stdext.jar"
+echo "  jce1_2_2.jar"
+echo "in ${BRANCH_DIR}/tools/java:"
+ls -l ${BRANCH_DIR}/tools/java
+
+echo ""
+echo "Remember to run buildDerby and updateBuildTestDerby with your correct ant property file:"
+echo " Default: ~/ant.properties"
+echo " E.g. Set jdk16 to build for JDK 6."
+echo "      Set jsr169compile.classpath to build for JSR 169."
+
+exit
+
+# CLEANUP:

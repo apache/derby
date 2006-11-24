@@ -1,0 +1,24 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+
+# Temporary patch until gawk is available on techra28/nevada:
+PATH=${PATH}:/usr/local/bin:/usr/sbin
+
+OS=`uname -s | gawk -F_ '{ print $1 }'`
+FULLOS=`uname`
+
+if [ "${OS}" = "SunOS" ]
+then
+   ${TOOLDIR}/solaris-system
+elif [ "${OS}" = "Linux" ]
+then
+  ${TOOLDIR}/linux-system
+elif [ "${OS}" = "CYGWIN" ]
+then 
+  ${TOOLDIR}/cygwin-system
+elif [ "${FULLOS}" = "HP-UX" ]
+then
+  uname -srv
+else
+  echo "Haven't yet figured out how to get SYSTEM info for ${OS}"
+fi

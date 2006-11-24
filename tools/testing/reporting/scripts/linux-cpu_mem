@@ -1,0 +1,11 @@
+#!/bin/bash
+# NB Assuming all CPUs are identical....
+NUMBER=`cat  /proc/cpuinfo | grep "model name" | wc -l | sed -e 's/  //g'`
+MODEL=`cat  /proc/cpuinfo | grep "model name" | head -1 | gawk -F: '{ print $2 }'`
+FREQ=`cat  /proc/cpuinfo | grep "cpu MHz" | head -1 | gawk -F: '{ print $2 }'`
+CACHE=`cat  /proc/cpuinfo | grep "cache size" | head -1 | gawk -F: '{ print $2 }'`
+
+MEMTOTAL=`cat /proc/meminfo | grep "MemTotal" | gawk -F: '{ print $2 }' | sed -e 's/  //g'`
+MEMFREE=`cat /proc/meminfo | grep "MemFree" | gawk -F: '{ print $2 }' | sed -e 's/  //g'`
+
+echo "${NUMBER} X ${MODEL}: ${FREQ} MHz, ${CACHE} cache. ${MEMTOTAL} Total Memory."

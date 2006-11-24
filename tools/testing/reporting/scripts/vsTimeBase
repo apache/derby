@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+HrMinSecString=$1
+baseLineSeconds=$2
+# echo "${HrMinSecString},${baseLineSeconds}"
+currSeconds=`toSeconds ${HrMinSecString}`
+# echo "${currSeconds} / ${baseLineSeconds}"
+let " Percent = ${currSeconds}*10000 / ${baseLineSeconds} "
+let " Decimal = ${Percent} % 100 "
+let " Percent = ${Percent} / 100 "
+if [ "${Decimal}" = "0" ]
+then
+  Decimal="00"
+fi
+echo "${Percent}.${Decimal}"
+# echo -e "${Percent}.${Decimal}\tx"

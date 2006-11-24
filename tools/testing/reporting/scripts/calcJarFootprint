@@ -1,0 +1,62 @@
+#!/bin/bash
+# $0 [jardir]. No jardir: uses ${SRCDIR}/jars/insane
+JARDIR=$1
+# You should NOT need to modify anything below.
+# derby_source must be defined.
+# NB: Assumes . ./env.sh is done to set DERBYDIR etc. correctly.
+#---------------------------------------------
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+SRCDIR=${derby_source}
+
+if [ "${DERBYDIR}" == "" ]
+then
+  echo "DERBYDIR is not defined"
+  exit
+fi
+if [ ! -e ${DERBYDIR} ]
+then
+  echo "${DERBYDIR} does not exist."
+  exit
+fi
+
+if [ "${JARDIR}" == "" ]
+then
+  if [ ! -e ${SRCDIR} ]
+  then
+    echo "${SRCDIR} does not exist."
+    exit
+  fi
+  JARDIR=${SRCDIR}/jars/insane
+fi
+cd ${JARDIR}
+BASEREV=`head -1 ${DERBYDIR}/testing/builds/baseline.size | gawk '{ print $2 }'`
+echo "Baseline ${BASEREV}"
+JARS="derby.jar derbynet.jar derbyclient.jar derbytools.jar derbyrun.jar derbyTesting.jar"
+
+OS=`uname -s | gawk -F_ '{ print $1 }'`
+
+for JAR in ${JARS}
+do
+  SIZE=0
+  PERCENT=0
+  if [ -e ${JAR} ]
+  then
+    # DU=`du -sk ${JAR}`
+    # SIZE=`echo ${DU} | gawk '{ print $1 }'`
+    # NAME=`echo ${DU} | gawk '{ print $2 }'`
+    DU=`ls -l ${JAR}`
+    if [ "${OS}" = "SunOS" ]
+    then
+      SIZE=`echo ${DU} | gawk '{ print $4 }'`
+    else
+      SIZE=`echo ${DU} | gawk '{ print $5 }'`
+    fi
+    NAME=${JAR}
+    BASESIZE=`grep ${JAR} ${DERBYDIR}/testing/builds/baseline.size | gawk '{ print $2 }'`
+    PERCENT=`${TOOLDIR}/calcPercent ${SIZE} ${BASESIZE}`
+  fi
+  echo "${NAME} ${SIZE} ${PERCENT}%"
+done
+

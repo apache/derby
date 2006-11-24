@@ -1,0 +1,215 @@
+#!/bin/bash
+SANDBOX=$1
+REVISION=$2
+# DEBUG echo "+++ $0"
+# SHOULD BE DEFINED OUTSIDE. DERBYDIR=${HOME}/Apache/${SANDBOX}
+if [ "${DERBYDIR}" == "" ] || [ "${REVISION}" == "" ]
+then
+  echo "Usage: $0 <DERBYDIR> revision"
+  echo "  Example: $0 Derby ..."
+  echo "           $0 DerbyJvm1.4 ..."
+  echo "           $0 TinderBox_Derby ..."
+  exit
+fi
+
+if [ ! -e ${DERBYDIR} ]
+then
+  echo "${DERBYDIR} does not exist."
+  exit
+fi
+
+cd ${DERBYDIR}
+if [ ! -e env.sh ]
+then
+  echo "${DERBYDIR} does not appear to be a Derby sandbox (No env.sh found)"
+  exit
+fi
+. ./env.sh
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+JIRA_DESCRIPTIONS="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/Failures/JIRA_description.txt"
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/showtestlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+## SUITES="derbyall"
+
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+# Get the set of platforms
+cd ${TESTLOGDIR}
+PLATFORMS=`ls`
+
+cd ${DERBYDIR}/FailReports
+
+SUMMARY="${REVISION}.html"
+# DEBUG echo -n "SUMMARY: ${SUMMARY} in ";pwd
+echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" > ${SUMMARY}
+echo "<html>" >> ${SUMMARY}
+echo "<head>" >> ${SUMMARY}
+echo "<title>${REVISION} ${DERBYVERSION} Apache Derby Open Source Database</title>" >> ${SUMMARY}
+echo "</head>" >> ${SUMMARY}
+echo "<body>" >> ${SUMMARY}
+echo "<font size=\"+2\"><b><i>${SANDBOX}</i> ${REVISION} </b></font>" >> ${SUMMARY}
+
+# DEBUG echo "${SANDBOX}"
+echo "<TABLE border="1">" >> ${SUMMARY}
+
+echo "<TR>" >> ${SUMMARY}
+for PLATFORM in ${PLATFORMS}
+do
+ if [ -e ${DERBYDIR}/testing/testlog/${PLATFORM}/externallyVisible ] && [ ! -e ${DERBYDIR}/testing/testlog/${PLATFORM}/excludeFromMailReport ]
+ then
+  echo "<TD>" >> ${SUMMARY}
+  TEMP=`echo ${PLATFORM} | sed -e 's/_/<br>/g'`
+  # echo "${PLATFORM}" >> ${SUMMARY}
+  echo "${TEMP}" >> ${SUMMARY}
+  echo "</TD>" >> ${SUMMARY}
+ fi
+done
+echo "</TR>" >> ${SUMMARY}
+
+echo "<TR>" >> ${SUMMARY}
+
+REVISION=`echo ${REVISION} | sed -e 's/M//'`
+for PLATFORM in ${PLATFORMS}
+do
+ HADERRORS=""
+ if [ -e ${DERBYDIR}/testing/testlog/${PLATFORM}/externallyVisible ] && [ ! -e ${DERBYDIR}/testing/testlog/${PLATFORM}/excludeFromMailReport ]
+ then
+  echo "<TD style=\"vertical-align: top;\">" >> ${SUMMARY}
+  # DEBUG echo "${PLATFORM}" 
+  # echo "${PLATFORM}" >> ${SUMMARY}
+  # echo "</TD>" >> ${SUMMARY}
+  FOUNDSUITES="false" # Must handle the case when no suites are reported.
+  for SUITE in ${SUITES} # The SUITES we look for
+  do
+    # DEBUG echo "SUITE: ${SUITE}"
+    FOUNDTHIS=`grep ${SUITE} ${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}.csv`
+    if [ "${FOUNDTHIS}" != "" ]
+    then
+      FOUNDSUITES="true"
+    fi
+    if [ -e ${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}.csv ]
+    then
+    # DEBUG echo "  ${SUITE}"
+    # DEBUG echo   "${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}-${SUITE}_fail.txt"
+    # DEBUG ls -l ${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}-${SUITE}_fail.txt
+    if [ -e ${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}-${SUITE}_fail.txt ]
+    then
+      FAILFILE="${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}-${SUITE}_fail.txt"
+      # dos2unix ${FAILFILE} FAILFILE$$
+      gawk '{ sub("\r$", ""); print }' ${FAILFILE} > FAILFILE$$
+      FAILFILE="FAILFILE$$"
+      # DEBUG echo "FAILFILE: ${FAILFILE}"
+      JUNIT=`echo ${SUITE} | grep 'org.apache.derbyTesting.'`
+      if [ "${JUNIT}" == "" ]
+      then
+        LINES=`grep : ${FAILFILE}`
+      else
+        # LINES=`grep "^.*) " ${FAILFILE} | sed -e 's/^[1-9]).//' | sed -e 's/org.apache.derbyTesting/../' | sed -e 's/).*: /) /'`
+        LINES=`grep "^.*) " ${FAILFILE} | sed -e 's/^[1-9]).//' | sed -e 's/org.apache.derbyTesting/../' | sed -e 's/).*: /) /' | gawk '{ print $1 }'`
+      fi
+      # Better go via file to really have LINES be a set of lines which may contain blanks.
+      # The way it stands now each "word" is treated as a LINE.
+      rm ${FAILFILE}
+      # DEBUG echo "LINES: ${LINES}"
+      JIRALIST=""
+      for LINE in ${LINES}
+      do
+        # DEBUG echo "LINE: ${LINE}"
+        if [ "${JUNIT}" == "" ]
+        then
+          FAILEDTEST=`echo ${LINE} | gawk -F: '{ print $2 }'`
+        else
+          FAILEDTEST=`echo ${LINE} | gawk '{ print $1 }'`
+        fi
+        # DEBUG echo "FAILEDTEST: ${FAILEDTEST}"
+        JIRA=`grep -v "^#" ${JIRA_DESCRIPTIONS} | grep "${FAILEDTEST}" | gawk '{ print $1 }'`
+        # DEBUG echo "JIRA: ${JIRA}"
+        if [ "${JIRA}" == "" ]
+        then
+          JIRA="'${FAILEDTEST}':<BR>&nbsp;&nbsp;<i><b>New JIRA?</b></i><BR>"
+        else
+          JIRAS=${JIRA}
+          INNERJIRAS="'${FAILEDTEST}':"
+          ORDELIM=""
+          for JIRA in ${JIRAS}
+          do
+            if [ "${JIRA}" == "NEW?" ]
+            then
+              JIRA="&nbsp;&nbsp;${ORDELIM}<i><b>New JIRA?</b></i>"
+            else
+              JIRA="&nbsp;&nbsp;${ORDELIM}<A HREF=\"https://issues.apache.org/jira/browse/DERBY-${JIRA}\">DERBY-${JIRA}</A>"
+            fi
+            INNERJIRAS="${INNERJIRAS}<BR>${JIRA}"
+            ORDELIM="or "
+          done
+          JIRA="${INNERJIRAS}<BR>"
+        fi
+        # DEBUG echo "    ${REVISION} ${JIRA} ${SANDBOX} ${PLATFORM}"
+        JIRALIST="${JIRALIST}<BR>${JIRA}"
+      done # LINES
+      echo "<b>${SUITE}</b>: ${JIRALIST}<BR><BR>" >> ${SUMMARY}
+      HADERRORS="${HADERRORS}E"
+    else
+      # echo "${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}-${SUITE}_fail.txt does not exist"
+      # echo "    ${REVISION} NA        ${SANDBOX} ${PLATFORM} (Not available)"
+      # echo "<b><i>${SUITE}</i></b>" >> ${SUMMARY}
+      HADERRORS="${HADERRORS}"
+      if [ "${SUITE}" == "derbyall" ]
+      then
+        # DEBUG echo "SUITE == derbyall"
+        DERBYALLRUN=`grep derbyall ${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}.csv`
+        if [ "${DERBYALLRUN}" != "" ]
+        then
+          DAERR=`echo ${DERBYALLRUN} | gawk '{ print $2 }'`
+          ERRS="No errors!"
+          if [ "${DAERR}" == "" ]
+          then
+            ERRS="Unknown!"
+            HADERRORS="${HADERRORS}U"
+          fi
+          # DEBUG echo "${SUITE}: ${ERRS}"
+          echo "<b>${SUITE}</b>: <br><b><i>${ERRS}</i></b><br><br>" >> ${SUMMARY}
+        fi
+      fi
+    fi # [ -e ${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}-${SUITE}_fail.txt ]
+    fi # [ -e ${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}.csv ]
+  done # SUITES
+  # DEBUG echo "HADERRORS: ${HADERRORS}"
+  if [ ! -e ${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}-system ]
+  then
+    echo "<b>${REVISION}: <i>NA</i></b>" >> ${SUMMARY}
+  elif [ ! -e ${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}.csv ]
+  then
+    echo "<b>Total: <i>NA</i></b>" >> ${SUMMARY}
+  elif [ "${HADERRORS}" == "" ]
+  then
+    TOTALMSG="No errors!"
+    if [ "${FOUNDSUITES}" == "false" ]
+    then
+      TOTALMSG="No results found!"
+    fi
+    echo "<br><br><b>TOTAL:</b> <br><b><i>${TOTALMSG}</i></b>" >> ${SUMMARY}
+  fi
+  echo "</TD>" >> ${SUMMARY}
+ fi # [ -e ${DERBYDIR}/testing/testlog/${PLATFORM}/externallyVisible ]  && [ not -e ${PLATFORM}/excludeFromMailReport ]
+done # PLATFORMS
+echo "</TR>" >> ${SUMMARY}
+echo "</TABLE>" >> ${SUMMARY}
+date >> ${SUMMARY}
+echo "</body>" >> ${SUMMARY}
+chmod go+r ${SUMMARY}
+
+# Make SUMARY publicly available:
+SRC="${SUMMARY}"
+DST="${PUBLISHDIR}"
+echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}/${SANDBOX}/FailReports/"
+### ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}/${SANDBOX}/FailReports/
+# DEBUG echo "--- $0"

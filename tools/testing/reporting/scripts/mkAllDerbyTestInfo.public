@@ -1,0 +1,24 @@
+#!/bin/bash
+# Run only when all platforms are ready (test completed).
+# DO NOT SHOW DETAILS.
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts" # then add
+. ${TOOLDIR}/env
+
+# Get the list of revisions, look for the latest update/build:
+REVISIONSFILE="${DERBYDIR}/testing/revisionlist"
+LATESTREVISION=`gawk '{ print $1 }' ${REVISIONSFILE} | grep -v "^#" | head -1`
+${TOOLDIR}/testSummariesDerby ${LATESTREVISION}
+# Next needed when new test is started before latest info has been created (e.g. Tinderbox...)
+PREVIOUSREVISION=`gawk '{ print $1 }' ${REVISIONLIST} | grep -v "^#" | head -2 | tail -1`
+${TOOLDIR}/testSummariesDerby ${PREVIOUSREVISION} ${DETAILS}
+
+${TOOLDIR}/testSummariesDerby current
+${TOOLDIR}/testSummariesDerby previous
+
+${TOOLDIR}/testHistoriesDerby
+
+# ${TOOLDIR}/testPlatformsDerby
+
+${TOOLDIR}/mkDerbyTestIndex
+

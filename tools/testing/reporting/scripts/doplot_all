@@ -1,0 +1,112 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+VAR=$1
+# Only accepts _last20
+
+GNUPLOT=/usr/local/bin/gnuplot
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/testlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+# Get the set of platforms
+cd ${DERBYDIR}/testing/Full/plot
+PLATFORMS=`ls ${DERBYDIR}/testing/testlog`
+NPLFS=`echo ${PLATFORMS} | wc -w`
+echo ${PLATFORMS}
+
+GNUPLOTCMD="_GPLCMD_$$"
+
+TITLE=`echo ${DERBYDIR} | gawk -F / '{ print $NF }'`
+echo "<html>"                > plot${VAR}.html 
+echo "<head>"               >> plot${VAR}.html 
+echo "<meta content=\"text/html; charset=ISO-8859-1\" http-equiv=\"content-type\">" \
+                            >> plot${VAR}.html 
+echo "<title>${TITLE} - Duration plot</title>"      >> plot${VAR}.html 
+echo "</head>"              >> plot${VAR}.html 
+echo "<body>"               >> plot${VAR}.html 
+CREDTTM=`date`
+echo "<b>${TITLE} duration vs. baseline - All platforms per testsuite.</b> <i>(${CREDTTM})</i><br>"  >> plot${VAR}.html 
+for SUITE in ${SUITES}
+do
+  echo ${SUITE}
+  # Create the plot command:
+  PLOTCMD="NOT INITIALIZED"
+  let " PLFN = 1 "
+  let " FIRST = 1 " # true
+  for  PLATFORM in ${PLATFORMS}
+  do
+    echo "${PLATFORM}"
+    if [ -s ${PLATFORM}/${SUITE}${VAR}.data ]
+    then
+      if [ ${FIRST} == 1 ]
+      then
+        PLOTCMD="plot \"${PLATFORM}/${SUITE}${VAR}.data\" using 1:3 title \"${PLATFORM}\""
+        FIRST=0
+      else
+        PLOTCMD="${PLOTCMD}, \"${PLATFORM}/${SUITE}${VAR}.data\" using 1:3 title \"${PLATFORM}\""
+      fi
+      # echo "${PLFN}  ${NPLFS}"
+    fi
+    let " PLFN = ${PLFN} + 1 "
+  done
+  echo ${PLOTCMD}
+  # sleep 5
+  # Create the gnuplot settings
+
+  echo "${GNUPLOT} <<EOF"                                        > ${GNUPLOTCMD}
+  echo "set ylabel \"${SUITE} run duration in % of baseline.\"" >> ${GNUPLOTCMD}
+
+  echo "set xdata time"                                         >> ${GNUPLOTCMD}
+  echo "set timefmt \"%Y-%m-%d\""                               >> ${GNUPLOTCMD}
+  echo "set xrange [*:*]"                                       >> ${GNUPLOTCMD}
+  echo "set yrange [0:*]"                                       >> ${GNUPLOTCMD}
+  echo "set format x \"-%m-%d\""                                >> ${GNUPLOTCMD}
+  echo "set data style linespoints"                             >> ${GNUPLOTCMD}
+  echo "set xtics rotate"                                       >> ${GNUPLOTCMD}
+  echo "set grid xtics"                                         >> ${GNUPLOTCMD}
+  echo "set key top left"                                       >> ${GNUPLOTCMD}
+  echo "set xtics 604800"                                       >> ${GNUPLOTCMD}
+
+  echo "set term png color"                                     >> ${GNUPLOTCMD}
+  echo "set out \"plot_all.png\""                               >> ${GNUPLOTCMD}
+
+  echo "${PLOTCMD}"                                             >> ${GNUPLOTCMD}
+  echo "EOF"                                                    >> ${GNUPLOTCMD}
+
+  cat ${GNUPLOTCMD}
+  . ./${GNUPLOTCMD}
+  mv plot_all.png ${SUITE}_all${VAR}.png
+  chmod go+r  ${SUITE}_all${VAR}.png
+  
+  echo -n "<img src=\""              >> plot${VAR}.html 
+  echo    "${SUITE}_all${VAR}.png\">"      >> plot${VAR}.html
+  # sleep 20
+done # SUITES
+
+# Show baseline info for each platform:
+echo "<TABLE>"              >> plot${VAR}.html 
+
+echo "<TR>"  >> plot${VAR}.html 
+echo "<TD><i>Platform</i></TD> <TD><i>Baseline<br>Revision</i></TD> <TD><i>Baseline<br>Date time</i></TD>" >> plot${VAR}.html 
+echo "</TR>" >> plot${VAR}.html 
+
+for PLATFORM in ${PLATFORMS}
+do
+  echo "<TR>" >> plot${VAR}.html 
+  BASELINE=`head -1 ${DERBYDIR}/testing/testlog/${PLATFORM}/baseline.csv  | gawk '{ print $2 }'`
+  TS=`cat ${UPDATELOGDIR}/${BASELINE}/UpdateTime`
+  PLATF=`echo "${PLATFORM}" | sed -e 's/CYGWIN_/CYGWIN /' | gawk -F_ '{ print $1" "$2 }' | sed -e 's/CYGWIN /CYGWIN_/'`
+  echo "<TD>${PLATF}:</TD> <TD><B>${BASELINE}</B></TD> <TD>${TS}</TD>" >> plot${VAR}.html 
+  echo "</TR>" >> plot${VAR}.html 
+done # PLATFORMS
+
+echo "</TABLE>"              >> plot${VAR}.html 
+
+
+echo "</body>"              >> plot${VAR}.html 
+echo "</html>"              >> plot${VAR}.html 
+chmod go+r plot${VAR}.html
+rm ${GNUPLOTCMD}

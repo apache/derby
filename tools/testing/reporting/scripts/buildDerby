@@ -1,0 +1,272 @@
+#!/bin/bash
+# ${TOOLDIR}/buildDerby [MKBUILDZIP] [ANTPROPFILE]
+#
+# if "ZipJars"..:
+MKBUILDZIP=$1
+#
+ANTPROPFILE=$2
+
+# You might want to modify:
+# NOT USED ANY MORE. MYWORKSTATION=atum02.norway.sun.com
+
+# You should NOT need to modify anything below.
+# derby_source must be defined.
+# NB: Assumes . ./env.sh is done to set JAVA_HOME etc. correctly.
+#---------------------------------------------
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+SRCDIR=${derby_source}
+
+if [ ! -e ${SRCDIR} ]
+then
+    echo "${SRCDIR} does not exist."
+    exit
+fi
+
+# GETHOSTNAME="host"
+GETHOSTNAME="echo"
+
+rm -f ${BUILDLOGDIR}/buildOK
+
+SANDBOX=`basename ${DERBYDIR}`
+
+UPDATELOGDIR=${DERBYDIR}/UpdateLog
+if [ ! -e ${UPDATELOGDIR}/updateOK ]
+then
+  echo "Derby was NOT updated:"
+  echo "  ${UPDATELOGDIR}/updateOK does not exist."
+  ### UNCOMMENT TO SEND MAIL. ${TOOLDIR}/textMail "${SANDBOX} was NOT updated" "${MAILTOINT}" "${UPDATELOGDIR}/update.out"
+  exit
+fi
+
+BUILDID=`date +%Y-%m-%d_%H-%M-%S`
+STARTTIME=`date +%Y-%m-%d" "%H:%M:%S`
+BUILDLOGDIRCUR=${BUILDLOGDIR}/${BUILDID}
+mkdir -p ${BUILDLOGDIRCUR}
+if [ ! -e ${BUILDLOGDIRCUR} ]
+then
+    echo "${BUILDLOGDIRCUR} does not exist."
+    exit
+fi
+
+BUILDINFO=${BUILDLOGDIRCUR}/info
+PUBLISHBUILDINFO=${BUILDLOGDIRCUR}/buildInfo
+BUILDDETAILS=${BUILDLOGDIRCUR}/buildDetails
+BUILDHOSTINFO=`uname -srpi`
+BUILDHOST=`uname -n`
+BUILDHOST=`${GETHOSTNAME} ${BUILDHOST} | awk '{print $1}'`
+cd ${SRCDIR}
+
+REVISION=`svn info | grep '^Revision:'`
+REVISION=`echo ${REVISION} | gawk '{ print $2 }'`
+REPOSITORY=`svn info | grep '^URL:'`
+
+echo "Built on ${BUILDHOSTINFO}[${BUILDHOST}] at ${STARTTIME}" \
+                                                  > ${BUILDINFO}
+echo "Using Revision: ${REVISION} from ${REPOSITORY}"      >> ${BUILDINFO}
+echo "ANT_HOME:  ${ANT_HOME}"                    >> ${BUILDINFO}
+echo "JAVA_HOME: ${JAVA_HOME}"                   >> ${BUILDINFO}
+
+# Build information for publishing along with build jars:
+echo "Build information:"                    >  ${PUBLISHBUILDINFO}
+echo "OS: ${BUILDHOSTINFO}"                  >> ${PUBLISHBUILDINFO}
+echo "JAVA_HOME: ${JAVA_HOME}"               >> ${PUBLISHBUILDINFO}
+echo "JDK: ${JAVA_HOME}/bin/java -version :" >> ${PUBLISHBUILDINFO}
+${JAVA_HOME}/bin/java -version               >> ${PUBLISHBUILDINFO} 2>${PUBLISHBUILDINFO}.err 
+cat ${PUBLISHBUILDINFO}.err                  >> ${PUBLISHBUILDINFO}
+
+# ssh ${MYWORKSTATION} "cd ${SRCDIR}; svn status" > ${BUILDLOGDIRCUR}/localChanges
+svn status > ${BUILDLOGDIRCUR}/localChanges
+
+echo "-------------------- ant" > ${BUILDDETAILS}
+# Set ant property file if NOT given as second param.
+if [ "${ANTPROPFILE}" == "" ]
+then
+  ANTPROPFILE=${HOME}/ant.properties
+fi
+echo "${ANTPROPFILE}:"  >> ${BUILDDETAILS}
+cat ${ANTPROPFILE} >> ${BUILDDETAILS}
+
+echo " Build details in: ${BUILDDETAILS}"
+echo "-------------------- ant clobber" \
+                     >> ${BUILDDETAILS} && \
+ant -propertyfile ${ANTPROPFILE} clobber          >> ${BUILDDETAILS} 2>> ${BUILDDETAILS} && \
+echo ""              >> ${BUILDDETAILS} && \
+echo "-------------------- ant all" \
+                     >> ${BUILDDETAILS} && \
+ant -propertyfile ${ANTPROPFILE} all              >> ${BUILDDETAILS} 2>> ${BUILDDETAILS} && \
+echo ""              >> ${BUILDDETAILS} && \
+echo "-------------------- ant buildjars" \
+                     >> ${BUILDDETAILS} && \
+ant -propertyfile ${ANTPROPFILE} buildjars        >> ${BUILDDETAILS} 2>> ${BUILDDETAILS}
+
+ENDTIME=`date +%Y-%m-%d" "%H:%M:%S`
+echo "[Build ended ${ENDTIME},"   >> ${BUILDINFO}
+echo "     started ${STARTTIME}]" >> ${BUILDINFO}
+rm -f ${BUILDLOGDIR}/lastBuildInfo
+cp ${BUILDINFO} ${BUILDLOGDIR}/lastBuildInfo
+grep "rrors " ${BUILDDETAILS} >> ${BUILDLOGDIR}/lastBuildInfo
+grep "BUILD" ${BUILDDETAILS} >> ${BUILDLOGDIR}/lastBuildInfo
+
+BUILDS="${DERBYDIR}/testing/builds"
+# Flag that building went OK:
+if [ -e ${BUILDLOGDIR}/${BUILDID}/buildDetails ]
+then
+  if [ "`grep "BUILD SUCCESSFUL" ${BUILDLOGDIR}/${BUILDID}/buildDetails | wc -l | gawk '{ print $1 }'`" == "3" ] && \
+     [ "`grep "BUILD FAILED"     ${BUILDLOGDIR}/${BUILDID}/buildDetails | wc -l | gawk '{ print $1 }'`" == "0" ]
+  then
+    echo "touch ${BUILDLOGDIR}/buildOK"
+    touch ${BUILDLOGDIR}/buildOK
+
+    # We're in ${SRCDIR}
+    ${TOOLDIR}/calcJarFootprint > ${BUILDS}/${REVISION}.size
+    chmod go+r ${BUILDS}/${REVISION}.size
+    # Publish externally:
+    SRC="${BUILDS}/${REVISION}.size"
+    DST="${PUBLISHDIR}/builds/${REVISION}.size"
+    echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+    ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+    
+    SUBJECT="Derby build OK - ${REVISION} ${SANDBOX}"
+
+    SHOWBUILDERRORS=""
+    if [ "`grep "errors" ${BUILDLOGDIR}/${BUILDID}/buildDetails | grep "\[javac\]" | wc -l | gawk '{ print $1 }'`" != "0" ]
+    then
+        SUBJECT="WARNING! There were build ERRORs! - ${REVISION} ${SANDBOX}"
+        SHOWBUILDERRORS="${BUILDLOGDIR}/${BUILDID}/buildDetails"
+        echo "touch ${BUILDLOGDIR}/buildERRORS"
+        touch ${BUILDLOGDIR}/buildERRORS
+
+        cp ${BUILDLOGDIR}/${BUILDID}/buildDetails ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails
+
+        SEDSCR="'s:${DERBYDIR}/::'"
+        SEDCMD="sed -e ${SEDSCR} ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails "
+        echo ${SEDCMD} > sedCmd$$
+        . ./sedCmd$$ \
+                   > ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails.txt
+        rm sedCmd$$
+
+        rm ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails
+        chmod go+r ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails.txt
+    fi
+
+    # Do an execution check, and get the sysinfo for use in test reports.
+    java -cp ${SRCDIR}/classes org.apache.derby.tools.sysinfo > ${BUILDLOGDIR}/${BUILDID}/sysinfo.txt 2> ${BUILDLOGDIR}/${BUILDID}/sysinfo.err
+    cp ${BUILDLOGDIR}/${BUILDID}/sysinfo.txt ${BUILDLOGDIR}/currentSysInfo.txt
+
+    # Include ${DERBYDIR}/testing/UpdateInfo/${REVISION}.txt (created by updateDerby) in mails 
+    # REVISION=`echo ${REVISION} | gawk '{ print $2 }'`
+    REVUPDATE="${DERBYDIR}/testing/UpdateInfo/${REVISION}.txt"
+    ### UNCOMMENT TO SEND MAIL. ${TOOLDIR}/textMail "${SUBJECT}" "${MAILTOINT}" "${BUILDLOGDIR}/lastBuildInfo ${BUILDLOGDIR}/${BUILDID}/sysinfo.txt ${SHOWBUILDERRORS} ${REVUPDATE}"
+    ### UNCOMMENT TO SEND MAIL.  ${TOOLDIR}/textMail "${SUBJECT}" "${MAILTOEXT}" "${BUILDLOGDIR}/lastBuildInfo ${BUILDLOGDIR}/${BUILDID}/sysinfo.txt ${SHOWBUILDERRORS} ${REVUPDATE}"
+    mv ${BUILDLOGDIR}/${BUILDID} ${BUILDLOGDIR}/${REVISION}
+    # Observe that e.g. PUBLISHBUILDINFO will no longer be valid: correct def.:
+    PUBLISHBUILDINFO="${BUILDLOGDIR}/${REVISION}/buildInfo"
+
+  if [ "${MKBUILDZIP}" == "ZipJars" ]
+  then
+    # Zip the jars
+    echo "${DERBYDIR}/BuildLog/${REVISION}/sysinfo.txt"
+    ls -al ${DERBYDIR}/BuildLog/${REVISION}
+    DERBYVERSION=`grep "/classes] " ${DERBYDIR}/BuildLog/${REVISION}/sysinfo.txt | gawk -F] '{ print $2 }' | gawk '{ print $1$2 }'`
+    cd ${SRCDIR}/jars/insane/
+    ZIPPEDJARS="Derby${DERBYVERSION}_${BUILDID}-SVN${REVISION}.zip"
+    # Copy COPYRIGHT, LICENSE, NOTICE to ${SRCDIR}/jars/insane/ (current dir.) to show them on outermost level in .zip file
+    cp ${SRCDIR}/jars/insane/lists/META-INF/COPYRIGHT ./COPYRIGHT
+    cp ${SRCDIR}/jars/insane/lists/META-INF/LICENSE   ./LICENSE
+    cp ${SRCDIR}/jars/insane/lists/META-INF/NOTICE    ./NOTICE 
+    chmod a+r COPYRIGHT LICENSE NOTICE 
+    echo "zip -r -q -9  ${BUILDS}/${ZIPPEDJARS} ."
+    zip -r -q -9  ${BUILDS}/${ZIPPEDJARS} .
+    chmod a+r ${BUILDS}/${ZIPPEDJARS}
+    # Transfer the .zip file to ISP:
+    SRC="${BUILDS}/${ZIPPEDJARS}"
+    DST="${PUBLISHDIR}/builds/${ZIPPEDJARS}"
+    ## echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+    ## ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+
+    # Handle the html page describing builds
+    cd ${BUILDS}
+
+    # Copy COPYRIGHT, LICENSE, NOTICE to builds dir(here):
+    cp ${SRCDIR}/jars/insane/lists/META-INF/COPYRIGHT ./COPYRIGHT
+    cp ${SRCDIR}/jars/insane/lists/META-INF/LICENSE   ./LICENSE
+    cp ${SRCDIR}/jars/insane/lists/META-INF/NOTICE    ./NOTICE 
+    chmod a+r COPYRIGHT LICENSE NOTICE 
+    cp ${PUBLISHBUILDINFO} ./buildInfo${REVISION}
+    chmod a+r buildInfo${REVISION}
+    # Ditto to ISP:
+    ## ${SCPUT} COPYRIGHT ${PUBLISHUSER}@${PUBLISHSITE}:${PUBLISHDIR}/builds/COPYRIGHT
+    ## ${SCPUT} LICENSE   ${PUBLISHUSER}@${PUBLISHSITE}:${PUBLISHDIR}/builds/LICENSE
+    ## ${SCPUT} NOTICE    ${PUBLISHUSER}@${PUBLISHSITE}:${PUBLISHDIR}/builds/NOTICE
+    ## ${SCPUT} buildInfo${REVISION} ${PUBLISHUSER}@${PUBLISHSITE}:${PUBLISHDIR}/builds/buildInfo${REVISION}
+
+    echo "<TR>" > this.txt
+    # Build date & time
+    echo "<TD>${STARTTIME}</TD>" >> this.txt
+    # SVN revision
+    echo "<TD>${REVISION}</TD>" >> this.txt
+    # Build info.
+    BUILDREF="<TD><a href=\"buildInfo${REVISION}\">Build OK</a></TD>"
+    if [ -e ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails.txt ]
+    then
+      BUILDREF="<TD><A HREF=\"../UpdateInfo/${REVISION}-buildDetails.txt\"><font color=\"red\"><b>Build errors</b></font></A></TD>" 
+    fi
+    echo ${BUILDREF} >> this.txt
+    # Test results
+    RESULTREF="<TD><A HREF=\"../Present/testSummary-${REVISION}.html\">Test results</A></TD>"
+                              # Present is a link to Limited(public) or Full(local)
+    echo ${RESULTREF} >> this.txt
+    # zip
+    echo "<TD><A HREF=\"${ZIPPEDJARS}\">${ZIPPEDJARS}</A></TD>" >> this.txt
+    # tar.gz
+    echo "<TD>tar.gz</TD>" >> this.txt
+    echo "</TR>" >> this.txt
+    # NB. 8-eight lines are added per build.
+    # Never present more than last 11 builds so use following 'head -((11-1)*8)' = 'head -80'
+    # NB. Manually clean old zipped jar files locally AND remote.
+    # cp buildlist.txt old_buildlist.txt
+    head -80 buildlist.txt > old_buildlist.txt
+    cat this.txt old_buildlist.txt > buildlist.txt
+    cat top.txt buildlist.txt bottom.txt > index.html
+    cat top_ext.txt buildlist.txt bottom_ext.txt > index_ext.html
+    chmod a+r index.html index_ext.html
+    # Transfer the index_ext.html file to ISP:
+    SRC="index_ext.html"
+    DST="${PUBLISHDIR}/builds/index.html"
+    # echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+    # ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+  fi #  if [ "${MKBUILDZIP}" == "BuildZippedJars" ]
+    exit
+  fi # if [ "`grep "BUILD FAILED" ${BUILDLOGDIR}/${BUILDID}/buildDetails | wc -l | gawk '{ print $1 }'`" = "0" ]
+
+    ########################################
+    # Buid was not successful, tell it...
+    # PARTLY DUPLICATED FROM ABOVE...
+    ## SHOWBUILDERRORS=""
+    ## if [ "`grep "errors" ${BUILDLOGDIR}/${BUILDID}/buildDetails | grep "\[javac\]" | wc -l | gawk '{ print $1 }'`" != "0" ]
+    ## then
+        SUBJECT="WARNING! There were build ERRORs! - ${REVISION} ${SANDBOX}"
+        ## SHOWBUILDERRORS="${BUILDLOGDIR}/${BUILDID}/buildDetails"
+        echo "touch ${BUILDLOGDIR}/buildERRORS"
+        touch ${BUILDLOGDIR}/buildERRORS
+
+        cp ${BUILDLOGDIR}/${BUILDID}/buildDetails ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails
+
+        SEDSCR="'s:${DERBYDIR}/::'"
+        SEDCMD="sed -e ${SEDSCR} ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails "
+        echo ${SEDCMD} > sedCmd$$
+        . ./sedCmd$$ \
+                   > ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails.txt
+        rm sedCmd$$
+
+        rm ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails
+        chmod go+r ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails.txt
+    ## fi
+    ########################################
+
+fi
+
+### UNCOMMENT TO SEND MAIL. ${TOOLDIR}/textMail "${SANDBOX} build failed" "${MAILTOINT}" "${BUILDLOGDIR}/lastBuildInfo ${BUILDLOGDIR}/${BUILDID}/buildDetails"
+### UNCOMMENT TO SEND MAIL. # ${TOOLDIR}/textMail "${SANDBOX} build failed" "${MAILTOEXT}" "${BUILDLOGDIR}/lastBuildInfo ${BUILDLOGDIR}/${BUILDID}/buildDetails"

@@ -1,0 +1,367 @@
+#!/bin/bash
+
+GETHOSTNAME="host"
+# GETHOSTNAME="echo"
+# Options:
+# VERBOSE="-Dverbose=true"
+# VERBOSE="-Dverbose=false"
+VERBOSE=""
+# You should NOT need to modify anything below.
+#---------------------------------------------
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+SEND_UPDATE_EXECUTE_REVISION_MISMATCH_MSG="true"
+SVNREVUSED="-"
+
+SANDBOX=`basename ${DERBYDIR}`
+
+move_log(){
+  TESTDIRl="$1"
+  TESTHOSTl="$2"
+  OSPLATFROMl="$3"
+  HWPROCl="$4"
+  startTimel="$5"
+  TESTLOGDIRl="$6"
+  ## Following may need modification.
+  # EXCLUDEl="-x \*.dat" # Does not seem to work.
+  EXCLUDEl="-x@/${DERBYDIR}/testing/ExcludeFromZip"
+  # EXCLUDEl=""
+  echo "*************************************************************"
+  echo "mkdir -p ${TESTLOGDIRl}/${OSPLATFROMl}_${HWPROCl}"
+  echo "zip -r -q -9 ${TESTLOGDIRl}/${OSPLATFROMl}_${HWPROCl}/${startTimel}.zip . ${EXCLUDEl}"
+  mkdir -p    ${TESTLOGDIRl}/${OSPLATFROMl}_${HWPROCl} && \
+  chmod go+rx ${TESTLOGDIRl}/${OSPLATFROMl}_${HWPROCl} && \
+  zip -r -q -9 ${TESTLOGDIRl}/${OSPLATFROMl}_${HWPROCl}/${startTimel}.zip . ${EXCLUDEl} && \
+  cd ../ && \
+  # Wait: keep until starting next testrun.rm -rf ${OSPLATFROMl}_${HWPROCl} && \
+  echo "Successfully moved logfiles to ${TESTLOGDIRl}/${OSPLATFROMl}_${HWPROCl}/${startTimel}.zip"
+  chmod go+r ${TESTLOGDIRl}/${OSPLATFROMl}_${HWPROCl}/${startTimel}.zip
+}
+# move_log END
+
+if [ "$1" == "" ]
+then
+    echo "Usage: $0 fileListingTestsToRun fullPathTestLogDir"
+    echo "       Derby db files and test logs are moved to fullPathTestLogDir after test."
+    echo "E.g. Unix: runAllTests testing/testlist ~/Apache/Derby/testing/testlog"
+    echo "     Win:  ~/bin/runAllTests.cygwin testing/testlist /log/huge3/derbytester/DerbyTestLog"
+    echo "     Rerun: cd ..../Derby/adhoc/"
+    echo "           runAllTests ../testing/testlistReRun ~/Apache/Derby/testing/testlogEmbeddedReRun"
+    exit
+fi
+if [ "$2" == "" ]
+then
+    echo "Usage: $0 $1 testLogDir"
+    echo "       Derby db files and test logs are moved to fullPathTestLogDir after test."
+    exit
+fi
+
+TESTLISTFILE=$1
+TESTLOGDIR=$2
+
+if [ ! -e $TESTLISTFILE ]
+then
+    echo "$TESTLISTFILE does not exist."
+    exit
+fi
+
+USEDERBYNET=""
+if [ "$3" != "" ]
+then
+   USEDERBYNET="-Dframework=DerbyNet"
+fi
+
+HASFULLPATH=`echo "$TESTLOGDIR" | sed -e 's|^/|HASFULLPATH /|' | gawk '{ print $1 }'`
+#DEBUG echo "${HASFULLPATH}"
+if [ "${HASFULLPATH}" != "HASFULLPATH" ]
+then
+    echo "Directory for test logs must be full path. You supplied '"$TESTLOGDIR"'"
+    exit
+fi
+if [ ! -d $TESTLOGDIR ]
+then
+    echo "$TESTLOGDIR does not exist."
+    exit
+fi
+if [ ! -w $TESTLOGDIR ]
+then
+    echo "$TESTLOGDIR is not writable."
+    exit
+fi
+
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+TESTHOST=`uname -n`
+TESTHOST=`${GETHOSTNAME} ${TESTHOST} | awk '{print $1}'`
+
+KERNEL=`uname -s`
+KERN_REV=`uname -r`
+OSPLATFROM="${KERNEL}-${KERN_REV}"
+# OSPLATFROM="${KERNEL}"
+HWNAME=`uname -m`
+PROCNAME=`uname -p`
+HWPROC="${HWNAME}-${PROCNAME}"
+HWPLATFORM=`uname -i`
+
+TESTLOG_PLATF_DIR="${TESTLOGDIR}/${OSPLATFROM}_${HWPROC}"
+
+#DEBUG echo "Log files will be zipped to $TESTLOG_PLATF_DIR/"
+
+# echo "mkdir -p ${TESTLOG_PLATF_DIR}"
+mkdir -p ${TESTLOG_PLATF_DIR}
+chmod go+rx ${TESTLOG_PLATF_DIR}
+
+TESTDIR="${TESTEXECUTIONDIR}/${OSPLATFROM}_${HWPROC}"
+
+# We keep old results until next test run is started, so now is the time to:
+rm -rf ${TESTDIR}
+
+# echo "mkdir -p ${TESTDIR}"
+mkdir -p ${TESTDIR}
+chmod go+rx ${TESTDIR}
+if [ ! -w $TESTDIR ]
+then
+    echo "$TESTDIR is not writable."
+    exit
+fi
+cd ${TESTDIR}
+
+#DEBUG pwd
+
+echo "Tests are executed on ${TESTHOST} in ${TESTDIR}"
+echo "${TESTHOST}: ${OSPLATFROM}_${HWPROC} [${HWPLATFORM}]" > OS_HW
+echo "ANT_HOME: ${ANT_HOME}" >> OS_HW
+echo "JAVA_HOME: ${JAVA_HOME}" >> OS_HW
+ant -version >> OS_HW
+java -version 2>> OS_HW
+
+echo "cp ${BUILDLOGDIR}/lastBuildInfo buildInfo"
+cp ${BUILDLOGDIR}/lastBuildInfo buildInfo
+
+REVISION=`head -2 buildInfo | tail -1 | gawk '{ print $3 }'`
+REPOSITORY=`head -2 buildInfo | tail -1 | gawk '{ print $6 }'`
+BUILTOS=`head -1 buildInfo | gawk '{ print $3 }'`
+BUILTOSKERN=`head -1 buildInfo | gawk '{ print $4 }'`
+BUILTDATE=`head -1 buildInfo | gawk '{ print $8" "$9 }'`
+BUILTINFO=`grep "^Built on" buildInfo`
+
+# echo "REVISION: ${REVISION} REPOSITORY: ${REPOSITORY} BUILTOS: ${BUILTOS} BUILTOSKERN: ${BUILTOSKERN} BUILTDATE: ${BUILTDATE} BUILTINFO: ${BUILTINFO}"
+
+timeId="${REVISION}"
+startTime=`date +%Y-%m-%d" "%H:%M:%S`
+
+SUITESLOG="${TESTLOG_PLATF_DIR}/${timeId}.csv"
+JAVAINFO="${TESTLOG_PLATF_DIR}/${timeId}.javainfo"
+CURRSUITESLOG="${TESTLOG_PLATF_DIR}/current.csv"
+PREVSUITESLOG="${TESTLOG_PLATF_DIR}/previous.csv"
+LOG="${TESTLOG_PLATF_DIR}/${timeId}.txt"
+cp ${CURRSUITESLOG} ${PREVSUITESLOG}
+echo -n "Starting Derby tests on ${TESTHOST} [${OSPLATFROM}_${HWPROC} [${HWPLATFORM}]] at "
+echo -n -e "${TESTHOST}\t${KERNEL}\t${KERN_REV}\t${HWNAME}\t${PROCNAME}\t${HWPLATFORM}\t${REVISION}\t${REPOSITORY}\t" > ${CURRSUITESLOG}
+echo ${startTime}
+echo -e ${startTime} >> ${CURRSUITESLOG}
+echo "${BUILTINFO}" >> ${CURRSUITESLOG}
+echo "" >> ${CURRSUITESLOG}
+
+# Start without knowing....
+echo "-"   > ${JAVAINFO}
+echo "-"  >> ${JAVAINFO}
+chmod go+r ${JAVAINFO}
+
+${TOOLDIR}/system  > ${TESTLOG_PLATF_DIR}/${REVISION}-system
+${TOOLDIR}/cpu_mem > ${TESTLOG_PLATF_DIR}/${REVISION}-cpu_mem
+chmod go+r ${TESTLOG_PLATF_DIR}/${REVISION}-system
+chmod go+r ${TESTLOG_PLATF_DIR}/${REVISION}-cpu_mem
+
+# echo "CLASSPATH = ${CLASSPATH}"
+
+HEADER="Tests \tPassed \tFailed \tSkippd \tDuration"
+echo -e "Suite \t${HEADER}" >> ${CURRSUITESLOG}
+
+# export CLASSPATH=`cygpath -wp $CLASSPATH`
+# echo "CLASSPATH: $CLASSPATH"
+
+# echo ${SUITES}
+echo "" >  ${LOG}
+JAVAVENDOR=""
+for suite in ${SUITES}
+do
+  if [ "${suite}" == "exit" ]
+  then
+    echo "Exit: found ${suite}"
+    echo -e "\n\n\n" >> ${CURRSUITESLOG}
+    endTime=`date +%Y-%m-%d" "%H:%M:%S`
+    echo -e "Started:\t${startTime}\tEnd:\t${endTime}\tHost:\t${TESTHOST}" >> ${CURRSUITESLOG}
+    # cat buildInfo >> ${CURRSUITESLOG}
+    echo "Started: ${startTime} End: ${endTime} ${TESTHOST}"   
+    cp -f ${CURRSUITESLOG} ${SUITESLOG}
+    chmod go+r ${SUITESLOG}
+    move_log ${TESTDIR} ${TESTHOST} ${OSPLATFROM} ${HWPROC} ${timeId} ${TESTLOGDIR}
+
+
+    SUBJECT="Regression Test: ${SANDBOX} ${timeId}/${SVNREVUSED} - ${OSPLATFROM}_${HWPROC} - ${TESTHOST} - ${BUILTOS} ${BUILTOSKERN} ${BUILTDATE}"
+    FILELIST="${SUITESLOG}"
+    ### ${TOOLDIR}/textMail "${SUBJECT}" ${MAILTOEXT} "${FILELIST}"
+
+    exit
+  fi
+  suiteStart=`date +%Y-%m-%d" "%H:%M:%S`
+  echo 
+  echo "------------ ${suite} "
+  echo "${suiteStart} ------------ ${suite} " >>  ${LOG}
+  
+  # Remove possible leftovers:
+  rm -rf ${suite}
+  # (re)Create the suite dir:
+  mkdir -p ${suite}
+  chmod go+rx ${suite}
+  cd ${suite}
+
+  ### VMPID=`${TOOLDIR}/beginVmStat vmstat.log`
+
+  date +%H:%M:%S > ${TESTLOG_PLATF_DIR}/suiteStart.txt
+  # ---------------
+  # The test suite is run here:
+  JUNIT=`echo ${suite} | grep org.apache.derbyTesting`
+  if [ "${JUNIT}" == "" ]
+  then
+    echo "java ${VERBOSE} ${USEDERBYNET} org.apache.derbyTesting.functionTests.harness.RunSuite ${suite}"
+    echo -n "Start: ${suiteStart}	End: "
+    java ${VERBOSE} ${USEDERBYNET} org.apache.derbyTesting.functionTests.harness.RunSuite ${suite} > out.log 2>out.err
+  else
+    echo "java junit.textui.TestRunner ${suite}"
+    echo -n "Start: ${suiteStart}	End: "
+    java junit.textui.TestRunner ${suite} > out.log 2>out.err
+    java  org.apache.derby.tools.sysinfo > ${suite}_report.txt # To have sysinfo for junit tests
+  fi
+  # ---------------
+  echo "" > ${TESTLOG_PLATF_DIR}/suiteStart.txt
+
+  ### ${TOOLDIR}/endVmStat ${VMPID} vmstat.log
+  date +%Y-%m-%d" "%H:%M:%S
+  # date +%Y-%m-%d" "%H:%M:%S >> suite.log
+
+  if [ "${SEND_UPDATE_EXECUTE_REVISION_MISMATCH_MSG}" = "true" ]
+  then
+    SVNREVUSED=`grep ".jar] " ${suite}_report.txt | head -1 | gawk '{ print $NF }' | sed -e 's/(//' | sed -e 's/)//'`
+    
+    if [ "${SVNREVUSED}" != "${REVISION}" ]
+    then
+      SUBJECT="Regression Test: ${SANDBOX} Expected revision ${REVISION}, found ${SVNREVUSED} - ${OSPLATFROM}_${HWPROC} - ${TESTHOST} - ${BUILTDATE}"
+      FILELIST="" # JVM1.6 produces a LARGE _report.txt file. "${suite}_report.txt"
+      ### UNCOMMENT TO SEND MAIL.  ${TOOLDIR}/textMail "${SUBJECT}" ${MAILTOEXT} "${FILELIST}"
+      ### UNCOMMENT TO SEND MAIL.  ${TOOLDIR}/textMail "${SUBJECT}" ${MAILTOINT} "${FILELIST}"
+      SEND_UPDATE_EXECUTE_REVISION_MISMATCH_MSG="false"
+    else
+      SUBJECT="Regression Test: ${SANDBOX} ${REVISION}/${SVNREVUSED} - ${OSPLATFROM}_${HWPROC} - ${TESTHOST} - ${BUILTDATE}"
+      FILELIST="${suite}_report.txt"
+      ### UNCOMMENT TO SEND MAIL.  ${TOOLDIR}/textMail "${SUBJECT}" ${MAILTOEXT} "${FILELIST}"
+      ### UNCOMMENT TO SEND MAIL.  ${TOOLDIR}/textMail "${SUBJECT}" ${MAILTOINT} "${FILELIST}"
+      SEND_UPDATE_EXECUTE_REVISION_MISMATCH_MSG="false"
+      
+    fi
+
+  fi
+
+
+  TESTSRUN="UNKNOWN"
+  PASS="UNKNOWN"
+  FAIL="UNKNOWN"
+  SKIPPED="UNKNOWN"
+  DURATION="UNKNOWN"
+  if [ "${JUNIT}" == "" ]
+  then
+    TESTSRUN=`grep "Tests Run" ${suite}_report.txt | gawk '{ print $1 }'`
+    PASS=`grep "% Pass" ${suite}_report.txt | gawk '{ print $3 }' | sed -e 's|(||'`
+    FAIL=`grep "% Fail" ${suite}_report.txt | gawk '{ print $3 }' | sed -e 's|(||'`
+    SKIPPED=`grep "Suites skipped" ${suite}_report.txt | gawk '{ print $1 }'`
+    DURATION=`grep "Test Run Duration:" ${suite}_report.txt | gawk '{ print $4 }'`
+  else
+    OK=`tail -3 out.log | grep "OK ("`
+    FAILURES=`tail -3 out.log | grep "FAILURES"`
+    if [ "${OK}" != "" ]
+    then
+      TESTSRUN=`tail -3 out.log | grep "OK ("| gawk '{ print $2 }' | sed -e s/\(//`
+      PASS=${TESTSRUN}
+      FAIL=0
+      SKIPPED=0 # NA for JUnit tests
+      TIME=`tail -5 out.log | grep "^Time: " ` # seconds as: 1,498.864
+      SECSONLY=`echo ${TIME} | gawk '{ print $2 }' | gawk -F. '{ print $1 }' | sed -e s/,//`
+      DURATION=`${TOOLDIR}/fromSeconds ${SECSONLY}`
+    elif [ "${FAILURES}" != "" ]
+    then
+      SUMMARY=`tail -3 out.log | grep "^Tests run: "`
+      TESTSRUN=`echo ${SUMMARY} | gawk '{ print $3 }' | sed -e s/,//`
+      FAILES=`echo ${SUMMARY} | gawk '{ print $5 }' | sed -e s/,//` # Assertion in test failed
+      ERRS=`echo ${SUMMARY} | gawk '{ print $7 }'` # Unhandled error, exception not catched...
+      let " PASS = ${TESTSRUN} - ${FAILES} -  ${ERRS} " # FIXME: may get PASS less than 0....
+      FAIL="F:${FAILES},E:${ERRS}"
+      SKIPPED=0 # NA for JUnit tests
+      TIME=`grep "^Time: " out.log` # seconds as: 1,498.864
+      SECSONLY=`echo ${TIME} | gawk '{ print $2 }' | gawk -F. '{ print $1 }' | sed -e s/,//`
+      DURATION=`${TOOLDIR}/fromSeconds ${SECSONLY}`
+      grep "^.*) " out.log > ${suite}_fail.txt
+    fi
+    cat out.log >> ${suite}_report.txt
+    echo "------------------------------" >> ${suite}_report.txt
+    cat out.err >> ${suite}_report.txt
+  fi
+  MSG="${TESTSRUN} \t${PASS} \t${FAIL} \t${SKIPPED} \t${DURATION}"
+  TEXT="${HEADER}\n${MSG}"
+  echo -e "${TEXT}"
+  echo -e "${TEXT}" > suite.log
+  echo -e "${TEXT}" >>  ${LOG}
+
+  if [ "${JAVAVENDOR}" == "" ]
+  then
+    JAVAVERSION=`grep '(build ' ../OS_HW | head -1 | gawk -F\( '{ print $NF }' | gawk '{ print $2 }' | sed -e s/\)//`
+    JAVAVENDOR=`grep "Java Vendor:" ${suite}_report.txt | sed -e 's/Java Vendor://'`
+  fi
+  echo ${JAVAVENDOR}   > ${JAVAINFO}
+  echo ${JAVAVERSION} >> ${JAVAINFO}
+  
+
+  if [ "${FAIL}" != "0" ]
+  then
+    FAILLOG="${TESTLOG_PLATF_DIR}/${timeId}-${suite}_fail.txt"
+    DIFFLOG="${TESTLOG_PLATF_DIR}/${timeId}-${suite}_diff.txt"
+
+    echo "${suite} fail *************************************************************" > ${FAILLOG}
+    cat ${suite}_fail.txt  >> ${FAILLOG}
+    echo "${suite} fail *************************************************************" > ${DIFFLOG}
+    cat ${suite}_fail.txt  >> ${DIFFLOG}
+    echo ""  >> ${DIFFLOG}
+    echo "${suite} diff -------------------------------------------------------------" >> ${DIFFLOG}
+    cat ${suite}_report.txt  >> ${DIFFLOG}
+    chmod go+r ${DIFFLOG} ${FAILLOG}
+  fi
+  if [ ${SKIPPED} != 0 ]
+  then
+    SKIPLOG="${TESTLOG_PLATF_DIR}/${timeId}-${suite}_skipped.txt"
+    cat ${suite}_skip.txt  > ${SKIPLOG}
+  fi
+
+  cd ../
+  echo -e "${suite} \t${MSG}" >> ${CURRSUITESLOG}
+  
+  #----------------
+  # Make it avalable as soon as possible:
+  cp -f ${CURRSUITESLOG} ${SUITESLOG}
+  chmod go+r ${SUITESLOG}
+  #----------------
+
+  echo "==========================================================="
+
+done
+echo -e "\n\n\n" >> ${CURRSUITESLOG}
+endTime=`date +%Y-%m-%d" "%H:%M:%S`
+echo -e "Started:\t${startTime}\tEnd:\t${endTime}\tHost:\t${TESTHOST}" >> ${CURRSUITESLOG}
+# cat buildInfo >> ${CURRSUITESLOG}
+echo "Started: ${startTime} End: ${endTime} ${TESTHOST}"
+cp -f ${CURRSUITESLOG} ${SUITESLOG}
+chmod go+r ${SUITESLOG}
+move_log ${TESTDIR} ${TESTHOST} ${OSPLATFROM} ${HWPROC} ${timeId} ${TESTLOGDIR}
+
+SUBJECT="Regression Test: ${SANDBOX} ${timeId}/${SVNREVUSED} - ${OSPLATFROM}_${HWPROC} - ${TESTHOST} - ${BUILTOS} ${BUILTOSKERN} ${BUILTDATE}"
+FILELIST="${SUITESLOG}"
+### UNCOMMENT TO SEND MAIL. ${TOOLDIR}/textMail "${SUBJECT}" ${MAILTOINT} "${FILELIST}"

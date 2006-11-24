@@ -1,0 +1,236 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+SHOWDETAILS=""
+PRESENTATION="Limited"
+if [ "$1" = "details" ]
+then
+  # Show details
+  SHOWDETAILS="ShowDetails"
+  PRESENTATION="Full"
+fi
+
+# We have one catalog per platform
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/showtestlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+# Get the set of platforms
+cd ${TESTLOGDIR}
+PLATFORMS=`ls`
+
+# Get the list of revisions
+# 12 latest.
+REVISIONSFILE="${REVISIONLIST}"
+REVISIONS=`head -12 ${REVISIONSFILE} | gawk '{ print $1 }' | grep -v "^#"`
+
+# Main loop for collecting suite status:
+for SUITE in ${SUITES}
+do
+  if [ "${SUITE}" = "exit" ]
+  then
+    echo "Exit: found ${SUITE}"
+    exit
+  fi
+
+  echo "${SUITE}"
+
+  HISTORY="${DERBYDIR}/testing/${PRESENTATION}/${SUITE}_history.html"
+  mkdir -p ${DERBYDIR}/testing/${PRESENTATION}
+  chmod o+rx ${DERBYDIR}/testing/${PRESENTATION}
+
+  # Build table header:
+  echo "<TABLE border="1">" > ${HISTORY}
+  echo "<TR>" >> ${HISTORY}
+  echo "<TD> <font size=\"+1\"><b> ${SUITE} </b></font></TD>" >> ${HISTORY} # NB This is the only variation in header....
+  no=0
+  for PLATFORM in ${PLATFORMS}
+  do
+   if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+   then
+    BGCOLOR="bgcolor=\"${COLOR0}\""
+    # expr $no % 2
+    if [ `expr $no % 2` = 0 ]
+    then
+      BGCOLOR="bgcolor=\"${COLOR1}\""
+    fi
+    no=`expr $no + 1`
+    #DEBUG echo "$no: $BGCOLOR"
+
+    #DEBUG echo "${PLATFORM}"
+    PLATF=`echo "${PLATFORM}" | gawk -F_ '{ print $1"<BR>"$2"<BR>"$3 }'`
+    #DEBUG echo "${PLATF}"
+
+    echo "<TD ${BGCOLOR} colspan=\"4\"> <I>${PLATF}</I>" >> ${HISTORY}
+   fi
+  done # PLATFORMS
+
+  echo "</TR>" >> ${HISTORY}
+  echo "<TR>" >> ${HISTORY}
+  echo "<TD> </TD>" >> ${HISTORY}
+  for PLATFORM in ${PLATFORMS}
+  do
+   if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+   then
+    for HEAD in Num OK Fail Skip
+    do
+      echo -n "<TD align=\"center\"> <font size=\"-1\"><i>${HEAD}</i></font></TD>" >> ${HISTORY}
+    done
+   fi
+  done # PLATFORMS
+  echo "</TR>" >> ${HISTORY}
+  # Done building header.
+
+
+  for REVISION in ${REVISIONS}
+  do
+   TS=`cat ${UPDATELOGDIR}/${REVISION}/UpdateTime`
+   echo "    ${REVISION}"
+
+    BGCOLOR="bgcolor=\"${COLOR0}\""
+    # expr $no % 2
+    if [ `expr $no % 2` = 0 ]
+    then
+      BGCOLOR="bgcolor=\"${COLOR1}\""
+    fi
+    no=`expr $no + 1`
+    #DEBUG echo "$no: $BGCOLOR"
+
+    echo "<TR ${BGCOLOR} rowspan=\"2\"><TD><A HREF=\"testSummary-${REVISION}.html\"><i>${REVISION}</A><BR><font size=\"-1\">${TS}</font></i></TD>" >> ${HISTORY}
+
+    for PLATFORM in ${PLATFORMS}
+    do
+     if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+     then
+      echo "         ${PLATFORM}"
+
+      #  2: Number, 3: OK, 4: Failed, 5: Skipped
+      RES=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv`
+      #DEBUG echo "${SUITE}: ${RES}"
+      if [ "${RES}" = "" ]
+      then
+        RES="<TD ALIGN=\"RIGHT\">"$NA"</TD><TD ALIGN=\"RIGHT\">"$NA"</TD><TD ALIGN=\"RIGHT\">"$NA"</TD><TD ALIGN=\"RIGHT\">"$NA"</TD>"
+      else
+        NUMBER=`echo ${RES} | gawk '{ print $2 }'`
+        OK=`echo ${RES} | gawk '{ print $3 }'`
+        FAILED=`echo ${RES} | gawk '{ print $4 }'`
+        SKIPPED=`echo ${RES} | gawk '{ print $5 }'`
+        CFB=""
+        CSB=""
+        if [ "${FAILED}" != "0" ]
+        then
+          # REV=`head -1 ${PLATFORM}/${REVISION}.csv | gawk '{ print $7 }'`
+          FAILED="<A HREF=\"../testlog/${PLATFORM}/${REVISION}-${SUITE}_diff.txt\">${FAILED}</A>"
+          CFB="bgcolor=\"red\""
+        fi
+        if [ "${SKIPPED}" != "0" ]
+        then
+          # CSB="bgcolor=\"yellow\""
+          CSB="bgcolor=\"#FFFFA0\""
+        fi
+        RES="<TD ALIGN=\"RIGHT\">${NUMBER}</TD><TD ALIGN=\"RIGHT\">${OK}</TD><TD ${CFB} ALIGN=\"RIGHT\">${FAILED}</TD><TD ${CSB} ALIGN=\"RIGHT\">${SKIPPED}</TD>"
+      fi
+      # DEBUG echo "${RES}"
+      echo -n "${RES}" >> ${HISTORY}
+
+     fi
+    done # PLATFORMS Number, OK, Failed, Skipped
+    echo "</TR>" >> ${HISTORY}
+
+   # if [ "${SHOWDETAILS}" = "ShowDetails" ]
+   # then
+    echo "<TR ${BGCOLOR}>" >> ${HISTORY}
+    echo "<TD ALIGN=\"RIGHT\"> <font size=\"-1\">Duration:</font></TD>" >> ${HISTORY}
+    for PLATFORM in ${PLATFORMS} # Duration
+    do
+     if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+     then
+
+      echo "         ${PLATFORM}"
+      TIME=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv | gawk '{ print $6 }'`
+      #DEBUG echo "${SUITE}: ${RES}"
+      if [ "${TIME}" = "" ]
+      then
+        RES="<TD colspan=\"4\" ALIGN=\"CENTER\">"$NA"</TD>"
+        echo -n "${RES}" >> ${HISTORY}
+      else
+        SECONDS=`${TOOLDIR}/toSeconds ${TIME}`
+        # echo ${SECONDS}
+        BASESECONDS=`grep "^${SUITE} " ${PLATFORM}/baseline.csv | gawk '{ print $3 }'`
+        # echo ${BASESECONDS}
+        PERCENT=`${TOOLDIR}/calcPercent ${SECONDS} ${BASESECONDS}`
+        # echo ${PERCENT}
+        # RES="<TD colspan=\"4\" ALIGN=\"CENTER\">"${TIME} ${PERCENT}"</TD>"
+        # echo ${RES}
+        if [ "${SHOWDETAILS}" = "ShowDetails" ]
+        then
+          echo -n "<TD colspan=\"2\" ALIGN=\"CENTER\">" >> ${HISTORY}
+          echo -n " ${TIME} " >> ${HISTORY}
+          echo -n "</TD>" >> ${HISTORY}
+          echo -n "<TD colspan=\"2\" ALIGN=\"CENTER\">" >> ${HISTORY}
+          echo -n " ${PERCENT}% " >> ${HISTORY}
+          echo -n "</TD>" >> ${HISTORY}
+        else
+          echo -n "<TD colspan=\"4\" ALIGN=\"CENTER\">" >> ${HISTORY}
+          echo -n " ${PERCENT}% " >> ${HISTORY}
+          echo -n "</TD>" >> ${HISTORY}
+        fi
+      fi
+     fi
+    done # PLATFORMS Duration
+    echo "</TR>" >> ${HISTORY}
+   # fi # SHOWDETAILS
+
+  done # REVISIONS
+
+  # Show baseline info for each platform:
+  echo "<TR ${BGCOLOR}>" >> ${HISTORY}
+  echo "<TD ALIGN=\"RIGHT\"> <font size=\"-1\">Baseline for duration <br>percent is rev.:</font></TD>" >> ${HISTORY}
+  no=0
+  for PLATFORM in ${PLATFORMS}
+  do
+   if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+   then
+    BGCOLOR="bgcolor=\"${COLOR0}\""
+    # expr $no % 2
+    if [ `expr $no % 2` = 0 ]
+    then
+      BGCOLOR="bgcolor=\"${COLOR1}\""
+    fi
+    no=`expr $no + 1`
+    BASELINE=`head -1 ${PLATFORM}/baseline.csv  | gawk '{ print $2 }'`
+    TS=`cat ${UPDATELOGDIR}/${BASELINE}/UpdateTime`
+    PLATF=`echo "${PLATFORM}" | sed -e 's/CYGWIN_/CYGWIN /' | gawk -F_ '{ print $1"<BR>"$2 }' | sed -e 's/CYGWIN /CYGWIN_/'`
+    echo "<TD ${BGCOLOR} colspan=\"4\">${BASELINE}<BR> ${TS}<BR> <I>(${PLATF})</I></TD>" >> ${HISTORY}
+   fi
+  done # PLATFORMS
+  echo "</TR>" >> ${HISTORY}
+  echo "</TABLE>" >> ${HISTORY}
+
+
+  echo "<HR>" >> ${HISTORY}
+  echo "<div style=\"text-align: right;\">"  >> ${HISTORY}
+  echo "<font size=\"-1\"><i>"  >> ${HISTORY}
+  date +%Y-%m-%d" "%H:%M:%S" "%Z >> ${HISTORY}
+  echo "</i></font>" >> ${HISTORY}
+  echo "</div>" >> ${HISTORY}
+  chmod go+r ${HISTORY}
+
+  if [ "${SHOWDETAILS}" != "ShowDetails" ]
+  then
+    DTIPUB="${PUBLISHDIR}/${PRESENTATION}/${SUITE}_history.html"
+    SRC="${HISTORY}"
+    DST="${DTIPUB}"
+    echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+    ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+fi
+
+done # SUITES
+

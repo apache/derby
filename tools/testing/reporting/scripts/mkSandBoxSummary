@@ -1,0 +1,43 @@
+#!/bin/bash
+REVISION=$1
+DETAILS=$2
+
+if [ "${DERBYDIR}" == "" ]
+then
+  echo "DERBYDIR is undefined!"
+  exit
+fi
+if [ ! -e ${DERBYDIR} ]
+then
+  echo "${DERBYDIR} does not exist!"
+  exit
+fi
+
+SUMMARY=${DERBYDIR}/summary.txt
+if [ "${DETAILS}" == "details" ]
+then
+  SUMMARY=${DERBYDIR}/summary-full.txt
+fi
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+echo -n " ${REVISION}: " > ${SUMMARY}
+
+# DEBUG echo "demo: " >> ${SUMMARY}
+# DEBUG ${TOOLDIR}/platformsFailCount ${REVISION} "${DETAILS}" demo >> ${SUMMARY}
+# DEBUG ## echo "/" >> ${SUMMARY}
+# DEBUG ## ${TOOLDIR}/platformsDurPrcnt ${REVISION} "${DETAILS}" demo >> ${SUMMARY}
+
+echo "derbyall: " >> ${SUMMARY}
+${TOOLDIR}/platformsFailCount ${REVISION} "${DETAILS}" derbyall >> ${SUMMARY}
+## echo "/" >> ${SUMMARY}
+## ${TOOLDIR}/platformsDurPrcnt ${REVISION} "${DETAILS}" derbyall >> ${SUMMARY}
+
+echo ", suites.All: " >> ${SUMMARY}
+${TOOLDIR}/platformsFailCount ${REVISION} "${DETAILS}" org.apache.derbyTesting.functionTests.suites.All >> ${SUMMARY}
+## echo "/" >> ${SUMMARY}
+## ${TOOLDIR}/platformsDurPrcnt ${REVISION} "${DETAILS}" org.apache.derbyTesting.functionTests.suites.All >> ${SUMMARY}
+
+chmod go+r ${SUMMARY}
+

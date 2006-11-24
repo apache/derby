@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+SecOnlyString=$1
+# echo ${SecOnlyString}
+let " Hours = ${SecOnlyString} / 3600 "
+let " Rest = ${SecOnlyString} - ${Hours}*3600 "
+let " Minutes = ${Rest} / 60 "
+let " Seconds = ${Rest} - ${Minutes}*60 "
+if [ ${Seconds} -le 9 ]
+then
+  Seconds="0${Seconds}"
+fi
+if [ ${Minutes} -le 9 ]
+then
+  Minutes="0${Minutes}"
+fi
+if [ ${Hours} -le 9 ]
+then
+  Hours="0${Hours}"
+fi
+echo "${Hours}:${Minutes}:${Seconds} "

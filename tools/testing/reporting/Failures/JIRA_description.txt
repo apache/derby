@@ -1,0 +1,153 @@
+# This is a VERY rough filter!:
+# Comment out (#) closed issues to avoid masking new failures in the same test. 
+# Or append Status: Closed as in 986?Closed, ...?Resolved...
+#JIRA  SUITE_TEST                                    DESCRIPTION
+#? 1059   compatibility:serverVM-1.6_serverTrunk_clientVM-1.3_clientDB2JCC java.lang.StackOverflowError
+#? 1059   compatibility:serverVM-1.6_serverTrunk_clientVM-1.4_clientDB2JCC java.net.ConnectException
+#? 1059   compatibility:serverVM-1.6_serverTrunk_clientVM-1.5_clientDB2JCC java.net.ConnectException
+#? 1059   compatibility:serverVM-1.6_serverTrunk_clientVM-1.6_clientDB2JCC java.net.ConnectException
+1061   compatibility:embedded_VM-1.6                 
+1042   store/OnlineBackupTest3.java
+# 1022?Closed   lang/syscat.sql
+# 324?Closed    store/aes.sql                                 Closed, but not merged to 10.1
+990    store/access.sql
+989?Intermittent:_'ran_out_of_time'    unit/daemonService.unit
+# incorrect? 1430?'SQLSTATE(null):_SQL_Exception:_unrecognized_sql_type'_vs_'IC' jdbcapi/parameterMapping.java
+1430?jdbcPM:ERROR_58009 jdbcapi/parameterMapping.java
+# 957                      jdbcapi/parameterMapping.java          (Was 988) Dup of 987,986,957? (en_US vs no_NO)
+# 957?Fixed?               jdbcapi/blobclob4BLOB.java                    (Was 987) Any rel. to 575? (en_US vs no_NO)
+1691              jdbcapi/blobclob4BLOB.java
+# 575?Resolved    jdbcapi/blobclob4BLOB.java
+957?Fixed?             jdbcapi/statementJdbc20.java                  Dup in 987. (en_US vs no_NO)
+# 986?Closed    jdbcapi/statementJdbc20.java                  Closed: Dup of 957 (en_US vs no_NO)
+# 985?Closed  i18n/urlLocale.sql                            Closed, dup of 834
+# 917?Resolved    largedata/LobLimits.java                      Resolved
+980?InterruptedException               derbynet/testSecMec.java                      Seen once? 
+1751?FIXED:ShutdownException               derbynet/testSecMec.java                      Seen once? 
+NEW:IA?InvalidAlgorithmParameterException derbynet/testSecMec.java                      Seen once?
+# 978?Closed    jdbcapi/dbMetaDataJdbc30.java                 Closed
+977    jdbcapi/xaSimplePositive.sql
+# 976?Resolved    jdbcapi/resultsetJdbc30.java                Resolved
+973    store/OnlineBackupTest1.java                intermittent
+967    lang/autoincrement.sql                      intermittent
+NEW:AI?'should_see_0vs20'  lang/autoincrement.sql 
+788?Closed    store/encryptionKey.sql                     Closed, but not merged to 10.1
+# 956?Resolved                             stress/stress.multi
+1750?...timed_out_trying_to_kill_all_testers  stress/stress.multi
+1870?FatalException:_X0Y67:_Cannot_issue_rollback...  stress/stress.mult
+# 937?FIXED:'Nested_Loop'_vs_'Hash'                     lang/wisconsin.java
+1801?Instability_in_wisconsin_test                     lang/wisconsin.java
+# 1625?FIXED:IJ_ERROR:_Unable_to_establish_connection   lang/wisconsin.java
+1649?SQL_CURLH000C7_vs_C                               lang/wisconsin.java
+# 937?FIXED:'Nested_Loop'_vs_'Hash'                     lang/wisconsin.sql
+# 800?Closed    lang/ConcurrentImplicitCreateSchema.java    intermittent, Closed
+273?Resolved    derbynet/dataSourcePermissions_net.java     intermittent, Resolved
+NEW?DRDA_NPE    derbynet/dataSourcePermissions_net.java     'org.apache.derby.iapi.services.context.ShutdownException: Exception in thread "DRDAConnThread_3" java.lang.NullPointerException'
+# 846           derbynet/dataSourcePermissions_net.java     r399351: Check in missing updated master file
+803?ShutdownException derbynet/DerbyNetAutoStart.java             intermittent "org.apache.derby.iapi.services.context.ShutdownException:"
+NEW?dnDNASnc derbynet/DerbyNetAutoStart.java 'org.apache.derby.impl.drda.DRDAProtocolException: Execution failed because of Permanent Agent Error: SVRCOD = 40; RDBNAM = database2; diagnostic msg = No current connection.'
+NEW?NPE derbynet/DerbyNetAutoStart.java NullPointerException
+# 1399?FIXED:ConnectException(port_1527_vs_31415)  derbynet/DerbyNetAutoStart.java   "Could not access database through the network server."
+830?Failed_to_start_database_'jar:(ina.jar)db7'    lang/dcl.sql
+# 317?Closed                                    tools/ieptests.sql
+NEW:SE?SQL_Exception:_'Table/View'_vs_'Table'    tools/ieptests.sql
+516?  jdbcapi/CompatibilityTest.java
+1351  lang/forupdate.sql                      SQL_CURLH000C3/SQL_CURLH000C1 sequence
+1303   derbynet/SuicideOfStreaming.java           
+NEW:PR?Project-Restrict_ResultSet_(13)vs(15)     lang/predicatePushdown.sql
+937?FIXED:'Nested_Loop'_vs_'Hash'                lang/predicatePushdown.sql
+NEW:EX?ERROR_XBCX0:_Exception_from_Cryptography_provider. store/encryptDatabaseTest1.sql 
+417    store/Beetle6038.java
+# 1438?FIXED:'java.sql.SQLException'_vs_'SQL_Exception'   jdbcapi/checkDataSource.java
+# 1438?FIXED:'java.sql.SQLException'_vs_'SQL_Exception'   jdbcapi/checkDataSource30.java
+1757 jdbcapi/checkDataSource.java
+1757 jdbcapi/checkDataSource30.java
+1817 jdbcapi/checkDataSource.java        'Race condition in network server's thread pool'
+1817 jdbcapi/checkDataSource30.java      'Race condition in network server's thread pool'
+1379?JDK1.6_Autoloading_of_JDBC_drivers      nist/schema1.sql
+NEW:MO?derbyrunjartest/runtool_output_gets_mixed tools/derbyrunjartest.java
+834?FIXED i18n/urlLocale.sql
+# 834?FIXED derbynet/sysinfo.java                Test_Env1:_'Current_Locale_:__[English/United_States_[en_US]]'_vs_'[norsk/Norge_[no_NO]]'
+1832?dnUacp  derbynet/sysinfo.java 'Unable to analyze class path: access denied (java.util.PropertyPermission java.class.path read)'
+# 834?FIXED derbynet/sysinfo_withproperties.java Test_Env2:_'Current_Locale_:__[English/United_States_[en_US]]'_vs_'[norsk/Norge_[no_NO]]'
+1832?dnUacp  derbynet/sysinfo_withproperties.java 'Unable to analyze class path: access denied (java.util.PropertyPermission java.class.path read)'
+645?FIXED derbynet/sysinfo.java 
+?Jvm_failure:_SIGSEGV lang/refActions1.sql' "delete from db2test.emp where dno in (select ..where e5.dno in (select..where db2test.emp.name.....where db2test.emp.mgrname = 'JOHN')))));"
+1374?PROTOCOL_Data_Stream_Syntax_Error serverVM-1.3_server10.1.2.0_clientVM-1.3_clientTrunk
+1374?PROTOCOL_Data_Stream_Syntax_Error serverVM-1.3_server10.0.2.1_clientVM-1.3_clientDB2JCC
+1444?Test_Env.:_'Possible_Reason_-_Test_could_not_find_the_location_of_jar_files...' upgradeTests/Upgrade_10_1_10_2.java
+# 1375?CLOSED:Need_master_update? upgradeTests/Upgrade_10_1_10_2.java
+# NEW:UT?caseVersionCheck_fails  upgradeTests/Upgrade_10_1_10_2.java
+NEW:CR?Connection_refused                jdbcapi/testRelative.java
+NEW:NC?No_current_connection             junitTests/derbyNet/CompatibilityTest.java
+734?Test_output_intermixed            lang/closed.java
+952?Network_Server_did_not_start     derbynet/NSinSameJVM.java                   XP only
+1432?Warning:_UnknkownHostException:   derbynet/NSinSameJVM.java
+INFRA?Forgot_to_turn_off_firewall? derbynet/NSinSameJVM.java
+1380?Interface_changes_introduced_in_Mustang_b86 jdbc4/ClosedObjectTest.junit
+1380?Interface_changes_introduced_in_Mustang_b86 jdbc4/ResultSetTest.junit
+1380?Interface_changes_introduced_in_Mustang_b86 jdbc4/UnsupportedVetter.junit
+1380?Interface_changes_introduced_in_Mustang_b86 jdbc4/VerifySignatures.junit
+1571?FIXED                                                derbynet/testProperties.java
+1694                                                derbynet/testProperties.java
+NEW:CR1?java.net.SocketException:_Connection_reset  derbynet/testProperties.java
+NEW:CR2?java.net.SocketException:_Connection_reset  derbynet/DerbyNetNewServer.java
+NEW:SURQueryMixTest jdbcapi/SURQueryMixTest.junit
+NEW:InvTransSt lang/procedure.java
+TEST:native2ascii i18n/JapanCodeConversion.sql
+# 1455?CLOSED:Active_Sessions:_1_vs_2 derbynet/runtimeinfo.java
+1626                          store/TransactionTable.sql
+TEMP?r423132_fixed_by_r423348 # Very special case: '#' was used in a .runall file.
+1640?FIXED                          jdbcapi/XATest.java         Instability in XATest
+NEW:JSF?XBM0W_org.apache.derby.impl.io.JarStorageFactory store/encryptionKey_jar.sql "ERROR XBM0W: An exception was thrown while creating an instance of class class org.apache.derby.impl.io.JarStorageFactory registered for identifier jar."
+1585?X0X95_'CREATE_TRIGGER'_cannot_be_performed   lang/procedureInTrigger.sql "ERROR X0X95: Operation 'CREATE TRIGGER' cannot be performed on object 'T1' because there is an open ResultSet dependent on that object."
+1705?Invalid_attribute_syntax jdbcapi/dataSourceReference.java
+NEW:TQO?Expected_fix_in_JDK1.6_b98                  jdbc4/TestQueryObject.java
+1746?upgrade_tests_should_start_using_10.1.3_released_builds upgradeTests/Upgrade_10_1_10_2.java ""
+1430?jdbcSUR:ERROR_58009      jdbcapi/SURTest_ij.sql
+1789?derby.system.durability=test_mode_seems_to_be_broken         store/TestDurabilityProperty.java
+1800?FIXED:Unexpected_SQL_state._expected:<22001>_but_was:<58009> jdbc4/_Suite.junit
+1813?jdbc4/_Suite.junit:Fix_hard-coded_JDBC_4.0_type_constants jdbc4/_Suite.junit
+1874?largeDataTests/LobLimits_master_needs_update? largedata/LobLimits.java
+1629?see:1729FIXED lang/grantRevokeDDL2.sql 'New master file for JDK 6 needed.'
+1834?FIXED:gRDDL2:[user_] lang/grantRevokeDDL2.sql 'WARNING 01006: Privilege not revoked from [user ]USER2.'
+1910?OoME jdbcapi/_Suite.junit OutOfMemoryError
+#
+# New in 10.2.1.2 testing:
+1430?dnBC derbynet/badConnection.java
+1430?dnca derbynet/callable.java
+1430?dncSM derbynet/checkSecMgr.java
+1430?dncsPS derbynet/csPrepStmt.java
+1430?dndtn derbynet/dblook_test_net.java
+1430?dneU derbynet/executeUpdate.java
+1883?i18nmL    i18n/messageLocale.sql 'I18N tests fail on Linux/JVM 1.4.2 when derbyclient.jar is the first element of the classpath'
+1883?i18nintES i18n/iepnegativetests_ES.sql 'I18N tests fail on Linux/JVM 1.4.2 when derbyclient.jar is the first element of the classpath'
+1883?i18nuL    i18n/urlLocale.sql 'I18N tests fail on Linux/JVM 1.4.2 when derbyclient.jar is the first element of the classpath'
+# 10.2.1.3
+1869?TIMESTAMPDIFF lang/timestampArith.java
+1871 derbynet/testSecMec.java 'testSecMec failing with what looks like just a error message change diff'
+# 10.2.1.6
+NEW:noJDBC4? lang/releaseCompileLocks.sql
+NEW:noJDBC4? jdbcapi/dbMetaDataJdbc30.java
+NEW:noJDBC4? jdbc4/TestConnectionMethods.java
+NEW:noJDBC4? jdbc4/TestQueryObject.java
+NEW:noJDBC4? jdbc4/TestPreparedStatementMethods.java
+NEW:noJDBC4? jdbc4/TestResultSetMethods.java
+NEW:noJDBC4? jdbc4/AutoloadBooting.junit
+NEW:noJDBC4? jdbc4/AutoloadTest.junit
+NEW:noJDBC4? jdbc4/VerifySignatures.junit
+NEW:noJDBC4? jdbc4/_Suite.junit
+NEW:noJDBC4? derbynet/checkSecMgr.java
+NEW:noJDBC4? lang/procedure.java
+NEW:noJDBC4? tools/importExport.java
+NEW:noJDBC4? tools/ieptests.sql
+NEW:noJDBC4? jdbc4/TestJDBC40Exception.java
+NEW:noJDBC4? jdbc4/TestDbMetaData.java
+937?FIXED:'Nested_Loop'_vs_'Hash' lang/subquery.sql
+2063?ACE_junit.properties_read derbynet/ShutDownDBWhenNSShutsDownTest.junit java.security.AccessControlException: access denied (java.io.FilePermission /home/os136789/junit.properties read)
+2056 junitTests/derbyNet/CompatibilityTest.java
+2038 lang/closed.java
+2038 lang/releaseCompileLocks.sql
+####################################
+# JUnit tests
+2048 views(...functionTests.tests.lang.LangScripts)

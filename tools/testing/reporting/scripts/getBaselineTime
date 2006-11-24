@@ -1,0 +1,17 @@
+#!/bin/bash
+PLATFORM=$1
+SUITE=$2
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts" # then add
+. ${TOOLDIR}/env
+
+# We have one catalog per platform
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+
+cd ${TESTLOGDIR}
+SECONDS=`grep "^${SUITE} " ${PLATFORM}/baseline.csv | gawk '{ print $3 }'`
+echo ${SECONDS}

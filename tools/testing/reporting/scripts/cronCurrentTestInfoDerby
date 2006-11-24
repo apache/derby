@@ -1,0 +1,31 @@
+#!/bin/bash
+echo "THIS IS SITE SPECIFIC! FIX!"
+exit
+
+export USER="derbytester"
+export HOME="/home/${USER}"
+export DERBYDIR="${HOME}/Apache/Derby/trunk_JDK15"
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+echo "*********************" > ${HOME}/cron/testSummariesDerby.log
+echo "*********************" >> ${HOME}/cron/testSummariesDerby.err
+/bin/date >> ${HOME}/cron/testSummariesDerby.log
+/bin/date >> ${HOME}/cron/testSummariesDerby.err
+
+. ${HOME}/.bashrc >> ${HOME}/cron/testSummariesDerby.log 2>${HOME}/cron/testSummariesDerby.err
+. ${DERBYDIR}/env.sh >> ${HOME}/cron/testSummariesDerby.log 2>${HOME}/cron/testSummariesDerby.err
+
+
+# Internal:
+${TOOLDIR}/testSummariesDerby current details >> ${HOME}/cron/testSummariesDerby.log 2>>${HOME}/cron/testSummariesDerby.err
+
+# For publishing:
+${TOOLDIR}/testSummariesDerby current >> ${HOME}/cron/testSummariesDerby.log 2>>${HOME}/cron/testSummariesDerby.err
+
+
+/bin/date >> ${HOME}/cron/testSummariesDerby.log
+/bin/date >> ${HOME}/cron/testSummariesDerby.err
+echo "---------------------" >> ${HOME}/cron/testSummariesDerby.log
+echo "---------------------" >> ${HOME}/cron/testSummariesDerby.err

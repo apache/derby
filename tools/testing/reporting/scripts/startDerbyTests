@@ -1,0 +1,40 @@
+#!/bin/bash
+# export DERBYDIR="${HOME}/Apache/Derby"
+DERBYDIR=$1
+
+if [ "${DERBYDIR}" = "" ]
+then
+  echo "DERBYDIR must be defined."
+  exit
+fi
+if [ ! -e ${DERBYDIR} ]
+then
+  echo "Nonexisting DERBYDIR: ${DERBYDIR} was given to $0."
+  exit
+fi
+
+cd ${DERBYDIR}
+
+HOST=`uname -n`
+
+. ./env.sh
+. ./testenv.sh
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+SANDBOX=`basename ${DERBYDIR}`
+if [ ! -e ${BUILDLOGDIR}/buildOK ]
+then
+  echo "Derby was NOT updated or build failed"
+  echo "  ${BUILDLOGDIR}/buildOK does not exist."
+  ### UNCOMMENT TO SEND MAIL. ${TOOLDIR}/textMail "${SANDBOX} was NOT updated or build failed" "${MAILTOINT}" "${BUILDLOGDIR}/lastBuildInfo"
+  exit
+fi
+
+mkdir -p TestRunLogs
+cd TestRunLogs
+
+echo "${TOOLDIR}/runAllTests ../testing/testlist ${DERBYDIR}/testing/testlog > ${HOST}.log" > ${HOST}.log
+${TOOLDIR}/runAllTests ../testing/testlist ${DERBYDIR}/testing/testlog >> ${HOST}.log 2>${HOST}.err &
+

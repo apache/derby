@@ -1,0 +1,44 @@
+#!/bin/bash
+REVISION=$1
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+# We have one catalog per platform
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/testlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+# Get the set of platforms
+cd ${TESTLOGDIR}
+PLATFORMS=`ls`
+
+for PLATFORM in ${PLATFORMS}
+do
+  echo ""
+  echo ${PLATFORM}
+  # Create one file per platform
+  BASELINEFILE="${PLATFORM}/baseline.csv"
+  echo "# ${REVISION}" > ${BASELINEFILE}
+
+  for SUITE in ${SUITES}
+  do
+    # DEBUG 
+echo "SUITE: ${SUITE}"
+    if [ "${SUITE}" == "exit" ]
+    then
+      exit
+    fi
+    TIME=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv | gawk '{ sub("\r$", ""); print }' | gawk '{ print $6 }'`
+                                                        # removes DOS endofline
+    SECONDS=`${TOOLDIR}/toSeconds ${TIME}`
+    echo "${SUITE} ${TIME} ${SECONDS}" >> ${BASELINEFILE}
+  done # SUITES
+
+done # PLATFORMS

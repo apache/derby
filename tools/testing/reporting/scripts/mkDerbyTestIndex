@@ -1,0 +1,324 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+SHOWDETAILS=""
+PRESENTATION="Limited"
+if [ "$1" = "details" ]
+then
+  # Show details
+  SHOWDETAILS="ShowDetails"
+  PRESENTATION="Full"
+fi
+
+# We have one catalog per platform
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/showtestlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+# Get the set of platforms
+cd ${TESTLOGDIR}
+PLATFORMS=`ls`
+
+TESTID=`echo ${DERBYDIR} | gawk -F/ '{ print $NF }'`
+  # Derby | TinderBox_Derby | XDerbyX | myDerbySandbox | jvm1.5 ....
+TINDER=`echo "${TESTID}" | grep TinderBox` # Contains TinderBox
+LARGEDATA=`echo "${TESTID}" | grep LargeData` # Contains LargeData
+
+# Get the list of revisions
+REVISIONSFILE="${DERBYDIR}/testing/revisionlist"
+# head -60 to reduce to approx. last 3 months of daily tests (otherwise last 60 - ..TinderBox)
+# head -16 to reduce to approx. last 2 weeks of daily tests (otherwise last 16 - ..TinderBox)
+NREVS=16
+if [ "${TINDER}" != "" ]
+then
+  NREVS=32
+fi
+
+# Update summary info for top level sandbox page:
+CUR_REV=`gawk '{ print $1 }' ${REVISIONSFILE} | grep -v "^#" | head -1`
+${TOOLDIR}/mkSandBoxSummary ${CUR_REV} "$1"
+#
+
+REVISIONS=`gawk '{ print $1 }' ${REVISIONSFILE} | grep -v "^#" | head -${NREVS}`
+# LASTUPDATEREV=`gawk '{ print $1 }' ${REVISIONSFILE} | grep -v "^#" | head -1 `
+PREVUPDATEREV=`gawk '{ print $1 }' ${REVISIONSFILE} | grep -v "^#" | head -2 | tail -1`
+    # If we use LASTUPDATEREV ~ head -1 svn log may not report the last update.... See below.
+
+# DTI="${DERBYDIR}/testing/testSummary.html"
+DTI="${DERBYDIR}/testing/${PRESENTATION}/index.html"
+DTIPUB="${PUBLISHDIR}/${PRESENTATION}/index.html"
+
+PUBLICREGRESSIONTESTMSG="<P>We provide daily regression test results based on the Apache Derby test suites. The regression tests are executed on several  platforms.</P>"
+INTERNALREGRESSIONTESTMSG="<P>We currently run the Derby test suites on a number of platforms available at ${WHOWEAREINTERN}.</P>"
+if [ "${TINDER}" != "" ]
+then
+  PUBLICREGRESSIONTESTMSG="<P>\"<em>Tinderbox</em>\" testing is performed when updates to the Derby source code repository is detected. This is done on one single test platform.</P>"
+  INTERNALREGRESSIONTESTMSG="${PUBLICREGRESSIONTESTMSG}"
+fi
+
+echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" > ${DTI}
+echo "<html> <head>" >> ${DTI}
+chmod go+r ${DTI}
+if [ "$1" = "details" ]
+then
+  echo "<title>Derby @ ${WHOWEARE} Regression Test Results [${TESTID}]</title>" >> ${DTI}
+else
+  echo "<title>Apache Derby Open Source Database, Regression Test Results [${TESTID}]</title>" >> ${DTI}
+fi
+echo "</head>" >> ${DTI}
+
+echo "<body>" >> ${DTI}
+
+if [ "$1" != "details" ]
+then
+  # echo "<br><font size=\"+1\"><b><a href=\"http://db.apache.org/derby\" target=\"_top\">Apache Derby</a></b></font> is an open source, 100% Java SQL Database." >> ${DTI}
+
+
+  echo "<table style=\"text-align: left; width: 100%;\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" >> ${DTI}
+  echo "  <tbody>" >> ${DTI}
+  echo "    <tr>" >> ${DTI}
+  echo "      <td style=\"vertical-align: bottom;\"><font size=\"+1\"><b>" >> ${DTI}
+  echo "        <a href=\"http://db.apache.org/derby\" target=\"_top\">Apache Derby" >> ${DTI}
+  echo "        </a></b></font> is an open source, 100% Java SQL Database." >> ${DTI}
+  echo "      </td>" >> ${DTI}
+  echo "    </tr>" >> ${DTI}
+  echo "  </tbody>" >> ${DTI}
+  echo "</table>" >> ${DTI}
+
+  echo "<HR>" >> ${DTI}
+fi
+if [ "$1" = "details" ]
+then
+  echo "<h2>Derby @ ${WHOWEARE} Regression Test Results [${TESTID}]" >> ${DTI}
+    echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp" >> ${DTI}
+    echo " <font size=-1>[<a href=\"InternalURL\">All ${WHOWEARE} Derby Tests</a>]</font>" >> ${DTI}
+  echo "</h2>" >> ${DTI}
+  echo "<a href=\"${INTERNHREF}\">"  >> ${DTI}
+  ### UNCOMMENT IF YOU HAVE A LOGO. echo "<img style=\"border: 0px solid\" src=\"${WHOWEARELOGO}\" alt=\"${WHOWEAREALT}\"><br>" >> ${DTI}
+  echo "<i>${WHOWEARELONG}</i><p/>" >> ${DTI}
+  echo "</a>" >> ${DTI}
+  echo "${INTERNALREGRESSIONTESTMSG}" >> ${DTI}
+else
+  echo "<h2>Derby Regression Test Results [${TESTID}]" >> ${DTI}
+    echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp" >> ${DTI}
+    echo " <font size=-1>[<a href=\"externalURL\">All ${WHOWEARE} Derby Tests</a>]</font>" >> ${DTI}
+  echo "</h2>" >> ${DTI}
+  echo "<i>${WHOWEARELONG}</i><p/>" >> ${DTI}
+  echo "${PUBLICREGRESSIONTESTMSG}" >> ${DTI}
+fi
+echo "<P></P>" >> ${DTI}
+
+echo "<P><a href="testSummary-current.html">Results of the latest testrun</a> started. This will show NA for test suites not yet completed.</P>" >> ${DTI}
+
+echo "<P><a href="testSummary-previous.html">Results of the previous testrun.</a></P>" >> ${DTI}
+
+THISPWD=`pwd`
+cd ${derby_source}
+echo "Latest Derby revision: " >> ${DTI}
+
+svn log -r${PREVUPDATEREV}:HEAD | grep "lines$" | grep "|" | tail -1 | sed -e 's/^r//' | gawk -F\| '{ print $1"["$3"]" }' >> ${DTI}
+echo " per " >> ${DTI}
+cd ${THISPWD}
+date +%Y-%m-%d" "%H:%M:%S" "%Z >> ${DTI}
+
+
+echo "<BR>" >> ${DTI}
+echo "<h3>Tested Revisions</h3>" >> ${DTI}
+
+
+TDB="TD style=\"vertical-align: bottom;\""
+TDT="TD style=\"vertical-align: top;\""
+
+DURHD="<$TDB></TD>"
+if [ "${TINDER}" != "" ] || [ "${LARGEDATA}" != "" ]
+then # Show duration %
+  SHOWDURSUITE="Derbyall"
+  if [ "${LARGEDATA}" != "" ]
+  then
+    SHOWDURSUITE="LargeData"
+  fi
+   DURHD="<$TDB><i> &nbsp;&nbsp;&nbsp;&nbsp;${SHOWDURSUITE}<br>&nbsp;&nbsp;&nbsp;&nbsp;duration<br>&nbsp;&nbsp;&nbsp;&nbsp;vs baseline </i></TD>"
+fi
+
+FOOTPRINTBASEREV=`head -1 ${DERBYDIR}/testing/builds/baseline.size | gawk -F\# '{ print $2 }'`
+# TS=`cat ${UPDATELOGDIR}/${FOOTPRINTBASEREV}/UpdateTime`
+TS=`head -2 ${DERBYDIR}/testing/builds/baseline.size | tail -1| gawk -F\# '{ print $2 }'`
+
+BGCOLOR="bgcolor=\"${COLOR0}\""
+echo "<TABLE border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" >> ${DTI}
+echo "<TR ${BGCOLOR} >" >> ${DTI}
+echo "<$TDB><i> Revision &nbsp;&nbsp;&nbsp;&nbsp;</i></TD>" >> ${DTI}
+echo "<$TDB><i> &nbsp;&nbsp;&nbsp;&nbsp;Date, Time </i></TD>" >> ${DTI}
+echo "<$TDB><i> &nbsp;&nbsp;&nbsp;&nbsp;Changes </i></TD>" >> ${DTI}
+echo "<$TDB><i> &nbsp;&nbsp;&nbsp;&nbsp;Size of derby.jar<br>&nbsp;&nbsp;&nbsp;&nbsp;</i>[Baseline: ${FOOTPRINTBASEREV}<br>&nbsp;&nbsp;&nbsp;&nbsp;${TS}]</TD>" >> ${DTI}
+echo "<$TDB><i> &nbsp;&nbsp;&nbsp;&nbsp;Derbyall<br>&nbsp;&nbsp;&nbsp;&nbsp;failures </i></TD>" >> ${DTI}
+echo "${DURHD}" >> ${DTI}
+echo "<$TDB><i>&nbsp;&nbsp;&nbsp;&nbsp;Notes </i></TD>" >> ${DTI}
+echo "</TR>" >> ${DTI}
+
+SANDBOX=`basename ${DERBYDIR}`
+no=1
+for REVISION in ${REVISIONS}
+do
+  echo "<TR>" >> ${DTI}
+  TS=`cat ${UPDATELOGDIR}/${REVISION}/UpdateTime`
+  DT=`echo ${TS} | gawk '{ print $1 }'`
+  TT=`echo ${TS} | gawk '{ print $2 }'`
+  TZ=`echo ${TS} | gawk '{ print $3 }'`
+  TS="${DT} ${TT} ${TZ}"
+  CHGLINK="&nbsp;&nbsp;&nbsp;&nbsp;"
+  if [ -e ${DERBYDIR}/testing/UpdateInfo/${REVISION}.txt ]
+  then
+##     if [ "$1" != "details" ] # FIXME
+##     then
+##      CHGLINK="&nbsp;&nbsp;&nbsp;&nbsp;<A HREF=\"../../../UpdateInfo/${REVISION}.txt\">Chgs</A> "
+##     else
+      CHGLINK="&nbsp;&nbsp;&nbsp;&nbsp;<A HREF=\"../../UpdateInfo/${REVISION}.txt\">Chgs</A> "
+##     fi
+  fi
+  FOOTPRINT="&nbsp;&nbsp;&nbsp;&nbsp;"
+  if [ -e ${DERBYDIR}/testing/builds/${REVISION}.size ]
+  then
+    SIZE=`grep derby.jar ${DERBYDIR}/testing/builds/${REVISION}.size | gawk '{ print $2" "$3 }'`
+    # FOOTPRINT="&nbsp;&nbsp;&nbsp;&nbsp;<A href=\"../../../builds/${REVISION}.size\">${SIZE}</A>"
+    FOOTPRINT="&nbsp;&nbsp;&nbsp;&nbsp;<A href=\"../../builds/${REVISION}.size\">${SIZE}</A>"
+  fi
+
+  DERBALLFAILS=""
+  DERBALLPRCNT=""
+  # TINDERBOX=`echo ${DERBYDIR} | grep TinderBox_`
+  # if [ "${TINDER}" != "" ]
+  # then
+    DERBALLFAILS="["
+    for PLATFORM in ${PLATFORMS} # TinderBox uses ONE platform..
+    do
+      # echo -n "${PLATFORM} "; pwd
+      if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+      then
+        if [ -e ${PLATFORM}/${REVISION}.csv ]
+        then
+          #  2: Number, 3: OK, 4: Failed, 5: Skipped, 6: time
+          RES=`grep "^derbyall " ${PLATFORM}/${REVISION}.csv`
+          # DEBUG RES=`grep "^demo " ${PLATFORM}/${REVISION}.csv`
+          if [ "${LARGEDATA}" != "" ]
+          then
+            RES=`grep "^largeData " ${PLATFORM}/${REVISION}.csv`
+          fi
+          FAILED=`echo ${RES} | gawk '{ print $4 }'`
+          if [ "${FAILED}" == "" ]
+          then
+            FAILED="?"
+          fi
+          DERBALLFAILS="${DERBALLFAILS} ${FAILED} "
+          if [ "${TINDER}" != "" ] || [ "${LARGEDATA}" != "" ]
+          then
+            TIME=`grep "^derbyall " ${PLATFORM}/${REVISION}.csv | gawk '{ print $6 }'`
+            if [ "${LARGEDATA}" != "" ]
+            then
+              TIME=`grep "^largeData " ${PLATFORM}/${REVISION}.csv | gawk '{ print $6 }'`
+            fi
+            SECONDS=`${TOOLDIR}/toSeconds ${TIME}`
+            BASESECONDS=`grep "^derbyall " ${PLATFORM}/baseline.csv | gawk '{ print $3 }'`
+            if [ "${LARGEDATA}" != "" ]
+            then
+              BASESECONDS=`grep "^largeData " ${PLATFORM}/baseline.csv | gawk '{ print $3 }'`
+            fi            
+            PERCENT=`${TOOLDIR}/calcPercent ${SECONDS} ${BASESECONDS}`
+            DERBALLPRCNT="&nbsp;&nbsp;&nbsp;&nbsp;${PERCENT}% "
+          fi
+        else
+          DERBALLFAILS="${DERBALLFAILS} - "
+        fi
+      fi # visible, showdetails
+    done # PLATFORMS
+    DERBALLFAILS="${DERBALLFAILS}]"
+  # fi # TINDERBOX
+  ######
+  # Above if ...
+  # fi could be replaced by
+  # DERBALLFAILS=`${TOOLDIR}/platformsFailCount ${REVISION} "${SHOWDETAILS}" ${SUITE}`
+  # DERBALLPRCNT=`${TOOLDIR}/platformsDurPrcnt ${REVISION} "${SHOWDETAILS}" ${SUITE}`
+  ######
+
+  BLDERRLINK=""
+  if [ -e ${DERBYDIR}/testing/UpdateInfo/${REVISION}-buildDetails.txt ]
+  then
+    BLDERRLINK="&nbsp;&nbsp;&nbsp;&nbsp;<A HREF=\"../../UpdateInfo/${REVISION}-buildDetails.txt\"><font color=\"red\"><b> Build Errors!</b></font></A><br>"
+  fi
+
+  FAILURELINK=""
+  if [ -e ${DERBYDIR}/FailReports/${REVISION}.html ]
+  then
+    FAILURELINK="&nbsp;&nbsp;&nbsp;&nbsp;<A HREF=\"../../FailReports/${REVISION}.html\">${DERBALLFAILS} </A>"
+  elif [ -e ${DERBYDIR}/FailReports/${REVISION}M.html ]
+  then # When we have Mods. e.g. JDK 1.6  testing with local mods to compatibility script....
+    FAILURELINK="&nbsp;&nbsp;&nbsp;&nbsp;<A HREF=\"../../FailReports/${REVISION}M.html\">${DERBALLFAILS} </A>"
+  fi
+
+  NOTE=""
+  if [ -e ${DERBYDIR}/testing/Notes/${REVISION}.txt ]
+  then
+    TXT=`cat ${DERBYDIR}/testing/Notes/${REVISION}.txt`
+    NOTE="${TXT}"
+  fi
+
+  echo "<$TDT><a href=\"testSummary-"${REVISION}".html\">"${REVISION}"</a></TD>" >> ${DTI}
+  echo "<$TDT>${TS}</TD>" >> ${DTI}
+  echo "<$TDT>${CHGLINK}</TD>" >> ${DTI}
+  echo "<$TDT>${FOOTPRINT}</TD>" >> ${DTI}
+  echo "<$TDT>${BLDERRLINK}${FAILURELINK}</TD>" >> ${DTI}
+  echo "<$TDT>${DERBALLPRCNT}</TD>" >> ${DTI}
+  echo "<$TDT>${NOTE}</TD>" >> ${DTI}
+  no=`expr $no + 1`
+  echo "<TR>" >> ${DTI}
+done # REVISIONS
+echo "</TABLE>" >> ${DTI}
+
+##########################################
+# BEGIN SKIP if ...._Release or ...._RC tests or ...._Snapshot tests
+IS_RELEASE=`echo ${DERBYDIR} | grep "_Release/"`
+IS_SNAPSHOT=`echo ${DERBYDIR} | grep "_Snapshot/"`
+IS_RC=`echo ${DERBYDIR} | grep "_RC/"`
+if [ "${IS_RELEASE}" == "" ] && [ "${IS_RC}" == "" ] && [ "${IS_SNAPSHOT}" == "" ]
+then
+
+echo "See full history <a href=\"index_all.html\">here!</a><BR>" >> ${DTI}
+
+
+if [ "${SHOWDETAILS}" = "ShowDetails" ]
+then
+  echo "<HR>" >> ${DTI}
+  echo "Experimental duration plots: " >> ${DTI}
+  echo "<a href=\"plot/plot.html\">all builds</a>, " >> ${DTI}
+  echo "<a href=\"plot/plot_last20.html\">last N builds</a>." >> ${DTI}
+fi
+
+fi
+# END SKIP if ....Release or ....Snapshot tests
+##########################################
+
+echo "<HR>" >> ${DTI}
+echo "<div style=\"text-align: right;\">"  >> ${DTI}
+echo "<font size=\"-1\"><i>"  >> ${DTI}
+date +%Y-%m-%d" "%H:%M:%S" "%Z >> ${DTI}
+echo "</i></font>" >> ${DTI}
+echo "</div>" >> ${DTI}
+
+
+echo "</body>" >> ${DTI}
+echo "</html>"  >> ${DTI}
+if [ "${SHOWDETAILS}" != "ShowDetails" ]
+then
+  SRC="${DTI}"
+  DST="${DTIPUB}"
+  echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+  ### ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+fi
+

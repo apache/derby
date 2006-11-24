@@ -1,0 +1,96 @@
+1. General
+**********
+These scripts are based on a directory structure where
+
+TESTEXECUTIONDIR (defined in the testenv.sh) specifies where
+tests are executed, and thus where Derby logs and db-files etc. are
+initially placed, and
+
+DERBYDIR (defined in env.sh) specifies where we place dirs and files
+keeping info on update, build and final test reports.
+
+In our environment we execute tests (via rsh/ssh) on a set of hosts
+listed in HOSTLISTFILE(defined in env).
+
+The list of Derby svn revisions we have tested are kept in
+REVISIONLIST(defined in env).
+
+'env' is a "definition" script which is sourced by most other scripts.
+All scripts must also be told where 'env' and other scripts are found:
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+
+
+
+2.Update, build, test.
+*********************
+I use a script 'updateBuildTestDerby' to initiate the full update,
+build, test sequence.
+
+First we define the Derby update and build environement by sourcing
+'env.sh' which we have in ${DERBYDIR}.
+'testenv.sh' defines the Derby test environment.
+${DERBYDIR}.) 
+
+
+2.1. ${TOOLDIR}/updateDerby
+---------------------------
+NB! assumes 'derby_source' is defined. (In our case that would
+actually be ${DERBYDIR}/trunk.)
+
+'updateDerby' creates update status files in ${UPDATELOGDIR}.
+If the update was successful ${REVISIONLIST} is updated and
+${UPDATELOGDIR}/updateOK is created to flag succesful update.
+
+The script may also send mail to inform of the update status
+(${TOOLDIR}/textMail). 
+
+
+2.2. ${TOOLDIR}/buildDerby
+--------------------------
+NB! assumes 'derby_source' is defined. 
+
+If ${UPDATELOGDIR}/updateOK exists we will build Derby.
+
+We do 'ant clobber', 'ant all' and 'ant buildjars'.
+
+'buildDerby' creates build status files in ${BUIDLOGDIR}.
+${BUILDLOGDIR}/builOK is created to flag succesful build.
+
+The script may also send mail to inform of the build
+status(${TOOLDIR}/textMail).
+
+
+2.3. Run tests
+--------------
+${TOOLDIR}/testDerby ${HOSTLISTFILE} uses rsh/ssh to call
+${TOOLDIR}/startDerbyTests on all test hosts in ${HOSTLISTFILE}.
+(In our env. I haven't been able to automatically do this via rsh to
+CYGWIN hosts yet ....)
+
+${TOOLDIR}/startDerbyTests essentially calls ${TOOLDIR}/runAllTests
+which is the main script for running tests and collecting initial test
+results.
+
+${TOOLDIR}/runAllTests takes 
+1) a file listing Derby test suites to be run and 
+2) the full path to where test results are put.
+
+${TOOLDIR}/runAllTests creates the following files which are used by
+the scripts creating the web presentation:
+SUITESLOG="${TESTLOG_PLATF_DIR}/${REVISION}.csv"
+JAVAINFO="${TESTLOG_PLATF_DIR}/${REVISION}.javainfo"
+CURRSUITESLOG="${TESTLOG_PLATF_DIR}/current.csv"
+PREVSUITESLOG="${TESTLOG_PLATF_DIR}/previous.csv"
+LOG="${TESTLOG_PLATF_DIR}/${REVISION}.txt"
+The *.csv files are essentially a summary from the Derby test harness
+${suite}_report.txt files.
+
+When the test suites run on a platform is finished the script may send mail
+to inform of the result. (${TOOLDIR}/textMail). 
+
+
+The *.csv files are a simple textual summary of the test results per
+platform tested. These are actually what I started out with before
+adding the web presentation.
+
+

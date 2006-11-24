@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+timeList=$1
+baseLine=$2
+baseLine=`toSeconds ${baseLine}`
+for TIME in ${timeList}
+do
+  echo `vsTimeBase ${TIME} ${baseLine}`
+done

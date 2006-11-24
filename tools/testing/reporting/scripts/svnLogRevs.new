@@ -1,0 +1,49 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+# echo "cd ${DERBYDIR}"
+cd ${DERBYDIR}
+. ./env.sh
+
+REVISIONSFILE="${REVISIONLIST}"
+# REVISIONS=`head -12 ${REVISIONSFILE} | gawk '{ print $1 }' | grep -v "^#"`
+OURPREVREV=`grep -v "^#" ${REVISIONSFILE} | head -2 | tail -1 | gawk '{ print $1 }'`
+# echo ${OURPREVREV}
+OURCURRENTREV=`grep -v "^#" ${REVISIONSFILE} | head -1 | gawk '{ print $1 }' `
+# echo ${OURCURRENTREV}
+
+# DEBUG echo "cd ${derby_source}"
+cd ${derby_source}
+
+
+if [ "$1" = "" ]
+then
+  # echo "Usage: $0 prevRev currRev"
+  # echo "       Do svn log -r prevRev+1:currRev"
+  # exit
+  # echo "Will do svn log -r OURPREVREV+1:OURCURRENTREV"
+  prevRev=` expr ${OURPREVREV} + 1 `
+  currRev="${OURCURRENTREV}"
+elif [ "$1" = "NEW" ]
+then
+#   echo "Will do svn log -r OURCURRENTREV+1:HEAD"
+  prevRev=` expr ${OURCURRENTREV} + 1 `
+  currRev="HEAD"
+else
+  # echo "Will do svn log -r $1+1:HEAD"
+  prevRev=` expr $1 + 1 `
+  currRev="HEAD"
+fi
+
+if [ "$2" != "" ]
+then
+  # echo "Usage: $0 $1 currRev"
+  # echo "       Do svn log -r prevRev+1:currRev"
+  # exit
+  # echo "Will do svn log -r ${prevRev}:$2"
+  currRev=$2
+fi
+
+# echo "svn log -r $prevRev:$currRev"
+svn log -r $prevRev:$currRev
+# svn info

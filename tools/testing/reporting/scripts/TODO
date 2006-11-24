@@ -1,0 +1,14 @@
+1. A large number of the scripts expect builds and UpdateInfo to exist in ${DERBYDIR}/testing/. 
+   A better location is ${DERBYDIR}/. 
+   Fix the relevant scripts to use ${DERBYDIR}/builds and ${DERBYDIR}/UpdateInfo.
+   (Currently handled using symlinks....)
+
+2. Merge production of Full and Limited reports. No need to have Limited at all?
+
+3. "Exception handling" in the scripts should be better....
+
+4. Convert the scripts to Ant! (and Java...)
+
+5. Use some standardized mechanism to format the report pages: E.g. XSLT, XPATH...
+
+6. Keep revision, build and test data in a (Derby) database.

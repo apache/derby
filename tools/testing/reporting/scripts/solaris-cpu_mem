@@ -1,0 +1,19 @@
+#!/bin/bash
+MODEL=`uname -m` # Minimalistic
+
+# Following gives details
+psrinfo -v > psrinfo$$
+NUMBER=`psrinfo -p`
+PROC=`grep "processor operates at " psrinfo$$ | head -1 | gawk  '{ print $2 }'`
+FREQ=`grep "processor operates at " psrinfo$$ | head -1 | gawk  '{ print $6 }'`
+CACHE='unknown'
+ARCH=`psrinfo -vp 1 | tail -1 | sed -e 's/  //g'`
+MODEL="${MODEL} ${PROC} (${ARCH})"
+
+# echo "Installed memory:"
+MEMTOTAL=`prtconf | grep "Memory size" | gawk -F: '{ print $2 }' | sed -e 's/  //g'`
+MEMFREE='unknown'
+
+rm psrinfo$$
+
+echo "${NUMBER} X ${MODEL}: ${FREQ} MHz, ${CACHE} cache. ${MEMTOTAL} Total Memory."

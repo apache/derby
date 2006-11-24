@@ -1,0 +1,37 @@
+# In all Derby regression test reporting scripts set
+# TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts" # then add
+# . ${TOOLDIR}/env
+
+# DERBYDIR is NOT really fixed: depends on which "sandbox" we're in.
+# DERBYDIR="${HOME}/Apache/TinderBox_Derby"
+# DERBYDIR="${HOME}/Apache/Derby"
+# For cron jobs move its definition to the respective bin/DerbyTools/cron* scripts
+
+TESTLOGDIR="${DERBYDIR}/testing/testlog"
+BUILDLOGDIR="${DERBYDIR}/BuildLog"
+UPDATELOGDIR="${DERBYDIR}/UpdateLog"
+REVISIONLIST="${DERBYDIR}/testing/revisionlist"
+HOSTLISTFILE=${DERBYDIR}/testing/testhostlist
+COLOR0=lightgrey
+COLOR1=lightblue
+
+### CHANGE THESE TO MATCH YOUR...
+WHOWEARE="How we present ourselves externally"
+WHOWEAREINTERN="How we present ourselves internally"
+WHOWEARELONG="How we present ourselves externally - long variant"
+WHOWEARELOGO="OURlogo.gif"
+WHOWEAREALT="Alternative to logo"
+INTERNHREF="http://local.host.our.domain/somewhere/somepage.html"
+EXTERNHREF="http://our.global.visibility.domain/somewhere/somepage.html"
+
+PUBLISHSITE=publish.host.my.domain
+PUBLISHUSER=publishinguser
+# PUBLISHDIR=public_html/public/Apache/Derby
+# Use ~/.ssh/config:
+# SCPUT=/usr/bin/scp
+# SSHUT=/usr/bin/ssh
+SCPUT=${TOOLDIR}/scp_dummy
+SSHUT=${TOOLDIR}/ssh_dummy
+
+MAILTOINT=Who.GetsMail@Internal.domain
+MAILTOEXT=Who.GetsMail@External.domain

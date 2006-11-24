@@ -1,0 +1,345 @@
+Short Story:
+**************************************************************************
+ 1. Create top level directory structure - See APPENDIX 1.
+ 2. Checkout Derby to ${DERBYDIR} - preferably NOT the very latest version
+    since we want to use ${TOOLDIR}/updateDerby to create version info for reports.
+ 2. Copy and modify env.sh, testenv.sh from tools/testing/reporting/TEMPLATES/ to ${DERBYDIR}.
+    Copy and modify index.html, index.shtml from tools/testing/reporting/TEMPLATES/ to ${DERBYDIR}/../
+ 3. ${TOOLDIR}/initDERBYDIR
+ 4. ${TOOLDIR}/updateDerby [revision]
+ 5. ${TOOLDIR}/buildDerby "[MKBUILDZIP]" [antpropertyFile]
+ 6. Create ${DERBYDIR}/testing/builds/baseline.size from ${DERBYDIR}/testing/builds/<revision>.size
+ 7. Edit ${DERBYDIR}/testing/testhostlist
+ 8. ${TOOLDIR}/testDerby ${DERBYDIR}/testing/testhostlist
+ 8. touch ${DERBYDIR}/testing/testlog/${PLATFORM}/externallyVisible for platforms that should be 
+    visible in public reports.
+ 9. ${TOOLDIR}/createBaselineFiles <revision>
+10. ${TOOLDIR}/mkAllDerbyTestInfo
+    Optional: ${TOOLDIR}/mkAllDerbyTestInfo.public
+    Optional: ${TOOLDIR}/mkAllPlotDataAndPlots [INIT] # Use INIT when new baselines created.
+
+After having established the sandbox and report structure you will normally do
+4., 5., 8. and 10. 
+${TOOLDIR}/updateBuildTestDerby  "[MKBUILDZIP]" "[revision]" [antpropertyfile] executes 4, 5 and 8.
+
+
+
+
+
+
+
+Long Story
+****************************************************************************
+The scripts assume Derby is checked out to
+a directory ${DERBYDIR} 
+such that we will have e.g.
+ DERBYDIR=${HOME}/Apache/Derby
+ BRANCH_DIR=trunk
+ derby_source=${DERBYDIR}/${BRANCH_DIR}
+or
+ DERBYDIR=${HOME}/Apache/Derby-10.1
+ BRANCH_DIR=10.1
+ derby_source=${DERBYDIR}/${BRANCH_DIR}
+
+
+The directory structure I have below ${DERBYDIR} is shown in APPENDIX 1..
+
+
+In ${DERBYDIR}/ I have env.sh and testenv.sh which is sourced to 
+set up the environment for update and build(env.sh) and testing(testenv.sh).
+Templates which can be copied to ${DERBYDIR}/ and modified to suite your
+environment are found in ${derby_source}/tools/testing/reporting/TEMPLATES/.
+
+
+
+The scripts are in TOOLDIR=${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts
+Templates for env.sh and testenv.sh are in 
+   TEMPLATEDIR=${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/TEMPLATES
+
+
+
+Main scripts
+************
+
+1. ${TOOLDIR}/updateDerby [revision] (Do '. ./env.sh' first)
+   ==================================
+   cd's to 'derby_source=${DERBYDIR}/${BRANCH_DIR}' as defined
+   in env.sh.
+   Does 'svn update'.
+   Creates/adds to testing/revisionlist. 
+   Creates testing/UpdateInfo/<revision>.txt
+   Updates status files(updateOK, update.out) in UpdateLog.
+   Creates directory UpdateLog/<revision>/ with status info.
+   used in test reports.
+
+
+2. ${TOOLDIR}/buildDerby "[MKBUILDZIP]" "[antpropertyFile]" (Do '. ./env.sh' first)
+   =================================
+   cd's to 'derby_source=${DERBYDIR}/${BRANCH_DIR}' as defined
+   in env.sh.
+   If UpdateLog/updateOK was not created because svn update in 1.
+   was not done, build is not attempted.
+   
+   If build is successful BuildLog/buildOK is created. Creates
+   BuildLog/<revision>/ with info used in test reports.
+
+   After the first successful build you should copy ${DERBYDIR}/testing/builds/<revision>.size
+   to ${DERBYDIR}/testing/builds/baseline.size and edit it to the format for the 
+   baseline.size file shown in this example: # FIXME: create a script...
+# 474376
+# My.first.build
+derby.jar 2257078
+derbynet.jar 186619
+derbyclient.jar 375758
+derbytools.jar 157327
+derbyrun.jar 11771
+derbyTesting.jar 5563839
+
+   Or you might want to use data for some other build...
+
+
+3. ${TOOLDIR}/testDerby ${HOSTLISTFILE} (Do . ./testenv.sh first)
+   ====================================
+   Will exit if UpdateLog/updateOK is not found.
+   ${HOSTLISTFILE} (Usually ${DERBYDIR}/testing/testhostlist) must 
+   contain the list of machines where tests should be run.
+   Assumes ${DERBYDIR} is accessible on all hosts.
+   Uses rsh (or ssh if you choose so) to connect to the hosts
+   and run "${TOOLDIR}/startDerbyTests ${DERBYDIR}.
+   If you just want to run the tests on the build host, remove 
+   the loop over machines and run startDerbyTests locally.
+   
+   ${TOOLDIR}/startDerbyTests executes 
+   ${TOOLDIR}/runAllTests using ${DERBYDIR}/testing/testlist which
+   lists the Derby testsuites to be run (one testsuite name per line).
+   
+   Tests are executed in TESTEXECUTIONDIR: e.g.
+   TESTEXECUTIONDIR="/export/home/tmp/${USER}/testingDerby<platform>/"
+   defined in testenv.sh.
+
+   Test results are reported in ${DERBYDIR}/testing/testlog/<platform>/. 
+   ${DERBYDIR}/testing/testlog/ MUST exist.
+   A zip file containing the ${DERBYDIR}/testing/testlog/<platform>/ is # FIXME FIXME
+   also included in ${DERBYDIR}/testing/testlog/<platform>/. Files
+   matching exceptions listed in ${DERBYDIR}/testing/ExcludeFromZip
+   are NOT included. I use the following exception:
+   
+      **.dat
+      **.ctrl
+      **Tester*.out
+
+
+
+ ${TOOLDIR}/updateBuildTestDerby  "[MKBUILDZIP]" "[revision]" [antpropertyfile] 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ executes 1, 2 and 3.
+
+
+4. Creating web presentations
+   ==========================
+
+   Important: cd to ${DERBYDIR} and do '. ./env.sh'.
+
+   Execute '${TOOLDIR}/createBaselineFiles <revision>' to
+   create a baseline for testsuite execution times for all platforms.
+   Or '${TOOLDIR}/createBaselineFilesOnePlatform <revision> <platform>'
+   to create a baseline for one specific platform. (<platform>/Directory name as found in
+   ${DERBYDIR}/testing/testlog/).
+
+   To make data for a platform publicly visible do
+   'touch ${DERBYDIR}/testing/testlog/${PLATFORM}/externallyVisible'.
+
+   The web pages are created by the scripts (check for parameters!)
+   ${TOOLDIR}/testSummariesDerby <revision> [details] :
+          builds a page for platforms/testsuites.
+   ${TOOLDIR}/mkAllDerbyTestInfo
+   ${TOOLDIR}/mkAllDerbyTestInfo.public :
+          builds pages for current, previous and 2 newest numbered revisions :
+                                 ${TOOLDIR}/testSummariesDerby ${LATESTREVISION}
+                                 ${TOOLDIR}/testSummariesDerby ${PREVIOUSREVISION}
+                                 ${TOOLDIR}/testSummariesDerby current
+                                 ${TOOLDIR}/testSummariesDerby previous
+          builds pages for revisions/testsuites :
+                                 (${TOOLDIR}/testHistoriesDerby)
+          builds pages for platforms/revisions :
+                                 (${TOOLDIR}/testPlatformsDerby)
+          builds top level presentation page :
+                                 (${TOOLDIR}/mkDerbyTestIndex)
+
+   'mkAllDerbyTestInfo' and 'mkAllDerbyTestInfo.public' creates index/top level pages for a 
+   limited number of tests over revisions. To create a complete index over *all*
+   tests where test results have been collected do
+   '${TOOLDIR}/mkDerbyTestIndex_all details' and '${TOOLDIR}/mkDerbyTestIndex_all'.
+   The index/top level pages contain a link to these labeled "See full history here!".
+
+
+   With the parameter 'details', pages are created in ${DERBYDIR}/testing/Full/,
+   without the parameter 'details', pages are created in ${DERBYDIR}/testing/Limited/.
+
+
+4.1 Creating test suite duration plots
+    ++++++++++++++++++++++++++++++++++
+    
+   Duration plots are only visible on "Full" pages. Do
+   '${TOOLDIR}/mkAllPlotDataAndPlots [INIT]', using 'INIT' the first time and
+   after baseline files have been modified.
+   NB. Requires gnuplot!
+   
+
+4.2 Adding new platforms
+    ++++++++++++++++++++
+   Assuming test runs have been completed for the new platforms:
+  
+4.2.1 Create baseline files
+      ---------------------
+   'cd ${DERBYDIR};. ./env.sh;. ./testenv.sh'.
+   For each of the newly added platforms do
+   '${TOOLDIR}/createBaselineFilesOnePlatform ${REVISION} ${PLATFORM}'.
+   Remember to do '${TOOLDIR}/mkAllPlotDataAndPlots INIT' to reestablish 
+   all plots using the new baseline.
+
+4.2.2 Present results on "Limited" pages
+      --------------------------
+   To show results for the newly added platforms in "Limited" pages create
+   the file externallyVisible in 
+   ${DERBYDIR}/testing/testlog/${PLATFORM}/.
+   E.g. 'touch ${DERBYDIR}/testing/testlog/${PLATFORM}/externallyVisible'.
+
+
+4.3 Adding revision specific Notes to index pages
+    +++++++++++++++++++++++++++++++++++++++++++++
+
+    If you want to display notes on a revision add a <revision number>.txt file
+    to ${DERBYDIR}/testing/Notes/.
+    HTML formatting is accepted.
+    The note is also displayed in the 'testSummary-<revision number>.html' file.
+
+
+==============================
+
+   OBSERVE: All commands sending mail for update, build and test status are 
+   commented out and must be explicitly enabled!
+
+
+
+-----------------------------------------------------------------------------
+#####################
+   OBSERVE: All commands using scp or ssh to copy or manipulate information
+   on the external publishing web host are commented out and must be explicitly
+    enabled!
+
+   FIXME: Will be removed alltogether: Use e.g. 'rsync' instead for publishing.
+
+#####################
+
+
+
+
+-----------------------------------------------------------------------------
+
+APPENDIX 1.
+==========
+${DERBYDIR} structure:
+
+BuildLog/
+    ...
+    474376/
+    ...
+    474695/
+        buildDetails
+        buildInfo
+        buildInfo.err
+        info
+        localChanges
+        sysinfo.err
+        sysinfo.txt
+    buildOK
+    currentSysInfo.txt
+    lastBuildInfo
+
+FailReports/
+    ...
+    474376.html
+    ...
+    474695.html
+
+Failures -> trunk/tools/testing/reporting/Failures
+
+TestRunLogs/
+    hostA.err
+    hostA.log
+    ....
+    hostN.err
+    nostN.log
+
+UpdateInfo/
+    ...
+    474376.txt
+    ...
+    474695.txt
+    LatestUpdateRevision.txt
+
+UpdateLog/
+    ...
+    474376/
+    ...
+    474695/
+        UpdateTime
+        status-u.err
+        status-u.out
+        svn--version
+        update.err
+        update.out
+
+    update.out
+    updateOK
+
+builds/
+    ...
+    474376.size
+    ...
+    474695.size
+    baseline.size
+
+env.sh
+summary-full.txt
+summary.txt
+testenv.sh
+
+testing/
+    ExcludeFromZip
+    Full/
+    Limited/
+    Notes/
+    ReadyToStartOnCygWin
+    UpdateInfo -> ../UpdateInfo
+    builds -> ../builds
+    revisionlist
+    showtestlist -> testlist
+    testhostlist
+    testlist
+
+    testlog/
+        ...
+        Linux-2.6.9-34.ELsmp_x86_64-x86_64/
+        SunOS-5.10_i86pc-i386/
+        SunOS-5.10_sun4u-sparc/
+            ...
+            474664.zip
+            474695-cpu_mem
+            474695-system
+            474695.csv
+            474695.javainfo
+            474695.txt
+            ...
+            baseline.csv
+            current.csv
+            externallyVisible
+            previous.csv
+            suiteStart.txt
+
+        ...
+
+trunk/ # or 10.1 or ....
+    ...
+    ...

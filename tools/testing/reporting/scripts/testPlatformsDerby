@@ -1,0 +1,243 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+SHOWDETAILS=""
+PRESENTATION="Limited"
+RSPAN=4
+if [ "$1" = "details" ]
+then
+  # Show details
+  SHOWDETAILS="ShowDetails"
+  PRESENTATION="Full"
+  RSPAN=5
+fi
+
+# We have one catalog per platform
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/testlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+# Get the set of platforms
+cd ${TESTLOGDIR}
+PLATFORMS=`ls`
+
+# Get the list of revisions
+REVISIONSFILE="${DERBYDIR}/testing/revisionlist"
+# This is extremely timeconsuming:
+# Use only 12 latest revisions
+REVISIONS=`head -12 ${REVISIONSFILE} | gawk '{ print $1 }' | grep -v "^#"`
+
+for PLATFORM in ${PLATFORMS}
+do
+ if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+ then
+  echo ${PLATFORM}
+  # Create one file per platform
+  HISTORY="${DERBYDIR}/testing/${PRESENTATION}/${PLATFORM}_history.html"
+  mkdir -p ${DERBYDIR}/testing/${PRESENTATION}
+  chmod o+rx ${DERBYDIR}/testing/${PRESENTATION}
+
+  # Build table header:
+  echo "<TABLE border="1">" > ${HISTORY}
+  echo "<TR>" >> ${HISTORY}
+  echo "<TD> <font size=\"+1\"><b> ${PLATFORM} </b></font></TD><TD></TD>" >> ${HISTORY}
+
+  chmod go+r ${HISTORY}
+
+  no=0
+  for REVISION in ${REVISIONS}
+  do
+    BGCOLOR="bgcolor=\"${COLOR0}\""
+    # expr $no % 2
+    if [ `expr $no % 2` = 0 ]
+    then
+      BGCOLOR="bgcolor=\"${COLOR1}\""
+    fi
+    no=`expr $no + 1`
+    #DEBUG echo "$no: $BGCOLOR"
+
+    #DEBUG echo "${REVISION}"
+
+    TS=`cat ${UPDATELOGDIR}/${REVISION}/UpdateTime`
+
+    echo "<TD ${BGCOLOR}><I>Rev.:</I><BR><font size=\"+1\">${REVISION}</font><BR>${TS}" >> ${HISTORY}
+  done
+  echo "</TR>" >> ${HISTORY}
+  # Done building header.
+
+  for SUITE in ${SUITES}
+  do
+    echo "    ${SUITE}"
+    # Info per SUITE in rows
+
+    BGCOLOR="bgcolor=\"${COLOR0}\""
+    # expr $no % 2
+    if [ `expr $no % 2` = 0 ]
+    then
+      BGCOLOR="bgcolor=\"${COLOR1}\""
+    fi
+    no=`expr $no + 1`
+    #DEBUG echo "$no: $BGCOLOR"
+
+    echo "<TR ${BGCOLOR}><TD rowspan=\"${RSPAN}\"><i><A HREF=\"${SUITE}_history.html\">${SUITE}</A></i></TD>" >> ${HISTORY}
+
+    echo "<font size=\"-1\">" >> ${HISTORY}
+
+    echo "<TD ALIGN=\"RIGHT\">"\#:"</TD>" >> ${HISTORY}
+    echo -n "      N:      "
+    for REVISION in ${REVISIONS}
+    do
+      echo -n " ${REVISION}"
+      # Info per REVISION in columns: Number of tests
+      #  2: Number, 3: OK, 4: Failed, 5: Skipped
+      RES=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv`
+      if [ "${RES}" = "" ]
+      then
+        RES="<TD ALIGN=\"RIGHT\">"$NA"</TD>"
+      else
+        NUMBER=`echo ${RES} | gawk '{ print $2 }'`
+        # OK=`echo ${RES} | gawk '{ print $3 }'`
+        # FAILED=`echo ${RES} | gawk '{ print $4 }'`
+        # SKIPPED=`echo ${RES} | gawk '{ print $5 }'`
+        RES="<TD ALIGN=\"RIGHT\">${NUMBER}</TD>"
+      fi
+      # DEBUG echo "${RES}"
+      echo -n "${RES}" >> ${HISTORY}
+    done # REVISIONS Number
+    echo "</TR>" >> ${HISTORY}
+    echo "<TR ${BGCOLOR}>" >> ${HISTORY}
+    echo "<TD ALIGN=\"RIGHT\">"OK:"</TD>" >> ${HISTORY}
+    echo ""; echo -n "      OK:     "
+    for REVISION in ${REVISIONS}
+    do
+      echo -n " ${REVISION}"
+      # Info per REVISION in columns: Number of tests
+      #  2: Number, 3: OK, 4: Failed, 5: Skipped
+      RES=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv`
+      if [ "${RES}" = "" ]
+      then
+        RES="<TD ALIGN=\"RIGHT\">"$NA"</TD>"
+      else
+        # NUMBER=`echo ${RES} | gawk '{ print $2 }'`
+        OK=`echo ${RES} | gawk '{ print $3 }'`
+        # FAILED=`echo ${RES} | gawk '{ print $4 }'`
+        # SKIPPED=`echo ${RES} | gawk '{ print $5 }'`
+        RES="<TD ALIGN=\"RIGHT\">${OK}</TD>"
+      fi
+      # DEBUG echo "${RES}"
+      echo -n "${RES}" >> ${HISTORY}
+    done # REVISIONS OK
+    echo "</TR>" >> ${HISTORY}
+    echo "<TR ${BGCOLOR}>" >> ${HISTORY}
+    echo "<TD ALIGN=\"RIGHT\">"Failed:"</TD>" >> ${HISTORY}
+    echo ""; echo -n "      Failed: "
+    for REVISION in ${REVISIONS}
+    do
+      echo -n " ${REVISION}"
+      # Info per REVISION in columns: Number of tests
+      #  2: Number, 3: OK, 4: Failed, 5: Skipped
+      RES=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv`
+      if [ "${RES}" = "" ]
+      then
+        RES="<TD ALIGN=\"RIGHT\">"$NA"</TD>"
+      else
+        # NUMBER=`echo ${RES} | gawk '{ print $2 }'`
+        # OK=`echo ${RES} | gawk '{ print $3 }'`
+        FAILED=`echo ${RES} | gawk '{ print $4 }'`
+        # SKIPPED=`echo ${RES} | gawk '{ print $5 }'`
+        CFB="${BGCOLOR}"
+        if [ "${FAILED}" != "0" ]
+        then
+          FAILED="<A HREF=\"../testlog/${PLATFORM}/${REVISION}-${SUITE}_diff.txt\">${FAILED}</A>"
+          CFB="bgcolor=\"red\""
+        fi
+        RES="<TD ${CFB} ALIGN=\"RIGHT\">${FAILED}</TD>"
+      fi
+      # DEBUG echo "${RES}"
+      echo -n "${RES}" >> ${HISTORY}
+    done # REVISIONS Failed
+    echo "</TR>" >> ${HISTORY}
+    echo "<TR ${BGCOLOR}>" >> ${HISTORY}
+    echo "<TD ALIGN=\"RIGHT\">"Skip:"</TD>" >> ${HISTORY}
+    echo ""; echo -n "      Skipped:"
+    for REVISION in ${REVISIONS}
+    do
+      echo -n " ${REVISION}"
+      # Info per REVISION in columns: Number of tests
+      #  2: Number, 3: OK, 4: Failed, 5: Skipped
+      RES=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv`
+      CSB=""
+      if [ "${RES}" = "" ]
+      then
+        RES="<TD ALIGN=\"RIGHT\">"$NA"</TD>"
+      else
+        # NUMBER=`echo ${RES} | gawk '{ print $2 }'`
+        # OK=`echo ${RES} | gawk '{ print $3 }'`
+        # FAILED=`echo ${RES} | gawk '{ print $4 }'`
+        SKIPPED=`echo ${RES} | gawk '{ print $5 }'`
+        if [ "${SKIPPED}" != "0" ]
+        then
+          # CSB="bgcolor=\"yellow\""
+          CSB="bgcolor=\"#FFFFA0\""
+        fi
+        RES="<TD ${CSB} ALIGN=\"RIGHT\">${SKIPPED}</TD>"
+      fi
+      # DEBUG echo "${RES}"
+      echo -n "${RES}" >> ${HISTORY}
+    done # REVISIONS Skipped
+    echo "</TR>" >> ${HISTORY}
+    if [ "${SHOWDETAILS}" = "ShowDetails" ]
+    then
+     echo "<TR ${BGCOLOR}>" >> ${HISTORY}
+     echo "<TD ALIGN=\"RIGHT\"> <font size=\"-1\">Duration:</font></TD>" >> ${HISTORY}
+     echo ""; echo -n "      Duratio:"
+     for REVISION in ${REVISIONS} # Duration
+     do
+       echo -n " ${REVISION}"
+       RES=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv | gawk '{ print "<TD  ALIGN=\"CENTER\">"$6"</TD>" }'`
+       #DEBUG echo "${RES}"
+       if [ "${RES}" = "" ]
+       then
+         RES="<TD ALIGN=\"CENTER\">"$NA"</TD>"
+       fi
+       echo -n "${RES}" >> ${HISTORY}
+     done # REVISIONS Duration
+     echo "</TR>" >> ${HISTORY}
+    fi # SHOWDETAILS
+
+    echo "</font>" >> ${HISTORY}
+    
+    echo ""; echo "    End ${SUITE}"
+  done # SUITES
+
+  echo "</TABLE>" >> ${HISTORY}
+  echo "<HR>" >> ${HISTORY}
+  echo "<div style=\"text-align: right;\">"  >> ${HISTORY}
+  echo "<font size=\"-1\"><i>"  >> ${HISTORY}
+  date +%Y-%m-%d" "%H:%M:%S" "%Z >> ${HISTORY}
+  echo "</i></font>" >> ${HISTORY}
+  echo "<div >" >> ${HISTORY}
+
+  chmod go+r ${HISTORY}
+
+  echo "End ${PLATFORM}"
+ fi
+
+  if [ "${SHOWDETAILS}" != "ShowDetails" ]
+  then
+    DTIPUB="${PUBLISHDIR}/${PRESENTATION}/${PLATFORM}_history.html"
+    SRC="${HISTORY}"
+    DST="${DTIPUB}"
+    echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+    ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+  fi
+
+done # PLATFORMS
+

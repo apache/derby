@@ -1,0 +1,23 @@
+#!/bin/bash
+echo "THIS IS SITE SPECIFIC! FIX!"
+exit
+
+export USER="derbytester"
+export HOME="/home/${USER}"
+export DERBYDIR="${HOME}/Apache/Derby/trunk_JDK15"
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+/bin/date > ${HOME}/cron/mkAllDerbyTestInfo.log
+/bin/date > ${HOME}/cron/mkAllDerbyTestInfo.err
+
+. ${HOME}/.bashrc >> ${HOME}/cron/mkAllDerbyTestInfo.log 2>>${HOME}/cron/mkAllDerbyTestInfo.err
+. ${DERBYDIR}/env.sh >> ${HOME}/cron/mkAllDerbyTestInfo.log 2>>${HOME}/cron/mkAllDerbyTestInfo.err
+
+# Internal:
+${TOOLDIR}/mkAllDerbyTestInfo details >> ${HOME}/cron/mkAllDerbyTestInfo.log 2>>${HOME}/cron/mkAllDerbyTestInfo.err
+
+# For publishing:
+${TOOLDIR}/mkAllDerbyTestInfo.public  >> ${HOME}/cron/mkAllDerbyTestInfo.log 2>>${HOME}/cron/mkAllDerbyTestInfo.err
+

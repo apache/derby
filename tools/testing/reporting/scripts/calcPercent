@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+DIVIDEND=$1
+DIVISOR=$2
+# echo "${currSeconds} / ${baseLineSeconds}"
+let " Percent = ${DIVIDEND}*10000 / ${DIVISOR} "
+let " Decimal = ${Percent} % 100 "
+let " Percent = ${Percent} / 100 "
+# [...]PPP.DD
+if [ "${Decimal}" = "0" ]
+then
+  Decimal="00"
+elif [ ${Decimal} -le 9 ]
+then
+  Decimal="0${Decimal}"
+fi
+if [ ${Percent} -le 9 ]
+then
+  Percent="  ${Percent}"
+elif [ ${Percent} -le 99 ]
+then
+  Percent=" ${Percent}"
+fi
+echo "${Percent}.${Decimal}"
+# echo -e "${Percent}.${Decimal}\tx"

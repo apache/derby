@@ -1,0 +1,66 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+# LOCAL_EXEC="true" # Set to 'true' to execute on THIS host only!; i.e. do not loop over machines in $1.
+LOCAL_EXEC="false" # Set to  NOT 'true' to execute on all machines in $1.
+RSH_SSH=ssh # Set to rsh or ssh.
+
+if [ "$1" == "" ]
+then
+    echo "Usage: $0 fileListingHostsToRunTests"
+    exit
+fi
+
+SANDBOX=`basename ${DERBYDIR}`
+if [ ! -e ${BUILDLOGDIR}/buildOK ]
+then
+  echo "Derby was NOT (re)built:"
+  echo "  ${BUILDLOGDIR}/buildOK does not exist."
+  ### UNCOMMENT TO SEND MAIL. ${TOOLDIR}/textMail "${SANDBOX} was NOT (re)built" "${MAILTOINT}" "${UPDATELOGDIR}/update.out ${BUILDLOGDIR}/lastBuildInfo"
+  exit
+fi
+
+HOSTLISTFILE=$1
+echo "Execute runAllTests on all hosts listed in ${HOSTLISTFILE}"
+if [ ! -e $HOSTLISTFILE ]
+then
+    echo "$HOSTLISTFILE does not exist."
+    exit
+fi
+
+if [ "${DERBYDIR}" = "" ]
+then
+  echo "DERBYDIR must be defined as it is sent to startDerbyTests"
+  exit
+fi
+if [ ! -e ${DERBYDIR} ]
+then
+  echo "Nonexisting DERBYDIR: ${DERBYDIR} was given to $0."
+  exit
+fi
+
+if [ "${LOCAL_EXEC}" != "true" ]
+then
+  HOSTLIST=`grep -v "^#" ${HOSTLISTFILE}`
+  for HOST in ${HOSTLIST}
+  do
+    if [ "${HOST}" == "exit" ]
+    then
+      echo "Exit: found ${HOST}"
+      exit
+    fi
+  
+    echo "Host: ${HOST}"
+    echo "${RSH_SSH} ${HOST} \"${TOOLDIR}/startDerbyTests ${DERBYDIR}\""
+    ${RSH_SSH} ${HOST} "${TOOLDIR}/startDerbyTests ${DERBYDIR}"
+  done
+else
+  ${TOOLDIR}/startDerbyTests ${DERBYDIR}
+fi
+
+# We can't handle win/cygwin via 'rsh host cmd' so must use a flag which
+# is detected by a looping script on the cygwin host(s):
+# touch ${TESTLOGDIR}/ReadyToStartOnCygWin
+touch ${DERBYDIR}/testing/ReadyToStartOnCygWin
+# To be detected by ${TOOLDIR}/loopToDetectAndStartDerbyTestsOnCygwin

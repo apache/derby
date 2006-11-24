@@ -1,0 +1,477 @@
+#!/bin/bash
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+if [ "$1" = "" ]
+then
+  echo "Usage: $0 current|previous|revision [details]"
+  exit
+fi
+WHICH=$1
+SHOWDETAILS=""
+PRESENTATION="Limited"
+if [ "$2" = "details" ]
+then
+  # Show details
+  SHOWDETAILS="ShowDetails"
+  PRESENTATION="Full"
+fi
+
+# We have one catalog per platform
+if [ ! -e ${TESTLOGDIR} ]
+then
+  echo "${TESTLOGDIR} does not exist"
+  exit
+fi
+
+cd ${TESTLOGDIR}
+
+SUMMARY="${DERBYDIR}/testing/${PRESENTATION}/testSummary-${WHICH}-$$.html"
+SHOWSUMMARY="${DERBYDIR}/testing/${PRESENTATION}/testSummary-${WHICH}.html"
+SHOWSUMMARYPUB="${PUBLISHDIR}/${PRESENTATION}/testSummary-${WHICH}.html"
+mkdir -p ${DERBYDIR}/testing/${PRESENTATION}
+chmod o+xr ${DERBYDIR}/testing/${PRESENTATION}
+
+# Get the list of testsuite we are running:
+TESTLISTFILE="${DERBYDIR}/testing/showtestlist"
+SUITES=`gawk '{ print $1 }' ${TESTLISTFILE} | grep -v "^#"`
+
+PLATFORMS=`ls`
+
+DERBYVERSION="  -"
+if [ "${WHICH}" = "current" ]
+then
+   DERBYVERSION=`grep "/classes] " ${DERBYDIR}/BuildLog/currentSysInfo.txt | gawk -F] '{ print $2 }'`
+   if [ "${DERBYVERSION}" == "" ] # extractFromJETrun copies from ..._report.txt. Make this default...
+   then
+     DERBYVERSION=`grep "derby.jar] " ${DERBYDIR}/BuildLog/currentSysInfo.txt | gawk -F] '{ print $2 }'`
+   fi
+elif [ "${WHICH}" = "previous" ]
+then
+   REVISIONSFILE="${DERBYDIR}/testing/revisionlist"
+   PREVREV=`grep -v "^#" ${REVISIONSFILE} | head -2 | tail -1 | gawk '{ print $1 }'`
+   DERBYVERSION=`grep "/classes] " ${DERBYDIR}/BuildLog/${PREVREV}/sysinfo.txt | gawk -F] '{ print $2 }'`
+   if [ "${DERBYVERSION}" == "" ] # extractFromJETrun copies from ..._report.txt. Make this default...
+   then
+     DERBYVERSION=`grep "derby.jar] " ${DERBYDIR}/BuildLog/${PREVREV}/sysinfo.txt | gawk -F] '{ print $2 }'`
+   fi
+else
+   DERBYVERSION=`grep "/classes] " ${DERBYDIR}/BuildLog/${WHICH}/sysinfo.txt | gawk -F] '{ print $2 }'`
+   if [ "${DERBYVERSION}" == "" ] # extractFromJETrun copies from ..._report.txt. Make this default...
+   then
+     DERBYVERSION=`grep "derby.jar] " ${DERBYDIR}/BuildLog/${WHICH}/sysinfo.txt | gawk -F] '{ print $2 }'`
+   fi
+fi
+
+SANDBOX=`basename ${DERBYDIR}`
+echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" > ${SUMMARY}
+echo "<html>" >> ${SUMMARY}
+echo "<head>" >> ${SUMMARY}
+echo "<title>${SANDBOX} ${WHICH} ${DERBYVERSION} Apache Derby Open Source Database</title>" >> ${SUMMARY}
+echo "</head>" >> ${SUMMARY}
+echo "<body>" >> ${SUMMARY}
+DBV=`echo "${DERBYVERSION}" | gawk -F\( '{ print $2 }' | gawk -F\) '{ print $1 }'`
+# Next is added since we now get e.g. 394991:394993M 
+DBV=`echo "${DBV}" | gawk -F: '{ print $1 }'`
+PUREDBV=`echo ${DBV} | sed -e 's/M//'`
+FAILDBV=${PUREDBV}
+HASSEQNO=`echo ${WHICH} | grep "S"`
+
+if [ "${WHICH}" = "current" ] # No need for mkJIRArefs.current: We have DBV.
+then
+  ${TOOLDIR}/mkJIRArefs.current ${SANDBOX} current # May be overkill, doing this too many places now.....
+elif [ "${WHICH}" = "previous" ] # No need for mkJIRArefs.current: We have DBV.
+then
+  ${TOOLDIR}/mkJIRArefs.current ${SANDBOX} previous # May be overkill, doing this too many places now.....
+elif [ "${HASSEQNO}" != "" ]
+then
+  ${TOOLDIR}/mkJIRArefs ${SANDBOX} ${WHICH} # May be overkill, doing this too many places now.....
+  FAILDBV=${WHICH}
+  PUREDBV=${WHICH}
+else
+  ${TOOLDIR}/mkJIRArefs ${SANDBOX} ${WHICH} # ${DBV} # May be overkill, doing this too many places now.....
+  FAILDBV=${WHICH}
+  PUREDBV=${WHICH}
+fi
+DETAILS="(<A HREF=\"../../FailReports/${FAILDBV}.html\">Failures in ${FAILDBV}</A>)"
+
+NOTE=""
+if [ -e ${DERBYDIR}/testing/Notes/${WHICH}.txt ]
+then
+  TXT=`cat ${DERBYDIR}/testing/Notes/${WHICH}.txt`
+  NOTE="<br><font size=\"+1\"><b>Note: ${TXT}</b></font>"
+fi
+
+echo "<font size=\"+2\"><b> <i>${SANDBOX}</i> ${WHICH} </b></font> ${DETAILS} ${NOTE}" >> ${SUMMARY}
+
+echo "<TABLE border="1">" >> ${SUMMARY}
+echo "<TR>" >> ${SUMMARY}
+
+# Show Legend in top, leftmost col.:
+echo "<TD>" >> ${SUMMARY}
+echo "<div style=\"text-align: right;\">"  >> ${SUMMARY}
+echo "<i>" >> ${SUMMARY}
+echo "Test platform:<BR><BR>" >> ${SUMMARY}
+echo "Java Vendor:<BR>" >> ${SUMMARY}
+echo "Java Version:<BR>" >> ${SUMMARY}
+if [ "${SHOWDETAILS}" = "ShowDetails" ]
+then
+  echo "<font size=\"-1\">Test host:</font>" >> ${SUMMARY}
+fi
+echo "<HR>" >> ${SUMMARY}
+echo "<font size=\"-1\">Rev: <BR>Date & Time:<HR>" >> ${SUMMARY}
+
+# DBV=`echo "${DERBYVERSION}" | gawk -F\( '{ print $2 }' | gawk -F\) '{ print $1 }'`
+
+# If the build failed:
+if [ -e ${DERBYDIR}/testing/UpdateInfo/${DBV}-buildDetails.txt ]
+then
+  echo "<A HREF=\"../../UpdateInfo/${DBV}-buildDetails.txt\"><font color=\"red\"><i><b>ERRORS!</b></i></font></A> " >> ${SUMMARY}
+
+  SRC="${DERBYDIR}/testing/UpdateInfo/${DBV}-buildDetails.txt"
+  DST="${PUBLISHDIR}/UpdateInfo/${DBV}-buildDetails.txt"
+  echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+  ### ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+
+fi
+
+if [ "${SHOWDETAILS}" != "ShowDetails" ]
+then
+  # Make sure we transfer the change info from previous rev.:
+  SRC="${DERBYDIR}/testing/UpdateInfo/${PUREDBV}.txt"
+  DST="${PUBLISHDIR}/UpdateInfo/${PUREDBV}.txt"
+  echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+  ### ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+fi
+
+echo "Build platform:" >> ${SUMMARY}
+if [ "${SHOWDETAILS}" = "ShowDetails" ]
+then
+  echo "<BR>Build host:</font></TD>" >> ${SUMMARY}
+fi
+echo "</font>" >> ${SUMMARY}
+echo "</i>" >> ${SUMMARY}
+echo "</div>" >> ${SUMMARY}
+echo "</TD>" >> ${SUMMARY}
+
+# Heading:
+no=0
+for PLATFORM in ${PLATFORMS}
+do
+ if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+ then
+  BGCOLOR="bgcolor=\"${COLOR0}\""
+  # expr $no % 2
+  if [ `expr $no % 2` = 0 ]
+  then
+    BGCOLOR="bgcolor=\"${COLOR1}\""
+  fi
+  no=`expr $no + 1`
+  #DEBUG echo "$no: $BGCOLOR"
+
+  #DEBUG echo "PLATFORM: ${PLATFORM}"
+  PLATF=`echo "${PLATFORM}" | sed -e 's/CYGWIN_/CYGWIN /' | gawk -F_ '{ print $1"<BR>"$2 }' | sed -e 's/CYGWIN /CYGWIN_/'`
+  #DEBUG echo "PLATF: ${PLATF}"
+  THNAME=""
+  BUILDPLATFHOST=`grep "^Built on " ${PLATFORM}/${WHICH}.csv | gawk '{ print $3" "$4" "$5" "$6 }'`
+  BP=`echo ${BUILDPLATFHOST} | gawk -F[ '{ print $1 }'`
+  BHNAME=""
+  if [ "${SHOWDETAILS}" = "ShowDetails" ]
+  then
+    TESTHOST=`head -1 ${PLATFORM}/${WHICH}.csv | gawk '{ print $1 }'`
+    THNAME="<BR><font size=\"-1\">${TESTHOST}</font>"
+    BHNAME=`echo ${BUILDPLATFHOST} | gawk -F[ '{ print $2 }' | gawk -F] '{ print $1 }'`
+    BHNAME="<BR>${BHNAME}"
+  fi
+  # DEBUG echo "BHNAME: ${BHNAME}"
+  REVISION=`head -1 ${PLATFORM}/${WHICH}.csv | gawk '{ print $7 }'`
+
+  # Need to check every time in case we're looking at current or previous :-(
+  TS=`cat ${UPDATELOGDIR}/${REVISION}/UpdateTime`
+
+  TESTLOG_PLATF_DIR="${TESTLOGDIR}/${PLATFORM}"
+  JAVA="${TESTLOG_PLATF_DIR}/${REVISION}.javainfo"
+  JAVAVENDOR=`head -1 ${JAVA}`
+  JAVAVERSION=`tail -1 ${JAVA}`
+  JAVAINFO="${JAVAVENDOR}<BR>${JAVAVERSION}"
+
+  SHREV="${REVISION}<BR>${TS}"
+  if [ "${REVISION}" != "${PUREDBV}" ]
+  then
+    SHREV="<I><B>${REVISION}</B><BR>${TS}</I>"
+  fi
+  # DEBUG echo "SHREV: ${SHREV}"
+
+  echo "<TD ${BGCOLOR} colspan=\"4\"> <I><A HREF=\"../testlog/${PLATFORM}/${REVISION}-system\">${PLATF}</A><BR></I>${JAVAINFO}<A HREF=\"../testlog/${PLATFORM}/${REVISION}-cpu_mem\">${THNAME}</A><HR><font size=\"-1\">${SHREV}<HR><i>${BP}${BHNAME}</i></font></TD>" >> ${SUMMARY}
+ fi # externallyVisible || "ShowDetails"
+done # PLATFORMS
+echo "</TR>" >> ${SUMMARY}
+
+if [ "${REVISION}" = "" ]
+then
+  REVISION="${WHICH}"
+fi
+
+echo "<TR>" >> ${SUMMARY}
+# echo "<TD> <A HREF=\"../UpdateInfo/${REVISION}.txt\"><b>Changes</b><i>(->${REVISION})</i></A> </TD>" >> ${SUMMARY}
+# DBV=`echo "${DERBYVERSION}" | gawk -F\( '{ print $2 }' | gawk -F\) '{ print $1 }'`
+## if [ "${SHOWDETAILS}" = "ShowDetails" ] # FIXME
+## then
+  echo "<TD> <A HREF=\"../../UpdateInfo/${PUREDBV}.txt\"><b>Changes</b><i>(->${PUREDBV})</i></A> </TD>" >> ${SUMMARY}
+## else
+##   echo "<TD> <A HREF=\"../../../UpdateInfo/${PUREDBV}.txt\"><b>Changes</b><i>(->${PUREDBV})</i></A> </TD>" >> ${SUMMARY}
+## fi
+for PLATFORM in ${PLATFORMS}
+do
+ if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+ then
+  for HEAD in Num OK Fail Skip
+  do
+    # echo -n "<TD> <i>${HEAD}</i></TD>" >> ${SUMMARY}
+    echo -n "<TD align=\"center\"> <font size=\"-1\"><i>${HEAD}</i></font></TD>" >> ${SUMMARY}
+  done
+ fi
+done # PLATFORMS
+echo "</TR>" >> ${SUMMARY}
+
+no=0
+NA="<font color=\"yellow\"><b>NA</b></font>"
+
+for SUITE in ${SUITES}
+do
+  if [ "${SUITE}" = "exit" ]
+  then
+    echo "Exit: found ${SUITE}"
+    echo "</TABLE>" >> ${SUMMARY}
+    echo "<HR>" >> ${SUMMARY}
+    echo "<div style=\"text-align: right;\">"  >> ${SUMMARY}
+    echo "<font size=\"-1\"><i>"  >> ${SUMMARY}
+    date +%Y-%m-%d" "%H:%M:%S" "%Z >> ${SUMMARY}
+    echo "</i></font>" >> ${SUMMARY}
+    echo "</div>" >> ${SUMMARY}
+    cp -f ${SUMMARY} ${SHOWSUMMARY}
+    chmod go+r ${SHOWSUMMARY}
+    rm -f ${SUMMARY}
+
+    if [ "${SHOWDETAILS}" != "ShowDetails" ]
+    then
+      SRC="${SHOWSUMMARY}"
+      DST="${SHOWSUMMARYPUB}"
+      echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+      ### ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+    fi
+
+    exit
+  fi
+
+  echo "${SUITE}"
+
+  BGCOLOR="bgcolor=\"${COLOR0}\""
+  # expr $no % 2
+  if [ `expr $no % 2` = 0 ]
+  then
+    BGCOLOR="bgcolor=\"${COLOR1}\""
+  fi
+  no=`expr $no + 1`
+  #DEBUG echo "$no: $BGCOLOR"
+
+  echo "<TR ${BGCOLOR}><TD><i><A HREF=\"${SUITE}_history.html\">${SUITE}</A></i></TD>" >> ${SUMMARY}
+  for PLATFORM in ${PLATFORMS}
+  do
+   if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+   then
+    echo "  ${PLATFORM}"
+    #  2: Number, 3: OK, 4: Failed, 5: Skipped
+    RES=`grep "^${SUITE} " ${PLATFORM}/${WHICH}.csv`
+    if [ "${RES}" = "" ]
+    then
+      RES="<TD ALIGN=\"RIGHT\">"$NA"</TD><TD ALIGN=\"RIGHT\">"$NA"</TD><TD ALIGN=\"RIGHT\">"$NA"</TD><TD ALIGN=\"RIGHT\">"$NA"</TD>"
+    else
+      NUMBER=`echo ${RES} | gawk '{ print $2 }'`
+      OK=`echo ${RES} | gawk '{ print $3 }'`
+      FAILED=`echo ${RES} | gawk '{ print $4 }'`
+      SKIPPED=`echo ${RES} | gawk '{ print $5 }'`
+      CFB=""
+      CSB=""
+      if [ "${FAILED}" != "0" ]
+      then
+        REVISION=`head -1 ${PLATFORM}/${WHICH}.csv | gawk '{ print $7 }'`
+        FAILFILE="${PLATFORM}/${REVISION}-${SUITE}_diff.txt"
+        FAILED="<A HREF=\"../testlog/${FAILFILE}\">${FAILED}</A>"
+        CFB="bgcolor=\"red\""
+        if [ "${SHOWDETAILS}" != "ShowDetails" ]
+        then
+          SRC="${DERBYDIR}/testing/testlog/${FAILFILE}"
+          DST="${PUBLISHDIR}/testlog/${FAILFILE}"
+          chmod go+r ${SRC}
+          echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+          ### ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+        fi
+      fi
+      if [ "${SKIPPED}" != "0" ]
+      then
+        REVISION=`head -1 ${PLATFORM}/${WHICH}.csv | gawk '{ print $7 }'`
+        SKIPFILE="${PLATFORM}/${REVISION}-${SUITE}_skipped.txt"
+        SKIPPED="<A HREF=\"../testlog/${SKIPFILE}\">${SKIPPED}</A>"
+        # CSB="bgcolor=\"yellow\""
+        CSB="bgcolor=\"#FFFFA0\""
+        if [ "${SHOWDETAILS}" != "ShowDetails" ]
+        then
+          SRC="${DERBYDIR}/testing/testlog/${SKIPFILE}"
+          DST="${PUBLISHDIR}/testlog/${SKIPFILE}"
+          chmod go+r ${SRC}
+          echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+          ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+        fi
+      fi
+      CNB=""
+      if [ "${NUMBER}" == "0" ]
+      then
+        CNB="bgcolor=\"yellow\""
+      fi
+      RES="<TD ${CNB} ALIGN=\"RIGHT\">${NUMBER}</TD><TD ALIGN=\"RIGHT\">${OK}</TD><TD ${CFB} ALIGN=\"RIGHT\">${FAILED}</TD><TD ${CSB} ALIGN=\"RIGHT\">${SKIPPED}</TD>"
+    fi
+    #DEBUG echo "${RES}"
+
+    echo -n "${RES}" >> ${SUMMARY}
+   fi
+  done # PLATFORMS
+  echo "</TR>" >> ${SUMMARY}
+
+  # if [ "${SHOWDETAILS}" = "ShowDetails" ]
+  # then
+    echo "<TR ${BGCOLOR}>" >> ${SUMMARY}
+  
+    echo "<TD ALIGN=\"RIGHT\"> <font size=\"-1\">Duration:</font></TD>" >> ${SUMMARY}
+    for PLATFORM in ${PLATFORMS}
+    do
+     if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+     then
+      #DEBUG echo "  ${PLATFORM}"
+      TIME=`grep "^${SUITE} " ${PLATFORM}/${WHICH}.csv | gawk '{ print $6 }'`
+      # echo "${TIME}"
+      if [ "${TIME}" = "" ]
+      then
+        RES="<TD colspan=\"4\" ALIGN=\"CENTER\">"$NA"</TD>"
+        STARTED=`head -1 ${PLATFORM}/suiteStart.txt`
+        if [ "${SHOWDETAILS}" = "ShowDetails" ]
+        then
+          if [ "${STARTED}" != "" ]
+          then
+            RES="<font size=\"-1\" color=\"darkblue\">Start: <i>${STARTED}</i></font>"
+            RES="<TD colspan=\"4\" ALIGN=\"CENTER\">${RES}</TD>"
+          fi
+        fi
+        echo -n "${RES}" >> ${SUMMARY}
+      else
+        SECONDS=`${TOOLDIR}/toSeconds ${TIME}`
+        # echo ${SECONDS}
+        BASESECONDS=`grep "^${SUITE} " ${PLATFORM}/baseline.csv | gawk '{ print $3 }'`
+        # echo ${BASESECONDS}
+        PERCENT=`${TOOLDIR}/calcPercent ${SECONDS} ${BASESECONDS}`
+        # echo ${PERCENT}
+        # RES="<TD colspan=\"4\" ALIGN=\"CENTER\">"${TIME} ${PERCENT}"</TD>"
+        # echo ${RES}
+        if [ "${SHOWDETAILS}" = "ShowDetails" ]
+        then
+          echo -n "<TD colspan=\"2\" ALIGN=\"CENTER\">" >> ${SUMMARY}
+          echo -n " ${TIME} " >> ${SUMMARY}
+          echo -n "</TD>" >> ${SUMMARY}
+          echo -n "<TD colspan=\"2\" ALIGN=\"CENTER\">" >> ${SUMMARY}
+          echo -n " ${PERCENT}% " >> ${SUMMARY}
+          echo -n "</TD>" >> ${SUMMARY}
+        else
+          echo -n "<TD colspan=\"4\" ALIGN=\"CENTER\">" >> ${SUMMARY}
+          echo -n " ${PERCENT}% " >> ${SUMMARY}
+          echo -n "</TD>" >> ${SUMMARY}
+        fi
+        # echo -n "${RES}" >> ${SUMMARY}
+      fi
+     fi
+    done # PLATFORMS
+    echo "</TR>" >> ${SUMMARY}
+  # fi # SHOWDETAILS
+
+done # SUITE in ${SUITES}
+
+# Show baseline info for each platform:
+echo "<TR>" >> ${SUMMARY}
+echo "<TD ALIGN=\"RIGHT\"> <font size=\"-1\">Baseline for<br>duration is rev.:</font></TD>" >> ${SUMMARY}
+no=0
+for PLATFORM in ${PLATFORMS}
+do
+ if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "ShowDetails" ]
+ then
+  BGCOLOR="bgcolor=\"${COLOR0}\""
+  # expr $no % 2
+  if [ `expr $no % 2` = 0 ]
+  then
+    BGCOLOR="bgcolor=\"${COLOR1}\""
+  fi
+  no=`expr $no + 1`
+  BASELINE=`head -1 ${PLATFORM}/baseline.csv  | gawk '{ print $2 }'`
+  TS=`cat ${UPDATELOGDIR}/${BASELINE}/UpdateTime`
+  PLATF=`echo "${PLATFORM}" | sed -e 's/CYGWIN_/CYGWIN /' | gawk -F_ '{ print $1"<BR>"$2 }' | sed -e 's/CYGWIN /CYGWIN_/'`
+  echo "<TD ${BGCOLOR} colspan=\"4\">${BASELINE}<BR><font size=\"-1\">${TS}<BR><I>(${PLATF})</I></font></TD>" >> ${SUMMARY}
+ fi
+done # PLATFORMS
+echo "</TR>" >> ${SUMMARY}
+
+if [ "${SHOWDETAILS}" == "ShowDetails" ] # Internal pages
+then
+  echo "<TR>" >> ${SUMMARY} # Show link to revision.zip file on internal pages:
+  echo "<TD ALIGN=\"RIGHT\"> <font size=\"-1\">Zipped <br>'Java user dir':</font></TD>" >> ${SUMMARY}
+  no=0
+  for PLATFORM in ${PLATFORMS}
+  do
+
+    BGCOLOR="bgcolor=\"${COLOR0}\""
+    # expr $no % 2
+    if [ `expr $no % 2` = 0 ]
+    then
+      BGCOLOR="bgcolor=\"${COLOR1}\""
+    fi
+    no=`expr $no + 1`
+    REVISION=`head -1 ${PLATFORM}/${WHICH}.csv | gawk '{ print $7 }'`
+    ZIPFILE="${PLATFORM}/${REVISION}.zip"
+    ZIPPED="<A HREF=\"../testlog/${ZIPFILE}\">${REVISION}.zip</A>"
+    echo "<TD ${BGCOLOR} colspan=\"4\">${ZIPPED}</TD>" >> ${SUMMARY}
+  done # PLATFORMS
+  echo "</TR>" >> ${SUMMARY}
+fi
+echo "</TABLE>" >> ${SUMMARY}
+
+echo "<HR>" >> ${SUMMARY}
+echo "<div style=\"text-align: right;\">"  >> ${SUMMARY}
+echo "<font size=\"-1\"><i>"  >> ${SUMMARY}
+date +%Y-%m-%d" "%H:%M:%S" "%Z >> ${SUMMARY}
+echo "</i></font>" >> ${SUMMARY}
+echo "</div>" >> ${SUMMARY}
+echo "</body>" >> ${SUMMARY}
+echo "</html>" >> ${SUMMARY}
+
+cp -f ${SUMMARY} ${SHOWSUMMARY}
+chmod go+r ${SHOWSUMMARY}
+rm -f ${SUMMARY}
+
+if [ "${SHOWDETAILS}" != "ShowDetails" ]
+then
+  SRC="${SHOWSUMMARY}"
+  DST="${SHOWSUMMARYPUB}"
+  echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+  ### ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+fi
+
+# Transfer -system info
+for PLATFORM in ${PLATFORMS}
+do
+  SRC="${DERBYDIR}/testing/testlog/${PLATFORM}/${REVISION}-system"
+  EXTVIS="${DERBYDIR}/testing/testlog/${PLATFORM}/externallyVisible"
+  if [ -e ${EXTVIS} ] && [ "${SHOWDETAILS}" != "ShowDetails" ] && [ -e ${SRC} ]
+  then
+    DST="${PUBLISHDIR}/testlog/${PLATFORM}/${REVISION}-system"
+    chmod go+r ${SRC}
+    echo "**** OBS! ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}"
+    ### ${SCPUT} ${SRC} ${PUBLISHUSER}@${PUBLISHSITE}:${DST}
+  fi
+done # PLATFORMS

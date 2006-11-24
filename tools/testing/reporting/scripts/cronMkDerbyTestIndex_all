@@ -1,0 +1,56 @@
+#!/bin/bash
+echo "THIS IS SITE SPECIFIC! FIX!"
+exit
+
+export USER="derbytester"
+export HOME="/home/${USER}"
+
+JOB=mkDerbyTestIndex_all
+
+echo "----------------------------------------------------" > ${HOME}/cron/${JOB}.log
+echo "----------------------------------------------------" > ${HOME}/cron/${JOB}.err
+/bin/date >> ${HOME}/cron/${JOB}.log
+/bin/date >> ${HOME}/cron/${JOB}.err
+
+. ${HOME}/.bashrc >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+
+
+export DERBYDIR="${HOME}/Apache/Derby/trunk_JDK15"
+echo "${DERBYDIR} ----------------------------------" >> ${HOME}/cron/${JOB}.log
+. ${DERBYDIR}/env.sh >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+. ${TOOLDIR}/env
+${TOOLDIR}/${JOB} details >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+${TOOLDIR}/${JOB}         >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+
+export DERBYDIR="${HOME}/Apache/Derby/tinderbox_trunk_JDK15"
+echo "${DERBYDIR} ----------------------------------" >> ${HOME}/cron/${JOB}.log
+. ${DERBYDIR}/env.sh >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+. ${TOOLDIR}/env
+${TOOLDIR}/${JOB} details >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+${TOOLDIR}/${JOB}         >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+
+export DERBYDIR="${HOME}/Apache/Derby/10.1_JDK15"
+echo "${DERBYDIR} ----------------------------------" >> ${HOME}/cron/${JOB}.log
+. ${DERBYDIR}/env.sh >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+. ${TOOLDIR}/env
+${TOOLDIR}/${JOB} details >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+${TOOLDIR}/${JOB}         >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+
+export DERBYDIR="${HOME}/Apache/Derby/trunk_JDK16"
+echo "${DERBYDIR} ----------------------------------" >> ${HOME}/cron/${JOB}.log
+. ${DERBYDIR}/env.sh >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+. ${TOOLDIR}/env
+${TOOLDIR}/${JOB} details >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+${TOOLDIR}/${JOB}         >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+
+export DERBYDIR="${HOME}/Apache/Derby/tinderbox_10.1_JDK15"
+echo "${DERBYDIR} ----------------------------------" >> ${HOME}/cron/${JOB}.log
+. ${DERBYDIR}/env.sh >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+. ${TOOLDIR}/env
+${TOOLDIR}/${JOB} details >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+${TOOLDIR}/${JOB}         >> ${HOME}/cron/${JOB}.log 2>>${HOME}/cron/${JOB}.err
+
+
+/bin/date >> ${HOME}/cron/${JOB}.log
+/bin/date >> ${HOME}/cron/${JOB}.err

@@ -1,0 +1,32 @@
+#!/bin/bash
+# if "ZipJars"..:
+MKBUILDZIP=$1
+DESIREDREVISION=$2
+ANTPROPFILE=$3
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+
+cd ${DERBYDIR}
+echo "This script is supposed to be executed on the Derby build host."
+echo "-------------------------------------"
+. ./env.sh
+echo "Update Derby source from repository."
+${TOOLDIR}/updateDerby ${DESIREDREVISION}
+echo "-------------------------------------"
+
+# Force build: uncomment next line
+# touch ${UPDATELOGDIR}/updateOK
+
+echo "Build Derby"
+${TOOLDIR}/buildDerby "${MKBUILDZIP}" "${ANTPROPFILE}"
+echo "-------------------------------------"
+
+# Force test: uncomment next line
+# touch ${BUILDLOGDIR}/buildOK
+
+echo "Test Derby"
+${TOOLDIR}/testDerby ${HOSTLISTFILE}
+echo "-------------------------------------"
+

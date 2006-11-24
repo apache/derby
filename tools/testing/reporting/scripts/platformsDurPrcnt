@@ -1,0 +1,37 @@
+#!/bin/bash
+REVISION=$1
+SHOWDETAILS=$2
+SUITE=$3
+
+TOOLDIR="${DERBYDIR}/${BRANCH_DIR}/tools/testing/reporting/scripts"
+. ${TOOLDIR}/env
+
+# Get the set of platforms
+cd ${TESTLOGDIR}
+PLATFORMS=`ls`
+
+DERBALLPRCNT="["
+for PLATFORM in ${PLATFORMS} # TinderBox uses ONE platform..
+do
+  # DEBUG echo -n "${PLATFORM} "; pwd
+  if [ -e ${PLATFORM}/externallyVisible ] || [ "${SHOWDETAILS}" = "details" ]
+  then
+    if [ -e ${PLATFORM}/${REVISION}.csv ]
+    then
+      #  2: Number, 3: OK, 4: Failed, 5: Skipped, 6: time
+
+      TIME=`grep "^${SUITE} " ${PLATFORM}/${REVISION}.csv | gawk '{ print $6 }'`
+      SECONDS=`${TOOLDIR}/toSeconds ${TIME}`
+      BASESECONDS=`grep "^${SUITE} " ${PLATFORM}/baseline.csv | gawk '{ print $3 }'`
+      PERCENT=`${TOOLDIR}/calcPercent ${SECONDS} ${BASESECONDS}`
+      DERBALLPRCNT="${DERBALLPRCNT} ${PERCENT}% "
+
+    else
+      # DERBALLPRCNT="${DERBALLPRCNT} &nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp; "
+      DERBALLPRCNT="${DERBALLPRCNT} ---.--%    "
+    fi
+  fi # visible, showdetails
+done # PLATFORMS
+DERBALLPRCNT="${DERBALLPRCNT}]"
+
+echo ${DERBALLPRCNT}
