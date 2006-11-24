@@ -94,7 +94,7 @@ public interface ResultDescription
      * If this object already has a saved meta data object
      * this call will do nothing.
      * Due to synchronization the saved ResultSetMetaData
-     * obejct may not be the one passed in, ie. if two
+     * object may not be the one passed in, ie. if two
      * threads call this concurrently, only one will be saved.
      * It is assumed the JDBC layer passes in a ResultSetMetaData
      * object based upon this.
