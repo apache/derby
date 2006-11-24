@@ -997,7 +997,7 @@ createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
 writeShort 4
-writeString "test" 
+writeString "wombat" 
 writeShort 18
 writeString "rdbcolid" 18
 writeShort 18
@@ -1022,13 +1022,42 @@ flush
 checkError SYNTAXRM 8 11 RDBNAM
 endTest
 //
+//
+DISPLAY "Test for bad RDBNAM in PKGNAMCSN"
+include connect.inc
+createDssRequest
+startDdm EXCSQLIMM
+startDdm PKGNAMCSN
+writePaddedString "nonexisting" 18
+writePaddedString "rdbcolid" 18
+writePaddedString "pkgid" 18
+writeBytes "0x0101010101010101"
+writeShort 1
+endDdm
+endDdm
+endDss
+createDssObject 
+startDdm SQLSTT
+writeByte 0	// null indicator
+writeEncodedLDString "create table abc (a int)" "UTF-8" 4
+writeByte 255 // null indicator
+endDdm
+endDss "0x40"
+createDssRequest // send commit
+startDdm RDBCMM
+endDdm
+endDss
+flush
+checkError PRCCNVRM 8 18
+endTest
+//
 DISPLAY "Test for bad length for PKGID in PKGNAMCSN"
 include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
 writeShort 18
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writeShort 8
 writePaddedString "rdbcolid" 8
 writeShort 5
@@ -1081,7 +1110,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1110,7 +1139,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1142,7 +1171,7 @@ skipDss //SQLCARD for commit
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1173,7 +1202,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1204,7 +1233,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1233,7 +1262,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1262,7 +1291,7 @@ skipDss // SQLCARD for commit
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1293,7 +1322,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1322,7 +1351,7 @@ skipDss // SQLCARD for commit
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1353,7 +1382,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1378,7 +1407,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1413,7 +1442,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1449,7 +1478,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1469,7 +1498,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1486,7 +1515,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1506,9 +1535,9 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "notthistest" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
-writePaddedString "pkgid"  18
+writePaddedString "wrongpkgid"  18
 writeBytes "0x0101010101010101"
 writeShort 1
 endDdm
@@ -1526,7 +1555,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1546,7 +1575,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1566,7 +1595,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1586,7 +1615,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1607,7 +1636,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1627,7 +1656,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1647,7 +1676,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1667,7 +1696,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1687,7 +1716,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1707,7 +1736,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1728,7 +1757,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1748,7 +1777,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1770,7 +1799,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1790,7 +1819,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1812,7 +1841,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1832,7 +1861,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1855,7 +1884,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1880,7 +1909,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1917,7 +1946,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1937,7 +1966,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1963,7 +1992,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -1985,7 +2014,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2015,7 +2044,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2032,7 +2061,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2052,7 +2081,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2072,7 +2101,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2094,7 +2123,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2112,7 +2141,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2135,7 +2164,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2162,7 +2191,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2184,7 +2213,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2211,7 +2240,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2237,7 +2266,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2265,7 +2294,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2299,7 +2328,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2321,7 +2350,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2339,7 +2368,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2361,7 +2390,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2379,7 +2408,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2401,7 +2430,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2419,7 +2448,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2441,7 +2470,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2459,7 +2488,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2477,7 +2506,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2497,7 +2526,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2519,7 +2548,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2539,7 +2568,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2561,7 +2590,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2583,7 +2612,7 @@ include values1.inc
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2601,7 +2630,7 @@ include values1.inc
 createDssRequest
 startDdm CLSQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2618,9 +2647,9 @@ include values1.inc
 createDssRequest
 startDdm CLSQRY
 startDdm PKGNAMCSN
-writePaddedString "notthere" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
-writePaddedString "pkgid"  18
+writePaddedString "wrongpkgid"  18
 writeBytes "0x0101010101010101"
 writeShort 1
 endDdm
@@ -2641,7 +2670,7 @@ include values1.inc
 createDssRequest
 startDdm CLSQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2658,7 +2687,7 @@ DISPLAY "Removing second close until JCC issue with sending double close is reso
 //createDssRequest
 //startDdm CLSQRY
 //startDdm PKGNAMCSN
-//writePaddedString "test" 18
+//writePaddedString "wombat" 18
 //writePaddedString "rdbcolid" 18
 //writePaddedString "pkgid"  18
 //writeBytes "0x0101010101010101"
@@ -2804,7 +2833,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2822,7 +2851,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2841,7 +2870,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2860,7 +2889,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2900,7 +2929,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2920,7 +2949,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2940,7 +2969,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2960,7 +2989,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -2992,7 +3021,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3014,7 +3043,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3053,7 +3082,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3073,7 +3102,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm DSCSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3093,7 +3122,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3113,7 +3142,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm DSCSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3145,7 +3174,7 @@ include connect.inc
 createDssRequest
 startDdm DSCSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3163,7 +3192,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3188,14 +3217,14 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLSET
 startDdm PKGNAMCT
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
 writeShort 1
 endDdm
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3216,7 +3245,7 @@ include connect.inc
 createDssRequest
 startDdm EXCSQLIMM
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3248,7 +3277,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3269,7 +3298,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3293,7 +3322,7 @@ skipBytes
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3317,7 +3346,7 @@ skipBytes
 createDssRequest
 startDdm CLSQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3347,7 +3376,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3368,7 +3397,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3391,7 +3420,7 @@ skipBytes
 createDssRequest
 startDdm CNTQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -3415,7 +3444,7 @@ skipBytes
 createDssRequest
 startDdm CLSQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"

@@ -4941,6 +4941,24 @@ class DRDAConnThread extends Thread {
 			reader.readString(rdbnam, CodePoint.RDBNAM_LEN, true);
 			if (SanityManager.DEBUG) 
 				trace("rdbnam = " + rdbnam);
+                        
+            // A check that the rdbnam field corresponds to a database
+            // specified in a ACCRDB term.
+            // The check is not performed if the client is DNC_CLIENT
+            // with version before 10.3.0 because these clients
+            // are broken and send incorrect database name
+            // if multiple connections to different databases
+            // are created
+                        
+            // This check was added because of DERBY-1434
+                        
+            // check the client version first
+            if ( appRequester.getClientType() != AppRequester.DNC_CLIENT
+                 || appRequester.greaterThanOrEqualTo(10,3,0) ) {
+                // check the database name
+                if (!rdbnam.toString().equals(database.dbName))
+                    rdbnamMismatch(CodePoint.PKGNAMCSN);
+            }
 
 			reader.readString(rdbcolid, CodePoint.RDBCOLID_LEN, true);
 			if (SanityManager.DEBUG) 
@@ -4968,6 +4986,24 @@ class DRDAConnThread extends Thread {
 			reader.readString(rdbnam, length, true);
 			if (SanityManager.DEBUG)
 				trace("rdbnam = " + rdbnam);
+
+            // A check that the rdbnam field corresponds to a database
+            // specified in a ACCRDB term.
+            // The check is not performed if the client is DNC_CLIENT
+            // with version before 10.3.0 because these clients
+            // are broken and send incorrect database name
+            // if multiple connections to different databases
+            // are created
+                        
+            // This check was added because of DERBY-1434
+                        
+            // check the client version first
+            if ( appRequester.getClientType() != AppRequester.DNC_CLIENT
+                 || appRequester.greaterThanOrEqualTo(10,3,0) ) {
+                // check the database name
+                if (!rdbnam.toString().equals(database.dbName))
+                    rdbnamMismatch(CodePoint.PKGNAMCSN);
+            }
 
 			//RDBCOLID can be variable length in this format
 			length = reader.readNetworkShort();

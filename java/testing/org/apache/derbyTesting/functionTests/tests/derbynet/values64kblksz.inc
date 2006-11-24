@@ -3,7 +3,7 @@ include connect.inc
 createDssRequest
 startDdm PRPSQLSTT
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"
@@ -23,7 +23,7 @@ checkSQLCard 0 "     "
 createDssRequest
 startDdm OPNQRY
 startDdm PKGNAMCSN
-writePaddedString "test" 18
+writePaddedString "wombat" 18
 writePaddedString "rdbcolid" 18
 writePaddedString "pkgid"  18
 writeBytes "0x0101010101010101"

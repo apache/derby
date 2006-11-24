@@ -121,6 +121,8 @@ Test too big PRTDTA
 PASSED
 Test for bad length for RDBNAM in PKGNAMCSN
 PASSED
+Test for bad RDBNAM in PKGNAMCSN
+PASSED
 Test for bad length for PKGID in PKGNAMCSN
 PASSED
 Test for invalid codepoint on EXCSQLIMM
