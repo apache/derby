@@ -552,11 +552,22 @@ public class MessageBuilder extends Task
         String        propertyText = escapePropertiesText( rawText );
         int             parameterCount = countParameters( rawText );
         String[]     args = getArgs( message );
-        String       displayText = replaceSpecialChars( plugInArgs( rawText, args ) );
 
         if ( parameterCount != args.length )
         {
             throw new Exception( name + " has " + parameterCount + " parameters but " + args.length + " nested args." );
+        }
+
+        String displayText;
+        if (rawText.indexOf('\'')>=0)
+        {
+            displayText = replaceSpecialChars( escapeTextWithAQuote( rawText ) );
+            displayText = plugInArgs( displayText , args );
+
+        }
+        else
+        {
+            displayText = plugInArgs( replaceSpecialChars( rawText), args ) ;
         }
 
         ditaWriter.beginTag( "row" );
@@ -643,7 +654,7 @@ public class MessageBuilder extends Task
         // add xml angle brackets around the args
         for ( int i = 0; i < count; i++ )
         {
-            cookedArgs[ i ] = "&lt;" + rawArgs[ i ] + "&gt;";
+            cookedArgs[ i ] = "<varname>&lt;" + rawArgs[ i ] + "&gt;</varname>";
         }
 
         return MessageFormat.format( message, cookedArgs );
@@ -729,6 +740,7 @@ public class MessageBuilder extends Task
         return output;
     }
 
+
     /**
      * <p>
      * Replace newlines with the escape sequence needed by properties files.
@@ -740,6 +752,19 @@ public class MessageBuilder extends Task
         String output = input.replaceAll( "\n", "\\\\n" );
 
         output = output.replaceAll( "\'", "\'\'" );
+        
+        return output;
+    }
+
+    /**
+     * <p>
+     * Replace single quotes with two single quotes.
+     * Only needed when there are parameters with quotes.
+     * </p>
+     */
+    private static String escapeTextWithAQuote( java.lang.String input )
+    {
+        String output = input.replaceAll( "\'", "\'\'" );
         
         return output;
     }

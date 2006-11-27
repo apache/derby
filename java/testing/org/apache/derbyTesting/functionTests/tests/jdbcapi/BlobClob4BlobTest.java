@@ -2634,7 +2634,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             assertTrue("FAIL - only embedded should be this exception",
                     usingEmbedded());
             assertEquals("FAIL - wrong exception", "ERROR 40XD0: Container " +
-                    "has been closed", ioe.getMessage());
+                    "has been closed.", ioe.getMessage());
         }
 
         rollback();

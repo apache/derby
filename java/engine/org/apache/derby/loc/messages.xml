@@ -942,12 +942,12 @@ Guide.
 
             <msg>
                 <name>40XD0</name>
-                <text>Container has been closed</text>
+                <text>Container has been closed.</text>
             </msg>
 
             <msg>
                 <name>40XD1</name>
-                <text>Container was opened in read-only mode.   </text>
+                <text>Container was opened in read-only mode.</text>
             </msg>
 
             <msg>
@@ -1467,13 +1467,13 @@ Guide.
 
             <msg>
                 <name>42X46</name>
-                <text>There are multiple functions named '{0}'. Use a the full signature or the specific name.</text>
+                <text>There are multiple functions named '{0}'. Use the full signature or the specific name.</text>
                 <arg>functionName</arg>
             </msg>
 
             <msg>
                 <name>42X47</name>
-                <text>There are multiple procedures named '{0}'. Use a the full signature or the specific name.</text>
+                <text>There are multiple procedures named '{0}'. Use the full signature or the specific name.</text>
                 <arg>procedureName</arg>
             </msg>
 
@@ -1506,7 +1506,7 @@ Guide.
 
             <msg>
                 <name>42X52</name>
-                <text>Calling  method ('{0}') using a receiver of the Java primitive type '{1}" is not allowed.</text>
+                <text>Calling  method ('{0}') using a receiver of the Java primitive type '{1}' is not allowed.</text>
                 <arg>methodName</arg>
                 <arg>type</arg>
             </msg>
@@ -1608,7 +1608,7 @@ Guide.
 
             <msg>
                 <name>42X69</name>
-                <text>It is not allowed to reference a field ('{0}') using a referencing expresssion of the Java primitive type '{1}'.</text>
+                <text>It is not allowed to reference a field ('{0}') using a referencing expression of the Java primitive type '{1}'.</text>
                 <arg>fieldName</arg>
                 <arg>type</arg>
             </msg>
@@ -2488,7 +2488,7 @@ Guide.
 
             <msg>
                 <name>58009.C.21</name>
-                <text>Network protocol exception: scldta length, {0}, is invalid for rdbnam.  The connection has been terminated.</text>
+                <text>Network protocol exception: SCLDTA length, {0}, is invalid for RDBNAM.  The connection has been terminated.</text>
                 <arg>length</arg>
             </msg>
 
@@ -2523,13 +2523,13 @@ Guide.
 
             <msg>
                 <name>58009.C.7</name>
-                <text>Network protocol exception: scldta length, {0}, is invalid for rdbcolid.  The connection has been terminated.</text>
+                <text>Network protocol exception: SCLDTA length, {0}, is invalid for RDBCOLID.  The connection has been terminated.</text>
                 <arg>length</arg>
             </msg>
 
             <msg>
                 <name>58009.C.8</name>
-                <text>Network protocol exception: scldta length, {0}, is invalid for pkgid.  The connection has been terminated.</text>
+                <text>Network protocol exception: SCLDTA length, {0}, is invalid for PKGID.  The connection has been terminated.</text>
                 <arg>length</arg>
             </msg>
 
@@ -3168,13 +3168,13 @@ Guide.
 
             <msg>
                 <name>XBCXU.S</name>
-                <text>Encryption of an un-encrypted database failed: {0}.</text>
+                <text>Encryption of an un-encrypted database failed: {0}</text>
                 <arg>failureMessage</arg>
             </msg>
 
             <msg>
                 <name>XBCXV.S</name>
-                <text>Encryption of an encrypted database with a new key or a new password failed: {0}.</text>
+                <text>Encryption of an encrypted database with a new key or a new password failed: {0}</text>
                 <arg>failureMessage</arg>
             </msg>
 
@@ -3213,7 +3213,7 @@ Guide.
 
             <msg>
                 <name>XBM08.D</name>
-                <text>Could not instantiage {0} StorageFactory class {1}.</text>
+                <text>Could not instantiate {0} StorageFactory class {1}.</text>
                 <arg>value</arg>
                 <arg>value</arg>
             </msg>
@@ -4189,7 +4189,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ100.S</name>
-                <text>The scale supplied by the registerOutParameter method does not match with the setter method. Possible loss of precision!"</text>
+                <text>The scale supplied by the registerOutParameter method does not match with the setter method. Possible loss of precision!</text>
             </msg>
 
             <msg>
@@ -4609,7 +4609,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSCB4.S</name>
-                <text>A method on a btree open scan has been called prior to positioning the scan on the first row (ie. no next() call has been made yet).  The current state of the scan is ({0}).</text>
+                <text>A method on a btree open scan has been called prior to positioning the scan on the first row (i.e. no next() call has been made yet).  The current state of the scan is ({0}).</text>
                 <arg>value</arg>
             </msg>
 
@@ -4923,7 +4923,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSDF2.S</name>
-                <text>Exception during creation of file {0} for container, file could not be removed.  The exeception was: {1}.</text>
+                <text>Exception during creation of file {0} for container, file could not be removed.  The exception was: {1}.</text>
                 <arg>fileName</arg>
                 <arg>value</arg>
             </msg>
@@ -5164,7 +5164,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSLAL.D</name>
-                <text>log record size {2} exceeded the maximum allowable log file size {3}. Error encounted in log file {0}, position {1}</text>
+                <text>log record size {2} exceeded the maximum allowable log file size {3}. Error encountered in log file {0}, position {1}.</text>
                 <arg>value</arg>
                 <arg>number</arg>
                 <arg>logfileName</arg>
@@ -5380,7 +5380,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSTB6.M</name>
-                <text>Cannot substitue a transaction table with another while one is already in use.</text>
+                <text>Cannot substitute a transaction table with another while one is already in use.</text>
             </msg>
 
         </family>
@@ -5570,7 +5570,7 @@ MessageId.java.
 
             <msg>
                 <name>42Z54.U</name>
-                <text>This excepiton stops the statement after parsing - no further processing is needed.</text>
+                <text>This exception stops the statement after parsing - no further processing is needed.</text>
             </msg>
 
             <msg>
@@ -6688,7 +6688,7 @@ MessageId.java.
 
             <msg>
                 <name>C001</name>
-                <text>Class {0} has a unknown certificate type in jar {1}, expecting X509 certificate.</text>
+                <text>Class {0} has an unknown certificate type in jar {1}, expecting X509 certificate.</text>
                 <arg>className</arg>
                 <arg>jarName</arg>
             </msg>
@@ -7169,13 +7169,13 @@ Shutting down instance {0}</text>
 
             <msg>
                 <name>L008</name>
-                <text>Deleteing incompatible old Logfile {0}</text>
+                <text>Deleting incompatible old Logfile {0}</text>
                 <arg>fileName</arg>
             </msg>
 
             <msg>
                 <name>L009</name>
-                <text>Deleteing old Logfile {0}</text>
+                <text>Deleting old Logfile {0}</text>
                 <arg>fileName</arg>
             </msg>
 

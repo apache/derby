@@ -133,7 +133,7 @@ XBM07|Startup failed. Boot password must be at least 8 bytes long.              
 ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = 'XBM08';
 SQL_&|MESSAGE                                                                                                                         |SEVERITY   
 --------------------------------------------------------------------------------------------------------------------------------------------------
-XBM08|Could not instantiage {0} StorageFactory class {1}.                                                                             |45000      
+XBM08|Could not instantiate {0} StorageFactory class {1}.                                                                             |45000      
 ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = 'XBM0G';
 SQL_&|MESSAGE                                                                                                                         |SEVERITY   
 --------------------------------------------------------------------------------------------------------------------------------------------------
@@ -282,7 +282,7 @@ XSLAK|Database has exceeded largest log file number {0}.                        
 ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = 'XSLAL';
 SQL_&|MESSAGE                                                                                                                         |SEVERITY   
 --------------------------------------------------------------------------------------------------------------------------------------------------
-XSLAL|log record size {2} exceeded the maximum allowable log file size {3}. Error encounted in log file {0}, position {1}             |45000      
+XSLAL|log record size {2} exceeded the maximum allowable log file size {3}. Error encountered in log file {0}, position {1}.          |45000      
 ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = 'XSLAM';
 SQL_&|MESSAGE                                                                                                                         |SEVERITY   
 --------------------------------------------------------------------------------------------------------------------------------------------------
@@ -400,7 +400,7 @@ XSTB5|Creating database with logging disabled encountered unexpected problem.   
 ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = 'XSTB6';
 SQL_&|MESSAGE                                                                                                                         |SEVERITY   
 --------------------------------------------------------------------------------------------------------------------------------------------------
-XSTB6|Cannot substitue a transaction table with another while one is already in use.                                                  |50000      
+XSTB6|Cannot substitute a transaction table with another while one is already in use.                                                 |50000      
 ij> select * from new org.apache.derby.diag.ErrorMessages() c where sql_state = 'XJ015';
 SQL_&|MESSAGE                                                                                                                         |SEVERITY   
 --------------------------------------------------------------------------------------------------------------------------------------------------
