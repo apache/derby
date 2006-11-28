@@ -78,6 +78,24 @@ public abstract class StatementNode extends QueryTreeNode
 	{
 		return true;
 	}
+	
+	/**
+	 * Returns whether or not this Statement requires a set/clear savepoint
+	 * around its execution.  The following statement "types" do not require them:
+	 *		Cursor	- unnecessary and won't work in a read only environment
+	 *		Xact	- savepoint will get blown away underneath us during commit/rollback
+	 * <p>
+	 * ONLY CALLABLE AFTER GENERATION
+	 * <P>
+	 * This implementation returns true, sub-classes can override the
+	 * method to not require a savepoint.
+	 *
+	 * @return boolean	Whether or not this Statement requires a set/clear savepoint
+	 */
+	public boolean needsSavepoint()
+	{
+		return true;
+	}
 
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
@@ -119,15 +137,6 @@ public abstract class StatementNode extends QueryTreeNode
 	{
 	}
 	
-	// TEMP map QueryTreeNode.bind() onto bindStatement()
-	// for StatementNode. Part of incremental development
-	// in switching the api for a compiled statement to
-	// be StatementNode.
-	public final QueryTreeNode bind() throws StandardException {
-		bindStatement();
-		return this;
-	}
-	
 	/**
 	 * Generates an optimized statement from a bound StatementNode.  Actually,
 	 * it annotates the tree in place rather than generating a new tree.
@@ -147,13 +156,7 @@ public abstract class StatementNode extends QueryTreeNode
 	{
 		
 	}
-	// TEMP -RE_WORK for switching to StatementNode.
-	public final QueryTreeNode optimize() throws StandardException
-	{
-		optimizeStatement();
-		return this;
-	}
-	
+
 	/**
 	 * create the outer shell class builder for the class we will
 	 * be generating, generate the expression to stuff in it,

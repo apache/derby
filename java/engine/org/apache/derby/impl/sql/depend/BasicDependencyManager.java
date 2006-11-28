@@ -305,7 +305,6 @@ public class BasicDependencyManager implements DependencyManager {
 							compSchema = dd.getSchemaDescriptor(vd.getCompSchemaId(), null);
 							CompilerContext newCC = lcc.pushCompilerContext(compSchema);
 							Parser	pa = newCC.getParser();
-							LanguageConnectionFactory	lcf = lcc.getLanguageConnectionFactory();
 
 							// Since this is always nested inside another SQL
 							// statement, so topLevel flag should be false
@@ -314,7 +313,7 @@ public class BasicDependencyManager implements DependencyManager {
 
 							// need a current dependent for bind
 							newCC.setCurrentDependent(dep);
-							cvn = (CreateViewNode) cvn.bind();
+							cvn.bindStatement();
 							ProviderInfo[] providerInfos = cvn.getProviderInfo();
 							lcc.popCompilerContext(newCC);
 

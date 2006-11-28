@@ -468,26 +468,6 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * Perform the binding operation on a query tree.  Binding consists of
-	 * permissions checking, view resolution, datatype resolution, and
-	 * creation of a dependency list (for determining whether a tree or
-	 * plan is still up to date).
-	 *
-	 * This bind() method does nothing.  Each node type that can appear
-	 * at the top of a tree can override this method with its own bind()
-	 * method that does "something".
-	 *
-	 * @return	The bound query tree
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-
-	public QueryTreeNode bind() throws StandardException
-	{
-		return this;
-	}
-
-	/**
 	 * Return true if the node references SESSION schema tables (temporary or permanent)
 	 *
 	 * @return	true if references SESSION schema tables, else false
@@ -575,29 +555,6 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * Generates an optimized QueryTree from a bound QueryTree.  Actually,
-	 * it annotates the tree in place rather than generating a new tree,
-	 * but this interface allows the root node of the optmized QueryTree
-	 * to be different from the root node of the bound QueryTree.
-	 *
-	 * For non-optimizable statements (for example, CREATE TABLE),
-	 * return the bound tree without doing anything.  For optimizable
-	 * statements, this method will be over-ridden in the statement's
-	 * root node (DMLStatementNode in all cases we know about so far).
-	 *
-	 * Throws an exception if the tree is not bound, or if the binding
-	 * is out of date.
-	 *
-	 * @return	An optimized QueryTree
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public QueryTreeNode optimize() throws StandardException
-	{
-		return this;
-	}
-
-	/**
 	 * this implementation of generate() is
 	 * a place-holder until all of the nodes that need to,
 	 * implement it. Only the root, statement nodes
@@ -680,20 +637,7 @@ public abstract class QueryTreeNode implements Visitable
 		return	null;
 	}
 
-	/**
-	 * Returns whether or not this Statement requires a set/clear savepoint
-	 * around its execution.  The following statement "types" do not require them:
-	 *		Cursor	- unnecessary and won't work in a read only environment
-	 *		Xact	- savepoint will get blown away underneath us during commit/rollback
-	 * <p>
-	 * ONLY CALLABLE AFTER GENERATION
-	 *
-	 * @return boolean	Whether or not this Statement requires a set/clear savepoint
-	 */
-	public boolean needsSavepoint()
-	{
-		return true;
-	}
+
 
 	/**
 	 * Returns the name of statement in EXECUTE STATEMENT command.

@@ -78,7 +78,7 @@ public class CreateTriggerNode extends DDLStatementNode
 	private	boolean				isRow;
 	private	boolean				isEnabled;
 	private	Vector				refClause;
-	private	QueryTreeNode		whenClause;
+	private	ValueNode		    whenClause;
 	private	String				whenText;
 	private	int					whenOffset;
 	private	StatementNode		actionNode;
@@ -157,7 +157,7 @@ public class CreateTriggerNode extends DDLStatementNode
 		this.isRow = ((Boolean) isRow).booleanValue();
 		this.isEnabled = ((Boolean) isEnabled).booleanValue();
 		this.refClause = (Vector) refClause;	
-		this.whenClause = (QueryTreeNode) whenClause;
+		this.whenClause = (ValueNode) whenClause;
 		this.whenText = (whenText == null) ? null : ((String) whenText).trim();
 		this.whenOffset = ((Integer) whenOffset).intValue();
 		this.actionNode = (StatementNode) actionNode;
@@ -279,12 +279,14 @@ public class CreateTriggerNode extends DDLStatementNode
 			if(isBefore)
 				compilerContext.setReliability(CompilerContext.MODIFIES_SQL_DATA_PROCEDURE_ILLEGAL);
 					
-			actionNode.bind();
+			actionNode.bindStatement();
 
+			/* when clause is always null
 			if (whenClause != null)
 			{
 				whenClause.bind();
 			}
+			*/
 		}
 		finally
 		{

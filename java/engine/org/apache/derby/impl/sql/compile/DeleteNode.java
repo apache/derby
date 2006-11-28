@@ -106,7 +106,7 @@ public class DeleteNode extends DMLModStatementNode
 
 	private ConstantAction[] dependentConstantActions;
 	private boolean cascadeDelete;
-	private QueryTreeNode[] dependentNodes;
+	private StatementNode[] dependentNodes;
 
 	/**
 	 * Initializer for a DeleteNode.
@@ -369,14 +369,14 @@ public class DeleteNode extends DMLModStatementNode
 				{
 					cascadeDelete = true;
 					int noDependents = fkTableNames.length;
-					dependentNodes = new QueryTreeNode[noDependents];
+					dependentNodes = new StatementNode[noDependents];
 					graphHashTable.put(currentTargetTableName, new Integer(noDependents));
 					for(int i =0 ; i < noDependents ; i ++)
 					{
 						dependentNodes[i] = getDependentTableNode(fkTableNames[i],
 															  fkRefActions[i],
 															  fkColDescriptors[i]);
-						dependentNodes[i].bind();
+						dependentNodes[i].bindStatement();
 					}
 				}
 			}
@@ -726,10 +726,10 @@ public class DeleteNode extends DMLModStatementNode
 	 * DML (UPDATE or DELETE) on the dependent tables. 
 	 * Following function returns the DML Node for the dependent table.
 	 */
-	private QueryTreeNode getDependentTableNode(String tableName, int refAction,
+	private StatementNode getDependentTableNode(String tableName, int refAction,
 												ColumnDescriptorList cdl) throws StandardException
 	{
-		QueryTreeNode node=null;
+		StatementNode node=null;
 
 		int index = tableName.indexOf('.');
 		String schemaName = tableName.substring(0 , index);
@@ -752,22 +752,18 @@ public class DeleteNode extends DMLModStatementNode
 	}
 
 
-    private QueryTreeNode getEmptyDeleteNode(String schemaName, String targetTableName)
+    private StatementNode getEmptyDeleteNode(String schemaName, String targetTableName)
         throws StandardException
     {
 
         ValueNode whereClause = null;
-        TableName tableName = null;
-        FromTable fromTable = null;
-        QueryTreeNode retval;
-        SelectNode resultSet;
 
-        tableName = new TableName();
+        TableName tableName = new TableName();
         tableName.init(schemaName , targetTableName);
 
         NodeFactory nodeFactory = getNodeFactory();
         FromList   fromList = (FromList) nodeFactory.getNode(C_NodeTypes.FROM_LIST, getContextManager());
-        fromTable = (FromTable) nodeFactory.getNode(
+        FromTable fromTable = (FromTable) nodeFactory.getNode(
                                                     C_NodeTypes.FROM_BASE_TABLE,
                                                     tableName,
                                                     null,
@@ -782,7 +778,7 @@ public class DeleteNode extends DMLModStatementNode
 		((FromBaseTable) fromTable).setTableProperties(targetProperties);
 
         fromList.addFromTable(fromTable);
-        resultSet = (SelectNode) nodeFactory.getNode(
+        SelectNode resultSet = (SelectNode) nodeFactory.getNode(
                                                      C_NodeTypes.SELECT_NODE,
                                                      null,
                                                      null,   /* AGGREGATE list */
@@ -791,35 +787,30 @@ public class DeleteNode extends DMLModStatementNode
                                                      null, /* GROUP BY list */
                                                      getContextManager());
 
-        retval =(QueryTreeNode) nodeFactory.getNode(
+        return (StatementNode) nodeFactory.getNode(
                                                     C_NodeTypes.DELETE_NODE,
                                                     tableName,
                                                     resultSet,
                                                     getContextManager());
 
-        return retval;
     }
 
 
 	
-    private QueryTreeNode getEmptyUpdateNode(String schemaName, 
+    private StatementNode getEmptyUpdateNode(String schemaName, 
 											 String targetTableName,
 											 ColumnDescriptorList cdl)
         throws StandardException
     {
 
         ValueNode whereClause = null;
-        TableName tableName = null;
-        FromTable fromTable = null;
-        QueryTreeNode retval;
-        SelectNode resultSet;
 
-        tableName = new TableName();
+        TableName tableName = new TableName();
         tableName.init(schemaName , targetTableName);
 
         NodeFactory nodeFactory = getNodeFactory();
         FromList   fromList = (FromList) nodeFactory.getNode(C_NodeTypes.FROM_LIST, getContextManager());
-        fromTable = (FromTable) nodeFactory.getNode(
+        FromTable fromTable = (FromTable) nodeFactory.getNode(
                                                     C_NodeTypes.FROM_BASE_TABLE,
                                                     tableName,
                                                     null,
@@ -836,7 +827,7 @@ public class DeleteNode extends DMLModStatementNode
 
         fromList.addFromTable(fromTable);
 
-		resultSet = (SelectNode) nodeFactory.getNode(
+        SelectNode resultSet = (SelectNode) nodeFactory.getNode(
                                                      C_NodeTypes.SELECT_NODE,
                                                      getSetClause(tableName, cdl),
                                                      null,   /* AGGREGATE list */
@@ -845,13 +836,12 @@ public class DeleteNode extends DMLModStatementNode
                                                      null, /* GROUP BY list */
                                                      getContextManager());
 
-        retval =(QueryTreeNode) nodeFactory.getNode(
+        return (StatementNode) nodeFactory.getNode(
                                                     C_NodeTypes.UPDATE_NODE,
                                                     tableName,
                                                     resultSet,
                                                     getContextManager());
 
-        return retval;
     }
 
 
@@ -896,7 +886,7 @@ public class DeleteNode extends DMLModStatementNode
 		{
 			for(int index=0 ; index < dependentNodes.length ; index++)
 			{
-				dependentNodes[index] =  dependentNodes[index].optimize();
+				dependentNodes[index].optimizeStatement();
 			}
 		}
 

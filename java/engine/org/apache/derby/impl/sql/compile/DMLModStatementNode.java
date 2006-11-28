@@ -1220,7 +1220,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		/* Finally, we can call the parser */
 		// Since this is always nested inside another SQL statement, so topLevel flag
 		// should be false
-		QueryTreeNode qt = p.parseStatement(select);
+		StatementNode qt = p.parseStatement(select);
 		if (SanityManager.DEBUG)
 		{
 			if (! (qt instanceof CursorNode))

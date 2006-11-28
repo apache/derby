@@ -44,10 +44,9 @@ import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.depend.Dependent;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
 
-import org.apache.derby.impl.sql.compile.QueryTreeNode;
+import org.apache.derby.impl.sql.compile.StatementNode;
 import org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -308,7 +307,7 @@ public class GenericStatement
 
 				//Only top level statements go through here, nested statement
 				//will invoke this method from other places
-				QueryTreeNode qt = p.parseStatement(statementText, paramDefaults);
+				StatementNode qt = p.parseStatement(statementText, paramDefaults);
 
 				parseTime = getCurrentTimeMillis(lcc);
 
@@ -342,7 +341,7 @@ public class GenericStatement
 					// transaction.
 					lcc.beginNestedTransaction(true);
 
-					qt = qt.bind();
+					qt.bindStatement();
 					bindTime = getCurrentTimeMillis(lcc);
 
 					if (SanityManager.DEBUG) 
@@ -393,7 +392,7 @@ public class GenericStatement
 							((GenericLanguageConnectionContext)lcc).removeStatement(this);
 					}
 					
-					qt = qt.optimize();
+					qt.optimizeStatement();
 
 					optimizeTime = getCurrentTimeMillis(lcc);
 

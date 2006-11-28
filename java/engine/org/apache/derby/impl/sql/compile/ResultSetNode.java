@@ -1243,7 +1243,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		/* Finally, we can call the parser */
 		// Since this is always nested inside another SQL statement, so topLevel flag
 		// should be false
-		QueryTreeNode qt = p.parseStatement(values);
+		StatementNode qt = p.parseStatement(values);
 		if (SanityManager.DEBUG)
 		{
 			if (! (qt instanceof CursorNode))
