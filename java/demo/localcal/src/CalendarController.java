@@ -125,12 +125,8 @@ public class CalendarController extends Applet {
     }
     
     /**
-     * Go online.  This means (a) send up to Google Calendar any stored
-     * requests, logging any errors that occur and (b) getting the latest
-     * list of events from Google Calendar.
-     *
-     * @return a JSON String representing the latest list of events for
-     *      this calendar
+     * Go online.  This method gets any pending requests and sends
+     * them up to Google Calendar.
      */
     public void goOnline() throws Exception {
         log("GOING ONLINE...");
@@ -157,7 +153,7 @@ public class CalendarController extends Applet {
         return this.online;
     }
     
-        /**
+    /**
      * Refresh our calendar from Google Calendar and return a JSON string that 
      * represents the array of entries for the given date range
      *

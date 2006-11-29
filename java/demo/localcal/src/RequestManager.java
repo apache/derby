@@ -216,8 +216,6 @@ public class RequestManager {
             } catch ( Exception e ) {
                 System.out.println("ERROR submitting " + request + ": " +
                    e.getMessage());
-                conflicts.add(e.getMessage());
-                // e.printStackTrace();
                 failures++;
                 deleteRequest(request);
             }
@@ -225,9 +223,7 @@ public class RequestManager {
         
         System.out.println("==== DONE - " + totalRequests + " requests submitted ==== ");
         System.out.println("");
-        
-        // Now clean out the request table
-                
+                        
         return failures;
     }
     
