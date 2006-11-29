@@ -90,8 +90,6 @@ public class ExecSPSNode extends StatementNode
 	 * For example, verifying that the ResultColumnList does not
 	 * contain any duplicate column names.
 	 *
-	 * @return	The bound query tree
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void bindStatement() throws StandardException
