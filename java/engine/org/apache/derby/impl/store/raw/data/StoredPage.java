@@ -1492,7 +1492,6 @@ public class StoredPage extends CachedPage
                         fetchDesc.getMaterializedColumns(),
                         lrdi, 
                         recordHeader,
-                        (ErrorObjectInput) null /* always null */, 
                         recordToLock);
                 }
                 else
@@ -1504,7 +1503,6 @@ public class StoredPage extends CachedPage
                         (int[]) null,
                         lrdi, 
                         recordHeader,
-                        (ErrorObjectInput) null /* always null */, 
                         recordToLock);
                 }
 
@@ -1527,7 +1525,6 @@ public class StoredPage extends CachedPage
                         fetchDesc.getMaterializedColumns(),
                         lrdi, 
                         recordHeader,
-                        (ErrorObjectInput) null /* always null */, 
                         recordToLock);
                 }
                 else
@@ -1539,7 +1536,6 @@ public class StoredPage extends CachedPage
                         (int[]) null,
                         lrdi, 
                         recordHeader,
-                        (ErrorObjectInput) null /* always null */, 
                         recordToLock);
                 }
 
@@ -1683,7 +1679,6 @@ public class StoredPage extends CachedPage
                     fetchDesc.getMaterializedColumns(),
                     lrdi, 
                     recordHeader,
-                    (ErrorObjectInput) null /* always null */, 
                     recordToLock);
             }
             else
@@ -1695,7 +1690,6 @@ public class StoredPage extends CachedPage
                     (int[]) null,
                     lrdi, 
                     recordHeader,
-                    (ErrorObjectInput) null /* always null */, 
                     recordToLock);
             }
 
@@ -4346,7 +4340,7 @@ public class StoredPage extends CachedPage
             (int[]) null, 
             in, 
             recordHeader,
-            (ErrorObjectInput) null /* always null */, null);
+            null);
 	}
 
     /**
@@ -4844,11 +4838,7 @@ public class StoredPage extends CachedPage
      * Process the list of qualifiers on the row in the stream.
      * <p>
      * The rawDataIn stream is expected to be positioned after the record 
-     * header.  The inUserCode parameter here is only to get around a 
-     * JDK 1.1.x (at least 1.1.7) JIT bug. If inUserCode was a local variable 
-     * then it is not correctly set on an exception, the only time we care 
-     * about its value. It seems to work when its a parameter. Null should 
-     * always be passed in.  This bug is fixed in the JDK 1.2 JIT.
+     * header.
      * <p>
      * Check all qualifiers in the qualifier array against row.  Return true
      * if all compares specified by the qualifier array return true, else
@@ -5075,12 +5065,7 @@ public class StoredPage extends CachedPage
      * restore a record from a stream.
      * <p>
      * The rawDataIn stream is expected to be positioned after the record 
-     * header.  The inUserCode parameter here is only to get around a 
-     * JDK 1.1.x (at least 1.1.7) JIT bug. If inUserCode was a local variable 
-     * then it is not correctly set on an exception, the only time we care 
-     * about its value. It seems to work when its a parameter. Null should 
-     * always be passed in.  This bug is fixed in the JDK 1.2 JIT.
-     * <p>
+     * header.
      *
 	 * @return The identifier to be used to open the conglomerate later.
      *
@@ -5097,7 +5082,6 @@ public class StoredPage extends CachedPage
      * @param dataIn            restore row from this stream.
      * @param recordHeader      The record header of the row, it was read in 
      *                          from stream and dataIn is positioned after it.
-     * @param inUserCode        see comments above about jit bug. 
      * @param recordToLock      The head row to use for locking, used to lock 
      *                          head row of overflow columns/rows.
      *
@@ -5110,10 +5094,10 @@ public class StoredPage extends CachedPage
     int[]                   mCols,
 	LimitObjectInput        dataIn, 
     StoredRecordHeader      recordHeader,
-    ErrorObjectInput        inUserCode, 
     RecordHandle            recordToLock)
 		 throws StandardException, IOException
 	{
+		ErrorObjectInput inUserCode = null;
 		try
 		{
 			// Get the number of columns in the row.
@@ -5429,10 +5413,10 @@ public class StoredPage extends CachedPage
     int[]                   mCols,
 	ArrayInputStream        dataIn, 
     StoredRecordHeader      recordHeader,
-    ErrorObjectInput        inUserCode, 
     RecordHandle            recordToLock)
 		 throws StandardException, IOException
 	{
+		ErrorObjectInput inUserCode = null;
 		try
 		{
 			// Get the number of columns in the row.
