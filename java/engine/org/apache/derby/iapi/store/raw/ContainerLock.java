@@ -34,10 +34,43 @@ package org.apache.derby.iapi.store.raw;
 
 public final class ContainerLock {
 
+	/** Integer representation of the type of the lock. */
 	private final int type;
+	/** Bit mask with one bit set. The position of the bit tells the type of
+	 * the lock. */
+	private final int typeBit;
+	/** Bit mask which represents the lock types that are compatible with this
+	 * lock type. */
+	private final int compat;
+
+	/** Number of types of container locks. */
+	public static final int C_NUMBER = 5;
+
+	/** Container lock compatibility table. */
+	private static final boolean[][] C_COMPAT = {
+
+	//                          Granted
+	// Request \	CIS		CIX		CS		CU		CX        
+	//	
+	/* CIS	*/  {	true,	true,	true,	false,	false    },
+	/* CIX	*/  {	true,	true,	false,	false,	false    },
+	/* CS	*/  {	true,	false,	true,	false,	false    },
+	/* CU	*/	{	false,	false,	true,	false,	false    },
+	/* CX	*/  {	false,	false,	false,	false,	false    }
+
+	};
 
 	private ContainerLock(int type) {
 		this.type = type;
+		typeBit = (1 << type);
+		int bitmask = 0;
+		for (int i = 0; i < C_NUMBER; i++) {
+			// set a bit in bitmask for each compatible lock type
+			if (C_COMPAT[type][i]) {
+				bitmask |= (1 << i);
+			}
+		}
+		compat = bitmask;
 	}
 
     // Names of locks for virtual lock table print out
@@ -54,23 +87,6 @@ public final class ContainerLock {
 	/** Container Exclusive lock */
 	public static final ContainerLock CX  = new ContainerLock(4);
 
-	/** number of types of container locks */
-	public static final int C_NUMBER = 5;
-
-	/** Container lock compatability table */
-	private static final boolean[][] C_COMPAT = {
-
-	//                          Granted
-	// Request \	CIS		CIX		CS		CU		CX        
-	//	
-	/* CIS	*/  {	true,	true,	true,	false,	false    },
-	/* CIX	*/  {	true,	true,	false,	false,	false    },
-	/* CS	*/  {	true,	false,	true,	false,	false    },
-	/* CU	*/	{	false,	false,	true,	false,	false    },
-	/* CX	*/  {	false,	false,	false,	false,	false    }
-
-	};
-
 	/**
 		Get an integer representation of the type of the lock. This method is guaranteed
 		to return an integer >= 0 and < C_NUMBER. No correlation between the value
@@ -82,13 +98,7 @@ public final class ContainerLock {
 	}
 
 	public boolean isCompatible(ContainerLock granted) {
-
-		return isCompatible(granted.getType());
-	}
-
-	public boolean isCompatible(int granted) {
-
-		return C_COMPAT[getType()][granted];
+		return (granted.typeBit & compat) != 0;
 	}
 
 	public String toString() {

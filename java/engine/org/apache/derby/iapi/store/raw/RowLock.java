@@ -34,10 +34,35 @@ package org.apache.derby.iapi.store.raw;
 
 public final class RowLock {
 
+	/** Integer representation of the type of the lock. */
 	private final int   type;
+	/** Bit mask with one bit set. The position of the bit tells the type of
+	 * the lock. */
+	private final int typeBit;
+	/** Bit mask which represents the lock types that are compatible with this
+	 * lock type. */
+	private final int compat;
 
     // Names of locks for virtual lock table print out
 	private static String[] shortnames =  { "S", "S", "U", "U", "X", "X", "X", "X" };
+
+	/** Number of row locks. */
+	public static final int R_NUMBER = 8;
+
+	/** Row lock compatibility table. */
+	public static final boolean[][] R_COMPAT = {
+        //          Granted
+        // Request   RS2     RS3    RU2    RU3    RIP    RI     RX2    RX3
+        //
+        /* RS2 */    {true,  true,  true,  true,  true,  false, false, false },
+        /* RS3 */    {true,  true,  true,  true,  false, false, false, false },
+        /* RU2 */    {true,  true,  false, false, true,  false, false, false },
+        /* RU3 */    {true,  true,  false, false, false, false, false, false },
+        /* RIP */    {true,  false, true,  false, true,  true , true,  false },
+        /* RI  */    {false, false, false, false, true,  false, false, false },
+        /* RX2 */    {false, false, false, false, true,  false, false, false },
+        /* RX3 */    {false, false, false, false, false, false, false, false }
+	};
 
 	/* Row Shared lock for repeatable read and below isolation level */
 	public static final RowLock RS2  = new RowLock(0);
@@ -56,24 +81,6 @@ public final class RowLock {
 	/* Row exclusive write lock for serializable isolation level */
 	public static final RowLock RX3  = new RowLock(7);
 
-	/** Number of row locks */
-	public static final int R_NUMBER = 8;
-
-	/** Row lock compatability table */
-	public static final boolean[][] R_COMPAT = {
-        //          Granted
-        // Request   RS2     RS3    RU2    RU3    RIP    RI     RX2    RX3
-        //
-        /* RS2 */    {true,  true,  true,  true,  true,  false, false, false },
-        /* RS3 */    {true,  true,  true,  true,  false, false, false, false },
-        /* RU2 */    {true,  true,  false, false, true,  false, false, false },
-        /* RU3 */    {true,  true,  false, false, false, false, false, false },
-        /* RIP */    {true,  false, true,  false, true,  true , true,  false },
-        /* RI  */    {false, false, false, false, true,  false, false, false },
-        /* RX2 */    {false, false, false, false, true,  false, false, false },
-        /* RX3 */    {false, false, false, false, false, false, false, false }
-	};
-
     /* lock debugging stuff */
     public static final String DIAG_INDEX       = "index";
     public static final String DIAG_XACTID      = "xactid";
@@ -90,6 +97,15 @@ public final class RowLock {
 
 	private RowLock(int type) {
 		this.type = type;
+		typeBit = (1 << type);
+		int bitmask = 0;
+		for (int i = 0; i < R_NUMBER; i++) {
+			// set a bit in bitmask for each compatible lock type
+			if (R_COMPAT[type][i]) {
+				bitmask |= (1 << i);
+			}
+		}
+		compat = bitmask;
 	}
 
 	/**
@@ -103,13 +119,7 @@ public final class RowLock {
 	}
 
 	public boolean isCompatible(RowLock granted) {
-
-		return isCompatible(granted.getType());
-	}
-
-	public boolean isCompatible(int granted) {
-
-		return R_COMPAT[getType()][granted];
+		return (granted.typeBit & compat) != 0;
 	}
 
 	public String toString()
