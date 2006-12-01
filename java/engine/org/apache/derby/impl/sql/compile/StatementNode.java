@@ -25,6 +25,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -96,12 +97,53 @@ public abstract class StatementNode extends QueryTreeNode
 	{
 		return true;
 	}
+	
+	/**
+	 * Get the name of the SPS that is used to execute this statement. Only
+	 * relevant for an ExecSPSNode -- otherwise, returns null.
+	 * 
+	 * @return the name of the underlying sps
+	 */
+	public String getSPSName() {
+		return null;
+	}
 
 	/**
-	 * Convert this object to a String.  See comments in QueryTreeNode.java
-	 * for how this should be done for tree printing.
-	 *
-	 * @return	This object as a String
+	 * Returns the name of statement in EXECUTE STATEMENT command. Returns null
+	 * for all other commands.
+	 * 
+	 * @return String null unless overridden for Execute Statement command
+	 */
+	public String executeStatementName() {
+		return null;
+	}
+
+	/**
+	 * Returns name of schema in EXECUTE STATEMENT command. Returns null for all
+	 * other commands.
+	 * 
+	 * @return String schema for EXECUTE STATEMENT null for all others
+	 */
+	public String executeSchemaName() {
+		return null;
+	}
+	
+	/**
+	 * Only DML statements have result descriptions - for all others return
+	 * null. This method is overridden in DMLStatementNode.
+	 * 
+	 * @return null
+	 * 
+	 */
+	public ResultDescription makeResultDescription() {
+		return null;
+	}
+
+	/**
+	 * Convert this object to a String. See comments in QueryTreeNode.java for
+	 * how this should be done for tree printing.
+	 * 
+	 * @return This object as a String
 	 */
 
 	public String toString()

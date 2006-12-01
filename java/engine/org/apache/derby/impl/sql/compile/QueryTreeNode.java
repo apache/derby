@@ -210,18 +210,6 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * Get the name of the SPS that is used
-	 * to execute this statement.  Only relevant
-	 * for an ExecSPSNode -- otherwise, returns null.
-	 *
-	 * @return the name of the underlying sps
-	 */
-	public String getSPSName()
-	{
-		return null;
-	}
-
-	/**
 	 * Gets the beginning offset of the SQL substring which this
 	 * query node represents.
 	 *
@@ -555,27 +543,6 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * this implementation of generate() is
-	 * a place-holder until all of the nodes that need to,
-	 * implement it. Only the root, statement nodes
-	 * implement this flavor of generate; the other nodes
-	 * will implement the version that returns Generators
-	 * and takes an activation class builder as an
-	 * argument.
-	 *
-	 * @param	ignored - ignored (he he)
-	 *
-	 * @return	A GeneratedClass for this statement
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public GeneratedClass generate(ByteArray ignored) throws StandardException
-	{
-		throw StandardException.newException(SQLState.LANG_UNABLE_TO_GENERATE,
-			this.nodeHeader());
-	}
-
-	/**
 	 * Do the code generation for this node.  This is a place-holder
 	 * method - it should be over-ridden in the sub-classes.
 	 *
@@ -592,21 +559,6 @@ public abstract class QueryTreeNode implements Visitable
 	{
 		throw StandardException.newException(SQLState.LANG_UNABLE_TO_GENERATE,
 			this.nodeHeader());
-	}
-
-	/**
-	 * Only DML statements have result descriptions - for all others
-	 * return null.  This method is overridden in DMLStatementNode.
-	 *
-	 * @return	null
-	 *
-	 * @exception StandardException never actually thrown here,
-	 *	but thrown by subclasses
-	 */
-	public ResultDescription makeResultDescription() 
-		throws StandardException
-	{
-		return null;
 	}
 
 	/**
@@ -635,28 +587,6 @@ public abstract class QueryTreeNode implements Visitable
 	public ConstantAction	makeConstantAction() throws StandardException
 	{
 		return	null;
-	}
-
-
-
-	/**
-	 * Returns the name of statement in EXECUTE STATEMENT command.
-	 * Returns null for all other commands.  
-	 * @return String null unless overridden for Execute Statement command
-	 */
-	public String executeStatementName()
-	{
-		return null;
-	}
-
-  /**
-   * Returns name of schema in EXECUTE STATEMENT command.
-   * Returns null for all other commands.
-   * @return String schema for EXECUTE STATEMENT null for all others
-   */
-	public String executeSchemaName()
-	{
-		return null;
 	}
 
     /**
