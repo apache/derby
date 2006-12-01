@@ -131,7 +131,6 @@ lang/triggerStream.java
 lang/unaryArithmeticDynamicParameter.java
 lang/ungroupedAggregatesNegative.sql
 lang/unlimited.sql
-lang/updatableResultSet.java
 lang/updateCursor.java
 lang/wisconsin.java
 lang/ShutdownDatabase.java

@@ -5,7 +5,6 @@
 # excluding statementJdbc20.java because this tests fetch_reverse throughout the test
 # excluding jdbcapi/testRelative.java because this is a new test contributed by Shreyas Kaushik and needs to be debugged with JCC  in order to get it running with network server
 # excluding jdbcapi/SetQueryTimeoutTest.java because neither the JCC driver nor the ClientDriver support setQueryTimeout() yet.
-# excluding lang/updatableResultSet.java because changes are required in JCC Driver for this test to run correctly
 # excluding jdbcapi/rsgetXXXcolumnNames.java as it fails incorrectly, according to JDBC spec. Forwarding test case to JCC team.
 # excluding jdbcapi/checkDataSource30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
@@ -22,7 +21,6 @@ jdbcapi/statementJdbc20.java
 jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/SetQueryTimeoutTest.java
-lang/updatableResultSet.java
 jdbcapi/blobSetBinaryStream.java
 jdbcapi/checkDataSource30.java
 jdbcapi/statementJdbc30.java

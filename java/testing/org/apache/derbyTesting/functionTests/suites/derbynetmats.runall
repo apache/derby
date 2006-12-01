@@ -33,7 +33,6 @@ lang/procedure.java
 lang/simpleScroll.sql
 lang/supersimple.sql
 lang/unaryArithmeticDynamicParameter.java
-lang/updatableResultSet.java
 lang/wisconsin.java
 lang/syscat.sql
 lang/ShutdownDatabase.java

@@ -86,7 +86,7 @@
       </classpath>
       <include name="${this.dir}/*.java"/>
       <exclude name="${this.dir}/declareGlobalTempTableJavaJDBC30.java"/>
-      <exclude name="${this.dir}/updatableResultSet.java"/>
+      <exclude name="${this.dir}/UpdatableResultSetTest.java"/>
       <exclude name="${this.dir}/holdCursorJavaReflection.java"/>
       <exclude name="${this.dir}/holdCursorJava.java"/>
       <exclude name="${this.dir}/streams.java"/>
@@ -112,13 +112,14 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/holdCursorJavaReflection.java"/>
       <include name="${this.dir}/holdCursorJava.java"/>
       <include name="${this.dir}/streams.java"/>
       <include name="${this.dir}/procedureJdbc30.java"/>
       <include name="${this.dir}/SpillHash.java"/>
-      <include name="${this.dir}/updatableResultSet.java"/>
+      <include name="${this.dir}/UpdatableResultSetTest.java"/>
       <include name="${this.dir}/unaryArithmeticDynamicParameter.java"/>
     </javac>
   </target>
