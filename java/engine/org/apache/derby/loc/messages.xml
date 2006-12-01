@@ -38,7 +38,12 @@ This file is used to generate the following files when Derby is built:
   * messages_en.properties - the English message text shipped with Derby
   * rrefexcept71493.dita - the source for the table of SQLStates in the Derby Reference Guide.
 
-See the accompanying messages.dtd for an explanation of this xml grammar.-->
+See the accompanying messages.dtd for an explanation of this xml grammar.
+
+Note of caution: 
+  If you change the number of parameters for an existing message, please
+also adjust the translations, or remove the message from the translated files
+so the product will default to showing a correct English message. -->
 
 <messages>
 
