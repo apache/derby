@@ -21,53 +21,41 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.execute.GenericConstantActionFactory;
-import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
-import org.apache.derby.iapi.util.ByteArray;
+import java.sql.Types;
+
+import org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.catalog.types.SynonymAliasInfo;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
-import org.apache.derby.iapi.services.loader.GeneratedClass;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.catalog.types.SynonymAliasInfo;
-import java.util.Properties;
-import java.util.Vector;
-import java.sql.Types;
-import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.impl.sql.execute.GenericConstantActionFactory;
+import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
 
 /**
  * QueryTreeNode is the root class for all query tree nodes. All

@@ -21,80 +21,43 @@
 package	org.apache.derby.impl.sql.compile;
 
 
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
+import java.lang.reflect.Modifier;
+import java.sql.ResultSetMetaData;
+import java.sql.Types;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.io.Storable;
-import org.apache.derby.iapi.services.context.ContextManager;
-
+import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
+import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.util.JBitSet;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.iapi.sql.Row;
-import org.apache.derby.iapi.types.TypeId;
-
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.RowLocation;
-
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.catalog.types.DefaultInfoImpl;
-
-import java.lang.reflect.Modifier;
-
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Types;
-
-import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * A ResultColumnList is the target list of a SELECT, INSERT, or UPDATE.
