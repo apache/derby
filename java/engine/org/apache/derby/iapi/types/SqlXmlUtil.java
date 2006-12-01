@@ -307,12 +307,29 @@ public class SqlXmlUtil implements Formatable
      *   serialization.
      * @return A properly serialized version of xmlAsText.
      */
-    protected String serializeToString(String xmlAsText)
+    protected String serializeToString(final String xmlAsText)
         throws Exception
     {
-        ArrayList aList = new ArrayList();
-        aList.add(dBuilder.parse(
-            new InputSource(new StringReader(xmlAsText))));
+        final ArrayList aList = new ArrayList();
+
+        /* The call to dBuilder.parse() is a call to an external
+         * (w.r.t. to Derby) JAXP parser.  If the received XML
+         * text references an external DTD, then the JAXP parser
+         * will try to read that external DTD.  Thus we wrap the
+         * call to parse inside a privileged action to make sure
+         * that the JAXP parser has the required permissions for
+         * reading the DTD file.
+         */
+        java.security.AccessController.doPrivileged(
+            new java.security.PrivilegedExceptionAction()
+            {
+                public Object run() throws Exception
+                {
+                    aList.add(dBuilder.parse(
+                        new InputSource(new StringReader(xmlAsText))));
+                    return null;
+                }
+            });
 
         /* The second argument in the following call is for
          * catching cases where we have a top-level (parentless)
