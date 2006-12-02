@@ -106,6 +106,10 @@ public interface ModuleFactory
      */
     public PersistentService getServiceProvider(String subSubProtocol) throws StandardException;
     
+    /**
+     * Return the application set of properties which correspond
+     * to the set of properties in the file derby.properties.
+     */
 	public Properties getApplicationProperties();
 
 	/**
