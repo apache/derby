@@ -61,8 +61,8 @@ import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 
-import org.apache.derby.impl.sql.compile.QueryTreeNode;
 import org.apache.derby.impl.sql.compile.CursorNode;
+import org.apache.derby.impl.sql.compile.StatementNode;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -872,7 +872,7 @@ recompileOutOfDatePlan:
 	 *
 	 * @return	true if references SESSION schema tables/views, else false
 	 */
-	public boolean referencesSessionSchema(QueryTreeNode qt)
+	public boolean referencesSessionSchema(StatementNode qt)
 	throws StandardException {
 		//If the query references a SESSION schema table (temporary or permanent), then
 		// mark so in this statement
@@ -893,7 +893,7 @@ recompileOutOfDatePlan:
 
 		@exception StandardException thrown on failure.
 	 */
-	void completeCompile(QueryTreeNode qt)
+	void completeCompile(StatementNode qt)
 						throws StandardException {
 		//if (finished)
 		//	throw StandardException.newException(SQLState.LANG_STATEMENT_CLOSED, "completeCompile()");
