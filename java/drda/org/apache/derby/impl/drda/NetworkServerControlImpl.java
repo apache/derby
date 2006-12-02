@@ -794,6 +794,7 @@ public final class NetworkServerControlImpl {
 		writeCommandHeader(COMMAND_SHUTDOWN);
 		send();
 		readResult();
+        closeSocket();
 		// Wait up to 10 seconds for things to really shut down
 		// need a quiet ping so temporarily disable the logwriter
 		PrintWriter savWriter = logWriter;
@@ -869,6 +870,7 @@ public final class NetworkServerControlImpl {
 			writeLDString(password);
 			send();
 			readResult();
+            closeSocket();
 
 	}
 
@@ -904,6 +906,7 @@ public final class NetworkServerControlImpl {
 		send();
 		readResult();
 		consoleTraceMessage(connNum, on);
+        closeSocket();
 	}
 
 	/**
@@ -943,6 +946,7 @@ public final class NetworkServerControlImpl {
 		writeByte(on ? 1 : 0);
 		send();
 		readResult();
+        closeSocket();
 	}
 
 	/**
@@ -956,6 +960,7 @@ public final class NetworkServerControlImpl {
 		writeLDString(traceDirectory);
 		send();
 		readResult();
+        closeSocket();
 	}
 
 	/**
@@ -964,10 +969,14 @@ public final class NetworkServerControlImpl {
 	public String sysinfo()
 		throws Exception
 	{
-		setUpSocket();
-		writeCommandHeader(COMMAND_SYSINFO);
-		send();
-		return readStringReply("DRDA_SysInfoError.S");
+		try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_SYSINFO);
+            send();
+            return readStringReply("DRDA_SysInfoError.S");
+        } finally {
+            closeSocket();
+        }
 	}
 
 	/**
@@ -976,10 +985,14 @@ public final class NetworkServerControlImpl {
 	public String runtimeInfo()
 	throws Exception 
 	{
-		setUpSocket();
-		writeCommandHeader(COMMAND_RUNTIME_INFO);
-		send();
-		return readStringReply("DRDA_RuntimeInfoError.S");
+		try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_RUNTIME_INFO);
+            send();
+            return readStringReply("DRDA_RuntimeInfoError.S");
+        } finally {
+            closeSocket();
+        }
 	}
 
 	/**
@@ -1013,6 +1026,7 @@ public final class NetworkServerControlImpl {
 		int newval = readInt();
 		consolePropertyMessage("DRDA_MaxThreadsChange.I", 
  					new Integer(newval).toString());
+        closeSocket();
 	}
 
 	/**
@@ -1034,6 +1048,7 @@ public final class NetworkServerControlImpl {
 		int newval = readInt();
 		consolePropertyMessage("DRDA_TimeSliceChange.I", 
 									   new Integer(newval).toString());
+        closeSocket();
 	}
 
 	/**
@@ -1049,6 +1064,7 @@ public final class NetworkServerControlImpl {
 		writeCommandHeader(COMMAND_PROPERTIES);
 		send();
 		byte [] val = readBytesReply("DRDA_PropertyError.S");
+        closeSocket();
 		Properties p = new Properties();
 		try {
 			ByteArrayInputStream bs = new ByteArrayInputStream(val);
@@ -2046,6 +2062,26 @@ public final class NetworkServerControlImpl {
 			consolePropertyMessage("DRDA_OnOffValue.U", arg);
 		return false;
 	}
+    
+    /**
+     * Close the resources associated with the opened socket.
+     * @throws IOException
+     */
+    private void closeSocket() throws IOException
+    {
+        try {
+            if (clientIs != null)
+                clientIs.close();
+            if (clientOs != null)
+                clientOs.close();
+            if (clientSocket != null)
+                clientSocket.close();
+        } finally {
+            clientIs = null;
+            clientOs = null;
+            clientSocket = null;
+        }
+    }
 
 	/**
 	 * Set up client socket to send a command to the network server
