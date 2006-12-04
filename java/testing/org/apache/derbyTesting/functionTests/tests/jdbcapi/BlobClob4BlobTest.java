@@ -2589,6 +2589,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
 
         assertEquals("FAIL - invalid column size", clobLength, columnSize);
         assertEquals("FAIL - invalid column size", columnSize, clob.length());
+
+        rs.close();
+        stmt.close();
     }
 
     /**
