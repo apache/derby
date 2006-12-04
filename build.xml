@@ -1668,5 +1668,9 @@
       <report format="frames" todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
     </junitreport>
   </target>   
+ 
+  <target name="l10ncheck"> 
+    <ant dir="${derbysrc.dir}/../tools/l10n"/>
+  </target>   
 
 </project>

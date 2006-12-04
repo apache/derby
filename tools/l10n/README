@@ -1,0 +1,136 @@
+This directory contains a java program that can be used to flag possible
+problems in the translation of the localized message files.
+This program can be run at any time, for instance, to identify where
+the localized files are lagging behind their English counterparts.
+But, it is anticipated to be run before a check-in of changes to one of
+the localization files, or before a release.
+
+It is intended to be run on the source of the messages; as such, there is
+no point in including this into any runtime jar file.
+
+The output of the program requires manual perusal, because many aspects 
+checked may be acceptable in a particular language, or translation, or for
+a specific message. As such, it is not part of the full build.
+
+Files in this directory
+=======================
+LocCompare.java
+  This file is the source code used to generate a test class for
+  translated messages. 
+build.xml
+  This file will build the class into the svnroot/classes directory
+README
+  This file
+
+
+Syntax
+======
+java [-Dderbysvntop=<svntop>] [-Dtranslations=<newloc>] LocCompare [<territories>][?|-h]
+ where 
+   svntop      = top of derby svn tree for branch or trunk
+                 default is current dir is the top
+   newloc      = temporary location for translated files 
+                 drda locale files are expected in a subdir 'drda'
+                 default is same file structure as for the english files
+   territories = one translated territories, or 'all' 
+                 where all means: 
+                    {cs,de_DE,es,fr,hu,it,ja_JP,ko_KR,pl,pt_BR,ru,zh_CN,zh_TW}
+   ?|-h        = you can pass on -h or ? to get this message
+   you can also pass -Dtvtdebug=true in to see more comments.
+
+Examples:
+--------------------
+compares french:
+  java -Dderbysvntop=c:/derby/trunk LocCompare fr 
+compares unexisting french french:
+  java -Dderbysvntop=c:/derby/trunk LocCompare fr
+compares all territories listed in program:
+  java -Dderbysvntop=c:/derby/trunk LocCompare 
+compares all territories listed in program in 'chatty' mode:
+  java -Dtvtdebug=true -Dderbysvntop=c:/derby/trunk LocCompare 
+gets usage message
+  java LocCompare -h
+--------------------
+
+Files accessed by the program
+=============================
+always: English:
+ svnroot/java/engine/org/apache/derby/loc/messages_en.properties
+ svnroot/java/tools/org/apache/derby/loc/toolsmessages.properties
+ svnroot/java/tools/org/apache/derby/loc/sysinfoMessages.properties
+ svnroot/java/drda/org/apache/derby/loc/drda/messages_en.properties
+ svnroot/java/drda/org/apache/derby/loc/drda/servlet_messages.properties
+
+translated files in the following languages:
+  cs	- Czech
+  de_DE  - German
+  es	- Spanish
+  fr	- French
+  hu	- Hungarian
+  it	- Italian
+  ja_JP  - Japanese
+  ko_KR	- Korean
+  pl	- Polish
+  pt_BR	- Portuguese
+  ru	- Russian
+  zh_CN	- Chinese
+  zh_TW	- Traditional Chinese
+
+ By default, the translated files are expected to be in the same location
+ as the English files indicated above, i.e. for German engine messages the
+ file is expected to be:
+ svnroot/java/engine/org/apache/derby/loc/messages_de_DE.properties
+
+ (For convenience, it is also possible to specify a temporary location, using
+  the -Dtranslations= property. In this case, it is necessary to place 
+  the network server files in a subdirectory because the main file server file
+  has the same name as the engine messages file.)
+
+
+Details about the program
+=========================
+The program has two modes, a 'chatty' mode, which shows a lot of information,
+and a normal mode, which only flags possible problems and Failures.
+The chatty mode is initialized by specifying the property -Dtvtdebug=true.
+In the chatty mode, every message string in the English message files is 
+printed out with - if existing - its localized counterpart. 
+In the normal mode, only messages that have been identified with a possible
+problem will be printed.
+
+The messages are printed with a < for English, and > for the localization:
+
+Example:
+--------------------
+********************************************* 
+********************************************* 
+Now comparing 
+ < c:/p4/p4main/opensource/java/engine/org/apache/derby/loc/messages_en.properties
+ > c:/p4/p4main/opensource/java/engine/org/apache/derby/loc/messages_fr.properties
+  ===============
+  en: < 07009=No input parameters.
+  fr: > 07009=Aucun param\u00e8tre d'entr\u00e9e.
+	 WARNING - found single single quotes - quotes need to be doubled
+
+  ===============
+--------------------
+
+The program will flag the following problems:
+- missing file
+- missing message
+- message containing characters outside the range 0x00-0x1f (which are ASCII) and 0x7f-0xff - message requiring double quotes but having only one
+- message not having same number of parameters as English
+- unmatched curly braces ('{' and '}')
+- unmatched number of uppercased strings 
+and warn about the following:
+- if the number of the following characters in the translated message is 
+  different from the English:
+	'%', ';', ':', '_', '=', '(', ')', '+', '/', '[', ']', '\'
+- if the strings or parameters, or their sequence within curly braces is different
+- for file toolsmessages*.properties, if there are double single quotes in a string
+  without replacements 
+- if there are single quotes where they should be doubled up
+- different uppercased strings 
+
+In addition, the chatty mode will describe successful comparisons.
+
+
