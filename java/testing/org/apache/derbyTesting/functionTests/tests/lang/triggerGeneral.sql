@@ -515,17 +515,6 @@ for each row insert into x values (333), (999), (333);
 insert into x values 1;
 select * from x order by 1;
 drop trigger tgood;
-
--- DERBY-1204 trigger causes StringIndexOutOfBoundsException
--- which half closes connection and causes rest of test to
--- fail. Enable this trigger test case to resolve 1204.
--- create trigger tgood after insert on x
--- referencing new as n
--- for each row insert into x values (n.x), (999), (333);
--- insert into x values 1;
--- select * from x order by 1;
--- drop trigger tgood;
-
 drop table x;
 
 -- Derby-388: When a set of inserts/updates is performed on a table
@@ -779,3 +768,62 @@ select * from topt2;
 drop trigger tropt;
 drop table topt2;
 drop table topt1;
+
+-- DERBY-1204
+-- trigger causes StringIndexOutOfBoundsException
+-- which half closes connection and causes rest of test to
+-- fail. Enable this trigger test case to resolve 1204.
+create table x (x int);
+-- ok
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into x values (n.x), (999), (333);
+insert into x values 1;
+select * from x order by 1;
+drop trigger tgood;
+drop table x;
+
+create table x (i int);
+create table y (i int);
+-- ok
+create trigger tgood after insert on x
+for each statement insert into y values (666), (999), (333);
+drop trigger tgood;
+-- ok
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (n.i);
+drop trigger tgood;
+-- ok
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (333), (999), (333);
+drop trigger tgood;
+-- ok.  This used to throw StringIndexOutOfBoundsException
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (n.i), (999), (333); 
+insert into x values (888);
+select * from y;
+drop trigger tgood;
+delete from x;
+delete from y;
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (n.i), (n.i+1), (n.i+2); 
+insert into x values (1), (4), (7);
+select * from y;
+drop trigger tgood;
+drop table x;
+drop table y;
+create table x (i int, j varchar(10));
+create table y (i int, j varchar(10));
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (0, 'X'), (n.i, 'Y'), (0, n.j), (n.i,n.j);
+insert into x values (1,'A'), (2,'B'), (3, 'C');
+select * from y;
+drop trigger tgood;
+drop table x;
+drop table y;
+

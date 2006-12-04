@@ -921,16 +921,7 @@ X
 -----------
 ij> drop trigger tgood;
 0 rows inserted/updated/deleted
-ij> -- DERBY-1204 trigger causes StringIndexOutOfBoundsException
--- which half closes connection and causes rest of test to
--- fail. Enable this trigger test case to resolve 1204.
--- create trigger tgood after insert on x
--- referencing new as n
--- for each row insert into x values (n.x), (999), (333);
--- insert into x values 1;
--- select * from x order by 1;
--- drop trigger tgood;
-drop table x;
+ij> drop table x;
 0 rows inserted/updated/deleted
 ij> -- Derby-388: When a set of inserts/updates is performed on a table
 -- and each update fires a trigger that in turn performs other updates,
@@ -1399,5 +1390,123 @@ ij(USER1)> drop trigger tropt;
 ij(USER1)> drop table topt2;
 0 rows inserted/updated/deleted
 ij(USER1)> drop table topt1;
+0 rows inserted/updated/deleted
+ij(USER1)> -- DERBY-1204
+-- trigger causes StringIndexOutOfBoundsException
+-- which half closes connection and causes rest of test to
+-- fail. Enable this trigger test case to resolve 1204.
+create table x (x int);
+0 rows inserted/updated/deleted
+ij(USER1)> -- ok
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into x values (n.x), (999), (333);
+0 rows inserted/updated/deleted
+ij(USER1)> insert into x values 1;
+ERROR 54038: Maximum depth of nested triggers was exceeded.
+ij(USER1)> select * from x order by 1;
+X          
+-----------
+ij(USER1)> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij(USER1)> drop table x;
+0 rows inserted/updated/deleted
+ij(USER1)> create table x (i int);
+0 rows inserted/updated/deleted
+ij(USER1)> create table y (i int);
+0 rows inserted/updated/deleted
+ij(USER1)> -- ok
+create trigger tgood after insert on x
+for each statement insert into y values (666), (999), (333);
+0 rows inserted/updated/deleted
+ij(USER1)> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij(USER1)> -- ok
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (n.i);
+0 rows inserted/updated/deleted
+ij(USER1)> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij(USER1)> -- ok
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (333), (999), (333);
+0 rows inserted/updated/deleted
+ij(USER1)> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij(USER1)> -- ok.  This used to throw StringIndexOutOfBoundsException
+create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (n.i), (999), (333);
+0 rows inserted/updated/deleted
+ij(USER1)> insert into x values (888);
+1 row inserted/updated/deleted
+ij(USER1)> select * from y;
+I          
+-----------
+888        
+999        
+333        
+ij(USER1)> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij(USER1)> delete from x;
+1 row inserted/updated/deleted
+ij(USER1)> delete from y;
+3 rows inserted/updated/deleted
+ij(USER1)> create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (n.i), (n.i+1), (n.i+2);
+0 rows inserted/updated/deleted
+ij(USER1)> insert into x values (1), (4), (7);
+3 rows inserted/updated/deleted
+ij(USER1)> select * from y;
+I          
+-----------
+1          
+2          
+3          
+4          
+5          
+6          
+7          
+8          
+9          
+ij(USER1)> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij(USER1)> drop table x;
+0 rows inserted/updated/deleted
+ij(USER1)> drop table y;
+0 rows inserted/updated/deleted
+ij(USER1)> create table x (i int, j varchar(10));
+0 rows inserted/updated/deleted
+ij(USER1)> create table y (i int, j varchar(10));
+0 rows inserted/updated/deleted
+ij(USER1)> create trigger tgood after insert on x
+referencing new as n
+for each row insert into y values (0, 'X'), (n.i, 'Y'), (0, n.j), (n.i,n.j);
+0 rows inserted/updated/deleted
+ij(USER1)> insert into x values (1,'A'), (2,'B'), (3, 'C');
+3 rows inserted/updated/deleted
+ij(USER1)> select * from y;
+I          |J         
+----------------------
+0          |X         
+1          |Y         
+0          |A         
+1          |A         
+0          |X         
+2          |Y         
+0          |B         
+2          |B         
+0          |X         
+3          |Y         
+0          |C         
+3          |C         
+ij(USER1)> drop trigger tgood;
+0 rows inserted/updated/deleted
+ij(USER1)> drop table x;
+0 rows inserted/updated/deleted
+ij(USER1)> drop table y;
 0 rows inserted/updated/deleted
 ij(USER1)> 

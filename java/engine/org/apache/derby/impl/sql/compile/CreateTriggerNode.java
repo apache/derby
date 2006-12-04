@@ -390,6 +390,31 @@ public class CreateTriggerNode extends DDLStatementNode
 			for (int i = 0; i < cols.length; i++)
 			{
 				ColumnReference ref = (ColumnReference) cols[i];
+				
+				/*
+				** Only occurrences of those OLD/NEW transition tables/variables 
+				** are of interest here.  There may be intermediate nodes in the 
+				** parse tree that have its own RCL which contains copy of 
+				** column references(CR) from other nodes. e.g.:  
+				**
+				** CREATE TRIGGER tt 
+				** AFTER INSERT ON x
+				** REFERENCING NEW AS n 
+				** FOR EACH ROW
+				**    INSERT INTO y VALUES (n.i), (999), (333);
+				** 
+				** The above trigger action will result in InsertNode that 
+				** contains a UnionNode of RowResultSetNodes.  The UnionNode
+				** will have a copy of the CRs from its left child and those CRs 
+				** will not have its beginOffset set which indicates they are 
+				** not relevant for the conversion processing here, so we can 
+				** safely skip them. 
+				*/
+				if (ref.getBeginOffset() == -1) 
+				{
+					continue;
+				}
+				
 				TableName tableName = ref.getTableNameNode();
 				if ((tableName == null) ||
 					((oldTableName == null || !oldTableName.equals(tableName.getTableName())) &&
