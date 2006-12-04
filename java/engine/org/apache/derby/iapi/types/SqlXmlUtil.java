@@ -307,10 +307,10 @@ public class SqlXmlUtil implements Formatable
      *   serialization.
      * @return A properly serialized version of xmlAsText.
      */
-    protected String serializeToString(final String xmlAsText)
+    protected String serializeToString(String xmlAsText)
         throws Exception
     {
-        final ArrayList aList = new ArrayList();
+        ArrayList aList = new ArrayList();
 
         /* The call to dBuilder.parse() is a call to an external
          * (w.r.t. to Derby) JAXP parser.  If the received XML
@@ -320,16 +320,32 @@ public class SqlXmlUtil implements Formatable
          * that the JAXP parser has the required permissions for
          * reading the DTD file.
          */
-        java.security.AccessController.doPrivileged(
-            new java.security.PrivilegedExceptionAction()
-            {
-                public Object run() throws Exception
+        try {
+
+            final InputSource is = new InputSource(new StringReader(xmlAsText));
+            aList.add(java.security.AccessController.doPrivileged(
+                new java.security.PrivilegedExceptionAction()
                 {
-                    aList.add(dBuilder.parse(
-                        new InputSource(new StringReader(xmlAsText))));
-                    return null;
-                }
-            });
+                    public Object run() throws IOException, SAXException
+                    {
+                        return dBuilder.parse(is);
+                    }
+                }));
+
+        } catch (java.security.PrivilegedActionException pae) {
+
+            /* Unwrap the privileged exception so that the user can
+             * see what the underlying error is. For example, it could
+             * be an i/o error from parsing the XML value, which can
+             * happen if the XML value references an external DTD file
+             * but the JAXP parser hits an i/o error when trying to read
+             * the DTD.  In that case we want to throw the i/o error
+             * itself so that it does not appear as a security exception
+             * to the user.
+             */
+            throw pae.getException();
+
+        }
 
         /* The second argument in the following call is for
          * catching cases where we have a top-level (parentless)
