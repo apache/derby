@@ -29,6 +29,7 @@ Project info
 Releases from trunk:
 
  * 10.3.0.0 : In development 
+ * 10.2.2.0 : Imminent
  * 10.2.1.6 : Released 10/05/2006
  * 10.1.3.1 : Released 06/30/2006
  * 10.1.2.1 : Released 11/18/2005
@@ -43,164 +44,14 @@ None.
 RESOLVED ISSUES SINCE LAST STATUS
 =================================
 
-[RESULT] [VOTE] Bryan Pendleton as committer
+New committers:
 
-  See email thread: "[VOTE] Bryan Pendleton as committer".
-  Vote ended February 10, 2006. Passed as follows:
-
-+1
-Kathey Marsden (committer)
-Andrew McIntyre (committer)
-Lance Andersen
-Suresh  Thalmati
-Deepa Remesh
-Army
-Sunitha Kambhampati
-Jeffrey Lichtman
-David W. Van Couvering (committer, DB PMC)
-Mamta Satoor
-Rick Hillegas (committer)
-Manjula G Kutty
-Rajesh Kartha
-Myrna Van Lunteren
-Jean T. Andersen (committer, DB PMC)
-Satheesh Bandaram (committer)
-Dag H. Wanvik
-V. Narayanan (committer)
-Daniel John Debrunner (committer, DB PMC)
-Knut Anders Hatlen
-Bernt M. Johnsen (commmitter)
-?ystein Gr?vlen
-Kristian Waagan
-John Embretsen
-Fernanda Pizzorno
-Tomohito Nakayama (committer, DB PMC)
-Ole Solberg
-Mike Matrigali (committer)
-Olav.Sandstaa
-Thomas Fischer (DB PMC)
-
-0:
-none
-
--1
-none
-
-[VOTE] [RESULT] Suresh Thalamati as Derby committer
-
-  See email thread: "[VOTE] Suresh Thalamati as Derby committer".
-  Vote ended on May 31, 2006. Passed as follows:
-
-+1
-David Van Couvering (committer, PMC)
-Myrna van Lunteren
-Rick Hillegas (committer)
-Bryan Pendleton (committer)
-Army
-Sunitha Kambhampati
-Deepa Ramesh
-Manjula Kutty
-Satheesh Bandaram (committer)
-Craig Russell (PMC)
-Olav Sandstaa
-Bernt Johnsen (committer)
-Kathey Marsden (committer)
-Andrew McIntyre (committer, PMC)
-derby@mylevita.com
-V. Narayanan
-Mamta Samtoor
-Kristian Waagan
-Knut Anders Hatlen (committer)
-Tomohito Nakayama (committer, PMC)
-Susan Cline
-Rajesh Karta
-Stanley Bradbury
-Andreas Kornelliusen
-Anurag Shekhar
-Dan Debrunner (committer, PMC)
-Jeremy Boynes (committer)
-Øystein Grøvlen
-Mike Matrigali (committer)
-Dag Wanvik
-
--1 None
-
-[VOTE][RESULT] Andreas Kornelliusen as committer for Derby
-
-  See email thread: "[VOTE] Andreas Kornelliusen as committer for Derby".
-  Vote ended May 31, 2006. Passed as follows:
-
-+1:
-David Van Couvering (committer, PMC)
-Rick Hillegas (committer)
-V. Narayanan
-Knut Anders Hatlen (committer)
-Bryan Pendleton (committer)
-Tomohito Nakayama (committer, PMC)
-Susan Cline
-Myrna van Lunteren
-Satheesh Bandaram (committer)
-Kristian Waagan
-Olav Sandstaa
-Anurag Shekhar
-Suresh Thalamati
-Jean Anderson (committer, PMC)
-Andrew McIntyre (committer, PMC)
-Dan Debrunner (committer, PMC)
-Manjula Kutty
-Jeremy Boynes (committer)
-Bernt Johnsen (committer)
-Øystein Grøvlen
-Kathey Marsden (committer)
-Rajesh Kartha
-Mike Matrigali (committer)
-Craig Russell (PMC)
-Dag Wanvik
-
--1:
-None
-
-[VOTE] Approve coding conventions for the Derby project
-
-  See email thread: "[VOTE] Approve coding conventions for the Derby project". Vote
-  ended on August 16, 2006. Passed with following results:
-
-  +1 from David Van Couvering (Committer), Bryan Pendleton (Committer)
-  Craig Russell, Kristian Waagan, Knut Anders Hatlen (Committer)
-  Narayan, Dag Wanvik, Andreas Korneliussen (Committer), Kathey Marsden (Committer),
-  Olav Sandstaa
-
-  -0 from Rick Hillegas (Committer), Mike Matrigali (Committer),
-  Bernt  Johnson (Committer)
-
-  -0.25 from Suresh Thalamati (Committer)
-
-
-[VOTE] 10.2.1.6 release
-
-  See email thread: "[VOTE] 10.2.1.6 release". Vote
-  ended on October 5, 2006. Passed with following results:
-
-+1:
-Laura Stewart
-Jean Andersen (committer, pmc)
-Andrew McIntyre (committer, pmc)
-Rick Hillegas (committer, pmc)
-Knut Anders Hatlen (committer, pmc)
-Mike Matrigali (committer, pmc)
 Army Brown
-Bryan Pendleton (committer, pmc)
-Yip Ng
-Vemund Ostgaard
-Henri van de Scheur
-John Embretsen
-Manjula G. Kutty
-Myrna van Lunteren
-Suresh Thalamati (committer)
-Rajesh Kartha
-Ole Solberg
-
-No 0s, no -1s. 
+Myrna Van Lunteren
+Fernanda Pizzorno
+Mamta Satoor
+Laura Stewart
+Kristian Waagan
 
 
 OTHER NEWS
@@ -226,20 +77,26 @@ Website         www       http://db.apache.org/derby/
 Mailing list    dev       derby-dev@db.apache.org
 Mailing list    users     derby-user@db.apache.org
 Source code     SVN       /repos/asf/db/derby/code/trunk/
-Committers      jta       Jean Anderson (CLA on file)
-Committers      satheesh  Satheesh Bandaram (CLA on file)
-Committers      jboynes   Jeremy Boynes (CLA on file)
-Committers      djd       Daniel Debrunner (CLA on file)
-Committers      kmarsden  Katherine Marsden (CLA on file)
-Committers      mikem     Mike Matrigali (CLA on file)
-Committers      mcintyre  Samuel McIntyre (CLA on file)
-Committers      coar      Ken Coar (CLA on file)
-Committers      tmnk      Tomohito Nakayama (CLA on file)
-Committers      bernt     Bernt M. Johnsen (CLA on file)
-Committers      oyvind    Øyvind Bakksjø (CLA on file)
-Committers      davidvc   David Van Couvering (CLA on file)
-Committers      rhillegas Rick Hillegas (CLA on file)
-Committers      kahatlen  Knut Anders Hatlen (CLA on file)
+Committers      jta                        Jean Anderson (CLA on file)
+Committers      kahatlen              Knut Anders Hatlen (CLA on file)
+Committers      oyvind                  Øyvind Bakksjø (CLA on file)
+Committers      satheesh              Satheesh Bandaram (CLA on file)
+Committers      jboynes                 Jeremy Boynes (CLA on file)
+Committers      abrown                 Army Brown (CLA on file)
+Committers      coar                      Ken Coar (CLA on file)
+Committers      djd                        Daniel Debrunner (CLA on file)
+Committers      rhillegas               Rick Hillegas (CLA on file)
+Committers      bernt                    Bernt M. Johnsen (CLA on file)
+Committers      andreask              Andreas Korneliussen (CLA on file)
+Committers      kmarsden             Katherine Marsden (CLA on file)
+Committers      mikem                  Mike Matrigali (CLA on file)
+Committers      mcintyre              Samuel McIntyre (CLA on file)
+Committers      tmnk                    Tomohito Nakayama (CLA on file)
 Committers      bryanpendleton  Bryan Pendleton (CLA on file)
-Committers      andreask  Andreas Korneliussen (CLA on file)
-Committers      suresht   Suresh Thalamati (CLA on file)
+Committers      fernanda             Fernanda Pizzorno (CLA on file)
+Committers      suresht               Suresh Thalamati (CLA on file)
+Committers      davidvc               David Van Couvering (CLA on file)
+Committers      myrnavl              Myrna Van Lunteren (CLA on file)
+Committers      mamta                Mamta Satoor (CLA on file)
+Committers      scotsmatrix        Laura Stewart (CLA on file)
+Committers      kristwaa             Kristian Waagan (CLA on file)
