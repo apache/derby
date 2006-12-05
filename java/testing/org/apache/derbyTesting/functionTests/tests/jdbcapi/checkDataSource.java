@@ -654,6 +654,38 @@ public class checkDataSource
 		conn4.close();
 		xac4.close();
 		
+		// Test following sequence of steps
+		// 1)start a read-only global transaction 
+		// 2)finish that read-only transaction
+		// 3)start another global transaction 
+		System.out.println("TESTING READ_ONLY TRANSACTION FOLLOWED BY WRTIABLE TRANSACTION");
+		XAConnection xac5 = dsx.getXAConnection();
+		Xid xid5a = new cdsXid(5, (byte) 119, (byte) 129);
+		Connection conn5 = xac5.getConnection();
+		Statement sru5a = conn5.createStatement();
+		xar = xac5.getXAResource();
+		xar.start(xid5a, XAResource.TMNOFLAGS);
+		conn5.setReadOnly(true);
+		printState("read-only XA transaction", conn5);
+		ResultSet rs5 = sru5a.executeQuery("select count(*) from autocommitxastart");
+		rs5.next(); System.out.println("acxs " + rs5.getInt(1));
+		rs5.close();
+		xar.end(xid5a, XAResource.TMSUCCESS);
+		xar.commit(xid5a, true);
+		conn5.close();
+		//now start a new transaction
+		conn5 = xac5.getConnection();
+		sru5a = conn5.createStatement();
+		xar.start(xid5a, XAResource.TMNOFLAGS);
+		printState("Writable XA transaction", conn5);
+		sru5a.executeUpdate("insert into autocommitxastart values 6,7");
+		rs5 = sru5a.executeQuery("select count(*) from autocommitxastart");
+		rs5.next(); System.out.println("acxs " + rs5.getInt(1));
+		xar.end(xid5a, XAResource.TMSUCCESS);
+		xar.commit(xid5a, true);
+		conn5.close();
+		xac5.close();
+		
 		
 		// test jira-derby 95 - a NullPointerException was returned when passing
 		// an incorrect database name (a url in this case) - should now give error XCY00

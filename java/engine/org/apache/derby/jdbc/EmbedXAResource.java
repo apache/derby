@@ -282,6 +282,12 @@ class EmbedXAResource implements XAResource {
                 } else {
                     
                     returnConnectionToResource(tranState, xid_im);
+					if (SanityManager.DEBUG)
+					{
+						if (realConnection != null)
+							SanityManager.ASSERT(realConnection.transactionIsIdle(),
+									"real connection should have been idle at this point"); 			
+					}
                     return XAResource.XA_RDONLY;
                 }
             } catch (SQLException sqle) {

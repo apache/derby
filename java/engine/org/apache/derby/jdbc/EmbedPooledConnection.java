@@ -229,6 +229,11 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 
 		// reset any remaining state of the connection
 		realConnection.resetFromPool();
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT(realConnection.transactionIsIdle(),
+			"real connection should have been idle at this point"); 			
+		}
 	}
 
 	/**
