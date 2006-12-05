@@ -49,12 +49,12 @@ I. Creating the Apache Derby UI and Help Plug-in projects:
   
 2) Install Eclipse 3.x and the JDK needed
 
-3) Install the Apache Derby 10.1.0 Eclipse Core plug-in from:
+3) Install the Apache Derby 10.x Eclipse Core plug-in from:
    http://db.apache.org/derby/derby_downloads.html
 
    It is available as a zip file:
 
-   for example; derby_core_plugin_10.1.0.178324.zip
+   for example; derby_core_plugin_10.1.3.zip
 
    Unzip this file into the directory where the eclipse executable is located.
    For instance, if Eclipse is installed in C:\eclipse, unzip the Derby
@@ -75,7 +75,8 @@ I. Creating the Apache Derby UI and Help Plug-in projects:
 6) Switch to the Plug-in perspective
    Window -> Open Perspective -> Other -> Select Plug-in Development
 
-7) To invoke and test the Apache Derby UI Plug-in in this development environment
+7) To invoke and test the Apache Derby UI Plug-in in this development 
+   environment
    
    Run ->Run As -> Eclipse Application (Eclipse 3.1)
    OR
@@ -96,40 +97,79 @@ II. Creating zip files for the Derby UI and Help Plug-ins via the Project
 In order to install the plug-ins easily in another Eclipse environment creating
 a zip file is useful.
 
-To create a zip file for the UI plug-in:
+To create a zip file for the UI plug-in only:
 
-1) From within the Plug-in Development perspective, right-click the org.apache.derby.ui
-   project.  Select Export --> Deployable plug-ins and fragments, then the Next button.
+1) From within the Plug-in Development perspective, right-click the 
+   org.apache.derby.ui project.  Select Export --> Deployable plug-ins and 
+   fragments, then the Next button.
 
-2) In the Export Plug-ins and Fragments window select the org.apache.derby.ui project
-   listed in the Available Plug-ins and Fragments text area.  For the Export Options
-   section select Deploy as: a single ZIP file.  Click the Build Options button.
-   Check any options desired from the Build Options Preferences window and then
-   click OK.
+2) In the Deployable plug-ins and fragments window select the 
+   org.apache.derby.ui project listed in the Available Plug-ins and Fragments 
+   text area. Depending on the Eclipse version used:
 
-3) Browse to a Destination where you would like to put the zip file and name it
-   org.apache.derby.ui_1.0.0.zip to represent the name and version of the plug-in.
+   Eclipse 3.1:
+   In the Export Destination, select the Archive File option
+
+   Eclipse 3.0:
+   For the Export Options section select Deploy as: a single ZIP file.  Click 
+   the Build Options button.  Check any options desired from the Build Options 
+   Preferences window and then click OK.
+
+3) Browse to a Destination where you would like to put the zip file and provide 
+   a file name for example: derby_ui_plugin_1.1.0.zip, to represent the name and
+   version of the plug-in.
 
 4) Finally, click Finish.
 
 5) To install in another Eclipse installation unzip this file in the base
    directory of the Eclipse installation.
 
-To create a zip file for the Doc plug-in:
+To create a zip file for the Doc plug-in only:
 
 1) From within the Plug-in Development perspective, right-click the
-   org.apache.derby.plugin.doc project.  Select Export --> Zip file.
+   org.apache.derby.plugin.doc project.  Select Export --> Deployable plug-ins 
+   and fragments, then the Next button.
 
-2) In the Export Zip file window select the org.apache.derby.plugin.doc project
-   listed in the left frame.  In the right frame uncheck the .project and
-   build.properties files.
+2) In the Deployable plug-ins and fragments window select the 
+   org.apache.derby.plugin.doc project listed in the left frame.  In the right 
+   frame uncheck the .project and build.properties files. Depending on the 
+   Eclipse version used:
 
-3) Browse to a Destination where you would like to put the zip file and name it
-   org.apache.derby.plugin.doc_1.0.0.zip to represent the name and version of 
-   the plug-in.
+   Eclipse 3.1:
+   In the Export Destination, select the Archive File option
+
+   Eclipse 3.0:
+   For the Export Options section select Deploy as: a single ZIP file.  Click 
+   the Build Options button.  Check any options desired from the Build Options 
+   Preferences window and then click OK.
+
+
+3) Browse to a Destination where you would like to put the zip file and provide    a file name, for example: derby_doc_plugin_1.1.0.zip, to represent the name 
+   and version of the plug-in.
 
 4) Finally, click Finish.
 
 5) Note that the documentation zip files' base directory is
    org.apache.derby.plugin.doc and therefore must be unzipped in the plug-ins
    directory.
+
+To create a single zip file for both UI and Doc plug-ins:
+
+1) From within the Plug-in Development perspective, right-click the
+   org.apache.derby.plugin.doc and the org.apache.derby.ui projects.  Select 
+   Export --> Deployable plug-ins and fragments, then the Next button.
+
+2) In the Deployable plug-ins and fragments window select the 
+   org.apache.derby.plugin.doc project listed in the left frame.  In the right 
+   frame uncheck the .project and build.properties files. Depending on the 
+   Eclipse version used:
+
+   Eclipse 3.1:
+   In the Export Destination, select the Archive File option
+
+3) Browse to a Destination where you would like to put the zip file and provide    a file name, for example: derby_ui_plugin_1.1.0.zip,  to represent the name 
+   and version of the plug-in.
+
+4) Finally, click Finish.
+
+
