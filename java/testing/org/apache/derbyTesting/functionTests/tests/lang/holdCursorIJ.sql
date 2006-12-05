@@ -34,6 +34,10 @@ next jdk4;
 close jdk4;
 next jdk4;
 
+-- clean up.
+close jdk1;
+close jdk2;
+
 -- second test - make sure that all the cursors (including holdability true)
 -- have their resultsets closed after rollback.
 
@@ -56,6 +60,11 @@ next jdk1;
 next jdk2;
 next jdk4;
 
+-- clean up.
+close jdk1;
+close jdk2;
+close jdk4;
+
 -- third test - Define a hold cursor on a table. Shouldn't be able to drop that
 -- table before & after commit. Have to close the cursor before table can be dropped.
 
@@ -73,6 +82,9 @@ drop table t1;
 -- close cursor jdk4 and try then deleting the table
 close jdk4;
 drop table t1;
+
+-- clean up.
+close jdk1;
 
 -- recreate and populate the table for next test
 create table t1(c11 int, c12 int);
@@ -98,6 +110,9 @@ set isolation = REPEATABLE READ;
 close jdk4;
 set isolation to serializable;
 
+-- clean up.
+close jdk1;
+
 -- fifth test - try isolation level change alongwith changing the isolation
 -- level of just one statement
 get with hold cursor jdk4 as 'SELECT * FROM t1';
@@ -112,6 +127,9 @@ close jdk4;
 -- should be able to change the isolation now
 set isolation READ UNCOMMITTED;
 set isolation RS;
+
+-- clean up.
+close jdk1;
 
 -- sixth test - try positioned update with hold cursor
 get with hold cursor jdk4 as 'SELECT * FROM t1 FOR UPDATE';
@@ -186,5 +204,8 @@ get with hold cursor scrollCursor as 'select * from t1 for update of c12';
 next scrollCursor;
 update t1 set c12=c12+1 where current of scrollCursor;
 
+-- clean up.
+close scrollCursor;
 
 
+drop table t1;
