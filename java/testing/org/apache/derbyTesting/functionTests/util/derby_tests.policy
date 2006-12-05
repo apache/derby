@@ -2,7 +2,7 @@
 // Policy file with minimal set of permissions to run derby's
 // functional tests.
 //
-// The test harness sets up three variables used by this policy file
+// The test harness sets up four variables used by this policy file
 //
 // derbyTesting.codejar - URL to the jar files when they are in the classpath
 // derbyTesting.codeclasses - URL to the classes directory when it is in the classpath
@@ -13,7 +13,9 @@
 // derbyTesting.codedir - File location of either derbyTesting.codejar or derbyTesting.codeclasses.
 // Only required due to a BUG (see below for more info).
 //
-// 
+// derbyTesting.jaxpjar - URL to the jar file containing the JAXP implementation
+//     for XML-based tests (ex. lang/XMLBindingTest.java).
+//
 // derbyTesting.serverhost - Host name or ip where network server is started 
 // derbyTesting.clienthost - specifies the clients ip address/hostName. 
 //     when testing with networkserver on a remote host, this needs to be passed in 
@@ -187,4 +189,12 @@ grant codeBase "${derbyTesting.antjunit}" {
 // through this mechanism.
 grant {
     permission java.util.PropertyPermission "derbyRoutineSecurityTest.yes", "read";
+};
+
+// When inserting XML values that use external DTD's, the JAXP parser
+// needs permission to read the DTD files.  We assume that all DTD
+// files will be copied to extin/ by whichever tests need them.  So
+// grant the JAXP parser permissions to read that directory.
+grant codeBase "${derbyTesting.jaxpjar}" {
+  permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
 };

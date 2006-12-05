@@ -30,15 +30,12 @@ import java.sql.Statement;
 import java.sql.Types;
 
 import junit.framework.Test;
-import junit.extensions.TestSetup;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
-import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -84,25 +81,15 @@ public class XMLBindingTest extends BaseJDBCTestCase {
             suite.addTest(
                 TestConfiguration.defaultSuite(XMLBindingTest.class, false));
 
-            TestSetup wrapper = new XBindTestSetup(suite);
+            XBindTestSetup wrapper = new XBindTestSetup(suite);
 
             /* XML parser needs to read "personal.dtd" for schema-based
              * insertion, so copy it to user directory.
              */
-            wrapper = new SupportFilesSetup(wrapper,
+            return new SupportFilesSetup(wrapper,
                 new String [] {
                     "functionTests/tests/lang/xmlTestFiles/personal.dtd"
                 });
-
-            /* RESOLVE: In order to run XMLBindingTest as part of a
-             * suite we currently have to disable the security manager
-             * to allow the JAXP parser to read DTD files.  Once we
-             * figure out how to give JAXP the correct permissions
-             * in the derby_tests policy file, we can then remove the
-             * "noSecurityManager()" decoration. See comments in
-             * DERBY-1758 for details.
-             */
-            return SecurityManagerSetup.noSecurityManager(wrapper);
         }
 
         return suite;

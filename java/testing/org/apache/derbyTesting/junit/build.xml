@@ -55,6 +55,29 @@
  
   <target name="junitcomponents" 
           description="Build Derby JUnit test components">
+    <!-- We only compile junit/XML.java against JDK 1.4 because  -->
+    <!-- it relies on a JAXP class that is part of 1.4 but is    -->
+    <!-- not part of 1.3.                                        -->
+    <javac
+      source="1.4"
+      target="1.4"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${junit}"/>
+        <pathelement path="${xml-apis}"/>
+      </classpath>
+	  <include name="${derby.testing.junit.dir}/XML.java"/>
+    </javac>
     <javac
       source="1.3"
       target="1.3"
@@ -73,6 +96,7 @@
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${derby.testing.junit.dir}/**/*.java"/>
+      <exclude name="${derby.testing.junit.dir}/XML.java"/>
     </javac>
   </target>
 

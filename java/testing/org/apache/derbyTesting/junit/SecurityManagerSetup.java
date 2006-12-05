@@ -252,6 +252,16 @@ public final class SecurityManagerSetup extends TestSetup {
             antjunit = null;
         }
 		
+        /* When inserting XML values that use external DTD's, the JAXP
+         * parser needs permission to read the DTD files.  So here we set
+         * a property to hold the location of the JAXP implementation
+         * jar file.  We can then grant the JAXP impl the permissions
+         * needed for reading the DTD files.
+         */
+        String jaxp = XML.getJAXPParserLocation();
+        if (jaxp != null)
+            classPathSet.setProperty("derbyTesting.jaxpjar", jaxp);
+
 		URL testing = getURL(SecurityManagerSetup.class);
 		
 		boolean isClasspath = testing.toExternalForm().endsWith("/");
@@ -317,12 +327,21 @@ public final class SecurityManagerSetup extends TestSetup {
 	/**
 	 * Get the URL of the code base from a class.
 	 */
-	private static URL getURL(final Class cl)
+	protected static URL getURL(final Class cl)
 	{
 		return (URL)
 		   AccessController.doPrivileged(new java.security.PrivilegedAction() {
 
 			public Object run() {
+
+                /* It's possible that the class does not have a "codeSource"
+                 * associated with it (ex. if it is embedded within the JVM,
+                 * as can happen with Xalan and/or a JAXP parser), so in that
+                 * case we just return null.
+                 */
+                if (cl.getProtectionDomain().getCodeSource() == null)
+                    return null;
+
 				return cl.getProtectionDomain().getCodeSource().getLocation();
 			}
 		});
