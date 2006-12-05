@@ -84,6 +84,7 @@ import java.io.InputStream;
  * database, come from a separate InstructionReader.  Note that in that case it
  * probably doesn't make sense to allow an instruction to specify a query.
  *
+ * @see http://java.sun.com/products/jdbc/download.html#corespec30
  * @author ames
  */
 public class EmbedDatabaseMetaData extends ConnectionChild 
@@ -451,17 +452,18 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 
     /**
      * Get a comma separated list of JDBC escaped numeric functions.
-     * Must be a complete or sub set of functions in appendix C.1
+     * Must be a complete or sub set of functions in appendix C.1 
+     * of JDBC 3.0 specification (pp. 183).
      * @return the list
      */
 	public String getNumericFunctions() {
-		return "ABS,ACOS,ASIN,ATAN,CEILING,COS,DEGREES,EXP,FLOOR,LOG,LOG10,MOD,PI,RADIANS,SIN,SQRT,TAN";
+		return "ABS,ACOS,ASIN,ATAN,CEILING,COS,COT,DEGREES,EXP,FLOOR,LOG,LOG10,MOD,PI,RADIANS,RAND,SIGN,SIN,SQRT,TAN";
 	}
 
     /**
      * Get a comma separated list of JDBC escaped string functions.
      * Must be a complete or sub set of functions in appendix C.2
-     * of JDBC 3.0 specification.
+     * of JDBC 3.0 specification (pp. 184).
      * @return the list
      */
 	public String getStringFunctions() {
@@ -471,7 +473,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     /**
      * Get a comma separated list of JDBC escaped system functions.
      * Must be a complete or sub set of functions in appendix C.4
-     * of JDBC 3.0 specification.
+     * of JDBC 3.0 specification (pp. 185).
      * @return the list
      */
 	public String getSystemFunctions()  {

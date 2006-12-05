@@ -1011,7 +1011,8 @@ public class SQLParser
     */
 	private static final String[] ESCAPED_SYSFUN_FUNCTIONS =
         {"ACOS", "ASIN", "ATAN", "COS", "SIN", "TAN", "PI",
-         "DEGREES", "RADIANS", "EXP", "LOG", "LOG10", "CEILING", "FLOOR" };
+         "DEGREES", "RADIANS", "EXP", "LOG", "LOG10", "CEILING", "FLOOR",
+         "SIGN", "RAND", "COT" };
        
     /**
        Convert a JDBC escaped function name to a function

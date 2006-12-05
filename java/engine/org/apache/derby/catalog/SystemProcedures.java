@@ -34,6 +34,7 @@ import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.db.Factory;
@@ -1277,4 +1278,65 @@ public class SystemProcedures  {
 	{
 		return StrictMath.log(value) / LOG10;
 	}
+
+	/**
+	 * Cotangent function. SYSFUN.COT
+	 * @see http://mathworld.wolfram.com/Cotangent.html
+	 * @return 1 / tan(x)
+	 */
+	public static double COT(double value)
+	{
+		return 1.0 / StrictMath.tan(value);
+	}
+
+	/**
+	 * Hyperbolic Cosine function. SYSFUN.COSH
+	 * @see http://mathworld.wolfram.com/HyperbolicFunctions.html
+	 * @return 1/2 (e^x + e^-x)
+	 */
+	public static double COSH(double value)
+	{
+		return (StrictMath.exp(value) + StrictMath.exp(-value)) / 2.0;
+	}
+
+	/**
+	 * Hyperbolic Sine function. SYSFUN.SINH
+	 * @see http://mathworld.wolfram.com/HyperbolicFunctions.html
+	 * @return 1/2 (e^x - e^-x)
+	 */
+	public static double SINH(double value)
+	{
+		return (StrictMath.exp(value) - StrictMath.exp(-value)) / 2.0;
+	}
+
+	/**
+	 * Hyperbolic Tangent function. SYSFUN.TANH
+	 * @see http://mathworld.wolfram.com/HyperbolicFunctions.html
+	 * @return (e^x - e^-x) / (e^x + e^-x)
+	 */
+	public static double TANH(double value)
+	{
+		return (StrictMath.exp(value) - StrictMath.exp(-value)) /
+			(StrictMath.exp(value) + StrictMath.exp(-value));
+	}
+
+	/**
+	 * Method to return the sign of the given value.
+	 * SYSFUN.SIGN().
+	 * @return 0, 1 or -1
+	 */
+	public static int SIGN(double value)
+	{
+		return value < 0 ? -1 : value > 0 ? 1 : 0;
+	}
+
+	/**
+	 * Pseudo-random number function.
+	 * @return a random number
+	 */
+	public static double RAND(int seed)
+	{
+		return (new Random(seed)).nextDouble();
+	}
+
 }

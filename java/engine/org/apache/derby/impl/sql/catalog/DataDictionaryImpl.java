@@ -234,7 +234,14 @@ public final class	DataDictionaryImpl
 			{"EXP", "DOUBLE", "java.lang.StrictMath", "exp(double)", "DOUBLE"},
 			{"CEIL", "DOUBLE", "java.lang.StrictMath", "ceil(double)", "DOUBLE"},
 			{"CEILING", "DOUBLE", "java.lang.StrictMath", "ceil(double)", "DOUBLE"}, // Same as CEIL
-			{"FLOOR", "DOUBLE", "java.lang.StrictMath", "floor(double)", "DOUBLE"},			
+			{"FLOOR", "DOUBLE", "java.lang.StrictMath", "floor(double)", "DOUBLE"},
+			{"SIGN", "INTEGER", "org.apache.derby.catalog.SystemProcedures", "SIGN(double)", "DOUBLE"},
+			{"RANDOM", "DOUBLE", "java.lang.StrictMath", "random()", null},
+			{"RAND", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "RAND(int)", "INTEGER"}, // Escape function spec.
+			{"COT", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COT(double)", "DOUBLE"},
+			{"COSH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COSH(double)", "DOUBLE"},
+			{"SINH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "SINH(double)", "DOUBLE"},
+			{"TANH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "TANH(double)", "DOUBLE"}
 	};
 	
 	/**
