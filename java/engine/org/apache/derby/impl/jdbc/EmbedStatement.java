@@ -85,7 +85,7 @@ public class EmbedStatement extends ConnectionChild
 
 	private final boolean forMetaData;
 	final int resultSetType;
-	private final int resultSetConcurrency;
+	final int resultSetConcurrency;
 	private final int resultSetHoldability;
 	final LanguageConnectionContext lcc;
 

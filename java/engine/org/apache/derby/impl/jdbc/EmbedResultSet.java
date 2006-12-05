@@ -245,7 +245,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		//and a warning will be issued on the ResultSet object.
 		if (stmt == null)
 			concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
-		else if (stmt.getResultSetConcurrency() == JDBC20Translation.CONCUR_READ_ONLY)
+		else if (stmt.resultSetConcurrency == JDBC20Translation.CONCUR_READ_ONLY)
 			concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
 		else {
 			if (!isForUpdate()) { //language resultset not updatable
