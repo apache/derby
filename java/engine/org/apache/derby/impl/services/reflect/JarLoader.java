@@ -42,14 +42,6 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 
 class JarLoader extends ClassLoader {
 
-	private static final JarFile jarFileFactory;
-
-	static {
-
-		// 
-		jarFileFactory = new JarFileJava2();
-	}
-
 	private UpdateLoader updateLoader;
 	private JarFile jf;
 	private HeaderPrintWriter vs;
@@ -57,7 +49,7 @@ class JarLoader extends ClassLoader {
 	JarLoader(UpdateLoader updateLoader, String[] name, HeaderPrintWriter vs) {
 
 		this.updateLoader = updateLoader;
-		this.jf = jarFileFactory.newJarFile(name);
+		this.jf = new JarFileJava2(name);
 		this.vs = vs;
 	}
 
@@ -273,7 +265,7 @@ class JarLoader extends ClassLoader {
 
 		jf.setInvalid();
 		updateLoader = null;
-		return newJarFile ? jarFileFactory.newJarFile(jf.name) : null;
+		return newJarFile ? new JarFileJava2(jf.name) : null;
 	}
 
 	/*

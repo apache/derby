@@ -45,18 +45,10 @@ import java.security.GeneralSecurityException;
 
 final class JarFileJava2 extends JarFile {
 
-	JarFileJava2() {
-		super();
-	}
-
 	JarFileJava2(String[] name) {
 		super(name);
 	}
-
-	JarFile newJarFile(String[] name) {
-		return new JarFileJava2(name);
-	}
-
+    
 	void initialize(File jarFile) throws IOException {
 
 		java.util.jar.JarFile jf = new java.util.jar.JarFile(jarFile);

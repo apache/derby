@@ -32,21 +32,20 @@ import java.io.ByteArrayOutputStream;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 
-class JarFile {
+/**
+ * Represents a jar file for class loading,
+ * previously installed by the sqlj.install_jar or replace_jar procedures.
+ * <br>
+ * The source for the Jar is either a File (database from a file system)
+ * or an InputStream (database is in a jar file itself).
+ */
+abstract class JarFile {
 	final String[] name;
 	protected ZipFile zip;
 	boolean isStream;
 
-	JarFile() {
-		name = null;
-	}
-
 	JarFile(String[] name) {
 		this.name = name;
-	}
-
-	JarFile newJarFile(String[] name) {
-		return new JarFile(name);
 	}
 
 	final String getJarName() {
@@ -112,7 +111,5 @@ class JarFile {
 		return data;
 	}
 
-	Object[] getSigners(String className, ZipEntry ze) throws IOException {
-		return null;
-	}
+	abstract Object[] getSigners(String className, ZipEntry ze) throws IOException;
 }
