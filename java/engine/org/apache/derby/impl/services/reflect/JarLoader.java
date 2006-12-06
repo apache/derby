@@ -24,14 +24,19 @@ package org.apache.derby.impl.services.reflect;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.error.StandardException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 
+import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.util.IdUtil;
 
@@ -40,15 +45,34 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 
 
 class JarLoader extends ClassLoader {
+    
+    /**
+     * Two part name for the jar file.
+     */
+    private final String[] name;
+    
+    /**
+     * When the jar file can be manipulated as a java.util.JarFile
+     * this holds the reference to the open jar. When the jar can
+     * only be manipulated as an InputStream (because the jar is itself
+     * in a database jar) then this will be null.
+     */
+    private JarFile jar;
+    
+    /**
+     * True if the jar can only be accessed using a stream, because
+     * the jar is itself in a database jar. When fals the jar is accessed
+     * using the jar field.
+     */
+    private boolean isStream;
 
 	private UpdateLoader updateLoader;
-	private InstalledJar jf;
 	private HeaderPrintWriter vs;
 
 	JarLoader(UpdateLoader updateLoader, String[] name, HeaderPrintWriter vs) {
 
 		this.updateLoader = updateLoader;
-		this.jf = new InstalledJar(name);
+        this.name = name;
 		this.vs = vs;
 	}
 
@@ -61,12 +85,16 @@ class JarLoader extends ClassLoader {
 		try {
 
 			if (zipData instanceof File) {
-				jf.initialize((File) zipData);
+                jar = new JarFile((File) zipData);
 				return;
 			}
 
+            // Jar is only accessible as an INputStream,
+            // which means we need to re-open the stream for
+            // each access. Thus we close the stream now as we have
+            // no further use for it.
 			if (zipData instanceof InputStream) {
-				jf.isStream = true;
+				isStream = true;
 				try {
 					((InputStream) zipData).close();
 				} catch (IOException ioe) {
@@ -116,12 +144,13 @@ class JarLoader extends ClassLoader {
 		return updateLoader.getResourceAsStream(name);
 	}
 
-	/*
-	** Package level api
-	*/
-	final String getJarName() {
-		return jf.getJarName();
-	}
+    /**
+     * Return the SQL name for the installed jar.
+     * Used for error and informational messages.
+     */
+    final String getJarName() {
+        return IdUtil.mkQualifiedName(name);
+    }
 
 	Class loadClassData(String className, String jvmClassName, boolean resolve) {
 
@@ -129,11 +158,10 @@ class JarLoader extends ClassLoader {
 			return null;
 
 		try {
-            JarFile jar = jf.getJarFile();
 			if (jar != null)
-				return loadClassDataFromJar(jar, className, jvmClassName, resolve);
+				return loadClassDataFromJar(className, jvmClassName, resolve);
 
-			if (jf.isStream) {
+			if (isStream) {
 				// have to use a new stream each time
 				return loadClassData((InputStream) load(),
 						className, jvmClassName, resolve);
@@ -154,13 +182,11 @@ class JarLoader extends ClassLoader {
 
 		if (updateLoader == null)
 			return null;
-        
-        JarFile jar = jf.getJarFile();
-
+     
 		if (jar != null)
-			return getRawStream(jar, name);
+			return getRawStream(name);
 
-		if (jf.isStream) {
+		if (isStream) {
 			return getRawStream((InputStream) load(), name);
 		}
 		return null;
@@ -177,7 +203,6 @@ class JarLoader extends ClassLoader {
      * as a java.util.jarFile.
      */
 	private Class loadClassDataFromJar(
-            JarFile jar,
             String className, String jvmClassName, boolean resolve) 
 		throws IOException {
 
@@ -221,12 +246,18 @@ class JarLoader extends ClassLoader {
 		
 	}
 
+    /**
+     * Load and optionally resolve the class given its
+     * JarEntry and an InputStream to the class fiel format.
+     * This is common code for when the jar is accessed
+     * directly using JarFile or through InputStream.
+     */
 	private Class loadClassData(JarEntry e, InputStream in,
 		String className, boolean resolve) throws IOException {
 
-		byte[] data = jf.readData(e, in, className);
+		byte[] data = readData(e, in, className);
 
-		Object[] signers = jf.getSigners(className, e);
+		Object[] signers = getSigners(className, e);
 
 		synchronized (updateLoader) {
 			// see if someone else loaded it while we
@@ -257,7 +288,7 @@ class JarLoader extends ClassLoader {
 
 	private Object load() {
 
-		String[] dbJarName = jf.name;
+		String[] dbJarName = name;
 
 		String schemaName = dbJarName[IdUtil.DBCP_SCHEMA_NAME];
 		String sqlName = dbJarName[IdUtil.DBCP_SQL_JAR_NAME];
@@ -267,7 +298,7 @@ class JarLoader extends ClassLoader {
 			return updateLoader.getJarReader().readJarFile(schemaName, sqlName);
 		} catch (StandardException se) {
 			if (vs != null)
-				vs.println(MessageService.getTextMessage(MessageId.CM_LOAD_JAR_EXCEPTION, jf.getJarName(), se));
+				vs.println(MessageService.getTextMessage(MessageId.CM_LOAD_JAR_EXCEPTION, getJarName(), se));
 			return null;
 		}
 
@@ -279,9 +310,16 @@ class JarLoader extends ClassLoader {
      *
      */
 	void setInvalid() {
-
-		jf.setInvalid();
 		updateLoader = null;
+        if (jar != null) {
+            try {
+                jar.close();
+            } catch (IOException ioe) {
+            }
+            jar = null;
+
+        }
+        isStream = false;
 	}
 
 	/*
@@ -294,7 +332,7 @@ class JarLoader extends ClassLoader {
 		It's a new stream set up by the zip code to read just
 		the contents of this entry.
 	*/
-	private InputStream getRawStream(JarFile jar, String name) {
+	private InputStream getRawStream(String name) {
 
 		try {
 			JarEntry e = jar.getJarEntry(name);
@@ -341,4 +379,87 @@ class JarLoader extends ClassLoader {
 		}
 		return null;
 	}
+    
+    /**
+     * Read the raw data for the class file format
+     * into a byte array that can be used for loading the class.
+     * If this is a signed class and it has been compromised then
+     * a SecurityException will be thrown.
+     */
+    byte[] readData(JarEntry ze, InputStream in, String className)
+            throws IOException {
+
+        try {
+            int size = (int) ze.getSize();
+
+            if (size != -1) {
+                byte[] data = new byte[size];
+
+                InputStreamUtil.readFully(in, data, 0, size);
+
+                return data;
+            }
+
+            // unknown size
+            byte[] data = new byte[1024];
+            ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
+            int r;
+            while ((r = in.read(data)) != -1) {
+                os.write(data, 0, r);
+            }
+
+            data = os.toByteArray();
+            return data;
+        } catch (SecurityException se) {
+            throw handleException(se, className);
+        }
+    }
+
+    /**
+     * Validate the security certificates (signers) for the class data.
+     */
+    Object[] getSigners(String className, JarEntry je) throws IOException {
+
+        try {
+            Certificate[] list = je.getCertificates();
+            if ((list == null) || (list.length == 0)) {
+                return null;
+            }
+
+            for (int i = 0; i < list.length; i++) {
+                if (!(list[i] instanceof X509Certificate)) {
+                    String msg = MessageService.getTextMessage(
+                            MessageId.CM_UNKNOWN_CERTIFICATE, className,
+                            getJarName());
+
+                    throw new SecurityException(msg);
+                }
+
+                X509Certificate cert = (X509Certificate) list[i];
+
+                cert.checkValidity();
+            }
+
+            return list;
+
+        } catch (GeneralSecurityException gse) {
+            // convert this into an unchecked security
+            // exception. Unchecked as eventually it has
+            // to pass through a method that's only throwing
+            // ClassNotFoundException
+            throw handleException(gse, className);
+        }
+        
+    }
+
+    /**
+     * Provide a SecurityManager with information about the class name
+     * and the jar file.
+     */
+    private SecurityException handleException(Exception e, String className) {
+        String msg = MessageService.getTextMessage(
+                MessageId.CM_SECURITY_EXCEPTION, className, getJarName(), e
+                        .getLocalizedMessage());
+        return new SecurityException(msg);
+    }
 }
