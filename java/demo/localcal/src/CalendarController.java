@@ -259,7 +259,7 @@ public class CalendarController extends Applet {
         }
 
         return event.getJSONObject().toString();
-}
+    }
     
     public void updateEvent(String id, String title) throws Exception {
         log("DerbyCalendarApplet.updateEntry(" + id  + ", " + title + ")");

@@ -101,63 +101,25 @@ commands
 
 
 3. BUILDING
-
 3.1 SET KEYSTORE PROPERTIES IN BUILD.XML
 Edit build.xml and set the keystore.alias and keystore.password
 values to match the ones you used above when signing the jar files.
 This is used to automatically sign the LocalCalendar jar file each
 time we build it.
 
-3.2 SET THE CALENDAR ID
-
-The calendar id uniquely identifies the calendar you want
-to work with.  Currently it is set to a test calendar that is
-owned by David Van Couvering.  You are free to use this, it is
-available to all, but you can also create your own calendar.  Here
-are the steps:
+3.2 SET UP A CALENDAR
+If you want you can use the default calendar for the Google Calendar
+user localcal@gmail.com, password "synchronize."  But be aware that
+others may be using this same calendar at the same time.  The alternative
+is to create your own Google Calendar account (if you don't have one
+already) and use that.
 
 3.2.1 Create a calendar
-Make sure it is set to be publicly available to all.  If you want
-to make it private, read the instructions for Google Calendar and
-the Google Calendar API for how to do this.
+Create a Google Mail account and then go to http://calendar.google.com
+to set up a calendar.  You can create multiple calendars, but 
+LocalCalendar only works with your default calendar.
 
-3.2.2 Get the id
-On the left hand pane of your Google Calendar page is the list of
-calendars you have created.  Click on the down-arrow for the
-one you want to use in LocalCalendar and choose "Calendar Settings"
-
-On the settings page, click on the orange [XML] box for calendar
-address.  You'll get a long URI of the form
-
-http://www.google.com/calendar/feeds/<id>@group.calendar.google.com/public/basic
-
-(unless you're using your default calendar, in which case it will be
-of the form
-
-http://www.google.com/calendar/feeds/<your-email-address>/public/basic)
-
-Your calendar id is either <id>@group.calendar.google.com or
-<your-email-address>.  
-
-3.2.3 Set the id in LocalCalendar
-Set the variable derbycal.calid in src/localcal.js to be your
-calendar id.
-
-3.3 SET THE DATE RANGE IN LOCALCALENDAR
-The date range used by LocalCalendar is currently hardcoded.  If you're
-interested, please feel free to make this dynamically settable by the
-user.  But I didn't get around to doing that.
-
-To change the date range, edit src/localcal.js and modify the
-array derbycal.days to match the dates you're interested in.
-
-3.4 CHANGE THE TITLE
-If you want, you can change the title to match what your calendar
-is about.  Edit src/index.html and change the <h1> tag with the
-id "loginHeader" and also the <h1> tag just underneat the <div>
-with id "main-div".
-
-3.4 BUILD
+3.3 BUILD
 To build, simply run "ant" in the top-level directory.  This will
 build the source, create and sign a jar file, and put this as well
 as all other needed resources into the dist directory.
@@ -167,9 +129,14 @@ as all other needed resources into the dist directory.
 
 Bring up Firefox and point it to <path-to-localcal>/dist/index.html.
 
-LocalCalendar shows a week's worth of events.  Each event is an 
-all-day event.  I didn't try to mess around with event times, this
-was more HTML and JavaScript than I was willing to write.
+LocalCalendar shows a week's worth of events.  You can change the
+week by changing the start date at the top.  The application will
+automatically pick the next Sunday from the date you enter as the
+starting date.  The default is the next Sunday from today.
+
+Each event is an all-day event.  I didn't try to mess around with 
+event times, this was more HTML and JavaScript than I was willing 
+to write.
 
 To play around with LocalCalendar's capabilities, try the following.
 To find bugs, try almost anything else :)

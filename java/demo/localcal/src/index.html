@@ -57,16 +57,27 @@
   <script type="text/javascript" src="localcal.js"></script>
 
 </head>
-<body id="body">
+<body id="body" onload="derbycal.init()">
+  <h1>My Week of Events</h1>
+  <form name="dateForm">
+      <table>
+          <tr>
+               <td><strong>Start Date: </strong></td>
+               <td>&nbsp;&nbsp;&nbsp;</td>
+               <td><input name="startDate" type="text"
+                    onChange="derbycal.changeStartDate()" 
+                    style="{font-weight: bold ; font-size : 14;}"/></td>
+          </tr>
+      </table>
+  </form>
   <div id="login-div" class="login">
-  <h1 id="loginHeader">My Week of Events</h1>
-  <h3>Please login to Google Calendar</h3>
-  <form class="login-form" name="loginForm" >
+  <form class="login-form" name="loginForm" id="loginForm">
+      <h3>Please login to Google Calendar</h3>
       <table>
           <tr>
               <td><strong>Google Id: </strong></td>
               <td><input type="text" name="user" size="40"/></td>
-              <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+              <td><b>@gmail.com</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
               <td><strong>Password: </strong></td>
               <td><input type="password" name="password"/></td>
               <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -88,8 +99,6 @@
   </form>
   </div>
   <div id="main-div" class="main">
-      <h1>My Week of Events</h1>
-      <hr>
       <table>
           <tr>
               <form name="offlineForm">

@@ -19,9 +19,7 @@
 
 var derbycal = {};
 
-// This is the Google Calendar id for the shared calendar for this
-// application
-derbycal.calid = "olj8s6vvk5pu2b7oib47t57pps@group.calendar.google.com";
+// INITIALIZATION VARIABLES.  Set these as you see fit
 
 // The offset from GMT for this calendar.  Change this if you want to change
 // time zones for the calendar.  Right now set to CST (Austin).
@@ -30,25 +28,91 @@ derbycal.gmtOffset = "-08:00";
 derbycal.onlineColor = "#66FF66";
 derbycal.offlineColor = "#ccFFFF";
 
+// This needs to be in a valid date format for initialization a Javascript date
+// It should generally be on a Sunday, but it can be any day and we'll start
+// the calendar from the next Sunday after your given date.
+derbycal.startDate = "October 12, 2006";
+
+// === END INIT VARIABLES ==
+
 /** 
-** You need to change the dates if you want a different week showing
-** on the calendar.  Yes, I could calculate this, but I have bigger
-** fish to fry...
+* The array of days.  The days are hardcoded, the dates will be calculated
+* as part of the derbycal.init() function
 */
 derbycal.days = [ 
-    ["Sunday",      "2006-10-01"],
-    ["Monday",      "2006-10-02"],
-    ["Tuesday",     "2006-10-03"],
-    ["Wednesday",   "2006-10-04"],
-    ["Thursday",    "2006-10-05"],
-    ["Friday",      "2006-10-06"],
-    ["Saturday",    "2006-10-07"]
+    ["Sunday",      ""],
+    ["Monday",      ""],
+    ["Tuesday",     ""],
+    ["Wednesday",   ""],
+    ["Thursday",    ""],
+    ["Friday",      ""],
+    ["Saturday",    ""]
 ];
 
-derbycal.startDate = derbycal.days[0][1];
-derbycal.endDate   = derbycal.days[6][1];
+// Sorry, English-chauvinist code...
+derbycal.months = [ 
+    "January", "Febuary", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November",
+    "December"
+];
 
 derbycal.offline   = false;
+
+
+/**
+* Do any initialization work.  This should be called when the
+* page is loaded
+*/
+derbycal.init = function() {
+  var today = new Date();
+  var dateForm = document.dateForm;
+  dateForm.startDate.value = derbycal.months[today.getMonth()] + " " +
+     today.getDate() + ", " + today.getFullYear();
+  derbycal.updateDays();
+}
+
+derbycal.updateDays = function() { 
+  derbycal.calcDays(document.dateForm.startDate.value);
+  derbycal.startDate = derbycal.days[0][1];
+  derbycal.endDate   = derbycal.days[6][1];  
+}
+
+derbycal.changeStartDate = function() {
+  derbycal.updateDays();
+  derbycal.refreshCalendar();
+}
+
+/**
+ * Given a starting day, set the dates for the derbycal.days
+ * array, starting with the next Sunday from the given start day.  
+ * This array is then used to set up the calendar.
+ */
+derbycal.calcDays = function(startDay) {
+    var date = new Date(startDay);
+
+    // adjust to the next Sunday, unless today is Sunday
+    var day = date.getDay();
+    var daysToSunday = 0;
+    if ( day != 0 ) {
+        daysToSunday = 7 - day;
+    }
+        
+    date.setDate(date.getDate() + daysToSunday);
+
+    // Update the date on the page to reflect Sunday's date
+    var dateForm = document.dateForm;
+    dateForm.startDate.value = derbycal.months[date.getMonth()] + 
+        " " + date.getDate() + ", " + date.getFullYear(); 
+
+    // Set the array of days to have the right dates based on
+    // the given start date
+    for ( day = 0 ; day < 7; day++ ) {
+        derbycal.days[day][1] = date.getFullYear() + "-" +
+                       (date.getMonth() + 1) + "-" +
+                       date.getDate();
+        date.setDate(date.getDate() + 1);
+    }
+} 
 
 /** 
  * Log in to Google Calendar
@@ -58,17 +122,18 @@ derbycal.login = function() {
     statusText.style.visibility = "visible";
 
     var loginForm = document.loginForm;
-    derbycal.user = loginForm.user.value;
+    derbycal.user = loginForm.user.value + "@gmail.com";
     derbycal.password = loginForm.password.value;
 
     try {
         // Get the events list from  Google Calendar
-        calapplet.login(derbycal.calid, derbycal.gmtOffset, 
+        calapplet.login(derbycal.user, derbycal.gmtOffset, 
             derbycal.user, derbycal.password,
             derbycal.startDate, derbycal.endDate, false);
 
 
     } catch ( e ) {
+        statusText.style.visibility = "hidden";
         alert("Error logging in to calendar : " + 
             derbycal.getExceptionMessage(e));
         return;
@@ -93,7 +158,6 @@ derbycal.startOffline = function () {
     derbycal.refreshCalendar();
 
     document.getElementById("workOfflineButton").style.visibility = "hidden";
-    document.getElementById("loginHeader").style.visibility = "hidden";
     document.getElementById("onlineButton").disabled = true;
 }
 
@@ -173,7 +237,7 @@ derbycal.loadEvents = function(eventStr) {
     var i = 0;
     while ( events != null  &&  i < events.length ) {
         var event = events[i++];
-        derbycal.addEventToPage(event.eventid, event.day, event.title);
+        derbycal.addEventToPage(event.eventid, event.day, event.date, event.title);
     }
 }
 derbycal.clearCalendarOnPage = function() {
@@ -210,7 +274,7 @@ derbycal.postNewEvent = function() {
         id = event.eventid;
 
         // Update the HTML
-        derbycal.addEventToPage(id, day, title);
+        derbycal.addEventToPage(id, day, date, title);
     } catch ( e ) {
         alert("Unable to add event: " + derbycal.getExceptionMessage(e));
     }
@@ -229,7 +293,12 @@ derbycal.getDateForDay = function(day) {
     throw "The day specified, " + day + " is not one I recognize";
 }
 
-derbycal.addEventToPage = function(id, day, title) {
+derbycal.addEventToPage = function(id, day, date, title) {
+    // Ignore the event if the date is out of range
+    if ( ! derbycal.dateInRange(date) ) {
+        return;
+    }
+    
     // Get the table for the specified day
     var table = document.getElementById(day);
 
@@ -253,6 +322,16 @@ derbycal.addEventToPage = function(id, day, title) {
         'value="' + title + '"></input></td>';
 
     table.appendChild(tr);
+}
+
+derbycal.dateInRange = function(date) {
+    for ( i = 0 ; i < 6 ; i++ ) {
+        if ( derbycal.days[i][1] == date ) {
+            return true;
+        }
+    }
+  
+    return false;
 }
 
 /**
