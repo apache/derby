@@ -39,6 +39,7 @@ import org.apache.derby.iapi.store.access.xa.XAResourceManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.TransactionResourceImpl;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Implements XAResource
@@ -284,8 +285,8 @@ class EmbedXAResource implements XAResource {
                     returnConnectionToResource(tranState, xid_im);
 					if (SanityManager.DEBUG)
 					{
-						if (realConnection != null)
-							SanityManager.ASSERT(realConnection.transactionIsIdle(),
+						if (con.realConnection != null)
+							SanityManager.ASSERT(con.realConnection.transactionIsIdle(),
 									"real connection should have been idle at this point"); 			
 					}
                     return XAResource.XA_RDONLY;
