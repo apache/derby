@@ -668,7 +668,7 @@ public class Like {
 
 	/**
 	 * Determine whether or not this LIKE can be transformed into optimizable
-	 * clauses.  It can if the pattern is non-null, of length > 0 and
+	 * clauses.  It can if the pattern is non-null and if the length == 0 or
 	 * the first character is not a wild card.
 	 *
 	 * @param pattern	The right side of the LIKE
@@ -678,10 +678,14 @@ public class Like {
 
 	public static boolean isOptimizable(String pattern)
 	{
-		if (pattern == null || (pattern.length() == 0))
+		if (pattern == null)
 		{
 			return false;
 		}
+
+        if (pattern.length() == 0) {
+            return true;
+        }
 
 		// if we have pattern matching at start of string, no optimization
 		char firstChar = pattern.charAt(0);
@@ -871,7 +875,6 @@ public class Like {
 
 	/**
 	 * Return the substring from the pattern for the < clause.
-	 * (NOTE: This may be null if the pattern is an empty string.)
 	 *
 	 * @param pattern	The right side of the LIKE
 	 * @param escape	The escape clause
@@ -887,12 +890,6 @@ public class Like {
 		char	oldLastChar;
 		char	newLastChar;
 		final int escChar;
-
-		if (pattern.length() == 0)
-		{
-			// pattern is ""
-			return null;
-		}
 
 		if ((escape != null) && (escape.length() !=0))
 		{
@@ -911,7 +908,7 @@ public class Like {
 		 *
 		 *	pattern			return
 		 *	-------			------
-		 *	""				null
+		 *	""				SUPER_STRING (match against super string)
 		 *	"%..."			SUPER_STRING (match against super string)
 		 *	"_..."			SUPER_STRING (match against super string)
 		 *	"asdf%"			"asdg"
@@ -934,7 +931,7 @@ public class Like {
 			upperLimit.append(c);
 		}
 
-		// Pattern starts with wildcard.
+		// Pattern is empty or starts with wildcard.
 		if (upperLimit.length() == 0) {
 			return SUPER_STRING;
 		}
