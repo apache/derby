@@ -233,24 +233,12 @@ class UpdateLoader {
 
 		if (!initDone)
 			return;
+        
+        // first close the existing jar file opens
+        close();
 
 		if (reload) {
-			//first close the existing jar file opens
-			close();
 			initializeFromClassPath(thisClasspath);
-			return;
-		}
-
-		// first thing to do is to remove all Class entries
-		// and then get a complete set of loaders ...
-		synchronized (this) {
-
-			for (int i = 0; i < jarList.length; i++) {
-
-				JarLoader jl = jarList[i];
-
-				InstalledJar newJarFile = jl.setInvalid(reload);
-			}
 		}
 	}
 
@@ -292,7 +280,7 @@ class UpdateLoader {
 	void close() {
 
 		for (int i = 0; i < jarList.length; i++) {
-			jarList[i].setInvalid(false);
+			jarList[i].setInvalid();
 		}
 
 	}

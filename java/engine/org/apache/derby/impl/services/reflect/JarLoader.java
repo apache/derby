@@ -79,7 +79,7 @@ class JarLoader extends ClassLoader {
 		}
 
 		// No such zip.
-		setInvalid(false);	
+		setInvalid();	
 	}
 
 	/**
@@ -273,11 +273,15 @@ class JarLoader extends ClassLoader {
 
 	}
 
-	InstalledJar setInvalid(boolean newJarFile) {
+    /**
+     * Set this loader to be invaid so that it will not
+     * resolve any classes or resources.
+     *
+     */
+	void setInvalid() {
 
 		jf.setInvalid();
 		updateLoader = null;
-		return newJarFile ? new InstalledJar(jf.name) : null;
 	}
 
 	/*
