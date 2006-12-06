@@ -24,11 +24,8 @@ package org.apache.derby.impl.services.reflect;
 import java.security.GeneralSecurityException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import java.io.IOException;
 import java.io.File;
@@ -47,29 +44,48 @@ import org.apache.derby.iapi.services.io.InputStreamUtil;
  * or an InputStream (database is in a jar file itself).
  */
 final class InstalledJar {
-	final String[] name;
-	private JarFile jar;
-	boolean isStream;
+    /**
+     * Two part name for the jar file.
+     */
+    final String[] name;
+    
+    /**
+     * When the jar file can be manipulated as a java.util.JarFile
+     * this holds the reference to the open jar. When the jar can
+     * only be manipulated as an InputStream (because the jar is itself
+     * in a database jar) then this will be null.
+     */
+    private JarFile jar;
+    
+    /**
+     * True if the jar can only be accessed using a stream, because
+     * the jar is itself in a database jar. When fals the jar is accessed
+     * using the jar field.
+     */
+    boolean isStream;
 
 	InstalledJar(String[] name) {
 		this.name = name;
 	}
 
+    /**
+     * Return the SQL name for the installed jar.
+     * Used for error and informational messages.
+     */
 	final String getJarName() {
 		return IdUtil.mkQualifiedName(name);
 	}
 
-
-	final boolean isZip() {
-		return jar != null;
-	}
-
-	final ZipFile getZip() {
+    /**
+     * Return the JarFile for this installed jar when it
+     * is being accessed through java.util.jar.
+     */
+	final JarFile getJarFile() {
 		return jar;
 	}
 
 	void initialize(File jarFile) throws IOException {
-        jar = new java.util.jar.JarFile(jarFile);
+        jar = new JarFile(jarFile);
 	}
 
 	final void setInvalid() {
@@ -84,17 +100,7 @@ final class InstalledJar {
 		isStream = false;
 	}
 
-	ZipEntry getEntry(String entryName) {
-		return jar.getJarEntry(entryName);
-	}
-	ZipInputStream getZipOnStream(InputStream in) throws IOException {
-		return new JarInputStream(in);
-	}
-	ZipEntry getNextEntry(ZipInputStream in) throws IOException {
-		return ((JarInputStream) in).getNextJarEntry();
-	}
-
-	byte[] readData(ZipEntry ze, InputStream in, String className) throws IOException {
+	byte[] readData(JarEntry ze, InputStream in, String className) throws IOException {
 
 		try {
             int size = (int) ze.getSize();
@@ -122,11 +128,11 @@ final class InstalledJar {
         }
 	}
 
-    Object[] getSigners(String className, ZipEntry ze) throws IOException {
+    Object[] getSigners(String className, JarEntry je) throws IOException {
         Exception e;
 
         try {
-            Certificate[] list = ((java.util.jar.JarEntry) ze).getCertificates();
+            Certificate[] list = je.getCertificates();
             if ((list == null) || (list.length == 0)) {
                 return null;
             }

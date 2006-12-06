@@ -28,10 +28,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipEntry;
-
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.util.IdUtil;
@@ -130,8 +129,9 @@ class JarLoader extends ClassLoader {
 			return null;
 
 		try {
-			if (jf.isZip())
-				return loadClassDataFromJar(className, jvmClassName, resolve);
+            JarFile jar = jf.getJarFile();
+			if (jar != null)
+				return loadClassDataFromJar(jar, className, jvmClassName, resolve);
 
 			if (jf.isStream) {
 				// have to use a new stream each time
@@ -154,9 +154,11 @@ class JarLoader extends ClassLoader {
 
 		if (updateLoader == null)
 			return null;
+        
+        JarFile jar = jf.getJarFile();
 
-		if (jf.isZip())
-			return getRawStream(jf.getZip(), name);
+		if (jar != null)
+			return getRawStream(jar, name);
 
 		if (jf.isStream) {
 			return getRawStream((InputStream) load(), name);
@@ -170,51 +172,61 @@ class JarLoader extends ClassLoader {
 	*/
 
 
-	private Class loadClassDataFromJar(String className, String jvmClassName, boolean resolve) 
+    /**
+     * Load the class data when the installed jar is accessible
+     * as a java.util.jarFile.
+     */
+	private Class loadClassDataFromJar(
+            JarFile jar,
+            String className, String jvmClassName, boolean resolve) 
 		throws IOException {
 
-		ZipEntry ze = jf.getEntry(jvmClassName);
-		if (ze == null)
+		JarEntry e = jar.getJarEntry(jvmClassName);
+		if (e == null)
 			return null;
 
-		InputStream in = jf.getZip().getInputStream(ze);
+		InputStream in = jar.getInputStream(e);
 
 		try {
-			return loadClassData(ze, in, className, resolve);
+			return loadClassData(e, in, className, resolve);
 		} finally {
 			in.close();
 		}
 	}
 
+    /**
+     * Load the class data when the installed jar is accessible
+     * only as an input stream (the jar is itself in a database jar).
+     */
 	private Class loadClassData(
 		InputStream in, String className, String jvmClassName, boolean resolve) 
 		throws IOException {
 
-		ZipInputStream zipIn = jf.getZipOnStream(in);
+        JarInputStream jarIn = new JarInputStream(in);
 
 		for (;;) {
 
-			ZipEntry ze = jf.getNextEntry(zipIn);
-			if (ze == null) {
-				zipIn.close();
+			JarEntry e = jarIn.getNextJarEntry();
+			if (e == null) {
+				jarIn.close();
 				return null;
 			}
 
-			if (ze.getName().equals(jvmClassName)) {
-				Class c = loadClassData(ze, zipIn, className, resolve);
-				zipIn.close();
+			if (e.getName().equals(jvmClassName)) {
+				Class c = loadClassData(e, jarIn, className, resolve);
+				jarIn.close();
 				return c;
 			}
 		}
 		
 	}
 
-	private Class loadClassData(ZipEntry ze, InputStream in,
+	private Class loadClassData(JarEntry e, InputStream in,
 		String className, boolean resolve) throws IOException {
 
-		byte[] data = jf.readData(ze, in, className);
+		byte[] data = jf.readData(e, in, className);
 
-		Object[] signers = jf.getSigners(className, ze);
+		Object[] signers = jf.getSigners(className, e);
 
 		synchronized (updateLoader) {
 			// see if someone else loaded it while we
@@ -273,19 +285,19 @@ class JarLoader extends ClassLoader {
 	*/
 
 	/**
-		Get a stream directly from a ZipFile.
+		Get a stream for a resource directly from a JarFile.
 		In this case we can safely return the stream directly.
 		It's a new stream set up by the zip code to read just
 		the contents of this entry.
 	*/
-	private InputStream getRawStream(ZipFile zip, String name) {
+	private InputStream getRawStream(JarFile jar, String name) {
 
 		try {
-			ZipEntry ze = zip.getEntry(name);
-			if (ze == null)
+			JarEntry e = jar.getJarEntry(name);
+			if (e == null)
 				return null;
 
-			return zip.getInputStream(ze);
+			return jar.getInputStream(e);
 		} catch (IOException ioe) {
 			return null;
 		}
@@ -299,26 +311,26 @@ class JarLoader extends ClassLoader {
 	*/
 	private InputStream getRawStream(InputStream in, String name) { 
 
-		ZipInputStream zipIn = null;
+		JarInputStream jarIn = null;
 		try {
-			zipIn = new ZipInputStream(in);
+			jarIn = new JarInputStream(in);
 
-			ZipEntry ze;
-			while ((ze = jf.getNextEntry(zipIn)) != null) {
+		    JarEntry e;
+			while ((e = jarIn.getNextJarEntry()) != null) {
 
-				if (ze.getName().equals(name)) {
-					LimitInputStream lis = new LimitInputStream(zipIn);
-					lis.setLimit((int) ze.getSize());
+				if (e.getName().equals(name)) {
+					LimitInputStream lis = new LimitInputStream(jarIn);
+					lis.setLimit((int) e.getSize());
 					return lis;
 				}
 			}
 
-			zipIn.close();
+			jarIn.close();
 
 		} catch (IOException ioe) {
-			if (zipIn != null) {
+			if (jarIn != null) {
 				try {
-					zipIn.close();
+					jarIn.close();
 				} catch (IOException ioe2) {
 				}
 			}
