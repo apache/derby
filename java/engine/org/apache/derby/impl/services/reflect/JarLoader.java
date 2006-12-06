@@ -49,7 +49,7 @@ class JarLoader extends ClassLoader {
 	JarLoader(UpdateLoader updateLoader, String[] name, HeaderPrintWriter vs) {
 
 		this.updateLoader = updateLoader;
-		this.jf = new JarFileJava2(name);
+		this.jf = new InstalledJar(name);
 		this.vs = vs;
 	}
 
@@ -265,7 +265,7 @@ class JarLoader extends ClassLoader {
 
 		jf.setInvalid();
 		updateLoader = null;
-		return newJarFile ? new JarFileJava2(jf.name) : null;
+		return newJarFile ? new InstalledJar(jf.name) : null;
 	}
 
 	/*
