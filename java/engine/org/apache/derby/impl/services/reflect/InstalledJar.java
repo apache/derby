@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.services.reflect.JarFile
+   Derby - Class org.apache.derby.impl.services.reflect.InstalledJar
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -39,12 +39,12 @@ import org.apache.derby.iapi.services.io.InputStreamUtil;
  * The source for the Jar is either a File (database from a file system)
  * or an InputStream (database is in a jar file itself).
  */
-abstract class JarFile {
+abstract class InstalledJar {
 	final String[] name;
 	protected ZipFile zip;
 	boolean isStream;
 
-	JarFile(String[] name) {
+	InstalledJar(String[] name) {
 		this.name = name;
 	}
 

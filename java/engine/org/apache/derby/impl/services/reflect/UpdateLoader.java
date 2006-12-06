@@ -249,7 +249,7 @@ class UpdateLoader {
 
 				JarLoader jl = jarList[i];
 
-				JarFile newJarFile = jl.setInvalid(reload);
+				InstalledJar newJarFile = jl.setInvalid(reload);
 			}
 		}
 	}

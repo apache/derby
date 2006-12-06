@@ -43,7 +43,7 @@ import java.security.GeneralSecurityException;
 	java.util.jar.* classes to be signature aware.
 */
 
-final class JarFileJava2 extends JarFile {
+final class JarFileJava2 extends InstalledJar {
 
 	JarFileJava2(String[] name) {
 		super(name);

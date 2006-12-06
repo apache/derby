@@ -43,7 +43,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 class JarLoader extends ClassLoader {
 
 	private UpdateLoader updateLoader;
-	private JarFile jf;
+	private InstalledJar jf;
 	private HeaderPrintWriter vs;
 
 	JarLoader(UpdateLoader updateLoader, String[] name, HeaderPrintWriter vs) {
@@ -261,7 +261,7 @@ class JarLoader extends ClassLoader {
 
 	}
 
-	JarFile setInvalid(boolean newJarFile) {
+	InstalledJar setInvalid(boolean newJarFile) {
 
 		jf.setInvalid();
 		updateLoader = null;
