@@ -687,7 +687,7 @@ acxs 2
 autocommitxastart expected  : XAException - null
 Expected XA error code: -9
 acxs 3
-TESTING READ_ONLY TRANSACTION FOLLOWED BY WRTIABLE TRANSACTION
+TESTING READ_ONLY TRANSACTION FOLLOWED BY WRITABLE TRANSACTION
 read-only XA transaction
   holdability     false
   isolation level READ_COMMITTED

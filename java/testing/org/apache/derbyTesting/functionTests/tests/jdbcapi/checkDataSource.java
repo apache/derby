@@ -658,7 +658,7 @@ public class checkDataSource
 		// 1)start a read-only global transaction 
 		// 2)finish that read-only transaction
 		// 3)start another global transaction 
-		System.out.println("TESTING READ_ONLY TRANSACTION FOLLOWED BY WRTIABLE TRANSACTION");
+		System.out.println("TESTING READ_ONLY TRANSACTION FOLLOWED BY WRITABLE TRANSACTION");
 		XAConnection xac5 = dsx.getXAConnection();
 		Xid xid5a = new cdsXid(5, (byte) 119, (byte) 129);
 		Connection conn5 = xac5.getConnection();
