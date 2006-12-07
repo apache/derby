@@ -35,12 +35,16 @@ DB2JCC=$DB2JCCDIR/lib/db2jcc.jar:$DB2JCCDIR/lib/db2jcc_license_c.jar
 DERBYTESTING=$JARDIR/derbyTesting.jar
 DERBYRUN=$JARDIR/derbyrun.jar
 
-LOCALES=$JARDIR/derbyLocale_de_DE.jar:\
+LOCALES=$JARDIR/derbyLocale_cs.jar:\
+$JARDIR/derbyLocale_de_DE.jar:\
 $JARDIR/derbyLocale_es.jar:\
 $JARDIR/derbyLocale_fr.jar:\
+$JARDIR/derbyLocale_hu.jar:\
 $JARDIR/derbyLocale_it.jar:\
 $JARDIR/derbyLocale_ja_JP.jar:\
+$JARDIR/derbyLocale_pl.jar:\
 $JARDIR/derbyLocale_ko_KR.jar:\
+$JARDIR/derbyLocale_ru.jar:\
 $JARDIR/derbyLocale_pt_BR.jar:\
 $JARDIR/derbyLocale_zh_CN.jar:\
 $JARDIR/derbyLocale_zh_TW.jar

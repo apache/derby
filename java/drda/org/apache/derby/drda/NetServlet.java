@@ -58,8 +58,8 @@ public class NetServlet extends HttpServlet {
 	private String tracingDirectory;
 	private boolean logStatus= false;	/* Logging off */
 	private boolean traceStatus = false;	/* Tracing off */
-	private String[] knownLang = {"en","es","de_DE", "fr", "it", "ja_JP",
-			"ko_KR", "pt_BR", "zh_CN", "zh_TW"};
+	private String[] knownLang = {"cs","en","es","de_DE","fr","hu","it",
+			"ja_JP",ko_KR","pl","pt_BR","ru","zh_CN","zh_TW"};
 	private String locale;
 
 	private final static int NOT_GIVEN = -2;
