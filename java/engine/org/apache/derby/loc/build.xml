@@ -75,11 +75,19 @@
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_cs"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
       <param name="msgfile" value="messages_de_DE"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
       <param name="msgfile" value="messages_es"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_hu"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
@@ -95,7 +103,15 @@
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_pl"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
       <param name="msgfile" value="messages_pt_BR"/>
+    </antcall>
+    <antcall target="doSplit">
+      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgfile" value="messages_ru"/>
     </antcall>
     <antcall target="doSplit">
       <param name="msgdir" value="${derby.locales.dir}"/>
