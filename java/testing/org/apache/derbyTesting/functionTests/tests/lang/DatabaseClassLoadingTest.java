@@ -662,8 +662,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
             assertStatementError("25502", s,
                     "CALL EMC.ADDCONTACT(3, 'really@is_read_only.gov')");
 
-            // Disabled due to DERBY-552
-            // getResourceTests(conn);
+            getResourceTests(conn);
             
             // Disabled due to DERBY-553
             // signersTests(conn);

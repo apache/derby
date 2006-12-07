@@ -36,6 +36,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 
+import org.apache.derby.iapi.services.io.AccessibleByteArrayOutputStream;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.util.IdUtil;
@@ -347,9 +348,18 @@ class JarLoader extends ClassLoader {
 
 	/**
 		Get a stream from a zip file that is itself a stream.
-		Here we need to get the size of the zip entry and
-		put a limiting stream around it. Otherwise the
-		caller would end up reading the entire zip file!
+        We copy to the contents to a byte array and return a
+        stream around that to the caller. Though a copy is
+        involved it has the benefit of:
+        <UL>
+        <LI> Isolating the application from the JarInputStream, thus
+        denying any possibility of the application reading more of the
+        jar that it should be allowed to. E.g. the contents class files are not
+        exposed through getResource.
+        <LI> Avoids any possibility of the application holding onto
+        the open stream beyond shutdown of the database, thus leading
+        to leaked file descriptors or inability to remove the jar.
+        </UL>
 	*/
 	private InputStream getRawStream(InputStream in, String name) { 
 
@@ -361,22 +371,27 @@ class JarLoader extends ClassLoader {
 			while ((e = jarIn.getNextJarEntry()) != null) {
 
 				if (e.getName().equals(name)) {
-					LimitInputStream lis = new LimitInputStream(jarIn);
-					lis.setLimit((int) e.getSize());
-					return lis;
+                    int size = (int) e.getSize();
+                    if (size == -1)
+                    {
+                        // unknown size so just pick a good buffer size.
+                        size = 8192;
+                    }
+                    return AccessibleByteArrayOutputStream.copyStream(jarIn, size);
 				}
 			}
-
-			jarIn.close();
 
 		} catch (IOException ioe) {
-			if (jarIn != null) {
-				try {
-					jarIn.close();
-				} catch (IOException ioe2) {
-				}
-			}
+            // can't read the jar file just assume it doesn't exist.
 		}
+        finally {
+            if (jarIn != null) {
+                try {
+                    jarIn.close();
+                } catch (IOException ioe2) {
+                }
+            }            
+        }
 		return null;
 	}
     
