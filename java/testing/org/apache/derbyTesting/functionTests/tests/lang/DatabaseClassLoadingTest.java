@@ -60,9 +60,11 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         Test test = suite;
         if (JDBC.vmSupportsJDBC3()) {
         
+          suite.addTest(new DatabaseClassLoadingTest("testJarHandling"));
         
           suite.addTest(new DatabaseClassLoadingTest("testWithNoInstalledJars"));
           suite.addTest(new DatabaseClassLoadingTest("testWithNoClasspath"));
+ 
           suite.addTest(
                 SecurityManagerSetup.noSecurityManager(
                         new DatabaseClassLoadingTest("testSetClasspath")));
@@ -170,6 +172,19 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         } catch (SQLException e) {
             assertSQLState("42X51", e);
         }
+    }
+    
+    /**
+     * Test the sqlj procedures without setting any database
+     * classpath. This allows testing with the security manager
+     * without hitting the bugs that exist when the database class path
+     * is set with the security manager.
+     */
+    public void testJarHandling() throws SQLException, MalformedURLException
+    {       
+        installJar("dcl_emc1.jar", "EMC.MAIL_APP_JHT");
+        replaceJar("dcl_emc2.jar", "EMC.MAIL_APP_JHT");
+        removeJar("EMC.MAIL_APP_JHT");
     }
     
     /**
@@ -714,6 +729,14 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         cs.close();
     }
     
+    private void removeJar(String jarName) throws SQLException
+    {
+        CallableStatement cs = prepareCall("CALL SQLJ.REMOVE_JAR(?, 0)");       
+        cs.setString(1, jarName);       
+        cs.executeUpdate();        
+        cs.close();
+    }
+    
     private void setDBClasspath(String cp) throws SQLException
     {
         CallableStatement cs = prepareCall(
@@ -723,6 +746,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         cs.executeUpdate();
         cs.close();
     }
+    
+    
+    
     
     private void derby2035Workaround() throws SQLException
     {

@@ -43,6 +43,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 class RFResource implements FileResource {
 
@@ -223,7 +227,7 @@ class RFResource implements FileResource {
 } // end of class RFResource
 
 
-class RemoveFile implements Serviceable
+final class RemoveFile implements Serviceable, PrivilegedExceptionAction
 {
 	private final StorageFile fileToGo;
 
@@ -235,15 +239,11 @@ class RemoveFile implements Serviceable
 	public int performWork(ContextManager context)
         throws StandardException
     {
-        // SECURITY PERMISSION - MP1, OP5
-        if (fileToGo.exists())
-        {
-            if (!fileToGo.delete())
-            {
-                throw StandardException.newException(
-                    SQLState.FILE_CANNOT_REMOVE_FILE, fileToGo);
-            }
-        }
+        try {
+            AccessController.doPrivileged(this);
+        } catch (PrivilegedActionException e) {
+            throw (StandardException) (e.getException());
+         }
         return Serviceable.DONE;
 	}
 
@@ -261,5 +261,16 @@ class RemoveFile implements Serviceable
 	public boolean serviceImmediately()
 	{
 		return true;
-	}	
+	}
+
+    public Object run() throws StandardException {
+        // SECURITY PERMISSION - MP1, OP5
+        if (fileToGo.exists()) {
+            if (!fileToGo.delete()) {
+                throw StandardException.newException(
+                        SQLState.FILE_CANNOT_REMOVE_FILE, fileToGo);
+            }
+        }
+        return null;
+    }	
 }

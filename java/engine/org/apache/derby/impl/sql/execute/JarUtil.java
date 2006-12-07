@@ -133,7 +133,7 @@ class JarUtil
             final String jarExternalName = JarDDL.mkExternalName(schemaName,
                     sqlName, fr.getSeparatorChar());
 
-            long generationId = setJar(jarExternalName, is);
+            long generationId = setJar(jarExternalName, is, true, 0L);
 
             fid = ddg.newFileInfoDescriptor(/*DJD*/null, sd, sqlName, generationId);
             dd.addDescriptor(fid, sd, DataDictionary.SYSFILES_CATALOG_NUM,
@@ -284,10 +284,9 @@ class JarUtil
 
 			//
 			//Replace the file.
-			long generationId = 
-				fr.replace(jarExternalName,
-					fid.getGenerationId(), is);
-
+			long generationId = setJar(jarExternalName, is, false,
+					fid.getGenerationId());
+            
 			//
 			//Re-add the descriptor to the data dictionary.
 			FileInfoDescriptor fid2 = 
@@ -359,16 +358,27 @@ class JarUtil
      * input stream into the database
      * @param jarExternalName Name of jar with database structure.
      * @param contents Contents of jar file.
+     * @param add true to add, false to replace
+     * @param currentGenerationId generation id of existing version, ignored when adding.
      */
-    private long setJar(final String jarExternalName, final InputStream contents)
+    private long setJar(final String jarExternalName,
+            final InputStream contents,
+            final boolean add,
+            final long currentGenerationId)
             throws StandardException {
         try {
             return ((Long) AccessController
                     .doPrivileged(new java.security.PrivilegedExceptionAction() {
 
                         public Object run() throws StandardException {
-                            long generatedId = fr.add(jarExternalName, contents);
-                            return new Long(generatedId);
+                            long generationId;
+                            
+                            if (add)
+                                generationId = fr.add(jarExternalName, contents);
+                            else
+                                generationId =  fr.replace(jarExternalName,
+                                        currentGenerationId, contents);
+                            return new Long(generationId);
                         }
                     })).longValue();
         } catch (PrivilegedActionException e) {
