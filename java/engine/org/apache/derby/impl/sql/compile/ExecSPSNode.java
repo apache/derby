@@ -263,13 +263,13 @@ public class ExecSPSNode extends StatementNode
 		return ps.needsSavepoint();
 	}
 
-	/** @see QueryTreeNode#executeStatementName */
+	/** @see StatementNode#executeStatementName */
 	public String executeStatementName()
 	{
 		return name.getTableName();
 	}
 
-	/** @see QueryTreeNode#executeSchemaName */
+	/** @see StatementNode#executeSchemaName */
 	public String executeSchemaName()
 	{
 		return name.getSchemaName();
