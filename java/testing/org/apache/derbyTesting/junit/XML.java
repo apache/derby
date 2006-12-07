@@ -36,14 +36,6 @@ import java.sql.SQLException;
 import java.util.StringTokenizer;
 import java.util.Properties;
 
-/* The following import is for a JDBC 3.0 JAXP class, which means that
- * this file can only be built with 1.4 or later (see build.xml in
- * this directory).  This means that 1.3 JVMs will not be able to
- * instantiate this class--but since 1.3 is deprecated as of 10.3,
- * we do not worry about that here.
- */
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import junit.framework.Assert;
 
 /**
@@ -97,14 +89,6 @@ public class XML {
      */
     private static final String HELPER_FILE_LOCATION =
         "org/apache/derbyTesting/functionTests/tests/lang/xmlTestFiles/";
-
-    /**
-     * String form of the URL for the jar file in the user's classpath
-     * that holds the JAXP implementation in use.  If the implementation
-     * is embedded within, or endorsed by, the JVM, then we will set this
-     * field to be an empty string.
-     */
-    private static String jaxpURLString = null;
 
     /**
      * Return true if the classpath contains JAXP and
@@ -389,62 +373,20 @@ public class XML {
      * then it must be embedded within the JVM (either implicitly or else
      * through use of "endorsed standards" jars), in which case we return
      * null.
-     *
-     * NOTE: Assumption is that we only get here if we know there is in
-     * fact a JAXP parser available to the JVM.  I.e. if a call to
-     * the "classpathMeetsXMLReqs()" method of this class will return 
-     * true.
      */
     protected static String getJAXPParserLocation()
     {
-        // Only get the URL if we have not already done it.
-        if (jaxpURLString == null)
-        {
-            try {
+        /* If the classpath does not have JAXP then we do not want to
+         * instantiate the JAXPFinder class (which happens indirectly
+         * if we call its static methods).  This is because JAXPFinder
+         * references a JAXP class that does not exist for J2ME, so
+         * if we try to call a method on JAXPFinder without a JAXP
+         * parser in the classpath, the result for J2ME would be
+         * be a NoClassDefFound error (DERBY-2153).
+         */
+        if (!classpathHasXalanAndJAXP())
+            return null;
 
-                /* Figure out which JAXP implementation we have by
-                 * instantiating a DocumentBuilderFactory and then getting
-                 * the implementation-specific class name for that object.
-                 * Note that we cannot just use:
-                 *
-                 *  Class.forName("javax.xml.parsers.DocumentBuilderFactory")
-                 *
-                 * because the constructor for DocumentBuilderFactory (and
-                 * for all JAXP abstract classes) is protected, which means
-                 * Class.forName() cannot instantiate the object.  So we
-                 * explicitly create the object using the JAXP method for
-                 * doing so, and then we pass the object's implementation-
-                 * specific class name to Class.forName() to get the
-                 * appropriate Class.  The Class can then be used for
-                 * retrieval of the URL.
-                 */
-                URL jaxpURL = SecurityManagerSetup.getURL(Class.forName(
-                    DocumentBuilderFactory.newInstance().getClass().getName()));
-
-                /* If we found a URL then the JAXP parser is in the classpath
-                 * in some jar external to the JVM; in that case we have the
-                 * the jar's location so we use/return that.  Otherwise we
-                 * assume that the JAXP parser is either embedded within the
-                 * JVM or else "endorsed" by it. In those cases we set our
-                 * URL string to be the empty string, which is non-null and
-                 * thus we will only execute this try-catch once.
-                 */
-                jaxpURLString =
-                    (jaxpURL == null) ? "" : jaxpURL.toExternalForm();
-
-            } catch (Exception e) {
-
-                /* Probably a ClassNotFoundException.  We assume this
-                 * means that there is no JAXP parser implementation
-                 * in the classpath--but in that case we do not expect
-                 * to get here.
-                 */
-                 Assert.fail("Failed to located JAXP parser.");
-
-            }
-        }
-
-        // If we didn't find the JAXP parser URL, then return null.
-        return ((jaxpURLString.length() == 0) ? null : jaxpURLString);
+        return JAXPFinder.getJAXPParserLocation();
     }
 }
