@@ -1332,7 +1332,7 @@
 
     <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
     <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
     </copy>
     
     <manifest file="${derby.jar.dir}/lists/smfcmd.mf">
@@ -1348,7 +1348,7 @@
       <fileset dir="${out.dir}"
                includes="org/apache/derby/iapi/tools/**"/>
       <fileset dir="${derby.jar.dir}/lists"
-               includes="META-INF/**"/>
+               includes="META-INF/LICENSE,META-INF/NOTICE"/>
     </jar>
 
   </target>
@@ -1444,7 +1444,7 @@
 	                 org/apache/derby/loc/*_${locale.iname}.properties,
 	                 org/apache/derby/loc/drda/*_${locale.iname}.properties"/>
       <fileset dir="${derby.jar.dir}/lists"
-               includes="META-INF/**"/>
+               includes="META-INF/LICENSE,META-INF/NOTICE"/>
     </jar>
   </target>
     
@@ -1508,7 +1508,7 @@
  
     <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
     <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*,COPYRIGHT*"/>
+      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
     </copy>
 
   </target>
@@ -1609,23 +1609,23 @@
     <property file="${basedir}/snapshot/maintversion.properties"/>
     <zip destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,COPYRIGHT,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
     </zip>
     <tar destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
       <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin,COPYRIGHT,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
     </tar>
 
     <!-- debug archives - DERBY-178 --> 
     <zip destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
-      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,COPYRIGHT,LICENSE,NOTICE,CHANGES,README,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,CHANGES,README,javadoc/publishedapi/**"/>
     </zip>
     <tar destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
       <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
-      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,COPYRIGHT,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
+      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
     </tar>
 
     <copy file="${basedir}/jars/insane/derby_core_plugin_${major}.${minor}.${interim}.zip"
