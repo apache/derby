@@ -21,20 +21,11 @@
 
 package org.apache.derby.impl.io;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.io.StorageFactory;
-import org.apache.derby.io.StorageFile;
-
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.IOException;
-
-import java.util.Properties;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import org.apache.derby.io.StorageFile;
 
 /**
  * This class provides a Jar file based implementation of the StorageFactory interface. It is used by the
@@ -122,6 +113,20 @@ public class JarStorageFactory extends BaseStorageFactory
         separatedDataDirectory = dataDirectory + '/'; // Zip files use '/' as a separator
         createTempDir();
     } // end of doInit
+    
+    /**
+     * Close the opened jar/zip file on shutdown.
+     * (Fix for DERBY-2083).
+     */
+    public void shutdown() {
+        if (zipData != null) {
+            try {
+                zipData.close();
+            } catch (IOException e) {
+            }
+            zipData = null;
+        }
+    }
 
     private File getJarFile( String name)
     {

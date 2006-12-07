@@ -99,13 +99,12 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testRemoveJar"))); 
 
-/*  SKIP due to DERBY-2083         
+       
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testDatabaseInJar"))); 
 
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testDatabaseInClasspath"))); 
-*/
 
            test = new SupportFilesSetup(suite,
                    new String[] {
@@ -616,7 +615,10 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
         setContextClassLoader(jarURL);
         try {
-            readOnlyTest(ds);
+            // Disabled due to DERBY-2162, running this opens
+            // the database thus accessing resources and means the
+            // jar file cannot be cleaned up.
+            // readOnlyTest(ds);
         } finally {
             setContextClassLoader(null);
         } 
@@ -660,7 +662,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
             assertStatementError("25502", s,
                     "CALL EMC.ADDCONTACT(3, 'really@is_read_only.gov')");
 
-            // Disabled due to DERBY-522
+            // Disabled due to DERBY-552
             // getResourceTests(conn);
             
             // Disabled due to DERBY-553

@@ -250,14 +250,14 @@ final class StorageFactoryService implements PersistentService
 		//recreate the service root  if requested by the user.
 		final String recreateFrom = recreateServiceRoot(serviceName, defaultProperties);
 
-        InputStream is = null;
+        final Properties serviceProperties = new Properties(defaultProperties);
 		try
         {
-            is = (InputStream) AccessController.doPrivileged(
+            AccessController.doPrivileged(
                 new PrivilegedExceptionAction()
                 {
                     public Object run()
-                        throws FileNotFoundException, IOException, StandardException,
+                        throws IOException, StandardException,
                         InstantiationException, IllegalAccessException
                     {
                         if( recreateFrom != null) // restore from a file
@@ -269,16 +269,23 @@ final class StorageFactoryService implements PersistentService
                         {
                             StorageFactory storageFactory = privGetStorageFactoryInstance( true, serviceName, null, null);
                             StorageFile file = storageFactory.newStorageFile( PersistentService.PROPERTIES_NAME);
-                            InputStream is1 = file.getInputStream();
-                            storageFactory.shutdown();
-                            return is1;
+                            try {
+                                InputStream is = file.getInputStream();
+                                try {
+                                    // Need to load the properties before closing the
+                                    // StorageFactory.
+                                    serviceProperties.load(new BufferedInputStream(is));
+                                } finally {
+                                    is.close();
+                                }
+                            } finally {
+                               storageFactory.shutdown();
+                            }
+                            return null;
                         }
                     }
                 }
                 );
-
-			Properties serviceProperties = new Properties(defaultProperties);
-			serviceProperties.load(new BufferedInputStream(is));
 
 			return serviceProperties;
 		}
@@ -288,20 +295,7 @@ final class StorageFactoryService implements PersistentService
                 return null;
             throw Monitor.exceptionStartingModule( pae.getException());
         }
-        catch (FileNotFoundException fnfe) {return null ;}
 		catch (SecurityException se) { throw Monitor.exceptionStartingModule(/*serviceName, */ se);	}
-        catch (IOException ioe) { throw Monitor.exceptionStartingModule(/*serviceName, */ ioe); }
-        finally
-        {
-			if (is != null)
-            {
-				try
-                {
-					is.close();
-				}
-                catch (IOException ioe2) {}
-			}
-		}
 	} // end of getServiceProperties
 
 

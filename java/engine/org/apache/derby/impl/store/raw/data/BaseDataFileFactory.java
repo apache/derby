@@ -126,7 +126,6 @@ public class BaseDataFileFactory
     implements DataFactory, CacheableFactory, ModuleControl, ModuleSupportable, PrivilegedExceptionAction
 {
 
-    private String subSubProtocol;
     StorageFactory storageFactory;
 
     /* writableStorageFactory == (WritableStorageFactory) storageFactory if 
@@ -496,6 +495,7 @@ public class BaseDataFileFactory
 
 		if (isReadOnly())		// do enough to close all files, then return 
         {
+            storageFactory.shutdown();
 			return;
         }
 
@@ -506,6 +506,8 @@ public class BaseDataFileFactory
 			removeStubs();
 
 		releaseJBMSLockOnDB();
+        
+        writableStorageFactory.shutdown();
 	} // end of stop
 
 	/*
