@@ -42,6 +42,7 @@ import org.apache.derby.iapi.jdbc.JDBCBoot;
 	The driver automatically supports the correct JDBC specification version
 	for the Java Virtual Machine's environment.
 	<UL>
+	<LI> JDBC 4.0 - Java SE 6
 	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
 	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
 	</UL>
@@ -66,6 +67,11 @@ import org.apache.derby.iapi.jdbc.JDBCBoot;
 	method call, but adding the newInstance() guarantees
 	that Derby will be booted on any Java Virtual Machine.
 
+	<P>
+	Note that you do not need to manually load the driver this way if you are
+	running on Jave SE 6 or later. In that environment, the driver will be
+	automatically loaded for you when your application requests a connection to
+	a Derby database.
 	<P>
 	Any initial error messages are placed in the PrintStream
 	supplied by the DriverManager. If the PrintStream is null error messages are
