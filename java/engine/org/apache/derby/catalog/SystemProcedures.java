@@ -1281,7 +1281,7 @@ public class SystemProcedures  {
 
 	/**
 	 * Cotangent function. SYSFUN.COT
-	 * @see http://mathworld.wolfram.com/Cotangent.html
+	 * @see <a href="http://mathworld.wolfram.com/HyperbolicFunctions.html">HyperbolicFunctions</a>
 	 * @return 1 / tan(x)
 	 */
 	public static double COT(double value)
@@ -1291,7 +1291,7 @@ public class SystemProcedures  {
 
 	/**
 	 * Hyperbolic Cosine function. SYSFUN.COSH
-	 * @see http://mathworld.wolfram.com/HyperbolicFunctions.html
+	 * @see <a href="http://mathworld.wolfram.com/HyperbolicFunctions.html">HyperbolicFunctions</a>
 	 * @return 1/2 (e^x + e^-x)
 	 */
 	public static double COSH(double value)
@@ -1301,7 +1301,7 @@ public class SystemProcedures  {
 
 	/**
 	 * Hyperbolic Sine function. SYSFUN.SINH
-	 * @see http://mathworld.wolfram.com/HyperbolicFunctions.html
+	 * @see <a href="http://mathworld.wolfram.com/HyperbolicFunctions.html">HyperbolicFunctions</a>
 	 * @return 1/2 (e^x - e^-x)
 	 */
 	public static double SINH(double value)
@@ -1311,7 +1311,7 @@ public class SystemProcedures  {
 
 	/**
 	 * Hyperbolic Tangent function. SYSFUN.TANH
-	 * @see http://mathworld.wolfram.com/HyperbolicFunctions.html
+	 * @see <a href="http://mathworld.wolfram.com/HyperbolicFunctions.html">HyperbolicFunctions</a>
 	 * @return (e^x - e^-x) / (e^x + e^-x)
 	 */
 	public static double TANH(double value)

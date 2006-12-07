@@ -84,7 +84,7 @@ import java.io.InputStream;
  * database, come from a separate InstructionReader.  Note that in that case it
  * probably doesn't make sense to allow an instruction to specify a query.
  *
- * @see http://java.sun.com/products/jdbc/download.html#corespec30
+ * @see <a href="http://java.sun.com/products/jdbc/download.html#corespec30">JDBC 3.0 Specification</a>
  * @author ames
  */
 public class EmbedDatabaseMetaData extends ConnectionChild 
