@@ -49,8 +49,8 @@ ERROR XIE0I: Se ha producido una excepci EnC:>243< n de E/S al grabar datos en e
 ij> --export table not found
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: La tabla 'IEP.NOTABLE' no existe.' al evaluar una expresi EnC:>243< n.
-ERROR 42X05: La tabla 'IEP.NOTABLE' no existe.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: La tabla/vista 'IEP.NOTABLE' no existe.' al evaluar una expresi EnC:>243< n.
+ERROR 42X05: La tabla/vista 'IEP.NOTABLE' no existe.
 ij> ---export schema is not valid
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
@@ -135,11 +135,11 @@ ERROR XIE04: Archivo de datos no encontrado: extin/nodir/t1.dat
 ij> --import table not found
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: La tabla 'IEP.NOTABLE' no existe. 
+ERROR XIE0M: La tabla 'IEP.NOTABLE' no existe.  
 ij> --import schema is not valid
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: La tabla 'XXXX.T1' no existe. 
+ERROR XIE0M: La tabla 'XXXX.T1' no existe.  
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
                                  null, null, 'INCORRECTCODESET', 0) ;
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: Se he generado la excepci EnC:>243< n 'java.lang.reflect.InvocationTargetException' al evaluar una expresi EnC:>243< n.' al evaluar una expresi EnC:>243< n.
@@ -220,9 +220,9 @@ declare global temporary table session.temp2(c1 int) not logged;
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SESSION', 'TEMP2' , 'extinout/temp1.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0M: La tabla 'SESSION.TEMP2' no existe. 
+ERROR XIE0M: La tabla 'SESSION.TEMP2' no existe.  
 ij> select * from session.temp2 ;
-ERROR 42X05: La tabla 'SESSION.TEMP2' no existe.
+ERROR 42X05: La tabla/vista 'SESSION.TEMP2' no existe.
 ij> commit ;
 ij> drop table v1;
 0 rows inserted/updated/deleted
@@ -314,8 +314,8 @@ call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24',
 ij> --import to a system table shoud fail
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SYS', 'SYSTABLES' , 'extinout/t3.dat' , 
                                       ';', '^', 'utf-16', 1) ;
-ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: 'SYS.SYSTABLES' es una tabla del sistema. Los usuarios no tienen permitido modificar el contenido de esta tabla.' al evaluar una expresi EnC:>243< n.
-ERROR 42Y25: 'SYS.SYSTABLES' es una tabla del sistema. Los usuarios no tienen permitido modificar el contenido de esta tabla.
+ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: 'SYS.SYSTABLES' es una tabla del sistema.  Los usuarios no tienen permitido modificar el contenido de esta tabla.' al evaluar una expresi EnC:>243< n.
+ERROR 42Y25: 'SYS.SYSTABLES' es una tabla del sistema.  Los usuarios no tienen permitido modificar el contenido de esta tabla.
 ij> ---not supported by db2 cloudscape import/export
 create table ntype(a int , ct CLOB(1024));
 0 rows inserted/updated/deleted
@@ -323,18 +323,18 @@ ij> create table ntype1(bt BLOB(1024) , a int);
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
                                  null, null, null) ;
-ERROR XIE0B: La columna CT de la tabla de tipo CLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export. 
+ERROR XIE0B: La columna CT de la tabla de tipo CLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export.   
 ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.ntype1',
  EnC:>9<  EnC:>9<  EnC:>9<  EnC:>9<    'extinout/ntype.dat' , 
                                    null, null, null) ;
-ERROR XIE0B: La columna BT de la tabla de tipo BLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export. 
+ERROR XIE0B: La columna BT de la tabla de tipo BLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export.   
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0B: La columna CT de la tabla de tipo CLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export. 
+ERROR XIE0B: La columna CT de la tabla de tipo CLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export.   
 ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'NTYPE1' , null , null, 
                                  'extinout/ntype.dat' , 
                                  null, null, null, 0) ;
-ERROR XIE0B: La columna BT de la tabla de tipo BLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export. 
+ERROR XIE0B: La columna BT de la tabla de tipo BLOB, no est EnC:>225<  soportada por la funci EnC:>243< n import/export.   
 ij> --import should aquire a lock on the table
 create table parent(a int not null primary key);
 0 rows inserted/updated/deleted

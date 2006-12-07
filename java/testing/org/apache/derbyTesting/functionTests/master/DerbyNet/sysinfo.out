@@ -15,13 +15,17 @@ derby.drda.traceAll=false
 -----
 ----- Locale Information -----------------
 Current Locale :  [English/United States [en_US]]
+Found support for locale: [cs]
 Found support for locale: [de_DE]
 Found support for locale: [es]
 Found support for locale: [fr]
+Found support for locale: [hu]
 Found support for locale: [it]
 Found support for locale: [ja_JP]
 Found support for locale: [ko_KR]
+Found support for locale: [pl]
 Found support for locale: [pt_BR]
+Found support for locale: [ru]
 Found support for locale: [zh_CN]
 Found support for locale: [zh_TW]
 -----
@@ -42,13 +46,17 @@ derby.drda.traceAll=false
 -----
 ----- Locale Information -----------------
 Current Locale :  [English/United States [en_US]]
+Found support for locale: [cs]
 Found support for locale: [de_DE]
 Found support for locale: [es]
 Found support for locale: [fr]
+Found support for locale: [hu]
 Found support for locale: [it]
 Found support for locale: [ja_JP]
 Found support for locale: [ko_KR]
+Found support for locale: [pl]
 Found support for locale: [pt_BR]
+Found support for locale: [ru]
 Found support for locale: [zh_CN]
 Found support for locale: [zh_TW]
 -----
@@ -70,13 +78,17 @@ derby.drda.traceAll=false
 -----
 ----- Locale Information -----------------
 Current Locale :  [English/United States [en_US]]
+Found support for locale: [cs]
 Found support for locale: [de_DE]
 Found support for locale: [es]
 Found support for locale: [fr]
+Found support for locale: [hu]
 Found support for locale: [it]
 Found support for locale: [ja_JP]
 Found support for locale: [ko_KR]
+Found support for locale: [pl]
 Found support for locale: [pt_BR]
+Found support for locale: [ru]
 Found support for locale: [zh_CN]
 Found support for locale: [zh_TW]
 -----

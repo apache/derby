@@ -210,6 +210,12 @@
   <target name="localeinfo" depends="checklocaleinfo" unless="localeinfo.available">
 
     <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="cs"/>
+      <param name="locale.ename" value="Czech/International [cs]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
       <param name="locale.iname" value="de_DE"/>
       <param name="locale.ename" value="German/Germany [de_DE]"/>
       <param name="info.buildnumber" value="1"/>
@@ -224,6 +230,12 @@
     <antcall target="buildlocaleinfo">
       <param name="locale.iname" value="fr"/>
       <param name="locale.ename" value="French/International [fr]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="hu"/>
+      <param name="locale.ename" value="Hungarian/International [hu]"/>
       <param name="info.buildnumber" value="1"/>
       <param name="info.productfile" value="codeline"/>
     </antcall>
@@ -246,8 +258,20 @@
       <param name="info.productfile" value="codeline"/>
     </antcall>
     <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="pl"/>
+      <param name="locale.ename" value="Polish/International [pl]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
       <param name="locale.iname" value="pt_BR"/>
       <param name="locale.ename" value="Portuguese/Brazil [pt_BR]"/>
+      <param name="info.buildnumber" value="1"/>
+      <param name="info.productfile" value="codeline"/>
+    </antcall>
+    <antcall target="buildlocaleinfo">
+      <param name="locale.iname" value="ru"/>
+      <param name="locale.ename" value="Russian/International [ru]"/>
       <param name="info.buildnumber" value="1"/>
       <param name="info.productfile" value="codeline"/>
     </antcall>
@@ -268,13 +292,17 @@
   <target name="checklocaleinfo">
     <condition property="localeinfo.available">
       <and>
+        <available file="${out.dir}/org/apache/derby/info/locale_cs.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_de_DE.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_es.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_fr.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_hu.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_it.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_pl.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_hu.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
       </and>
@@ -282,13 +310,17 @@
   </target>
 
   <target name="cleanlocale">
+    <delete file="${out.dir}/org/apache/derby/info/locale_cs.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_de_DE.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_es.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_fr.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_hu.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_it.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_ja_JP.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_pl.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
+    <delete file="${out.dir}/org/apache/derby/info/locale_ru.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
   </target>
@@ -1074,7 +1106,7 @@
       <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
       <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
       <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
-      <attribute name="Class-Path" value="derbyLocale_de_DE.jar derbyLocale_es.jar derbyLocale_fr.jar derbyLocale_it.jar derbyLocale_ja_JP.jar derbyLocale_ko_KR.jar derbyLocale_pt_BR.jar derbyLocale_zh_CN.jar derbyLocale_zh_TW.jar"/>
+      <attribute name="Class-Path" value="derbyLocale_cs.jar derbyLocale_de_DE.jar derbyLocale_es.jar derbyLocale_fr.jar derbyLocale_hu.jar derbyLocale_it.jar derbyLocale_ja_JP.jar derbyLocale_ko_KR.jar derbyLocale_pl.jar derbyLocale_pt_BR.jar derbyLocale_ru.jar derbyLocale_zh_CN.jar derbyLocale_zh_TW.jar"/>
 
       	<attribute name="Sealed" value="true"/>
     	<section name="org/apache/derby/impl/tools/sysinfo/">
@@ -1339,6 +1371,10 @@
     <!-- call localejar for each locale -->
 
     <antcall target="localejar">
+      <param name="locale.iname" value="cs"/>
+      <param name="locale.ename" value="Czech/International [cs]"/>
+    </antcall>
+    <antcall target="localejar">
       <param name="locale.iname" value="de_DE"/>
       <param name="locale.ename" value="German/Germany [de_DE]"/>
     </antcall>
@@ -1349,6 +1385,10 @@
     <antcall target="localejar">
       <param name="locale.iname" value="fr"/>
       <param name="locale.ename" value="French/International [fr]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="hu"/>
+      <param name="locale.ename" value="Hungarian/International [hu]"/>
     </antcall>
     <antcall target="localejar">
       <param name="locale.iname" value="it"/>
@@ -1363,8 +1403,16 @@
       <param name="locale.ename" value="Korean/Korea [ko_KR]"/>
     </antcall>
     <antcall target="localejar">
+      <param name="locale.iname" value="pl"/>
+      <param name="locale.ename" value="Polish/International [pl]"/>
+    </antcall>
+    <antcall target="localejar">
       <param name="locale.iname" value="pt_BR"/>
       <param name="locale.ename" value="Portuguese/Brazil [pt_BR]"/>
+    </antcall>
+    <antcall target="localejar">
+      <param name="locale.iname" value="ru"/>
+      <param name="locale.ename" value="Russian/International [ru]"/>
     </antcall>
     <antcall target="localejar">
       <param name="locale.iname" value="zh_CN"/>
