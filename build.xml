@@ -302,7 +302,7 @@
         <available file="${out.dir}/org/apache/derby/info/locale_ko_KR.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_pl.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_pt_BR.properties"/>
-        <available file="${out.dir}/org/apache/derby/info/locale_hu.properties"/>
+        <available file="${out.dir}/org/apache/derby/info/locale_ru.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
         <available file="${out.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
       </and>
