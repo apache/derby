@@ -24,8 +24,6 @@ package org.apache.derby.iapi.store.access;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.io.StorageFile;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 
 /**

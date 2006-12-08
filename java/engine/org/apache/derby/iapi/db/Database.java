@@ -25,6 +25,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import java.io.InputStream;
@@ -119,4 +120,10 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 
 	/** Set the Locale that is returned by this LocaleFinder */
 	public	void	setLocale(Locale locale);
+    
+    /**
+     * Return the DataDictionary for this database, set up at boot time.
+     */
+    public DataDictionary getDataDictionary();
+
 }

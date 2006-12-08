@@ -48,7 +48,6 @@ import org.apache.derby.iapi.sql.depend.ProviderList;
 
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
@@ -75,6 +74,11 @@ import java.util.List;
  */
 
 public class BasicDependencyManager implements DependencyManager {
+  
+    /**
+     * DataDictionary for this database.
+     */
+    private final DataDictionary dd;
 
 	//
 	// DependencyManager interface
@@ -149,7 +153,6 @@ public class BasicDependencyManager implements DependencyManager {
 			{
 				/* Add a stored dependency */
 				LanguageConnectionContext	lcc = getLanguageConnectionContext(cm);
-				DataDictionary				dd = getDataDictionary();
 				DependencyDescriptor		dependencyDescriptor;
 				boolean wait = (tc == null);
 			
@@ -181,8 +184,6 @@ public class BasicDependencyManager implements DependencyManager {
 			}
 		}
 
-		DataDictionary				dd = getDataDictionary();
-		
 		DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(d, p);
 
 		dd.dropStoredDependency( dependencyDescriptor, 
@@ -300,7 +301,6 @@ public class BasicDependencyManager implements DependencyManager {
 						if (dep instanceof ViewDescriptor)
 						{
 							ViewDescriptor vd = (ViewDescriptor) dep;
-							DataDictionary dd = getDataDictionary();
 							SchemaDescriptor compSchema;
 							compSchema = dd.getSchemaDescriptor(vd.getCompSchemaId(), null);
 							CompilerContext newCC = lcc.pushCompilerContext(compSchema);
@@ -443,7 +443,6 @@ public class BasicDependencyManager implements DependencyManager {
 			/* Remove all the stored dependencies */
 			if (d.isPersistent())
 			{
-				DataDictionary			  dd = getDataDictionary();
 				boolean wait = (tc == null);
 				
 				dd.dropDependentsStoredDependencies(d.getObjectID(),
@@ -900,8 +899,7 @@ public class BasicDependencyManager implements DependencyManager {
 			int numDependencies = 0;
 			Enumeration deps = dependents.elements();
 			Enumeration provs = providers.elements();
-			List storedDeps = getDataDictionary().
-									getAllDependencyDescriptorsList();
+			List storedDeps = dd.getAllDependencyDescriptorsList();
 
 			/* Count the in memory dependencies */
 			while (deps.hasMoreElements())
@@ -1038,8 +1036,7 @@ public class BasicDependencyManager implements DependencyManager {
 				   ordering problems in canons. Also the dependencyDescriptor.getUUID()
 				   in this list is not unique, hence the sort on the output string values instead
 				*/
-				List storedDeps =
-							getDataDictionary().getAllDependencyDescriptorsList();
+				List storedDeps = dd.getAllDependencyDescriptorsList();
 
 				String[] dependStr = new String[storedDeps.size()];
 
@@ -1095,7 +1092,8 @@ public class BasicDependencyManager implements DependencyManager {
 	//
 	// class interface
 	//
-	public BasicDependencyManager() {
+	public BasicDependencyManager(DataDictionary dd) {
+        this.dd = dd;
 	}
 
 	//
@@ -1237,39 +1235,6 @@ public class BasicDependencyManager implements DependencyManager {
 	}
 
 	/**
-	 * Returns the DataDictionary to use.
-	 *
-	 * @return DataDictionary	The DataDictionary to use.
-	 */
-	private DataDictionary getDataDictionary()
-	{
-		if (dataDictionary == null)
-		{
-			DataDictionaryContext	  ddc;
-			
-			ddc = (DataDictionaryContext)
-						(ContextService.getContext(DataDictionaryContext.CONTEXT_ID));
-
-
-			dataDictionary = ddc.getDataDictionary();
-		}
-
-		return dataDictionary;
-	}
-
-	/**
-	 * Returns the LanguageConnectionContext to use.
-	 *
-	 * @return LanguageConnectionContext	The LanguageConnectionContext to use.
-	 */
-	private LanguageConnectionContext getLanguageConnectionContext()
-	{
-		// find the language context.
-		return (LanguageConnectionContext) 
-				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
-	}
-
-	/**
 	 * Returns the LanguageConnectionContext to use.
 	 *
 	 * @param cm	Current ContextManager
@@ -1347,8 +1312,7 @@ public class BasicDependencyManager implements DependencyManager {
 		 	* list before returning
 		 	*/
 			List storedList = getDependencyDescriptorList(
-							getDataDictionary().
-								getDependentsDescriptorList(
+								dd.getDependentsDescriptorList(
 												d.getObjectID().toString()
 															),
 								(Provider) null
@@ -1400,8 +1364,7 @@ public class BasicDependencyManager implements DependencyManager {
 		 	* list before returning
 		 	*/
 			List storedList = getDependencyDescriptorList(
-							getDataDictionary().
-								getProvidersDescriptorList(
+								dd.getProvidersDescriptorList(
 												p.getObjectID().toString()
 															),
 							p

@@ -102,7 +102,6 @@ public class GenericLanguageConnectionFactory
 	/*
 		fields
 	 */
-	protected 	DataDictionary	dd;
 	private 	ExecutionFactory		ef;
 	private 	OptimizerFactory		of;
 	private		TypeCompilerFactory		tcf;
@@ -170,7 +169,7 @@ public class GenericLanguageConnectionFactory
 		String drdaID,
 		String dbname) throws StandardException {
 		
-		pushDataDictionaryContext(cm);
+		db.getDataDictionary().pushDataDictionaryContext(cm);
 
 		return new GenericLanguageConnectionContext(cm,
 													tc,
@@ -263,11 +262,6 @@ public class GenericLanguageConnectionFactory
 		return dvf;
 	}
 
-	protected void pushDataDictionaryContext(ContextManager cm) {
-		// we make sure there is a data dictionary context in place.
-		dd.pushDataDictionaryContext(cm);
-	}
-
 	/*
 		ModuleControl interface
 	 */
@@ -319,8 +313,6 @@ public class GenericLanguageConnectionFactory
 		if (classFactory == null)
  			classFactory = (ClassFactory) Monitor.findSystemModule(org.apache.derby.iapi.reference.Module.ClassFactory);
 
-		bootDataDictionary(create, startParams);
-
 		//set the property validation module needed to do propertySetCallBack
 		//register and property validation
 		setValidation();
@@ -341,10 +333,6 @@ public class GenericLanguageConnectionFactory
 												cacheSize);
 		}
 
-	}
-
-	protected void bootDataDictionary(boolean create, Properties startParams) throws StandardException {
-		dd = (DataDictionary) Monitor.bootServiceModule(create, this, DataDictionary.MODULE, startParams);
 	}
 
 	/**

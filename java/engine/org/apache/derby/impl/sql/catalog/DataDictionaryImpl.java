@@ -757,7 +757,7 @@ public final class	DataDictionaryImpl
 	 */
 	protected void setDependencyManager()
 	{
-		dmgr = new BasicDependencyManager();
+		dmgr = new BasicDependencyManager(this);
 	}
 
 	/**

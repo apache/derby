@@ -52,7 +52,6 @@ import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import	org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -2843,17 +2842,7 @@ public class GenericLanguageConnectionContext
 
 	public DataDictionary getDataDictionary()
 	{
-		DataDictionaryContext ddc =
-			(DataDictionaryContext) getContextManager().getContext(DataDictionaryContext.CONTEXT_ID);
-
-		if (ddc != null)
-		{
-			return ddc.getDataDictionary();
-		}
-		else 
-		{
-			return null;
-		}
+        return getDatabase().getDataDictionary();
 	}
 
 	/**

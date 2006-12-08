@@ -115,6 +115,11 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	protected AccessFactory af;
 	protected PropertyFactory pf;
 	protected ClassFactory cfDB; // classFactory but only set when per-database
+    /**
+     * DataDictionary for this database.
+     */
+    private DataDictionary dd;
+    
 	protected LanguageConnectionFactory lcf;
 	protected LanguageFactory lf;
 	// hold resourceAdapter in an Object instead of a ResourceAdapter
@@ -191,6 +196,10 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			// Boot the ClassFactory, will be per-database or per-system.
 			// reget the tc in case someone inadverdently destroyed it 
 		bootClassFactory(create, allParams);
+        
+        dd = (DataDictionary)
+            Monitor.bootServiceModule(create, this,
+                    DataDictionary.MODULE, startParams);
 
 		lcf = (LanguageConnectionFactory) Monitor.bootServiceModule(create, this, LanguageConnectionFactory.MODULE, allParams);
 		lf = (LanguageFactory) Monitor.bootServiceModule(create, this, LanguageFactory.MODULE, allParams);
@@ -287,6 +296,14 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		return lctx;
 
 	}
+    
+    /**
+     * Return the DataDictionary for this database, set up at boot time.
+     */
+    public final DataDictionary getDataDictionary()
+    {
+        return dd;
+    }
 
 	public void pushDbContext(ContextManager cm)
 	{
@@ -615,12 +632,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			dbcp = IdUtil.parseDbClassPath(newClasspath, normalizeToUpper);
 		}
 
-		DataDictionaryContext ddc =
-			(DataDictionaryContext)ContextService.getContext(DataDictionaryContext.CONTEXT_ID);
-		if (SanityManager.DEBUG)
-			if (ddc == null) SanityManager.THROWASSERT("Class path change with no connection");
-		DataDictionary dd = ddc.getDataDictionary();
-
 		//
 		//Verify that all jar files on the database classpath are in the data dictionary.
 		if (dbcp != null)
@@ -654,15 +665,10 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		// only do the change dynamically if we are already
 		// a per-database classapath.
 		if (cfDB != null) {
-			DataDictionaryContext ddc =
-				(DataDictionaryContext)ContextService.getContext(DataDictionaryContext.CONTEXT_ID);
-			if (SanityManager.DEBUG)
-				if (ddc == null) SanityManager.THROWASSERT("Class path change with no connection");
-			DataDictionary dd = ddc.getDataDictionary();
 
 			//
 			// Invalidate stored plans.
-			dd.invalidateAllSPSPlans();
+            getDataDictionary().invalidateAllSPSPlans();
 		
 			String newClasspath = (String) value;
 			if (newClasspath == null) newClasspath = "";
@@ -789,7 +795,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 		DataDictionaryContext ddc =
 			(DataDictionaryContext) ContextService.getContext(DataDictionaryContext.CONTEXT_ID);
-		DataDictionary dd = ddc.getDataDictionary();
+		DataDictionary dd = getDataDictionary();
 
 		SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, null, true);
 		FileInfoDescriptor fid = dd.getFileInfoDescriptor(sd,sqlName);
