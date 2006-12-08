@@ -263,7 +263,10 @@ class DRDAConnThread extends Thread {
 						sessionInitialState();
 						if (session == null)
 							break;
+                        // else fallthrough
 					case Session.ATTEXC:
+					case Session.SECACC:
+					case Session.CHKSEC:
 						long currentTimeSlice;
 
 						do {
