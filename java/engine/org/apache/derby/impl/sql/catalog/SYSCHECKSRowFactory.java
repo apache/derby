@@ -21,42 +21,25 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
+import java.sql.Types;
 
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.sql.dictionary.SystemColumn;
+import org.apache.derby.catalog.ReferencedColumns;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.SubCheckConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
-
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.catalog.ReferencedColumns;
-import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.catalog.UUID;
-
-import java.sql.Types;
-import java.util.Properties;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
 
 /**
  * Factory for creating a SYSCHECKS row.

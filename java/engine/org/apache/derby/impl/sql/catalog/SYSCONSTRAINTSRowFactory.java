@@ -21,42 +21,26 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.types.RowLocation;
-
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.catalog.TypeDescriptor;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SubCheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SubConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
-
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.catalog.IndexDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
 
 /**
  * Factory for creating a SYSCONTRAINTS row.
