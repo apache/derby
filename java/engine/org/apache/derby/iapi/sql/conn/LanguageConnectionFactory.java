@@ -24,7 +24,6 @@ package org.apache.derby.iapi.sql.conn;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.db.Database;
 
-import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.services.property.PropertyFactory;
 
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
@@ -34,7 +33,6 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.Statement;
 import org.apache.derby.iapi.sql.compile.Parser;
 
@@ -48,9 +46,6 @@ import org.apache.derby.iapi.sql.LanguageFactory;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
-import java.io.InputStream;
-
-import java.util.Locale;
 
 /**
  * Factory interface for items specific to a connection in the language system.
@@ -143,11 +138,6 @@ public interface LanguageConnectionFactory {
 		Get the PropertyFactory to use with this language connection
 	 */
 	PropertyFactory	getPropertyFactory();
-
-	/**
-		Get the AccessFactory to use with this language connection
-	 */
-	AccessFactory	getAccessFactory();
 
 	/**
 		Get the OptimizerFactory to use with this language connection

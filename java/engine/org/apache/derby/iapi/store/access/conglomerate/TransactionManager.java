@@ -112,14 +112,6 @@ public interface TransactionManager extends TransactionController
     public void closeMe(SortController sort_control);
 
     /**
-     * Get reference to access factory which started this transaction.
-     * <p>
-     *
-	 * @return The AccessFactory which started this transaction.
-     **/
-    public AccessFactory getAccessManager();
-
-    /**
      * Get an Internal transaction.
      * <p>
      * Start an internal transaction.  An internal transaction is a completely

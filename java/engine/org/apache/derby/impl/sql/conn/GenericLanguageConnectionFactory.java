@@ -111,7 +111,6 @@ public class GenericLanguageConnectionFactory
 	private 	JavaFactory				javaFactory;
 	private 	ClassFactory			classFactory;
 	private 	NodeFactory				nodeFactory;
-	private 	AccessFactory			af;
 	private 	PropertyFactory			pf;
 
 	private		int						nextLCCInstanceNumber;
@@ -237,14 +236,6 @@ public class GenericLanguageConnectionFactory
 	}
 
 	/**
-		Get the AccessFactory to use with this language connection
-	 */
-	public AccessFactory	getAccessFactory() 
-	{
-		return af;
-	}	
-
-	/**
 		Get the PropertyFactory to use with this language connection
 	 */
 	public PropertyFactory	getPropertyFactory() 
@@ -333,8 +324,6 @@ public class GenericLanguageConnectionFactory
 		//set the property validation module needed to do propertySetCallBack
 		//register and property validation
 		setValidation();
-
-		setStore();
 
 		ef = (ExecutionFactory) Monitor.bootServiceModule(create, this, ExecutionFactory.MODULE, startParams);
 		of = (OptimizerFactory) Monitor.bootServiceModule(create, this, OptimizerFactory.MODULE, startParams);
@@ -453,10 +442,6 @@ public class GenericLanguageConnectionFactory
 		pf = (PropertyFactory) Monitor.findServiceModule(this,
 			org.apache.derby.iapi.reference.Module.PropertyFactory);
 		pf.addPropertySetNotification(this);
-	}
-
-	protected void setStore() throws StandardException {
-		af = (AccessFactory) Monitor.findServiceModule(this,AccessFactory.MODULE);
 	}
 
     public Parser newParser(CompilerContext cc)

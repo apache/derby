@@ -33,7 +33,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException; 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.error.PublicAPI;
 
@@ -98,7 +97,6 @@ public class LockTable extends VTITemplate implements VTICosting  {
 	** private 
 	*/
 	private TransactionController tc;
-	private LanguageConnectionFactory lcf;
 	private Hashtable currentRow;		// an entry in the lock table
 	private Enumeration lockTable;	
 	private boolean wasNull;
@@ -151,8 +149,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
 				LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
 				tc = lcc.getTransactionExecute();
-				LanguageConnectionFactory lcf = lcc.getLanguageConnectionFactory();
-				LockFactory lf = lcf.getAccessFactory().getLockFactory();
+				LockFactory lf = tc.getAccessManager().getLockFactory();
 				lockTable = lf.makeVirtualLockTable();
 				initialized = true;
 				tabInfo = new TableNameInfo(lcc, true);

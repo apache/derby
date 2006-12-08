@@ -21,12 +21,8 @@
 
 package org.apache.derby.diag;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
-import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.TransactionInfo;
 
 import org.apache.derby.vti.VTITemplate;
@@ -108,8 +104,8 @@ public class TransactionTable extends VTITemplate implements VTICosting {
 		{
 			LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
-			AccessFactory af = lcc.getLanguageConnectionFactory().getAccessFactory();
-			transactionTable = af.getTransactionInfo();
+			transactionTable = lcc.getTransactionExecute().
+			   getAccessManager().getTransactionInfo();
 
 			initialized = true;
 			currentRow = -1;

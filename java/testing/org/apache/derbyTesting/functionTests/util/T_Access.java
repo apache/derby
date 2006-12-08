@@ -21,13 +21,9 @@
 
 package org.apache.derbyTesting.functionTests.util;
 
-import org.apache.derby.iapi.error.StandardException; 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
-import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.AccessFactory;
-import org.apache.derby.iapi.error.PublicAPI;
 import java.sql.SQLException;
 
 /**
@@ -40,8 +36,7 @@ public class T_Access
 	public static AccessFactory getAccessFactory() throws SQLException
 	{
 		LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-		LanguageConnectionFactory lcf = lcc.getLanguageConnectionFactory();
-		return (AccessFactory)lcf.getAccessFactory();
+		return lcc.getTransactionExecute().getAccessManager();
 	}
 
 	/*

@@ -266,6 +266,14 @@ public interface TransactionController
      * Interfaces previously defined in TcAccessIface:
      **************************************************************************
      */
+	
+    /**
+     * Get reference to access factory which started this transaction.
+     * <p>
+     *
+	 * @return The AccessFactory which started this transaction.
+     **/
+    public AccessFactory getAccessManager();
 
 	/**
 	Check whether a conglomerate exists.

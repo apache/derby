@@ -21,15 +21,11 @@
 
 package org.apache.derby.impl.services.locks;
 
-import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.VirtualLockTable;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -266,7 +262,7 @@ inner:		for (;;) {
 				tc = lcc.getTransactionExecute();
 				tabInfo = new TableNameInfo(lcc, false);
 
-				tt = lcc.getLanguageConnectionFactory().getAccessFactory().getTransactionInfo();
+				tt = tc.getAccessManager().getTransactionInfo();
 
 			} catch (StandardException se) {
 				// just don't get any table info.
