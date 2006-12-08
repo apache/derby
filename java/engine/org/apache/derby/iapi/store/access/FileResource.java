@@ -105,28 +105,14 @@ public interface FileResource {
 		throws StandardException;
 
 	/**
-	  Get the File handle to a file resource. In some situations
-	  higher level code can make optimisations if it can access
-	  a file as a File, rather than an output stream. If this call
-	  returns null then the resouce is not accessable as a file
-	  (e.g. the database is in a zip file).
+	  Get the StorageFile for a file resource.
 	  
 	  @param name The name of the fileResource
 	  @param generationId the generationId of the fileResource
 	  
-	  @return A File object representing the file, or null if
-	  the resource is not accessable as a file.
+	  @return A StorageFile object representing the file.
 	  */
 	public StorageFile getAsFile(String name, long generationId);
-
-	/**
-	  Get the file resource as a stream.
-
-	  @exception IOException some io error occured
-	  @exception FileNotFoundException file does not exist.
-	*/
-	public InputStream getAsStream(String name, long generationId)
-		throws IOException;
 
     /**
      * @return the separator character to be used in file names.

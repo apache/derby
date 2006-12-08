@@ -21,32 +21,22 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.daemon.Serviceable;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.FileResource;
-import org.apache.derby.iapi.store.raw.Transaction;
-import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
-import org.apache.derby.iapi.store.access.DatabaseInstant;
-import org.apache.derby.iapi.store.raw.xact.RawTransaction;
-
-import org.apache.derby.io.StorageFactory;
-import org.apache.derby.io.WritableStorageFactory;
-import org.apache.derby.io.StorageFile;
-import org.apache.derby.io.StorageRandomAccessFile;
-
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.daemon.Serviceable;
+import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
+import org.apache.derby.iapi.store.access.FileResource;
+import org.apache.derby.iapi.store.raw.xact.RawTransaction;
+import org.apache.derby.io.StorageFile;
 
 class RFResource implements FileResource {
 
@@ -208,16 +198,6 @@ class RFResource implements FileResource {
 		String versionedFileName = factory.getVersionedName(name, generationId);
 
 		return factory.storageFactory.newStorageFile( versionedFileName);
-	}
-
-	/**
-	  @see FileResource#getAsStream
-	  @exception IOException trouble accessing file.
-	  */
-	public InputStream getAsStream(String name, long generationId) 
-		 throws IOException
-	{
-        return getAsFile(name, generationId).getInputStream();
 	}
 
     public char getSeparatorChar()
