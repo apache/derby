@@ -21,55 +21,25 @@
 
 package org.apache.derby.impl.sql;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-
-import org.apache.derby.iapi.reference.JDBC20Translation;
-import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.Statement;
-import org.apache.derby.iapi.sql.PreparedStatement;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-import org.apache.derby.iapi.sql.ParameterValueSet;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.StatementContext;
-
-import org.apache.derby.iapi.sql.depend.Dependent;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.Parser;
-
-import org.apache.derby.impl.sql.compile.StatementNode;
-import org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.services.compiler.JavaFactory;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.iapi.util.ByteArray;
+import java.sql.Timestamp;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.context.Context;
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
-
-import java.sql.Timestamp;
-import java.sql.SQLWarning;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.iapi.sql.PreparedStatement;
+import org.apache.derby.iapi.sql.Statement;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.StatementContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.impl.sql.compile.StatementNode;
+import org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext;
 
 public class GenericStatement
 	implements Statement {
