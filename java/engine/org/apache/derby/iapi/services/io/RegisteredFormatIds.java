@@ -515,7 +515,7 @@ String[] TwoByte = {
         /* 451 */   "org.apache.derby.catalog.types.RoutineAliasInfo",
 		/* 452 */   null,
 		/* 453 */   "org.apache.derby.impl.store.raw.log.ChecksumOperation",
-		/* 454 */   "org.apache.derby.impl.store.raw.data.CompressSpacePageOperation",
+		/* 454 */   "org.apache.derby.impl.store.raw.data.CompressSpacePageOperation10_2",
 		/* 455 */   "org.apache.derby.catalog.types.SynonymAliasInfo",
         /* 456 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter, XML_TYPE_ID
         /* 457 */   "org.apache.derby.catalog.types.TypesImplInstanceGetter", // XML_TYPE_ID_IMPL
@@ -526,5 +526,6 @@ String[] TwoByte = {
         /* 462 */   "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
         /* 463 */   "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
         /* 464 */   "org.apache.derby.iapi.types.SqlXmlUtil",        
+	/* 465 */   "org.apache.derby.impl.store.raw.data.CompressSpacePageOperation",
 };
 }

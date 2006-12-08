@@ -308,6 +308,15 @@ public class Xact extends RawTransaction implements Limit  {
 	public final DataFactory getDataFactory() {
 		return dataFactory;
 	}
+	
+	/**
+	 * JIRA-606. As a part of this fix, it was required that
+	 * LogFactory.checkVersion method to be exposed for any possible Version 
+	 * checks in the Transaction processing module.  
+	 */
+	public final LogFactory getLogFactory() {
+		return logFactory;
+	}
 
 	/**
 		Get cache statistics for the specified cache

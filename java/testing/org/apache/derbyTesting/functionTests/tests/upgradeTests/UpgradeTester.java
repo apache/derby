@@ -78,7 +78,12 @@ import org.apache.derbyTesting.functionTests.harness.jvm;
     <LI> Grant/Revoke tests
     </UL>
 	
-	
+    <BR>
+	10.3 Upgrade tests
+ 
+	<UL>
+	<LI> Log Record Format change to support negative value (DERBY-606)
+	</UL>
 	
  */
 public class UpgradeTester {
@@ -369,7 +374,8 @@ public class UpgradeTester {
 			passed = caseCompilationSchema(phase, conn) && passed;
             passed = caseGrantRevoke(conn, phase, classLoader, false) && passed;
             // Test grant/revoke feature with sql authorization
-            if(phase == PH_HARD_UPGRADE) {
+			passed = caseNegValueSupportedLogRecord(conn, phase) && passed;
+		if(phase == PH_HARD_UPGRADE) {
             	setSQLAuthorization(conn, true);
             	conn = restartDatabase(classLoader);
             	passed = caseGrantRevoke(conn, phase, classLoader, true) && passed;
@@ -1001,7 +1007,121 @@ public class UpgradeTester {
     	
     	return passed;
     }
-    
+     
+	/**
+	 * In 10.3: We will write a LogRecord with a different format 
+	 * that can also write negative values.
+	 * 
+	 * Verify here that a 10.2 Database does not malfunction from this and
+	 * 10.2 Databases will work with the old LogRecord format.
+	 */
+	private boolean caseNegValueSupportedLogRecord(Connection conn, int phase)
+		throws SQLException
+	{
+		boolean passed;
+		switch(phase) {
+		case PH_CREATE: {
+			// This case is derived from OnlineCompressTest.test6.
+			passed = false;
+			Statement s = conn.createStatement();
+			s.execute("create table case606(keycol int, indcol1 int,"+
+			    "indcol2 int, data1 char(24), data2 char(24), data3 char(24)," +
+			    "data4 char(24), data5 char(24), data6 char(24),"+
+			    "data7 char(24), data8 char(24), data9 char(24)," + 
+			    "data10 char(24), inddec1 decimal(8), indcol3 int,"+
+			    "indcol4 int, data11 varchar(50))");
+			passed = true;
+			break;
+		}
+		case PH_SOFT_UPGRADE:
+			passed = false;
+			// Ensure that the old Log Record format is written
+			// by Newer release without throwing any exceptions.
+			checkDataToCase606(conn, 0, 2000);
+			passed = true;
+			break;
+		case PH_POST_SOFT_UPGRADE: {
+			// We are now back to Old release
+			passed = false;
+			checkDataToCase606(conn, 0, 1000);
+			passed = true;
+			break;
+		}
+		case PH_HARD_UPGRADE:
+			// Create the Derby606 bug scenario and test that
+			// the error does not occur in Hard Upgrade
+			checkDataToCase606(conn, 0, 94000);
+			// passed If no exception thrown.
+			passed = true;
+			break;
+		default:
+			passed = false;
+			break;
+		}
+		System.out.println("complete caseNegValueSupportedLogRecord - passed " + passed);
+		return passed;
+	}
+
+	private void checkDataToCase606(Connection conn, int start_value, int end_value)
+		throws SQLException {
+		Statement s = conn.createStatement();
+		PreparedStatement insert_stmt = conn.prepareStatement(
+			"insert into case606 values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		char[] data_dt = new char[24];
+		char[] data_dt2 = new char[50];
+		for( int i=0; i < data_dt.length; i++)
+			data_dt[i] = 'a';
+		for( int i=0; i < data_dt2.length; i++)
+			data_dt2[i] = 'z';
+		String data1_str = new String(data_dt);
+		String data2_str = new String(data_dt2);
+		try
+		{
+		    for (int i = start_value; i < end_value; i++)
+		    {
+			insert_stmt.setInt(1, i);               // keycol
+			insert_stmt.setInt(2, i * 10);          // indcol1
+			insert_stmt.setInt(3, i * 100);         // indcol2
+			insert_stmt.setString(4, data1_str);    // data1_data
+			insert_stmt.setString(5, data1_str);    // data2_data
+			insert_stmt.setString(6, data1_str);    // data3_data
+			insert_stmt.setString(7, data1_str);    // data4_data
+			insert_stmt.setString(8, data1_str);    // data5_data
+			insert_stmt.setString(9, data1_str);    // data6_data
+			insert_stmt.setString(10, data1_str);    // data7_data
+			insert_stmt.setString(11, data1_str);    // data8_data
+			insert_stmt.setString(12, data1_str);    // data9_data
+			insert_stmt.setString(13, data1_str);    // data10_data
+			insert_stmt.setInt(14, i * 20);          // indcol3
+			insert_stmt.setInt(15, i * 200);         // indcol4
+			insert_stmt.setInt(16, i * 50);
+			insert_stmt.setString(17, data2_str);    // data11_data
+
+			insert_stmt.execute();
+		    }
+		    conn.commit();
+
+		    s.execute("delete from case606 where case606.keycol > 10000");
+		    conn.commit();
+		}
+		catch (SQLException sqle)
+		{
+		    System.out.println(
+			"Exception while trying to update the database!");
+		    throw sqle;
+		}
+
+		try {
+			s.execute("call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('APP','CASE606',1,1,1)");
+			conn.commit();
+		}
+		catch (SQLException sqle)
+		{
+			System.out.println("Exception while CompressSpace Operation!");
+			throw sqle;
+		}
+	}
+   
     /**
      * Set derby.database.sqlAuthorization as a database property.
      * 

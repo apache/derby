@@ -50,7 +50,7 @@ it to the operating system.
 
 **/
 
-public final class CompressSpacePageOperation extends PhysicalPageOperation
+public class CompressSpacePageOperation extends PhysicalPageOperation
 {
     /**************************************************************************
      * Fields of the class
@@ -100,8 +100,11 @@ public final class CompressSpacePageOperation extends PhysicalPageOperation
 	public void writeExternal(ObjectOutput out) throws IOException 
 	{
 		super.writeExternal(out);
-		CompressedNumber.writeInt(out, newHighestPage);
-		CompressedNumber.writeInt(out, num_pages_truncated);
+		if( !(this instanceof CompressSpacePageOperation10_2) )
+		{
+			out.writeInt(newHighestPage);
+			CompressedNumber.writeInt(out, num_pages_truncated);
+		}
 	}
 
 	/**
@@ -112,8 +115,11 @@ public final class CompressSpacePageOperation extends PhysicalPageOperation
 		 throws IOException, ClassNotFoundException
 	{
 		super.readExternal(in);
-		newHighestPage      = CompressedNumber.readInt(in);
-		num_pages_truncated = CompressedNumber.readInt(in);
+		if( !(this instanceof CompressSpacePageOperation10_2) )
+		{
+			newHighestPage      = in.readInt();
+			num_pages_truncated = CompressedNumber.readInt(in);
+		}
 	}
 
 	/**

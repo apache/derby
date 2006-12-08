@@ -170,6 +170,147 @@ public class OnlineCompressTest extends BaseTest
     }
 
     /**
+     * Create and load a table with large columns.
+     * <p>
+     * If create_table is set creates a test data table with indexes.
+     * Loads num_rows into the table.  This table defaults to 32k page size.
+     * <p>
+     *
+     *
+     * @param conn          Connection to use for sql execution.
+     * @param create_table  If true, create new table - otherwise load into
+     *                      existing table.
+     * @param tblname       table to use.
+     * @param num_rows      number of rows to add to the table.
+     * @param start_value   Starting number from which num_rows are inserted
+     * @exception  StandardException  Standard exception policy.
+     **/
+    protected void createAndLoadLargeTable(
+    Connection  conn,
+    boolean     create_table,
+    String      tblname,
+    int         num_rows,
+    int         start_value)
+        throws SQLException
+    {
+        if (create_table)
+        {
+            Statement s = conn.createStatement();
+
+	    // Derby-606. Note that this table is currently only used by Test6.
+	    // Test6 needs data be to spread over 2 AllocExtents
+	    // and this table schema is chosen so that the required scenario
+	    // is exposed in minimum test execution time.
+            s.execute(
+                "create table " + tblname + 
+                    "(keycol int, indcol1 int, indcol2 int, data1 char(24), data2 char(24), data3 char(24)," +
+			    "data4 char(24), data5 char(24), data6 char(24), data7 char(24), data8 char(24)," + 
+			    "data9 char(24), data10 char(24), inddec1 decimal(8), indcol3 int, indcol4 int, data11 varchar(50))");
+            s.close();
+        }
+
+        PreparedStatement insert_stmt = 
+            conn.prepareStatement(
+                "insert into " + tblname + " values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+        char[]  data1_data = new char[24];
+        char[]  data2_data = new char[24];
+        char[]  data3_data = new char[24];
+        char[]  data4_data = new char[24];
+        char[]  data5_data = new char[24];
+        char[]  data6_data = new char[24];
+        char[]  data7_data = new char[24];
+        char[]  data8_data = new char[24];
+        char[]  data9_data = new char[24];
+        char[]  data10_data = new char[24];
+        char[]  data11_data = new char[50];
+
+        for (int i = 0; i < data1_data.length; i++) 
+	{
+            data1_data[i] = 'a';
+            data2_data[i] = 'b';
+            data3_data[i] = 'c';
+            data4_data[i] = 'd';
+            data5_data[i] = 'e';
+            data6_data[i] = 'f';
+            data7_data[i] = 'g';
+            data8_data[i] = 'h';
+            data9_data[i] = 'i';
+            data10_data[i] = 'j';
+	}
+	for( int i=0; i < data11_data.length; i++) 
+	{
+	    data11_data[i] = 'z';
+        }
+
+        String  data1_str = new String(data1_data);
+        String  data2_str = new String(data2_data);
+        String  data3_str = new String(data3_data);
+        String  data4_str = new String(data4_data);
+        String  data5_str = new String(data5_data);
+        String  data6_str = new String(data6_data);
+        String  data7_str = new String(data7_data);
+        String  data8_str = new String(data8_data);
+        String  data9_str = new String(data9_data);
+        String  data10_str = new String(data10_data);
+        String  data11_str = new String(data11_data);
+
+        int row_count = 0;
+        try
+        {
+            for (int i = start_value; row_count < num_rows; row_count++, i++)
+            {
+                insert_stmt.setInt(1, i);               // keycol
+                insert_stmt.setInt(2, i * 10);          // indcol1
+                insert_stmt.setInt(3, i * 100);         // indcol2
+                insert_stmt.setString(4, data1_str);    // data1_data
+                insert_stmt.setString(5, data2_str);    // data2_data
+                insert_stmt.setString(6, data3_str);    // data3_data
+                insert_stmt.setString(7, data4_str);    // data4_data
+                insert_stmt.setString(8, data5_str);    // data5_data
+                insert_stmt.setString(9, data6_str);    // data6_data
+                insert_stmt.setString(10, data7_str);    // data7_data
+                insert_stmt.setString(11, data8_str);    // data8_data
+                insert_stmt.setString(12, data9_str);    // data9_data
+                insert_stmt.setString(13, data10_str);    // data10_data
+                insert_stmt.setInt(14, i * 20);          // indcol3
+                insert_stmt.setInt(15, i * 200);         // indcol4
+		insert_stmt.setInt(16, i * 50);
+                insert_stmt.setString(17, data11_str);    // data11_data
+
+                insert_stmt.execute();
+            }
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println(
+                "Exception while trying to insert row number: " + row_count);
+            throw sqle;
+        }
+
+        if (create_table)
+        {
+            Statement s = conn.createStatement();
+
+            s.execute(
+                "create index " + tblname + "_idx_keycol on " + tblname +
+                    "(keycol)");
+            s.execute(
+                "create index " + tblname + "_idx_indcol1 on " + tblname +
+                    "(indcol1)");
+            s.execute(
+                "create index " + tblname + "_idx_indcol2 on " + tblname +
+                    "(indcol2)");
+            s.execute(
+                "create unique index " + tblname + "_idx_indcol3 on " + tblname +
+                    "(indcol3)");
+            s.close();
+        }
+
+        conn.commit();
+    }
+
+    /**
      * Create and load a table with long columns and long rows.
      * <p>
      * If create_table is set creates a test data table with indexes.
@@ -1219,6 +1360,82 @@ public class OnlineCompressTest extends BaseTest
         endTest(conn, test_name);
     }
 
+    /**
+     * Test 6 - Online compress test for table that spans more than 1 AllocExtent.
+     * <p>
+     * Create dataset with Data spread over more than 1 AllcExtent and then:
+     * delete enough rows so that the last AllocExtent is empty.
+     * Try OnlineCompress with Purge, Defragment and Truncate
+     * <p>
+     * run test with at least 103000 rows.
+     *
+     **/
+    private void test6(
+    Connection  conn,
+    String      test_name,
+    String      table_name)
+        throws SQLException 
+    {
+        beginTest(conn, test_name);
+
+        int[] noRows = {104000};
+
+        for (int i = 0; i < noRows.length; i++)
+        {
+            // first create new table and run the tests.
+            createAndLoadLargeTable(conn, true, table_name, noRows[i], 0);
+
+        if (verbose)
+            testProgress("Calling compress.");
+
+        // compress with no deletes should not affect size
+        int[] ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        int[] ret_after  = getSpaceInfo(conn, "APP", table_name, true);
+
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != ret_before[SPACE_INFO_NUM_ALLOC])
+        {
+            log_wrong_count(
+                "Expected no alloc page change.", 
+                table_name, noRows[i], 
+                ret_before[SPACE_INFO_NUM_ALLOC], 
+                ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        testProgress("no delete case complete.");
+
+        // delete all the rows.
+        ret_before = getSpaceInfo(conn, "APP", table_name, true);
+        executeQuery(conn, "delete from " + table_name, true);
+	conn.commit();
+
+        if (verbose)
+            testProgress("deleted all rows, now calling compress.");
+
+        callCompress(conn, "APP", table_name, true, true, true, true);
+        ret_after  = getSpaceInfo(conn, "APP", table_name, true);
+
+        // An empty table has 2 pages, one allocation page and the 1st page
+        // which will have a system row in it.  The space vti only reports
+        // a count of the user pages so the count is 1.
+        if (ret_after[SPACE_INFO_NUM_ALLOC] != 1)
+        {
+            log_wrong_count(
+                "Expected all pages to be truncated.",
+                table_name, noRows[i], 1, ret_after[SPACE_INFO_NUM_ALLOC],
+                ret_before, ret_after);
+        }
+
+        testProgress("delete all rows case succeeded.");
+
+        testProgress("end simple deleteAllRows," + noRows[i] + " row test.");
+
+            executeQuery(conn, "drop table " + table_name, true);
+        }
+
+        endTest(conn, test_name);
+    }
 
 
     public void testList(Connection conn)
@@ -1229,6 +1446,7 @@ public class OnlineCompressTest extends BaseTest
         test3(conn, "test3", "TEST3");
         // test4(conn, "test4", "TEST4");
         test5(conn, "test5", "TEST5");
+	test6(conn, "test6", "TEST6");
     }
 
     public static void main(String[] argv) 

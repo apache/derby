@@ -24,6 +24,7 @@ package org.apache.derby.impl.store.raw.data;
 import org.apache.derby.impl.store.raw.data.AllocationActions;
 import org.apache.derby.impl.store.raw.data.BasePage;
 
+import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 
@@ -119,10 +120,23 @@ public class LoggableAllocActions implements AllocationActions {
     int             num_pages_truncated)
         throws StandardException
     {
-		Loggable lop = 
-            new CompressSpacePageOperation(
-                (AllocPage)allocPage, new_highest_page, num_pages_truncated);
-        allocPage.preDirty();
+	Loggable lop = null;
+	
+	// Derby-606. As part of the fix for Derby-606, negative values can be written to
+	// CompressSpace operation Log Records. In order for this fix to be backword 
+	// compatible, we make sure that the implementation behaves the old way in soft
+	// upgrade mode, here. This is achieved by passing null to feature argument.
+	if( t.getLogFactory().checkVersion(RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10,
+					RawStoreFactory.DERBY_STORE_MINOR_VERSION_3,
+					null) )
+	{
+		lop = new CompressSpacePageOperation(
+				(AllocPage)allocPage, new_highest_page, num_pages_truncated);
+	} else {
+		lop = new CompressSpacePageOperation10_2(
+				(AllocPage)allocPage, new_highest_page, num_pages_truncated);
+	}
+	allocPage.preDirty();
 
         t.logAndDo(lop);
     }

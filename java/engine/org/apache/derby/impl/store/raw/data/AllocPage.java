@@ -909,7 +909,9 @@ public class AllocPage extends StoredPage
         {
 			SanityManager.ASSERT(isLatched(), "page is not latched");
             SanityManager.ASSERT(isLast(), "compress on non last alloc page.");
-            SanityManager.ASSERT(new_highest_page >= 0, "negative new high page.");
+	    //Derby-606. newHighestPage = -1, is a valid case as it means that 
+	    //all the pages in this extent can be compressed.
+            SanityManager.ASSERT(new_highest_page >= -1, "negative new high page.");
         }
 
 		logAction(instant);

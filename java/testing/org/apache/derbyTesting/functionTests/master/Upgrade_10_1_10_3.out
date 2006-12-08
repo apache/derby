@@ -12,6 +12,7 @@ complete caseTriggerVTI - passed true
 complete caseCompilationSchema - passed true
 Test grant/revoke, Phase: CREATE; derby.database.sqlAuthorization=false
 complete caseGrantRevoke - passed true
+complete caseNegValueSupportedLogRecord - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -281,6 +282,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYS,SYSVIEWS,SYSTEM TABLE,
 ,SYSIBM,SYSDUMMY1,SYSTEM TABLE,
 ,APP,ALLTYPES,TABLE,
+,APP,CASE606,TABLE,
 ,APP,CT1,TABLE,
 ,APP,GR_TAB,TABLE,
 ,APP,INFLIGHT,TABLE,
@@ -297,6 +299,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR]
 ,APP,ALLTYPES,TABLE,
+,APP,CASE606,TABLE,
 ,APP,CT1,TABLE,
 ,APP,GR_TAB,TABLE,
 ,APP,INFLIGHT,TABLE,
@@ -724,6 +727,7 @@ SYS.SYSVIEWS.COMPILATIONSCHEMAID IS_NULLABLE=YES
 complete caseCompilationSchema - passed true
 Test grant/revoke, Phase: SOFT UPGRADE; derby.database.sqlAuthorization=false
 complete caseGrantRevoke - passed true
+complete caseNegValueSupportedLogRecord - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 12 type name: DECIMAL
@@ -1079,6 +1083,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYS,SYSVIEWS,SYSTEM TABLE,,null,null,null,null,null
 ,SYSIBM,SYSDUMMY1,SYSTEM TABLE,,null,null,null,null,null
 ,APP,ALLTYPES,TABLE,,null,null,null,null,null
+,APP,CASE606,TABLE,,null,null,null,null,null
 ,APP,CT1,TABLE,,null,null,null,null,null
 ,APP,GR_TAB,TABLE,,null,null,null,null,null
 ,APP,INFLIGHT,TABLE,,null,null,null,null,null
@@ -1095,6 +1100,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR],TYPE_CAT[VARCHAR],TYPE_SCHEM[VARCHAR],TYPE_NAME[VARCHAR],SELF_REFERENCING_COL_NAME[VARCHAR],REF_GENERATION[VARCHAR]
 ,APP,ALLTYPES,TABLE,,null,null,null,null,null
+,APP,CASE606,TABLE,,null,null,null,null,null
 ,APP,CT1,TABLE,,null,null,null,null,null
 ,APP,GR_TAB,TABLE,,null,null,null,null,null
 ,APP,INFLIGHT,TABLE,,null,null,null,null,null
@@ -1478,6 +1484,7 @@ complete caseTriggerVTI - passed true
 complete caseCompilationSchema - passed true
 Test grant/revoke, Phase: POST SOFT UPGRADE; derby.database.sqlAuthorization=false
 complete caseGrantRevoke - passed true
+complete caseNegValueSupportedLogRecord - passed true
 Test metadata starting
 Union Result -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
 dec(10,2) -- precision: 10 scale: 2 display size: 13 type name: DECIMAL
@@ -1747,6 +1754,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYS,SYSVIEWS,SYSTEM TABLE,
 ,SYSIBM,SYSDUMMY1,SYSTEM TABLE,
 ,APP,ALLTYPES,TABLE,
+,APP,CASE606,TABLE,
 ,APP,CT1,TABLE,
 ,APP,GR_TAB,TABLE,
 ,APP,INFLIGHT,TABLE,
@@ -1763,6 +1771,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR]
 ,APP,ALLTYPES,TABLE,
+,APP,CASE606,TABLE,
 ,APP,CT1,TABLE,
 ,APP,GR_TAB,TABLE,
 ,APP,INFLIGHT,TABLE,
@@ -2189,6 +2198,7 @@ SYS.SYSVIEWS.COMPILATIONSCHEMAID IS_NULLABLE=YES
 complete caseCompilationSchema - passed true
 Test grant/revoke, Phase: UPGRADE; derby.database.sqlAuthorization=false
 complete caseGrantRevoke - passed true
+complete caseNegValueSupportedLogRecord - passed true
 Expected exception during shutdown: Database 'wombat' shutdown.
 Test grant/revoke, Phase: UPGRADE; derby.database.sqlAuthorization=true
 complete caseGrantRevoke - passed true
@@ -2572,6 +2582,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 ,SYS,SYSVIEWS,SYSTEM TABLE,,null,null,null,null,null
 ,SYSIBM,SYSDUMMY1,SYSTEM TABLE,,null,null,null,null,null
 ,APP,ALLTYPES,TABLE,,null,null,null,null,null
+,APP,CASE606,TABLE,,null,null,null,null,null
 ,APP,CT1,TABLE,,null,null,null,null,null
 ,APP,GR_TAB,TABLE,,null,null,null,null,null
 ,APP,INFLIGHT,TABLE,,null,null,null,null,null
@@ -2588,6 +2599,7 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],
 getTables() with TABLE_TYPE in ('VIEW','TABLE') :
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR],TYPE_CAT[VARCHAR],TYPE_SCHEM[VARCHAR],TYPE_NAME[VARCHAR],SELF_REFERENCING_COL_NAME[VARCHAR],REF_GENERATION[VARCHAR]
 ,APP,ALLTYPES,TABLE,,null,null,null,null,null
+,APP,CASE606,TABLE,,null,null,null,null,null
 ,APP,CT1,TABLE,,null,null,null,null,null
 ,APP,GR_TAB,TABLE,,null,null,null,null,null
 ,APP,INFLIGHT,TABLE,,null,null,null,null,null

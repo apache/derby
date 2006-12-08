@@ -32,6 +32,7 @@ import org.apache.derby.iapi.store.raw.Loggable;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.GlobalTransactionId;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
+import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.iapi.store.raw.data.RawContainerHandle;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -83,6 +84,11 @@ public abstract class RawTransaction extends Observable implements Transaction {
 		Get the data factory to be used during this transaction.
 	*/
 	public abstract DataFactory getDataFactory();
+
+	/**	
+		Get the log factory to be used during this transaction.
+	*/
+	public abstract LogFactory getLogFactory();
 
 	/**
 		Get cache statistics for the specified cache

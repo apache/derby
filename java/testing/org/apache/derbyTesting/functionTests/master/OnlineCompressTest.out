@@ -78,3 +78,8 @@ Executing test: end test5: 2000 row test.
 Executing test: begin test5: 10000 row test.
 Executing test: end test5: 10000 row test.
 Ending test: test5
+Beginning test: test6
+Executing test: no delete case complete.
+Executing test: delete all rows case succeeded.
+Executing test: end simple deleteAllRows,104000 row test.
+Ending test: test6

@@ -105,6 +105,9 @@ public interface RawStoreFactory extends Corruptable {
     /** Derby Store Minor Version (2) **/
 	public static final int DERBY_STORE_MINOR_VERSION_2    = 2;
 
+	/** Derby Store Minor Version (3) **/
+	public static final int DERBY_STORE_MINOR_VERSION_3    = 3;
+
 	/** Derby 10 Store Major version */
 	public static final int DERBY_STORE_MAJOR_VERSION_10   = 10;
 
