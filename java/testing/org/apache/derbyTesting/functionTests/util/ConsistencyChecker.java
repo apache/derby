@@ -22,30 +22,12 @@
 package org.apache.derbyTesting.functionTests.util;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.ConglomerateController;
-
 import org.apache.derby.iapi.services.context.ContextService;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
  * This class provides static methods for checking the consistency of database
