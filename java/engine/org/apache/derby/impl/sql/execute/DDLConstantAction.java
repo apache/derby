@@ -24,45 +24,26 @@ package org.apache.derby.impl.sql.execute;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 import org.apache.derby.iapi.sql.dictionary.StatementSchemaPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementTablePermission;
-
-import org.apache.derby.iapi.sql.depend.Dependency;
-import org.apache.derby.iapi.sql.depend.Dependent;
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.catalog.UUID;
 
 /**
  * Abstract class that has actions that are across

@@ -21,84 +21,55 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-import org.apache.derby.iapi.services.io.StreamStorable;
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.StatementUtil;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-
-import org.apache.derby.iapi.sql.ResultColumnDescriptor ;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.RowChanger;
-import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-import org.apache.derby.iapi.sql.execute.TargetResultSet;
-
-import org.apache.derby.iapi.types.NumberDataValue;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.LanguageProperties;
-import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.iapi.store.access.ColumnOrdering;
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.GroupFetchScanController;
-import org.apache.derby.iapi.store.access.Qualifier;
-import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
-import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.SortObserver;
-import org.apache.derby.iapi.store.access.SortController;
-import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.impl.sql.execute.AutoincrementCounter;
-import	org.apache.derby.impl.sql.execute.InternalTriggerExecutionContext;
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.catalog.types.StatisticsImpl;
-import org.apache.derby.iapi.db.TriggerExecutionContext;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.util.StringUtil;
-
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
+
+import org.apache.derby.catalog.types.StatisticsImpl;
+import org.apache.derby.iapi.db.TriggerExecutionContext;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.StreamStorable;
+import org.apache.derby.iapi.services.loader.GeneratedMethod;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.LanguageProperties;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
+import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.StatementUtil;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.sql.execute.CursorResultSet;
+import org.apache.derby.iapi.sql.execute.ExecIndexRow;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.NoPutResultSet;
+import org.apache.derby.iapi.sql.execute.RowChanger;
+import org.apache.derby.iapi.sql.execute.TargetResultSet;
+import org.apache.derby.iapi.store.access.ColumnOrdering;
+import org.apache.derby.iapi.store.access.ConglomerateController;
+import org.apache.derby.iapi.store.access.GroupFetchScanController;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
+import org.apache.derby.iapi.store.access.ScanController;
+import org.apache.derby.iapi.store.access.SortController;
+import org.apache.derby.iapi.store.access.SortObserver;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.NumberDataValue;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.util.StringUtil;
 
 /**
  * Insert the rows from the source into the specified

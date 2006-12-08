@@ -21,32 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.monitor.ModuleFactory;
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.catalog.UUID;
 
 /**
  *	Utilities for constant actions

@@ -21,49 +21,25 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.PreparedStatement;
+import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.Statement;
-import org.apache.derby.iapi.sql.PreparedStatement;
-
-import org.apache.derby.iapi.types.NumberDataValue;
-
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
-
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.types.NumberDataValue;
 /**
  *	This class  describes actions that are ALWAYS performed for a
  *	constraint creation at Execution time.

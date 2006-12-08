@@ -21,42 +21,26 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-
-import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.services.io.Formatable;
-
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.Properties;
 
 import org.apache.derby.catalog.UUID;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
-
-import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 
 
 /**

@@ -21,22 +21,8 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.store.access.TransactionController;
-
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  *	This class is the superclass for the classes that describe actions 

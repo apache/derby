@@ -21,51 +21,31 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.StatementType;
-
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.sql.Activation;
-
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import java.util.Hashtable;
-import java.util.Enumeration;
+import org.apache.derby.iapi.types.RowLocation;
 
 /**
  * This class describes actions that are performed for a

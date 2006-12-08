@@ -21,82 +21,54 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.context.Context;
-
-
-import org.apache.derby.iapi.jdbc.ConnectionContext;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
-import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-import org.apache.derby.iapi.sql.execute.CursorActivation;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-import org.apache.derby.iapi.sql.ParameterValueSet;
-import org.apache.derby.iapi.sql.ResultDescription;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.iapi.sql.execute.ResultSetFactory;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-
-import org.apache.derby.iapi.store.access.Qualifier;
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.context.ContextService;
-
-import org.apache.derby.iapi.services.loader.GeneratedClass;
-import org.apache.derby.iapi.services.loader.GeneratedByteCode;
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.sql.compile.Optimizer;
-
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Hashtable;
 import java.util.HashSet;
-import org.apache.derby.iapi.util.ReuseFactory;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.ConnectionContext;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.Context;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.loader.GeneratedByteCode;
+import org.apache.derby.iapi.services.loader.GeneratedClass;
+import org.apache.derby.iapi.services.loader.GeneratedMethod;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.ParameterValueSet;
+import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.CursorActivation;
+import org.apache.derby.iapi.sql.execute.CursorResultSet;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.sql.execute.NoPutResultSet;
+import org.apache.derby.iapi.sql.execute.ResultSetFactory;
 import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
+import org.apache.derby.iapi.store.access.ConglomerateController;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.store.access.ScanController;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.NumberDataValue;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 /**
  * BaseActivation

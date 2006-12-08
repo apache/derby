@@ -21,60 +21,44 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import java.util.Properties;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.types.StatisticsImpl;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.ExecIndexRow;
+import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
 import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.SortObserver;
 import org.apache.derby.iapi.store.access.SortController;
+import org.apache.derby.iapi.store.access.SortObserver;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.catalog.types.StatisticsImpl;
-
-import java.util.Properties;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  *	This class  describes actions that are ALWAYS performed for a
