@@ -51,20 +51,9 @@ public interface DependableFinder
 	public	Dependable	getDependable(UUID dependableObjectID) throws SQLException;
 
 	/**
-	  *	Get the in-memory object associated with the passed-in object ID.
-	  *
-	  *	@param	dependableObjectID the UUID of the Dependable as a String.
-	  * Used to locate that Dependable
-	  *
-	  *	@return	the associated Dependable
-	  * @exception SQLException		thrown on error
-	  */
-	public	Dependable	getDependable(String dependableObjectID) throws SQLException;
-
-	/**
 	  * The name of the class of Dependables as a "SQL Object" which this
 	  * Finder can find.
-	  * This is a value like "Table", "View", or "Publication".
+	  * This is a value like "Table" or "View".
 	  *	Every DependableFinder can find some class of Dependables. 
 	  *
 	  *

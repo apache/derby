@@ -24,6 +24,14 @@ package	org.apache.derby.impl.sql.catalog;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
 
+/**
+ * FormatableInstanceGetter to load stored instances
+ * of DependableFinder. Class is registered in RegisteredFormatIds
+ * 
+ * @see org.apache.derby.catalog.DependableFinder
+ * @see org.apache.derby.iapi.services.io.RegisteredFormatIds
+ *
+ */
 public class CoreDDFinderClassInfo extends FormatableInstanceGetter {
 
 	public Object getNewInstance() 

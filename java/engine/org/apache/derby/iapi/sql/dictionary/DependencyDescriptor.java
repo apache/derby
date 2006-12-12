@@ -21,27 +21,20 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.catalog.DependableFinder;
-import org.apache.derby.catalog.Dependable;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.depend.Dependent;
-import org.apache.derby.iapi.sql.depend.Dependency;
 import org.apache.derby.iapi.sql.depend.Provider;
 
 /**
- * This interface is used to get information from a DependencyDescriptor.
- *
- * @version 0.1
- * @author Jerry Brenner
+ * DependencyDescriptor represents a persistent dependency between
+ * SQL objects, such as a TRIGGER being dependent on a TABLE.
+ * 
+ * A DependencyDescriptor is stored in SYSDEPENDS as four
+ * separate columms corresponding to the getters of this class. 
+ * 
+ * 
  */
-
 public class DependencyDescriptor extends TupleDescriptor 
 	implements UniqueTupleDescriptor
 {

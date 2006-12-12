@@ -145,26 +145,6 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	//
 	////////////////////////////////////////////////////////////////////////
 
-
-	/**
-	 * Gets the in-memory object associated with the passed-in object ID.
-	 *
-	 * @param	dependableObjectID the UUID of the Dependable as a String.
-	 * 			Used to locate that Dependable
-	 *
-	 * @return	the associated Dependable
-	 *
-	 * @exception java.sql.SQLException		thrown on error
-	 */
-	public	final Dependable	getDependable(String dependableObjectID) throws java.sql.SQLException
-	{
-		/*
-		** Call the specific implementation of getDependable
-		** to do the work
-		*/
-		return getDependable(recreateUUID(dependableObjectID));
-	}
-
 	/**
 	  *	Gets the AliasDescriptor associated with the passed-in object ID.
 	  *
