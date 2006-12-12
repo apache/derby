@@ -26,6 +26,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
 
@@ -43,6 +44,7 @@ import org.apache.derby.iapi.util.IdUtil;
 
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.io.StorageFile;
 
 
 class JarLoader extends ClassLoader {
@@ -51,6 +53,11 @@ class JarLoader extends ClassLoader {
      * Two part name for the jar file.
      */
     private final String[] name;
+    
+    /**
+     * Handle to the installed jar file.
+     */
+    private StorageFile installedJar;
     
     /**
      * When the jar file can be manipulated as a java.util.JarFile
@@ -77,45 +84,53 @@ class JarLoader extends ClassLoader {
 		this.vs = vs;
 	}
 
-	// Initialize the class loader so it knows if it
-	// is loading from a ZipFile or an InputStream
+	/**
+	 *  Initialize the class loader so it knows if it
+	 *  is loading from a ZipFile or an InputStream
+	 */
 	void initialize() {
 
-		Object zipData = load();
+		String schemaName = name[IdUtil.DBCP_SCHEMA_NAME];
+		String sqlName = name[IdUtil.DBCP_SQL_JAR_NAME];
 
+		Exception e;
 		try {
+			installedJar =
+				updateLoader.getJarReader().getJarFile(
+					schemaName, sqlName);
 
-			if (zipData instanceof File) {
-                jar = new JarFile((File) zipData);
+			if (installedJar instanceof File) {
+				jar = new JarFile((File) installedJar);
 				return;
 			}
 
-            // Jar is only accessible as an INputStream,
-            // which means we need to re-open the stream for
-            // each access. Thus we close the stream now as we have
-            // no further use for it.
-			if (zipData instanceof InputStream) {
-				isStream = true;
-				try {
-					((InputStream) zipData).close();
-				} catch (IOException ioe) {
-				}
-				return;
-			}
+			// Jar is only accessible as an InputStream,
+			// which means we need to re-open the stream for
+			// each access.
+
+			isStream = true;
+			return;
+
 		} catch (IOException ioe) {
-			if (vs != null)
-				vs.println(MessageService.getTextMessage(MessageId.CM_LOAD_JAR_EXCEPTION, getJarName(), ioe));
+			e = ioe;
+		} catch (StandardException se) {
+			e = se;
 		}
 
+		if (vs != null)
+			vs.println(MessageService.getTextMessage(
+					MessageId.CM_LOAD_JAR_EXCEPTION, getJarName(), e));
+
 		// No such zip.
-		setInvalid();	
+		setInvalid();
 	}
 
 	/**
-		Handle all requests to the top-level loader.
-
-		@exception ClassNotFoundException Class can not be found
-	*/
+	 * Handle all requests to the top-level loader.
+	 * 
+	 * @exception ClassNotFoundException
+	 *                Class can not be found
+	 */
 	public Class loadClass(String className, boolean resolve) 
 		throws ClassNotFoundException {
 
@@ -164,10 +179,13 @@ class JarLoader extends ClassLoader {
 
 			if (isStream) {
 				// have to use a new stream each time
-				return loadClassData((InputStream) load(),
+				return loadClassData(installedJar.getInputStream(),
 						className, jvmClassName, resolve);
 			}
 
+			return null;
+		} catch (FileNotFoundException fnfe) {
+			// No such entry.
 			return null;
 		} catch (IOException ioe) {
 			if (vs != null)
@@ -188,7 +206,11 @@ class JarLoader extends ClassLoader {
 			return getRawStream(name);
 
 		if (isStream) {
-			return getRawStream((InputStream) load(), name);
+			try {
+				return getRawStream(installedJar.getInputStream(), name);
+			} catch (FileNotFoundException e) {
+				// no such entry
+			}
 		}
 		return null;
 	}
@@ -285,24 +307,6 @@ class JarLoader extends ClassLoader {
 		if ((c != null) && resolve)
 			resolveClass(c);
 		return c;
-	}
-
-	private Object load() {
-
-		String[] dbJarName = name;
-
-		String schemaName = dbJarName[IdUtil.DBCP_SCHEMA_NAME];
-		String sqlName = dbJarName[IdUtil.DBCP_SQL_JAR_NAME];
-
-		// don't need a connection, just call the code directly
-		try {
-			return updateLoader.getJarReader().readJarFile(schemaName, sqlName);
-		} catch (StandardException se) {
-			if (vs != null)
-				vs.println(MessageService.getTextMessage(MessageId.CM_LOAD_JAR_EXCEPTION, getJarName(), se));
-			return null;
-		}
-
 	}
 
     /**
