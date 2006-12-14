@@ -94,11 +94,18 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 		synchronized (getConnectionSynchronization())
 		{
 			wasNull = false;
-			ParameterValueSet pvs = getParms();
+			//Don't fetch the getParms into a local varibale
+			//at this point because it is possible that the activation
+			//associated with this callable statement may have become
+			//stale. If the current activation is invalid, a new activation 
+			//will be created for it in executeStatement call below. 
+			//We should be using the ParameterValueSet associated with
+			//the activation associated to the CallableStatement after
+			//the executeStatement below. That ParameterValueSet is the
+			//right object to hold the return value from the CallableStatement.
 			try
 			{
-				pvs.validate();
-
+				getParms().validate();
 			} catch (StandardException e)
 			{
 				throw EmbedResultSet.noStateChangeException(e);
@@ -109,6 +116,13 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 			 */
 			boolean execResult = super.executeStatement(a, executeQuery,
 				(executeUpdate && (! hasReturnOutputParameter)));
+
+			//Fetch the getParms into a local variable now because the
+			//activation associated with a CallableStatement at this 
+			//point(after the executStatement) is the current activation. 
+			//We can now safely stuff the return value of the 
+			//CallableStatement into the following ParameterValueSet object.
+			ParameterValueSet pvs = getParms();
 
 			/*
 			** If we have a return parameter, then we

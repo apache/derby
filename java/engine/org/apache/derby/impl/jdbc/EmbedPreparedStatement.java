@@ -1447,7 +1447,24 @@ public abstract class EmbedPreparedStatement
 	}
 
 	/**
-	 * Get the ParameterValueSet from the activation
+	 * Get the ParameterValueSet from the activation.
+	 * 
+	 * The caller of this method should be aware that the
+	 * activation associated with a Statement can change
+	 * and hence the ParameterValueSet returned by this
+	 * call should not be hold onto. An example of this
+	 * can be seen in EmbedCallableStatement.executeStatement
+	 * where at the beginning of the method, we check the
+	 * validity of the parameters. But we donot keep the
+	 * parameters in a local variable to use later. The reason
+	 * for this is that the next call in the method, 
+	 * super.executeStatement can recompile the statement and 
+	 * create a new activation if the statement plan has been 
+	 * invalidated. To account for this possibility, 
+	 * EmbedCallableStatement.executeStatement makes 
+	 * another call to get the ParameterValueSet before stuffing 
+	 * the output parameter value into the ParameterValueSet
+	 * object.
 	 *
 	 *
 	 * @return	The ParameterValueSet for the activation
