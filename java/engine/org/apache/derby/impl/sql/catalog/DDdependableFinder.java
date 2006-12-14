@@ -21,42 +21,27 @@
 
 package	org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.context.ContextService;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.Formatable;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.error.PublicAPI;
-
-import org.apache.derby.iapi.services.i18n.MessageService;
-
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-
-import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
-
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
+import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 
 /**
- *	Class for all DependableFinders in the core DataDictionary
+ *	Class for most DependableFinders in the core DataDictionary.
+ * This class is stored in SYSDEPENDS for the finders for
+ * the provider and dependent. It stores no state, its functionality
+ * is driven off its format identifier.
  *
  *
  * @author Rick
@@ -69,9 +54,6 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	//	STATE
 	//
 	////////////////////////////////////////////////////////////////////////
-
-	private transient DataDictionary			dataDictionary;
-	private transient UUIDFactory				uuidFactory;
 
 	private final int formatId;
 
@@ -146,50 +128,6 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	////////////////////////////////////////////////////////////////////////
 
 	/**
-	  *	Gets the AliasDescriptor associated with the passed-in object ID.
-	  *
-	  *	@param	dependableObjectID	the object ID of an Alias. Used to locate its AliasDescriptor
-	  *
-	  *	@return	the associated AliasDescriptor
-	  * @exception java.sql.SQLException		thrown on error
-	  */
-	public final Dependable	getDependable(UUID dependableObjectID)
-		 throws java.sql.SQLException
-	{
-		try 
-		{
-			return getDependable(getDataDictionary(),dependableObjectID);
-		} 
-		catch (StandardException se) 
-		{
-			throw PublicAPI.wrapStandardException(se);
-		}
-	}
-
-	/**
-	  * @see DependableFinder#getSQLObjectName
-	  * @exception java.sql.SQLException		thrown on error
-	  */
-	public final String	getSQLObjectName(String idString) throws java.sql.SQLException
-	{
-
-		try {
-
-			// This should really be getDependable(idString).getObjectName()
-			// and then the sub-classes would not have to provide a getSQLObjectName
-			// method. Currently getDependable(idString).getObjectName() would
-			// not always return the same result - fix in main.
-
-			return getSQLObjectName(getDataDictionary(), recreateUUID(idString));
-		} 
-		catch (StandardException se) 
-		{
-			throw PublicAPI.wrapStandardException( se );
-		}
-	}
-
-
-	/**
 	  * @see DependableFinder#getSQLObjectType
 	  */
 	public	String	getSQLObjectType()
@@ -249,93 +187,74 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 	}
 
 	/**
-	  *	Gets the datadictionary for this connection.
-	  *
-	  *	@return	the data dictionary for this connection
-	  *
-	  * @exception StandardException		Thrown on failure
-	  */
-	private	DataDictionary	getDataDictionary()
-						throws StandardException
-	{
-		if ( dataDictionary == null )
-	    {
-			ContextManager				cm  = ContextService.getFactory().getCurrentContextManager();
-			DataDictionaryContext		ddc = (DataDictionaryContext)
-			                              (cm.getContext(DataDictionaryContext.CONTEXT_ID));
-			dataDictionary = ddc.getDataDictionary();
-		}
-		return	dataDictionary;
-	}
-
-	/**
-	 * Get the UUID for the given string
-	 *
-	 * @param idString the string
-	 *
-	 * @return the UUID
-	 */
-	private UUID recreateUUID(String idString)
-	{
-		if (uuidFactory == null)
-		{
-			uuidFactory = Monitor.getMonitor().getUUIDFactory();
-		}
-		return uuidFactory.recreateUUID(idString);
-	}
-
-	/**
 		Get the dependable for the given UUID
 		@exception StandardException thrown on error
 	*/
-	protected Dependable getDependable(DataDictionary dd, UUID dependableObjectID)
+	public final Dependable getDependable(DataDictionary dd, UUID dependableObjectID)
 		throws StandardException
 	{
+        Dependable dependable = findDependable(dd, dependableObjectID);
+        if (dependable == null)
+            throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND,
+                    getSQLObjectType(), dependableObjectID);
+        return dependable;
+    }
+        
+       
+    /**
+     * Find the dependable for getDependable.
+     * Can return a null references, in which case getDependable()
+     * will thrown an exception.
+     */
+    Dependable findDependable(DataDictionary dd, UUID dependableObjectID)
+        throws StandardException
+    {     
 		switch (formatId)
 		{
 			case StoredFormatIds.ALIAS_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getAliasDescriptor(dependableObjectID);
+                return dd.getAliasDescriptor(dependableObjectID);
 
 			case StoredFormatIds.CONGLOMERATE_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getConglomerateDescriptor(dependableObjectID);
+                return dd.getConglomerateDescriptor(dependableObjectID);
 
 			case StoredFormatIds.CONSTRAINT_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getConstraintDescriptor(dependableObjectID);
+                return dd.getConstraintDescriptor(dependableObjectID);
 
 			case StoredFormatIds.DEFAULT_DESCRIPTOR_FINDER_V01_ID:
 				ColumnDescriptor	cd = dd.getColumnDescriptorByDefaultId(dependableObjectID);
-				DefaultDescriptor ddi = new DefaultDescriptor(
+                if (cd != null)
+                    return new DefaultDescriptor(
 												dd, 
 												cd.getDefaultUUID(), cd.getReferencingUUID(), 
 												cd.getPosition());
-				return ddi;
+                return null;
 
 			case StoredFormatIds.FILE_INFO_FINDER_V01_ID:
-				return dd.getFileInfoDescriptor(dependableObjectID);
+                return dd.getFileInfoDescriptor(dependableObjectID);
 
 			case StoredFormatIds.SCHEMA_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getSchemaDescriptor(dependableObjectID, null);
+                return dd.getSchemaDescriptor(dependableObjectID, null);
 
 			case StoredFormatIds.SPS_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getSPSDescriptor(dependableObjectID);
+                return dd.getSPSDescriptor(dependableObjectID);
 
 			case StoredFormatIds.TABLE_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getTableDescriptor(dependableObjectID);
+                return dd.getTableDescriptor(dependableObjectID);
 
 			case StoredFormatIds.TRIGGER_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getTriggerDescriptor(dependableObjectID);
-
+                return dd.getTriggerDescriptor(dependableObjectID);
+ 
 			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getViewDescriptor(dependableObjectID);
+                return dd.getViewDescriptor(dependableObjectID);
 
-			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
-				return dd.getColumnPermissions(dependableObjectID);
+            case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
+                return dd.getColumnPermissions(dependableObjectID);
 
 			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
-				return dd.getTablePermissions(dependableObjectID);
+                return dd.getTablePermissions(dependableObjectID);
 
 			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
-				return dd.getRoutinePermissions(dependableObjectID);
+                return dd.getRoutinePermissions(dependableObjectID);
 
 			default:
 				if (SanityManager.DEBUG)
@@ -343,73 +262,7 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 					SanityManager.THROWASSERT(
 						"getDependable() called with unexpeced formatId = " + formatId);
 				}
-				return null;
+                return null;
 		}
-	}
-
-	/**
-		Get the SQL object name for the given UUID
-		@exception StandardException thrown on error
-	*/
-	protected String getSQLObjectName(DataDictionary dd, UUID dependableObjectID)
-		throws StandardException
-	{
-		switch (formatId)
-		{
-			case StoredFormatIds.ALIAS_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getAliasDescriptor(dependableObjectID).getDescriptorName();
-
-			case StoredFormatIds.CONGLOMERATE_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getConglomerateDescriptor(dependableObjectID).getConglomerateName();
-
-			case StoredFormatIds.CONSTRAINT_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getConstraintDescriptor(dependableObjectID).getConstraintName();
-
-			case StoredFormatIds.DEFAULT_DESCRIPTOR_FINDER_V01_ID:
-				ColumnDescriptor columnDescriptor = dd.getColumnDescriptorByDefaultId( dependableObjectID );
-				TableDescriptor tableDescriptor = dd.getTableDescriptor(
-										columnDescriptor.getReferencingUUID());
-
-				return	MessageService.getTextMessage(
-							SQLState.LANG_COLUMN_DEFAULT,
-							tableDescriptor.getQualifiedName() + "." +
-							columnDescriptor.getColumnName());
-
-			case StoredFormatIds.FILE_INFO_FINDER_V01_ID:
-				return dd.getFileInfoDescriptor(dependableObjectID).getName();
-
-			case StoredFormatIds.SCHEMA_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getSchemaDescriptor(dependableObjectID, null).getSchemaName();
-
-			case StoredFormatIds.SPS_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getSPSDescriptor(dependableObjectID).getName();
-
-			case StoredFormatIds.TABLE_DESCRIPTOR_FINDER_V01_ID:
-			case StoredFormatIds.COLUMN_DESCRIPTOR_FINDER_V01_ID:
-				return getDependable(dd, dependableObjectID).getObjectName();
-
-			case StoredFormatIds.TRIGGER_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getTriggerDescriptor(dependableObjectID).getName();
-
-			case StoredFormatIds.VIEW_DESCRIPTOR_FINDER_V01_ID:
-				return dd.getTableDescriptor(dependableObjectID).getName();
-
-			case StoredFormatIds.COLUMNS_PERMISSION_FINDER_V01_ID:
-				return dd.getColumnPermissions(dependableObjectID).getObjectName();
-
-			case StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID:
-				return dd.getTablePermissions(dependableObjectID).getObjectName();
-
-			case StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID:
-				return dd.getRoutinePermissions(dependableObjectID).getObjectName();
-
-			default:
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.THROWASSERT(
-						"getSQLObjectName() called with unexpeced formatId = " + formatId);
-				}
-				return null;
-		}
-	}
+    }
 }

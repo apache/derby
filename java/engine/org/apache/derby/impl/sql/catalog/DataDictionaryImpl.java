@@ -39,7 +39,6 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
@@ -642,9 +641,6 @@ public final class	DataDictionaryImpl
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT((cm != null), "Failed to get current ContextManager");
 
-		/* push a datadictionary context onto this stack */
-		pushDataDictionaryContext(cm);
-
 		// RESOLVE other non-StandardException errors.
 		bootingTC = null;
 		try
@@ -723,7 +719,6 @@ public final class	DataDictionaryImpl
 				bootingTC.destroy();  // gets rid of the transaction context
 				bootingTC = null;
 			}
-			cm.popContext(); // the data dictionary context; check that it is?
 		}
 	
 		setDependencyManager();
@@ -1221,18 +1216,6 @@ public final class	DataDictionaryImpl
 	{
 		return exFactory;
 	}
-
-	/**
-	 * @see DataDictionary#pushDataDictionaryContext
-	 */
-	public DataDictionaryContext pushDataDictionaryContext(ContextManager contextManager)
-	{
-		DataDictionaryContextImpl dataDictionaryContextImpl =
-			new DataDictionaryContextImpl(contextManager, this);
-
-		return dataDictionaryContextImpl;
-	}
-
 
     /* We defer getting the builtin schemas (system and default) past boot time so that
      * the language connection context will be available.

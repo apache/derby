@@ -321,20 +321,10 @@ public class BasicDependencyManager implements DependencyManager {
 							for (int i = 0; i < providerInfos.length; i++)
 							{
 								Provider provider = null;
-								try
-								{
 									provider = (Provider) providerInfos[i].
 													getDependableFinder().
-													getDependable(
+													getDependable(dd,
 													providerInfos[i].getObjectId());
-								}
-								catch(java.sql.SQLException te)
-								{
-									if (SanityManager.DEBUG)
-									{
-										SanityManager.THROWASSERT("unexpected java.sql.SQLException - " + te);
-									}
-								}
 								if (provider instanceof TableDescriptor)
 								{
 									TableDescriptor tab = (TableDescriptor)provider;
@@ -1044,25 +1034,26 @@ public class BasicDependencyManager implements DependencyManager {
 				for (ListIterator depsIterator = storedDeps.listIterator();
 					 depsIterator.hasNext(); )
 				{
-					DependencyDescriptor dd = (DependencyDescriptor)depsIterator.next();
+					DependencyDescriptor dependDescr =
+                        (DependencyDescriptor) depsIterator.next();
 
 					if (! foundStored)
 					{
 						debugBuf.append("Stored Dependencies:\n");
 						foundStored = true;
 					}
+                    
+                    DependableFinder providerFinder = dependDescr.getProviderFinder();
+                    DependableFinder dependentFinder = dependDescr.getDependentFinder();
+                    
 
-					dependStr[i++] = new String(
-									dd.getProviderFinder().getSQLObjectName(
-										dd.getProviderID().toString()) +
-									", type " +
-									dd.getProviderFinder().getSQLObjectType() +
-									", provides for " +
-									dd.getDependentFinder().getSQLObjectName(
-										dd.getUUID().toString()) +
-									", type " +
-									dd.getDependentFinder().getSQLObjectType() +
-									"\n");
+					dependStr[i++] =
+                        providerFinder.getDependable(dd, dependDescr.getProviderID()).getObjectName() +
+                        ", type " + providerFinder.getSQLObjectType() +
+                        ", provides for " +
+                        dependentFinder.getDependable(dd, dependDescr.getUUID()).getObjectName() +
+                        ", type " + dependentFinder.getSQLObjectType() +
+                        "\n";
 				}
 
 				// sort stored dependencies; dependStr
@@ -1198,9 +1189,8 @@ public class BasicDependencyManager implements DependencyManager {
 
 				DependencyDescriptor depDesc = (DependencyDescriptor) depsIterator.next();
 
-				try {
 					finder = depDesc.getDependentFinder();
-					tempD = (Dependent) finder.getDependable( depDesc.getUUID() );
+					tempD = (Dependent) finder.getDependable(dd, depDesc.getUUID() );
 
 					if (providerForList != null)
 					{
@@ -1218,14 +1208,9 @@ public class BasicDependencyManager implements DependencyManager {
 					else
 					{
 						finder = depDesc.getProviderFinder();
-						tempP = (Provider) finder.getDependable( depDesc.getProviderID() );
+						tempP = (Provider) finder.getDependable(dd, depDesc.getProviderID() );
 						
 					}
-
-				} catch (java.sql.SQLException te) {
-					throw StandardException.newException(SQLState.DEP_UNABLE_TO_RESTORE, finder.getClass().getName(), te.getMessage());
-
-				}
 
 				depsIterator.set(new BasicDependency(tempD, tempP));
 			}

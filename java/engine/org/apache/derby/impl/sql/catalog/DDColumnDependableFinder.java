@@ -106,7 +106,7 @@ public class DDColumnDependableFinder extends DDdependableFinder
 	}
 
 	/**
-	 * Get a dependable object, which is essentially a table descriptor with
+	 * Find a dependable object, which is essentially a table descriptor with
 	 * referencedColumnMap field set.
 	 *
 	 * @param	dd data dictionary
@@ -114,7 +114,7 @@ public class DDColumnDependableFinder extends DDdependableFinder
 	 * @return	a dependable, a table descriptor with referencedColumnMap
 	 *			field set
 	 */
-	protected Dependable getDependable(DataDictionary dd, UUID dependableObjectID)
+	Dependable findDependable(DataDictionary dd, UUID dependableObjectID)
 		throws StandardException
 	{
 		TableDescriptor td = dd.getTableDescriptor(dependableObjectID);

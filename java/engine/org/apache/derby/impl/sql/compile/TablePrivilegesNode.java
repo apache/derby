@@ -150,28 +150,14 @@ public class TablePrivilegesNode extends QueryTreeNode
 		int siz = pis.length;
 		for (int i=0; i < siz; i++) 
 		{
-			try 
-			{
-				Provider provider = (Provider) pis[i].getDependableFinder().getDependable(pis[i].getObjectId());
-				if (provider == null)  
-				{
-					throw StandardException.newException(
-							SQLState.LANG_OBJECT_NOT_FOUND, 
-							"OBJECT", 
-							pis[i].getObjectId());
-				}
+				Provider provider = (Provider) pis[i].getDependableFinder().getDependable(dd, pis[i].getObjectId());
 							
 				if (provider instanceof TableDescriptor || 
 					provider instanceof ViewDescriptor ||
 					provider instanceof AliasDescriptor)
 				{
 					descriptorList.add(provider);
-				}
-			}
-			catch(java.sql.SQLException ex)
-			{
-				throw StandardException.plainWrapException(ex);
-			}		   
+				}	   
 		}
 	}
 	

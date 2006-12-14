@@ -23,6 +23,9 @@ package org.apache.derby.catalog;
 
 import java.sql.SQLException;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+
 /**
 	
   A DependableFinder is an object that can find an in-memory
@@ -43,12 +46,14 @@ public interface DependableFinder
 	/**
 	  *	Get the in-memory object associated with the passed-in object ID.
 	  *
+      * @param dd DataDictionary to use for lookup.
 	  *	@param	dependableObjectID the ID of a Dependable. Used to locate that Dependable.
 	  *
 	  *	@return	the associated Dependable
-	  * @exception SQLException		thrown on error
+	  * @exception StandardException		thrown if the object cannot be found or on error o
 	  */
-	public	Dependable	getDependable(UUID dependableObjectID) throws SQLException;
+    public	Dependable	getDependable(DataDictionary dd,
+            UUID dependableObjectID) throws StandardException;
 
 	/**
 	  * The name of the class of Dependables as a "SQL Object" which this
@@ -61,17 +66,4 @@ public interface DependableFinder
 	  * @see Dependable
 	  */
 	public	String	getSQLObjectType();
-
-	/**
-	  * Get the name of the SQL Object that corresponds to the specified 
-	  * UUID String. For example, if getSQLObjectType() returns "Table", 
-	  * this will return the table name.
-	  *
-	  *	@param	idString the UUID String of a Dependable. Used to locate that Dependable.
-	  *
-	  *	@return	String		Name of the associated Dependable
-	  * @exception SQLException		thrown on error
-	  */
-	public	String	getSQLObjectName(String idString) throws SQLException;
-
 }

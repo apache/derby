@@ -54,7 +54,6 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DataDictionaryContext;
 import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
@@ -793,10 +792,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	public StorageFile getJarFile(String schemaName, String sqlName)
 		throws StandardException {
 
-		DataDictionaryContext ddc =
-			(DataDictionaryContext) ContextService.getContext(DataDictionaryContext.CONTEXT_ID);
-		DataDictionary dd = getDataDictionary();
-
 		SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, null, true);
 		FileInfoDescriptor fid = dd.getFileInfoDescriptor(sd,sqlName);
 		if (fid == null)
@@ -804,7 +799,8 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 		long generationId = fid.getGenerationId();
 
-		FileResource fr = af.getTransaction(ddc.getContextManager()).getFileHandler();
+        ContextManager cm = ContextService.getFactory().getCurrentContextManager();
+		FileResource fr = af.getTransaction(cm).getFileHandler();
 
 		String externalName = org.apache.derby.impl.sql.execute.JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar());
 

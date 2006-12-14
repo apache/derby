@@ -199,23 +199,11 @@ class CreateViewConstantAction extends DDLConstantAction
 		for (int ix = 0; ix < providerInfo.length; ix++)
 		{
 			/* We should always be able to find the Provider */
-			try 
-			{
 				Provider provider = (Provider) providerInfo[ix].
 										getDependableFinder().
-											getDependable(
+											getDependable(dd,
 												providerInfo[ix].getObjectId());
-				if (provider == null)  //see beetle 4444
-				{
-					throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, "OBJECT", providerInfo[ix].getObjectId());
-				}
 				dm.addDependency(vd, provider, lcc.getContextManager());
-			}
-			catch(java.sql.SQLException te)
-			{
-				// we should allow timeout to be thrown
-				throw StandardException.plainWrapException(te);
-			}
 		}
 		//store view's dependency on various privileges in the dependeny system
 		storeViewTriggerDependenciesOnPrivileges(activation, vd);

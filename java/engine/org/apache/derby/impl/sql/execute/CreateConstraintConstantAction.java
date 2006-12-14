@@ -374,20 +374,11 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				Provider provider = null;
 	
 				/* We should always be able to find the Provider */
-				try 
-				{
 					provider = (Provider) providerInfo[ix].
 											getDependableFinder().
-												getDependable(
+												getDependable(dd, 
 													providerInfo[ix].getObjectId());
-				}
-				catch(java.sql.SQLException te)
-				{
-					if (SanityManager.DEBUG)
-					{
-						SanityManager.THROWASSERT("unexpected java.sql.SQLException - " + te);
-					}
-				}
+
 				dm.addDependency(conDesc, provider, lcc.getContextManager());
 			}
 		}

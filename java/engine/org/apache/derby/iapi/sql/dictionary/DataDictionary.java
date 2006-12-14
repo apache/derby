@@ -177,14 +177,6 @@ public interface DataDictionary
 	public static final int DDL_MODE = 1;
 
 	/**
-	 * Push a data dictionary context onto the
-	 * current context manager.
-	 *
-	 * @param cm Context manager
-	 */
-	DataDictionaryContext pushDataDictionaryContext(ContextManager cm);
-
-	/**
 	 * Clear all of the DataDictionary caches.
 	 *
 	 * @exception StandardException Standard Cloudscape error policy

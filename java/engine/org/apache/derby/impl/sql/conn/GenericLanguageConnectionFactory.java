@@ -169,8 +169,6 @@ public class GenericLanguageConnectionFactory
 		String drdaID,
 		String dbname) throws StandardException {
 		
-		db.getDataDictionary().pushDataDictionaryContext(cm);
-
 		return new GenericLanguageConnectionContext(cm,
 													tc,
 													lf,
