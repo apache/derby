@@ -628,14 +628,18 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
         URL jarURL = SupportFilesSetup.getReadOnlyURL("dclt.jar");
         
-        setContextClassLoader(jarURL);
+        // DERBY-2179 - temp disable using the class loader
+        // (since due to DERBY-2162) it's not working anyway)
+        // need to re-write code not to assume there is no
+        // existing thread context loader.
+        //setContextClassLoader(jarURL);
         try {
             // Disabled due to DERBY-2162, running this opens
             // the database thus accessing resources and means the
             // jar file cannot be cleaned up.
             // readOnlyTest(ds);
         } finally {
-            setContextClassLoader(null);
+            //setContextClassLoader(null);
         } 
     }
     
