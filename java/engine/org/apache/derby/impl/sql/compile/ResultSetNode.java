@@ -1044,9 +1044,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * This ResultSet is the source for an Insert.  The target RCL
 	 * is in a different order and/or a superset of this RCL.  In most cases
 	 * we will reorder and/or add defaults to the current RCL so that is
-	 * matches the target RCL.  Those RSNs whose generate() method does
-	 * not handle projects will insert a PRN, with a new RCL which matches
-	 * the target RCL, above the current RSN.
+	 * matches the target RCL.
 	 * NOTE - The new or enhanced RCL will be fully bound.
 	 *
 	 * @param numTargetColumns	# of columns in target RCL
@@ -1057,11 +1055,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @param targetTD			TableDescriptor for target if the target is not a VTI, null if a VTI
      * @param targetVTI         Target description if it is a VTI, null if not a VTI
 	 *
-	 * @return ResultSetNode	The new top of the tree
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode enhanceRCLForInsert(int numTargetColumns, int[] colMap, 
+	public void enhanceRCLForInsert(int numTargetColumns, int[] colMap, 
 											 DataDictionary dataDictionary,
 											 TableDescriptor targetTD,
                                              FromVTI targetVTI)
@@ -1072,7 +1068,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 							(ResultColumnList) getNodeFactory().getNode(
 												C_NodeTypes.RESULT_COLUMN_LIST,
 												getContextManager());
-		int numResultSetColumns = resultColumns.size();
 
 		/* Create a massaged version of the source RCL.
 		 * (Much simpler to build new list and then assign to source,
@@ -1098,8 +1093,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 		/* Set the source RCL to the massaged version */
 		resultColumns = newResultCols;
-
-		return this;
 	}
 
 	/**

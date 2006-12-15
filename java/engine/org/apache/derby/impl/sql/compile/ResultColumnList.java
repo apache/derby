@@ -2253,36 +2253,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * If the resultset is a UnionNode (e.g., multi-rows in VALUES clause), we recursively call itself.
-	 * checkAutoincrement() will set ColumnDescriptor for autoincrement columns.
-	 * This way, all ColumnDescriptor of all rows will be set properly.
-	 */
-	public void	checkAutoincrementUnion(ResultSetNode rs)
-		throws StandardException
-	{
-		ResultSetNode lrs = ((TableOperatorNode)rs).getLeftResultSet();
-		ResultSetNode rrs = ((TableOperatorNode)rs).getRightResultSet();
-
-		if (lrs instanceof UnionNode)
-		{
-			this.checkAutoincrementUnion(lrs);
-		}
-		else
-		{
-			this.checkAutoincrement(lrs.getResultColumns());
-		}
-
-		if (rrs instanceof UnionNode)
-		{
-			this.checkAutoincrementUnion(rrs);
-		}
-		else
-		{
-			this.checkAutoincrement(rrs.getResultColumns());
-		}
-	}
-
-	/**
 	 * Do the 2 RCLs have the same type & length.
 	 * This is useful for UNIONs when deciding whether a NormalizeResultSet is required.
 	 *

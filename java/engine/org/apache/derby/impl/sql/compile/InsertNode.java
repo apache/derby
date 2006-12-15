@@ -411,45 +411,10 @@ public final class InsertNode extends DMLModStatementNode
 			}
 		}
 
-		// colmap[x] == y means that column x in the target table
-		// maps to column y in the source result set.
-		// colmap[x] == -1 means that column x in the target table
-		// maps to its default value.
-		// both colmap indexes and values are 0-based.
+		enhanceAndCheckForAutoincrement(resultSet, inOrder,
+				numTableColumns, colMap, dataDictionary,
+				targetTableDescriptor, targetVTI);
 
-		/* if the list is in order and complete, we don't have to change
-		 * the tree. If it is not, then we call RSN.enhanceRCLForInsert() 
-		 * which will either
-		 * (reorder and/or "enhance" the source RCL within the same RSN) or
-		 * (generate and return a PRN with a new reordered/enhanced RCL above
-		 * the existing RSN).  This way, RSN's that understand how to do projections
-		 * can avoid the additional PRN while those that do not will get one.
-		 */
-		/* NOTE - javascope gives confusing branch coverage info here.  By
-		 * breaking apart the following if condition, I have verified that
-		 * we test all cases.  (Jerry 7/17/97)
-		 */
-		if (! inOrder || resultSet.resultColumns.size() < numTableColumns)
-		{
-			// one thing we do know is that all of the resultsets underneath
-			// us have their resultColumn names filled in with the names of
-			// the target table columns.  That makes generating the mapping
-			// "easier" -- we simply generate the names of the target table columns
-			// that are included.  For the missing columns, we generate default
-			// value expressions.
-
-			resultSet = resultSet.enhanceRCLForInsert(numTableColumns, colMap, 
-													  dataDictionary,
-													  targetTableDescriptor, targetVTI);
-		}
-
-		if (resultSet instanceof UnionNode)
-		{
-			// If we are inserting a number of rows in VALUES clause, we need to
-			// examine each row for 'autoincrement'.
-			resultColumnList.checkAutoincrementUnion(resultSet);
-		}
-		else resultColumnList.checkAutoincrement(resultSet.getResultColumns());
 		resultColumnList.checkStorableExpressions(resultSet.getResultColumns());
 		/* Insert a NormalizeResultSetNode above the source if the source
 		 * and target column types and lengths do not match.
@@ -527,6 +492,104 @@ public final class InsertNode extends DMLModStatementNode
 		}
         
 		getCompilerContext().popCurrentPrivType();
+	}
+
+	/**
+	 * Process ResultSet column lists for projection and autoincrement.
+	 *
+	 * This method recursively descends the result set node tree. When
+	 * it finds a simple result set, it processes any autoincrement
+	 * columns in that rs by calling checkAutoIncrement. When it finds
+	 * a compound result set, like a Union or a PRN, it recursively
+	 * descends to the child(ren) nodes. Union nodes can arise due to
+	 * multi-rows in VALUES clause), PRN nodes can arise when the set
+	 * of columns being inserted is a subset of the set of columns in 
+	 * the table.
+	 *
+	 * In addition to checking for autoincrement columns in the result set,
+	 * we may need to enhance and re-order the column list to match the
+	 * column list of the table we are inserting into. This work is handled
+	 * by ResultsetNode.enhanceRCLForInsert.
+	 *
+	 * Note that, at the leaf level, we need to enhance the RCL first, then
+	 * check for autoincrement columns. At the non-leaf levels, we have
+	 * to enhance the RCL, but we don't have to check for autoincrement
+	 * columns, since they only occur at the leaf level.
+	 *
+	 * This way, all ColumnDescriptor of all rows will be set properly.
+	 *
+	 * @param resultSet			current node in the result set tree
+	 * @param inOrder			FALSE if the column list needs reordering
+	 * @param numTableColumns   # of columns in target RCL
+	 * @param colMap            correspondence between RCLs
+	 * @param dataDictionary    DataDictionary to use
+	 * @param targetTD          Table Descriptor for target
+	 * @param targetVTI         Target description if it is a VTI
+	 *
+	 * @exception StandardException Thrown on error
+	 */
+	private void enhanceAndCheckForAutoincrement(ResultSetNode resultSet, 
+			boolean inOrder, int numTableColumns, int []colMap, 
+			DataDictionary dataDictionary,
+			TableDescriptor targetTableDescriptor,
+			FromVTI targetVTI)
+		throws StandardException
+	{
+		/*
+		 * Some implementation notes:
+		 * 
+		 * colmap[x] == y means that column x in the target table
+		 * maps to column y in the source result set.
+		 * colmap[x] == -1 means that column x in the target table
+		 * maps to its default value.
+		 * both colmap indexes and values are 0-based.
+		 *
+		 * if the list is in order and complete, we don't have to change
+		 * the tree. If it is not, then we call RSN.enhanceRCLForInsert() 
+		 * which will reorder ("enhance") the source RCL within the same RSN)
+		 *
+		 * one thing we do know is that all of the resultsets underneath
+		 * us have their resultColumn names filled in with the names of
+		 * the target table columns.  That makes generating the mapping
+		 * "easier" -- we simply generate the names of the target table columns
+		 * that are included.  For the missing columns, we generate default
+		 * value expressions.
+		 */
+
+		if (resultSet instanceof SingleChildResultSetNode)
+		{
+			enhanceAndCheckForAutoincrement(
+				((SingleChildResultSetNode)resultSet).getChildResult(),
+				inOrder, numTableColumns, colMap, dataDictionary,
+				targetTableDescriptor, targetVTI);
+			if (! inOrder || resultSet.resultColumns.size() < numTableColumns)
+				resultSet.enhanceRCLForInsert(
+						numTableColumns, colMap, dataDictionary,
+						targetTableDescriptor, targetVTI);
+		}
+		else if (resultSet instanceof UnionNode)
+		{
+			enhanceAndCheckForAutoincrement(
+				((TableOperatorNode)resultSet).getLeftResultSet(),
+				inOrder, numTableColumns, colMap, dataDictionary,
+				targetTableDescriptor, targetVTI);
+			enhanceAndCheckForAutoincrement(
+				((TableOperatorNode)resultSet).getRightResultSet(),
+				inOrder, numTableColumns, colMap, dataDictionary,
+				targetTableDescriptor, targetVTI);
+			if (! inOrder || resultSet.resultColumns.size() < numTableColumns)
+				resultSet.enhanceRCLForInsert(
+						numTableColumns, colMap, dataDictionary,
+						targetTableDescriptor, targetVTI);
+		}
+		else
+		{
+			if (! inOrder || resultSet.resultColumns.size() < numTableColumns)
+				resultSet.enhanceRCLForInsert(
+						numTableColumns, colMap, dataDictionary,
+						targetTableDescriptor, targetVTI);
+			resultColumnList.checkAutoincrement(resultSet.getResultColumns());
+		}
 	}
 
 	int getPrivType()
