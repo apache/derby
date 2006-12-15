@@ -523,7 +523,7 @@ public final class InsertNode extends DMLModStatementNode
 	 * @param numTableColumns   # of columns in target RCL
 	 * @param colMap            correspondence between RCLs
 	 * @param dataDictionary    DataDictionary to use
-	 * @param targetTD          Table Descriptor for target
+	 * @param targetTableDescriptor    Table Descriptor for target
 	 * @param targetVTI         Target description if it is a VTI
 	 *
 	 * @exception StandardException Thrown on error
