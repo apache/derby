@@ -32,6 +32,8 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
 
     /** True if the server supports QRYCLSIMP. */
     private boolean supportsQryclsimp_;
+    
+    private boolean supportsLayerBStreaming_;
 
     public NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
         // Consider setting product level during parse
@@ -87,6 +89,9 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
         } else {
             supportsQryclsimp_ = false;
         }
+        
+        supportsLayerBStreaming_ = 
+            productLevel_.greaterThanOrEqualTo(10, 3, 0);
     }
 
     /**
@@ -97,6 +102,10 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
      */
     final boolean serverSupportsQryclsimp() {
         return supportsQryclsimp_;
+    }
+
+    final boolean serverSupportsLayerBStreaming() {
+        return supportsLayerBStreaming_;
     }
 
 }

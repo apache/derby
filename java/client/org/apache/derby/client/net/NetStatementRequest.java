@@ -21,6 +21,7 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.client.am.Lob;
 import org.apache.derby.client.am.Blob;
 import org.apache.derby.client.am.Clob;
 import org.apache.derby.client.am.ColumnMetaData;
@@ -646,7 +647,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                              Object[] inputs) throws SqlException {
         try
         {
-            long dataLength = 0;
+            
             Object o = null;
 
             markLengthBytes(CodePoint.FDODTA);
@@ -674,9 +675,10 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         if (o == null) {
                             writeSingleorMixedCcsidLDString((String) inputs[i], netAgent_.typdef_.getCcsidMbcEncoding());
                         } else { // use the promototed object instead
-                            Clob c = (Clob) o;
-                            dataLength = c.length();
-                            setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                            setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
+                                         (Clob) o,
+                                         protocolTypesAndLengths,
+                                         i);
                         }
                         break;
 
@@ -686,8 +688,12 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         if (o == null) {
 
                         } else { // use the promototed object instead
-                            dataLength = ((Clob) o).length();
-                            setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                            
+                            setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
+                                         (Clob) o,
+                                         protocolTypesAndLengths,
+                                         i);
+                            
                         }
                         break;
 
@@ -726,9 +732,11 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         if (o == null) {
                             writeLDBytes((byte[]) inputs[i]);
                         } else { // use the promototed object instead
-                            Blob b = (Blob) o;
-                            dataLength = b.length();
-                            setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                            
+                            setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
+                                         (Clob) o,
+                                         protocolTypesAndLengths,
+                                         i);
                         }
                         break;
                     case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
@@ -737,47 +745,93 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         o = retrievePromotedParameterIfExists(i);
                         if (o == null) {
                             try {
-                                dataLength = ((java.sql.Clob) inputs[i]).length();
+
+                                java.sql.Clob c = (java.sql.Clob) inputs[i];
+                                
+                                if( c instanceof Clob &&
+                                    ( (Clob) c ).willBeLayerBStreamed() ) {
+                                    setFDODTALobLengthUnknown( i );
+                                    
+                                }else{
+                                    long dataLength = c.length();
+                                    setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+
+                                }
+                                
                             } catch (java.sql.SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
                             }
                         } else {
-                            dataLength = ((Clob) o).length();
+                            setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
+                                         (Clob) o,
+                                         protocolTypesAndLengths,
+                                         i);
                         }
-                        setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                        
                         break;
                     case DRDAConstants.DRDA_TYPE_NLOBBYTES:
                         // check for a promoted Clob
                         o = retrievePromotedParameterIfExists(i);
                         if (o == null) {
                             try {
-                                dataLength = ((java.sql.Blob) inputs[i]).length();
+
+                                java.sql.Blob b = (java.sql.Blob) inputs[i];
+                                
+                                if(  b instanceof Blob &&
+                                     ( (Blob) b ).willBeLayerBStreamed() ) {
+                                    
+                                    setFDODTALobLengthUnknown( i );
+                                    
+                                }else{
+                                    long dataLength = b.length();
+                                    setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+                                    
+                                }
+                                
                             } catch (java.sql.SQLException e) {
                                 throw new SqlException(netAgent_.logWriter_, 
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
                             }
                         } else { // use promoted Blob
-                            dataLength = ((Blob) o).length();
+                            setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
+                                         (Blob) o,
+                                         protocolTypesAndLengths,
+                                         i);
                         }
-                        setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
                         break;
                     case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
                         // check for a promoted Clob
                         o = retrievePromotedParameterIfExists(i);
                         if (o == null) {
-                            if (((Clob) inputs[i]).isString()) {
-                                dataLength = ((Clob) inputs[i]).getUTF8Length();
-                            } else // must be a Unicode stream
-                            {
-                                dataLength = ((Clob) inputs[i]).length();
+                            
+                            final Clob c = (Clob) inputs[i];
+
+                            if (c.isString()) {
+                                setFDODTALobLength(protocolTypesAndLengths, 
+                                                   i, 
+                                                   c.getUTF8Length() );
+                                
+                            } else if ( ! c.willBeLayerBStreamed() ){
+                                // must be a Unicode stream
+                                setFDODTALobLength(protocolTypesAndLengths, 
+                                                   i, 
+                                                   c.length() );
+                                
+                            } else {
+                                setFDODTALobLengthUnknown( i );
+                                
                             }
+                            
                         } else { // use promoted Clob
-                            dataLength = ((Clob) o).length();
+                            setFDODTALob(netAgent_.netConnection_.getSecurityMechanism(),
+                                         (Clob) o,
+                                         protocolTypesAndLengths,
+                                         i);
                         }
-                        setFDODTALobLength(protocolTypesAndLengths, i, dataLength);
+
                         break;
                     default:
                         throw new SqlException(netAgent_.logWriter_, 
@@ -851,14 +905,24 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
                             }
-                        } else if (((Blob) b).isBinaryStream()) {
-                            writeScalarStream(chainFlag,
-                                    chainedWithSameCorrelator,
-                                    CodePoint.EXTDTA,
-                                    (int) ((Blob) b).length(),
-                                    ((Blob) b).getBinaryStream(),
-                                    writeNullByte,
-                                    index + 1);
+                        } else if ( ( (Blob) b).isBinaryStream()) {
+                            
+                            if( ( (Blob) b).willBeLayerBStreamed() ){
+                                writeScalarStream(chainFlag,
+                                                  chainedWithSameCorrelator,
+                                                  CodePoint.EXTDTA,
+                                                  ((Blob) b).getBinaryStream(),
+                                                  writeNullByte,
+                                                  index + 1);
+                            }else{
+                                writeScalarStream(chainFlag,
+                                                  chainedWithSameCorrelator,
+                                                  CodePoint.EXTDTA,
+                                                  (int) ((Blob) b).length(),
+                                                  ((Blob) b).getBinaryStream(),
+                                                  writeNullByte,
+                                                  index + 1);
+                            }
                         } else { // must be a binary string
                             // note: a possible optimization is to use writeScalarLobBytes
                             //       when the input is small
@@ -898,30 +962,62 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                     new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH),
                                     e);
                             }
-                        } else if (((Clob) c).isCharacterStream()) {
-                            writeScalarStream(chainFlag,
-                                    chainedWithSameCorrelator,
-                                    CodePoint.EXTDTA,
-                                    (int) ((Clob) c).length(),
-                                    ((Clob) c).getCharacterStream(),
-                                    writeNullByte,
-                                    index + 1);
+                        } else if ( ( (Clob) c).isCharacterStream()) {
+                            
+                            if( ( (Clob) c).willBeLayerBStreamed() ) {
+                                writeScalarStream(chainFlag,
+                                                  chainedWithSameCorrelator,
+                                                  CodePoint.EXTDTA,
+                                                  ((Clob) c).getCharacterStream(),
+                                                  writeNullByte,
+                                                  index + 1);
+                            }else{
+                                writeScalarStream(chainFlag,
+                                                  chainedWithSameCorrelator,
+                                                  CodePoint.EXTDTA,
+                                                  (int) ((Clob) c).length(),
+                                                  ((Clob) c).getCharacterStream(),
+                                                  writeNullByte,
+                                                  index + 1);
+                            }
+                            
                         } else if (((Clob) c).isAsciiStream()) {
-                            writeScalarStream(chainFlag,
-                                    chainedWithSameCorrelator,
-                                    CodePoint.EXTDTA,
-                                    (int) ((Clob) c).length(),
-                                    ((Clob) c).getAsciiStream(),
-                                    writeNullByte,
-                                    index + 1);
+                            
+                            if( ( (Clob) c).willBeLayerBStreamed() ){
+                                writeScalarStream(chainFlag,
+                                                  chainedWithSameCorrelator,
+                                                  CodePoint.EXTDTA,
+                                                  ((Clob) c).getAsciiStream(),
+                                                  writeNullByte,
+                                                  index + 1);
+                            }else { 
+                                writeScalarStream(chainFlag,
+                                                  chainedWithSameCorrelator,
+                                                  CodePoint.EXTDTA,
+                                                  (int) ((Clob) c).length(),
+                                                  ((Clob) c).getAsciiStream(),
+                                                  writeNullByte,
+                                                  index + 1);
+                            }
+                                
                         } else if (((Clob) c).isUnicodeStream()) {
-                            writeScalarStream(chainFlag,
-                                    chainedWithSameCorrelator,
-                                    CodePoint.EXTDTA,
-                                    (int) ((Clob) c).length(),
-                                    ((Clob) c).getUnicodeStream(),
-                                    writeNullByte,
-                                    index + 1);
+                            
+                            if( ( (Clob) c).willBeLayerBStreamed() ){
+                                writeScalarStream(chainFlag,
+                                                  chainedWithSameCorrelator,
+                                                  CodePoint.EXTDTA,
+                                                  ((Clob) c).getUnicodeStream(),
+                                                  writeNullByte,
+                                                  index + 1);
+                            }else{
+                                writeScalarStream(chainFlag,
+                                                  chainedWithSameCorrelator,
+                                                  CodePoint.EXTDTA,
+                                                  (int) ((Clob) c).length(),
+                                                  ((Clob) c).getUnicodeStream(),
+                                                  writeNullByte,
+                                                  index + 1);
+                            }
                         } else { // must be a String
                             // note: a possible optimization is to use writeScalarLobBytes
                             //       when the input is small.
@@ -1028,9 +1124,19 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             // Place the new Lob in the promototedParameter_ collection for
                             // NetStatementRequest use
                             promototedParameters_.put(new Integer(i), c);
-
+                            
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-                            lidAndLengths[i][1] = buildPlaceholderLength(c.length());
+
+                            if( c.willBeLayerBStreamed() ){
+                                
+                                //Correspond to totalLength 0 as default length for unknown
+                                lidAndLengths[i][1] = 0x8002;
+                                
+                            }else {
+                                lidAndLengths[i][1] = buildPlaceholderLength(c.length());
+                                
+                            }
+                            
                         } catch (java.io.UnsupportedEncodingException e) {
                             throw new SqlException(netAgent_.logWriter_, 
                                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
@@ -1206,7 +1312,17 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     } else {
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         try {
-                            lidAndLengths[i][1] = buildPlaceholderLength(b.length());
+                            
+                            if( b instanceof Blob && 
+                                ( (Blob) b).willBeLayerBStreamed() ){
+                                
+                                //Correspond to totalLength 0 as default length for unknown
+                                lidAndLengths[i][1] = 0x8002;
+                                    
+                            }else {
+                                lidAndLengths[i][1] = buildPlaceholderLength(b.length());
+                                
+                            }
                         } catch (java.sql.SQLException e) {
                             throw new SqlException(netAgent_.logWriter_, 
                                 new ClientMessageId(SQLState.NET_ERROR_GETTING_BLOB_LENGTH), e);
@@ -1219,6 +1335,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         java.sql.Clob c = (java.sql.Clob) inputRow[i];
                         boolean isExternalClob = !(c instanceof org.apache.derby.client.am.Clob);
                         long lobLength = 0;
+                        
+                        boolean doesLayerBStreaming = false;
+                        
                         if (c == null) {
                             lobLength = parameterMetaData.sqlLength_[i];
                         } else if (isExternalClob) {
@@ -1230,8 +1349,16 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                     e);
                             }
                         } else {
-                            lobLength = ((Clob) c).length();
+                            if( ( (Clob) c ).willBeLayerBStreamed() ){
+                                doesLayerBStreaming = true;
+                                
+                            }else{
+                                lobLength = ((Clob) c).length();
+                                
+                            }
+                            
                         }
+                        
                         if (c == null) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
                             lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
@@ -1240,16 +1367,52 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                             lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
                         } else if (((Clob) c).isCharacterStream()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCDBCS;
-                            lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                            
+                            if( doesLayerBStreaming ) {
+                                
+                                //Correspond to totalLength 0 as default length for unknown
+                                lidAndLengths[i][1] = 0x8002;
+                                
+                            }else {
+                                lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                            }
+                            
                         } else if (((Clob) c).isUnicodeStream()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-                            lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                            
+                            if( doesLayerBStreaming ) {
+                                
+                                //Correspond to totalLength 0 as default length for unknown
+                                lidAndLengths[i][1] = 0x8002;
+                                
+                            }else {
+                                lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                            }
+                            
                         } else if (((Clob) c).isAsciiStream()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCSBCS;
-                            lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+
+                            if( doesLayerBStreaming ) {
+
+                                //Correspond to totalLength 0 as default length for unknown
+                                lidAndLengths[i][1] = 0x8002;
+                                
+                            }else {
+                                lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                            }
+                            
                         } else if (((Clob) c).isString()) {
                             lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBCMIXED;
-                            lidAndLengths[i][1] = buildPlaceholderLength(((Clob) c).getUTF8Length());
+                            
+                            if( doesLayerBStreaming ) {
+                                
+                                //Correspond to totalLength 0 as default length for unknown
+                                lidAndLengths[i][1] = 0x8002;
+                                
+                            }else {
+                                lidAndLengths[i][1] = buildPlaceholderLength(lobLength);
+                            }
+                            
                         }
                     }
                     break;
@@ -1509,6 +1672,16 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
             extdtaPositions_.add(new Integer(i));
         }
     }
+    
+    private void setFDODTALobLengthUnknown(int i) throws SqlException {
+        short v = 1;
+        writeShort( v <<= 15 );
+        if (extdtaPositions_ == null) {
+            extdtaPositions_ = new java.util.ArrayList();
+        }
+        
+        extdtaPositions_.add(new Integer(i));
+    }
 
     private boolean checkSendQryrowset(int fetchSize,
                                        int resultSetType) {
@@ -1567,6 +1740,26 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     private int getNextOverrideLid() {
         return overrideLid_++;
     }
+    
+    private void setFDODTALob(int securityMechanism,
+                              Lob lob,
+                              int[][] protocolTypesAndLengths,
+                              int i) 
+        throws SqlException, java.sql.SQLException{
+        
+        if( lob.willBeLayerBStreamed() ) {
+            
+            setFDODTALobLengthUnknown( i );
+            
+        } else {
+            setFDODTALobLength(protocolTypesAndLengths, 
+                               i, 
+                               lob.length() );
+        }
+        
+    }
+    
+    
 }
 
 

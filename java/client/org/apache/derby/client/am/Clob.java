@@ -54,10 +54,13 @@ public class Clob extends Lob implements java.sql.Clob {
     //This boolean variable indicates whether the Clob object has
     //been invalidated by calling free() on it
     private boolean isValid = true;
-
+    
     //---------------------constructors/finalizer---------------------------------
     public Clob(Agent agent, String string) {
-        this(agent);
+        
+        this(agent,
+             false);
+        
         string_ = string;
         sqlLength_ = string_.length();
         lengthObtained_ = true;
@@ -69,7 +72,10 @@ public class Clob extends Lob implements java.sql.Clob {
                 byte[] unconvertedBytes,
                 String charsetName,
                 int dataOffset) throws SqlException {
-        this(agent);
+        
+        this(agent,
+             false);
+        
         try {
             // check for null encoding is needed because the net layer
             // will no longer throw an exception if the server didn't specify
@@ -102,7 +108,9 @@ public class Clob extends Lob implements java.sql.Clob {
                 java.io.InputStream inputStream,
                 String encoding,
                 int length) throws SqlException {
-        this(agent);
+        
+        this(agent,
+             false);
 
         sqlLength_ = length;
         lengthObtained_ = true;
@@ -142,10 +150,12 @@ public class Clob extends Lob implements java.sql.Clob {
      */
     public Clob(Agent agent, java.io.InputStream inputStream, String encoding)
             throws SqlException {
-        this(agent);
-
+        
+        this(agent,
+             isLayerBStreamingPossible( agent ));
+        
         lengthObtained_ = false;
-
+        
         if (encoding.equals("US-ASCII")) {
             asciiStream_ = inputStream;
             dataType_ |= ASCII_STREAM;
@@ -159,7 +169,10 @@ public class Clob extends Lob implements java.sql.Clob {
     // CTOR for character stream input
     // THE ENCODING IS ASSUMED TO BE "UTF-16BE"
     public Clob(Agent agent, java.io.Reader reader, int length) {
-        this(agent);
+        
+        this(agent,
+             false);
+        
         sqlLength_ = length;
         lengthObtained_ = true;
         characterStream_ = reader;
@@ -177,7 +190,10 @@ public class Clob extends Lob implements java.sql.Clob {
      * @param reader the data to insert
      */
     public Clob(Agent agent, Reader reader) {
-        this(agent);
+        
+        this(agent,
+             isLayerBStreamingPossible( agent ) );
+        
         lengthObtained_ = false;
         // Wrap reader in stream to share code.
         unicodeStream_ = EncodedInputStream.createUTF8Stream(reader);
@@ -185,8 +201,10 @@ public class Clob extends Lob implements java.sql.Clob {
         dataType_ |= UNICODE_STREAM;
     }
 
-    private Clob(Agent agent) {
-        super(agent);
+    private Clob(Agent agent,
+                 boolean willBeLayerBStreamed) {
+        super(agent,
+              willBeLayerBStreamed);
     }
 
     protected void finalize() throws java.lang.Throwable {
@@ -214,6 +232,11 @@ public class Clob extends Lob implements java.sql.Clob {
                 if (lengthObtained_) {
                     return sqlLength_;
                 }
+
+                if( willBeLayerBStreamed() )
+                    throw new SqlException(agent_.logWriter_,
+                                           LOB_OBJECT_LENGTH_UNKNOWN_YET);
+                
                 materializeStream();
                 lengthInBytes_ = super.sqlLength();
 
@@ -875,4 +898,5 @@ public class Clob extends Lob implements java.sql.Clob {
                                                  "java.sql.Clob");
         dataType_ = UNICODE_STREAM;
     }
+    
 }

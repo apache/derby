@@ -848,7 +848,8 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         try {
             setBinaryStreamOnBlob(key, length, -1, 0, true);
         } catch (SQLException sqle) {
-            if (usingEmbedded()) {
+            if (usingEmbedded() || 
+                usingDerbyNetClient() ) {
                 assertSQLState("XSDA4", sqle);
             } else {
                 assertSQLState("22001", sqle);
@@ -994,10 +995,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         try {
             setAsciiStream(psInsertClob, key, length, -1, 0, true);
         } catch (SQLException sqle) {
-            if (usingEmbedded()) {
+            if (usingEmbedded() || 
+                usingDerbyNetClient() ){
                 assertSQLState("XSDA4", sqle);
+                
             } else {
                 assertSQLState("22001", sqle);
+                
             }
         }
     }
@@ -1015,10 +1019,15 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             setAsciiStream(psInsertLongVarchar, key, length, -1, 0, true);
             fail("Inserted a LONG VARCHAR that is too long");
         } catch (SQLException sqle) {
-            if (usingEmbedded()) {
+            if (usingEmbedded()){
                 assertInternalDerbyIOExceptionState("XCL30", "22001", sqle);
+                
+            } else if ( usingDerbyNetClient() ) {
+                assertSQLState("XCL30", sqle);
+                
             } else {
                 assertSQLState("22001", sqle);
+                
             }
         }
     }
@@ -1031,10 +1040,15 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
                     trailingBlanks, true);
             fail("Truncation is not allowed for LONG VARCHAR");
         } catch (SQLException sqle) {
-            if (usingEmbedded()) {
+            if (usingEmbedded()){
                 assertInternalDerbyIOExceptionState("XCL30", "22001", sqle);
+                
+            } else if( usingDerbyNetClient() ) {
+                assertSQLState("XCL30", sqle);
+                
             } else {
                 assertSQLState("22001", sqle);
+                
             }
         }
     }

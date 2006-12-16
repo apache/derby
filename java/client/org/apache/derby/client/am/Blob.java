@@ -42,13 +42,16 @@ public class Blob extends Lob implements java.sql.Blob {
     // must generate an independent stream.
     java.io.InputStream binaryStream_ = null;
     int dataOffset_;
-
+    
     //---------------------constructors/finalizer---------------------------------
 
     public Blob(byte[] binaryString,
                 Agent agent,
                 int dataOffset) {
-        super(agent);
+        
+        super(agent, 
+              false);
+        
         binaryString_ = binaryString;
         dataType_ |= BINARY_STRING;
         sqlLength_ = binaryString.length - dataOffset;
@@ -60,7 +63,10 @@ public class Blob extends Lob implements java.sql.Blob {
     public Blob(Agent agent,
                 java.io.InputStream binaryStream,
                 int length) {
-        super(agent);
+        
+        super(agent,
+              false);
+        
         binaryStream_ = binaryStream;
         dataType_ |= BINARY_STREAM;
         sqlLength_ = length;
@@ -88,11 +94,15 @@ public class Blob extends Lob implements java.sql.Blob {
      * @param binaryStream the stream to get data from
      */
     public Blob(Agent agent, java.io.InputStream binaryStream) {
-        super(agent);
+        
+        super(agent,
+              isLayerBStreamingPossible(agent));
+        
         binaryStream_ = binaryStream;
         dataType_ |= BINARY_STREAM;
         sqlLength_ = -1;
         lengthObtained_ = false;
+        
     }
 
     // ---------------------------jdbc 2------------------------------------------
@@ -109,6 +119,11 @@ public class Blob extends Lob implements java.sql.Blob {
                 }
                 // Code to handle the lengthless constructor.
                 if (!lengthObtained_) {
+                    
+                    if( willBeLayerBStreamed() )
+                        throw new SqlException(agent_.logWriter_,
+                                               LOB_OBJECT_LENGTH_UNKNOWN_YET);
+                    
                     binaryStream_ = super.materializeStream(binaryStream_,
                                                             "java.sql.Blob");
                 }
@@ -562,4 +577,5 @@ public class Blob extends Lob implements java.sql.Blob {
             throw new SqlException(null,new ClientMessageId(SQLState.LOB_OBJECT_INVALID))
                                                   .getSQLException();
     }
+    
 }

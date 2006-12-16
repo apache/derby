@@ -500,6 +500,30 @@ public class BrokeredPreparedStatement extends BrokeredStatement
     {
         getPreparedStatement().setTimestamp( i, x, cal);
     }
+    
+    
+    public void setBinaryStream(int parameterIndex, 
+                                InputStream x)
+        throws SQLException {
+        
+        final EnginePreparedStatement engnps = 
+            (EnginePreparedStatement) getPreparedStatement();  
+
+        engnps.setBinaryStream(parameterIndex, x);
+
+    }
+    
+    
+    public void setCharacterStream(int parameterIndex, 
+                                   Reader reader)
+        throws SQLException{
+        
+        final EnginePreparedStatement engnps = 
+            (EnginePreparedStatement) getPreparedStatement();  
+
+        engnps.setCharacterStream(parameterIndex, reader);
+        
+    }
 
 	/*
 	** Control methods.

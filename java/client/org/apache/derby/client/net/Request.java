@@ -27,7 +27,10 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.reference.SQLState;
 
+import java.io.BufferedInputStream;
 import java.io.UnsupportedEncodingException;
+
+import java.io.IOException;
 
 public class Request {
 
@@ -217,6 +220,23 @@ public class Request {
         simpleDssFinalize = simpleFinalizeBuildingNextDss;
     }
 	
+    
+    final void writeScalarStream(boolean chained,
+                                 boolean chainedWithSameCorrelator,
+                                 int codePoint,
+                                 java.io.InputStream in,
+                                 boolean writeNullByte,
+                                 int parameterIndex) throws DisconnectException, SqlException {
+        
+        writePlainScalarStream(chained,
+                               chainedWithSameCorrelator,
+                               codePoint,
+                               in,
+                               writeNullByte,
+                               parameterIndex);
+        
+	}
+    
 	
 	final void writeScalarStream(boolean chained,
                                  boolean chainedWithSameCorrelator,
@@ -250,7 +270,8 @@ public class Request {
 		}
 
 	}
-
+    
+    
     // We need to reuse the agent's sql exception accumulation mechanism
     // for this write exception, pad if the length is too big, and truncation if the length is too small
     final private void writeEncryptedScalarStream(boolean chained,
@@ -498,6 +519,107 @@ public class Request {
 	}
 
 
+    // We need to reuse the agent's sql exception accumulation mechanism
+    // for this write exception, pad if the length is too big, and truncation if the length is too small
+	final private void writePlainScalarStream(boolean chained,
+                                              boolean chainedWithSameCorrelator,
+                                              int codePoint,
+                                              java.io.InputStream in,
+                                              boolean writeNullByte,
+                                              int parameterIndex) throws DisconnectException, SqlException {
+		
+        in = new BufferedInputStream( in );
+
+        flushExistingDSS();
+		
+        ensureLength( DssConstants.MAX_DSS_LEN );
+        
+        buildDss(true,
+                 chained,
+                 chainedWithSameCorrelator,
+                 DssConstants.GDSFMT_OBJDSS,
+                 correlationID_,
+                 true);
+        
+        int spareInDss;
+        
+		if (writeNullByte) {
+			spareInDss = DssConstants.MAX_DSS_LEN - 6 - 4 - 1;
+		} else {
+			spareInDss = DssConstants.MAX_DSS_LEN - 6 - 4;
+		}
+				
+		buildLengthAndCodePointForLob(codePoint,
+									  writeNullByte);
+        
+        try{
+            
+            int bytesRead = 0;
+            
+            while( ( bytesRead = 
+                     in.read(bytes_, offset_, spareInDss )  
+                     ) > -1 ) {
+                
+                spareInDss -= bytesRead;
+                offset_ += bytesRead;
+
+                if( spareInDss <= 0 ){
+                    
+                    if( ! peekStream( (  BufferedInputStream ) in ) )
+                        break;
+                    
+                    flushScalarStreamSegment();
+                    
+                    bytes_[offset_++] = (byte) (0xff);
+                    bytes_[offset_++] = (byte) (0xff);
+                    
+                    spareInDss = DssConstants.MAX_DSS_LEN - 2;
+                    
+                }
+                
+            }
+            
+            
+        } catch (java.io.IOException e) {
+            
+            final SqlException sqlex = 
+                new SqlException(netAgent_.logWriter_,
+                                 new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
+                                 new Integer(parameterIndex),
+                                 e.getMessage(),
+                                 e);
+
+            netAgent_.accumulateReadException(sqlex);
+            
+					return;
+        }
+        
+        
+        
+		// check to make sure that the specified length wasn't too small
+		try {
+			if (in.read() != -1) {
+				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
+
+                final SqlException sqlex = 
+                    new SqlException(netAgent_.logWriter_,
+                                     new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
+                                     new Integer(parameterIndex));
+
+				netAgent_.accumulateReadException(sqlex);
+			}
+		} catch (java.io.IOException e) {
+			netAgent_.accumulateReadException(new SqlException(
+															   netAgent_.logWriter_,
+															   new ClientMessageId(
+																				   SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
+															   new Integer(parameterIndex),
+															   e.getMessage(),
+															   e));
+		}
+	}
+
+
     // Throw DataTruncation, instead of closing connection if input size mismatches
     // An implication of this, is that we need to extend the chaining model
     // for writes to accomodate chained write exceptoins
@@ -518,8 +640,24 @@ public class Request {
                           writeNullByte,
                           parameterIndex);
     }
-
-
+    
+    
+    final void writeScalarStream(boolean chained,
+                                 boolean chainedWithSameCorrelator,
+                                 int codePoint,
+                                 java.io.Reader r,
+                                 boolean writeNullByte,
+                                 int parameterIndex) throws DisconnectException, 
+                                                            SqlException{
+        writeScalarStream(chained,
+                          chainedWithSameCorrelator,
+                          codePoint,
+                          EncodedInputStream.createUTF16BEStream(r),
+                          writeNullByte,
+                          parameterIndex);
+    }
+    
+    
     // prepScalarStream does the following prep for writing stream data:
     // 1.  Flushes an existing DSS segment, if necessary
     // 2.  Determines if extended length bytes are needed
@@ -576,6 +714,22 @@ public class Request {
         return extendedLengthByteCount;
     }
 
+    
+    protected final void flushExistingDSS() throws DisconnectException {
+        
+        try {
+            if (simpleDssFinalize) {
+                finalizeDssLength();
+            } else {
+                finalizePreviousChainedDss(true);
+            }
+            sendBytes(netAgent_.getOutputStream());
+        } catch (java.io.IOException e) {
+            netAgent_.throwCommunicationsFailure(e);
+        }
+        
+    }
+
 
     // Writes out a scalar stream DSS segment, along with DSS continuation headers,
     // if necessary.
@@ -601,6 +755,19 @@ public class Request {
 
         return newBytesToRead;
     }
+    
+    protected final int flushScalarStreamSegment() throws DisconnectException {
+        
+        try {
+            sendBytes(netAgent_.getOutputStream());
+        } catch (java.io.IOException ioe) {
+            netAgent_.throwCommunicationsFailure(ioe);
+        }
+        
+        dssLengthLocation_ = offset_;
+        return DssConstants.MAX_DSS_LEN;
+    }
+    
 
     // the offset_ must not be updated when an error is encountered
     // note valid data may be overwritten
@@ -1494,12 +1661,41 @@ public class Request {
         }
 
     }
+    
+    
+    private void buildLengthAndCodePointForLob(int codePoint,
+                                               boolean writeNullByte) throws DisconnectException {
+        
+        //0x8004 is for Layer B Streaming. 
+        //See DRDA, Version 3, Volume 3: Distributed Data Management (DDM) Architecture page 315.
+        writeLengthCodePoint(0x8004, codePoint);
+        
+        // write the null byte, if necessary
+        if (writeNullByte) {
+            write1Byte(0x0);
+        }
+        
+    }
+    
 
     public void setDssLengthLocation(int location) {
         dssLengthLocation_ = location;
     }
-
+    
+    
     public void setCorrelationID(int id) {
         correlationID_ = id;
     }
+    
+    
+    private static boolean peekStream( BufferedInputStream in ) 
+        throws IOException {
+        
+        in.mark( 1 );
+        boolean notYet =  in.read() > -1;
+        in.reset();
+        return notYet;
+        
+    }
+
 }

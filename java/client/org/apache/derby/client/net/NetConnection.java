@@ -1768,6 +1768,17 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             (NetDatabaseMetaData) databaseMetaData_;
         return metadata.serverSupportsQryclsimp();
     }
+
+    
+    public final boolean serverSupportsLayerBStreaming() {
+        
+        NetDatabaseMetaData metadata =
+            (NetDatabaseMetaData) databaseMetaData_;
+        
+        return metadata.serverSupportsLayerBStreaming();
+
+    }
+    
     
     /**
      * Returns if a transaction is in process

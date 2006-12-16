@@ -536,7 +536,7 @@ public class TestProto {
 	 */
 	private void skipDdm() throws DRDAProtocolException
 	{
-		reader.readLengthAndCodePoint();
+		reader.readLengthAndCodePoint( false );
 		reader.skipBytes();
 	}
 	/**
@@ -784,7 +784,7 @@ public class TestProto {
 		int reqVal;
 		Vector manager = new Vector(), managerLevel = new Vector() ;
 		reader.readReplyDss();
-		int error = reader.readLengthAndCodePoint();
+		int error = reader.readLengthAndCodePoint( false );
 		int reqCP = getCP();
 		if (error != reqCP)
 		{
@@ -793,7 +793,7 @@ public class TestProto {
 		}
 		while (reader.moreDssData())
 		{
-			codepoint = reader.readLengthAndCodePoint();
+			codepoint = reader.readLengthAndCodePoint( false );
 			switch (codepoint)
 			{
 				case CodePoint.SVRCOD:
@@ -884,7 +884,7 @@ public class TestProto {
 	 */
 	private void readLengthAndCodePoint() throws IOException, DRDAProtocolException
 	{
-		int codepoint = reader.readLengthAndCodePoint();
+		int codepoint = reader.readLengthAndCodePoint( false );
 		int reqCP = getCP();
 		if (codepoint != reqCP)
 			cpError(codepoint, reqCP);
@@ -905,7 +905,7 @@ public class TestProto {
         int val = -1;
         do
         {
-            codepoint = reader.readLengthAndCodePoint();
+            codepoint = reader.readLengthAndCodePoint( false );
             switch(codepoint)
             {
               case CodePoint.SECMEC:
@@ -1006,7 +1006,7 @@ public class TestProto {
 		throws IOException, DRDAProtocolException
 	{
 		reader.readReplyDss();
-		int codepoint = reader.readLengthAndCodePoint();
+		int codepoint = reader.readLengthAndCodePoint( false );
 		if (codepoint != CodePoint.SQLCARD)
 		{
 			fail("Expecting SQLCARD got "+ Integer.toHexString(codepoint));

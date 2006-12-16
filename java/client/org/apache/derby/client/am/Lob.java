@@ -25,6 +25,11 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import java.sql.SQLException;
+
+import org.apache.derby.client.net.NetConfiguration;
+import org.apache.derby.client.net.NetConnection;
+
 import org.apache.derby.shared.common.reference.SQLState;
 
 public abstract class Lob implements UnitOfWorkListener {
@@ -44,11 +49,20 @@ public abstract class Lob implements UnitOfWorkListener {
 
     protected long sqlLength_;      // length of the LOB value, as defined by the server
     protected boolean lengthObtained_;
+    
+    final private boolean willBeLayerBStreamed_;
 
+    //-----------------------------messageId------------------------------------------
+    final static protected ClientMessageId LOB_OBJECT_LENGTH_UNKNOWN_YET =
+        new ClientMessageId( SQLState.LOB_OBJECT_LENGTH_UNKNOWN_YET );
+    
+    
     //---------------------constructors/finalizer---------------------------------
-    protected Lob(Agent agent) {
+    protected Lob(Agent agent,
+                  boolean willBeLayerBStreamed) {
         agent_ = agent;
         lengthObtained_ = false;
+        willBeLayerBStreamed_ = willBeLayerBStreamed;
     }
 
     protected void finalize() throws java.lang.Throwable {
@@ -172,4 +186,30 @@ public abstract class Lob implements UnitOfWorkListener {
                     );
         }
     }
+    
+    public static boolean isLengthObtained(Lob l){
+        return l.lengthObtained_;
+    }
+    
+    public abstract long length() throws SQLException;
+    
+    protected static boolean isLayerBStreamingPossible( Agent agent ){
+        
+        final NetConnection netConn = 
+            ( NetConnection  ) agent.connection_ ;
+        
+        final int securityMechanism = 
+            netConn.getSecurityMechanism();
+
+        return 
+            netConn.serverSupportsLayerBStreaming() &&
+            securityMechanism != NetConfiguration.SECMEC_EUSRIDDTA &&
+            securityMechanism != NetConfiguration.SECMEC_EUSRPWDDTA;
+        
+    }
+    
+    public boolean willBeLayerBStreamed() {
+        return willBeLayerBStreamed_;
+    }
+
 }

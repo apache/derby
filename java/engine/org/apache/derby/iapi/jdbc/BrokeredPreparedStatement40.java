@@ -160,20 +160,8 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     throws SQLException {
         getPreparedStatement().setAsciiStream(parameterIndex,x,length);
     }
-
-    /**
-     * Sets the designated parameter to the given input stream.
-     *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
-     * @param x the java input stream which contains the binary parameter value
-     * @throws SQLException if a database access error occurs or this method is
-     *      called on a closed <code>PreparedStatement</code>
-     */
-    public final void setBinaryStream(int parameterIndex, InputStream x)
-            throws SQLException {
-        getPreparedStatement().setBinaryStream(parameterIndex, x);
-    }
-
+    
+    
     /**
      * Sets the designated parameter to the given input stream, which will have
      * the specified number of bytes.
@@ -205,21 +193,8 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
             throws SQLException {
         getPreparedStatement().setBlob(parameterIndex, inputStream);
     }
-
-    /**
-     * Sets the designated parameter to the given <code>Reader</code> object.
-     *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
-     * @param reader the <code>java.io.Reader</code> object that contains the
-     *      Unicode data
-     * @throws SQLException if a database access error occurs or this method is
-     *      called on a closed <code>PreparedStatement</code>
-     */
-    public final void setCharacterStream(int parameterIndex, Reader reader)
-            throws SQLException {
-        getPreparedStatement().setCharacterStream(parameterIndex, reader);
-    }
-
+    
+    
     /**
      * Sets the designated parameter to the given Reader, which will have
      * the specified number of bytes.

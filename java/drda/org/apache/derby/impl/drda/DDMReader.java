@@ -99,6 +99,7 @@ class DDMReader
 	private final static boolean NO_ADJUST_LENGTHS = false;
 	private final static long MAX_EXTDTA_SIZE= Long.MAX_VALUE;
 	private static boolean internalTrace = true;
+    
 
 	// magnitude represented in an int array, used in BigDecimal conversion
     private static final int[][] tenRadixMagnitude = {
@@ -152,6 +153,9 @@ class DDMReader
 
 	// input stream
 	private InputStream inputStream;
+    
+    // State whether doing layer B Streaming or not.
+    private boolean doingLayerBStreaming = false;;
 
 	// constructor
 	DDMReader (DRDAConnThread agent, DssTrace dssTrace)
@@ -496,11 +500,13 @@ class DDMReader
 	/**
 	 * Read the DDM Length and CodePoint
 	 *
+     * @param isLayerBStreamingPossible true only when layer B streaming is possible
 	 * @return - returns codepoint
 	 *
 	 * @exception DRDProtocolException
 	 */
-	protected int readLengthAndCodePoint() throws DRDAProtocolException
+	protected int readLengthAndCodePoint( boolean isLayerBStreamingPossible ) 
+        throws DRDAProtocolException
 	{
 		ensureBLayerDataInBuffer (4, NO_ADJUST_LENGTHS);
 
@@ -552,6 +558,23 @@ class DDMReader
 					((buffer[pos++] & 0xff) << 0);
 				adjustSize = 8;
 				break;
+                
+            case 0:
+                
+                if( isLayerBStreamingPossible &&
+                    ( codePoint == CodePoint.EXTDTA || 
+                      codePoint == CodePoint.QRYDTA ) ){
+                    
+                    startLayerBStreaming();
+                    adjustSize = 4;
+                    
+                }else {
+                    agent.throwSyntaxrm(CodePoint.SYNERRCD_INCORRECT_EXTENDED_LEN,
+                                        DRDAProtocolException.NO_CODPNT_ARG);
+                }
+                
+                break;
+                
 			default:
 				agent.throwSyntaxrm(CodePoint.SYNERRCD_INCORRECT_EXTENDED_LEN,
 							   DRDAProtocolException.NO_CODPNT_ARG);
@@ -610,13 +633,13 @@ class DDMReader
 		{
 			// if the collecion is exhausted then return NO_CODEPOINT
 			if (ddmCollectionLenStack[topDdmCollectionStack] == 0) 
-			{
+                {
 				// done with this collection so remove it's length from the stack
 				ddmCollectionLenStack[topDdmCollectionStack--] = 0;
 				return NO_CODEPOINT;
 			}
 			else {
-				return readLengthAndCodePoint();
+				return readLengthAndCodePoint( false );
 			}
 		}
 	}
@@ -963,15 +986,40 @@ class DDMReader
 	{
 		if (checkNullability && isEXTDTANull()) {
 			return null;
-		} else {
-			return new EXTDTAReaderInputStream(this);
-		}
+            
+		} else if ( doingLayerBStreaming ){
+			return new LayerBStreamedEXTDTAReaderInputStream(this);
+        
+        } else {
+            return new StandardEXTDTAReaderInputStream(this);
+            
+        }
+
 	}
+    
+    /**
+	 * This method is used by EXTDTAReaderInputStream to read the first chunk 
+	 * of data.
+     * This lengthless method must be called only when layer B streaming.
+     *
+	 * @exception DRDAProtocolException standard DRDA protocol exception
+	 */
+	ByteArrayInputStream readLOBInitStream() 
+		throws DRDAProtocolException
+	{
+        if ( SanityManager.DEBUG ) {
+            SanityManager.ASSERT( doingLayerBStreaming );
+        }
+		
+        return readLOBInitStream( 0 );
+        
+	}
+	
 
 	/**
 	 * This method is used by EXTDTAReaderInputStream to read the first chunk 
 	 * of data.
-	 * @param desiredLength the desired length of chunk
+	 * @param desiredLength the desired length of chunk. This parameter is ignored when layerB Streaming is doing.
 	 * @exception DRDAProtocolException standard DRDA protocol exception
 	 */
 	ByteArrayInputStream readLOBInitStream(final long desiredLength) 
@@ -980,10 +1028,37 @@ class DDMReader
 		return readLOBChunk(false, desiredLength);
 	}
 	
+    
+    /**
+	 * This method is used by EXTDTAReaderInputStream to read the next chunk 
+	 * of data.
+     *
+     * Calling this method finishes layer B streaming 
+     * if continuation of DSS segment was finished.
+     * This lengthless method must be called only when layer B streaming.
+     *
+	 * @param desiredLength the desired length of chunk. This parameter is ignored when layerB Streaming is doing.
+	 * @exception IOException IOException
+	 */
+	ByteArrayInputStream readLOBContinuationStream ()
+		throws IOException
+	{		
+        if ( SanityManager.DEBUG ) {
+            SanityManager.ASSERT( doingLayerBStreaming );
+        }
+        return readLOBContinuationStream( 0 );
+	}
+    
+
 	/**
 	 * This method is used by EXTDTAReaderInputStream to read the next chunk 
 	 * of data.
-	 * @param desiredLength the desired length of chunk
+     *
+     * Furthermore, when Layer B streaming is carried out,
+     * calling this method finishes layer B streaming 
+     * if continuation of DSS segment was finished.
+     *
+	 * @param desiredLength the desired length of chunk. This parameter is ignored when layerB Streaming is doing.
 	 * @exception IOException IOException
 	 */
 	ByteArrayInputStream readLOBContinuationStream (final long desiredLength)
@@ -1000,8 +1075,12 @@ class DDMReader
 	/**
 	 * This method is used by EXTDTAReaderInputStream to read the next chunk 
 	 * of data.
+     *
+     * Furthermore, when Layer B streaming is carried out,
+     * calling this method may finish layer B streaming.
+     *
 	 * @param readHeader set to true if the dss continuation should be read
-	 * @param desiredLength the desired length of chunk
+	 * @param desiredLength the desired length of chunk. This parameter is ignored when layerB Streaming is doing.
 	 * @exception DRDAProtocolException standard DRDA protocol exception
 	 */
 	private ByteArrayInputStream readLOBChunk
@@ -1011,11 +1090,21 @@ class DDMReader
 		if (readHeader) {			
 			readDSSContinuationHeader();
 		}
-		int copySize = (int) Math.min(dssLength, desiredLength);
+		
+        int copySize = doingLayerBStreaming ? 
+            dssLength : 
+            (int) Math.min(dssLength, desiredLength);
 		
 		// read the segment
 		ensureALayerDataInBuffer (copySize);
-		adjustLengths (copySize);
+        
+        if( ! doingLayerBStreaming ){
+            adjustLengths (copySize);
+            
+        }else{
+            dssLength -= copySize;
+            
+        }
 		
 		// Create ByteArrayInputStream on top of buffer. 
 		// This will not make a copy of the buffer.
@@ -1023,11 +1112,20 @@ class DDMReader
 			new ByteArrayInputStream(buffer, pos, copySize);
 		pos += copySize;
 		
+        if( doingLayerBStreaming && 
+            ! dssIsContinued )
+            finishLayerBStreaming();
+        
 		return bais;
 	}
 
 	byte[] getExtData (long desiredLength, boolean checkNullability) throws DRDAProtocolException
   {
+
+      if ( SanityManager.DEBUG ) {
+            SanityManager.ASSERT( ! doingLayerBStreaming );
+        }
+
     boolean readHeader;
     int copySize;
     ByteArrayOutputStream baos;
@@ -1865,5 +1963,21 @@ class DDMReader
 		return DssConstants.DSSCHAIN;
 
 	}
-
+    
+    
+    private void startLayerBStreaming() {
+        doingLayerBStreaming = true;
+    }
+    
+    
+    private void finishLayerBStreaming() {
+        doingLayerBStreaming = false;
+    }
+    
+    
+    boolean doingLayerBStreaming() {
+        return doingLayerBStreaming;
+    }
+    
+    
 }

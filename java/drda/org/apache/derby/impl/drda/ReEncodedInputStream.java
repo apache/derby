@@ -158,7 +158,7 @@ public class ReEncodedInputStream extends InputStream {
     }
     
     
-    static class PublicBufferOutputStream extends ByteArrayOutputStream{
+    private static class PublicBufferOutputStream extends ByteArrayOutputStream{
 	
 	PublicBufferOutputStream(int size){
 	    super(size);

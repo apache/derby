@@ -4396,6 +4396,11 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XJ215.S</name>
                 <text>You cannot invoke other java.sql.Clob/java.sql.Blob methods after calling the free() method.</text>
             </msg>
+	    
+	    <msg>
+                <name>XJ216.S</name>
+                <text>The length of this BLOB/CLOB is not available yet. When a BLOB or CLOB is accessed as a stream, the length is not available until the entire stream has been processed.</text>
+            </msg>
 
         </family>
 

@@ -26,9 +26,10 @@
 package org.apache.derby.impl.drda;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -64,6 +65,7 @@ import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 
 class DRDAConnThread extends Thread {
 
@@ -661,7 +663,7 @@ class DRDAConnThread extends Thread {
 		do
 		{
 			correlationID = reader.readDssHeader();
-			int codePoint = reader.readLengthAndCodePoint();
+			int codePoint = reader.readLengthAndCodePoint( false );
 			int writerMark = writer.markDSSClearPoint();
 			
 			if (checkSecurityCodepoint)
@@ -1022,7 +1024,7 @@ class DRDAConnThread extends Thread {
 		  }
 		}
 
-		codePoint = reader.readLengthAndCodePoint();
+		codePoint = reader.readLengthAndCodePoint( false );
 
 		// The first code point in the exchange of attributes must be EXCSAT
 		if (codePoint != CodePoint.EXCSAT)
@@ -1058,7 +1060,7 @@ class DRDAConnThread extends Thread {
 		}
 
 		correlationID = reader.readDssHeader();
-		codePoint = reader.readLengthAndCodePoint();
+		codePoint = reader.readLengthAndCodePoint( false );
 		verifyRequiredObject(codePoint,CodePoint.ACCRDB);
 		int svrcod = parseACCRDB();
 
@@ -1965,7 +1967,7 @@ class DRDAConnThread extends Thread {
 			correlationID = reader.readDssHeader();
 			while (reader.moreDssData())
 			{
-				codePoint = reader.readLengthAndCodePoint();
+				codePoint = reader.readLengthAndCodePoint( false );
 				switch(codePoint)
 				{
 					// optional
@@ -2411,7 +2413,7 @@ class DRDAConnThread extends Thread {
 			correlationID = reader.readDssHeader();
 			while (reader.moreDssData())
 			{
-				codePoint = reader.readLengthAndCodePoint();
+				codePoint = reader.readLengthAndCodePoint( false );
 				switch(codePoint)
 				{
 					// optional
@@ -3446,7 +3448,7 @@ class DRDAConnThread extends Thread {
 			correlationID = reader.readDssHeader();
 			while (reader.moreDssData())
 			{
-				codePoint = reader.readLengthAndCodePoint();
+				codePoint = reader.readLengthAndCodePoint( false );
 				switch(codePoint)
 				{
 					// required
@@ -3945,7 +3947,7 @@ class DRDAConnThread extends Thread {
 			correlationID = reader.readDssHeader();
 			while (reader.moreDssData())
 			{
-				codePoint = reader.readLengthAndCodePoint();
+				codePoint = reader.readLengthAndCodePoint( true );
 				switch(codePoint)
 				{
 					// optional
@@ -4481,7 +4483,7 @@ class DRDAConnThread extends Thread {
 						if (i < numExt -1)
 						{
 							correlationID = reader.readDssHeader();
-							int codePoint = reader.readLengthAndCodePoint();
+							int codePoint = reader.readLengthAndCodePoint( true );
 						}
 					}
 
@@ -4524,11 +4526,27 @@ class DRDAConnThread extends Thread {
 							paramBytes = null;
 							final EXTDTAReaderInputStream stream = 
 								reader.getEXTDTAReaderInputStream(checkNullability);
-							if (stream==null) {
-								ps.setBytes(i+1, null);
-							} else {
-								ps.setBinaryStream(i+1, stream, (int) stream.getLength());
-							}
+                            
+                            if( stream instanceof StandardEXTDTAReaderInputStream ){
+                                
+                                final StandardEXTDTAReaderInputStream stdeis = 
+                                    (StandardEXTDTAReaderInputStream) stream ;
+
+                                ps.setBinaryStream( i + 1, 
+                                                    stdeis, 
+                                                    (int) stdeis.getLength() );
+                                
+                            } else if( stream instanceof LayerBStreamedEXTDTAReaderInputStream ) {
+                                
+                                ( ( EnginePreparedStatement ) ps).setBinaryStream( i + 1, 
+                                                                                   stream);
+                                
+							} else if( stream == null ){
+                                ps.setBytes(i+1, null);
+                                
+                            } else {
+                                throw new IllegalStateException();
+                            }
 							
 							if (SanityManager.DEBUG) {
 								if (stream==null) {
@@ -4538,50 +4556,68 @@ class DRDAConnThread extends Thread {
 								}
 							}
 						} else {
-							paramBytes = reader.getExtData(checkNullability);
+                            final EXTDTAReaderInputStream stream = 
+								reader.getEXTDTAReaderInputStream(checkNullability);
 							
-                            if ( paramBytes==null ) {
-								ps.setBytes(i+1, 
+                            if ( stream == null ) {
+								
+                                ps.setBytes(i+1, 
                                             null );
                                 
-							} else {
-								ps.setBinaryStream(i+1, 
-                                                   new ByteArrayInputStream(paramBytes),
-												   paramBytes.length);
-							}
-							if (SanityManager.DEBUG) {
-								if (paramBytes==null) {
+                                if (SanityManager.DEBUG) {
 									trace("parameter value : NULL");
-								} else {
+                                }
+                                
+							} else {
+
+                                ByteArrayInputStream bais = 
+                                    convertAsByteArrayInputStream( stream );
+                                
+                                if (SanityManager.DEBUG) {
 									trace("parameter value is a LOB with length:" +
-										  paramBytes.length);
+										  bais.available() );
 								}
+                                
+								ps.setBinaryStream(i+1, 
+                                                   bais,
+												   bais.available() );
+                                
 							}
+							
 						}
 						break;
 					case DRDAConstants.DRDA_TYPE_LOBCSBCS:
 					case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
-						paramBytes = reader.getExtData(checkNullability);
-						paramString = new String(paramBytes, stmt.ccsidSBCEncoding);
-						if (SanityManager.DEBUG)
-							trace("parameter value is: "+ paramString);
-						ps.setString(i+1,paramString);
+                        
+                        setAsCharacterStream(ps,
+                                             i,
+                                             checkNullability,
+                                             reader,
+                                             streamLOB,
+                                             stmt.ccsidSBCEncoding );
+
 						break;
 					case DRDAConstants.DRDA_TYPE_LOBCDBCS:
 					case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
-						paramBytes = reader.getExtData(checkNullability);
-						paramString = new String(paramBytes, stmt.ccsidDBCEncoding );
-						if (SanityManager.DEBUG)
-							trace("parameter value is: "+ paramString);
-						ps.setString(i+1,paramString);
+                        
+                        setAsCharacterStream(ps,
+                                             i,
+                                             checkNullability,
+                                             reader,
+                                             streamLOB,
+                                             stmt.ccsidDBCEncoding);
+                        
 						break;
 					case DRDAConstants.DRDA_TYPE_LOBCMIXED:
 					case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
-						paramBytes = reader.getExtData(checkNullability);
-						paramString = new String(paramBytes, stmt.ccsidMBCEncoding);
-						if (SanityManager.DEBUG)
-							trace("parameter value is: "+ paramString);
-						ps.setString(i+1,paramString);
+
+                        setAsCharacterStream(ps,
+                                             i,
+                                             checkNullability,
+                                             reader,
+                                             streamLOB,
+                                             stmt.ccsidMBCEncoding);
+                        
 						break;
 					default:
 						paramBytes = null;
@@ -4593,7 +4629,11 @@ class DRDAConnThread extends Thread {
 			}
 			catch (java.io.UnsupportedEncodingException e) {
 				throw new SQLException (e.getMessage());
-			}
+                
+			} catch( IOException e ){
+                throw new SQLException ( e.getMessage() );
+                
+            }
 		}
 
 	/**
@@ -4746,7 +4786,7 @@ class DRDAConnThread extends Thread {
 			correlationID = reader.readDssHeader();
 			while (reader.moreDssData())
 			{
-				codePoint = reader.readLengthAndCodePoint();
+				codePoint = reader.readLengthAndCodePoint( false );
 				switch(codePoint)
 				{
 					// optional
@@ -4805,7 +4845,7 @@ class DRDAConnThread extends Thread {
 			while (reader.moreDssData())
 			{
 
-				codePoint = reader.readLengthAndCodePoint();
+				codePoint = reader.readLengthAndCodePoint( false );
 
 				switch(codePoint)
 				{
@@ -5063,7 +5103,7 @@ class DRDAConnThread extends Thread {
 	private String parseSQLSTTDss() throws DRDAProtocolException
 	{
 		correlationID = reader.readDssHeader();
-		int codePoint = reader.readLengthAndCodePoint();
+		int codePoint = reader.readLengthAndCodePoint( false );
 		String strVal = parseEncodedString();
 		if (SanityManager.DEBUG) 
 			trace("SQL Statement = " + strVal);
@@ -8089,4 +8129,80 @@ class DRDAConnThread extends Thread {
 	}
 	
     }
+    
+    
+    private static ByteArrayInputStream 
+        convertAsByteArrayInputStream( EXTDTAReaderInputStream stream )
+        throws IOException {
+        
+        final int byteArrayLength = 
+            stream instanceof StandardEXTDTAReaderInputStream ?
+            (int) ( ( StandardEXTDTAReaderInputStream ) stream ).getLength() : 
+            32;// default length
+        
+        PublicBufferOutputStream pbos = 
+            new PublicBufferOutputStream( byteArrayLength );
+        
+        byte[] buffer = new byte[32 * 1024];
+        
+        int c = 0;
+        
+        while( ( c = stream.read( buffer,
+                                  0,
+                                  buffer.length ) ) > -1 ) {
+            pbos.write( buffer, 0, c );
+        }
+
+        return new ByteArrayInputStream( pbos.getBuffer(),
+                                         0, 
+                                         pbos.getCount() );
+
+    }
+    
+    
+    private static class PublicBufferOutputStream extends ByteArrayOutputStream{
+        
+        PublicBufferOutputStream(int size){
+            super(size);
+        }
+        
+        public byte[] getBuffer(){
+            return buf;
+        }
+        
+        public int getCount(){
+            return count;
+        }
+        
+    }
+    
+    private static void setAsCharacterStream(PreparedStatement ps,
+                                             int i,
+                                             boolean checkNullability,
+                                             DDMReader reader,
+                                             boolean streamLOB,
+                                             String encoding) 
+        throws DRDAProtocolException ,
+               SQLException ,
+               IOException {
+        
+        EnginePreparedStatement engnps = 
+            ( EnginePreparedStatement ) ps;
+        
+        final EXTDTAReaderInputStream extdtastream = 
+            reader.getEXTDTAReaderInputStream(checkNullability);
+        
+        final InputStream is = 
+            streamLOB ?
+            (InputStream) extdtastream :
+            convertAsByteArrayInputStream( extdtastream );
+        
+        final InputStreamReader streamReader = 
+            new InputStreamReader( is,
+                                   encoding ) ;
+        
+        engnps.setCharacterStream( i + 1, 
+                                   streamReader );
+    }
+
 }

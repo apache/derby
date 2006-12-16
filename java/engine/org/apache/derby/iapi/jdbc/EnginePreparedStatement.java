@@ -20,6 +20,8 @@
  */
 package org.apache.derby.iapi.jdbc;
 
+import java.io.InputStream;
+import java.io.Reader;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 
@@ -47,4 +49,9 @@ public interface EnginePreparedStatement extends PreparedStatement {
     public EngineParameterMetaData getEmbedParameterSetMetaData()
         throws SQLException;
     
+    public void setBinaryStream(int parameterIndex, InputStream x)
+        throws SQLException; 
+    
+    public void setCharacterStream(int parameterIndex, Reader reader)
+        throws SQLException;
 }
