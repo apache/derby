@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
@@ -442,18 +443,15 @@ public final class	DataDictionaryImpl
 
 
 	/**
-	  Currently, all this routine does is check to see if the Replication
-	  property has been turned on for this database. If so, then this is not
-	  the NodeFactory that's wanted--so we return false. The NodeFactory that
-	  is wanted is our child class "RepNodeFactory".
+     * This is the data dictionary implementation for
+     * the standard database engine.
 
-	  @return	true		if this database does not want Replication
-	            false		otherwise
+	  @return true if this service requested is for a database engine.
 	  */
 
 	public boolean canSupport(Properties startParams)
 	{
-		return	Monitor.isDesiredType( startParams, org.apache.derby.iapi.reference.EngineType.NONE );
+        return Monitor.isDesiredType(startParams, EngineType.STANDALONE_DB);
 	}
 
 	/**

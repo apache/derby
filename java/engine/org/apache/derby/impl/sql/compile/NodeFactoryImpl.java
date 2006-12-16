@@ -40,6 +40,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.catalog.AliasInfo;
@@ -82,9 +83,16 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 	//
 	//////////////////////////////////////////////////////////////////////
 
+    /**
+     * Module supports the standard database engine and
+     * a storeless SQL engine. Probably a single NodeFactory
+     * will only ever exist, see DERBY-673, as part of the
+     * compile system.
+     */
 	public boolean canSupport(Properties startParams)
 	{
-		return	Monitor.isDesiredType( startParams, org.apache.derby.iapi.reference.EngineType.NONE );
+		return Monitor.isDesiredType(startParams,
+                EngineType.STANDALONE_DB | EngineType.STORELESS_ENGINE);
 	}
 
 	/**

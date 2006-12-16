@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.impl.sql.GenericColumnDescriptor;
@@ -81,7 +82,8 @@ public class GenericExecutionFactory
 	//
 	public boolean canSupport(Properties startParams)
 	{
-		return	Monitor.isDesiredType( startParams, org.apache.derby.iapi.reference.EngineType.NONE);
+        return Monitor.isDesiredType(startParams,
+                EngineType.STANDALONE_DB | EngineType.STORELESS_ENGINE);
 	}
 
 	/**

@@ -141,9 +141,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	 */
 
 	public boolean canSupport(Properties startParams) {
-
-		return Monitor.isDesiredCreateType(startParams, org.apache.derby.iapi.reference.EngineType.NONE);
-
+        return Monitor.isDesiredCreateType(startParams, getEngineType());
 	}
 
 	protected Properties allParams;	// properties to be used *only* while booting.
@@ -248,10 +246,13 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
  	 */
 
 	/**
-	  *	@return	one of the values from EngineType.java:
-	  *
+     * Return the engine type that this Database implementation
+     * supports.
+     * This implementation supports the standard database.
 	  */
-	public	int	getEngineType() { return org.apache.derby.iapi.reference.EngineType.NONE; }
+	public int getEngineType() {
+        return EngineType.STANDALONE_DB;
+    }
 
 	public boolean isReadOnly()
 	{

@@ -733,8 +733,7 @@ public class Monitor {
 	  */
 	public static boolean isDesiredType(Properties startParams, int desiredProperty )
 	{
-		boolean	retval = false;
-		int		engineType = EngineType.NONE;
+		int		engineType = EngineType.STANDALONE_DB;
 
 		if ( startParams != null )
 		{
@@ -743,8 +742,13 @@ public class Monitor {
 
 		return (engineType & desiredProperty) != 0;
 	}
-	public static boolean isDesiredType(int engineType, int desiredProperty) {
-		return (engineType & desiredProperty) != 0;
+    
+    /**
+     * Is engineType a match for desiredType. A match exists
+     * if the bit intersect of the two values is no zero.
+     */
+	public static boolean isDesiredType(int engineType, int desiredType) {
+		return (engineType & desiredType) != 0;
 	}
 	
 	/**
@@ -778,7 +782,7 @@ public class Monitor {
 		boolean plainCreate = Boolean.valueOf(p.getProperty(Attribute.CREATE_ATTR)).booleanValue();
 
 		if (plainCreate) {
-			return (type & EngineType.NONE) != 0;
+			return (type & EngineType.STANDALONE_DB) != 0;
 		}
 
 		// database must already exist
