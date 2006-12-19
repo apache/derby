@@ -37,8 +37,6 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
 
