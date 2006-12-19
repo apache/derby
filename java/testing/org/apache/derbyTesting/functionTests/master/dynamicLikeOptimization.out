@@ -413,21 +413,29 @@ ij> insert into likeable values ('foo%bar', 'fooZ%baZ', 'Z');
 1 row inserted/updated/deleted
 ij> -- error
 select match_me from likeable where match_me like pattern escape esc;
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+MATCH_ME  
+----------
+foo%bar   
+foo%bar   
+ERROR 22025: Escape character must be followed by escape character, '_', or '%'. It cannot be followed by any other character or be at the end of the pattern.
 ij> delete from likeable;
 3 rows inserted/updated/deleted
 ij> insert into likeable values ('foo%bar', 'foo%bar', NULL);
 1 row inserted/updated/deleted
 ij> -- should error
 select match_me from likeable where match_me like pattern escape esc;
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+MATCH_ME  
+----------
+ERROR 22501: An ESCAPE clause of NULL returns undefined results and is not allowed.
 ij> delete from likeable;
 1 row inserted/updated/deleted
 ij> insert into likeable values ('foo%bar', 'foo%bar', '');
 1 row inserted/updated/deleted
 ij> -- should error
 select match_me from likeable where match_me like pattern escape esc;
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
+MATCH_ME  
+----------
+ERROR 22019: Invalid escape sequence, ''. The escape string must be exactly one character. It cannot be a null or more than one character.
 ij> -- Defect 6002/6039
 create table cei(id int, name varchar(192) not null, source varchar(252) not null);
 0 rows inserted/updated/deleted

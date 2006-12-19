@@ -1187,19 +1187,15 @@ values cast('   ' as blob(1M));
 ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
 ij> values cast('a' as blob(1M));
 ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
-ij> -- beetle 5294
+ij> -- Test removed: DERBY-2147
+-- beetle 5294
 -- diable column names in the characterExpression and escape clause of a LIKE predicate
-create table likeable (match_me varchar(10), pattern varchar(10), esc varchar(1));
-0 rows inserted/updated/deleted
-ij> insert into likeable values ('foo%bar3', 'fooZ%bar3', 'Z');
-1 row inserted/updated/deleted
-ij> select match_me from likeable where match_me like pattern escape esc;
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
-ij> select match_me from likeable where match_me like pattern escape 'Z';
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
-ij> drop table likeable;
-0 rows inserted/updated/deleted
-ij> -- beetle 5298 
+-- create table likeable (match_me varchar(10), pattern varchar(10), esc varchar(1));
+-- insert into likeable values ('foo%bar3', 'fooZ%bar3', 'Z');
+-- select match_me from likeable where match_me like pattern escape esc;
+-- select match_me from likeable where match_me like pattern escape 'Z';
+-- drop table likeable;
+-- beetle 5298 
 -- disable Field Access
 VALUES java.lang.Integer::MAX_VALUE;
 ERROR 42X01: Syntax error: java.lang.Integer::MAX_VALUE.
@@ -1272,23 +1268,18 @@ ij> select match_me from likeable where 'foo%bar3' like 'foo%';
 MATCH_ME  
 ----------
 foo%bar3  
-ij> -- SQLSTATE=42824
-select match_me from likeable where match_me like pattern escape esc;
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
-ij> select match_me from likeable where match_me like pattern escape e;
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
-ij> select match_me from likeable where match_me like pattern escape 'Z';
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
-ij> select match_me from likeable where match_me like pattern;
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
-ij> select match_me from likeable where match_me like e;
-ERROR 42824: An operand of LIKE is not a string, or the first operand is not a column.
-ij> -- SQLSTATE=22019
-select match_me from likeable where match_me like 'fooZ%bar3' escape esc;
-ERROR 22019: Invalid escape sequence, 'ESC'. The escape string must be exactly one character. It cannot be a null or more than one character.
-ij> select match_me from likeable where match_me like 'fooZ%bar3' escape e;
-ERROR 22019: Invalid escape sequence, 'E'. The escape string must be exactly one character. It cannot be a null or more than one character.
-ij> -- SQLSTATE=42884
+ij> -- Test removed: DERBY-2147
+-- SQLSTATE=42824
+-- select match_me from likeable where match_me like pattern escape esc;
+-- select match_me from likeable where match_me like pattern escape e;
+-- select match_me from likeable where match_me like pattern escape 'Z';
+-- select match_me from likeable where match_me like pattern;
+-- select match_me from likeable where match_me like e;
+-- Test removed: DERBY-2147
+-- SQLSTATE=22019
+-- select match_me from likeable where match_me like 'fooZ%bar3' escape esc;
+-- select match_me from likeable where match_me like 'fooZ%bar3' escape e;
+-- SQLSTATE=42884
 select match_me from likeable where match_me like 'fooZ%bar3' escape 1;
 ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
 ij> select match_me from likeable where match_me like 'fooZ%bar3' escape 1;

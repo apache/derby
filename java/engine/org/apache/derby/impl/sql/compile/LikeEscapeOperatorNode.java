@@ -159,22 +159,11 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
 		String pattern = null;
 
-		// pattern cannot be a column
-		if (leftOperand instanceof ColumnReference)
-			throw StandardException.newException(SQLState.LANG_DB2_LIKE_SYNTAX_ERROR);
-
 		// pattern must be a string or a parameter
 
 		if (!(leftOperand.requiresTypeFromContext()) && !(leftOperand.getTypeId().isStringTypeId()))
 			throw StandardException.newException(SQLState.LANG_DB2_FUNCTION_INCOMPATIBLE,
 													 "LIKE", "FUNCTION");
-
-		// escape cannot be a column
-		if (rightOperand != null && rightOperand instanceof ColumnReference)
-		{
-			throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
-										 ((ColumnReference) rightOperand).getColumnName());
-		}
 
 		// escape must be a string or a parameter
 		if ((rightOperand != null) && 

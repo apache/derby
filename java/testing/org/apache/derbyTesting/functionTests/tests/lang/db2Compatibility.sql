@@ -805,13 +805,14 @@ values cast(X'11' as blob(1M));
 values cast('   ' as blob(1M));
 values cast('a' as blob(1M));
 
+-- Test removed: DERBY-2147
 -- beetle 5294
 -- diable column names in the characterExpression and escape clause of a LIKE predicate
-create table likeable (match_me varchar(10), pattern varchar(10), esc varchar(1));
-insert into likeable values ('foo%bar3', 'fooZ%bar3', 'Z');
-select match_me from likeable where match_me like pattern escape esc;
-select match_me from likeable where match_me like pattern escape 'Z';
-drop table likeable;
+-- create table likeable (match_me varchar(10), pattern varchar(10), esc varchar(1));
+-- insert into likeable values ('foo%bar3', 'fooZ%bar3', 'Z');
+-- select match_me from likeable where match_me like pattern escape esc;
+-- select match_me from likeable where match_me like pattern escape 'Z';
+-- drop table likeable;
 
 -- beetle 5298 
 -- disable Field Access
@@ -854,16 +855,18 @@ select match_me from likeable where 'foo%bar3' like 'fooZ%bar3' escape 'Z';
 select match_me from likeable where 'foo%bar3' like 'foo%';
 
 
+-- Test removed: DERBY-2147
 -- SQLSTATE=42824
-select match_me from likeable where match_me like pattern escape esc;
-select match_me from likeable where match_me like pattern escape e;
-select match_me from likeable where match_me like pattern escape 'Z';
-select match_me from likeable where match_me like pattern;
-select match_me from likeable where match_me like e;
+-- select match_me from likeable where match_me like pattern escape esc;
+-- select match_me from likeable where match_me like pattern escape e;
+-- select match_me from likeable where match_me like pattern escape 'Z';
+-- select match_me from likeable where match_me like pattern;
+-- select match_me from likeable where match_me like e;
 
+-- Test removed: DERBY-2147
 -- SQLSTATE=22019
-select match_me from likeable where match_me like 'fooZ%bar3' escape esc;
-select match_me from likeable where match_me like 'fooZ%bar3' escape e;
+-- select match_me from likeable where match_me like 'fooZ%bar3' escape esc;
+-- select match_me from likeable where match_me like 'fooZ%bar3' escape e;
 
 -- SQLSTATE=42884
 select match_me from likeable where match_me like 'fooZ%bar3' escape 1;
