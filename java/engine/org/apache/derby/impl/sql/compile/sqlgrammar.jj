@@ -7375,6 +7375,61 @@ newInvocation() throws StandardException :
 }
 
 /*
+ * <A NAME="vtiTableConstruct">vtiTableConstruct</A>
+ *
+ * Parse a TABLE() constructor that corresponds to an internal
+ * VTI invocation.  For example:
+ *
+ *    TABLE ( <qualifiedName> (arg1, arg2, ...) )
+ *
+ * where <qualifiedName> is a table name that Derby will map internally
+ * to a VTI (ex. "SYSCS_DIAG.SPACE_TABLE").  The list of arguments
+ * will then be passed to the VTI when it is invoked (DERBY-2152).
+ *
+ * An example query where this might occur is as follows:
+ *
+ *   SELECT * FROM TABLE(SYSCS_DIAG.SPACE_TABLE('APP', 'T1')) x
+ *
+ * in which case SYSCS_DIAG.SPACE_TABLE will be mapped (internally)
+ * to the "org.apache.derby.diag.SpaceTable" diagnostic VTI.  Thus
+ * the equivalent call prior to DERBY-2152 would have been:
+ *
+ *   SELECT * FROM NEW org.apache.derby.diag.SpaceTable('APP', 'T1')) x
+ *
+ * Note that this latter syntax is still supported.
+ */
+JavaToSQLValueNode
+vtiTableConstruct() throws StandardException :
+{
+    QueryTreeNode newNode = null;
+    Vector parameterList = new Vector();
+    TableName vtiTableName = null;
+}
+{
+    <TABLE> <LEFT_PAREN>
+        vtiTableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+        methodCallParameterList(parameterList)
+    <RIGHT_PAREN>
+    {
+        newNode = nodeFactory.getNode(C_NodeTypes.NEW_INVOCATION_NODE,
+                    vtiTableName,
+                    parameterList, 
+                    lastTokenDelimitedIdentifier,
+                    getContextManager());
+
+        /*
+        ** Assume this is being returned to the SQL domain.  If it turns
+        ** out that this is being returned to the Java domain, we will
+        ** get rid of this node.
+        */
+        return (JavaToSQLValueNode) nodeFactory.getNode(
+                    C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
+                    newNode,
+                    getContextManager());
+    }
+}
+
+/*
  * <A NAME="staticMethodInvocation">staticMethodInvocation</A>
  */
 ValueNode
@@ -8554,14 +8609,19 @@ dummyTableReferenceRule(FromList fromList) throws StandardException :
 	FromTable tableReference;
 }
 {
-	<TABLE>
-	LOOKAHEAD( {
-				getToken(1).kind == LEFT_PAREN &&
+	/* If we have a table constructor and the expression is a SELECT
+	 * query or a VALUES query then we read the <TABLE> keyword;
+	 * otherwise we leave the <TABLE> token in the queue and let
+	 * other types of expressions (namely, vtiTableConstruct())
+	 * deal with it accordingly.  DERBY-2152.
+	 */
+	LOOKAHEAD({ getToken(1).kind == TABLE &&
+				getToken(2).kind == LEFT_PAREN &&
 				(
-					getToken(2).kind == SELECT ||
-					getToken(2).kind == VALUES
+					getToken(3).kind == SELECT ||
+					getToken(3).kind == VALUES
 				)
-			} )
+			}) <TABLE>
 	tableReference = tableReferenceTypes(false)
 	{
 		fromList.addFromTable(tableReference);
@@ -8656,8 +8716,10 @@ tableReference(boolean nestedInParens) throws StandardException :
 	 * a reserved word.
 	 */
 	/* identifier() used to be correlationName() */
-	LOOKAHEAD( { newInvocationFollows(1) } )
-	javaToSQLNode = newInvocation() [ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+	(LOOKAHEAD({ newInvocationFollows(1) }) javaToSQLNode = newInvocation()
+	| javaToSQLNode = vtiTableConstruct()
+	)
+		[ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 		[ <LEFT_PAREN> derivedRCL = derivedColumnList() <RIGHT_PAREN> ]
 		[ optionalTableClauses = optionalTableProperties() ]
 		(LOOKAHEAD( { joinedTableExpressionFollows() } )

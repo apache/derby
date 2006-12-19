@@ -37,6 +37,8 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -68,7 +70,9 @@ public class NewInvocationNode extends MethodCallNode
 	 * Initializer for a NewInvocationNode. Parameters are:
 	 *
 	 * <ul>
-	 * <li>javaClassName		The full package.class name of the class</li>
+	 * <li>javaClassName		The full package.class name of the class
+	 * 	                    	(as a String), or else a TableName object
+	 *                  		that maps to the full class name </li>
 	 * <li>parameterList		The parameter list for the constructor</li>
 	 * </ul>
 	 *
@@ -83,7 +87,50 @@ public class NewInvocationNode extends MethodCallNode
 		super.init("<init>");
 		addParms((Vector) params);
 
-		this.javaClassName = (String) javaClassName;
+		/* If javaClassName is a String then it is the full package
+		 * class name for the class to be invoked, so just store it
+		 * locally.
+		 */
+		if (javaClassName instanceof String)
+			this.javaClassName = (String) javaClassName;
+		else
+		{
+			/* javaClassName is a TableName object representing a table
+			 * function name that maps to some VTI class name.  For
+			 * example, in the following query:
+			 *
+			 *   select * from TABLE(SYSCS_DIAG.SPACE_TABLE(?)) x
+			 *
+			 * javaClassName will be a TableName object representing
+			 * the table function name "SYSCS_DIAG.SPACE_TABLE".  So
+			 * we need to look up that TableName to figure out what
+			 * the corresponding target class name should be.  We
+			 * figure that out by using the data dictionary.
+			 */
+			TableName funcName = (TableName)javaClassName;
+
+			/* If no schema was specified then we want to default to the
+			 * current schema; that's what the following line does.
+			 */
+			String funcSchema =
+				getSchemaDescriptor(funcName.getSchemaName()).getSchemaName();
+
+			this.javaClassName =
+				getDataDictionary().getVTIClassForTableFunction(
+					funcSchema, funcName.getTableName());
+
+			/* If javaClassName is still null at this point then we
+			 * could not find the target class for the received
+			 * table function name.
+			 */
+			if (this.javaClassName == null)
+			{
+				throw StandardException.newException(
+					SQLState.LANG_NO_SUCH_METHOD_ALIAS,
+					funcName.getFullTableName());
+			}
+		}
+
 		this.delimitedIdentifier =
 				 ((Boolean) delimitedIdentifier).booleanValue();
 	}

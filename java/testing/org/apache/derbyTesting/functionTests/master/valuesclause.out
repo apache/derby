@@ -413,13 +413,13 @@ A          |A
 ij> -- should fail because <TABLE> can appear in front of derived table
 select *
 from  table target;
-ERROR 42X01: Syntax error: Encountered "" at line 3, column 13.
+ERROR 42X01: Syntax error: Encountered "target" at line 3, column 13.
 ij> select *
 from  table (target);
-ERROR 42X01: Syntax error: Encountered "" at line 2, column 13.
+ERROR 42X01: Syntax error: Encountered ")" at line 2, column 20.
 ij> select *
 from  table (target as q);
-ERROR 42X01: Syntax error: Encountered "" at line 2, column 13.
+ERROR 42X01: Syntax error: Encountered "as" at line 2, column 21.
 ij> drop table sub;
 0 rows inserted/updated/deleted
 ij> drop table target;

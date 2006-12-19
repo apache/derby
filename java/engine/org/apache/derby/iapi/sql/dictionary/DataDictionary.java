@@ -1699,10 +1699,22 @@ public interface DataDictionary
 	 * the virtual table. Assumes the descriptor is
 	 * of type TableDescriptor.VTI_TYPE.
 	 */
-	public String getVTIClass(TableDescriptor td)
+	public String getVTIClassForTable(TableDescriptor td)
 		throws StandardException;
 
-	
+	/**
+	 * Return the Java class to use for the VTI to which the received table
+	 * function name maps.  The table function name is a qualified name and
+	 * thus has two parts: a schema name and a function name.
+	 *
+	 * @param funcSchema Schema part of the function name
+	 * @param funcName Actual name of the function
+	 * @return Java class name to which <funcSchema>.<funcName> maps, or
+	 *  null if no mapping is found.
+	 */
+	public String getVTIClassForTableFunction(String funcSchema,
+		String funcName) throws StandardException;
+
 	/**
 	 * Adds a descriptor to a system catalog identified by the catalogNumber. 
 	 *

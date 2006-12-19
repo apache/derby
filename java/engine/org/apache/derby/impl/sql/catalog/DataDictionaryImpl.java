@@ -1781,7 +1781,7 @@ public final class	DataDictionaryImpl
 						TableDescriptor.DEFAULT_LOCK_GRANULARITY);
 			
 			// ensure a vti class exists
-			if (getVTIClass(td) != null)
+			if (getVTIClassForTable(td) != null)
 				return td;
 			
 			// otherwise just standard search
@@ -10408,7 +10408,7 @@ public final class	DataDictionaryImpl
     	}
     } // end of getUncachedRoutinePermsDescriptor
  
-	private String[][] DIAG_VTI_CLASSES =
+	private String[][] DIAG_VTI_TABLE_CLASSES =
 	{
 			{"LOCK_TABLE", "org.apache.derby.diag.LockTable"},
 			{"STATEMENT_CACHE", "org.apache.derby.diag.StatementCache"},
@@ -10418,10 +10418,18 @@ public final class	DataDictionaryImpl
 			
 	};
 	
+	private String[][] DIAG_VTI_TABLE_FUNCTION_CLASSES =
+	{
+			{"SPACE_TABLE", "org.apache.derby.diag.SpaceTable"},
+			{"ERROR_LOG_READER", "org.apache.derby.diag.ErrorLogReader"},
+			{"STATEMENT_DURATION", "org.apache.derby.diag.StatementDuration"},
+	};
+
 	/**
-	 * @see org.apache.derby.iapi.sql.dictionary.DataDictionary#getVTIClass(org.apache.derby.iapi.sql.dictionary.TableDescriptor)
+	 * @see DataDictionary#getVTIClassForTable(TableDescriptor)
 	 */
-	public String getVTIClass(TableDescriptor td) throws StandardException {
+	public String getVTIClassForTable(TableDescriptor td)
+		throws StandardException {
 		
 		if (SanityManager.DEBUG)
 		{
@@ -10429,10 +10437,32 @@ public final class	DataDictionaryImpl
 				SanityManager.THROWASSERT("getVTIClass: Invalid table type " + td);
 		}
 		
-		for (int i = 0; i < DIAG_VTI_CLASSES.length; i++)
+		for (int i = 0; i < DIAG_VTI_TABLE_CLASSES.length; i++)
 		{
-			String[] entry = DIAG_VTI_CLASSES[i];
+			String[] entry = DIAG_VTI_TABLE_CLASSES[i];
 			if (entry[0].equals(td.getDescriptorName()))
+				return entry[1];	
+		}	
+		
+		return null;
+	}
+
+	/**
+	 * @see DataDictionary#getVTIClassForTableFunction(String, String)
+	 */
+	public String getVTIClassForTableFunction(String funcSchema,
+		String funcName) throws StandardException
+	{
+		/* For now we only recognize table function names that are in
+		 * the "SYSCS_DIAG" schema; for anything else just return null.
+		 */
+		if (!SchemaDescriptor.STD_SYSTEM_DIAG_SCHEMA_NAME.equals(funcSchema))
+			return null;
+
+		for (int i = 0; i < DIAG_VTI_TABLE_FUNCTION_CLASSES.length; i++)
+		{
+			String[] entry = DIAG_VTI_TABLE_FUNCTION_CLASSES[i];
+			if (entry[0].equals(funcName))
 				return entry[1];	
 		}	
 		

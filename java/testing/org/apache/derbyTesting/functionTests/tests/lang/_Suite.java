@@ -70,6 +70,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SQLAuthorizationPropTest.suite());
         suite.addTest(TimeHandlingTest.suite());
         suite.addTest(VTITest.suite());
+        suite.addTest(SysDiagVTIMappingTest.suite());
         suite.addTest(UpdatableResultSetTest.suite());
 
         // Add the XML tests, which exist as a separate suite

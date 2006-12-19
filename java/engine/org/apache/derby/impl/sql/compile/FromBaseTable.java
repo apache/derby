@@ -2110,7 +2110,7 @@ public class FromBaseTable extends FromTable
 		if (tableDescriptor.getTableType() == TableDescriptor.VTI_TYPE) {
 			ResultSetNode vtiNode = getNodeFactory().mapTableAsVTI(
 					tableDescriptor,
-					dataDictionary.getVTIClass(tableDescriptor),
+					dataDictionary.getVTIClassForTable(tableDescriptor),
 					getCorrelationName(),
 					resultColumns,
 					getProperties(),
