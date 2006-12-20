@@ -1050,31 +1050,14 @@ private static char[] decodeArray = {'0', '1', '2', '3', '4', '5', '6', '7',
 		if (otherLength > getLength())
 			grow(otherLength); // expand this bit 
 
-		if (otherBit instanceof FormatableBitSet)
-		{
-			// we know the bit ordering, optimize this 
-			FormatableBitSet ob = (FormatableBitSet)otherBit;
-			int obByteLen = ob.getLengthInBytes();
-			for (int i = 0; i < obByteLen-1; i++)
-				value[i] |= ob.value[i];
-
-			// do the last byte bit by bit
-			for (int i = (obByteLen-1)*8; i < otherLength; i++)
-				if (otherBit.isSet(i))
-					set(i);
-		}
-		else
-		{
-			// we don't know the bit ordering, call thru the interface and go
-			// thru bit by bit
-			// this bit impl's length >= other bit's length
-
-			for (int i = 0; i < otherLength; i++)
-			{
-				if (otherBit.isSet(i))
-					set(i);
-			}
-		}
+		int obByteLen = otherBit.getLengthInBytes();
+		for (int i = 0; i < obByteLen-1; i++)
+			value[i] |= otherBit.value[i];
+		
+		// do the last byte bit by bit
+		for (int i = (obByteLen-1)*8; i < otherLength; i++)
+			if (otherBit.isSet(i))
+				set(i);
 	}
 
 	/**
