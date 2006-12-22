@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.security.PrivilegedActionException;
 import java.net.URL;
 import java.sql.*;
@@ -413,7 +414,13 @@ public abstract class BaseJDBCTestCase
         } catch (AssertionFailedError e) {
             
             // Save the SQLException
-            // e.initCause(exception);
+            try {
+                Method m = Throwable.class.getMethod(
+                    "initCause", new Class[] { Throwable.class } );
+                m.invoke(e, new Object[] { exception });
+            } catch (Throwable t) {
+                // Some VMs don't support initCause(). It is OK if they fail.
+            }
 
             if (usingDerbyNetClient())
             {
