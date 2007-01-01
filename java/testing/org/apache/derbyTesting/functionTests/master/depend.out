@@ -242,4 +242,110 @@ C1         |C2
 4          |4          
 ij> -- cleanup, roll everything back to the beginning
 rollback;
+ij> -- DERBY-2202
+-- test various DROP statements
+
+-- test procedure
+autocommit off;
+ij> CREATE SCHEMA datamgmt;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE datamgmt.exit ( IN value INTEGER )
+ MODIFIES SQL DATA
+ PARAMETER STYLE JAVA
+ LANGUAGE JAVA
+ EXTERNAL NAME 'java.lang.System.exit';
+0 rows inserted/updated/deleted
+ij> DROP PROCEDURE datamgmt.exit;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA datamgmt RESTRICT;
+0 rows inserted/updated/deleted
+ij> CREATE SCHEMA datamgmt;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE datamgmt.exit ( IN value INTEGER )
+ MODIFIES SQL DATA
+ PARAMETER STYLE JAVA
+ LANGUAGE JAVA
+ EXTERNAL NAME 'java.lang.System.exit';
+0 rows inserted/updated/deleted
+ij> DROP PROCEDURE datamgmt.exit;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA datamgmt RESTRICT;
+0 rows inserted/updated/deleted
+ij> autocommit on;
+ij> CREATE SCHEMA datamgmt;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE datamgmt.exit ( IN value INTEGER )
+ MODIFIES SQL DATA
+ PARAMETER STYLE JAVA
+ LANGUAGE JAVA
+ EXTERNAL NAME 'java.lang.System.exit';
+0 rows inserted/updated/deleted
+ij> DROP PROCEDURE datamgmt.exit;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA datamgmt RESTRICT;
+0 rows inserted/updated/deleted
+ij> CREATE SCHEMA datamgmt;
+0 rows inserted/updated/deleted
+ij> CREATE PROCEDURE datamgmt.exit ( IN value INTEGER )
+ MODIFIES SQL DATA
+ PARAMETER STYLE JAVA
+ LANGUAGE JAVA
+ EXTERNAL NAME 'java.lang.System.exit';
+0 rows inserted/updated/deleted
+ij> DROP PROCEDURE datamgmt.exit;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA datamgmt RESTRICT;
+0 rows inserted/updated/deleted
+ij> -- test function
+CREATE SCHEMA datamgmt;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION datamgmt.f_abs(P1 INT)
+ RETURNS INT
+ NO SQL
+ RETURNS NULL ON NULL INPUT
+ EXTERNAL NAME 'java.lang.Math.abs'
+ LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION datamgmt.f_abs;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA datamgmt RESTRICT;
+0 rows inserted/updated/deleted
+ij> CREATE SCHEMA datamgmt;
+0 rows inserted/updated/deleted
+ij> CREATE FUNCTION datamgmt.f_abs(P1 INT)
+ RETURNS INT
+ NO SQL
+ RETURNS NULL ON NULL INPUT
+ EXTERNAL NAME 'java.lang.Math.abs'
+ LANGUAGE JAVA PARAMETER STYLE JAVA;
+0 rows inserted/updated/deleted
+ij> DROP FUNCTION datamgmt.f_abs;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA datamgmt RESTRICT;
+0 rows inserted/updated/deleted
+ij> -- test synonym
+CREATE SCHEMA datamgmt;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE datamgmt.t1 (c1 int);
+0 rows inserted/updated/deleted
+ij> CREATE SYNONYM datamgmt.s1 for datamgmt.t1;
+0 rows inserted/updated/deleted
+ij> DROP SYNONYM datamgmt.s1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE datamgmt.t1;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA datamgmt RESTRICT;
+0 rows inserted/updated/deleted
+ij> CREATE SCHEMA datamgmt;
+0 rows inserted/updated/deleted
+ij> CREATE TABLE datamgmt.t1 (c1 int);
+0 rows inserted/updated/deleted
+ij> CREATE SYNONYM datamgmt.s1 for datamgmt.t1;
+0 rows inserted/updated/deleted
+ij> DROP SYNONYM datamgmt.s1;
+0 rows inserted/updated/deleted
+ij> DROP TABLE datamgmt.t1;
+0 rows inserted/updated/deleted
+ij> DROP SCHEMA datamgmt RESTRICT;
+0 rows inserted/updated/deleted
 ij> 

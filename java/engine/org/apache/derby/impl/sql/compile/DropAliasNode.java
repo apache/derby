@@ -124,6 +124,8 @@ public class DropAliasNode extends DDLStatementNode
 			throw StandardException.newException(SQLState.LANG_CANNOT_DROP_SYSTEM_ALIASES, aliasName);
 		}
 
+		// Statement is dependent on the AliasDescriptor
+		getCompilerContext().createDependency(ad);
 	}
 
 	// inherit generate() method from DDLStatementNode

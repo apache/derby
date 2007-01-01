@@ -158,3 +158,80 @@ select * from t1 where c2 > 0;
 
 -- cleanup, roll everything back to the beginning
 rollback;
+
+-- DERBY-2202
+-- test various DROP statements
+
+-- test procedure
+autocommit off;
+CREATE SCHEMA datamgmt;
+CREATE PROCEDURE datamgmt.exit ( IN value INTEGER )
+ MODIFIES SQL DATA
+ PARAMETER STYLE JAVA
+ LANGUAGE JAVA
+ EXTERNAL NAME 'java.lang.System.exit';
+DROP PROCEDURE datamgmt.exit;
+DROP SCHEMA datamgmt RESTRICT;
+CREATE SCHEMA datamgmt;
+CREATE PROCEDURE datamgmt.exit ( IN value INTEGER )
+ MODIFIES SQL DATA
+ PARAMETER STYLE JAVA
+ LANGUAGE JAVA
+ EXTERNAL NAME 'java.lang.System.exit';
+DROP PROCEDURE datamgmt.exit;
+DROP SCHEMA datamgmt RESTRICT;
+
+autocommit on;
+CREATE SCHEMA datamgmt;
+CREATE PROCEDURE datamgmt.exit ( IN value INTEGER )
+ MODIFIES SQL DATA
+ PARAMETER STYLE JAVA
+ LANGUAGE JAVA
+ EXTERNAL NAME 'java.lang.System.exit';
+DROP PROCEDURE datamgmt.exit;
+DROP SCHEMA datamgmt RESTRICT;
+
+CREATE SCHEMA datamgmt;
+CREATE PROCEDURE datamgmt.exit ( IN value INTEGER )
+ MODIFIES SQL DATA
+ PARAMETER STYLE JAVA
+ LANGUAGE JAVA
+ EXTERNAL NAME 'java.lang.System.exit';
+DROP PROCEDURE datamgmt.exit;
+DROP SCHEMA datamgmt RESTRICT;
+
+-- test function
+CREATE SCHEMA datamgmt;
+CREATE FUNCTION datamgmt.f_abs(P1 INT)
+ RETURNS INT
+ NO SQL
+ RETURNS NULL ON NULL INPUT
+ EXTERNAL NAME 'java.lang.Math.abs'
+ LANGUAGE JAVA PARAMETER STYLE JAVA;
+DROP FUNCTION datamgmt.f_abs;
+DROP SCHEMA datamgmt RESTRICT;
+
+CREATE SCHEMA datamgmt;
+CREATE FUNCTION datamgmt.f_abs(P1 INT)
+ RETURNS INT
+ NO SQL
+ RETURNS NULL ON NULL INPUT
+ EXTERNAL NAME 'java.lang.Math.abs'
+ LANGUAGE JAVA PARAMETER STYLE JAVA;
+DROP FUNCTION datamgmt.f_abs;
+DROP SCHEMA datamgmt RESTRICT;
+
+-- test synonym
+CREATE SCHEMA datamgmt;
+CREATE TABLE datamgmt.t1 (c1 int);
+CREATE SYNONYM datamgmt.s1 for datamgmt.t1;
+DROP SYNONYM datamgmt.s1;
+DROP TABLE datamgmt.t1;
+DROP SCHEMA datamgmt RESTRICT;
+
+CREATE SCHEMA datamgmt;
+CREATE TABLE datamgmt.t1 (c1 int);
+CREATE SYNONYM datamgmt.s1 for datamgmt.t1;
+DROP SYNONYM datamgmt.s1;
+DROP TABLE datamgmt.t1;
+DROP SCHEMA datamgmt RESTRICT;
