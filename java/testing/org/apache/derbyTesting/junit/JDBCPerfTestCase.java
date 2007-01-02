@@ -159,7 +159,9 @@ public class JDBCPerfTestCase extends BaseJDBCTestCase {
         else
             total = runs[0];
 
-        System.out.println("Test-" + getName() + ":iterations: " + iterations
+        System.out.println("Test-" + getName() +
+                ": framework:"+ getTestConfiguration().getJDBCClient().getName()+
+                ":iterations: " + iterations
                 + " : Avg elapsedTime(ms): " + 
                 total / (repeats > 1 ? (long) (repeats - 1) : (long) repeats));
     }
@@ -177,9 +179,10 @@ public class JDBCPerfTestCase extends BaseJDBCTestCase {
             super.runTest();
         endTime = System.currentTimeMillis();
         runs[testRunNum] = (endTime-startTime);
-        System.out.println("Test-" + getName() + ": run#" + testRunNum
+        System.out.println("Test-" + getName() + 
+                ": framework:"+ getTestConfiguration().getJDBCClient().getName()+
+                ": run#" + testRunNum
                 + " iterations: " + iterations + " : elapsedTime(ms): "
                 + (endTime - startTime));
-        
     }
 }

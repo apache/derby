@@ -37,6 +37,10 @@ public class _Suite extends BaseTestCase{
         TestSuite suite = new TestSuite("BasicPerf");
         
         suite.addTest(ValuesTest.suite());
+        suite.addTest(CountTest.suite());
+        suite.addTest(HeapScan.suite());
+        suite.addTest(CoveredIdxScan.suite());
+        suite.addTest(SortTest.suite());
 
         return suite;
     }
