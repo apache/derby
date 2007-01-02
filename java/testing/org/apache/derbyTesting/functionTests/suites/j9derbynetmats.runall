@@ -7,7 +7,6 @@ derbynet/dataSourcePermissions_net.java
 derbynet/executeUpdate.java
 derbynet/getCurrentProperties.java
 derbynet/maxthreads.java
-derbynet/prepStmt.java
 derbynet/runtimeinfo.java
 derbynet/testProperties.java
 derbynet/testconnection.java

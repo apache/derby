@@ -45,6 +45,7 @@ public class _Suite extends BaseTestCase  {
         TestSuite suite = new TestSuite("derbynet");
         
         suite.addTest(ByteArrayCombinerStreamTest.suite());
+        suite.addTest(PrepareStatementTest.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
         suite.addTest(SqlExceptionTest.suite());
         suite.addTest(SuicideOfStreamingTest.suite());
