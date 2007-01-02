@@ -22,10 +22,9 @@
 package org.apache.derby.impl.store.access;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
-import java.util.Vector;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.ReuseFactory;
@@ -117,10 +116,10 @@ public class RAMTransaction
 
 	// XXX (nat) management of the controllers is still embryonic.
 	// XXX (nat) would be nice if sort controllers were like conglom controllers
-	private Vector scanControllers;
-	private Vector conglomerateControllers;
-	private Vector sorts;
-	private Vector sortControllers;
+	private ArrayList scanControllers;
+	private ArrayList conglomerateControllers;
+	private ArrayList sorts;
+	private ArrayList sortControllers;
 
     /** List of sort identifiers (represented as <code>Integer</code> objects)
      * which can be reused. Since sort identifiers are used as array indexes,
@@ -130,7 +129,7 @@ public class RAMTransaction
 	/**
 	Where to look for temporary conglomerates.
 	**/
-	protected Hashtable tempCongloms = null;
+	protected HashMap tempCongloms;
 
 	/**
 	Next id to use for a temporary conglomerate.
@@ -166,8 +165,8 @@ public class RAMTransaction
 		this.rawtran            = theRawTran;
         this.parent_tran        = parent_tran;
 		accessmanager           = myaccessmanager;
-		scanControllers         = new Vector();
-		conglomerateControllers = new Vector();
+		scanControllers         = new ArrayList();
+		conglomerateControllers = new ArrayList();
 
 		sorts                   = null; // allocated on demand.
 		freeSortIds             = null; // allocated on demand.
@@ -240,14 +239,13 @@ public class RAMTransaction
 	protected void closeControllers(boolean closeHeldControllers)
         throws StandardException
 	{
-        Enumeration e;
 
         if (!scanControllers.isEmpty())
         {
             // loop from end to beginning, removing scans which are not held.
             for (int i = scanControllers.size() - 1; i >= 0; i--)
             {
-                ScanManager sc = (ScanManager) scanControllers.elementAt(i);
+                ScanManager sc = (ScanManager) scanControllers.get(i);
 
                 if (sc.closeForEndTransaction(closeHeldControllers))
                 {
@@ -264,7 +262,7 @@ public class RAMTransaction
                     SanityManager.ASSERT(scanControllers.isEmpty());
                 }
                 // just to make sure everything has been closed and removed.
-                scanControllers.removeAllElements();
+                scanControllers.clear();
             }
         }
 
@@ -275,7 +273,7 @@ public class RAMTransaction
             {
                 ConglomerateController cc = 
                     (ConglomerateController) 
-                        conglomerateControllers.elementAt(i);
+                        conglomerateControllers.get(i);
 
                 if (cc.closeForEndTransaction(closeHeldControllers))
                 {
@@ -292,7 +290,7 @@ public class RAMTransaction
                     SanityManager.ASSERT(scanControllers.isEmpty());
                 }
                 // just to make sure everything has been closed and removed.
-                conglomerateControllers.removeAllElements();
+                conglomerateControllers.clear();
             }
         }
 
@@ -300,13 +298,14 @@ public class RAMTransaction
         {
             if (closeHeldControllers)
             {
-                e = sortControllers.elements();
-                while (e.hasMoreElements())
+                // Loop from the end since the call to close() will remove the
+                // element from the list.
+                for (int i = sortControllers.size() - 1; i >= 0; i--)
                 {
-                    SortController sc = (SortController) e.nextElement();
+                    SortController sc = (SortController) sortControllers.get(i);
                     sc.close();
                 }
-                sortControllers.removeAllElements();
+                sortControllers.clear();
             }
         }
 
@@ -314,14 +313,15 @@ public class RAMTransaction
 		{
             if (closeHeldControllers)
             {
-                e = sorts.elements();
-                while (e.hasMoreElements())
+                // Loop from the end since the call to drop() will remove the
+                // element from the list.
+                for (int i = sorts.size() - 1; i >= 0; i--)
                 {
-                    Sort sort = (Sort) e.nextElement();
+                    Sort sort = (Sort) sorts.get(i);
                     if (sort != null)
                         sort.drop(this);
                 }
-                sorts.removeAllElements();
+                sorts.clear();
                 freeSortIds.clear();
             }
 		}
@@ -494,7 +494,7 @@ public class RAMTransaction
                 dynamic_info);
 
 		// Keep track of it so we can release on close.
-		conglomerateControllers.addElement(cc);
+		conglomerateControllers.add(cc);
 
 		return cc;
     }
@@ -551,7 +551,7 @@ public class RAMTransaction
                 dynamic_info);
 
 		// Keep track of it so we can release on close.
-		scanControllers.addElement(sm);
+		scanControllers.add(sm);
 
 		return(sm);
 	}
@@ -721,7 +721,7 @@ public class RAMTransaction
         {
             for (int i = 0; i < sorts.size(); i++)
             {
-                if (sorts.elementAt(i) != null)
+                if (sorts.get(i) != null)
                     ret_val++;
             }
         }
@@ -849,7 +849,7 @@ public class RAMTransaction
 		{
 			conglomId = nextTempConglomId--;
 			if (tempCongloms == null)
-				tempCongloms = new Hashtable();
+				tempCongloms = new HashMap();
 			tempCongloms.put(new Long(conglomId), conglom);
 		}
 		else
@@ -954,31 +954,28 @@ public class RAMTransaction
 
         if (SanityManager.DEBUG)
         {
-            Enumeration e;
 
             str = new String();
 
-            e = scanControllers.elements();
-            while (e.hasMoreElements())
+            for (Iterator it = scanControllers.iterator(); it.hasNext(); )
             {
-                ScanController sc = (ScanController) e.nextElement();
+                ScanController sc = (ScanController) it.next();
                 str += "open scan controller: " + sc + "\n";
             }
 
-            e = conglomerateControllers.elements();
-            while (e.hasMoreElements())
+            for (Iterator it = conglomerateControllers.iterator();
+                 it.hasNext(); )
             {
                 ConglomerateController cc = 
-                    (ConglomerateController) e.nextElement();
+                    (ConglomerateController) it.next();
                 str += "open conglomerate controller: " + cc + "\n";
             }
 
             if (sortControllers != null)
             {
-                e = sortControllers.elements();
-                while (e.hasMoreElements())
+                for (Iterator it = sortControllers.iterator(); it.hasNext(); )
                 {
-                    SortController sc = (SortController) e.nextElement();
+                    SortController sc = (SortController) it.next();
                     str += "open sort controller: " + sc + "\n";
                 }
             }
@@ -987,7 +984,7 @@ public class RAMTransaction
             {
                 for (int i = 0; i < sorts.size(); i++)
                 {
-                    Sort sort = (Sort) sorts.elementAt(i);
+                    Sort sort = (Sort) sorts.get(i);
 
                     if (sort != null)
                     {
@@ -1000,10 +997,10 @@ public class RAMTransaction
 
 			if (tempCongloms != null)
 			{
-                e = tempCongloms.keys();
-                while (e.hasMoreElements())
+                for (Iterator it = tempCongloms.keySet().iterator();
+                     it.hasNext(); )
                 {
-					Long conglomId = (Long) e.nextElement();
+					Long conglomId = (Long) it.next();
 					Conglomerate c = (Conglomerate) tempCongloms.get(conglomId);
 					str += "temp conglomerate id = " + conglomId + ": " + c;
 				}
@@ -1441,7 +1438,7 @@ public class RAMTransaction
                 (DynamicCompiledOpenConglomInfo) null);
 
 		// Keep track of it so we can release on close.
-		scanControllers.addElement(sm);
+		scanControllers.add(sm);
 
 		return(sm);
 	}
@@ -1569,7 +1566,7 @@ public class RAMTransaction
                 isolation_level);
 
 		// Keep track of it so we can release on close.
-		scanControllers.addElement(sm);
+		scanControllers.add(sm);
 
 		return(sm);
 	}
@@ -1727,7 +1724,7 @@ public class RAMTransaction
 
 		// Add the sort to the sorts vector
 		if (sorts == null) {
-			sorts = new Vector();
+			sorts = new ArrayList();
             freeSortIds = new ArrayList();
         }
 
@@ -1735,12 +1732,12 @@ public class RAMTransaction
         if (freeSortIds.isEmpty()) {
             // no free identifiers, add sort at the end
             sortid = sorts.size();
-            sorts.addElement(sort);
+            sorts.add(sort);
         } else {
             // reuse a sort identifier
             sortid = ((Integer) freeSortIds.remove(freeSortIds.size() - 1))
                 .intValue();
-            sorts.setElementAt(sort, sortid);
+            sorts.set(sortid, sort);
         }
 
 		return sortid;
@@ -1763,12 +1760,12 @@ public class RAMTransaction
         throws StandardException
     {
         // should call close on the sort.
-        Sort sort = (Sort) sorts.elementAt((int) sortid);
+        Sort sort = (Sort) sorts.get((int) sortid);
 
         if (sort != null)
         {
             sort.drop(this);
-            sorts.setElementAt(null, (int) sortid);
+            sorts.set((int) sortid, null);
             freeSortIds.add(ReuseFactory.getInteger((int) sortid));
         }
     }
@@ -1855,7 +1852,7 @@ public class RAMTransaction
 		// Find the sort in the sorts list, throw an error
 		// if it doesn't exist.
 		if (sorts == null || id >= sorts.size()
-			|| (sort = ((Sort) sorts.elementAt((int) id))) == null)
+			|| (sort = ((Sort) sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
                     SQLState.AM_NO_SUCH_SORT, new Long(id));
@@ -1866,8 +1863,8 @@ public class RAMTransaction
 
 		// Keep track of it so we can release on close.
 		if (sortControllers == null)
-			sortControllers = new Vector();
-		sortControllers.addElement(sc);
+			sortControllers = new ArrayList();
+		sortControllers.add(sc);
 
 		return sc;
 	}
@@ -1925,7 +1922,7 @@ public class RAMTransaction
 		// Find the sort in the sorts list, throw an error
 		// if it doesn't exist.
 		if (sorts == null || id >= sorts.size()
-			|| (sort = ((Sort) sorts.elementAt((int) id))) == null)
+			|| (sort = ((Sort) sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
                     SQLState.AM_NO_SUCH_SORT, new Long(id));
@@ -1935,7 +1932,7 @@ public class RAMTransaction
 		ScanController sc = sort.openSortScan(this, hold);
 
 		// Keep track of it so we can release on close.
-		scanControllers.addElement(sc);
+		scanControllers.add(sc);
 
 		return sc;
 	}
@@ -1952,7 +1949,7 @@ public class RAMTransaction
 		// Find the sort in the sorts list, throw an error
 		// if it doesn't exist.
 		if (sorts == null || id >= sorts.size()
-			|| (sort = ((Sort) sorts.elementAt((int) id))) == null)
+			|| (sort = ((Sort) sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
                     SQLState.AM_NO_SUCH_SORT, new Long(id));
@@ -1962,7 +1959,7 @@ public class RAMTransaction
 		ScanControllerRowSource sc = sort.openSortRowSource(this);
 
 		// Keep track of it so we can release on close.
-		scanControllers.addElement(sc);
+		scanControllers.add(sc);
 
 		return sc;
 	}
@@ -2167,7 +2164,7 @@ public class RAMTransaction
      **/
     public void closeMe(ConglomerateController conglom_control)
     {
-        conglomerateControllers.removeElement(conglom_control);
+        conglomerateControllers.remove(conglom_control);
     }
 
     /**
@@ -2180,7 +2177,7 @@ public class RAMTransaction
      **/
     public void closeMe(SortController sort_control)
     {
-        sortControllers.removeElement(sort_control);
+        sortControllers.remove(sort_control);
     }
 
     /**
@@ -2193,7 +2190,7 @@ public class RAMTransaction
      **/
     public void closeMe(ScanManager scan)
     {
-        scanControllers.removeElement(scan);
+        scanControllers.remove(scan);
     }
 
     /**
@@ -2375,10 +2372,9 @@ public class RAMTransaction
     public void saveScanPositions(Conglomerate conglom, Page page)
         throws StandardException
     {
-		Enumeration e = scanControllers.elements();
-		while (e.hasMoreElements())
+        for (Iterator it = scanControllers.iterator(); it.hasNext(); )
 		{
-            Object o = e.nextElement();
+            Object o = it.next();
 
             if (SanityManager.DEBUG)
             {
