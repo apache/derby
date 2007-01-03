@@ -21,44 +21,27 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.catalog.types.SynonymAliasInfo;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.context.ContextService;
-
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.catalog.types.RoutineAliasInfo;
-import org.apache.derby.catalog.types.SynonymAliasInfo;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
  *	This class  describes actions that are ALWAYS performed for a
- *	CREATE ALIAS Statement at Execution time.
+ *	CREATE FUNCTION, PROCEDURE or SYNONYM Statement at execution time.
+ *  These SQL objects are stored in the SYS.SYSALIASES table.
  *
  *	@author Jerry Brenner.
  */
@@ -75,7 +58,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 	// CONSTRUCTORS
 
 	/**
-	 *	Make the ConstantAction for a CREATE ALIAS statement.
+	 *	Make the ConstantAction for a CREATE alias statement.
 	 *
 	 *  @param aliasName		Name of alias.
 	 *  @param schemaName		Name of alias's schema.
@@ -157,7 +140,9 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 
 	/**
-	 *	This is the guts of the Execution-time logic for CREATE ALIAS.
+	 *	This is the guts of the Execution-time logic for
+     *  CREATE FUNCTION, PROCEDURE or SYNONYM.
+     *  Each will result in a row inserted into SYS.SYSALIASES.
 	 *
 	 *	@see ConstantAction#executeConstantAction
 	 *
@@ -166,91 +151,16 @@ class CreateAliasConstantAction extends DDLConstantAction
 	public void	executeConstantAction( Activation activation )
 						throws StandardException
 	{
-		LanguageConnectionContext lcc;
-		if (activation != null)
-		{
-			lcc = activation.getLanguageConnectionContext();
-		}
-		else // only for direct executions by the database meta data
-		{
-			lcc = (LanguageConnectionContext) ContextService.getContext
-          				(LanguageConnectionContext.CONTEXT_ID);
-		}
+		LanguageConnectionContext lcc =
+            activation.getLanguageConnectionContext();
+
 		DataDictionary dd = lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
 
-		/* Verify the method alias:
-		**		Aggregates - just verify the class
-		**		Method alias - verify the class and method
-		**		Work units - verify the class and method 
-		**				(depends on whether we're at a source or target)
-		*/
-		String checkMethodName = null;
-
-		String checkClassName = javaClassName;
-
-		if (aliasInfo != null)
-			checkMethodName = aliasInfo.getMethodName();
-
-		// Procedures do not check class or method validity until runtime execution of the procedure.
-		// This matches DB2 behaviour
-		switch (aliasType)
-		{
-		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
-		case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
-		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
-			break;
-
-		default:
-		{
-
-			ClassFactory cf = lcc.getLanguageConnectionFactory().getClassFactory();
-
-			Class realClass = null;
-			try
-			{
-				// Does the class exist?
-				realClass = cf.loadApplicationClass(checkClassName);
-			}
-			catch (ClassNotFoundException t)
-			{
-				throw StandardException.newException(SQLState.LANG_TYPE_DOESNT_EXIST2, t, checkClassName);
-			}
-
-			if (! Modifier.isPublic(realClass.getModifiers()))
-			{
-				throw StandardException.newException(SQLState.LANG_TYPE_DOESNT_EXIST2, checkClassName);
-			}
-
-			if (checkMethodName != null)
-			{
-				// Is the method public and static
-				Method[] methods = realClass.getMethods();
-				
-				int index = 0;
-				for ( ; index < methods.length; index++) 
-				{
-					if (!Modifier.isStatic(methods[index].getModifiers()))
-					{
-						continue;
-					}
-
-					if (checkMethodName.equals(methods[index].getName())) 
-					{
-						break;
-					}
-				}
-
-				if (index == methods.length)
-				{
-					throw StandardException.newException(SQLState.LANG_NO_METHOD_MATCHING_ALIAS, 
-									checkMethodName, checkClassName);
-				}
-			}
-		}
-		}
-			
-
+		// For routines no validity checking is made
+        // on the Java method, that is checked when the
+        // routine is executed.
+        
 		/*
 		** Inform the data dictionary that we are about to write to it.
 		** There are several calls to data dictionary "get" methods here
@@ -263,11 +173,8 @@ class CreateAliasConstantAction extends DDLConstantAction
 		dd.startWriting(lcc);
 
 		
-		SchemaDescriptor sd = null;
-		if (activation == null)
-			sd = dd.getSysIBMSchemaDescriptor();
-		else if (schemaName != null)
-			sd = DDLConstantAction.getSchemaDescriptorForCreate(dd, activation, schemaName);
+		SchemaDescriptor sd =
+            DDLConstantAction.getSchemaDescriptorForCreate(dd, activation, schemaName);
 
 		//
 		// Create a new method alias descriptor with aliasID filled in.
@@ -276,7 +183,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 		AliasDescriptor ads = new AliasDescriptor(dd, aliasID,
 									 aliasName,
-									 sd != null ? sd.getUUID() : null,
+									 sd.getUUID(),
 									 javaClassName,
 									 aliasType,
 									 nameSpace,
@@ -359,6 +266,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 			td = ddg.newTableDescriptor(aliasName, sd, TableDescriptor.SYNONYM_TYPE,
 						TableDescriptor.DEFAULT_LOCK_GRANULARITY);
 			dd.addDescriptor(td, sd, DataDictionary.SYSTABLES_CATALOG_NUM, false, tc);
+            break;
 		
 		default:
 			break;
