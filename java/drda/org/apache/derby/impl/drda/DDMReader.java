@@ -1037,7 +1037,6 @@ class DDMReader
      * if continuation of DSS segment was finished.
      * This lengthless method must be called only when layer B streaming.
      *
-	 * @param desiredLength the desired length of chunk. This parameter is ignored when layerB Streaming is doing.
 	 * @exception IOException IOException
 	 */
 	ByteArrayInputStream readLOBContinuationStream ()
