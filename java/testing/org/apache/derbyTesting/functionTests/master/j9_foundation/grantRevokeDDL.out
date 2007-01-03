@@ -2207,7 +2207,7 @@ ij(MAMTA1)> insert into t12RoutineTest values (1),(2);
 ij(MAMTA1)> grant select on t12RoutineTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> drop function selectFromSpecificSchema;
-ERROR: Failed with SQLSTATE 42X94
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA1)> CREATE FUNCTION selectFromSpecificSchema (P1 INT)
         RETURNS INT 
         RETURNS NULL ON NULL INPUT
