@@ -1810,13 +1810,31 @@ public class GenericLanguageConnectionContext
 
 	/**
 	 * Push a CompilerContext on the context stack with
-	 * the passed in default schema as the default schema
+	 * the passed in schema sd as the default schema
 	 * we compile against.
 	 *
 	 * @param sd the default schema 
 	 *
 	 * @return the compiler context
 	 *
+	 * For the parameter sd, there are 3 possible values(of interest) that can 
+	 * get passed into this method:
+	 * 
+	 * a) A null SchemaDescriptor which indicates to the system to use the 
+	 *    CURRENT SCHEMA as the compilation schema.
+	 *    
+	 * b) A SchemaDescriptor with its UUID == null, this indicates that either 
+	 *    the schema has not been physically created yet or that the LCC's 
+	 *    getDefaultSchema() is not yet up-to-date with its actual UUID. 
+	 *    The system will use the CURRENT SCHEMA as the compilation schema. 
+	 *    
+	 * c) A SchemaDescriptor with its UUID != null, this means that the schema 
+	 *    has been physically created.  The system will use this schema as the 
+	 *    compilation schema (e.g.: for trigger or view recompilation cases, 
+	 *    etc.). 
+	 *    
+	 * The compiler context's compilation schema will be set accordingly based 
+	 * on the given input above.   
 	 */
 	public	CompilerContext pushCompilerContext(SchemaDescriptor sd)
 	{
@@ -1855,6 +1873,24 @@ public class GenericLanguageConnectionContext
 		if (sc.getSystemCode())
 			cc.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
 
+		/*
+		 * Set the compilation schema when its UUID is available.
+		 * i.e.:  Schema may not have been physically created yet, so
+		 *        its UUID will be null.
+		 * 
+		 * o For trigger SPS recompilation, the system must use its
+		 *   compilation schema to recompile the statement. 
+		 * 
+		 * o For view recompilation, we set the compilation schema
+		 *   for this compiler context if its UUID is available.
+		 *   Otherwise, the compilation schema will be determined
+		 *   at execution time of view creation.
+		 */
+		if (sd != null && sd.getUUID() != null)
+		{
+			cc.setCompilationSchema(sd);
+		}
+		
 		return	cc;
 	}
 

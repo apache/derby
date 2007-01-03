@@ -1509,4 +1509,115 @@ ij(USER1)> drop table x;
 0 rows inserted/updated/deleted
 ij(USER1)> drop table y;
 0 rows inserted/updated/deleted
-ij(USER1)> 
+ij(USER1)> -- DERBY-2183
+-- trigger recompilation test
+disconnect user1;
+ij> connect 'jdbc:derby:wombat' user 'user1' as user1;
+ij(USER1)> set schema app;
+0 rows inserted/updated/deleted
+ij(USER1)> drop trigger app.tr1;
+ERROR 42X94: TRIGGER 'APP.TR1' does not exist.
+ij(USER1)> drop table app.t1;
+0 rows inserted/updated/deleted
+ij(USER1)> create table app.t1 (i int, j int);
+0 rows inserted/updated/deleted
+ij(USER1)> insert into app.t1 values (1,10);
+1 row inserted/updated/deleted
+ij(USER1)> create trigger app.tr1 after update of i on app.t1 referencing old as old for each row update t1 set j = old.j+1;
+0 rows inserted/updated/deleted
+ij(USER1)> update app.t1 set i=i+1;
+1 row inserted/updated/deleted
+ij(USER1)> select * from app.t1;
+I          |J          
+-----------------------
+2          |11         
+ij(USER1)> call sqlj.install_jar('file:dcl_emc1.jar', 'APP.dcl_emc1', 0);
+0 rows inserted/updated/deleted
+ij(USER1)> connect 'jdbc:derby:wombat' user 'user2' as user2;
+ij(USER2)> -- ok
+update app.t1 set i=i+1;
+1 row inserted/updated/deleted
+ij(USER2)> select * from app.t1;
+I          |J          
+-----------------------
+3          |12         
+ij(USER2)> call sqlj.replace_jar('file:dcl_emc1.jar', 'APP.dcl_emc1');
+0 rows inserted/updated/deleted
+ij(USER2)> update app.t1 set i=i+1;
+1 row inserted/updated/deleted
+ij(USER2)> select * from app.t1;
+I          |J          
+-----------------------
+4          |13         
+ij(USER2)> call sqlj.remove_jar('APP.dcl_emc1', 0);
+0 rows inserted/updated/deleted
+ij(USER2)> update app.t1 set i=i+1;
+1 row inserted/updated/deleted
+ij(USER2)> select * from app.t1;
+I          |J          
+-----------------------
+5          |14         
+ij(USER2)> drop trigger app.tr1;
+0 rows inserted/updated/deleted
+ij(USER2)> drop table app.t1;
+0 rows inserted/updated/deleted
+ij(USER2)> set connection user1;
+ij(USER1)> set schema app;
+0 rows inserted/updated/deleted
+ij(USER1)> create table app.t1 (id int, i int, j int);
+0 rows inserted/updated/deleted
+ij(USER1)> insert into app.t1 values (1,10, 100);
+1 row inserted/updated/deleted
+ij(USER1)> insert into app.t1 values (2,20, 200);
+1 row inserted/updated/deleted
+ij(USER1)> insert into app.t1 values (3,30, 300);
+1 row inserted/updated/deleted
+ij(USER1)> create trigger app.tr1 after update on app.t1 referencing old as oldt  new as newt 
+for each row update t1 set t1.j = CASE WHEN (oldt.j < 100) THEN (oldt.j + 1) ELSE 1 END WHERE
+((newt.j is null) OR (oldt.j = newt.j)) AND newt.id = t1.id;
+0 rows inserted/updated/deleted
+ij(USER1)> update app.t1 set i=i+1;
+3 rows inserted/updated/deleted
+ij(USER1)> select * from app.t1;
+ID         |I          |J          
+-----------------------------------
+1          |11         |1          
+2          |21         |1          
+3          |31         |1          
+ij(USER1)> call sqlj.install_jar('file:dcl_emc1.jar', 'APP.dcl_emc1', 0);
+0 rows inserted/updated/deleted
+ij(USER1)> set connection user2;
+ij(USER2)> -- ok
+update app.t1 set i=i+1;
+3 rows inserted/updated/deleted
+ij(USER2)> select * from app.t1;
+ID         |I          |J          
+-----------------------------------
+1          |12         |2          
+2          |22         |2          
+3          |32         |2          
+ij(USER2)> call sqlj.replace_jar('file:dcl_emc1.jar', 'APP.dcl_emc1');
+0 rows inserted/updated/deleted
+ij(USER2)> update app.t1 set i=i+1;
+3 rows inserted/updated/deleted
+ij(USER2)> select * from app.t1;
+ID         |I          |J          
+-----------------------------------
+1          |13         |3          
+2          |23         |3          
+3          |33         |3          
+ij(USER2)> call sqlj.remove_jar('APP.dcl_emc1', 0);
+0 rows inserted/updated/deleted
+ij(USER2)> update app.t1 set i=i+1;
+3 rows inserted/updated/deleted
+ij(USER2)> select * from app.t1;
+ID         |I          |J          
+-----------------------------------
+1          |14         |4          
+2          |24         |4          
+3          |34         |4          
+ij(USER2)> drop trigger app.tr1;
+0 rows inserted/updated/deleted
+ij(USER2)> drop table app.t1;
+0 rows inserted/updated/deleted
+ij(USER2)> 
