@@ -33,8 +33,7 @@ Contents
 2.2.5 Download and install JUnit 3.8.*
 2.2.6 Download Java Development Kit release 1.6.x (Optional)
 2.2.7 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
-2.2.8 Download Jikes 1.14 (Optional)
-2.2.9 Download J2ME/CDC/FOundation 1.0 and JSR169 jars (Optional)
+2.2.8 Download J2ME/CDC/Foundation 1.0 and JSR169 jars (Optional)
 
 3     Build instructions
 3.1   Set required environmental variables
@@ -276,23 +275,7 @@ ${derby.source}/tools/java/jdbc2_0-stdext.jar
 ${derby.source}/tools/java/osgi.jar
 
 
-2.2.8 Download and Install Jikes 1.14 (Optional)
-
-This is an optional section.
-
-Jikes is an open source java compiler that improves compile 
-speed over standard java compiler. If you would like to have 
-improved compile speed, you can proceed to install Jikes. 
-Jikes 1.14 is the required version for derby builds.
-
-Jikes 1.14 can be downloaded from:
-    http://jikes.sourceforge.net/
-     
-Install Jikes 1.14 in any directory. This directory will be 
-referred to as the ${jikes.dir} directory in the rest of this 
-document. 
-
-2.2.9 Download J2ME/CDC/Foundation and JSR 169 jars
+2.2.8 Download J2ME/CDC/Foundation and JSR 169 jars
 
 This is an optional section.
 
@@ -327,13 +310,7 @@ on J2ME, or J2SE, write once run anywhere.
 (2) Modify the PATH environment variable to include the 
     directory ${ant.dir}/bin in its list. This makes the "ant" 
     command line script available, which will be used to 
-    actually perform the build. Also, if you opted to install
-    jikes in section 2.2.8 of this document, add ${jikes.dir} 
-    to the PATH as well. For example:
-
-     setenv PATH ${ant.dir}/bin:${jikes.dir}:$PATH -- On unix(csh)
-     export PATH=${ant.dir}/bin:${jikes.dir}:$PATH -- On unix(ksh)
-     set PATH=${ant.dir}\bin;${jikes.dir};%PATH%   -- On Windows
+    actually perform the build. 
 
 (3) Create environment variable JAVA_HOME  to point to the 
     directory where you have installed JDK 1.4.x. For example:
@@ -444,14 +421,9 @@ to specify your environment and options:
       
     - build.compiler
 
-      This variable defines if standard java compiler or jikes is 
-      used for build. The default value of this variable is set to 
-      use standard java compiler for build. If you opted to install
-      jikes in section 2.2.8 of this document, you can give your 
-      option to use jikes for build by overwriting default value of 
-      this variable by setting it as following: 
-   
-          build.compiler=jikes
+      This variable defines the java compiler to be used for build. 
+      The default value of this variable is set to use the standard java 
+      compiler for build. 
 
     - proceed
 

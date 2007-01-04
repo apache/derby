@@ -844,10 +844,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
             {
                 if (cd.isIndex() && ( ! isCoveringIndex(cd) ) )
                 {
-                    // workaround for a jikes bug. Can't directly reference a 
-                    // double with a value of 12.0 in this classfile. 
-                    double baseIndexUsage = 1.0;
-                    perRowUsage += ( baseIndexUsage + 11 );
+                    perRowUsage +=  12.0 ;
                 }
             }
         }
