@@ -97,9 +97,75 @@ X
 ij> -- The following should work, but because of defect 5602, it raises NullPointerException.
 -- After the fix for 5602, we could enable the following part of the test.
 -- Reduce the recursion level to 16. It should pass now.
--- drop trigger tr17;
--- insert  into t1 values 2;
--- prove it
--- select * from t1;
-;
+drop trigger tr17;
+0 rows inserted/updated/deleted
+ij> insert  into t1 values 2;
+1 row inserted/updated/deleted
+ij> -- prove it
+select * from t1;
+X          
+-----------
+2          
+ij> -- clean up
+drop table t17;
+0 rows inserted/updated/deleted
+ij> drop table t16;
+0 rows inserted/updated/deleted
+ij> drop table t15;
+0 rows inserted/updated/deleted
+ij> drop table t14;
+0 rows inserted/updated/deleted
+ij> drop table t13;
+0 rows inserted/updated/deleted
+ij> drop table t12;
+0 rows inserted/updated/deleted
+ij> drop table t11;
+0 rows inserted/updated/deleted
+ij> drop table t10;
+0 rows inserted/updated/deleted
+ij> drop table t9;
+0 rows inserted/updated/deleted
+ij> drop table t8;
+0 rows inserted/updated/deleted
+ij> drop table t7;
+0 rows inserted/updated/deleted
+ij> drop table t6;
+0 rows inserted/updated/deleted
+ij> drop table t5;
+0 rows inserted/updated/deleted
+ij> drop table t4;
+0 rows inserted/updated/deleted
+ij> drop table t3;
+0 rows inserted/updated/deleted
+ij> drop table t2;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> -- DERBY-2195
+-- Nested triggers not working properly after maximum trigger count exception is thrown
+create table t1 (i int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values 1,2,3;
+3 rows inserted/updated/deleted
+ij> create trigger tr1 after update on t1 for each row update t1 set i=i+1;
+0 rows inserted/updated/deleted
+ij> update t1 set i=i+1;
+ERROR 54038: Maximum depth of nested triggers was exceeded.
+ij> drop trigger tr1;
+0 rows inserted/updated/deleted
+ij> create trigger tr1 after update on t1 referencing old as oldt for each row update t1 set i=i+1 where oldt.i=2;
+0 rows inserted/updated/deleted
+ij> -- ok
+update t1 set i=i+1;
+3 rows inserted/updated/deleted
+ij> select * from t1;
+I          
+-----------
+4          
+5          
+6          
+ij> drop trigger tr1;
+0 rows inserted/updated/deleted
+ij> drop table t1;
+0 rows inserted/updated/deleted
 ij> 

@@ -64,10 +64,43 @@ select * from t1;
 -- The following should work, but because of defect 5602, it raises NullPointerException.
 -- After the fix for 5602, we could enable the following part of the test.
 -- Reduce the recursion level to 16. It should pass now.
--- drop trigger tr17;
+drop trigger tr17;
 
--- insert  into t1 values 2;
+insert  into t1 values 2;
 
 -- prove it
--- select * from t1;
+select * from t1;
+
+-- clean up
+drop table t17;
+drop table t16;
+drop table t15;
+drop table t14;
+drop table t13;
+drop table t12;
+drop table t11;
+drop table t10;
+drop table t9;
+drop table t8;
+drop table t7;
+drop table t6;
+drop table t5;
+drop table t4;
+drop table t3;
+drop table t2;
+drop table t1;
+
+-- DERBY-2195
+-- Nested triggers not working properly after maximum trigger count exception is thrown
+create table t1 (i int);
+insert into t1 values 1,2,3;
+create trigger tr1 after update on t1 for each row update t1 set i=i+1;
+update t1 set i=i+1;
+drop trigger tr1;
+create trigger tr1 after update on t1 referencing old as oldt for each row update t1 set i=i+1 where oldt.i=2;
+-- ok
+update t1 set i=i+1;
+select * from t1;
+drop trigger tr1;
+drop table t1;
 

@@ -152,6 +152,9 @@ public abstract class GenericTriggerExecutor
 				ps.setSPSAction();
 			}
 
+			// save the active statement context for exception handling purpose
+			StatementContext active_sc = lcc.getStatementContext();
+			
 			/*
 			** Execute the activation.  If we have an error, we
 			** are going to go to some extra work to pop off
@@ -182,16 +185,46 @@ public abstract class GenericTriggerExecutor
 			} 
 			catch (StandardException e)
 			{
+				/* 
+				** When a trigger SPS action is executed and results in 
+				** an exception, the system needs to clean up the active 
+				** statement context(SC) and the trigger execution context
+				** (TEC) in language connection context(LCC) properly (e.g.:  
+				** "Maximum depth triggers exceeded" exception); otherwise, 
+				** this will leave old TECs lingering and may result in 
+				** subsequent statements within the same connection to throw 
+				** the same exception again prematurely.  
+				**    
+				** A new statement context will be created for the SPS before
+				** it is executed.  However, it is possible for some 
+				** StandardException to be thrown before a new statement 
+				** context is pushed down to the context stack; hence, the 
+				** trigger executor needs to ensure that the current active SC 
+				** is associated with the SPS, so that it is cleaning up the 
+				** right statement context in LCC. 
+				**    
+				** When the active SC is cleaned up, the TEC will be removed
+				** from LCC and the SC object will be popped off from the LCC 
+				** as part of cleanupOnError logic.  
+				 */
+				
+				/* retrieve the current active SC */
+				StatementContext sc = lcc.getStatementContext();
+				
+				/* make sure that the cleanup is on the new SC */
+				if (active_sc != sc) 
+				{
+					sc.cleanupOnError(e);
+				}
+				
 				/* Handle dynamic recompiles */
 				if (e.getMessageId().equals(SQLState.LANG_STATEMENT_NEEDS_RECOMPILE))
 				{
-					StatementContext sc = lcc.getStatementContext();
-					sc.cleanupOnError(e);
 					recompile = true;
 					sps.revalidate(lcc);
 					continue;
 				}
-				lcc.popStatementContext(lcc.getStatementContext(), e);
+				
 				spsActivation.close();
 				throw e;
 			}
