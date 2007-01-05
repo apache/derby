@@ -2496,8 +2496,8 @@ public final class	DataDictionaryImpl
 	        columns.grow(currentLength+1);
 	        curRow.setColumn(SYSCOLPERMSRowFactory.COLUMNS_COL_NUM,
 					  dvf.getDataValue((Object) columns));
-			ti.updateRow(keyRow, curRow,
-					SYSCOLPERMSRowFactory.TABLEID_INDEX_NUM,
+			ti.updateRow(uuidKey, curRow,
+					SYSCOLPERMSRowFactory.COLPERMSID_INDEX_NUM,
 					 bArray, 
 					 colsToUpdate,
 					 tc);

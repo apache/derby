@@ -2043,3 +2043,16 @@ next crs1;
 close crs1;
 autocommit on;
 set connection user1;
+
+-- Another test for DERBY-1847: verify that columns field is updated
+-- correctly when adding a column to a table:
+create table d1847_c (a int, b int, c int);
+grant select (a) on d1847_c to first_user;
+grant update (b) on d1847_c to second_user;
+grant select (c) on d1847_c to third_user;
+select c.grantee, c.type, c.columns from sys.syscolperms c, sys.systables t
+    where c.tableid = t.tableid and t.tablename='D1847_C';
+alter table d1847_c add column d int;
+select c.grantee, c.type, c.columns from sys.syscolperms c, sys.systables t
+    where c.tableid = t.tableid and t.tablename='D1847_C';
+
