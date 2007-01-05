@@ -23,4 +23,4 @@ if [ -z "$DERBY_HOME" ]; then
   exit 1
 fi
 
-export CLASSPATH="${DERBY_HOME}/lib/derby.jar:${DERBY_HOME}/lib/derbytools.jar:${DERBY_HOME}/lib/derbynet.jar:${CLASSPATH}"
+export CLASSPATH="${DERBY_HOME}/lib/derbynet.jar:${DERBY_HOME}/lib/derbytools.jar:${CLASSPATH}"
