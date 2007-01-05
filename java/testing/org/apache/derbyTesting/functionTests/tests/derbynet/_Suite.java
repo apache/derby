@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.Derby;
 
 import junit.framework.Test; 
 import junit.framework.TestSuite;
@@ -43,13 +44,19 @@ public class _Suite extends BaseTestCase  {
     public static Test suite() {
 
         TestSuite suite = new TestSuite("derbynet");
-        
-        suite.addTest(ByteArrayCombinerStreamTest.suite());
+             
         suite.addTest(PrepareStatementTest.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
-        suite.addTest(SqlExceptionTest.suite());
         suite.addTest(SuicideOfStreamingTest.suite());
         suite.addTest(DRDAProtocolTest.suite());
+        
+        // These tests references a client class directly
+        // thus causing class not found exceptions if the
+        // client code is not in the classpath.
+        if (Derby.hasClient()) {
+            suite.addTest(ByteArrayCombinerStreamTest.suite());
+            suite.addTest(SqlExceptionTest.suite());
+        }
  
         return suite;
     }

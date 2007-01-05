@@ -236,21 +236,15 @@ public final class SecurityManagerSetup extends TestSetup {
 
 		//We need the junit classes to instantiate this class, so the
 		//following should not cause runtime errors.
-        URL junit = null;
-        junit = getURL(junit.framework.Test.class);
-        classPathSet.setProperty("derbyTesting.junit", junit == null ? "" : junit.toString());
+        URL junit = getURL(junit.framework.Test.class);
+        if (junit != null)
+            classPathSet.setProperty("derbyTesting.junit", junit.toExternalForm());
 	
-        URL antjunit = null;
-        Class antjunitclass = null;
-        try {
-        	// Load indirectly so we don't need ant-junit.jar at compile time.
-            antjunitclass = Class.forName("org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner");
-            antjunit = getURL(antjunitclass);
-            classPathSet.setProperty("derbyTesting.antjunit", antjunit == null ? "" : antjunit.toString());
-        } catch (java.lang.ClassNotFoundException e) {
-        	// Not running in Ant, do nothing.
-            antjunit = null;
-        }
+        // Load indirectly so we don't need ant-junit.jar at compile time.
+        URL antjunit = getURL("org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner");
+        if (antjunit != null)
+            classPathSet.setProperty("derbyTesting.antjunit", antjunit.toExternalForm());
+
 		
         /* When inserting XML values that use external DTD's, the JAXP
          * parser needs permission to read the DTD files.  So here we set
@@ -279,22 +273,13 @@ public final class SecurityManagerSetup extends TestSetup {
         }
         isJars = true;
 		
-		URL derby = null;
-		try {
-			derby = getURL(org.apache.derby.jdbc.EmbeddedSimpleDataSource.class);
-		} catch (java.lang.NoClassDefFoundError e) {
-			derby = testing;
-		}		
-		classPathSet.setProperty("derbyTesting.codejar", stripJar(derby));
+		URL derby = getURL("org.apache.derby.jdbc.EmbeddedSimpleDataSource");
+        if (derby != null)
+		    classPathSet.setProperty("derbyTesting.codejar", stripJar(derby));
 
-		URL client = null;
-		try {
-			client = getURL(org.apache.derby.jdbc.ClientDataSource.class);
-		} catch (java.lang.NoClassDefFoundError e) {
-			client = derby;
-		}
-		
-		classPathSet.setProperty("derbyTesting.clientjar", stripJar(client));
+		URL client = getURL("org.apache.derby.jdbc.ClientDataSource");
+		if (client != null)
+		    classPathSet.setProperty("derbyTesting.clientjar", stripJar(client));
 	
 		return false;
 	}
@@ -323,11 +308,23 @@ public final class SecurityManagerSetup extends TestSetup {
 		String ef = url.toExternalForm();
 		return ef.substring(0, ef.lastIndexOf('/') + 1);
 	}
+    
+    /**
+     * Get the URL of the code base from a class name.
+     * If the class cannot be loaded, null is returned.
+     */
+    static URL getURL(String className) {
+        try {
+            return getURL(Class.forName(className));
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
 	
 	/**
 	 * Get the URL of the code base from a class.
 	 */
-	protected static URL getURL(final Class cl)
+	static URL getURL(final Class cl)
 	{
 		return (URL)
 		   AccessController.doPrivileged(new java.security.PrivilegedAction() {

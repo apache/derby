@@ -250,8 +250,11 @@ public class TestConfiguration {
      */
     public static Test clientServerDecorator(Test suite)
     {
-        if (JDBC.vmSupportsJSR169())
-            return new TestSuite();
+        // Need to have network server and client and not
+        // running in J2ME (JSR169).
+        if (!(Derby.hasClient() && Derby.hasServer())
+                || JDBC.vmSupportsJSR169())
+            return new TestSuite("empty: no network server support");
             
         TestConfiguration config = TestConfiguration.getCurrent();
         

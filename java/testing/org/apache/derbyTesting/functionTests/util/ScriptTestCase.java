@@ -23,7 +23,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 
+import org.apache.derbyTesting.junit.Derby;
+
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Run a .sql script as a test comparing it to
@@ -71,6 +74,11 @@ public abstract class ScriptTestCase extends CanonTestCase {
 	 */
 	public static Test getIJConfig(Test test)
 	{
+        // Need the tools to run the scripts as this
+        // test uses ij as the script runner.
+        if (!Derby.hasTools())
+            return new TestSuite("empty: no tools support");
+            
 		// No decorator needed currently.
 		return test;
 	}

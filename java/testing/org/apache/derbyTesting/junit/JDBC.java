@@ -59,7 +59,7 @@ public class JDBC {
      * @param className Class to attempt load on.
      * @return true if class can be loaded, false otherwise.
      */
-    protected static boolean haveClass(String className)
+    static boolean haveClass(String className)
     {
         try {
             Class.forName(className);
