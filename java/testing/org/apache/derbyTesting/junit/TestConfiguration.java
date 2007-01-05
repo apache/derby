@@ -255,17 +255,10 @@ public class TestConfiguration {
         if (!(Derby.hasClient() && Derby.hasServer())
                 || JDBC.vmSupportsJSR169())
             return new TestSuite("empty: no network server support");
-            
-        TestConfiguration config = TestConfiguration.getCurrent();
-        
-        TestConfiguration derbyClientConfig =
-            new TestConfiguration(config, JDBCClient.DERBYNETCLIENT,
-                    DEFAULT_HOSTNAME, DEFAULT_PORT);
                    
         Test test = new NetworkServerTestSetup(suite, false);
             
-        return new ChangeConfigurationSetup(derbyClientConfig, test);
-
+        return new ServerSetup(test, DEFAULT_HOSTNAME, DEFAULT_PORT);
     }
     
     /**
@@ -280,8 +273,6 @@ public class TestConfiguration {
      */
     public static Test singleUseDatabaseDecorator(Test test)
     {
-        TestConfiguration config = TestConfiguration.getCurrent();
-
         // Forward slash is ok, Derby treats database names
         // as URLs and translates forward slash to the local
         // separator.
@@ -291,10 +282,8 @@ public class TestConfiguration {
         synchronized (dbName) {
             dbName = dbName.concat(Integer.toHexString(uniqueDB++));
         }
-        TestConfiguration newDBconfig = 
-            new TestConfiguration(config, dbName);
-        return new ChangeConfigurationSetup(newDBconfig,
-                new DropDatabaseSetup(test));
+
+        return new DatabaseChangeSetup(new DropDatabaseSetup(test), dbName);
     }
     
     /**
@@ -332,11 +321,7 @@ public class TestConfiguration {
      * @see DatabasePropertyTestSetup#builtinAuthentication(Test, String[], String)
      */
     public static Test sqlAuthorizationDecorator(Test test)
-    {
-        TestConfiguration config = TestConfiguration.getCurrent();
-        TestConfiguration newDBconfig = 
-            new TestConfiguration(config, DEFAULT_DBNAME_SQL);
-        
+    {       
         // Set the SQL authorization mode as a database property
         // with a modified DatabasePropertyTestSetup that does not
         // reset it.
@@ -348,7 +333,7 @@ public class TestConfiguration {
             }
         };
 
-        return new ChangeConfigurationSetup(newDBconfig, setSQLAuthMode);
+        return new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL);
     }
     
     /**
@@ -364,22 +349,8 @@ public class TestConfiguration {
      */
     public static Test connectionXADecorator(Test test)
     {
-        // Copy the current configuration by creating one
-        // with the same database name
-        TestConfiguration config = TestConfiguration.getCurrent();
-        TestConfiguration newConfig = 
-            new TestConfiguration(config, config.getDatabaseName());
-        
-        try {
-            newConfig.connector = (Connector) Class.forName(
-              "org.apache.derbyTesting.junit.XADataSourceConnector").newInstance();
-        } catch (Exception e) {
-            Assert.fail(e.getMessage());
-        }
-        
-        newConfig.connector.setConfiguration(newConfig);
-       
-        return new ChangeConfigurationSetup(newConfig, test);
+        return new ConnectorSetup(test,
+                "org.apache.derbyTesting.junit.XADataSourceConnector");
     }
     
     /**
@@ -399,7 +370,7 @@ public class TestConfiguration {
  
     }
 
-    private TestConfiguration(TestConfiguration copy, JDBCClient client,
+    TestConfiguration(TestConfiguration copy, JDBCClient client,
             String hostName, int port)
     {
         this.dbName = copy.dbName;
@@ -787,7 +758,7 @@ public class TestConfiguration {
      * Indirection for obtaining connections based upon
      * this configuration.
      */
-    private Connector connector;
+    Connector connector;
     
     /*
      * SecurityManager related configuration.

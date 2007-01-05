@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class org.apache.derbyTesting.junit.ChangeConfigurationSetup
+ * Derby - Class org.apache.derbyTesting.junit.ServerSetup
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,34 +19,29 @@
  */
 package org.apache.derbyTesting.junit;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-abstract class ChangeConfigurationSetup extends TestSetup {
+/**
+ * Change to a client server configuration based upon the
+ * current configuration at setup time. Previous configuration
+ * is restored at tearDown time. This only changes the
+ * configuration, it does not start any network server.
+ *
+ */
+final class ServerSetup extends ChangeConfigurationSetup {
+
+    private final String host;
+    private final int port;
     
-    private TestConfiguration old;
-    
-    ChangeConfigurationSetup(Test test)
-    {
+    public ServerSetup(Test test, String host, int port) {
         super(test);
+        this.host = host;
+        this.port = port;
     }
-    
-    protected final void setUp()
-    {
-        old = TestConfiguration.getCurrent();
-        TestConfiguration.setCurrent(getNewConfiguration(old));
+
+    TestConfiguration getNewConfiguration(TestConfiguration old) {
+               
+        return new TestConfiguration(old, JDBCClient.DERBYNETCLIENT,
+                    host, port);
     }
-    
-    protected final void tearDown()
-    {
-        TestConfiguration.setCurrent(old);
-    }
-    
-    /**
-     * Return the new configuration to use at setUp time.
-     * Most likely based upon the old configuration passed in. 
-     * @param old The current configuration.
-     * @return new configuration
-     */
-    abstract TestConfiguration getNewConfiguration(TestConfiguration old);
 }

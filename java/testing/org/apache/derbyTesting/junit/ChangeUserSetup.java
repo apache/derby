@@ -28,11 +28,10 @@ import junit.framework.Test;
  * the previous configuration.
  * 
  */
-final class ChangeUserSetup extends TestSetup {
+final class ChangeUserSetup extends ChangeConfigurationSetup {
     
     private final String user;
     private final String password;
-    private TestConfiguration old;
     
     ChangeUserSetup(Test test, String user, String password)
     {
@@ -41,15 +40,8 @@ final class ChangeUserSetup extends TestSetup {
         this.password = password;
     }
     
-    protected void setUp()
+    TestConfiguration getNewConfiguration(TestConfiguration old)
     {
-        old = TestConfiguration.getCurrent();
-        TestConfiguration config = new TestConfiguration(old, user, password);
-        TestConfiguration.setCurrent(config);
-    }
-    
-    protected void tearDown()
-    {
-        TestConfiguration.setCurrent(old);
+        return new TestConfiguration(old, user, password);
     }
 }

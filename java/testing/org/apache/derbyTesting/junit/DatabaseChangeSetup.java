@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class org.apache.derbyTesting.junit.ChangeConfigurationSetup
+ * Derby - Class org.apache.derbyTesting.junit.DatabaseChangeSetup
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,34 +19,23 @@
  */
 package org.apache.derbyTesting.junit;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-abstract class ChangeConfigurationSetup extends TestSetup {
+/**
+ * Change the current configuration's database name at setup.
+ * Previous configuration is restored on tearDown.
+ *
+ */
+final class DatabaseChangeSetup extends ChangeConfigurationSetup {
+
+    private final String dbName;
     
-    private TestConfiguration old;
-    
-    ChangeConfigurationSetup(Test test)
-    {
+    public DatabaseChangeSetup(Test test, String dbName) {
         super(test);
+        this.dbName = dbName;
+   }
+
+    TestConfiguration getNewConfiguration(TestConfiguration old) {
+        return new TestConfiguration(old, dbName);
     }
-    
-    protected final void setUp()
-    {
-        old = TestConfiguration.getCurrent();
-        TestConfiguration.setCurrent(getNewConfiguration(old));
-    }
-    
-    protected final void tearDown()
-    {
-        TestConfiguration.setCurrent(old);
-    }
-    
-    /**
-     * Return the new configuration to use at setUp time.
-     * Most likely based upon the old configuration passed in. 
-     * @param old The current configuration.
-     * @return new configuration
-     */
-    abstract TestConfiguration getNewConfiguration(TestConfiguration old);
 }
