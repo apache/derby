@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import junit.extensions.TestSetup;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -271,7 +272,7 @@ public class TestConfiguration {
      * @param test Test to be decorated
      * @return decorated test.
      */
-    public static Test singleUseDatabaseDecorator(Test test)
+    public static TestSetup singleUseDatabaseDecorator(Test test)
     {
         // Forward slash is ok, Derby treats database names
         // as URLs and translates forward slash to the local
@@ -347,10 +348,24 @@ public class TestConfiguration {
      * The tearDown reverts the configuration to the previous
      * configuration.
      */
-    public static Test connectionXADecorator(Test test)
+    public static TestSetup connectionXADecorator(Test test)
     {
         return new ConnectorSetup(test,
                 "org.apache.derbyTesting.junit.XADataSourceConnector");
+    }
+    /**
+     * Return a decorator that changes the configuration to obtain
+     * connections from a standard DataSource using
+     * <code>
+     * getConnection()
+     * </code>
+     * The tearDown reverts the configuration to the previous
+     * configuration.
+     */
+    public static TestSetup connectionDSDecorator(Test test)
+    {
+        return new ConnectorSetup(test,
+            "org.apache.derbyTesting.junit.DataSourceConnector");
     }
     
     /**
@@ -366,7 +381,7 @@ public class TestConfiguration {
         
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
         url = createJDBCUrlWithDatabaseName(dbName);
-        initConnector();
+        initConnector(null);
  
     }
 
@@ -384,7 +399,7 @@ public class TestConfiguration {
         this.hostName = hostName;
         
         this.url = createJDBCUrlWithDatabaseName(dbName);
-        initConnector();
+        initConnector(copy.connector);
     }
 
     
@@ -408,7 +423,7 @@ public class TestConfiguration {
         this.hostName = copy.hostName;
         
         this.url = copy.url;
-        initConnector();
+        initConnector(copy.connector);
     }
     /**
      * Obtain a new configuration identical to the passed in
@@ -429,7 +444,7 @@ public class TestConfiguration {
         this.hostName = copy.hostName;
         
         this.url = createJDBCUrlWithDatabaseName(dbName);
-        initConnector();
+        initConnector(copy.connector);
     }
   
     /**
@@ -469,7 +484,7 @@ public class TestConfiguration {
             jdbcClient = JDBCClient.getDefaultEmbedded();
         }
         url = createJDBCUrlWithDatabaseName(dbName);
-        initConnector();
+        initConnector(null);
     }
 
     /**
@@ -515,9 +530,21 @@ public class TestConfiguration {
      * DataSource implementation for JSR 169.
      *
      */
-    private void initConnector()
+    private void initConnector(Connector oldConnector)
     {
-        if (JDBC.vmSupportsJDBC2())
+        if (oldConnector != null)
+        {
+            // Use the same type of connector as the
+            // configuration we are copying from.
+            
+            try {
+                connector = (Connector) Class.forName(
+                  oldConnector.getClass().getName()).newInstance();
+            } catch (Exception e) {
+                Assert.fail(e.getMessage());
+            }            
+        }
+        else if (JDBC.vmSupportsJDBC2())
         {
             try {
                 connector = (Connector) Class.forName(

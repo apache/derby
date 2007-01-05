@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.junit;
 
 import java.lang.reflect.Method;
+import java.security.AccessController;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -98,15 +99,37 @@ public class JDBCDataSource {
     /**
      * Return a DataSource object of the passsed in type
      * configured with the passed in Java bean properties.
-     * This will actually work with an object that has Java bean
+     * This will actually work with any object that has Java bean
      * setter methods.
+     * <BR>
+     * If a thread context class loader exists then it is used
+     * to try and load the class.
      */
     static Object getDataSourceObject(String classname, HashMap beanProperties)
     {
-
-        Object ds;
+        ClassLoader contextLoader =
+            (ClassLoader) AccessController.doPrivileged
+        (new java.security.PrivilegedAction(){
+            
+            public Object run()  { 
+                return Thread.currentThread().getContextClassLoader();
+            }
+        });
+    
         try {
-            ds = Class.forName(classname).newInstance();
+            Object ds = null;
+            if (contextLoader != null)
+            {
+                try {
+                    ds = Class.forName(classname, true, contextLoader).newInstance();
+                } catch (Exception e) {
+                    // context loader may not be correctly hooked up
+                    // with parent, try without it.
+                }
+            }
+            
+            if (ds == null)
+                ds = Class.forName(classname).newInstance();
             
             for (Iterator i = beanProperties.keySet().iterator();
                 i.hasNext(); )
