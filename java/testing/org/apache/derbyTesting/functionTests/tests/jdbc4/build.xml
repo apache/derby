@@ -54,7 +54,7 @@
             executable="${jdk16}/bin/javac"
             bootclasspath="${empty}"
             nowarn="on"
-            debug="${debug}"
+            debug="true"
             depend="${depend}"
             deprecation="${deprecation}"
             optimize="${optimize}"
