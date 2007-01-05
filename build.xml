@@ -1649,9 +1649,19 @@
 <!-- =================================================================== -->
 
   <target name="junit-init">
-    <tstamp prefix="derby.junit"/>
+    <tstamp prefix="derby.junit">
+      <format property="standardtime" pattern="yyyy-MM-dd hh:mm aa zzz"/>
+    </tstamp>
     <property name="derby.junit.jvm" value="java"/>
-    <mkdir dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}/testout"/>
+    <property name="derby.junit.timestamp" value="${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
+    <mkdir dir="junit_${derby.junit.timestamp}/testout"/>
+  </target>
+
+  <target name="junit-sysinfo" depends="junit-init">
+    <java classname="org.apache.derby.tools.sysinfo"
+          output="junit_${derby.junit.timestamp}/sysinfo.txt">
+        <classpath path="${out.dir}"/>
+    </java>
   </target>
 
   <target name="junit-clean">
@@ -1665,9 +1675,10 @@
            fork="yes" forkmode="once"
            jvm="${derby.junit.jvm}"
            showoutput="yes"
-           dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}/testout">
+           dir="junit_${derby.junit.timestamp}/testout">
       <formatter type="xml"/>
-      <test name="${derby.junit.testname}" todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
+      <test name="${derby.junit.testname}" 
+            todir="junit_${derby.junit.timestamp}"/>
       <classpath>
         <pathelement path="${out.dir}"/>
         <pathelement path="${junit}"/>
@@ -1708,15 +1719,29 @@
     </antcall>
   </target>
 
-  <target name="junitreport" depends="junit-all"> 
-    <junitreport todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}">
-      <fileset dir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}">
+  <target name="junitreport" depends="junit-sysinfo,junit-all">
+    <junitreport todir="junit_${derby.junit.timestamp}">
+      <fileset dir="junit_${derby.junit.timestamp}">
         <include name="TEST-*.xml"/>
       </fileset>
-      <report format="frames" todir="junit_${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
+      <report format="frames" todir="junit_${derby.junit.timestamp}"/>
     </junitreport>
-  </target>   
- 
+
+    <!-- fix up unterminated elements in overview-frame.html -->
+    <replace token="href=&quot;stylesheet.css&quot;&gt;"
+             value="href=&quot;stylesheet.css&quot;/&gt;&lt;/META&gt;"
+             file="junit_${derby.junit.timestamp}/overview-frame.html"/>
+    <replace token="Unit Test Results"
+             value="Apache Derby Test Results - ${derby.junit.standardtime}&lt;br&gt;JVM: ${java.vm.vendor} ${java.vm.version}"
+             file="junit_${derby.junit.timestamp}/overview-summary.html"/>
+
+    <xslt style="${basedir}/tools/ant/xsl/sysinfo_junitreport.xsl"
+          in="junit_${derby.junit.timestamp}/overview-frame.html"
+          out="junit_${derby.junit.timestamp}/overview-frame2.html"/>
+    <move file="junit_${derby.junit.timestamp}/overview-frame2.html"
+          tofile="junit_${derby.junit.timestamp}/overview-frame.html"/>
+  </target>
+
   <target name="l10ncheck"> 
     <ant dir="${derbysrc.dir}/../tools/l10n"/>
   </target>   
