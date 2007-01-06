@@ -457,9 +457,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 for (int i=0; i<10; i++) {
                     // find a random string to search for
                     start = Math.max(random.nextInt(clobLength - 1), 1);
-                    // length = random.nextInt(clobLength - start) + 1;
-                    // use 256 until DERBY-1917 is fixed
-                    length = random.nextInt(256) + 1;
+                    length = random.nextInt(clobLength - start) + 1;
                     println("start:" + start + " length:" + length);
                     searchString = clob.getSubString(start, length);
                     // get random position to start the search from

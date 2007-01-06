@@ -371,7 +371,57 @@ final class EmbedClob extends ConnectionChild implements Clob
   /**
    * Determines the character position at which the specified substring
    * <code>searchstr</code> appears in the <code>CLOB</code>.  The search
-   * begins at position <code>start</code>.
+	* begins at position <code>start</code>. The method uses the following
+	* algorithm for the search
+	*
+	*
+	* 1)Is the length of the current pattern string to be matched greater than 256 ?
+	*
+	*	1.1)If "YES"
+	*		Extract the first 256 bytes as the current pattern to be matched
+	*
+	*		If "NO"
+	*		Make the pattern string itself as the current pattern to be matched
+	*
+	*	1.2)Initialize a variable that will indicate the character in the pattern
+	*		String being matched to zero. (say currPatternPos)
+	*
+	* 2)Read the 256 bytes of the Clob from the database
+	*
+	*	2.1)Initialize a variable that will indicate the current index in this array
+	*		to zero. (say currClobPos)
+	*	2.2)Exit if there are no more characters to be read in the Clob
+	*
+	* 3)Initialize a bestMatchPosition that will keep storing the next occurence of the 
+	*	first character in the pattern.This will be useful when we want to go back and 
+	*	start searching in the Clob array when a mismatch occurs.
+	*
+	* 4)Do the characters in currPatternPos and currClobPos match ?
+	*	4.1)If "YES" 
+	*
+	*		Increment currPatternPos and currClobPos. 
+	*
+	*		If currPatternPos is not 0 and the character in the 
+	*		currentClobPos is the same as the first character in the
+	*		pattern set bestMatchPosition = currentClobPos
+	*
+	*	4.2)If "No" 
+	*
+	*		set currClobPos = bestMatchPosition
+	*		set currPatternPos = 0
+	*
+	*	4.3)If currPatternPos > 256 
+	*		4.3.1)If "YES" 
+	*			  Return the current position in the Clob if all characters 
+	*			  have been matched otherwise perform step 1 to fetch the
+	*			  next 256 characters and increment matchCount
+	*		4.3.2)If "NO" repeat Step 4
+	*
+	*	4.4)If currClobPos > 256
+	*		4.4.1)If "YES"
+	*			  Repeat step 2 to fetch next 256 characters
+	*		4.4.2)If "NO"
+	*			  Repeat step 4
    * @param searchStr the substring for which to search
    * @param start the position at which to begin searching; the first position
    *              is 1
@@ -459,10 +509,15 @@ search:
 							if (needPattern) {
 
 								String tmpPatternS;
+								//Keep extracting substrings of length 256 from the pattern string
+								//and use these substrings for comparison with the data from the Clob
+								//if the subString remaining has a length > 256 then extract 256 bytes
+								//and return it
+								//otherwise return the remaining string 
 								if ((patternLength - patternIndex) > 256)
-									tmpPatternS = searchStr.substring(patternIndex, 256);
+									tmpPatternS = searchStr.substring(patternIndex , patternIndex + 256);
 								else
-									tmpPatternS = searchStr;
+									tmpPatternS = searchStr.substring(patternIndex , patternLength);
 
 								tmpPattern = tmpPatternS.toCharArray();
 								needPattern = false;
@@ -514,6 +569,11 @@ compareArrays:
 										}
 
 										needPattern = true;
+										//We need to increment clobOffset
+										//to start comparison from the 
+										//next character since the current
+										//character has already been compared
+										clobOffset++;
 										continue search;
 
 									}
