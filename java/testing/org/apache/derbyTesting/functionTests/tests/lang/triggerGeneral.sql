@@ -612,3 +612,56 @@ create trigger update_test
     update test set ts=current_timestamp where testid=old.testid;
 insert into test(info) values (1),(2),(3);
 UPDATE TEST SET INFO = 1 WHERE TESTID = 2;
+
+-- DERBY-2183
+-- trigger recompilation test
+autocommit on;
+connect 'jdbc:derby:wombat' user 'user1' as user1;
+set schema app;
+drop trigger app.tr1;
+drop table app.t1;
+create table app.t1 (i int, j int);
+insert into app.t1 values (1,10);
+create trigger app.tr1 after update of i on app.t1 referencing old as old for each row mode db2sql update t1 set j = old.j+1;
+update app.t1 set i=i+1;
+select * from app.t1;
+call sqlj.install_jar('file:dcl_emc1.jar', 'APP.dcl_emc1', 0);
+
+connect 'jdbc:derby:wombat' user 'user2' as user2;
+-- ok
+update app.t1 set i=i+1;
+select * from app.t1;
+call sqlj.replace_jar('file:dcl_emc1.jar', 'APP.dcl_emc1');
+update app.t1 set i=i+1;
+select * from app.t1;
+call sqlj.remove_jar('APP.dcl_emc1', 0);
+update app.t1 set i=i+1;
+select * from app.t1;
+drop trigger app.tr1;
+drop table app.t1;
+
+set connection user1;
+set schema app;
+create table app.t1 (id int, i int, j int);
+insert into app.t1 values (1,10, 100);
+insert into app.t1 values (2,20, 200);
+insert into app.t1 values (3,30, 300);
+create trigger app.tr1 after update on app.t1 referencing old as oldt  new as newt 
+for each row mode db2sql update t1 set t1.j = CASE WHEN (oldt.j < 100) THEN (oldt.j + 1) ELSE 1 END WHERE
+((newt.j is null) OR (oldt.j = newt.j)) AND newt.id = t1.id;
+update app.t1 set i=i+1;
+select * from app.t1;
+call sqlj.install_jar('file:dcl_emc1.jar', 'APP.dcl_emc1', 0);
+
+set connection user2;
+-- ok
+update app.t1 set i=i+1;
+select * from app.t1;
+call sqlj.replace_jar('file:dcl_emc1.jar', 'APP.dcl_emc1');
+update app.t1 set i=i+1;
+select * from app.t1;
+call sqlj.remove_jar('APP.dcl_emc1', 0);
+update app.t1 set i=i+1;
+select * from app.t1;
+drop trigger app.tr1;
+drop table app.t1;
