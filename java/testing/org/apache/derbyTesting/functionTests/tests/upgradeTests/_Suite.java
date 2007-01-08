@@ -28,18 +28,63 @@ import org.apache.derbyTesting.junit.BaseTestCase;
 /**
  * Run the full upgrade suite. This is the only
  * way to run tests in this package.
- *
+ * A set of tests are run against a number of
+ * previous releases, see the static OLD_VERSIONS
+ * field in this class.
+ * 
+ * Each test against the old release consists of following phases:
+   
+    <OL>
+    <LI> Create database with the <B>old</B> release.
+    <LI> Boot the database with the <B>new</B> release in soft upgrade mode.
+    Try to execute functionality that is not allowed in soft upgrade.
+    <LI> Boot the database with the <B>old</B> release to ensure the
+    database can be booted by the old release after soft upgrade.
+    <LI> Boot the database with the <B>new</B> release in hard upgrade mode,
+    specifying the upgrade=true attribute.
+    <LI> Boot the database with the <B>old</B> release to ensure the
+    database can not be booted by the old release after hard upgrade.
+    </OL>
+    The class PhaseChanger is the decorator that sets up the
+    fixtures to run in a given phase.
+
+    <P>
+    The test fixtures themseleves are in JUnit test classes
+    that are sub-classes of UpgradeChange. The set of fixtures
+    in BasicSetup is general setup and the changes per release
+    are in classes of the form Changes10_1 etc.
+    
+    <P>
+    The class UpgradeRun hooks up the test fixtures for a set
+    of runs against a single old release into a single suite.
+    Each fixture is run multiple times, once per phase against
+    each old release.
+    
+    @see UpgradeRun
+    @see UpgradeChange
  */
 public class _Suite extends BaseTestCase {
     
+    /**
+     * List of the versions to test against.
+     * The tests look for the jar files in each releasae
+     * in the folder:
+     * ${derbyTesting.jar.path}/M.m.f.p/lib
+     * 
+     * If derbyTesting.jar.path is not set then no tests will be run.
+     * 
+     * If ${derbyTesting.jar.path}/M.m.f.p/lib does not exist
+     * for a specific release then those sets of tests will
+     * be skipped.
+     */
     private static final int[][] OLD_VERSIONS =
     {
-        // {10, 0, 2, 1}, // 10.0.2.1 (incubator release)
+        {10, 0, 2, 1}, // 10.0.2.1 (incubator release)
         {10, 1, 1, 0}, // 10.1.1.0 (Aug 3, 2005 / SVN 208786)
         {10, 1, 2, 1}, // 10.1.2.1 (Nov 18, 2005 / SVN 330608)
         {10, 1, 3, 1}, // 10.1.3.1 (Jun 30, 2006 / SVN 417277)
-        // {10, 2, 1, 6}, // 10.2.1.6 (Oct 02, 2006 / SVN 452058)
-        // {10, 2, 1, 6}, // 10.2.2.0 (Dec 12, 2006 / SVN 485682)
+        {10, 2, 1, 6}, // 10.2.1.6 (Oct 02, 2006 / SVN 452058)
+        {10, 2, 2, 0}, // 10.2.2.0 (Dec 12, 2006 / SVN 485682)
     };
 
 
@@ -51,6 +96,10 @@ public class _Suite extends BaseTestCase {
     }
     
     public static Test suite() {
+        
+        if (getSystemProperty("derbyTesting.jar.path") == null)
+            return new TestSuite(
+                    "empty: no upgrade tests: derbyTesting.jar.path not set");
         
         TestSuite suite = new TestSuite("Upgrade Suite");       
 

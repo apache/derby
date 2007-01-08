@@ -64,8 +64,6 @@ class UpgradeRun {
 
     public final static Test suite(final int[] version) {
         
-        TestSuite suite = new TestSuite(
-                "Upgrade Tests from " + getTextVersion(version));
         
         ClassLoader oldLoader = (ClassLoader )AccessController.doPrivileged
         (new java.security.PrivilegedAction(){
@@ -77,6 +75,19 @@ class UpgradeRun {
 
         }
          );
+        
+        // If no jars then just skip.
+        if (oldLoader == null)
+        {
+            TestSuite suite = new TestSuite(
+                    "Empty: Skipped upgrade Tests (no jars) for " + getTextVersion(version));
+            return suite;
+        }
+        
+        
+        TestSuite suite = new TestSuite(
+                "Upgrade Tests from " + getTextVersion(version));
+
         
         for (int phase = 0;
               phase < UpgradeChange.PHASES.length; phase++)
@@ -95,7 +106,8 @@ class UpgradeRun {
                 
             }
             Test phaseTests = baseSuite(
-                    "Upgrade Phase: " + UpgradeChange.PHASES[phase]);
+                    "Upgrade Phase: " + UpgradeChange.PHASES[phase],
+                    phase);
             
             suite.addTest(new PhaseChanger(phaseTests, phase, loader, version));
         }
@@ -111,12 +123,19 @@ class UpgradeRun {
         return SecurityManagerSetup.noSecurityManager(setup);
     }
     
-    private static Test baseSuite(String name) {
+    private static Test baseSuite(String name, int phase) {
         TestSuite suite = new TestSuite(name);
-        
-        suite.addTest(BasicSetup.suite());
-        
-        suite.addTest(Changes10_1.suite());
+          
+        // No connection is expected in the post hard upgrade
+        // phase, so don't bother adding test fixtures.
+        if (phase != UpgradeChange.PH_POST_HARD_UPGRADE)
+        {
+            suite.addTest(BasicSetup.suite());
+            
+            suite.addTest(Changes10_1.suite());
+            suite.addTest(Changes10_2.suite());
+            suite.addTest(Changes10_3.suite());
+        }
                 
         return TestConfiguration.connectionDSDecorator(suite);
     }
@@ -152,10 +171,17 @@ class UpgradeRun {
         
         String jarLocation = getOldJarLocation(version);
         
+        File lib = new File(jarLocation);
+        
+        // If the jars do not exist then return null
+        // and the caller will set up to skip this.
+        if (!lib.exists())
+            return null;
+        
+        
         for (int i=0; i < jarFiles.length; i++) {
             try {
-                url[i] = new File(jarLocation + File.separator + jarFiles[i]).toURL();
-                System.out.println("URL " + url[i].toString());
+                url[i] = new File(lib, jarFiles[i]).toURL();
             } catch (MalformedURLException e) {
                 Assert.fail(e.toString());
             }

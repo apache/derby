@@ -114,4 +114,13 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
             return true;
         return false;
     } 
+    /**
+     * Return true if the old version is equal
+     *  the passed in major and minor version.
+     */
+    boolean oldIs(int requiredMajor, int requiredMinor) 
+    {
+        return (getOldMajor() == requiredMajor)
+          && (getOldMinor() == requiredMinor);
+     } 
 }

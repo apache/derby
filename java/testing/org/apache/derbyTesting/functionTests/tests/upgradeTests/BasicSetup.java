@@ -21,7 +21,9 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -54,11 +56,74 @@ public class BasicSetup extends UpgradeChange {
         case PH_CREATE:
         case PH_POST_SOFT_UPGRADE:
             DatabaseMetaData dmd = getConnection().getMetaData();
-            assertEquals("Old major: ",
+            assertEquals("Old major (driver): ",
                     getOldMajor(), dmd.getDriverMajorVersion());
-            assertEquals("Old minor: ",
+            assertEquals("Old minor (driver): ",
                     getOldMinor(), dmd.getDriverMinorVersion());
+            assertEquals("Old major (database): ",
+                    getOldMajor(), dmd.getDatabaseMajorVersion());
+            assertEquals("Old minor (database): ",
+                    getOldMinor(), dmd.getDatabaseMinorVersion());
             break;
         }
+    }
+    
+    /**
+     * Test general DML. Just execute some INSERT/UPDATE/DELETE
+     * statements in all phases to see that generally the database works.
+     * @throws SQLException
+     */
+    public void testDML() throws SQLException {
+        
+        final int phase = getPhase();
+        
+        Statement s = createStatement();
+        
+        switch (phase) {
+        case PH_CREATE:
+            s.executeUpdate("CREATE TABLE PHASE" +
+                                                "(id INT NOT NULL, ok INT)");
+            s.executeUpdate("CREATE TABLE TABLE1" +
+                        "(id INT NOT NULL PRIMARY KEY, name varchar(200))");
+            break;
+        case PH_SOFT_UPGRADE:
+            break;
+        case PH_POST_SOFT_UPGRADE:
+            break;
+        case PH_HARD_UPGRADE:
+            break;
+        }
+        s.close();
+    
+        PreparedStatement ps = prepareStatement(
+                "INSERT INTO PHASE(id) VALUES (?)");
+        ps.setInt(1, phase);
+        ps.executeUpdate();
+        ps.close();
+        
+        ps = prepareStatement("INSERT INTO TABLE1 VALUES (?, ?)");
+        for (int i = 1; i < 20; i++)
+        {
+            ps.setInt(1, i + (phase * 100));
+            ps.setString(2, "p" + phase + "i" + i);
+            ps.executeUpdate();
+        }
+        ps.close();
+        ps = prepareStatement("UPDATE TABLE1 set name = name || 'U' " +
+                                    " where id = ?");
+        for (int i = 1; i < 20; i+=3)
+        {
+            ps.setInt(1, i + (phase * 100));
+            ps.executeUpdate();
+        }
+        ps.close();
+        ps = prepareStatement("DELETE FROM TABLE1 where id = ?");
+        for (int i = 1; i < 20; i+=4)
+        {
+            ps.setInt(1, i + (phase * 100));
+            ps.executeUpdate();
+        }
+        ps.close();
+        commit();
     }
 }

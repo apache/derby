@@ -20,6 +20,9 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -28,6 +31,13 @@ import junit.framework.TestSuite;
 
 /**
  * Upgrade test cases for changes made in 10.1.
+ * <BR>
+    10.1 Upgrade issues
+
+    <UL>
+    <LI> testProcedureSignature - Routines with explicit Java signatures.
+    </UL>
+
  */
 public class Changes10_1 extends UpgradeChange {
     

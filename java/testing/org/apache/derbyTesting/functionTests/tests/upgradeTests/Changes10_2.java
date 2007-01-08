@@ -1,0 +1,216 @@
+/*
+
+Derby - Class org.apache.derbyTesting.functionTests.tests.upgradeTests.Changes10_2
+
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+*/
+package org.apache.derbyTesting.functionTests.tests.upgradeTests;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.apache.derbyTesting.junit.JDBC;
+
+/**
+ * Upgrade test cases for changes made in 10.2.
+ * <BR>
+ * 10.2 Upgrade issues
+ * <UL>
+ * <LI> testTriggerInternalVTI - Check internal re-write of triggers
+ * does not break triggers in soft upgrade mode.
+ * <LI> testReusableRecordIdSequenceNumber - Test reuseable record
+ * identifiers does not cause issues in soft upgrade
+ * </UL>
+ */
+public class Changes10_2 extends UpgradeChange {
+    
+    public static Test suite() {
+        TestSuite suite = new TestSuite("Upgrade changes for 10.2");
+        
+        suite.addTestSuite(Changes10_2.class);
+        
+        return suite;
+    }
+
+    public Changes10_2(String name) {
+        super(name);
+    }
+    
+    /**
+     * Triger (internal) VTI
+     * 10.2 - Check that a statement trigger created in 10.0
+     * or 10.1 can be executed in 10.2 and that a statement
+     * trigger created in soft upgrade in 10.2 can be used
+     * in older releases.
+     * 
+     * The VTI implementing statement triggers changed in
+     * 10.2 from implementations of ResultSet to implementations
+     * of PreparedStatement. See DERBY-438. The internal
+     * api for the re-written action statement remains the
+     * same. The re-compile of the trigger on version changes
+     * should automatically switch between the two implementations.
+     *
+     * @param conn Connection
+     * @param phase Upgrade test phase
+     * @param dbMajor Major version of old release 
+     * @param dbMinor Minor version of old release
+     * @return true, if the test passes
+     * @throws SQLException
+     */
+    public void testTriggerInternalVTI()
+                                    throws SQLException {
+                
+        
+        Statement s = createStatement();
+
+        boolean modeDb2SqlOptional = oldAtLeast(10, 3);
+
+        switch (getPhase()) {
+        case PH_CREATE:
+            s.execute("CREATE TABLE D438.T438(a int, b varchar(20), c int)");
+            s.execute("INSERT INTO D438.T438 VALUES(1, 'DERBY-438', 2)");
+            s.execute("CREATE TABLE D438.T438_T1(a int, b varchar(20))");
+            s.execute("CREATE TABLE D438.T438_T2(a int, c int)");
+            s.execute(
+               "create trigger D438.T438_ROW_1 after UPDATE on D438.T438 " +
+               "referencing new as n old as o " + 
+               "for each row "+ 
+               (modeDb2SqlOptional?"":"mode db2sql ") +
+               "insert into D438.T438_T1(a, b) values (n.a, n.b || '_ROW')");
+            s.executeUpdate(
+               "create trigger D438.T438_STMT_1 after UPDATE on D438.T438 " +
+               "referencing new_table as n " + 
+               "for each statement "+ 
+               (modeDb2SqlOptional?"":"mode db2sql ") +
+               "insert into D438.T438_T1(a, b) select n.a, n.b || '_STMT' from n"); 
+            
+            commit();
+            break;
+            
+        case PH_SOFT_UPGRADE:
+            s.execute(
+               "create trigger D438.T438_ROW_2 after UPDATE on D438.T438 " +
+               "referencing new as n old as o " + 
+               "for each row "+ 
+               (modeDb2SqlOptional?"":"mode db2sql ") +
+               "insert into D438.T438_T2(a, c) values (n.a, n.c + 100)");
+             s.executeUpdate(
+                "create trigger D438.T438_STMT_2 after UPDATE on D438.T438 " +
+                "referencing new_table as n " + 
+                "for each statement "+ 
+               (modeDb2SqlOptional?"":"mode db2sql ") +
+                "insert into D438.T438_T2(a, c) select n.a, n.c + 4000 from n"); 
+                 
+            commit();
+            break;
+        case PH_POST_SOFT_UPGRADE:
+            break;
+        case PH_HARD_UPGRADE:
+           break;
+        }
+        
+        // Test the firing of the triggers
+        s.executeUpdate("UPDATE D438.T438 set c = c + 1");
+        commit();
+        
+        ResultSet rs = s.executeQuery("SELECT a,b from D438.T438_T1 ORDER BY 2");
+        JDBC.assertFullResultSet(rs, new String[][]
+                {{"1", "DERBY-438_ROW"},
+                {"1", "DERBY-438_STMT"}});
+        rs.close();
+        
+        rs = s.executeQuery("SELECT a,c from D438.T438_T2 ORDER BY 2");
+        if (getPhase() == PH_CREATE)
+        {
+            // expect no rows since the trigger that populates
+            // the table is defined in soft upgrade.
+            assertFalse(rs.next());
+        }
+        else
+        {
+            JDBC.assertFullResultSet(rs, new String[][] {
+                    {"1", Integer.toString(2 + 100 + getPhase() + 1)},
+                    {"1", Integer.toString(2 + 4000 + getPhase() + 1)}});
+            
+        }
+        rs.close();
+            
+        s.executeUpdate("DELETE FROM D438.T438_T1");
+        s.executeUpdate("DELETE FROM D438.T438_T2");
+        commit();
+       
+        s.close();
+    }
+    
+    /**
+     * In 10.2: We will write a ReusableRecordIdSequenceNumber in the 
+     * header of a FileContaienr.
+     * 
+     * Verify here that a 10.1 Database does not malfunction from this.
+     * 10.1 Databases should ignore the field.
+     */
+    public void testReusableRecordIdSequenceNumber()
+        throws SQLException
+    {
+        boolean runCompress = oldAtLeast(10, 1);
+
+        switch(getPhase()) {
+        case PH_CREATE: {
+            Statement s = createStatement();
+            s.execute("create table CT1(id int)");
+            s.execute("insert into CT1 values 1,2,3,4,5,6,7,8,9,10");
+            s.close();
+            commit();
+            break;
+        }
+        case PH_SOFT_UPGRADE:
+            if (runCompress) {
+                PreparedStatement ps = prepareStatement
+                    ("call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?,?,?,?,?)");
+                ps.setString(1, "APP"); // schema
+                ps.setString(2, "CT1");  // table name
+                ps.setInt(3, 1); // purge
+                ps.setInt(4, 1); // defragment rows
+                ps.setInt(5, 1); // truncate end
+                ps.executeUpdate();
+                ps.close();
+               commit();
+            }
+            break;
+        case PH_POST_SOFT_UPGRADE: {
+            // We are now back to i.e 10.1
+            Statement s = createStatement();
+            ResultSet rs = s.executeQuery("select * from CT1");
+            while (rs.next()) {
+                rs.getInt(1);
+            }
+            s.execute("insert into CT1 values 11,12,13,14,15,16,17,18,19");
+            s.close();
+            commit();
+            break;
+        }
+        case PH_HARD_UPGRADE:
+            break;
+        }
+    }
+}
