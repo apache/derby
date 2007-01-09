@@ -141,7 +141,7 @@ public class JDBCDataSource {
             }
             return ds;
         } catch (Exception e) {
-            Assert.fail(e.getMessage());
+            Assert.fail(e.toString());
             return null;
         }
     }

@@ -31,6 +31,8 @@ import junit.framework.TestSuite;
 
 /**
  * Upgrade test cases for changes made in 10.1.
+ * If the old version is 10.1 or later then these tests
+ * will not be run.
  * <BR>
     10.1 Upgrade issues
 
@@ -70,54 +72,22 @@ public class Changes10_1 extends UpgradeChange {
      */
     public void testProcedureSignature() throws SQLException
     {      
-       boolean signaturesAllowedInOldRelease = oldAtLeast(10, 1);
-        
+       Statement s = createStatement();
         switch (getPhase())
         {
         case PH_CREATE:
+        case PH_POST_SOFT_UPGRADE:
             break;
         case PH_SOFT_UPGRADE:
-        {
-            Statement s = createStatement();
-            try {
-                s.execute(PROC_SIGNATURE);
-                if (!signaturesAllowedInOldRelease)
-                    fail("created procedure with signature");
+            assertStatementError(SQLSTATE_NEED_UPGRADE, s,
+                    PROC_SIGNATURE);
+            break;
 
-            } catch (SQLException sqle) {
-                if (signaturesAllowedInOldRelease)
-                    fail("failed to create valid procedure");
-                
-                assertSQLState("XCL47", sqle);
-            }
-            s.close();
-            break;
-        }
-        case PH_POST_SOFT_UPGRADE:
-        {
-            Statement s = createStatement();
-            try {
-                s.execute("CALL GC()");
-                if (!signaturesAllowedInOldRelease)
-                    fail("procedure was created in soft upgrade!");
-                    
-            } catch (SQLException sqle)
-            {
-                if (signaturesAllowedInOldRelease)
-                    fail("procedure was created not in soft upgrade!");
-            }
-            s.close();
-            break;
-        }
         case PH_HARD_UPGRADE:
-        {
-            Statement s = createStatement();
-            if (!signaturesAllowedInOldRelease)
-                s.execute(PROC_SIGNATURE);
+            s.execute(PROC_SIGNATURE);
             s.execute("CALL GC()");
-            s.close();
             break;
         }
-        }
+        s.close();
     }
 }

@@ -21,15 +21,14 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.security.AccessController;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.apache.derbyTesting.junit.JDBCDataSource;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
+
+import org.apache.derbyTesting.junit.JDBCDataSource;
 
 /**
  * Decorator that sets the phase of the upgrade process
@@ -90,7 +89,16 @@ final class PhaseChanger extends TestSetup {
             break;
         }
         
-        ds.getConnection().close();
+        try {
+            ds.getConnection().close();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            do {
+                e.printStackTrace();
+                e = e.getNextException();
+            } while (e != null);
+            //throw e;
+        }
     }
     
     /**

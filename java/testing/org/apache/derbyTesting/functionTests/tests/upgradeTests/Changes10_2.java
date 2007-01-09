@@ -33,6 +33,9 @@ import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Upgrade test cases for changes made in 10.2.
+ * If the old version is 10.2 or later then these tests
+ * will not be run.
+
  * <BR>
  * 10.2 Upgrade issues
  * <UL>
@@ -40,6 +43,8 @@ import org.apache.derbyTesting.junit.JDBC;
  * does not break triggers in soft upgrade mode.
  * <LI> testReusableRecordIdSequenceNumber - Test reuseable record
  * identifiers does not cause issues in soft upgrade
+ * <LI> testGrantRevokeStatements - Check G/R not allowed in soft upgrade.
+ * <LI> testDatabaseOwner - test that on a hard upgrade database owner is set.
  * </UL>
  */
 public class Changes10_2 extends UpgradeChange {
@@ -210,6 +215,126 @@ public class Changes10_2 extends UpgradeChange {
             break;
         }
         case PH_HARD_UPGRADE:
+            break;
+        }
+    }
+    
+    /**
+     * Simple test of if GRANT/REVOKE statements are handled
+     * correctly in terms of being allowed in soft upgrade.
+     * @throws SQLException 
+     *
+     */
+    public void testGrantRevokeStatements() throws SQLException
+    {
+        Statement s = createStatement();
+        switch(getPhase()) {
+        // 
+        case PH_CREATE:
+        case PH_POST_SOFT_UPGRADE:
+            // was syntax error in 10.0,10.1
+            assertStatementError("42X01", s,
+                "GRANT SELECT ON TABLE1 TO USER1");
+            assertStatementError("42X01", s,
+                "REVOKE SELECT ON TABLE1 FROM USER1");
+
+            break;
+            
+        case PH_SOFT_UPGRADE:
+            // require hard upgrade
+            assertStatementError(SQLSTATE_NEED_UPGRADE, s,
+                "GRANT SELECT ON TABLE1 TO USER1");
+            assertStatementError(SQLSTATE_NEED_UPGRADE, s,
+                "REVOKE SELECT ON TABLE1 FROM USER1");
+
+            break;
+            
+        case PH_HARD_UPGRADE:
+            // not supported because SQL authorization not set
+            assertStatementError("42Z60", s,
+                "GRANT SELECT ON TABLE1 TO USER1");
+            assertStatementError("42Z60", s,
+                "REVOKE SELECT ON TABLE1 FROM USER1");
+            break;
+        }
+        s.close();
+    }
+    
+    /**
+     * This method lists the schema names and authorization ids in 
+     * SYS.SCHEMAS table. This is to test that the owner of system schemas is 
+     * changed from pseudo user "DBA" to the user invoking upgrade. 
+     * 
+     * @throws SQLException
+     */
+    public void testDatabaseOwnerChange() throws SQLException
+    {
+        switch (getPhase())
+        {
+        case PH_CREATE:
+        case PH_SOFT_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+            checkSystemSchemasOwner("DBA");
+            break;
+
+        case PH_HARD_UPGRADE:
+            checkSystemSchemasOwner(getTestConfiguration().getUserName());
+            break;
+        }
+    }
+    
+    private void checkSystemSchemasOwner(String name) throws SQLException
+    {
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery(
+                "select AUTHORIZATIONID, SCHEMANAME from SYS.SYSSCHEMAS " +
+                   "WHERE SCHEMANAME LIKE 'SYS%' OR " +
+                   "SCHEMANAME IN ('NULLID', 'SQLJ')");
+        
+        while (rs.next()) {
+            assertEquals("AUTHORIZATIONID not valid for " + rs.getString(2),
+                    name, rs.getString(1));
+        }
+        
+        rs.close();
+        s.close();
+    }
+    
+    /**
+     * This method checks that some system routines are granted public access 
+     * after a full upgrade.
+     * 
+     * @throws SQLException
+     */
+    public void testSystemRoutinePermissions() throws SQLException
+    {
+        switch (getPhase())
+        {
+        case PH_CREATE:
+        case PH_SOFT_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+            break;
+
+        case PH_HARD_UPGRADE:
+            Statement s = createStatement();
+            ResultSet rs = s.executeQuery("select A.ALIAS FROM " +
+                    "SYS.SYSROUTINEPERMS R, SYS.SYSALIASES A " +
+                    "WHERE R.ALIASID = A.ALIASID AND " +
+                    "R.GRANTEE = 'PUBLIC' AND " +
+                    "R.GRANTOR = '"
+                        + getTestConfiguration().getUserName() + "'" +
+                    " ORDER BY 1");
+            
+            JDBC.assertFullResultSet(rs, new String[][]
+                    {{"SYSCS_COMPRESS_TABLE"},
+                    {"SYSCS_GET_RUNTIMESTATISTICS"},
+                    {"SYSCS_INPLACE_COMPRESS_TABLE"},
+                    {"SYSCS_SET_RUNTIMESTATISTICS"},
+                    {"SYSCS_SET_STATISTICS_TIMING"}}
+                    );
+
+            rs.close();
+            s.close();
             break;
         }
     }

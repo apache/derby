@@ -43,6 +43,13 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
     static ThreadLocal oldVersion = new ThreadLocal();
     
     /**
+     * SWL state thrown when a feature requires upgrade
+     * to a newer version and thus cannot be run in soft
+     * upgrade mode.
+     */
+    static final String SQLSTATE_NEED_UPGRADE = "XCL47";
+    
+    /**
      * Phases in upgrade test
      */
     static final String[] PHASES =

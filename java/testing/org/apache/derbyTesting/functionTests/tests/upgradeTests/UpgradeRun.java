@@ -32,7 +32,6 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -107,7 +106,7 @@ class UpgradeRun {
             }
             Test phaseTests = baseSuite(
                     "Upgrade Phase: " + UpgradeChange.PHASES[phase],
-                    phase);
+                    phase, version);
             
             suite.addTest(new PhaseChanger(phaseTests, phase, loader, version));
         }
@@ -123,8 +122,32 @@ class UpgradeRun {
         return SecurityManagerSetup.noSecurityManager(setup);
     }
     
-    private static Test baseSuite(String name, int phase) {
+    /**
+     * Add the tests from the various Changes classes (sub-classes
+     * of UpgradeChange) to the base suite which corresponds to
+     * a single phase of a run against an old database version.
+     * <BR>
+     * Changes are only added if the old version is older than
+     * then version the changes represent. Thus Changes10_2
+     * is not added if the old database (upgrade from) is already
+     * at 10.2, since Changes10_2 is intended to test upgrade
+     * from an older version to 10.2.
+     * <BR>
+     * This is for two reasons:
+     * <OL>
+     * <LI> Prevents an endless increase in number of test
+     * cases that do no real testing. 
+     * <LI> Simplifies test fixtures by allowing them to
+     * focus on cases where testing is required, and not
+     * handling all future situations.
+     * </OL>
+     * 
+     */
+    private static Test baseSuite(String name, int phase, int[] version) {
         TestSuite suite = new TestSuite(name);
+        
+        int oldMajor = version[0];
+        int oldMinor = version[1];
           
         // No connection is expected in the post hard upgrade
         // phase, so don't bother adding test fixtures.
@@ -132,9 +155,14 @@ class UpgradeRun {
         {
             suite.addTest(BasicSetup.suite());
             
-            suite.addTest(Changes10_1.suite());
-            suite.addTest(Changes10_2.suite());
-            suite.addTest(Changes10_3.suite());
+            if (oldMajor == 10) {
+                if (oldMinor < 1)
+                    suite.addTest(Changes10_1.suite());
+                if (oldMinor < 2)
+                   suite.addTest(Changes10_2.suite());
+                if (oldMinor < 3)
+                   suite.addTest(Changes10_3.suite());
+            }
         }
                 
         return TestConfiguration.connectionDSDecorator(suite);
