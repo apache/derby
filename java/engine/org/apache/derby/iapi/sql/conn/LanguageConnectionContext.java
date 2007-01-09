@@ -391,35 +391,7 @@ public interface LanguageConnectionContext extends Context {
 	 */
 
 	TransactionController getTransactionExecute();
-
-    /**
-     * Get the system schema name.
-     *
-     * @return a String containing the system schema name.
-     */
-    public String getSystemSchemaName() throws StandardException;
-    
-    /**
-     * Get the SYSIBM schema name.
-     *
-     * @return a String containing the SYSIBM schema name.
-     */
-    public String getSysIBMSchemaName() throws StandardException;
-
-    /**
-     * Get the SYSCS_DIAG schema name.
-     *
-     * @return a String containing the SYSIBM schema name.
-     */
-    public String getSystemDiagSchemaName() throws StandardException;
-
-    /**
-     * Get the SYSCS_UTIL schema name.
-     *
-     * @return a String containing the SYSIBM schema name.
-     */
-    public String getSystemUtilSchemaName() throws StandardException;
-    
+   
 	/**
 		Get the data dictionary 
 
@@ -457,13 +429,6 @@ public interface LanguageConnectionContext extends Context {
 	 * @return String	the authorization id
 	 */
 	public String getAuthorizationId();
-
-    /**
-     * Get the declared global temporary tables schema name.
-     *
-     * @return a String containing the declared global temporary tables schema name.
-     */
-    public String getDeclaredGlobalTemporaryTablesSchemaName() throws StandardException;
   
 	/**
 	 *	Get the current default schema

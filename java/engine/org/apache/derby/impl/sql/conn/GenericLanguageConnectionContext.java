@@ -2817,65 +2817,6 @@ public class GenericLanguageConnectionContext
 		statementDepth = 0;
 	}
 
-    /**
-     * Get the name of the system schema.
-     *
-     * @return	A String containing the name of the system schema.
-     * @throws StandardException
-     */
-    public String getSystemSchemaName() throws StandardException
-    {
-        return convertIdentifierCase( SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME);
-    }
-    
-    /**
-     * Get the name of the SYSIBM schema.
-     *
-     * @return	A String containing the name of the SYSIBM schema.
-     * @throws StandardException
-     */
-    public String getSysIBMSchemaName() throws StandardException
-    {
-        return convertIdentifierCase( SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME);
-    }
-
-    /**
-     * Get the name of the SYSCS_DIAG schema.
-     *
-     * @return	A String containing the name of the SYSIBM schema.
-     * @throws StandardException
-     */
-    public String getSystemDiagSchemaName() throws StandardException
-    {
-        return(
-            convertIdentifierCase(
-                SchemaDescriptor.STD_SYSTEM_DIAG_SCHEMA_NAME));
-    }
-
-    /**
-     * Get the name of the SYSCS_UTIL schema.
-     *
-     * @return	A String containing the name of the SYSIBM schema.
-     * @throws StandardException
-     */
-    public String getSystemUtilSchemaName() throws StandardException
-    {
-        return(
-            convertIdentifierCase(
-                SchemaDescriptor.STD_SYSTEM_UTIL_SCHEMA_NAME));
-    }
-    
-    /**
-     * Get the declared global temporary tables schema name.
-     *
-     * @return	a String containing the declared global temporary tables schema name.
-     * @throws StandardException
-     */
-    public String getDeclaredGlobalTemporaryTablesSchemaName() throws StandardException
-    {
-        return convertIdentifierCase( SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME);
-    }
-
 	public DataDictionary getDataDictionary()
 	{
         return getDatabase().getDataDictionary();

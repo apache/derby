@@ -150,20 +150,9 @@ import java.io.IOException;
 import java.sql.Types;
 
 /**
- * This abstract class contains the common code for the "regular" and
- * limited data dictionaries.  The limited configuration puts an upper
- * limit on the number of tables a user is allowed to create.
- *
- * This class provides the entire implementation of DataDictionary,
- * and ModuleControl, except for the stop()
- * method, which is to be provided by a non-abstract super-class.
- * The reason for putting the stop() method in the super-class is to
- * prevent someone from inadvertently changing this to a non-abstract
- * class.  This class is shipped with both the limited and non-limited
- * configurations, and we don't want anyone to be able to cheat by
- * booting this class instead of booting the super-class.
+ * Standard database implementation of the data dictionary
+ * that stores the information in the system catlogs.
  */
-
 public final class	DataDictionaryImpl
 	implements DataDictionary, CacheableFactory, ModuleControl, ModuleSupportable,java.security.PrivilegedAction
 {
@@ -268,18 +257,10 @@ public final class	DataDictionaryImpl
 	** SchemaDescriptors for system and app schemas.  Both
 	** are canonical.  We cache them for fast lookup.
 	*/
-	protected SchemaDescriptor systemSchemaDesc;
-	protected SchemaDescriptor sysIBMSchemaDesc;
-	protected SchemaDescriptor declaredGlobalTemporaryTablesSchemaDesc;
-	protected SchemaDescriptor systemDiagSchemaDesc;
-	protected SchemaDescriptor systemUtilSchemaDesc;
-
-    private String systemSchemaName;
-    private String systemDiagSchemaName;
-    private String systemUtilSchemaName;
-    private String sysIBMSchemaName;
-    private String declaredGlobalTemporaryTablesSchemaName;
-    boolean builtinSchemasAreFromLCC;
+	private SchemaDescriptor systemSchemaDesc;
+	private SchemaDescriptor sysIBMSchemaDesc;
+	private SchemaDescriptor declaredGlobalTemporaryTablesSchemaDesc;
+	private SchemaDescriptor systemUtilSchemaDesc;
 
     protected boolean convertIdToLower;
     // Convert identifiers to lower case (as in Foundation) or not.
@@ -349,8 +330,8 @@ public final class	DataDictionaryImpl
 	// no other system tables have id's in the configuration.
 
 	public	DataDescriptorGenerator		dataDescriptorGenerator;
-	protected DataValueFactory			dvf;
-	protected AccessFactory               af;
+	private DataValueFactory			dvf;
+	AccessFactory               af;
 	//DataDictionaryContext				ddc;
 
 	private	ExecutionFactory	exFactory;
@@ -481,6 +462,8 @@ public final class	DataDictionaryImpl
 		uuidFactory = Monitor.getMonitor().getUUIDFactory();
 
 		engineType = Monitor.getEngineType( startParams );
+        
+        getBuiltinSchemas();
 
 		// REMIND: actually, we're supposed to get the DataValueFactory
 		// out of the connection context...this is a bit of a shortcut.
@@ -1215,68 +1198,28 @@ public final class	DataDictionaryImpl
 		return exFactory;
 	}
 
-    /* We defer getting the builtin schemas (system and default) past boot time so that
-     * the language connection context will be available.
+
+    /**
+     * Set up the builtin schema descriptors.
      */
-    private void getBuiltinSchemaNames() throws StandardException
+    private void getBuiltinSchemas()
     {
-        if( builtinSchemasAreFromLCC)
+        if (systemSchemaDesc != null)
             return;
-        
-        LanguageConnectionContext lcc = getLCC();
-        if( null == lcc)
-        {
-            systemSchemaName        = SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME;
-            sysIBMSchemaName        = SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME;
-
-            systemDiagSchemaName    = 
-                SchemaDescriptor.STD_SYSTEM_DIAG_SCHEMA_NAME;
-            systemUtilSchemaName    = 
-                SchemaDescriptor.STD_SYSTEM_UTIL_SCHEMA_NAME;
-            declaredGlobalTemporaryTablesSchemaName = 
-                SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME;
-        }
-        else
-        {
-            systemSchemaName        = lcc.getSystemSchemaName();
-            sysIBMSchemaName        = lcc.getSysIBMSchemaName();
-            systemDiagSchemaName    = lcc.getSystemDiagSchemaName();
-            systemUtilSchemaName    = lcc.getSystemUtilSchemaName();
-            declaredGlobalTemporaryTablesSchemaName = 
-                lcc.getDeclaredGlobalTemporaryTablesSchemaName();
-
-            builtinSchemasAreFromLCC = true;
-        }
-    }
-
-    private void getBuiltinSchemas() throws StandardException
-    {
-        if( builtinSchemasAreFromLCC
-            && null != systemSchemaDesc
-            && null != sysIBMSchemaDesc
-            && null != systemDiagSchemaDesc
-            && null != systemUtilSchemaDesc
-            && null != declaredGlobalTemporaryTablesSchemaDesc)
-            return;
-
-        getBuiltinSchemaNames();
-
+ 
 		systemSchemaDesc = 
-            newSystemSchemaDesc(
-                systemSchemaName, SchemaDescriptor.SYSTEM_SCHEMA_UUID);
+            newSystemSchemaDesc(SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME,
+                SchemaDescriptor.SYSTEM_SCHEMA_UUID);
 		sysIBMSchemaDesc = 
-            newSystemSchemaDesc(
-                sysIBMSchemaName, SchemaDescriptor.SYSIBM_SCHEMA_UUID);
-		systemDiagSchemaDesc  = 
-            newSystemSchemaDesc(
-                systemDiagSchemaName, SchemaDescriptor.SYSCS_DIAG_SCHEMA_UUID);
+            newSystemSchemaDesc(SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME,
+                SchemaDescriptor.SYSIBM_SCHEMA_UUID);
 		systemUtilSchemaDesc  = 
-            newSystemSchemaDesc(
-                systemUtilSchemaName, SchemaDescriptor.SYSCS_UTIL_SCHEMA_UUID);
+            newSystemSchemaDesc(SchemaDescriptor.STD_SYSTEM_UTIL_SCHEMA_NAME,
+                SchemaDescriptor.SYSCS_UTIL_SCHEMA_UUID);
 
 		declaredGlobalTemporaryTablesSchemaDesc = 
             newDeclaredGlobalTemporaryTablesSchemaDesc(
-                declaredGlobalTemporaryTablesSchemaName);
+                    SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME);
     }
 
 	/**
@@ -1293,7 +1236,6 @@ public final class	DataDictionaryImpl
 	public SchemaDescriptor	getSystemSchemaDescriptor()
 						throws StandardException
     {
-        getBuiltinSchemas();
         return systemSchemaDesc;
     }
 
@@ -1312,26 +1254,7 @@ public final class	DataDictionaryImpl
 	public SchemaDescriptor	getSystemUtilSchemaDescriptor()
 						throws StandardException
     {
-        getBuiltinSchemas();
         return(systemUtilSchemaDesc);
-    }
-
-	/**
-	 * Get the descriptor for the SYSCS_DIAG system schema. 
-     * Schema descriptors include authorization ids and schema ids.
-     *
-	 * SQL92 allows a schema to specify a default character set - we will
-	 * not support this.
-	 *
-	 * @return	The descriptor for the schema.
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	public SchemaDescriptor	getSystemDiagSchemaDescriptor()
-						throws StandardException
-    {
-        getBuiltinSchemas();
-        return(systemDiagSchemaDesc);
     }
 
 	/**
@@ -1348,7 +1271,6 @@ public final class	DataDictionaryImpl
 	public SchemaDescriptor	getSysIBMSchemaDescriptor()
 						throws StandardException
     {
-        getBuiltinSchemas();
         return sysIBMSchemaDesc;
     }
 
@@ -1363,7 +1285,6 @@ public final class	DataDictionaryImpl
 	public SchemaDescriptor	getDeclaredGlobalTemporaryTablesSchemaDescriptor()
         throws StandardException
     {
-        getBuiltinSchemas();
         return declaredGlobalTemporaryTablesSchemaDesc;
     }  
     
@@ -1378,8 +1299,6 @@ public final class	DataDictionaryImpl
     public boolean isSystemSchemaName( String name)
         throws StandardException
     {
-        getBuiltinSchemaNames();
-
         boolean ret_val = false;
 
         for (int i = systemSchemaNames.length - 1; i >= 0;)

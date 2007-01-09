@@ -339,20 +339,6 @@ public interface DataDictionary
 						throws StandardException;
 
 	/**
-	 * Get the descriptor for the SYSCS_DIAG schema. Schema descriptors 
-     * include authorization ids and schema ids.
-     *
-	 * SQL92 allows a schema to specify a default character set - we will
-	 * not support this.
-	 *
-	 * @return	The descriptor for the schema.
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	public SchemaDescriptor	getSystemDiagSchemaDescriptor( )
-						throws StandardException;
-
-	/**
 	 * Get the descriptor for the declared global temporary table schema which is always named "SESSION".
 	 *
 	 * SQL92 allows a schema to specify a default character set - we will
