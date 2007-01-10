@@ -138,7 +138,9 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     protected void setUp() throws UnsupportedEncodingException, SQLException
     {
         cal = Calendar.getInstance();
-        runSQLCommands("DELETE FROM TIME_ALL;");
+        Statement s  = createStatement();
+        s.executeUpdate("DELETE FROM TIME_ALL");
+        s.close();
     }
     
     /**

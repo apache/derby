@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Types;
 
@@ -65,24 +66,24 @@ public class RoutineTest extends BaseJDBCTestCase {
      */
     public void testFunctionNullHandling() throws SQLException, UnsupportedEncodingException
     {
+        Statement s = createStatement();
+        
         // Create three simple functions that take an integer and
         // return its value as a VARCHAR().
-        int errors = runSQLCommands(
+        s.executeUpdate(
         "CREATE FUNCTION SV_NOCALL(INTEGER) RETURNS VARCHAR(10) " +
            "RETURNS NULL ON NULL INPUT " +
            "EXTERNAL NAME 'java.lang.String.valueOf'  " +
-           "LANGUAGE JAVA PARAMETER STYLE JAVA; " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
            
-        "CREATE FUNCTION SV_CALL(INTEGER) RETURNS VARCHAR(10) " +
+        s.executeUpdate("CREATE FUNCTION SV_CALL(INTEGER) RETURNS VARCHAR(10) " +
           "CALLED ON NULL INPUT " +
           "EXTERNAL NAME 'java.lang.String.valueOf' " +
-          "LANGUAGE JAVA PARAMETER STYLE JAVA; " +
+          "LANGUAGE JAVA PARAMETER STYLE JAVA");
           
-        "CREATE FUNCTION SV_DEFAULT(INTEGER) RETURNS VARCHAR(10) " +
+        s.executeUpdate("CREATE FUNCTION SV_DEFAULT(INTEGER) RETURNS VARCHAR(10) " +
           "EXTERNAL NAME 'java.lang.String.valueOf' " +
-          "LANGUAGE JAVA PARAMETER STYLE JAVA; ");
-        
-        assertEquals("errors running DDL", 0, errors);
+          "LANGUAGE JAVA PARAMETER STYLE JAVA");
         
         // Simple cases of calling each function individually
         // Test each function with non-NULL and NULL values.
@@ -116,22 +117,20 @@ public class RoutineTest extends BaseJDBCTestCase {
         ps.close();
         
         // Test that any single argument being null causes NULL to be returned.
-        errors = runSQLCommands(
+        s.executeUpdate(
                 "CREATE FUNCTION CONCAT_NOCALL(VARCHAR(10), VARCHAR(10)) " +
                    "RETURNS VARCHAR(20) " +
                    "RETURNS NULL ON NULL INPUT " +
                    "EXTERNAL NAME '" +
                    RoutineTest.class.getName() + ".concat'  " +
-                   "LANGUAGE JAVA PARAMETER STYLE JAVA; " +
+                   "LANGUAGE JAVA PARAMETER STYLE JAVA");
+         s.executeUpdate(
                 "CREATE FUNCTION CONCAT_CALL(VARCHAR(10), VARCHAR(10)) " +
                    "RETURNS VARCHAR(20) " +
                    "CALLED ON NULL INPUT " +
                    "EXTERNAL NAME '" +
                    RoutineTest.class.getName() + ".concat'  " +
-                   "LANGUAGE JAVA PARAMETER STYLE JAVA; "
-                   
-        );  
-        assertEquals("errors running DDL", 0, errors);
+                   "LANGUAGE JAVA PARAMETER STYLE JAVA");
         
         ps = prepareStatement("VALUES CONCAT_NOCALL(?, ?)");
         ps.setString(1, "good");
@@ -215,22 +214,21 @@ public class RoutineTest extends BaseJDBCTestCase {
         
         // Nested calls with SQL types that do not need casts
         // and map to primitive types. This had issues see DERBY-479
-        errors = runSQLCommands(
+        s.executeUpdate(
                 "CREATE FUNCTION SAME_NOCALL(INTEGER) " +
                    "RETURNS INTEGER " +
                    "RETURNS NULL ON NULL INPUT " +
                    "EXTERNAL NAME '" +
                    RoutineTest.class.getName() + ".same'  " +
-                   "LANGUAGE JAVA PARAMETER STYLE JAVA; " +
+                   "LANGUAGE JAVA PARAMETER STYLE JAVA");
+        
+        s.executeUpdate(
                 "CREATE FUNCTION SAME_CALL(INTEGER) " +
                    "RETURNS INTEGER " +
                    "CALLED ON NULL INPUT " +
                    "EXTERNAL NAME '" +
                    RoutineTest.class.getName() + ".same'  " +
-                   "LANGUAGE JAVA PARAMETER STYLE JAVA; "
-                   
-        );  
-        assertEquals("errors running DDL", 0, errors);
+                   "LANGUAGE JAVA PARAMETER STYLE JAVA");
         
         ps = prepareStatement("VALUES SAME_NOCALL(SAME_NOCALL(?))");
         ps.setInt(1, 41);
@@ -260,22 +258,21 @@ public class RoutineTest extends BaseJDBCTestCase {
         assertStatementError("39004", ps); // Can't pass NULL into primitive type
         ps.close();
 
-        errors = runSQLCommands(
+        s.executeUpdate(
                 "CREATE FUNCTION NOON_NOCALL(TIME) " +
                    "RETURNS TIME " +
                    "RETURNS NULL ON NULL INPUT " +
                    "EXTERNAL NAME '" +
                    RoutineTest.class.getName() + ".nullAtNoon'  " +
-                   "LANGUAGE JAVA PARAMETER STYLE JAVA; " +
+                   "LANGUAGE JAVA PARAMETER STYLE JAVA");
+        
+        s.executeUpdate(
                 "CREATE FUNCTION NOON_CALL(TIME) " +
                    "RETURNS TIME " +
                    "CALLED ON NULL INPUT " +
                    "EXTERNAL NAME '" +
                    RoutineTest.class.getName() + ".nullAtNoon'  " +
-                   "LANGUAGE JAVA PARAMETER STYLE JAVA; "
-                   
-        );  
-        assertEquals("errors running DDL", 0, errors);
+                   "LANGUAGE JAVA PARAMETER STYLE JAVA");
         
         // Function maps:
         // NULL to 11:00:00 (if null can be passed)
@@ -347,6 +344,8 @@ public class RoutineTest extends BaseJDBCTestCase {
         ps.setTime(1, null); // NULL->11:00:00->11:30:00
         JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:30:00");
         ps.close();
+        
+        s.close();
     }
     
     /*

@@ -31,6 +31,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.Derby;
 
 /**
  * Test the ij.runScript api method.
@@ -40,9 +41,13 @@ public class IJRunScriptTest extends BaseJDBCTestCase {
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("IJRunScriptTest");
-        suite.addTestSuite(IJRunScriptTest.class);
-        return new CleanDatabaseTestSetup(suite);
+        if (Derby.hasTools()) {
+            TestSuite suite = new TestSuite("IJRunScriptTest");
+            suite.addTestSuite(IJRunScriptTest.class);
+            return new CleanDatabaseTestSetup(suite);
+        }
+        
+        return new TestSuite("empty: no tools support");
     }
     
     public IJRunScriptTest(String name)
