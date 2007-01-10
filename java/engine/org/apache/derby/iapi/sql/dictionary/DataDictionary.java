@@ -1681,25 +1681,43 @@ public interface DataDictionary
     throws StandardException;
 
 	/**
-	 * Return the Java class to use for the VTI for
-	 * the virtual table. Assumes the descriptor is
-	 * of type TableDescriptor.VTI_TYPE.
-	 */
-	public String getVTIClassForTable(TableDescriptor td)
-		throws StandardException;
-
-	/**
-	 * Return the Java class to use for the VTI to which the received table
-	 * function name maps.  The table function name is a qualified name and
-	 * thus has two parts: a schema name and a function name.
+	 * Return the Java class to use for the VTI to which the received
+	 * table descriptor maps.
 	 *
-	 * @param funcSchema Schema part of the function name
-	 * @param funcName Actual name of the function
-	 * @return Java class name to which <funcSchema>.<funcName> maps, or
-	 *  null if no mapping is found.
+	 * There are two kinds of VTI mappings that we do: the first is for
+	 * "table names", the second is for "table function names".  Table
+	 * names can only be mapped to VTIs that do not accept any arguments;
+	 * any VTI that has at least one constructor which accepts one or more
+	 * arguments must be mapped from a table *function* name.
+	 *
+	 * An example of a VTI "table name" is the following:
+	 *
+	 *   select * from SYSCS_DIAG.LOCK_TABLE
+	 *
+	 * In this case "SYSCS_DIAG.LOCK_TABLE" is the table name that we want
+	 * to map.  Since the corresonding VTI does not accept any arguments,
+	 * this VTI table name can be used anywhere a normal base table name
+	 * can be used.
+	 *
+	 * An example of a VTI "table function name" is the following:
+	 *
+	 *   select * from TABLE(SYSCS_DIAG.SPACE_TABLE(?)) x
+	 *
+	 * In this case "SYSCS_DIAG.SPACE_TABLE" is the table function name that
+	 * we want to map.  Since the corresponding VTI can take either one or
+	 * two arguments we have to use the TABLE constructor syntax to pass the
+	 * argument(s) in as if we were making a function call.  Hence the term
+	 * "table function".
+	 *
+	 * @param td Table descriptor used for the VTI look-up.
+	 * @param asTableFunction If false then treat td's descriptor name as a
+	 *  VTI "table name"; if true, treat the descriptor name as a VTI "table
+	 *  function name".
+	 * @return Java class name to which "td" maps, or null if no mapping
+	 *  is found.
 	 */
-	public String getVTIClassForTableFunction(String funcSchema,
-		String funcName) throws StandardException;
+	public String getVTIClass(TableDescriptor td, boolean asTableFunction)
+		throws StandardException;
 
 	/**
 	 * Adds a descriptor to a system catalog identified by the catalogNumber. 

@@ -7411,8 +7411,16 @@ vtiTableConstruct() throws StandardException :
         methodCallParameterList(parameterList)
     <RIGHT_PAREN>
     {
+		/* The fact that we pass a NULL table descriptor to the
+		 * following call is an indication that we are mapping to a
+		 * VTI table function (i.e. one that accepts arguments).
+		 * Since we have the table name we do not need to pass in a
+		 * TableDescriptor--we'll just create one from the table
+		 * name. See NewInvocationNode for more.
+		 */
         newNode = nodeFactory.getNode(C_NodeTypes.NEW_INVOCATION_NODE,
-                    vtiTableName,
+                    vtiTableName,  // TableName
+                    null,          // TableDescriptor
                     parameterList, 
                     lastTokenDelimitedIdentifier,
                     getContextManager());

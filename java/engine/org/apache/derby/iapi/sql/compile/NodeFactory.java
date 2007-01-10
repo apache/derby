@@ -610,7 +610,6 @@ public abstract class NodeFactory
 	 * Used to convert from system diagnostic tables
 	 * to VTI scans.
 	 * @param td Table that is really a vti
-	 * @param vtiClass Java class name for virtual table
 	 * @param correlationName Correlation name of table clause
 	 * @param resultColumns Columns extracted from table.
 	 * @param tableProperties Properties being passed onto the table scan
@@ -618,7 +617,6 @@ public abstract class NodeFactory
 	 */
 	public abstract ResultSetNode mapTableAsVTI(
 			TableDescriptor td,
-			String vtiClass,
 			String correlationName,
 			ResultColumnList resultColumns,
 			Properties tableProperties,		

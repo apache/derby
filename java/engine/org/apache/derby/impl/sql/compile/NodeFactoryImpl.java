@@ -678,7 +678,9 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 
 	/**
 	 * Return a node that represents invocation of the virtual table
-	 * for the given table descriptor using the passed in vti class name.
+	 * for the given table descriptor.  The mapping of the table descriptor
+	 * to a specific VTI class name will occur as part of the "init"
+	 * phase for the NewInvocationNode that we create here.
 	 * <P>
 	 * Currently only handles no argument vtis corresponding to a subset
 	 * of the diagnostic tables. (e.g. lock_table).
@@ -690,7 +692,6 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 	 */
 	public ResultSetNode mapTableAsVTI(
 			TableDescriptor td,
-			String vtiClass,
 			String correlationName,
 			ResultColumnList resultColumns,
 			Properties tableProperties,		
@@ -698,9 +699,18 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		throws StandardException {
 		
 	
-		QueryTreeNode newNode = getNode(C_NodeTypes.NEW_INVOCATION_NODE, 
-				vtiClass,
-				emptyVector, Boolean.FALSE,
+		/* The fact that we pass a non-null table descriptor to the
+		 * following call is an indication that we are mapping to a
+		 * no-argument VTI.  Since we have the table descriptor we
+		 * do not need to pass in a TableName. See NewInvocationNode
+		 * for more.
+		 */
+		QueryTreeNode newNode =
+			getNode(C_NodeTypes.NEW_INVOCATION_NODE, 
+				null,	// TableName
+				td,     // TableDescriptor
+				emptyVector,
+				Boolean.FALSE,
 				cm);
 		
 		 QueryTreeNode vtiNode;

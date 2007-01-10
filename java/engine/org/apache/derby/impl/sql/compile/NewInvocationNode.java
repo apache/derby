@@ -36,7 +36,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -68,9 +68,7 @@ public class NewInvocationNode extends MethodCallNode
 	 * Initializer for a NewInvocationNode. Parameters are:
 	 *
 	 * <ul>
-	 * <li>javaClassName		The full package.class name of the class
-	 * 	                    	(as a String), or else a TableName object
-	 *                  		that maps to the full class name </li>
+	 * <li>javaClassName		The full package.class name of the class</li>
 	 * <li>parameterList		The parameter list for the constructor</li>
 	 * </ul>
 	 *
@@ -85,48 +83,107 @@ public class NewInvocationNode extends MethodCallNode
 		super.init("<init>");
 		addParms((Vector) params);
 
-		/* If javaClassName is a String then it is the full package
-		 * class name for the class to be invoked, so just store it
-		 * locally.
-		 */
-		if (javaClassName instanceof String)
-			this.javaClassName = (String) javaClassName;
-		else
+		this.javaClassName = (String) javaClassName;
+		this.delimitedIdentifier =
+				 ((Boolean) delimitedIdentifier).booleanValue();
+	}
+
+	/* This version of the "init" method is used for mapping a table name
+	 * or table function name to a corresponding VTI class name.  The VTI
+	 * is then invoked as a regular NEW invocation node.
+	 *
+	 * There are two kinds of VTI mappings that we do: the first is for
+	 * "table names", the second is for "table function names".  Table
+	 * names can only be mapped to VTIs that do not accept any arguments;
+	 * any VTI that has at least one constructor which accepts one or more
+	 * arguments must be mapped from a table *function* name.  The way we
+	 * tell the difference is by looking at the received arguments: if
+	 * the vtiTableFuncName that we receive is null then we are mapping
+	 * a "table name" and tableDescriptor must be non-null; if the
+	 * vtiTableFuncName is non-null then we are mapping a "table
+	 * function name" and tableDescriptor must be null.
+	 *
+	 * Note that we could have just used a single "init()" method and
+	 * performed the mappings based on what type of Object "javaClassName"
+	 * was (String, TableDescriptor, or TableName), but making this VTI
+	 * mapping method separate from the "normal" init() method seems
+	 * cleaner...
+	 *
+	 * @param vtiTableFuncName A TableName object holding a qualified name
+	 *  that maps to a VTI which accepts arguments.  If vtiTableFuncName is
+	 *  null then tableDescriptor must NOT be null.
+	 * @param tableDescriptor A table descriptor that corresponds to a
+	 *  table name (as opposed to a table function name) that will be
+	 *  mapped to a no-argument VTI.  If tableDescriptor is null then
+	 *  vtiTableFuncName should not be null.
+	 * @param params Parameter list for the VTI constructor.
+	 * @param delimitedIdentifier Whether or not the target class name
+	 *  is a delimited identifier.
+	 */
+	public void init(
+					Object vtiTableFuncName,
+					Object tableDescriptor,
+					Object params,
+					Object delimitedIdentifier)
+		throws StandardException
+	{
+		super.init("<init>");
+		addParms((Vector) params);
+
+		if (SanityManager.DEBUG)
 		{
-			/* javaClassName is a TableName object representing a table
-			 * function name that maps to some VTI class name.  For
-			 * example, in the following query:
-			 *
-			 *   select * from TABLE(SYSCS_DIAG.SPACE_TABLE(?)) x
-			 *
-			 * javaClassName will be a TableName object representing
-			 * the table function name "SYSCS_DIAG.SPACE_TABLE".  So
-			 * we need to look up that TableName to figure out what
-			 * the corresponding target class name should be.  We
-			 * figure that out by using the data dictionary.
-			 */
-			TableName funcName = (TableName)javaClassName;
+			// Exactly one of vtiTableFuncName or tableDescriptor should
+			// be null.
+			SanityManager.ASSERT(
+				((vtiTableFuncName == null) && (tableDescriptor != null)) ||
+				((vtiTableFuncName != null) && (tableDescriptor == null)),
+				"Exactly one of vtiTableFuncName or tableDescriptor should " +
+				"be null, but neither or both of them were null.");
+		}
 
-			/* If no schema was specified then we want to default to the
-			 * current schema; that's what the following line does.
-			 */
-			String funcSchema =
-				getSchemaDescriptor(funcName.getSchemaName()).getSchemaName();
+		TableName vtiName = (TableName)vtiTableFuncName;
+		TableDescriptor td = (TableDescriptor)tableDescriptor;
+		boolean isTableFunctionVTI = (vtiTableFuncName != null);
+		if (isTableFunctionVTI)
+		{
+			// We have to create a generic TableDescriptor to
+			// pass to the data dictionary.
+			td = new TableDescriptor(getDataDictionary(),
+					vtiName.getTableName(),
+					getSchemaDescriptor(vtiName.getSchemaName()),
+					TableDescriptor.VTI_TYPE,
+					TableDescriptor.DEFAULT_LOCK_GRANULARITY);
+		}
 
-			this.javaClassName =
-				getDataDictionary().getVTIClassForTableFunction(
-					funcSchema, funcName.getTableName());
+		/* Use the table descriptor to figure out what the corresponding
+		 * VTI class name is; we let the data dictionary do the mapping
+		 * for us.
+		 */
+		this.javaClassName = getDataDictionary().getVTIClass(
+			td, isTableFunctionVTI);
 
-			/* If javaClassName is still null at this point then we
-			 * could not find the target class for the received
-			 * table function name.
-			 */
-			if (this.javaClassName == null)
+		/* If javaClassName is still null at this point then we
+		 * could not find the target class for the received table
+		 * (or table function) name.  So throw the appropriate
+		 * error.
+		 */
+		if (this.javaClassName == null)
+		{
+			if (!isTableFunctionVTI)
 			{
-				throw StandardException.newException(
-					SQLState.LANG_NO_SUCH_METHOD_ALIAS,
-					funcName.getFullTableName());
+				/* Create a TableName object from the table descriptor
+				 * that we received.  This gives us the name to use
+				 * in the error message.
+				 */
+				vtiName = makeTableName(td.getSchemaName(),
+					td.getDescriptorName());
 			}
+
+			throw StandardException.newException(
+				isTableFunctionVTI
+					? SQLState.LANG_NO_SUCH_METHOD_ALIAS
+					: SQLState.LANG_TABLE_NOT_FOUND,
+				vtiName.getFullTableName());
 		}
 
 		this.delimitedIdentifier =
