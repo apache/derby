@@ -375,6 +375,20 @@ public class VerifySignatures extends BaseJDBCTestCase {
          * @exception NoSuchMethodException if the method is not found
          */
         public void runTest() throws NoSuchMethodException {
+            checkImplementationMethod(derbyImplementation, ifaceMethod);
+        }   
+    }
+    
+    /**
+     * checks that a class implements a specific method.
+     * @param derbyImplementation The Derby implementation class which is tested
+     * @param ifaceMethod The method that should be implemented.
+     */
+    private static void checkImplementationMethod(
+            Class derbyImplementation, Method ifaceMethod)
+        throws NoSuchMethodException
+    {
+        
             assertFalse("Implementation class is interface",
                         derbyImplementation.isInterface());
 
@@ -413,7 +427,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
          * exception class, or <code>null</code> if no compatible
          * class is found
          */
-        private Class findCompatibleClass(Class exception, Class[] declared)
+        private static Class findCompatibleClass(Class exception, Class[] declared)
         {
             for (Class<?> dec : declared) {
                 if (dec.isAssignableFrom(exception)) {
@@ -422,7 +436,6 @@ public class VerifySignatures extends BaseJDBCTestCase {
             }
             return null;
         }
-    }
 
     /**
      * Test case which checks that all relevant JDBC interfaces are
