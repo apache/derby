@@ -515,12 +515,9 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
         // needs to be RESOLVED
 		Object[] row = new Object[fieldId + 1];
 		row[fieldId] = column;
-		FormatableBitSet singleColumn = new FormatableBitSet(fieldId + 1);
 
-		singleColumn.set(fieldId);
-
-        FetchDescriptor fetchDesc = 
-            new FetchDescriptor(fieldId + 1, singleColumn,(Qualifier[][]) null);
+		FetchDescriptor fetchDesc = 
+			new FetchDescriptor(fieldId + 1, fieldId);
 
 		return(fetchFromSlot(null, slot, row, fetchDesc, true));
 	}
