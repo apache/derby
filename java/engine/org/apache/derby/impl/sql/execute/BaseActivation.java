@@ -621,7 +621,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		return null;
 	}
 
-	/*
+	/**
 	 * Called by generated code to compute the next autoincrement value.
 	 * 
 	 * @return The next autoincrement value which should be inserted.
