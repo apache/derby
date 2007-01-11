@@ -69,11 +69,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(TestJDBC40Exception.suite());
 		suite.addTest(UnsupportedVetter.suite());
 		suite.addTest(XA40Test.suite());
-        
-        // This test is a little strange in its suite
-        // method in that it accesses 
-        // the database to determine the set of tests to run.
-        // suite.addTest(VerifySignatures.suite());
+        suite.addTest(VerifySignatures.suite());
 		
 		return suite;
 	}

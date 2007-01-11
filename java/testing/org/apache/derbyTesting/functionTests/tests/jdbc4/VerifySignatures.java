@@ -32,7 +32,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -41,8 +41,12 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * JUnit test which checks that all methods specified by the
  * interfaces in JDBC 4.0 are implemented. The test requires JVM 1.6
  * to run.
+ * Even though this class uses JDBC it extends BaseTestCase as
+ * it handles getting connections itself and thus does not
+ * need the utility methods or connecion handlng provided by
+ * BaseJDBCTestCase.
  */
-public class VerifySignatures extends BaseJDBCTestCase {
+public class VerifySignatures extends BaseTestCase {
 
     /**
      * All the java.sql and javax.sql interfaces specified by JDBC 4.0.
@@ -89,17 +93,23 @@ public class VerifySignatures extends BaseJDBCTestCase {
     /**
      * Creates a new instance.
      */
-    public VerifySignatures() {
-        super("VerifySignatures");
+    public VerifySignatures(String name) {
+        super(name);
     }
 
     /**
      * Build a suite of tests to be run.
      *
      * @return a test suite
-     * @exception SQLException if a database error occurs
      */
-    public static Test suite() throws SQLException {
+    public static Test suite()  {
+        
+        return TestConfiguration.defaultSuite(VerifySignatures.class);
+    }
+    
+    public void testAllJDBCObjects()
+      throws NoSuchMethodException, SQLException
+    {
         // set of all implementation/interface pairs found
         Set<ClassInfo> classes = new HashSet<ClassInfo>();
 
@@ -109,8 +119,6 @@ public class VerifySignatures extends BaseJDBCTestCase {
         addClass(classes,
                  DriverManager.getDriver(TestConfiguration.getCurrent().getJDBCUrl()).getClass(),
                  java.sql.Driver.class);
-
-        TestSuite suite = new TestSuite("VerifySignatures suite");
 
         // all interfaces for which tests have been generated
         Set<Class> interfaces = new HashSet<Class>();
@@ -126,12 +134,22 @@ public class VerifySignatures extends BaseJDBCTestCase {
                 }
             }
             for (Method method : methods) {
-                suite.addTest(new MethodTestCase(pair.derbyImplementation,
-                                                 method));
+                checkImplementationMethod(pair.derbyImplementation,
+                        method);
             }
         }
-        suite.addTest(new InterfaceCoverageTestCase(interfaces));
-        return suite;
+        
+        // Now ensure all interfaces were covered.
+        // get the declared set of interfaces Derby is
+        // expected to implement.
+        Set<Class> jdbcInterfaces = getInterfacesToCheck();
+        
+        // remove from it all that were tested.
+        jdbcInterfaces.removeAll(interfaces);
+        
+        // and the resultin set should be empty if we tested all!
+        assertTrue("Unchecked interfaces: " + jdbcInterfaces,
+                   jdbcInterfaces.isEmpty());
     }
 
     /**
@@ -344,41 +362,7 @@ public class VerifySignatures extends BaseJDBCTestCase {
         }
         return set;
     }
-
-    /**
-     * Test case which checks that a class implements a specific
-     * method.
-     */
-    private static class MethodTestCase extends TestCase {
-        /** The Derby implementation class which is tested. */
-        private final Class derbyImplementation;
-        /** The method that should be implemented. */
-        private final Method ifaceMethod;
-
-        /**
-         * Creates a new <code>MethodTestCase</code> instance.
-         *
-         * @param imp the class to test
-         * @param method the method to look for
-         */
-        private MethodTestCase(Class imp, Method method) {
-            super("MethodTestCase{Class=" + imp.getName() +
-                  ",Method=" + method + "}");
-            derbyImplementation = imp;
-            ifaceMethod = method;
-        }
-
-        /**
-         * Run the test. Check that the method is implemented and that
-         * its signature is correct.
-         *
-         * @exception NoSuchMethodException if the method is not found
-         */
-        public void runTest() throws NoSuchMethodException {
-            checkImplementationMethod(derbyImplementation, ifaceMethod);
-        }   
-    }
-    
+   
     /**
      * checks that a class implements a specific method.
      * @param derbyImplementation The Derby implementation class which is tested
@@ -437,28 +421,14 @@ public class VerifySignatures extends BaseJDBCTestCase {
             return null;
         }
 
-    /**
-     * Test case which checks that all relevant JDBC interfaces are
-     * covered by the test.
-     */
-    private static class InterfaceCoverageTestCase extends TestCase {
-
-        /** The interfaces that have been tested by
-         * <code>MethodTestCase</code>. */
-        private final Set<Class> checkedInterfaces;
-        /** All JDBC interfaces whose implementations are relevant to
-         * test. */
-        private final Set<Class> jdbcInterfaces;
-
         /**
-         * Creates a new <code>InterfaceCoverageTestCase</code> instance.
+         * Returns the declared set of JDBC interfaces that
+         * Derby implements.
          *
-         * @param interfaces the interfaces that have been tested
          */
-        private InterfaceCoverageTestCase(Set<Class> interfaces) {
-            super("InterfaceCoverageTestCase");
-            checkedInterfaces = interfaces;
-            jdbcInterfaces = new HashSet<Class>(Arrays.asList(JDBC_INTERFACES));
+        private static Set<Class> getInterfacesToCheck() {
+
+            Set<Class> jdbcInterfaces = new HashSet<Class>(Arrays.asList(JDBC_INTERFACES));
 
             // Remove the interfaces that we know we haven't checked.
 
@@ -483,18 +453,9 @@ public class VerifySignatures extends BaseJDBCTestCase {
             // application code, not in Derby code.
             jdbcInterfaces.remove(javax.sql.ConnectionEventListener.class);
             jdbcInterfaces.remove(javax.sql.StatementEventListener.class);
+            
+            return jdbcInterfaces;
         }
-
-        /**
-         * Run the test. Check that all relevant interfaces have been
-         * tested.
-         */
-        public void runTest() {
-            jdbcInterfaces.removeAll(checkedInterfaces);
-            assertTrue("Unchecked interfaces: " + jdbcInterfaces,
-                       jdbcInterfaces.isEmpty());
-        }
-    }
 
     /**
      * Data structure holding a Derby implementation class and the
