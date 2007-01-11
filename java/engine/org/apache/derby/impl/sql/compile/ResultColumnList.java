@@ -2559,31 +2559,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Count the number of RCs with simple ColumnReferences.  
-	 * (RC.expression instanceof ColumnReference)  This is useful
-	 * for ensuring that the number of columns in the group by list
-	 * equals the number of grouping columns.
-	 *
-	 * @return int	The number of simple ColumnReferences.
-	 */
-	public int countNumberOfSimpleColumnReferences()
-	{
-		int				numCRs = 0;
-
-		int size = size();
-
-		for (int index = 0; index < size; index++)
-		{
-			if (((ResultColumn) elementAt(index)).getExpression() instanceof ColumnReference)
-			{
-				numCRs++;
-			}
-		}
-
-		return numCRs;
-	}
-
-	/**
 	 * Given a ResultColumn at the next deepest level in the tree, 
 	 * search this RCL for its parent ResultColumn.
 	 *

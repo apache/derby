@@ -1356,9 +1356,7 @@ public class SelectNode extends ResultSetNode
 			 *	   from the same conglomerate in order to get consistent data.
 			 */
 			boolean distinctScanPossible = false;
-			if (origFromListSize == 1 &&
-				(! orderByAndDistinctMerged) &&
-				resultColumns.countNumberOfSimpleColumnReferences() == resultColumns.size())
+			if (origFromListSize == 1 && !orderByAndDistinctMerged)
 			{
 				boolean simpleColumns = true;
 				HashSet distinctColumns = new HashSet();
