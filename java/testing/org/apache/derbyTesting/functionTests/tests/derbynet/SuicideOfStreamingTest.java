@@ -87,8 +87,9 @@ public class SuicideOfStreamingTest
      * Unset the debug property.
      */
     public void tearDown()
-            throws SQLException {
+            throws Exception {
         removeSystemProperty("derby.debug.suicideOfLayerBStreaming");
+        super.tearDown();
     }
 
     /**
