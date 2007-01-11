@@ -86,8 +86,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Properties;
-import java.util.Vector;
 import java.util.Stack;
 import java.io.Serializable;
 
@@ -114,8 +114,11 @@ public class GenericLanguageConnectionContext
 		fields
 	 */
 
-	private final Vector acts;
+	private final ArrayList acts;
 	private volatile boolean unusedActs=false;
+	/** The maximum size of acts since the last time it was trimmed. Used to
+	 * determine whether acts should be trimmed to reclaim space. */
+	private int maxActsSize;
 	protected int bindCount;
 	private boolean ddWriteMode;
 	private boolean runTimeStatisticsSetting ;
@@ -230,9 +233,9 @@ public class GenericLanguageConnectionContext
 	// database is booted.
 	private int lockEscalationThreshold; 
 
-	private Vector stmtValidators;
-	private Vector triggerExecutionContexts;
-	private Vector triggerTables;
+	private ArrayList stmtValidators;
+	private ArrayList triggerExecutionContexts;
+	private ArrayList triggerTables;
 
 	// OptimizerTrace
 	private boolean optimizerTrace;
@@ -278,7 +281,7 @@ public class GenericLanguageConnectionContext
 		 throws StandardException
 	{
 		super(cm, org.apache.derby.iapi.reference.ContextId.LANG_CONNECTION);
-		acts = new Vector();
+		acts = new ArrayList();
 		tran = tranCtrl;
 
 		dataFactory = lcf.getDataValueFactory();
@@ -310,9 +313,9 @@ public class GenericLanguageConnectionContext
 									   Property.MIN_LOCKS_ESCALATION_THRESHOLD,
 									   Integer.MAX_VALUE,
 									   Property.DEFAULT_LOCKS_ESCALATION_THRESHOLD);															 
-		stmtValidators = new Vector();
-		triggerExecutionContexts = new Vector();
-		triggerTables = new Vector();
+		stmtValidators = new ArrayList();
+		triggerExecutionContexts = new ArrayList();
+		triggerTables = new ArrayList();
 		
 		statementCache = lcf.getStatementCache();
 	}
@@ -428,7 +431,11 @@ public class GenericLanguageConnectionContext
 	 */
 	public void addActivation(Activation a) 
 		throws StandardException {
-		acts.addElement(a);
+		acts.add(a);
+
+		if (acts.size() > maxActsSize) {
+			maxActsSize = acts.size();
+		}
 
 		// DERBY-418. Activations which are marked unused,
 		// are closed here. Activations Vector is iterated 
@@ -445,7 +452,7 @@ public class GenericLanguageConnectionContext
 				if (i >= acts.size())
 					continue;
 
-				Activation a1 = (Activation) acts.elementAt(i);
+				Activation a1 = (Activation) acts.get(i);
 				if (!a1.isInUse()) {
 					a1.close();
 				}
@@ -760,12 +767,11 @@ public class GenericLanguageConnectionContext
 			SanityManager.ASSERT(a.isClosed(), "Activation is not closed");
 		}
 
-		acts.removeElement(a);
+		acts.remove(a);
 
-		int capacity = acts.capacity();
-
-		if (capacity > 20 && (capacity > 2 * acts.size())) {
+		if (maxActsSize > 20 && (maxActsSize > 2 * acts.size())) {
 			acts.trimToSize();
+			maxActsSize = acts.size();
 		}
 	}
 
@@ -794,7 +800,7 @@ public class GenericLanguageConnectionContext
 		if (size > 0)
 		{
 			for (int i = 0; i < size; i++) {
-				 Activation a = (Activation) acts.elementAt(i);
+				 Activation a = (Activation) acts.get(i);
 
 				 if (!a.isInUse())
 				 {
@@ -1519,7 +1525,7 @@ public class GenericLanguageConnectionContext
 			throws StandardException
 	{
 		for (int i = acts.size() - 1; i >= 0; i--) {
-			Activation a = (Activation) acts.elementAt(i);
+			Activation a = (Activation) acts.get(i);
 			if (a.checkIfThisActivationHasHoldCursor(tableName))
 				return true;
     }
@@ -1547,7 +1553,7 @@ public class GenericLanguageConnectionContext
 		/* For every activation */
 		for (int i = acts.size() - 1; i >= 0; i--) {
 
-			Activation a = (Activation) acts.elementAt(i);
+			Activation a = (Activation) acts.get(i);
 
 			if (SanityManager.DEBUG)
 			{
@@ -1586,7 +1592,7 @@ public class GenericLanguageConnectionContext
 		/* For every activation */
 		for (int i = acts.size() - 1; i >= 0; i--) {
 				
-			Activation a = (Activation) acts.elementAt(i);
+			Activation a = (Activation) acts.get(i);
 
 			if (SanityManager.DEBUG)
 			{
@@ -1643,7 +1649,7 @@ public class GenericLanguageConnectionContext
 		// in this list, thus invalidating the Enumeration
 		for (int i = acts.size() - 1; i >= 0; i--) {
 				
-			Activation a = (Activation) acts.elementAt(i);
+			Activation a = (Activation) acts.get(i);
 
 			if (!a.isInUse())
 			{
@@ -1680,7 +1686,7 @@ public class GenericLanguageConnectionContext
 		// in this list, thus invalidating the Enumeration
 		for (int i = acts.size() - 1; i >= 0; i--) {
 				
-			Activation a = (Activation) acts.elementAt(i);
+			Activation a = (Activation) acts.get(i);
 
 			if (!a.isInUse())
 			{
@@ -2104,7 +2110,7 @@ public class GenericLanguageConnectionContext
 	 */
 	public void pushExecutionStmtValidator(ExecutionStmtValidator validator)
 	{
-		stmtValidators.addElement(validator);
+		stmtValidators.add(validator);
 	}
 
 	/**
@@ -2118,7 +2124,7 @@ public class GenericLanguageConnectionContext
 	public void popExecutionStmtValidator(ExecutionStmtValidator validator)
 		throws StandardException
 	{
-		boolean foundElement = stmtValidators.removeElement(validator);
+		boolean foundElement = stmtValidators.remove(validator);
 		if (SanityManager.DEBUG)
 		{
 			if (!foundElement)
@@ -2150,7 +2156,7 @@ public class GenericLanguageConnectionContext
 			throw StandardException.newException(SQLState.LANG_TRIGGER_RECURSION_EXCEEDED);
 		}
 
-		triggerExecutionContexts.addElement(tec);
+		triggerExecutionContexts.add(tec);
 	}
 
 	/**
@@ -2169,7 +2175,7 @@ public class GenericLanguageConnectionContext
 			outermostTrigger = -1; 
 		}
 
-		boolean foundElement = triggerExecutionContexts.removeElement(tec);
+		boolean foundElement = triggerExecutionContexts.remove(tec);
 		if (SanityManager.DEBUG)
 		{
 			if (!foundElement)
@@ -2188,7 +2194,8 @@ public class GenericLanguageConnectionContext
 	{
 		return triggerExecutionContexts.size() == 0 ? 
 				(TriggerExecutionContext)null :
-				(TriggerExecutionContext)triggerExecutionContexts.lastElement();	
+				(TriggerExecutionContext)triggerExecutionContexts.get(
+					triggerExecutionContexts.size() - 1);	
 	}
 
 	/**
@@ -2211,9 +2218,10 @@ public class GenericLanguageConnectionContext
 
 		if (stmtValidators.size() > 0)
 		{
-			for (Enumeration e = stmtValidators.elements(); e.hasMoreElements(); )
+			for (Iterator it = stmtValidators.iterator(); it.hasNext(); )
 			{
-				((ExecutionStmtValidator)e.nextElement()).validateStatement(constantAction);
+				((ExecutionStmtValidator)it.next())
+					.validateStatement(constantAction);
 			}
 		}
 	}
@@ -2228,7 +2236,7 @@ public class GenericLanguageConnectionContext
 	 */
 	public void pushTriggerTable(TableDescriptor td)
 	{
-		triggerTables.addElement(td);
+		triggerTables.add(td);
 	}
 
 	/**
@@ -2238,7 +2246,7 @@ public class GenericLanguageConnectionContext
 	 */
 	public void popTriggerTable(TableDescriptor td)
 	{
-		boolean foundElement = triggerTables.removeElement(td);
+		boolean foundElement = triggerTables.remove(td);
 		if (SanityManager.DEBUG)
 		{
 			if (!foundElement)
@@ -2259,7 +2267,7 @@ public class GenericLanguageConnectionContext
 	{
 		return triggerTables.size() == 0 ? 
 			(TableDescriptor)null :
-			(TableDescriptor)triggerTables.lastElement();
+			(TableDescriptor)triggerTables.get(triggerTables.size() - 1);
 	}
 	/**
 	 * @see LanguageConnectionContext#getDatabase
@@ -2687,7 +2695,7 @@ public class GenericLanguageConnectionContext
 				// the end of the array
 				if (i >= acts.size())
 					continue;
-				Activation a = (Activation) acts.elementAt(i);
+				Activation a = (Activation) acts.get(i);
 				a.reset();
 				a.close();
 			}
@@ -2738,7 +2746,7 @@ public class GenericLanguageConnectionContext
 			if (i >= acts.size())
 				continue;
 
-			Activation a = (Activation) acts.elementAt(i);
+			Activation a = (Activation) acts.get(i);
 			/*
 			** andClose true means we are here for rollback.
 			** In case of rollback, we don't care for holding
@@ -2878,7 +2886,7 @@ public class GenericLanguageConnectionContext
 		{
 			// first loop through triggers.
 			InternalTriggerExecutionContext itec = 
-				(InternalTriggerExecutionContext)triggerExecutionContexts.elementAt(i);
+				(InternalTriggerExecutionContext)triggerExecutionContexts.get(i);
 			Long value = itec.getAutoincrementValue(aiKey);
 			if (value == null)
 				continue;
@@ -3065,7 +3073,7 @@ public class GenericLanguageConnectionContext
 	 */
 	public Activation getLastActivation()
 	{
-		return (Activation)acts.lastElement();
+		return (Activation)acts.get(acts.size() - 1);
 	}
 
 	public StringBuffer appendErrorInfo() {
