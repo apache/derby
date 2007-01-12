@@ -37,8 +37,8 @@
 
   <target name="compile">
   <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -50,14 +50,13 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement location="${jce1_2_1}"/>
-        <pathelement path="${java13compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/drda/DecryptionManager.java"/>
     </javac>
   <javac
-    source="1.3"
-    target="1.3"
+    source="1.4"
+    target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -70,15 +69,15 @@
       destdir="${out.dir}">
       <classpath>
       <pathelement location="${jta1_2}"/>
-        <pathelement path="${java13compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/drda/DRDAXAProtocol.java"/>
       <include name="${derby.dir}/impl/drda/DRDAXid.java"/>
       <include name="${derby.dir}/impl/drda/XADatabase.java"/>
     </javac>
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -90,7 +89,7 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java13compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/drda/*.java"/>
       <exclude name="${derby.dir}/impl/drda/DecryptionManager.java"/>

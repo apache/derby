@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,9 +41,7 @@ import java.lang.reflect.Array;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineConnection;
-import org.apache.derby.iapi.jdbc.EngineStatement;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
-import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.util.StringUtil;
@@ -84,7 +83,7 @@ class DRDAStatement
 	protected byte [] rslsetflg;		// Result Set Flags
 	protected int maxrslcnt;			// Maximum Result set count
 	protected PreparedStatement ps;     // Prepared statement
-	protected EngineParameterMetaData stmtPmeta; // param metadata
+	protected ParameterMetaData stmtPmeta; // param metadata
 	protected boolean isCall;
 	protected String procName;			// callable statement's method name
 	private   int[] outputTypes;		// jdbc type for output parameter or NOT_OUTPUT_PARAM
@@ -380,18 +379,7 @@ class DRDAStatement
 	 */
 	protected int getResultSetHoldability() throws SQLException
 	{
-		Statement rsstmt;
-		ResultSet rs = getResultSet();
-
-		if (rs  != null)
-			rsstmt = rs.getStatement();
-		else
-			rsstmt = getPreparedStatement();
-        
-        int holdValue = 
-            ((EngineStatement) rsstmt).getResultSetHoldability();
-
-		return holdValue;
+		return getResultSetHoldability(getResultSet());
 	}
 	
 	/**
@@ -411,10 +399,7 @@ class DRDAStatement
 		else
 			rsstmt = getPreparedStatement();
         
-        int holdValue = 
-            ((EngineStatement) rsstmt).getResultSetHoldability();
-
-		return holdValue;
+        return rsstmt.getResultSetHoldability();
 	}	
 
 	/*
@@ -1303,7 +1288,7 @@ class DRDAStatement
 	{
 		if (ps != null && ps instanceof CallableStatement)
 		{
-			EngineParameterMetaData pmeta = 	getParameterMetaData();
+			ParameterMetaData pmeta = getParameterMetaData();
 
 			return Math.min(pmeta.getPrecision(index),
 							FdocaConstants.NUMERIC_MAX_PRECISION);
@@ -1324,7 +1309,7 @@ class DRDAStatement
 	{
 		if (ps != null && ps instanceof CallableStatement)
 		{
-			EngineParameterMetaData pmeta = 	getParameterMetaData();
+			ParameterMetaData pmeta = getParameterMetaData();
 			return Math.min(pmeta.getScale(index),FdocaConstants.NUMERIC_MAX_PRECISION);
 		}
 		else 
@@ -1450,7 +1435,7 @@ class DRDAStatement
 
 	private void setupCallableStatementParams(CallableStatement cs) throws SQLException
 	{
-		EngineParameterMetaData pmeta = 	getParameterMetaData();
+		ParameterMetaData pmeta = getParameterMetaData();
 		int numElems = pmeta.getParameterCount();
 
 		for ( int i = 0; i < numElems; i ++)
@@ -1682,18 +1667,15 @@ class DRDAStatement
 	
 	/** 
 	 * Retrieve the ParameterMetaData for the prepared statement. 
-     * To do so, use the engine defined interfaces:
-     * @see org.apache.derby.iapi.jdbc.EnginePreparedStatement
-     * @see org.apache.derby.iapi.jdbc.EngineParameterMetaData 
-	 * @return EngineParameterMetaData for the prepared statement. 
+	 * @return ParameterMetaData for the prepared statement. 
 	 * Note: there is no separate BrokeredParameterSetMetaData.
 	 */
-	protected EngineParameterMetaData getParameterMetaData() throws SQLException
+	protected ParameterMetaData getParameterMetaData() throws SQLException
 	{
 		if (stmtPmeta != null)
 			return stmtPmeta;
 
-		stmtPmeta = ((EnginePreparedStatement)ps).getEmbedParameterSetMetaData();
+		stmtPmeta = ps.getParameterMetaData();
         
         return stmtPmeta;
 	}
@@ -1708,8 +1690,7 @@ class DRDAStatement
 	 */
 	private boolean getMoreResults(int current) throws SQLException
 	{       
-        return
-            ((EngineStatement) getPreparedStatement()).getMoreResults(current);
+        return getPreparedStatement().getMoreResults(current);
 	}
 
 	/**

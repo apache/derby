@@ -34,21 +34,6 @@ import java.sql.PreparedStatement;
  */
 public interface EnginePreparedStatement extends PreparedStatement {
     
-    /**
-     * Imitate the getParameterMetaData() that is in JDBC 3.0
-     * Once,JDK1.3 stops being supported, instead of returning EngineParameterMetaData
-     * the JDBC 3.0 class - ParameterMetaData can be used.
-     *
-     * Retrieves the number, types and properties of this PreparedStatement
-     * object's parameters.
-     *
-     * @return a EngineParameterMetaData object that contains information about the
-     * number, types and properties of this PreparedStatement object's parameters.
-     * @exception SQLException if a database access error occurs
-     */
-    public EngineParameterMetaData getEmbedParameterSetMetaData()
-        throws SQLException;
-    
     public void setBinaryStream(int parameterIndex, InputStream x)
         throws SQLException; 
     

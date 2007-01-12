@@ -417,7 +417,7 @@ to specify your environment and options:
       ant.properties file to account for the difference in
       packaging. Define the variable as follows:
 
-      java14compile.classpath=${j14lib}/core.jar;${j14lib}/server.jar;${j14lib}/xml.jar
+      java14compile.classpath=${j14lib}/core.jar;${j14lib}/server.jar;${j14lib}/xml.jar;${j14lib}/ibmjcefw.jar
       
     - build.compiler
 

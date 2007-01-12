@@ -47,21 +47,6 @@ public class BrokeredPreparedStatement extends BrokeredStatement
 		this.sql = sql;
     }
 
-    /**
-     * Imitate the getParameterMetaData() function in JDBC 3.0
-     *
-     * Retrieves the number, types and properties of this PreparedStatement
-     * object's parameters.
-     *
-     * @return a EngineParameterMetaData object that contains information about the
-     * number, types and properties of this PreparedStatement object's parameters.
-     * @exception SQLException if a database access error occurs
-     */
-    public EngineParameterMetaData getEmbedParameterSetMetaData()
-    throws SQLException
-    {
-        return ((EnginePreparedStatement)getPreparedStatement()).getEmbedParameterSetMetaData();
-    }
 	/**
      * A prepared SQL query is executed and its ResultSet is returned.
      *

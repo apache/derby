@@ -1590,7 +1590,7 @@ public abstract class EmbedPreparedStatement
     * number, types and properties of this PreparedStatement object's parameters.
     * @exception SQLException if a database access error occurs
 	*/
-	public EngineParameterMetaData getEmbedParameterSetMetaData()
+	private EngineParameterMetaData getEmbedParameterSetMetaData()
     	throws SQLException
 	{
 	  checkExecStatus();

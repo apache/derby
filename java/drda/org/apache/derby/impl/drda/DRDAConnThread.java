@@ -36,6 +36,7 @@ import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -61,7 +62,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
-import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
@@ -4115,7 +4115,7 @@ class DRDAConnThread extends Thread {
 		String strVal;
 		PreparedStatement ps = stmt.getPreparedStatement();
 		int codePoint;
-		EngineParameterMetaData pmeta = null;
+		ParameterMetaData pmeta = null;
 
 		// Clear params without releasing storage
 		stmt.clearDrdaParams();
@@ -4254,7 +4254,7 @@ class DRDAConnThread extends Thread {
 	 */
 	private void readAndSetParams(int i,
 								  DRDAStatement stmt,
-								  EngineParameterMetaData pmeta)
+								  ParameterMetaData pmeta)
 				throws DRDAProtocolException, SQLException
 	{
 		PreparedStatement ps = stmt.getPreparedStatement();
@@ -6077,7 +6077,7 @@ class DRDAConnThread extends Thread {
 	{
 		PreparedStatement ps = stmt.getPreparedStatement();
 		ResultSetMetaData rsmeta = ps.getMetaData();
-		EngineParameterMetaData pmeta = stmt.getParameterMetaData();
+		ParameterMetaData pmeta = stmt.getParameterMetaData();
 		int numElems = 0;
 		if (e == null || e instanceof SQLWarning)
 		{
@@ -6129,7 +6129,7 @@ class DRDAConnThread extends Thread {
 
 		ResultSet rs = null;
 		ResultSetMetaData rsmeta = null;
-		EngineParameterMetaData pmeta = null;
+		ParameterMetaData pmeta = null;
 		if (!stmt.needsToSendParamData)
 			rs = stmt.getResultSet();
 		if (rs == null)		// this is a CallableStatement, use parameter meta data
@@ -6225,7 +6225,7 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
 	 */
 	private void writeSQLDTAGRP(DRDAStatement stmt, ResultSetMetaData rsmeta, 
-								EngineParameterMetaData pmeta,
+								ParameterMetaData pmeta,
 								int colStart, int colEnd, boolean first)
 		throws DRDAProtocolException, SQLException
 	{
@@ -6971,7 +6971,9 @@ class DRDAConnThread extends Thread {
 	 * @throws DRDAProtocolException
      * @throws SQLException
 	 */
-	private void writeSQLDAGRP(ResultSetMetaData rsmeta, EngineParameterMetaData pmeta, int elemNum, boolean rtnOutput)
+	private void writeSQLDAGRP(ResultSetMetaData rsmeta,
+							   ParameterMetaData pmeta,
+							   int elemNum, boolean rtnOutput)
 		throws DRDAProtocolException, SQLException
 	{
 		//jdbc uses offset of 1
@@ -7106,14 +7108,18 @@ class DRDAConnThread extends Thread {
 	}
 
   
-	private void writeSQLUDTGRP(ResultSetMetaData rsmeta, EngineParameterMetaData pmeta, int jdbcElemNum, boolean rtnOutput)
+	private void writeSQLUDTGRP(ResultSetMetaData rsmeta,
+								ParameterMetaData pmeta,
+								int jdbcElemNum, boolean rtnOutput)
 		throws DRDAProtocolException,SQLException
 	{
 		writer.writeByte(CodePoint.NULLDATA);
 
 	}
 
-	private void writeSQLDOPTGRP(ResultSetMetaData rsmeta, EngineParameterMetaData pmeta, int jdbcElemNum, boolean rtnOutput)
+	private void writeSQLDOPTGRP(ResultSetMetaData rsmeta,
+								 ParameterMetaData pmeta,
+								 int jdbcElemNum, boolean rtnOutput)
 		throws DRDAProtocolException,SQLException
 	{
 
@@ -7133,7 +7139,9 @@ class DRDAConnThread extends Thread {
 	}
 
 
-	private void writeSQLDXGRP(ResultSetMetaData rsmeta, EngineParameterMetaData pmeta, int jdbcElemNum, boolean rtnOutput)
+	private void writeSQLDXGRP(ResultSetMetaData rsmeta,
+							   ParameterMetaData pmeta,
+							   int jdbcElemNum, boolean rtnOutput)
 		throws DRDAProtocolException,SQLException
 	{
 		// Null indicator indicates we have data

@@ -37,8 +37,8 @@
 
   <target name="compile">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -50,7 +50,7 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/drda/*.java"/>
       <exclude name="${derby.dir}/drda/NetServlet.java"/>
@@ -59,8 +59,8 @@
 
   <target name="servlet" depends="checkservletjar" if="servletjar.available">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -73,7 +73,7 @@
       destdir="${out.dir}">
       <classpath>
 	 	<pathelement location="${servlet24}"/>
-        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
 	  <include name="${derby.dir}/drda/NetServlet.java"/>
     </javac>
