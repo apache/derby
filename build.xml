@@ -1679,10 +1679,6 @@
       <formatter type="xml"/>
       <test name="${derby.junit.testname}" 
             todir="junit_${derby.junit.timestamp}"/>
-      <classpath>
-        <pathelement path="${out.dir}"/>
-        <pathelement path="${junit}"/>
-      </classpath>
     </junit>
   </target>
  
