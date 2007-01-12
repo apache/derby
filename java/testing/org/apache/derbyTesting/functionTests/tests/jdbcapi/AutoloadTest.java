@@ -54,36 +54,49 @@ public class AutoloadTest extends BaseJDBCTestCase
         if (!JDBC.vmSupportsJDBC2())
             return new TestSuite("empty: no java.sql.DriverManager");
 
-        if (JDBC.vmSupportsJDBC4() && TestConfiguration.loadingFromJars()) {
+        boolean embeddedAutoLoad = false;
+        boolean clientAutoLoad = false;
+        
+        if (JDBC.vmSupportsJDBC4() && TestConfiguration.loadingFromJars())
+        {
             // test client & embedded
-            return TestConfiguration.defaultSuite(AutoloadTest.class);
+            embeddedAutoLoad = true;
+            clientAutoLoad = true;
         }
-        // Simple test to see if the driver class is
-        // in the value. Could get fancy and see if it is
-        // correctly formatted but not worth it.
+        else
+        {
+            // Simple test to see if the driver class is
+            // in the value. Could get fancy and see if it is
+            // correctly formatted but not worth it.
 
-        try {
-            String jdbcDrivers = getSystemProperty("jdbc.drivers");
-            if (jdbcDrivers == null)
-                jdbcDrivers = "";
+            try {
+                String jdbcDrivers = getSystemProperty("jdbc.drivers");
+                if (jdbcDrivers == null)
+                    jdbcDrivers = "";
 
-            boolean embedded = jdbcDrivers
-                    .indexOf("org.apache.derby.jdbc.EmbeddedDriver") != -1;
+                embeddedAutoLoad = jdbcDrivers
+                        .indexOf("org.apache.derby.jdbc.EmbeddedDriver") != -1;
 
-            boolean clientServer = jdbcDrivers
-                    .indexOf("org.apache.derby.jdbc.ClientDriver") != -1;
+                clientAutoLoad = jdbcDrivers
+                        .indexOf("org.apache.derby.jdbc.ClientDriver") != -1;
 
-            if (embedded && clientServer)
-                return TestConfiguration.defaultSuite(AutoloadTest.class);
-
-            if (embedded)
-                return TestConfiguration.embeddedSuite(AutoloadTest.class);
-
-            if (clientServer)
-                return TestConfiguration.clientServerSuite(AutoloadTest.class);
-        } catch (SecurityException se) {
-            // assume there is no autoloading if
-            // we can't read the value of jdbc.drivers.
+            } catch (SecurityException se) {
+                // assume there is no autoloading if
+                // we can't read the value of jdbc.drivers.
+            }
+        }
+        
+        if (embeddedAutoLoad || clientAutoLoad)
+        {
+            TestSuite suite = new TestSuite("AutoloadTest");
+            if (embeddedAutoLoad)
+                suite.addTest(baseAutoLoadSuite("embedded"));
+            if (clientAutoLoad)
+                suite.addTest(
+                  TestConfiguration.clientServerDecorator(
+                          baseAutoLoadSuite("client")));
+                
+            return suite;
         }
 
         // Run a single test that ensures that the driver is
@@ -94,6 +107,21 @@ public class AutoloadTest extends BaseJDBCTestCase
         suite.addTest(TestConfiguration.clientServerDecorator(
                 new AutoloadTest("noloadTestNodriverLoaded")));
         
+        return suite;
+    }
+    
+    /**
+     * Return the ordered set of tests when autoloading is enabled.
+     * @return
+     */
+    private static Test baseAutoLoadSuite(String which)
+    {
+        TestSuite suite = new TestSuite("AutoloadTest: " + which);
+        
+        suite.addTest(new AutoloadTest("testRegisteredDriver"));
+        suite.addTest(new AutoloadTest("testSuccessfulConnect"));
+        suite.addTest(new AutoloadTest("testUnsuccessfulConnect"));
+        suite.addTest(new AutoloadTest("testExplicitLoad"));
         return suite;
     }
 
@@ -111,9 +139,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     {
         String protocol =
             getTestConfiguration().getJDBCClient().getUrlBase();
-        
-        System.out.println("PROTOCOL " + protocol);
-            
+                    
         Driver driver = DriverManager.getDriver(protocol);
         assertNotNull("Expected registered driver", driver);
     }
@@ -152,6 +178,26 @@ public class AutoloadTest extends BaseJDBCTestCase
             
             assertSQLState(expectedError, e);
         }
+    }
+    
+    /**
+     * Test an explict load of the driver works as well.
+     * @throws Exception 
+     *
+     */
+    public void testExplicitLoad() throws Exception
+    {
+        String driverClass =
+            getTestConfiguration().getJDBCClient().getJDBCDriverName();
+        
+        // With and without a new instance
+        Class.forName(driverClass);
+        testSuccessfulConnect();
+        testUnsuccessfulConnect();
+        
+        Class.forName(driverClass).newInstance();
+        testSuccessfulConnect();
+        testUnsuccessfulConnect();
     }
     
     /**
