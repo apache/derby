@@ -31,6 +31,10 @@
 </font></p>
 <ul>
   <li>
+    <p style="margin-bottom: 0in;"><a href="#migrate">0. Migration to JUnit</a>
+    </p>
+  </li>
+  <li>
     <p style="margin-bottom: 0in;"><a href="#intro">1. Introduction</a>
     </p>
   </li>
@@ -132,6 +136,25 @@ JDBC4 Tests</a></p>
 <p><br>
 <br>
 </p>
+<h2><a name="migrate">0. Migration to JUnit</h2>
+In the trunk codeline (10.3 and later) Derby is migrating testing using JUnit.
+All new tests are being written using JUnit and a number of the older
+harness based tests have been converted.
+<P>
+Since the conversion is ongoing the current JUnit state is not represented
+in this file, sections 1 onwards apply to running tests using the
+old harness which still applies to a significant number of tests.
+Currently to run the complete set of tests two runs are required,
+run the harness based tests decribed in this document and then
+running all the JUnit bases tests.
+<P>
+How to run the JUnit based tests is currently being maintained
+on Derby's wiki at:
+<BR>
+ <a href="http://wiki.apache.org/db-derby/DerbyJUnitTesting">http://wiki.apache.org/db-derby/DerbyJUnitTesting</a>
+<BR>
+The wiki also includes information about writing new JUnit tests
+and conversion of existing tests.
 <h2><a name="intro"></a>1. Introduction</h2>
 <p>This document describes functionality of the derby functional
 testing package org.apache.derbyTesting. This package is based on the
