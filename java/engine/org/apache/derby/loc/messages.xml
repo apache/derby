@@ -1200,6 +1200,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>42909</name>
+                <text>The CREATE TABLE statement does not include a column list.</text>
+            </msg>
+
+            <msg>
                 <name>42915</name>
                 <text>Foreign  Key '{0}' is invalid because '{1}'. </text>
                 <arg>key</arg>
@@ -1619,6 +1624,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>42X70</name>
+                <text>The number of columns in the table column list does not match the number of columns in the underlying query expression in the table definition for '{0}'.</text>
+                <arg>value</arg>
+            </msg>
+
+            <msg>
                 <name>42X72</name>
                 <text>No static field '{0}' was found belonging to class '{1}'.  The field might exist, but it is not public and/or static, or the class does not exist or the class is not public.  </text>
                 <arg>fieldName</arg>
@@ -1765,6 +1776,11 @@ Guide.
             <msg>
                 <name>42X98</name>
                 <text>Parameters are not allowed in a VIEW definition.</text>
+            </msg>
+
+            <msg>
+                <name>42X99</name>
+                <text>Parameters are not allowed in a TABLE definition.</text>
             </msg>
 
             <msg>

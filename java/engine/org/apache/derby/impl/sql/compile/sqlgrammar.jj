@@ -9589,20 +9589,71 @@ tableDefinition() throws StandardException :
 	Properties			properties = null;
 	TableName			tableName;
 	TableElementList	tableElementList;
+	ResultColumnList	resultColumns = null;
+	ResultSetNode		queryExpression;
+	boolean				withData = true;
 }
 {
 	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
-	tableElementList = tableElementList()
-	[ properties = propertyList(false)<CHECK_PROPERTIES>]
+			// Lookahead needed to choose between
+			// tableElementList and tableColumnList
+	(		LOOKAHEAD({getToken(1).kind == LEFT_PAREN && 
+	                   getToken(3).kind != COMMA &&
+	                   getToken(3).kind != RIGHT_PAREN})
+			tableElementList = tableElementList()
+			[ properties = propertyList(false)<CHECK_PROPERTIES>]
+			{
+				return (StatementNode) nodeFactory.getNode(
+										C_NodeTypes.CREATE_TABLE_NODE,
+										tableName,
+										tableElementList,
+										properties,
+										new Character(lockGranularity),
+										getContextManager());
+			}
+		|
+			[ <LEFT_PAREN> resultColumns = tableColumnList() <RIGHT_PAREN> ]
+			<AS>
+			queryExpression = queryExpression(null, NO_SET_OP)
+			<WITH> [ <NO> { withData = false; } ] <DATA>
+			{
+				// Raise error if WITH DATA is specified
+				// (until it is implemented)
+				if (withData) {
+					throw StandardException.newException(
+						SQLState.NOT_IMPLEMENTED, "WITH DATA");
+				}
+				/* Parameters not allowed in create table */
+				HasNodeVisitor visitor =
+					new HasNodeVisitor(ParameterNode.class);
+				queryExpression.accept(visitor);
+				if (visitor.hasNode())
+				{
+					throw StandardException.newException(
+						SQLState.LANG_NO_PARAMS_IN_TABLES);
+				}
+				
+				return (StatementNode) nodeFactory.getNode(
+										C_NodeTypes.CREATE_TABLE_NODE,
+										tableName,
+										resultColumns,
+										queryExpression,
+										getContextManager());
+			}
+	)
+}
+
+ResultColumnList
+tableColumnList() throws StandardException :
+{
+	ResultColumnList resultColumns = (ResultColumnList) nodeFactory.getNode(
+											C_NodeTypes.RESULT_COLUMN_LIST,
+											getContextManager());
+}
+{
+	columnNameList(resultColumns)
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.CREATE_TABLE_NODE,
-								tableName,
-								tableElementList,
-								properties,
-								new Character(lockGranularity),
-								getContextManager());
-		
+		return resultColumns;
 	}
 }
 

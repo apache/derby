@@ -1,0 +1,295 @@
+/*
+
+   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.CreateTableFromQueryTest
+
+       Licensed to the Apache Software Foundation (ASF) under one
+       or more contributor license agreements.  See the NOTICE file
+       distributed with this work for additional information
+       regarding copyright ownership.  The ASF licenses this file
+       to you under the Apache License, Version 2.0 (the
+       "License"); you may not use this file except in compliance
+       with the License.  You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing,
+       software distributed under the License is distributed on an
+       "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+       KIND, either express or implied.  See the License for the
+       specific language governing permissions and limitations
+       under the License
+*/
+package org.apache.derbyTesting.functionTests.tests.lang;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import junit.framework.Assert;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
+
+/**
+ * Test for creating tables using a query expression.
+ */
+public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
+    private Statement stmt;
+
+    /**
+     * Public constructor required for running test as standalone JUnit.
+     */
+    public CreateTableFromQueryTest(String name)
+    {
+        super(name);
+    }
+
+    /**
+     * Create a suite of tests.
+    */
+    public static Test suite()
+    {
+        final TestSuite suite = new TestSuite("CreateTableFromQueryTest");
+        suite.addTestSuite(CreateTableFromQueryTest.class);
+        return suite;
+    }
+
+    /**
+     * Test basic table creation.
+     * @throws Exception
+     */
+    public void testBasicTableCreation() throws Exception
+    {
+        positiveTest("create table t3 as select * from t1 with no data",
+            new String [] {"I", "S", "F", "DP", "V"},
+            new String [] {"NO", "YES", "YES", "YES", "NO"},
+            new String [] {"INTEGER", "SMALLINT", "DOUBLE", "DOUBLE", "VARCHAR"});
+    }
+    
+    /**
+     * Test creating table with a list of column names.
+     * @throws Exception
+     */
+    public void testCreateTableWithColumnList() throws Exception
+    {
+        positiveTest(
+            "create table t3 (a,b,c,d,e) as select * from t1 with no data",
+            new String [] {"A", "B", "C", "D", "E"},
+            new String [] {"NO", "YES", "YES", "YES", "NO"},
+            new String [] {"INTEGER", "SMALLINT", "DOUBLE", "DOUBLE", "VARCHAR"});
+    }
+
+    /**
+     * Test creating a table with a subset of the base table's columns.
+     * @throws Exception
+     */
+    public void testCreateTableWithSubsetOfColumns() throws Exception
+    {
+        positiveTest("create table t3 as select v,f from t1 with no data",
+            new String [] {"V", "F"},
+            new String [] {"NO", "YES"},
+            new String [] {"VARCHAR", "DOUBLE"});
+    }
+
+    /**
+     * Test creating a table with a subset of the base table's columns
+     * and a column list.
+     * @throws Exception
+     */
+    public void testCreateTableWithSubsetOfColumnsAndColumnList() throws Exception
+    {
+        positiveTest(
+            "create table t3 (a,b,c) as select v,dp,i from t1 with no data",
+            new String [] {"A", "B", "C"},
+            new String [] {"NO", "YES", "NO"},
+            new String [] {"VARCHAR", "DOUBLE", "INTEGER"});
+    }
+
+    /**
+     * Test creating a table with multiple base tables.
+     * @throws Exception
+     */
+    public void testCreateTableWithMultipleBaseTables() throws Exception
+    {
+        positiveTest("create table t3 (one, two) as select x.s, y.v from "
+                     + "t1 y, t2 x where x.a = y.i with no data",
+            new String [] {"ONE", "TWO"},
+            new String [] {"YES", "NO"},
+            new String [] {"VARCHAR", "VARCHAR"});
+    }
+
+    /**
+     * Test creating a table with a column list and system generated
+     * column names in the query.
+     * @throws Exception
+     */
+    public void testCreateTableWithDerivedColumnName() throws Exception
+    {
+        positiveTest(
+            "create table t3 (x,y) as select 2*i,2.0*f from t1 with no data",
+            new String [] {"X", "Y"},
+            new String [] {"NO", "YES"},
+            new String [] {"INTEGER", "DOUBLE"});
+    }
+
+    /**
+     * Test creating a table from a values statement.
+     * @throws Exception
+     */
+    public void testCreateTableFromValues() throws Exception
+    {
+        positiveTest(
+            "create table t3 (x,y) as values (1, 'name') with no data",
+            new String [] {"X", "Y"},
+            new String [] {"NO", "NO"},
+            new String [] {"INTEGER", "CHAR"});
+    }
+
+    /**
+     * Test error when base table does not exist.
+     * @throws Exception
+     */
+    public void testBaseTableDoesNotExist() throws Exception
+    {
+        assertStatementError("42X05", stmt,
+            "create table t3 as select * from t4 with no data");
+    }
+
+    /**
+     * Test error when parameters are supplied in the query expression.
+     * @throws Exception
+     */
+    public void testParametersNotAllowed() throws Exception
+    {
+        assertStatementError("42X99", stmt,
+            "create table t3 as select * from t1 where i = ? with no data");
+    }
+
+    /**
+     * Test error when duplicate column names are specified in the column list.
+     * @throws Exception
+     */
+    public void testDuplicateColumnName() throws Exception
+    {
+        assertStatementError("42X12", stmt,
+            "create table t3 (c1,c2,c1) "
+                + "as select i, s, f from t1 with no data");
+    }
+
+    /**
+     * Test error when the number of columns in the column list does
+     * not match the number of columns in the query expression.
+     * @throws Exception
+     */
+    public void testColumnCountMismatch() throws Exception
+    {
+        assertStatementError("42X70", stmt,
+            "create table t3 (c1,c2,c3) as select i,s from t1 with no data");
+    }
+
+    /**
+     * Test error when the query expression contains system generated
+     * column names and no column list was provided.
+     * @throws Exception
+     */
+    public void testSystemGeneratedColumnName() throws Exception
+    {
+        assertStatementError("42909", stmt,
+            "create table t3 as select i, 2*i from t1 with no data");
+    }
+
+    /**
+     * Test error when the column type can not be determined.
+     * @throws Exception
+     */
+    public void testNullValues() throws Exception
+    {
+        assertStatementError("42X07", stmt,
+            "create table t3 (x) as values null with no data");
+    }
+
+    /**
+     * Test error for unimplemented WITH DATA clause.
+     * @throws Exception
+     */
+    public void testUnimplementedWithDataClause() throws Exception
+    {
+        assertStatementError("0A000", stmt,
+            "create table t3 as select * from t1 with data");
+    }
+   
+    private void positiveTest(String sql, String [] columnNames,
+            String [] nullability, String [] types) throws Exception
+    {
+        // create table
+        stmt.executeUpdate(sql);
+
+        // check column's name, nullability, and type
+        DatabaseMetaData dmd = getConnection().getMetaData();
+        ResultSet rs = dmd.getColumns(null, null, "T3", null);
+        int col = 0;
+        while (rs.next()) {
+            Assert.assertEquals("Column names do not match:",
+                    columnNames[col], rs.getString("COLUMN_NAME"));
+            Assert.assertEquals("Nullability incorrect:",
+                    nullability[col], rs.getString("IS_NULLABLE"));
+            Assert.assertEquals("Column type incorrect:",
+                    types[col], rs.getString("TYPE_NAME"));
+            col++;
+        }
+        Assert.assertEquals("Unexpected column count:",
+                columnNames.length, col);
+        stmt.executeUpdate("drop table t3");
+    }
+
+    /**
+     * Set the fixture up with base tables t1 and t2.
+     */
+    protected void setUp() throws SQLException
+    {    
+        getConnection().setAutoCommit(false);
+
+        stmt = createStatement();
+
+        // create base tables t1 and t2       
+        stmt.executeUpdate(
+            "create table t1(i int not null, s smallint, f float, dp "
+            + "double precision, v varchar(10) not null)");
+
+        stmt.executeUpdate("create table t2 (a int, s varchar(5))");
+    }
+    
+    /**
+     * Tear-down the fixture by removing the tables
+     * (if they still exist).
+     */
+    protected void tearDown() throws Exception
+    {
+        // drop tables
+        try {
+            stmt.execute("drop table t1");
+        } catch (SQLException e) {
+            assertSQLState("42Y55", e);
+        }
+
+        try {
+            stmt.execute("drop table t2");
+        } catch (SQLException e) {
+            assertSQLState("42Y55", e);
+        }
+
+        try {
+            stmt.execute("drop table t3");
+        } catch (SQLException e) {
+            assertSQLState("42Y55", e);
+        }
+
+        stmt.close();
+
+        super.tearDown();
+    }
+}

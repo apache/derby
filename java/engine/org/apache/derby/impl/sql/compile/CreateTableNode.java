@@ -30,11 +30,14 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
+import org.apache.derby.iapi.sql.depend.ProviderList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -58,6 +61,8 @@ public class CreateTableNode extends DDLStatementNode
 	private Properties			properties;
 	private TableElementList	tableElementList;
 	protected int	tableType; //persistent table or global temporary table
+	private ResultColumnList	resultColumns;
+	private ResultSetNode		queryExpression;
 
 	/**
 	 * Initializer for a CreateTableNode for a base table
@@ -137,6 +142,28 @@ public class CreateTableNode extends DDLStatementNode
 			}
 		}
 	}
+	
+	/**
+	 * Initializer for a CreateTableNode for a base table create from a query
+	 * 
+	 * @param newObjectName		The name of the new object being created
+	 * 	                        (ie base table).
+	 * @param resultColumns		The optional column list.
+	 * @param queryExpression	The query expression for the table.
+	 */
+	public void init(
+			Object newObjectName,
+			Object resultColumns,
+			Object queryExpression)
+		throws StandardException
+	{
+		tableType = TableDescriptor.BASE_TABLE_TYPE;
+		lockGranularity = TableDescriptor.DEFAULT_LOCK_GRANULARITY;
+		implicitCreateSchema = true;
+		initAndCheck(newObjectName);
+		this.resultColumns = (ResultColumnList) resultColumns;
+		this.queryExpression = (ResultSetNode) queryExpression;
+	}
 
 	/**
 	 * If no schema name specified for global temporary table, SESSION is the implicit schema.
@@ -208,6 +235,78 @@ public class CreateTableNode extends DDLStatementNode
 		int numCheckConstraints = 0;
 		int numReferenceConstraints = 0;
 		int numUniqueConstraints = 0;
+
+		if (queryExpression != null)
+		{
+			FromList fromList = (FromList) getNodeFactory().getNode(
+					C_NodeTypes.FROM_LIST,
+					getNodeFactory().doJoinOrderOptimization(),
+					getContextManager());
+			
+			CompilerContext cc = getCompilerContext();
+			ProviderList prevAPL = cc.getCurrentAuxiliaryProviderList();
+			ProviderList apl = new ProviderList();
+			
+			try
+			{
+				cc.setCurrentAuxiliaryProviderList(apl);
+				cc.pushCurrentPrivType(Authorizer.SELECT_PRIV);
+				
+				/* Bind the tables in the queryExpression */
+				queryExpression =
+					queryExpression.bindNonVTITables(dataDictionary, fromList);
+				queryExpression = queryExpression.bindVTITables(fromList);
+				
+				/* Bind the expressions under the resultSet */
+				queryExpression.bindExpressions(fromList);
+				
+				/* Bind the query expression */
+				queryExpression.bindResultColumns(fromList);
+				
+				/* Reject any untyped nulls in the RCL */
+				/* e.g. CREATE TABLE t1 (x) AS VALUES NULL WITH NO DATA */
+				queryExpression.bindUntypedNullsToResultColumns(null);
+			}
+			finally
+			{
+				cc.popCurrentPrivType();
+				cc.setCurrentAuxiliaryProviderList(prevAPL);
+			}
+			
+			/* If there is an RCL for the table definition then copy the
+			 * names to the queryExpression's RCL after verifying that
+			 * they both have the same size.
+			 */
+			ResultColumnList qeRCL = queryExpression.getResultColumns();
+			
+			if (resultColumns != null)
+			{
+				if (resultColumns.size() != qeRCL.size())
+				{
+					throw StandardException.newException(
+							SQLState.LANG_TABLE_DEFINITION_R_C_L_MISMATCH,
+							getFullName());
+				}
+				qeRCL.copyResultColumnNames(resultColumns);
+			}
+			
+			/* Create table element list from columns in query expression */
+			tableElementList = new TableElementList();
+			
+			for (int index = 0; index < qeRCL.size(); index++)
+			{
+				ResultColumn rc = (ResultColumn) qeRCL.elementAt(index);
+				/* Raise error if column name is system generated. */
+				if (rc.isNameGenerated())
+				{
+					throw StandardException.newException(
+							SQLState.LANG_TABLE_REQUIRES_COLUMN_NAMES);
+				}
+				ColumnDefinitionNode column = new ColumnDefinitionNode();
+				column.init(rc.getName(), null, rc.getType(), null);
+				tableElementList.addTableElement(column);
+			}
+		}
 
 		tableElementList.validate(this, dataDictionary, (TableDescriptor) null);
 

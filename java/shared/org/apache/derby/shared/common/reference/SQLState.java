@@ -747,6 +747,7 @@ public interface SQLState {
 
 	String LANG_NO_AGGREGATES_IN_WHERE_CLAUSE                          = "42903";
 	String LANG_DB2_VIEW_REQUIRES_COLUMN_NAMES                         = "42908";
+	String LANG_TABLE_REQUIRES_COLUMN_NAMES                            = "42909";
 	String LANG_DELETE_RULE_VIOLATION		   					       = "42915";
 	String LANG_SYNONYM_CIRCULAR   		   					           = "42916";
 	String LANG_DB2_ON_CLAUSE_INVALID		   					       = "42972";
@@ -818,6 +819,7 @@ public interface SQLState {
 	//42X67
 	String LANG_NO_FIELD_FOUND                                         = "42X68";
 	String LANG_PRIMITIVE_REFERENCING_EXPRESSION                       = "42X69";
+	String LANG_TABLE_DEFINITION_R_C_L_MISMATCH                        = "42X70";
 	String LANG_NO_STATIC_FIELD_FOUND                                  = "42X72";
 	String LANG_AMBIGUOUS_METHOD_INVOCATION                            = "42X73";
 	String LANG_INVALID_CALL_STATEMENT                                 = "42X74";
@@ -843,6 +845,7 @@ public interface SQLState {
 	String LANG_OBJECT_NOT_FOUND                                       = "42X94";
 	String LANG_DB_CLASS_PATH_HAS_MISSING_JAR                          = "42X96";
 	String LANG_NO_PARAMS_IN_VIEWS                                     = "42X98";
+	String LANG_NO_PARAMS_IN_TABLES                                    = "42X99";
 	String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";
