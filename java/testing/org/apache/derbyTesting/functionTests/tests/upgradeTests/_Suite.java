@@ -66,6 +66,13 @@ import org.apache.derbyTesting.junit.BaseTestCase;
 public class _Suite extends BaseTestCase {
     
     /**
+     * Property that indicates the location of the
+     * old releases.
+     */
+    static final String OLD_RELEASE_PATH_PROPERTY =
+        "derbyTesting.oldReleasePath";
+    
+    /**
      * List of the versions to test against.
      * The tests look for the jar files in each releasae
      * in the folder:
@@ -97,9 +104,10 @@ public class _Suite extends BaseTestCase {
     
     public static Test suite() {
         
-        if (getSystemProperty("derbyTesting.jar.path") == null)
+        if (getSystemProperty(OLD_RELEASE_PATH_PROPERTY) == null)
             return new TestSuite(
-                    "empty: no upgrade tests: derbyTesting.jar.path not set");
+                    "empty: no upgrade tests: " +
+                    OLD_RELEASE_PATH_PROPERTY + " not set");
         
         TestSuite suite = new TestSuite("Upgrade Suite");       
 

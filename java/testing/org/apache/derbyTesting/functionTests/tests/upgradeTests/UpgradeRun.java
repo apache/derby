@@ -170,14 +170,15 @@ class UpgradeRun {
     
     /**
      * Get the location of jars of old release. The location is specified 
-     * in the property "derbyTesting.jar.path".
+     * in the property derbyTesting.oldReleasePath.
      *  
      * @return location of jars of old release
      */
     private static String getOldJarLocation(int[] oldVersion) {
-        String jarPath = System.getProperty("derbyTesting.jar.path");
+        String jarPath = System.getProperty(_Suite.OLD_RELEASE_PATH_PROPERTY);
         
-        Assert.assertNotNull("derbyTesting.jar.path not set", jarPath);
+        Assert.assertNotNull(_Suite.OLD_RELEASE_PATH_PROPERTY
+                + " not set", jarPath);
       
         String version = getTextVersion(oldVersion);
         String jarLocation = jarPath + File.separator + version
@@ -200,7 +201,7 @@ class UpgradeRun {
         String jarLocation = getOldJarLocation(version);
         
         File lib = new File(jarLocation);
-        
+                
         // If the jars do not exist then return null
         // and the caller will set up to skip this.
         if (!lib.exists())
