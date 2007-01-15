@@ -71,6 +71,7 @@
       <classpath>
         <pathelement path="${jta1_2}"/>
         <pathelement path="${compile.classpath}"/>
+        <pathelement path="${junit}"/>
       </classpath>
       <include name="${derby.testing.unittest.dir}/**/*.java"/>
     </javac>

@@ -67,6 +67,10 @@ public class AllPackages extends BaseTestCase {
                             "org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"));
         }
 
+        // Adding JUnit unit tests here to avoid creating a new JUnit
+        // harness above the functionTests and unitTests
+        // directories(packages)
+        suite.addTest(org.apache.derbyTesting.unitTests.junit._Suite.suite());
         return suite;
     }
     
