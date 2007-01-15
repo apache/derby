@@ -122,6 +122,7 @@
       <exclude name="${this.dir}/LobStreamsTest.java"/>
       <exclude name="${this.dir}/XATest.java"/>
       <exclude name="${this.dir}/ScrollResultSetTest.java"/>
+      <exclude name="${this.dir}/DatabaseMetaDataTest.java"/>
       <exclude name="${this.dir}/_Suite.java"/>
     </javac>
   </target>
@@ -156,6 +157,7 @@
       <include name="${this.dir}/LobStreamsTest.java"/>
       <include name="${this.dir}/XATest.java"/>
       <include name="${this.dir}/ScrollResultSetTest.java"/>
+      <include name="${this.dir}/DatabaseMetaDataTest.java"/>
     </javac>
   </target>
 
