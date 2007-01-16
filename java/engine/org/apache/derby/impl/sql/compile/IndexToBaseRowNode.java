@@ -68,6 +68,8 @@ public class IndexToBaseRowNode extends FromTable
 	protected boolean	forUpdate;
 	private FormatableBitSet	heapReferencedCols;
 	private FormatableBitSet	indexReferencedCols;
+	private FormatableBitSet	allReferencedCols;
+	private FormatableBitSet	heapOnlyReferencedCols;
 
 	public void init(
 			Object	source,
@@ -89,6 +91,19 @@ public class IndexToBaseRowNode extends FromTable
 		this.forUpdate = ((Boolean) forUpdate).booleanValue();
 		this.heapReferencedCols = (FormatableBitSet) heapReferencedCols;
 		this.indexReferencedCols = (FormatableBitSet) indexReferencedCols;
+
+		if (this.indexReferencedCols == null) {
+			this.allReferencedCols = this.heapReferencedCols;
+			heapOnlyReferencedCols = this.heapReferencedCols;
+		}
+		else {
+			this.allReferencedCols =
+				new FormatableBitSet(this.heapReferencedCols);
+			this.allReferencedCols.or(this.indexReferencedCols);
+			heapOnlyReferencedCols =
+				new FormatableBitSet(allReferencedCols);
+			heapOnlyReferencedCols.xor(this.indexReferencedCols);
+		}
 	}
 
 	/** @see Optimizable#forUpdate */
@@ -187,14 +202,19 @@ public class IndexToBaseRowNode extends FromTable
 
 
 		int heapColRefItem = -1;
-		int indexColRefItem = -1;
 		if (heapReferencedCols != null)
 		{
 			heapColRefItem = acb.addItem(heapReferencedCols);
 		}
-		if (indexReferencedCols != null)
+		int allColRefItem = -1;
+		if (allReferencedCols != null)
 		{
-			indexColRefItem = acb.addItem(indexReferencedCols);
+			allColRefItem = acb.addItem(allReferencedCols);
+		}
+		int heapOnlyColRefItem = -1;
+		if (heapOnlyReferencedCols != null)
+		{
+			heapOnlyColRefItem = acb.addItem(heapOnlyReferencedCols);
 		}
 
 		/* Create the ReferencedColumnsDescriptorImpl which tells which columns
@@ -218,7 +238,10 @@ public class IndexToBaseRowNode extends FromTable
 		mb.push(resultSetNumber);
 		mb.push(source.getBaseTableName());
 		mb.push(heapColRefItem);
-		mb.push(indexColRefItem);
+
+		mb.push(allColRefItem);
+		mb.push(heapOnlyColRefItem);
+
 		mb.push(indexColMapItem);
 
 		// if there is no restriction, we just want to pass null.
@@ -263,7 +286,7 @@ public class IndexToBaseRowNode extends FromTable
 		mb.push(costEstimate.getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getIndexRowToBaseRowResultSet",
-						ClassName.NoPutResultSet, 13);
+						ClassName.NoPutResultSet, 14);
 
 		/* The IndexRowToBaseRowResultSet generator is what we return */
 

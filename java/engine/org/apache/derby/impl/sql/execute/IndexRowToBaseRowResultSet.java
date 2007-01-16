@@ -36,6 +36,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.impl.sql.GenericPreparedStatement;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
@@ -75,7 +76,6 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	private GeneratedMethod restriction;
     private long baseConglomId;
 	public FormatableBitSet accessedHeapCols;
-	private FormatableBitSet accessedIndexCols;
 	//caching accessed columns (heap+index) beetle 3865
 	private FormatableBitSet accessedAllCols;
 	public String indexName;
@@ -87,7 +87,6 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	private ConglomerateController	baseCC;
 	private boolean                 closeBaseCCHere;
 	private ExecRow					resultRow;
-	private ExecRow					compactRow;
 	private boolean					forUpdate;
 	private DataValueDescriptor[]	rowArray;
 
@@ -117,7 +116,8 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 					int resultSetNumber,
 					String indexName,
 					int heapColRefItem,
-					int indexColRefItem,
+					int allColRefItem,
+					int heapOnlyColRefItem,
 					int indexColMapItem,
 					GeneratedMethod restriction,
 					boolean forUpdate,
@@ -126,8 +126,11 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		throws StandardException
 	{
 		super(a, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
-        scoci = (StaticCompiledOpenConglomInfo)(activation.getPreparedStatement().
-						getSavedObject(scociItem));
+		final GenericPreparedStatement gp =
+			(GenericPreparedStatement)a.getPreparedStatement();
+		final Object[] saved = gp.getSavedObjects();
+
+		scoci = (StaticCompiledOpenConglomInfo)saved[scociItem];
 		TransactionController tc = activation.getTransactionController();
 		dcoci = tc.getDynamicCompiledConglomInfo(conglomId);
         this.source = source;
@@ -142,76 +145,58 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 
 		// retrieve the valid column list from
 		// the saved objects, if it exists
-		this.accessedHeapCols = null;
-		if (heapColRefItem != -1)
-		{
-			this.accessedHeapCols = (FormatableBitSet)(a.getPreparedStatement().
-						getSavedObject(heapColRefItem));
+		if (heapColRefItem != -1) {
+			this.accessedHeapCols = (FormatableBitSet)saved[heapColRefItem];
 		}
-		if (indexColRefItem != -1)
-		{
-			this.accessedIndexCols = (FormatableBitSet)(a.getPreparedStatement().
-						getSavedObject(indexColRefItem));
+		if (allColRefItem != -1) {
+			this.accessedAllCols = (FormatableBitSet)saved[allColRefItem];
 		}
-		if (accessedIndexCols == null)
-			accessedAllCols = accessedHeapCols;
-		else
-		{
-			accessedAllCols = new FormatableBitSet(accessedHeapCols);
-			accessedAllCols.or(accessedIndexCols);
-		}
-			
+
 		// retrieve the array of columns coming from the index
-		indexCols = ((ReferencedColumnsDescriptorImpl) (a.getPreparedStatement().
-						getSavedObject(indexColMapItem))).getReferencedColumnPositions();
+		indexCols = 
+			((ReferencedColumnsDescriptorImpl)
+			 saved[indexColMapItem]).getReferencedColumnPositions();
 
 		/* Get the result row template */
 		resultRow = (ExecRow) resultRowAllocator.invoke(activation);
 
-		compactRow =
-			getCompactRow(resultRow,
-							accessedHeapCols,
-							accessedIndexCols,
-							false);
+		// Note that getCompactRow will assign its return value to the
+		// variable compactRow which can be accessed through
+		// inheritance. Hence we need not collect the return value
+		// of the method.
+		getCompactRow(resultRow, accessedAllCols, 
+					  (FormatableBitSet)null, false);
 
 		/* If there's no partial row bit map, then we want the entire
 		 * row, otherwise we need to diddle with the row array so that
 		 * we only get the columns coming from the heap on the fetch.
 		 */
-		if (accessedHeapCols == null)
-		{
+		if (accessedHeapCols == null) {
 			rowArray = resultRow.getRowArray();
 		}
-		else
-		{
+		else {
 			// Figure out how many columns are coming from the heap
-			int arraySize = accessedHeapCols.getNumBitsSet();
-			int accessedHeapColsSize = accessedHeapCols.size();
 
-			rowArray = new DataValueDescriptor[accessedHeapColsSize];
+			final DataValueDescriptor[] resultRowArray =
+				resultRow.getRowArray();
+			final FormatableBitSet heapOnly =
+				(FormatableBitSet)saved[heapOnlyColRefItem];
+			final int heapOnlyLen = heapOnly.getLength();
 
-			// Now, fill in rowArray with the desired columns
-			int partialIndex = 0;
-			int numFromIndex = 0;
-			for (int index = 0; index < accessedHeapColsSize; index++)
-			{
-				if (accessedIndexCols != null && accessedIndexCols.get(index))
-				{
-					numFromIndex++;
-					continue;
-				}
-				if (accessedHeapCols.get(index))
-				{
-					rowArray[index] =
-						resultRow.getRowArray()[index];
-					partialIndex++;
+			// Need a separate DataValueDescriptor array in this case
+			rowArray =
+ 				new DataValueDescriptor[heapOnlyLen];
+			final int minLen = Math.min(resultRowArray.length, heapOnlyLen);
+
+			// Make a copy of the relevant part of rowArray
+			for (int i = 0; i < minLen; ++i) {
+				if (resultRowArray[i] != null && heapOnly.isSet(i)) {
+					rowArray[i] = resultRowArray[i];
 				}
 			}
 		}
-
 		constructorTime += getElapsedMillis(beginTime);
-
-    }
+	}
 
 	//
 	// ResultSet interface (leftover from NoPutResultSet)

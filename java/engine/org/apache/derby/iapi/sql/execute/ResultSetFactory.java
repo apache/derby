@@ -1006,9 +1006,13 @@ public interface ResultSetFactory {
 		@param heapColRefItem	A saved item for a bitImpl of columns that
 								are referenced in the underlying heap.  -1 if
 								no item.
-		@param indexColRefItem	A saved item for a bitImpl of columns that
-								are referenced in the underlying index.  -1 if
-								no item.
+		@param allColRefItem A saved item for a bitImpl of columns
+								that are referenced in the underlying
+								index and heap.  -1 if no item.
+		@param heapOnlyColRefItem A saved item for a bitImpl of
+								columns that are referenced in the
+								underlying heap only.  -1 if no item.
+
 		@param indexColMapItem	A saved item for a ReferencedColumnsDescriptorImpl
 								which tell  which columms are coming from the index.
 		@param restriction		The restriction, if any, to be applied to the base row
@@ -1029,7 +1033,8 @@ public interface ResultSetFactory {
 								int resultSetNumber,
 								String indexName,
 								int heapColRefItem,
-								int indexColRefItem,
+								int allColRefItem,
+								int heapOnlyColRefItem,
 								int indexColMapItem,
 								GeneratedMethod restriction,
 								boolean forUpdate,
