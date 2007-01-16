@@ -395,6 +395,20 @@ public class JDBC {
 		    column.close();
 		}
 	}
+    
+    /**
+     * Assert a result set is empty.
+     * If the result set is not empty it will
+     * be drained before the check to see if
+     * it is empty.
+     * The ResultSet is closed by this method.
+
+     */
+    public static void assertEmpty(ResultSet rs)
+    throws SQLException
+    {
+        assertDrainResults(rs, 0);
+    }
 	
 	/**
 	 * Drain a single ResultSet by reading all of its
@@ -404,14 +418,18 @@ public class JDBC {
 	 *
 	 * Provides simple testing of the ResultSet when the
 	 * contents are not important.
+     * 
+     * The ResultSet is closed by this method.
 	 *
 	 * @param rs Result set to drain.
+     * @return the number of rows seen.
+
 	 * @throws SQLException
 	 */
-	public static void assertDrainResults(ResultSet rs)
+	public static int assertDrainResults(ResultSet rs)
 	    throws SQLException
 	{
-		assertDrainResults(rs, -1);
+		return assertDrainResults(rs, -1);
 	}
 
 	/**
@@ -419,13 +437,16 @@ public class JDBC {
 	 * above.  If the received row count is non-negative,
 	 * this method also asserts that the number of rows
 	 * in the result set matches the received row count.
+     * 
+     * The ResultSet is closed by this method.
 	 *
 	 * @param rs Result set to drain.
 	 * @param expectedRows If non-negative, indicates how
 	 *  many rows we expected to see in the result set.
+     *  @return the number of rows seen.
 	 * @throws SQLException
 	 */
-	public static void assertDrainResults(ResultSet rs,
+	public static int assertDrainResults(ResultSet rs,
 	    int expectedRows) throws SQLException
 	{
 		ResultSetMetaData rsmd = rs.getMetaData();
@@ -442,7 +463,9 @@ public class JDBC {
 		rs.close();
 
 		if (expectedRows >= 0)
-			Assert.assertEquals("Unexpected row count:", expectedRows, rows); 
+			Assert.assertEquals("Unexpected row count:", expectedRows, rows);
+        
+        return rows;
 	}
 	
     /**

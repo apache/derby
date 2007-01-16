@@ -25,17 +25,32 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test the DatabaseMetaData api.
+ * <P>
+ * For the methods that return a ResultSet to determine the
+ * attributes of SQL objects (e.g. getTables) two methods
+ * are provided. A non-modify and a modify one.
+ * 
+ * <BR>
+ * The non-modify method tests that the getXXX method call works.
+ * This can be used by other tests where issues have been seen
+ * with database meta data, such as upgrade and read-only databases.
+ * The non-modify means that the test method does not change the database
+ * in order to test the return of the getXXX method is correct.
+ * <BR>
+ * The modify versions test
  * Work in progress.
  * Methods left to test from JDBC 3
  * 
@@ -49,10 +64,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *  getPrimaryKeys
  *  getProcedureColumns
  *  getProcedures
- *  getSchemas
  *  getTablePrivileges
- *  getTables
- *  getTableTypes
+ *  getTables (modify)
  *  getTypeInfo
  */
 public class DatabaseMetaDataTest extends BaseJDBCTestCase {
@@ -140,9 +153,25 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         { "SUBSTRING", "'Ruby the Rubicon Jeep'", "10", "7", },
         { "UCASE", "'Fernando Alonso'" }
         };
+    
+    /**
+     * Did the test modifiy the database.
+     */
+    private boolean modifiedDatabase;
 
     public DatabaseMetaDataTest(String name) {
         super(name);
+    }
+    
+    protected void tearDown() throws Exception
+    {
+        if (modifiedDatabase)
+        {
+            Connection conn = getConnection();
+            conn.setAutoCommit(false);
+            CleanDatabaseTestSetup.cleanDatabase(conn);
+        }
+        super.tearDown();
     }
     
     public static Test suite() {
@@ -563,46 +592,284 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         rs = dmd.getAttributes(null,null,null,null);
         assertMetaDataResultSet(rs, null, null);
-        assertFalse(rs.next());
-        rs.close();
+        JDBC.assertEmpty(rs);
         
         rs = dmd.getCatalogs();
-        assertMetaDataResultSet(rs, null, null);
-        assertFalse(rs.next());
-        rs.close();
+        checkCatalogsShape(rs);
+        JDBC.assertEmpty(rs);
         
         rs = dmd.getSuperTables(null,null,null);
         assertMetaDataResultSet(rs, null, null);
-        assertFalse(rs.next());
-        rs.close();
+        JDBC.assertEmpty(rs);
 
         rs = dmd.getSuperTypes(null,null,null);
         assertMetaDataResultSet(rs, null, null);
-        assertFalse(rs.next());
-        rs.close();
+        JDBC.assertEmpty(rs);
 
         rs = dmd.getUDTs(null,null,null,null);
         assertMetaDataResultSet(rs, null, null);
-        assertFalse(rs.next());
-        rs.close();
+        JDBC.assertEmpty(rs);
         
         rs = dmd.getVersionColumns(null,null,
                 usingDerbyNetClient() ? "%" : null);
+        checkVersionColumnsShape(rs);
+        JDBC.assertEmpty(rs);
+    }
+    
+    /**
+     * Six cominations of valid identifiers with mixed
+     * case, to see how the various pattern matching
+     * and returned values handle them.
+     */
+    public final String[] IDS =
+    {
+            "one",
+            "TWO",
+            "ThReE",
+            "\"four\"",
+            "\"FIVE\"",
+            "\"sIx\"" 
+    };
+    
+    /**
+     * Test getSchemas() without modifying the database.
+     * 
+     * @throws SQLException
+     */
+    public void testGetSchemasNoModify() throws SQLException {
         
-        assertMetaDataResultSet(rs,
-           new String[] {
-           "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME",
-           "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", "PSEUDO_COLUMN"
-           },
-           new int[] {
-           Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
-           Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT
-           }
-        );
+        DatabaseMetaData dmd = getDMD();
+         
+        ResultSet rs = dmd.getSchemas();
+        checkSchemasShape(rs);
+        int schemaCount = JDBC.assertDrainResults(rs);
+        // There are 11 builtin schemas including APP
+        assertTrue("too few schemas", schemaCount >= 11);
+    }
+    
+    /**
+     * Test getSchemas().
+     * 
+     * @throws SQLException
+     */
+    public void testGetSchemasModify() throws SQLException {
+        // Set to cleanup on teardown.
+        modifiedDatabase = true;
         
-        assertFalse(rs.next());
+        DatabaseMetaData dmd = getDMD();
+        
+        Statement s = createStatement();
+        for (int i = 0; i < IDS.length; i++)
+           s.executeUpdate("CREATE SCHEMA " + IDS[i]);
+        s.close();
+         
+        ResultSet rs = dmd.getSchemas();
+        checkSchemas(rs, new String[]
+         { "APP", "FIVE", "NULLID", "ONE",
+           "SQLJ", "SYS", "SYSCAT", "SYSCS_DIAG",
+           "SYSCS_UTIL", "SYSFUN", "SYSIBM", "SYSPROC", "SYSSTAT",
+           "THREE", "TWO", "four", "sIx"});
+    }
+    /**
+     * Check the returned information from a getSchemas().
+     * The passed in String[] expected is a list of the
+     * schemas expected to be returned in order.
+     */
+    public static void checkSchemas(ResultSet rs,
+            String[] expected) throws SQLException
+    {
+        // Since catalog is always NULL expand into the
+        // two value set expected by assertFullResultSet.
+        String[][] expected2cols = new String[expected.length][];
+        for (int i = 0; i < expected.length; i++)
+        {
+            expected2cols[i] = new String[] {expected[i], null};
+        }
+        
+        checkSchemasShape(rs);
+        JDBC.assertFullResultSet(rs, expected2cols, true);
         rs.close();
-   
+    }
+
+    /**
+     * Check the shape of the ResultSet from any
+     * getSchemas call.
+     */
+    private static void checkSchemasShape(ResultSet rs) throws SQLException
+    {
+        assertMetaDataResultSet(rs,
+          new String[] {
+          "TABLE_SCHEM", "TABLE_CATALOG"
+         },
+         new int[] {
+          Types.VARCHAR, Types.VARCHAR
+         }
+        );        
+    }
+    
+    /**
+     * Test getTables() without modifying the database.
+     * 
+     * @throws SQLException
+     */
+    public void testGetTablesNoModify() throws SQLException {
+        
+        DatabaseMetaData dmd = getDMD();
+        
+        ResultSet rs;
+        
+        rs = dmd.getTables(null, null, null, null);
+        checkTablesShape(rs);
+        int allTableCount = JDBC.assertDrainResults(rs);
+        assertTrue("getTables() on all was empty!", allTableCount > 0);
+        
+        rs = dmd.getTables("%", "%", "%", null);
+        checkTablesShape(rs);
+        assertEquals("Different counts from getTables",
+                allTableCount, JDBC.assertDrainResults(rs));
+        
+        rs = dmd.getTables(null, "NO_such_schema", null, null);
+        checkTablesShape(rs);
+        JDBC.assertEmpty(rs);
+        
+        rs = dmd.getTables(null, "SQLJ", null, null);
+        checkTablesShape(rs);
+        JDBC.assertEmpty(rs);
+        
+        rs = dmd.getTables(null, "SQLJ", "%", null);
+        checkTablesShape(rs);
+        JDBC.assertEmpty(rs);
+        
+        rs = dmd.getTables(null, "SYS", "No_such_table", null);
+        checkTablesShape(rs);
+        JDBC.assertEmpty(rs);
+        
+        String[] userTableOnly = new String[] {"TABLE"};
+
+        // no user tables in SYS
+        rs = dmd.getTables(null, "SYS", null, userTableOnly);
+        checkTablesShape(rs);
+        JDBC.assertEmpty(rs);
+        
+        rs = dmd.getTables(null, "SYS", "%", userTableOnly);
+        checkTablesShape(rs);
+        JDBC.assertEmpty(rs);
+        
+        String[] systemTableOnly = new String[] {"SYSTEM_TABLE"};
+        
+        rs = dmd.getTables(null, "SYS", null, systemTableOnly);
+        checkTablesShape(rs);
+        int systemTableCount = JDBC.assertDrainResults(rs);
+        assertTrue("getTables() on system tables was empty!", systemTableCount > 0);
+        
+        rs = dmd.getTables(null, "SYS", "%", systemTableOnly);
+        checkTablesShape(rs);
+        assertEquals(systemTableCount, JDBC.assertDrainResults(rs));
+
+        String[] viewOnly = new String[] {"VIEW"};
+        rs = dmd.getTables(null, "SYS", null, viewOnly);
+        JDBC.assertEmpty(rs);
+        
+        rs = dmd.getTables(null, "SYS", "%", viewOnly);
+        JDBC.assertEmpty(rs);
+        
+        String[] allTables = {"SYNONYM","SYSTEM TABLE","TABLE","VIEW"};
+        rs = dmd.getTables(null, null, null, allTables);
+        checkTablesShape(rs);
+        assertEquals("Different counts from getTables",
+                allTableCount, JDBC.assertDrainResults(rs));
+        rs = dmd.getTables("%", "%", "%", allTables);
+        checkTablesShape(rs);
+        assertEquals("Different counts from getTables",
+                allTableCount, JDBC.assertDrainResults(rs));
+        
+    }
+    
+    /**
+     * Test getTableTypes()
+     */
+    public void testTableTypes() throws SQLException
+    {
+        DatabaseMetaData dmd = getDMD();
+        
+        ResultSet rs = dmd.getTableTypes();
+        assertMetaDataResultSet(rs,
+                new String[] {
+                "TABLE_TYPE"
+               },
+               new int[] {
+                Types.VARCHAR
+               }
+              );
+        
+        JDBC.assertFullResultSet(rs, new String[][]
+          {
+            {"SYNONYM"},{"SYSTEM TABLE"},{"TABLE"},{"VIEW"},               
+          }, true);
+        rs.close();
+    }
+    /**
+     * Check the shape of the ResultSet from any getTables call.
+     */
+    private void checkTablesShape(ResultSet rs) throws SQLException
+    {
+        assertMetaDataResultSet(rs,
+          new String[] {
+          "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "TABLE_TYPE",
+          "REMARKS", "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME",
+          "SELF_REFERENCING_COL_NAME", "REF_GENERATION"
+         },
+         new int[] {
+          Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+          Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+          Types.VARCHAR, Types.VARCHAR
+         }
+        );        
+    }
+    
+   /* 
+    # TABLE_CAT String => table catalog (may be null)
+    # TABLE_SCHEM String => table schema (may be null)
+    # TABLE_NAME String => table name
+    # TABLE_TYPE String => table type. Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
+    # REMARKS String => explanatory comment on the table
+    # TYPE_CAT String => the types catalog (may be null)
+    # TYPE_SCHEM String => the types schema (may be null)
+    # TYPE_NAME String => type name (may be null)
+    # SELF_REFERENCING_COL_NAME String => name of the designated "identifier" column of a typed table (may be null)
+    # REF_GENERATION
+*/
+    /**
+     * Check the shape of the ResultSet from any getCatlogs call.
+     */
+    private void checkCatalogsShape(ResultSet rs) throws SQLException
+    {
+        assertMetaDataResultSet(rs,
+          new String[] {
+          "TABLE_CAT"
+         },
+         new int[] {
+          Types.CHAR
+         }
+        );        
+    }
+    
+    /**
+     * Check the shape of the ResultSet from any
+     * getVersionColumns call.
+     */
+    private static void checkVersionColumnsShape(ResultSet rs) throws SQLException
+    {
+        assertMetaDataResultSet(rs,
+          new String[] {
+          "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME",
+          "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", "PSEUDO_COLUMN"
+         },
+         new int[] {
+          Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
+          Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT
+         }
+        );        
     }
     
     public static void assertMetaDataResultSet(ResultSet rs,
