@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.services.io;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.io.InputStream;
 import java.io.ObjectOutput;
@@ -67,6 +68,8 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	** zero length byte array, with all bits
 	** marked as unused.
 	*/
+	// value is never null. An empty bitset is represented by a
+	// zero-length array.
 	private byte[]	value;
 	private	short	bitsInLastByte;
 
@@ -77,6 +80,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public FormatableBitSet()
 	{
+		value = ReuseFactory.getZeroLenByteArray();
 	}
 
 	/**
@@ -167,11 +171,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public int getLengthInBytes()
 	{
-		if (value == null)
-		{
-			return 0;
-		}
-
 		return FormatableBitSet.numBytesFromBits(lengthAsBits);
 	}
 
@@ -219,9 +218,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 
 	public byte[] getByteArray()
 	{
-		if (value == null)
-			return null;
-
 		// In some cases the array is bigger than the actual number
 		// of valid bytes.
 		int realByteLength = getLengthInBytes();
@@ -239,16 +235,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	}
 
 	/**
-	 * Set the value of the byte array
-	 *
-	 * @return	The value of the byte array
-	 */
-	public boolean isNull()
-	{
-		return this.value == null;
-	}
-
-	/**
 	 * Grow (widen) a FormatableBitSet to N bis
 	 *
 	 * @param n	The number of bits you want.  The bits are
@@ -262,12 +248,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	{
 		if (n <= this.getLength())
 			return;
-
-		if (value == null)
-		{
-			initializeBits(n);
-			return;
-		}
 
 		int delta = n - this.getLength();
 
@@ -321,20 +301,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	{
 		int		numBytes;
 		int		lastByteNum;
-
-		/*
-		** Sanity check: we shouldn't shrink down to
-		** nothing.
-		*/
-		if (SanityManager.DEBUG)
-		{
-			if (value == null)
-			{
-				SanityManager.THROWASSERT("Attempt to shrink a null Bit"+
-						" -- caller should have known better probably");
-				return null;
-			}
-		}
 
 		if (n >= this.getLength())
 		{
@@ -413,18 +379,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 		byte[]	otherb;
 
 		otherb = other.value;
-		/*
-		** By convention, nulls sort low, and null == null
-		*/
-		if (this.value == null || otherb == null)
-		{
-			if (this.value != null)	// otherb == null
-				return 1;
-			if (otherb != null)		// this.value == null
-				return -1;
-			return 0;				// both null
-		}
-
 		otherLen = other.getLengthInBytes();
 		thisLen = getLengthInBytes();
 		for (otherCount = 0, thisCount = 0;
@@ -581,9 +535,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
      */
     public int hashCode()
     {
-        if( null == value)
-            return 0;
-        
         int code = 0;
         int i;
         int shift = 0;
@@ -710,9 +661,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	  */
 	public void clear()
 	{
-		if (value == null) 
-            return;
-
 		int byteLength = getLengthInBytes();
 		for (int ix=0; ix < byteLength; ix++)
             value[ix] = 0;
@@ -861,10 +809,6 @@ private static char[] decodeArray = {'0', '1', '2', '3', '4', '5', '6', '7',
 		int		outPosition;
 		int 	inByte;
 
-		if (value == null)
-		{
-			return null;
-		}
 		{
 			// give it a reasonable size
 			StringBuffer str = new StringBuffer(getLength()*8*3);

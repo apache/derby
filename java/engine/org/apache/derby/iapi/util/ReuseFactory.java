@@ -122,4 +122,10 @@ public class ReuseFactory {
     {
         return b ? staticTrue : staticFalse;
     }
+
+	private static final byte[] staticZeroLenByteArray = new byte[0];
+	public static byte[] getZeroLenByteArray() 
+	{
+		return staticZeroLenByteArray;
+	}
 }

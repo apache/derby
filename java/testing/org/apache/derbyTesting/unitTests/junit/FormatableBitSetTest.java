@@ -101,7 +101,7 @@ public class FormatableBitSetTest extends TestCase {
     public void testSetup() {
         assertEquals(0,empty.getLength());
         assertEquals(0,empty.getLengthInBytes());
-        assertEquals(null,empty.getByteArray());
+        assertEquals(0,empty.getByteArray().length);
         assertEquals(0,empty.getNumBitsSet());
 
         assertEquals(18,bitset18.getLength());
@@ -240,16 +240,11 @@ public class FormatableBitSetTest extends TestCase {
 
     // Test cases for shrink(int)
     public void testShrinkEmpty() {
-        if (SanityManager.DEBUG) {
-            try { empty.shrink(0); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            empty.shrink(0);
-            assertEquals(0,empty.getLength());
-            assertEquals(0,empty.getLengthInBytes());
-            assertEquals(null,empty.getByteArray());
-            assertEquals(0,empty.getNumBitsSet());
-        }
+        empty.shrink(0);
+        assertEquals(0,empty.getLength());
+        assertEquals(0,empty.getLengthInBytes());
+        assertEquals(0,empty.getByteArray().length);
+        assertEquals(0,empty.getNumBitsSet());
     }
     public void testShrink() {
         bitset18.shrink(9);
@@ -316,14 +311,14 @@ public class FormatableBitSetTest extends TestCase {
         empty.concatenate(empty);
         assertEquals(0,empty.getLength());
         assertEquals(0,empty.getLengthInBytes());
-        assertEquals(null,empty.getByteArray());
+        assertEquals(0,empty.getByteArray().length);
         assertEquals(0,empty.getNumBitsSet());
     }
     public void testCatAnotherEmpty() {
         empty.concatenate(new FormatableBitSet());
         assertEquals(0,empty.getLength());
         assertEquals(0,empty.getLengthInBytes());
-        assertEquals(null,empty.getByteArray());
+        assertEquals(0,empty.getByteArray().length);
         assertEquals(0,empty.getNumBitsSet());
     }
     public void testCatSame() {
@@ -351,12 +346,12 @@ public class FormatableBitSetTest extends TestCase {
 
     // Test cases for isSet(int)
     public void testIsSetEmpty() {
-        try { empty.isSet(-1); fail(); } catch (NullPointerException npe) {}
+        empty.isSet(-1);
         if (SanityManager.DEBUG) {
             try { empty.isSet(0); fail(); } catch (AssertFailure af) {}
         }
         else {
-            try { empty.isSet(0); fail(); } catch (NullPointerException e) {}
+            assertFalse(empty.isSet(0));
         }
     }
     public void testIsSet() {
@@ -393,13 +388,14 @@ public class FormatableBitSetTest extends TestCase {
 
     // Test cases for set(int)
     public void testSetEmpty() {
-        try { empty.set(-1); fail(); } catch (NullPointerException npe) {}
+        try { empty.set(-1); fail(); } 
+        catch (ArrayIndexOutOfBoundsException e) {}
         if (SanityManager.DEBUG) {
             try { empty.set(0); fail(); } catch (AssertFailure af) {}
         }
         else {
             try { empty.set(0); fail(); }
-            catch (NullPointerException npe) {}
+            catch (ArrayIndexOutOfBoundsException e) {}
         }
     }
     public void testSet() {
@@ -421,12 +417,14 @@ public class FormatableBitSetTest extends TestCase {
 
     // Test cases for clear(int)
     public void testClearEmpty() {
-        try { empty.clear(-1); fail(); } catch (NullPointerException npe) {}
+        try { empty.clear(-1); fail(); } 
+        catch (ArrayIndexOutOfBoundsException e) {}
         if (SanityManager.DEBUG) {
             try { empty.clear(0); fail(); } catch (AssertFailure af) {}
         }
         else {
-            try { empty.clear(0); fail(); } catch (NullPointerException npe) {}
+            try { empty.clear(0); fail(); } 
+            catch (ArrayIndexOutOfBoundsException e) {}
         }
     }
     public void testClear() {
@@ -451,7 +449,8 @@ public class FormatableBitSetTest extends TestCase {
     // Test cases for anySetBit()
     public void testAnySetBitEmpty() {
         // More reasonable to return -1 here ?
-        try { empty.anySetBit(); fail(); } catch (NullPointerException npe) {}
+        try { empty.anySetBit(); fail(); } 
+        catch (ArrayIndexOutOfBoundsException e) {}
         //assertEquals(empty.anySetBit(),-1);
     }
     public void testAnySetBit() {
@@ -552,7 +551,7 @@ public class FormatableBitSetTest extends TestCase {
             bitset18.xor(empty);
             assertEquals(0,empty.getLength());
             assertEquals(0,empty.getLengthInBytes());
-            assertEquals(null,empty.getByteArray());
+            assertEquals(0,empty.getByteArray().length);
             assertEquals(0,empty.getNumBitsSet());
         }
         //assertEquals(9,bitset18.getNumBitsSet());
