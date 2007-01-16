@@ -1009,6 +1009,10 @@ public class RunTest
                         {
                             jvmName = "j9_foundation";
                         }
+                        else if (System.getProperty("com.ibm.oti.configuration").equals("foun11"))
+                        {
+                            jvmName = "j9_foundation11";
+                        }
                         else
                         {
                             // for reporting; first extend javaVersion
@@ -1071,7 +1075,7 @@ public class RunTest
 		        upgradetest = true;
 		}
 	
-        if ( framework.equals("DerbyNet") && (! jvmName.equals("j9_foundation")))
+        if ( framework.equals("DerbyNet") && (! jvmName.startsWith("j9_foundation")))
 		{	
 
 			Class c = null;
@@ -1690,6 +1694,8 @@ clp.list(System.out);
             if (jvmName.startsWith("j9"))
             {
             	if (jvmName.equals("j9_foundation"))
+            		testJVM = "foundation";
+            	else if (jvmName.equals("j9_foundation11"))
             		testJVM = "foundation";
             	else
             		testJVM = "j9";
@@ -2918,10 +2924,10 @@ clp.list(System.out);
      */
     private static boolean installSecurityManager() throws ClassNotFoundException, IOException
     {
-    	// SecurityManager not currently work with j9 and useProcess=false
+    	// SecurityManager not currently work with older j9 and useProcess=false
     	// need to disable to allow tests to run.
-    	if (jvmName.startsWith("j9"))
-    		return false;
+   	if (jvmName.startsWith("j9") && (!jvmName.equals("j9_foundation11")))
+   		return false;
     	
     	boolean installedSecurityManager = false;
     	// Set up the SecurityManager in this JVM for this test.

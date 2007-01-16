@@ -687,7 +687,7 @@ public class RunList
             runwithibmjvm = parentProps.getProperty("runwithibmjvm");
             String testJVM = jvmName;
             if (jvmName.startsWith("j9"))
-            	testJVM = (jvmName.equals("j9_foundation") ? "foundation" : "j9");            
+            	testJVM = (jvmName.startsWith("j9_foundation") ? "foundation" : "j9");            
             runwithjvm = parentProps.getProperty("runwith" + testJVM);
             excludeJCC = parentProps.getProperty("excludeJCC");
         }                
@@ -712,6 +712,8 @@ public class RunList
 		if (j9config != null)
 			if (j9config.equals("foun10")) 
 				jvmName="j9_foundation";
+			else if (j9config.equals("foun11"))
+				jvmName="j9_foundation11";
 			else if (j9config.equals("max"))
 				jvmName="j9_13";
 		if (jversion == null)
@@ -784,7 +786,7 @@ public class RunList
                 derbyTestingXaSingle = suiteProperties.getProperty("derbyTesting.xa.single");
         String testJVM = jvmName;
         if (jvmName.startsWith("j9"))
-        	testJVM = (jvmName.equals("j9_foundation") ? "foundation" : "j9");
+        	testJVM = (jvmName.startsWith("j9_foundation") ? "foundation" : "j9");
         runwithjvm = suiteProperties.getProperty("runwith" + testJVM);
 		excludeJCC = suiteProperties.getProperty("excludeJCC");
 		keepfiles = suiteProperties.getProperty("keepfiles");
@@ -957,7 +959,7 @@ public class RunList
         // runwithjvm may be set at the top or just for a subsuite
 	    String testJVM = jvmName;
         if (jvmName.startsWith("j9"))
-        	testJVM = (jvmName.equals("j9_foundation") ? "foundation" : "j9");
+        	testJVM = (jvmName.startsWith("j9_foundation") ? "foundation" : "j9");
 	    if ( parentProperties.getProperty("runwith" + testJVM) != null )
 		    p.put("runwith" + testJVM, runwithjvm);
 		else

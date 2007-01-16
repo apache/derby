@@ -99,6 +99,8 @@ public class RunSuite
 		if (j9config != null) 
 			if (j9config.equals("foun10")) 
 				jvmName="j9_foundation";
+			else if (j9config.equals("foun11")) 
+				jvmName="j9_foundation11";
 			else if (j9config.equals("max"))
 				jvmName="j9_13";
 
