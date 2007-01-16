@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -90,7 +91,11 @@ public class SqlExceptionTest extends BaseTestCase
     }
 
     public static Test suite() {
-        return new TestSuite(SqlExceptionTest.class,
-                             "SqlExceptionTest");
+    	if ( JDBC.vmSupportsJSR169())
+    		// see DERBY-2157 for details
+    		return new TestSuite("empty SqlExceptionTest - client not supported on JSR169");
+    	else 
+    		return new TestSuite(SqlExceptionTest.class,
+                "SqlExceptionTest");
     }
 }
