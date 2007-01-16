@@ -469,7 +469,36 @@ public class JDBC {
                 expectedColNames[i], rsmd.getColumnName(i+1));
         }
     }
-    
+    /**
+     * Takes a result set and an array of expected column types
+     * from java.sql.Types 
+     * and asserts that the column types in the result
+     * set metadata match the number, order, and names of those
+     * in the array.
+     * 
+     * No length information for variable length types
+     * can be passed. For ResultSets from JDBC DatabaseMetaData
+     * the specification only indicates the types of the
+     * columns, not the length.
+     *
+     * @param rs ResultSet for which we're checking column names.
+     * @param expectedTypes Array of expected column types.
+     */
+    public static void assertColumnTypes(ResultSet rs,
+        int[] expectedTypes) throws SQLException
+    {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int actualCols = rsmd.getColumnCount();
+
+        Assert.assertEquals("Unexpected column count:",
+                expectedTypes.length, rsmd.getColumnCount());
+
+        for (int i = 0; i < actualCols; i++)
+        {
+            Assert.assertEquals("Column types do not match for column " + (i+1),
+                    expectedTypes[i], rsmd.getColumnType(i+1));
+        }
+    }
     /**
      * Asserts a ResultSet returns a single row with a single
      * column equal to the passed in String value. The value can

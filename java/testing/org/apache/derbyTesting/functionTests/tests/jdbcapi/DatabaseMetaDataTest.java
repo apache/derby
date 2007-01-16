@@ -330,6 +330,265 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertEquals(30, dmd.getMaxUserNameLength());
     }
     
+    public void testMiscellaneous() throws SQLException
+    {
+        DatabaseMetaData dmd = getDMD();
+        
+        assertTrue(dmd.allProceduresAreCallable());
+        assertTrue(dmd.allTablesAreSelectable());
+        assertFalse(dmd.dataDefinitionCausesTransactionCommit());
+        assertFalse(dmd.dataDefinitionIgnoredInTransactions());
+        
+        assertFalse(dmd.deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY));
+        assertTrue(dmd.deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
+        assertFalse(dmd.deletesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
+        
+        assertTrue(dmd.doesMaxRowSizeIncludeBlobs());
+        
+        // Catalogs not supported, so empty string returned for separator.
+        assertEquals("", dmd.getCatalogSeparator());
+        assertEquals("CATALOG", dmd.getCatalogTerm());
+        
+        assertEquals(Connection.TRANSACTION_READ_COMMITTED,
+                dmd.getDefaultTransactionIsolation());
+        
+        assertEquals("", dmd.getExtraNameCharacters());
+        assertEquals("\"", dmd.getIdentifierQuoteString());
+        
+        assertEquals("PROCEDURE", dmd.getProcedureTerm());
+        
+        assertEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT,
+                dmd.getResultSetHoldability());
+        
+        assertEquals("SCHEMA", dmd.getSchemaTerm());
+        
+        assertEquals("", dmd.getSearchStringEscape());
+        
+        assertEquals(DatabaseMetaData.sqlStateSQL99,
+                dmd.getSQLStateType());
+        
+        assertFalse(dmd.isCatalogAtStart()); 
+        
+        assertFalse(dmd.locatorsUpdateCopy());
+        
+        assertTrue(dmd.usesLocalFilePerTable());
+        assertTrue(dmd.usesLocalFiles());
+    }
+    
+    /**
+     * Methods that describe the version of the
+     * driver and database.
+     */
+    public void testVersionInfo() throws SQLException
+    {
+        DatabaseMetaData dmd = getDMD();
+        int databaseMajor = dmd.getDatabaseMajorVersion();
+        int databaseMinor = dmd.getDatabaseMinorVersion();
+        
+        int driverMajor = dmd.getDriverMajorVersion();
+        int driverMinor = dmd.getDriverMinorVersion();
+        
+        String databaseVersion = dmd.getDatabaseProductVersion();
+        String driverVersion = dmd.getDriverVersion();
+        
+        if (usingEmbedded())
+        {
+            // Database *is* the driver.
+            
+            assertEquals("Embedded Major version ",
+                    databaseMajor, driverMajor);
+            assertEquals("Embedded Minor version ",
+                    databaseMinor, driverMinor);
+            
+            assertEquals("Embedded version",
+                    databaseVersion, driverVersion);
+        }
+        
+        assertEquals("Apache Derby", dmd.getDatabaseProductName());
+        
+        String driverName = dmd.getDriverName();
+        if (usingEmbedded())
+        {
+            assertEquals("Apache Derby Embedded JDBC Driver",
+                    driverName);
+        }
+        else if (usingDerbyNetClient())
+        {
+            assertEquals("Apache Derby Network Client JDBC Driver",
+                    driverName);
+        }
+
+        int jdbcMajor = dmd.getJDBCMajorVersion();
+        int jdbcMinor = dmd.getJDBCMinorVersion();
+        
+        int expectedJDBCMajor = -1;
+        if (JDBC.vmSupportsJDBC4())
+        {
+            expectedJDBCMajor = 4;
+        }
+        else if (JDBC.vmSupportsJDBC3())
+        {
+            expectedJDBCMajor = 3;
+        }
+        else if (JDBC.vmSupportsJSR169())
+        {
+            // Not sure what is the correct output for JSR 169
+            expectedJDBCMajor = -1;
+        }
+         
+        if (expectedJDBCMajor != -1)
+        {
+            assertEquals("JDBC Major version",
+                    expectedJDBCMajor, jdbcMajor);
+            assertEquals("JDBC Minor version", 0, jdbcMinor);
+        }
+
+        /*
+String  getDatabaseProductName()
+        Retrieves the name of this database product.
+String  getDatabaseProductVersion()
+        Retrieves the version number of this database product.
+String  getDriverName()
+        Retrieves the name of this JDBC driver.
+String  getDriverVersion()
+*/
+    }
+    
+    /**
+     * Derby stores unquoted identifiers as upper
+     * case and quoted ones as mixed case.
+     * They are always compared case sensitive.
+     */
+    public void testIdentifierStorage() throws SQLException
+    {
+        DatabaseMetaData dmd = getDMD();
+        
+        assertFalse(dmd.storesLowerCaseIdentifiers());
+        assertFalse(dmd.storesLowerCaseQuotedIdentifiers());
+        assertFalse(dmd.storesMixedCaseIdentifiers());
+        
+        assertTrue(dmd.storesMixedCaseQuotedIdentifiers());
+        assertTrue(dmd.storesUpperCaseIdentifiers());
+        assertFalse(dmd.storesUpperCaseQuotedIdentifiers());
+    }
+    
+    /**
+     * methods that return information about handling NULL.
+     */
+    public void testNullInfo() throws SQLException
+    {
+        DatabaseMetaData dmd = getDMD();
+        
+        assertTrue(dmd.nullPlusNonNullIsNull());
+        assertFalse(dmd.nullsAreSortedAtEnd());
+        assertFalse(dmd.nullsAreSortedAtStart());
+        assertTrue(dmd.nullsAreSortedHigh());
+        assertFalse(dmd.nullsAreSortedLow());
+    }
+    
+    /**
+     * Method getSQLKeywords, returns list of SQL keywords
+     * that are not defined by SQL92.
+     */
+    public void testSQLKeywords() throws SQLException
+    {
+        String keywords = getDMD().getSQLKeywords();
+        
+        assertNotNull(keywords);
+        
+        //TODO: more testing but not sure what!     
+    }
+    
+    /**
+     * Methods that return information specific to
+     * the current connection.
+     */
+    public void testConnectionSpecific() throws SQLException
+    {
+        DatabaseMetaData dmd = getDMD();
+        
+        assertSame(getConnection(), dmd.getConnection());
+        assertEquals(getTestConfiguration().getUserName(),
+                dmd.getUserName());
+        assertEquals(getConnection().isReadOnly(), dmd.isReadOnly());
+    }
+    
+    /*
+    ** DatabaseMetaData calls that return ResultSets.
+    */
+    
+    /**
+     * Test methods that describe attributes of SQL Objects
+     * that are not supported by derby. In each case the
+     * metadata should return an empty ResultSet of the
+     * correct shape.
+     */
+    public void testUnimplementedSQLObjectAttributes() throws SQLException
+    {
+        DatabaseMetaData dmd = getDMD();
+        
+        ResultSet rs;
+        
+        rs = dmd.getAttributes(null,null,null,null);
+        assertMetaDataResultSet(rs, null, null);
+        assertFalse(rs.next());
+        rs.close();
+        
+        rs = dmd.getCatalogs();
+        assertMetaDataResultSet(rs, null, null);
+        assertFalse(rs.next());
+        rs.close();
+        
+        rs = dmd.getSuperTables(null,null,null);
+        assertMetaDataResultSet(rs, null, null);
+        assertFalse(rs.next());
+        rs.close();
+
+        rs = dmd.getSuperTypes(null,null,null);
+        assertMetaDataResultSet(rs, null, null);
+        assertFalse(rs.next());
+        rs.close();
+
+        rs = dmd.getUDTs(null,null,null,null);
+        assertMetaDataResultSet(rs, null, null);
+        assertFalse(rs.next());
+        rs.close();
+        
+        rs = dmd.getVersionColumns(null,null,
+                usingDerbyNetClient() ? "%" : null);
+        
+        assertMetaDataResultSet(rs,
+           new String[] {
+           "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME",
+           "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", "PSEUDO_COLUMN"
+           },
+           new int[] {
+           Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
+           Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT
+           }
+        );
+        
+        assertFalse(rs.next());
+        rs.close();
+   
+    }
+    
+    public static void assertMetaDataResultSet(ResultSet rs,
+            String[] columnNames, int[] columnTypes) throws SQLException
+    {
+        assertEquals(ResultSet.TYPE_FORWARD_ONLY, rs.getType());
+        assertEquals(ResultSet.CONCUR_READ_ONLY, rs.getConcurrency());
+        
+        if (columnNames != null)
+            JDBC.assertColumnNames(rs, columnNames);
+        if (columnTypes != null)
+            JDBC.assertColumnTypes(rs, columnTypes);
+    }
+    
+    /*
+    ** Set of escaped functions.
+    */
+    
     /**
      * JDBC escaped numeric functions - JDBC 3.0 C.1
      * @throws SQLException
