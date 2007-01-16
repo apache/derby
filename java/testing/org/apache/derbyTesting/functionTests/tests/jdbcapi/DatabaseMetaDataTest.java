@@ -37,7 +37,23 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 /**
  * Test the DatabaseMetaData api.
  * Work in progress.
- *
+ * Methods left to test from JDBC 3
+ * 
+ *  getBestRowIdentifier
+ *  getColumnPrivileges
+ *  getColumns
+ *  getCrossReference
+ *  getExportedKeys
+ *  getImportedKeys
+ *  getIndexInfo
+ *  getPrimaryKeys
+ *  getProcedureColumns
+ *  getProcedures
+ *  getSchemas
+ *  getTablePrivileges
+ *  getTables
+ *  getTableTypes
+ *  getTypeInfo
  */
 public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /*
@@ -143,7 +159,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * is supported or not. Methods start with
      * 'support'. See secton 7.3 in JDBC 3.0 specification.
      * 
-     * Work in progress.
      * @throws SQLException 
      *
      */
@@ -182,28 +197,28 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // specific to convert.
         assertFalse(dmd.supportsConvert(Types.INTEGER, Types.SMALLINT));
         
-        //supportsCoreSQLGrammar()
+        assertFalse(dmd.supportsCoreSQLGrammar());
         assertTrue(dmd.supportsCorrelatedSubqueries());
         
         assertTrue(dmd.supportsDataDefinitionAndDataManipulationTransactions());
         assertFalse(dmd.supportsDataManipulationTransactionsOnly());
-        //supportsDifferentTableCorrelationNames()
+        assertTrue(dmd.supportsDifferentTableCorrelationNames());
         
         // Bug DERBY-2244, order by with expressions was added by DERBY-134
         assertFalse(dmd.supportsExpressionsInOrderBy());
         
-        //supportsExtendedSQLGrammar()
-        //supportsFullOuterJoins()
-        //supportsGetGeneratedKeys()
+        assertFalse(dmd.supportsExtendedSQLGrammar());
+        assertFalse(dmd.supportsFullOuterJoins());
+        assertFalse(dmd.supportsGetGeneratedKeys());
         
         assertTrue(dmd.supportsGroupBy());
-        //supportsGroupByBeyondSelect()
-        //supportsGroupByUnrelated()
+        assertTrue(dmd.supportsGroupByBeyondSelect());
+        assertTrue(dmd.supportsGroupByUnrelated());
         
-        //supportsIntegrityEnhancementFacility()
+        assertFalse(dmd.supportsIntegrityEnhancementFacility());
         assertTrue(dmd.supportsLikeEscapeClause());
-        //supportsLimitedOuterJoins()
-       //supportsMinimumSQLGrammar()
+        assertTrue(dmd.supportsLimitedOuterJoins());
+        assertTrue(dmd.supportsMinimumSQLGrammar());
         
         assertFalse(dmd.supportsMixedCaseIdentifiers());
         assertTrue(dmd.supportsMixedCaseQuotedIdentifiers());
@@ -266,12 +281,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertTrue(dmd.supportsSchemasInTableDefinitions());
         assertTrue(dmd.supportsSelectForUpdate());
         
-       //supportsStatementPooling()
-       //supportsStoredProcedures()
-       //supportsSubqueriesInComparisons()
-       //supportsSubqueriesInExists()
-       //supportsSubqueriesInIns()
-       //supportsSubqueriesInQuantifieds()
+        assertFalse(dmd.supportsStatementPooling());
+        assertTrue(dmd.supportsStoredProcedures());
+        assertTrue(dmd.supportsSubqueriesInComparisons());
+        assertTrue(dmd.supportsSubqueriesInExists());
+        assertTrue(dmd.supportsSubqueriesInIns());
+        assertTrue(dmd.supportsSubqueriesInQuantifieds());
         assertTrue(dmd.supportsTableCorrelationNames());
         
         assertTrue(dmd.supportsTransactionIsolationLevel(
@@ -296,7 +311,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Note a return of zero from one of these functions means
      * no limit or limit not known.
      * 
-     * Work in progress.
      * @throws SQLException 
      *
      */
@@ -442,16 +456,33 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                     expectedJDBCMajor, jdbcMajor);
             assertEquals("JDBC Minor version", 0, jdbcMinor);
         }
-
-        /*
-String  getDatabaseProductName()
-        Retrieves the name of this database product.
-String  getDatabaseProductVersion()
-        Retrieves the version number of this database product.
-String  getDriverName()
-        Retrieves the name of this JDBC driver.
-String  getDriverVersion()
-*/
+    }
+    
+    /**
+     * getURL() method. Note that this method
+     * is the only JDBC 3 DatabaseMetaData method
+     * that is dropped in JSR169.
+     */
+    public void testGetURL() throws SQLException
+    {
+        DatabaseMetaData dmd = getDMD();
+        
+        String url;
+        try {
+            url = dmd.getURL();
+        } catch (NoSuchMethodError e) {
+            // JSR 169 - method must not be there!
+            assertTrue("getURL not supported", JDBC.vmSupportsJSR169());
+            assertFalse("getURL not supported", JDBC.vmSupportsJDBC2());
+            return;
+        }
+        
+        assertFalse("getURL is supported!", JDBC.vmSupportsJSR169());
+        assertTrue("getURL is supported!", JDBC.vmSupportsJDBC2());
+        
+        assertEquals("getURL match",
+                getTestConfiguration().getJDBCUrl(),
+                url);              
     }
     
     /**
@@ -522,6 +553,7 @@ String  getDriverVersion()
      * that are not supported by derby. In each case the
      * metadata should return an empty ResultSet of the
      * correct shape.
+     * TODO: types and column names of the ResultSets
      */
     public void testUnimplementedSQLObjectAttributes() throws SQLException
     {
