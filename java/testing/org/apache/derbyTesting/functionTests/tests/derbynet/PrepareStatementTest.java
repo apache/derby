@@ -69,8 +69,12 @@ public class PrepareStatementTest extends BaseJDBCTestCase
      * run in both embedded and client/server.
      */
     public static Test suite()
-    {
-        return TestConfiguration.defaultSuite(PrepareStatementTest.class);
+    {	
+        if ( JDBC.vmSupportsJSR169())
+            // see DERBY-2233 for details
+            return new TestSuite("empty PrepareStatementTest - client not supported on JSR169");
+        else
+            return TestConfiguration.defaultSuite(PrepareStatementTest.class);
     }
 
 
