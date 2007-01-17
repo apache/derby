@@ -41,19 +41,7 @@ import java.sql.*;
  * insertRow API
  */
 public class UpdatableResultSetTest  extends BaseJDBCTestCase {
-    
-    private static boolean HAVE_BIG_DECIMAL;
-    
-    static {
-        if (BigDecimalHandler.representation != 
-                BigDecimalHandler.BIGDECIMAL_REPRESENTATION)
-        {
-            HAVE_BIG_DECIMAL = false;
-        } else {
-            HAVE_BIG_DECIMAL = true;
-        }
-    }
-    
+        
     private static String[] allUpdateXXXNames =
     {
         "updateShort",
@@ -2506,7 +2494,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     updateXXXName <= allUpdateXXXNames.length; 
                     updateXXXName++) 
             {
-                if(!HAVE_BIG_DECIMAL && (updateXXXName == 4))
+                if(JDBC.vmSupportsJSR169() && (updateXXXName == 4))
                     continue;
                 println("Testing " + allUpdateXXXNames[updateXXXName-1] + 
                         " on SQL type " + allSQLTypes[sqlType-1]);
@@ -2568,7 +2556,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                                 rs1.getLong(updateXXXName));
                 } else if (updateXXXName == 4) { 
                     //update column with updateBigDecimal methods
-                    if(HAVE_BIG_DECIMAL) {
+                    if(!JDBC.vmSupportsJSR169()) {
                         if (indexOrName == 1) //test by passing column position
                             rs.updateBigDecimal(sqlType, 
                                     rs1.getBigDecimal(updateXXXName));
@@ -2791,7 +2779,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     updateXXXName <= allUpdateXXXNames.length; 
                     updateXXXName++) 
             {
-                if(!HAVE_BIG_DECIMAL && (updateXXXName == 4))
+                if(JDBC.vmSupportsJSR169() && (updateXXXName == 4))
                     continue;
                 println("  Testing " + allUpdateXXXNames[updateXXXName-1] + 
                         " on SQL type " + allSQLTypes[sqlType-1]);
@@ -2857,7 +2845,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                                 new Long(rs1.getLong(updateXXXName)));
                 } else if (updateXXXName == 4) { 
                     //updateObject using BigDecimal object
-                    if(HAVE_BIG_DECIMAL) {
+                    if(!JDBC.vmSupportsJSR169()) {
                         println(displayString + 
                                 " BigDecimal object as parameters");
                         if (indexOrName == 1) //test by passing column position
@@ -4094,13 +4082,18 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                         rs.updateLong(ColumnNames[sqlType-1], 
                                 rs1.getLong(updateXXXName));
                 } else if (updateXXXName == 4) { 
-                    //update column with updateBigDecimal methods
-                    if (indexOrName == 1) //test by passing column position
-                        rs.updateBigDecimal(sqlType, 
+                    if (!JDBC.vmSupportsJSR169())
+                    {
+                        //update column with updateBigDecimal methods
+                        if (indexOrName == 1) //test by passing column position
+                            rs.updateBigDecimal(sqlType, 
                                 rs1.getBigDecimal(updateXXXName));
-                    else //test by passing column name
-                        rs.updateBigDecimal(ColumnNames[sqlType-1], 
+                        else //test by passing column name
+                            rs.updateBigDecimal(ColumnNames[sqlType-1], 
                                 rs1.getBigDecimal(updateXXXName));
+                    } else {
+                        continue;
+                    }
                 } else if (updateXXXName == 5) { 
                     //update column with updateFloat methods
                     if (indexOrName == 1) //test by passing column position
@@ -4487,11 +4480,13 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     " using " + allUpdateXXXNames[updateXXXName - 1],
                     rs1.getLong(updateXXXName), rs.getLong(sqlType));
         } else if (sqlType == 4) {
-            // verify update made to DECIMAL column with updateXXX methods
-            assertTrue("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
+            if (!JDBC.vmSupportsJSR169()) {
+                // verify update made to DECIMAL column with updateXXX methods
+                assertTrue("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
                     rs.getBigDecimal(sqlType),
                     rs.getBigDecimal(sqlType).doubleValue() == 
                             rs1.getBigDecimal(updateXXXName).doubleValue());
+            }
         } else if (sqlType == 5) {
             // verify update made to REAL column with updateXXX methods
             assertTrue("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
