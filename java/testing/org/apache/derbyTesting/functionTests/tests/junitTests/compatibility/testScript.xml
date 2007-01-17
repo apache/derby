@@ -37,6 +37,7 @@
 	j13lib          Set as you would to compile Derby (see trunk/BUILDING.txt).
 	j14lib          Set as you would to compile Derby (see trunk/BUILDING.txt).
 	jdk15           The JAVA_HOME of your 1.5 vm.
+    jdk16           The JAVA_HOME of your 1.6 vm.
 
 	10.0.2.1_lib    Directory containing the released 10.0.2.1 jars.
 	10.1.1.0_lib    Directory containing the released 10.1.1.0 jars.
@@ -68,7 +69,10 @@
 			}
 		}
 
-	Note that the test exits as soon as one combination fails.
+    If a combination fails, the test continues with the next combination.
+    Consult the summary file to see if all combinations succeeded or not.
+    The summary file is named 'SUMMARY_COMPAT.txt' and can be found in the
+    specified output directory.
 
 	To run just one combination, copy the oneCombo.properties template
 	file from this suite and customize it. Then invoke the oneCombination
@@ -93,6 +97,7 @@
   <property name="VM_1.3" value="${j13lib}/../bin/java"/>
   <property name="VM_1.4" value="${j14lib}/../bin/java"/>
   <property name="VM_1.5" value="${jdk15}/bin/java"/>
+  <property name="VM_1.6" value="${jdk16}/bin/java"/>
 
   <!-- legal values of serverClasspath -->
   <property name="SERVER_10.0.2.1" value="${10.0.2.1_lib}/derby.jar;${10.0.2.1_lib}/derbynet.jar;${TEST_JARS}"/>
@@ -160,10 +165,12 @@
 
 	<!-- Now loop through server VMs -->
 
+        <!-- JVM 1.3 in client/server mode is not supported on trunk/10.3
 	<antcall target="_forServerVM">
 	  <param name="fsvVM" value="${VM_1.3}"/>
 	  <param name="fsvName" value="serverVM-1.3"/>
     </antcall>
+        -->
 
 	<antcall target="_forServerVM">
 	  <param name="fsvVM" value="${VM_1.4}"/>
@@ -173,6 +180,11 @@
 	<antcall target="_forServerVM">
 	  <param name="fsvVM" value="${VM_1.5}"/>
 	  <param name="fsvName" value="serverVM-1.5"/>
+    </antcall>
+
+    <antcall target="_forServerVM">
+      <param name="fsvVM" value="${VM_1.6}"/>
+      <param name="fsvName" value="serverVM-1.6"/>
     </antcall>
 
 	<!-- Done looping through server VMs -->
@@ -229,7 +241,7 @@
 	  <param name="codeline" value="${SERVER_TRUNK}"/>
     </antcall>
 
-    <antcall target="_forEmbeddedVM">
+    <antcall target="_forEmbeddedVM"> <!-- Still OK with JVM 1.3 in embedded mode. -->
 	  <param name="eVM" value="${VM_1.3}"/>
 	  <param name="eName" value="VM-1.3"/>
     </antcall>
@@ -242,6 +254,11 @@
     <antcall target="_forEmbeddedVM">
 	  <param name="eVM" value="${VM_1.5}"/>
 	  <param name="eName" value="VM-1.5"/>
+    </antcall>
+
+    <antcall target="_forEmbeddedVM">
+      <param name="eVM" value="${VM_1.6}"/>
+      <param name="eName" value="VM-1.6"/>
     </antcall>
 
   </target>
@@ -330,10 +347,12 @@
 
 	<!-- Now loop through client VMs -->
 
+    <!-- JVM 1.3 in client/server mode is not supported on trunk/10.3
 	<antcall target="_forClientVM">
 	  <param name="fcvVM" value="${VM_1.3}"/>
 	  <param name="fcvName" value="${fsvnName}_clientVM-1.3"/>
     </antcall>
+        -->
 
 	<antcall target="_forClientVM">
 	  <param name="fcvVM" value="${VM_1.4}"/>
@@ -343,6 +362,11 @@
 	<antcall target="_forClientVM">
 	  <param name="fcvVM" value="${VM_1.5}"/>
 	  <param name="fcvName" value="${fsvnName}_clientVM-1.5"/>
+    </antcall>
+
+    <antcall target="_forClientVM">
+      <param name="fcvVM" value="${VM_1.6}"/>
+      <param name="fcvName" value="${fsvnName}_clientVM-1.6"/>
     </antcall>
 
 	<!-- Done looping through client VMs -->
@@ -587,14 +611,14 @@
 
 	<antcall target="_stopServer"/>
 
-    <fail message="Testrun ${testrun} failed."/>
+    <!-- try to continue on error! fail message="Testrun ${testrun} failed."/ -->
 
   </target>
 
   <!-- Write the summary file -->
   <target name="_writeSummary">
 
-    <echo file="${summaryFile}"> 
+    <echo file="${summaryFile}" append="true"> 
 ${summaryMessage}
 
 </echo>
