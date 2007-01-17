@@ -24,7 +24,6 @@ package org.apache.derby.iapi.services.io;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.util.ReuseFactory;
 
-import java.io.InputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -675,10 +674,8 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	*
 	* @return	the number of bytes
 	*/
-	protected static int
-	numBytesFromBits(int bits)
-	{
-		return (bits == 0) ? 0 : ((bits - 1) / 8) + 1;
+	private static int numBytesFromBits(int bits) {
+		return (bits + 7) >> 3;
 	}
 
 	/**
@@ -804,17 +801,12 @@ private static char[] decodeArray = {'0', '1', '2', '3', '4', '5', '6', '7',
 	 */
 	public String toString()
 	{
-		char[]	outChars;
-		int		inPosition;
-		int		outPosition;
-		int 	inByte;
-
 		{
 			// give it a reasonable size
 			StringBuffer str = new StringBuffer(getLength()*8*3);
 			str.append("{");
 			boolean first = true;
-			for (inPosition = 0; inPosition < getLength(); inPosition++)
+			for (int inPosition = 0; inPosition < getLength(); inPosition++)
 			{
 				if (isSet(inPosition))
 				{

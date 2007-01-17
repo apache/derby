@@ -148,8 +148,8 @@ public class FormatableBitSetTest extends TestCase {
         // Should throw an exception?
         FormatableBitSet negBits = new FormatableBitSet(-1);
         assertEquals(-1,negBits.getLength());
-        assertEquals(1,negBits.getLengthInBytes());
-        assertEquals(1,negBits.getByteArray().length);
+        assertEquals(0,negBits.getLengthInBytes());
+        assertEquals(0,negBits.getByteArray().length);
         assertEquals(0,negBits.getNumBitsSet());
     }
 
