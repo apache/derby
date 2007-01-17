@@ -513,7 +513,8 @@ public class T_RecoverBadLog extends T_Generic {
 			
 			logFactory.flushAll();
 
-			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, bigrow.getRow(), null);
 
 			if(checksumTest)
 				simulateLogFileCorruption();
@@ -647,7 +648,8 @@ public class T_RecoverBadLog extends T_Generic {
 			}
 
 			logFactory.flushAll();
-			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, bigrow.getRow(), null);
 			
 			if(checksumTest)
 				simulateLogFileCorruption();
@@ -817,7 +819,8 @@ public class T_RecoverBadLog extends T_Generic {
 				for (j = 0; j < numpages; j++)
 				{
 					t[i].switchTransactionContext();
-					page[i][j].update(rh[i][j], row2.getRow(), (FormatableBitSet) null);
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row2.getRow(), null);
 					t[i].resetContext();
 				}
 
@@ -835,8 +838,10 @@ public class T_RecoverBadLog extends T_Generic {
 			//////////////////////// step 3 ////////////////////////
 			T_RawStoreRow row3 = new T_RawStoreRow(REC_003);
 			for (i = 0; i < numtrans; i++)
-				for (j = 0; j < numpages; j++)
-					page[i][j].update(rh[i][j], row3.getRow(), (FormatableBitSet) null);
+				for (j = 0; j < numpages; j++) {
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row3.getRow(), null);
+				}
 
 			for (i = 0; i < numtrans; i++)
 				t[i].setSavePoint(SP2, null);	// sp2
@@ -847,8 +852,10 @@ public class T_RecoverBadLog extends T_Generic {
 			{
 				t[i].switchTransactionContext();
 
-				for (j = 0; j < numpages; j++)
-					page[i][j].update(rh[i][j], row4.getRow(), (FormatableBitSet) null);
+				for (j = 0; j < numpages; j++) {
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row4.getRow(), null);
+				}
 				t[i].resetContext();
 			}
 
@@ -893,8 +900,10 @@ public class T_RecoverBadLog extends T_Generic {
 			for (i = 0; i < numtrans; i++)
 			{
 				t[i].switchTransactionContext();
-				for (j = 0; j < numpages; j++)
-					page[i][j].update(rh[i][j], row5.getRow(), (FormatableBitSet) null);
+				for (j = 0; j < numpages; j++) {
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row5.getRow(), null);
+				}
 				t[i].resetContext();
 			}
 
@@ -939,8 +948,10 @@ public class T_RecoverBadLog extends T_Generic {
 			for (i = 0; i < numtrans; i++)
 			{
 				t[i].switchTransactionContext();
-				for (j = 0; j < numpages; j++)
-					page[i][j].update(rh[i][j], row6.getRow(), (FormatableBitSet) null); // step 8
+				for (j = 0; j < numpages; j++) {
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row6.getRow(), null);
+				}
 				t[i].resetContext();
 			}
 
@@ -1272,7 +1283,8 @@ public class T_RecoverBadLog extends T_Generic {
 			}
 
 			logFactory.flushAll();
-			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, bigrow.getRow(), null);
 
 			if(checksumTest)
 				simulateLogFileCorruption();
@@ -1413,7 +1425,8 @@ public class T_RecoverBadLog extends T_Generic {
 			}
 			logFactory.flushAll();
 
-			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, bigrow.getRow(), null);
 
 			if(checksumTest)
 				simulateLogFileCorruption();
@@ -1551,7 +1564,8 @@ public class T_RecoverBadLog extends T_Generic {
 				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString((1997/2) + 16));
 			}
 			logFactory.flushAll();
-			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, bigrow.getRow(), null);
 
 			if(checksumTest)
 				simulateLogFileCorruption();
@@ -1690,7 +1704,8 @@ public class T_RecoverBadLog extends T_Generic {
 				System.setProperty(LogToFile.TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES, Integer.toString(1997+15));
 			}
 			logFactory.flushAll();
-			page.update(rh, bigrow.getRow(), (FormatableBitSet) null);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, bigrow.getRow(), null);
 
 			if(checksumTest)
 				simulateLogFileCorruption();

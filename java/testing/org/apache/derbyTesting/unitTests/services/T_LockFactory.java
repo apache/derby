@@ -505,6 +505,10 @@ public class T_LockFactory extends T_MultiIterations
 		Create two compatability spaces and ensure that locks/latches
 		block each other out.
 
+		This test case originally tested that latches were released when a row
+		lock couldn't be obtained immediately, but LockFactory doesn't have
+		that functionality any more after DERBY-2197.
+
 		@exception StandardException	An exception thrown by a method of LockFactory
 		@exception T_Fail	Some behaviour of the LockFactory is incorrect
 	*/
@@ -524,19 +528,17 @@ public class T_LockFactory extends T_MultiIterations
 
 		// Simulate a page/row lock type access
 		lf.latchObject(cs0, page, null, C_LockFactory.WAIT_FOREVER);
-		lf.lockObject(g0, rA, null, C_LockFactory.WAIT_FOREVER, page.latch);		// would release the latch if it had to wait
+		lf.lockObject(cs0, g0, rA, null, C_LockFactory.WAIT_FOREVER);
 		lf.unlatch(page.latch);
 
 		lf.latchObject(cs1, page, null, C_LockFactory.WAIT_FOREVER);
-		lf.lockObject(g1, rB, null, C_LockFactory.WAIT_FOREVER, page.latch);		// would release the latch if it had to wait
+		lf.lockObject(cs1, g1, rB, null, C_LockFactory.WAIT_FOREVER);
 
 		checkLockCount(cs0, 1);
 		checkLockCount(cs1, 2);
 
-		// this wait should release the latch, while waiting
-        // on lock, but then re-get the latch after the timeout.
 		try {
-			lf.lockObject(g1, rA, null, 5000, page.latch);
+			lf.lockObject(cs1, g1, rA, null, 5000);
 			throw T_Fail.testFailMsg("lock succeeded on already locked object");
 		}
 		catch (StandardException lfe) {

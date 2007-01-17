@@ -23,7 +23,6 @@ package org.apache.derby.impl.store.raw.xact;
 
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
-import org.apache.derby.iapi.services.locks.Latch;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -193,35 +192,6 @@ public class RowLocking3 extends NoLocking
 	}
 
     /**
-     * Obtain lock on record being read while holding a latch.
-     * <p>
-     * Assumes that a table level IS has been acquired.  Will acquire a Shared
-     * or Update lock on the row, depending on the "forUpdate" parameter.
-     * <p>
-     *
-     * @param latch         The latch being held.
-     * @param record        The record to be locked.
-     * @param forUpdate     Whether to open for read or write access.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-	public void lockRecordForRead(
-    Latch			latch, 
-    RecordHandle    record, 
-    boolean         forUpdate)
-		throws StandardException
-	{
-        // RESOLVE - Did I do the right thing with the "forUpdate" variable.
-
-        // For now just lock the row in Shared mode.
-		Object qualifier = forUpdate ? getUpdateLockType() : getReadLockType();
-
-        lf.lockObject(
-            latch.getCompatabilitySpace(), record, qualifier, 
-            C_LockFactory.TIMED_WAIT, latch);
-	}
-
-    /**
      * Obtain lock on record being written.
      * <p>
      * Assumes that a table level IX has been acquired.  Will acquire an
@@ -279,31 +249,6 @@ public class RowLocking3 extends NoLocking
             t.getCompatibilitySpace(), t, record, 
             lockForInsert ? RowLock.RI : getWriteLockType(),
             waitForLock   ? C_LockFactory.TIMED_WAIT : C_LockFactory.NO_WAIT));
-	}
-
-    /**
-     * Obtain lock on record being written while holding a latch.
-     * <p>
-     * Assumes that a table level IX has been acquired.  Will acquire an
-     * Exclusive (X) lock on the row.
-     * <p>
-     *
-     * @param latch         The latch being held
-     * @param record        The record to be locked.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-	public void lockRecordForWrite(
-    Latch		    latch, 
-    RecordHandle    record)
-		throws StandardException
-	{
-        lf.lockObject(
-            latch.getCompatabilitySpace(), 
-            record, 
-            getWriteLockType(),
-            C_LockFactory.TIMED_WAIT, 
-            latch);
 	}
 
 	public int getMode() {

@@ -196,45 +196,6 @@ public interface Page
 		 throws StandardException;
 
     /**
-     * Fetch and lock a non-deleted record.
-     * <p>
-     * Lock and fetch a non-deleted record identified by a RecordHandle.  
-     * Reads data from the page into row.
-     * <P>
-     * <B>Locking Policy</B>
-     * <BR>
-     * Calls the lockRecordForRead() method of the LockingPolicy object
-     * passed to the openContainer() call before the record is accessed.
-     * <BR>
-     * The page latch may be released and re-latched within this method.
-     * This will occur if the record lock has to be waited for.
-     *
-     * @param handle        Handle to record.
-     * @param row           Row to be filled in with data from the record.
-     * @param validColumns  a bit map of which columns in the row is to be 
-     *                      fetched.  ValidColumns will not be changed by 
-     *                      RawStore.
-     * @param forUpdate     true if the intention is to update this record, 
-     *                      false otherwise.
-     *
-     * @return A handle to the record, null if the record has been deleted.
-     *
-     * @exception StandardException	Standard Cloudscape error policy, 
-     *                              a statemente level exception is thrown if
-     *                              the record handle does not match a record 
-     *                              on the page.
-     *
-     * @see Page#delete
-     * @see LockingPolicy
-     **/
-	RecordHandle fetch(
-    RecordHandle        handle, 
-    Object[]            row, 
-    FormatableBitSet    validColumns, 
-    boolean             forUpdate)
-		throws StandardException;
-
-    /**
      * Is it likely that an insert will fit on this page?
      * <p>
      * Return true if there is a good chance an insert will fit on this page, 
@@ -316,77 +277,6 @@ public interface Page
     FormatableBitSet    validColumns,
     byte                insertFlag, 
     int                 overflowThreshold)
-		throws StandardException;
-
-    /**
-     * Update the record identified by the record handle.
-     * <p>
-     * Update the record, the new column values are found in row[] and if
-     * validColumns is not-null, only use the columns indicated as valid in
-     * the bit set.
-     * <p>
-     * <BR>
-     * The page latch may be released and re-latched within this method.
-     * This will occur if the record lock has to be waited for.
-     *
-     * @param handle        the record handle
-     * @param row           The row version of the data
-     * @param validColumns  A bit map of which columns in the row is valid.  
-     *                      ValidColumns will not be changed by RawStore.
-     *
-     * @return true if the record is updated.  
-     *         False if it is not because the record is already deleted.
-     *
-     * @exception StandardException	Standard Cloudscape error policy
-     * @exception StandardException The container was not opened in update mode.
-     * @exception StandardException If the record handle does not match 
-     *                              a record on the page.
-     *
-     * @see Page#updateAtSlot
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-	boolean update(
-    RecordHandle        handle, 
-    Object[]            row, 
-    FormatableBitSet                 validColumns)
-		throws StandardException;
-
-    /**
-     * Mark the record identified by position as deleted.
-     * <p>
-     * Mark the record identified by position as deleted. The record may be 
-     * undeleted sometime later using undelete() by any transaction that sees 
-     * the record.
-     * <p>
-     * <B>Locking Policy</B>
-     * <P>
-     * Calls the lockRecordForWrite() method of the LockingPolicy object
-     * passed to the openContainer() call before the record is deleted.
-     *
-     * <BR>
-     * The page latch may be released and re-latched within this method.
-     * This will occur if the record lock has to be waited for.
-     *
-     * @param handle    record Handle to record
-     * @param undo      if logical undo may be necessary, a function pointer to
-     *                  the access code where the logical undo logic resides.
-     *                  Null if logical undo is not necessary.
-     *
-     * @return true if the record was updated.  
-     *         False if it wasn't because it is already deleted.
-     *
-     * @exception StandardException	Standard Cloudscape error policy
-     * @exception StandardException The container was not opened in update mode.
-     * @exception StandardException If the record handle does not match 
-     *                              a record on the page.
-     *
-     * @see Page#deleteAtSlot
-     * @see LockingPolicy
-     **/
-	public boolean delete(
-    RecordHandle    handle, 
-    LogicalUndo     undo)
 		throws StandardException;
 
     /**

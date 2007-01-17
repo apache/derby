@@ -1361,17 +1361,24 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 }
             }
 
+            if (SanityManager.DEBUG) {
+                // DERBY-2197: Assume no row locking here. If locking policy
+                // requires row locking, we would need to obtain a row lock at
+                // this point.
+                SanityManager.ASSERT(
+                    (container.getLockingPolicy().getMode() !=
+                         LockingPolicy.MODE_RECORD),
+                    "Locking policy requires row locking.");
+            }
 
-            // Do a fetch just to get the RecordHandle for the delete call,
-            // don't fetch any columns.
-            RecordHandle delete_rh = 
-                scan_position.current_leaf.page.fetchFromSlot(
-                    (RecordHandle) null, scan_position.current_slot, 
-                    RowUtil.EMPTY_ROW, (FetchDescriptor) null, true);
-
-            ret_val =
-                scan_position.current_leaf.page.delete(
-                    delete_rh, this.btree_undo);
+            if (scan_position.current_leaf.page.isDeletedAtSlot(
+                    scan_position.current_slot)) {
+                ret_val = false;
+            } else {
+                scan_position.current_leaf.page.deleteAtSlot(
+                    scan_position.current_slot, true, this.btree_undo);
+                ret_val = true;
+            }
 
             // See if we just deleted the last row on the page, in a btree a
             // page with all rows still has 1 left - the control row.

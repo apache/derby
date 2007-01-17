@@ -23,7 +23,6 @@ package org.apache.derby.impl.store.raw.xact;
 
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
-import org.apache.derby.iapi.services.locks.Latch;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -171,36 +170,6 @@ public class RowLocking2 extends RowLockingRR
                 qualifier,
                 waitForLock ? 
                     C_LockFactory.TIMED_WAIT : C_LockFactory.NO_WAIT));
-	}
-
-    /**
-     * Obtain lock on record being read while holding a latch.
-     * <p>
-     * Assumes that a table level IS has been acquired.  Will acquire a Shared
-     * or Update lock on the row, depending on the "forUpdate" parameter.
-     * <p>
-     *
-     * @param latch         The latch being held.
-     * @param record        The record to be locked.
-     * @param forUpdate     Whether to open for read or write access.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-	public void lockRecordForRead(
-    Latch			latch, 
-    RecordHandle    record, 
-    boolean         forUpdate)
-		throws StandardException
-	{
-        // RESOLVE - Did I do the right thing with the "forUpdate" variable.
-        // RESOLVE (mikem) - looks like it needs work for update locks, and
-        //     compatibility spaces.
-
-		Object qualifier = forUpdate ? RowLock.RU2 : RowLock.RS2;
-
-        lf.lockObject(
-            record.getContainerId(), record, qualifier, 
-            C_LockFactory.TIMED_WAIT, latch);
 	}
 
 	public void unlockRecordAfterRead(

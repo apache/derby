@@ -241,7 +241,7 @@ public class T_Util
 		@exception StandardException Unexpected exception from the implementation
 
 		@see Page#recordExists
-		@see Page#fetch
+		@see Page#fetchFromSlot
 	*/
 	public void t_checkFetchDeleted(ContainerHandle c, RecordHandle rh, 
 									String data)
@@ -291,7 +291,8 @@ public class T_Util
 		for (int i = 0; i < ncol; i++)
 			readRow.setColumn(i, (String) null);
 
-		RecordHandle rhf = page.fetch(rh, readRow.getRow(), (FormatableBitSet) null, false);
+		RecordHandle rhf = page.fetchFromSlot(rh, page.getSlotNumber(rh),
+											  readRow.getRow(), null, false);
 		if (rhf == null)
 			throw T_Fail.testFailMsg("Failed to read record");
 		if (!readRow.toString().equals(row.toString()))
@@ -318,8 +319,10 @@ public class T_Util
 			readRow.setColumn(i, (String) null);
 		FormatableBitSet colList = new FormatableBitSet(numCols);
 		colList.set(colNum);
+		FetchDescriptor desc = new FetchDescriptor(numCols, colList, null);
 
-		RecordHandle rhf = page.fetch(rh, readRow.getRow(), colList, false);
+		RecordHandle rhf = page.fetchFromSlot(rh, page.getSlotNumber(rh),
+											  readRow.getRow(), desc, false);
 		if (rhf == null)
 			throw T_Fail.testFailMsg("Failed to read record");
 		String col = readRow.getStorableColumn(colNum).toString();
@@ -1248,7 +1251,7 @@ public class T_Util
 		@exception T_Fail Record handle returned is null.
 		@exception StandardException Unexpected exception from the implementation
 
-		@see Page#update
+		@see Page#updateAtSlot
 	*/
 	public void t_update(ContainerHandle c, RecordHandle rh, T_RawStoreRow row)
 		 throws T_Fail, StandardException
@@ -1256,7 +1259,8 @@ public class T_Util
 		Page page = t_getPage(c, rh.getPageNumber());
 		try
 		{
-			if (!page.update(rh, row.getRow(), (FormatableBitSet)null))
+			int slot = page.getSlotNumber(rh);
+			if (page.updateAtSlot(slot, row.getRow(), null) == null)
 				throw T_Fail.testFailMsg("update failed");
 
 			t_checkFetch(page, rh, row);
@@ -1276,7 +1280,7 @@ public class T_Util
 		@exception T_Fail Record handle returned is null.
 		@exception StandardException Unexpected exception from the implementation
 
-		@see Page#update
+		@see Page#updateAtSlot
 	*/
 	public void t_checkUpdateCol(Page page, RecordHandle rh, int colNum, int
 								 numCols, String data)
@@ -1292,42 +1296,11 @@ public class T_Util
 		FormatableBitSet colList = new FormatableBitSet(numCols);
 		colList.set(colNum);
 
-		if (!page.update(rh, writeRow.getRow(), colList))
+		int slot = page.getSlotNumber(rh);
+		if (page.updateAtSlot(slot, writeRow.getRow(), colList) == null)
 			throw T_Fail.testFailMsg("update failed");
 		
 		t_checkFetchCol(page, rh, colNum, numCols, data);
-	}
-
-        
-
-	/**
-		Delete a record.
-
-		@exception T_Fail Record handle returned is null.
-		@exception StandardException Unexpected exception from the implementation
-
-		@see Page#delete
-	*/
-	public void t_delete(ContainerHandle c, RecordHandle rh)
-		throws T_Fail, StandardException {
-
-		Page page = t_getPage(c, rh.getPageNumber());
-
-		try
-		{
-			if (!page.recordExists(rh, false))
-				throw T_Fail.testFailMsg("record does not exist");
-
-			if (!page.delete(rh, (LogicalUndo)null))
-				throw T_Fail.testFailMsg("delete failed");
-
-			if (page.recordExists(rh, false))
-				throw T_Fail.testFailMsg("recordExists() returns true after a delete");
-		}
-		finally
-		{
-			page.unlatch();
-		}
 	}
 
 	/**

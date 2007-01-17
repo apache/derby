@@ -22,8 +22,6 @@
 package org.apache.derby.impl.store.raw.xact;
 
 import org.apache.derby.iapi.services.locks.LockFactory;
-import org.apache.derby.iapi.services.locks.C_LockFactory;
-import org.apache.derby.iapi.services.locks.Latch;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -102,29 +100,6 @@ public class RowLocking1 extends RowLocking2
                 true : 
                 super.lockRecordForRead(
                     t, container_handle, record, waitForLock, forUpdate));
-	}
-
-    /**
-     * Obtain lock on record being read while holding a latch.
-     * <p>
-     * Assumes that a table level IS has been acquired.  Will acquire a Shared
-     * or Update lock on the row, depending on the "forUpdate" parameter.
-     * <p>
-     *
-     * @param latch         The latch being held.
-     * @param record        The record to be locked.
-     * @param forUpdate     Whether to open for read or write access.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-	public void lockRecordForRead(
-    Latch			latch, 
-    RecordHandle    record, 
-    boolean         forUpdate)
-		throws StandardException
-	{
-        if (forUpdate)
-            super.lockRecordForRead(latch, record, forUpdate);
 	}
 
 	public void unlockRecordAfterRead(

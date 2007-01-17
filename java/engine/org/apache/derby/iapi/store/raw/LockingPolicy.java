@@ -21,8 +21,6 @@
 
 package org.apache.derby.iapi.store.raw;
 
-import org.apache.derby.iapi.services.locks.Latch;
-
 import org.apache.derby.iapi.error.StandardException;
 
 /**
@@ -135,26 +133,6 @@ public interface LockingPolicy {
     boolean         forUpdate)
 		throws StandardException;
 
-
-	/**
-		Lock a record while holding a page latch.
-
-        @param latch        Latch held.
-        @param record       Record to lock.
-        @param forUpdate    Should container be locked for update, or read?
-
-
-		@exception StandardException	Standard Cloudscape error policy
-
-		@see Page
-
-	*/
-	public void lockRecordForRead(
-		Latch			latch, 
-		RecordHandle    record, 
-		boolean         forUpdate)
-			throws StandardException;
-
 	/**
         Request a write lock which will be released immediately upon grant.
 
@@ -204,21 +182,6 @@ public interface LockingPolicy {
     boolean         waitForLock)
 		throws StandardException;
 
-	/**
-	    Lock a record for write while holding a page latch.
-
-
-        @param latch        Page latch held.
-        @param record       Record to lock.
-
-		@exception StandardException	Standard Cloudscape error policy
-
-		@see Page
-	*/
-	public void lockRecordForWrite(
-    Latch			latch, 
-    RecordHandle    record)
-		throws StandardException;
 	/**
 		Called after a record has been fetched.
 

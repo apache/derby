@@ -119,7 +119,8 @@ public class SinglePool extends Hashtable
 	public boolean latchObject(Object compatabilitySpace, Lockable ref, Object qualifier, int timeout) 
 		throws StandardException {
 
-		Lock latch = lockTable.lockObject(compatabilitySpace, ref, qualifier, timeout, (Latch) null);
+		Lock latch = lockTable.lockObject(compatabilitySpace, ref, qualifier,
+										  timeout);
 
 		if (SanityManager.DEBUG) {
 			if (latch == null)
@@ -150,7 +151,8 @@ public class SinglePool extends Hashtable
 
 		@see LockFactory#lockObject
 	*/
-	protected Lock lockAnObject(Object compatabilitySpace, Object group, Lockable ref, Object qualifier, int timeout, Latch heldLatch)
+	protected Lock lockAnObject(Object compatabilitySpace, Object group,
+								Lockable ref, Object qualifier, int timeout)
 			throws StandardException
 	{
 		if (SanityManager.DEBUG) {
@@ -173,7 +175,7 @@ public class SinglePool extends Hashtable
 		}
 
 		Lock lock = 
-            lockTable.lockObject(compatabilitySpace, ref, qualifier, timeout, heldLatch);
+            lockTable.lockObject(compatabilitySpace, ref, qualifier, timeout);
 
 		// See if NO_WAIT was passed in and the lock could not be granted.
 		if (lock == null) {
@@ -224,29 +226,10 @@ public class SinglePool extends Hashtable
 	public boolean lockObject(Object compatabilitySpace, Object group, Lockable ref, Object qualifier, int timeout)
 		throws StandardException {
 
-		return lockAnObject(compatabilitySpace, group, ref, qualifier, timeout, (Latch) null) != null;
-	}
+		Lock lock =
+			lockAnObject(compatabilitySpace, group, ref, qualifier, timeout);
 
-	/**
-		Lock a specific object while holding a latch
-
-		<BR>
-		MT - thread safe
-
-		@exception StandardException Standard Cloudscape error policy
-
-		@see LockFactory#lockObject
-	*/
-	public boolean lockObject(Object group, Lockable ref, Object qualifier, int timeout, Latch latch)
-		throws StandardException {
-
-		if (SanityManager.DEBUG) {
-			if (timeout == C_LockFactory.NO_WAIT)
-				SanityManager.THROWASSERT("no wait lock requested in lockObject() with latch");
-		}
-
-		Lock lock = lockAnObject(latch.getCompatabilitySpace(), group, ref, qualifier, timeout, latch);
-		return lock instanceof ActiveLock;
+		return lock != null;
 	}
 
 	/**
@@ -457,7 +440,7 @@ public class SinglePool extends Hashtable
 		}
 
 		Lock lock = 
-            lockTable.lockObject(compatabilitySpace, ref, qualifier, timeout, (Latch) null);
+            lockTable.lockObject(compatabilitySpace, ref, qualifier, timeout);
 
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {

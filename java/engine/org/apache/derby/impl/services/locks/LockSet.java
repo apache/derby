@@ -121,7 +121,8 @@ public final class LockSet extends Hashtable
 	 *	@exception	StandardException Standard Cloudscape policy.
 
 	*/
-	public Lock lockObject(Object compatabilitySpace, Lockable ref, Object qualifier, int timeout, Latch latch)
+	public Lock lockObject(Object compatabilitySpace, Lockable ref,
+						   Object qualifier, int timeout)
 		throws StandardException
 	{		
 		if (SanityManager.DEBUG) {
@@ -203,11 +204,6 @@ public final class LockSet extends Hashtable
 
 				return null;
 			}
-
-			// this is where we need to release the latch
-			if (latch != null)
-				unlock(latch, 1);
-
 
 		} // synchronized block
 
@@ -306,19 +302,6 @@ forever:	for (;;) {
                             nextWaitingLock = 
                                 control.getNextWaiter(waitingLock, true, this);
 
-                            // this is where we need to re-obtain the latch, 
-                            // it's safe to call this lockObject() which will 
-                            // get the synchronization we already hold, because
-                            // java allows nested synchronization and it will 
-                            // be released automatically if we have to wait
-
-                            if (latch != null) {
-                                lockObject(
-                                    compatabilitySpace, latch.getLockable(), 
-                                    latch.getQualifier(), 
-                                    C_LockFactory.WAIT_FOREVER,
-                                    (Latch) null);
-                            }
                             return waitingLock;
                         }
 
@@ -363,17 +346,6 @@ forever:	for (;;) {
                         // If we were not woken by another then we have
                         // timed out. Either deadlock out or timeout
                         if (willQuitWait) {
-
-                            // Even if we deadlocked trying to get the lock, 
-                            // still reget the latch so that client's need not
-                            // know latch was released.
-
-                            if (latch != null) {
-                                lockObject(
-                                    compatabilitySpace, latch.getLockable(), 
-                                    latch.getQualifier(), 
-                                    C_LockFactory.WAIT_FOREVER, (Latch) null);
-                            }
 
                             if (SanityManager.DEBUG) 
                             {

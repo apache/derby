@@ -838,15 +838,14 @@ public class T_Recovery extends T_Generic {
 			// slot 0
 			RecordHandle r2 = t_util.t_insertAtSlot(page, 0, row2);
 			if (r2 != null) {
-				page.delete(r2, (LogicalUndo)null);
+				page.deleteAtSlot(0, true, null);
 			}
 
 			// slot 1
 			RecordHandle r3 = (r2 == null) ? r2 : t_util.t_insertAtSlot(page, 1, row3);
 			if (r3 != null)
 			{
-			
-				page.delete(r3, (LogicalUndo)null);
+				page.deleteAtSlot(1, true, null);
 			}
 
 			// slot 2
@@ -1509,7 +1508,8 @@ public class T_Recovery extends T_Generic {
                         row2.getRow(), 
                         (FetchDescriptor) null, 
                         true);
-				p.update(rh, big.getRow(), (FormatableBitSet) null);
+				int slot = p.getSlotNumber(rh);
+				p.updateAtSlot(slot, big.getRow(), null);
 				p.unlatch();
 			}
 
@@ -2036,18 +2036,24 @@ public class T_Recovery extends T_Generic {
 			t2.resetContext();
 
 			t1.switchTransactionContext();
-			p10.update(r10, row2.getRow(), (FormatableBitSet) null);
-			p11.update(r11, row2.getRow(), (FormatableBitSet) null);
+			int slot10 = p10.getSlotNumber(r10);
+			p10.updateAtSlot(slot10, row2.getRow(), null);
+			int slot11 = p11.getSlotNumber(r11);
+			p11.updateAtSlot(slot11, row2.getRow(), null);
 			t1.resetContext();
 
 			t2.switchTransactionContext();
-			p20.update(r20, row2.getRow(), (FormatableBitSet) null);
-			p21.update(r21, row2.getRow(), (FormatableBitSet) null);
+			int slot20 = p20.getSlotNumber(r20);
+			p20.updateAtSlot(slot20, row2.getRow(), null);
+			int slot21 = p21.getSlotNumber(r21);
+			p21.updateAtSlot(slot21, row2.getRow(), null);
 			t2.resetContext();
 		
 			t1.switchTransactionContext();
-			p10.update(r10, rowP.getRow(), BS_COL_0);
-			p11.update(r11, rowP.getRow(), BS_COL_0);
+			slot10 = p10.getSlotNumber(r10);
+			p10.updateAtSlot(slot10, rowP.getRow(), BS_COL_0);
+			slot11 = p11.getSlotNumber(r11);
+			p11.updateAtSlot(slot11, rowP.getRow(), BS_COL_0);
 			p10.unlatch();
 			p11.unlatch();
 			t1.resetContext();
@@ -2055,10 +2061,12 @@ public class T_Recovery extends T_Generic {
 
 
 			t2.switchTransactionContext();
-			p20.update(r20, rowP.getRow(), BS_COL_0);
-			p21.update(r21, rowP.getRow(), BS_COL_0);
+			slot20 = p20.getSlotNumber(r20);
+			p20.updateAtSlot(slot20, rowP.getRow(), BS_COL_0);
+			slot21 = p21.getSlotNumber(r21);
+			p21.updateAtSlot(slot21, rowP.getRow(), BS_COL_0);
 
-			p21.delete(r21, (LogicalUndo)null);
+			p21.deleteAtSlot(slot21, true, null);
 			p20.unlatch();
 			p21.unlatch();
 			t2.resetContext();
@@ -2180,7 +2188,8 @@ public class T_Recovery extends T_Generic {
 			////////////////////////////////////////////////////////////////
 			t.setSavePoint(SP2, null);
 
-			page.update(r0, row5.getRow(), (FormatableBitSet) null);
+			int slot0 = page.getSlotNumber(r0);
+			page.updateAtSlot(slot0, row5.getRow(), null);
 			page.deleteAtSlot(1, true, (LogicalUndo)null);
 
 			t_util.t_checkRecordCount(page, 3, 2);
@@ -2199,7 +2208,8 @@ public class T_Recovery extends T_Generic {
 
 			// after a rollback to sp, do some more changes
 
-			page.update(r0, row5.getRow(), (FormatableBitSet) null);
+			slot0 = page.getSlotNumber(r0);
+			page.updateAtSlot(slot0, row5.getRow(), null);
 			page.deleteAtSlot(0, true, (LogicalUndo)null);
 			page.deleteAtSlot(1, true, (LogicalUndo)null);
 			page.deleteAtSlot(2, true, (LogicalUndo)null);
@@ -2436,26 +2446,34 @@ public class T_Recovery extends T_Generic {
 			t2.resetContext();
 
 			t1.switchTransactionContext();
-			p10.update(r10, row2.getRow(), (FormatableBitSet) null);
-			p11.update(r11, row2.getRow(), (FormatableBitSet) null);
+			int slot10 = p10.getSlotNumber(r10);
+			p10.updateAtSlot(slot10, row2.getRow(), null);
+			int slot11 = p11.getSlotNumber(r11);
+			p11.updateAtSlot(slot11, row2.getRow(), null);
 			t1.resetContext();
 
 			t2.switchTransactionContext();
-			p20.update(r20, row2.getRow(), (FormatableBitSet) null);
-			p21.update(r21, row2.getRow(), (FormatableBitSet) null);
+			int slot20 = p20.getSlotNumber(r20);
+			p20.updateAtSlot(slot20, row2.getRow(), null);
+			int slot21 = p21.getSlotNumber(r21);
+			p21.updateAtSlot(slot21, row2.getRow(), null);
 			t2.resetContext();
 
 
 			t1.switchTransactionContext();
-			p10.update(r10, rowP.getRow(), BS_COL_0);
-			p11.update(r11, rowP.getRow(), BS_COL_0);
+			slot10 = p10.getSlotNumber(r10);
+			p10.updateAtSlot(slot10, rowP.getRow(), BS_COL_0);
+			slot11 = p11.getSlotNumber(r11);
+			p11.updateAtSlot(slot11, rowP.getRow(), BS_COL_0);
 			t1.resetContext();
 
 			t2.switchTransactionContext();
-			p20.update(r20, rowP.getRow(), BS_COL_0);
-			p21.update(r21, rowP.getRow(), BS_COL_0);
+			slot20 = p20.getSlotNumber(r20);
+			p20.updateAtSlot(slot20, rowP.getRow(), BS_COL_0);
+			slot21 = p21.getSlotNumber(r21);
+			p21.updateAtSlot(slot21, rowP.getRow(), BS_COL_0);
 
-			p21.delete(r21, (LogicalUndo)null);
+			p21.deleteAtSlot(slot21, true, null);
 			t2.resetContext();
 
 			REPORT("setup S201: container1 " + cid10 + " container2 " + cid11 + 
@@ -2570,7 +2588,8 @@ public class T_Recovery extends T_Generic {
 			/////////////////////////////////////////////////////
 			t.setSavePoint(SP1, null);
 
-			page.update(r0, row5.getRow(), (FormatableBitSet) null);
+			int slot0 = page.getSlotNumber(r0);
+			page.updateAtSlot(slot0, row5.getRow(), null);
 			t_util.t_checkFetchBySlot(page, 0, REC_005, false, false);
 			t_util.t_checkFetchBySlot(page, 1, REC_002, false, false);
 
@@ -2608,7 +2627,8 @@ public class T_Recovery extends T_Generic {
 			////////////////////////////////////////////////////////////////
 			t.setSavePoint(SP2, null);
 
-			page.update(r0, row5.getRow(), (FormatableBitSet) null);
+			slot0 = page.getSlotNumber(r0);
+			page.updateAtSlot(slot0, row5.getRow(), null);
 			page.deleteAtSlot(1, true, (LogicalUndo)null);
 
 			t_util.t_checkRecordCount(page, 3, 2);
@@ -2627,7 +2647,8 @@ public class T_Recovery extends T_Generic {
 
 		// after a rollback to sp, do some more changes
 
-			page.update(r0, row5.getRow(), (FormatableBitSet) null);
+			slot0 = page.getSlotNumber(r0);
+			page.updateAtSlot(slot0, row5.getRow(), null);
 			page.deleteAtSlot(0, true, (LogicalUndo)null);
 			page.deleteAtSlot(1, true, (LogicalUndo)null);
 			page.deleteAtSlot(2, true, (LogicalUndo)null);
@@ -2815,7 +2836,8 @@ public class T_Recovery extends T_Generic {
 				for (j = 0; j < numpages; j++)
 				{
 					t[i].switchTransactionContext();
-					page[i][j].update(rh[i][j], row2.getRow(), (FormatableBitSet) null);
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row2.getRow(), null);
 					t[i].resetContext();
 				}
 
@@ -2829,8 +2851,10 @@ public class T_Recovery extends T_Generic {
 			//////////////////////// step 3 ////////////////////////
 			T_RawStoreRow row3 = new T_RawStoreRow(REC_003);
 			for (i = 0; i < numtrans; i++)
-				for (j = 0; j < numpages; j++)
-					page[i][j].update(rh[i][j], row3.getRow(), (FormatableBitSet) null);
+				for (j = 0; j < numpages; j++) {
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row3.getRow(), null);
+				}
 
 			for (i = 0; i < numtrans; i++)
 				t[i].setSavePoint(SP2, null);	// sp2
@@ -2841,8 +2865,10 @@ public class T_Recovery extends T_Generic {
 			{
 				t[i].switchTransactionContext();
 
-				for (j = 0; j < numpages; j++)
-					page[i][j].update(rh[i][j], row4.getRow(), (FormatableBitSet) null);
+				for (j = 0; j < numpages; j++) {
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row4.getRow(), null);
+				}
 				t[i].resetContext();
 			}
 
@@ -2882,8 +2908,10 @@ public class T_Recovery extends T_Generic {
 			for (i = 0; i < numtrans; i++)
 			{
 				t[i].switchTransactionContext();
-				for (j = 0; j < numpages; j++)
-					page[i][j].update(rh[i][j], row5.getRow(), (FormatableBitSet) null);
+				for (j = 0; j < numpages; j++) {
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row5.getRow(), null);
+				}
 				t[i].resetContext();
 			}
 
@@ -2922,8 +2950,10 @@ public class T_Recovery extends T_Generic {
 			for (i = 0; i < numtrans; i++)
 			{
 				t[i].switchTransactionContext();
-				for (j = 0; j < numpages; j++)
-					page[i][j].update(rh[i][j], row6.getRow(), (FormatableBitSet) null); // step 8
+				for (j = 0; j < numpages; j++) {
+					int slot = page[i][j].getSlotNumber(rh[i][j]);
+					page[i][j].updateAtSlot(slot, row6.getRow(), null);
+				}
 				t[i].resetContext();
 			}
 
@@ -3589,7 +3619,8 @@ public class T_Recovery extends T_Generic {
 			RecordHandle r5 = (r4 == null) ? r4 : t_util.t_insertAtSlot(page, 4, row5);
 			if (r5 != null)
 			{
-				page.delete(r5, (LogicalUndo)null);
+				int slot = page.getSlotNumber(r5);
+				page.deleteAtSlot(slot, true, null);
 			}
 
 			t_util.t_commit(t);

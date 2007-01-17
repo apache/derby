@@ -42,6 +42,7 @@ import org.apache.derby.iapi.store.access.SpaceInfo;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
+import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
@@ -1361,9 +1362,36 @@ public abstract class GenericScanController
 	{
         repositionScanForUpateOper();
 
-        boolean ret_val = 
-            scan_position.current_page.update(
-                scan_position.current_rh, row, validColumns);
+        Page page = scan_position.current_page;
+        int slot = scan_position.current_slot;
+
+        if (SanityManager.DEBUG) {
+            // DERBY-2197: Previously, we would try to get an exclusive row
+            // lock here when the container was opened in row locking mode. In
+            // most cases, the container is not opened in row locking mode. If
+            // it is, and the open conglomerate uses update locks,
+            // repositionScanForUpateOper() has already obtained an exclusive
+            // row lock. We don't expect this method to be called unless these
+            // conditions are satisfied, so now we just assert that no row
+            // locking is required at this point.
+            SanityManager.ASSERT(
+                ((open_conglom.getContainer().getLockingPolicy().getMode() !=
+                      LockingPolicy.MODE_RECORD) ||
+                          (open_conglom.isUseUpdateLocks())),
+                "Current mode of container requires row locking.");
+
+            // make sure current_rh and current_slot are in sync
+            SanityManager.ASSERT(
+                slot == page.getSlotNumber(scan_position.current_rh));
+        }
+
+        boolean ret_val;
+        if (page.isDeletedAtSlot(slot)) {
+            ret_val = false;
+        } else {
+            page.updateAtSlot(slot, row, validColumns);
+            ret_val = true;
+        }
 
         scan_position.unlatch();
 

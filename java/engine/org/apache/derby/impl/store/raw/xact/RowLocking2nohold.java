@@ -23,7 +23,6 @@ package org.apache.derby.impl.store.raw.xact;
 
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
-import org.apache.derby.iapi.services.locks.Latch;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 

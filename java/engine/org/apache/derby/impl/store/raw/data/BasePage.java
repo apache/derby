@@ -397,61 +397,6 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 				(ignoreDelete || !isDeletedAtSlot(slot)));
 	}
 
-	/**
-		<OL>
-		<LI>Lock the record (according to the locking policy)
-		<LI>If the record is deleted then return null. We must check after we hold the lock to
-		ensure that we don't look at the delete status of an uncommitted record.
-		<LI>Fetch the record
-		<LI>Unlock the record (according to the locking policy)
-		</OL>
-
-		@see Page#fetch
-
-		@exception StandardException messageId equals StandardException.newException(SQLState.RECORD_VANISHED
-		If the record identfied by handle does not exist on this page.
-
-		@exception StandardException	Standard Cloudscape error policy
-		@exception StandardException   record is not on page with message id equal to
-			StandardException.newException(SQLState.RECORD_VANISHED.
-	*/
-
-	public RecordHandle fetch(
-    RecordHandle        handle, 
-    Object[]            row, 
-    FormatableBitSet    validColumns, 
-    boolean             forUpdate)
-	throws StandardException {
-
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(isLatched());
-		}
-
-		owner.getLockingPolicy().lockRecordForRead(myLatch, handle, forUpdate);
-
-		// See if the record is deleted or not.
-		int slot = getSlotNumber(handle);
-
-        StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
-
-		if (recordHeader.isDeleted())
-			return null;
-
-        FetchDescriptor hack_fetch = 
-            new FetchDescriptor(
-                    row.length, validColumns, (Qualifier[][]) null);
-
-		// magic to copy rows across ...
-		restoreRecordFromSlot(
-            slot, row, hack_fetch, handle, recordHeader, true);
-
-		owner.getLockingPolicy().unlockRecordAfterRead(
-                owner.getTransaction(), owner, handle, forUpdate, true);
-
-		return handle;
-	}
-
-
 	public RecordHandle fetchFromSlot(
     RecordHandle            rh, 
     int                     slot, 
@@ -1017,59 +962,6 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 
 	protected abstract BasePage getNewOverflowPage()
 		throws StandardException;
-
-	public final boolean update(
-    RecordHandle            handle, 
-    Object[]   row, 
-    FormatableBitSet                 validColumns)
-		throws StandardException
-	{
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(isLatched());
-		}
-
-		if (!owner.updateOK())
-        {
-			throw StandardException.newException(
-                    SQLState.DATA_CONTAINER_READ_ONLY);
-        }
-
-		RawTransaction t = owner.getTransaction();
-
-		owner.getLockingPolicy().lockRecordForWrite(myLatch, handle);
-
-		int slot = getSlotNumber(handle);
-
-		if (isDeletedAtSlot(slot))
-			return false;
-
-		doUpdateAtSlot(t, slot, handle.getId(), row, validColumns);
-		
-		return true;
-	}
-
-
-	/** @see Page#delete
-	    @see BasePage#deleteAtSlot
-		@exception StandardException Standard exception policy. 
-	*/
-	public boolean delete(RecordHandle handle, LogicalUndo undo)
-		throws StandardException
-	{
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(isLatched());
-		}
-
-		owner.getLockingPolicy().lockRecordForWrite(myLatch, handle);
-
-		int slot = getSlotNumber(handle);
-
-		if (isDeletedAtSlot(slot))
-			return false;
-
-		deleteAtSlot(slot, true, undo);
-		return true;
-	}
 
 	/** @see Page#updateAtSlot
 		@exception StandardException	Standard Cloudscape error policy

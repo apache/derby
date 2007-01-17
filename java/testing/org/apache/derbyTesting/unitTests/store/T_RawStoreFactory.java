@@ -297,8 +297,6 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		// Page tests
 		P001(0);
 		P002(0);
-		P003(0);
-		P004(0);
 		P005(0);
 		P006();
 		P007(0);
@@ -351,7 +349,6 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 		P050(); // rollback tests
 		P051();
-		P052();
 		P053();
 		P054();
         P055(0);
@@ -395,8 +392,6 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		C012(ContainerHandle.TEMPORARY_SEGMENT);
 		//P001(ContainerHandle.TEMPORARY_SEGMENT);
 		//P002(ContainerHandle.TEMPORARY_SEGMENT);
-		P003(ContainerHandle.TEMPORARY_SEGMENT);
-		P004(ContainerHandle.TEMPORARY_SEGMENT);
 		P005(ContainerHandle.TEMPORARY_SEGMENT);
 		P011(ContainerHandle.TEMPORARY_SEGMENT);
 		P012(ContainerHandle.TEMPORARY_SEGMENT);
@@ -1235,9 +1230,10 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		t_util.t_checkFetch(lastPage, rh002, REC_002);
 		t_util.t_checkFetch(lastPage, rh003, REC_003);
 
-		lastPage.delete(rh001, (LogicalUndo)null);
-		if (lastPage.fetch(
-              rh001, new DataValueDescriptor[0], (FormatableBitSet) null, false) != null)
+		int slot1 = lastPage.getSlotNumber(rh001);
+		lastPage.deleteAtSlot(slot1, true, null);
+		if (lastPage.fetchFromSlot(
+				rh001, slot1, new DataValueDescriptor[0], null, false) != null)
         {
 			throw T_Fail.testFailMsg("deleted record is still present");
         }
@@ -1248,9 +1244,10 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		t_util.t_checkFetchNext(lastPage, rh002, REC_003);
 		t_util.t_checkFetchPrevious(lastPage, rh003, REC_002);
 
-		lastPage.delete(rh002, (LogicalUndo)null);
-		if (lastPage.fetch(
-              rh002, new DataValueDescriptor[0], (FormatableBitSet) null, false) != null)
+		int slot2 = lastPage.getSlotNumber(rh002);
+		lastPage.deleteAtSlot(slot2, true, null);
+		if (lastPage.fetchFromSlot(
+				rh002, slot2, new DataValueDescriptor[0], null, false) != null)
         {
 			throw T_Fail.testFailMsg("deleted record is still present");
         }
@@ -1277,14 +1274,9 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 		T_RawStoreRow urow = new T_RawStoreRow(REC_004);
 
-		if (lastPage.fetch(
-              rh003, new DataValueDescriptor[0], (FormatableBitSet) null, true) == null)
-        {
-			throw T_Fail.testFailMsg("fetch for update returned false");
-        }
-	
-		if (!lastPage.update(rh003, urow.getRow(), (FormatableBitSet) null))
-			throw T_Fail.testFailMsg("update returned false");
+		int slot3 = lastPage.getSlotNumber(rh003);
+		if (lastPage.updateAtSlot(slot3, urow.getRow(), null) == null)
+			throw T_Fail.testFailMsg("updateAtSlot returned null");
 
 		// Order is 003
 		t_util.t_checkFetch(lastPage, rh003, REC_004);
@@ -1718,144 +1710,6 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		PASS("P002");
 	}
 
-	/**
-		Test Page.delete
-
-		@exception T_Fail Unexpected behaviour from the API
-		@exception StandardException Unexpected exception from the implementation
-
-		@see Page#delete
-	*/
-
-	protected void P003(long segment) throws StandardException, T_Fail {
-
-		Transaction t = t_util.t_startTransaction();		
-
-		long cid = t_util.t_addContainer(t, segment);
-
-		ContainerHandle c = t_util.t_openContainer(t, segment, cid, true);
-		Page page = t_util.t_getPage(c, ContainerHandle.FIRST_PAGE_NUMBER);
-
-		RecordHandle r1, r2;
-
-		T_RawStoreRow row1 = new T_RawStoreRow(REC_001);
-		T_RawStoreRow row2 = new T_RawStoreRow(REC_002);
-
-		r1 = t_util.t_insertAtSlot(page, 0, row1);
-		r2 = t_util.t_insertAtSlot(page, 1, row2);
-
-		t_util.t_checkFetch(page, r1, REC_001);
-		if (r2 != null)
-			t_util.t_checkFetch(page, r2, REC_002);
-
-		t_util.t_checkRecordCount(page, 2, r2 == null ? 1 : 2);
-
-		// delete the first
-		if (!page.delete(r1, (LogicalUndo)null))
-			throw T_Fail.testFailMsg("delete() returned false");
-
-		t_util.t_checkRecordCount(page, 2, r2 == null ? 0 : 1);
-
-		if (page.delete(r1, (LogicalUndo)null))
-			throw T_Fail.testFailMsg("delete() returned true on already deleted record");
-
-		t_util.t_checkRecordCount(page, 2, r2 == null ? 0 : 1);
-
-		if (page.recordExists(r1, false))
-			throw T_Fail.testFailMsg("recordExists() returned true for deleted record");
-
-		// check the other record is still there
-		if (r2 != null)
-			t_util.t_checkFetch(page, r2, REC_002);
-
-
-		if (!page.isDeletedAtSlot(0))
-			throw T_Fail.testFailMsg("isDeletedAtSlot() doesn't represent correct state");
-
-		t_util.t_dropContainer(t, segment, cid);	// cleanup
-
-		t_util.t_commit(t);
-		t.close();
-
-		PASS("P003");
-	}
-
-	/**
-		Test Page.update
-
-		@exception T_Fail Unexpected behaviour from the API
-		@exception StandardException Unexpected exception from the implementation
-
-		@see Page#update
-	*/
-	protected void P004(long segment) throws StandardException, T_Fail {
-
-		Transaction t = t_util.t_startTransaction();		
-
-		long cid = t_util.t_addContainer(t, segment);
-
-		ContainerHandle c = t_util.t_openContainer(t, segment, cid, true);
-		Page page = t_util.t_getPage(c, ContainerHandle.FIRST_PAGE_NUMBER);
-
-		RecordHandle r1, r2;
-
-		T_RawStoreRow row1 = new T_RawStoreRow(REC_001);
-		T_RawStoreRow row2 = new T_RawStoreRow(REC_002);
-
-		r1 = t_util.t_insertAtSlot(page, 0, row1);
-		r2 = t_util.t_insertAtSlot(page, 1, row2);
-
-		t_util.t_checkFetch(page, r1, REC_001);
-		if (r2 != null)
-			t_util.t_checkFetch(page, r2, REC_002);
-
-		row1 = new T_RawStoreRow((String) null);
-		if (!page.update(r1, row1.getRow(), (FormatableBitSet) null))
-			throw T_Fail.testFailMsg("update() returned false");
-
-		t_util.t_checkFetch(page, r1, (String) null);
-		if (r2 != null)
-			t_util.t_checkFetch(page, r2, REC_002);
-
-		t_util.t_checkFetch(page, r1, (String) null);
-		if (r2 != null)
-			t_util.t_checkFetch(page, r2, REC_002);
-
-		row1 = new T_RawStoreRow(REC_003);
-		if (!page.update(r1, row1.getRow(), (FormatableBitSet) null))
-			throw T_Fail.testFailMsg("update() returned false");
-
-		t_util.t_checkFetch(page, r1, REC_003);
-		if (r2 != null)
-			t_util.t_checkFetch(page, r2, REC_002);
-
-		// now delete the record we have been updating
-		if (!page.delete(r1, (LogicalUndo)null))
-			throw T_Fail.testFailMsg("delete returned false");
-
-		row1 = new T_RawStoreRow(REC_004);
-		if (page.update(r1, row1.getRow(), (FormatableBitSet) null))
-			throw T_Fail.testFailMsg("update returned true on deleted record");
-
-		page.deleteAtSlot(0, false, (LogicalUndo)null);
-
-		t_util.t_checkFetch(page, r1, REC_003);
-
-		if (!page.update(r1, row1.getRow(), (FormatableBitSet) null))
-			throw T_Fail.testFailMsg("update returned false");
-
-		t_util.t_checkFetch(page, r1, REC_004);
-
-
-		t_util.t_dropContainer(t, segment, cid);	// cleanup
-
-		t_util.t_commit(t);
-		t.close();
-
-		PASS("P004");
-
-	}
-
 	/* test repeated insert */
 	protected void P005(long segment) throws StandardException, T_Fail 
 	{
@@ -1972,20 +1826,22 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			throw T_Fail.testFailMsg("failed pdate should not change time stamp");
 
 		T_RawStoreRow row2 = new T_RawStoreRow(REC_002);
-		page1.update(rh, row2.getRow(), (FormatableBitSet) null);
+		int slot2 = page1.getSlotNumber(rh);
+		page1.updateAtSlot(slot2, row2.getRow(), null);
 		if (page1.equalTimeStamp(ts))
 			throw T_Fail.testFailMsg("timestamp on page not changed after update operation");
 
 		page1.setTimeStamp(ts);
 
 		T_RawStoreRow upd1 = new T_RawStoreRow(REC_003);
-		page1.update(rh, upd1.getRow(), BS_COL_0);
+		int slot = page1.getSlotNumber(rh);
+		page1.updateAtSlot(slot, upd1.getRow(), BS_COL_0);
 		if (page1.equalTimeStamp(ts))
 			throw T_Fail.testFailMsg("timestamp on page not changed after update field operation");
 
 		page1.setTimeStamp(ts);
 
-		page1.delete(rh, (LogicalUndo)null);
+		page1.deleteAtSlot(slot, true, null);
 		if (page1.equalTimeStamp(ts))
 			throw T_Fail.testFailMsg("timestamp on page not changed after delete operation");
 
@@ -3064,7 +2920,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			if ((i % 3) == 1)
 			{
 				deleted++;
-				page1.delete(rh, (LogicalUndo)null);
+				page1.deleteAtSlot(i, true, null);
 			}
 		}
 
@@ -3237,8 +3093,9 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 			try 
 			{
-				page1.fetch(
-                    rhs[i], new DataValueDescriptor[0], (FormatableBitSet) null, true);
+				int slot = page1.getSlotNumber(rhs[i]);
+				page1.fetchFromSlot(
+					rhs[i], slot, new DataValueDescriptor[0], null, false);
 				throw T_Fail.testFailMsg("fetched an invalid record " + rhs[i]);
 			}
 			catch (StandardException se)
@@ -3248,7 +3105,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 			try 
 			{
-				page1.update(rhs[i], row1.getRow(), (FormatableBitSet) null);
+				int slot = page1.getSlotNumber(rhs[i]);
+				page1.updateAtSlot(slot, row1.getRow(), null);
 				throw T_Fail.testFailMsg("updated an invalid record " + rhs[i]);
 			}
 			catch (StandardException se)
@@ -3258,7 +3116,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 			try 
 			{
-				page1.update(rhs[i], row1.getRow(), BS_COL_0);
+				int slot = page1.getSlotNumber(rhs[i]);
+				page1.updateAtSlot(slot, row1.getRow(), BS_COL_0);
 				throw T_Fail.testFailMsg("updated an invalid record field");
 			}
 			catch (StandardException se)
@@ -3268,7 +3127,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 			try 
 			{
-				page1.delete(rhs[i], null);
+				int slot = page1.getSlotNumber(rhs[i]);
+				page1.deleteAtSlot(slot, true, null);
 				throw T_Fail.testFailMsg("delete an invalid record " + rhs[i]);
 			}
 			catch (StandardException se)
@@ -4770,7 +4630,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			c = t_util.t_openContainer(t, segment, cid, true);
 
 			page = t_util.t_getPage(c, ContainerHandle.FIRST_PAGE_NUMBER);
-			page.update(rh1, bigRow.getRow(), (FormatableBitSet)null);
+			int slot1 = page.getSlotNumber(rh1);
+			page.updateAtSlot(slot1, bigRow.getRow(), null);
 			t_util.t_checkFetch(page, rh1, bigRow);
 			page.unlatch();
 			page = null;
@@ -4808,7 +4669,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 			page = t_util.t_getPage(c, ContainerHandle.FIRST_PAGE_NUMBER);
 
-			page.update(rh2, partialRow.getRow(), colList);
+			int slot2 = page.getSlotNumber(rh2);
+			page.updateAtSlot(slot2, partialRow.getRow(), colList);
 
 			bigRow.setColumn(1, 8000, REC_006);
 			t_util.t_checkFetch(page, rh2, bigRow);
@@ -4843,7 +4705,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 			c = t_util.t_openContainer(t, segment, cid, true);
 			page = t_util.t_getPage(c, ContainerHandle.FIRST_PAGE_NUMBER);
-			page.update(rh3, bigRow.getRow(), (FormatableBitSet)null);
+			int slot3 = page.getSlotNumber(rh3);
+			page.updateAtSlot(slot3, bigRow.getRow(), null);
 			t_util.t_checkFetch(page, rh3, bigRow);
 			page.unlatch();
 			page = null;
@@ -4960,11 +4823,13 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 			FormatableBitSet colList = new FormatableBitSet(2);
 			colList.set(1);		// update first row column 1, the second column
-			page.update(rh1, partialRow.getRow(), colList);
+			int slot1 = page.getSlotNumber(rh1);
+			page.updateAtSlot(slot1, partialRow.getRow(), colList);
 
 			colList.clear(1);
 			colList.set(0);		// update second row column 0, the first column
-			page.update(rh2, partialRow2.getRow(), colList);
+			int slot2 = page.getSlotNumber(rh2);
+			page.updateAtSlot(slot2, partialRow2.getRow(), colList);
 
 			// verify the update worked.
 			row1.setColumn(1, 400, REC_004);
@@ -5067,7 +4932,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			r2.setColumn(4, 500, REC_006);
 			r2.setColumn(5, 500, REC_005);
 
-			page.update(rh1, r2.getRow(), (FormatableBitSet)null);
+			int slot1 = page.getSlotNumber(rh1);
+			page.updateAtSlot(slot1, r2.getRow(), null);
 			t_util.t_checkFetch(page, rh1, r2);
 
 			page.unlatch();
@@ -5088,7 +4954,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			
 			t.setSavePoint(SP1, null);
 
-			page.update(rh1, r1.getRow(), (FormatableBitSet)null);
+			slot1 = page.getSlotNumber(rh1);
+			page.updateAtSlot(slot1, r1.getRow(), null);
 			t_util.t_checkFetch(page, rh1, r1);
 			page.unlatch();
 			page = null;
@@ -5170,7 +5037,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 			T_RawStoreRow bigRow = new T_RawStoreRow(1);
 			bigRow.setColumn(0, 6400, REC_001);
-			page.update(rh1, bigRow.getRow(), (FormatableBitSet)null);
+			int slot1 = page.getSlotNumber(rh1);
+			page.updateAtSlot(slot1, bigRow.getRow(), null);
 			t_util.t_checkFetch(page,rh1, bigRow);
 			page.unlatch();
 			page = null;
@@ -5210,7 +5078,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			page = t_util.t_getPage(c, ContainerHandle.FIRST_PAGE_NUMBER);
 
 			t.setSavePoint(SP1, null);
-			page.update(rh1, row2.getRow(), (FormatableBitSet)null);
+			slot1 = page.getSlotNumber(rh1);
+			page.updateAtSlot(slot1, row2.getRow(), null);
 
 			nextPage = t_util.t_addPage(c);
 			nextPageNumber = nextPage.getPageNumber();
@@ -5237,7 +5106,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			t_util.t_checkFetch(page, rh1, smallRow);
 
 			// update row so that it has overflow rows and long columns
-			page.update(rh1, row2.getRow(), (FormatableBitSet)null);
+			slot1 = page.getSlotNumber(rh1);
+			page.updateAtSlot(slot1, row2.getRow(), null);
 
 			// remember the next page
 			nextPage = t_util.t_addPage(c);
@@ -5256,7 +5126,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			
 			c = t_util.t_openContainer(t, segment, cid, true);
 			page = t_util.t_getPage(c, ContainerHandle.FIRST_PAGE_NUMBER);
-			page.update(rh1, row3.getRow(), (FormatableBitSet)null);
+			slot1 = page.getSlotNumber(rh1);
+			page.updateAtSlot(slot1, row3.getRow(), null);
 			t_util.t_checkFetch(page, rh1, row3);
 			page.unlatch();
 			page = null;
@@ -5388,57 +5259,6 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		page.unlatch();
 
 		PASS("P051");
-
-		t_util.t_dropContainer(t, 0, cid);	// cleanup
-
-		t_util.t_commit(t);
-		t.close();
-	}
-	/**
-		Test rollback of Page.delete
-		@exception T_Fail Unexpected behaviour from the API
-		@exception StandardException Unexpected exception from the implementation
-
-		@see Page#delete
-
-	*/
-	protected void P052()
-		 throws StandardException, T_Fail
-	{
-		if (!testRollback)
-			return;
-
-		Transaction t = t_util.t_startTransaction();
-
-		long cid = t_util.t_addContainer(t,0);
-		t_util.t_commit(t);
-
-		ContainerHandle c = t_util.t_openContainer(t, 0, cid, true);
-
-		// first insert two rows
-		T_RawStoreRow row = new T_RawStoreRow(REC_001);
-		RecordHandle rh1 = t_util.t_insert(c, row);
-		row = new T_RawStoreRow(REC_002);
-		RecordHandle rh2 = t_util.t_insert(c, row);
-
-		t_util.t_commit(t);
-
-		c = t_util.t_openContainer(t, 0, cid, true);
-
-		t_util.t_checkFetch(c, rh1, REC_001);
-		t_util.t_checkFetch(c, rh2, REC_002);
-
-		t_util.t_delete(c, rh2);
-
-		t_util.t_checkFetch(c, rh1, REC_001);
-
-		t_util.t_abort(t);
-
-		c = t_util.t_openContainer(t, 0, cid, true);
-		t_util.t_checkFetch(c, rh1, REC_001);
-		t_util.t_checkFetch(c, rh2, REC_002);
-
-		PASS("P052");
 
 		t_util.t_dropContainer(t, 0, cid);	// cleanup
 
@@ -6096,7 +5916,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 				row.setColumn(j, 256, "XX" + j + "YY");
 			}
 
-			page.update(rh, row.getRow(), (FormatableBitSet) null);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, row.getRow(), null);
 			page.unlatch();
 			page = t_util.t_getPage(c, ContainerHandle.FIRST_PAGE_NUMBER);
 
@@ -6155,7 +5976,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			T_RawStoreRow rowU = new T_RawStoreRow(i+1);
 			rowU.setColumn(i, 256, "XX" + i + "YY");
 
-			page.update(rh, rowU.getRow(), colList);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, rowU.getRow(), colList);
 			page.unlatch();
 
 			T_RawStoreRow rowF = new T_RawStoreRow(i+1);
@@ -6257,7 +6079,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		colList.set(1);
 		row.setColumn(0, REC_004);
 		row.setColumn(1, REC_003);
-		page.update(rh, row.getRow(), colList);
+		int slot = page.getSlotNumber(rh);
+		page.updateAtSlot(slot, row.getRow(), colList);
 		t_util.t_checkFetch(page, rh, row);
 
 
@@ -6291,7 +6114,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		} else {
 			colNum = 0; // only used for read from now on
 		}
-		page.update(rh, rowU.getRow(), colList);
+		int slot = page.getSlotNumber(rh);
+		page.updateAtSlot(slot, rowU.getRow(), colList);
 
 		T_RawStoreRow row = new T_RawStoreRow(2);
 		row.setColumn(colNum, newVal);
@@ -6343,7 +6167,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			T_RawStoreRow rowU = new T_RawStoreRow(i+1);
 			rowU.setColumn(i, 400, "WW" + i + "UU");
 
-			page.update(rh, rowU.getRow(), colList);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, rowU.getRow(), colList);
 			page.unlatch();
 
 			row.setColumn(i, 400, "WW" + i + "UU");
@@ -6406,7 +6231,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			T_RawStoreRow rowU = new T_RawStoreRow(i+1);
 			rowU.setColumn(i, 400, "WW" + i + "UU");
 
-			page.update(rh, rowU.getRow(), colList);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, rowU.getRow(), colList);
 			page.unlatch();
 
 			row.setColumn(i, 400, "WW" + i + "UU");
@@ -6475,7 +6301,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			T_RawStoreRow rowU = new T_RawStoreRow(i+1);
 			rowU.setColumn(i, 3000, "WW" + i + "UU"); // longer than 4096 page length
 
-			page.update(rh, rowU.getRow(), colList);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, rowU.getRow(), colList);
 			page.unlatch();
 
 			row.setColumn(i, 3000, "WW" + i + "UU");
@@ -6500,7 +6327,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			T_RawStoreRow rowU = new T_RawStoreRow(i+1);
 			rowU.setColumn(i, (String) null);
 
-			page.update(rh, rowU.getRow(), colList);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, rowU.getRow(), colList);
 			page.unlatch();
 
 			row.setColumn(i, (String) null);
@@ -6614,7 +6442,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			T_RawStoreRow rowU = new T_RawStoreRow(i+1);
 			rowU.setColumn(i, 3000, "WW" + i + "UU"); // longer than 4096 page length
 
-			page.update(rh, rowU.getRow(), colList);
+			int slot = page.getSlotNumber(rh);
+			page.updateAtSlot(slot, rowU.getRow(), colList);
 		}
 
 		t_util.t_abort(t);
@@ -7252,7 +7081,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 			c = t_util.t_openContainer(longtran, 0, cid, true);
 			Page p2 = t_util.t_getPage(c, r2.getPageNumber());
-			p2.update(r2, row5.getRow(), (FormatableBitSet) null);
+			int slot2 = p2.getSlotNumber(r2);
+			p2.updateAtSlot(slot2, row5.getRow(), null);
 			p2.unlatch();
 
 
@@ -7279,7 +7109,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			t_util.t_commit(t2);
 			c2 = t_util.t_openContainer(t2, 0, cid2, true);
 			Page p5 = t_util.t_getPage(c2, r5.getPageNumber());
-			p5.update(r5, row5.getRow(), (FormatableBitSet) null);
+			int slot5 = p5.getSlotNumber(r5);
+			p5.updateAtSlot(slot5, row5.getRow(), null);
 			p5.unlatch();
 
 			//		cpm = contextService.newContextManager();

@@ -111,35 +111,6 @@ public interface LockFactory extends PropertySetCallback {
 	//	throws StandardException;
 
 	/**
-		Lock an object within a compatability space
-		and associate the lock with a group object,
-		In addition a held latch is passed in. If the lock
-		cannot be granted immediately, the latch will be released
-		and relatched after the lock is obtained. If the lock can be granted
-		immediately the latch is not released.
-		<BR>
-		The compatability space of the request is defined by the compatability
-		space of the latch.
-		<P>
-		@param group handle of group, must be private to a compatability space.
-		@param ref reference to object to be locked
-		@param qualifier A qualification of the request.
-		@param timeout amount of time to wait, <B>NO_WAIT is not supported</B>
-		@param latch latch to be atomically released/re-latched in a wait.
-
-		@return true if the latch was released, false otherwise.
-
-		@exception org.apache.derby.iapi.error.StandardException A deadlock has occured (message id will be LockFactory.Deadlock)
-		@exception org.apache.derby.iapi.error.StandardException Another thread interupted this thread while
-		it was waiting for the lock. This will be a StandardException with a nested java.lang.InterruptedException exception,
-		(message id will be LockFactory.InterruptedExceptionId)
-		@exception StandardException Standard Cloudscape error policy.
-
-	*/
-	public boolean lockObject(Object group, Lockable ref, Object qualifier, int timeout, Latch latch)
-		throws StandardException;
-
-	/**
 		Unlock a single lock on a single object held within this compatability space
 		that was locked with the supplied qualifier.
 
