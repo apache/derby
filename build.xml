@@ -342,7 +342,8 @@
   <target name="tools" depends="engine">
     <ant dir="${derby.tools.src.dir}"/>
   </target>
-
+	
+	
   <target name="shared" depends="init,state">
     <ant dir="${derby.shared.src.dir}"/>
   </target>
@@ -367,6 +368,8 @@
   <target name="testing" depends="demo">
     <ant dir="${derby.testing.src.dir}"/>
   </target>
+	
+
 
 <!-- ==================================================================== -->
 <!--                     Build SanityState.java                           -->
@@ -1692,7 +1695,7 @@
     </antcall>
   </target>
 
-  <target name="junit-all" depends="junit-init,junit-jdbc4">
+  <target name="junit-all" depends="junit-init,junit-jdbc4,junit-autoloadtest">
     <antcall target="junit-oneclass">
       <param name="derby.junit.testname"
              value="org.apache.derbyTesting.functionTests.tests.derbynet._Suite"/>
@@ -1714,7 +1717,36 @@
              value="org.apache.derbyTesting.functionTests.tests.store._Suite"/>
     </antcall>
   </target>
-
+	
+  <!--
+  Autoloading tests need to be run in a separate JVM thus
+  as a separate test. This target runs the test a number of 
+  times, each with a different setting for jdbc.drivers.
+  When run with jar files on java SE 6/JDBC 4 the run without
+  setting jdbc.drivers will test that autoloading from
+  the manifest file works. The settings with jdbc.drivers
+  test the auto-loading in non JDBC 4 environments and
+  that setting jdbc.drivers in JDBC 4 does not cause issues.
+   -->
+  <target name="junit-autoloadtest" depends="junit-init">
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.testname"
+        value="org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest"/>
+    </antcall>
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.testname"
+        value="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversEmbeddedTest"/>
+    </antcall>
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.testname"
+        value="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversClientTest"/>
+    </antcall>
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.testname"
+        value="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversAllTest"/>
+    </antcall>
+  </target>
+ 
   <target name="junitreport" depends="junit-sysinfo,junit-all">
     <junitreport todir="junit_${derby.junit.timestamp}">
       <fileset dir="junit_${derby.junit.timestamp}">
