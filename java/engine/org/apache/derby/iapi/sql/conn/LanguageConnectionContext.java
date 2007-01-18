@@ -22,7 +22,6 @@
 package org.apache.derby.iapi.sql.conn;
 
 import org.apache.derby.iapi.services.context.Context;
-import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -35,25 +34,19 @@ import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
-import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionStmtValidator;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.LanguageFactory;
 import org.apache.derby.iapi.sql.PreparedStatement;
-import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
-import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.catalog.UUID;
 
-import java.util.Locale;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.Map;
 
 /**
  * LanguageConnectionContext keeps the result sets,
@@ -978,10 +971,10 @@ public interface LanguageConnectionContext extends Context {
 	public boolean getAutoincrementUpdate();
 
 	/**
-	 * copy a hashtable of autoincrement key value pairs into the cache of 
+	 * Copy a map of autoincrement key value pairs into the cache of
 	 * ai values stored in the language connection context.
 	 */
-	public void copyHashtableToAIHT(Hashtable from);
+	public void copyHashtableToAIHT(Map from);
 	
 	/**
 	 * returns the <b>next</b> value to be inserted into an autoincrement col.

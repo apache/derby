@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
@@ -512,7 +513,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 		if (aiCache != null)
 		{
-			Hashtable aiHashtable = new Hashtable();
+			HashMap aiHashtable = new HashMap();
 			int numColumns = aiCache.length;
 			// this insert updated ai values, store them in some persistent
 			// place so that I can see these values.

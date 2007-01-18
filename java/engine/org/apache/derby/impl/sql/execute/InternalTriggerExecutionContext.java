@@ -40,6 +40,7 @@ import org.apache.derby.catalog.UUID;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Hashtable;
+import java.util.Map;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -619,22 +620,17 @@ public class InternalTriggerExecutionContext implements TriggerExecutionContext,
 		return null;
 	}
 	/**
-	 * Copy a hashtable of autoincrement values into the trigger 
+	 * Copy a map of autoincrement values into the trigger 
 	 * execution context hashtable of autoincrement values.
 	 */
-	public void copyHashtableToAIHT(Hashtable from)
+	public void copyHashtableToAIHT(Map from)
 	{
 		if (from == null)
 			return;
 		if (aiHT == null)
 			aiHT = new Hashtable();
-		for (Enumeration e = from.keys(); e.hasMoreElements(); )
-		{
-			Object key = e.nextElement();
-			Object value = from.get(key);
-			aiHT.put(key, value);
-			//			System.out.println(" in itec:chte-- " + key + " " + value);
-		}
+
+		aiHT.putAll(from);
 	}
 		
 	/** 

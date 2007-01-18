@@ -30,10 +30,8 @@ import org.apache.derby.impl.sql.execute.AutoincrementCounter;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derby.impl.sql.GenericStatement;
 import org.apache.derby.iapi.sql.Statement;
-import org.apache.derby.impl.sql.conn.CachedStatement;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -72,7 +70,6 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
@@ -84,12 +81,9 @@ import org.apache.derby.iapi.reference.Property;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Properties;
-import java.util.Stack;
-import java.io.Serializable;
+import java.util.Map;
 
 /**
  * LanguageConnectionContext keeps the pool of prepared statements,
@@ -249,7 +243,7 @@ public class GenericLanguageConnectionContext
 	 * To support lastAutoincrementValue: This is a hashtable which maps
 	 * schemaName,tableName,columnName to a Long value.
 	 */
-	private Hashtable autoincrementHT;
+	private HashMap autoincrementHT;
 	/**
 	 * whether to allow updates or not. 
 	 */
@@ -258,7 +252,7 @@ public class GenericLanguageConnectionContext
 	private boolean identityNotNull;	//frugal programmer
 
 	// cache of ai being handled in memory (bulk insert + alter table).
-	private Hashtable autoincrementCacheHashtable;
+	private HashMap autoincrementCacheHashtable;
 
 	// temp public
 	public CacheManager statementCache;
@@ -2925,7 +2919,7 @@ public class GenericLanguageConnectionContext
 		
 		if (autoincrementCacheHashtable == null)
 		{
-			autoincrementCacheHashtable = new Hashtable();
+			autoincrementCacheHashtable = new HashMap();
 		}
 
 		AutoincrementCounter aic = 
@@ -2997,13 +2991,13 @@ public class GenericLanguageConnectionContext
 			return;
 
 		if (autoincrementHT == null)
-			autoincrementHT = new Hashtable();
+			autoincrementHT = new HashMap();
 
 		DataDictionary dd = getDataDictionary();
-		for (Enumeration e = autoincrementCacheHashtable.keys(); 
-			 e.hasMoreElements(); )
+		for (Iterator it = autoincrementCacheHashtable.keySet().iterator();
+			 it.hasNext(); )
 		{
-			Object key = e.nextElement();
+			Object key = it.next();
 			AutoincrementCounter aic = 
 				(AutoincrementCounter)autoincrementCacheHashtable.get(key);
 			Long value = aic.getCurrentValue();
@@ -3017,23 +3011,18 @@ public class GenericLanguageConnectionContext
 	}
 
 	/**
-	 * Copies an existing hashtable of autoincrement mappings 
+	 * Copies an existing autoincrement mapping
 	 * into autoincrementHT, the cache of autoincrement values 
 	 * kept in the languageconnectioncontext.
 	 */
-	public void copyHashtableToAIHT(Hashtable from)
+	public void copyHashtableToAIHT(Map from)
 	{
 		if (from.isEmpty())
 			return;
 		if (autoincrementHT == null)
-			autoincrementHT = new Hashtable();
+			autoincrementHT = new HashMap();
 		
-		for (Enumeration e = from.keys(); e.hasMoreElements(); )
-		{
-			Object key = e.nextElement();
-			Object value = from.get(key);
-			autoincrementHT.put(key, value);
-		}
+		autoincrementHT.putAll(from);
 	}
 	
 	/**
