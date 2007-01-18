@@ -114,27 +114,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	}
 
 	/**
-	 * Constructs a Bit from an array of bytes.
-	 *
-	 * @param newValue	The array of bytes to make up the new Bit
-	 * @param numBits	The number of bits
-	 */
-	public FormatableBitSet(byte[] newValue, int numBits)
-	{
-		bitsInLastByte = numBitsInLastByte(numBits);
-		lengthAsBits = numBits;
-
-		int lenInBytes = numBytesFromBits(numBits);
-
-		if (lenInBytes == newValue.length) {
-			value = newValue;
-		} else {
-			value = new byte[lenInBytes];
-			System.arraycopy(newValue, 0, value, 0, newValue.length);
-		}
-	}
-
-	/**
 	 * Copy constructor
 	 *
 	 * @param original the FormatableBitSet to make a copy from
@@ -436,96 +415,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 		}
 	}
 
-	/**
-	 * Bit concatenation.
-	 *
-	 * @param other 	the other bit to append to this
-	 *
-	 * @return Bit -- the newly concatenated bit
-	 *
-	 */
-	public FormatableBitSet concatenate(FormatableBitSet other)
-	{
-		int		newLen;
-		int		otherLen;
-		int		prevLen;
-		int		prevLenBytes;
-		int		newLenBytes;
-		int     otherLenBytes;
-		int		i, j;
-		byte[]	newValue;
-		byte[]	otherValue;
-		int		shiftBits;
-		int		inByte;
-
-
-		prevLen = this.getLength();
-		prevLenBytes = this.getLengthInBytes();
-		otherLen = other.getLength();
-		otherValue = other.getByteArray();
-		otherLenBytes = other.getLengthInBytes();
-		newLen = prevLen + otherLen;
-		newLenBytes = numBytesFromBits(newLen);
-		newValue = new byte[newLenBytes];
-
-
-		/*
-		** Copy over the entire array in this.value
-		** to newLenBytes.
-		*/
-		for (i = 0; i < prevLenBytes; i++)
-		{
-			newValue[i] = this.value[i];
-		}
-
-		/*
-		** Now if we have any bits left over
-		** we need to shift them, and keep
-		** shifting everything down.  Be careful
-		** to handle the case where the bit
-		** used to have length 0.
-		*/
-		shiftBits = (prevLen == 0) ? 8 : this.bitsInLastByte;
-		for (j = 0; j < otherLenBytes; j++, i++)
-		{
-			if (shiftBits == 8)
-			{
-				newValue[i] = otherValue[j];
-			}
-			else
-			{
-				/*
-				** Convert to an int because it will get converted
-				** on the shift anyway.
-				*/
-				inByte = (int)otherValue[j];
-
-				/*
-				** Mask off the high bits in case they are now
-				** turned on if we had the sign bit on.
-				*/
-				inByte &= (0x100 - 1);
-
-				/*
-				** Use the high order bits to finish off
-				** the last byte
-				*/
-				newValue[i-1] |= (inByte >>> shiftBits);
-
-	            /*
-		        ** Start the next one with whatever is left, unless
-		        ** there is nothing left.
-	            */
-	            if (i < newLenBytes)
-				{
-		            newValue[i] |= (inByte << (8 - shiftBits));
-				}
-			}
-		}
-
-		return new FormatableBitSet(newValue, newLen);
-	}
-
     /**
      * Produce a hash code by putting the value bytes into an int, exclusive OR'ing
      * if there are more than 4 bytes.
@@ -694,104 +583,6 @@ public final class FormatableBitSet implements Formatable, Cloneable
 				((bits == 0) ? 0 : 8) :
 				modulo);
 	}
-
-	/**
-	 * Translate a hex character to a byte.
-	 *
-	 * @param hexChar	A character with the value [0-9a-fA-F].
-	 *
-	 * @return	A byte with the numeric value corresponding to the hex character
-	 */
-	private static byte
-	hexCharToByte(char hexChar)
-	{
-		byte	byteValue;
-
-		switch (hexChar)
-		{
-		  case '0':
-			byteValue = 0;
-			break;
-
-		  case '1':
-			byteValue = 1;
-			break;
-
-		  case '2':
-			byteValue = 2;
-			break;
-
-		  case '3':
-			byteValue = 3;
-			break;
-
-		  case '4':
-			byteValue = 4;
-			break;
-
-		  case '5':
-			byteValue = 5;
-			break;
-
-		  case '6':
-			byteValue = 6;
-			break;
-
-		  case '7':
-			byteValue = 7;
-			break;
-
-		  case '8':
-			byteValue = 8;
-			break;
-
-		  case '9':
-			byteValue = 9;
-			break;
-
-		  case 'a':
-		  case 'A':
-			byteValue = 0xA;
-			break;
-
-		  case 'b':
-		  case 'B':
-			byteValue = 0xB;
-			break;
-
-		  case 'c':
-		  case 'C':
-			byteValue = 0xC;
-			break;
-
-		  case 'd':
-		  case 'D':
-			byteValue = 0xD;
-			break;
-
-		  case 'e':
-		  case 'E':
-			byteValue = 0xE;
-			break;
-
-		  case 'f':
-		  case 'F':
-			byteValue = 0xF;
-			break;
-
-		  default:
-			  if (SanityManager.DEBUG)
-			  {
-				  SanityManager.THROWASSERT("illegal char = " + hexChar);
-			  }
-		  	throw new IllegalArgumentException();
-		}
-
-		return byteValue;
-	}
-
-private static char[] decodeArray = {'0', '1', '2', '3', '4', '5', '6', '7',
-								'8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 	/**
 	 * Format the string into BitSet format: {0, 2, 4, 8} if bits 0, 2, 4, 8
@@ -1159,21 +950,6 @@ private static char[] decodeArray = {'0', '1', '2', '3', '4', '5', '6', '7',
 			bitsInLastByte = numBitsInLastByte(lenInBits);
 
 			lengthAsBits = lenInBits;
-	}
-
-	public void readExternalFromArray(ArrayInputStream in) throws IOException
-	{
-		int lenInBits = in.readInt();
-
-		int lenInBytes = FormatableBitSet.numBytesFromBits(lenInBits);
-
-		value = new byte[lenInBytes];
-
-		in.readFully(value);
-
-		bitsInLastByte = numBitsInLastByte(lenInBits);
-
-		lengthAsBits = lenInBits;
 	}
 
 	/**

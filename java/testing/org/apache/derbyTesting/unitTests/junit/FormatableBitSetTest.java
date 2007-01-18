@@ -153,46 +153,6 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(0,negBits.getNumBitsSet());
     }
 
-    // Test cases for two-arg constructor
-    public void testArrayIntCtor0() {
-        byte[] zeroByteArray = new byte[0];
-        FormatableBitSet zeroBits = new FormatableBitSet(zeroByteArray,0);
-        assertEquals(0,zeroBits.getLength());
-        assertEquals(0,zeroBits.getLengthInBytes());
-        assertEquals(0,zeroBits.getByteArray().length);
-        assertEquals(zeroByteArray,zeroBits.getByteArray());
-        assertEquals(0,zeroBits.getNumBitsSet());
-    }
-    public void testArrayIntCtor9() {
-        byte[] twoByteArray = new byte[2];
-        FormatableBitSet nineBits = new FormatableBitSet(twoByteArray,9);
-        assertEquals(9,nineBits.getLength());
-        assertEquals(2,nineBits.getLengthInBytes());
-        assertEquals(twoByteArray,nineBits.getByteArray());
-        assertEquals(2,nineBits.getByteArray().length);
-        assertEquals(0,nineBits.getNumBitsSet());
-    }
-    public void testArrayIntCtor0_1() {
-        byte[] zeroByteArray = new byte[0];
-        FormatableBitSet oneBit = new FormatableBitSet(zeroByteArray,1);
-        assertEquals(1,oneBit.getLength());
-        assertEquals(1,oneBit.getLengthInBytes());
-        assertEquals(1,oneBit.getByteArray().length);
-        assertEquals(0,oneBit.getNumBitsSet());
-    }
-    // Not covered by other tests
-    public void testArrayIntCtor1_0() {
-        byte[] oneByteArray = new byte[1];
-        try {
-            FormatableBitSet zeroBits = new FormatableBitSet(oneByteArray,0);
-            fail();
-        } catch (ArrayIndexOutOfBoundsException e) {}
-        //      assertEquals(0,zeroBits.getLength());
-        //      assertEquals(0,zeroBits.getLengthInBytes());
-        //      assertEquals(oneByteArray,zeroBits.getByteArray());
-        //      assertEquals(0,zeroBits.getNumBitsSet());
-    }
-
     // Test cases for the copy constructor
     public void testEmptyCpyCtor() {
         FormatableBitSet emptyCpy = new FormatableBitSet(empty);
@@ -303,45 +263,6 @@ public class FormatableBitSetTest extends TestCase {
         large.grow(100);
         large.shrink(9);
         assertEquals(0,small.compare(large));
-    }
-
-    // Test cases for concatenate(FormatableBitSet)
-    // Not covered by other tests
-    public void testCatSameEmpty() {
-        empty.concatenate(empty);
-        assertEquals(0,empty.getLength());
-        assertEquals(0,empty.getLengthInBytes());
-        assertEquals(0,empty.getByteArray().length);
-        assertEquals(0,empty.getNumBitsSet());
-    }
-    public void testCatAnotherEmpty() {
-        empty.concatenate(new FormatableBitSet());
-        assertEquals(0,empty.getLength());
-        assertEquals(0,empty.getLengthInBytes());
-        assertEquals(0,empty.getByteArray().length);
-        assertEquals(0,empty.getNumBitsSet());
-    }
-    public void testCatSame() {
-        bitset18.concatenate(bitset18);
-        // Failure - is 18
-        //assertEquals(36,bitset18.getLength());
-        // Failure - is 3
-        //assertEquals(5,bitset18.getLengthInBytes());
-        // Failure - is 3
-        //assertEquals(5,bitset18.getByteArray().length);
-        // Failure - is 9
-        //assertEquals(18,bitset18.getNumBitsSet());
-    }
-    public void testCatAnother() {
-        bitset18.concatenate(new FormatableBitSet(bitset18));
-        // Failure - is 18
-        //assertEquals(36,bitset18.getLength());
-        // Failure - is 3
-        //assertEquals(5,bitset18.getLengthInBytes());
-        // Failure - is 3
-        //assertEquals(5,bitset18.getByteArray().length);
-        // Failure - is 9
-        //assertEquals(18,bitset18.getNumBitsSet());
     }
 
     // Test cases for isSet(int)
