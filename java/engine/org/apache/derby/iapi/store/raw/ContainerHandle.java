@@ -501,7 +501,6 @@ public interface ContainerHandle
 
 
 		@see Page#unlatch
-		@see Page#fetch
 	*/
 	public void close();
 

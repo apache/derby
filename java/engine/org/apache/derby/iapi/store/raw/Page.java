@@ -37,7 +37,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 	A record is a stream of bytes created from a row array. The record
 	contains one or more fields, fields have a one to one correlation with
 	the DataValueDescriptor's contained within a row array.
-  <P>
+    <P>
 	A Page represents <B>exclusive</B> access to a data page within a container.
 	Exclusive access is released by calling the unlatch() method, once that 
     occurs the caller must no longer use the Page reference.
@@ -53,7 +53,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 	<UL>
 	<LI> Obtaining the handle during this exclusive access of this page
 	<LI> Checking the record still exists with the method recordExists()
-	<LI> Not using a handle after a delete().
+	<LI> Not using a handle after a deleteAtSlot().
 	</UL>
 	<P>
 	Several of the methods in Page take a slot number as an argument.  A slot 
@@ -762,12 +762,6 @@ public interface Page
 	public int fetchNumFieldsAtSlot(int slot)
 		 throws StandardException;
 
-	/**
-		Mark the record identified by slot as deleted or undeleted according to the
-		delete flag.
-
-
-	*/
     /**
      * Mark the record at slot as deleted or undeleted according to delete flag.
      * <p>
@@ -803,7 +797,6 @@ public interface Page
      *                              the slot is not on the page.
      *
      * @see LockingPolicy
-     * @see Page#delete
      * @see LogicalUndo
      * @see LogicalUndoable
      *
@@ -958,7 +951,6 @@ public interface Page
 		@exception StandardException The container was not opened in update mode.
 		@exception StandardException if the slot is not on the page.
 
-		@see Page#update
 	*/
 	RecordHandle updateAtSlot(
     int                     slot, 
