@@ -28,8 +28,11 @@ import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -119,6 +122,15 @@ public class AutoloadTest extends BaseJDBCTestCase
         TestSuite suite = new TestSuite("AutoloadTest: " + which);
         
         suite.addTest(new AutoloadTest("testRegisteredDriver"));
+        if ("embedded".equals(which))
+        {
+            // Tests to see if the full engine is booted correctly
+            // when the embedded driver is autoloading
+            if (Derby.hasServer())
+                suite.addTest(new AutoloadTest("testAutoNetworkServerBoot"));
+
+        }
+            
         suite.addTest(new AutoloadTest("testSuccessfulConnect"));
         suite.addTest(new AutoloadTest("testUnsuccessfulConnect"));
         suite.addTest(new AutoloadTest("testExplicitLoad"));
@@ -212,6 +224,55 @@ public class AutoloadTest extends BaseJDBCTestCase
             fail("Derby junit setup code is loading driver!");
         } catch (SQLException e) {
         }
+    }
+
+    /**
+     * Test that the auto-load of the network server is as expected.
+     * <P>
+     * derby.drda.startNetworkServer=false or not set
+     * <BR>
+     *     network server should not auto boot.
+     * <P>
+     * derby.drda.startNetworkServer=true
+     * <BR>
+     * If jdbc.drivers contains the name of the embedded driver
+     * then the server must be booted.
+     * <BR>
+     * Otherwise even if auto-loading the embedded driver due to JDBC 4
+     * auto-loading the network server must not boot. This is because
+     * the auto-loaded driver for JDBC 4 is a proxy driver that registers
+     * a driver but does not boot the complete embedded engine.
+     * @throws Exception 
+     * 
+     *
+     */
+    public void testAutoNetworkServerBoot() throws Exception
+    {
+        boolean nsAutoBoot = "true".equalsIgnoreCase(
+                getSystemProperty("derby.drda.startNetworkServer"));
+        
+        boolean serverShouldBeUp =
+            nsAutoBoot && fullEngineAutoBoot();
+        
+        NetworkServerControl control = new NetworkServerControl();
+        
+        boolean isServerUp = NetworkServerTestSetup.pingForServerStart(control);
+        
+        assertEquals("Network Server state incorrect",
+                serverShouldBeUp, isServerUp);
+        
+        if (isServerUp)
+            control.shutdown();
+    }
+    
+    /**
+     * Return true if a full auto-boot of the engine is expected
+     * due to jdbc.drivers containing the name of the embedded driver.
+     */
+    private boolean fullEngineAutoBoot()
+    {
+        String jdbcDrivers = getSystemProperty("jdbc.drivers");
+        return jdbcDrivers.indexOf("org.apache.derby.jdbc.EmbeddedDriver") != -1;
     }
 }
 

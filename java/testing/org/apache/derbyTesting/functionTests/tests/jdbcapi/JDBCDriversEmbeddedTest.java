@@ -32,6 +32,11 @@ public class JDBCDriversEmbeddedTest extends JDBCDriversPropertyTest {
     
     public static Test suite() throws Exception
     {
+        // Also test that the network server comes up automatically
+        // when this property is set and the embedded driver
+        // is autoloaded by jdbc.drivers
+        System.setProperty("derby.drda.startNetworkServer", "true");
+ 
         return getSuite("org.apache.derby.jdbc.EmbeddedDriver");
     }
 }

@@ -166,17 +166,29 @@ final public class NetworkServerTestSetup extends TestSetup {
      * if the server has not started within sixty seconds.
      */
     public static void waitForServerStart(NetworkServerControl networkServerController)
-        throws InterruptedException {
+       throws InterruptedException 
+    {
+        if (!pingForServerStart(networkServerController))
+            fail("Timed out waiting for network server to start");
+    }
+    
+    /**
+     * Ping server for upto sixty seconds. If the server responds
+     * in that time then return true, otherwise return false.
+     * 
+     */
+    public static boolean pingForServerStart(NetworkServerControl networkServerController)
+        throws InterruptedException
+    {
         final long startTime = System.currentTimeMillis();
         while (true) {
             Thread.sleep(SLEEP_TIME);
             try {
                 networkServerController.ping();
-                break;
+                return true;
             } catch (Exception e) {
                 if (System.currentTimeMillis() - startTime > WAIT_TIME) {
-                    e.printStackTrace();
-                    fail("Timed out waiting for network server to start");
+                    return false;
                 }
             }
         }
