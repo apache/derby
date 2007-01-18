@@ -32,6 +32,7 @@ import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -162,6 +163,38 @@ class UpgradeRun {
                    suite.addTest(Changes10_2.suite());
                 if (oldMinor < 3)
                    suite.addTest(Changes10_3.suite());
+            }
+            
+            // Add DatabaseMetaData tests. Since metadata
+            // queries may be changed by an upgrade it is
+            // an area that is subject to bugs. Here we run
+            // all or a subset of DatabaseMetaData tests
+            // as required.
+            switch (phase) {
+            case UpgradeChange.PH_CREATE:
+                // No need to test, should have been covered
+                // by the original tests of the old release 
+                break;
+                
+            case UpgradeChange.PH_POST_SOFT_UPGRADE:
+                // reverted to old engine and metadata queries
+                // must continue to work. Cannot run the full
+                // set of tests here as the full DatabaseMetaDataTest
+                // functionality may not match the old engine.
+                // However we run individual fixtures that exercise
+                // the code path for the metadata queries.
+                //
+                // Any specific change to the metadata queries
+                // due to upgrade (e.g. fixing a system catalog)
+                // must be tested in a ChangesM_n fixture.
+                break;
+            
+            // Running at the new level so the full functionality
+            // of DatabaseMetaData should be available.
+            case UpgradeChange.PH_SOFT_UPGRADE:
+            case UpgradeChange.PH_HARD_UPGRADE:
+                suite.addTestSuite(DatabaseMetaDataTest.class);
+                break;
             }
         }
                 

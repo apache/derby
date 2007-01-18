@@ -27,6 +27,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
@@ -67,6 +69,9 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *  getTablePrivileges
  *  getTables (modify)
  *  getTypeInfo
+ *  <P>
+ *  This test is also called from the upgrade tests to test that
+ *  metadata continues to work at various points in the upgrade.
  */
 public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /*
@@ -169,7 +174,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         {
             Connection conn = getConnection();
             conn.setAutoCommit(false);
-            CleanDatabaseTestSetup.cleanDatabase(conn);
+
+            DatabaseMetaData dmd = getDMD();
+            for (int i = 0; i < IDS.length; i++)
+                JDBC.dropSchema(dmd, getStoredIdentifier(IDS[i]));
+  
+            commit();
         }
         super.tearDown();
     }
@@ -610,8 +620,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertMetaDataResultSet(rs, null, null);
         JDBC.assertEmpty(rs);
         
-        rs = dmd.getVersionColumns(null,null,
-                usingDerbyNetClient() ? "%" : null);
+        rs = dmd.getVersionColumns(null,null, "No_such_table");
         checkVersionColumnsShape(rs);
         JDBC.assertEmpty(rs);
     }
@@ -620,17 +629,33 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Six cominations of valid identifiers with mixed
      * case, to see how the various pattern matching
      * and returned values handle them.
+     * This test only creates objects in these schemas.
      */
-    public final String[] IDS =
+    private static final String[] IDS =
     {
-            "one",
-            "TWO",
-            "ThReE",
-            "\"four\"",
-            "\"FIVE\"",
-            "\"sIx\"" 
+            "one_dmd_test",
+            "TWO_dmd_test",
+            "ThReE_dmd_test",
+            "\"four_dmd_test\"",
+            "\"FIVE_dmd_test\"",
+            "\"sIx_dmd_test\"" 
     };
     
+    /**
+     * All the builtin schemas.
+     */
+    private static final String[] BUILTIN_SCHEMAS = {
+            "APP", "NULLID", "SQLJ", "SYS", "SYSCAT", "SYSCS_DIAG",
+            "SYSCS_UTIL", "SYSFUN", "SYSIBM", "SYSPROC", "SYSSTAT"};
+    
+    public static String getStoredIdentifier(String sqlIdentifier)
+    {
+        if (sqlIdentifier.charAt(0) == '"')
+            return sqlIdentifier.substring(1, sqlIdentifier.length() - 1);
+        else
+            return sqlIdentifier.toUpperCase(Locale.ENGLISH);       
+    }
+
     /**
      * Test getSchemas() without modifying the database.
      * 
@@ -641,10 +666,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
          
         ResultSet rs = dmd.getSchemas();
-        checkSchemasShape(rs);
-        int schemaCount = JDBC.assertDrainResults(rs);
-        // There are 11 builtin schemas including APP
-        assertTrue("too few schemas", schemaCount >= 11);
+        checkSchemas(rs, new String[0]);
     }
     
     /**
@@ -662,33 +684,61 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         for (int i = 0; i < IDS.length; i++)
            s.executeUpdate("CREATE SCHEMA " + IDS[i]);
         s.close();
-         
+                 
         ResultSet rs = dmd.getSchemas();
-        checkSchemas(rs, new String[]
-         { "APP", "FIVE", "NULLID", "ONE",
-           "SQLJ", "SYS", "SYSCAT", "SYSCS_DIAG",
-           "SYSCS_UTIL", "SYSFUN", "SYSIBM", "SYSPROC", "SYSSTAT",
-           "THREE", "TWO", "four", "sIx"});
+        checkSchemas(rs, IDS);
     }
     /**
      * Check the returned information from a getSchemas().
      * The passed in String[] expected is a list of the
-     * schemas expected to be returned in order.
+     * schemas expected to be present in the returned
+     * set. The returned set may contain additional
+     * schemas which will be ignored, thus this test
+     * can be used regardless of the database state.
+     * The builtin schemas are automatically checked
+     * and must not be part of the passed in list.
      */
     public static void checkSchemas(ResultSet rs,
-            String[] expected) throws SQLException
+            String[] userExpected) throws SQLException
     {
-        // Since catalog is always NULL expand into the
-        // two value set expected by assertFullResultSet.
-        String[][] expected2cols = new String[expected.length][];
-        for (int i = 0; i < expected.length; i++)
-        {
-            expected2cols[i] = new String[] {expected[i], null};
-        }
-        
         checkSchemasShape(rs);
-        JDBC.assertFullResultSet(rs, expected2cols, true);
+        
+        // Add in the system schemas
+        String[] expected =
+            new String[BUILTIN_SCHEMAS.length + userExpected.length];
+        
+        System.arraycopy(BUILTIN_SCHEMAS, 0,
+                expected, 0, BUILTIN_SCHEMAS.length);
+        System.arraycopy(userExpected, 0,
+                expected, BUILTIN_SCHEMAS.length, userExpected.length);
+                
+        // Remove any quotes from user schemas and upper case
+        // those without quotes.
+        for (int i = BUILTIN_SCHEMAS.length; i < expected.length; i++)
+        {          
+            expected[i] = getStoredIdentifier(expected[i]);
+        }
+              
+        //output is ordered by TABLE_SCHEM
+        Arrays.sort(expected);
+                   
+        int nextMatch = 0;
+ 
+        while (rs.next()) {
+            String schema = rs.getString("TABLE_SCHEM");
+            assertNotNull(schema);
+            
+            // Catalogs not supported
+            assertNull(rs.getString("TABLE_CATALOG"));
+                        
+            if (nextMatch < expected.length)
+            {
+                if (expected[nextMatch].equals(schema))
+                    nextMatch++;
+            }
+        }
         rs.close();
+        assertEquals("Schemas missing ", expected.length, nextMatch);
     }
 
     /**
