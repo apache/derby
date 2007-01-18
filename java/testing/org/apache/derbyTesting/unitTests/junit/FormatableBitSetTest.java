@@ -267,17 +267,16 @@ public class FormatableBitSetTest extends TestCase {
 
     // Test cases for isSet(int)
     public void testIsSetEmpty() {
-        empty.isSet(-1);
-        if (SanityManager.DEBUG) {
-            try { empty.isSet(0); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            assertFalse(empty.isSet(0));
-        }
+        try { empty.isSet(-8); fail(); } catch (IllegalArgumentException iae) {}
+        try { empty.isSet(-1); fail(); } catch (IllegalArgumentException iae) {}
+        try { empty.isSet(0); fail(); } catch (IllegalArgumentException iae) {}
     }
     public void testIsSet() {
-        // Should trigger an exception?
-        assertFalse(bitset18C.isSet(-1));
+        try { bitset18C.isSet(-8); fail(); }
+        catch (IllegalArgumentException iae) {}
+
+        try { bitset18C.isSet(-1); fail(); }
+        catch (IllegalArgumentException iae) {}
 
         assertFalse(bitset18C.isSet(0));
         assertFalse(bitset18C.isSet(1));
@@ -297,74 +296,42 @@ public class FormatableBitSetTest extends TestCase {
         assertTrue(bitset18C.isSet(15));
         assertTrue(bitset18C.isSet(16));
         assertTrue(bitset18C.isSet(17));
-
-        if (SanityManager.DEBUG) {
-            try { bitset18C.isSet(18); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            // Should fail?
-            assertFalse(bitset18C.isSet(18));
-        }
+        try { bitset18C.isSet(18); fail(); }
+        catch (IllegalArgumentException iae) {}
     }
 
     // Test cases for set(int)
     public void testSetEmpty() {
-        try { empty.set(-1); fail(); } 
-        catch (ArrayIndexOutOfBoundsException e) {}
-        if (SanityManager.DEBUG) {
-            try { empty.set(0); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            try { empty.set(0); fail(); }
-            catch (ArrayIndexOutOfBoundsException e) {}
-        }
+        try { empty.set(-8); fail(); } catch (IllegalArgumentException iae) {}
+        try { empty.set(-1); fail(); } catch (IllegalArgumentException iae) {}
+        try { empty.set(0); fail(); } catch (IllegalArgumentException iae) {}
     }
     public void testSet() {
-        // Should trigger an exception?
-        bitset18.set(-1);
+        try { bitset18.set(-8); fail(); }
+        catch (IllegalArgumentException iae) {}
+        try { bitset18.set(-1); fail(); }
+        catch (IllegalArgumentException iae) {}
         bitset18.set(0);
         bitset18.set(1);
-        if (SanityManager.DEBUG) {
-            try { bitset18.set(18); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            bitset18.set(18);
-            assertEquals(18,bitset18.getLength());
-            assertEquals(3,bitset18.getLengthInBytes());
-            assertEquals(3,bitset18.getByteArray().length);
-            assertEquals(9,bitset18.getNumBitsSet());
-        }
+        try { bitset18.set(18); fail(); }
+        catch (IllegalArgumentException iae) {}
     }
 
     // Test cases for clear(int)
     public void testClearEmpty() {
-        try { empty.clear(-1); fail(); } 
-        catch (ArrayIndexOutOfBoundsException e) {}
-        if (SanityManager.DEBUG) {
-            try { empty.clear(0); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            try { empty.clear(0); fail(); } 
-            catch (ArrayIndexOutOfBoundsException e) {}
-        }
+        try { empty.clear(-8); fail(); } catch (IllegalArgumentException iae) {}
+        try { empty.clear(-1); fail(); } catch (IllegalArgumentException iae) {}
+        try { empty.clear(0); fail(); } catch (IllegalArgumentException iae) {}
     }
     public void testClear() {
-        // Should trigger an exception?
-        bitset18.clear(-1);
+        try { bitset18.clear(-8); fail(); }
+        catch (IllegalArgumentException iae) {}
+        try { bitset18.clear(-1); fail(); }
+        catch (IllegalArgumentException iae) {}
         bitset18.clear(0);
         bitset18.clear(1);
-
-        if (SanityManager.DEBUG) {
-            try { bitset18.clear(18); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            bitset18.clear(18);
-            assertEquals(18,bitset18.getLength());
-            assertEquals(3,bitset18.getLengthInBytes());
-            assertEquals(3,bitset18.getByteArray().length);
-            // Should have been 9?
-            assertEquals(7,bitset18.getNumBitsSet());
-        }
+        try { bitset18.clear(18); fail(); }
+        catch (IllegalArgumentException iae) {}
     }
 
     // Test cases for anySetBit()
@@ -507,13 +474,8 @@ public class FormatableBitSetTest extends TestCase {
             try { bitset18.xor(bitset18C); fail(); } catch (AssertFailure af) {}
         }
         else {
-            bitset18.xor(bitset18C);
-            // Should have been 18?
-            assertEquals(17,bitset18.getLength());
-            assertEquals(3,bitset18.getLengthInBytes());
-            assertEquals(3,bitset18.getByteArray().length);
-            // Should have been 9?
-            assertEquals(13,bitset18.getNumBitsSet());
+            try { bitset18.xor(bitset18C); fail(); }
+            catch (IllegalArgumentException iae) {}
         }
         //assertEquals(14,bitset18.getNumBitsSet());
     }

@@ -74,6 +74,14 @@ public final class FormatableBitSet implements Formatable, Cloneable
 
 	private transient int	lengthAsBits;
 
+	private void checkPosition(int p) {
+		if (p < 0 || lengthAsBits <= p) {
+			throw new
+				IllegalArgumentException("Bit position "+p+
+										 " is outside the legal range");
+		}
+	}
+
 	/**
 	 * Niladic Constructor
 	 */
@@ -446,29 +454,12 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public final boolean isSet(int position)
 	{
-		if (SanityManager.DEBUG)
-		{
-			if (position >= this.getLength())
-            {
-                SanityManager.THROWASSERT(
-                   "Attempt to get a bit position (" + position +
-                   ")" +
-                   "that exceeds the max length (" + this.getLength() + ")");
-            }
-		}
+		checkPosition(position);
 
-		try {
+		int bytepos = position / 8;
+		int bitpos = 7 - (position % 8);
 
-			int bytepos = position / 8;
-			int bitpos = 7 - (position % 8);
-
-			return ((value[bytepos] & (1 << bitpos)) != 0);
-
-		} catch (ArrayIndexOutOfBoundsException e) {
-			// Should not happen, handle it just in case not all cases are tested
-			// by insane server.
-			return false;
-		}
+		return ((value[bytepos] & (1 << bitpos)) != 0);
 	}
 
 	/**
@@ -490,21 +481,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public void set(int position)
 	{
-
-		if (SanityManager.DEBUG)
-		{
-            if (position >= this.getLength())
-            {
-                SanityManager.THROWASSERT(
-				   "Attempt to set a bit position that exceeds the max length ("
-                   + this.getLength() + ")");
-            }
-		}
-
-		// Should not happen, handle it just in case not all cases are tested
-		// by insane server.
-		if (position >= getLength())
-			grow(position);
+		checkPosition(position);
 
 		int bytepos = position / 8;
 		int bitpos = 7 - (position % 8);
@@ -520,26 +497,10 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public void clear(int position)
 	{
-		int	bytepos;
-		int	bitpos;
+		checkPosition(position);
 
-		if (SanityManager.DEBUG)
-		{
-            if (position >= this.getLength())
-            {
-                SanityManager.THROWASSERT(
-                   "Attempt to set a bit position that exceeds the max length ("
-                   + this.getLength() + ")");
-            }
-		}
-
-		// Should not happen, handle it just in case not all cases are tested
-		// by insane server.
-		if (position >= getLength())
-			grow(position);
-
-		bytepos = position / 8;
-		bitpos = 7 - (position % 8);
+		int bytepos = position / 8;
+		int bitpos = 7 - (position % 8);
 
 		value[bytepos] &= ~(1 << bitpos);
 	}
