@@ -858,6 +858,221 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
           }, true);
         rs.close();
     }
+    
+    /**
+     * Test getTypeInfo
+     * @throws SQLException 
+     */
+    public void testGetTypeInfo() throws SQLException
+    {
+        // Client returns BOOLEAN type from the engine as SMALLINT
+        int BOOLEAN = Types.BOOLEAN;      
+        if (usingDerbyNetClient())
+            BOOLEAN = Types.SMALLINT;
+        
+        ResultSet rs = getDMD().getTypeInfo();
+        assertMetaDataResultSet(rs,
+          new String[] {
+            "TYPE_NAME", "DATA_TYPE", "PRECISION", "LITERAL_PREFIX",
+            "LITERAL_SUFFIX", "CREATE_PARAMS", "NULLABLE", "CASE_SENSITIVE",
+            
+            "SEARCHABLE", "UNSIGNED_ATTRIBUTE", "FIXED_PREC_SCALE",
+            "AUTO_INCREMENT", "LOCAL_TYPE_NAME",
+            
+            "MINIMUM_SCALE", "MAXIMUM_SCALE",
+            "SQL_DATA_TYPE", "SQL_DATETIME_SUB",
+            
+            "NUM_PREC_RADIX"          
+          },
+          new int[] {
+            Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.VARCHAR,
+            Types.VARCHAR, Types.VARCHAR, Types.SMALLINT, BOOLEAN,
+            
+            Types.SMALLINT, BOOLEAN, BOOLEAN,
+            BOOLEAN, Types.VARCHAR,
+            
+            Types.SMALLINT, Types.SMALLINT,
+            Types.INTEGER, Types.INTEGER,
+            
+            Types.INTEGER
+          }
+        );
+        
+        int[] supportedTypes = new int[] {
+          Types.BIGINT, Types.BINARY, Types.BLOB,
+          Types.CHAR, Types.CHAR, Types.CLOB, Types.DATE,
+          Types.DECIMAL, Types.DOUBLE, Types.FLOAT,
+          Types.INTEGER, Types.LONGVARBINARY, Types.LONGVARCHAR, Types.LONGVARCHAR,
+          Types.NUMERIC, Types.REAL, Types.SMALLINT,
+          Types.TIME, Types.TIMESTAMP,  Types.VARBINARY,
+          Types.VARCHAR, Types.VARCHAR 
+        };
+        
+        // Rows are returned from getTypeInfo in order of
+        // "DATA_TYPE" (which is a constant from java.sql.Types)
+        Arrays.sort(supportedTypes);
+        
+        int offset = 0;
+        while (rs.next()) {
+            // TYPE_NAME (column 1)
+            String typeName = rs.getString("TYPE_NAME");
+            assertNotNull(typeName);
+            
+            // DATA_TYPE (column 2)
+            int type = rs.getInt("DATA_TYPE");
+            assertFalse(rs.wasNull());
+            if (supportedTypes[offset] != type)
+            {
+                fail("Unexpected type " + typeName);
+            }
+            else
+            {
+                offset++;
+            }
+            
+            // National types not supported, ignore them
+            // DERBY-2258
+            if (typeName.indexOf("NATIONAL") != -1)
+                continue;
+            if (typeName.indexOf("NVARCHAR") != -1)
+                continue;
+            
+            // PRECISION (column 3)
+            int precision = -1;
+            switch (type)
+            {
+            case Types.BINARY:
+            case Types.CHAR:
+                precision = 254;
+                break;
+            case Types.BLOB:
+            case Types.CLOB:
+                precision = Integer.MAX_VALUE;
+                break;
+            
+            case Types.DATE:
+                precision = 10;
+                break;
+            case Types.TIME:
+                precision = 8;
+                break;
+            case Types.TIMESTAMP:
+                precision = 26;
+                break;
+                                
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                precision = 31;
+                break;
+            case Types.DOUBLE:
+            case Types.FLOAT:
+                precision = 52;
+                break;
+            case Types.REAL:
+                precision = 23;
+                break;
+                
+            case Types.BIGINT:
+                precision = 19;
+                break;              
+            case Types.INTEGER:
+                precision = 10;
+                break;
+            case Types.SMALLINT:
+                precision = 5;
+                break;
+                
+            case Types.LONGVARBINARY:
+            case Types.LONGVARCHAR:
+                precision = 32700;
+                break;
+                        
+            case Types.VARBINARY:
+                precision = 32762; // BUG DERBY-2260
+                break;
+
+            case Types.VARCHAR:
+                precision = 32672;
+                break;
+            }
+            assertEquals("PRECISION " + typeName,
+                    precision, rs.getInt("PRECISION"));
+            assertFalse(rs.wasNull());
+            
+            // LITERAL_PREFIX (column 4)
+            // LITERAL_SUFFIX (column 5)
+            // CREATE_PARAMS (column 6)
+            
+            // NULLABLE (column 7) - all types are nullable in Derby
+            assertEquals("NULLABLE " + typeName,
+                    DatabaseMetaData.typeNullable, rs.getInt("NULLABLE"));
+            assertFalse(rs.wasNull());
+            
+            // CASE_SENSITIVE (column 8)
+            
+            // SEARCHABLE (column 9) - most types searchable
+            {
+            int searchable;
+            switch (type)
+            {
+            case Types.LONGVARBINARY:
+                searchable = DatabaseMetaData.typePredBasic; // BUG DERBY-2259
+                break;
+            case Types.LONGVARCHAR:
+                searchable = DatabaseMetaData.typeSearchable; // BUG DERBY-2259
+                break;
+                
+            case Types.BLOB:
+            case Types.CLOB:
+                searchable = // DatabaseMetaData.typePredNone;
+                    DatabaseMetaData.typePredChar; // BUG DERBY-2259
+                break;
+            case Types.CHAR:
+            case Types.VARCHAR:
+                searchable = DatabaseMetaData.typeSearchable;
+                break;
+            default:
+                searchable = DatabaseMetaData.typePredBasic;
+                break;  
+            }
+
+            assertEquals("SEARCHABLE " + typeName,
+                    searchable, rs.getInt("SEARCHABLE"));
+            }
+            
+            // UNSIGNED_ATTRIBUTE (column 10)
+            //assertFalse("UNSIGNED_ATTRIBUTE " + typeName,
+            //        rs.getBoolean("UNSIGNED_ATTRIBUTE"));
+            
+            
+            // FIXED_PREC_SCALE (column 11)
+            // AUTO_INCREMENT (column 12)
+            
+            // LOCAL_TYPE_NAME (column 13) always the same as TYPE_NAME
+            assertEquals("LOCAL_TYPE_NAME " + typeName,
+                    typeName, rs.getString("LOCAL_TYPE_NAME"));
+            
+            
+            // MINIMUM_SCALE (column 14)
+            // MAXIMUM_SCALE (column 15)
+            
+            // SQL_DATA_TYPE (column 16) - Unused
+            assertEquals("SQL_DATA_TYPE " + typeName,
+                    0, rs.getInt("SQL_DATA_TYPE"));
+            assertTrue(rs.wasNull());
+            
+            // SQL_DATETIME_SUB (column 17) - Unused
+            assertEquals("SQL_DATETIME_SUB " + typeName,
+                    0, rs.getInt("SQL_DATETIME_SUB"));
+            assertTrue(rs.wasNull());
+
+            // NUM_PREC_RADIX (column 18)
+            
+        }
+        
+        rs.close();
+    }
+    
     /**
      * Check the shape of the ResultSet from any getTables call.
      */
@@ -877,18 +1092,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         );        
     }
     
-   /* 
-    # TABLE_CAT String => table catalog (may be null)
-    # TABLE_SCHEM String => table schema (may be null)
-    # TABLE_NAME String => table name
-    # TABLE_TYPE String => table type. Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
-    # REMARKS String => explanatory comment on the table
-    # TYPE_CAT String => the types catalog (may be null)
-    # TYPE_SCHEM String => the types schema (may be null)
-    # TYPE_NAME String => type name (may be null)
-    # SELF_REFERENCING_COL_NAME String => name of the designated "identifier" column of a typed table (may be null)
-    # REF_GENERATION
-*/
     /**
      * Check the shape of the ResultSet from any getCatlogs call.
      */
