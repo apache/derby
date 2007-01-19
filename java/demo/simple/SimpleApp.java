@@ -56,6 +56,9 @@ public class SimpleApp
     public String framework = "embedded";
     public String driver = "org.apache.derby.jdbc.EmbeddedDriver";
     public String protocol = "jdbc:derby:";
+    
+    public String username = "user1";
+    public String password = "user1";
 
     public static void main(String[] args)
     {
@@ -67,6 +70,14 @@ public class SimpleApp
         /* parse the arguments to determine which framework is desired*/
         parseArguments(args);
 
+        /* check for J2ME specification - J2ME must use a DataSource further on */
+        String javaspec = System.getProperty( "java.specification.name" );
+        boolean java2me = false;
+        if( javaspec.indexOf( "J2ME" ) > -1 )
+        {
+            java2me = true;
+        }
+        
         System.out.println("SimpleApp starting in " + framework + " mode.");
 
         try
@@ -75,26 +86,56 @@ public class SimpleApp
                The driver is installed by loading its class.
                In an embedded environment, this will start up Derby, since it is not already running.
              */
-            Class.forName(driver).newInstance();
-            System.out.println("Loaded the appropriate driver.");
-
+            org.apache.derby.jdbc.EmbeddedSimpleDataSource ds = null;
             Connection conn = null;
             Properties props = new Properties();
-            props.put("user", "user1");
-            props.put("password", "user1");
+            props.put("user", username);
+            props.put("password", password);
 
-            /*
-               The connection specifies create=true to cause
-               the database to be created. To remove the database,
-               remove the directory derbyDB and its contents.
-               The directory derbyDB will be created under
-               the directory that the system property
-               derby.system.home points to, or the current
-               directory if derby.system.home is not set.
+            /* If we are using a J2ME jvm, we need to use a DataSource, otherwise
+             * we can use java.sql.DriverManager to get the connection, or
+             * a Datasource. This example program uses a DataSource with J2ME
+             * but uses DriverManager otherwise.
+             * If we were to use a DataSource for J2SE, we could use
+             * the org.apache.derby.jdbc.EmbeddedDataSource, rather than the
+             * org.apache.derby.jdbc.EmbeddedSimpleDataSource we need to use for J2ME.
              */
-            conn = DriverManager.getConnection(protocol +
+         
+            if( java2me )
+            {
+                /*
+                   The connection specifies create in the DataSource settings for
+                   the database to be created. To remove the database,
+                   remove the directory derbyDB and its contents.
+                   The directory derbyDB will be created under
+                   the directory that the system property
+                   derby.system.home points to, or the current
+                   directory if derby.system.home is not set.
+                 */
+       
+                ds = new org.apache.derby.jdbc.EmbeddedSimpleDataSource();
+                ds.setDatabaseName("derbyDB");
+                ds.setCreateDatabase("create");
+                conn = ds.getConnection(username, password);
+            }
+            else
+            {
+                /*
+                   The connection specifies create=true in the url to cause
+                   the database to be created. To remove the database,
+                   remove the directory derbyDB and its contents.
+                   The directory derbyDB will be created under
+                   the directory that the system property
+                   derby.system.home points to, or the current
+                   directory if derby.system.home is not set.
+                 */
+          
+                Class.forName(driver).newInstance();
+                System.out.println("Loaded the appropriate driver.");
+            
+                conn = DriverManager.getConnection(protocol +
                     "derbyDB;create=true", props);
-
+            }
             System.out.println("Connected to and created database derbyDB");
 
             conn.setAutoCommit(false);
@@ -184,13 +225,32 @@ public class SimpleApp
 
             if (framework.equals("embedded"))
             {
-                try
+                /* again, with J2ME, we need to use a datasource to get the connection */
+                if( java2me )
                 {
-                    DriverManager.getConnection("jdbc:derby:;shutdown=true");
+                    try
+                    {
+                        ds.setShutdownDatabase( "shutdown" );
+                        conn = ds.getConnection(username, password);
+                    }
+                    catch (SQLException se)
+                    {
+                        if( se.getErrorCode() == 45000 )
+                        {
+                            gotSQLExc = true;
+                        }
+                    }
                 }
-                catch (SQLException se)
-                {
-                    gotSQLExc = true;
+                else                  
+                {   
+                    try
+                    {
+                        DriverManager.getConnection("jdbc:derby:;shutdown=true");
+                    }
+                    catch (SQLException se)
+                    {
+                        gotSQLExc = true;
+                    }
                 }
 
                 if (!gotSQLExc)

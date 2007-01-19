@@ -18,7 +18,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<meta name="LASTUPDATED" content="06/15/05 12:10:42">
+<meta name="LASTUPDATED" content="07/18/01 06:12:42">
 <link rel="StyleSheet" href="../../csfull.css" type="text/css" media="screen">
 <title>Simple JDBC Application</title>
 
@@ -69,6 +69,7 @@ else
   <a name="820012"> </a>This example program is a very minimal JDBC application. JDBC is the primary API for interacting with Apache Derby. This program:
 </p><ul class="Normal">  
   <li class="Normal">runs in either embedded mode (the default) or as a client in a server environment, depending on the arguments passed to the program.
+  <li class="Normal">runs in J2ME or J2SE Java Virtual Machines.
   <li class="Normal"><a name="817266"> </a>starts up the Derby engine, if running in embedded mode
   <li class="Normal"><a name="817266"> </a>connects to the Derby Network Server, if running in client mode
   <li class="Normal"><a name="817275"> </a>creates and connects to a database
@@ -81,7 +82,7 @@ else
   <li class="Normal"><a name="817282"> </a>shuts down Derby, if running in embedded mode
 </ul>
 <p class="Body">
-  <a name="817267"> </a>In embedded mode, the application starts up an instance of Derby within the current Java Virtual Machine and shuts down the instance before it completes. No network access is involved. Only one application can access a database at a time. 
+  <a name="817267"> </a>In embedded mode, the application starts up an instance of Derby within the current Java Virtual Machine and shuts down the instance before it completes. For a J2ME Java Virtual Machine an appropriate DataSource is used, otherwise, the java.sql.Driver mechanism is used. No network access is involved. Only one application can access a database at a time. 
 </p>
 <p>In a server environment, the application demonstrates the use of the Derby network client or the IBM DB2 JDBC Universal Driver by connecting to the Network Server and running the demo. Note that the client drivers allow multiple instances of the application to run at the same time.  However, the SQL operations performed by this demo will cause failures when multiple simultaneous instances of the application are run. Use of a client driver to connect to the Network Server in this application is intended only to demonstrate this type of connection. The SimpleApp demo is not suited for simultaneous executions because it creates and drops the table on which it operates.
 </p>
