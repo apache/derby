@@ -26,6 +26,8 @@ import junit.framework.TestSuite;
 
 /**
  * Run all of the XML JUnit tests as a single suite.
+ * This suite is included in lang._Suite but is at
+ * this level to allow easy running of just the XML tests.
  */
 public final class XMLSuite extends BaseTestCase {
 
