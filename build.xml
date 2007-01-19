@@ -1353,7 +1353,7 @@
          update="true"
     	 manifest="${derby.jar.dir}/lists/smfcmd.mf">
       <fileset dir="${out.dir}"
-               includes="org/apache/derby/iapi/tools/**"/>
+               includes="org/apache/derby/iapi/tools/run.class"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/LICENSE,META-INF/NOTICE"/>
     </jar>
