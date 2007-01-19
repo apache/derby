@@ -556,3 +556,18 @@ select * from t1;
 drop table t1;
 drop table t2;
 
+-- DERBY-2218
+create table t1 (i int);
+-- ok
+select * from t1 where i in (1, 2, (values cast(null as integer)));
+-- expect error, this used to throw NPE
+select * from t1 where i in (1, 2, (values null));
+select * from t1 where i in (select i from t1 where i in (1, 2, (values null)));
+-- expect error
+select * from t1 where exists (values null);
+select * from t1 where exists (select * from t1 where exists(values null));
+select i from t1 where exists (select i from t1 where exists(values null));
+select * from (values null) as t2;
+select * from t1 where exists (select 1 from (values null) as t2);
+select * from t1 where exists (select * from (values null) as t2);
+drop table t1;
