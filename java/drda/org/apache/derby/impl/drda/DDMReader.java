@@ -1896,12 +1896,16 @@ class DDMReader
 			try {
 				actualBytesRead = inputStream.read (
 				  buffer, count, buffer.length - count);
-			}
-			catch (java.io.IOException ioe) {
-				agent.markCommunicationsFailure ("DDMReader.fill()",
-				  "InputStream.read()", ioe.getMessage(), "*");
-			}
-			finally {
+			} catch (java.net.SocketTimeoutException ste) {
+
+                // Transport the timeout out through the layers. This
+                // exception is caught in DRDAConnThread.run();
+                throw new DRDASocketTimeoutException(agent);
+
+			} catch (java.io.IOException ioe) {
+                agent.markCommunicationsFailure("DDMReader.fill()",
+                                                "InputStream.read()", ioe.getMessage(), "*");
+			} finally {
 				if ((dssTrace != null) && dssTrace.isComBufferTraceOn())
 				  dssTrace.writeComBufferData (buffer,
 				                               count,
@@ -1917,8 +1921,8 @@ class DDMReader
 				totalBytesRead += actualBytesRead;
 			}
 
-		}
-		while ((totalBytesRead < minimumBytesNeeded) && (actualBytesRead != -1));
+		} while ((totalBytesRead < minimumBytesNeeded) && (actualBytesRead != -1));
+
 		if (actualBytesRead == -1) 
 		{
 			if (totalBytesRead < minimumBytesNeeded) 

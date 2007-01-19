@@ -272,7 +272,14 @@ class DRDAConnThread extends Thread {
 						long currentTimeSlice;
 
 						do {
-							processCommands();
+                            try {
+                                processCommands();
+                            } catch (DRDASocketTimeoutException ste) {
+                                // Just ignore the exception. This was
+                                // a timeout on the read call in
+                                // DDMReader.fill(), which will happen
+                                // only when timeSlice is set.
+                            }
 							currentTimeSlice = getTimeSlice();
 						} while ((currentTimeSlice == 0)  || 
 							(System.currentTimeMillis() - timeStart < currentTimeSlice));

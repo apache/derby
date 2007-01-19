@@ -101,6 +101,7 @@ class DRDAProtocolException extends Exception
 
 	protected static String DRDA_Disconnect=	   "DRDA_Disconnect";
 	protected static String DRDA_AgentError=	   "DRDA_AgentError";
+    protected static String DRDA_Timeout=          "DRDA_Timeout";
 
 	static {
 	/* Create the errorInfoTable
@@ -198,6 +199,14 @@ class DRDAProtocolException extends Exception
 			   new DRDAProtocolExceptionInfo(
 							 CodePoint.AGNPRMRM,
 							 CodePoint.SVRCOD_PRMDMG,
+							 NO_ASSOC_ERRCD,
+							 false));
+
+
+	errorInfoTable.put(DRDA_Timeout,
+			   new DRDAProtocolExceptionInfo(
+							 0,
+							 0,
 							 NO_ASSOC_ERRCD,
 							 false));
 
@@ -387,7 +396,13 @@ class DRDAProtocolException extends Exception
 }
 
 
-
-
-
-
+/**
+ * Class used to transport that fact that we had a timeout and should
+ * *NOT* disconnect the connection.
+ * See DRDAConnThread.run()
+ */
+class DRDASocketTimeoutException extends DRDAProtocolException {
+    DRDASocketTimeoutException(DRDAConnThread t) {
+        super(DRDA_Timeout,t,0,0);
+    }
+}

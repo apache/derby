@@ -62,8 +62,9 @@ final class ClientThread extends Thread {
 						}
 					 );
 							clientSocket.setKeepAlive(parent.getKeepAlive());
-					//set time out					
-					//this looks highly suspect.  Why does timeSlice setSoTimeout?		
+
+					// Set time out: Stops DDMReader.fill() from
+					// waiting indefinitely when timeSlice is set.
 					if (timeSlice != 0)
 						clientSocket.setSoTimeout(timeSlice);
 				} catch (PrivilegedActionException e) {
