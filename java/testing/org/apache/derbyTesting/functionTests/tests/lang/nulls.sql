@@ -39,7 +39,7 @@ alter table a add constraint ap1 primary key(a1,a2);
 drop table a;
 
 -- create table with not null column and unique key should work
-create table a (a int not null unique );
+create table a (a int not null constraint auniq unique );
 insert into a values (1);
 -- second insert should fail
 insert into a values (1);

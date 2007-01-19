@@ -5,15 +5,12 @@ lang/AIjdbc.java
 lang/AggregateClassLoading.java
 lang/CharUTF8.java
 lang/DB2IsolationLevels.sql
-lang/LOB.sql
 lang/LOBDB2compatibility.sql
-lang/aggregate.sql
 lang/aggregateOptimization.sql
 lang/altertable.sql
 lang/altertableDropColumn.sql
 lang/authorize.sql
 lang/autoincrement.sql
-lang/bit.sql
 lang/bug4356.java
 lang/bug5052rts.java
 lang/bug5054.java
@@ -81,7 +78,6 @@ lang/miscerrors.sql
 lang/modifyColumn.sql
 lang/nestedCommit.sql
 lang/nonreserved.sql
-lang/nulls.sql
 lang/openScans.sql
 lang/optimizerOverrides.sql
 lang/orderby.sql

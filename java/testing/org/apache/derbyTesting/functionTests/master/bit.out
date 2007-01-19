@@ -17,6 +17,7 @@ ij> --
 --
 -- Test the builtin type 'bit'
 -- Specifically the base-16, hex bit literal
+
 -- stupid test of literals
 values(X'aAff');
 1   
@@ -206,6 +207,7 @@ ij> drop table nulltab;
 ij> --
 -- select comparisons
 --
+
 create table t (b10 char(20) for bit data, vb10 varchar(20) for bit data, b16 char(2) for bit data, vb16 varchar(2) for bit data, lbv LONG VARCHAR FOR BIT DATA, c20 char(20), cv20 varchar(20));
 0 rows inserted/updated/deleted
 ij> insert into t values (null, null, null, null, null, 'null', 'null columns');
@@ -316,10 +318,12 @@ VB10
 ij> select vb10 from t where vb10 < X'0000000010';
 VB10                                    
 ----------------------------------------
+                                        
 0000000001                              
 ij> select vb10 from t where vb10 <= X'0000000011';
 VB10                                    
 ----------------------------------------
+                                        
 0000000001                              
 0000000011                              
 ij> select vb10 from t where vb10 >= X'0000000011';
@@ -331,6 +335,7 @@ VB10
 ij> select vb10 from t where vb10 <> X'0000000011';
 VB10                                    
 ----------------------------------------
+                                        
 0000000001                              
 1111111111                              
 11                                      
@@ -374,9 +379,11 @@ aa
 ij> select vb16 from t where vb16 < X'0000000010';
 VB16
 ----
+    
 ij> select vb16 from t where vb16 <= X'0000000011';
 VB16
 ----
+    
 ij> select vb16 from t where vb16 >= X'0000000011';
 VB16
 ----
@@ -387,6 +394,7 @@ aa
 ij> select vb16 from t where vb16 <> X'0000000011';
 VB16
 ----
+    
 01  
 03  
 ff  
@@ -443,6 +451,7 @@ ij> select lbv || vb10 from t;
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
 NULL                                                                                                                            
+                                                                                                                                
 00000000010000000001                                                                                                            
 030000000011                                                                                                                    
 11111111111111111111                                                                                                            
@@ -451,6 +460,7 @@ ij> select vb10 || lbv from t;
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
 NULL                                                                                                                            
+                                                                                                                                
 00000000010000000001                                                                                                            
 000000001103                                                                                                                    
 11111111111111111111                                                                                                            
@@ -696,6 +706,7 @@ insert into t1 values
 ERROR 22001: A truncation error was encountered trying to shrink CHAR () FOR BIT DATA '11111111111111111110' to length 9.
 ij> AUTOCOMMIT OFF;
 ij> -- bug 5160 - incorrect typing of VALUES table constructor on an insert;
+
 create table iv (id int, vc varchar(12));
 0 rows inserted/updated/deleted
 ij> insert into iv values (1, 'abc'), (2, 'defghijk'), (3, 'lmnopqrstcc');
@@ -764,7 +775,9 @@ ij> drop table dv;
 0 rows inserted/updated/deleted
 ij> -- bug 5306 -- incorrect padding of VALUES table constructor on an insert,
 -- when implicit casting (bit->char or char->bit) is used.
+
 -- 5306: Char -> For Bit Data Types
+
 create table bitTable (id int, bv LONG VARCHAR FOR BIT DATA);
 0 rows inserted/updated/deleted
 ij> insert into bitTable values (1, X'031'), (2, X'032'), (3, X'');
@@ -781,6 +794,7 @@ ERROR 42846: Cannot convert types 'LONG VARCHAR FOR BIT DATA' to 'VARCHAR'.
 ij> drop table bitTable;
 0 rows inserted/updated/deleted
 ij> -- 5306: Bit -> Char
+
 create table charTable (id int, cv long varchar);
 0 rows inserted/updated/deleted
 ij> insert into charTable values (1, x'0101'), (2, x'00101100101001'), (3, x'');
@@ -799,6 +813,7 @@ ID         |CV                                                                  
 ij> drop table charTable;
 0 rows inserted/updated/deleted
 ij> -- Verify that 5306 still works with Union.
+
 create table pt5 (b5 char(2) for bit data);
 0 rows inserted/updated/deleted
 ij> create table pt10 (b10 char (4) for bit data);
@@ -814,6 +829,7 @@ ij> drop table pt5;
 ij> drop table pt10;
 0 rows inserted/updated/deleted
 ij> -- beetle 5612
+
 create table t5612 (c1 char(10), c2 varchar(10), c3 long  varchar);
 0 rows inserted/updated/deleted
 ij> insert into t5612 values (X'00680069', X'00680069', X'00680069');
@@ -824,6 +840,7 @@ C1        |C2        |C3
 ij> values cast(X'00680069' as char(30)), cast(X'00680069' as varchar(30)), cast(X'00680069' as long varchar);
 ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'CHAR'.
 ij> -- DERBY-1085
+
 create table npetest1 (col1 varchar(36) for bit data not null, constraint pknpe1 primary key (col1));
 0 rows inserted/updated/deleted
 ij> create table npetest2 (col2 varchar(36) for bit data, constraint fknpe1 foreign key (col2) references npetest1(col1) on delete cascade);

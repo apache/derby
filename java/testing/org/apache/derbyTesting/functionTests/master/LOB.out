@@ -17,8 +17,11 @@ ij> --
 -- This test lang/LOB.sql still includes tests for 
 -- DB2 UDB incompatible datatype NCLOB.
 -- Still waiting for DB2 UDB compatible functionality for NCLOB to be implemented
+
 -- Also note that in DB2 UDB, to create BLOB and CLOB strings greater than 1 gigabyte,
 -- the NOT LOGGED option must be specified (SQLSTATE 42993).
+
+
 -- test that BLOB/CLOB are not reserved words
 create table blob(a int);
 0 rows inserted/updated/deleted
@@ -113,6 +116,7 @@ ERROR 0A000: Feature not implemented: NCLOB.
 ij> select 1 from b where cast('1' as nclob(1)) = cast('1' as nclob(1));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> -- NCLOB is comparable with CLOB
+
 select 1 from b where cast('1' as nclob(10)) = cast('1' as clob(10));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> select 1 from b where cast('1' as clob(10)) = cast('1' as nclob(10));
@@ -337,6 +341,7 @@ ij> -- test operands on autocast
 -- beetle 5282
 -- <,> <=, >= operands are not supported in db2 but supported in cloudscape
 -- compare w. integer/char types are also not ok
+
 -- CLOB testing
 CREATE TABLE testoperatorclob (colone clob(1K));
 0 rows inserted/updated/deleted
@@ -541,6 +546,7 @@ ERROR 0A000: Feature not implemented: NCLOB.
 ij> values {fn length(cast('foo' as nclob(10)))};
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> -- Longvarchar negative tests
+
 create table testPredicate1 (c1 long varchar);
 0 rows inserted/updated/deleted
 ij> create table testPredicate2 (c1 long varchar);
@@ -593,6 +599,7 @@ ij> drop table testpredicate1;
 ij> drop table testpredicate2;
 0 rows inserted/updated/deleted
 ij> -- CLOB/BLOB limits and sizes
+
 -- FAIL - bigger than 2G or 2Gb with no modifier
 create table DB2LIM.FB1(FB1C BLOB(3G));
 ERROR 42X44: Invalid length '3G' in column specification.
@@ -702,6 +709,7 @@ GC3       |GC3C      |CLOB(2147483647)
 GC4       |GC4C      |CLOB(2147483647)              
 ij> --- CHAR/VARCHAR and LOBs. (beetle 5741)
 --- test that we can insert CHAR/VARCHAR directly
+
 CREATE TABLE b (colone blob(1K));
 0 rows inserted/updated/deleted
 ij> VALUES '50';

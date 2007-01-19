@@ -38,13 +38,13 @@ alter table a add constraint ap1 primary key(a1,a2);
 ij> drop table a;
 0 rows inserted/updated/deleted
 ij> -- create table with not null column and unique key should work
-create table a (a int not null unique );
+create table a (a int not null constraint auniq unique );
 0 rows inserted/updated/deleted
 ij> insert into a values (1);
 1 row inserted/updated/deleted
 ij> -- second insert should fail
 insert into a values (1);
-ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'A'.
+ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'AUNIQ' defined on 'A'.
 ij> drop table a;
 0 rows inserted/updated/deleted
 ij> -- alter nullability on a unique column should fail
