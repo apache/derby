@@ -2088,15 +2088,18 @@ ij(MAMTA3)> create table t31TriggerTest(c11 int);
 ij(MAMTA3)> -- following will pass because all the required privileges are in place for mamta3
 create trigger tr31t31 after insert on t31TriggerTest for each statement
         insert into mamta1.t13TriggerTest values (values mamta1.selectFromSpecificSchema(1));
-ERROR: Failed with SQLSTATE XJ001
+0 rows inserted/updated/deleted
 ij(MAMTA3)> -- following insert will cause a row to be inserted into mamta1.t13TriggerTest if the session user
 --    has SELECT privilege on mamta1.t12RoutineTest. This shows that although triggers execute
 --    with definer privileges, routines always execute with session user's privilege, even when 
 --    called by an object which runs with definer's privilege 
 insert into t31TriggerTest values(1);
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 38000
+ERROR: Failed with SQLSTATE XJ001
 ij(MAMTA3)> select * from t31TriggerTest;
-ERROR: Failed with SQLSTATE 08003
+C11        
+-----------
+0 rows selected
 ij(MAMTA3)> set connection mamta1;
 ij(MAMTA1)> select * from t12RoutineTest;
 C121       
@@ -2115,9 +2118,8 @@ ij(MAMTA2)> -- will fail because mamta2 doesn't have INSERT privilege on mamta3.
 insert into mamta3.t31TriggerTest values(1);
 ERROR: Failed with SQLSTATE 28506
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> grant insert on t31TriggerTest to mamta2;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> set connection mamta2;
 ij(MAMTA2)> -- should still fail because trigger on mamta3.t31TriggerTest accesses a routine which
 --   accesses a table on which mamta2 doesn't have SELECT privilege on. mamta3 doesn't
@@ -2125,18 +2127,21 @@ ij(MAMTA2)> -- should still fail because trigger on mamta3.t31TriggerTest access
 --   with the definer privilege. But the routine itself never runs with definer privilege and
 --   hence the session user needs access to objects accessed by the routine.
 insert into mamta3.t31TriggerTest values(1);
-ERROR: Failed with SQLSTATE 28506
+ERROR: Failed with SQLSTATE 38000
+ERROR: Failed with SQLSTATE XJ001
 ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> grant select on t12RoutineTest to mamta2;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- mamta2 got the SELECT privilege on mamta1.t12RoutineTest and hence following insert should pass
 insert into mamta3.t31TriggerTest values(1);
-ERROR: Failed with SQLSTATE 28506
+ERROR: Failed with SQLSTATE 38000
+ERROR: Failed with SQLSTATE XJ001
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> select * from t31TriggerTest;
-ERROR: Failed with SQLSTATE 08003
+C11        
+-----------
+0 rows selected
 ij(MAMTA3)> set connection mamta1;
 ij(MAMTA1)> select * from t12RoutineTest;
 C121       
@@ -2156,11 +2161,12 @@ ij(MAMTA1)> -- Trying to revoke execute privilege below will fail because mamta3
 -- Derby supports only RESTRICT form of revoke execute. Which means that it can be revoked only if there are no
 -- objects relying on that permission
 revoke execute on function selectFromSpecificSchema from mamta3 restrict;
-0 rows inserted/updated/deleted
+ERROR: Failed with SQLSTATE X0Y25
 ij(MAMTA1)> -- now try the insert and make sure the insert trigger still fires
 set connection mamta2;
 ij(MAMTA2)> insert into mamta3.t31TriggerTest values(1);
-ERROR: Failed with SQLSTATE 28506
+ERROR: Failed with SQLSTATE 38000
+ERROR: Failed with SQLSTATE XJ001
 ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> -- If number of rows returned by following select is 1, then we know insert trigger did get fire.
 -- Insert's trigger's action is to insert into following table. 
@@ -2169,20 +2175,17 @@ C131
 -----------
 0 rows selected
 ij(MAMTA1)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> -- drop the trigger manually
 drop trigger tr31t31;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> set connection mamta1;
 ij(MAMTA1)> -- Now, we should be able to revoke execute permission on routine because there are no dependent objects on that permission
 revoke execute on function selectFromSpecificSchema from mamta3 restrict;
 0 rows inserted/updated/deleted
-WARNING 01006: Privilege not revoked from user MAMTA3.
 ij(MAMTA1)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> -- cleanup
 drop table t31TriggerTest;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> set connection mamta1;
 ij(MAMTA1)> -- cleanup
 drop table t12RoutineTest;
@@ -2217,29 +2220,31 @@ ij(MAMTA1)> CREATE FUNCTION selectFromSpecificSchema (P1 INT)
 ij(MAMTA1)> grant execute on function selectFromSpecificSchema to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> drop view v21ViewTest;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE X0X05
 ij(MAMTA3)> -- following will succeed because mamta3 has EXECUTE privileges on the function
 create view v21ViewTest(c211) as values mamta1.selectFromSpecificSchema(1);
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> select * from v21ViewTest;
-ERROR: Failed with SQLSTATE 08003
+C211       
+-----------
+ERROR: Failed with SQLSTATE 38000
+ERROR: Failed with SQLSTATE XJ001
 ij(MAMTA3)> grant select on v21ViewTest to mamta2;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 2850G
 ij(MAMTA3)> set connection mamta2;
 ij(MAMTA2)> -- Although mamta2 has SELECT privileges on mamta3.v21ViewTest, mamta2 doesn't have
 --    SELECT privileges on table mamta1.t12RoutineTest accessed by the routine
 --    (which is underneath the view) and hence select from view will fail
 select * from mamta3.v21ViewTest;
-ERROR: Failed with SQLSTATE 42X05
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA2)> set connection mamta1;
 ij(MAMTA1)> grant select  on t12RoutineTest to mamta2;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta2;
 ij(MAMTA2)> -- should fail
 select * from mamta3.v21ViewTest;
-ERROR: Failed with SQLSTATE 42X05
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA2)> -- In this test, the trigger is accessing a view. Any user that has insert privilege
 --  on trigger table will be able to make an insert even if that user doesn't have
 --  privileges on objects referenced by the trigger.
@@ -2262,13 +2267,12 @@ ij(MAMTA2)> create view v21ViewTest as select * from mamta1.t11TriggerTest;
 ij(MAMTA2)> grant select on v21ViewTest to mamta4;
 ERROR: Failed with SQLSTATE 2850G
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> drop table t31TriggerTest;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t31TriggerTest (c311 int);
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> grant insert on t31TriggerTest to mamta4;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> set connection mamta4;
 ij(MAMTA4)> drop table t41TriggerTest;
 ERROR: Failed with SQLSTATE 42Y07
@@ -2278,7 +2282,7 @@ ij(MAMTA4)> drop trigger tr41t41;
 ERROR: Failed with SQLSTATE 42X94
 ij(MAMTA4)> create trigger tr41t41 after insert on t41TriggerTest for each statement
         insert into mamta3.t31TriggerTest (select * from mamta2.v21ViewTest);
-ERROR: Failed with SQLSTATE 28506
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA4)> insert into t41TriggerTest values(1);
 1 row inserted/updated/deleted
 ij(MAMTA4)> insert into t41TriggerTest values(2);
@@ -2304,27 +2308,27 @@ C111
 2          
 2 rows selected
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> select * from t31TriggerTest;
-ERROR: Failed with SQLSTATE 08003
+C311       
+-----------
+0 rows selected
 ij(MAMTA3)> -- will fail because no permissions on mamta4.t41TriggerTest
 insert into mamta4.t41TriggerTest values(1);
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 28506
 ij(MAMTA3)> -- will fail because no permissions on mamta2.v21ViewTest
 select * from mamta2.v21ViewTest;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> -- will fail because no permissions on mamta1.t11TriggerTest
 select * from mamta1.t11TriggerTest;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> set connection mamta4;
 ij(MAMTA4)> grant insert on t41TriggerTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA4)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> -- although mamta3 doesn't have access to the objects referenced by the insert trigger
 --   following insert will still pass because triggers run with definer's privileges.
 insert into mamta4.t41TriggerTest values(1);
-ERROR: Failed with SQLSTATE 08003
+1 row inserted/updated/deleted
 ij(MAMTA3)> -- Test constraints
 set connection mamta1;
 ij(MAMTA1)> drop table t11ConstraintTest;
@@ -2349,11 +2353,10 @@ ij(MAMTA2)> insert into t21ConstraintTest values(2);
 ij(MAMTA2)> grant references on t21ConstraintTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> create table t31ConstraintTest (c311 int references mamta1.t11ConstraintTest, c312 int references mamta2.t21ConstraintTest);
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> drop table t31ConstraintTest;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> -- multi-key foreign key constraint and the REFERENCES privilege granted at user level. This should cause only
 --   one row in SYSDEPENDS for REFERENCES privilege.
 set connection mamta1;
@@ -2364,13 +2367,12 @@ ij(MAMTA1)> create table t11ConstraintTest (c111 int not null, c112 int not null
 ij(MAMTA1)> grant references on t11ConstraintTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> drop table t31ConstraintTest;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t31ConstraintTest (c311 int, c312 int, foreign key(c311, c312) references mamta1.t11ConstraintTest);
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> drop table t31ConstraintTest;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> -- Same test as above with multi-key foreign key constraint but one column REFERENCES privilege granted at user level
 --   and other column REFERENCES privilege granted at PUBLIC level. This should cause two rows in SYSDEPENDS for REFERENCES privilege.
 set connection mamta1;
@@ -2384,28 +2386,27 @@ ij(MAMTA1)> grant references(c112) on t11ConstraintTest to PUBLIC;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> --connect 'jdbc:derby:c:/dellater/dbmaintest2;create=true' user 'mamta3' as mamta3;
 set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> drop table t31ConstraintTest;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table t31ConstraintTest (c311 int,  c312 int, foreign key(c311, c312) references mamta1.t11ConstraintTest);
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> drop table t31ConstraintTest;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> -- Same test as above with multi-key foreign key constraint, one column REFERENCES privilege granted at user level
 --   and other column REFERENCES privilege granted at PUBLIC level. This should cause two rows in SYSDEPENDS for REFERENCES privilege.
 --   But foreign key reference is added using alter table rather than at create table time
 create table t31constrainttest(c311 int, c312 int);
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> alter table t31constrainttest add foreign key (c311, c312) references mamta1.t11constrainttest;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> drop table t31ConstraintTest;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> -- create the table again, but this time one foreign key constraint on one table with single column primary key and
 --   another foreign key constraint on another table with multi-column primary key
 create table t31constrainttest(c311 int, c312 int, c313 int references mamta2.t21ConstraintTest);
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> alter table t31constrainttest add foreign key (c311, c312) references mamta1.t11constrainttest;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> -- revoke of TRIGGERS and other privileges should drop dependent triggers
 set connection mamta1;
 ij(MAMTA1)> drop table t11TriggerRevokeTest;
@@ -3084,13 +3085,12 @@ ij(MAMTA1)> create table d1589t11ConstraintTest (c111 int not null, c112 int not
 ij(MAMTA1)> grant references on d1589t11ConstraintTest to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> drop table d1589t31ConstraintTest;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 42Y55
 ij(MAMTA3)> create table d1589t31ConstraintTest (c311 int, c312 int, foreign key(c311, c312) references mamta1.d1589t11ConstraintTest);
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> drop table d1589t31ConstraintTest;
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> set connection mamta1;
 ij(MAMTA1)> drop table d1589t11ConstraintTest;
 0 rows inserted/updated/deleted
@@ -3101,9 +3101,8 @@ ij(MAMTA1)> grant references(c111) on d1589t11ConstraintTest to mamta3;
 ij(MAMTA1)> grant references(c112) on d1589t11ConstraintTest to PUBLIC;
 0 rows inserted/updated/deleted
 ij(MAMTA1)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> create table d1589t31ConstraintTest (c311 int, c312 int, foreign key(c311, c312) references mamta1.d1589t11ConstraintTest);
-ERROR: Failed with SQLSTATE 08003
+0 rows inserted/updated/deleted
 ij(MAMTA3)> -- DERBY-1847 SELECT statement asserts with XJ001 when attempted to select a newly added column
 -- Grant access on 2 columns and then add another column to the table. The select on the new column
 -- by another user should complain about no permissions granted on that new column.
@@ -3115,41 +3114,40 @@ ij(MAMTA2)> grant select(c1,c2) on t1Derby1847 to mamta3;
 ij(MAMTA2)> alter table t1Derby1847 add c3 int;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> -- should fail because mamta3 doesn't have any permission on this column in table mamta2.t1Derby1847
 select c3 from mamta2.t1Derby1847;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> set connection mamta2;
 ij(MAMTA2)> grant select on t1Derby1847 to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> -- should work now because mamta3 got select permission on new column in table mamta2.t1Derby1847 through table level select permission
 select c3 from mamta2.t1Derby1847;
-ERROR: Failed with SQLSTATE 08003
+C3         
+-----------
+0 rows selected
 ij(MAMTA3)> set connection mamta2;
 ij(MAMTA2)> revoke select on t1Derby1847 from mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> -- should fail because mamta3 lost it's select permission on new column in table mamta2.t1Derby1847
 select c3 from mamta2.t1Derby1847;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 28508
 ij(MAMTA3)> set connection mamta2;
 ij(MAMTA2)> grant select(c3) on t1Derby1847 to mamta3;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> -- should work now because mamta3 got select permission on new column in table mamta2.t1Derby1847 through column level select permission
 select c3 from mamta2.t1Derby1847;
-ERROR: Failed with SQLSTATE 08003
+C3         
+-----------
+0 rows selected
 ij(MAMTA3)> set connection mamta2;
 ij(MAMTA2)> drop table t1Derby1847;
 0 rows inserted/updated/deleted
 ij(MAMTA2)> set connection mamta3;
-ERROR: Failed with SQLSTATE 08003
 ij(MAMTA3)> select c3 from mamta2.t1Derby1847;
-ERROR: Failed with SQLSTATE 08003
+ERROR: Failed with SQLSTATE 42X05
 ij(MAMTA3)> -- DERBY-1716
 -- Revoking select privilege from a user times out when that user still have
 -- a cursor open before the patch.
@@ -3229,4 +3227,32 @@ ij(USER2)> close crs1;
 IJ ERROR: Unable to establish cursor
 ij(USER2)> autocommit on;
 ij(USER2)> set connection user1;
+ij(USER1)> -- Another test for DERBY-1847: verify that columns field is updated
+-- correctly when adding a column to a table:
+create table d1847_c (a int, b int, c int);
+0 rows inserted/updated/deleted
+ij(USER1)> grant select (a) on d1847_c to first_user;
+0 rows inserted/updated/deleted
+ij(USER1)> grant update (b) on d1847_c to second_user;
+0 rows inserted/updated/deleted
+ij(USER1)> grant select (c) on d1847_c to third_user;
+0 rows inserted/updated/deleted
+ij(USER1)> select c.grantee, c.type, c.columns from sys.syscolperms c, sys.systables t
+    where c.tableid = t.tableid and t.tablename='D1847_C';
+GRANTEE                                                                                                                         |&|COLUMNS        
+--------------------------------------------------------------------------------------------------------------------------------------------------
+FIRST_USER                                                                                                                      |s|{0}            
+SECOND_USER                                                                                                                     |u|{1}            
+THIRD_USER                                                                                                                      |s|{2}            
+3 rows selected
+ij(USER1)> alter table d1847_c add column d int;
+0 rows inserted/updated/deleted
+ij(USER1)> select c.grantee, c.type, c.columns from sys.syscolperms c, sys.systables t
+    where c.tableid = t.tableid and t.tablename='D1847_C';
+GRANTEE                                                                                                                         |&|COLUMNS        
+--------------------------------------------------------------------------------------------------------------------------------------------------
+FIRST_USER                                                                                                                      |s|{0}            
+SECOND_USER                                                                                                                     |u|{1}            
+THIRD_USER                                                                                                                      |s|{2}            
+3 rows selected
 ij(USER1)> 

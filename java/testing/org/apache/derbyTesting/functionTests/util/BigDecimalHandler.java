@@ -25,12 +25,16 @@ import java.sql.SQLException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.math.BigDecimal;
+import java.lang.reflect.*;
 
 /**
  *  BigDecimalHandler provides wrappers for JDBC API methods which use BigDecimal.
  *  When writing tests which use BigDecimal, the methods in this class can be called
  *  instead of directly calling JDBC methods. This way the same test can be used in JVMs 
- *  like J2ME/CDC/Foundation Profile, which do not have BigDecimal class. 
+ *  like J2ME/CDC/Foundation Profile 1.0, which do not have BigDecimal class, or
+ *  JSR169 Profile, which does not support method calls using BigDecimal (such 
+ *  as ResultSet.getBigDecimal(..).
+ *  
  * 
  *  * @author deepa
  *
@@ -45,11 +49,22 @@ public class BigDecimalHandler {
 		try{
 			Class.forName("java.math.BigDecimal");
 			representation = BIGDECIMAL_REPRESENTATION;
+			// This class will attempt calls to ResultSet.getBigDecimal,
+			// which may not be available with jvms that support JSR169,
+			// even if BigDecimal itself has been made available (e.g. 
+			// supporting J2ME/CDC/Foundation Profile 1.1).
+			Method getbd = ResultSet.class.getMethod("getBigDecimal", new Class[] {int.class});
+			representation = BIGDECIMAL_REPRESENTATION;
 		}
 		catch(ClassNotFoundException e){
 			//Used for J2ME/Foundation
 			representation = STRING_REPRESENTATION;
 		}
+		catch(NoSuchMethodException e){
+			//Used for J2ME/Foundation
+			representation = STRING_REPRESENTATION;
+		}
+
 	}
 	
 	//Type conversions supported by ResultSet getBigDecimal method - JDBC3.0 Table B-6 

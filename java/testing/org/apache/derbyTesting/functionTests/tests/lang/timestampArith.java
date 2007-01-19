@@ -172,6 +172,7 @@ public class timestampArith
         // Test add with all combinatons of interval types and datetime types
         new OneAddTest( FRAC_SECOND_INTERVAL, 1000, ts("2005-05-11 15:55:00"), ts("2005-05-11 15:55:00.000001"),
                         null, null),
+        // following gives an error with J2ME j9_foundation 1.1 (DERBY-2225):
         new OneAddTest( FRAC_SECOND_INTERVAL, -1000, dt("2005-05-11"), ts("2005-05-10 23:59:59.999999"),
                         null, null),
         new OneAddTest( SECOND_INTERVAL, 60, ts("2005-05-11 15:55:00"), ts("2005-05-11 15:56:00"), null, null),

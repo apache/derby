@@ -1,0 +1,4 @@
+Test timestamp arithmetic starting.
+Unexpected result from 'values( {fn TIMESTAMPADD( SQL_TSI_FRAC_SECOND, -1000,{d '2005-05-11'})})'.  Expected xxxxxxFILTERED-TIMESTAMPxxxxxgot xxxxxxFILTERED-TIMESTAMPxxxxx.
+Unexpected result from 'values( {fn TIMESTAMPADD( SQL_TSI_FRAC_SECOND, -1000,{d '2005-05-11'})})'.  Expected xxxxxxFILTERED-TIMESTAMPxxxxxgot xxxxxxFILTERED-TIMESTAMPxxxxx.
+FAILED. 2 errors.

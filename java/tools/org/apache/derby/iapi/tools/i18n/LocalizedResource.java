@@ -23,6 +23,7 @@ package org.apache.derby.iapi.tools.i18n;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -45,17 +46,24 @@ import java.sql.Types;
 
 public final class LocalizedResource  implements java.security.PrivilegedAction {
 
-	private static final boolean HAVE_BIG_DECIMAL;
+	private static final boolean SUPPORTS_BIG_DECIMAL_CALLS;
 	
 	static {
-		boolean haveBigDecimal;
+		boolean supportsBigDecimalCalls;
 		try {
+			// This class attempts to make a call to a 
+			// ResultSet.getBigDecimal method, which may not be available.
+			// For instance, java.math.BigDecimal is not available with
+			// J2ME/CDC/Foundation 1.0 profile.
 			Class.forName("java.math.BigDecimal");
-			haveBigDecimal = true;
+			supportsBigDecimalCalls = true;
+			// And no methods using BigDecimal are available with JSR169 spec.
+			Method getbd = ResultSet.class.getMethod("getBigDecimal", new Class[] {int.class});
+			supportsBigDecimalCalls = true;
 		} catch (Throwable t) {
-			haveBigDecimal = false;
+			supportsBigDecimalCalls = false;
 		}
-		HAVE_BIG_DECIMAL = haveBigDecimal;
+		SUPPORTS_BIG_DECIMAL_CALLS = supportsBigDecimalCalls;
 	}
 	
 	private ResourceBundle res;
@@ -331,7 +339,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 					type == Types.DOUBLE ) {
 				return getNumberAsString(rs.getDouble(columnNumber));
 			}
-			else if (HAVE_BIG_DECIMAL && (type == Types.NUMERIC || type == Types.DECIMAL)) {
+			else if (SUPPORTS_BIG_DECIMAL_CALLS && (type == Types.NUMERIC || type == Types.DECIMAL)) {
 				return	getNumberAsString(rs.getBigDecimal(columnNumber,
 											rsm.getScale(columnNumber)));
 			}
