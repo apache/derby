@@ -37,7 +37,7 @@
 
 <!-- Targets -->
 
-  <target name="buildsource" depends="init,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
+  <target name="buildsource" depends="init,engine,tools,drda,client,build,versioninfo,localeinfo"/>
   <target name="all" depends="buildsource,demo,testing"/>
 
 <!-- ==================================================================== -->
@@ -343,9 +343,6 @@
     <ant dir="${derby.tools.src.dir}"/>
   </target>
 	
-  <target name="storeless" depends="engine">
-  	<ant dir="${derby.storeless.src.dir}"/>
-  </target>
 	
   <target name="shared" depends="init,state">
     <ant dir="${derby.shared.src.dir}"/>
@@ -428,7 +425,6 @@
 <!-- =================================================================== -->
   <target name="clean">
     <delete dir="${out.dir}"/>
-  	<delete dir="${out.storeless.dir}"/>
   </target>
 
 <!-- ==================================================================== -->
