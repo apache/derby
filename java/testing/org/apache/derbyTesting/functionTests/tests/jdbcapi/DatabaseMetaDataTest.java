@@ -1001,7 +1001,36 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             
             // LITERAL_PREFIX (column 4)
             // LITERAL_SUFFIX (column 5)
+            
             // CREATE_PARAMS (column 6)
+            String createParams;
+            switch (type)
+            {
+            case Types.CHAR:
+            case Types.VARCHAR:
+            case Types.BLOB:
+            case Types.CLOB:
+            case Types.BINARY:
+            case Types.VARBINARY:
+                createParams = "length";
+                break;
+                
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                createParams = "precision,scale";
+                break;
+                
+            case Types.FLOAT:
+                createParams = "precision";
+                break;
+                
+            default:
+                createParams = null;
+                break;
+            }
+            assertEquals("CREATE_PARAMS " + typeName,
+                    createParams, rs.getString("CREATE_PARAMS"));
+                     
             
             // NULLABLE (column 7) - all types are nullable in Derby
             assertEquals("NULLABLE " + typeName,
@@ -1035,7 +1064,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 searchable = DatabaseMetaData.typePredBasic;
                 break;  
             }
-
             assertEquals("SEARCHABLE " + typeName,
                     searchable, rs.getInt("SEARCHABLE"));
             }
@@ -1046,15 +1074,68 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             
             
             // FIXED_PREC_SCALE (column 11)
+            boolean fixedScale = type == Types.DECIMAL || type == Types.NUMERIC;
+            assertEquals("FIXED_PREC_SCALE " + typeName,
+                    fixedScale, rs.getBoolean("FIXED_PREC_SCALE"));
+            assertFalse(rs.wasNull());
+            
             // AUTO_INCREMENT (column 12)
+            boolean autoIncrement;
+            switch (type)
+            {
+            case Types.BIGINT:
+            case Types.INTEGER:
+            case Types.SMALLINT:
+                autoIncrement = true;
+                break;
+            default:
+                autoIncrement = false;
+                break;
+            }
+            assertEquals("AUTO_INCREMENT " + typeName,
+                    autoIncrement, rs.getBoolean("AUTO_INCREMENT"));
             
             // LOCAL_TYPE_NAME (column 13) always the same as TYPE_NAME
             assertEquals("LOCAL_TYPE_NAME " + typeName,
                     typeName, rs.getString("LOCAL_TYPE_NAME"));
             
             
+            int maxScale;
+            boolean hasScale = true;
+            switch (type)
+            {
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                maxScale = 32767; // 31; BUG DERBY-2262
+                break;
+            case Types.TIMESTAMP:
+                maxScale = 6;
+                break;
+            case Types.SMALLINT:
+            case Types.INTEGER:
+            case Types.BIGINT:
+            case Types.DATE:
+            case Types.TIME:
+                maxScale = 0;
+                break;
+            default:
+                maxScale = 0;
+                hasScale = false;
+                break;
+            }
+            
             // MINIMUM_SCALE (column 14)
+            assertEquals("MINIMUM_SCALE " + typeName,
+                    0, rs.getInt("MINIMUM_SCALE"));
+            assertEquals("MINIMUM_SCALE (wasNull) " + typeName,
+                    !hasScale, rs.wasNull());
+            
             // MAXIMUM_SCALE (column 15)
+            assertEquals("MAXIMUM_SCALE " + typeName,
+                    maxScale, rs.getInt("MAXIMUM_SCALE"));            
+            assertEquals("MAXIMUM_SCALE (wasNull)" + typeName,
+                    !hasScale, rs.wasNull());
+
             
             // SQL_DATA_TYPE (column 16) - Unused
             assertEquals("SQL_DATA_TYPE " + typeName,
