@@ -54,17 +54,21 @@ import java.util.Locale;
  */
 public final class util implements java.security.PrivilegedAction {
 	
-	private static boolean HAVE_BIG_DECIMAL;
+	private static boolean IS_AT_LEAST_JDBC2;
 	
 	{
-		boolean haveBigDecimal;
+		boolean isAtLeastJDBC2;
 		try {
-			Class.forName("java.math.BigDecimal");
-			haveBigDecimal = true;
+            // Need to test to see if this is
+            // currently JDBC 2 or JSR169.
+            // Checking for BigDecimal doesn't work because
+            // BigDecimal exists in J2ME/CDC/Foundation 1.1
+            Class.forName("java.sql.Driver");
+			isAtLeastJDBC2 = true;
 		} catch (Throwable t) {
-			haveBigDecimal = false;
+			isAtLeastJDBC2 = false;
 		}
-		HAVE_BIG_DECIMAL = haveBigDecimal;
+		IS_AT_LEAST_JDBC2 = isAtLeastJDBC2;
 	}
 	
 	private static final Class[] DS_GET_CONN_TYPES = {"".getClass(), "".getClass()};
@@ -647,7 +651,7 @@ AppUI.out.println("SIZE="+l);
 				
 				if (sqlType == Types.DECIMAL)
 				{
-					if (util.HAVE_BIG_DECIMAL)
+					if (util.IS_AT_LEAST_JDBC2)
 					{
 						ps.setObject(c,rs.getObject(c),
 								 sqlType,
@@ -660,21 +664,21 @@ AppUI.out.println("SIZE="+l);
 						// pass values around, but for integral types
 						// first convert to a integral type from the DECIMAL
 						// because strings like 3.4 are not convertible to
-						// an integral type.
-						switch (ps.getMetaData().getColumnType(c))
-						{
-						case Types.BIGINT:
-							ps.setLong(c, rs.getLong(c));
-						    break;
-						case Types.INTEGER:
-						case Types.SMALLINT:
-						case Types.TINYINT:
-							ps.setInt(c, rs.getInt(c));
-							break;
-						default:
-							ps.setString(c,rs.getString(c));
-						    break;
-						}								
+						// an integral type. Of course in JSR169 we have
+                        // no way to determine the parameter types,
+                        // ParameterMetaData is not supported.
+                        // So convert as string, and on a conversion error
+                        // try as a long.
+                        
+                        try {
+                            ps.setString(c, rs.getString(c));
+                        } catch (SQLException e) {
+                            // 22018 - invalid format
+                            if ("22018".equals(e.getSQLState()))
+                                ps.setLong(c, rs.getLong(c));
+                            else
+                                throw e;
+                        }						
 					}
 					
 				}
