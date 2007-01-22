@@ -150,7 +150,7 @@ create table primaryTab (i int not null primary key, j int, c char(10));
 create synonym synPrimary for primaryTab;
 
 -- Should fail
-create table foreignTab(i int, j int references synPrimary(i));
+create table foreignTab(i int, j int CONSTRAINT SYNPK_F references synPrimary(i));
 
 create table foreignTab(i int, j int references primaryTab(i));
 

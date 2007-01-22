@@ -16,15 +16,18 @@ ij> --
 --
 -- tests for cast expressions
 -- refer to casting.java for a complete analysis on casting
+
 --==================================
 --
 -- simple test cases
 --
 --==================================
+
 -- shrink/grow bit and char
 -- no exceptions should be raised.
 -- once we have warnings we'll expect
 -- a warning when shrinking non space/zeros
+
 -- shrink
 values (cast ('hell' as char(2)));
 1   
@@ -352,6 +355,7 @@ ij> values (
 -----------------------------------------------
 9223372036854775807.9     |9223372036854775807 
 ij> --   -9223372036854775808 is Long::MIN_VALUE
+
 values (
   cast ('-9223372036854775808' as DECIMAL(24,1)),
   cast (cast ('-9223372036854775808' as DECIMAL(24,1)) as BIGINT)
@@ -629,12 +633,12 @@ ij> values (cast ('1999-09-09' as date));
 1         
 ----------
 1999-09-09
-ij> values (cast ('TIMESTAMP''xxxxxxFILTERED-TIMESTAMPxxxxx'' as timestamp));
+ij> values (cast ('TIMESTAMP''1999-09-09 11:11:11''' as timestamp));
 ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
-ij> values (cast ('xxxxxxFILTERED-TIMESTAMPxxxxxas timestamp));
+ij> values (cast ('1999-09-09 11:11:11' as timestamp));
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1999-09-09 11:11:11.0     
 ij> ------------------
 --date/time ->other
 ------------------
@@ -646,10 +650,10 @@ ij> values (cast (DATE('1999-09-09') as char(20)));
 1                   
 --------------------
 1999-09-09          
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as char(40)));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as char(40)));
 1                                       
 ----------------------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1999-09-09 11:11:11.0                   
 ij> values (cast (TIME('11:11:11') as varchar(20)));
 1                   
 --------------------
@@ -658,23 +662,23 @@ ij> values (cast (DATE('1999-09-09') as varchar(20)));
 1                   
 --------------------
 1999-09-09          
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as varchar(40)));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as varchar(40)));
 1                                       
 ----------------------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1999-09-09 11:11:11.0                   
 ij> values (cast (TIME('11:11:11') as long varchar));
 ERROR 42846: Cannot convert types 'TIME' to 'LONG VARCHAR'.
 ij> values (cast (DATE('1999-09-09') as long varchar));
 ERROR 42846: Cannot convert types 'DATE' to 'LONG VARCHAR'.
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as long varchar));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as long varchar));
 ERROR 42846: Cannot convert types 'TIMESTAMP' to 'LONG VARCHAR'.
 ij> -- truncation errors
 values (cast (TIME('11:11:11') as char(2)));
 ERROR 22001: A truncation error was encountered trying to shrink CHAR '11:11:11' to length 2.
 ij> values (cast (DATE('1999-09-09') as char(2)));
 ERROR 22001: A truncation error was encountered trying to shrink CHAR '1999-09-09' to length 2.
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as char(2)));
-ERROR 22001: A truncation error was encountered trying to shrink CHAR 'xxxxxxFILTERED-TIMESTAMPxxxxx' to length 2.
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as char(2)));
+ERROR 22001: A truncation error was encountered trying to shrink CHAR '1999-09-09 11:11:11.0' to length 2.
 ij> -- to date/time
 values (cast (TIME('11:11:11') as time));
 1       
@@ -697,50 +701,50 @@ ij> values (cast (DATE('1999-09-09') as time));
 ERROR 42846: Cannot convert types 'DATE' to 'TIME'.
 ij> values (cast (DATE('1999-09-09') as timestamp));
 ERROR 42846: Cannot convert types 'DATE' to 'TIMESTAMP'.
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as date));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as date));
 1         
 ----------
 1999-09-09
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as time));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as time));
 1       
 --------
 11:11:11
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as timestamp));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as timestamp));
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1999-09-09 11:11:11.0     
 ij> --bad
-values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as int));
+values (cast (TIMESTAMP('1999-09-09 11:11:11' )as int));
 ERROR 42846: Cannot convert types 'TIMESTAMP' to 'INTEGER'.
 ij> values (cast (DATE('1999-09-09') as int));
 ERROR 42846: Cannot convert types 'DATE' to 'INTEGER'.
 ij> values (cast (TIME('11:11:11') as int));
 ERROR 42846: Cannot convert types 'TIME' to 'INTEGER'.
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as smallint));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as smallint));
 ERROR 42846: Cannot convert types 'TIMESTAMP' to 'SMALLINT'.
 ij> values (cast (DATE('1999-09-09') as smallint));
 ERROR 42846: Cannot convert types 'DATE' to 'SMALLINT'.
 ij> values (cast (TIME('11:11:11') as smallint));
 ERROR 42846: Cannot convert types 'TIME' to 'SMALLINT'.
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as bigint));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as bigint));
 ERROR 42846: Cannot convert types 'TIMESTAMP' to 'BIGINT'.
 ij> values (cast (DATE('1999-09-09') as bigint));
 ERROR 42846: Cannot convert types 'DATE' to 'BIGINT'.
 ij> values (cast (TIME('11:11:11') as bigint));
 ERROR 42846: Cannot convert types 'TIME' to 'BIGINT'.
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as numeric));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as numeric));
 ERROR 42846: Cannot convert types 'TIMESTAMP' to 'NUMERIC'.
 ij> values (cast (DATE('1999-09-09') as numeric));
 ERROR 42846: Cannot convert types 'DATE' to 'NUMERIC'.
 ij> values (cast (TIME('11:11:11') as numeric));
 ERROR 42846: Cannot convert types 'TIME' to 'NUMERIC'.
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx)as decimal));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' )as decimal));
 ERROR 42846: Cannot convert types 'TIMESTAMP' to 'DECIMAL'.
 ij> values (cast (DATE('1999-09-09') as decimal));
 ERROR 42846: Cannot convert types 'DATE' to 'DECIMAL'.
 ij> values (cast (TIME('11:11:11') as decimal));
 ERROR 42846: Cannot convert types 'TIME' to 'DECIMAL'.
-ij> values (cast (TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx) as char(13) for bit data));
+ij> values (cast (TIMESTAMP('1999-09-09 11:11:11' ) as char(13) for bit data));
 ERROR 42846: Cannot convert types 'TIMESTAMP' to 'CHAR () FOR BIT DATA'.
 ij> values (cast (DATE('1999-09-09') as char(13) for bit data));
 ERROR 42846: Cannot convert types 'DATE' to 'CHAR () FOR BIT DATA'.
@@ -759,6 +763,7 @@ ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'VARCHAR'.
 ij> values (cast (X'11' as long varchar));
 ERROR 42846: Cannot convert types 'CHAR () FOR BIT DATA' to 'LONG VARCHAR'.
 ij> --values (cast (X'00' as char(10)));
+
 --odd length won't work anymore
 values (cast (X'123' as char(20)));
 ERROR 42606: An invalid hexadecimal constant starting with 'X'123'' has been detected.
@@ -795,7 +800,7 @@ ij> insert into tab1 values(1,
 				cast(1.1 as real), 
 				DATE('1990-10-10'),
 				TIME('11:11:11'), 
-				TIMESTAMP('xxxxxxFILTERED-TIMESTAMPxxxxx),
+				TIMESTAMP('1990-11-11 11:11:11'),
 				1.1);
 1 row inserted/updated/deleted
 ij> insert into tab1 values (null,
@@ -860,7 +865,7 @@ NULL
 ij> select cast(ts as timestamp) from tab1;
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1990-11-11 11:11:11.0     
 NULL                      
 ij> select cast(dc as dec) from tab1;
 1     
@@ -1018,6 +1023,7 @@ ij> -- uninitialized parameter
 values cast(? as int);
 ERROR 07000: At least one parameter to the current statement is uninitialized.
 ij> -- positive
+
 -- test casting null to all builtin types
 insert into t1 (bt) values cast(null as char(1) for bit data);
 1 row inserted/updated/deleted
@@ -1347,7 +1353,7 @@ NULL|NULL|NULL                          |NULL                  |NULL       |NULL
 NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |123456             |NULL               |NULL      |NULL    |NULL                      |NULL                          |NULL                                                                                                                            
 NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |9876-05-04|NULL    |NULL                      |NULL                          |NULL                                                                                                                            
 NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |01:02:34|NULL                      |NULL                          |NULL                                                                                                                            
-NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |xxxxxxFILTERED-TIMESTAMPxxxxx|NULL                          |NULL                                                                                                                            
+NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |9876-05-04 01:02:34.0     |NULL                          |NULL                                                                                                                            
 NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |654321                        |NULL                                                                                                                            
 NULL|NULL|NULL                          |NULL                  |NULL       |NULL         |NULL  |NULL               |NULL               |NULL      |NULL    |NULL                      |NULL                          |987654                                                                                                                          
 ij> -- clean up t1
@@ -1395,6 +1401,7 @@ ij> delete from x;
 ij> drop table x;
 0 rows inserted/updated/deleted
 ij> -- method resolution tests
+
 -- clean up the prepared statements
 remove a1;
 ij> remove q1;
@@ -1414,6 +1421,7 @@ ij> -- reset autocomiit
 commit;
 ij> autocommit on;
 ij> -- bind time casting tests
+
 -- negative
 values cast('asdf' as smallint);
 ERROR 22018: Invalid character string format for type SMALLINT.
@@ -1491,7 +1499,7 @@ values (cast ('08.08.08' as TIME));
 ij> values (cast ('2001-01-01-08.08.08.123456' as TIMESTAMP));
 1                         
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+2001-01-01 08:08:08.123456
 ij> -- char, varchar
 values (char('abcde', 5));
 1    
@@ -1508,22 +1516,23 @@ abcd
 ij> values (varchar('', 20));
 1                   
 --------------------
+                    
 ij> create table t1 (c5 date, c6 time, c7 timestamp, c8 char(5), c9 varchar(5));
 0 rows inserted/updated/deleted
-ij> insert into t1 values ('2003-09-10', '16:44:02', 'xxxxxxFILTERED-TIMESTAMPxxxxx', 'abc', 'abcde');
+ij> insert into t1 values ('2003-09-10', '16:44:02', '2003-09-08 12:20:30.123456', 'abc', 'abcde');
 1 row inserted/updated/deleted
 ij> insert into t1 values ('2005-09-10', '18.44.02', '2004-09-08-12.20.30.123456', 'cba', 'c');
 1 row inserted/updated/deleted
 ij> select char(c5), char(c6), char(c7), char(c8), char(c9) from t1;
 1         |2       |3                         |4    |5    
 ----------------------------------------------------------
-2003-09-10|16:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|abc  |abcde
-2005-09-10|18:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|cba  |c    
+2003-09-10|16:44:02|2003-09-08 12:20:30.123456|abc  |abcde
+2005-09-10|18:44:02|2004-09-08 12:20:30.123456|cba  |c    
 ij> select varchar(c5), varchar(c6), varchar(c7), varchar(c8), varchar(c9) from t1;
 1         |2       |3                         |4    |5    
 ----------------------------------------------------------
-2003-09-10|16:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|abc  |abcde
-2005-09-10|18:44:02|xxxxxxFILTERED-TIMESTAMPxxxxx|cba  |c    
+2003-09-10|16:44:02|2003-09-08 12:20:30.123456|abc  |abcde
+2005-09-10|18:44:02|2004-09-08 12:20:30.123456|cba  |c    
 ij> select char(c8, 10), varchar(c9, 9) from t1;
 1         |2        
 --------------------

@@ -14,7 +14,6 @@ lang/autoincrement.sql
 lang/bug4356.java
 lang/bug5052rts.java
 lang/bug5054.java
-lang/cast.sql
 lang/casting.java
 lang/checkConstraint.sql
 lang/closed.java
@@ -41,13 +40,10 @@ lang/distinctElimination.sql
 lang/distinctFiltering.sql
 lang/dropTable.sql
 lang/dynamicLikeOptimization.sql
-lang/ejbql.sql
-lang/ejbql_nonSPS.sql
 lang/emptyStatistics.sql
 lang/errorCode.sql
 lang/errorStream.java
 lang/fk_nonSPS.sql
-lang/floattypes.sql
 lang/forbitdata.java
 lang/forupdate.sql
 lang/functions.sql
@@ -94,7 +90,6 @@ lang/primarykey.sql
 lang/procedure.java
 lang/procedureInTrigger.sql
 lang/refActions.sql
-lang/refActions1.sql
 lang/refActions2.sql
 lang/refActions3.sql
 lang/releaseCompileLocks.sql
@@ -115,9 +110,7 @@ lang/subquery.sql
 lang/subquery2.sql
 lang/subqueryFlattening.sql
 lang/supersimple.sql
-lang/synonym.sql
 lang/syscat.sql
-lang/tempRestrictions.sql
 lang/timestampArith.java
 lang/triggerBeforeTrig.sql
 lang/triggerGeneral.sql
@@ -126,7 +119,6 @@ lang/triggerRefClause.sql
 lang/triggerStream.java
 lang/unaryArithmeticDynamicParameter.java
 lang/ungroupedAggregatesNegative.sql
-lang/unlimited.sql
 lang/updateCursor.java
 lang/wisconsin.java
 lang/ShutdownDatabase.java

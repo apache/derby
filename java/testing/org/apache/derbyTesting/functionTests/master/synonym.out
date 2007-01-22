@@ -15,6 +15,7 @@ ij> --
 --   limitations under the License.
 --
 -- tests for synonym support
+
 set schema APP;
 0 rows inserted/updated/deleted
 ij> -- negative tests
@@ -103,6 +104,7 @@ ERROR X0Y32: Table/View 'MYTABLE' already exists in Schema 'APP'.
 ij> create view myTable as select * from table1;
 ERROR X0Y32: Table/View 'MYTABLE' already exists in Schema 'APP'.
 ij> -- Positive test cases
+
 -- Using synonym in DML
 select * from myTable;
 I          |J          
@@ -163,6 +165,7 @@ I          |J
 2          |2          
 ij> close c1;
 ij> -- Try updatable cursors
+
 autocommit off;
 ij> get cursor c2 as 'select * from myTable for update';
 ij> next c2;
@@ -223,13 +226,14 @@ I          |J
 ij> drop table table2;
 0 rows inserted/updated/deleted
 ij> -- Try referential constraints. Synonyms should not be allowed there.
+
 create table primaryTab (i int not null primary key, j int, c char(10));
 0 rows inserted/updated/deleted
 ij> create synonym synPrimary for primaryTab;
 0 rows inserted/updated/deleted
 ij> -- Should fail
-create table foreignTab(i int, j int references synPrimary(i));
-ERROR X0Y46: Constraint 'xxxxGENERATED-IDxxxx' is invalid: referenced table SYNPRIMARY does not exist.
+create table foreignTab(i int, j int CONSTRAINT SYNPK_F references synPrimary(i));
+ERROR X0Y46: Constraint 'SYNPK_F' is invalid: referenced table SYNPRIMARY does not exist.
 ij> create table foreignTab(i int, j int references primaryTab(i));
 0 rows inserted/updated/deleted
 ij> drop table foreignTab;
@@ -287,6 +291,7 @@ ij> drop table notPresent.t1;
 ij> drop synonym mySynonym;
 0 rows inserted/updated/deleted
 ij> -- Positive test case with three levels of synonym chaining
+
 create schema synonymSchema;
 0 rows inserted/updated/deleted
 ij> create synonym synonymSchema.mySynonym1 for APP.table1;
@@ -324,6 +329,7 @@ ij> update mySynonym set j=4 where i=5;
 1 row inserted/updated/deleted
 ij> delete from mySynonym where j=6;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from mySynonym;
 I          |J          
 -----------------------

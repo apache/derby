@@ -15,6 +15,7 @@ ij> --
 --   limitations under the License.
 --
 -- Tests for temporary restrictions in the language
+
 -- create a table
 create table t1(c1 int);
 0 rows inserted/updated/deleted

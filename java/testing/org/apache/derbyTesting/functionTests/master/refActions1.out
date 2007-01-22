@@ -39,6 +39,7 @@ ij> --
 -- #                  : subquery that qualifies which rows are changed
 -- #                  : and the deleted table has a self-ref'g RI const.
 -- *************************************************************************
+
 create schema db2test;
 0 rows inserted/updated/deleted
 ij> set schema db2test;
@@ -119,6 +120,7 @@ ij> create table db2test.origemp (c0 int, name char(10) not null primary key,
 ij> insert into db2test.origemp select * from db2test.emp;
 20 rows inserted/updated/deleted
 ij> -- "END OF TESTUNIT: 01";
+
 -- *************************************************************************
 -- TESTUNIT         : 02
 -- DESCRIPTION      : delete where SQ on same table on RI cascade col
@@ -148,6 +150,8 @@ C0         |NAME      |MGRNAME   |DNO
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
 ij> -- "END OF TESTUNIT: 02";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 03
 -- DESCRIPTION      : delete with 2 levels of SQ and self-ref in 2nd
@@ -193,6 +197,7 @@ C0         |NAME      |MGRNAME   |DNO
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
 ij> -- "END OF TESTUNIT: 03";
+
 -- *************************************************************************
 -- TESTUNIT         : 04
 -- DESCRIPTION      : delete with SQ GB Having SQ on
@@ -258,6 +263,7 @@ ij> select * from db2test.emp order by name, mgrname, dno;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 ij> -- "END OF TESTUNIT: 04";
+
 -- *************************************************************************
 -- TESTUNIT         : 05
 -- DESCRIPTION      : delete with SQ GB Having SQ on
@@ -268,6 +274,7 @@ ij> -- "END OF TESTUNIT: 04";
 -- reset to original rows
 delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.emp select * from db2test.origemp;
 20 rows inserted/updated/deleted
 ij> select * from db2test.emp where exists ( select max(mgrname) from
@@ -325,6 +332,7 @@ ij> select * from db2test.emp order by name, mgrname, dno;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 ij> -- "END OF TESTUNIT: 05";
+
 -- *************************************************************************
 -- TESTUNIT         : 06
 -- DESCRIPTION      : delete on view with SQ GB Having SQ on
@@ -335,6 +343,7 @@ ij> -- "END OF TESTUNIT: 05";
 -- reset to original rows
 delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.emp select * from db2test.origemp;
 20 rows inserted/updated/deleted
 ij> create view db2test.vemp (vc0, vname, vmgrname, vdno) as
@@ -412,6 +421,7 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 06";
+
 -- "cleanup";
 drop view db2test.vemp;
 0 rows inserted/updated/deleted
@@ -441,6 +451,7 @@ ij> -- #########################################################################
 -- #                  : shape of the RI tree is a 1 level star fanout.
 -- #########################################################################
 -- "START OF TESTCASE: cself302.sql";
+
 autocommit off;
 ij> -- *************************************************************************
 -- TESTUNIT         : 01
@@ -523,6 +534,7 @@ ij> insert into db2test.secondemp select * from db2test.emp;
 20 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 01";
+
 -- *************************************************************************
 -- TESTUNIT         : 02
 -- DESCRIPTION      : delete where SQ on same table on RI cascade col
@@ -571,6 +583,8 @@ C0         |NAME      |MGRNAME   |DNO
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
 ij> -- "END OF TESTUNIT: 02";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 03
 -- DESCRIPTION      : delete with 2 levels of SQ and self-ref in 2nd
@@ -637,6 +651,7 @@ C0         |NAME      |MGRNAME   |DNO
 16         |GUY       |JOHN      |K55 
 6          |HAMID     |JOHN      |K55 
 ij> -- "END OF TESTUNIT: 03";
+
 -- *************************************************************************
 -- TESTUNIT         : 04
 -- DESCRIPTION      : delete with SQ GB Having SQ on
@@ -683,6 +698,7 @@ C0         |NAME      |MGRNAME   |DNO
 --------------------------------------
 1          |ASHOK     |NULL      |K51 
 ij> -- "END OF TESTUNIT: 04";
+
 -- *************************************************************************
 -- TESTUNIT         : 05
 -- DESCRIPTION      : delete with SQ on child table correlated to SQ
@@ -693,8 +709,10 @@ ij> -- "END OF TESTUNIT: 04";
 -- reset to original rows
 delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 1 row inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -744,6 +762,7 @@ C0         |NAME      |MGRNAME   |DNO
 --------------------------------------
 1          |ASHOK     |NULL      |K51 
 ij> -- "END OF TESTUNIT: 05";
+
 -- *************************************************************************
 -- TESTUNIT         : 06
 -- DESCRIPTION      : delete with SQ on child table correlated to SQ
@@ -754,8 +773,10 @@ ij> -- "END OF TESTUNIT: 05";
 -- reset to original rows
 delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 1 row inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -800,6 +821,8 @@ ij> select * from db2test.emp2 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 ij> -- "END OF TESTUNIT: 06";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 07
 -- DESCRIPTION      : delete with SQ on child table correlated to SQ
@@ -810,10 +833,13 @@ ij> -- "END OF TESTUNIT: 06";
 -- reset to original rows
 delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 1 row inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -854,6 +880,7 @@ ij> select * from db2test.emp2 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 ij> -- "END OF TESTUNIT: 07";
+
 -- *************************************************************************
 -- TESTUNIT         : 08
 -- DESCRIPTION      : delete with SQ on child table correlated to SQ
@@ -864,12 +891,15 @@ ij> -- "END OF TESTUNIT: 07";
 -- reset to original rows
 delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 1 row inserted/updated/deleted
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -907,6 +937,7 @@ ij> select * from db2test.emp2 order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 ij> -- "END OF TESTUNIT: 08";
+
 -- *************************************************************************
 -- TESTUNIT         : 09
 -- DESCRIPTION      : delete on view with SQ GB Having SQ on
@@ -917,10 +948,13 @@ ij> -- "END OF TESTUNIT: 08";
 -- reset to original rows
 delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 1 row inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -980,6 +1014,7 @@ C0         |NAME      |MGRNAME   |DNO
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
 ij> -- "END OF TESTUNIT: 09";
+
 -- *************************************************************************
 -- TESTUNIT         : 10
 -- DESCRIPTION      : delete on iudt where SQ on
@@ -1138,6 +1173,7 @@ ij> -- FOLLOWING TWO QUERIES HANG IN DERBY NOW ..
 -- select * from db2test.dept where dno in (select vdno from
 --  db2test.vempjoin12)
 --  and dno in ('K55', 'K52') order by 2, 3;
+
 --delete from db2test.dept where dno in (select vdno from
 --  db2test.vempjoin12)
 --  and dno in ('K55', 'K52');
@@ -1516,6 +1552,8 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 10";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 11
 -- DESCRIPTION      : delete with many SQ levels correl'd on child tables
@@ -1527,36 +1565,51 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 1 row inserted/updated/deleted
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp6;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp7;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp8;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp9;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp10;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp11;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp12;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp13;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp14;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp15;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -1750,6 +1803,8 @@ C0         |NAME      |MGRNAME   |DNO
 2          |JOHN      |ASHOK     |K51 
 3          |ROBIN     |ASHOK     |K51 
 ij> -- "END OF TESTUNIT: 11";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 12
 -- DESCRIPTION      : delete on view with union of 15 child tables
@@ -1763,34 +1818,49 @@ ij> delete from db2test.secondemp;
 1 row inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp6;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp7;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp8;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp9;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp10;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp11;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp12;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp13;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp14;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp15;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -2021,6 +2091,7 @@ C0         |NAME      |MGRNAME   |DNO
 3          |ROBIN     |ASHOK     |K51 
 ij> -- "END OF TESTUNIT: 12";
 -- "cleanup";
+
 drop view VEMPUNION15;
 0 rows inserted/updated/deleted
 ij> drop view VEMPJOIN12;
@@ -2067,6 +2138,7 @@ ij> drop table db2test.dept;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "cself302.sql ENDED";
+
 -- #########################################################################
 -- # TESTCASE NAME    : cself303.sql
 -- # LINE ITEM        : Self-referencing subqueries
@@ -2082,7 +2154,9 @@ ij> -- "cself302.sql ENDED";
 -- #                  : tables in the query by cascade on delete.
 -- #                  : shape of the RI tree is a 6 level chain.
 -- #########################################################################
+
 -- "START OF TESTCASE: cself303.sql";
+
 autocommit off;
 ij> -- *************************************************************************
 -- TESTUNIT         : 01
@@ -2202,6 +2276,7 @@ create table db2test.emp6 (c0 int, name char(10) not null primary key
 ij> insert into db2test.emp6 select * from db2test.emp;
 20 rows inserted/updated/deleted
 ij> -- "END OF TESTUNIT: 01";
+
 -- *************************************************************************
 -- TESTUNIT         : 02
 -- DESCRIPTION      : delete where SQ on child table on RI cascade col
@@ -2293,6 +2368,7 @@ C0         |NAME      |MGRNAME   |DNO
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
 ij> -- "END OF TESTUNIT: 02";
+
 -- *************************************************************************
 -- TESTUNIT         : 03
 -- DESCRIPTION      : delete where SQ on child table on RI cascade col
@@ -2304,14 +2380,19 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -2409,6 +2490,7 @@ C0         |NAME      |MGRNAME   |DNO
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
 ij> -- "END OF TESTUNIT: 03";
+
 -- *************************************************************************
 -- TESTUNIT         : 04
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -2420,14 +2502,19 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -2463,6 +2550,7 @@ ij> delete from db2test.emp
                   where e1.name = db2test.emp.mgrname and 
                   e1.mgrname = 'JOHN')))));
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -2579,6 +2667,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 04";
+
 -- *************************************************************************
 -- TESTUNIT         : 05
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -2591,14 +2680,19 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -2748,6 +2842,8 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 05";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 06
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -2760,14 +2856,19 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -2916,6 +3017,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 06";
+
 -- *************************************************************************
 -- TESTUNIT         : 07
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -2928,14 +3030,19 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -3077,6 +3184,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 07";
+
 -- *************************************************************************
 -- TESTUNIT         : 08
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -3089,14 +3197,19 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -3246,6 +3359,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 08";
+
 -- *************************************************************************
 -- TESTUNIT         : 09
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -3258,14 +3372,19 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp3;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp4;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp5;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -3438,6 +3557,7 @@ ij> drop table db2test.origdept;
 0 rows inserted/updated/deleted
 ij> rollback;
 ij> -- "cself303.clp ENDED";
+
 -- #########################################################################
 -- # TESTCASE NAME    : cself304.sql
 -- # LINE ITEM        : Self-referencing subqueries
@@ -3540,12 +3660,14 @@ ij> alter table db2test.dept add constraint dmgr foreign key (dmgrname)
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 01";
+
 -- ************************************************************************
 -- TESTUNIT         : 02
 -- DESCRIPTION      : delete where SQ on child table on RI cascade col
 -- EXPECTED RESULTS : SQL commands should complete successfully
 -- *************************************************************************
 -- "START OF TESTUNIT: 02";
+
 select * from db2test.emp e where dno in (select dno from db2test.emp2 e2
    where e2.dno in (select dno from db2test.dept d
    where dmgrname = 'JOHN'));
@@ -3603,6 +3725,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 02";
+
 -- ************************************************************************
 -- TESTUNIT         : 03
 -- DESCRIPTION      : same as 02, but with correlation to top table
@@ -3614,6 +3737,7 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 1 row inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -3635,6 +3759,7 @@ ij> delete from db2test.emp where dno in (select dno from db2test.emp2 e2
    where e2.dno in (select dno from db2test.dept d
    where mgrname = 'john' and e2.name = d.dmgrname));
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.dept order by dno, dname, dmgrname;
 C0         |DNO|DNAME     |DMGRNAME  
 -------------------------------------
@@ -3691,6 +3816,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 03";
+
 -- ************************************************************************
 -- TESTUNIT         : 04
 -- DESCRIPTION      : same as 02 but SQ's reversed
@@ -3702,6 +3828,7 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 1 row inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -3775,6 +3902,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 04";
+
 -- ************************************************************************
 -- TESTUNIT         : 05
 -- DESCRIPTION      : same as 03 but SQ's reversed
@@ -3786,6 +3914,7 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 1 row inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -3859,6 +3988,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 05";
+
 -- ************************************************************************
 -- TESTUNIT         : 06
 -- DESCRIPTION      : same as 05 but extra table
@@ -3870,6 +4000,7 @@ delete from db2test.dept;
 3 rows inserted/updated/deleted
 ij> delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 1 row inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -3945,6 +4076,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 06";
+
 -- *************************************************************************
 -- TESTUNIT         : 07
 -- DESCRIPTION      : delete on parent with SQ on join view of children
@@ -4011,6 +4143,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 07";
+
 -- *************************************************************************
 -- TESTUNIT         : 08
 -- DESCRIPTION      : delete on parent with SQ on union view of children
@@ -4097,6 +4230,7 @@ ij> --drop view db2test.vempjoin;
 --drop view db2test.vempunion;
 commit;
 ij> -- "cself304.sql ENDED";
+
 -- #########################################################################
 -- # TESTCASE NAME    : cself311.sql
 -- # LINE ITEM        : Self-referencing subqueries
@@ -4113,7 +4247,9 @@ ij> -- "cself304.sql ENDED";
 -- #                  : and the deleted table has a self-ref'g RI const.
 -- # EXPECTED RESULTS : File should run successfully with no errors.
 -- #########################################################################
+
 -- "START OF TESTCASE: cself311.sql";
+
 autocommit off;
 ij> -- *************************************************************************
 -- TESTUNIT         : 01
@@ -4189,6 +4325,7 @@ ij> create table db2test.origemp (c0 int, name char(10) not null primary key,
 ij> insert into db2test.origemp select * from db2test.emp;
 20 rows inserted/updated/deleted
 ij> -- "END OF TESTUNIT: 01";
+
 -- *************************************************************************
 -- TESTUNIT         : 02
 -- DESCRIPTION      : delete where SQ on same table on RI set null col
@@ -4226,6 +4363,8 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 7          |TRUONG    |NULL      |K55 
 ij> -- "END OF TESTUNIT: 02";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 03
 -- DESCRIPTION      : delete with 2 levels of SQ and self-ref in 2nd
@@ -4271,6 +4410,7 @@ C0         |NAME      |MGRNAME   |DNO
 14         |SAM1      |ROGER     |K52 
 15         |SAM2      |ROGER     |K52 
 ij> -- "END OF TESTUNIT: 03";
+
 -- *************************************************************************
 -- TESTUNIT         : 04
 -- DESCRIPTION      : delete with SQ GB Having SQ on
@@ -4336,6 +4476,7 @@ ij> select * from db2test.emp order by name, mgrname, dno;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 ij> -- "END OF TESTUNIT: 04";
+
 -- *************************************************************************
 -- TESTUNIT         : 05
 -- DESCRIPTION      : delete with SQ GB Having SQ on
@@ -4346,6 +4487,8 @@ ij> -- "END OF TESTUNIT: 04";
 -- reset to original rows
 delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.emp select * from db2test.origemp;
 20 rows inserted/updated/deleted
 ij> select * from db2test.emp where exists ( select max(mgrname) from
@@ -4403,6 +4546,7 @@ ij> select * from db2test.emp order by name, mgrname, dno;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 ij> -- "END OF TESTUNIT: 05";
+
 -- *************************************************************************
 -- TESTUNIT         : 06
 -- DESCRIPTION      : delete on view with SQ GB Having SQ on
@@ -4413,6 +4557,8 @@ ij> -- "END OF TESTUNIT: 05";
 -- reset to original rows
 delete from db2test.emp;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.emp select * from db2test.origemp;
 20 rows inserted/updated/deleted
 ij> create view db2test.vemp (vc0, vname, vmgrname, vdno) as
@@ -4490,6 +4636,7 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |K52 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 06";
+
 -- "cleanup";
 drop view db2test.vemp;
 0 rows inserted/updated/deleted
@@ -4503,6 +4650,7 @@ ij> drop table db2test.origdept;
 0 rows inserted/updated/deleted
 ij> rollback;
 ij> -- "cself311.clp ENDED";
+
 -- #########################################################################
 -- # TESTCASE NAME    : cself312.sql
 -- # LINE ITEM        : Self-referencing subqueries
@@ -4518,7 +4666,9 @@ ij> -- "cself311.clp ENDED";
 -- #                  : tables in the query by set null on delete.
 -- #                  : shape of the RI tree is a 1 level star fanout.
 -- #########################################################################
+
 -- "START OF TESTCASE: cself312.sql";
+
 autocommit off;
 ij> -- *************************************************************************
 -- TESTUNIT         : 01
@@ -4601,6 +4751,7 @@ ij> insert into db2test.secondemp select * from db2test.emp;
 20 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 01";
+
 -- *************************************************************************
 -- TESTUNIT         : 02
 -- DESCRIPTION      : delete where SQ on same table on RI set null col
@@ -4667,6 +4818,8 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 02";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 03
 -- DESCRIPTION      : delete with 2 levels of SQ and self-ref in 2nd
@@ -4679,6 +4832,7 @@ delete from db2test.emp;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 2 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 20 rows inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -4751,6 +4905,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 03";
+
 -- *************************************************************************
 -- TESTUNIT         : 04
 -- DESCRIPTION      : delete with SQ GB Having SQ on
@@ -4763,6 +4918,7 @@ delete from db2test.emp;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 2 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 20 rows inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -4836,6 +4992,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 04";
+
 -- *************************************************************************
 -- TESTUNIT         : 05
 -- DESCRIPTION      : delete with SQ on child table correlated to SQ
@@ -4848,6 +5005,8 @@ delete from db2test.emp;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 20 rows inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -4932,6 +5091,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 05";
+
 -- *************************************************************************
 -- TESTUNIT         : 06
 -- DESCRIPTION      : delete with SQ on child table correlated to SQ
@@ -4944,6 +5104,8 @@ delete from db2test.emp;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 20 rows inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -5047,6 +5209,8 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |NULL
 7          |TRUONG    |HAMID     |NULL
 ij> -- "END OF TESTUNIT: 06";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 07
 -- DESCRIPTION      : delete with SQ on child table correlated to SQ
@@ -5061,6 +5225,9 @@ ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 20 rows inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -5159,6 +5326,7 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |NULL
 7          |TRUONG    |HAMID     |NULL
 ij> -- "END OF TESTUNIT: 07";
+
 -- *************************************************************************
 -- TESTUNIT         : 08
 -- DESCRIPTION      : delete with SQ on child table correlated to SQ
@@ -5175,6 +5343,9 @@ ij> delete from db2test.secondemp;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -5271,6 +5442,7 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |NULL
 7          |TRUONG    |HAMID     |NULL
 ij> -- "END OF TESTUNIT: 08";
+
 -- *************************************************************************
 -- TESTUNIT         : 09
 -- DESCRIPTION      : delete on view with SQ GB Having SQ on
@@ -5285,6 +5457,9 @@ ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 20 rows inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -5385,6 +5560,7 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |NULL
 7          |TRUONG    |HAMID     |NULL
 ij> -- "END OF TESTUNIT: 09";
+
 -- *************************************************************************
 -- TESTUNIT         : 10
 -- DESCRIPTION      : delete on iudt where SQ on
@@ -5399,6 +5575,8 @@ ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 1 row inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.secondemp;
 20 rows inserted/updated/deleted
 ij> insert into db2test.dept select * from db2test.origdept;
@@ -5921,6 +6099,8 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 10";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 11
 -- DESCRIPTION      : delete with many SQ levels correl'd on child tables
@@ -6392,6 +6572,8 @@ C0         |NAME      |MGRNAME   |DNO
 15         |SAM2      |ROGER     |NULL
 7          |TRUONG    |HAMID     |NULL
 ij> -- "END OF TESTUNIT: 11";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 12
 -- DESCRIPTION      : delete on view with union of 15 child tables
@@ -6900,6 +7082,8 @@ C0         |NAME      |MGRNAME   |DNO
 7          |TRUONG    |HAMID     |NULL
 ij> -- "END OF TESTUNIT: 12";
 -- "cleanup";
+
+
 drop view db2test.vempunion15;
 0 rows inserted/updated/deleted
 ij> drop view db2test.vempjoin12;
@@ -6966,7 +7150,9 @@ ij> -- #########################################################################
 -- #                  : tables in the query by set null on delete.
 -- #                  : shape of the RI tree is a 6way star.
 -- #########################################################################
+
 -- "START OF TESTCASE: cself313.sql";
+
 autocommit off;
 ij> -- *************************************************************************
 -- TESTUNIT         : 01
@@ -7086,6 +7272,7 @@ create table db2test.emp6 (c0 int, name char(10) not null primary key,
 ij> insert into db2test.emp6 select * from db2test.emp;
 20 rows inserted/updated/deleted
 ij> -- "END OF TESTUNIT: 01";
+
 -- *************************************************************************
 -- TESTUNIT         : 02
 -- DESCRIPTION      : delete where SQ on child table on RI set null col
@@ -7101,6 +7288,12 @@ ij> delete from db2test.emp where dno in (select dno from db2test.emp3 e3
    where e3.dno in (select dno from db2test.emp2 e2
    where mgrname = 'JOHN' and e3.name = e2.mgrname));
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7217,6 +7410,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 02";
+
 -- *************************************************************************
 -- TESTUNIT         : 03
 -- DESCRIPTION      : delete where SQ on child table on RI set null col
@@ -7267,6 +7461,7 @@ ij> delete from db2test.emp  where dno in (select dno from db2test.emp3 e3
    where e3.dno in (select dno from db2test.emp2 e2
    where mgrname = 'JOHN'));
 10 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7373,6 +7568,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |NULL      |K55 
 7          |TRUONG    |NULL      |K55 
 ij> -- "END OF TESTUNIT: 03";
+
 -- *************************************************************************
 -- TESTUNIT         : 04
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -7382,8 +7578,10 @@ ij> -- "END OF TESTUNIT: 03";
 -- reset to original rows
 delete from db2test.dept;
 3 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp;
 10 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.emp3;
@@ -7427,6 +7625,12 @@ ij> delete from db2test.emp
                   where e1.name = db2test.emp.mgrname and
                   e1.mgrname = 'JOHN')))));
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7543,6 +7747,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 04";
+
 -- *************************************************************************
 -- TESTUNIT         : 05
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -7553,8 +7758,10 @@ ij> -- "END OF TESTUNIT: 04";
 -- reset to original rows
 delete from db2test.dept;
 3 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp;
 20 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.emp3;
@@ -7605,6 +7812,11 @@ ij> delete from db2test.emp e
                   e2.dno in (select e1.dno from db2test.emp  e1
                   where e1.name = e.mgrname and e1.mgrname = 'JOHN')))));
 8 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7713,6 +7925,8 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |GUY       |K55 
 7          |TRUONG    |HAMID     |K55 
 ij> -- "END OF TESTUNIT: 05";
+
+
 -- *************************************************************************
 -- TESTUNIT         : 06
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -7723,8 +7937,10 @@ ij> -- "END OF TESTUNIT: 05";
 -- reset to original rows
 delete from db2test.dept;
 3 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp;
 12 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.emp3;
@@ -7768,6 +7984,7 @@ ij> delete from db2test.emp e
                   e2.dno in (select e1.dno from db2test.emp  e1
                    where e.mgrname = 'JOHN')))));
 2 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -7882,6 +8099,7 @@ C0         |NAME      |MGRNAME   |DNO
 18         |MONICA    |NULL      |K55 
 7          |TRUONG    |NULL      |K55 
 ij> -- "END OF TESTUNIT: 06";
+
 -- *************************************************************************
 -- TESTUNIT         : 07
 -- DESCRIPTION      : delete where SQ chain reversing RI child chain
@@ -7892,8 +8110,10 @@ ij> -- "END OF TESTUNIT: 06";
 -- reset to original rows
 delete from db2test.dept;
 3 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp;
 18 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.emp3;
@@ -7937,6 +8157,7 @@ ij> delete from db2test.emp
                   e2.dno in (select dno from db2test.emp  e1
                    where db2test.emp.mgrname = 'JOHN')))));
 2 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -8052,6 +8273,7 @@ C0         |NAME      |MGRNAME   |DNO
 7          |TRUONG    |NULL      |K55 
 ij> -- "END OF TESTUNIT: 07";
 -- "cleanup";
+
 drop table db2test.emp6;
 0 rows inserted/updated/deleted
 ij> drop table db2test.emp5;
@@ -8072,6 +8294,7 @@ ij> drop table db2test.origdept;
 0 rows inserted/updated/deleted
 ij> rollback;
 ij> -- "cself313.clp ENDED";
+
 -- #########################################################################
 -- # TESTCASE NAME    : cself314.sql
 -- # LINE ITEM        : Self-referencing subqueries
@@ -8087,7 +8310,9 @@ ij> -- "cself313.clp ENDED";
 -- #                  : where the deleted table is connected to other
 -- #                  : tables in the query by set null on delete.
 -- #                  : shape of the RI tree is a 3-way cycle to parent
+
 -- "START OF TESTCASE: cself314.sql";
+
 autocommit off;
 ij> -- *************************************************************************
 -- TESTUNIT         : 01
@@ -8173,6 +8398,7 @@ ij> alter table db2test.dept add constraint dmgr foreign key (dmgrname)
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 01";
+
 -- ************************************************************************
 -- TESTUNIT         : 02
 -- DESCRIPTION      : delete where SQ on child table on RI set null col
@@ -8245,6 +8471,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 02";
+
 -- ************************************************************************
 -- TESTUNIT         : 03
 -- DESCRIPTION      : same as 02, but with correlation to top table
@@ -8277,6 +8504,8 @@ ij> delete from db2test.emp  where dno in (select dno from db2test.emp2 e2
    where e2.dno in (select dno from db2test.dept d
    where mgrname = 'john' and e2.name = d.dmgrname));
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.dept order by dno, dname, dmgrname;
 C0         |DNO|DNAME     |DMGRNAME  
 -------------------------------------
@@ -8333,6 +8562,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 03";
+
 -- ************************************************************************
 -- TESTUNIT         : 04
 -- DESCRIPTION      : same as 02 but SQ's reversed
@@ -8369,6 +8599,8 @@ ij> delete from db2test.emp  where dno in
      (select dno from db2test.emp2 e2
        where e2.mgrname = 'john'));
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.dept order by dno, dname, dmgrname;
 C0         |DNO|DNAME     |DMGRNAME  
 -------------------------------------
@@ -8425,6 +8657,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 04";
+
 -- ************************************************************************
 -- TESTUNIT         : 05
 -- DESCRIPTION      : same as 03 but SQ's reversed
@@ -8461,6 +8694,8 @@ ij> delete from db2test.emp where dno in
      (select dno from db2test.emp2 e2 where e2.dno = d.dno and
         e2.mgrname = 'john'));
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.dept order by dno, dname, dmgrname;
 C0         |DNO|DNAME     |DMGRNAME  
 -------------------------------------
@@ -8517,6 +8752,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 05";
+
 -- ************************************************************************
 -- TESTUNIT         : 06
 -- DESCRIPTION      : same as 05 but extra table
@@ -8555,6 +8791,8 @@ ij> delete from db2test.emp  where dno in
      (select dno from db2test.emp2 e2 where e2.dno = d.dno and
         e2.mgrname = 'john')));
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> select * from db2test.dept order by dno, dname, dmgrname;
 C0         |DNO|DNAME     |DMGRNAME  
 -------------------------------------
@@ -8611,6 +8849,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 06";
+
 -- *************************************************************************
 -- TESTUNIT         : 07
 -- DESCRIPTION      : delete on parent with SQ on join view of children
@@ -8624,6 +8863,7 @@ ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 3 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -8705,6 +8945,7 @@ ij> alter table db2test.dept drop constraint dmgr;
 0 rows inserted/updated/deleted
 ij> commit;
 ij> -- "END OF TESTUNIT: 07";
+
 -- *************************************************************************
 -- TESTUNIT         : 08
 -- DESCRIPTION      : delete on parent with SQ on union view of children
@@ -8718,6 +8959,7 @@ ij> delete from db2test.emp2;
 20 rows inserted/updated/deleted
 ij> delete from db2test.dept;
 1 row inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into db2test.dept select * from db2test.origdept;
 3 rows inserted/updated/deleted
 ij> insert into db2test.emp select * from db2test.origemp;
@@ -8743,6 +8985,7 @@ C0         |DNO|DNAME     |DMGRNAME
 2          |K52|OFC       |ROBIN     
 1          |K55|DB        |JOHN      
 ij> -- #END;
+
 delete from db2test.dept where dno in (select vdno from
   db2test.vempunion)
   and dno in ('K55', 'K52');
@@ -8820,5 +9063,6 @@ ij> -- "cself314.clp ENDED";
 drop schema db2test restrict;
 0 rows inserted/updated/deleted
 ij> -- END OF REFACTIONS1.sql --
+
 ;
 ij> 

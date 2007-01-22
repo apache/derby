@@ -511,7 +511,10 @@ select i, d, i * d, d * i, d * d, d * 2, d * 2.0e0 from t;
 select -(d * 100 / 100e0 ), +(d * 100e0 / 100 ) from t;
 
 -- test null/null, constant/null, null/constant
-select i, d, i / d, 10 / d, d / 10e0 from t;
+-- Cast to decimal to remove a minor diff among
+-- vms, where 0.005 converted to a String would be
+-- either 0.005 or 0.0050 (both valid formats for Double.toString(double)
+select i, d, CAST (i / d AS DECIMAL(6,5)), 10 / d, d / 10e0 from t;
 
 -- test for divide by 0
 select d / i from t;
@@ -799,8 +802,10 @@ select i, d, s, r, i * r, r * i, s * r, d * r, r * r, r * 2, r * 2.0e0 from t;
 select -(r * 100 / 100e0 ), +(r * 100e0 / 100 ) from t;
 
 -- test null/null, constant/null, null/constant
-select i, d, r, d / r, i / r, 10 / r, r / d, r / 10e0 from t;
-
+-- Cast to decimal to remove a minor diff among
+-- vms, where 0.005 converted to a String would be
+-- either 0.005 or 0.0050 (both valid formats for Double.toString(double)
+select i, d, r, d / r, CAST (i / r AS DECIMAL(6,5)), 10 / r, r / d, r / 10e0 from t;
 -- test for divide by 0
 select r / i from t;
 

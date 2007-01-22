@@ -21,6 +21,8 @@ ij> --
 -- same thing, so we don't do much testing with
 -- the two types other than to make sure the 
 -- syntax is the same.
+
+
 -- test some of the meta data
 drop table tmp;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TMP' because it does not exist.
@@ -636,6 +638,7 @@ ij> --try a tiny number
 --		 cast(1.7e308 as dec(2147483647)) *
 --		 cast(1.7e308 as dec(2147483647))));
 --
+
 values cast(1 as dec(31, 20));
 1                                
 ---------------------------------
@@ -657,6 +660,7 @@ drop table w;
 ij> --
 -- comparisons
 --
+
 insert into t values (123,			-- int
 						123,		-- bigint
 						123,		-- smallint	
@@ -978,6 +982,7 @@ DC
 ij> --
 -- test a variety of inserts and updates
 --
+
 drop table t2;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
 ij> create table t2 (i int, 
@@ -1124,6 +1129,7 @@ ERROR 42Y55: 'DROP TABLE' cannot be performed on 'BAD' because it does not exist
 ij> drop table t;
 0 rows inserted/updated/deleted
 ij> -- ** insert double.sql
+
 --
 -- Test the builtin type 'double precision'
 -- assumes these builtin types exist:
@@ -1131,9 +1137,11 @@ ij> -- ** insert double.sql
 --
 -- other things we might test:
 -- show how doubles lose precision on computations
+
 --
 -- Test the arithmetic operators
 --
+
 create table t (i int, s smallint, c char(10), v varchar(50),
 	d double precision);
 0 rows inserted/updated/deleted
@@ -1181,12 +1189,15 @@ NULL                  |NULL
 -200.0                |200.0                 
 200.0                 |-200.0                
 ij> -- test null/null, constant/null, null/constant
-select i, d, i / d, 10 / d, d / 10e0 from t;
-I          |D                     |3                     |4                     |5                     
--------------------------------------------------------------------------------------------------------
-NULL       |NULL                  |NULL                  |NULL                  |NULL                  
-0          |200.0                 |0.0                   |0.05                  |20.0                  
--1         |-200.0                |0.0050                |-0.05                 |-20.0                 
+-- Cast to decimal to remove a minor diff among
+-- vms, where 0.005 converted to a String would be
+-- either 0.005 or 0.0050 (both valid formats for Double.toString(double)
+select i, d, CAST (i / d AS DECIMAL(6,5)), 10 / d, d / 10e0 from t;
+I          |D                     |3       |4                     |5                     
+-----------------------------------------------------------------------------------------
+NULL       |NULL                  |NULL    |NULL                  |NULL                  
+0          |200.0                 |0.00000 |0.05                  |20.0                  
+-1         |-200.0                |0.00500 |-0.05                 |-20.0                 
 ij> -- test for divide by 0
 select d / i from t;
 1                     
@@ -1229,6 +1240,7 @@ D
 ij> drop table t;
 0 rows inserted/updated/deleted
 ij> -- test overflow
+
 create table s (d double precision, p double);
 0 rows inserted/updated/deleted
 ij> insert into s values (null, null);
@@ -1463,6 +1475,7 @@ D
 ----------------------
 5.0                   
 ij> -- show that double is comparable to real
+
 create table o (c char(10), v varchar(30), dc decimal);
 0 rows inserted/updated/deleted
 ij> select d from c,o where d <> dc;
@@ -1489,6 +1502,7 @@ create table source (i int, s smallint, c char(10), v varchar(50),
 ij> create table target (p double precision not null);
 0 rows inserted/updated/deleted
 ij> -- we have already tested inserting integer and double literals.
+
 insert into source values (1, 2, '3', '4', 5);
 1 row inserted/updated/deleted
 ij> -- these will all work:
@@ -1499,6 +1513,7 @@ ij> insert into target select s from source;
 ij> insert into target select d from source;
 1 row inserted/updated/deleted
 ij> -- these will all fail:
+
 delete from source;
 1 row inserted/updated/deleted
 ij> insert into source values (null, null, null, null, null);
@@ -1602,8 +1617,10 @@ ij> -- ** insert float.sql
 -- show the mapping here; the double and real tests
 -- show how well those types behave.
 --
+
 -- this shows several working versions of float, the default
 -- and all of the boundary values:
+
 create table t (d double precision, r real, f float, f1 float(1),
 	f23 float(23), f24 float(24), f53 float(52));
 0 rows inserted/updated/deleted
@@ -1638,8 +1655,10 @@ ij> update t set r = NaN;
 ERROR 42X04: Column 'NAN' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NAN' is not a column in the target table.
 ij> update t set r = +3.4021E+38;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> update t set r = -3.4021E+38;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> drop table t;
 0 rows inserted/updated/deleted
 ij> drop table tt;
@@ -1666,9 +1685,11 @@ ij> -- ** insert real.sql
 --
 -- other things we might test:
 -- show how reals lose precision on computations
+
 --
 -- Test the arithmetic operators
 --
+
 create table t (i int, s smallint, c char(10), v varchar(50),
 	d double precision, r real);
 0 rows inserted/updated/deleted
@@ -1716,12 +1737,15 @@ NULL                  |NULL
 -200.0                |200.0                 
 200.0                 |-200.0                
 ij> -- test null/null, constant/null, null/constant
-select i, d, r, d / r, i / r, 10 / r, r / d, r / 10e0 from t;
-I          |D                     |R            |4                     |5            |6            |7                     |8                     
--------------------------------------------------------------------------------------------------------------------------------------------------
-NULL       |NULL                  |NULL         |NULL                  |NULL         |NULL         |NULL                  |NULL                  
-0          |200.0                 |200.0        |1.0                   |0.0          |0.05         |1.0                   |20.0                  
--1         |-200.0                |-200.0       |1.0                   |0.0050       |-0.05        |1.0                   |-20.0                 
+-- Cast to decimal to remove a minor diff among
+-- vms, where 0.005 converted to a String would be
+-- either 0.005 or 0.0050 (both valid formats for Double.toString(double)
+select i, d, r, d / r, CAST (i / r AS DECIMAL(6,5)), 10 / r, r / d, r / 10e0 from t;
+I          |D                     |R            |4                     |5       |6            |7                     |8                     
+--------------------------------------------------------------------------------------------------------------------------------------------
+NULL       |NULL                  |NULL         |NULL                  |NULL    |NULL         |NULL                  |NULL                  
+0          |200.0                 |200.0        |1.0                   |0.00000 |0.05         |1.0                   |20.0                  
+-1         |-200.0                |-200.0       |1.0                   |0.00500 |-0.05        |1.0                   |-20.0                 
 ij> -- test for divide by 0
 select r / i from t;
 1            
@@ -1745,6 +1769,7 @@ NULL         |NULL                  |NULL                  |NULL         |NULL
 ij> drop table t;
 0 rows inserted/updated/deleted
 ij> -- test overflow
+
 create table s (d real, p real);
 0 rows inserted/updated/deleted
 ij> insert into s values (null, null);
@@ -1865,6 +1890,7 @@ drop table w;
 ij> --
 -- comparisons
 --
+
 create table c (i int, s smallint, d double precision, r real, l real);
 0 rows inserted/updated/deleted
 ij> -- insert some values
@@ -1975,6 +2001,7 @@ R
 2.0          
 1956475.0    
 ij> -- show that real is comparable to decimal
+
 create table o (c char(10), v varchar(30), dc decimal);
 0 rows inserted/updated/deleted
 ij> select r from c,o where r <> dc;
@@ -1994,6 +2021,7 @@ create table source (i int, s smallint, c char(10), v varchar(50),
 ij> create table target (t real not null);
 0 rows inserted/updated/deleted
 ij> -- we have already tested inserting integer and double literals.
+
 insert into source values (1, 2, '3', '4', 5, 6);
 1 row inserted/updated/deleted
 ij> -- these will all work:
@@ -2108,6 +2136,7 @@ ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> values 5e-324;
 ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> -- --- TEST SPECIAL VALUES
+
 -- DB2 (should succed)
 insert into fake values( -3.402E+38 );
 1 row inserted/updated/deleted
@@ -2170,6 +2199,7 @@ ERROR 22003: The resulting value is outside the range for the data type DOUBLE.
 ij> insert into fake values -11;
 1 row inserted/updated/deleted
 ij> -- ============================================================
+
 -- DB2 MAX_VALUES (first succeed, second fail)
 insert into fake values( -3.4019E+38 );
 1 row inserted/updated/deleted
@@ -2274,6 +2304,7 @@ ij> create table fake(r real);
 ij> -- ============================================================
 -- ---underflow aritmetic
 -- underflow to small real but / makes double!=0, so we catch
+
 -- ok
 values cast(5e-37/1e0 as real);
 1            
@@ -2378,7 +2409,9 @@ ij> values 0123456789012345678901234567e1;
 ----------------------
 1.2345678901234569E27 
 ij> -- ============================================================
+
 --- Marks tests
+
 -- Examples in Cloudscape 5.2:
 -- these 2 insert statements should raise error msgs in compat mode because 
 -- the values are between the -mpv and +mpv (fail)
@@ -2426,6 +2459,7 @@ C1
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- ============================================================
+
 -- bug 5704 - make sure we catch the overflow correctly for multiplication operator
 values cast(1e30 as decimal(31))*cast(1e30 as decimal(31));
 1                               

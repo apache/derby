@@ -24,6 +24,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -39,22 +40,20 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *
  */
 public final class LangScripts extends ScriptTestCase {
-	
-	/**
-	 * Language SQL scripts (.sql files) that run under all configurations.
-	 */
-	private static final String[] SQL_LANGUAGE_TESTS = {
-		"case",
-		"constantExpression",
-		};
 
     /**
      * Language SQL scripts (.sql files) that run under Derby's client
-     * and emebdded configurations.
+     * and emebedded configurations. SQL tests are put in this category
+     * if they are likely to have some testing of the protocol,
+     * typically tests related to data types.
+     * 
      */
-    private static final String[] DERBY_TESTS = {
+    private static final String[] CLIENT_AND_EMBEDDED_TESTS = {
+        "LOB",
+        "bit",
         "bit2",
-        "derived",
+        "nulls",
+        "stringtypes",
         };
     
     /**
@@ -66,21 +65,33 @@ public final class LangScripts extends ScriptTestCase {
         "aggbuiltin",
         "aggregate",
         "arithmetic",
-        "bit",
+        "case",
         "comparisons",
+        "constantExpression",
         "delete",
+        "derived",
         "depend",
+        "ejbql",
+        "floattypes",
         "insert",
-        "LOB",
-        "nulls",
+        "refActions1",
         "schemas",
         "select",
-        "stringtypes",
+        "synonym",
+        "tempRestrictions",
         "union",
         "update",
         "valuesclause",
         "views",
-        };	
+        };
+    
+    /**
+     * Tests that run in embedded and require JDBC3_TESTS
+     * (ie. can not run on JSR169).
+     */
+    private static final String[] JDBC3_TESTS = {
+        "cast",  // DERBY-2228 (also never ran with J2ME with old harness)
+    };
 
 	/**
 	 * Run a set of language SQL scripts (.sql files) passed in on the
@@ -102,14 +113,14 @@ public final class LangScripts extends ScriptTestCase {
 	public static Test suite() {
         
         TestSuite suite = new TestSuite("LangScripts");
-        suite.addTest(getSuite(SQL_LANGUAGE_TESTS));
-        suite.addTest(getSuite(DERBY_TESTS));
+        suite.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
         suite.addTest(getSuite(EMBEDDED_TESTS));
+        if (JDBC.vmSupportsJDBC3())
+            suite.addTest(getSuite(JDBC3_TESTS));
         
         // Set up the scripts run with the network client
         TestSuite clientTests = new TestSuite("LangScripts:client");
-        clientTests.addTest(getSuite(SQL_LANGUAGE_TESTS));
-        clientTests.addTest(getSuite(DERBY_TESTS));
+        clientTests.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
         Test client = TestConfiguration.clientServerDecorator(clientTests);
         
         // add those client tests into the top-level suite.
