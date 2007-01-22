@@ -109,7 +109,9 @@ class UpgradeRun {
                     "Upgrade Phase: " + UpgradeChange.PHASES[phase],
                     phase, version);
             
-            suite.addTest(new PhaseChanger(phaseTests, phase, loader, version));
+            Test phaseSet = new PhaseChanger(phaseTests, phase, loader, version);
+            phaseSet = handleJavaSE6(phase, version, phaseSet);
+            suite.addTest(phaseSet);
         }
           
         TestSetup setup = TestConfiguration.singleUseDatabaseDecorator(suite);
@@ -252,5 +254,42 @@ class UpgradeRun {
         // Specify null for parent class loader to avoid mixing up 
         // jars specified in the system classpath
         return new URLClassLoader(url, null);       
+    }
+    
+    
+    /**
+     * When running against certains old releases in Java SE 6
+     * we need to setup the connections to the old
+     * database to not use the specific JDBC 4
+     * datasources (e.g. EmbeddedDataSource40).
+     * (Since they don't exist in the old release).
+     *
+     */
+    private static Test handleJavaSE6(int phase, int[] version, Test test)
+    {
+        // 
+        // we need to tell the JUnit infratructure not to
+        // look for the  40 datasources (e.g. EmbeddedDataSource40)
+        boolean oldReleaseNeedsJDBC3 = false;
+        switch (phase)
+        {
+        case UpgradeChange.PH_CREATE:
+        case UpgradeChange.PH_POST_SOFT_UPGRADE:
+            
+            // Pre 10.2.2.0 need jdbc 3 drivers.
+            if (version[0] == 10 && version[1] < 3)
+            {
+                if (version[1] < 2 || version[2] < 2)
+                   oldReleaseNeedsJDBC3 = true;
+            }
+            break;
+        default:
+            break;
+        }
+        
+        if (oldReleaseNeedsJDBC3) {
+            return TestConfiguration.forceJDBC3Embedded(test);
+        }
+        return test;
     }
 }

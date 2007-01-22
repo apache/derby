@@ -369,6 +369,23 @@ public class TestConfiguration {
     }
     
     /**
+     * Returns a decorator that forces the JDBC 3 embedded client  in
+     * a Java SE 6/JDBC 4 environment. The only difference is that
+     * the DataSource class names will be the "old" JDBC 3 versions
+     * and not the JDBC 4 specific ones.
+     * that
+     * @param test
+     * @return
+     */
+    public static Test forceJDBC3Embedded(Test test)
+    {
+        if (JDBC.vmSupportsJDBC4()) {
+            test = new JDBCClientSetup(test, JDBCClient.EMBEDDED_30);
+        }
+        return test;
+    }
+    
+    /**
      * Default embedded configuration
      *
      */
