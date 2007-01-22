@@ -94,90 +94,6 @@ public abstract class metadata_test {
 	public Connection con;
 	public static Statement s;
 	
-	/*
-	** Escaped function testing
-	*/
-	private static final String[][] NUMERIC_FUNCTIONS =
-	{
-		// Section C.1 JDBC 3.0 spec.
-		{ "ABS", "-25.67" },
-		{ "ACOS", "0.0707" },
-		{ "ASIN", "0.997" },
-		{ "ATAN", "14.10" },
-		{ "ATAN2", "0.56", "1.2" },
-		{ "CEILING", "3.45" },
-		{ "COS", "1.2" },
-		{ "COT", "3.4" },
-		{ "DEGREES", "2.1" },
-		{ "EXP", "2.3" },
-		{ "FLOOR", "3.22" },
-		{ "LOG", "34.1" },
-		{ "LOG10", "18.7" },
-		{ "MOD", "124", "7" },
-		{ "PI" },
-		{ "POWER", "2", "3" },
-		{ "RADIANS", "54" },
-		{ "RAND", "17" }, 
-		{ "ROUND", "345.345", "1" }, 
-		{ "SIGN", "-34" },
-		{ "SIN", "0.32" },
-		{ "SQRT", "6.22" },
-		{ "TAN", "0.57", },
-		{ "TRUNCATE", "345.395", "1" }
-	};
-	
-	private static final String[][] TIMEDATE_FUNCTIONS =
-	{	
-		// Section C.3 JDBC 3.0 spec.
-		{ "CURDATE" },
-		{ "CURTIME" },
-		{ "DAYNAME", "{d '1995-12-19'h}" },
-		{ "DAYOFMONTH", "{d '1995-12-19'}" },
-		{ "DAYOFWEEK", "{d '1995-12-19'}" },
-		{ "DAYOFYEAR", "{d '1995-12-19'}" },
-		{ "HOUR", "{t '16:13:03'}" },
-		{ "MINUTE", "{t '16:13:03'}" },
-		{ "MONTH", "{d '1995-12-19'}" },
-		{ "MONTHNAME", "{d '1995-12-19'}" },
-		{ "NOW" },
-		{ "QUARTER", "{d '1995-12-19'}" },
-		{ "SECOND", "{t '16:13:03'}" },
-		{ "TIMESTAMPADD", "SQL_TSI_DAY", "7", "{ts '1995-12-19 12:15:54'}" },
-		{ "TIMESTAMPDIFF", "SQL_TSI_DAY", "{ts '1995-12-19 12:15:54'}", "{ts '1997-11-02 00:15:23'}" },
-		{ "WEEK", "{d '1995-12-19'}" },
-		{ "YEAR", "{d '1995-12-19'}" },
-		
-	};
-
-	private static final String[][] SYSTEM_FUNCTIONS =
-	{	
-		// Section C.4 JDBC 3.0 spec.
-		{ "DATABASE" },
-		{ "IFNULL", "'this'", "'that'" },
-		{ "USER"},
-		};	
-	
-	private static final String[][] STRING_FUNCTIONS =
-	{	
-		// Section C.2 JDBC 3.0 spec.
-		{ "ASCII" , "'Yellow'" },
-		{ "CHAR", "65" },
-		{ "CONCAT", "'hello'", "'there'" },
-		{ "DIFFERENCE", "'Pires'", "'Piers'" },
-		{ "INSERT", "'Bill Clinton'", "4", "'William'" },
-		{ "LCASE", "'Fernando Alonso'" },
-		{ "LEFT", "'Bonjour'", "3" },
-		{ "LENGTH", "'four    '" } ,
-		{ "LOCATE", "'jour'", "'Bonjour'" },
-		{ "LTRIM", "'   left trim   '"},
-		{ "REPEAT", "'echo'", "3" },
-		{ "REPLACE", "'to be or not to be'", "'be'", "'England'" },
-		{ "RTRIM", "'  right trim   '"},
-		{ "SOUNDEX", "'Derby'" },
-		{ "SPACE", "12"},
-		{ "SUBSTRING", "'Ruby the Rubicon Jeep'", "10", "7", },
-		{ "UCASE", "'Fernando Alonso'" }
-		};
 
 	public void runTest() {
 
@@ -380,45 +296,8 @@ public abstract class metadata_test {
 							   "." + met.getDriverMinorVersion() +
 							   " (" + met.getDriverVersion() + ")");
 
-			boolean pass = false;
-			try {
-				pass = TestUtil.compareURL(met.getURL());				 
-			}catch (NoSuchMethodError msme) {
-				// DatabaseMetaData.getURL not present - correct for JSR169
-				if(!TestUtil.HAVE_DRIVER_CLASS)
-					pass = true;
-			} catch (Throwable err) {
-			    System.out.println("%%getURL() gave the exception: " + err);
-			}
-			
-			if(pass)
-				System.out.println("DatabaseMetaData.getURL test passed");
-			else
-				System.out.println("FAIL: DatabaseMetaData.getURL test failed");
-
-			System.out.println("allTablesAreSelectable(): " +
-							   met.allTablesAreSelectable());
-			
-			System.out.println("maxColumnNameLength(): " + met.getMaxColumnNameLength());
-
-			System.out.println();
-			System.out.println("getSchemas():");
-			dumpRS(met.getSchemas());
-
 			testGetSchemasWithTwoParams(met);
 
-			System.out.println();
-			System.out.println("getCatalogs():");
-			dumpRS(met.getCatalogs());
-
-			System.out.println("getSearchStringEscape(): " +
-							   met.getSearchStringEscape());
-
-			System.out.println("getSQLKeywords(): " +
-							   met.getSQLKeywords());
-
-			System.out.println("getDefaultTransactionIsolation(): " +
-							   met.getDefaultTransactionIsolation());
 
 			System.out.println("getProcedures():");
 			dumpRS(GET_PROCEDURES, getMetaDataRS(met, GET_PROCEDURES,
@@ -533,230 +412,8 @@ public abstract class metadata_test {
 			 */
 
 
-			System.out.println("allProceduresAreCallable(): " +
-							   met.allProceduresAreCallable());
-			System.out.println("getUserName(): " +
-							   met.getUserName());
-			System.out.println("isReadOnly(): " +
-							   met.isReadOnly());
-			System.out.println("nullsAreSortedHigh(): " +
-							   met.nullsAreSortedHigh());
-			System.out.println("nullsAreSortedLow(): " +
-							   met.nullsAreSortedLow());
-			System.out.println("nullsAreSortedAtStart(): " +
-							   met.nullsAreSortedAtStart());
-			System.out.println("nullsAreSortedAtEnd(): " +
-							   met.nullsAreSortedAtEnd());
-
-
-			System.out.println("getDatabaseProductName(): " + met.getDatabaseProductName());
-
-			String v = met.getDatabaseProductVersion();
-			System.out.println("getDatabaseProductVersion(): " + v);
-			System.out.println("getDriverVersion(): " +
-							   met.getDriverVersion());
-			System.out.println("usesLocalFiles(): " +
-							   met.usesLocalFiles());
-			System.out.println("usesLocalFilePerTable(): " +
-							   met.usesLocalFilePerTable());
-			System.out.println("supportsMixedCaseIdentifiers(): " +
-							   met.supportsMixedCaseIdentifiers());
-			System.out.println("storesUpperCaseIdentifiers(): " +
-							   met.storesUpperCaseIdentifiers());
-			System.out.println("storesLowerCaseIdentifiers(): " +
-							   met.storesLowerCaseIdentifiers());
-			System.out.println("storesMixedCaseIdentifiers(): " +
-							   met.storesMixedCaseIdentifiers());
-			System.out.println("supportsMixedCaseQuotedIdentifiers(): " +
-							   met.supportsMixedCaseQuotedIdentifiers());
-			System.out.println("storesUpperCaseQuotedIdentifiers(): " +
-							   met.storesUpperCaseQuotedIdentifiers());
-			System.out.println("storesLowerCaseQuotedIdentifiers(): " +
-							   met.storesLowerCaseQuotedIdentifiers());
-			System.out.println("storesMixedCaseQuotedIdentifiers(): " +
-							   met.storesMixedCaseQuotedIdentifiers());
-			System.out.println("getIdentifierQuoteString(): " +
-							   met.getIdentifierQuoteString());
-			System.out.println("getNumericFunctions(): " +
-							   met.getNumericFunctions());
-			System.out.println("getStringFunctions(): " +
-							   met.getStringFunctions());
-			System.out.println("getSystemFunctions(): " +
-							   met.getSystemFunctions());
-			System.out.println("getTimeDateFunctions(): " +
-							   met.getTimeDateFunctions());
-			System.out.println("getExtraNameCharacters(): " +
-							   met.getExtraNameCharacters());
-			System.out.println("supportsAlterTableWithAddColumn(): " +
-							   met.supportsAlterTableWithAddColumn());
-			System.out.println("supportsAlterTableWithDropColumn(): " +
-							   met.supportsAlterTableWithDropColumn());
-			System.out.println("supportsColumnAliasing(): " +
-							   met.supportsColumnAliasing());
-			System.out.println("nullPlusNonNullIsNull(): " +
-							   met.nullPlusNonNullIsNull());
-			System.out.println("supportsConvert(): " +
-							   met.supportsConvert());
-			System.out.println("supportsConvert(Types.INTEGER, Types.SMALLINT): " +
-							   met.supportsConvert(Types.INTEGER, Types.SMALLINT));
-			System.out.println("supportsTableCorrelationNames(): " +
-							   met.supportsTableCorrelationNames());
-			System.out.println("supportsDifferentTableCorrelationNames(): " +
-							   met.supportsDifferentTableCorrelationNames());
-			System.out.println("supportsExpressionsInOrderBy(): " +
-							   met.supportsExpressionsInOrderBy());
-			System.out.println("supportsOrderByUnrelated(): " +
-							   met.supportsOrderByUnrelated());
-			System.out.println("supportsGroupBy(): " +
-							   met.supportsGroupBy());
-			System.out.println("supportsGroupByUnrelated(): " +
-							   met.supportsGroupByUnrelated());
-			System.out.println("supportsGroupByBeyondSelect(): " +
-							   met.supportsGroupByBeyondSelect());
-			System.out.println("supportsLikeEscapeClause(): " +
-							   met.supportsLikeEscapeClause());
-			System.out.println("supportsMultipleResultSets(): " +
-							   met.supportsMultipleResultSets());
-			System.out.println("supportsMultipleTransactions(): " +
-							   met.supportsMultipleTransactions());
-			System.out.println("supportsNonNullableColumns(): " +
-							   met.supportsNonNullableColumns());
-			System.out.println("supportsMinimumSQLGrammar(): " +
-							   met.supportsMinimumSQLGrammar());
-			System.out.println("supportsCoreSQLGrammar(): " +
-							   met.supportsCoreSQLGrammar());
-			System.out.println("supportsExtendedSQLGrammar(): " +
-							   met.supportsExtendedSQLGrammar());
-			System.out.println("supportsANSI92EntryLevelSQL(): " +
-							   met.supportsANSI92EntryLevelSQL());
-			System.out.println("supportsANSI92IntermediateSQL(): " +
-							   met.supportsANSI92IntermediateSQL());
-			System.out.println("supportsANSI92FullSQL(): " +
-							   met.supportsANSI92FullSQL());
-			System.out.println("supportsIntegrityEnhancementFacility(): " +
-							   met.supportsIntegrityEnhancementFacility());
-			System.out.println("supportsOuterJoins(): " +
-							   met.supportsOuterJoins());
-			System.out.println("supportsFullOuterJoins(): " +
-							   met.supportsFullOuterJoins());
-			System.out.println("supportsLimitedOuterJoins(): " +
-							   met.supportsLimitedOuterJoins());
-			System.out.println("getSchemaTerm(): " +
-							   met.getSchemaTerm());
-			System.out.println("getProcedureTerm(): " +
-							   met.getProcedureTerm());
-			System.out.println("getCatalogTerm(): " +
-							   met.getCatalogTerm());
-			System.out.println("isCatalogAtStart(): " +
-							   met.isCatalogAtStart());
-			System.out.println("getCatalogSeparator(): " +
-							   met.getCatalogSeparator());
-			System.out.println("supportsSchemasInDataManipulation(): " +
-							   met.supportsSchemasInDataManipulation());
-			System.out.println("supportsSchemasInProcedureCalls(): " +
-							   met.supportsSchemasInProcedureCalls());
-			System.out.println("supportsSchemasInTableDefinitions(): " +
-							   met.supportsSchemasInTableDefinitions());
-			System.out.println("supportsSchemasInIndexDefinitions(): " +
-							   met.supportsSchemasInIndexDefinitions());
-			System.out.println("supportsSchemasInPrivilegeDefinitions(): " +
-							   met.supportsSchemasInPrivilegeDefinitions());
-			System.out.println("supportsCatalogsInDataManipulation(): " +
-							   met.supportsCatalogsInDataManipulation());
-			System.out.println("supportsCatalogsInProcedureCalls(): " +
-							   met.supportsCatalogsInProcedureCalls());
-			System.out.println("supportsCatalogsInTableDefinitions(): " +
-							   met.supportsCatalogsInTableDefinitions());
-			System.out.println("supportsCatalogsInIndexDefinitions(): " +
-							   met.supportsCatalogsInIndexDefinitions());
-			System.out.println("supportsCatalogsInPrivilegeDefinitions(): " +
-							   met.supportsCatalogsInPrivilegeDefinitions());
-			System.out.println("supportsPositionedDelete(): " +
-							   met.supportsPositionedDelete());
-			System.out.println("supportsPositionedUpdate(): " +
-							   met.supportsPositionedUpdate());
-			System.out.println("supportsSelectForUpdate(): " +
-							   met.supportsSelectForUpdate());
-			System.out.println("supportsStoredProcedures(): " +
-							   met.supportsStoredProcedures());
-			System.out.println("supportsSubqueriesInComparisons(): " +
-							   met.supportsSubqueriesInComparisons());
-			System.out.println("supportsSubqueriesInExists(): " +
-							   met.supportsSubqueriesInExists());
-			System.out.println("supportsSubqueriesInIns(): " +
-							   met.supportsSubqueriesInIns());
-			System.out.println("supportsSubqueriesInQuantifieds(): " +
-							   met.supportsSubqueriesInQuantifieds());
-			System.out.println("supportsCorrelatedSubqueries(): " +
-							   met.supportsCorrelatedSubqueries());
-			System.out.println("supportsUnion(): " +
-							   met.supportsUnion());
-			System.out.println("supportsUnionAll(): " +
-							   met.supportsUnionAll());
-			System.out.println("supportsOpenCursorsAcrossCommit(): " +
-							   met.supportsOpenCursorsAcrossCommit());
-			System.out.println("supportsOpenCursorsAcrossRollback(): " +
-							   met.supportsOpenCursorsAcrossRollback());
-			System.out.println("supportsOpenStatementsAcrossCommit(): " +
-							   met.supportsOpenStatementsAcrossCommit());
-			System.out.println("supportsOpenStatementsAcrossRollback(): " +
-							   met.supportsOpenStatementsAcrossRollback());
-			System.out.println("getMaxBinaryLiteralLength(): " +
-							   met.getMaxBinaryLiteralLength());
-			System.out.println("getMaxCharLiteralLength(): " +
-							   met.getMaxCharLiteralLength());
-			System.out.println("getMaxColumnsInGroupBy(): " +
-							   met.getMaxColumnsInGroupBy());
-			System.out.println("getMaxColumnsInIndex(): " +
-							   met.getMaxColumnsInIndex());
-			System.out.println("getMaxColumnsInOrderBy(): " +
-							   met.getMaxColumnsInOrderBy());
-			System.out.println("getMaxColumnsInSelect(): " +
-							   met.getMaxColumnsInSelect());
-			System.out.println("getMaxColumnsInTable(): " +
-							   met.getMaxColumnsInTable());
-			System.out.println("getMaxConnections(): " +
-							   met.getMaxConnections());
-			System.out.println("getMaxCursorNameLength(): " +
-							   met.getMaxCursorNameLength());
-			System.out.println("getMaxIndexLength(): " +
-							   met.getMaxIndexLength());
-			System.out.println("getMaxSchemaNameLength(): " +
-							   met.getMaxSchemaNameLength());
-			System.out.println("getMaxProcedureNameLength(): " +
-							   met.getMaxProcedureNameLength());
-			System.out.println("getMaxCatalogNameLength(): " +
-							   met.getMaxCatalogNameLength());
-			System.out.println("getMaxRowSize(): " +
-							   met.getMaxRowSize());
-			System.out.println("doesMaxRowSizeIncludeBlobs(): " +
-							   met.doesMaxRowSizeIncludeBlobs());
-			System.out.println("getMaxStatementLength(): " +
-							   met.getMaxStatementLength());
-			System.out.println("getMaxStatements(): " +
-							   met.getMaxStatements());
-			System.out.println("getMaxTableNameLength(): " +
-							   met.getMaxTableNameLength());
-			System.out.println("getMaxTablesInSelect(): " +
-							   met.getMaxTablesInSelect());
-			System.out.println("getMaxUserNameLength(): " +
-							   met.getMaxUserNameLength());
-			System.out.println("supportsTransactions(): " +
-							   met.supportsTransactions());
 			System.out.println("supportsTransactionIsolationLevel(Connection.TRANSACTION_NONE): " +
 							   met.supportsTransactionIsolationLevel(Connection.TRANSACTION_NONE));
-			System.out.println("supportsTransactionIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ): " +
-							   met.supportsTransactionIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ));
-			System.out.println("supportsTransactionIsolationLevel(Connection.TRANSACTION_SERIALIZABLE): " +
-							   met.supportsTransactionIsolationLevel(Connection.TRANSACTION_SERIALIZABLE));
-			System.out.println("supportsDataDefinitionAndDataManipulationTransactions(): " +
-							   met.supportsDataDefinitionAndDataManipulationTransactions());
-			System.out.println("supportsDataManipulationTransactionsOnly(): " +
-							   met.supportsDataManipulationTransactionsOnly());
-			System.out.println("dataDefinitionCausesTransactionCommit(): " +
-							   met.dataDefinitionCausesTransactionCommit());
-			System.out.println("dataDefinitionIgnoredInTransactions(): " +
-							   met.dataDefinitionIgnoredInTransactions());
 
 			System.out.println("Test the metadata calls related to visibility of changes made by others for different resultset types");
 			System.out.println("Since Derby materializes a forward only ResultSet incrementally, it is possible to see changes");
@@ -824,36 +481,10 @@ public abstract class metadata_test {
 				}
 			}
 
-			System.out.println("getConnection(): "+
-					   ((met.getConnection()==con)?"same connection":"different connection") );
 			System.out.println("getProcedureColumns():");
 			dumpRS(GET_PROCEDURE_COLUMNS, getMetaDataRS(met, GET_PROCEDURE_COLUMNS,
 				new String [] {null, "%", "GETPCTEST%", "%"},
 				null, null, null));
-
- 			System.out.println("getTables() with TABLE_TYPE in ('SYSTEM TABLE') :");
- 			String[] tabTypes = new String[1];
- 			tabTypes[0] = "SYSTEM TABLE";
- 			dumpRS(GET_TABLES, getMetaDataRS(met, GET_TABLES,
-				new String [] {null, null, null},
- 				tabTypes, null, null));
-
-			System.out.println("getTables() with no types:");
- 			dumpRS(GET_TABLES, getMetaDataRS(met, GET_TABLES,
-				new String [] {"", null, "%"},
-				null, null, null));
-
- 			System.out.println("getTables() with TABLE_TYPE in ('VIEW','TABLE') :");
- 			tabTypes = new String[2];
- 			tabTypes[0] = "VIEW";
- 			tabTypes[1] = "TABLE";
- 			dumpRS(GET_TABLES, getMetaDataRS(met, GET_TABLES,
-				new String [] {null, null, null},
- 				tabTypes, null, null));
-
-
-			System.out.println("getTableTypes():");
-			dumpRS(met.getTableTypes());
 
 			System.out.println("getColumns():");
 			dumpRS(GET_COLUMNS, getMetaDataRS(met, GET_COLUMNS,
@@ -965,9 +596,6 @@ public abstract class metadata_test {
 				new String [] {"", "BADSCHEMA", "LOUIE", "", "APP", "REFTAB"},
 				null, null, null));
 
-			System.out.println("getTypeInfo():");
-			dumpRS(GET_TYPE_INFO, getMetaDataRS(met, GET_TYPE_INFO, null, null, null, null));
-
 			/* NOTE - we call getIndexInfo() only on system tables here
  			 * so that there will be no diffs due to generated names.
 			 */
@@ -1013,18 +641,6 @@ public abstract class metadata_test {
 			}
 			rs.close();
 			
-			System.out.println("Test escaped numeric functions - JDBC 3.0 C.1");
-			testEscapedFunctions(con, NUMERIC_FUNCTIONS, met.getNumericFunctions());
-			
-			System.out.println("Test escaped string functions - JDBC 3.0 C.2");
-			testEscapedFunctions(con, STRING_FUNCTIONS, met.getStringFunctions());
-
-			System.out.println("Test escaped date time functions - JDBC 3.0 C.3");
-			testEscapedFunctions(con, TIMEDATE_FUNCTIONS, met.getTimeDateFunctions());
-
-			System.out.println("Test escaped system functions - JDBC 3.0 C.4");
-			testEscapedFunctions(con, SYSTEM_FUNCTIONS, met.getSystemFunctions());
-
 			//
 			// Test referential actions on delete
 			//
@@ -1280,133 +896,7 @@ public abstract class metadata_test {
 		System.out.println("Test metadata finished");
     }
 
-	/**
-	 * Test escaped functions. Working from the list of escaped functions defined
-	 * by JDBC, compared to the list returned by the driver.
-	 * <OL>
-	 * <LI> See that all functions defined by the driver are in the spec list
-	 * and that they work.
-	 * <LI> See that only functions defined by the spec are in the driver's list.
-	 * <LI> See that any functions defined by the spec that work are in the driver's list.
-	 * </OL>
-	 * FAIL will be printed for any issues.
-	 * @param conn
-	 * @param specList
-	 * @param metaDataList
-	 * @throws SQLException
-	 */
-	private static void testEscapedFunctions(Connection conn, String[][] specList, String metaDataList)
-	throws SQLException
-	{
-		boolean[] seenFunction = new boolean[specList.length];
-		
-		System.out.println("TEST FUNCTIONS DECLARED IN DATABASEMETADATA LIST");
-		StringTokenizer st = new StringTokenizer(metaDataList, ",");
-		while (st.hasMoreTokens())
-		{
-			String function = st.nextToken();
-			
-			// find this function in the list
-			boolean isSpecFunction = false;
-			for (int f = 0; f < specList.length; f++)
-			{
-				String[] specDetails = specList[f];
-				if (function.equals(specDetails[0]))
-				{
-					// Matched spec.
-					if (seenFunction[f])
-						System.out.println("FAIL Function in list twice: " + function);
-					seenFunction[f] = true;
-					isSpecFunction = true;
-					
-					if (!executeEscaped(conn, specDetails))
-						System.out.println("FAIL Function failed to execute "+ function);
-					break;
-				}
-			}
-			
-			if (!isSpecFunction)
-			{
-				System.out.println("FAIL Non-JDBC spec function in list: " + function);
-			}
-		}
-		
-		// Now see if any speced functions are not in the metadata list
-		System.out.println("TEST FUNCTIONS NOT DECLARED IN DATABASEMETADATA LIST");
-		for (int f = 0; f < specList.length; f++)
-		{
-			if (seenFunction[f])
-				continue;
-			String[] specDetails = specList[f];
-			if (executeEscaped(conn, specDetails))
-				System.out.println("FAIL function works but not declared in list: " + specDetails[0]);
-			
-		}
-	}
-	
-	private static boolean executeEscaped(Connection conn, String[] specDetails)
-	{
-		
-		String sql = "VALUES { fn " + specDetails[0] + "(";
-		
-		for (int p = 0; p < specDetails.length - 1; p++)
-		{
-			if (p != 0)
-				sql = sql + ", ";
-			
-			sql = sql + specDetails[p + 1];
-		}
-		
-		sql = sql + ") }";
-		
-		// Special processing for functions that return
-		// current date, time or timestamp. This is to
-		// ensure we don't have output that depends on
-		// the time the test is run.
-		if ("CURDATE".equals(specDetails[0]))
-			sql = "VALUES CASE WHEN { fn CURDATE()} = CURRENT_DATE THEN 'OK' ELSE 'wrong' END";
-		else if ("CURTIME".equals(specDetails[0]))
-			sql = "VALUES CASE WHEN { fn CURTIME()} = CURRENT_TIME THEN 'OK' ELSE 'wrong' END";
-		else if ("NOW".equals(specDetails[0]))
-			sql = "VALUES CASE WHEN { fn NOW()} = CURRENT_TIMESTAMP THEN 'OK' ELSE 'wrong' END";
-		
-		
-		System.out.print("Executing " + sql + " -- ");
-			
-		try {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ResultSet rs = ps.executeQuery();
-			
-			while (rs.next())
-			{
-				// truncate numbers to avoid multiple master files
-				// with double values.
-				String res = rs.getString(1);
-				
-				switch (rs.getMetaData().getColumnType(1))
-				{
-				case Types.DOUBLE:
-				case Types.REAL:
-				case Types.FLOAT:
-					if (res.length() > 4)
-						res = res.substring(0, 4);
-					break;
-				default:
-					break;
-				}
-				System.out.print("  = >" + res + "< ");
-			}
-			rs.close();
-			ps.close();
-			System.out.println(" << ");
-			return true;
-		} catch (SQLException e) {
-			System.out.println("");
-			showSQLExceptions(e);
-			return false;
-		}
-		
-	}
+
 
     /**
      * Run tests for <code>getSchemas()</code> with two
