@@ -175,7 +175,7 @@ supportsConvert(): true
 supportsConvert(Types.INTEGER, Types.SMALLINT): false
 supportsTableCorrelationNames(): true
 supportsDifferentTableCorrelationNames(): true
-supportsExpressionsInOrderBy(): false
+supportsExpressionsInOrderBy(): true
 supportsOrderByUnrelated(): false
 supportsGroupBy(): true
 supportsGroupByUnrelated(): true

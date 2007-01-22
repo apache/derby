@@ -208,12 +208,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertTrue(dmd.supportsAlterTableWithAddColumn());
         assertTrue(dmd.supportsAlterTableWithDropColumn());
         
-        // Bug DERBY-2243 - return value is indicating support
-        // level of the SQL engine, so should be consistent.
-        if (usingEmbedded())
-            assertFalse(dmd.supportsANSI92EntryLevelSQL());
-        else
-            assertTrue(dmd.supportsANSI92EntryLevelSQL());
+	/* DERBY-2243 Derby does support ANSI 92 standards
+	* and this behaviour is now consistant across drivers
+	*/
+	assertTrue(dmd.supportsANSI92EntryLevelSQL());
               
         assertFalse(dmd.supportsANSI92FullSQL());
         assertFalse(dmd.supportsANSI92IntermediateSQL());
@@ -243,8 +241,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertFalse(dmd.supportsDataManipulationTransactionsOnly());
         assertTrue(dmd.supportsDifferentTableCorrelationNames());
         
-        // Bug DERBY-2244, order by with expressions was added by DERBY-134
-        assertFalse(dmd.supportsExpressionsInOrderBy());
+	/* DERBY-2244 Derby does support Order By clause
+	* thus the changing the assert condition to TRUE
+	*/
+	assertTrue(dmd.supportsExpressionsInOrderBy());
         
         assertFalse(dmd.supportsExtendedSQLGrammar());
         assertFalse(dmd.supportsFullOuterJoins());

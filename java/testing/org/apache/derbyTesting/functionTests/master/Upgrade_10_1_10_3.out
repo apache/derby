@@ -904,7 +904,7 @@ supportsConvert(): true
 supportsConvert(Types.INTEGER, Types.SMALLINT): false
 supportsTableCorrelationNames(): true
 supportsDifferentTableCorrelationNames(): true
-supportsExpressionsInOrderBy(): false
+supportsExpressionsInOrderBy(): true
 supportsOrderByUnrelated(): false
 supportsGroupBy(): true
 supportsGroupByUnrelated(): true
@@ -916,7 +916,7 @@ supportsNonNullableColumns(): true
 supportsMinimumSQLGrammar(): true
 supportsCoreSQLGrammar(): false
 supportsExtendedSQLGrammar(): false
-supportsANSI92EntryLevelSQL(): false
+supportsANSI92EntryLevelSQL(): true
 supportsANSI92IntermediateSQL(): false
 supportsANSI92FullSQL(): false
 supportsIntegrityEnhancementFacility(): false
@@ -2397,7 +2397,7 @@ supportsConvert(): true
 supportsConvert(Types.INTEGER, Types.SMALLINT): false
 supportsTableCorrelationNames(): true
 supportsDifferentTableCorrelationNames(): true
-supportsExpressionsInOrderBy(): false
+supportsExpressionsInOrderBy(): true
 supportsOrderByUnrelated(): false
 supportsGroupBy(): true
 supportsGroupByUnrelated(): true
@@ -2409,7 +2409,7 @@ supportsNonNullableColumns(): true
 supportsMinimumSQLGrammar(): true
 supportsCoreSQLGrammar(): false
 supportsExtendedSQLGrammar(): false
-supportsANSI92EntryLevelSQL(): false
+supportsANSI92EntryLevelSQL(): true
 supportsANSI92IntermediateSQL(): false
 supportsANSI92FullSQL(): false
 supportsIntegrityEnhancementFacility(): false
