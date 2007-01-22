@@ -557,4 +557,27 @@ ij> VALUES INT(1.5);
 1          
 -----------
 1          
+ij> -- DERBY-2218
+drop table t3;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T3' because it does not exist.
+ij> create table t3 (i int);
+0 rows inserted/updated/deleted
+ij> -- expect errors
+-- where clause
+select * from t3 where (values null);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> -- order by clause
+select * from t3 order by (values null);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> -- result column
+select (values null) from t3;
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> -- group by clause
+select * from t3 group by (values null);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> -- having clause
+select * from t3 group by i having (values null);
+ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> drop table t3;
+0 rows inserted/updated/deleted
 ij> 

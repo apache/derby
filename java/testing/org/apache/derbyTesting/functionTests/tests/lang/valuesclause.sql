@@ -326,3 +326,24 @@ select new java.lang.String('asdf') = 'asdf' from t1;
 -- DERBY-1587
 VALUES INTEGER(1.5);
 VALUES INT(1.5);
+
+-- DERBY-2218
+drop table t3;
+create table t3 (i int);
+-- expect errors
+-- where clause
+select * from t3 where (values null);
+
+-- order by clause
+select * from t3 order by (values null);
+
+-- result column
+select (values null) from t3;
+
+-- group by clause
+select * from t3 group by (values null);
+
+-- having clause
+select * from t3 group by i having (values null); 
+
+drop table t3;

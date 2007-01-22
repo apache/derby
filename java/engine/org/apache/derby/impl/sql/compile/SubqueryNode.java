@@ -489,8 +489,6 @@ public class SubqueryNode extends ValueNode
 			/* Bind the expression in the SELECT list */
 			resultSet.bindTargetExpressions(fromList);
 
-			resultSet.bindResultColumns(fromList);
-
 			/* 
 			 * reject any untyped nulls in the EXISTS subquery before 
 			 * SELECT TRUE transformation. 
