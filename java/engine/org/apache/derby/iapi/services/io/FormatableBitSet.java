@@ -149,6 +149,45 @@ public final class FormatableBitSet implements Formatable, Cloneable
 		return new FormatableBitSet(this);
 	}
 
+	/**
+	 * This method returns true if the following conditions hold:
+	 * 1. The number of bits in the bitset will fit into the allocated
+	 * byte array. 2. 'lengthAsBits' and 'bitsInLastByte' are
+	 * consistent. 3. All unused bits in the byte array are
+	 * unset. This represents an invariant for the class, so this
+	 * method should always return true.
+	 *
+	 * The method is public, but is primarily intended for testing and
+	 * ASSERTS.
+	 * @returns true if invariant holds, false otherwise
+	 */
+	public boolean invariantHolds() {
+		// Check that all bits will fit in byte array
+		final int arrayLengthAsBits = value.length*8;
+		if (lengthAsBits > arrayLengthAsBits) { return false; }
+
+		// Check consistency of 'lengthAsBits' and 'bitsInLastByte'
+		final int partialByteIndex = (lengthAsBits-1)/8;
+		if (bitsInLastByte != (lengthAsBits - (8*partialByteIndex))) {
+			return false;
+		}
+		// Special case for empty bitsets since they will have
+		// 'partialByteIndex'==0, but this isn't a legal index into
+		// the byte array
+		if (value.length==0) { return true; }
+
+		// Check that the last used (possibly partial) byte doesn't
+		// contain any unused bit positions that are set.
+		byte partialByte = value[partialByteIndex];
+		partialByte <<= bitsInLastByte;  // must be zero after shift
+
+		// Check the remaining completely unused bytes (if any)
+		for (int i = partialByteIndex+1; i < value.length; ++i) {
+			partialByte |= value[i];
+		}
+		return (partialByte==0);
+	}
+
 
 	/**
 	 * Get the length in bytes of a Bit value
@@ -724,101 +763,97 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	}
 
 	/**
-	 * Bitwise OR this Bit with another Bit.
+	 * Bitwise OR this FormatableBitSet with another
+	 * FormatableBitSet. The result is stored in this bitset. The
+	 * operand is unaffected. A null operand is treated as an empty
+	 * bitset (i.e. a noop). A bitset that is smaller than its operand
+	 * is expanded to the same size.
 	 *
-	 * @param otherBit the other Bit
+	 * @param otherBit bitset operand
 	 */
 	public void or(FormatableBitSet otherBit)
 	{
-		if (otherBit == null || otherBit.getLength() == 0)
+		if (otherBit == null) {
 			return;
-
+		}
 		int otherLength = otherBit.getLength();
 
-		if (otherLength > getLength())
-			grow(otherLength); // expand this bit 
+		if (otherLength > getLength()) {
+			grow(otherLength);
+		}
 
 		int obByteLen = otherBit.getLengthInBytes();
-		for (int i = 0; i < obByteLen-1; i++)
+		for (int i = 0; i < obByteLen; ++i) {
 			value[i] |= otherBit.value[i];
-		
-		// do the last byte bit by bit
-		for (int i = (obByteLen-1)*8; i < otherLength; i++)
-			if (otherBit.isSet(i))
-				set(i);
+		}
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(invariantHolds(),"or() broke invariant");
+		}
 	}
 
 	/**
-	 * Bitwise AND this Bit with another Bit.
-	 *
-	 * @param otherBit the other Bit
+	 * Bitwise AND this FormatableBitSet with another
+	 * FormatableBitSet. The result is stored in this bitset. The
+	 * operand is unaffected. A null operand is treated as an empty
+	 * bitset (i.e. clearing this bitset). A bitset that is smaller
+	 * than its operand is expanded to the same size.
+	 * @param otherBit bitset operand
 	 */
 	public void and(FormatableBitSet otherBit)
 	{
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(otherBit != null, "cannot AND null with a FormatableBitSet");
-
+		if (otherBit == null) {
+			clear();
+			return;
+		}
 		int otherLength = otherBit.getLength();
 
-		// Supposedly cannot happen, but handle it just in case.
-		if (otherLength > getLength())
-			grow(otherLength); // expand this bit 
-
-		if (otherLength < getLength())
-		{
-			// clear all bits that are not in the other bit
-			int startingByte = (otherLength * 8) + 1;
-			int len = getLengthInBytes();
-			for (int i = startingByte; i < len; i++)
-				value[i] = 0;
-
-			for (int i = otherLength; i < startingByte*8; i++)
-			{
-				if (i < getLength())
-					clear(i);
-				else
-					break;
-			}
+		if (otherLength > getLength()) {
+			grow(otherLength);
 		}
 
-		if (otherLength == 0)
-			return;
-			
-		int length = otherBit.getLengthInBytes() < getLengthInBytes() ? 
-			otherBit.getLengthInBytes() : getLengthInBytes();
-
-		for (int i = 0; i < length; i++)
+		// Since this bitset is at least as large as the other bitset,
+		// one can use the length of the other bitset in the iteration
+		int byteLength = otherBit.getLengthInBytes();
+		int i = 0;
+		for (; i < byteLength; ++i) {
 			value[i] &= otherBit.value[i];
+		}
+
+		// If the other bitset is shorter the excess bytes in this
+		// bitset must be cleared
+		byteLength = getLengthInBytes();
+		for (; i < byteLength; ++i) {
+			value[i] = 0;
+		}
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(invariantHolds(),"and() broke invariant");
+		}
 	}
 
 	/**
-	 * Logically XORs this FormatableBitSet with the specified FormatableBitSet.
-	 * @param set	The FormatableBitSet to be XORed with.
+	 * Bitwise XOR this FormatableBitSet with another
+	 * FormatableBitSet. The result is stored in this bitset. The
+	 * operand is unaffected. A null operand is treated as an empty
+	 * bitset (i.e. a noop). A bitset that is smaller than its operand
+	 * is expanded to the same size.
+	 * @param otherBit bitset operand
 	 */
-	public void xor(FormatableBitSet set)
+	public void xor(FormatableBitSet otherBit)
 	{
-		if (SanityManager.DEBUG)
-		{
-			if (getLength() != set.getLength())
-			{
-				SanityManager.THROWASSERT("getLength() (" + getLength() +
-					") and set.getLength() (" +
-					set.getLength() +
-					") expected to be the same");
-			}
+		if (otherBit == null) {
+			return;
+		}
+		int otherLength = otherBit.getLength();
+		if (otherLength > getLength()) {
+			grow(otherLength);
 		}
 
-		int setLength = set.getLength();
-		for (int i = setLength; i-- > 0; )
-		{
-			if (isSet(i) && set.isSet(i))
-			{
-				clear(i);
-			}
-			else if (isSet(i) || set.isSet(i))
-			{
-				set(i);
-			}
+		int obByteLen = otherBit.getLengthInBytes();
+		for (int i = 0; i < obByteLen; ++i) {
+			value[i] ^= otherBit.value[i];
+		}
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(invariantHolds(),"xor() broke invariant");
 		}
 	}
 

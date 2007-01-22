@@ -103,16 +103,19 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(0,empty.getLengthInBytes());
         assertEquals(0,empty.getByteArray().length);
         assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
 
         assertEquals(18,bitset18.getLength());
         assertEquals(3,bitset18.getLengthInBytes());
         assertEquals(bits24,bitset18.getByteArray());
         assertEquals(9,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
 
         assertEquals(18,bitset18C.getLength());
         assertEquals(3,bitset18C.getLengthInBytes());
         assertEquals(bits24C,bitset18C.getByteArray());
         assertEquals(9,bitset18C.getNumBitsSet());
+        assertTrue(bitset18C.invariantHolds());
     }
 
     // Test cases for single arg constructor
@@ -122,6 +125,7 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(0,zeroBits.getLengthInBytes());
         assertEquals(0,zeroBits.getByteArray().length);
         assertEquals(0,zeroBits.getNumBitsSet());
+        assertTrue(zeroBits.invariantHolds());
     }
     public void testIntCtor1() {
         FormatableBitSet oneBit = new FormatableBitSet(1);
@@ -129,6 +133,7 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(1,oneBit.getLengthInBytes());
         assertEquals(1,oneBit.getByteArray().length);
         assertEquals(0,oneBit.getNumBitsSet());
+        assertTrue(oneBit.invariantHolds());
     }
     public void testIntCtor8() {
         FormatableBitSet eightBits = new FormatableBitSet(8);
@@ -136,6 +141,7 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(1,eightBits.getLengthInBytes());
         assertEquals(1,eightBits.getByteArray().length);
         assertEquals(0,eightBits.getNumBitsSet());
+        assertTrue(eightBits.invariantHolds());
     }
     public void testIntCtor9() {
         FormatableBitSet nineBits = new FormatableBitSet(9);
@@ -143,6 +149,7 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(2,nineBits.getLengthInBytes());
         assertEquals(2,nineBits.getByteArray().length);
         assertEquals(0,nineBits.getNumBitsSet());
+        assertTrue(nineBits.invariantHolds());
     }
     public void testIntCtorNeg() {
         // Should throw an exception?
@@ -151,6 +158,7 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(0,negBits.getLengthInBytes());
         assertEquals(0,negBits.getByteArray().length);
         assertEquals(0,negBits.getNumBitsSet());
+        assertTrue(negBits.invariantHolds());
     }
 
     // Test cases for the copy constructor
@@ -161,6 +169,7 @@ public class FormatableBitSetTest extends TestCase {
         // FAILURE - the byte array of the copy is not null
         //assertEquals(null,emptyCpy.getByteArray());
         assertEquals(0,emptyCpy.getNumBitsSet());
+        assertTrue(emptyCpy.invariantHolds());
     }
     public void testCpyCtor() {
         FormatableBitSet cpy = new FormatableBitSet(bitset18);
@@ -170,6 +179,7 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(9,cpy.getNumBitsSet());
         assertEquals(0,cpy.compare(bitset18));
         assertTrue(cpy.equals(bitset18));
+        assertTrue(cpy.invariantHolds());
     }
 
     // Test cases for grow(int)
@@ -179,6 +189,7 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(3,empty.getLengthInBytes());
         assertEquals(3,empty.getByteArray().length);
         assertEquals(0,empty.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
     public void testGrow() {
         bitset18.grow(25);
@@ -186,16 +197,19 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(4,bitset18.getLengthInBytes());
         assertEquals(4,bitset18.getByteArray().length);
         assertEquals(9,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
     // OK - should fail?
     public void testGrowSmaller() {
         bitset18.grow(9);
         assertEquals(18,bitset18.getLength());
+        assertTrue(bitset18.invariantHolds());
     }
     // OK - should fail?
     public void testGrowNeg() {
         bitset18.grow(-9);
         assertEquals(18,bitset18.getLength());
+        assertTrue(bitset18.invariantHolds());
     }
 
     // Test cases for shrink(int)
@@ -205,6 +219,7 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(0,empty.getLengthInBytes());
         assertEquals(0,empty.getByteArray().length);
         assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
     }
     public void testShrink() {
         bitset18.shrink(9);
@@ -212,11 +227,13 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(2,bitset18.getLengthInBytes());
         assertEquals(2,bitset18.getByteArray().length);
         assertEquals(5,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
     // OK - should fail?
     public void testShrinkLarger() {
         bitset18.shrink(25);
         assertEquals(18,bitset18.getLength());
+        assertTrue(bitset18.invariantHolds());
     }
     public void testShrinkNeg() {
         try {
@@ -259,9 +276,12 @@ public class FormatableBitSetTest extends TestCase {
     public void testCompareDifferentArray() {
         FormatableBitSet small = new FormatableBitSet(bitset18);
         small.shrink(9);
+        assertTrue(small.invariantHolds());
         FormatableBitSet large = new FormatableBitSet(bitset18);
         large.grow(100);
+        assertTrue(large.invariantHolds());
         large.shrink(9);
+        assertTrue(large.invariantHolds());
         assertEquals(0,small.compare(large));
     }
 
@@ -312,7 +332,9 @@ public class FormatableBitSetTest extends TestCase {
         try { bitset18.set(-1); fail(); }
         catch (IllegalArgumentException iae) {}
         bitset18.set(0);
+        assertTrue(bitset18.invariantHolds());
         bitset18.set(1);
+        assertTrue(bitset18.invariantHolds());
         try { bitset18.set(18); fail(); }
         catch (IllegalArgumentException iae) {}
     }
@@ -329,7 +351,9 @@ public class FormatableBitSetTest extends TestCase {
         try { bitset18.clear(-1); fail(); }
         catch (IllegalArgumentException iae) {}
         bitset18.clear(0);
+        assertTrue(bitset18.invariantHolds());
         bitset18.clear(1);
+        assertTrue(bitset18.invariantHolds());
         try { bitset18.clear(18); fail(); }
         catch (IllegalArgumentException iae) {}
     }
@@ -372,6 +396,7 @@ public class FormatableBitSetTest extends TestCase {
     // Test cases for or(FormatableBitSet)
     public void testORWithNull() {
         FormatableBitSet cpy = new FormatableBitSet(bitset18);
+        assertTrue(cpy.invariantHolds());
         bitset18.or(null);
         assertEquals(9,bitset18.getNumBitsSet());
         assertTrue(cpy.equals(bitset18));
@@ -381,69 +406,75 @@ public class FormatableBitSetTest extends TestCase {
         bitset18.or(empty);
         assertEquals(9,bitset18.getNumBitsSet());
         assertTrue(cpy.equals(bitset18));
+        assertTrue(bitset18.invariantHolds());
     }
     public void testORWithComplement() {
         bitset18.or(bitset18C);
         assertEquals(bitset18.getNumBitsSet(),18);
+        assertTrue(bitset18.invariantHolds());
     }
     public void testORWithSmaller() {
         bitset18C.shrink(9);
         bitset18.or(bitset18C);
         assertEquals(13,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
     public void testORWithLarger() {
         bitset18.shrink(9);
         bitset18.or(bitset18C);
         assertEquals(14,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
 
     // Test cases for and(FormatableBitSet)
     public void testANDWithNull() {
-        if (SanityManager.DEBUG) {
-            try { bitset18.and(null); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            try { bitset18.and(null); fail(); }
-            catch (NullPointerException npe) {}
-        }
+        bitset18.and(null);
+        assertEquals(18,bitset18.getLength());
+        assertEquals(3,bitset18.getLengthInBytes());
+        assertEquals(3,bitset18.getByteArray().length);
+        assertEquals(0,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
     public void testANDWithEmpty() {
         bitset18.and(new FormatableBitSet());
         assertEquals(0,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
     public void testANDWithComplement() {
         bitset18.and(bitset18C);
         assertEquals(0,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
     public void testANDWithSmaller() {
         bitset18C.shrink(9);
         bitset18.and(bitset18C);
         assertEquals(0,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
     public void testANDWithLarger() {
         bitset18.shrink(9);
         bitset18.and(bitset18C);
         assertEquals(0,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
 
     // Test cases for xor(FormatableBitSet)
     public void testXORWithNull() {
-        try { bitset18.xor(null); fail(); } catch (NullPointerException npe) {}
+        FormatableBitSet cpy = new FormatableBitSet(bitset18);
+        bitset18.xor(null);
+        assertEquals(9,bitset18.getNumBitsSet());
+        assertTrue(cpy.equals(bitset18));
+        assertTrue(bitset18.invariantHolds());
     }
     public void testXORWithEmpty() {
         FormatableBitSet cpy = new FormatableBitSet(bitset18);
-        if (SanityManager.DEBUG) {
-            try { bitset18.xor(empty); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            bitset18.xor(empty);
-            assertEquals(0,empty.getLength());
-            assertEquals(0,empty.getLengthInBytes());
-            assertEquals(0,empty.getByteArray().length);
-            assertEquals(0,empty.getNumBitsSet());
-        }
-        //assertEquals(9,bitset18.getNumBitsSet());
-        //assertTrue(cpy.equals(bitset18));
+        bitset18.xor(empty);
+        assertEquals(18,bitset18.getLength());
+        assertEquals(3,bitset18.getLengthInBytes());
+        assertEquals(3,bitset18.getByteArray().length);
+        assertEquals(9,bitset18.getNumBitsSet());
+        assertTrue(cpy.equals(bitset18));
+        assertTrue(bitset18.invariantHolds());
     }
     public void testXORWithComplement() {
         bitset18.set(2);
@@ -452,32 +483,22 @@ public class FormatableBitSetTest extends TestCase {
         assertEquals(16,bitset18.getNumBitsSet());
         assertFalse(bitset18.isSet(2));
         assertFalse(bitset18.isSet(3));
+        assertTrue(bitset18.invariantHolds());
     }
     public void testXORWithSmaller() {
         bitset18C.shrink(9);
-        if (SanityManager.DEBUG) {
-            try { bitset18.xor(bitset18C); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            bitset18.xor(bitset18C);
-            assertEquals(18,bitset18.getLength());
-            assertEquals(3,bitset18.getLengthInBytes());
-            assertEquals(3,bitset18.getByteArray().length);
-            assertEquals(13,bitset18.getNumBitsSet());
-
-        }
-        //assertEquals(13,bitset18.getNumBitsSet());
+        bitset18.xor(bitset18C);
+        assertEquals(18,bitset18.getLength());
+        assertEquals(3,bitset18.getLengthInBytes());
+        assertEquals(3,bitset18.getByteArray().length);
+        assertEquals(13,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
     public void testXORWithLarger() {
         bitset18.shrink(9);
-        if (SanityManager.DEBUG) {
-            try { bitset18.xor(bitset18C); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            try { bitset18.xor(bitset18C); fail(); }
-            catch (IllegalArgumentException iae) {}
-        }
-        //assertEquals(14,bitset18.getNumBitsSet());
+        bitset18.xor(bitset18C);
+        assertEquals(14,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
     }
 
     // Test case for writeExternal(ObjectOut) and readExternal(ObjectOut)
@@ -487,18 +508,10 @@ public class FormatableBitSetTest extends TestCase {
         bitset18.writeExternal(oos);
         oos.flush();
 
-        empty.readExternal(new ObjectInputStream(new ByteArrayInputStream(buf.toByteArray())));
+        empty.readExternal
+            (new ObjectInputStream(new ByteArrayInputStream
+                                   (buf.toByteArray())));
         assertTrue(empty.equals(bitset18));
+        assertTrue(empty.invariantHolds());
     }
-
-    // ERROR - Negative array size argument
-    // Not covered by other tests
-    //     public void testReadExternalFromArray() throws IOException {
-    //      ByteArrayOutputStream buf = new ByteArrayOutputStream();
-    //      ObjectOutput oos = new ObjectOutputStream(buf);
-    //      bitset18.writeExternal(oos);
-    //     oos.flush();
-    //     empty.readExternalFromArray(new ArrayInputStream(buf.toByteArray()));
-    //     assertTrue(empty.equals(bitset18));
-    //      }
 }
