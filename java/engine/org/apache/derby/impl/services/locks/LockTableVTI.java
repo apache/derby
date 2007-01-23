@@ -23,13 +23,13 @@ package org.apache.derby.impl.services.locks;
 
 import org.apache.derby.iapi.services.locks.Latch;
 
-import java.util.Hashtable;
-import java.util.Vector;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.List;
+import java.util.Map;
 
 /**
 	This provides an Enumeration of Latch's
@@ -45,18 +45,15 @@ class LockTableVTI implements Enumeration
 	// its time digesting the information without blocking the real lock
 	// manager.
 
-	private final LockSet clonedLockTable;
-	private final Enumeration outerControl;
+	private final Iterator outerControl;
 	private Control control;
 	private ListIterator grantedList;
 	private ListIterator waitingList;
 	private Latch nextLock;
 
-	LockTableVTI(LockSet clonedLockTable)
+	LockTableVTI(Map clonedLockTable)
 	{
-		this.clonedLockTable = clonedLockTable;
-
-		outerControl = clonedLockTable.elements();
+		outerControl = clonedLockTable.values().iterator();
 	}
 
 
@@ -68,11 +65,11 @@ class LockTableVTI implements Enumeration
 		for (;;) {
 
 			if (control == null) {
-				if (!outerControl.hasMoreElements())
+				if (!outerControl.hasNext())
 					return false;
 //System.out.println("new control lock ");
 
-				control = (Control) outerControl.nextElement();
+				control = (Control) outerControl.next();
 
 				List granted = control.getGranted();
 				if (granted != null)

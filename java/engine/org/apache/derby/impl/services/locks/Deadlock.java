@@ -46,6 +46,11 @@ class Deadlock  {
 
 	private Deadlock() {}
 
+	/**
+	 * Look for a deadlock.
+	 * <BR>
+	 * MT - must be synchronized on the <code>LockSet</code> object.
+	 */
 	static Object[] look(SinglePool factory, LockSet set, LockControl control, ActiveLock startingLock, byte deadlockWake) {
 
 		// step one, get a list of all waiters
@@ -177,16 +182,8 @@ inner:		for (;;) {
 	}
 
 	private static Hashtable getWaiters(LockSet set) {
-
-		Hashtable waiters = new Hashtable(set.size() * 2);
-
-		for (Enumeration e = set.elements(); e.hasMoreElements(); ) {
-
-			Control control = (Control) e.nextElement();
-
-			control.addWaiters(waiters);
-		}
-
+		Hashtable waiters = new Hashtable();
+		set.addWaiters(waiters);
 		return waiters;
 	}
 

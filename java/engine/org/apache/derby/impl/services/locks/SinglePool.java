@@ -422,7 +422,7 @@ public class SinglePool extends Hashtable
 		// release the lock method.
 		synchronized (lockTable) {
 
-			Control control = (Control) lockTable.get(ref);
+			Control control = lockTable.getControl(ref);
 			if (control == null) {
 				return true;
 			}

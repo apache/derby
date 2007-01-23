@@ -24,7 +24,6 @@ package org.apache.derby.impl.services.locks;
 import org.apache.derby.iapi.services.locks.Latch;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -34,8 +33,12 @@ import org.apache.derby.iapi.services.diag.DiagnosticUtil;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 
+import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 
 
 /**
@@ -46,10 +49,11 @@ import java.util.Enumeration;
 	A LockControl contains information about the locks held on a Lockable.
 
 	<BR>
-	MT - Mutable - Container Object : Thread Safe
+	MT - Mutable - Container Object : All non-private methods of this class are
+	thread safe unless otherwise stated by their javadoc comments.
 
 	<BR>
-	The Hashtable we extend is synchronized on this, all addition, searching of
+	All searching of
     the hashtable is performed using java synchroization(this).
 	<BR>
 	The class creates ActiveLock and LockControl objects.
@@ -65,12 +69,15 @@ import java.util.Enumeration;
 	@see LockControl
 */
 
-public final class LockSet extends Hashtable
-{
+final class LockSet {
 	/*
 	** Fields
 	*/
 	private final SinglePool factory;
+
+    /** Hash table which maps <code>Lockable</code> objects to
+     * <code>Lock</code>s. */
+    private final HashMap locks;
 
 	/**
 		Timeout for deadlocks, in ms.
@@ -92,15 +99,15 @@ public final class LockSet extends Hashtable
 //EXCLUDE-END-lockdiag- 
 
 	// The number of waiters for locks
-	protected int	blockCount;
+	private int blockCount;
 
 	/*
 	** Constructor
 	*/
 
 	protected LockSet(SinglePool factory) {
-		super();
 		this.factory = factory;
+		locks = new HashMap();
 	}
 
 
@@ -129,8 +136,9 @@ public final class LockSet extends Hashtable
 
 			if (SanityManager.DEBUG_ON("memoryLeakTrace")) {
 
-				if (size() > 1000)
-					System.out.println("memoryLeakTrace:LockSet: " + size());
+				if (locks.size() > 1000)
+					System.out.println("memoryLeakTrace:LockSet: " +
+                                           locks.size());
 			}
 		}
 
@@ -150,14 +158,14 @@ public final class LockSet extends Hashtable
 
 				gl.grant();
 
-				put(ref, gl);
+				locks.put(ref, gl);
 
 				return gl;
 			}
 
 			control = gc.getLockControl();
 			if (control != gc) {
-				put(ref, control);
+				locks.put(ref, control);
 			}
 			
 
@@ -550,7 +558,7 @@ forever:	for (;;) {
 			if (mayBeEmpty) {
 				if (control.isEmpty()) {
 					// no-one granted, no-one waiting, remove lock control
-					remove(control.getLockable());
+					locks.remove(control.getLockable());
 				}
 				return;
 			}
@@ -589,12 +597,10 @@ forever:	for (;;) {
             String str = new String();
 
             int i = 0;
-            for (Enumeration e = this.elements(); 
-                 e.hasMoreElements();
-                 i++)
+            for (Iterator it = locks.values().iterator(); it.hasNext(); )
             {
                 str += "\n  lock[" + i + "]: " + 
-                    DiagnosticUtil.toDiagString(e.nextElement());
+                    DiagnosticUtil.toDiagString(it.next());
             }
 
             return(str);
@@ -605,18 +611,30 @@ forever:	for (;;) {
         }
     }
 
+    /**
+     * Add all waiters in this lock table to a <code>Dictionary</code> object.
+     * <br>
+     * MT - must be synchronized on this <code>LockSet</code> object.
+     */
+    void addWaiters(Dictionary waiters) {
+        for (Iterator it = locks.values().iterator(); it.hasNext(); ) {
+            Control control = (Control) it.next();
+            control.addWaiters(waiters);
+        }
+    }
+
 //EXCLUDE-START-lockdiag- 
 	/*
 	 * make a shallow clone of myself and my lock controls
 	 */
 	/* package */
-	synchronized LockSet shallowClone()
+	synchronized Map shallowClone()
 	{
-		LockSet clone = new LockSet(factory);
+		HashMap clone = new HashMap();
 
-		for (Enumeration e = keys(); e.hasMoreElements(); )
+		for (Iterator it = locks.keySet().iterator(); it.hasNext(); )
 		{
-			Lockable lockable = (Lockable)e.nextElement();
+			Lockable lockable = (Lockable) it.next();
 			Control control = getControl(lockable);
 
 			clone.put(lockable, control.shallowClone());
@@ -630,25 +648,40 @@ forever:	for (;;) {
 	** Support for anyoneBlocked(). These methods assume that caller
 	** is synchronized on this LockSet object.
 	*/
+
+	/**
+	 * Increase blockCount by one.
+	 * <BR>
+	 * MT - must be synchronized on this <code>LockSet</code> object.
+	 */
 	void oneMoreWaiter() {
 		blockCount++;
 	}
 
+	/**
+	 * Decrease blockCount by one.
+	 * <BR>
+	 * MT - must be synchronized on this <code>LockSet</code> object.
+	 */
 	void oneLessWaiter() {
 		blockCount--;
 	}
 
-	boolean anyoneBlocked() {
+	synchronized boolean anyoneBlocked() {
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(
 				blockCount >= 0, "blockCount should not be negative");
 		}
 
-		// no synchronization needed because reads of ints are atomic
 		return blockCount != 0;
 	}
 
+	/**
+	 * Get the <code>Control</code> for an object in the lock table.
+	 * <br>
+	 * MT - must be synchronized on this <code>LockSet</code> object.
+	 */
 	public final Control getControl(Lockable ref) {
-		return (Control) get(ref);
+		return (Control) locks.get(ref);
 	}
 }
