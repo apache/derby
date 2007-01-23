@@ -613,7 +613,11 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if so
      */
 	public boolean supportsExpressionsInOrderBy() {
-		return false;
+		/* DERBY - 2244 : Derby does support Order By Expression (Derby-134)
+		* thus changing the return value to true to relfect that the support
+		* is present
+		*/
+		return true;
 	}
 
     /**
@@ -731,7 +735,11 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if so
      */
 	public boolean supportsANSI92EntryLevelSQL() {
-		return false;
+		/* DERBY - 2243 : Derby does support ANSI 92 standards,
+		* thus changing the return value to true to relfect that the support
+		* is present
+		*/
+		return true;
 	}
 
     /**
