@@ -68,6 +68,28 @@ public class DataSourceConnector implements Connector {
        }
     }
 
+    public Connection openConnection(String databaseName) throws SQLException {
+        JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
+        try {
+            return ds.getConnection();
+        } catch (SQLException e) {
+            // Expected state for database not found.
+            // For the client the generic 08004 is returned,
+            // will just retry on that.
+            String expectedState = 
+                config.getJDBCClient().isEmbedded() ? "XJ004" : "08004";
+
+            // If there is a database not found exception
+            // then retry the connection request with
+            // a new DataSource with the createDtabase property set.
+            if (!expectedState.equals(e.getSQLState()))
+                throw e;
+            DataSource tmpDs = singleUseDS("createDatabase", "create");
+            JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
+            return tmpDs.getConnection();
+       }
+    }
+
     public Connection openConnection(String user, String password)
             throws SQLException {
         try {
@@ -80,6 +102,23 @@ public class DataSourceConnector implements Connector {
                 throw e;
             return singleUseDS(
                     "createDatabase", "create").getConnection(user, password); 
+       }
+    }
+
+    public Connection openConnection(String databaseName, String user, String password)
+            throws SQLException {
+        JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
+        try {
+            return ds.getConnection(user, password);
+        } catch (SQLException e) {
+            // If there is a database not found exception
+            // then retry the connection request with
+            // a new DataSource with the createDatabase property set.
+            if (!"XJ004".equals(e.getSQLState()))
+                throw e;
+            DataSource tmpDs = singleUseDS("createDatabase", "create");
+            JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
+            return tmpDs.getConnection(user, password); 
        }
     }
 

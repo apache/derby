@@ -586,7 +586,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
 
         cs.close();
         
-        final String db = getTestConfiguration().getDatabaseName();
+        final String db = getTestConfiguration().getDefaultDatabaseName();
         AccessController.doPrivileged
         (new java.security.PrivilegedExceptionAction(){
             

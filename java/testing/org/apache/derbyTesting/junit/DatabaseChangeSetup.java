@@ -29,13 +29,15 @@ import junit.framework.Test;
 final class DatabaseChangeSetup extends ChangeConfigurationSetup {
 
     private final String dbName;
+    private final boolean defaultDb;
     
-    public DatabaseChangeSetup(Test test, String dbName) {
+    public DatabaseChangeSetup(Test test, String dbName, boolean defaultDb) {
         super(test);
         this.dbName = dbName;
+        this.defaultDb = defaultDb;
    }
 
     TestConfiguration getNewConfiguration(TestConfiguration old) {
-        return new TestConfiguration(old, dbName);
+        return new TestConfiguration(old, dbName, defaultDb);
     }
 }

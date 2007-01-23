@@ -44,10 +44,7 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
     /** Test whether the multiple connections to different databases
       * on a same derby instance are working without exceptions. */
     public void testMultipleConnections() throws Exception {
-        DataSource ds1 = JDBCDataSource.getDataSource("FIRSTDB1");
-        JDBCDataSource.setBeanProperty(ds1, "connectionAttributes",
-                                       "create=true");
-        Connection conn1 = ds1.getConnection();
+        Connection conn1 = openConnection("FIRSTDB1");
         conn1.setAutoCommit(false);
 
         Statement st = conn1.createStatement();
@@ -60,10 +57,7 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
         rs1.next();
         rs1.close();
         
-        DataSource ds2 = JDBCDataSource.getDataSource("SECONDDB2");
-        JDBCDataSource.setBeanProperty(ds2, "connectionAttributes",
-                                       "create=true");
-        Connection conn2 = ds2.getConnection();
+        Connection conn2 = openConnection("SECONDDB2");
         conn2.setAutoCommit(false);
         Statement st2 = conn2.createStatement();
         st2.execute("create table SECONDDB_T1 (i int, j int, k int)");
@@ -87,7 +81,11 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        return TestConfiguration.clientServerSuite(DRDAProtocolTest.class);
+        Test test;
+        test = TestConfiguration.clientServerSuite(DRDAProtocolTest.class);
+        test = TestConfiguration.singleUseDatabaseDecorator(test, "FIRSTDB1", false);
+        test = TestConfiguration.singleUseDatabaseDecorator(test, "SECONDDB2", false);
+        return test;
     }
     
 }

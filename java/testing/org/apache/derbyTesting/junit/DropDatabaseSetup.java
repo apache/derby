@@ -22,6 +22,7 @@ package org.apache.derbyTesting.junit;
 import java.io.File;
 import java.security.AccessController;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
@@ -37,7 +38,7 @@ class DropDatabaseSetup extends BaseJDBCTestSetup {
      }
     
     /**
-     * Drop the current database.
+     * Drop the last database added to the list of used databases.
      */
     protected void tearDown() throws Exception {
         
@@ -48,7 +49,8 @@ class DropDatabaseSetup extends BaseJDBCTestSetup {
         
         TestConfiguration.getCurrent().shutdownDatabase();
 
-        String dbName = TestConfiguration.getCurrent().getDatabaseName();
+        ArrayList usedDbs = TestConfiguration.getCurrent().getUsedDatabaseNames();
+        String dbName = (String) usedDbs.get(usedDbs.size()-1);
         dbName = dbName.replace('/', File.separatorChar);
         
         String dsh = BaseTestCase.getSystemProperty("derby.system.home");

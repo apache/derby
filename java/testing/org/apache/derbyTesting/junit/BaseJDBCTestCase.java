@@ -198,6 +198,23 @@ public abstract class BaseJDBCTestCase
     }
     
     /**
+     * Open a connection to the specified database.
+     * If the database does not exist, it will be created.
+     * A default username and password will be used for the connection.
+     * Requires that the test has been decorated with a
+     * singleUseDatabaseDecorator with the matching name.
+     *
+     * @return connection to default database.
+     * @see TestConfiguration#singleUseDatabaseDecorator(Test, String, boolean)
+     */
+    public Connection openConnection(String databaseName)
+        throws SQLException {
+        Connection conn =  getTestConfiguration().openConnection(databaseName);
+        initializeConnection(conn);
+        return conn;
+    }
+    
+    /**
      * Run a SQL script through ij discarding the output
      * using this object's default connection. Intended for
      * setup scripts.

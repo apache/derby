@@ -40,7 +40,15 @@ public class DriverManagerConnector implements Connector {
     }
 
     public Connection openConnection() throws SQLException {
-        return openConnection(config.getUserName(), config.getUserPassword());
+        return openConnection(config.getDefaultDatabaseName(), config.getUserName(), config.getUserPassword());
+    }
+
+    public Connection openConnection(String databaseName) throws SQLException {
+        return openConnection(databaseName, config.getUserName(), config.getUserPassword());
+    }
+
+    public Connection openConnection(String user, String password) throws SQLException {
+        return openConnection(config.getDefaultDatabaseName(), user, password);
     }
 
     /**
@@ -53,10 +61,10 @@ public class DriverManagerConnector implements Connector {
      * (database not found) then the connection is retried
      * with attributes create=true.
      */
-    public Connection openConnection(String user, String password)
+    public Connection openConnection(String databaseName, String user, String password)
             throws SQLException {
 
-        String url = config.getJDBCUrl();
+        String url = config.getJDBCUrl(databaseName);
 
         try {
             DriverManager.getDriver(url);

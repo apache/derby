@@ -193,7 +193,7 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
         // check if db.lck exists
         String fileName = getSystemProperty("derby.system.home") +
                 java.io.File.separator +
-                TestConfiguration.getCurrent().getDatabaseName() +
+                TestConfiguration.getCurrent().getDefaultDatabaseName() +
                 java.io.File.separator + "db.lck";
 
         boolean fileNotFound = false;

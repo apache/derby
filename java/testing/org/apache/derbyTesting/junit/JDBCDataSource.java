@@ -88,7 +88,7 @@ public class JDBCDataSource {
             beanProperties.put("portNumber", new Integer(config.getPort()));
         }
         
-        beanProperties.put("databaseName", config.getDatabaseName());
+        beanProperties.put("databaseName", config.getDefaultDatabaseName());
         beanProperties.put("user", config.getUserName());
         beanProperties.put("password", config.getUserPassword());
 

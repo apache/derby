@@ -39,7 +39,7 @@ final class ConnectorSetup extends ChangeConfigurationSetup {
         // Copy the current configuration by creating one
         // with the same database name
         TestConfiguration newConfig = 
-            new TestConfiguration(old, old.getDatabaseName());
+            new TestConfiguration(old, old.getDefaultDatabaseName(), true);
         
         try {
             newConfig.connector = (Connector)

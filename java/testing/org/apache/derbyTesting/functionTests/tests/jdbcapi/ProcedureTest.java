@@ -596,7 +596,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         PreparedStatement ps =
             getConnection().prepareStatement("CALL RETRIEVE_EXTERNAL_RESULT(?,?,?)");
         
-        ps.setString(1, getTestConfiguration().getDatabaseName());
+        ps.setString(1, getTestConfiguration().getDefaultDatabaseName());
         ps.setString(2, getTestConfiguration().getUserName());
         ps.setString(3, getTestConfiguration().getUserPassword());
         try {
@@ -619,7 +619,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         PreparedStatement ps =
             getConnection().prepareStatement("CALL RETRIEVE_EXTERNAL_RESULT(?,?,?)");
         
-        ps.setString(1, getTestConfiguration().getDatabaseName());
+        ps.setString(1, getTestConfiguration().getDefaultDatabaseName());
         ps.setString(2, getTestConfiguration().getUserName());
         ps.setString(3, getTestConfiguration().getUserPassword());
         

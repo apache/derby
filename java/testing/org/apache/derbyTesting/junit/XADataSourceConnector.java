@@ -70,6 +70,28 @@ public class XADataSourceConnector implements Connector {
        }
     }
 
+    public Connection openConnection(String databaseName) throws SQLException {
+        JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
+        try {
+            return ds.getXAConnection().getConnection();
+        } catch (SQLException e) {
+            // Expected state for database not found.
+            // For the client the generic 08004 is returned,
+            // will just retry on that.
+            String expectedState = 
+                config.getJDBCClient().isEmbedded() ? "XJ004" : "08004";
+
+            // If there is a database not found exception
+            // then retry the connection request with
+            // a new DataSource with the createDtabase property set.
+            if (!expectedState.equals(e.getSQLState()))
+                throw e;
+            XADataSource tmpDs = singleUseDS("createDatabase", "create");
+            JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
+            return tmpDs.getXAConnection().getConnection();
+       }
+    }
+
     public Connection openConnection(String user, String password)
             throws SQLException {
         try {
@@ -81,7 +103,24 @@ public class XADataSourceConnector implements Connector {
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
             return singleUseDS("createDatabase", "create").
-                         getXAConnection(user, password).getConnection(); 
+                   getXAConnection(user, password).getConnection(); 
+       }
+    }
+
+    public Connection openConnection(String databaseName, String user, String password)
+            throws SQLException {
+        JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
+        try {
+            return ds.getXAConnection(user, password).getConnection();
+        } catch (SQLException e) {
+            // If there is a database not found exception
+            // then retry the connection request with
+            // a new DataSource with the createDatabase property set.
+            if (!"XJ004".equals(e.getSQLState()))
+                throw e;
+            XADataSource tmpDs = singleUseDS("createDatabase", "create");
+            JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
+            return tmpDs.getXAConnection(user, password).getConnection(); 
        }
     }
 

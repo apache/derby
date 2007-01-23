@@ -26,6 +26,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import junit.extensions.TestSetup;
 import junit.framework.Assert;
@@ -35,6 +37,14 @@ import junit.framework.TestSuite;
 
 /**
  * Class which holds information about the configuration of a Test.
+ * 
+ * A configuration manages the pool of databases in use
+ * in <code>usedDbNames</code> property. One of those databases
+ * is supposed to be the default database. A new database name
+ * is added to the pool by one of singleUseDatabaseDecorator functions.
+ * The database files are supposed to be local and they will be
+ * removed by <code>DropDatabaseSetup</code>.
+ *
  */
 public class TestConfiguration {
     /**
@@ -101,7 +111,7 @@ public class TestConfiguration {
             assumeHarness = true;
         
         // Assume harness if database name is not default
-        if (!DERBY_HARNESS_CONFIG.getDatabaseName().equals(DEFAULT_DBNAME))
+        if (!DERBY_HARNESS_CONFIG.getDefaultDatabaseName().equals(DEFAULT_DBNAME))
             assumeHarness = true;
         
         // Assume harness if user name is not default
@@ -266,7 +276,10 @@ public class TestConfiguration {
      * Decorate a test to use a new database that is created upon the
      * first connection request to the database and shutdown & deleted at
      * tearDown. The configuration differs only from the current configuration
-     * by the database name.
+     * by the list of used databases. The new database name
+     * is generated automatically as 'singleUse/oneuseXX' where 'XX' is
+     * the unique number. The generated database name is added at the end
+     * of <code>usedDbNames</code> and assigned as a default database name.
      * This decorator expects the database file to be local so it
      * can be removed.
      * @param test Test to be decorated
@@ -284,7 +297,26 @@ public class TestConfiguration {
             dbName = dbName.concat(Integer.toHexString(uniqueDB++));
         }
 
-        return new DatabaseChangeSetup(new DropDatabaseSetup(test), dbName);
+        return new DatabaseChangeSetup(new DropDatabaseSetup(test), dbName, true);
+    }
+    
+    /**
+     * Decorate a test to use a new database that is created upon the
+     * first connection request to the database and shutdown & deleted at
+     * tearDown. The configuration differs only from the current configuration
+     * by the list of used databases. The default database name is changed
+     * according the <code>defaultDb</code> parameter. The passed database name
+     * is added at the end of <code>usedDbNames</code>.
+     * This decorator expects the database file to be local so it
+     * can be removed.
+     * @param test Test to be decorated
+     * @param dbName The database name to be added to the list of used databases.
+     * @param defaultDb Indicates that the passed database name should be used as a default database.
+     * @return decorated test.
+     */
+    public static TestSetup singleUseDatabaseDecorator(Test test, String dbName, boolean defaultDb)
+    {
+        return new DatabaseChangeSetup(new DropDatabaseSetup(test), dbName, defaultDb);
     }
     
     /**
@@ -334,7 +366,7 @@ public class TestConfiguration {
             }
         };
 
-        return new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL);
+        return new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, true);
     }
     
     /**
@@ -390,14 +422,15 @@ public class TestConfiguration {
      *
      */
     private TestConfiguration() {
-        this.dbName = DEFAULT_DBNAME;
+        this.defaultDbName = DEFAULT_DBNAME;
+        usedDbNames.add(DEFAULT_DBNAME);
         this.userName = DEFAULT_USER_NAME;
         this.userPassword = DEFAULT_USER_PASSWORD;
         this.hostName = null;
         this.port = -1;
         
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
-        url = createJDBCUrlWithDatabaseName(dbName);
+        url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(null);
  
     }
@@ -405,7 +438,8 @@ public class TestConfiguration {
     TestConfiguration(TestConfiguration copy, JDBCClient client,
             String hostName, int port)
     {
-        this.dbName = copy.dbName;
+        this.defaultDbName = copy.defaultDbName;
+        this.usedDbNames.addAll(copy.usedDbNames);        
         this.userName = copy.userName;
         this.userPassword = copy.userPassword;
 
@@ -415,7 +449,7 @@ public class TestConfiguration {
         this.jdbcClient = client;
         this.hostName = hostName;
         
-        this.url = createJDBCUrlWithDatabaseName(dbName);
+        this.url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(copy.connector);
     }
 
@@ -429,7 +463,8 @@ public class TestConfiguration {
      */
     TestConfiguration(TestConfiguration copy, String user, String password)
     {
-        this.dbName = copy.dbName;
+        this.defaultDbName = copy.defaultDbName;
+        this.usedDbNames.addAll(copy.usedDbNames);
         this.userName = user;
         this.userPassword = password;
 
@@ -444,13 +479,25 @@ public class TestConfiguration {
     }
     /**
      * Obtain a new configuration identical to the passed in
-     * one except for the database name.
+     * one except for the database name. The passed database name
+     * is added at the end of the list of used databases.
+     * If the <code>defaulDb</code> parameter is <code>true</code>
+     * the new database name is used as a default database.
      * @param copy Configuration to copy.
-     * @param dbName New database name
-      */
-    TestConfiguration(TestConfiguration copy, String dbName)
+     * @param defaultDbName New database name
+     * @param defaultDb Indicates that the passed <code>dbName</code> is supposed
+     * to be used as the default database name.
+     */
+    TestConfiguration(TestConfiguration copy, String dbName, boolean defaultDb)
     {
-        this.dbName = dbName;
+        this.usedDbNames.addAll(copy.usedDbNames);
+        this.usedDbNames.add(dbName);
+        if (defaultDb) {
+            this.defaultDbName = dbName;
+        } else {
+            this.defaultDbName = copy.defaultDbName;
+        }
+        
         this.userName = copy.userName;
         this.userPassword = copy.userPassword;
 
@@ -460,7 +507,7 @@ public class TestConfiguration {
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
         
-        this.url = createJDBCUrlWithDatabaseName(dbName);
+        this.url = createJDBCUrlWithDatabaseName(this.defaultDbName);
         initConnector(copy.connector);
     }
   
@@ -472,7 +519,7 @@ public class TestConfiguration {
     private TestConfiguration(Properties props) 
         throws NumberFormatException {
 
-        dbName = props.getProperty(KEY_DBNAME, DEFAULT_DBNAME);
+        defaultDbName = props.getProperty(KEY_DBNAME, DEFAULT_DBNAME);
         userName = props.getProperty(KEY_USER_NAME, DEFAULT_USER_NAME);
         userPassword = props.getProperty(KEY_USER_PASSWORD, 
                                          DEFAULT_USER_PASSWORD);
@@ -500,7 +547,7 @@ public class TestConfiguration {
         } else {
             jdbcClient = JDBCClient.getDefaultEmbedded();
         }
-        url = createJDBCUrlWithDatabaseName(dbName);
+        url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(null);
     }
 
@@ -610,10 +657,19 @@ public class TestConfiguration {
      * 
      * @return default database name.
      */
-    public String getDatabaseName() {
-        return dbName;
+    public String getDefaultDatabaseName() {
+        return defaultDbName;
     }
     
+    /**
+     * Return the names of all used databases.
+     * 
+     * @return The ArrayList containing the database names.
+     */
+    public ArrayList getUsedDatabaseNames() {
+        return usedDbNames;
+    }
+
     /**
      * Return the user name.
      * 
@@ -660,6 +716,23 @@ public class TestConfiguration {
     Connection openDefaultConnection()
         throws SQLException {
         return connector.openConnection();
+    }
+    
+    /**
+     * Open connection to the specified database.
+     * If the database does not exist, it will be created.
+     * A default username and password will be used for the connection.
+     * Requires that the test has been decorated with a
+     * singleUseDatabaseDecorator with the matching name.
+     * @return connection to specified database.
+     */
+    Connection openConnection(String databaseName)
+        throws SQLException {
+        if (usedDbNames.contains(databaseName))
+            return connector.openConnection(databaseName);
+        else
+            throw new SQLException("Database name \"" + databaseName + "\" is not in a list of used databases. "
+                                 + "Use method TestConfiguration.singleUseDatabaseDecorator first.");
     }
     
     /**
@@ -786,10 +859,15 @@ public class TestConfiguration {
         
     }
     
-    /**
+    /*
      * Immutable data members in test configuration
      */
-    private final String dbName;
+    
+    /** The default database name for tests. */
+    private final String defaultDbName;
+    /** Holds the names of all other databases used in a test to perform a proper cleanup.
+     * The <code>defaultDbName</code> is also contained here.  */
+    private final ArrayList usedDbNames = new ArrayList();
     private final String url;
     private final String userName; 
     private final String userPassword; 

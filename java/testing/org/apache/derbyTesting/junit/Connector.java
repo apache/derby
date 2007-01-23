@@ -54,11 +54,26 @@ interface Connector {
     abstract Connection openConnection() throws SQLException;
    
     /**
+     * Open a connection with the database, user and password
+     * defined by the configuration passed to setConfiguration.
+     * If the database does not exist then it should be created.
+     */
+    abstract Connection openConnection(String databaseName) throws SQLException;
+   
+    /**
      * Open a connection to the database
      * defined by the configuration passed to setConfiguration.
      * If the database does not exist then it should be created.
      */
      abstract Connection openConnection(String user, String password)
+         throws SQLException;
+
+    /**
+     * Open a connection to the database
+     * defined by the configuration passed to setConfiguration.
+     * If the database does not exist then it should be created.
+     */
+     abstract Connection openConnection(String databaseName, String user, String password)
          throws SQLException;
 
     /**

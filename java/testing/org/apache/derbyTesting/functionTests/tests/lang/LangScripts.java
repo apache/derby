@@ -66,6 +66,7 @@ public final class LangScripts extends ScriptTestCase {
         "aggregate",
         "arithmetic",
         "case",
+        "cast",
         "comparisons",
         "constantExpression",
         "delete",
@@ -90,7 +91,6 @@ public final class LangScripts extends ScriptTestCase {
      * (ie. can not run on JSR169).
      */
     private static final String[] JDBC3_TESTS = {
-        "cast",  // DERBY-2228 (also never ran with J2ME with old harness)
     };
 
 	/**
