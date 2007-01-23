@@ -29,8 +29,7 @@ import java.sql.SQLException;
  * <OL>
  * <LI> Use the setupLoad to perform any necessary initialization for the load
  * phase
- * <LI> Load data into the tables 
- * <LI> Provide information about cardinality of rows in each table.
+ * <LI> Load data into all the tables 
  * </OL>
  * <P>
  * DECIMAL values are represented as String objects to allow Order Entry to be
@@ -67,12 +66,6 @@ public interface Load {
         (ORDERS_COUNT_W - NEWORDERS_COUNT_W)/ DISTRICT_COUNT_W;
 
     /**
-     * Return the warehouse scale factor of the database. 
-     * @return
-     */
-    public short getScale();
-
-    /**
      * Perform the necessary setup before database population.
      * @param conn - database connection 
      * @param scale - scale of the database.  The WAREHOUSE table is 
@@ -84,75 +77,12 @@ public interface Load {
     /**
      * Follow the initial database population requirements in Section 4.3.3 
      * and populate all the required tables.
+     * BE CAREFUL to use the correct starting identifiers for the data in
+     * the tables. In the specification, identifiers start at 1 (one), 
+     * e.g. 1-10 for a district and is not zero based.
+     * 
      * @throws SQLException
      */
     public void populateAllTables() throws SQLException;
-
-    /**
-     * Return the number of rows in the table. 
-     * A simple select count(*) from tableName 
-     * @param tableName - name of the table
-     * @throws SQLException
-     */
-    public int rowsInTable(String tableName) throws SQLException;
-
-    /**
-     * Populate the ITEM table 
-     * See population requirements in section 4.3.3.1
-     * <BR>
-     * @param itemStart insert item information starting from this Item id (ITEM.I_ID) 
-     * @param itemEnd  last Item id (ITEM.I_ID) for inserting information for
-     * @throws SQLException
-     */
-    public void itemTable(int itemStart, int itemEnd) throws SQLException;
-
-    /**
-     * Populate the WAREHOUSE table for a given warehouse.
-     * See population requirements in section 4.3.3.1
-     * @param w WAREHOUSE ID (W_ID)
-     * @throws SQLException
-     */
-    public void warehouseTable(short w) throws SQLException;
-
-    /**
-     * Populate the STOCK table for a given warehouse.
-     * See population requirements in section 4.3.3.1
-     * <BR>
-     * @param itemStart insert stocks of items from this Item id (ITEM.I_ID) 
-     * @param itemEnd  last Item id (ITEM.I_ID) to insert stocks of times for.
-     * @param w WAREHOUSE id (W_ID) for which the stock is populated.
-     * @throws SQLException
-     */
-    public void stockTable(int itemStart, int itemEnd, short w)
-    throws SQLException;
-
-    /**
-     * Populate the DISTRICT table for a given warehouse.
-     * See population requirements in section 4.3.3.1
-     * <BR>
-     * @param w - WAREHOUSE id (W_ID)
-     * @param d - DISTRICT id (D_ID)
-     * @throws SQLException
-     */
-    public void districtTable(short w, short d) throws SQLException;
-
-    /**
-     * Populate the CUSTOMER table for a given district for a specific warehouse.
-     * See population requirements in section 4.3.3.1
-     * <BR>
-     * @param w - WAREHOUSE id (W_ID)
-     * @param d - DISTRICT id (D_ID)
-     * @throws SQLException
-     */
-    public void customerTable(short w, short d) throws SQLException;
-
-    /**
-     * Populate the ORDER table 
-     * See population requirements in section 4.3.3.1
-     * @param w - WAREHOUSE id (W_ID)
-     * @param d - DISTRICT id (D_ID)
-     * @throws SQLException
-     */
-    public void orderTable(short w, short d) throws SQLException;
 
 }

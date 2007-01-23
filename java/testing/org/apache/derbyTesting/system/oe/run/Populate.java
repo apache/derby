@@ -24,15 +24,14 @@ import java.io.UnsupportedEncodingException;
 import java.security.PrivilegedActionException;
 import java.sql.SQLException;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.system.oe.client.Load;
 import org.apache.derbyTesting.system.oe.load.SimpleInsert;
-
+import org.apache.derbyTesting.system.oe.run.Checks;
+import org.apache.derbyTesting.system.oe.run.Schema;
 
 /**
  * Driver to do the load phase for the Order Entry benchmark.
@@ -105,7 +104,8 @@ public class Populate extends JDBCPerfTestCase {
         // different implementations, the loading mechanism will need
         // to be configurable taking an option from the command line
         // arguments.
-       loader = new SimpleInsert(getConnection(), scale);
+       loader = new SimpleInsert();
+       loader.setupLoad(getConnection(), scale);
     }
 
     /**
@@ -166,76 +166,28 @@ public class Populate extends JDBCPerfTestCase {
         TestSuite suite = new TestSuite("Order Entry");
 
         // Create Schema
-        suite.addTest(new Populate("testSchema"));
+        suite.addTest(new Schema("testSchema"));
         if (createConstraintsBeforeLoad)
-            addConstraints(suite);
+            Schema.addConstraints(suite);
+        
         // this will populate db
         suite.addTest(new Populate("testLoad"));
 
         if (!createConstraintsBeforeLoad)
-            addConstraints(suite);
+            Schema.addConstraints(suite);
 
         if (doChecks)
         {
             //check if cardinality of rows are OK after
             //population phase.
-            suite.addTest(new Populate("testWarehouseRows"));
-            suite.addTest(new Populate("testStockRows"));
-            suite.addTest(new Populate("testItemRows"));
-            suite.addTest(new Populate("testCustomerRows"));
-            suite.addTest(new Populate("testDistrictRows"));
-            suite.addTest(new Populate("testOrdersRows"));
-            suite.addTest(new Populate("testNewOrdersRows"));
-            suite.addTest(new Populate("testOrderLineRows"));
-            suite.addTest(new Populate("testHistoryRows"));
+            suite.addTest(Checks.checkAllRowCounts(scale));
+            // consistency checks.
+            suite.addTest(Checks.consistencyChecks());
         }
         
         return suite;
     }
 
-    /**
-     * Add constraint tests to suite.
-     * 
-     * @param suite
-     */
-    private static void addConstraints(TestSuite suite) {
-        suite.addTest(new Populate("testPrimaryKey"));
-        suite.addTest(new Populate("testForeignKey"));
-        suite.addTest(new Populate("testIndex"));
-
-    }
-
-    /**
-     * Test setting up the base tables.
-     */
-    public void testSchema() throws UnsupportedEncodingException, SQLException,
-    PrivilegedActionException, IOException {
-        script("schema.sql");
-    }
-
-    /**
-     * Test setting up the primary keys.
-     */
-    public void testPrimaryKey() throws UnsupportedEncodingException,
-    SQLException, PrivilegedActionException, IOException {
-        script("primarykey.sql");
-    }
-
-    /**
-     * Test setting up the foreign keys.
-     */
-    public void testForeignKey() throws UnsupportedEncodingException,
-    SQLException, PrivilegedActionException, IOException {
-        script("foreignkey.sql");
-    }
-
-    /**
-     * Test setting up the remaining indexes.
-     */
-    public void testIndex() throws UnsupportedEncodingException, SQLException,
-    PrivilegedActionException, IOException {
-        script("index.sql");
-    }
 
     /**
      * test the initial database load
@@ -251,136 +203,6 @@ public class Populate extends JDBCPerfTestCase {
         // that is defined in oe.properties
         // One extension would be to have an implementation that 
         // uses bulkinsert vti to load data.
-
     }
 
-    /**
-     * Test cardinality of WAREHOUSE table
-     * 
-     * @throws Exception
-     */
-    public void testWarehouseRows() throws Exception {
-        checkCountStar("WAREHOUSE", loader.getScale());
-    }
-
-    /**
-     * Test cardinality of STOCK table
-     * 
-     * @throws Exception
-     */
-    public void testStockRows() throws Exception {
-        checkCountStar("STOCK", Load.STOCK_COUNT_W * loader.getScale());
-    }
-
-    /**
-     * Test cardinality of ORDERS table
-     * 
-     * @throws Exception
-     */
-    public void testOrdersRows() throws Exception {
-        checkCountStar("ORDERS", Load.ORDERS_COUNT_W * loader.getScale());
-    }
-
-    /**
-     * Test cardinality of DISTRICT table
-     * 
-     * @throws Exception
-     */
-    public void testDistrictRows() throws Exception {
-        checkCountStar("DISTRICT", Load.DISTRICT_COUNT_W * loader.getScale());
-    }
-
-    /**
-     * Test cardinality of CUSTOMER table
-     * 
-     * @throws Exception
-     */
-    public void testCustomerRows() throws Exception {
-        checkCountStar("CUSTOMER", Load.CUSTOMER_COUNT_W * loader.getScale());
-    }
-
-    /**
-     * Test cardinality of ITEM table
-     * 
-     * @throws Exception
-     */
-    public void testItemRows() throws Exception {
-        checkCountStar("ITEM", Load.ITEM_COUNT);
-    }
-
-    /**
-     * Test cardinality of NEWORDERS table
-     * 
-     * @throws Exception
-     */
-    public void testNewOrdersRows() throws Exception {
-        checkCountStar("NEWORDERS", Load.NEWORDERS_COUNT_W * loader.getScale());
-    }
-
-    /**
-     * Test cardinality of HISTORY table
-     * 
-     * @throws Exception
-     */
-    public void testHistoryRows() throws Exception {
-        checkCountStar("HISTORY", Load.HISTORY_COUNT_W * loader.getScale());
-    }
-
-    /**
-     * Test cardinality of ORDERLINE table
-     * 
-     * @throws Exception
-     */
-    public void testOrderLineRows() throws Exception {
-        checkWithinOnePercent("ORDERLINE", Load.ORDERLINE_COUNT_WV
-                * loader.getScale());
-    }
-
-    /**
-     * Check if number of rows in table is as expected
-     * 
-     * @param table -
-     *            table on which to execute the query
-     * @param expected -
-     *            expected number of rows
-     * @throws Exception
-     */
-    private void checkCountStar(String table, int expected) throws Exception {
-        Assert.assertEquals("Number of rows loaded for " + table
-                + " not correct", expected, loader.rowsInTable(table));
-    }
-
-    /**
-     * Check if number of rows in table is within one percent of expected value
-     * 
-     * @param table -
-     *            table on which to execute the query
-     * @param expected -
-     *            expected number of rows
-     * @throws Exception
-     */
-    private void checkWithinOnePercent(String tableName, int expected)
-    throws Exception {
-
-        double count = loader.rowsInTable(tableName);
-
-        double low = ((double) expected) * 0.99;
-        double high = ((double) expected) * 1.01;
-
-        Assert.assertEquals("Initial rows" + count + " in " + tableName
-                + " is out of range.[" + low + "-" + high + "]", false,
-                ((count < low) || (count > high)));
-
-    }
-
-    /**
-     * Run a Order Entry script.
-     */
-    private void script(String name) throws UnsupportedEncodingException,
-    SQLException, PrivilegedActionException, IOException {
-
-        String script = "org/apache/derbyTesting/system/oe/schema/" + name;
-        int errorCount = runScript(script, "US-ASCII");
-        assertEquals("Errors in script ", 0, errorCount);
-    }
 }

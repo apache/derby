@@ -46,26 +46,6 @@ public class SimpleInsert implements Load {
     OERandom random;
 
     /**
-     * Create an instance of this implementation. Connection will be set to non
-     * auto commit mode and SERIALIZABLE isolation.
-     */
-    public SimpleInsert(Connection conn, short scale) throws SQLException {
-        this.conn = conn;
-        conn.setAutoCommit(false);
-        conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-        setupLoad(conn, scale);
-    }
-
-    /**
-     * return the warehouse scale factor
-     * 
-     * @see org.apache.derbyTesting.system.oe.client.Load#getScale()
-     */
-    public short getScale() {
-        return scale;
-    }
-
-    /**
      * Perform the necessary setup before database population.
      * 
      * @param conn -
@@ -76,6 +56,11 @@ public class SimpleInsert implements Load {
      * @throws Exception
      */
     public void setupLoad(Connection conn, short scale) throws SQLException {
+
+        this.conn = conn;
+        conn.setAutoCommit(false);
+        conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
         Statement s = conn.createStatement();
         try {
             s.execute("DROP TABLE C");
@@ -112,36 +97,17 @@ public class SimpleInsert implements Load {
         // the customer table. for each row in customer table, load
         // the history, and order table.
 
-        for (short w = 0; w < scale; w++) {
+        for (short w = 1; w <= scale; w++) {
             warehouseTable(w);
             // for each warehouse: load the stock table
             stockTable(1, Load.STOCK_COUNT_W, w);
-            for (short d = 0; d < Load.DISTRICT_COUNT_W; d++) {
+            for (short d = 1; d <= Load.DISTRICT_COUNT_W; d++) {
                 districtTable(w, d);
                 customerTable(w, d);
                 orderTable(w, d);
             }
         }
 
-    }
-
-    /**
-     * Return the number of rows in the table. A simple select count(*) from
-     * tableName
-     * 
-     * @param tableName -
-     *            name of the table
-     * @throws SQLException
-     */
-    public int rowsInTable(String table) throws SQLException {
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + table);
-        rs.next();
-        int count = rs.getInt(1);
-        rs.close();
-        stmt.close();
-
-        return count;
     }
 
     /**
@@ -380,15 +346,15 @@ public class SimpleInsert implements Load {
         int[] cid = random.randomIntPerm(Load.CUSTOMER_COUNT_W
                 / Load.DISTRICT_COUNT_W);
         
-        for (int o_id = 0; o_id < cid.length; o_id++) {
+        for (int o_id = 1; o_id <= cid.length; o_id++) {
             psO.setInt(1, o_id);
-            psO.setInt(4, cid[o_id]);
+            psO.setInt(4, cid[o_id-1]);
 
             Timestamp o_entry_d = new Timestamp(System.currentTimeMillis());
 
             psO.setTimestamp(5, o_entry_d);
 
-            if (o_id < Load.NEWORDERS_BREAKPOINT)
+            if (o_id <= Load.NEWORDERS_BREAKPOINT)
                 psO.setShort(6, (short) random.randomInt(1, 10));
             else
                 psO.setNull(6, Types.SMALLINT);
@@ -402,7 +368,7 @@ public class SimpleInsert implements Load {
             psOL.setShort(3, w);
             psNO.setShort(2, d);
             psNO.setShort(3, w);
-            for (int ol_number = 0; ol_number < o_ol_cnt; ol_number++) {
+            for (int ol_number = 1; ol_number <= o_ol_cnt; ol_number++) {
 
                 psOL.setInt(1, o_id);
                 psOL.setInt(4, ol_number);
@@ -410,7 +376,7 @@ public class SimpleInsert implements Load {
                 // OL_I_ID random within [1 .. 100,000]
                 psOL.setInt(5, random.randomInt(1, Load.ITEM_COUNT));
                 psOL.setShort(6, w);
-                if (o_id < Load.NEWORDERS_BREAKPOINT) {
+                if (o_id <= Load.NEWORDERS_BREAKPOINT) {
                     psOL.setTimestamp(7, o_entry_d);
                     psOL.setString(9, "0.00");
                 } else {
@@ -421,7 +387,7 @@ public class SimpleInsert implements Load {
                 psOL.setString(10, random.randomAString24());
                 psOL.executeUpdate();
             }
-            if (o_id >= Load.NEWORDERS_BREAKPOINT) {
+            if (o_id > Load.NEWORDERS_BREAKPOINT) {
                 psNO.setInt(1, o_id);
                 psNO.executeUpdate();
             }
