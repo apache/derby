@@ -44,27 +44,6 @@ Column result scale after division is: 23
 dc / 2 = 5.55000000000000000000000
 dc / 2 = 5.55500000000000000000000
 JDBC Driver 'IBM DB2 JDBC Universal Driver Architecture', version (EXPECTED VERSION)
-DatabaseMetaData.getURL test passed
-allTablesAreSelectable(): true
-maxColumnNameLength(): 128
-getSchemas():
-TABLE_SCHEM[VARCHAR],TABLE_CATALOG[VARCHAR]
-APP,null
-NULLID,null
-SQLJ,null
-SYS,null
-SYSCAT,null
-SYSCS_DIAG,null
-SYSCS_UTIL,null
-SYSFUN,null
-SYSIBM,null
-SYSPROC,null
-SYSSTAT,null
-getCatalogs():
-TABLE_CAT[CHAR]
-getSearchStringEscape(): 
-getSQLKeywords(): ALIAS,BIGINT,BOOLEAN,CALL,CLASS,COPY,DB2J_DEBUG,EXECUTE,EXPLAIN,FILE,FILTER,GETCURRENTCONNECTION,INDEX,INSTANCEOF,METHOD,NEW,OFF,PROPERTIES,PUBLICATION,RECOMPILE,REFRESH,RENAME,RUNTIMESTATISTICS,STATEMENT,STATISTICS,TIMING,WAIT
-getDefaultTransactionIsolation(): 2
 getProcedures():
 PROCEDURE_CAT[VARCHAR],PROCEDURE_SCHEM[VARCHAR],PROCEDURE_NAME[VARCHAR],NUM_INPUT_PARAMS[INTEGER],NUM_OUTPUT_PARAMS[INTEGER],NUM_RESULT_SETS[INTEGER],REMARKS[VARCHAR],PROCEDURE_TYPE[SMALLINT]
 ,APP,GETPCTEST1,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1
@@ -84,117 +63,7 @@ getUDTs() with user-named types in ('DISTINCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR],BASE_TYPE[SMALLINT]
 getUDTs() with user-named types in ('JAVA_OBJECT', 'STRUCT') :
 TYPE_CAT[CHAR],TYPE_SCHEM[CHAR],TYPE_NAME[VARCHAR],CLASS_NAME[LONG VARCHAR],DATA_TYPE[INTEGER],REMARKS[CHAR],BASE_TYPE[SMALLINT]
-allProceduresAreCallable(): true
-getUserName(): APP
-isReadOnly(): false
-nullsAreSortedHigh(): true
-nullsAreSortedLow(): false
-nullsAreSortedAtStart(): false
-nullsAreSortedAtEnd(): false
-getDatabaseProductName(): Apache Derby
-getDatabaseProductVersion(): 10.3.0.0 alpha -(EXPECTED SUBVERSION INFO)
-getDriverVersion(): EXPECTED VERSION
-usesLocalFiles(): true
-usesLocalFilePerTable(): true
-supportsMixedCaseIdentifiers(): false
-storesUpperCaseIdentifiers(): true
-storesLowerCaseIdentifiers(): false
-storesMixedCaseIdentifiers(): false
-supportsMixedCaseQuotedIdentifiers(): true
-storesUpperCaseQuotedIdentifiers(): false
-storesLowerCaseQuotedIdentifiers(): false
-storesMixedCaseQuotedIdentifiers(): true
-getIdentifierQuoteString(): "
-getNumericFunctions(): ABS,ACOS,ASIN,ATAN,CEILING,COS,COT,DEGREES,EXP,FLOOR,LOG,LOG10,MOD,PI,RADIANS,RAND,SIGN,SIN,SQRT,TAN
-getStringFunctions(): CONCAT,LENGTH,LCASE,LOCATE,LTRIM,RTRIM,SUBSTRING,UCASE
-getSystemFunctions(): USER
-getTimeDateFunctions(): CURDATE,CURTIME,HOUR,MINUTE,MONTH,SECOND,TIMESTAMPADD,TIMESTAMPDIFF,YEAR
-getExtraNameCharacters(): 
-supportsAlterTableWithAddColumn(): true
-supportsAlterTableWithDropColumn(): true
-supportsColumnAliasing(): true
-nullPlusNonNullIsNull(): true
-supportsConvert(): true
-supportsConvert(Types.INTEGER, Types.SMALLINT): false
-supportsTableCorrelationNames(): true
-supportsDifferentTableCorrelationNames(): true
-supportsExpressionsInOrderBy(): false
-supportsOrderByUnrelated(): false
-supportsGroupBy(): true
-supportsGroupByUnrelated(): true
-supportsGroupByBeyondSelect(): true
-supportsLikeEscapeClause(): true
-supportsMultipleResultSets(): true
-supportsMultipleTransactions(): true
-supportsNonNullableColumns(): true
-supportsMinimumSQLGrammar(): true
-supportsCoreSQLGrammar(): false
-supportsExtendedSQLGrammar(): false
-supportsANSI92EntryLevelSQL(): true
-supportsANSI92IntermediateSQL(): false
-supportsANSI92FullSQL(): false
-supportsIntegrityEnhancementFacility(): false
-supportsOuterJoins(): true
-supportsFullOuterJoins(): false
-supportsLimitedOuterJoins(): true
-getSchemaTerm(): SCHEMA
-getProcedureTerm(): PROCEDURE
-getCatalogTerm(): CATALOG
-isCatalogAtStart(): false
-getCatalogSeparator(): 
-supportsSchemasInDataManipulation(): true
-supportsSchemasInProcedureCalls(): true
-supportsSchemasInTableDefinitions(): true
-supportsSchemasInIndexDefinitions(): true
-supportsSchemasInPrivilegeDefinitions(): true
-supportsCatalogsInDataManipulation(): false
-supportsCatalogsInProcedureCalls(): false
-supportsCatalogsInTableDefinitions(): false
-supportsCatalogsInIndexDefinitions(): false
-supportsCatalogsInPrivilegeDefinitions(): false
-supportsPositionedDelete(): true
-supportsPositionedUpdate(): true
-supportsSelectForUpdate(): true
-supportsStoredProcedures(): true
-supportsSubqueriesInComparisons(): true
-supportsSubqueriesInExists(): true
-supportsSubqueriesInIns(): true
-supportsSubqueriesInQuantifieds(): true
-supportsCorrelatedSubqueries(): true
-supportsUnion(): true
-supportsUnionAll(): true
-supportsOpenCursorsAcrossCommit(): false
-supportsOpenCursorsAcrossRollback(): false
-supportsOpenStatementsAcrossCommit(): true
-supportsOpenStatementsAcrossRollback(): false
-getMaxBinaryLiteralLength(): 0
-getMaxCharLiteralLength(): 0
-getMaxColumnsInGroupBy(): 0
-getMaxColumnsInIndex(): 0
-getMaxColumnsInOrderBy(): 0
-getMaxColumnsInSelect(): 0
-getMaxColumnsInTable(): 0
-getMaxConnections(): 0
-getMaxCursorNameLength(): 128
-getMaxIndexLength(): 0
-getMaxSchemaNameLength(): 128
-getMaxProcedureNameLength(): 128
-getMaxCatalogNameLength(): 0
-getMaxRowSize(): 0
-doesMaxRowSizeIncludeBlobs(): true
-getMaxStatementLength(): 0
-getMaxStatements(): 0
-getMaxTableNameLength(): 128
-getMaxTablesInSelect(): 0
-getMaxUserNameLength(): 30
-supportsTransactions(): true
 supportsTransactionIsolationLevel(Connection.TRANSACTION_NONE): false
-supportsTransactionIsolationLevel(Connection.TRANSACTION_REPEATABLE_READ): true
-supportsTransactionIsolationLevel(Connection.TRANSACTION_SERIALIZABLE): true
-supportsDataDefinitionAndDataManipulationTransactions(): true
-supportsDataManipulationTransactionsOnly(): false
-dataDefinitionCausesTransactionCommit(): false
-dataDefinitionIgnoredInTransactions(): false
 Test the metadata calls related to visibility of changes made by others for different resultset types
 Since Derby materializes a forward only ResultSet incrementally, it is possible to see changes
 made by others and hence following 3 metadata calls will return true for forward only ResultSets.
@@ -232,7 +101,6 @@ insertsAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE)? false
 updatesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE)? false
 deletesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE)? false
 insertsAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE)? false
-getConnection(): same connection
 getProcedureColumns():
 PROCEDURE_CAT[VARCHAR],PROCEDURE_SCHEM[VARCHAR],PROCEDURE_NAME[VARCHAR],COLUMN_NAME[VARCHAR],COLUMN_TYPE[SMALLINT],DATA_TYPE[SMALLINT],TYPE_NAME[VARCHAR],COLUMN_SIZE[INTEGER],BUFFER_LENGTH[INTEGER],DECIMAL_DIGITS[SMALLINT],NUM_PREC_RADIX[SMALLINT],NULLABLE[SMALLINT],REMARKS[VARCHAR],COLUMN_DEF[VARCHAR],SQL_DATA_TYPE[SMALLINT],SQL_DATETIME_SUB[SMALLINT],CHAR_OCTET_LENGTH[INTEGER],ORDINAL_POSITION[INTEGER],IS_NULLABLE[VARCHAR],METHOD_ID[SMALLINT],PARAMETER_ID[SMALLINT]
 null,APP,GETPCTEST1,OUTB,4,12,VARCHAR,3,6,null,null,1,null,null,12,null,6,1,YES,12,0
@@ -254,70 +122,6 @@ null,APP,GETPCTEST3A,STRING2,4,12,VARCHAR,5,10,null,null,1,null,null,12,null,10,
 null,APP,GETPCTEST3B,STRING3,1,12,VARCHAR,5,10,null,null,1,null,null,12,null,10,1,YES,2,0
 null,APP,GETPCTEST3B,STRING4,2,12,VARCHAR,5,10,null,null,1,null,null,12,null,10,2,YES,2,1
 null,APP,GETPCTEST4BX,RETPARAM,4,4,INTEGER,10,4,0,10,1,null,null,4,null,null,1,YES,1,0
-getTables() with TABLE_TYPE in ('SYSTEM TABLE') :
-TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR],TYPE_CAT[VARCHAR],TYPE_SCHEM[VARCHAR],TYPE_NAME[VARCHAR],SELF_REFERENCING_COL_NAME[VARCHAR],REF_GENERATION[VARCHAR]
-,SYS,SYSALIASES,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCHECKS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCOLPERMS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCOLUMNS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCONGLOMERATES,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCONSTRAINTS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSDEPENDS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSFILES,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSFOREIGNKEYS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSKEYS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSROUTINEPERMS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSSCHEMAS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSSTATEMENTS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSSTATISTICS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSTABLEPERMS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSTABLES,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSTRIGGERS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSVIEWS,SYSTEM TABLE,,null,null,null,null,null
-,SYSIBM,SYSDUMMY1,SYSTEM TABLE,,null,null,null,null,null
-getTables() with no types:
-TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR],TYPE_CAT[VARCHAR],TYPE_SCHEM[VARCHAR],TYPE_NAME[VARCHAR],SELF_REFERENCING_COL_NAME[VARCHAR],REF_GENERATION[VARCHAR]
-,SYS,SYSALIASES,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCHECKS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCOLPERMS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCOLUMNS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCONGLOMERATES,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSCONSTRAINTS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSDEPENDS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSFILES,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSFOREIGNKEYS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSKEYS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSROUTINEPERMS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSSCHEMAS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSSTATEMENTS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSSTATISTICS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSTABLEPERMS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSTABLES,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSTRIGGERS,SYSTEM TABLE,,null,null,null,null,null
-,SYS,SYSVIEWS,SYSTEM TABLE,,null,null,null,null,null
-,SYSIBM,SYSDUMMY1,SYSTEM TABLE,,null,null,null,null,null
-,APP,ALLTYPES,TABLE,,null,null,null,null,null
-,APP,INFLIGHT,TABLE,,null,null,null,null,null
-,APP,LOUIE,TABLE,,null,null,null,null,null
-,APP,REFTAB,TABLE,,null,null,null,null,null
-,APP,REFTAB2,TABLE,,null,null,null,null,null
-,APP,T,TABLE,,null,null,null,null,null
-,APP,SCREWIE,VIEW,,null,null,null,null,null
-getTables() with TABLE_TYPE in ('VIEW','TABLE') :
-TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],TABLE_TYPE[VARCHAR],REMARKS[VARCHAR],TYPE_CAT[VARCHAR],TYPE_SCHEM[VARCHAR],TYPE_NAME[VARCHAR],SELF_REFERENCING_COL_NAME[VARCHAR],REF_GENERATION[VARCHAR]
-,APP,ALLTYPES,TABLE,,null,null,null,null,null
-,APP,INFLIGHT,TABLE,,null,null,null,null,null
-,APP,LOUIE,TABLE,,null,null,null,null,null
-,APP,REFTAB,TABLE,,null,null,null,null,null
-,APP,REFTAB2,TABLE,,null,null,null,null,null
-,APP,T,TABLE,,null,null,null,null,null
-,APP,SCREWIE,VIEW,,null,null,null,null,null
-getTableTypes():
-TABLE_TYPE[VARCHAR]
-SYNONYM
-SYSTEM TABLE
-TABLE
-VIEW
 getColumns():
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],COLUMN_NAME[VARCHAR],DATA_TYPE[SMALLINT],TYPE_NAME[VARCHAR],COLUMN_SIZE[INTEGER],BUFFER_LENGTH[INTEGER],DECIMAL_DIGITS[SMALLINT],NUM_PREC_RADIX[SMALLINT],NULLABLE[SMALLINT],REMARKS[VARCHAR],COLUMN_DEF[VARCHAR],SQL_DATA_TYPE[SMALLINT],SQL_DATETIME_SUB[SMALLINT],CHAR_OCTET_LENGTH[INTEGER],ORDINAL_POSITION[INTEGER],IS_NULLABLE[VARCHAR],SCOPE_CATLOG[VARCHAR],SCOPE_SCHEMA[VARCHAR],SCOPE_TABLE[VARCHAR],SOURCE_DATA_TYPE[SMALLINT],IS_AUTOINCREMENT[VARCHAR]
 getColumns('SYSTABLES'):
@@ -462,30 +266,6 @@ PKTABLE_CAT[VARCHAR],PKTABLE_SCHEM[VARCHAR],PKTABLE_NAME[VARCHAR],PKCOLUMN_NAME[
 ,APP,LOUIE,I,,APP,REFTAB2,T2_I,2,3,3,T2_FKEY1,PRIMKEY,7
 getCrossReference('','badschema','LOUIE','','APP','REFTAB' ):
 PKTABLE_CAT[VARCHAR],PKTABLE_SCHEM[VARCHAR],PKTABLE_NAME[VARCHAR],PKCOLUMN_NAME[VARCHAR],FKTABLE_CAT[VARCHAR],FKTABLE_SCHEM[VARCHAR],FKTABLE_NAME[VARCHAR],FKCOLUMN_NAME[VARCHAR],KEY_SEQ[SMALLINT],UPDATE_RULE[SMALLINT],DELETE_RULE[SMALLINT],FK_NAME[VARCHAR],PK_NAME[VARCHAR],DEFERRABILITY[SMALLINT]
-getTypeInfo():
-TYPE_NAME[VARCHAR],DATA_TYPE[SMALLINT],COLUMN_SIZE[INTEGER],LITERAL_PREFIX[VARCHAR],LITERAL_SUFFIX[VARCHAR],CREATE_PARAMS[VARCHAR],NULLABLE[SMALLINT],CASE_SENSITIVE[SMALLINT],SEARCHABLE[SMALLINT],UNSIGNED_ATTRIBUTE[SMALLINT],FIXED_PREC_SCALE[SMALLINT],AUTO_UNIQUE_VAL[SMALLINT],LOCAL_TYPE_NAME[VARCHAR],MINIMUM_SCALE[SMALLINT],MAXIMUM_SCALE[SMALLINT],SQL_DATA_TYPE[SMALLINT],SQL_DATETIME_SUB[SMALLINT],NUM_PREC_RADIX[INTEGER],INTERVAL_PRECISION[SMALLINT]
-BIGINT,-5,19,null,null,null,1,0,2,0,0,1,BIGINT,0,0,-5,null,10,null
-LONG VARCHAR FOR BIT DATA,-4,32700,X',',null,1,0,2,null,0,null,LONG VARCHAR FOR BIT DATA,null,null,-4,null,null,null
-VARCHAR () FOR BIT DATA,-3,32762,X',',length,1,0,2,null,0,null,VARCHAR () FOR BIT DATA,null,null,-3,null,null,null
-CHAR () FOR BIT DATA,-2,254,X',',length,1,0,2,null,0,null,CHAR () FOR BIT DATA,null,null,-2,null,null,null
-LONG VARCHAR,-1,32700,',',null,1,1,3,null,0,null,LONG VARCHAR,null,null,-1,null,null,null
-LONG NVARCHAR,-1,32700,',',null,1,1,3,null,0,null,LONG NVARCHAR,null,null,-1,null,null,null
-CHAR,1,254,',',length,1,1,3,null,0,null,CHAR,null,null,1,null,null,null
-NATIONAL CHAR,1,2147483647,',',length,1,1,3,null,0,null,NATIONAL CHAR,null,null,1,null,null,null
-NUMERIC,2,31,null,null,precision,scale,1,0,2,0,1,0,NUMERIC,0,32767,2,null,10,null
-DECIMAL,3,31,null,null,precision,scale,1,0,2,0,1,0,DECIMAL,0,32767,3,null,10,null
-INTEGER,4,10,null,null,null,1,0,2,0,0,1,INTEGER,0,0,4,null,10,null
-SMALLINT,5,5,null,null,null,1,0,2,0,0,1,SMALLINT,0,0,5,null,10,null
-FLOAT,6,52,null,null,precision,1,0,2,0,0,0,FLOAT,null,null,6,null,2,null
-REAL,7,23,null,null,null,1,0,2,0,0,0,REAL,null,null,7,null,2,null
-DOUBLE,8,52,null,null,null,1,0,2,0,0,0,DOUBLE,null,null,8,null,2,null
-VARCHAR,12,32672,',',length,1,1,3,null,0,null,VARCHAR,null,null,12,null,null,null
-NATIONAL CHAR VARYING,12,2147483647,',',length,1,1,3,null,0,null,NATIONAL CHAR VARYING,null,null,12,null,null,null
-DATE,91,10,DATE',',null,1,0,2,1,0,0,DATE,0,0,9,1,2,null
-TIME,92,8,TIME',',null,1,0,2,1,0,0,TIME,0,0,9,2,2,null
-TIMESTAMP,93,26,TIMESTAMP',',null,1,0,2,1,0,0,TIMESTAMP,0,6,9,3,2,null
-BLOB,2004,2147483647,null,null,length,1,0,1,null,0,null,BLOB,null,null,2004,null,null,null
-CLOB,2005,2147483647,',',length,1,1,1,null,0,null,CLOB,null,null,2005,null,null,null
 getIndexInfo():
 TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],NON_UNIQUE[SMALLINT],INDEX_QUALIFIER[VARCHAR],INDEX_NAME[VARCHAR],TYPE[SMALLINT],ORDINAL_POSITION[SMALLINT],COLUMN_NAME[VARCHAR],ASC_OR_DESC[CHAR],CARDINALITY[INTEGER],PAGES[INTEGER],FILTER_CONDITION[VARCHAR]
 ,SYS,SYSCOLUMNS,0,,SYSCOLUMNS_INDEX1,3,1,REFERENCEID,A,null,null,null
@@ -508,102 +288,6 @@ TABLE_CAT[VARCHAR],TABLE_SCHEM[VARCHAR],TABLE_NAME[VARCHAR],COLUMN_NAME[VARCHAR]
 ,SYS,SYSTABLES,SCHEMAID,1,CHAR,36,72,null,null,0,,null,1,null,72,4,NO,null,null,null,null,NO
 ,SYS,SYSTABLES,LOCKGRANULARITY,1,CHAR,1,2,null,null,0,,null,1,null,2,5,NO,null,null,null,null,NO
 OK -- user result set closed by intervening OBDC getColumns request; this was expected because of the way the test works.
-Test escaped numeric functions - JDBC 3.0 C.1
-TEST FUNCTIONS DECLARED IN DATABASEMETADATA LIST
-Executing VALUES { fn ABS(-25.67) } --   = >25.67<  << 
-Executing VALUES { fn ACOS(0.0707) } --   = >1.50<  << 
-Executing VALUES { fn ASIN(0.997) } --   = >1.49<  << 
-Executing VALUES { fn ATAN(14.10) } --   = >1.49<  << 
-Executing VALUES { fn CEILING(3.45) } --   = >4.0<  << 
-Executing VALUES { fn COS(1.2) } --   = >0.36<  << 
-Executing VALUES { fn COT(3.4) } --   = >3.78<  << 
-Executing VALUES { fn DEGREES(2.1) } --   = >120.<  << 
-Executing VALUES { fn EXP(2.3) } --   = >9.97<  << 
-Executing VALUES { fn FLOOR(3.22) } --   = >3.0<  << 
-Executing VALUES { fn LOG(34.1) } --   = >3.52<  << 
-Executing VALUES { fn LOG10(18.7) } --   = >1.27<  << 
-Executing VALUES { fn MOD(124, 7) } --   = >5<  << 
-Executing VALUES { fn PI() } --   = >3.14<  << 
-Executing VALUES { fn RADIANS(54) } --   = >0.94<  << 
-Executing VALUES { fn RAND(17) } --   = >0.73<  << 
-Executing VALUES { fn SIGN(-34) } --   = >-1<  << 
-Executing VALUES { fn SIN(0.32) } --   = >0.31<  << 
-Executing VALUES { fn SQRT(6.22) } --   = >2.49<  << 
-Executing VALUES { fn TAN(0.57) } --   = >0.64<  << 
-TEST FUNCTIONS NOT DECLARED IN DATABASEMETADATA LIST
-Executing VALUES { fn ATAN2(0.56, 1.2) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "ATAN2" at line 1, column 13.
-Executing VALUES { fn POWER(2, 3) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "POWER" at line 1, column 13.
-Executing VALUES { fn ROUND(345.345, 1) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "ROUND" at line 1, column 13.
-Executing VALUES { fn TRUNCATE(345.395, 1) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "TRUNCATE" at line 1, column 13.
-Test escaped string functions - JDBC 3.0 C.2
-TEST FUNCTIONS DECLARED IN DATABASEMETADATA LIST
-Executing VALUES { fn CONCAT('hello', 'there') } --   = >hellothere<  << 
-Executing VALUES { fn LENGTH('four    ') } --   = >4<  << 
-Executing VALUES { fn LCASE('Fernando Alonso') } --   = >fernando alonso<  << 
-Executing VALUES { fn LOCATE('jour', 'Bonjour') } --   = >4<  << 
-Executing VALUES { fn LTRIM('   left trim   ') } --   = >left trim   <  << 
-Executing VALUES { fn RTRIM('  right trim   ') } --   = >  right trim<  << 
-Executing VALUES { fn SUBSTRING('Ruby the Rubicon Jeep', 10, 7) } --   = >Rubicon<  << 
-Executing VALUES { fn UCASE('Fernando Alonso') } --   = >FERNANDO ALONSO<  << 
-TEST FUNCTIONS NOT DECLARED IN DATABASEMETADATA LIST
-Executing VALUES { fn ASCII('Yellow') } -- 
-SQLSTATE(42X01): Syntax error: Encountered "ASCII" at line 1, column 13.
-Executing VALUES { fn CHAR(65) } --   = >65         <  << 
-FAIL function works but not declared in list: CHAR
-Executing VALUES { fn DIFFERENCE('Pires', 'Piers') } -- 
-SQLSTATE(42X01): Syntax error: Encountered "DIFFERENCE" at line 1, column 13.
-Executing VALUES { fn INSERT('Bill Clinton', 4, 'William') } -- 
-SQLSTATE(42X01): Syntax error: Encountered "INSERT" at line 1, column 13.
-Executing VALUES { fn LEFT('Bonjour', 3) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "LEFT" at line 1, column 13.
-Executing VALUES { fn REPEAT('echo', 3) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "REPEAT" at line 1, column 13.
-Executing VALUES { fn REPLACE('to be or not to be', 'be', 'England') } -- 
-SQLSTATE(42X01): Syntax error: Encountered "REPLACE" at line 1, column 13.
-Executing VALUES { fn SOUNDEX('Derby') } -- 
-SQLSTATE(42X01): Syntax error: Encountered "SOUNDEX" at line 1, column 13.
-Executing VALUES { fn SPACE(12) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "SPACE" at line 1, column 13.
-Test escaped date time functions - JDBC 3.0 C.3
-TEST FUNCTIONS DECLARED IN DATABASEMETADATA LIST
-Executing VALUES CASE WHEN { fn CURDATE()} = CURRENT_DATE THEN 'OK' ELSE 'wrong' END --   = >OK<  << 
-Executing VALUES CASE WHEN { fn CURTIME()} = CURRENT_TIME THEN 'OK' ELSE 'wrong' END --   = >OK<  << 
-Executing VALUES { fn HOUR({t '16:13:03'}) } --   = >16<  << 
-Executing VALUES { fn MINUTE({t '16:13:03'}) } --   = >13<  << 
-Executing VALUES { fn MONTH({d '1995-12-19'}) } --   = >12<  << 
-Executing VALUES { fn SECOND({t '16:13:03'}) } --   = >3<  << 
-Executing VALUES { fn TIMESTAMPADD(SQL_TSI_DAY, 7, {ts 'xxxxxxFILTERED-TIMESTAMPxxxxx}) } --   = >xxxxxxFILTERED-TIMESTAMPxxxxx<  << 
-Executing VALUES { fn TIMESTAMPDIFF(SQL_TSI_DAY, {ts 'xxxxxxFILTERED-TIMESTAMPxxxxx}, {ts 'xxxxxxFILTERED-TIMESTAMPxxxxx}) } --   = >683<  << 
-Executing VALUES { fn YEAR({d '1995-12-19'}) } --   = >1995<  << 
-TEST FUNCTIONS NOT DECLARED IN DATABASEMETADATA LIST
-Executing VALUES { fn DAYNAME({d '1995-12-19'h}) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "DAYNAME" at line 1, column 13.
-Executing VALUES { fn DAYOFMONTH({d '1995-12-19'}) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "DAYOFMONTH" at line 1, column 13.
-Executing VALUES { fn DAYOFWEEK({d '1995-12-19'}) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "DAYOFWEEK" at line 1, column 13.
-Executing VALUES { fn DAYOFYEAR({d '1995-12-19'}) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "DAYOFYEAR" at line 1, column 13.
-Executing VALUES { fn MONTHNAME({d '1995-12-19'}) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "MONTHNAME" at line 1, column 13.
-Executing VALUES CASE WHEN { fn NOW()} = CURRENT_TIMESTAMP THEN 'OK' ELSE 'wrong' END -- 
-SQLSTATE(42X01): Syntax error: Encountered "NOW" at line 1, column 23.
-Executing VALUES { fn QUARTER({d '1995-12-19'}) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "QUARTER" at line 1, column 13.
-Executing VALUES { fn WEEK({d '1995-12-19'}) } -- 
-SQLSTATE(42X01): Syntax error: Encountered "WEEK" at line 1, column 13.
-Test escaped system functions - JDBC 3.0 C.4
-TEST FUNCTIONS DECLARED IN DATABASEMETADATA LIST
-Executing VALUES { fn USER() } --   = >APP<  << 
-TEST FUNCTIONS NOT DECLARED IN DATABASEMETADATA LIST
-Executing VALUES { fn DATABASE() } -- 
-SQLSTATE(42X01): Syntax error: Encountered "DATABASE" at line 1, column 13.
-Executing VALUES { fn IFNULL('this', 'that') } -- 
-SQLSTATE(42X01): Syntax error: Encountered "IFNULL" at line 1, column 13.
 -----
 Referential action values
 RESTRICT = 1
