@@ -180,30 +180,24 @@ QuickStart</h2>
 tests. Before you can run, you need to setup your environment:</p>
 <ul>
   <li>
-    <p>Obtain a jdk or jre (based on jdk 1.3.1 specification <a
- href="#Note1:"><font size="1">See Note1</font></a> or higher). Add the
-bin directory to your $PATH. Currently supported are:</p>
+    <p>Obtain a jdk or jre (based on jdk 1.4 specification or higher). Add the
+bin directory to your $PATH. Currently supported with regards to the tests are:</p>
   </li>
 </ul>
 <table border="1" cellpadding="2" cellspacing="2">
   <tbody>
     <tr>
       <td>
-      <p>&nbsp;&nbsp;&nbsp; <font size="2">jdk131 - Sun HotSpot
-jdk1.3.1</font><br>
+      <p>
 &nbsp;&nbsp;&nbsp; <font size="2">jdk141 - Sun HotSpot jdk1.4.1</font><br>
 &nbsp;&nbsp;&nbsp; <font size="2">jdk142 - Sun HotSpot jdk1.4.2</font><br>
 &nbsp;&nbsp;&nbsp; <font size="2">jdk15 - Sun HotSpot jdk1.5</font><br>
-&nbsp;&nbsp;&nbsp; <font size="2">ibm131 - IBM Classic jdk1.3.1</font><br>
+&nbsp;&nbsp;&nbsp; <font size="2">jdk16 - Sun HotSpot jdk1.6</font><br>
 &nbsp;&nbsp;&nbsp; <font size="2">ibm141 - IBM Classic jdk1.4.1</font><br>
 &nbsp;&nbsp;&nbsp; <font size="2">ibm142 - IBM Classic jdk1.4.2</font><br>
-&nbsp;&nbsp;&nbsp; <font size="2">j9_13 - WCTME jvm (available with
-IBM Websphere Studio Device Developer, 5.6), version 2.1</font><br>
-&nbsp;&nbsp;&nbsp; <font size="2">j9_22 - WCTME jvm (available with
-IBM Websphere Client Technology Micro Edition, 5.7), version 2.2</font><br>
-&nbsp;&nbsp;&nbsp; <font size="2">j9_foundation - WCTME jvm (available
-with IBM Websphere Client Technology Micro Edition, 5.7), version 2.2,
-foundation library </font> </p>
+&nbsp;&nbsp;&nbsp; <font size="2">ibm15 - IBM Classic jdk1.5</font><br>
+&nbsp;&nbsp;&nbsp; <font size="2">j9_foundation11 - IBM weme jvm (available
+with IBM Websphere EveryPlace Micro Edition, 6.1.1), version 2.3, j2ME 1.1 </font> </p>
       </td>
     </tr>
   </tbody>
@@ -219,7 +213,7 @@ following jars: </p>
     <ul>
       <li>
         <p style="margin-bottom: 0in;"><font size="2">jakarta-oro-2.0.8.jar</font>
-&nbsp;&nbsp;&nbsp; <font size="2">oromatcher, obtain from <a
+&nbsp;&nbsp;&nbsp; <font size="2">oromatcher, obtain from the svn source tree, or from <a
  href="http://jakarta.apache.org/oro/index.html">http://jakarta.apache.org/oro/index.html</a>,
 or follow this link for <a
  href="http://apache.roweboat.net/jakarta/oro/source/jakarta-oro-2.0.8.zip">zip</a>
@@ -288,9 +282,10 @@ messages.</font></p>
 variable and that the set CLASSPATH command below has carriage returns
 for formatting reasons):<br>
 set jardir=/local/derbyjar<br>
+set tstjardir=/local/testingjars<br>
 set
 CLASSPATH="$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbyrun.jar:$jardir/derbynet.jar:$jardir/derbyclient.jar:<br>
-$jardir/derbyTesting.jar:/local/derby/tools/java/jakarta-oro-2.0.8.jar:<br>
+$tstjardir/derbyTesting.jar:$tstjardir/jakarta-oro-2.0.8.jar:$tstjardir/junit.jar:<br>
 $jardir/derbyLocale_cs.jar:$jardir/derbyLocale_de_DE.jar:$jardir/derbyLocale_es.jar:<br>
 $jardir/derbyLocale_fr.jar:$jardir/derbyLocale_hu.jar:$jardir/derbyLocale_it.jar:<br>
 $jardir/derbyLocale_ja_JP.jar:$jardir/derbyLocale_ko_KR.jar:$jardir/derbyLocale_pl.jar:<br>
@@ -407,7 +402,7 @@ org.apache.derbyTesting.functionTests.harness.RunSuite&nbsp;
         <li>
           <p style="margin-bottom: 0in;">&nbsp;&nbsp; <font size="2">&lt;java&gt;
 is the jvm with any jvm flags. For testing with CDC/Foundation Profile
-using j9 jvm from IBM, this will be 'j9 -jcl:foun10'. </font> </p>
+using j9 jvm from IBM, this will be 'j9 -jcl:foun11'. </font> </p>
         </li>
         <li>
           <p style="margin-bottom: 0in;">&nbsp;&nbsp; <font size="2">&lt;jdbc_jar&gt;
@@ -421,7 +416,7 @@ the suites under org/apache/derbyTesting/suites</font> </p>
       </ul>
       <p><font size="2">for example for running&nbsp; the suite
 derbyall:<br>
-      </font>&nbsp;&nbsp; <font size="2">j9 -jcl:foun10
+      </font>&nbsp;&nbsp; <font size="2">j9 -jcl:foun11
 -Xbootclasspath/a:$jardir/jdbc.jar -Dbootcp=$jardir/jdbc.jar <br>
 -Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource <br>
 -Djvmflags="-Dij.dataSource=org.apache.derby.jdbc.EmbeddedSimpleDataSource"
@@ -583,6 +578,15 @@ from the jdbc 20 specification </p>
       </li>
       <li>
         <p style="margin-bottom: 0in;">takes 2 to 5 minutes</p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p style="margin-bottom: 0in;">jdbc4 </p>
+    <ul>
+      <li>
+        <p style="margin-bottom: 0in;">tests implementation of jdbc 4.0
+ </p>
       </li>
     </ul>
   </li>
@@ -941,8 +945,8 @@ Issues.<br>
 <p>When the test is successful, cleanup will occur unless the test
 harness property -Dkeepfiles=true is used. Cleanup will attempt to
 cleanup all files except for .pass. <font size="2"><br>
-<a href="#Note3:">See
-Note3.</a></font> </p>
+<a href="#Note2:">See
+Note2.</a></font> </p>
 <p>A successful run (this example is from a dos environment) would
 look for instance like: </p>
 <table border="1" cellpadding="2" cellspacing="2">
@@ -1224,7 +1228,7 @@ then the search for the master to compare with starts in the
 functionTests/derbynet/jcc2.4/jdk14 directory. If a .out file with
 the same name as the test is found in that directory, that master is
 taken. If there is no such file in that directory, search continues
-in the directory functionTests/derbynet/jcc2.4/jdk13 if it exists.</p>
+in the directory functionTests/derbynet/jcc2.4/jdk14 if it exists.</p>
 <p>If there is no file there, nor for any other jcc directory, it
 will continue to derbynet/jdk14, and the search is continued for
 earlier jvm versions.<br>
@@ -1437,28 +1441,24 @@ Running with a new jvm</h3>
   <tbody>
     <tr>
       <td>
-      <p>&nbsp;&nbsp;&nbsp; <font size="2">jdk131 - Sun HotSpot
-jdk1.3.1 - class: jdk13</font><br>
+      <p>
 &nbsp;&nbsp;&nbsp; <font size="2">jdk141 - Sun HotSpot jdk1.4.1 -
 class jdk14</font><br>
 &nbsp;&nbsp;&nbsp; <font size="2">jdk142 - Sun HotSpot jdk1.4.2 -
 class jdk14</font><br>
 &nbsp;&nbsp;&nbsp; <font size="2">jdk15 - Sun HotSpot jdk1.5 - class
 jdk15</font><br>
-&nbsp;&nbsp;&nbsp; <font size="2">ibm131 - IBM Classic jdk1.3.1&nbsp;
-- class ibm13</font><br>
+&nbsp;&nbsp;&nbsp; <font size="2">jdk16 - Sun HotSpot jdk1.6 - class
+jdk16</font><br>
 &nbsp;&nbsp;&nbsp; <font size="2">ibm141 - IBM Classic jdk1.4.1 -
 class ibm14</font><br>
 &nbsp;&nbsp;&nbsp; <font size="2">ibm142 - IBM Classic jdk1.4.1 -
 class ibm14</font><br>
-&nbsp;&nbsp;&nbsp; <font size="2">j9_13 - WCTME jvm (available with
-IBM Websphere Studio Device Developer, 5.6), version 2.1 - class j9_13</font><br>
-&nbsp;&nbsp;&nbsp; <font size="2">j9_22 - WCTME jvm (available with
-IBM Websphere Client Technology Micro Edition, 5.7), version 2.2 -
-class j9_22</font><br>
-&nbsp;&nbsp;&nbsp; <font size="2">j9_foundation - WCTME jvm (available
-with IBM Websphere Client Technology Micro Edition, 5.7), version 2.2,
-foundation library - class j9_foundation</font></p>
+&nbsp;&nbsp;&nbsp; <font size="2">ibm15 - IBM Classic jdk1.5 -
+class ibm15</font><br>
+&nbsp;&nbsp;&nbsp; <font size="2">j9_foundation11 - WEME jvm (available
+with IBM Websphere Everyplace Micro Edition, 6.1.1), version 2.3, j2ME 1.1 - 
+class j9_foundation11</font></p>
       </td>
     </tr>
   </tbody>
@@ -1503,7 +1503,7 @@ file indicating this. For instance to add a line for a jvm called
 jdk29, it would be like this: runwithjdk29=false. Note that the
 versioning does not currently extend past 2 digits. For j9 jvms,
 versioning does not apply currently. For all j9 versions, use
-runwithj9=false. For j9_foundation, use runwithfoundation=false. </p>
+runwithj9=false. For j9_foundation*, use runwithfoundation=false. </p>
       </li>
       <li>
         <p>Add code in RunTest.java to switch to the new jvm based on
@@ -1582,7 +1582,7 @@ Setting the
 framework property will invoke the test harness class NetServer which
 has the actual configuration (driver name, portnumber etc.) used for
 the individual frameworks. <a href="#Note3:"><font size="2">See
-Note4.</font></a><br>
+Note3.</font></a><br>
 Setting this framework also causes the search
 for expected output to include appropriate DerbyNetClient or&nbsp;
 DerbyNet and jcc version specific subdirectories under the master
@@ -2092,20 +2092,15 @@ lang/supersimple.sql</td>
   </li>
 </ul>
 <h2>Notes</h2>
-<p style="margin-bottom: 0in;"><a name="Note1:"></a><font size="2">Note1:</font></p>
-<p style="margin-left: 0.42in; margin-bottom: 0in;"><font size="2">A
-number of tests require packages that are optional with jdk13, but
-included with later jvms: jdbc20ext.jar and jta1_2.jar. When running
-with jdk131, these need to be downloaded separately &amp; placed in
-the jre/lib/ext directory of your jvm installation.</font></p>
-<p style="margin-bottom: 0in;"><a name="Note2:"></a><font size="2"><br>
-Note2:</font></p>
+<p style="margin-bottom: 0in;"><a name="Note1:"></a><font size="2"><br>
+Note1:</font></p>
 <p style="margin-left: 0.42in; margin-bottom: 0in;"><font size="2">There
 is one more suite included: the j9derbynetmats suite is a
-modification of the derbynetmats suite. It is available to test the
+modification of the derbynetmats suite. It was intended to test the
 network server with the jvm available with IBM's WCTME (Workplace
-Client Technology, Micro Edition; formerly WSDD), and will be run at
-IBM. Note that the setup for running the j9derbynetmats tests is very
+Client Technology, Micro Edition; formerly WSDD).
+Its use has been discontinued.
+Note that the setup for running the j9derbynetmats tests is very
 specific to the test harness, not even using the WCTME files in their
 normal location.</font> <font size="2"><br>
 The j9derbynetmats suite is
@@ -2120,8 +2115,8 @@ the test harness class j9_13. See also section on adding a new <a
  href="#ov9">jvm
 setup</a>. </font>
 </p>
-<p style="margin-bottom: 0in;"><a name="Note3:"></a><br>
-<font size="2">Note3:</font></p>
+<p style="margin-bottom: 0in;"><a name="Note2:"></a><br>
+<font size="2">Note2:</font></p>
 <p style="margin-left: 0.42in; margin-bottom: 0in;">O<font size="2">ccasionally,
 cleanup is unsuccessful. This does not constitute a problem in any
 way, as the harness for most suites starts with a clean database, and
@@ -2129,8 +2124,8 @@ clean copies of all files. However, you will see something like this
 in the output:</font><br>
 <font size="2">Warning: Cleanup failed on
 baseDir: /local/myrun1/DerbyNet/supersimple.</font></p>
-<p style="margin-bottom: 0in;"><a name="Note4:_"></a><br>
-<font size="2">Note4:
+<p style="margin-bottom: 0in;"><a name="Note3:_"></a><br>
+<font size="2">Note3:
 </font></p>
 <p style="margin-left: 0.42in; margin-bottom: 0in;"><font size="2">NetServer
 also has a configuration for connecting to DB2 via jcc - the IBM
