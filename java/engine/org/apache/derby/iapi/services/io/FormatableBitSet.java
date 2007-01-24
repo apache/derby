@@ -159,7 +159,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 *
 	 * The method is public, but is primarily intended for testing and
 	 * ASSERTS.
-	 * @returns true if invariant holds, false otherwise
+	 * @return true if invariant holds, false otherwise
 	 */
 	public boolean invariantHolds() {
 		// Check that all bits will fit in byte array

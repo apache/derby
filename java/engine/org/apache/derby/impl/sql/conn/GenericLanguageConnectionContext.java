@@ -2709,7 +2709,7 @@ public class GenericLanguageConnectionContext
 	}
 
 	/**
-	 * @see Context#isLastHandler
+	 * @see org.apache.derby.iapi.services.context.Context#isLastHandler
 	 */
 	public boolean isLastHandler(int severity)
 	{
