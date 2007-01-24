@@ -298,8 +298,17 @@ public abstract class jvm {
 		String sep = System.getProperty("file.separator");
 		// need to strip off the java directory  assuming it's something
 		// like ibm14/jre or ibm14
-		wshome = jhome.substring(0,jhome.indexOf(sep + "jre"));
-		wshome = wshome.substring(0,wshome.lastIndexOf(sep));
+		int havejre=jhome.indexOf(sep + "jre");
+		if (havejre > 0)
+		{
+			wshome = jhome.substring(0,jhome.indexOf(sep + "jre"));
+			if (wshome.lastIndexOf(sep) >= 0)
+				wshome = wshome.substring(0,wshome.lastIndexOf(sep));
+		}
+		{
+			if (jhome.lastIndexOf(sep) >= 0)
+				wshome = jhome.substring(0,jhome.lastIndexOf(sep));	
+		}
 		return wshome;
 	}
 
