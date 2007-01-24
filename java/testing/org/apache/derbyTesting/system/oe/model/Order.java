@@ -51,7 +51,7 @@ public class Order {
     private short warehouse;
     private int customer;
     private Timestamp entry_d;
-    private Short carrier_id;
+    private Integer carrier_id; // JDBC maps SMALLINT to java.lang.Integer
     private int ol_cnt;
     private boolean all_local;
 
@@ -61,10 +61,10 @@ public class Order {
     public void setAll_local(boolean all_local) {
         this.all_local = all_local;
     }
-    public Short getCarrier_id() {
+    public Integer getCarrier_id() {
         return carrier_id;
     }
-    public void setCarrier_id(Short carrier_id) {
+    public void setCarrier_id(Integer carrier_id) {
         this.carrier_id = carrier_id;
     }
     public int getCustomer() {

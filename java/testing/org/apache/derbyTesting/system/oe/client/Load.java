@@ -64,6 +64,16 @@ public interface Load {
 
     public static final int NEWORDERS_BREAKPOINT = 
         (ORDERS_COUNT_W - NEWORDERS_COUNT_W)/ DISTRICT_COUNT_W;
+    
+    
+    /**
+     * Set the seed for the random number generator used to
+     * populate the data. Useful for testing to ensure consistent
+     * repeatable runs. If not set, defaults a value based upon current time.
+     * Must be called before setupLoad to have an effect.
+     * @param seed
+     */
+    public void setSeed(long seed);
 
     /**
      * Perform the necessary setup before database population.

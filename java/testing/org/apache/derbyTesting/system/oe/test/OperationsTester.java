@@ -19,7 +19,14 @@
  */
 package org.apache.derbyTesting.system.oe.test;
 
+import org.apache.derbyTesting.system.oe.client.Display;
 import org.apache.derbyTesting.system.oe.client.Operations;
+import org.apache.derbyTesting.system.oe.model.Customer;
+import org.apache.derbyTesting.system.oe.model.District;
+import org.apache.derbyTesting.system.oe.model.Order;
+import org.apache.derbyTesting.system.oe.model.OrderLine;
+import org.apache.derbyTesting.system.oe.model.Warehouse;
+import org.apache.derbyTesting.system.oe.util.OERandom;
 
 /**
  * Test an implementation of Operations.
@@ -27,12 +34,15 @@ import org.apache.derbyTesting.system.oe.client.Operations;
  * code is added the implemetations of the transactions
  * will be added.
  */
-class OperationsTester  {
+class OperationsTester implements Display {
 
     private final Operations ops;
+    private final OERandom rand;
+    private final short w = 1;
     
     OperationsTester(Operations ops) {
         this.ops = ops;
+        this.rand = new OERandom(-1, -1, -1, 3458567);
     }
     
     void test() throws Exception
@@ -48,10 +58,44 @@ class OperationsTester  {
     private void testStockLevel() throws Exception
     {
         ops.setupStockLevel();
+        
+        // Check a null display is handled
+        ops.stockLevel(null, null,
+                w, rand.district(), rand.threshold());
+        
+        for (int i = 0; i < 20; i++)
+            ops.stockLevel(this, null,
+                    w, rand.district(), rand.threshold());
     }
+    
+    /**
+     * Execute a number of order-status transactions
+     * by name and identifier. Also check the implementation
+     * accepts a null display.
+     * @throws Exception
+     */
     private void testOrderStatus() throws Exception
     {
         ops.setupOrderStatus();
+        
+        // By identifier
+        ops.orderStatus(null, null,
+                w, rand.district(), rand.NURand1023());
+        for (int i = 0; i < 50; i++) {
+            ops.orderStatus(this, null,
+                    w, rand.district(), rand.NURand1023());
+        }
+        
+        // By name 
+        ops.orderStatus(null, null,
+                w, rand.district(), rand.randomCLast());
+        for (int i = 0; i < 50; i++)
+        {
+            ops.orderStatus(this, null,
+                    w, rand.district(), rand.randomCLast());
+            
+        }
+        //
     }
     private void testPayment() throws Exception
     {
@@ -68,5 +112,29 @@ class OperationsTester  {
     private void testDelivery() throws Exception
     {
         ops.setupDelivery();
+    }
+
+    public void displayStockLevel(Object displayData, short w, short d, int threshold, int level) throws Exception {
+        // TODO: Check expected data is set.  
+    }
+
+    public void displayOrderStatus(Object displayData, boolean byName, Customer customer, Order order, OrderLine[] lineItems) throws Exception {
+        // TODO: Check expected data is set.   
+        
+    }
+
+    public void displayPayment(Object displayData, String amount, boolean byName, Warehouse warehouse, District district, Customer customer) throws Exception {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void displayNewOrder(Object displayData, Warehouse warehouse, District district, Customer customer, Order order) throws Exception {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void displayScheduleDelivery(Object displayData, short w, short carrier) throws Exception {
+        // TODO Auto-generated method stub
+        
     }
 }

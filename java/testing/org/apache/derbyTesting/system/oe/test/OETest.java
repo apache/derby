@@ -78,6 +78,7 @@ public class OETest extends BaseJDBCTestCase {
     {
         OperationsTester tester = new OperationsTester(ops);
         tester.test();
+        ops.close();
     }
     
 

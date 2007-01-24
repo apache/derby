@@ -97,7 +97,25 @@ public class OERandom {
 
         return ((int) rrand) + start;
     }
+    
+    /**
+     * Return a random district [1..10]
+     * @return
+     */
+    public short district()
+    {
+        return (short) randomInt(1, 10);
+    }
 
+    /**
+     * Return a random threshold for the stock level [10..20]
+     * @return
+     */
+    public int threshold()
+    {
+        return randomInt(10, 20);
+    }
+    
     /**
      * tpcc 4.3.2.2 (random a string)
      */

@@ -39,6 +39,11 @@ public class SimpleInsert implements Load {
      * warehouse scale factor, default to 1.
      */
     short scale = 1;
+    
+    /**
+     * Seed value for random number generator.
+     */
+    private long seed = System.currentTimeMillis();
 
     /**
      * Utility to generate random data per the TPC-C requirements
@@ -71,12 +76,12 @@ public class SimpleInsert implements Load {
         s.execute("CREATE TABLE C(CLOAD INT, CLAST INT, CID INT, CITEM INT)");
         conn.commit();
 
-        random = new OERandom(-1, -1, -1);
+        random = new OERandom(-1, -1, -1, seed);
 
         // Section 2.1.6.1 of TPC-C spec
         int loadRandomFactor = random.randomInt(0, 255);
         s.execute("INSERT INTO C VALUES(" + loadRandomFactor + ", -1, -1, -1)");
-        random = new OERandom(loadRandomFactor, -1, -1);
+        random = new OERandom(loadRandomFactor, -1, -1, seed);
         conn.commit();
 
         this.scale = scale;
@@ -401,6 +406,10 @@ public class SimpleInsert implements Load {
         psOL.close();
         psO.close();
         psNO.close();
+    }
+
+    public void setSeed(long seed) {
+        this.seed = seed;
     }
 
 }

@@ -22,6 +22,7 @@ package org.apache.derbyTesting.system.oe.client;
 import org.apache.derbyTesting.system.oe.model.Customer;
 import org.apache.derbyTesting.system.oe.model.District;
 import org.apache.derbyTesting.system.oe.model.Order;
+import org.apache.derbyTesting.system.oe.model.OrderLine;
 import org.apache.derbyTesting.system.oe.model.Warehouse;
 
 /**
@@ -74,10 +75,11 @@ public interface Display {
      *            Customer for order
      * @param order
      *            Order fetched.
+     * @param lineItems Items for the order
      * @throws Exception
      */
     public void displayOrderStatus(Object displayData, boolean byName,
-            Customer customer, Order order) throws Exception;
+            Customer customer, Order order, OrderLine[] lineItems) throws Exception;
               
     /**
      * Display the result of a payment. Payment terminal i/o

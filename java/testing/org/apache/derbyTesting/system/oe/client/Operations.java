@@ -274,5 +274,11 @@ public interface Operations {
      * @throws Exception
      */
     public int delivery() throws Exception;
+    
+    /**
+     * Release any resources.
+     * 
+     */
+    public void close() throws Exception;
 
 }
