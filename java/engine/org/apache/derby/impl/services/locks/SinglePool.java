@@ -505,19 +505,6 @@ public class SinglePool extends Hashtable
 
 
 	/*
-	** Non-public methods
-	*/
-
-//EXCLUDE-START-debug- 
-
-    public String toDebugString()
-    {
-        return(lockTable.toDebugString());
-    }
-
-//EXCLUDE-END-debug- 
-	
-	/*
 	** Methods of PropertySetCallback
 	*/
 

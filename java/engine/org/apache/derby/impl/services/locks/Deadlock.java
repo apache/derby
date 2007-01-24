@@ -32,7 +32,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.TransactionInfo;
 
 import java.util.Hashtable;
-import java.util.Enumeration;
 import java.util.Dictionary;
 import java.util.Stack;
 

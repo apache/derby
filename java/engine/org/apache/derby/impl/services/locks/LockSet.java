@@ -319,8 +319,6 @@ forever:	for (;;) {
                         willQuitWait = 
                             (wakeupReason != Constants.WAITING_LOCK_GRANT);
 
-                        StandardException deadlockException = null;
-
                         if (((wakeupReason == Constants.WAITING_LOCK_IN_WAIT) &&
                                     deadlockWait) ||
                             (wakeupReason == Constants.WAITING_LOCK_DEADLOCK))
