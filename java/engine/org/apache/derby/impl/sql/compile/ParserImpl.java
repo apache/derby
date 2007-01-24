@@ -156,6 +156,15 @@ public class ParserImpl implements Parser
 		}
 		catch (TokenMgrError e)
 		{
+			// Derby - 2103.
+			// When the exception occurs cachedParser may live with
+			// some flags set inappropriately that may cause Exception
+			// in the subsequent compilation. This seems to be a javacc bug.
+			// Issue Javacc-152 has been raised.
+			// As a workaround, the cachedParser object is cleared to ensure
+			// that the exception does not have any side effect.
+			// TODO : Remove the following line if javacc-152 is fixed.
+			cachedParser = null;
 		    throw StandardException.newException(SQLState.LANG_LEXICAL_ERROR, e.getMessage());
 		}
 	}
