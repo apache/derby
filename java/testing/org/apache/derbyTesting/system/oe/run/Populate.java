@@ -166,7 +166,7 @@ public class Populate extends JDBCPerfTestCase {
         TestSuite suite = new TestSuite("Order Entry");
 
         // Create Schema
-        suite.addTest(new Schema("testSchema"));
+        Schema.addBaseSchema(suite);
         if (createConstraintsBeforeLoad)
             Schema.addConstraints(suite);
         

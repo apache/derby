@@ -81,6 +81,15 @@ public class OERandom {
 
         return decimalString.toString();
     }
+    
+    /**
+     * Payment amount between 1.00 and 5,000.00
+     * @return Payment amount between 1.00 and 5,000.00
+     */
+    public BigDecimal payment()
+    {
+        return randomDecimal(1, 500000, 2);
+    }
 
     public BigDecimal randomDecimal(int start, int end, int scale) {
         BigInteger bi = BigInteger.valueOf(randomInt(start, end));
@@ -300,8 +309,12 @@ public class OERandom {
      * in the TPC-C spec. 
      */
     public String randomCLastPopulate(int cid) {
-        if (cid < 1000)
-            return randomCLast(cid); // range 0 - 999
+        
+        // First thousand customers (C_ID is one based)
+        // have a fixed last name based upon the contiguous
+        // values from 0-999, section 4.3.3.1
+        if (cid <= 1000)
+            return randomCLast(cid-1); // range 0 - 999
 
         return randomCLast(NURand255());
     }

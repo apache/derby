@@ -28,9 +28,12 @@ import java.util.List;
 
 import org.apache.derbyTesting.system.oe.client.Display;
 import org.apache.derbyTesting.system.oe.client.Operations;
+import org.apache.derbyTesting.system.oe.model.Address;
 import org.apache.derbyTesting.system.oe.model.Customer;
+import org.apache.derbyTesting.system.oe.model.District;
 import org.apache.derbyTesting.system.oe.model.Order;
 import org.apache.derbyTesting.system.oe.model.OrderLine;
+import org.apache.derbyTesting.system.oe.model.Warehouse;
 
 /**
  * Implement the transactions following the TPC-C specification
@@ -117,7 +120,7 @@ public class Standard implements Operations {
 
                 rs.next();
                 int nextOrder = rs.getInt("D_NEXT_O_ID");
-                rs.close();
+                reset(sl1);
 
                 sl2.setInt(3, nextOrder);
                 sl2.setInt(4, nextOrder - 20);
@@ -125,7 +128,7 @@ public class Standard implements Operations {
                 rs = sl2.executeQuery();
                 rs.next();
                 level = rs.getInt("LOW_STOCK");
-                rs.close();
+                reset(sl2);
 
                 conn.commit();
             } finally {
@@ -204,7 +207,7 @@ public class Standard implements Operations {
                 
                 list.add(customer);
             }
-            rs.close();
+            reset(osCustomerByName);
             if (list.isEmpty())
                 throw new SQLException("Order Status by name - no matching customer "
                         + customerLast);
@@ -248,7 +251,7 @@ public class Standard implements Operations {
             customer.setFirst(rs.getString("C_FIRST"));
             customer.setMiddle(rs.getString("C_MIDDLE"));
             customer.setLast(rs.getString("C_LAST"));    
-            rs.close();
+            reset(osCustomerById);
 
             getOrderStatusForCustomer(display, displayData, false, customer);
         } catch (SQLException e) {
@@ -275,7 +278,7 @@ public class Standard implements Operations {
         ResultSet rs = osLastOrderNumber.executeQuery();
         rs.next();
         order.setId(rs.getInt("LAST_ORDER"));
-        rs.close();
+        reset(osLastOrderNumber);
         
         // Details for the order.
         osOrderDetails.setShort(1, customer.getWarehouse());
@@ -313,23 +316,245 @@ public class Standard implements Operations {
             display.displayOrderStatus(displayData,
                     byName, customer, order, lineItems);
     }
+    
+    private PreparedStatement pyCustomerPayment;
+    private PreparedStatement pyCustomerInfoId;
+    private PreparedStatement pyCustomerByName;
+    private PreparedStatement pyCustomerUpdateBadCredit;
+    private PreparedStatement pyCustomerGetData;
+    private PreparedStatement pyDistrictUpdate;
+    private PreparedStatement pyDistrictInfo;
+    private PreparedStatement pyWarehouseUpdate;
+    private PreparedStatement pyWarehouseInfo;
+    private PreparedStatement pyHistory;
 
     public void setupPayment() throws Exception {
-        // TODO Auto-generated method stub
+        pyCustomerPayment = prepare(
+            "UPDATE CUSTOMER SET C_BALANCE = C_BALANCE - ?, " +
+            "C_YTD_PAYMENT = C_YTD_PAYMENT + ?, " +
+            "C_PAYMENT_CNT = C_PAYMENT_CNT + 1 " +
+            "WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+        
+        pyCustomerInfoId = prepare(
+            "SELECT C_FIRST, C_MIDDLE, C_LAST, C_BALANCE, " +
+            "C_STREET_1, C_STREET_2, C_CITY, C_STATE, C_ZIP, " +
+            "C_PHONE, C_SINCE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT " +
+            "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+        
+        pyCustomerByName = prepare(
+                "SELECT C_ID " +
+                "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_LAST = ? " +
+                "ORDER BY C_FIRST");
+        
+        pyCustomerUpdateBadCredit = prepare(
+            "UPDATE CUSTOMER SET C_DATA = " +
+            " BAD_CREDIT_DATA(C_DATA, ?, ?, C_W_ID, C_W_ID, C_ID, ?) " +
+            "WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+        pyCustomerGetData = prepare(
+            "SELECT SUBSTR(C_DATA, 1, 200) AS C_DATA_200 " +
+            "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+        
+        pyDistrictUpdate = prepare(
+            "UPDATE DISTRICT SET D_YTD = D_YTD + ? WHERE D_W_ID = ? AND D_ID = ?");
+        pyDistrictInfo = prepare(
+            "SELECT D_NAME, D_STREET_1, D_STREET_2, D_CITY, D_STATE, D_ZIP FROM DISTRICT WHERE D_W_ID = ? AND D_ID = ? ");
+        pyWarehouseUpdate = prepare(
+            "UPDATE WAREHOUSE SET W_YTD = W_YTD + ? WHERE W_ID = ?");
+        pyWarehouseInfo = prepare(
+                "SELECT W_NAME, W_STREET_1, W_STREET_2, W_CITY, W_STATE, W_ZIP " +
+                "FROM WAREHOUSE WHERE W_ID = ?");
+        
+        pyHistory = prepare(
+            "INSERT INTO HISTORY(H_C_ID, H_C_D_ID, H_C_W_ID, H_D_ID, H_W_ID, " +
+            "H_DATE, H_AMOUNT, H_DATA) " +
+            "VALUES (?, ?, ?, ?, ?, CURRENT TIMESTAMP, ?, ?)");
+     }
 
-    }
-
+    /**
+     * Payment by customer last name.
+     * Section 2.5.2
+     * The CUSTOMER row will be fetched and then updated.
+     * This is due to the need to select the specific customer
+     * first based upon last name (which will actually fetch and
+     * hence lock a number of customers).
+     */
     public void payment(Display display, Object displayData, short w, short d,
             short cw, short cd, String customerLast, String amount)
             throws Exception {
-        // TODO Auto-generated method stub
+        
+        // Since so much data is needed for the payment transaction
+        // from the customer we don't fill it in as we select the
+        // correct customer. Instead we just fetch the identifier
+        // and then execute a payment by identifier.
+        try {
+            pyCustomerByName.setShort(1, cw);
+            pyCustomerByName.setShort(2, cd);
+            pyCustomerByName.setString(3, customerLast);
+            ResultSet rs = pyCustomerByName.executeQuery();
+            int n = 0;
+            List list = new ArrayList();
+            while (rs.next())
+            {           
+                list.add(rs.getObject("C_ID"));            
+            }
+            reset(pyCustomerByName);
+            if (list.isEmpty())
+                throw new SQLException("Payment by name - no matching customer "
+                        + customerLast);
+            
+            // Customer to use is midpoint (with round up) (see 2.5.2.2)
+            int mid = n/2;
+            if (n%2 == 1)
+                mid++;
+            
+            int c = ((Integer) list.get(mid)).intValue();
 
+            paymentById(display, displayData, w, d, cw, cd, c, amount);
+        } catch (SQLException e) {
+            conn.rollback();
+            throw e;
+        }
+        
+        if (display != null)
+            ;
     }
 
+    /**
+     * Payment by customer identifier.
+     * Section 2.5.2.
+     * The CUSTOMER row is update and then fetched.
+     * 
+     */
     public void payment(Display display, Object displayData, short w, short d,
-            short cw, short cd, int c, String amount) throws Exception {
-        // TODO Auto-generated method stub
+            short cw, short cd, int c, final String amount) throws Exception {
+        
+        try {
+            paymentById(display, displayData, w, d, cw, cd, c, amount);
+        } catch (SQLException e) {
+            conn.rollback();
+            throw e;
+        }
+        
+        if (display != null)
+            ;
+    }
+    
+    private void paymentById(Display display, Object displayData, short w, short d,
+            short cw, short cd, int c, final String amount) throws Exception {
+  
+        
+        Customer customer = new Customer();
+        customer.setWarehouse(cw);
+        customer.setDistrict(cd);
+        customer.setId(c);
+        
+        // Update the customer assuming that they have good credit
+        pyCustomerPayment.setString(1, amount);
+        pyCustomerPayment.setString(2, amount);
+        pyCustomerPayment.setShort(3, cw);
+        pyCustomerPayment.setShort(4, cd);
+        pyCustomerPayment.setInt(5, c);
+        pyCustomerPayment.executeUpdate();
+        
+        // Get the customer information
+        pyCustomerInfoId.setShort(1, cw);
+        pyCustomerInfoId.setShort(2, cd);
+        pyCustomerInfoId.setInt(3, c);
+        ResultSet rs = pyCustomerInfoId.executeQuery();
+        rs.next();
+        
+        customer.setFirst(rs.getString("C_FIRST"));
+        customer.setMiddle(rs.getString("C_MIDDLE"));
+        customer.setLast(rs.getString("C_LAST"));
+        customer.setBalance(rs.getString("C_BALANCE"));
+        
+        customer.setAddress(getAddress(rs, "C_STREET_1"));
 
+        customer.setPhone(rs.getString("C_PHONE"));
+        customer.setSince(rs.getTimestamp("C_SINCE"));
+        customer.setCredit(rs.getString("C_CREDIT"));
+        customer.setCredit_lim(rs.getString("C_CREDIT_LIM"));
+        customer.setDiscount(rs.getString("C_DISCOUNT"));
+        reset(pyCustomerInfoId);
+        
+        // additional work for bad credit customers.
+        if ("BC".equals(customer.getCredit()))
+        {
+            pyCustomerUpdateBadCredit.setShort(1, w);
+            pyCustomerUpdateBadCredit.setShort(2, d);
+            pyCustomerUpdateBadCredit.setString(3, amount);
+            pyCustomerUpdateBadCredit.setShort(4, cw);
+            pyCustomerUpdateBadCredit.setShort(5, cd);
+            pyCustomerUpdateBadCredit.setInt(6, c);         
+            pyCustomerUpdateBadCredit.executeUpdate();
+            reset(pyCustomerUpdateBadCredit);
+            
+            // Need to display the first 200 characters
+            // of C_DATA information if the customer has
+            // bad credit.
+            pyCustomerGetData.setShort(1, cw);
+            pyCustomerGetData.setShort(2, cd);
+            pyCustomerGetData.setInt(3, c);                     
+            rs = pyCustomerGetData.executeQuery();
+            rs.next();
+            customer.setData(rs.getString("C_DATA_200"));
+            reset(pyCustomerGetData);
+        }
+
+        District district = new District();
+        district.setWarehouse(w);
+        district.setId(d);
+
+        // Update DISTRICT
+        pyDistrictUpdate.setString(1, amount);
+        pyDistrictUpdate.setShort(2, w);
+        pyDistrictUpdate.setShort(3, d);
+        pyDistrictUpdate.executeUpdate();
+        reset(pyDistrictUpdate);
+
+        // Get the required information from DISTRICT
+        pyDistrictInfo.setShort(1, w);
+        pyDistrictInfo.setShort(2, d);
+        rs = pyDistrictInfo.executeQuery();
+        rs.next();
+        district.setName(rs.getString("D_NAME"));
+        district.setAddress(getAddress(rs, "D_STREET_1"));
+        reset(pyDistrictInfo);        
+        
+        Warehouse warehouse = new Warehouse();
+        warehouse.setId(w);
+        
+        // Update WAREHOUSE
+        pyWarehouseUpdate.setString(1, amount);
+        pyWarehouseUpdate.setShort(2, w);
+        pyWarehouseUpdate.executeUpdate();
+        reset(pyWarehouseUpdate);
+        
+        // Get the required information from WAREHOUSE
+        pyWarehouseInfo.setShort(1, w);
+        rs = pyWarehouseInfo.executeQuery();
+        rs.next();
+        warehouse.setName(rs.getString("W_NAME"));
+        warehouse.setAddress(getAddress(rs, "W_STREET_1"));
+        reset(pyWarehouseInfo);
+         
+        // Insert HISTORY row
+        pyHistory.setInt(1, c);
+        pyHistory.setShort(2, cd);
+        pyHistory.setShort(3, cw);
+        pyHistory.setShort(4, d);
+        pyHistory.setShort(5, w);
+        pyHistory.setString(6, amount);
+        StringBuffer hData = new StringBuffer(24);
+        hData.append(warehouse.getName());
+        hData.append("    ");
+        hData.append(district.getName());
+        pyHistory.setString(7, hData.toString());
+        pyHistory.executeUpdate();
+        reset(pyHistory);
+        
+        conn.commit();
+  
     }
     
     public void setupNewOrder() throws Exception {
@@ -372,11 +597,56 @@ public class Standard implements Operations {
         close(osOrderDetails);
         close(osOrderLineItems);
         
+        close(pyCustomerPayment);
+        close(pyCustomerInfoId);
+        close(pyCustomerUpdateBadCredit);
+        close(pyDistrictUpdate);
+        close(pyDistrictInfo);
+        close(pyWarehouseUpdate);
+        close(pyWarehouseInfo);
+        close(pyHistory);
+        
     }
+    
+    /**
+     * Reset a PreparedStatement. Closes its open ResultSet
+     * and clears the parameters. While clearing the parameters
+     * is not required since any future execution will override
+     * them, it is done here to reduce the chance of errors.
+     * E.g. using the wrong prepared statement for a operation
+     * or not setting all the parameters.
+     * It is assumed the prepared statement was just executed.
+     * @throws SQLException 
+     */
+    private static void reset(PreparedStatement ps) throws SQLException
+    {
+        ResultSet rs = ps.getResultSet();
+        if (rs != null)
+            rs.close();
+        ps.clearParameters();
+    }
+    
+    /**
+     * Close a PreparedStatement if it was opened.
+     */
     private static void close(PreparedStatement ps)
        throws SQLException
     {
         if (ps != null)
             ps.close();
+    }
+    
+    private Address getAddress(ResultSet rs, String firstColumnName) throws SQLException
+    {
+        Address address = new Address();
+        
+        int col = rs.findColumn(firstColumnName);
+        address.setStreet1(rs.getString(col++));
+        address.setStreet2(rs.getString(col++));
+        address.setCity(rs.getString(col++));
+        address.setState(rs.getString(col++));
+        address.setZip(rs.getString(col));
+        
+        return address;
     }
 }

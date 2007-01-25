@@ -55,13 +55,13 @@ public interface Display {
      *            District (input)
      * @param threshold
      *            Threshold (input)
-     * @param level
+     * @param lowStock
      *            (result)
      * @throws Exception
      *             Error displaying data
      */
     public void displayStockLevel(Object displayData, short w, short d,
-            int threshold, int level) throws Exception;
+            int threshold, int lowStock) throws Exception;
 
     /**
      * Display the result of an order status. Order status terminal i/o is

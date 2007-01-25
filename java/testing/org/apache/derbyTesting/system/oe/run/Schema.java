@@ -54,9 +54,15 @@ public class Schema extends JDBCPerfTestCase {
         TestSuite suite = new TestSuite("Order Entry- Schema");
 
         // Create Schema
-        suite.addTest(new Schema("testSchema"));
+        addBaseSchema(suite);
         addConstraints(suite);
         return suite;
+    }
+    
+    public static void addBaseSchema(TestSuite suite) {
+        // Create Schema
+        suite.addTest(new Schema("schema.sql"));
+        suite.addTest(new Schema("dataroutines.sql"));
     }
 
     /**
@@ -65,51 +71,19 @@ public class Schema extends JDBCPerfTestCase {
      * @param suite
      */
     static void addConstraints(TestSuite suite) {
-        suite.addTest(new Schema("testPrimaryKey"));
-        suite.addTest(new Schema("testForeignKey"));
-        suite.addTest(new Schema("testIndex"));
+        suite.addTest(new Schema("primarykey.sql"));
+        suite.addTest(new Schema("foreignkey.sql"));
+        suite.addTest(new Schema("index.sql"));
 
-    }
-
-    /**
-     * Test setting up the base tables.
-     */
-    public void testSchema() throws UnsupportedEncodingException, SQLException,
-    PrivilegedActionException, IOException {
-        script("schema.sql");
-    }
-
-    /**
-     * Test setting up the primary keys.
-     */
-    public void testPrimaryKey() throws UnsupportedEncodingException,
-    SQLException, PrivilegedActionException, IOException {
-        script("primarykey.sql");
-    }
-
-    /**
-     * Test setting up the foreign keys.
-     */
-    public void testForeignKey() throws UnsupportedEncodingException,
-    SQLException, PrivilegedActionException, IOException {
-        script("foreignkey.sql");
-    }
-
-    /**
-     * Test setting up the remaining indexes.
-     */
-    public void testIndex() throws UnsupportedEncodingException, SQLException,
-    PrivilegedActionException, IOException {
-        script("index.sql");
     }
 
     /**
      * Run a Order Entry script.
      */
-    private void script(String name) throws UnsupportedEncodingException,
+    public void runTest() throws UnsupportedEncodingException,
     SQLException, PrivilegedActionException, IOException {
 
-        String script = "org/apache/derbyTesting/system/oe/schema/" + name;
+        String script = "org/apache/derbyTesting/system/oe/schema/" + getName();
         int errorCount = runScript(script, "US-ASCII");
         assertEquals("Errors in script ", 0, errorCount);
     }

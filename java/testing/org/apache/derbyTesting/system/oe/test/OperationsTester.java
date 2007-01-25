@@ -19,8 +19,12 @@
  */
 package org.apache.derbyTesting.system.oe.test;
 
+import java.util.HashMap;
+
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.system.oe.client.Display;
 import org.apache.derbyTesting.system.oe.client.Operations;
+import org.apache.derbyTesting.system.oe.direct.Standard;
 import org.apache.derbyTesting.system.oe.model.Customer;
 import org.apache.derbyTesting.system.oe.model.District;
 import org.apache.derbyTesting.system.oe.model.Order;
@@ -34,28 +38,29 @@ import org.apache.derbyTesting.system.oe.util.OERandom;
  * code is added the implemetations of the transactions
  * will be added.
  */
-class OperationsTester implements Display {
+public class OperationsTester extends BaseJDBCTestCase implements Display {
 
-    private final Operations ops;
+    private Operations ops;
     private final OERandom rand;
     private final short w = 1;
     
-    OperationsTester(Operations ops) {
-        this.ops = ops;
-        this.rand = new OERandom(-1, -1, -1, 3458567);
+    public OperationsTester(String name) {
+        super(name);
+        this.rand = new OERandom(-1, -1, -1);
     }
     
-    void test() throws Exception
+    protected void setUp() throws Exception 
     {
-        testStockLevel();
-        testOrderStatus();
-        testPayment();
-        testNewOrder();
-        testScheduleDelivery();
-        testDelivery();
+        ops = new Standard(getConnection());
     }
     
-    private void testStockLevel() throws Exception
+    protected void tearDown() throws Exception
+    {
+        ops.close();
+        super.tearDown();
+    }
+    
+    public void testStockLevel() throws Exception
     {
         ops.setupStockLevel();
         
@@ -63,9 +68,18 @@ class OperationsTester implements Display {
         ops.stockLevel(null, null,
                 w, rand.district(), rand.threshold());
         
-        for (int i = 0; i < 20; i++)
-            ops.stockLevel(this, null,
-                    w, rand.district(), rand.threshold());
+        for (int i = 0; i < 20; i++) {
+           
+            short d = rand.district();
+            int threshold = rand.threshold();
+            
+            HashMap inputData = new HashMap();
+            inputData.put("d", new Short(d));
+            inputData.put("threshold", new Integer(threshold));
+            
+            ops.stockLevel(this, inputData,
+                    w, d, threshold);
+        }
     }
     
     /**
@@ -74,7 +88,7 @@ class OperationsTester implements Display {
      * accepts a null display.
      * @throws Exception
      */
-    private void testOrderStatus() throws Exception
+    public void testOrderStatus() throws Exception
     {
         ops.setupOrderStatus();
         
@@ -82,8 +96,15 @@ class OperationsTester implements Display {
         ops.orderStatus(null, null,
                 w, rand.district(), rand.NURand1023());
         for (int i = 0; i < 50; i++) {
-            ops.orderStatus(this, null,
-                    w, rand.district(), rand.NURand1023());
+            
+            short d = rand.district();
+            int c = rand.NURand1023();
+            
+            HashMap inputData = new HashMap();
+            inputData.put("d", new Short(d));
+            inputData.put("c", new Integer(c));
+
+            ops.orderStatus(this, inputData, w, d, c);
         }
         
         // By name 
@@ -91,36 +112,74 @@ class OperationsTester implements Display {
                 w, rand.district(), rand.randomCLast());
         for (int i = 0; i < 50; i++)
         {
-            ops.orderStatus(this, null,
-                    w, rand.district(), rand.randomCLast());
+            short d = rand.district();
+            String customerLast = rand.randomCLast();
+            
+            HashMap inputData = new HashMap();
+            inputData.put("d", new Short(d));
+            inputData.put("customerLast", customerLast);
+
+            ops.orderStatus(this, inputData, w, d, customerLast);
             
         }
-        //
     }
-    private void testPayment() throws Exception
+    public void testPayment() throws Exception
     {
         ops.setupPayment();
+        
+        //  With no display
+        ops.payment(null, null, w, rand.district(),
+                w, rand.district(), rand.randomCLast(), rand.payment().toString());
+        
+        for (int i = 0; i < 50; i++) {
+            ops.payment(this, null, w, rand.district(),
+                    w, rand.district(), rand.randomCLast(), rand.payment().toString());
+        }  
+        
+        // With no display
+        ops.payment(null, null, w, rand.district(),
+                w, rand.district(), rand.NURand1023(), rand.payment().toString());
+
+        for (int i = 0; i < 50; i++) {
+            
+            ops.payment(this, null, w, rand.district(),
+                    w, rand.district(), rand.NURand1023(), rand.payment().toString());
+        }
     }
-    private void testNewOrder() throws Exception
+    public void testNewOrder() throws Exception
     {
         ops.setupNewOrder();
     }
-    private void testScheduleDelivery() throws Exception
+    public void testScheduleDelivery() throws Exception
     {
         ops.setupScheduleDelivery();
     }
-    private void testDelivery() throws Exception
+    public void testDelivery() throws Exception
     {
         ops.setupDelivery();
     }
 
-    public void displayStockLevel(Object displayData, short w, short d, int threshold, int level) throws Exception {
-        // TODO: Check expected data is set.  
+    public void displayStockLevel(Object displayData, short w, short d, int threshold, int lowStock) throws Exception {
+        HashMap inputData = (HashMap) displayData;
+        assertEquals("sl:w", this.w, w);
+        assertEquals("sl:d", ((Short) inputData.get("d")).shortValue(), d);
+        assertEquals("sl:threshold", ((Integer) inputData.get("threshold")).intValue(), threshold);
+        assertTrue("sl:low stock", lowStock >= 0); 
     }
 
     public void displayOrderStatus(Object displayData, boolean byName, Customer customer, Order order, OrderLine[] lineItems) throws Exception {
-        // TODO: Check expected data is set.   
+        HashMap inputData = (HashMap) displayData;
+        assertEquals("os:w", this.w, customer.getWarehouse());
+        assertEquals("os:d", ((Short) inputData.get("d")).shortValue(), customer.getDistrict());
         
+        if (byName)
+        {
+            assertNotNull(inputData.get("customerLast"));
+        }
+        else
+        {
+            assertNull(inputData.get("customerLast"));
+        }
     }
 
     public void displayPayment(Object displayData, String amount, boolean byName, Warehouse warehouse, District district, Customer customer) throws Exception {

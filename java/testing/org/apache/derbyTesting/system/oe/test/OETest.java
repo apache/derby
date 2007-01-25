@@ -19,18 +19,12 @@
  */
 package org.apache.derbyTesting.system.oe.test;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.PrivilegedActionException;
-import java.sql.SQLException;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.system.oe.direct.Standard;
-import org.apache.derbyTesting.system.oe.client.Operations;
 import org.apache.derbyTesting.system.oe.run.Checks;
 import org.apache.derbyTesting.system.oe.run.Populate;
 import org.apache.derbyTesting.system.oe.run.Schema;
@@ -58,29 +52,8 @@ public class OETest extends BaseJDBCTestCase {
         // perform checks tests.
         suite.addTest(Checks.suite());
 
-        suite.addTest(new OETest("testStandardOperations"));
-        
+        suite.addTestSuite(OperationsTester.class);
+                
         return new CleanDatabaseTestSetup(suite);
     }
-
-    /**
-     * Test the Standard implementations of the business transactions.
-     */
-    public void testStandardOperations() throws Exception
-    {
-        operationsTest(new Standard(getConnection()));
-    }
-    /**
-     * Run a standard set of tests against an implementation
-     * of Operations using the OperationsTester class.
-     */
-    private static void operationsTest(Operations ops) throws Exception
-    {
-        OperationsTester tester = new OperationsTester(ops);
-        tester.test();
-        ops.close();
-    }
-    
-
-
 }
