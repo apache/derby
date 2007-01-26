@@ -153,10 +153,16 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
     public void testScheduleDelivery() throws Exception
     {
         ops.setupScheduleDelivery();
+        for (int i = 0; i < 50; i++)
+            ops.scheduleDelivery(this, null, w, rand.carrier());
     }
     public void testDelivery() throws Exception
     {
         ops.setupDelivery();
+        // Ensure there are some schedule deliveries
+        testScheduleDelivery();
+        for (int i = 0; i < 50; i++)
+            ops.delivery();
     }
 
     public void displayStockLevel(Object displayData, short w, short d, int threshold, int lowStock) throws Exception {

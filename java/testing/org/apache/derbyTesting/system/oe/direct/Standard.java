@@ -19,10 +19,13 @@
  */
 package org.apache.derbyTesting.system.oe.direct;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,7 +103,7 @@ public class Standard implements Operations {
         
         int isolation = conn.getTransactionIsolation();
 
-        int level;
+        int lowStock;
         try {
 
             try {
@@ -127,7 +130,7 @@ public class Standard implements Operations {
 
                 rs = sl2.executeQuery();
                 rs.next();
-                level = rs.getInt("LOW_STOCK");
+                lowStock = rs.getInt("LOW_STOCK");
                 reset(sl2);
 
                 conn.commit();
@@ -142,7 +145,7 @@ public class Standard implements Operations {
         }
 
         if (display != null)
-            display.displayStockLevel(displayData, w, d, threshold, level);
+            display.displayStockLevel(displayData, w, d, threshold, lowStock);
     }
     
     /*
@@ -567,45 +570,200 @@ public class Standard implements Operations {
         // TODO Auto-generated method stub
 
     }
+    
+    private PreparedStatement sdSchedule;
+    
     public void setupScheduleDelivery() throws Exception {
-        // TODO Auto-generated method stub
-
+        sdSchedule = prepare(
+           "INSERT INTO DELIVERY_REQUEST(DR_W_ID, DR_CARRIER_ID, DR_STATE) " +
+           "VALUES(?, ?, 'Q')");
     }
+    
+    /**
+     * Schedule a delivery using the database as the queuing
+     * mechanism and the results file.
+     * See delivery.sql.
+     */
     public void scheduleDelivery(Display display, Object displayData, short w,
             short carrier) throws Exception {
-        // TODO Auto-generated method stub
+        int isolation = conn.getTransactionIsolation(); 
+        try {
+
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            
+            sdSchedule.setShort(1, w);
+            sdSchedule.setShort(2, carrier);
+            sdSchedule.executeUpdate();
+            reset(sdSchedule);
+            conn.commit();
+        } finally {
+            conn.setTransactionIsolation(isolation);
+        }
+        
+        if (display != null)
+            display.displayScheduleDelivery(displayData, w, carrier);
+    }
+    
+    private PreparedStatement dlFindOldestRequest;
+    private PreparedStatement dlSetRequestState;
+    private PreparedStatement dlFindOrderToDeliver;
+    private PreparedStatement dlDeleteNewOrder;
+    private PreparedStatement dlSetOrderCarrier;
+    private PreparedStatement dlSetOrderlineDate;
+    private PreparedStatement dlUpdateCustomer;
+    private PreparedStatement dlRecordDelivery;
+    private PreparedStatement dlCompleteDelivery;
+    
+    
+    public void setupDelivery() throws Exception {
+
+        dlFindOldestRequest = prepare(
+            "SELECT DR_ID, DR_W_ID, DR_CARRIER_ID FROM DELIVERY_REQUEST " +
+            "WHERE DR_STATE = 'Q' ORDER BY DR_QUEUED");
+        dlFindOldestRequest.setMaxRows(1);
+        
+        dlSetRequestState = prepare(
+            "UPDATE DELIVERY_REQUEST SET DR_STATE = ? " +
+            "WHERE DR_ID = ?");
+        dlCompleteDelivery = prepare(
+            "UPDATE DELIVERY_REQUEST SET DR_STATE = 'C', DR_COMPLETED = CURRENT TIMESTAMP " +
+            "WHERE DR_ID = ?");
+        
+        dlFindOrderToDeliver = prepare(
+            "SELECT MIN(NO_O_ID) AS ORDER_TO_DELIVER FROM NEWORDERS " +
+            "WHERE NO_W_ID = ? AND NO_D_ID = ?");
+        
+        dlDeleteNewOrder = prepare(
+            "DELETE FROM NEWORDERS WHERE NO_W_ID = ? AND NO_D_ID = ? AND NO_O_ID = ?");
+        
+        dlSetOrderCarrier = prepare(
+            "UPDATE ORDERS SET O_CARRIER_ID = ? " +
+            "WHERE O_W_ID = ? AND O_D_ID = ? AND O_ID = ?");
+        
+        dlSetOrderlineDate = prepare(
+            "UPDATE ORDERLINE SET OL_DELIVERY_D = CURRENT TIMESTAMP " +
+            "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?");
+        
+        
+        dlUpdateCustomer = prepare(
+            "UPDATE CUSTOMER SET " +
+            "C_BALANCE = (SELECT SUM(OL_AMOUNT) FROM ORDERLINE " +
+                          "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?), " +
+            "C_DELIVERY_CNT = C_DELIVERY_CNT + 1 " +
+            "WHERE C_W_ID = ? AND C_D_ID = ? AND " +
+            "C_ID = (SELECT O_C_ID FROM ORDERS " +
+                    "WHERE O_W_ID = ? AND O_D_ID = ? AND O_ID = ?)");
+        
+        dlRecordDelivery = prepare(
+            "INSERT INTO DELIVERY_ORDERS(DO_DR_ID, DO_D_ID, DO_O_ID) " +
+            "VALUES (?, ?, ?)");
 
     }
     
-    public void setupDelivery() throws Exception {
-        // TODO Auto-generated method stub
 
-    }
-    public int delivery() throws Exception {
-        // TODO Auto-generated method stub
-        return 0;
+    public void delivery() throws Exception {
+        
+        // Find the most oldest queued order (FIFO)
+        ResultSet rs = dlFindOldestRequest.executeQuery();
+        rs.next();
+        int request = rs.getInt("DR_ID");
+        short w = rs.getShort("DR_W_ID");
+        short carrier = rs.getShort("DR_CARRIER_ID");
+        reset(dlFindOldestRequest);
+        
+        // Mark it as in progress
+        dlSetRequestState.setString(1, "I");
+        dlSetRequestState.setInt(2, request);
+        dlSetRequestState.executeUpdate();
+        reset(dlSetRequestState);
+        
+        conn.commit();
+        
+        // This parameter remains invariant over
+        // the batch we will insert.
+        dlRecordDelivery.setInt(1, request);
+        
+        // Process one row per-district for this warehouse
+        for (short d = 1; d <= 10; d++)
+        {
+            dlRecordDelivery.setShort(2, d);
+
+            // Get the oldest NEWORDERS for this district
+            dlFindOrderToDeliver.setShort(1, w);
+            dlFindOrderToDeliver.setShort(2, d);
+            rs = dlFindOrderToDeliver.executeQuery();
+            rs.next();
+            int order = rs.getInt("ORDER_TO_DELIVER");
+            if (rs.wasNull()) {
+                // No orders to deliver
+                dlRecordDelivery.setNull(3, Types.INTEGER);
+                dlRecordDelivery.addBatch();
+            }
+            reset(dlFindOrderToDeliver);
+            
+            // Delete the NEWORDERS row
+            dlDeleteNewOrder.setShort(1, w);
+            dlDeleteNewOrder.setShort(2, d);
+            dlDeleteNewOrder.setInt(3, order);
+            dlDeleteNewOrder.executeUpdate();
+            reset(dlDeleteNewOrder);
+            
+            // Set the carrier in ORDERS
+            dlSetOrderCarrier.setShort(1, carrier);
+            dlSetOrderCarrier.setShort(2, w);
+            dlSetOrderCarrier.setShort(3, d);
+            dlSetOrderCarrier.setInt(4, order);
+            dlSetOrderCarrier.executeUpdate();
+            reset(dlSetOrderCarrier);
+            
+            // Update ORDERLINE with the delivery date
+            dlSetOrderlineDate.setShort(1, w);
+            dlSetOrderlineDate.setShort(2, d);
+            dlSetOrderlineDate.setInt(3, order);
+            dlSetOrderlineDate.executeUpdate();
+            reset(dlSetOrderlineDate);
+            
+            dlUpdateCustomer.setShort(1, w);
+            dlUpdateCustomer.setShort(2, d);
+            dlUpdateCustomer.setInt(3, order);
+            dlUpdateCustomer.setShort(4, w);
+            dlUpdateCustomer.setShort(5, d);
+            dlUpdateCustomer.setShort(6, w);
+            dlUpdateCustomer.setShort(7, d);
+            dlUpdateCustomer.setInt(8, order);
+            dlUpdateCustomer.executeUpdate();
+            reset(dlUpdateCustomer);
+                      
+            conn.commit();
+            
+            dlRecordDelivery.setInt(3, order);
+            dlRecordDelivery.addBatch();
+        }
+        
+        // Record the delivery including the timestamp
+        // 90% are meant to complete within 80 seconds
+        // of them being queued.
+        dlRecordDelivery.executeBatch();
+        reset(dlRecordDelivery);
+        dlCompleteDelivery.setInt(1, request);
+        dlCompleteDelivery.executeUpdate();
+        reset(dlCompleteDelivery);
+        conn.commit();
+        
     }
 
-    public void close() throws SQLException {
+    public void close() throws Exception {
         
-        close(sl1);
-        close(sl2);
-        
-        close(osCustomerById);
-        close(osCustomerByName);
-        close(osLastOrderNumber);
-        close(osOrderDetails);
-        close(osOrderLineItems);
-        
-        close(pyCustomerPayment);
-        close(pyCustomerInfoId);
-        close(pyCustomerUpdateBadCredit);
-        close(pyDistrictUpdate);
-        close(pyDistrictInfo);
-        close(pyWarehouseUpdate);
-        close(pyWarehouseInfo);
-        close(pyHistory);
-        
+        // Close any instance field that is a PreparedStatement
+        Field[] fields = getClass().getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            Field f = fields[i];
+                       
+            if (PreparedStatement.class.isAssignableFrom(f.getType()))
+            {
+                close((PreparedStatement) f.get(this));
+            }
+        }
     }
     
     /**

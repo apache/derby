@@ -115,6 +115,15 @@ public class OERandom {
     {
         return (short) randomInt(1, 10);
     }
+    
+    /**
+     * Return a random carrier [1..10]
+     * @return
+     */
+    public short carrier()
+    {
+        return (short) randomInt(1, 10);
+    }
 
     /**
      * Return a random threshold for the stock level [10..20]

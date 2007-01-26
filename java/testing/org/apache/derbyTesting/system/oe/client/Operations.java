@@ -269,11 +269,9 @@ public interface Operations {
      * Execute a single delivery from the FIFO queue. Processing a delivery
      * request is described in clause 2.7.4.
      * 
-     * @return Number of seconds the delivery request was queued for. If no
-     *         request was queued then -1 is returned.
-     * @throws Exception
+      * @throws Exception
      */
-    public int delivery() throws Exception;
+    public void delivery() throws Exception;
     
     /**
      * Release any resources.

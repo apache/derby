@@ -63,6 +63,7 @@ public class Schema extends JDBCPerfTestCase {
         // Create Schema
         suite.addTest(new Schema("schema.sql"));
         suite.addTest(new Schema("dataroutines.sql"));
+        suite.addTest(new Schema("delivery.sql"));
     }
 
     /**
