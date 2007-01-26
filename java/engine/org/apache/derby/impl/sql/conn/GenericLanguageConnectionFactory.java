@@ -269,7 +269,8 @@ public class GenericLanguageConnectionFactory
 	 */
 	public boolean canSupport(Properties startParams) {
 
-		return Monitor.isDesiredType( startParams, EngineType.STANDALONE_DB);
+		return Monitor.isDesiredType( startParams,
+                EngineType.STANDALONE_DB | EngineType.STORELESS_ENGINE);
 	}
 
 	private	int	statementCacheSize(Properties startParams)
