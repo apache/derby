@@ -163,9 +163,11 @@ grant codeBase "${derbyTesting.codeclasses}" {
 // JUnit jar file tries to read junit.properties in the user's
 // home directory and seems to require permission to read the
 // property user.home as well.
+// junit.swingui.TestRunner writes to .junitsession on exit.
 grant codeBase "${derbyTesting.junit}" {
     permission java.util.PropertyPermission "user.home", "read";
     permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
+    permission java.io.FilePermission "${user.home}${/}.junitsession", "write";
 };
 
 // Due to a problem running tests/derbynet/CompatibilityTest in the old test
