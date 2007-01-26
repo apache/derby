@@ -70,17 +70,29 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	// value is never null. An empty bitset is represented by a
 	// zero-length array.
 	private byte[]	value;
-	private	short	bitsInLastByte;
+	private	byte	bitsInLastByte;
 
 	private transient int	lengthAsBits;
 
-	private void checkPosition(int p) {
+	private final void checkPosition(int p) {
 		if (p < 0 || lengthAsBits <= p) {
 			throw new
 				IllegalArgumentException("Bit position "+p+
 										 " is outside the legal range");
 		}
 	}
+
+	// Division, multiplication and remainder calcuation of a positive
+	// number with a power of two can be done using shifts and bit
+	// masking. The compiler attempts this optimization but since Java
+	// does not have unsigned ints it will also have to create code to
+	// handle negative values. In this class the argument is
+	// frequently an array index or array length, which is known not
+	// to be negative. These utility methods allow us to perform
+	// "unsigned" operations with 8. Hopefully the extra function call
+	// will be inlined by the compiler.
+	private static int udiv8(int i) { return (i>>3); }
+	private static byte umod8(int i) { return (byte)(i&0x7); }
 
 	/**
 	 * Niladic Constructor
@@ -95,6 +107,11 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public FormatableBitSet(int numBits)
 	{
+		if (numBits < 0) {
+			throw new
+			IllegalArgumentException("Bit set size "+ numBits +
+									 " is not allowed");
+		}
 		initializeBits(numBits);
 	}
 
@@ -324,6 +341,11 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public FormatableBitSet shrink(int n)
 	{
+		if (n < 0) {
+			throw new
+			IllegalArgumentException("Bit set size "+ n +
+									 " is not allowed");
+		}
 		int		numBytes;
 		int		lastByteNum;
 
@@ -494,12 +516,11 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	public final boolean isSet(int position)
 	{
 		checkPosition(position);
-
-		int bytepos = position / 8;
-		int bitpos = 7 - (position % 8);
-
-		return ((value[bytepos] & (1 << bitpos)) != 0);
+		final int byteIndex = udiv8(position);
+		final byte bitIndex = umod8(position);
+		return ((value[byteIndex] & (0x80>>bitIndex)) != 0);
 	}
+
 
 	/**
 	 * Bit get -- alias for isSet()
@@ -521,11 +542,9 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	public void set(int position)
 	{
 		checkPosition(position);
-
-		int bytepos = position / 8;
-		int bitpos = 7 - (position % 8);
-
-		value[bytepos] |= (1 << bitpos);
+		final int byteIndex = udiv8(position);
+		final byte bitIndex = umod8(position);
+		value[byteIndex] |= (0x80>>bitIndex);
 	}
 
 	/**
@@ -537,11 +556,9 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	public void clear(int position)
 	{
 		checkPosition(position);
-
-		int bytepos = position / 8;
-		int bitpos = 7 - (position % 8);
-
-		value[bytepos] &= ~(1 << bitpos);
+		final int byteIndex = udiv8(position);
+		final byte bitIndex = umod8(position);
+		value[byteIndex] &= ~(0x80>>bitIndex);
 	}
 
 	/**
@@ -575,13 +592,12 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	*
 	* @return	the number of bits
 	*/
-	private static short
+	private static byte
 	numBitsInLastByte(int bits)
 	{
-		int modulo = bits % 8;
-		return (short)((modulo == 0) ?
-				((bits == 0) ? 0 : 8) :
-				modulo);
+		if (bits == 0) return 0;
+		byte lastbits = umod8(bits);
+		return (lastbits != 0 ? lastbits : 8);
 	}
 
 	/**

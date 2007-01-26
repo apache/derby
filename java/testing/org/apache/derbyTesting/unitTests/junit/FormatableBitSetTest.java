@@ -152,13 +152,8 @@ public class FormatableBitSetTest extends TestCase {
         assertTrue(nineBits.invariantHolds());
     }
     public void testIntCtorNeg() {
-        // Should throw an exception?
-        FormatableBitSet negBits = new FormatableBitSet(-1);
-        assertEquals(-1,negBits.getLength());
-        assertEquals(0,negBits.getLengthInBytes());
-        assertEquals(0,negBits.getByteArray().length);
-        assertEquals(0,negBits.getNumBitsSet());
-        assertTrue(negBits.invariantHolds());
+        try { FormatableBitSet negBits = new FormatableBitSet(-1); fail(); }
+        catch(IllegalArgumentException iae) {}
     }
 
     // Test cases for the copy constructor
@@ -239,7 +234,7 @@ public class FormatableBitSetTest extends TestCase {
         try {
             bitset18.shrink(-9);
             fail();
-        } catch (ArrayIndexOutOfBoundsException e) {}
+        } catch (IllegalArgumentException iae) {}
     }
     // Should be allowed?
     public void testShrink0() {
