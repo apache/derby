@@ -76,6 +76,11 @@ class DropDatabaseSetup extends BaseJDBCTestSetup {
     }
 
     private static void removeDir(File dir) {
+        
+        // Check if anything to do!
+        // Database may not have been created.
+        if (!dir.exists())
+            return;
 
         String[] list = dir.list();
 
