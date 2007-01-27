@@ -1575,9 +1575,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             }
         }
         
-        for (Iterator i = list.iterator(); i.hasNext(); )
-            System.out.println("TYPE: " + i.next());
-            
         return list;
     }
 }
