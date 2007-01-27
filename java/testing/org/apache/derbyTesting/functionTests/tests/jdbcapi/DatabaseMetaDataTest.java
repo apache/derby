@@ -27,8 +27,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
@@ -675,19 +679,26 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testGetSchemasModify() throws SQLException {
+        createSchemasForTests();
+        DatabaseMetaData dmd = getDMD();
+        ResultSet rs = dmd.getSchemas();
+        checkSchemas(rs, IDS);
+    }
+    
+    private void createSchemasForTests() throws SQLException
+    {
         // Set to cleanup on teardown.
         modifiedDatabase = true;
-        
-        DatabaseMetaData dmd = getDMD();
-        
+
         Statement s = createStatement();
         for (int i = 0; i < IDS.length; i++)
            s.executeUpdate("CREATE SCHEMA " + IDS[i]);
         s.close();
-                 
-        ResultSet rs = dmd.getSchemas();
-        checkSchemas(rs, IDS);
+        
+        commit();
     }
+    
+    
     /**
      * Check the returned information from a getSchemas().
      * The passed in String[] expected is a list of the
@@ -833,6 +844,171 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertEquals("Different counts from getTables",
                 allTableCount, JDBC.assertDrainResults(rs));
         
+    }
+    /**
+     * Test getTables() with  modifying the database.
+     * 
+     * @throws SQLException
+     */
+    public void testGetTablesModify() throws SQLException {
+        
+        int totalTables = createTablesForTest();
+        
+        DatabaseMetaData dmd = getDMD();
+        ResultSet rs;
+        
+        String[] userTableOnly = new String[] {"TABLE"};
+        
+        // Get the list of idenifiers from IDS as the database
+        // would store them in the order required.
+        
+        String[] dbIDS = new String[IDS.length];
+        // Remove any quotes from user schemas and upper case
+        // those without quotes.
+        for (int i = 0; i < IDS.length; i++)
+        {          
+            dbIDS[i] = getStoredIdentifier(IDS[i]);
+        }
+        Arrays.sort(dbIDS);     
+               
+        // Check the contents, ordered by TABLE_CAT, TABLE_SCHEMA, TABLE_NAME
+        rs = dmd.getTables(null, null, null, userTableOnly);
+        checkTablesShape(rs);
+        int rowPosition = 0;
+        while (rs.next())
+        {
+            //assertNull("TABLE_CAT", rs.getString("TABLE_CAT"));
+            assertEquals("TABLE_CAT", "", rs.getString("TABLE_CAT"));
+            assertEquals("TABLE_SCHEM",
+                    dbIDS[rowPosition/dbIDS.length], rs.getString("TABLE_SCHEM"));
+            assertEquals("TABLE_NAME",
+                    dbIDS[rowPosition%dbIDS.length], rs.getString("TABLE_NAME"));
+            assertEquals("TABLE_TYPE", "TABLE", rs.getString("TABLE_TYPE"));
+            
+            assertEquals("REMARKS", "", rs.getString("REMARKS"));
+
+            assertNull("TYPE_CAT", rs.getString("TYPE_CAT"));
+            assertNull("TYPE_SCHEM", rs.getString("TYPE_SCHEM"));
+            assertNull("TYPE_NAME", rs.getString("TYPE_NAME"));
+            assertNull("SELF_REFERENCING_COL_NAME", rs.getString("SELF_REFERENCING_COL_NAME"));
+            assertNull("REF_GENERATION", rs.getString("REF_GENERATION"));
+            
+            rowPosition++;
+         }
+         rs.close();
+         assertEquals("getTables count for all user tables",
+               totalTables, rowPosition);
+       
+         Random rand = new Random();
+        
+         // Test using schema pattern with a pattern unique to
+         // a single schema.
+         for (int i = 0; i < dbIDS.length; i++)
+         {
+            String schema = dbIDS[i];
+            int pc = rand.nextInt(6);
+            String schemaPattern = schema.substring(0, pc + 2) + "%";
+            
+            rs = dmd.getTables(null, schemaPattern, null, userTableOnly);
+            checkTablesShape(rs);
+            rowPosition = 0;
+            while (rs.next())
+            {
+                assertEquals("TABLE_SCHEM",
+                        schema, rs.getString("TABLE_SCHEM"));
+                assertEquals("TABLE_NAME",
+                        dbIDS[rowPosition%dbIDS.length], rs.getString("TABLE_NAME"));
+                assertEquals("TABLE_TYPE", "TABLE", rs.getString("TABLE_TYPE"));
+                rowPosition++;
+            }
+            rs.close();
+            assertEquals("getTables count schema pattern",
+                    dbIDS.length, rowPosition);
+         }
+         
+         // Test using table pattern with a pattern unique to
+         // a single table per schema.
+         for (int i = 0; i < dbIDS.length; i++)
+         {
+            String table = dbIDS[i];
+            int pc = rand.nextInt(6);
+            String tablePattern = table.substring(0, pc + 2) + "%";
+            
+            rs = dmd.getTables(null, null, tablePattern, userTableOnly);
+            checkTablesShape(rs);
+            rowPosition = 0;
+            while (rs.next())
+            {
+                assertEquals("TABLE_SCHEM",
+                        dbIDS[rowPosition%dbIDS.length], rs.getString("TABLE_SCHEM"));
+                assertEquals("TABLE_TYPE", "TABLE", rs.getString("TABLE_TYPE"));
+                assertEquals("TABLE_NAME",
+                        table, rs.getString("TABLE_NAME"));
+                rowPosition++;
+            }
+            rs.close();
+            assertEquals("getTables count schema pattern",
+                    dbIDS.length, rowPosition);
+         }        
+    }
+    
+    /**
+     * Create a set of tables using the identifiers in IDS.
+     * For each identifier in IDS a schema is created.
+     * For each identifier in IDS create a table in every schema just created.
+     * Each table has five columns with names using the identifiers from IDS
+     * suffixed with _N where N is the column number in the table. The base
+     * name for each column is round-robined from the set of IDS.
+     * The type of each column is round-robined from the set of supported
+     * types returned by getSQLTypes.
+     * @throws SQLException
+     */
+    private int createTablesForTest() throws SQLException
+    {
+        List types = getSQLTypes(getConnection());
+        int typeCount = types.size();
+               
+        createSchemasForTests();
+        
+        Statement s = createStatement();
+        
+        int columnCounter = 0;
+        
+        for (int sid = 0; sid < IDS.length; sid++) {
+            for (int tid = 0; tid < IDS.length; tid++)
+            {
+                StringBuffer sb = new StringBuffer();
+                sb.append("CREATE TABLE ");
+                sb.append(IDS[sid]);
+                sb.append('.');
+                sb.append(IDS[tid]);
+                sb.append(" (");
+                
+                // Five columns per table
+                for (int c = 1; c <= 5; c++) {
+                    String colName = IDS[columnCounter % IDS.length];
+                    boolean delimited = colName.charAt(colName.length() - 1) == '"';
+                    if (delimited)
+                        colName = colName.substring(0, colName.length() - 1);
+                    sb.append(colName);  
+                    sb.append('_');
+                    sb.append(c); // append the column number
+                    if (delimited)
+                        sb.append('"');
+                    sb.append(' ');
+                    sb.append(types.get(columnCounter++ % typeCount));
+                    if (c < 5)
+                        sb.append(", ");
+                }
+                
+                sb.append(")");
+                s.execute(sb.toString());
+            }
+        }
+        
+        s.close();
+
+        return IDS.length * IDS.length;
     }
     
     /**
@@ -1152,6 +1328,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         
         rs.close();
+        
+        getSQLTypes(getConnection());
     }
     
     /**
@@ -1345,5 +1523,61 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         JDBC.assertDrainResults(rs);
         rs.close();
         ps.close();
+    }
+    
+    public static List getSQLTypes(Connection conn) throws SQLException
+    {
+        List list = new ArrayList();
+        
+        Random rand = new Random();
+        
+        ResultSet rs = conn.getMetaData().getTypeInfo();
+        while (rs.next())
+        {
+            String typeName = rs.getString("TYPE_NAME");
+            
+            // National types not supported, ignore them
+            // DERBY-2258
+            if (typeName.indexOf("NATIONAL") != -1)
+                continue;
+            if (typeName.indexOf("NVARCHAR") != -1)
+                continue;
+            
+            
+            String createParams = rs.getString("CREATE_PARAMS");
+            
+            if (createParams == null) {
+                // Type name stands by itself.
+                list.add(typeName);
+                continue;
+            }
+            
+            if (createParams.indexOf("length") != -1)
+            {
+                int maxLength = rs.getInt("PRECISION");
+                
+                // nextInt returns a value between 0 and maxLength-1
+                int length = rand.nextInt(maxLength) + 1;
+                
+                int paren = typeName.indexOf('(');
+                if (paren == -1) {
+                    list.add(typeName + "(" + length + ")");
+                    
+                } else {
+                    StringBuffer sb = new StringBuffer();
+                    sb.append(typeName.substring(0, paren+1));
+                    sb.append(length);
+                    sb.append(typeName.substring(paren+1));
+                    list.add(sb.toString());
+                }
+                
+                continue;
+            }
+        }
+        
+        for (Iterator i = list.iterator(); i.hasNext(); )
+            System.out.println("TYPE: " + i.next());
+            
+        return list;
     }
 }
