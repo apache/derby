@@ -355,10 +355,7 @@ public class FormatableBitSetTest extends TestCase {
 
     // Test cases for anySetBit()
     public void testAnySetBitEmpty() {
-        // More reasonable to return -1 here ?
-        try { empty.anySetBit(); fail(); } 
-        catch (ArrayIndexOutOfBoundsException e) {}
-        //assertEquals(empty.anySetBit(),-1);
+        assertEquals(empty.anySetBit(),-1);
     }
     public void testAnySetBit() {
         assertEquals(2,bitset18C.anySetBit());
@@ -373,19 +370,13 @@ public class FormatableBitSetTest extends TestCase {
     public void testAnySetBitBeyondBitNeg() {
         assertEquals(1,bitset18.anySetBit(0));
         assertEquals(0,bitset18.anySetBit(-1));
-
-        // Should be 0 or failure?
-        assertEquals(10,bitset18.anySetBit(-2));
-        // Should be 0 or failure?
-        assertEquals(10,bitset18.anySetBit(-3));
+        try { bitset18.anySetBit(-2); fail(); }
+        catch (ArrayIndexOutOfBoundsException e) {}
+        try { bitset18.anySetBit(-3); fail(); }
+        catch (ArrayIndexOutOfBoundsException e) {}
     }
     public void testAnySetBitBeyondBitPastEnd() {
-        if (SanityManager.DEBUG) {
-            try { bitset18.anySetBit(18); fail(); } catch (AssertFailure af) {}
-        }
-        else {
-            assertEquals(-1, bitset18.anySetBit(18));
-        }
+        assertEquals(-1, bitset18.anySetBit(18));
     }
 
     // Test cases for or(FormatableBitSet)

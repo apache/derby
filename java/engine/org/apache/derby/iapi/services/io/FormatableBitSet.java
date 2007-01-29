@@ -93,6 +93,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	// will be inlined by the compiler.
 	private static int udiv8(int i) { return (i>>3); }
 	private static byte umod8(int i) { return (byte)(i&0x7); }
+	private static int umul8(int i) { return (i<<3); }
 
 	/**
 	 * Niladic Constructor
@@ -642,42 +643,56 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	}
 
 	/**
-	 * If any bit is set, return the bit number of a bit that is set.
-	 * If no bit is set, return -1; 
-	 *
-	 * @return the bit number of a bit that is set, or -1 if no bit is set
+	 * A utility method which treats the byte argument as an 8-bit
+	 * bitset and finds the first set bit in that byte. Assumes that
+	 * at least one bit in v is set (v!=0).
+	 * @param a non-zero byte to check for set bits
+	 * @return the zero-based index of the first set bit in the argument byte
 	 */
-	public int anySetBit()
-	{
-		int numbytes = getLengthInBytes();
-		int bitpos;
-
-		for (int i = 0; i < numbytes-1; i++)
-		{
-			if (value[i] != 0)
-			{
-				for (int j = 0; j < 8; j++)
-				{
-					bitpos = 7-j;
-					if (((1 << bitpos) & value[i]) != 0)
-						return ((i*8)+j);
-				}
-			}
+	private static byte firstSet(byte v) {
+		if ((v & 0x80) != 0) {
+			return 0;
 		}
-
-
-		// only the top part of the last byte is relevant
-		byte mask = (byte)(0xFF << (8-bitsInLastByte));
-		if ((value[numbytes-1] & mask) != 0)
-		{
-			for (int j = 0; j < bitsInLastByte; j++)
-			{
-				bitpos = 7-j;
-				if (((1 << bitpos) & value[numbytes-1]) != 0)
-					return ((numbytes-1)*8)+j;
-			}
+		if ((v & 0x40) != 0) {
+			return 1;
 		}
+		if ((v & 0x20) != 0) {
+			return 2;
+		}
+		if ((v & 0x10) != 0) {
+			return 3;
+		}
+		if ((v & 0x8) != 0) {
+			return 4;
+		}
+		if ((v & 0x4) != 0) {
+			return 5;
+		}
+		if ((v & 0x2) != 0) {
+			return 6;
+		}
+		return 7;
+	}
 
+	/**
+	 * If any bit is set, return the zero-based bit index of the first
+	 * bit that is set. If no bit is set, return -1. By using
+	 * anySetBit() and anySetBit(beyondBit), one can quickly go thru
+	 * the entire bit array to return all set bit.
+	 *
+	 * @return the zero-based index of the first bit that is set, or
+	 * -1 if no bit is set
+	 */
+	public int anySetBit() {
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(invariantHolds(), "broken invariant");
+		}
+		final int numbytes = getLengthInBytes();
+		for (int i = 0; i < numbytes; ++i) {
+			final byte v = value[i];
+			if (v == 0) continue;
+			return (umul8(i) + firstSet(v));
+		}
 		return -1;
 	}
 
@@ -691,91 +706,25 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 * @return the bit number of a bit that is set, or -1 if no bit after
 	 * beyondBit is set
 	 */
-	public int anySetBit(int beyondBit)
-	{
-		if (SanityManager.DEBUG)
-		{
-			if (beyondBit >= this.getLength())
-                SanityManager.THROWASSERT(
-                   "Attempt to access bit position that exceeds the max length ("
-                    + this.getLength() + ")");
+	public int anySetBit(int beyondBit) {
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(invariantHolds(), "broken invariant");
 		}
-
-		int startingBit = (beyondBit+1);
-
-		// we have seen the last bit.
-		if (startingBit >= this.getLength())
+		if (++beyondBit >= lengthAsBits) {
 			return -1;
-
-		int numbytes = getLengthInBytes();
-		int startingByte = startingBit / 8;
-		int startingBitpos = startingBit % 8;
-		int bitpos;
-		byte mask;
-
-		// see if any bits in this byte is set, only the bottom part of the
-		// first byte is relevant
-		mask = (byte)(0xFF >> startingBitpos);
-
-		if (startingByte == numbytes-1)	// starting byte == last byte 
-			mask &= (byte)(0xFF << (8-bitsInLastByte));
-
-		if ((value[startingByte] & mask ) != 0)
-		{
-			// I know we will see the bit before bitsInLastByte even if we are
-			// at the last byte, no harm in going up to 8 in the loop
-			for (int j = startingBitpos; j < 8; j++)
-			{
-				if (SanityManager.DEBUG)
-				{
-					if (startingByte == numbytes-1)
-						SanityManager.ASSERT(j < bitsInLastByte,
-								 "going beyond the last bit");
-				}
-				bitpos = 7-j;
-				if (((1 << bitpos) & value[startingByte]) != 0)
-				{
-					return (startingByte*8+j);
-				}
-			}	
 		}
-
-		for (int i = (startingByte+1); i < numbytes-1; i++)
-		{			
-			if (value[i] != 0)
-			{
-				for (int j = 0; j < 8; j++)
-				{
-					bitpos = 7-j;
-					if (((1 << bitpos) & value[i]) != 0)
-					{
-						return ((i*8)+j);
-					}
-				}
-			}
+		int i = udiv8(beyondBit);
+		byte v = (byte)(value[i] << umod8(beyondBit));
+		if (v != 0) {
+			return (beyondBit + firstSet(v));
 		}
-		
-		// Last byte if there are more than one bytes.  Only the top part of
-		// the last byte is relevant 
-		if (startingByte != numbytes-1)
-		{
-			mask = (byte)(0xFF << (8-bitsInLastByte));
-
-			if ((value[numbytes-1] & mask) != 0)
-			{
-				for (int j = 0; j < bitsInLastByte; j++)
-				{
-					bitpos = 7-j;
-					if (((1 << bitpos) & value[numbytes-1]) != 0)
-					{
-						return ((numbytes-1)*8)+j;	
-					}
-				}
-			}
+		final int numbytes = getLengthInBytes();
+		for (++i; i < numbytes; ++i) {
+			v = value[i];
+			if (v == 0) continue;
+			return (umul8(i) + firstSet(v));
 		}
-
 		return -1;
-
 	}
 
 	/**
