@@ -43,10 +43,10 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 /**
  * Log operation to encrypt a container with a new encryption key or to encrypt
  * an unencrypted container while configuring the database for
- * encryption. Container is  synced to the disk when encryption is 
- * is successfull, there is nothing to do on a redo. If there is crash/error
+ * encryption. Container is synced to the disk when encryption is 
+ * is successful, there is nothing to do on a redo. If there is crash/error
  * while configuring a database for encryption; original version of the
- * container is put backup during undo. 
+ * container is put back during undo. 
  *
  * <PRE>
  *  @format_id	LOGOP_ENCRYPT_CONTAINER
