@@ -829,17 +829,46 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public int getNumBitsSet()
 	{
-		int count = 0;
-
-		for (int index = getLength() - 1; index >= 0; index--)
-		{
-			if (isSet(index))
-			{
-				count++;
-			}
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(invariantHolds(),"broken invariant");
 		}
+		int bitsSet = 0;
+		final int numbytes = getLengthInBytes();
+		for (int i = 0; i < numbytes; ++i) {
+			byte v = value[i];
 
-		return count;
+			// "Truth table", bits set in half-nibble (2 bits):
+			//  A | A>>1 | A-=A>>1 | bits set
+			// ------------------------------
+			// 00 |  00  |    0    |    0
+			// 01 |  00  |    1    |    1
+			// 10 |  01  |    1    |    1
+			// 11 |  01  |    2    |    2
+
+			// Calculate bits set in each half-nibble in parallel
+			//   |ab|cd|ef|gh|
+			// - |>a|&c|&e|&g|>
+			// ----------------
+			// = |ij|kl|mn|op|
+			v -= ((v >> 1) & 0x55);
+
+			// Add the upper and lower half-nibbles together and store
+			// in each nibble
+			//  |&&|kl|&&|op|
+			//+ |>>|ij|&&|mn|>>
+			//-----------------
+			//= |0q|rs|0t|uv|
+			v = (byte)((v & 0x33) + ((v >> 2) & 0x33));
+
+			// Add the nibbles together
+			//  |&&&&|&tuv|
+			//+ |>>>>|0qrs|>>>>
+			//-----------------
+			//= |0000|wxyz|
+			v = (byte)((v & 0x7) + (v >> 4));
+			bitsSet += v;
+		}
+		return bitsSet;
 	}
 
 	/////////////////////////////////////////////////////////
