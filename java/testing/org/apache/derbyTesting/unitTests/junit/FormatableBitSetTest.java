@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Method;
 
 
 /**
@@ -45,6 +46,19 @@ public class FormatableBitSetTest extends TestCase {
     private FormatableBitSet empty;
     private FormatableBitSet bitset18;
     private FormatableBitSet bitset18C;
+
+    /**
+     * <code>Integer.bitCount</code> method. Only available in JDK 1.5 or
+     * later.
+     */
+    private final static Method bitCount;
+    static {
+        Method m = null;
+        try {
+            m = Integer.class.getMethod("bitCount", new Class[]{Integer.TYPE});
+        } catch (Throwable t) {}
+        bitCount = m;
+    }
 
     /**
      * Create a test with the given name.
@@ -91,8 +105,15 @@ public class FormatableBitSetTest extends TestCase {
      * @throws Exception
      */
     public static Test suite() {
-        return new TestSuite(FormatableBitSetTest.class,
+        TestSuite ts = new TestSuite(FormatableBitSetTest.class,
                              "FormatableBitSetTest suite");
+
+        if (bitCount != null) {
+            ts.addTest(new FormatableBitSetTest("numBitsSetInOneByte"));
+            ts.addTest(new FormatableBitSetTest("numBitsSetInTwoBytes"));
+        }
+
+        return ts;
     }
 
     /**
@@ -485,6 +506,39 @@ public class FormatableBitSetTest extends TestCase {
         bitset18.xor(bitset18C);
         assertEquals(14,bitset18.getNumBitsSet());
         assertTrue(bitset18.invariantHolds());
+    }
+
+    // count one-bits in a byte with Integer.bitCount()
+    private static int bitsInByte(byte b) throws Exception {
+        Integer arg = new Integer(b & 0xff);
+        Integer ret = (Integer) bitCount.invoke(null, new Object[] { arg });
+        return ret.intValue();
+    }
+
+    // test getNumBitsSet() for a one-byte bit set
+    public void numBitsSetInOneByte() throws Exception {
+        for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; ++i) {
+            final byte b = (byte) i;
+            FormatableBitSet bs = new FormatableBitSet(new byte[] { b });
+            assertEquals("invalid bit count for b=" + b,
+                         bitsInByte(b), bs.getNumBitsSet());
+        }
+    }
+
+    // test getNumBitsSet() for a two-byte bit set
+    public void numBitsSetInTwoBytes() throws Exception {
+        for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; ++i) {
+            final byte b1 = (byte) i;
+            final int bits1 = bitsInByte(b1);
+            for (int j = Byte.MIN_VALUE; j <= Byte.MAX_VALUE; ++j) {
+                final byte b2 = (byte) j;
+                FormatableBitSet bs =
+                    new FormatableBitSet(new byte[] { b1, b2 });
+                assertEquals(
+                    "invalid bit count for b1=" + b1 + " and b2=" + b2,
+                    bits1 + bitsInByte(b2), bs.getNumBitsSet());
+            }
+        }
     }
 
     // Test case for writeExternal(ObjectOut) and readExternal(ObjectOut)
