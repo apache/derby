@@ -646,7 +646,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 * A utility method which treats the byte argument as an 8-bit
 	 * bitset and finds the first set bit in that byte. Assumes that
 	 * at least one bit in v is set (v!=0).
-	 * @param a non-zero byte to check for set bits
+	 * @param v a non-zero byte to check for set bits
 	 * @return the zero-based index of the first set bit in the argument byte
 	 */
 	private static byte firstSet(byte v) {
