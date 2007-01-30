@@ -53,13 +53,7 @@ public class derbyrunjartest {
             derbyrunloc = result.toString().substring(5);
             if (System.getProperty("os.name").startsWith("Windows"))
               derbyrunloc = derbyrunloc.substring(1);
-
-            if ((System.getProperty("java.vm.name") != null) &&
-                    System.getProperty("java.vm.name").equals("J9")) {
-                jvm = jvm.getJvm("j9_13");
-            } else {
-                jvm = jvm.getJvm("currentjvm"); // ensure compatibility
-            }
+            jvm = jvm.getJvm("currentjvm"); // ensure compatibility
         }
 
         String[][] testCommands = new String[][] {
