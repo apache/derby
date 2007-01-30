@@ -88,9 +88,16 @@ public class Derby {
         // classes folder - assume all is available.
         if (!SecurityManagerSetup.isJars)
             return true;
-        
-        return hasCorrectJar("/derbyclient.jar",
+
+        // if we attempt to check on availability of the ClientDataSource with 
+        // JSR169, attempts will be made to load classes not supported in
+        // that environment, such as javax.naming.Referenceable. See DERBY-2269.
+        if (!JDBC.vmSupportsJSR169()) {
+            return hasCorrectJar("/derbyclient.jar",
                 "org.apache.derby.jdbc.ClientDataSource");
+        }
+        else
+            return false;
     }
     
     private static boolean hasCorrectJar(String jarName, String className)
