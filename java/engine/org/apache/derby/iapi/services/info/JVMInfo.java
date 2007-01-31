@@ -133,8 +133,8 @@ public abstract class JVMInfo
 
 				try {
 
-					if (Float.valueOf(javaVersion).floatValue() > 1.4f)
-						id = 5;
+					if (Float.valueOf(javaVersion).floatValue() > 1.6f)
+						id = J2SE_16;
 				} catch (NumberFormatException nfe) {
 				}
 			}
