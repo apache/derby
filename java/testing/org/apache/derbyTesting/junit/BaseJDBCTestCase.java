@@ -198,6 +198,48 @@ public abstract class BaseJDBCTestCase
     }
     
     /**
+     * Open a connection to the current default database using the
+     * specified user name and password.
+     * <BR>
+     * This connection is not
+     * automaticaly closed on tearDown, the text fixture must
+     * ensure the connection is closed.
+     */
+    public Connection openDefaultConnection(String user, String password)
+    throws SQLException
+    {
+        Connection conn =  getTestConfiguration().openDefaultConnection(user,
+                password);
+        initializeConnection(conn);
+        return conn;        
+    }
+    
+    /**
+     * Open a connection to the current default database using the
+     * specified user name. The password is a function of
+     * the user name and the password token setup by the
+     * builtin authentication decorators.
+     * <BR>
+     * If the fixture is not wrapped in one of the decorators
+     * that setup BUILTIN authentication then the password
+     * is a function of the user name and the empty string
+     * as the password token. This mode is not recommended.
+     * 
+     * <BR>
+     * This connection is not
+     * automaticaly closed on tearDown, the text fixture must
+     * ensure the connection is closed.
+     * 
+     * @see DatabasePropertyTestSetup#builtinAuthentication(Test, String[], String)
+     * @see TestConfiguration#sqlAuthorizationDecorator(Test, String[], String)
+     */
+    public Connection openUserConnection(String user) throws SQLException
+    {
+        return openDefaultConnection(user,
+                getTestConfiguration().getPassword(user));
+    }
+    
+    /**
      * Open a connection to the specified database.
      * If the database does not exist, it will be created.
      * A default username and password will be used for the connection.

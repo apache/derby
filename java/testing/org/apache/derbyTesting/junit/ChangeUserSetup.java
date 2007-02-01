@@ -19,29 +19,36 @@
  */
 package org.apache.derbyTesting.junit;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 /**
  * A decorator that changes the default user and password
  * for the current configuration. Its tearDown method restores
  * the previous configuration.
+ * Optionally the passwordToken can be changed as well. 
  * 
  */
 final class ChangeUserSetup extends ChangeConfigurationSetup {
     
     private final String user;
     private final String password;
-    
-    ChangeUserSetup(Test test, String user, String password)
+    private final String passwordToken;
+
+    ChangeUserSetup(Test test, String user, String password, String passwordToken)
     {
         super(test);
         this.user = user;
         this.password = password;
+        this.passwordToken = passwordToken;
+    }
+    
+    ChangeUserSetup(Test test, String user, String password)
+    {
+        this(test, user, password, null);
     }
     
     TestConfiguration getNewConfiguration(TestConfiguration old)
     {
-        return new TestConfiguration(old, user, password);
+        return new TestConfiguration(old, user, password, passwordToken);
     }
 }

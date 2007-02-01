@@ -79,8 +79,13 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
      * using the BUILTIN provider and the set of users passed in.
      * The password for each user is set to the user's name with 
      * the value of passwordToken appended.
+     * <BR>
+     * The decorated test can use BaseJDBCTestCase.openUserConnection(String user)
+     * method to simplify using authentication.
      * <P>
      * Assumption is that no authentication was enabled upon entry.
+     * <P>
+     * Current user is set to the first user in the list users[0].
      * <P>
      * The authentication is removed by the decorator's tearDown method.
      * @param test Test to be decorated.
@@ -99,7 +104,8 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         for (int i = 0; i < users.length; i++)
         {
             String user = users[i];
-            userProps.setProperty("derby.user." + user, user.concat(passwordToken));
+            userProps.setProperty("derby.user." + user,
+                    TestConfiguration.getPassword(user, passwordToken));
         }
         
         // Need to setup the decorators carefully.
@@ -118,7 +124,9 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         // outer (added last) to inner.
         
         test = new DatabasePropertyTestSetup(test, authProps, true);
-        test = new ChangeUserSetup(test, users[0], users[0].concat(passwordToken));
+        test = new ChangeUserSetup(test, users[0],
+                TestConfiguration.getPassword(users[0], passwordToken),
+                passwordToken);
         test = new DatabasePropertyTestSetup(test, userProps, false);
         
         return test;

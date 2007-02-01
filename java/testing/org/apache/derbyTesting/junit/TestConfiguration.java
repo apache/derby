@@ -343,10 +343,24 @@ public class TestConfiguration {
      * The tearDown reverts the configuration to the previous
      * configuration.
      * 
+     * The database owner of this default SQL authorization mode
+     * database is TEST_DBO. This decorator sets the default user
+     * to be TEST_DBO.
+     * 
      * Tests can use this in conjunction with
      * DatabasePropertyTestSetup.builtinAuthentication
      * to set up BUILTIN authentication and changeUserDecorator
-     * to switch users.
+     * to switch users. The database owner TEST_DBO must be included
+     * in the list of users provided to builtinAuthentication.
+     * This decorator must be the outer one in this mode.
+     * <code>
+     * test = DatabasePropertyTestSetup.builtinAuthentication(test,
+                new String[] {"TEST_DBO","U1","U2",},
+                "nh32ew");
+       test = TestConfiguration.sqlAuthorizationDecorator(test);
+     * </code>
+     * A utility version of sqlAuthorizationDecorator is provided
+     * that combines the two setups.
      * 
      * @param test Test to be decorated
      * @return decorated test.
@@ -365,8 +379,37 @@ public class TestConfiguration {
             protected void tearDown() {
             }
         };
-
-        return new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, true);
+        
+        return changeUserDecorator(
+            new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, true),
+            "TEST_DBO", "");
+    }
+    
+    /**
+     * Utility version of sqlAuthorizationDecorator that also sets
+     * up authentication. A combination of
+     * DatabasePropertyTestSetup.builtinAuthentication wrapped in
+     * sqlAuthorizationDecorator.
+     * <BR>
+     * The database owner of this default SQL authorization mode
+     * database is TEST_DBO. This decorator sets the default user
+     * to be TEST_DBO.
+     * <BR>
+     * Assumption is that no authentication is enabled on the default
+     * SQL authorization database on entry.
+     * 
+     * @param users Set of users excluding the database owner, that will
+     * be added by this decorator.
+     */
+    public static Test sqlAuthorizationDecorator(Test test,
+            String[] users, String passwordToken)
+    {
+        String[] usersWithDBO = new String[users.length + 1];
+        usersWithDBO[0] = "TEST_DBO";
+        System.arraycopy(users, 0, usersWithDBO, 1, users.length);
+        return sqlAuthorizationDecorator(
+            DatabasePropertyTestSetup.builtinAuthentication(test, 
+                    usersWithDBO, passwordToken));
     }
     
     /**
@@ -461,12 +504,15 @@ public class TestConfiguration {
      * @param user New default user
      * @param password New default password.
      */
-    TestConfiguration(TestConfiguration copy, String user, String password)
+    TestConfiguration(TestConfiguration copy, String user,
+            String password, String passwordToken)
     {
         this.defaultDbName = copy.defaultDbName;
         this.usedDbNames.addAll(copy.usedDbNames);
         this.userName = user;
         this.userPassword = password;
+        this.passwordToken = passwordToken == null ?
+                copy.passwordToken : passwordToken;
 
         this.isVerbose = copy.isVerbose;
         this.port = copy.port;
@@ -719,6 +765,16 @@ public class TestConfiguration {
     }
     
     /**
+     * Open connection to the default database.
+     * If the database does not exist, it will be created.
+     *
+     * @return connection to default database.
+     */
+    Connection openDefaultConnection(String user, String password)
+        throws SQLException {
+        return connector.openConnection(user, password);
+    }    
+    /**
      * Open connection to the specified database.
      * If the database does not exist, it will be created.
      * A default username and password will be used for the connection.
@@ -877,6 +933,14 @@ public class TestConfiguration {
     private boolean isVerbose;
     
     /**
+     * Password token used by the builtin authentication decorators.
+     * Default simple scheme is the password is a function
+     * of the user and a password token. password token
+     * is set by DatabasePropertyTestSetup.builtinAuthentication
+     */
+    private String passwordToken = "";
+    
+    /**
      * Indirection for obtaining connections based upon
      * this configuration.
      */
@@ -911,5 +975,26 @@ public class TestConfiguration {
     	}
     }
     
-        
+    
+    /*
+    ** BUILTIN password handling.
+    */
+    
+    /**
+     * Get the password that is a function of the user
+     * name and the passed in token.
+     */
+    static final String getPassword(String user, String token)
+    {
+        return user.concat(token);
+    }
+    
+    /**
+     * Get the password that is a function of the user
+     * name and the token for the current configuration.
+     */
+    final String getPassword(String user)
+    {
+        return getPassword(user, passwordToken);
+    }
 }
