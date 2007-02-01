@@ -122,21 +122,21 @@ public class FormatableBitSetTest extends TestCase {
     public void testSetup() {
         assertEquals(0,empty.getLength());
         assertEquals(0,empty.getLengthInBytes());
-        assertEquals(0,empty.getByteArray().length);
         assertEquals(0,empty.getNumBitsSet());
         assertTrue(empty.invariantHolds());
+        assertEquals(0,empty.getByteArray().length);
 
         assertEquals(18,bitset18.getLength());
         assertEquals(3,bitset18.getLengthInBytes());
-        assertEquals(bits24,bitset18.getByteArray());
         assertEquals(9,bitset18.getNumBitsSet());
         assertTrue(bitset18.invariantHolds());
+        assertEquals(bits24,bitset18.getByteArray());
 
         assertEquals(18,bitset18C.getLength());
         assertEquals(3,bitset18C.getLengthInBytes());
-        assertEquals(bits24C,bitset18C.getByteArray());
         assertEquals(9,bitset18C.getNumBitsSet());
         assertTrue(bitset18C.invariantHolds());
+        assertEquals(bits24C,bitset18C.getByteArray());
     }
 
     // Test cases for single arg constructor
@@ -144,33 +144,33 @@ public class FormatableBitSetTest extends TestCase {
         FormatableBitSet zeroBits = new FormatableBitSet(0);
         assertEquals(0,zeroBits.getLength());
         assertEquals(0,zeroBits.getLengthInBytes());
-        assertEquals(0,zeroBits.getByteArray().length);
         assertEquals(0,zeroBits.getNumBitsSet());
         assertTrue(zeroBits.invariantHolds());
+        assertEquals(0,zeroBits.getByteArray().length);
     }
     public void testIntCtor1() {
         FormatableBitSet oneBit = new FormatableBitSet(1);
         assertEquals(1,oneBit.getLength());
         assertEquals(1,oneBit.getLengthInBytes());
-        assertEquals(1,oneBit.getByteArray().length);
         assertEquals(0,oneBit.getNumBitsSet());
         assertTrue(oneBit.invariantHolds());
+        assertEquals(1,oneBit.getByteArray().length);
     }
     public void testIntCtor8() {
         FormatableBitSet eightBits = new FormatableBitSet(8);
         assertEquals(8,eightBits.getLength());
         assertEquals(1,eightBits.getLengthInBytes());
-        assertEquals(1,eightBits.getByteArray().length);
         assertEquals(0,eightBits.getNumBitsSet());
         assertTrue(eightBits.invariantHolds());
+        assertEquals(1,eightBits.getByteArray().length);
     }
     public void testIntCtor9() {
         FormatableBitSet nineBits = new FormatableBitSet(9);
         assertEquals(9,nineBits.getLength());
         assertEquals(2,nineBits.getLengthInBytes());
-        assertEquals(2,nineBits.getByteArray().length);
         assertEquals(0,nineBits.getNumBitsSet());
         assertTrue(nineBits.invariantHolds());
+        assertEquals(2,nineBits.getByteArray().length);
     }
     public void testIntCtorNeg() {
         try { FormatableBitSet negBits = new FormatableBitSet(-1); fail(); }
@@ -182,8 +182,6 @@ public class FormatableBitSetTest extends TestCase {
         FormatableBitSet emptyCpy = new FormatableBitSet(empty);
         assertEquals(0,emptyCpy.getLength());
         assertEquals(0,emptyCpy.getLengthInBytes());
-        // FAILURE - the byte array of the copy is not null
-        //assertEquals(null,emptyCpy.getByteArray());
         assertEquals(0,emptyCpy.getNumBitsSet());
         assertTrue(emptyCpy.invariantHolds());
     }
@@ -191,11 +189,11 @@ public class FormatableBitSetTest extends TestCase {
         FormatableBitSet cpy = new FormatableBitSet(bitset18);
         assertEquals(18,cpy.getLength());
         assertEquals(3,cpy.getLengthInBytes());
-        assertEquals(3,cpy.getByteArray().length);
         assertEquals(9,cpy.getNumBitsSet());
         assertEquals(0,cpy.compare(bitset18));
         assertTrue(cpy.equals(bitset18));
         assertTrue(cpy.invariantHolds());
+        assertEquals(3,cpy.getByteArray().length);
     }
 
     // Test cases for grow(int)
@@ -203,29 +201,109 @@ public class FormatableBitSetTest extends TestCase {
         empty.grow(18);
         assertEquals(18,empty.getLength());
         assertEquals(3,empty.getLengthInBytes());
-        assertEquals(3,empty.getByteArray().length);
         assertEquals(0,empty.getNumBitsSet());
         assertTrue(bitset18.invariantHolds());
+        assertEquals(3,empty.getByteArray().length);
     }
     public void testGrow() {
         bitset18.grow(25);
         assertEquals(25,bitset18.getLength());
         assertEquals(4,bitset18.getLengthInBytes());
-        assertEquals(4,bitset18.getByteArray().length);
         assertEquals(9,bitset18.getNumBitsSet());
         assertTrue(bitset18.invariantHolds());
+        assertEquals(4,bitset18.getByteArray().length);
     }
-    // OK - should fail?
     public void testGrowSmaller() {
         bitset18.grow(9);
         assertEquals(18,bitset18.getLength());
+        assertEquals(3,bitset18.getLengthInBytes());
+        assertEquals(9,bitset18.getNumBitsSet());
         assertTrue(bitset18.invariantHolds());
+        assertEquals(3,bitset18.getByteArray().length);
     }
-    // OK - should fail?
     public void testGrowNeg() {
-        bitset18.grow(-9);
-        assertEquals(18,bitset18.getLength());
-        assertTrue(bitset18.invariantHolds());
+        try { bitset18.grow(-9); fail(); }
+        catch (IllegalArgumentException iae) {}
+    }
+    public void testGrow0() {
+        empty.grow(0);
+        assertEquals(0,empty.getLength());
+        assertEquals(0,empty.getLengthInBytes());
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(0,empty.getByteArray().length);
+    }
+    public void testGrow1() {
+        empty.grow(1);
+        assertEquals(1,empty.getLength());
+        assertEquals(1,empty.getLengthInBytes());
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(1,empty.getByteArray().length);
+    }
+    public void testGrow2() {
+        empty.grow(2);
+        assertEquals(2,empty.getLength());
+        assertEquals(1,empty.getLengthInBytes());
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(1,empty.getByteArray().length);
+    }
+    public void testGrow3() {
+        empty.grow(3);
+        assertEquals(3,empty.getLength());
+        assertEquals(1,empty.getLengthInBytes());
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(1,empty.getByteArray().length);
+    }
+    public void testGrow4() {
+        empty.grow(4);
+        assertEquals(4,empty.getLength());
+        assertEquals(1,empty.getLengthInBytes());
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(1,empty.getByteArray().length);
+    }
+    public void testGrow5() {
+        empty.grow(5);
+        assertEquals(5,empty.getLength());
+        assertEquals(1,empty.getLengthInBytes());
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(1,empty.getByteArray().length);
+    }
+    public void testGrow6() {
+        empty.grow(6);
+        assertEquals(6,empty.getLength());
+        assertEquals(1,empty.getLengthInBytes());
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(1,empty.getByteArray().length);
+    }
+    public void testGrow7() {
+        empty.grow(7);
+        assertEquals(7,empty.getLength());
+        assertEquals(1,empty.getLengthInBytes());
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(1,empty.getByteArray().length);
+    }
+    public void testGrow8() {
+        empty.grow(8);
+        assertEquals(8,empty.getLength());
+        assertEquals(1,empty.getLengthInBytes());
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(1,empty.getByteArray().length);
+    }
+    public void testGrow9() {
+        empty.grow(9);
+        assertEquals(9,empty.getLength());
+        assertEquals(2,empty.getByteArray().length);
+        assertEquals(0,empty.getNumBitsSet());
+        assertTrue(empty.invariantHolds());
+        assertEquals(2,empty.getLengthInBytes());
     }
 
     // Test cases for shrink(int)
@@ -233,23 +311,21 @@ public class FormatableBitSetTest extends TestCase {
         empty.shrink(0);
         assertEquals(0,empty.getLength());
         assertEquals(0,empty.getLengthInBytes());
-        assertEquals(0,empty.getByteArray().length);
         assertEquals(0,empty.getNumBitsSet());
         assertTrue(empty.invariantHolds());
+        assertEquals(0,empty.getByteArray().length);
     }
     public void testShrink() {
         bitset18.shrink(9);
         assertEquals(9,bitset18.getLength());
         assertEquals(2,bitset18.getLengthInBytes());
-        assertEquals(2,bitset18.getByteArray().length);
         assertEquals(5,bitset18.getNumBitsSet());
         assertTrue(bitset18.invariantHolds());
+        assertEquals(2,bitset18.getByteArray().length);
     }
-    // OK - should fail?
     public void testShrinkLarger() {
-        bitset18.shrink(25);
-        assertEquals(18,bitset18.getLength());
-        assertTrue(bitset18.invariantHolds());
+        try { bitset18.shrink(25); fail(); }
+        catch (IllegalArgumentException iae) {}
     }
     public void testShrinkNeg() {
         try {
@@ -257,14 +333,93 @@ public class FormatableBitSetTest extends TestCase {
             fail();
         } catch (IllegalArgumentException iae) {}
     }
-    // Should be allowed?
     public void testShrink0() {
-        try { bitset18.shrink(0); fail(); }
-        catch (ArrayIndexOutOfBoundsException e) {}
-        //      assertEquals(0,bitset18.getLength());
-        //      assertEquals(0,bitset18.getLengthInBytes());
-        //      assertEquals(0,bitset18.getByteArray().length);
-        //      assertEquals(0,bitset18.getNumBitsSet());
+        bitset18.shrink(0);
+        assertEquals(0,bitset18.getLength());
+        assertEquals(0,bitset18.getLengthInBytes());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(0,bitset18.getNumBitsSet());
+        assertEquals(0,bitset18.getByteArray().length);
+    }
+    public void testShrink1() {
+        bitset18.shrink(1);
+        assertEquals(1,bitset18.getLength());
+        assertEquals(1,bitset18.getLengthInBytes());
+        assertEquals(1,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(1,bitset18.getByteArray().length);
+    }
+    public void testShrink2() {
+        bitset18.shrink(2);
+        assertEquals(2,bitset18.getLength());
+        assertEquals(1,bitset18.getLengthInBytes());
+        assertEquals(2,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(1,bitset18.getByteArray().length);
+    }
+    public void testShrink3() {
+        bitset18.shrink(3);
+        assertEquals(3,bitset18.getLength());
+        assertEquals(1,bitset18.getLengthInBytes());
+        assertEquals(2,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(1,bitset18.getByteArray().length);
+    }
+    public void testShrink4() {
+        bitset18.shrink(4);
+        assertEquals(4,bitset18.getLength());
+        assertEquals(1,bitset18.getLengthInBytes());
+        assertEquals(2,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(1,bitset18.getByteArray().length);
+    }
+    public void testShrink5() {
+        bitset18.shrink(5);
+        assertEquals(5,bitset18.getLength());
+        assertEquals(1,bitset18.getLengthInBytes());
+        assertEquals(3,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(1,bitset18.getByteArray().length);
+    }
+    public void testShrink6() {
+        bitset18.shrink(6);
+        assertEquals(6,bitset18.getLength());
+        assertEquals(1,bitset18.getLengthInBytes());
+        assertEquals(4,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(1,bitset18.getByteArray().length);
+    }
+    public void testShrink7() {
+        bitset18.shrink(7);
+        assertEquals(7,bitset18.getLength());
+        assertEquals(1,bitset18.getLengthInBytes());
+        assertEquals(5,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(1,bitset18.getByteArray().length);
+    }
+    public void testShrink8() {
+        bitset18.shrink(8);
+        assertEquals(8,bitset18.getLength());
+        assertEquals(1,bitset18.getLengthInBytes());
+        assertEquals(5,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(1,bitset18.getByteArray().length);
+    }
+    public void testShrink9() {
+        bitset18.shrink(9);
+        assertEquals(9,bitset18.getLength());
+        assertEquals(2,bitset18.getLengthInBytes());
+        assertEquals(5,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(2,bitset18.getByteArray().length);
+    }
+    public void testShrink10() {
+        bitset18.shrink(10);
+        assertEquals(10,bitset18.getLength());
+        assertEquals(2,bitset18.getLengthInBytes());
+        assertEquals(5,bitset18.getNumBitsSet());
+        assertTrue(bitset18.invariantHolds());
+        assertEquals(2,bitset18.getByteArray().length);
     }
 
     // Test cases for compare(FormatableBitSet)
@@ -478,10 +633,10 @@ public class FormatableBitSetTest extends TestCase {
         bitset18.xor(empty);
         assertEquals(18,bitset18.getLength());
         assertEquals(3,bitset18.getLengthInBytes());
-        assertEquals(3,bitset18.getByteArray().length);
         assertEquals(9,bitset18.getNumBitsSet());
         assertTrue(cpy.equals(bitset18));
         assertTrue(bitset18.invariantHolds());
+        assertEquals(3,bitset18.getByteArray().length);
     }
     public void testXORWithComplement() {
         bitset18.set(2);
@@ -497,9 +652,9 @@ public class FormatableBitSetTest extends TestCase {
         bitset18.xor(bitset18C);
         assertEquals(18,bitset18.getLength());
         assertEquals(3,bitset18.getLengthInBytes());
-        assertEquals(3,bitset18.getByteArray().length);
         assertEquals(13,bitset18.getNumBitsSet());
         assertTrue(bitset18.invariantHolds());
+        assertEquals(3,bitset18.getByteArray().length);
     }
     public void testXORWithLarger() {
         bitset18.shrink(9);

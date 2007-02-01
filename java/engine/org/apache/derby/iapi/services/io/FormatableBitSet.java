@@ -278,23 +278,28 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	}
 
 	/**
-	 * Grow (widen) a FormatableBitSet to N bis
+	 * Grow (widen) a FormatableBitSet so that it contains at least N
+	 * bits. If the bitset already has more than n bits, this is a
+	 * noop. Negative values of n are not allowed.
+	 * ASSUMPTIONS: that all extra bits in the last byte are
+	 * zero.
 	 *
 	 * @param n	The number of bits you want.  The bits are
 	 *			always added as 0 and are appended to the
 	 *			least significant end of the bit array.
 	 *
-	 * ASSUMPTIONS: that all extra bits in the last byte
-	 * are zero.
 	 */
 	public void grow(int n)
 	{
-		if (n <= this.getLength())
-			return;
+ 		if (n < 0) {
+ 			throw new IllegalArgumentException("Bit set cannot grow from "+
+ 											   lengthAsBits+" to "+n+" bits");
+ 		}
+		if (n <= lengthAsBits) {
+ 			return;
+ 		}
 
-		int delta = n - this.getLength();
-
-
+		int delta = n - lengthAsBits;
 		int oldNumBytes = getLengthInBytes();
 
 		/*
@@ -334,42 +339,33 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	}
 
 	/**
-	 * Shrink (narrow) a FormatableBitSet to N bits
+	 * Shrink (narrow) a FormatableBitSet to N bits. N may not be
+	 * larger than the current bitset size, or negative.
 	 *
 	 * @param n	The number of bits the caller wants.  The
 	 * 			bits are always removed from the
 	 *			least significant end of the bit array.
 	 */
-	public FormatableBitSet shrink(int n)
+	public void shrink(int n)
 	{
-		if (n < 0) {
+		if (n < 0 || n > lengthAsBits) {
 			throw new
-			IllegalArgumentException("Bit set size "+ n +
-									 " is not allowed");
-		}
-		int		numBytes;
-		int		lastByteNum;
-
-		if (n >= this.getLength())
-		{
-			return this;
+				IllegalArgumentException("Bit set cannot shrink from "+
+										 lengthAsBits+" to "+n+" bits");
 		}
 
-
-		lastByteNum = numBytesFromBits(n) - 1;
+		final int firstUnusedByte = numBytesFromBits(n);
 		bitsInLastByte = numBitsInLastByte(n);
 		lengthAsBits = n;
 
-		/*
-		** Mask out any left over bits in the
-		** last byte.  Retain the highest bits.
-		*/
-		if (bitsInLastByte != 8)
-		{
-			value[lastByteNum] &= 0xFF00 >> bitsInLastByte;
+		for (int i = firstUnusedByte; i < value.length; ++i) {
+			value[i] = 0;
 		}
-
-		return this;
+		if (firstUnusedByte > 0) {
+			// Mask out any left over bits in the
+			// last byte.  Retain the highest bits.
+			value[firstUnusedByte-1] &= 0xff00 >> bitsInLastByte;
+		}
 	}
 
 	/*
