@@ -1,0 +1,93 @@
+/*
+
+   Derby - Class org.apache.derbyTesting.functionTests.suites.EncryptionSuite
+
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to you under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+ */
+package org.apache.derbyTesting.functionTests.suites;
+
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.LobStreamsTest;
+import org.apache.derbyTesting.junit.Decorator;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+/**
+ * A suite that runs a set of tests using encrypted
+ * databases with a number of algorithms.
+ * This is a general encryption test to see if
+ * tests run without any problems when encryption
+ * is enabled.
+ * <BR>
+ * It is not for testing of encrpytion functionality,
+ * e.g. testing that bootPassword must be a certain
+ * length etc. That should be in a specific JUnit test
+ * that probably needs to control database creation
+ * more carefully than this.
+ * <BR>
+ * The same set of tests is run for each algorithm,
+ * and each algorithm (obviously) uses a single
+ * use database with the required encryption setup.
+ * 
+ * @see Decorator#encryptedDatabase(Test)
+ * @see Decorator#encryptedDatabase(Test, String)
+ *
+ */
+public final class EncryptionSuite {
+    
+
+    private EncryptionSuite() {
+        super();
+    }
+    
+    /**
+     * Runs tests with a set of encryption algorithms.
+     * The set comes from the set of algorithms used
+     * for the same purpose in the old harness.
+     */
+    public static Test suite()
+    {
+        TestSuite suite = new TestSuite("Encrpytion Suite");
+        
+        suite.addTest(Decorator.encryptedDatabase(baseSuite("default")));
+        suite.addTest(encryptedSuite("AES/CBC/NoPadding"));
+        suite.addTest(encryptedSuite("DES/ECB/NoPadding"));
+        suite.addTest(encryptedSuite("DESede/CFB/NoPadding"));
+        suite.addTest(encryptedSuite("DES/CBC/NoPadding"));
+        suite.addTest(encryptedSuite("Blowfish/CBC/NoPadding"));
+        suite.addTest(encryptedSuite("AES/CBC/NoPadding"));
+        
+        return suite;
+    }
+    
+    private static Test encryptedSuite(String algorithm)
+    {
+        return Decorator.encryptedDatabase(baseSuite(algorithm), algorithm);
+    }
+    
+    /**
+     * Set of tests which are run for each encryption algorithm.
+     */
+    private static Test baseSuite(String algorithm)
+    {
+        TestSuite suite = new TestSuite("Encryption Algorithm: " + algorithm);
+        
+        // LobStreamsTest was in the encrpytion suite for the old harness. 
+        suite.addTest(LobStreamsTest.suite());
+        return suite;
+    }
+}
