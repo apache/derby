@@ -20,6 +20,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -63,7 +64,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * 
  *  getBestRowIdentifier
  *  getColumnPrivileges
- *  getColumns
+ *  getColumns (filtering)
  *  getCrossReference
  *  getExportedKeys
  *  getImportedKeys
@@ -72,8 +73,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *  getProcedureColumns
  *  getProcedures
  *  getTablePrivileges
- *  getTables (modify)
- *  getTypeInfo
  *  <P>
  *  This test is also called from the upgrade tests to test that
  *  metadata continues to work at various points in the upgrade.
@@ -619,7 +618,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         ResultSet rs;
         
         rs = dmd.getAttributes(null,null,null,null);
-        assertMetaDataResultSet(rs, null, null);
+        assertMetaDataResultSet(rs, null, null, null);
         JDBC.assertEmpty(rs);
         
         rs = dmd.getCatalogs();
@@ -627,15 +626,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(rs);
         
         rs = dmd.getSuperTables(null,null,null);
-        assertMetaDataResultSet(rs, null, null);
+        assertMetaDataResultSet(rs, null, null, null);
         JDBC.assertEmpty(rs);
 
         rs = dmd.getSuperTypes(null,null,null);
-        assertMetaDataResultSet(rs, null, null);
+        assertMetaDataResultSet(rs, null, null, null);
         JDBC.assertEmpty(rs);
 
         rs = dmd.getUDTs(null,null,null,null);
-        assertMetaDataResultSet(rs, null, null);
+        assertMetaDataResultSet(rs, null, null, null);
         JDBC.assertEmpty(rs);
         
         rs = dmd.getVersionColumns(null,null, "No_such_table");
@@ -779,7 +778,20 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
          new int[] {
           Types.VARCHAR, Types.VARCHAR
          }
+        , new boolean[] {false, true}
         );        
+    }
+    
+    /**
+     * Execute dmd.getTables() but perform additional checking
+     * of the ODBC variant.
+     */
+    private ResultSet getDMDTables(DatabaseMetaData dmd,
+            String catalog, String schema, String table, String[] tableTypes)
+        throws SQLException
+    {
+        checkGetTablesODBC(catalog, schema, table, tableTypes);
+        return dmd.getTables(catalog, schema, table, tableTypes);
     }
     
     /**
@@ -793,67 +805,67 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         ResultSet rs;
         
-        rs = dmd.getTables(null, null, null, null);
+        rs = getDMDTables(dmd, null, null, null, null);
         checkTablesShape(rs);
         int allTableCount = JDBC.assertDrainResults(rs);
         assertTrue("getTables() on all was empty!", allTableCount > 0);
         
-        rs = dmd.getTables("%", "%", "%", null);
+        rs = getDMDTables(dmd, "%", "%", "%", null);
         checkTablesShape(rs);
         assertEquals("Different counts from getTables",
                 allTableCount, JDBC.assertDrainResults(rs));
         
-        rs = dmd.getTables(null, "NO_such_schema", null, null);
+        rs = getDMDTables(dmd, null, "NO_such_schema", null, null);
         checkTablesShape(rs);
         JDBC.assertEmpty(rs);
         
-        rs = dmd.getTables(null, "SQLJ", null, null);
+        rs = getDMDTables(dmd, null, "SQLJ", null, null);
         checkTablesShape(rs);
         JDBC.assertEmpty(rs);
         
-        rs = dmd.getTables(null, "SQLJ", "%", null);
+        rs = getDMDTables(dmd, null, "SQLJ", "%", null);
         checkTablesShape(rs);
         JDBC.assertEmpty(rs);
         
-        rs = dmd.getTables(null, "SYS", "No_such_table", null);
+        rs = getDMDTables(dmd, null, "SYS", "No_such_table", null);
         checkTablesShape(rs);
         JDBC.assertEmpty(rs);
         
         String[] userTableOnly = new String[] {"TABLE"};
 
         // no user tables in SYS
-        rs = dmd.getTables(null, "SYS", null, userTableOnly);
+        rs = getDMDTables(dmd, null, "SYS", null, userTableOnly);
         checkTablesShape(rs);
         JDBC.assertEmpty(rs);
         
-        rs = dmd.getTables(null, "SYS", "%", userTableOnly);
+        rs = getDMDTables(dmd, null, "SYS", "%", userTableOnly);
         checkTablesShape(rs);
         JDBC.assertEmpty(rs);
         
         String[] systemTableOnly = new String[] {"SYSTEM_TABLE"};
         
-        rs = dmd.getTables(null, "SYS", null, systemTableOnly);
+        rs = getDMDTables(dmd, null, "SYS", null, systemTableOnly);
         checkTablesShape(rs);
         int systemTableCount = JDBC.assertDrainResults(rs);
         assertTrue("getTables() on system tables was empty!", systemTableCount > 0);
         
-        rs = dmd.getTables(null, "SYS", "%", systemTableOnly);
+        rs = getDMDTables(dmd, null, "SYS", "%", systemTableOnly);
         checkTablesShape(rs);
         assertEquals(systemTableCount, JDBC.assertDrainResults(rs));
 
         String[] viewOnly = new String[] {"VIEW"};
-        rs = dmd.getTables(null, "SYS", null, viewOnly);
+        rs = getDMDTables(dmd, null, "SYS", null, viewOnly);
         JDBC.assertEmpty(rs);
         
-        rs = dmd.getTables(null, "SYS", "%", viewOnly);
+        rs = getDMDTables(dmd, null, "SYS", "%", viewOnly);
         JDBC.assertEmpty(rs);
         
         String[] allTables = {"SYNONYM","SYSTEM TABLE","TABLE","VIEW"};
-        rs = dmd.getTables(null, null, null, allTables);
+        rs = getDMDTables(dmd, null, null, null, allTables);
         checkTablesShape(rs);
         assertEquals("Different counts from getTables",
                 allTableCount, JDBC.assertDrainResults(rs));
-        rs = dmd.getTables("%", "%", "%", allTables);
+        rs = getDMDTables(dmd, "%", "%", "%", allTables);
         checkTablesShape(rs);
         assertEquals("Different counts from getTables",
                 allTableCount, JDBC.assertDrainResults(rs));
@@ -886,7 +898,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         Arrays.sort(dbIDS);     
                
         // Check the contents, ordered by TABLE_CAT, TABLE_SCHEMA, TABLE_NAME
-        rs = dmd.getTables(null, null, null, userTableOnly);
+        rs = getDMDTables(dmd, null, null, null, userTableOnly);
         checkTablesShape(rs);
         int rowPosition = 0;
         while (rs.next())
@@ -923,7 +935,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             int pc = rand.nextInt(6);
             String schemaPattern = schema.substring(0, pc + 2) + "%";
             
-            rs = dmd.getTables(null, schemaPattern, null, userTableOnly);
+            rs = getDMDTables(dmd, null, schemaPattern, null, userTableOnly);
             checkTablesShape(rs);
             rowPosition = 0;
             while (rs.next())
@@ -948,7 +960,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             int pc = rand.nextInt(6);
             String tablePattern = table.substring(0, pc + 2) + "%";
             
-            rs = dmd.getTables(null, null, tablePattern, userTableOnly);
+            rs = getDMDTables(dmd, null, null, tablePattern, userTableOnly);
             checkTablesShape(rs);
             rowPosition = 0;
             while (rs.next())
@@ -965,6 +977,49 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                     dbIDS.length, rowPosition);
          }        
     }
+    
+  
+    /**
+     * Execute and check the ODBC variant of getTables which
+     * uses a procedure to provide the same information to ODBC clients.
+     */
+    private void checkGetTablesODBC(String catalog, String schema,
+            String table, String[] tableTypes) throws SQLException
+    {
+        String tableTypesAsString = null;
+        if (tableTypes != null) {
+            int count = tableTypes.length;
+            StringBuffer sb = new StringBuffer();
+           for (int i = 0; i < count; i++) {
+               if (i > 0)
+                    sb.append(",");
+            sb.append(tableTypes[i]);
+           }
+           tableTypesAsString = sb.toString();
+        }
+
+        CallableStatement cs = prepareCall(
+            "CALL SYSIBM.SQLTABLES(?, ?, ?, ?, 'DATATYPE=''ODBC''')");
+        cs.setString(1, catalog);
+        cs.setString(2, schema);
+        cs.setString(3, table);
+        cs.setString(4, tableTypesAsString);
+        
+        cs.execute();
+        ResultSet odbcrs = cs.getResultSet();
+        assertNotNull(odbcrs);
+        
+        // Returned ResultSet will have the same shape as
+        // DatabaseMetaData.getTables() even though ODBC
+        // only defines the first five columns.
+        checkTablesShape(odbcrs);
+        
+        // Expect the contents of JDBC and ODBC metadata to be the same.
+        ResultSet dmdrs = getDMD().getTables(catalog, schema, table, tableTypes);
+        JDBC.assertSameContents(odbcrs, dmdrs);
+        
+        cs.close();
+    }   
 
     /**
      * Create a set of tables using the identifiers in IDS.
@@ -1273,6 +1328,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                new int[] {
                 Types.VARCHAR
                }
+        , null
               );
         
         JDBC.assertFullResultSet(rs, new String[][]
@@ -1319,6 +1375,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             
             Types.INTEGER
           }
+        , null
         );
         
         int[] supportedTypes = new int[] {
@@ -1601,38 +1658,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
                Types.VARCHAR, Types.SMALLINT, Types.VARCHAR
                }
+        , null
               );          
     }
-    /*
-     *    1.  TABLE_CAT String => table catalog (may be null)
-   2. TABLE_SCHEM String => table schema (may be null)
-   3. TABLE_NAME String => table name
-   4. COLUMN_NAME String => column name
-   
-   5. DATA_TYPE int => SQL type from java.sql.Types
-   6. TYPE_NAME String => Data source dependent type name, for a UDT the type name is fully qualified
-   7. COLUMN_SIZE int => column size. For char or date types this is the maximum number of characters, for numeric or decimal types this is precision.
-   8. BUFFER_LENGTH is not used.
-   
-   9. DECIMAL_DIGITS int => the number of fractional digits
-  10. NUM_PREC_RADIX int => Radix (typically either 10 or 2)
-  11. NULLABLE int => is NULL allowed.
-          * columnNoNulls - might not allow NULL values
-          * columnNullable - definitely allows NULL values
-          * columnNullableUnknown - nullability unknown 
-  12. REMARKS String => comment describing column (may be null)
-  
-  13. COLUMN_DEF String => default value (may be null)
-  14. SQL_DATA_TYPE int => unused
-  15. SQL_DATETIME_SUB int => unused
-  16. CHAR_OCTET_LENGTH int => for char types the maximum number of bytes in the column
-  17. ORDINAL_POSITION int => index of column in table (starting at 1)
-  18. IS_NULLABLE String => "NO" means column definitely does not allow NULL values; "YES" means the column might allow NULL values. An empty string means nobody knows.
-  19. SCOPE_CATLOG String => catalog of table that is the scope of a reference attribute (null if DATA_TYPE isn't REF)
-  20. SCOPE_SCHEMA String => schema of table that is the scope of a reference attribute (null if the DATA_TYPE isn't REF)
-  21. SCOPE_TABLE String => table name that this the scope of a reference attribure (null if the DATA_TYPE isn't REF)
-  22. SOURCE_DATA_TYPE short => source type of a distinct type or user-generated Ref type, SQL type from java.sql.Types (null if DATA_TYPE isn't DISTINCT or user-generated REF) 
-     */
+
     /**
      * Check the shape of the ResultSet from any getTables call.
      */
@@ -1649,6 +1678,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
           Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
           Types.VARCHAR, Types.VARCHAR
          }
+        , new boolean[] {
+          true, false, false, true, // TABLE_SCHEM cannot be NULL in Derby
+          true, true, true, true,
+          true, true
+        }
         );        
     }
     
@@ -1664,6 +1698,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
          new int[] {
           Types.CHAR
          }
+        , new boolean[] {false}
         );        
     }
     
@@ -1682,11 +1717,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
           Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
           Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT
          }
+        , null
         );        
     }
     
     public static void assertMetaDataResultSet(ResultSet rs,
-            String[] columnNames, int[] columnTypes) throws SQLException
+            String[] columnNames, int[] columnTypes,
+            boolean[] nullability) throws SQLException
     {
         assertEquals(ResultSet.TYPE_FORWARD_ONLY, rs.getType());
         assertEquals(ResultSet.CONCUR_READ_ONLY, rs.getConcurrency());
@@ -1696,6 +1733,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             JDBC.assertColumnNames(rs, columnNames);
         if (columnTypes != null)
             JDBC.assertColumnTypes(rs, columnTypes);
+        if (nullability != null)
+            JDBC.assertNullability(rs, nullability);
     }
     
     /*

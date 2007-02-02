@@ -522,6 +522,31 @@ public class JDBC {
                     expectedTypes[i], rsmd.getColumnType(i+1));
         }
     }
+    
+    /**
+     * Check the nullability of the column definitions for
+     * the ResultSet matches the expected values.
+     * @param rs
+     * @param nullability
+     * @throws SQLException 
+     */
+    public static void assertNullability(ResultSet rs,
+            boolean[] nullability) throws SQLException
+    {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int actualCols = rsmd.getColumnCount();
+
+        Assert.assertEquals("Unexpected column count:",
+                nullability.length, rsmd.getColumnCount());
+
+        for (int i = 0; i < actualCols; i++)
+        {
+            int expected = nullability[i] ?
+               ResultSetMetaData.columnNullable : ResultSetMetaData.columnNoNulls;
+            Assert.assertEquals("Column nullability do not match for column " + (i+1),
+                    expected, rsmd.isNullable(i+1));
+        }       
+    }
     /**
      * Asserts a ResultSet returns a single row with a single
      * column equal to the passed in String value. The value can
@@ -715,6 +740,46 @@ public class JDBC {
                     "<\n    Found:    >" + found + "<");
             }
         }
+    }
+    
+    /**
+     * Assert two result sets have the same contents.
+     * MetaData is determined from rs1, thus if rs2 has extra
+     * columns they will be ignored. The metadata for the
+     * two ResultSets are not compared.
+     * <BR>
+     * The compete ResultSet is walked for both ResultSets,
+     * and they are both closed.
+     * <BR>
+     * Columns are compared as primitive ints or longs or as
+     * Strings. Code needs more work to handle BLOB/CLOB columns.
+     */
+    public static void assertSameContents(ResultSet rs1, ResultSet rs2)
+            throws SQLException {
+        ResultSetMetaData rsmd = rs1.getMetaData();
+        int columnCount = rsmd.getColumnCount();
+        while (rs1.next()) {
+            Assert.assertTrue(rs2.next());
+            for (int col = 1; col <= columnCount; col++) {
+                switch (rsmd.getColumnType(col)) {
+                case Types.SMALLINT:
+                case Types.INTEGER:
+                    Assert.assertEquals(rs1.getInt(col), rs2.getInt(col));
+                    break;
+                case Types.BIGINT:
+                    Assert.assertEquals(rs1.getLong(col), rs2.getLong(col));
+                    break;
+                default:
+                    Assert.assertEquals(rs1.getString(col), rs2.getString(col));
+                    break;
+                }
+                Assert.assertEquals(rs1.wasNull(), rs2.wasNull());
+            }
+        }
+        Assert.assertFalse(rs2.next());
+        
+        rs1.close();
+        rs2.close();
     }
 
     /**
