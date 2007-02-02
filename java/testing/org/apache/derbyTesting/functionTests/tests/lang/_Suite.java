@@ -73,6 +73,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(VTITest.suite());
         suite.addTest(SysDiagVTIMappingTest.suite());
         suite.addTest(UpdatableResultSetTest.suite());
+        suite.addTest(CurrentOfTest.suite());
 
         // Add the XML tests, which exist as a separate suite
         // so that users can "run all XML tests" easily.
