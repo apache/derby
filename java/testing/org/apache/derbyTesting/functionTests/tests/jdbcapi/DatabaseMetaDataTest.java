@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
@@ -587,6 +588,19 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertEquals(getConnection().isReadOnly(), dmd.isReadOnly());
     }
     
+    /**
+     * This is not a test of Derby but JDBC constants for meta data
+     * that this test depends on.
+     * The constants for nullability are the same but let's check to make sure.
+     *
+     */
+    public void testConstants()
+    {
+      assertEquals(DatabaseMetaData.columnNoNulls, ResultSetMetaData.columnNoNulls);
+      assertEquals(DatabaseMetaData.columnNullable, ResultSetMetaData.columnNullable);
+      assertEquals(DatabaseMetaData.columnNullableUnknown, ResultSetMetaData.columnNullableUnknown);
+    }
+    
     /*
     ** DatabaseMetaData calls that return ResultSets.
     */
@@ -851,8 +865,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testGetTablesModify() throws SQLException {
-        
-        int totalTables = createTablesForTest();
+                
+        int totalTables = createTablesForTest(false);
         
         DatabaseMetaData dmd = getDMD();
         ResultSet rs;
@@ -951,7 +965,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                     dbIDS.length, rowPosition);
          }        
     }
-    
+
     /**
      * Create a set of tables using the identifiers in IDS.
      * For each identifier in IDS a schema is created.
@@ -961,11 +975,25 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * name for each column is round-robined from the set of IDS.
      * The type of each column is round-robined from the set of supported
      * types returned by getSQLTypes.
+     * 
+     * <BR>
+     * skipXML can be set to true to create tables without any XML
+     * columns. This is useful for getColumns() testing where
+     * the fixture compares the output of DatabaseMetaData to
+     * ResultSetMetaData by a SELCT * from the table. However
+     * for XML columns they cannot be returned through JDBC yet.
+     * 
+     * @param skipXML true if tables with the XML column should not
+     * be created.
      * @throws SQLException
      */
-    private int createTablesForTest() throws SQLException
+    private int createTablesForTest(boolean skipXML) throws SQLException
     {
+        getConnection().setAutoCommit(false);
         List types = getSQLTypes(getConnection());
+        if (skipXML)
+            types.remove("XML");
+            
         int typeCount = types.size();
                
         createSchemasForTests();
@@ -1007,9 +1035,228 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         
         s.close();
+        
+        commit();
 
         return IDS.length * IDS.length;
     }
+    
+    /**
+     * Test getTableColumns().
+     * Contents are compared to the ResultSetMetaData
+     * for a SELECT * from the table. All columns in
+     * all tables are checked.
+     */
+    public void testGetColumnsNoModify() throws SQLException
+    {
+        DatabaseMetaData dmd = getDMD();
+        ResultSet rs = dmd.getColumns(null, null, null, null);
+        checkColumnsShape(rs);
+        crossCheckGetColumnsAndResultSetMetaData(rs);
+        
+    }
+    
+    /**
+     * Test getColumns() with  modifying the database.
+     * 
+     * @throws SQLException
+     */
+    public void testGetColumns() throws SQLException {
+           
+        // skip XML datatype as our cross check with
+        // ResultSetMetaData will fail
+        int totalTables = createTablesForTest(true);
+        
+        // First cross check all the columns in the database
+        // with the ResultSetMetaData.
+        testGetColumnsNoModify();
+        
+        // TODO: pattern matching on getColumns
+    }
+    
+    /**
+     * Compare a ResultSet from getColumns() with ResultSetMetaData
+     * returned from a SELECT * against the table. This method
+     * handles situations where a full set of the columns are in
+     * the ResultSet.
+     * The first action is to call rs.next().
+     * The ResultSet will be closed by this method.
+     * @param rs
+     * @throws SQLException
+     */
+    private void crossCheckGetColumnsAndResultSetMetaData(ResultSet rs)
+    throws SQLException
+    {
+        Statement s = createStatement();
+        while (rs.next())
+        {
+            String schema = rs.getString("TABLE_SCHEM");
+            String table = rs.getString("TABLE_NAME");
+            
+            ResultSet rst = s.executeQuery(
+                "SELECT * FROM " + JDBC.escape(schema, table));
+            ResultSetMetaData rsmdt = rst.getMetaData();
+                     
+            for (int col = 1; col <= rsmdt.getColumnCount() ; col++)
+            {
+                if (col != 1)
+                     assertTrue(rs.next());
+                
+                assertEquals("ORDINAL_POSITION",
+                            col, rs.getInt("ORDINAL_POSITION"));
+                
+                assertEquals("TABLE_CAT",
+                        "", rs.getString("TABLE_CAT"));
+                assertEquals("TABLE_SCHEM",
+                        schema, rs.getString("TABLE_SCHEM"));
+                assertEquals("TABLE_NAME",
+                        table, rs.getString("TABLE_NAME"));
+                
+                crossCheckGetColumnRowAndResultSetMetaData(rs, rsmdt);
+                
+            }
+            rst.close();
+            
+            
+        }
+        rs.close();
+        s.close();
+    }
+    
+    /**
+     * Cross check a single row from getColumns() with ResultSetMetaData
+     * for a SELECT * from the same table.
+     * @param rs ResultSet from getColumns already positioned on the row.
+     * @param rsmdt ResultSetMetaData for the SELECT *
+     * @throws SQLException
+     */
+    public static void crossCheckGetColumnRowAndResultSetMetaData(
+            ResultSet rs, ResultSetMetaData rsmdt)
+        throws SQLException
+    {
+        int col = rs.getInt("ORDINAL_POSITION");
+        
+        assertEquals("RSMD.getCatalogName",
+                rsmdt.getCatalogName(col), rs.getString("TABLE_CAT"));
+        assertEquals("RSMD.getSchemaName",
+                rsmdt.getSchemaName(col), rs.getString("TABLE_SCHEM"));
+        assertEquals("RSMD.getTableName",
+                rsmdt.getTableName(col), rs.getString("TABLE_NAME"));
+        
+        assertEquals("COLUMN_NAME",
+                rsmdt.getColumnName(col), rs.getString("COLUMN_NAME"));
+        
+        // DERBY-2285 BOOLEAN columns appear different on
+        // network client.
+        // DMD returns BOOLEAN
+        // RSMD returns SMALLINT
+        int dmdColumnType = rs.getInt("DATA_TYPE");
+        if (dmdColumnType == Types.BOOLEAN && usingDerbyNetClient())
+        {
+            assertEquals("TYPE_NAME",
+                    "BOOLEAN", rs.getString("TYPE_NAME"));
+            assertEquals("TYPE_NAME",
+                    "SMALLINT", rsmdt.getColumnTypeName(col));
+
+            assertEquals("DATA_TYPE",
+                    Types.SMALLINT, rsmdt.getColumnType(col));
+        }
+        else if (dmdColumnType == Types.JAVA_OBJECT && usingDerbyNetClient())
+        {
+            // DMD returns JAVA_OBJECT
+            // RSMD returns LONGVARBINARY!                    
+            assertEquals("DATA_TYPE",
+                    Types.LONGVARBINARY, rsmdt.getColumnType(col));                   
+        }
+        else if (dmdColumnType == Types.VARBINARY && usingDerbyNetClient())
+        {
+            // DMD returns different type name to RSMD
+            assertEquals("DATA_TYPE",
+                    Types.VARBINARY, rsmdt.getColumnType(col));  
+        }
+        else if (dmdColumnType == Types.BINARY && usingDerbyNetClient())
+        {
+            // DMD returns different type name to RSMD
+            assertEquals("DATA_TYPE",
+                    Types.BINARY, rsmdt.getColumnType(col));                               
+        }
+        else
+        {
+            assertEquals("DATA_TYPE",
+                rsmdt.getColumnType(col), rs.getInt("DATA_TYPE"));
+            assertEquals("TYPE_NAME",
+                rsmdt.getColumnTypeName(col), rs.getString("TYPE_NAME"));
+        }
+        
+        /*
+        if (dmdColumnType != Types.JAVA_OBJECT) {
+        System.out.println("TYPE " + rs.getInt("DATA_TYPE"));
+        System.out.println(JDBC.escape(schema, table) + " " + rs.getString("COLUMN_NAME"));
+        assertEquals("COLUMN_SIZE",
+                rsmdt.getPrecision(col), rs.getInt("COLUMN_SIZE"));
+        }
+        */
+        
+        // not used by JDBC spec
+        assertEquals("BUFFER_LENGTH", 0, rs.getInt("BUFFER_LENGTH"));
+        assertTrue("BUFFER_LENGTH", rs.wasNull());
+        
+        /*
+        assertEquals("DECIMAL_DIGITS",
+                rsmdt.getScale(col), rs.getInt("DECIMAL_DIGITS"));
+        */
+        
+        // This assumes the constants defined by DMD and ResultSet
+        // for nullability are equal. They are by inspection
+        // and since they are static final and part of a defined
+        // api by definition they cannot change. We also
+        // check statically this is true in the testConstants fixture.
+        assertEquals("NULLABLE",
+                rsmdt.isNullable(col), rs.getInt("NULLABLE"));
+        
+        // REMARKS set to empty string by Derby
+        assertEquals("REMARKS", "", rs.getString("REMARKS"));
+        
+        // COLUMN_DEF ??
+       
+        // both unused by JDBC spec
+        assertEquals("SQL_DATA_TYPE", 0, rs.getInt("SQL_DATA_TYPE"));
+        assertTrue(rs.wasNull());
+        assertEquals("SQL_DATETIME_SUB", 0, rs.getInt("SQL_DATETIME_SUB"));
+        assertTrue(rs.wasNull());
+        
+        // IS_NULLABLE
+        switch (rsmdt.isNullable(col))
+        {
+        case ResultSetMetaData.columnNoNulls:
+            assertEquals("IS_NULLABLE", "NO", rs.getString("IS_NULLABLE"));
+            break;
+        case ResultSetMetaData.columnNullable:
+            assertEquals("IS_NULLABLE", "YES", rs.getString("IS_NULLABLE"));
+            break;
+        case ResultSetMetaData.columnNullableUnknown:
+            assertEquals("IS_NULLABLE", "", rs.getString("IS_NULLABLE"));
+            break;
+        default:
+            fail("invalid return from rsmdt.isNullable(col)");
+        }
+        
+        // SCOPE not supported
+        assertNull("SCOPE_CATLOG", rs.getString("SCOPE_CATLOG"));
+        assertNull("SCOPE_SCHEMA", rs.getString("SCOPE_SCHEMA"));
+        assertNull("SCOPE_TABLE", rs.getString("SCOPE_TABLE"));
+        
+        // DISTINCT not supported
+        assertEquals("SOURCE_DATA_TYPE", 0, rs.getShort("SOURCE_DATA_TYPE"));
+        assertTrue(rs.wasNull());
+        
+        // IS_AUTOINCREMENT added in JDBC 4.0
+       assertEquals("IS_AUTOINCREMENT",
+               rsmdt.isAutoIncrement(col) ? "YES" : "NO",
+               rs.getString("IS_AUTOINCREMENT"));
+       assertFalse(rs.wasNull());        
+    }
+    
     
     /**
      * Test getTableTypes()
@@ -1332,6 +1579,60 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         getSQLTypes(getConnection());
     }
     
+    /*
+     * Check the shape of the ResultSet from any getColumns call.
+     */
+    private void checkColumnsShape(ResultSet rs) throws SQLException
+    {
+        assertMetaDataResultSet(rs,
+                new String[] {
+                "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME",
+                "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "BUFFER_LENGTH",
+                "DECIMAL_DIGITS", "NUM_PREC_RADIX", "NULLABLE", "REMARKS",
+                "COLUMN_DEF", "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
+                "ORDINAL_POSITION", "IS_NULLABLE", "SCOPE_CATLOG", "SCOPE_SCHEMA",
+                "SCOPE_TABLE", "SOURCE_DATA_TYPE", "IS_AUTOINCREMENT"
+               },
+               new int[] {
+               Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+               Types.INTEGER, Types.VARCHAR, Types.INTEGER, Types.INTEGER,
+               Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.VARCHAR,
+               Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER,
+               Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+               Types.VARCHAR, Types.SMALLINT, Types.VARCHAR
+               }
+              );          
+    }
+    /*
+     *    1.  TABLE_CAT String => table catalog (may be null)
+   2. TABLE_SCHEM String => table schema (may be null)
+   3. TABLE_NAME String => table name
+   4. COLUMN_NAME String => column name
+   
+   5. DATA_TYPE int => SQL type from java.sql.Types
+   6. TYPE_NAME String => Data source dependent type name, for a UDT the type name is fully qualified
+   7. COLUMN_SIZE int => column size. For char or date types this is the maximum number of characters, for numeric or decimal types this is precision.
+   8. BUFFER_LENGTH is not used.
+   
+   9. DECIMAL_DIGITS int => the number of fractional digits
+  10. NUM_PREC_RADIX int => Radix (typically either 10 or 2)
+  11. NULLABLE int => is NULL allowed.
+          * columnNoNulls - might not allow NULL values
+          * columnNullable - definitely allows NULL values
+          * columnNullableUnknown - nullability unknown 
+  12. REMARKS String => comment describing column (may be null)
+  
+  13. COLUMN_DEF String => default value (may be null)
+  14. SQL_DATA_TYPE int => unused
+  15. SQL_DATETIME_SUB int => unused
+  16. CHAR_OCTET_LENGTH int => for char types the maximum number of bytes in the column
+  17. ORDINAL_POSITION int => index of column in table (starting at 1)
+  18. IS_NULLABLE String => "NO" means column definitely does not allow NULL values; "YES" means the column might allow NULL values. An empty string means nobody knows.
+  19. SCOPE_CATLOG String => catalog of table that is the scope of a reference attribute (null if DATA_TYPE isn't REF)
+  20. SCOPE_SCHEMA String => schema of table that is the scope of a reference attribute (null if the DATA_TYPE isn't REF)
+  21. SCOPE_TABLE String => table name that this the scope of a reference attribure (null if the DATA_TYPE isn't REF)
+  22. SOURCE_DATA_TYPE short => source type of a distinct type or user-generated Ref type, SQL type from java.sql.Types (null if DATA_TYPE isn't DISTINCT or user-generated REF) 
+     */
     /**
      * Check the shape of the ResultSet from any getTables call.
      */
@@ -1389,6 +1690,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     {
         assertEquals(ResultSet.TYPE_FORWARD_ONLY, rs.getType());
         assertEquals(ResultSet.CONCUR_READ_ONLY, rs.getConcurrency());
+        //assertNull(rs.getStatement());
         
         if (columnNames != null)
             JDBC.assertColumnNames(rs, columnNames);
@@ -1525,6 +1827,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         ps.close();
     }
     
+    /**
+     * Return a list of all valid supported datatypes as Strings
+     * suitable for use in any SQL statement where a SQL type is
+     * expected. For variable sixzed types the string will
+     * have random valid length information. E.g. CHAR(37).
+     */
     public static List getSQLTypes(Connection conn) throws SQLException
     {
         List list = new ArrayList();
