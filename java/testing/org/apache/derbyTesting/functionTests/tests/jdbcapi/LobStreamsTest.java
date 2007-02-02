@@ -438,6 +438,7 @@ public class LobStreamsTest extends BaseJDBCTestCase {
 
     /**
      * Run with DerbyNetClient only.
+     * Embedded Clob/Blob.setXXXStream() methods are not implmented.
      * @return
      */
     public static Test suite() {
