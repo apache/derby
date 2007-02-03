@@ -17,12 +17,15 @@ ij> --
 --
 -- this test is for miscellaneous errors
 --
+
 -- lexical error
 select @#^%*&! from swearwords;
 ERROR 42X02: Lexical error at line 22, column 8.  Encountered: "@" (64), after : "".
 ij> --
 -- try to create duplicate table
 --
+
+
 create table a (one int);
 0 rows inserted/updated/deleted
 ij> create table a (one int, two int);

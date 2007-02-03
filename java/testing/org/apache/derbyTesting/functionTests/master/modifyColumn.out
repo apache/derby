@@ -14,8 +14,10 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
+
 -- Testing changing the length of a column.
 -- Also testing the new syntax for generated column spec and identity attribute
+
 create table alltypes (i int, tn int, s smallint, l bigint,
 				c char(10), v varchar(50), lvc long varchar,
 				nc char(10), nvc varchar(10),
@@ -25,6 +27,7 @@ create table alltypes (i int, tn int, s smallint, l bigint,
 				dc decimal(5,2), n numeric(8,4), o bigint);
 0 rows inserted/updated/deleted
 ij> -- lets start with negative tests first.
+
 alter table alltypes alter c set data type char(20);
 ERROR 42Z16: Only columns of type VARCHAR may have their length altered. 
 ij> alter table alltypes alter b set data type char(4) for bit data;
@@ -173,6 +176,7 @@ drop table t1;
 ij> -- DERBY-882
 -- ALTER TABLE to increase size of varchar could convert a non-null column to nullable
 -- before fix for DERBY-882
+
 create table a (id integer not null, name varchar(20) not null, primary key(name));
 0 rows inserted/updated/deleted
 ij> insert into a values (1, 'abc');

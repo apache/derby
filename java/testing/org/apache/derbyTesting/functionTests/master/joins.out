@@ -17,6 +17,7 @@ ij> --
 --
 -- this test shows the current supported join functionality
 --
+
 -- create some tables
 create table t1 (t1_c1 int, t1_c2 char(10));
 0 rows inserted/updated/deleted

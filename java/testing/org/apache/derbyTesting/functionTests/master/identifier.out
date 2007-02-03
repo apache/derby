@@ -14,6 +14,7 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
+
 --
 -- this test is for identifiers and delimited idenifiers
 -- identifiers get converted to upper case
@@ -21,6 +22,7 @@ ij> --
 -- any pair of adjacent double quotes is converted to a single double quote
 -- max identifier length is 128
 --
+
 -- trailing blank not trimmed
 create table t1("       " int);
 0 rows inserted/updated/deleted
@@ -84,6 +86,7 @@ create table idtest1 (i integer, j integer);
 ij> create table idtest2 (i integer, j integer);
 0 rows inserted/updated/deleted
 ij> -- table
+
 create table
 asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfaslast6
 (c1 int);
@@ -242,8 +245,9 @@ ij> drop procedure ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
 0 rows inserted/updated/deleted
 ij> drop procedure "pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp";
 0 rows inserted/updated/deleted
-ij> -- xxxxxxFILTERED-TIMESTAMPxxxxx
+ij> -- 2003-04-14 14:04:38 
 -- new testcases for SQL92 reserved keywords as identifiers
+
 CREATE TABLE WHEN (WHEN INT, A INT);
 0 rows inserted/updated/deleted
 ij> INSERT INTO WHEN (WHEN) VALUES (1);

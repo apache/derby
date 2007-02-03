@@ -19,10 +19,13 @@ ij> --
 -- tests for positioned delete
 --
 -- note that comments that begin '-- .' are test cases from the test plan
+
 -- assumed available in queries at time of initial writing:
 -- subqueries.  Additional tests will be needed once we have:
 -- order by, group by, having, aggregates, distinct, views ...
+
 -- setup some tables for use in the tests
+
 create table t1 ( i int, v varchar(10), d double precision, t time );
 0 rows inserted/updated/deleted
 ij> create table t1_copy ( i int, v varchar(10), d double precision, t time );
@@ -38,6 +41,7 @@ ij> -- we need to turn autocommit off so that cursors aren't closed before
 -- the positioned statements against them.
 autocommit off;
 ij> -- empty table tests
+
 -- .no table name given
 -- this should fail with a syntax error
 delete;
@@ -57,6 +61,7 @@ ij> close c0;
 ij> -- restore t1
 delete from t1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into t1 select * from t1_copy;
 1 row inserted/updated/deleted
 ij> select * from t1;
@@ -146,6 +151,7 @@ ij> close c6;
 ij> -- restore t1
 delete from t1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into t1 select * from t1_copy;
 1 row inserted/updated/deleted
 ij> select * from t1;
@@ -175,6 +181,7 @@ ij> close c8;
 ij> -- restore t1
 delete from t1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into t1 select * from t1_copy;
 1 row inserted/updated/deleted
 ij> select * from t1;
@@ -198,6 +205,7 @@ ij> close c9;
 ij> -- restore t1
 delete from t1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into t1 select * from t1_copy;
 1 row inserted/updated/deleted
 ij> select * from t1;
@@ -226,6 +234,7 @@ ij> close c10;
 ij> -- restore t1
 delete from t1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into t1 select * from t1_copy;
 1 row inserted/updated/deleted
 ij> select * from t1;
@@ -314,6 +323,7 @@ ij> close c12;
 ij> -- restore t1
 delete from t1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into t1 select * from t1_copy;
 1 row inserted/updated/deleted
 ij> select * from t1;
@@ -394,10 +404,13 @@ ij> -- ** insert positionedUpdate.sql
 -- tests for positioned update
 --
 -- note that comments that begin '-- .' are test cases from the test plan
+
 -- assumed available in queries at time of initial writing:
 -- subqueries.  Additional tests will be needed once we have:
 -- order by, group by, having, aggregates, distinct, views ...
+
 -- setup some tables for use in the tests
+
 create table t1 ( i int, v varchar(10), d double precision, t time );
 0 rows inserted/updated/deleted
 ij> create table t1_copy ( i int, v varchar(10), d double precision, t time );
@@ -413,6 +426,7 @@ ij> -- we need to turn autocommit off so that cursors aren't closed before
 -- the positioned statements against them.
 autocommit off;
 ij> -- empty table tests
+
 -- .no table name given
 -- this should fail with a syntax error
 update set c1 = c1;
@@ -538,6 +552,7 @@ ij> close c8;
 ij> -- restore t1
 delete from t1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into t1 select * from t1_copy;
 1 row inserted/updated/deleted
 ij> select * from t1;
@@ -561,6 +576,7 @@ ij> close c9;
 ij> -- restore t1
 delete from t1;
 0 rows inserted/updated/deleted
+WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> insert into t1 select * from t1_copy;
 1 row inserted/updated/deleted
 ij> select * from t1;
@@ -809,6 +825,7 @@ ij> -- a positioned update requires a named target table.
 -- if we prepare the positioned update, close the underlying cursor
 -- and reopen it on a different table, then the positioned update
 -- should fail 
+
 create table t3(c1 int, c2 int);
 0 rows inserted/updated/deleted
 ij> insert into t3 values (1,1), (2, 1), (3,3);
@@ -1136,6 +1153,7 @@ ij> drop table ejb.test1;
 0 rows inserted/updated/deleted
 ij> --drop schema ejb restrict; - can't drop this because it will fail SPS tests since
 --statements are created and would need to be dropped
+
 -- test correlation on select in current of cursor in current schema
 -- this was also broken
 create table test1

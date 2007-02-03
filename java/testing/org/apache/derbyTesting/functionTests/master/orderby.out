@@ -16,6 +16,7 @@ ij> --
 --
 -- order by tests
 -- in V52, we allow "select a from t order by b" where the ORDERBY column doesn't necessarily appear in the SELECT list.
+
 autocommit off;
 ij> -- . order by on values
 values (1,0,1),(1,0,0),(0,0,1),(0,1,0) order by 1,2,3;
@@ -581,6 +582,7 @@ I          |V
 3          |hello                                   
 NULL       |NULL                                    
 ij> -- . redundant order by on index scan (later)
+
 -- rollback should release the prepared statements
 rollback ;
 ij> -- . order by with empty source, nulls in source, etc.
@@ -636,13 +638,13 @@ ERROR 42Y55: 'DROP TABLE' cannot be performed on 'V' because it does not exist.
 ij> -- . order by on all data types
 create table missed (s smallint, r real, d date, t time, ts timestamp, c char(10), l bigint);
 0 rows inserted/updated/deleted
-ij> insert into missed values (1,1.2e4, '1992-01-01','23:01:01', 'xxxxxxFILTERED-TIMESTAMPxxxxx', 'theend', 2222222222222);
+ij> insert into missed values (1,1.2e4, '1992-01-01','23:01:01', '1993-02-04 12:02:00.001', 'theend', 2222222222222);
 1 row inserted/updated/deleted
-ij> insert into missed values (1,1.2e4, '1992-01-01', '23:01:01', 'xxxxxxFILTERED-TIMESTAMPxxxxx', 'theend', 3333333333333);
+ij> insert into missed values (1,1.2e4, '1992-01-01', '23:01:01', '1993-02-04 12:02:00.001', 'theend', 3333333333333);
 1 row inserted/updated/deleted
-ij> insert into missed values (2,1.0e4, '1992-01-01', '20:01:01', 'xxxxxxFILTERED-TIMESTAMPxxxxx', 'theend', 4444444444444);
+ij> insert into missed values (2,1.0e4, '1992-01-01', '20:01:01', '1997-02-04 12:02:00.001', 'theend', 4444444444444);
 1 row inserted/updated/deleted
-ij> insert into missed values (2,1.0e4, '1992-01-01', '20:01:01', 'xxxxxxFILTERED-TIMESTAMPxxxxx', null,     2222222222222);
+ij> insert into missed values (2,1.0e4, '1992-01-01', '20:01:01', '1997-02-04 12:02:00.001', null,     2222222222222);
 1 row inserted/updated/deleted
 ij> select s from missed order by s;
 S     
@@ -668,10 +670,10 @@ D         |C
 ij> select ts,t from missed order by ts desc, t;
 TS                        |T       
 -----------------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx|20:01:01
-xxxxxxFILTERED-TIMESTAMPxxxxx|20:01:01
-xxxxxxFILTERED-TIMESTAMPxxxxx|23:01:01
-xxxxxxFILTERED-TIMESTAMPxxxxx|23:01:01
+1997-02-04 12:02:00.001   |20:01:01
+1997-02-04 12:02:00.001   |20:01:01
+1993-02-04 12:02:00.001   |23:01:01
+1993-02-04 12:02:00.001   |23:01:01
 ij> select l from missed order by l;
 L                   
 --------------------
@@ -755,15 +757,15 @@ create table tab1 (
 				ts timestamp,
 				dc decimal(2,1));
 0 rows inserted/updated/deleted
-ij> insert into tab1 values (1, cast(1 as int), cast(1 as smallint), cast(1 as bigint), '1', '1', '1', cast(1.1 as double precision), cast(1.1 as real), '1996-01-01', '11:11:11','xxxxxxFILTERED-TIMESTAMPxxxxx', cast(1.1 as decimal(2,1)));
+ij> insert into tab1 values (1, cast(1 as int), cast(1 as smallint), cast(1 as bigint), '1', '1', '1', cast(1.1 as double precision), cast(1.1 as real), '1996-01-01', '11:11:11','1996-01-01 11:10:10.1', cast(1.1 as decimal(2,1)));
 1 row inserted/updated/deleted
-ij> insert into tab1 values (2, cast(2 as int), cast(2 as smallint), cast(2 as bigint), '2', '2', '2', cast(2.2 as double precision), cast(2.2 as real), '1995-02-02', '12:12:12', 'xxxxxxFILTERED-TIMESTAMPxxxxx', cast(2.2 as decimal(2,1)));
+ij> insert into tab1 values (2, cast(2 as int), cast(2 as smallint), cast(2 as bigint), '2', '2', '2', cast(2.2 as double precision), cast(2.2 as real), '1995-02-02', '12:12:12', '1996-02-02 12:10:10.1', cast(2.2 as decimal(2,1)));
 1 row inserted/updated/deleted
 ij> select * from tab1 order by 1;
 I          |TN         |S          |L          |C         |V         |LVC       |D                     |R            |DT        |T       |TS                        |DC  
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-1          |1          |1          |1          |1         |1         |1         |1.1                   |1.1          |1996-01-01|11:11:11|xxxxxxFILTERED-TIMESTAMPxxxxx|1.1 
-2          |2          |2          |2          |2         |2         |2         |2.2                   |2.2          |1995-02-02|12:12:12|xxxxxxFILTERED-TIMESTAMPxxxxx|2.2 
+1          |1          |1          |1          |1         |1         |1         |1.1                   |1.1          |1996-01-01|11:11:11|1996-01-01 11:10:10.1     |1.1 
+2          |2          |2          |2          |2         |2         |2         |2.2                   |2.2          |1995-02-02|12:12:12|1996-02-02 12:10:10.1     |2.2 
 ij> rollback;
 ij> -- bug 2769 (correlation columns, group by and order by)
 create table bug2769(c1 int, c2 int);
@@ -910,6 +912,7 @@ B          |C
 3          |NULL       
 0          |NULL       
 ij> --Test addtive expression in order clause
+
 create table test_word(value varchar(32));
 0 rows inserted/updated/deleted
 ij> insert into test_word(value) values('anaconda');
@@ -1336,6 +1339,7 @@ ij> -- some investigation of the handling of non-unique columns in the result se
 -- then order by it, so long as the multiple columns truly are equivalent.
 -- There are a few cases where there truly is an ambiguity, and in those
 -- cases we reject the ORDER BY clause.
+
 create table derby147 (a int, b int, c int, d int);
 0 rows inserted/updated/deleted
 ij> insert into derby147 values (1, 2, 3, 4);

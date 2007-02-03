@@ -16,8 +16,11 @@ ij> --
 --
 -- test inner joins
 -- (NO NATURAL JOIN)
+
+
 autocommit off;
 ij> -- create some tables
+
 create table t1(c1 int);
 0 rows inserted/updated/deleted
 ij> create table t2(c1 int);
@@ -34,6 +37,7 @@ ij> insert into t2 values 1, 3, 5, 6;
 ij> insert into t3 values 2, 3, 5, 7;
 4 rows inserted/updated/deleted
 ij> -- negative tests
+
 -- no join clause
 select * from t1 join t2;
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 4, column 24.
@@ -67,6 +71,7 @@ ERROR 42972: An ON clause associated with a JOIN operator is not valid.
 ij> select * from t3 where exists (select * from t1 inner join t2 on t3.c1 = t2.c1);
 ERROR 42972: An ON clause associated with a JOIN operator is not valid.
 ij> -- positive tests
+
 select a.c1 from t1 a join t2 b on a.c1 = b.c1;
 C1         
 -----------

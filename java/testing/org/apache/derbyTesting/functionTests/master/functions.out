@@ -15,6 +15,7 @@ ij> --
 --   limitations under the License.
 --
 -- Test various functions
+
 create table alltypes(
   id int not null primary key,
   smallIntCol smallint,
@@ -436,6 +437,7 @@ ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_NS;
 ij> -- SYSFUN functions (unqualifed functions are automatically resolved
 -- to the in-memory SYSFUN functions if the function does not exist
 -- in the current schema.
+
 -- SYSFUN math functions
 create table SYSFUN_MATH_TEST (d double);
 0 rows inserted/updated/deleted

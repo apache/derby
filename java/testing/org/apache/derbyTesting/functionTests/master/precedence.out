@@ -14,9 +14,13 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
+
 -- this tests precedence of operators.
+
+
 -- test precedence of operators other than and, or, and not
 -- that return boolean.
+
 -- expect 'true' row:
 create table t1(c11 int);
 0 rows inserted/updated/deleted

@@ -16,6 +16,7 @@ ij> --
 --
 -- This tests that SQL92 formally reserved words are now unreserved
 --
+
 -- INTERVAL
 create table interval(interval int);
 0 rows inserted/updated/deleted
@@ -177,33 +178,33 @@ IJ ERROR: Unable to establish prepared statement TIME
 ij> -- TIMESTAMP
 create table timestamp (timestamp timestamp);
 0 rows inserted/updated/deleted
-ij> insert into timestamp(timestamp) values (timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx'));
+ij> insert into timestamp(timestamp) values (timestamp('2002-05-22 16:17:34.144'));
 1 row inserted/updated/deleted
 ij> select timestamp from timestamp;
 TIMESTAMP                 
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
-ij> select timestamp( 'xxxxxxFILTERED-TIMESTAMPxxxxx'), timestamp "xxxxxxFILTERED-TIMESTAMPxxxxx" from timestamp;
-1                         |xxxxxxFILTERED-TIMESTAMPxxxxx
+2002-05-22 16:17:34.144   
+ij> select timestamp( '2003-05-22 16:17:34.144'), timestamp "2003-05-22 16:17:34.144" from timestamp;
+1                         |2003-05-22 16:17:34.144   
 -----------------------------------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx|xxxxxxFILTERED-TIMESTAMPxxxxx
+2003-05-22 16:17:34.144   |2002-05-22 16:17:34.144   
 ij> select timestamp timestamp from timestamp;
 TIMESTAMP                 
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+2002-05-22 16:17:34.144   
 ij> select timestamp as timestamp from timestamp;
 TIMESTAMP                 
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+2002-05-22 16:17:34.144   
 ij> select timestamp.timestamp as timestamp from timestamp timestamp;
 TIMESTAMP                 
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
+2002-05-22 16:17:34.144   
 ij> select timestamp.timestamp as timestamp from timestamp as timestamp;
 TIMESTAMP                 
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
-ij> delete from timestamp where timestamp = timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx');
+2002-05-22 16:17:34.144   
+ij> delete from timestamp where timestamp = timestamp('2002-05-22 16:17:34.144');
 1 row inserted/updated/deleted
 ij> create index timestamp on timestamp(timestamp);
 0 rows inserted/updated/deleted

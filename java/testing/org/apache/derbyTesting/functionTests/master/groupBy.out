@@ -14,7 +14,9 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
+
 -- negative tests for group by and having clauses
+
 create table t1 (a int, b int, c int);
 0 rows inserted/updated/deleted
 ij> create table t2 (a int, b int, c int);
@@ -45,6 +47,7 @@ ij> -- correlation on outer table
 select t2.a, (select b from t1 where t1.b = t2.b) from t1 t2 group by t2.a;
 ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.  
 ij> -- having clause
+
 -- cannot contain column references which are not grouping columns
 select a from t1 group by a having c = 1;
 ERROR 42X04: Column 'C' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C' is not a column in the target table.
@@ -66,6 +69,7 @@ ij> drop table t2;
 ij> drop table unmapped;
 0 rows inserted/updated/deleted
 ij> -- Test group by and having clauses with no aggregates
+
 -- create an all types tables
 create table t (i int, s smallint, l bigint,
 				c char(10), v varchar(50), lvc long varchar,
@@ -94,91 +98,91 @@ ij> insert into t (i) values (null);
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (1, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 200, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 2000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'goodbye', 'everyone is here', 'adios, muchachos',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'noone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  100.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 100.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-09-09'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-09-09'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:55:55'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:55:55'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:55:55'),
 					  X'12af', X'0f0f', X'ABCD');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'ffff', X'0f0f', X'1234');
 1 row inserted/updated/deleted
 ij> insert into t values (0, 100, 1000000,
 					  'hello', 'everyone is here', 'what the heck do we care?',
 					  200.0e0, 200.0e0, 
-					  date('1992-01-01'), time('12:30:30'), timestamp('xxxxxxFILTERED-TIMESTAMPxxxxx),
+					  date('1992-01-01'), time('12:30:30'), timestamp('1992-01-01 12:30:30'),
 					  X'12af', X'ffff', X'ABCD');
 1 row inserted/updated/deleted
 ij> -- bit maps to Byte[], so can't test for now
@@ -243,8 +247,8 @@ NULL
 ij> select ts from t group by ts order by ts;
 TS                        
 --------------------------
-xxxxxxFILTERED-TIMESTAMPxxxxx
-xxxxxxFILTERED-TIMESTAMPxxxxx
+1992-01-01 12:30:30.0     
+1992-01-01 12:55:55.0     
 NULL                      
 ij> select b from t group by b order by b;
 B   
@@ -465,6 +469,7 @@ T_I        |T_I
 0          |0          
 1          |1          
 ij> -- having
+
 -- parameters in having clause
 prepare p1 as 'select i, dt, b from t group by i, dt, b having i = ? order by i,dt,b';
 ij> execute p1 using 'values 0';
@@ -561,6 +566,7 @@ drop table t;
 ij> drop table tab1;
 0 rows inserted/updated/deleted
 ij> -- negative tests for selects with a having clause without a group by
+
 -- create a table
 create table t1(c1 int, c2 int);
 0 rows inserted/updated/deleted
@@ -581,6 +587,7 @@ drop table t1;
 0 rows inserted/updated/deleted
 ij> -- bug 5653
 -- test (almost useful) restrictions on a having clause without a group by clause
+
 -- create the table
 create table t1 (c1 float);
 0 rows inserted/updated/deleted

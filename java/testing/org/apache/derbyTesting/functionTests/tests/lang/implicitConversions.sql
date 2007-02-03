@@ -1163,13 +1163,13 @@ drop table all_c1;
 drop table t;
 drop table x;
 commit;
-disconnect;
+
 -- ** insert implicitConversionsNegative.sql
 -- negate tests for implicit conversions
 -- to/from (var)char
 
 -- union
-connect 'wombat';
+
 autocommit on;
 values cast(1 as smallint), 'a';
 values 'a', cast(1 as smallint);
