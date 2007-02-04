@@ -25,12 +25,6 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
-import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
-
-import org.apache.derby.iapi.services.locks.C_LockFactory;
-import org.apache.derby.iapi.services.locks.Lockable;
-import org.apache.derby.iapi.services.locks.Latch;
-import org.apache.derby.iapi.services.locks.VirtualLockTable;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -46,20 +40,15 @@ import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.RecordHandle;
-import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.ObjectInput;
 
-import java.util.Hashtable;
 import java.util.Observer;
 import java.util.Observable;
 
@@ -85,7 +74,7 @@ import java.util.Observable;
  **/
 
 
-public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
+abstract class BasePage implements Page, Observer, TypedFormat
 {
 
 	/**
@@ -128,12 +117,6 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	*/
 	private int nestedLatch;
 
-	/**
-		LockManager held latch during exclusive access.
-		When this is not null, latch.getQualifier() == owner
-	*/
-	private Latch	myLatch;
-	
 	protected boolean		inClean;	// is the page being cleaned
 
     /**
@@ -1306,18 +1289,16 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	   releaseExclusive();
 	}
 
-	/** @see Page#isLatched */
-	public boolean isLatched() {
+	/**
+	 * Check whether the page is latched.
+	 *
+	 * @return <code>true</code> if the page is latched, <code>false</code>
+	 * otherwise
+	 * @see Page#isLatched
+	 */
+	public final synchronized boolean isLatched() {
 		if (SanityManager.DEBUG) {
-
-			synchronized(this)
-			{
-				SanityManager.ASSERT(identity != null);
-				if (owner != null) {
-					if (owner != myLatch.getQualifier())
-						SanityManager.THROWASSERT("Page incorrectly latched - " + owner + " " + myLatch.getQualifier());
-				}
-			}
+			SanityManager.ASSERT(identity != null);
 		}
 
 		return owner != null;
@@ -1503,88 +1484,6 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 	}
 
 	/*
-	** Methods from Lockable, just require a single exclusive locker
-	*/
-
-	/**
-		Latch me.
-		<BR>
-		MT - single thread required (methods of Lockable)
-		@see Lockable#lockEvent
-	*/
-	public void lockEvent(Latch lockInfo) {
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(owner == null, "Should only be called when not locked");
-		}
-
-		synchronized (this) {
-
-			myLatch = lockInfo;
-
-            // Move page state from UNLATCHED to PRELATCH, setExclusiveNo*()
-            // routines do the work of completing the latch - using the 
-            // preLatch status.  This is so that
-            // we don't have to wait for a clean() initiated I/O here while
-            // holding the locking system monitor.
-			(owner = (BaseContainerHandle) lockInfo.getQualifier()).addObserver(this);
-            preLatch = true;
-		}
-	}
-
-	/**
-		Is another request compatible, no never.
-		<BR> MT - single thread required (methods of Lockable)
-		@see Lockable#requestCompatible
-	*/
-	public boolean requestCompatible(Object requestedQualifier, Object grantedQualifier) {
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(owner != null, "Should only be called when locked");
-		}
-
-		return false;
-	}
-
-	/**
-		Is another request compatible, no never.
-		<BR> MT - single thread required (methods of Lockable)
-		@see Lockable#requestCompatible
-	*/
-	public boolean lockerAlwaysCompatible() {
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(owner != null, "Should only be called when locked");
-		}
-
-		return false;
-	}
-
-	/**
-		Unlatch me, only to be called from lock manager.
-		<BR> MT - single thread required (methods of Lockable)
-
-		@see Lockable#requestCompatible
-	*/
-	public void unlockEvent(Latch lockInfo) {
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(owner != null, "Should only be called when locked");
-		}
-
-		synchronized (this) {
-
-			if (SanityManager.DEBUG) {
-				if (nestedLatch != 0)
-					SanityManager.THROWASSERT("nestedLatch is non-zero on unlockEvent - value = " + nestedLatch);
-			}
-
-			owner.deleteObserver(this);
-			owner = null;
-			myLatch = null;
-			if (inClean)
-				notifyAll();
-		}
-	}
-
-
-	/*
 	** Methods of Observer.
 	*/
 
@@ -1632,7 +1531,7 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 		MT - thread safe
 		@exception StandardException Standard Cloudscape policy.
 	*/
-	public void setExclusive(BaseContainerHandle requester) 
+	void setExclusive(BaseContainerHandle requester)
 		throws StandardException {
 
 		RawTransaction t = requester.getTransaction();
@@ -1642,7 +1541,7 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 		// If this is the case then during an abort a latch
 		// request will be made for a latch that is already held.
 		// We do not allow the latch to be obtained multiple times
-		// because i) lock manager might assume latches are exclusive for
+		// because i) latches are exclusive for simplicity and
 		// performance, ii) holding a page latched means that the page is
 		// on the container handle's obervers list, if we latched it twice
 		// then the paeg would have to be on the list twice, which is not supported
@@ -1661,24 +1560,29 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 					nestedLatch++;
 					return;
 				}
+
+				// just deadlock out if a transaction tries to double latch the
+				// page while not in abort
 			}
-			// just deadlock out ...
-		}
 
+			while (owner != null) {
+				try {
+					// Expect notify from releaseExclusive().
+					wait();
+				} catch (InterruptedException ie) {
+					throw StandardException.interrupt(ie);
+				}
+			}
 
-		// Latch the page, owner is set through the Lockable call backs.
-		t.getLockFactory().latchObject(
-            t, this, requester, C_LockFactory.WAIT_FOREVER);		
+			preLatch(requester);
 
-        // latch granted, but cleaner may "own" the page.  
+			// latch granted, but cleaner may "own" the page.
 
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(isLatched(), "page not latched");
-		}
+			if (SanityManager.DEBUG) {
+				SanityManager.ASSERT(isLatched(), "page not latched");
+			}
 
-        synchronized (this)
-        {
-            // lockEvent() will grant latch, even if cleaner "owns" the page.
+            // Latch will be granted, even if cleaner "owns" the page.
             // Wait here unil cleaner is done.  This is safe as now we own the
             // latch, and have yet to do anything to the in-memory data 
             // structures.
@@ -1724,17 +1628,16 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 					return true;
 				}
 			}
-			// just deadlock out ...
-		}
 
-		// Latch the page, owner is set through the Lockable call backs.
-		boolean gotLatch = t.getLockFactory().latchObject(t, this, requester, C_LockFactory.NO_WAIT);
-		if (!gotLatch)
-			return false;
+			// Pre-latch the page if no one already has latched it or requested
+			// a latch. Otherwise, give up and return false.
+			if (owner == null) {
+				preLatch(requester);
+			} else {
+				return false;
+			}
 
-        synchronized (this)
-        {
-            // lockEvent() will grant latch, even if cleaner "owns" the page.
+            // Latch will be granted, even if cleaner "owns" the page.
             // Wait here unil cleaner is done.  This is safe as now we own the
             // latch, and have yet to do anything to the in-memory data 
             // structures.
@@ -1773,7 +1676,7 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 		<BR>
 		MT - latched
 	*/
-	protected void releaseExclusive() /* throws StandardException */ {
+	protected synchronized void releaseExclusive() {
 
 		if (SanityManager.DEBUG) {
             if (!isLatched())
@@ -1788,8 +1691,26 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 			return;
 		}
 
-		RawTransaction t = owner.getTransaction();
-		t.getLockFactory().unlatch(myLatch);
+		owner.deleteObserver(this);
+		owner = null;
+		notifyAll();
+	}
+
+	/**
+	 * Move page state from UNLATCHED to PRELATCH. setExclusive*() routines do
+	 * the work of completing the latch - using the preLatch status.
+	 *
+	 * @param requester handle to the container requesting ownership
+	 */
+	private void preLatch(BaseContainerHandle requester) {
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(!isLatched(),
+								 "Attempted to pre-latch a latched page");
+		}
+		owner = requester;
+		// make sure the latch is released if the container is closed
+		requester.addObserver(this);
+		preLatch = true;
 	}
 
 	/*
@@ -2798,39 +2719,4 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 		}
 		return str;
 	}
-
-	/**
-		This lockable wants to participate in the Virtual Lock table.
-	 */
-	public boolean lockAttributes(int flag, Hashtable attributes)
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(attributes != null, 
-				"cannot call lockProperties with null attribute list");
-		}
-
-		if ((flag & VirtualLockTable.LATCH) == 0)
-			return false;
-
-		// by the time this is called, the page may be unlatched.
-		PageKey pageId = identity;
-
-		// not latched
-		if (pageId == null)
-			return false;
-
-		attributes.put(VirtualLockTable.CONTAINERID, 
-					   new Long(pageId.getContainerId().getContainerId()));
-		attributes.put(VirtualLockTable.LOCKNAME, pageId.toString());
-		attributes.put(VirtualLockTable.LOCKTYPE, "LATCH");
-
-		// don't new unecesary things for now
-		// attributes.put(VirtualLockTable.SEGMENTID, new Long(pageId.getContainerId().getSegmentId()));
-		// attributes.put(VirtualLockTable.PAGENUM, new Long(pageId.getPageNumber()));
-
-		return true;
-	}
-		
-
 }
