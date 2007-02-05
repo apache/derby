@@ -539,6 +539,25 @@ public interface DataDictionary
 	public void	updateSYSCOLPERMSforAddColumnToUserTable(UUID tableID, TransactionController tc)
 	throws StandardException;
 	
+	/**
+	 * Update SYSCOLPERMS to reflect the dropping of a column from a table.
+	 *
+	 * This method rewrites SYSCOLPERMS rows to update the COLUMNS bitmap
+	 * to reflect the removal of a column from a table.
+	 *
+	 * Currently, this code gets called during execution phase of
+	 * ALTER TABLE .. DROP COLUMN .. 
+	 *
+	 * @param tableID	The UUID of the table whose column has been dropped
+	 * @param tc		TransactionController for the transaction
+	 * @param columnDescriptor   Info about the dropped column
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void	updateSYSCOLPERMSforDropColumn(UUID tableID,
+			TransactionController tc, ColumnDescriptor columnDescriptor)
+	throws StandardException;
+	
 	
 	/**
 	 * Drops all routine permission descriptors for the given routine.

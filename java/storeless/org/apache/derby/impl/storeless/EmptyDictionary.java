@@ -225,6 +225,12 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	}
 
+	public void updateSYSCOLPERMSforDropColumn(UUID tableID,
+		TransactionController tc, ColumnDescriptor columnDescriptor)
+	    throws StandardException
+	{
+	}
+
 	public void dropAllRoutinePermDescriptors(UUID routineID,
 			TransactionController tc) throws StandardException {
 		// TODO Auto-generated method stub

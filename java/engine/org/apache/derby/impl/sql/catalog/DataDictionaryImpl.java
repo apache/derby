@@ -2364,6 +2364,45 @@ public final class	DataDictionaryImpl
 	public void	updateSYSCOLPERMSforAddColumnToUserTable(UUID tableID, TransactionController tc)
 	throws StandardException
 	{
+		rewriteSYSCOLPERMSforAlterTable(tableID, tc, null);
+	}
+	/**
+	 * Update SYSCOLPERMS due to dropping a column from a table.
+	 *
+	 * Since ALTER TABLE .. DROP COLUMN .. has removed a column from the
+	 * table, we need to shrink COLUMNS by removing the corresponding bit
+	 * position, and shifting all the subsequent bits "left" one position.
+	 *
+	 * @param tableID	The UUID of the table from which a col has been dropped
+	 * @param tc		TransactionController for the transaction
+	 * @param columnDescriptor   Information about the dropped column
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void updateSYSCOLPERMSforDropColumn(UUID tableID, 
+			TransactionController tc, ColumnDescriptor columnDescriptor)
+		throws StandardException
+	{
+		rewriteSYSCOLPERMSforAlterTable(tableID, tc, columnDescriptor);
+	}
+	/**
+	 * Workhorse for ALTER TABLE-driven mods to SYSCOLPERMS
+	 *
+	 * This method finds all the SYSCOLPERMS rows for this table. Then it
+	 * iterates through each row, either adding a new column to the end of
+	 * the table, or dropping a column from the table, as appropriate. It
+	 * updates each SYSCOLPERMS row to store the new COLUMNS value.
+	 *
+	 * @param tableID	The UUID of the table being altered
+	 * @param tc		TransactionController for the transaction
+	 * @param columnDescriptor   Dropped column info, or null if adding
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	private void rewriteSYSCOLPERMSforAlterTable(UUID tableID,
+			TransactionController tc, ColumnDescriptor columnDescriptor)
+		throws StandardException
+	{
 		// In Derby authorization mode, permission catalogs may not be present
 		if (!usesSqlAuthorization)
 			return;
@@ -2395,8 +2434,8 @@ public final class	DataDictionaryImpl
 			false);
 
 		/* Next, using each of the ColPermDescriptor's uuid, get the unique row 
-		in SYSCOLPERMS and expand the "COLUMNS" column in SYSCOLPERMS to 
-		accomodate the newly added column to the tableid*/
+		in SYSCOLPERMS and adjust the "COLUMNS" column in SYSCOLPERMS to 
+		accomodate the added or dropped column in the tableid*/
 		ColPermsDescriptor colPermsDescriptor;
 		ExecRow curRow;
 		ExecIndexRow uuidKey;
@@ -2411,8 +2450,34 @@ public final class	DataDictionaryImpl
 			curRow=ti.getRow(tc, uuidKey, rf.COLPERMSID_INDEX_NUM);
 	        FormatableBitSet columns = (FormatableBitSet) curRow.getColumn( 
 					  SYSCOLPERMSRowFactory.COLUMNS_COL_NUM).getObject();
-	        int currentLength = columns.getLength();
-	        columns.grow(currentLength+1);
+			// See whether this is ADD COLUMN or DROP COLUMN. If ADD, then
+			// add a new bit to the bit set. If DROP, then remove the bit
+			// for the dropped column.
+			if (columnDescriptor == null)
+			{
+				int currentLength = columns.getLength();
+				columns.grow(currentLength+1);
+			}
+			else
+			{
+				FormatableBitSet modifiedColumns=new FormatableBitSet(columns);
+				modifiedColumns.shrink(columns.getLength()-1);
+				// All the bits from 0 ... colPosition-2 are OK. The bits from
+				// colPosition to the end need to be shifted 1 to the left.
+				// The bit for colPosition-1 simply disappears from COLUMNS.
+				// ColumnPosition values count from 1, while bits in the
+				// FormatableBitSet count from 0.
+				for (int i = columnDescriptor.getPosition()-1;
+						i < modifiedColumns.getLength();
+						i++)
+				{
+					if (columns.isSet(i+1))
+						modifiedColumns.set(i);
+					else
+						modifiedColumns.clear(i);
+				}
+				columns = modifiedColumns;
+			}
 	        curRow.setColumn(SYSCOLPERMSRowFactory.COLUMNS_COL_NUM,
 					  dvf.getDataValue((Object) columns));
 			ti.updateRow(uuidKey, curRow,

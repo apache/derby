@@ -673,17 +673,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * fixup of schema objects (such as triggers and column
 	 * privileges) which refer to columns by column position number.
 	 * 
-	 * Currently, column privileges are not repaired when
-	 * dropping a column. This is bug DERBY-1909, and for the
-	 * time being we simply reject DROP COLUMN if it is specified
-	 * when sqlAuthorization is true (that check occurs in the
-	 * parser, not here). When DERBY-1909 is fixed:
-	 *  - Update this comment
-	 *  - Remove the check in dropColumnDefinition() in the parser
-	 *  - consolidate all the tests in altertableDropColumn.sql
-	 *    back into altertable.sql and remove the separate
-	 *    altertableDropColumn files
-	 * 
 	 * Indexes are a bit interesting. The official SQL spec
 	 * doesn't talk about indexes; they are considered to be
 	 * an imlementation-specific performance optimization.
@@ -957,6 +946,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								 true, tc);
 			}
 		}
+		// Adjust the column permissions rows in SYSCOLPERMS to reflect the
+		// changed column positions due to the dropped column:
+		dd.updateSYSCOLPERMSforDropColumn(td.getUUID(), tc, columnDescriptor);
 	}
 
 	private void modifyColumnType(Activation activation,

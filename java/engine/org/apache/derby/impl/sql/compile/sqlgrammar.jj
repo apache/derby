@@ -12005,10 +12005,6 @@ dropColumnDefinition(int []behavior) throws StandardException :
 	[ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 				 dropColumnReferentialAction(behavior)
 	{
-		if( getLanguageConnectionContext().usesSqlAuthorization())
-                    throw StandardException.newException(
-                        SQLState.NOT_IMPLEMENTED,
-                        "ALTER TABLE DROP COLUMN (sqlAuthorization=true)");
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.DROP_COLUMN_NODE,
 						columnName, null,
