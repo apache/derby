@@ -34,7 +34,7 @@ import junit.framework.Test;
  */
 public class SystemPropertyTestSetup extends TestSetup {
 	
-	private Properties newValues;
+	protected Properties newValues;
 	private Properties oldValues;
 	
 	/**
