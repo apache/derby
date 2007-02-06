@@ -1485,11 +1485,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             }
             assertEquals("PRECISION " + typeName,
                     precision, rs.getInt("PRECISION"));
-	    /* TO DO : currently this asserts fails
-	     corrects the condition for assert if any change is required
-	     or remove the assert
-	    */
-            //assertFalse(rs.wasNull());
+
+            /*
+              Precision value is null for XML data type
+            */
+            if (typeName.equals("XML" ))
+                assertTrue(rs.wasNull());
+            else
+                assertFalse(rs.wasNull());
+
             
             // LITERAL_PREFIX (column 4)
             // LITERAL_SUFFIX (column 5)
