@@ -68,6 +68,16 @@ public interface Attribute {
     String JCC_PROTOCOL = "jdbc:derby:net:";
 
     /**
+     * User should use this prefix for the client attributes traceLevel 
+     * and traceDirectory when they are sending those attributes as JVM 
+     * properties. 
+     * These 2 attributes can be sent through jdbc url directly (supported
+     * way) or as JVM properties with the following prefix (undocumented 
+     * way). DERBY-1275
+     */
+    String CLIENT_JVM_PROPERTY_PREFIX = "derby.client.";
+
+    /**
      * Attribute name to encrypt the database on disk. If set to true, all user
      * data is stored encrypted on disk.
      */

@@ -49,6 +49,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
         suite.addTest(SuicideOfStreamingTest.suite());
         suite.addTest(DRDAProtocolTest.suite());
+        suite.addTest(ClientSideSystemPropertiesTest.suite());
         
         // These tests references a client class directly
         // thus causing class not found exceptions if the

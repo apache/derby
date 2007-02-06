@@ -23,16 +23,14 @@ package org.apache.derby.jdbc;
 
 import java.io.Serializable;
 import java.io.PrintWriter;
-import java.util.Enumeration;
+import java.security.AccessController;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import javax.naming.RefAddr;
 import javax.naming.Referenceable;
 import javax.naming.Reference;
 import javax.naming.NamingException;
@@ -341,8 +339,45 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     //
     private String traceDirectory;
     
+    /**
+     * Check if derby.client.traceDirectory is provided as a JVM property. 
+     * If yes, then we use that value. If not, then we look for traceDirectory 
+     * in the the properties parameter.
+     *
+     * @param properties jdbc url properties 
+     * @return value of traceDirectory property
+     */
     public static String getTraceDirectory(Properties properties) {
-        return properties.getProperty(Attribute.CLIENT_TRACE_DIRECTORY);
+    	String traceDirectoryString;
+    	traceDirectoryString  = readSystemProperty(Attribute.CLIENT_JVM_PROPERTY_PREFIX+Attribute.CLIENT_TRACE_DIRECTORY);
+		if (traceDirectoryString == null) 
+			return properties.getProperty(Attribute.CLIENT_TRACE_DIRECTORY);
+		else
+			return traceDirectoryString;
+    }
+    
+    /**
+     * Read the value of the passed system property.
+     * @param key name of the system property
+     * @return value of the system property
+     */
+    private static String readSystemProperty(final String key) {
+    	//Using an anonymous class to read the system privilege because the
+    	//method java.security.AccessController.doPrivileged requires an 
+    	//instance of a class(which implements java.security.PrivilegedAction). 
+    	//Since readSystemProperty method is static, we can't simply pass "this"  
+    	//to doPrivileged method and have ClientBaseDataSource implement 
+    	//PrivilegedAction. To get around the static nature of method 
+    	//readSystemProperty, have an anonymous class implement PrivilegeAction.
+    	//This class will read the system property in it's run method and
+    	//return the value to the caller.
+    	return (String )AccessController.doPrivileged
+    	    (new java.security.PrivilegedAction(){
+    		    public Object run(){
+    			return System.getProperty(key);
+    		    }
+    	    }
+    	    );
     }
 
     // ---------------------------- traceFileAppend -----------------------------------
@@ -839,9 +874,20 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     
     protected int traceLevel = propertyDefault_traceLevel;
 
+    /**
+     * Check if derby.client.traceLevel is provided as a JVM property. 
+     * If yes, then we use that value. If not, then we look for traceLevel 
+     * in the the properties parameter.
+     *
+     * @param properties jdbc url properties 
+     * @return value of traceLevel property
+     */
     public static int getTraceLevel(Properties properties) {
-        String traceLevelString = properties.getProperty(Attribute.CLIENT_TRACE_LEVEL);
-        return parseInt(traceLevelString, propertyDefault_traceLevel);
+    	String traceLevelString;
+    	traceLevelString  = readSystemProperty(Attribute.CLIENT_JVM_PROPERTY_PREFIX+Attribute.CLIENT_TRACE_LEVEL);
+		if (traceLevelString == null) 
+			traceLevelString = properties.getProperty(Attribute.CLIENT_TRACE_LEVEL);
+		return parseInt(traceLevelString, propertyDefault_traceLevel);
     }
 
     synchronized public void setTraceLevel(int traceLevel) {
@@ -851,7 +897,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public int getTraceLevel() {
         return this.traceLevel;
     }
-
 
     public synchronized void setTraceFile(String traceFile) {
         this.traceFile = traceFile;
