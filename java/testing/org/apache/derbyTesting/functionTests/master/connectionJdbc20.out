@@ -209,9 +209,9 @@ VARCHAR
 DATE
 TIME
 TIMESTAMP
-XML
 BLOB
 CLOB
+XML
 Try to Get the connection back from metadata
 Got Same Connection Object
  Try to get the connection back from a callable stmt
