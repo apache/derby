@@ -8,7 +8,6 @@ lang/DB2IsolationLevels.sql
 lang/LOBDB2compatibility.sql
 lang/aggregateOptimization.sql
 lang/altertable.sql
-lang/altertableDropColumn.sql
 lang/authorize.sql
 lang/autoincrement.sql
 lang/bug4356.java
