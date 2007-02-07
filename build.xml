@@ -1262,7 +1262,8 @@
       <fileset dir="${out.dir}"
                includes="org/apache/derby/loc/drda/**,
                          org/apache/derby/loc/sysinfoMessages.properties,
-                         org/apache/derby/info/net.properties"/>
+                         org/apache/derby/info/net.properties,
+                         org/apache/derby/drda/server.policy"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>

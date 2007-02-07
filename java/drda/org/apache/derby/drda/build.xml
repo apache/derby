@@ -33,7 +33,14 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="drda" depends="compile,servlet"/>
+  <target name="drda" depends="compile,servlet,copyfiles"/>
+
+  <target name="copyfiles">
+    <copy
+       todir="${out.dir}/${derby.dir}/drda/"
+       file="${derby.drda.dir}/drda/server.policy"
+    />
+  </target>
 
   <target name="compile">
     <javac

@@ -1,0 +1,30 @@
+grant codeBase "${derby.derby.jar}"
+{
+//
+// These permissions are needed for everyday, embedded Derby usage.
+//
+  permission java.lang.RuntimePermission "createClassLoader";
+  permission java.util.PropertyPermission "derby.*", "read";
+  permission java.io.FilePermission "${derby.system.home}","read";
+  permission java.io.FilePermission "${derby.system.home}${/}-", "read,write,delete";
+
+//
+// This permission lets you backup and restore databases
+// to and from arbitrary locations in your file system.
+//
+// This permission also lets you import/export data to and from
+// arbitrary locations in your file system.
+//
+// You may want to restrict this access to specific directories.
+//
+  permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
+};
+
+grant codeBase "${derby.derbynet.jar}"
+{
+//
+// This permission lets the Network Server manage connections from clients.
+//
+  permission java.net.SocketPermission "${derby.drda.host}:*", "accept"; 
+};
+
