@@ -291,6 +291,10 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public void grow(int n)
 	{
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(invariantHolds(), "broken invariant");
+		}
+
  		if (n < 0) {
  			throw new IllegalArgumentException("Bit set cannot grow from "+
  											   lengthAsBits+" to "+n+" bits");
@@ -299,37 +303,17 @@ public final class FormatableBitSet implements Formatable, Cloneable
  			return;
  		}
 
-		int delta = n - lengthAsBits;
-		int oldNumBytes = getLengthInBytes();
-
-		/*
-		** If we have enough space in the left over bits,
-		** then all we need to do is change the modulo.
-		*/
-		if ((oldNumBytes != 0) &&
-		    (8 - this.bitsInLastByte) >= delta)
-		{
-			this.bitsInLastByte += delta;
-			lengthAsBits = n;
-			return;
-		}
-
 		int newNumBytes = FormatableBitSet.numBytesFromBits(n);
 
 		// is there enough room in the existing array
-		if (newNumBytes <= value.length) {
-			// ensure the bits are zeroed
-			for (int i = oldNumBytes; i <  newNumBytes; i++)
-				value[i] = 0;
-		} else {
-
-
+		if (newNumBytes > value.length) {
 			/*
 			** We didn't have enough bytes in value, so we need
 			** to create a bigger byte array and use that.
 			*/
 			byte[] newValue = new byte[newNumBytes];
 
+			int oldNumBytes = getLengthInBytes();
 			System.arraycopy(value, 0, newValue, 0, oldNumBytes);
 
 			value = newValue;
@@ -348,6 +332,10 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public void shrink(int n)
 	{
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(invariantHolds(), "broken invariant");
+		}
+
 		if (n < 0 || n > lengthAsBits) {
 			throw new
 				IllegalArgumentException("Bit set cannot shrink from "+
