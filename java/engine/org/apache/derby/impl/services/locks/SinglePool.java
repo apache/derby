@@ -21,12 +21,9 @@
 
 package org.apache.derby.impl.services.locks;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
 import org.apache.derby.iapi.services.locks.Lockable;
-import org.apache.derby.iapi.services.locks.Latch;
 import org.apache.derby.iapi.services.locks.Limit;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -39,24 +36,14 @@ import org.apache.derby.iapi.util.Matchable;
 import org.apache.derby.iapi.reference.Property;
 
 import java.util.Hashtable;
-import java.util.Properties;
 import java.io.Serializable;
 import java.util.Dictionary;
 import java.util.Enumeration;
-
-// debugging
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 
 /**
 	An implementation of LockFactory that uses a single pool
 	for the locks, i.e. all lock requests go through a single
 	point of synchronisation.
-    <p>
-    The default concrete class "SinglePool.java", prints nothing and thus 
-    incurs no overhead associated with the code to dump lock information.  An
-    alternate concrete class "LockDebug/TracingSinglePool.java", attempts to 
-    output only lock information that "makes sense" to a user - for instance it
-    doesn't print latch locks.
 
     <BR>
 	MT - Mutable - Container Object : Thread Aware
@@ -105,41 +92,6 @@ public class SinglePool extends Hashtable
 	/*
 	** Methods of LockFactory
 	*/
-
-	/**
-		Latch a specific object with a timeout.
-
-		<BR>
-		MT - thread safe
-
-		@exception StandardException Standard Cloudscape error policy
-
-		@see LockFactory#latchObject
-	*/
-	public boolean latchObject(Object compatabilitySpace, Lockable ref, Object qualifier, int timeout) 
-		throws StandardException {
-
-		Lock latch = lockTable.lockObject(compatabilitySpace, ref, qualifier,
-										  timeout);
-
-		if (SanityManager.DEBUG) {
-			if (latch == null)
-				SanityManager.ASSERT(timeout == C_LockFactory.NO_WAIT, "timeout not NO_WAIT");
-		}
-		return latch != null;
-	}
-
-	/**
-		Unlatch an  object.
-
-		<BR>
-		MT - thread safe
-
-		@see LockFactory#unlatch
-	*/
-	public void unlatch(Latch heldLatch) {
-		lockTable.unlock(heldLatch, 1);
-	}
 
 	/**
 		Lock a specific object with a timeout.

@@ -91,7 +91,6 @@ public class T_LockFactory extends T_MultiIterations
 			S004();
 			S005();
 			S007();
-			S008();
 
 			M001();
 			M002();
@@ -498,81 +497,6 @@ public class T_LockFactory extends T_MultiIterations
 
 		PASS("S007");
 	}
-
-	/**
-		Single user API test 008.
-
-		Create two compatability spaces and ensure that locks/latches
-		block each other out.
-
-		This test case originally tested that latches were released when a row
-		lock couldn't be obtained immediately, but LockFactory doesn't have
-		that functionality any more after DERBY-2197.
-
-		@exception StandardException	An exception thrown by a method of LockFactory
-		@exception T_Fail	Some behaviour of the LockFactory is incorrect
-	*/
-	void S008() throws StandardException, T_Fail {
-
-		Object cs0 = new Object();	// create an object for the compatability space
-		Object cs1 = new Object();	// create an object for the compatability space
-
-		Object g0 = new Object();
-		Object g1 = new Object();
-
-		T_L1 page = new T_L1();
-		Lockable rA = new T_L1();
-		Lockable rB = new T_L1();
-
-		int count;
-
-		// Simulate a page/row lock type access
-		lf.latchObject(cs0, page, null, C_LockFactory.WAIT_FOREVER);
-		lf.lockObject(cs0, g0, rA, null, C_LockFactory.WAIT_FOREVER);
-		lf.unlatch(page.latch);
-
-		lf.latchObject(cs1, page, null, C_LockFactory.WAIT_FOREVER);
-		lf.lockObject(cs1, g1, rB, null, C_LockFactory.WAIT_FOREVER);
-
-		checkLockCount(cs0, 1);
-		checkLockCount(cs1, 2);
-
-		try {
-			lf.lockObject(cs1, g1, rA, null, 5000);
-			throw T_Fail.testFailMsg("lock succeeded on already locked object");
-		}
-		catch (StandardException lfe) {
-			// we are expecting the timoeut exception, anything else is an error
-			if (!lfe.getMessageId().equals(SQLState.LOCK_TIMEOUT)) {
-				throw lfe;
-			}
-			checkLockCount(cs0, 1);
-			checkLockCount(cs1, 1);
-		}
-
-        try {
-            // make sure latch is held
-            lf.latchObject(cs0, page, null, 5000);
-			throw T_Fail.testFailMsg("latch succeeded on already latch object");
-        }
-		catch (StandardException lfe) {
-			// we are expecting timoeut exception, anything else is an error
-			if (!lfe.getMessageId().equals(SQLState.LOCK_TIMEOUT)) {
-				throw lfe;
-			}
-		}
-
-		lf.unlatch(page.latch);
-
-		lf.unlock(cs0,  g0, rA, null);
-		lf.unlock(cs1,  g0, rB, null);
-
-		PASS("S008");
-
-
-	}	
-
-
 
 	/*
 	** Multi-user tests.

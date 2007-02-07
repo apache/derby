@@ -78,39 +78,6 @@ public interface LockFactory extends PropertySetCallback {
 		throws StandardException;
 
 	/**
-		Lock an object within a compatability space
-		and associate the lock with a group object,
-		waits forever the object to become unlocked.
-		<P>
-		A compatibility space in an space where lock requests are assumed to be
-        compatabile and granted by the lock manager if the trio
-        {compatabilitySpace, ref, qualifier} are equal (i.e. reference equality
-        for qualifier, equals() method
-		for compatabilitySpace and ref ). A typical reference to use for the compatability
-		space is a reference to an object representing a transaction.
-		Granted by the lock manager means that the Lockable object may or may 
-        not be queried to see if the request is compatible.
-		<BR>
-		A compatability space is not assumed to be owned by a single thread.
-	
-
-
-		@param compatabilitySpace object defining compatability space (by value)
-		@param group handle of group, must be private to a thread.
-		@param ref reference to object to be locked
-		@param qualifier A qualification of the request.
-
-		@exception org.apache.derby.iapi.error.StandardException A deadlock has occured (message id will be LockFactory.Deadlock)
-		@exception org.apache.derby.iapi.error.StandardException Another thread interupted this thread while
-		it was waiting for the lock. This will be a StandardException with a nested java.lang.InterruptedException exception,
-		(message id will be LockFactory.InterruptedExceptionId)
-		@exception StandardException Standard Cloudscape error policy.
-
-	*/
-	//public void lockObject(Object compatabilitySpace, Object group, Lockable ref, Object qualifier)
-	//	throws StandardException;
-
-	/**
 		Unlock a single lock on a single object held within this compatability space
 		that was locked with the supplied qualifier.
 
@@ -159,37 +126,6 @@ public interface LockFactory extends PropertySetCallback {
 	*/
 	public boolean areLocksHeld(Object compatabilitySpace);
 
-
-	/**
-		Latch an object. A latch is a lock without a group.
-		This means that it must be released explicitly by the owner.
-		A latch is not released by any unlock methods, it must be
-		released by the unlatch method. A latch is assumed to only
-		be held by one locker at a time.
-<BR>
-		The first argument passed to lockEvent() is the Latch that
-		is to be used in the unlatch() call.
-		The firstArgument passed to unlockEvent() should be ignored.
-
-  		@return true if the latch was obtained,
-		false if timeout is equal to LockFactory.NO_WAIT and the lock could not be granted.
-
-
-		@exception org.apache.derby.iapi.error.StandardException A deadlock has occured (message id will be LockFactory.Deadlock)
-		@exception org.apache.derby.iapi.error.StandardException Another thread interupted this thread while
-		it was waiting for the latch. This will be a StandardException with a nested java.lang.InterruptedException exception,
-		(message id will be LockFactory.InterruptedExceptionId)
-		@exception StandardException Standard Cloudscape error policy.
-	*/
-	public boolean latchObject(Object compatabilitySpace, Lockable ref, Object qualifier, int timeout)
-		throws StandardException;
-
-	/**
-		Unlatch an object.
-	*/
-	public void unlatch(Latch heldLatch);
-
-	
 	/**
 		Lock an object with zero duration within a compatability space,
 		waits up to timeout milli-seconds for the object to become unlocked. A 
