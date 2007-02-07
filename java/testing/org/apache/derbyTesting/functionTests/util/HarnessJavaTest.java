@@ -29,6 +29,7 @@ import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -104,9 +105,29 @@ public abstract class HarnessJavaTest extends CanonTestCase {
         {
             protected void setUp() throws java.lang.Exception
             {
-                newValues.setProperty(
+                TestConfiguration config = TestConfiguration.getCurrent();
+                
+                // With JDBC 3 connect using a JDBC URL
+                if (JDBC.vmSupportsJDBC3())
+                {
+                   newValues.setProperty(
                         "ij.database", 
-                        TestConfiguration.getCurrent().getJDBCUrl());
+                        config.getJDBCUrl());
+                }
+                else if (JDBC.vmSupportsJSR169())
+                {
+                    // Use a data source and set its database name.
+                    // The database will be created by the CleanDatabaseTestSetup
+                    // used for each individual fixture/test.
+                    
+                    newValues.setProperty(
+                        "ij.dataSource", 
+                        "org.apache.derby.jdbc.EmbeddedSimpleDataSource");
+                    
+                    newValues.setProperty(
+                        "ij.dataSource.databaseName",
+                        config.getDefaultDatabaseName());
+                }
                 super.setUp();
             }
         };
