@@ -1217,7 +1217,8 @@ public class JDBCDisplayUtil {
                 .doPrivileged(new java.security.PrivilegedAction() {
 
                     public Object run() {
-                        return Boolean.valueOf(Boolean.getBoolean(name));
+                        return Boolean.getBoolean(name) ?
+                            Boolean.TRUE : Boolean.FALSE;
 
                     }
 
