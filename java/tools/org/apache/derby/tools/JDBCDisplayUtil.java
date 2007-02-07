@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import java.security.AccessController;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -97,7 +98,7 @@ public class JDBCDisplayUtil {
 	static public void ShowSQLException(PrintWriter out, SQLException e) {
 		String errorCode;
 
-		if (Boolean.getBoolean("ij.showErrorCode")) {
+		if (getSystemBoolean("ij.showErrorCode")) {
 			errorCode = LocalizedResource.getMessage("UT_Error0", LocalizedResource.getNumber(e.getErrorCode()));
 		}
 		else {
@@ -703,7 +704,7 @@ public class JDBCDisplayUtil {
 		@param e the exception to display
 	 */
 	static public void doTrace(PrintWriter out, Exception e) {
-		if (Boolean.getBoolean("ij.exceptionTrace")) {
+		if (getSystemBoolean("ij.exceptionTrace")) {
 			e.printStackTrace(out);
 		    out.flush();
 		}
@@ -744,7 +745,7 @@ public class JDBCDisplayUtil {
 	static public void ShowSQLException(PrintStream out, SQLException e) {
 		String errorCode;
 
-		if (Boolean.getBoolean("ij.showErrorCode")) {
+		if (getSystemBoolean("ij.showErrorCode")) {
 			errorCode = " (errorCode = " + e.getErrorCode() + ")";
 		}
 		else {
@@ -1180,7 +1181,7 @@ public class JDBCDisplayUtil {
 	} // DisplayRow
 
 	static public void doTrace(PrintStream out, Exception e) {
-		if (Boolean.getBoolean("ij.exceptionTrace")) {
+		if (getSystemBoolean("ij.exceptionTrace")) {
 			e.printStackTrace(out);
 		    out.flush();
 		}
@@ -1204,6 +1205,24 @@ public class JDBCDisplayUtil {
 	}
 	
 	// ==========================
+    
+    /**
+     * Get an ij boolean system property.
+     *
+     * @param name name of the property
+     */
+    private static boolean getSystemBoolean(final String name) {
+
+        return ((Boolean) AccessController
+                .doPrivileged(new java.security.PrivilegedAction() {
+
+                    public Object run() {
+                        return Boolean.valueOf(Boolean.getBoolean(name));
+
+                    }
+
+                })).booleanValue();
+    }
 }
 
 
