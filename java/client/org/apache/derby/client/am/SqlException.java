@@ -74,8 +74,9 @@ import org.apache.derby.shared.common.reference.SQLState;
 //
 public class SqlException extends Exception implements Diagnosable {
     protected static final int DEFAULT_ERRCODE = 99999;
-    protected Sqlca sqlca_ = null; // for engine generated errors only
+    protected transient Sqlca sqlca_ = null; // for engine generated errors only
     protected String message_ = null;
+    protected String cachedMessage_ = null;
     private String batchPositionLabel_; // for batched exceptions only
     protected String sqlstate_ = null;
     protected int errorcode_ = DEFAULT_ERRCODE;
@@ -387,8 +388,22 @@ public class SqlException extends Exception implements Diagnosable {
             return wrappedException_.getMessage();
         }
         
+        // The Net JDBC message is retrieved and cached if we have a valid
+        // SQLCA handle.
+        // It is possible that we don't have one in case of a serialized
+        // SqlException for instance. In this case, we set the message to the
+        // last one cached previously (if any available).
+        // For serialized SqlException, we can serialize the SQLCA as the
+        // object handle would become invalid, upon deserialization, causing
+        // the connection and JDBC not being retrievable (hence why it is
+        // being cached here).
         if (sqlca_ != null) {
-            message_ = ((Sqlca) sqlca_).getJDBCMessage();
+            cachedMessage_ = message_ = ((Sqlca) sqlca_).getJDBCMessage();
+        }
+        else if (cachedMessage_ != null) {
+            // SQLCA is no longer valid, set the message to the previously
+            // cached one
+            message_ = cachedMessage_;
         }
         
         if (batchPositionLabel_ != null) {

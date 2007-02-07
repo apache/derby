@@ -33,6 +33,7 @@ import java.sql.*;
 
 import junit.framework.AssertionFailedError;
 
+import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.tools.ij;
 
 
@@ -684,6 +685,79 @@ public abstract class BaseJDBCTestCase
             if (haveRS)
                 JDBC.assertDrainResults(st.getResultSet(), -1);
             haveRS = st.getMoreResults();
+        }
+    }
+
+    /**
+     * Assert that the two (2) passed-in SQLException's are equals and
+     * not just '=='.
+     *
+     * @param se1 first SQLException to compare
+     * @param se2 second SQLException to compare
+     */
+    public static void assertSQLExceptionEquals(SQLException se1,
+                                                SQLException se2) {
+        // Ensure non-null SQLException's are being passed.
+        assertNotNull(
+            "Passed-in SQLException se1 cannot be null",
+            se1);
+        assertNotNull(
+            "Passed-in SQLException se2 cannot be null",
+            se2);
+
+        // Now verify that the passed-in SQLException's are of the same type
+        assertEquals("SQLException class types are different",
+                     se1.getClass().getName(), se2.getClass().getName());
+
+        // Here we check that the detailed message of both
+        // SQLException's is the same
+        assertEquals(
+                "Detailed messages of the SQLException's are different",
+                 se1.getMessage(), se2.getMessage());
+
+        // Now if we're running in a java runtime that supports chained
+        // exception, then let's compare these 2 SQLException's and
+        // whatever chained SQLException there can be through the beauty
+        // of recursion
+        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14)
+        {
+            // Here we check that the detailed message of both
+            // SQLException's throwable "cause" is the same.
+            // getCause() was introduced as part of Java 4.
+            // Save the SQLException
+            Throwable se1Cause = null, se2Cause = null;
+            Method m = null;
+            try
+            {
+                m = Throwable.class.getMethod("getCause", new Class[] {});
+                se1Cause = (Throwable) m.invoke(se1, new Object[] {});
+            }
+            catch (Throwable t)
+            {
+                // Throwable.getCause() should have succeeded
+                fail("Unexpected error: " + t.getMessage());
+            }
+            if (se1Cause != (Throwable) null)
+            {
+                try
+                {
+                    se2Cause = (Throwable) m.invoke(se2, new Object[] {});
+                }
+                catch (Throwable t)
+                {
+                    // Throwable.getCause() should have succeeded
+                    fail("Unexpected error: " + t.getMessage());
+                }
+                assertThrowableEquals(se1Cause, se2Cause);
+            }
+            else // se2.getCause() should not return any Cause then
+                assertNull(se2Cause);
+
+            if (se1.getNextException() != null)
+            {
+                assertSQLExceptionEquals(se1.getNextException(),
+                                         se2.getNextException());
+            }
         }
     }
 

@@ -311,4 +311,31 @@ public abstract class BaseTestCase
         r1.close();
         r2.close();
     }
+
+    /**
+     * Assert that the detailed messages of the 2 passed-in Throwable's are
+     * equal (rather than '=='), as well as their class types.
+     *
+     * @param t1 first throwable to compare
+     * @param t2 second throwable to compare
+     */
+    public static void assertThrowableEquals(Throwable t1,
+                                             Throwable t2) {
+        // Ensure non-null throwable's are being passed.
+        assertNotNull(
+            "Passed-in throwable t1 cannot be null to assert detailed message",
+            t1);
+        assertNotNull(
+            "Passed-in throwable t2 cannot be null to assert detailed message",
+            t2);
+
+        // Now verify that the passed-in throwable are of the same type
+        assertEquals("Throwable class types are different",
+                     t1.getClass().getName(), t2.getClass().getName());
+
+        // Here we finally check that the detailed message of both
+        // throwable's is the same
+        assertEquals("Detailed messages of the throwable's are different",
+                     t1.getMessage(), t2.getMessage());
+    }
 } // End class BaseTestCase
