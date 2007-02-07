@@ -1,7 +1,6 @@
 lang/scrollCursors1.sql
 lang/scrollCursors2.java
 lang/scrollCursors3.sql
-jdbcapi/batchUpdate.java
 jdbcapi/getCurConnJdbc20.sql
 jdbcapi/statementJdbc20.java
 jdbcapi/connectionJdbc20.java

@@ -46,7 +46,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
     private static final String[] JDBCAPI_TESTS_BOTH =
     {
             // from old jdbc20.runall
-            // "batchUpdate", runs in embedded only
             "connectionJdbc20",
             // "statementJdbc20", runs in embedded only
             "resultsetJdbc20",           
@@ -89,7 +88,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
     private static final String[] JDBCAPI_TESTS_EMEBDDED=
     {
         // excluded from derby client in old harness
-        "batchUpdate",
         "statementJdbc20",
         "statementJdbc30",
         

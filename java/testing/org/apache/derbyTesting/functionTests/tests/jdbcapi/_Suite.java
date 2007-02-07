@@ -48,6 +48,7 @@ public class _Suite extends BaseTestCase  {
 		TestSuite suite = new TestSuite("jdbcapi");
 
 		suite.addTest(ConcurrencyTest.suite());
+		suite.addTest(BatchUpdateTest.suite());
 		suite.addTest(HoldabilityTest.suite());
         suite.addTest(LobLengthTest.suite()); 
 		suite.addTest(ProcedureTest.suite());
@@ -59,6 +60,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ResultSetCloseTest.suite());
 		suite.addTest(BlobClob4BlobTest.suite());
 		suite.addTest(CharacterStreamsTest.suite());
+		suite.addTest(BatchUpdateTest.suite());
 		suite.addTest(StreamTest.suite());
         
         if (JDBC.vmSupportsJDBC3())

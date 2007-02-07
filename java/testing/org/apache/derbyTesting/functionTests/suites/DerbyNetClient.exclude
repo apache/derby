@@ -1,6 +1,5 @@
 # excluding TestErrorStreamTarget.java since it's not relevant for clients
 # excluding scrollCursors2.java because updatable resultsets & scroll sensitive cursors are not supported
-# excluding batchUpdate.java for it hits a problem in networkserver ('beetle' 5561)
 # excluding statementJdbc20.java because this tests fetch_reverse throughout the test
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/dataSourceReference.java - client side only tests, tests all data sources
@@ -10,7 +9,6 @@
 lang/errorStream.java
 # lang/scrollCursors2.java
 #
-jdbcapi/batchUpdate.java
 jdbcapi/statementJdbc20.java
 jdbcapi/statementJdbc30.java
 jdbcapi/dataSourceReference.java
