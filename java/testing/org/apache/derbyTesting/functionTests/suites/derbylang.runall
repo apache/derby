@@ -90,7 +90,6 @@ lang/staleplans.sql
 lang/stmtCache0.sql
 lang/stmtCache1.sql
 lang/stmtCache3.java
-lang/streams.java
 lang/subquery.sql
 lang/subquery2.sql
 lang/subqueryFlattening.sql

@@ -131,6 +131,20 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
         
         return test;
     }
+    
+    /**
+     * Decorate a test so that it sets a single database property
+     * at setUp and resets it at tearDown. Shorthand for
+     * using DatabasePropertyTestSetup when only a single property is needed.
+     * Does not perform a reboot of the database.
+     */
+    public static Test singleProperty(Test test, String property, String value)
+    {
+        final Properties properties = new Properties();
+        properties.setProperty(property, value);
+
+        return new DatabasePropertyTestSetup(test, properties, false);
+    }    
 	
 	/**
 	 * Create a test decorator that sets and restores the passed
