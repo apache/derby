@@ -85,6 +85,12 @@ grant codeBase "${derbyTesting.clientjar}derbyclient.jar" {
   // the classpath.
   permission java.util.PropertyPermission "derby.*", "read";
 
+  // DERBY-2302: derbyclient.jar needs to be able to read the user.dir property in order to
+  // do tracing in that directory. Also, it needs read/write permissions in user.dir in order
+  // to create the trace files in that directory.
+  permission java.util.PropertyPermission "user.dir", "read";
+  permission java.io.FilePermission "${user.dir}${/}-", "read, write"; 
+
 };
 
 //
