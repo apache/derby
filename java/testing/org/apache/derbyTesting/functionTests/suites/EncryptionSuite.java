@@ -20,8 +20,12 @@
  */
 package org.apache.derbyTesting.functionTests.suites;
 
+import java.sql.SQLException;
+
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.LobStreamsTest;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Decorator;
+import org.apache.derbyTesting.junit.JDBC;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -47,11 +51,11 @@ import junit.framework.TestSuite;
  * @see Decorator#encryptedDatabase(Test, String)
  *
  */
-public final class EncryptionSuite {
+public final class EncryptionSuite extends BaseJDBCTestCase {
     
 
-    private EncryptionSuite() {
-        super();
+    public EncryptionSuite(String name) {
+        super(name);
     }
     
     /**
@@ -63,13 +67,18 @@ public final class EncryptionSuite {
     {
         TestSuite suite = new TestSuite("Encrpytion Suite");
         
-        suite.addTest(Decorator.encryptedDatabase(baseSuite("default")));
-        suite.addTest(encryptedSuite("AES/CBC/NoPadding"));
-        suite.addTest(encryptedSuite("DES/ECB/NoPadding"));
-        suite.addTest(encryptedSuite("DESede/CFB/NoPadding"));
-        suite.addTest(encryptedSuite("DES/CBC/NoPadding"));
-        suite.addTest(encryptedSuite("Blowfish/CBC/NoPadding"));
-        suite.addTest(encryptedSuite("AES/CBC/NoPadding"));
+        // Encryption only supported for Derby in J2SE/J2EE environments.
+        // J2ME (JSR169) does not support encryption.
+        if (JDBC.vmSupportsJDBC3()) {
+        
+          suite.addTest(Decorator.encryptedDatabase(baseSuite("default")));
+          suite.addTest(encryptedSuite("AES/CBC/NoPadding"));
+          suite.addTest(encryptedSuite("DES/ECB/NoPadding"));
+          suite.addTest(encryptedSuite("DESede/CFB/NoPadding"));
+          suite.addTest(encryptedSuite("DES/CBC/NoPadding"));
+          suite.addTest(encryptedSuite("Blowfish/CBC/NoPadding"));
+          suite.addTest(encryptedSuite("AES/CBC/NoPadding"));
+        }
         
         return suite;
     }
@@ -86,8 +95,20 @@ public final class EncryptionSuite {
     {
         TestSuite suite = new TestSuite("Encryption Algorithm: " + algorithm);
         
-        // LobStreamsTest was in the encrpytion suite for the old harness. 
-        suite.addTest(LobStreamsTest.suite());
+        // Very simple test to get the setup working while we have
+        // no tests that were previously run under encryption converted.
+        suite.addTestSuite(EncryptionSuite.class);
+        
         return suite;
+    }
+    
+    /**
+     * Very simple test that ensures we can get a connection to
+     * the booted encrypted database.
+     * @throws SQLException
+     */
+    public void testConnection() throws SQLException
+    {
+        getConnection().close();
     }
 }

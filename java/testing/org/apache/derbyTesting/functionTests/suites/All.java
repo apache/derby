@@ -41,6 +41,9 @@ public class All extends BaseTestCase {
         // All package tests
         suite.addTest(AllPackages.suite());
         
+        // Encrypted tests
+        suite.addTest(EncryptionSuite.suite());
+        
         return suite;
     }
 }

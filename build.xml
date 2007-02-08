@@ -1721,6 +1721,10 @@
       <param name="derby.junit.testname"
              value="org.apache.derbyTesting.functionTests.tests.store._Suite"/>
     </antcall>
+    <antcall target="junit-oneclass">
+      <param name="derby.junit.testname"
+             value="org.apache.derbyTesting.functionTests.suites.EncryptionSuite"/>
+    </antcall>
   </target>
 	
   <!--
