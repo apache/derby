@@ -1,3 +1,23 @@
+/*
+ *
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.lang.CurrentOfTest
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, 
+ * software distributed under the License is distributed on an 
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ * either express or implied. See the License for the specific 
+ * language governing permissions and limitations under the License.
+ */
+
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.PreparedStatement;
@@ -7,18 +27,35 @@ import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
+/** This tests the current of statements, i.e.
+     * delete where current of and update where current of.
+ * Not done in ij since the cursor names may not be stable.
+ */
 public class CurrentOfTest extends BaseJDBCTestCase {
+
+	
+	/**
+     * Public constructor required for running test as standalone JUnit.
+     */
 	public CurrentOfTest(String name) {
 		super(name);
 	}
-
+	/**
+     * Create a suite of tests.
+     */
 	public static Test suite() {
-		TestSuite suite = new TestSuite("CurrentOfJunit");
+		TestSuite suite = new TestSuite("CurrentOfTest");
 		suite.addTestSuite(CurrentOfTest.class);
+		//To run the test in both embedded and client/server mode
+		//commenting it for the time being sicne the test fails in the client/server mode
+		//return   TestConfiguration.defaultSuite(CurrentOfTest.class);
 		return suite;
 	}
-
+	 /**
+     * Set the fixture up with tables t and s and insert 4 rows in table t.
+     */
 	protected void setUp() throws SQLException {
 		getConnection().setAutoCommit(false);
 		Statement stmt = createStatement();
@@ -31,7 +68,9 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		stmt.close();
 		commit();
 	}
-
+	/**
+     * Tear-down the fixture by removing the tables
+     */
 	protected void tearDown() throws Exception {
 		Statement stmt = createStatement();
 		stmt.executeUpdate("drop table t");
@@ -40,7 +79,12 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		commit();
 		super.tearDown();
 	}
-
+	/**
+    * Test delete with the current of statements.
+    * Also do some negative testing to see whether correct
+    * exceptions are thrown or not.
+    * @throws Exception
+    */
 	public void testDelete() throws SQLException {
 		PreparedStatement select, delete;
 		Statement delete2;
@@ -55,15 +99,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 
 		// TEST: cursor and target table mismatch
 
-		try {
-			delete = prepareStatement("delete from s where current of "
-					+ cursor.getCursorName());
-			fail("Exception expected above!");
-			delete.close();	
-		}catch (SQLException e) {
-			assertSQLState("42X28", e);
-			
-		}
+		assertCompileError("42X28","delete from s where current of " + cursor.getCursorName()); 
 		
 		// TEST: find the cursor during compilation
 		delete = prepareStatement("delete from t where current of "
@@ -82,14 +118,26 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		// TEST: delete past the last row
 		cursor.next();// skip this row
 		assertFalse(cursor.next());
-		assertStatementError("24000", delete);
+		if (usingEmbedded())
+			assertStatementError("24000", delete);
+		else
+			assertStatementError("XCL07", delete);
+		
+		
 		// TEST: delete off a closed cursor
 		// Once this is closed then the cursor no longer exists.
 		cursor.close();
-		assertStatementError("XCL07", delete);
+		if (usingEmbedded())
+			assertStatementError("XCL07", delete);
+		else 
+			assertStatementError("XCL16", delete);
+		
 		// TEST: no cursor with that name exists
 		delete2 = createStatement();
-		assertStatementError("42X30", delete2,"delete from t where current of myCursor" );
+		if (usingEmbedded())
+			assertStatementError("42X30", delete2,"delete from t where current of myCursor" );
+		else
+			assertStatementError("XJ202", delete2,"delete from t where current of myCursor" );
 		delete.close();
 		delete2.close();
 		select.close();
@@ -98,7 +146,12 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		// TBD
 
 	}
-
+	/**
+	    * Test update with the current of statements.
+	    * Also do some negative testing to see whether correct
+	    * exceptions are thrown or not.
+	    * @throws Exception
+	    */
 	public void testUpdate() throws SQLException {
 		PreparedStatement select = null;
 		PreparedStatement update = null;
@@ -117,25 +170,18 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 
 		select = prepareStatement("select I, C from t for update of I");
 		cursor = select.executeQuery(); // cursor is now open
-		try {
-			update = prepareStatement("update t set C = 'abcde' where current of "
-					+ cursor.getCursorName());
-			fail("Exception expected above!");
-
-		} catch (SQLException se) {
-			assertSQLState("42X31", se);
-		}
-
+		assertCompileError("42X31", "update t set C = 'abcde' where current of "+ cursor.getCursorName());
 		cursor.close();
 		select.close();
-
+		
 		// TEST: Update of cursor declared READ ONLY
 		select = prepareStatement("select I, C from t for read only");
 		cursor = select.executeQuery(); // cursor is now open
 		assertNull(cursor.getCursorName());
+		
 		cursor.close();
 		select.close();
-
+		
 		// TEST: Update of cursor declared FETCH ONLY
 		select = prepareStatement("select I, C from t for fetch only");
 		cursor = select.executeQuery(); // cursor is now open
@@ -188,14 +234,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 
 		// TEST: cursor and target table mismatch
 
-		try {
-			update = prepareStatement("update s set i=1 where current of "
-					+ cursor.getCursorName());
-			fail("Exception expected above!");
-
-		} catch (SQLException se) {
-			assertSQLState("42X29", se);
-		}
+		assertCompileError("42X29","update s set i=1 where current of " + cursor.getCursorName());
 
 		// TEST: find the cursor during compilation
 		update = prepareStatement("update t set i=i+10, c='Gumby was here' where current of "
@@ -234,12 +273,14 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		update2.close();
 		// TEST: attempt to do positioned update before cursor execute'd
 		// TBD
+		if(cursor != null)
+			cursor.close();
 
-		
 	}
-
+		/**
+	    *TEST closing a cursor will close the related update
+	    */
 	public void testbug4395() throws SQLException { 
-//		 TEST closing a cursor will close the related update
 		bug4395("CS4395"); // Application provided cursor name
 		bug4395(null); // system provided cursor name
 	}
