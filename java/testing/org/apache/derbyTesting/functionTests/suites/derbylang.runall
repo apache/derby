@@ -23,7 +23,6 @@ lang/concateTests.java
 lang/connect.sql
 lang/consistencyChecker.sql
 lang/currentSchema.sql
-lang/currentof.java
 lang/cursor.java
 lang/cursorerrors.sql
 lang/datetime.sql
