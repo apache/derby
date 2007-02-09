@@ -21,3 +21,5 @@
 **/*.tmpl
 **/package.html
 **/*.rej
+**/*.orig
+**/*.policy
