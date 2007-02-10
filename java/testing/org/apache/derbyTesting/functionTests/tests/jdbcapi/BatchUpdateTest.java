@@ -92,7 +92,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *      try executing a batch which nothing in it.
  *    - testNoParametersPreparedBatch()
  *      try executing a batch with no parameters. 
- *      (fails with NullPointerException with NetworkServer. See DERBY-2112
  *    - testSingleValueSetPreparedBatch()
  *      try executing a batch which one parameter set in it.
  *    - testMultipleValueSetPreparedBatch()
@@ -1017,14 +1016,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         commit();
     }
     
-    // try prepared statement batch with just no settable parameters.
+    // try prepared statement batch without settable parameters.
     public void testNoParametersPreparedBatch() throws SQLException {
 
-        // TODO: analyze & implement for NetworkServer when DERBY-2112 is fixed
-        // test fails with NullPointerException with NetworkServer
-        // see DERBY-2112
-        if (!usingEmbedded())
-            return;
+        // Note: also tests for fix of NPE of DERBY-2112
      
         Statement stmt = createStatement();
         ResultSet rs;

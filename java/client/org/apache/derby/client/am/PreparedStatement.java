@@ -2261,9 +2261,11 @@ public class PreparedStatement extends Statement
         }
 
         for (int i = 0; i < batchSize; i++) {
-            parameterMetaData_.clientParamtertype_ = (int[]) parameterTypeList.get(i);
-            parameters_ = (Object[]) batch_.get(i);
-
+            if (parameterMetaData_ != null) {
+                parameterMetaData_.clientParamtertype_ = (int[]) parameterTypeList.get(i);
+                parameters_ = (Object[]) batch_.get(i);
+            }
+            
             if (sqlMode_ != isCall__) {
                 boolean outputExpected;
                 try {
