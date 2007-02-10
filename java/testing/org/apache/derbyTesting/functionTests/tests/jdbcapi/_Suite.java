@@ -48,7 +48,6 @@ public class _Suite extends BaseTestCase  {
 		TestSuite suite = new TestSuite("jdbcapi");
 
 		suite.addTest(ConcurrencyTest.suite());
-		suite.addTest(BatchUpdateTest.suite());
 		suite.addTest(HoldabilityTest.suite());
         suite.addTest(LobLengthTest.suite()); 
 		suite.addTest(ProcedureTest.suite());

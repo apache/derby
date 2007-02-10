@@ -43,32 +43,94 @@ import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
-
 /**
  * Test BatchUpdate functionality.
  * <P>
  * This test examines the behavior fo BatchUpdate test.
- * There are 5 actual fixtures, and even the setup is executing in batch, to 
- * verify basic create table and insert statements also work in batch.
- * The five actual fixtures are:
- * testStatementBatchUpdatePositive - verifies correct usage with Statements 
- *                                work as expected 
- * testStatementBatchUpdateNegative - verifies incorrect usage with Statments
- *                                gives appropriate errors
- * testCallableStatementBatchUpdate - verifies usage with callableStatements
- *                                works as expected
- * testPreparedStatementBatchUpdatePositive
- *                              - verifies correct usage with preparedStatements
- * testPreparedStatementBatchUpdateNegative
- *                              - verifies incorrect use with preparedStatements
+ * One fixture tests creating tables in batch, the other fixtures can be grouped
+ * into 5 rough categories:
+ *  - tests that verify that correct usage with Statements work as expected
+ *    - testEmptyStatementBatch()
+ *      try executing a batch which nothing in it.
+ *    - testSingleStatementBatch()
+ *      try executing a batch which one statement in it.
+ *    - testMultipleStatementsBatch()
+ *      try executing a batch with 3 different statements in it.
+ *    - test1000StatementsBatch()
+ *      try executing a batch with 1000 statements in it.
+ *    - testAutoCommitTrueBatch()
+ *      try batch with autocommit true
+ *    - testCombinationsOfClearBatch()
+ *      try clear batch
+ *    - testAssociatedParams()
+ *      confirm associated parameters run ok with batches
+ *   
+ *  - tests that verify that incorrect usage with Statments give appropriate
+ *    errors
+ *    - testStatementWithResultSetBatch()
+ *      statements which will return a resultset are not allowed in batch
+ *      update. The following case should throw an exception for select.
+ *      Below trying various placements of select statement in the batch,
+ *      i.e. as 1st stmt, nth stmt and last stmt
+ *    - testStatementNonBatchStuffInBatch()
+ *      try executing a batch with regular statement intermingled.
+ *    - testStatementWithErrorsBatch()
+ *      Below trying various placements of overflow update statement
+ *      in the batch, i.e. as 1st stmt, nth stat and last stmt
+ *    - testTransactionErrorBatch()
+ *      try transaction error, i.e. time out while getting the lock
+ *    
+ *  - tests that verify that usage with callableStatements work as expected
+ *    - testCallableStatementBatch()
+ *      try callable statements
+ *    - testCallableStatementWithOutputParamBatch()
+ *      try callable statement with output parameters
+ *      
+ *  - tests that verify that correct usage with preparedStatements work as
+ *    expected
+ *    - testEmptyValueSetPreparedBatch()
+ *      try executing a batch which nothing in it.
+ *    - testNoParametersPreparedBatch()
+ *      try executing a batch with no parameters. 
+ *      (fails with NullPointerException with NetworkServer. See DERBY-2112
+ *    - testSingleValueSetPreparedBatch()
+ *      try executing a batch which one parameter set in it.
+ *    - testMultipleValueSetPreparedBatch()
+ *      try executing a batch with 3 parameter sets in it.
+ *    - testMultipleValueSetNullPreparedBatch()
+ *      try executing a batch with 2 parameter sets in it and they are set 
+ *      to null.
+ *    - test1000ValueSetPreparedBatch()
+ *      try executing a batch with 1000 statements in it.
+ *    - testPreparedStatRollbackAndCommitCombinations()
+ *      try executing batches with various rollback and commit combinations.
+ *    - testAutoCommitTruePreparedStatBatch()
+ *      try prepared statement batch with autocommit true
+ *    - testCombinationsOfClearPreparedStatBatch()
+ *      try clear batch
+ *      
+ *  - tests that verify that incorrect use with preparedStatements give 
+ *    appropriate errors
+ *    - testPreparedStmtWithResultSetBatch()
+ *      statements which will return a resultset are not allowed in batch
+ *      update. The following case should throw an exception for select.
+ *    - testPreparedStmtNonBatchStuffInBatch();
+ *      try executing a batch with regular statement intermingled.
+ *    - testPreparedStmtWithErrorsBatch();
+ *      trying various placements of overflow update statement
+ *      in the batch
+ *    - testTransactionErrorPreparedStmtBatch()
+ *      try transaction error, in this particular case time out while
+ *      getting the lock
  * 
- * The test executes almost all submethods of these fixtures with both
- * embedded and NetworkServer/DerbyNetClient - however, there is a difference
- * in functionality between the two when an error condition is reaches. Thus,
+ * Almost all fixtures but 1 execute with embedded and 
+ * NetworkServer/DerbyNetClient - however, there is a difference in 
+ * functionality between the two when an error condition is reaches. Thus,
  * the negative tests have if / else if blocks for embedded and client.
  * 
- * The three subtests that are not running with network server are 
- * identified with //TODO: tags and have an if (usingEmbedded()) block.
+ * The 1 fixture that ise not running with network server is 
+ * identified with //TODO: tags and has an if (usingEmbedded()) block and
+ * a JIRA issue attached to it.
  * 
  */
 
@@ -84,56 +146,55 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
      *  This is itself a test of statements creating tables in batch. 
      */
     public void setUp() throws  Exception {
-        Connection conn = getConnection();
-        conn.setAutoCommit(false);
-        Statement stmt = createStatement();
-        stmt.addBatch("create table t1(c1 int)");
-        stmt.addBatch("create procedure Integ() language java " +
-            "parameter style java external name 'java.lang.Integer'");
-        stmt.addBatch("create table datetab(c1 date)");
-        stmt.addBatch("create table timetab(c1 time)");
-        stmt.addBatch("create table timestamptab(c1 timestamp)");
-        stmt.addBatch("create table usertypetab(c1 DATE)");
-
-        int expectedCount[] = {0,0,0,0,0,0};
-        assertBatchUpdateCounts(expectedCount, stmt.executeBatch());
-        
-        // for method checkAssociatedParams
-        stmt.executeUpdate("create table assoc" +
-                "(x char(10) not null primary key, y char(100))");
-        stmt.executeUpdate("create table assocout(x char(10))");
-        
-        conn.commit();
-    }
-
-    protected void tearDown() throws Exception {
-        Statement stmt = createStatement();
-        stmt.executeUpdate("DROP TABLE datetab");
-        stmt.executeUpdate("DROP TABLE timetab");
-        stmt.executeUpdate("DROP TABLE timestamptab");
-        stmt.executeUpdate("DROP TABLE usertypetab");
-        stmt.executeUpdate("DROP PROCEDURE Integ");
-        stmt.executeUpdate("DROP TABLE t1");
-        // for method checkAssociatedParams
-        stmt.executeUpdate("drop table assoc");
-        stmt.executeUpdate("drop table assocout");
+        getConnection().setAutoCommit(false);
+        Statement s = createStatement();
+        try {
+            s.execute("delete from t1");
+        } catch (SQLException e) {} // ignore if this fails, 
+        // if it's the first time, it *will* fail, thereafter, other things
+        // will fail anyway.
+        s.close();
         commit();
-        super.tearDown();
     }
     
     public static Test suite() {
         TestSuite suite = new TestSuite("BatchUpdateTest");
-        suite.addTest(
-            TestConfiguration.defaultSuite(BatchUpdateTest.class));
-
+        suite.addTest(baseSuite("BatchUpdateTest:embedded"));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+            baseSuite("BatchUpdateTest:client")));
+        return suite;
+    }
+    
+    protected static Test baseSuite(String name) {
+        TestSuite suite = new TestSuite(name);
+        suite.addTestSuite(BatchUpdateTest.class);
         return new CleanDatabaseTestSetup(
-            DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4));
-     }
+                DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4)) 
+        {
+            /**
+             * Creates the tables used in the test cases.
+             * @exception SQLException if a database error occurs
+             */
+            protected void decorateSQL(Statement stmt) throws SQLException
+            {
+                stmt.execute("create table t1(c1 int)");
+                // for fixture testCallableStatementBatch
+                stmt.execute("create table datetab(c1 date)");
+                stmt.execute("create table timetab(c1 time)");
+                stmt.execute("create table timestamptab(c1 timestamp)");
+                stmt.execute("create table usertypetab(c1 DATE)");
+                // for fixture testAssociatedParams
+                stmt.execute("create table assoc" +
+                    "(x char(10) not null primary key, y char(100))");
+                stmt.execute("create table assocout(x char(10))");
+            }
+        };
+    } 
     
     /* 
      * helper method to check each count in the return array of batchExecute
      */
-    public void assertBatchUpdateCounts( 
+    private void assertBatchUpdateCounts( 
         int[] expectedBatchResult, int[] executeBatchResult )
     {
         assertEquals("length of array should be identical", 
@@ -162,218 +223,48 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
      * @param int[]                The expectedUpdateCount array.
      */
     protected void assertBatchExecuteError( 
-            String expectedError,
-            Statement stmt,
-            int[] expectedUpdateCount) throws SQLException 
+        String expectedError,
+        Statement stmt,
+        int[] expectedUpdateCount) 
+    throws SQLException 
     {
         int[] updateCount;    
         try {
             updateCount = stmt.executeBatch();
-            fail("Expected stmt.batchExecute to fail");
-        } catch (SQLException sqle) {
-            assertSQLState(expectedError, sqle);
-            assertTrue("Expect BatchUpdateException", 
-                (sqle instanceof BatchUpdateException));
-            updateCount = ((BatchUpdateException)sqle).getUpdateCounts();
+            fail("Expected batchExecute to fail");
+        } catch (BatchUpdateException bue) {
+            assertSQLState(expectedError, bue);
+            updateCount = ((BatchUpdateException)bue).getUpdateCounts();
             assertBatchUpdateCounts(expectedUpdateCount, updateCount);
-        }
-    }
-
-
-    /** 
-     * helper method to evaluate negative tests where we expect a
-     * batchExecuteException to be returned
-     * 
-     * @exception SQLException     Thrown if the expected error occurs.
-     *                             We expect a BatchUpdateException, and
-     *                             verify it is so.
-     *
-     * @param String               The sqlstate to look for.
-     * @param PreparedStatement    The PreparedStatement that contains the 
-     *                             batch to be executed.
-     * @param int[]                The expectedUpdateCount array.
-     *                             
-     */
-    protected void assertBatchExecuteError( 
-            String expectedError,
-            PreparedStatement pstmt,
-            int[] expectedUpdateCount) throws SQLException 
-    {
-        int[] updateCount;    
-        try {
-            updateCount = pstmt.executeBatch();
-            fail("Expected pstmt.batchExecute to fail");
-        } catch (SQLException sqle) {
-            assertSQLState(expectedError, sqle);
-            assertTrue("Expect BatchUpdateException", 
-                (sqle instanceof BatchUpdateException));
-            updateCount = ((BatchUpdateException)sqle).getUpdateCounts();
-            assertBatchUpdateCounts(expectedUpdateCount, updateCount);
-        }
+        } 
     }
     
-    /**
-     * Positive tests for statement batch update.
-     *
-     * @exception SQLException      Thrown if some unexpected error happens
-     */
-    public void testStatementBatchUpdatePositive()
-    throws SQLException
-    {
-        Connection conn = getConnection();
+    /* Fixture that verifies tables can be created in batch */
+    public void testMinimalDDLInBatch() throws SQLException {
+        
         Statement stmt = createStatement();
-        // try executing a batch which nothing in it.
-        runEmptyStatementBatch(conn, stmt);
-        // try executing a batch which one statement in it.
-        runSingleStatementBatch(conn, stmt);
-        // try executing a batch with 3 different statements in it.
-        runMultipleStatementsBatch(conn, stmt);
-        // try executing a batch with 1000 statements in it.
-        run1000StatementsBatch(conn, stmt);
-        // try batch with autocommit true
-        runAutoCommitTrueBatch(conn, stmt);
-        // try clear batch
-        runCombinationsOfClearBatch(conn, stmt);
-        // confirm associated parameters run ok with batches
-        checkAssociatedParams(conn, stmt);
-        conn.commit();
+        stmt.addBatch("create table ddltsttable1(c1 int)");
+        stmt.addBatch("create procedure ddlinteg() language java " +
+            "parameter style java external name 'java.lang.Integer'");
+        stmt.addBatch("create table ddltable2(c1 date)");
+        int expectedCount[] = {0,0,0};
+        assertBatchUpdateCounts(expectedCount, stmt.executeBatch());
+        ResultSet rs = stmt.executeQuery(
+            "select count(*) from SYS.SYSTABLES where tablename like 'DDL%'");
+        JDBC.assertFullResultSet(rs, new String[][] {{"2"}}, true);
+        rs = stmt.executeQuery(
+            "select count(*) from SYS.SYSALIASES where alias like 'DDL%'");
+        JDBC.assertFullResultSet(rs, new String[][] {{"1"}}, true);
+
+        commit();
     }
 
-    /**
-     * Negative tests for statement batch update.
-     * 
-     * @exception SQLException      Thrown if some unexpected error happens
-     */
-    public void testStatementBatchUpdateNegative() throws SQLException 
-    {
-        Connection conn = getConnection();
-        Connection conn2 = openDefaultConnection();
-        conn.setAutoCommit(false);
-        conn2.setAutoCommit(false);        
-        Statement stmt = conn.createStatement();
-        Statement stmt2 = conn2.createStatement();
-
-        // statements which will return a resultset are not allowed in batch
-        // update. The following case should throw an exception for select.
-        // Below trying various placements of select statement in the batch,
-        // i.e. as 1st stmt, nth stmt and last stmt
-        runStatementWithResultSetBatch(conn, stmt);
-
-        // try executing a batch with regular statement intermingled.
-        runStatementNonBatchStuffInBatch(conn, stmt);
-
-        // Below trying various placements of overflow update statement 
-        // in the batch, i.e. as 1st stmt, nth stat and last stmt
-        runStatementWithErrorsBatch(conn, stmt);
-
-        // TODO: When running this with networkserver, we won't be able
-        // to drop t1 afterwards. Needs researching.
-        if (usingEmbedded())
-            // try transaction error, i.e. time out while getting the lock
-            runTransactionErrorBatch(conn, stmt, conn2, stmt2);
-        
-     }
-
-    /**
-     * Tests for callable statement batch update.
-     *
-     * @exception SQLException      Thrown if some unexpected error happens
-     */
-    public void testCallableStatementBatchUpdate()
-    throws SQLException
-    {
-        Connection conn = getConnection();
-        
-        // try callable statements
-        runCallableStatementBatch(conn);
-
-        // try callable statement with output parameters
-        runCallableStatementWithOutputParamBatch(conn);
-    }
     
-    /**
-     * Positive tests for prepared statement batch update.
-     *
-     *  @exception SQLException      Thrown if some unexpected error happens
-     */
-    public void testPreparedStatementBatchUpdatePositive()
-    throws SQLException 
-    {
-        Connection conn = getConnection();
-        Statement stmt = createStatement();
-
-        //try executing a batch which nothing in it.
-        runEmptyValueSetPreparedBatch(conn, stmt);
-
-        // following fails with NullPointerException with NetworkServer
-        // see DERBY-2112
-        if (usingEmbedded())
-        // try executing a batch with no parameters.
-            runNoParametersPreparedBatch(conn, stmt);
-
-        // try executing a batch which one parameter set in it.
-        runSingleValueSetPreparedBatch(conn, stmt);
-
-        // try executing a batch with 3 parameter sets in it.
-        runMultipleValueSetPreparedBatch(conn, stmt);
-
-        // try executing a batch with 2 parameter sets in it 
-        // and they are set to null.
-        runMultipleValueSetNullPreparedBatch(conn, stmt);
-
-        // try executing a batch with 1000 statements in it.
-        run1000ValueSetPreparedBatch(conn, stmt);
-
-        // try executing batches with various rollback and commit combinations.
-        runPreparedStatRollbackAndCommitCombinations(conn, stmt);
-
-        // try prepared statement batch with autocommit true
-        runAutoCommitTruePreparedStatBatch(conn, stmt);
-
-        // try clear batch
-        runCombinationsOfClearPreparedStatBatch(conn, stmt);
-
-    }
-       
-    /**
-     * Negative tests for prepared statement batch update.
-     *
-     *  @exception SQLException      Thrown if some unexpected error happens
-     */
-    public void testPreparedStatementBatchUpdateNegative() throws SQLException 
-    {
-
-        Connection conn = getConnection();
-        Connection conn2 = openDefaultConnection();
-        conn.setAutoCommit(false);
-        conn2.setAutoCommit(false);        
-        Statement stmt = conn.createStatement();
-        Statement stmt2 = conn2.createStatement();
-        
-        // statements which will return a resultset are not allowed in batch
-        // update. The following case should throw an exception for select.
-        runPreparedStmtWithResultSetBatch(conn, stmt);
-
-        // try executing a batch with regular statement intermingled.
-        runPreparedStmtNonBatchStuffInBatch(conn, stmt);
-
-        // Below trying various placements of overflow update statement 
-        // in the batch
-        runPreparedStmtWithErrorsBatch(conn, stmt);
-
-        // TODO: when running this test with NetworkServer, t1 can
-        //       no longer be dropped. Needs research.
-        if (usingEmbedded())
-            // try transaction error, in this particular case time out while 
-            // getting the lock
-            runTransactionErrorPreparedStmtBatch(conn, stmt, conn2, stmt2);
-    }
-	
-    /* Following are methods used in testStatementUpdateBatchPositive */
+    /* Fixtures that test correct usage of batch handling with Statements */
     
     // try executing a batch which nothing in it. Should work.
-    protected void runEmptyStatementBatch(Connection conn, Statement stmt) 
-    throws SQLException {
+    public void testEmptyStatementBatch() throws SQLException {
+        Statement stmt = createStatement();
         int updateCount[];
 
         // try executing a batch which nothing in it. Should work.
@@ -383,25 +274,25 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("expected updateCount of 0", 0, updateCount.length);
 
         stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
 
     // try executing a batch which single statement in it. Should work.
-    protected void runSingleStatementBatch(Connection conn, Statement stmt) 
-    throws SQLException {
+    public void testSingleStatementBatch() throws SQLException {
 
+        Statement stmt = createStatement();
         println("Positive Statement: testing 1 statement batch");
         stmt.addBatch("insert into t1 values(2)");
 
         assertBatchUpdateCounts(new int[] {1}, stmt.executeBatch());
             
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try executing a batch with 3 different statements in it.
-    protected void runMultipleStatementsBatch(
-            Connection conn, Statement stmt) throws SQLException {
+    public void testMultipleStatementsBatch() throws SQLException {
+
+        Statement stmt = createStatement();
         ResultSet rs;
 
         println("Positive Statement: testing 2 inserts and 1 update batch");
@@ -431,14 +322,14 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("expect 2 rows total", 2, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
 
     // try executing a batch with 1000 statements in it.
-    protected void run1000StatementsBatch(Connection conn, Statement stmt) 
-    throws SQLException {
+    public void test1000StatementsBatch() throws SQLException {
         int updateCount[];
+
+        Statement stmt = createStatement();
         ResultSet rs;
 
         println("Positive Statement: 1000 statements batch");
@@ -455,16 +346,16 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             1000, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
 
     // try batch with autocommit true
-    protected void runAutoCommitTrueBatch(Connection conn, Statement stmt) 
-    throws SQLException {
+    public void testAutoCommitTrueBatch() throws SQLException {
+
+        getConnection().setAutoCommit(true);    
+        Statement stmt = createStatement();
         ResultSet rs;
 
-        conn.setAutoCommit(true);
         // try batch with autocommit true
         println("Positive Statement: stmt testing with autocommit true");
         stmt.addBatch("insert into t1 values(1)");
@@ -477,15 +368,16 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("expect 0 rows", 0,rs.getInt(1));
         rs.close();
 
-        //turn it true again after the above negative test
-        conn.setAutoCommit(false);
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        // turn it false again after the above negative test. 
+        // should happen automatically, but just in case
+        getConnection().setAutoCommit(false);    
+        commit();
     }
 
     //  try combinations of clear batch.
-    protected void runCombinationsOfClearBatch(
-            Connection conn, Statement stmt) throws SQLException {
+    public void testCombinationsOfClearBatch() throws SQLException {
+
+        Statement stmt = createStatement();
         ResultSet rs;
 
         println("Positive Statement: add 3 statements, clear and execute batch");
@@ -516,8 +408,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, new String[][] {{"3"}}, true);
 
         rs.close();
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
 
     /*
@@ -528,15 +419,15 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
      ** that we use for predicates that we give to the access
      ** manager. 
      */
-    protected void checkAssociatedParams(Connection conn, Statement stmt)
-    throws SQLException 
+    public void testAssociatedParams() throws SQLException 
     {
+
+        Statement stmt = createStatement();
         int i;
-        conn.setAutoCommit(false);
         println("Positive Statement: testing associated parameters");
-        PreparedStatement checkps = conn.prepareStatement(
+        PreparedStatement checkps = prepareStatement(
             "select x from assocout order by x");
-        PreparedStatement ps = conn.prepareStatement(
+        PreparedStatement ps = prepareStatement(
             "insert into assoc values (?, 'hello')");
         for ( i = 10; i < 60; i++)
         {
@@ -544,7 +435,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             ps.executeUpdate();     
         }
 
-        ps = conn.prepareStatement(
+        ps = prepareStatement(
             "insert into assocout select x from assoc where x like ?");
         ps.setString(1, "33%");
         ps.addBatch();
@@ -561,7 +452,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
                 
         stmt.executeUpdate("delete from assocout");
 
-        ps = conn.prepareStatement(
+        ps = prepareStatement(
                 "insert into assocout select x from assoc where x like ?");
         ps.setString(1, "3%");
         ps.addBatch(); // expectedCount 10: values 10-19
@@ -583,7 +474,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expectedStrArray, true);
                 
         stmt.executeUpdate("delete from assocout");
-        ps = conn.prepareStatement(
+        ps = prepareStatement(
             "insert into assocout select x from assoc where x like ?");
         ps.setString(1, "%");// values 10-59
         ps.addBatch();
@@ -610,15 +501,15 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expectedStrArray2, true);
     }
 
-    /* Following are methods used in testStatementBatchUpdateNegative */
+    /* Fixtures that test incorrect batch usage with Statements */
 
     // statements which will return a resultset are not allowed in batch
     // update. The following case should throw an exception for select. 
     // Below trying various placements of select statement in the batch,
     // i.e. as 1st stmt, nth stat and last stmt
-    protected void runStatementWithResultSetBatch(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testStatementWithResultSetBatch() throws SQLException {
         
+        Statement stmt = createStatement();
         ResultSet rs;
 
         // trying select as the first statement
@@ -684,22 +575,21 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
                 "There should now be 5 rows in the table", 5, rs.getInt(1));
         rs.close();
 
-        conn.rollback();
+        rollback();
 
         rs = stmt.executeQuery("select count(*) from t1");
         rs.next();
         assertEquals("There should be no rows in the table after rollback", 
-                0, rs.getInt(1));
+            0, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try executing a batch with regular statement intermingled.
-    protected void runStatementNonBatchStuffInBatch(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testStatementNonBatchStuffInBatch() throws SQLException {
         
+        Statement stmt = createStatement();
         int[] updateCount=null;
         ResultSet rs;
 
@@ -716,7 +606,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             stmt.addBatch("insert into t1 values(1)"); 
             assertBatchExecuteError("XJ208",stmt, new int[] {-3,1});           
             // pull level with embedded situation
-            conn.rollback();
+            rollback();
         }
         // do clearBatch so we can proceed
         stmt.clearBatch();
@@ -726,27 +616,30 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("There should be no rows in the table", 0, rs.getInt(1));
         rs.close();
 
-        try
+        // trying executeQuery after addBatch
+        println("Negative Statement: " +
+            "statement testing executeQuery in the middle of batch");
+        stmt.addBatch("insert into t1 values(1)");
+        if (usingEmbedded())
         {
-            // trying executeQuery after addBatch
-            println("Negative Statement: " +
-                "statement testing executeQuery in the middle of batch");
-            stmt.addBatch("insert into t1 values(1)");
+            try
+            {
+                stmt.executeQuery("SELECT * FROM SYS.SYSTABLES");
+                fail("Expected executeQuerywith embedded");
+            } catch (SQLException sqle) {
+                /* Check to be sure the exception is the MIDDLE_OF_BATCH */
+                assertSQLState("XJ068", sqle);
+                // do clearBatch so we can proceed
+                stmt.clearBatch();
+            }
+        }
+        else if (usingDerbyNetClient())
+        {
             stmt.executeQuery("SELECT * FROM SYS.SYSTABLES");
             updateCount = stmt.executeBatch();
-            if (usingEmbedded())
-                fail("Expected executeBatch to fail with embedded");
-            else if (usingDerbyNetClient())
-            {   
-                assertBatchUpdateCounts(new int[] {1}, updateCount);
-                // set to same spot as embedded
-                conn.rollback();
-            }
-        } catch (SQLException sqle) {
-            /* Check to be sure the exception is the MIDDLE_OF_BATCH */
-            assertSQLState("XJ068", sqle);
-            // do clearBatch so we can proceed
-            stmt.clearBatch();
+            assertBatchUpdateCounts(new int[] {1}, updateCount);
+            // set to same spot as embedded
+            rollback();
         }
 
         rs = stmt.executeQuery("select count(*) from t1");
@@ -756,12 +649,12 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         println("Negative Statement: " +
             "statement testing executeUpdate in the middle of batch");
+        // trying executeUpdate after addBatch
+        println("Negative Statement: " +
+        "statement testing executeUpdate in the middle of batch");
+        stmt.addBatch("insert into t1 values(1)");
         try
         {
-            // trying executeUpdate after addBatch
-            println("Negative Statement: " +
-                "statement testing executeUpdate in the middle of batch");
-            stmt.addBatch("insert into t1 values(1)");
             stmt.executeUpdate("insert into t1 values(1)");
             stmt.addBatch("insert into t1 values(1)");
             stmt.addBatch("SELECT * FROM SYS.SYSCOLUMNS");
@@ -794,22 +687,21 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
                 3, rs.getInt(1));
         rs.close();
 
-        conn.rollback();
+        rollback();
 
         rs = stmt.executeQuery("select count(*) from t1");
         rs.next();
         assertEquals("There should be no rows in the table", 0, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // Below trying various placements of overflow update statement in the 
     // batch, i.e. as 1st stmt, nth stmt and last stmt
-    protected void runStatementWithErrorsBatch(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testStatementWithErrorsBatch() throws SQLException {
         
+        Statement stmt = createStatement();
         ResultSet rs;
 
         stmt.executeUpdate("insert into t1 values(1)");
@@ -878,62 +770,70 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             assertEquals("expected: 6 rows", 6, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try transaction error, in this particular case time out while
     // getting the lock
-    protected void runTransactionErrorBatch(
-        Connection conn, Statement stmt,
-        Connection conn2, Statement stmt2) throws SQLException {
+    public void testTransactionErrorBatch() throws SQLException {
 
+        // conn is just default connection
+        Connection conn = getConnection();
+        Connection conn2 = openDefaultConnection();
+        conn.setAutoCommit(false);
+        conn2.setAutoCommit(false);        
+        Statement stmt = conn.createStatement();
+        Statement stmt2 = conn2.createStatement();
+        
         int[] updateCount = null;
+
+        println("Negative Statement: statement testing time out" +
+            " while getting the lock in the batch");
+
+        stmt.execute("insert into t1 values(1)");
+        stmt2.execute("insert into t1 values(2)");
+
+        stmt.addBatch("update t1 set c1=3 where c1=2");
+        stmt2.addBatch("update t1 set c1=4 where c1=1");
 
         try
         {
-            println("Negative Statement: statement testing time out" +
-                " while getting the lock in the batch");
-
-            stmt.execute("insert into t1 values(1)");
-            stmt2.execute("insert into t1 values(2)");
-
-            stmt.addBatch("update t1 set c1=3 where c1=2");
-            stmt2.addBatch("update t1 set c1=4 where c1=1");
-                      
             stmt.executeBatch();
-            updateCount = stmt2.executeBatch();
             fail ("Batch is expected to fail");
-        } catch (SQLException sqle) {
+            updateCount = stmt2.executeBatch();
+        } catch (BatchUpdateException bue) {
             /* Ensure the exception is time out while getting lock */
-            assertSQLState("40XL1",sqle);
-            assertTrue("we should get a BatchUpdateException", 
-                (sqle instanceof BatchUpdateException));
-            updateCount = ((BatchUpdateException)sqle).getUpdateCounts();
+            if (usingEmbedded())
+                assertSQLState("40XL1", bue);
+            else if (usingDerbyNetClient())
+                assertSQLState("XJ208", bue);
+            updateCount = ((BatchUpdateException)bue).getUpdateCounts();
             if (updateCount != null) {
-                assertEquals("first statement in the batch caused time out" +
-                    " while getting the lock, expect no update count",
-                    0, updateCount.length);
+                if (usingEmbedded())
+                    assertEquals("first statement in the batch caused time out" +
+                        " while getting the lock, there should be no update count", 
+                        0, updateCount.length);
+                else if (usingDerbyNetClient())
+                    /* first statement in the batch caused time out while getting
+                     *  the lock, there should be 1 update count of -3 */
+                    assertBatchUpdateCounts(new int[] {-3}, updateCount);
             }
         }
         conn.rollback();
         conn2.rollback();
         stmt.clearBatch();
         stmt2.clearBatch();
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
-    /* Following are methods used in testCallableStatementBatchUpdate */
+    /* Fixtures that test batch updates with CallableStatements */
 
     // try callable statements
-    protected void runCallableStatementBatch(Connection conn)
-    throws SQLException {
-        conn.setAutoCommit(false);
-        
+    public void testCallableStatementBatch() throws SQLException {
+
         println("Positive Callable Statement: " +
             "statement testing callable statement batch");
-        CallableStatement cs = conn.prepareCall("insert into t1 values(?)");
+        CallableStatement cs = prepareCall("insert into t1 values(?)");
 
         cs.setInt(1, 1);
         cs.addBatch();
@@ -947,14 +847,14 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         {   
             fail("The executeBatch should have succeeded");
         }
-        cleanUpCallableStatement(conn, cs, "t1");
+        cleanUpCallableStatement(cs, "t1");
 
         /* For 'beetle' bug 2813 - setDate/setTime/setTimestamp
          * calls on callableStatement throws ClassNotFoundException 
          * verify setXXXX() works with Date, Time and Timestamp 
          * on CallableStatement.
          */
-        cs = conn.prepareCall("insert into datetab values(?)");
+        cs = prepareCall("insert into datetab values(?)");
 
         cs.setDate(1, Date.valueOf("1990-05-05"));
         cs.addBatch();
@@ -968,9 +868,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         {   
             fail("The executeBatch should have succeeded");
         }
-        cleanUpCallableStatement(conn, cs, "datetab");
+        cleanUpCallableStatement(cs, "datetab");
 
-        cs = conn.prepareCall("insert into timetab values(?)");
+        cs = prepareCall("insert into timetab values(?)");
 
         cs.setTime(1, Time.valueOf("11:11:11"));
         cs.addBatch();
@@ -984,9 +884,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         {   
             fail("The executeBatch should have succeeded");
         }
-        cleanUpCallableStatement(conn, cs, "timestamptab");
+        cleanUpCallableStatement(cs, "timestamptab");
 
-        cs = conn.prepareCall("insert into timestamptab values(?)");
+        cs = prepareCall("insert into timestamptab values(?)");
 
         cs.setTimestamp(1, Timestamp.valueOf("1990-05-05 11:11:11.1"));
         cs.addBatch();
@@ -1000,10 +900,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         {   
             fail("The executeBatch should have succeeded");
         }
-        cleanUpCallableStatement(conn, cs, "timestamptab");
+        cleanUpCallableStatement(cs, "timestamptab");
 
         // Try with a user type
-        cs = conn.prepareCall("insert into usertypetab values(?)");
+        cs = prepareCall("insert into usertypetab values(?)");
 
         cs.setObject(1, Date.valueOf("1990-05-05"));
         cs.addBatch();
@@ -1017,10 +917,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         {   
             fail("The executeBatch should have succeeded");
         }
-        cleanUpCallableStatement(conn, cs, "usertypetab");
+        cleanUpCallableStatement(cs, "usertypetab");
     }
     
-    // helper method to runCallableStatementBatch 
+    // helper method to testCallableStatementBatch 
     // executes and evaluates callable statement
     private static void executeBatchCallableStatement(CallableStatement cs)
     throws SQLException
@@ -1029,53 +929,46 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         updateCount = cs.executeBatch();
         assertEquals("there were 2 statements in the batch", 
-                2, updateCount.length);
+            2, updateCount.length);
         for (int i=0; i<updateCount.length; i++) 
         {
             assertEquals("update count should be 1", 1, updateCount[i]);
         }
     }
 
-    // helper method to runCallableStatementBatch - 
+    // helper method to testCallableStatementBatch - 
     // removes all rows from table
-    protected static void cleanUpCallableStatement(
-        Connection conn, CallableStatement cs, String tableName)
+    protected void cleanUpCallableStatement(
+        CallableStatement cs, String tableName)
     throws SQLException
     {
+        getConnection();
         cs.close();
-        conn.rollback();
-        cs = conn.prepareCall("delete from " + tableName);
+        rollback();
+        cs = prepareCall("delete from " + tableName);
         cs.executeUpdate();
         cs.close();
-        conn.commit();
+        commit();
     }
     
     // try callable statements with output parameters
-    // TODO: isolate the procedure(s) from lang/outparams? 
-    protected void runCallableStatementWithOutputParamBatch(Connection conn) 
+    public void testCallableStatementWithOutputParamBatch() 
     throws SQLException {
-        String CLASS_NAME;
-        if(JDBC.vmSupportsJDBC3())
-            CLASS_NAME = 
-               "org.apache.derbyTesting.functionTests.tests.lang.outparams30.";
-        else
-            CLASS_NAME = 
-                "org.apache.derbyTesting.functionTests.tests.lang.outparams.";
 
         println("Negative Callable Statement: " +
             "callable statement with output parameters in the batch");
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         s.execute("CREATE PROCEDURE " +
-                "takesString(OUT P1 VARCHAR(40), IN P2 INT) " +
-                "EXTERNAL NAME '" + CLASS_NAME + "takesString'" +
+            "takesString(OUT P1 VARCHAR(40), IN P2 INT) " +
+            "EXTERNAL NAME '" + this.getClass().getName() + ".takesString'" +
         " NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA");
 
-        CallableStatement cs = conn.prepareCall("call takesString(?,?)");
+        CallableStatement cs = prepareCall("call takesString(?,?)");
+        cs.registerOutParameter(1, Types.CHAR);
+        cs.setInt(2, Types.INTEGER);
         try
         {
-            cs.registerOutParameter(1, Types.CHAR);
-            cs.setInt(2, Types.INTEGER);
             cs.addBatch();
             if (usingEmbedded())
                 fail("Expected to see error XJ04C");
@@ -1092,38 +985,53 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         cs.close();
         s.execute("drop procedure takesString");
         s.close();
-        conn.rollback();
-        conn.commit();
+        rollback();
+        commit();
+    }
+    
+    // helper method to be used as procedure in test 
+    // testCallableStatementWithOutputParamBatch
+    public static void takesString(String[] outparam, int type) 
+    throws Throwable
+    {
+        // method is stripped from takesString in jdbcapi/outparams.java
+        outparam[0] = "3";
     }
 
-    /* Following are methods used in 
-     * testPreparedStatementBatchUpdatePositive */    
+    /* Fixtures that test correct usage with PreparedStatements */    
     
     // try executing a batch which nothing in it. Should work.
-    protected void runEmptyValueSetPreparedBatch(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testEmptyValueSetPreparedBatch() throws SQLException {
 
+        Statement stmt = createStatement();
+        
         // try executing a batch which nothing in it. Should work.
         println("Positive Prepared Stat: " +
             "set no parameter values and run the batch");
         PreparedStatement pStmt = 
-            conn.prepareStatement("insert into t1 values(?)");
+            prepareStatement("insert into t1 values(?)");
 
         assertBatchUpdateCounts(new int[] {}, pStmt.executeBatch());
 
         pStmt.close();
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try prepared statement batch with just no settable parameters.
-    protected void runNoParametersPreparedBatch(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testNoParametersPreparedBatch() throws SQLException {
+
+        // TODO: analyze & implement for NetworkServer when DERBY-2112 is fixed
+        // test fails with NullPointerException with NetworkServer
+        // see DERBY-2112
+        if (!usingEmbedded())
+            return;
+     
+        Statement stmt = createStatement();
         ResultSet rs;
 
         println("Positive Prepared Stat: no settable parameters");
         PreparedStatement pStmt = 
-            conn.prepareStatement("insert into t1 values(5)");
+            prepareStatement("insert into t1 values(5)");
         pStmt.addBatch();
         pStmt.addBatch();
         pStmt.addBatch();
@@ -1142,20 +1050,20 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("There should be 3 rows", 3, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try prepared statement batch with just one set of values.
-    protected void runSingleValueSetPreparedBatch(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testSingleValueSetPreparedBatch() throws SQLException {
+
+        Statement stmt = createStatement();
         ResultSet rs;
 
         // try prepared statement batch with just one set of values
         println("Positive Prepared Stat: " +
             "set one set of parameter values and run the batch");
         PreparedStatement pStmt = 
-            conn.prepareStatement("insert into t1 values(?)");
+            prepareStatement("insert into t1 values(?)");
         pStmt.setInt(1, 1);
         pStmt.addBatch();
         /* 1 parameter was set in batch, update count length should be 1 */
@@ -1173,20 +1081,20 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("There should be 1 row", 1, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try executing a batch with 3 different parameter sets in it.
-    protected void runMultipleValueSetPreparedBatch(
-            Connection conn, Statement stmt) throws SQLException {
+    public void testMultipleValueSetPreparedBatch() throws SQLException {
+
+        Statement stmt = createStatement();
         ResultSet rs;
 
         // try prepared statement batch with just one set of values
         println("Positive Prepared Stat: " +
             "set 3 set of parameter values and run the batch");
         PreparedStatement pStmt = 
-            conn.prepareStatement("insert into t1 values(?)");
+            prepareStatement("insert into t1 values(?)");
         pStmt.setInt(1, 1);
         pStmt.addBatch();
         pStmt.setInt(1, 2);
@@ -1203,23 +1111,23 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("There should be 3 rows", 3, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try prepared statement batch with just 2 set of values 
     // and there value is null. 
     // tests fix for 'beetle' bug 4002: Execute batch for
     // preparedStatement gives nullPointerException
-    protected void runMultipleValueSetNullPreparedBatch(
-            Connection conn, Statement stmt) throws SQLException {
+    public void testMultipleValueSetNullPreparedBatch() throws SQLException {
+
+        Statement stmt = createStatement();
         ResultSet rs;
 
         // try prepared statement batch with just one set of values
         println("Positive Prepared Stat: " +
             "set one set of parameter values to null and run the batch");
         PreparedStatement pStmt = 
-            conn.prepareStatement("insert into t1 values(?)");
+            prepareStatement("insert into t1 values(?)");
         pStmt.setNull(1, Types.INTEGER);
         pStmt.addBatch();
         pStmt.setNull(1, Types.INTEGER);
@@ -1240,20 +1148,19 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("There should be 2 rows", 2, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try executing a batch with 1000 statements in it.
-    protected void run1000ValueSetPreparedBatch(
-        Connection conn, Statement stmt) 
-    throws SQLException {
+    public void test1000ValueSetPreparedBatch() throws SQLException {
+        
+        Statement stmt = createStatement();
         int updateCount[];
         ResultSet rs;
 
         println("Positive Prepared Stat: 1000 parameter set batch");
         PreparedStatement pStmt = 
-            conn.prepareStatement("insert into t1 values(?)");
+            prepareStatement("insert into t1 values(?)");
         for (int i=0; i<1000; i++){
             pStmt.setInt(1, 1);
             pStmt.addBatch();
@@ -1266,24 +1173,24 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         rs = stmt.executeQuery("select count(*) from t1");
         rs.next();
         assertEquals("There should be 1000 rows in the table",
-                1000, rs.getInt(1));
+            1000, rs.getInt(1));
         rs.close();
 
         pStmt.close();
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
 
     // try executing batches with various rollback and commit combinations.
-    protected void runPreparedStatRollbackAndCommitCombinations(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testPreparedStatRollbackAndCommitCombinations() 
+    throws SQLException {
 
+        Statement stmt = createStatement();
         ResultSet rs;
 
         println("Positive Prepared Stat: batch, rollback," +
-                " batch and commit combinations");
+            " batch and commit combinations");
         PreparedStatement pStmt = 
-            conn.prepareStatement("insert into t1 values(?)");
+            prepareStatement("insert into t1 values(?)");
         pStmt.setInt(1, 1);
         pStmt.addBatch();
         pStmt.setInt(1, 1);
@@ -1292,7 +1199,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
          * update count length should be 2 */
         assertBatchUpdateCounts(new int[] {1,1}, pStmt.executeBatch());
 
-        conn.rollback();
+        rollback();
 
         rs = stmt.executeQuery("select count(*) from t1");
         rs.next();
@@ -1307,7 +1214,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
          * update count length should be 2 */
         assertBatchUpdateCounts(new int[] {1,1}, pStmt.executeBatch());
 
-        conn.commit();
+        commit();
 
         rs = stmt.executeQuery("select count(*) from t1");
         rs.next();
@@ -1325,7 +1232,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
          * update count length should be 2 */
         assertBatchUpdateCounts(new int[] {1,1}, pStmt.executeBatch());
 
-        conn.commit();
+        commit();
 
         rs = stmt.executeQuery("select count(*) from t1");
         rs.next();
@@ -1351,7 +1258,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
          * update count length should be 2 */
         assertBatchUpdateCounts(new int[] {1,1}, pStmt.executeBatch());
 
-        conn.rollback();
+        rollback();
 
         rs = stmt.executeQuery("select count(*) from t1");
         rs.next();
@@ -1377,7 +1284,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
          * update count length should be 2 */
         assertBatchUpdateCounts(new int[] {1,1}, pStmt.executeBatch());
 
-        conn.commit();
+        commit();
 
         rs = stmt.executeQuery("select count(*) from t1");
         rs.next();
@@ -1386,20 +1293,21 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         rs.close();
         pStmt.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
 
     // try prepared statement batch with autocommit true
-    protected void runAutoCommitTruePreparedStatBatch(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testAutoCommitTruePreparedStatBatch() throws SQLException {
+
         ResultSet rs;
 
-        conn.setAutoCommit(true);
+        getConnection().setAutoCommit(true);    
+        Statement stmt = createStatement();
+
         // prepared statement batch with autocommit true
         println("Positive Prepared Stat: testing batch with autocommit true");
         PreparedStatement pStmt = 
-            conn.prepareStatement("insert into t1 values(?)");
+            prepareStatement("insert into t1 values(?)");
         pStmt.setInt(1, 1);
         pStmt.addBatch();
         pStmt.setInt(1, 1);
@@ -1416,24 +1324,25 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         rs.close();
         pStmt.close();
 
-        // turn it true again after the above negative test
-        conn.setAutoCommit(false);
+        // turn it false again after the above negative test
+        // should happen automatically, but doesn't hurt
+        getConnection().setAutoCommit(false);    
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try combinations of clear batch.
-    protected void runCombinationsOfClearPreparedStatBatch(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testCombinationsOfClearPreparedStatBatch() 
+    throws SQLException {
 
+        Statement stmt = createStatement();
         int updateCount[];
         ResultSet rs;
 
         println("Positive Prepared Stat: add 3 statements, " +
             "clear batch and execute batch");
         PreparedStatement pStmt = 
-            conn.prepareStatement("insert into t1 values(?)");
+            prepareStatement("insert into t1 values(?)");
         pStmt.setInt(1, 1);
         pStmt.addBatch();
         pStmt.setInt(1, 2);
@@ -1471,22 +1380,21 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         rs.close();
         pStmt.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
-    /* Methods used in testPreparedStatementBatchUpdateNegative */
+    /* Fixtures that test incorrect usage with PreparedStatements */
     
     // statements which will return a resultset are not allowed in
     // batch Updates. Following case should throw an exception for select.
-    protected void runPreparedStmtWithResultSetBatch(
-        Connection conn, Statement stmt) throws SQLException {
+    public void testPreparedStmtWithResultSetBatch() throws SQLException {
 
+        Statement stmt = createStatement();
         ResultSet rs;
 
         println("Negative Prepared Stat: testing select in the batch");
         PreparedStatement pStmt = 
-            conn.prepareStatement("select * from t1 where c1=?");
+            prepareStatement("select * from t1 where c1=?");
         pStmt.setInt(1, 1);
         pStmt.addBatch();
         if (usingEmbedded())
@@ -1503,28 +1411,31 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             0, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try executing a batch with regular statement intermingled.
-    protected void runPreparedStmtNonBatchStuffInBatch(
-            Connection conn, Statement stmt) throws SQLException {
+    public void testPreparedStmtNonBatchStuffInBatch() throws SQLException {
+        
+        Statement stmt = createStatement();
+
         int updateCount[] = null;
         ResultSet rs;
 
+        // trying execute in the middle of batch
+        println("Negative Prepared Stat: " +
+            "testing execute in the middle of batch");
+        PreparedStatement pStmt = 
+            prepareStatement("select * from t1 where c1=?");
+        pStmt.setInt(1, 1);
+        pStmt.addBatch();
         try
         {
-            // trying execute in the middle of batch
-            println("Negative Prepared Stat: " +
-                "testing execute in the middle of batch");
-            PreparedStatement pStmt = 
-                conn.prepareStatement("select * from t1 where c1=?");
-            pStmt.setInt(1, 1);
-            pStmt.addBatch();
             pStmt.execute();
-            updateCount = pStmt.executeBatch();
-            fail("Expected executeBatch to fail");
+            if (usingEmbedded())
+                fail("Expected executeBatch to fail");
+            else if (usingDerbyNetClient())
+                updateCount = pStmt.executeBatch();
         } catch (SQLException sqle) {
             if (usingEmbedded())
                 /* Check to be sure the exception is the MIDDLE_OF_BATCH */
@@ -1541,18 +1452,20 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             0, rs.getInt(1));
         rs.close();
 
+        // trying executeQuery in the middle of batch
+        println("Negative Prepared Statement: " +
+            "testing executeQuery in the middle of batch");
+        pStmt = 
+            prepareStatement("select * from t1 where c1=?");
+        pStmt.setInt(1, 1);
+        pStmt.addBatch();
         try
         {
-            // trying executeQuery in the middle of batch
-            println("Negative Prepared Statement: " +
-                "testing executeQuery in the middle of batch");
-            PreparedStatement pStmt = 
-                conn.prepareStatement("select * from t1 where c1=?");
-            pStmt.setInt(1, 1);
-            pStmt.addBatch();
             pStmt.executeQuery();
-            updateCount = pStmt.executeBatch();
-            fail("Expected executeBatch to fail");
+            if (usingEmbedded())
+                fail("Expected executeBatch to fail");
+            else if (usingDerbyNetClient())
+                updateCount = pStmt.executeBatch();
         } catch (SQLException sqle) {
             if (usingEmbedded())
                 /* Check to be sure the exception is the MIDDLE_OF_BATCH */
@@ -1569,18 +1482,20 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             0, rs.getInt(1));
         rs.close();
 
+        //  trying executeUpdate in the middle of batch
+        println("Negative Prepared Stat: " +
+            "testing executeUpdate in the middle of batch");
+        pStmt = 
+            prepareStatement("select * from t1 where c1=?");
+        pStmt.setInt(1, 1);
+        pStmt.addBatch();
         try
         {
-            //  trying executeUpdate in the middle of batch
-            println("Negative Prepared Stat: " +
-                        "testing executeUpdate in the middle of batch");
-            PreparedStatement pStmt = 
-                conn.prepareStatement("select * from t1 where c1=?");
-            pStmt.setInt(1, 1);
-            pStmt.addBatch();
             pStmt.executeUpdate();
-            updateCount = pStmt.executeBatch();
-            fail("Expected executeBatch to fail");
+            if (usingEmbedded())
+                fail("Expected executeBatch to fail");
+            else if (usingDerbyNetClient())
+                updateCount = pStmt.executeBatch();
         } catch (SQLException sqle) {
             if (usingEmbedded())
                 /* Check to be sure the exception is the MIDDLE_OF_BATCH */
@@ -1597,14 +1512,13 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             0, rs.getInt(1));
         rs.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // Below trying placements of overflow update statement in the batch
-    protected void runPreparedStmtWithErrorsBatch(
-        Connection conn, Statement stmt) throws SQLException {
-        
+    public void testPreparedStmtWithErrorsBatch() throws SQLException {
+
+        Statement stmt = createStatement();
         ResultSet rs;
         PreparedStatement pStmt = null;
 
@@ -1612,7 +1526,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         println("Negative Prepared Stat: " +
             "testing overflow as first set of values");
-        pStmt = conn.prepareStatement("update t1 set c1=(? + 1)");
+        pStmt = prepareStatement("update t1 set c1=(? + 1)");
         pStmt.setInt(1, java.lang.Integer.MAX_VALUE);
         pStmt.addBatch();
         if (usingEmbedded())
@@ -1630,7 +1544,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         println("Negative Prepared Stat: " +
             "testing overflow as nth set of values");
-        pStmt = conn.prepareStatement("update t1 set c1=(? + 1)");
+        pStmt = prepareStatement("update t1 set c1=(? + 1)");
         pStmt.setInt(1, 1);
         pStmt.addBatch();
         pStmt.setInt(1, java.lang.Integer.MAX_VALUE);
@@ -1653,7 +1567,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         // trying select as the last statement
         println("Negative Prepared Stat: " +
             "testing overflow as last set of values");
-        pStmt = conn.prepareStatement("update t1 set c1=(? + 1)");
+        pStmt = prepareStatement("update t1 set c1=(? + 1)");
         pStmt.setInt(1, 1);
         pStmt.addBatch();
         pStmt.setInt(1, 1);
@@ -1674,56 +1588,65 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         rs.close();
         pStmt.close();
 
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
     
     // try transaction error, in this particular case 
     // time out while getting the lock
-    protected void runTransactionErrorPreparedStmtBatch(
-            Connection conn, Statement stmt,
-            Connection conn2, Statement stmt2) throws SQLException {
+    public void testTransactionErrorPreparedStmtBatch() throws SQLException {
+
+        Connection conn = getConnection();
+        Connection conn2 = openDefaultConnection();
+        conn.setAutoCommit(false);
+        conn2.setAutoCommit(false);        
+        Statement stmt = conn.createStatement();
+        Statement stmt2 = conn2.createStatement();
 
         int updateCount[] = null;
-        
+
+        println("Negative Prepared Statement: " +
+            "testing transaction error, time out while getting the lock");
+
+        stmt.execute("insert into t1 values(1)");
+        stmt2.execute("insert into t1 values(2)");
+
+        PreparedStatement pStmt1 = 
+            conn.prepareStatement("update t1 set c1=3 where c1=?");
+        pStmt1.setInt(1, 2);
+        pStmt1.addBatch();
+
+        PreparedStatement pStmt2 = 
+            conn.prepareStatement("update t1 set c1=4 where c1=?");
+        pStmt2.setInt(1, 1);
+        pStmt2.addBatch();
+
         try
         {
-            println("Negative Prepared Statement: " +
-                "testing transaction error, time out while getting the lock");
-
-            stmt.execute("insert into t1 values(1)");
-            stmt2.execute("insert into t1 values(2)");
-
-            PreparedStatement pStmt1 = 
-                conn.prepareStatement("update t1 set c1=3 where c1=?");
-            pStmt1.setInt(1, 2);
-            pStmt1.addBatch();
-
-            PreparedStatement pStmt2 = 
-                conn.prepareStatement("update t1 set c1=4 where c1=?");
-            pStmt2.setInt(1, 1);
-            pStmt2.addBatch();
-
             pStmt1.executeBatch();
             updateCount = pStmt2.executeBatch();
             fail ("Batch is expected to fail");
-        } catch (SQLException sqle) {
+        } catch (BatchUpdateException bue) {
             /* Check that the exception is time out while 
              * getting the lock */
-            assertSQLState("40XL1", sqle);
-            assertTrue("Expect BatchUpdateException", 
-                (sqle instanceof BatchUpdateException));
-            updateCount = ((BatchUpdateException)sqle).getUpdateCounts();
+            if (usingEmbedded())
+                assertSQLState("40XL1", bue);
+            else if (usingDerbyNetClient())
+                assertSQLState("XJ208", bue);
+            updateCount = ((BatchUpdateException)bue).getUpdateCounts();
             if (updateCount != null) {
-                assertEquals("first statement in the batch caused time out" +
-                    " while getting the lock, there should be no update count", 
-                    0, updateCount.length);
+                if (usingEmbedded())
+                    assertEquals("first statement in the batch caused time out" +
+                        " while getting the lock, there should be no update count", 
+                        0, updateCount.length);
+                else if (usingDerbyNetClient())
+                    /* first statement in the batch caused time out while getting
+                     *  the lock, there should be 1 update count of -3 */
+                    assertBatchUpdateCounts(new int[] {-3}, updateCount);
             }
         }
 
         conn.rollback();
         conn2.rollback();
-        stmt.executeUpdate("delete from t1");
-        conn.commit();
+        commit();
     }
 }
