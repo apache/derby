@@ -719,7 +719,7 @@
              Windowtitle="Apache Derby ${major}.${minor} API Documentation"
              Doctitle="Apache Derby ${major}.${minor} API Documentation"
              Footer="${javadoc.Footer}"
-             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 1997,2006 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;">
+             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 2004,2007 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;">
       <fileset dir="${derby.engine.src.dir}"
                includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.client.src.dir}"
@@ -766,7 +766,7 @@
         windowtitle="Apache Derby V${major}.${minor} Internals"
         doctitle="Apache Derby V${major}.${minor} Internals"
         Footer="${javadoc.Footer}"
-        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 1997,2006 The Apache Software Foundation or its licensors, as applicable.&lt;/i&gt;"
+        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,2007 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
         source="1.4">
         <taglet name="org.apache.derbyBuild.javadoc.FormatIdTaglet" 
                 path="${basedir}/classes"/>
