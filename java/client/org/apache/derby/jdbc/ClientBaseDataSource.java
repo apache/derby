@@ -23,6 +23,7 @@ package org.apache.derby.jdbc;
 
 import java.io.Serializable;
 import java.io.PrintWriter;
+import java.io.File;
 import java.security.AccessController;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -584,9 +585,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
             if (traceDirectory != null) {
                 String fileName;
                 if (traceFile == null) {
-                    fileName = traceDirectory + "/" + logWriterInUseSuffix + "_" + traceFileSuffixIndex;
+                    fileName = traceDirectory + File.separator + logWriterInUseSuffix + "_" + traceFileSuffixIndex;
                 } else {
-                    fileName = traceDirectory + "/" + traceFile + logWriterInUseSuffix + "_" + traceFileSuffixIndex;
+                    fileName = traceDirectory + File.separator + traceFile + logWriterInUseSuffix + "_" + traceFileSuffixIndex;
                 }
                 return LogWriter.getPrintWriter(fileName, true); // no file append and not enable caching.
             } else if (traceFile != null) {
