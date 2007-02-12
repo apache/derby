@@ -415,6 +415,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             ps.setString(1, new Integer(i).toString());
             ps.executeUpdate();     
         }
+        ps.close();
 
         ps = prepareStatement(
             "insert into assocout select x from assoc where x like ?");
