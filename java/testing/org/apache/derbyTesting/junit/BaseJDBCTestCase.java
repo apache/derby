@@ -72,7 +72,12 @@ public abstract class BaseJDBCTestCase
      * <P>
      * The tearDown method will close the connection if
      * it is open.
-     * @see TestConfiguration#openDefaultConnection()
+     * <BR>
+     * The connection will be initialized by calling initializeConnection.
+     * A sub-class may provide an implementation of initializeConnection
+     * to ensure its connections are in a consistent state that is different
+     * to the default.
+     * @see openDefaultConnection()
      */
     public Connection getConnection() throws SQLException
     {
@@ -94,10 +99,8 @@ public abstract class BaseJDBCTestCase
      * <LI> openDefaultConnection()
      * <LI> openConnection(database)
      * <LI> getDefaultConnection(String connAttrs)
-     * <LI> getConnection(String databaseName, String connAttrs)
      * </UL>
-     * when getConnection() opens a new connection. Default
-     * action is to not modify the connection's state from
+     * Default action is to not modify the connection's state from
      * the initialization provided by the data source.
      * @param conn Connection to be intialized
      * @throws SQLException Error setting the initial state.
@@ -187,9 +190,15 @@ public abstract class BaseJDBCTestCase
      * Open a connection to the default database.
      * If the database does not exist, it will be created.
      * A default username and password will be used for the connection.
+     * 
+     * The connection will be initialized by calling initializeConnection.
+     * A sub-class may provide an implementation of initializeConnection
+     * to ensure its connections are in a consistent state that is different
+     * to the default.
      *
      * @return connection to default database.
      * @see TestConfiguration#openDefaultConnection()
+     * @see BaseJDBCTestCase#initializeConnection(Connection)
      */
     public Connection openDefaultConnection()
         throws SQLException {
@@ -205,6 +214,12 @@ public abstract class BaseJDBCTestCase
      * This connection is not
      * automaticaly closed on tearDown, the text fixture must
      * ensure the connection is closed.
+     * 
+     * The connection will be initialized by calling initializeConnection.
+     * A sub-class may provide an implementation of initializeConnection
+     * to ensure its connections are in a consistent state that is different
+     * to the default.
+     * @see BaseJDBCTestCase#initializeConnection(Connection)
      */
     public Connection openDefaultConnection(String user, String password)
     throws SQLException
@@ -230,9 +245,15 @@ public abstract class BaseJDBCTestCase
      * This connection is not
      * automaticaly closed on tearDown, the text fixture must
      * ensure the connection is closed.
+     * <BR>
+     * The connection will be initialized by calling initializeConnection.
+     * A sub-class may provide an implementation of initializeConnection
+     * to ensure its connections are in a consistent state that is different
+     * to the default.
      * 
      * @see DatabasePropertyTestSetup#builtinAuthentication(Test, String[], String)
      * @see TestConfiguration#sqlAuthorizationDecorator(Test, String[], String)
+     * @see BaseJDBCTestCase#initializeConnection(Connection)
      */
     public Connection openUserConnection(String user) throws SQLException
     {
@@ -246,9 +267,14 @@ public abstract class BaseJDBCTestCase
      * A default username and password will be used for the connection.
      * Requires that the test has been decorated with a
      * singleUseDatabaseDecorator with the matching name.
-     *
+     * <BR>
+     * The connection will be initialized by calling initializeConnection.
+     * A sub-class may provide an implementation of initializeConnection
+     * to ensure its connections are in a consistent state that is different
+     * to the default.
      * @return connection to default database.
      * @see TestConfiguration#singleUseDatabaseDecorator(Test, String, boolean)
+     * @see BaseJDBCTestCase#initializeConnection(Connection)
      */
     public Connection openConnection(String databaseName)
         throws SQLException {
@@ -561,6 +587,41 @@ public abstract class BaseJDBCTestCase
         } catch (SQLException se) {
             assertSQLState(sqlState, se);
         }
+    }
+    
+    /**
+     * Assert that the number of rows in a table is an expected value.
+     * Query uses a SELECT COUNT(*) FROM "table".
+     * 
+     * @param table Name of table in current schema, will be quoted
+     * @param rowCount Number of rows expected in the table
+     * @throws SQLException Error accessing the database.
+     */
+    protected void assertTableRowCount(String table, int rowCount) throws SQLException
+    {
+        assertEscapedTableRowCount(JDBC.escape(table), rowCount);
+    }
+
+    /**
+     * Assert that the number of rows in a table is an expected value.
+     * Query uses a SELECT COUNT(*) FROM table.
+     * 
+     * @param table Escaped name of table, will be used as-is.
+     * @param rowCount Number of rows expected in the table
+     * @throws SQLException Error accessing the database.
+     */
+    private void assertEscapedTableRowCount(String escapedTableName, int rowCount)
+       throws SQLException
+    {
+    
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery(
+                "SELECT COUNT(*) FROM " + escapedTableName);
+        rs.next();
+        assertEquals(escapedTableName + " row count:",
+            rowCount, rs.getInt(1));
+        rs.close();
+        s.close();
     }
 
     /**
