@@ -680,6 +680,39 @@ public abstract class BaseJDBCTestCase
     }
 
     /**
+     * Perform a fetch on the ResultSet with an expected failure
+     * 
+     * @param sqlState Expected SQLState
+     * @param rs   ResultSet upon which next() will be called
+     */
+    public static void assertNextError(String sqlState,ResultSet rs)
+    {
+    	try {
+    		rs.next();
+    		fail("Expected error on next()");
+    	}catch (SQLException se){
+    		assertSQLState(sqlState,se);
+    	}
+    }
+    
+    /**
+     * Perform getInt(position) with expected error
+     * @param position  position argument to pass to getInt
+     * @param sqlState  sqlState of expected error
+     * @param rs ResultSet upon which to call getInt(position)
+     */
+    public static void assertGetIntError(int position, String sqlState, ResultSet rs)
+    {
+    	try {
+    		rs.getInt(position);
+    		fail("Expected exception " + sqlState);
+    	} catch (SQLException se){
+    		assertSQLState(sqlState,se);
+    	}
+    			
+    	
+    }
+    /**
      * Take a Statement object and a SQL query, execute it
      * via the "executeUpdate()" method, and assert that the
      * resultant row count matches the received row count.
