@@ -19,12 +19,6 @@
 
  */
 
-/**
- * This class contains database state specific to XA,
- * specifically the XAResource that will be used for XA commands.
- * @author kmarsden@Sourcery.Org
- */
-
 package org.apache.derby.impl.drda;
 
 import java.sql.Connection;
@@ -43,6 +37,12 @@ import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derby.impl.drda.DRDAXid;
 import  org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.EngineConnection;
+
+/**
+ * This class contains database state specific to XA,
+ * specifically the XAResource that will be used for XA commands.
+ * @author kmarsden@Sourcery.Org
+ */
 
 class XADatabase extends Database {
 
