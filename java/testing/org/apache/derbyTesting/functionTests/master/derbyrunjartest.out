@@ -29,7 +29,7 @@ server:
 No arguments given.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>]
+start [-h <host>] [-p <portnumber>] [-unsecure]
 shutdown [-h <host>][-p <portnumber>]
 ping [-h <host>][-p <portnumber>]
 sysinfo [-h <host>][-p <portnumber>]

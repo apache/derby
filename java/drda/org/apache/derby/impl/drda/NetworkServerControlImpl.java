@@ -83,29 +83,30 @@ public final class NetworkServerControlImpl {
 	// number of required arguments for each command
 	private final static int [] COMMAND_ARGS =
 	{0, 0, 1, 1, 0, 1, 0, 0, 1, 1};
-	private final static int COMMAND_START = 0;
-	private final static int COMMAND_SHUTDOWN = 1;
-	private final static int COMMAND_TRACE = 2;
-	private final static int COMMAND_TRACEDIRECTORY = 3;
-	private final static int COMMAND_TESTCONNECTION = 4;
-	private final static int COMMAND_LOGCONNECTIONS = 5;
-	private final static int COMMAND_SYSINFO = 6;
-	private final static int COMMAND_RUNTIME_INFO = 7;
-	private final static int COMMAND_MAXTHREADS = 8;
-	private final static int COMMAND_TIMESLICE = 9;
-	private final static int COMMAND_PROPERTIES = 10;
-	private final static int COMMAND_UNKNOWN = -1;
-	private final static String [] DASHARGS =
-	{"p","d","u","ld","ea","ep", "b", "h", "s"};
-	private final static int DASHARG_PORT = 0;
-	private final static int DASHARG_DATABASE = 1;
-	private final static int DASHARG_USER = 2;
-	private final static int DASHARG_LOADSYSIBM = 3;
-	private final static int DASHARG_ENCALG = 4;
-	private final static int DASHARG_ENCPRV = 5;
-	private final static int DASHARG_BOOTPASSWORD = 6;
-	private final static int DASHARG_HOST = 7;
-	private final static int DASHARG_SESSION = 8;
+	public final static int COMMAND_START = 0;
+	public final static int COMMAND_SHUTDOWN = 1;
+	public final static int COMMAND_TRACE = 2;
+	public final static int COMMAND_TRACEDIRECTORY = 3;
+	public final static int COMMAND_TESTCONNECTION = 4;
+	public final static int COMMAND_LOGCONNECTIONS = 5;
+	public final static int COMMAND_SYSINFO = 6;
+	public final static int COMMAND_RUNTIME_INFO = 7;
+	public final static int COMMAND_MAXTHREADS = 8;
+	public final static int COMMAND_TIMESLICE = 9;
+	public final static int COMMAND_PROPERTIES = 10;
+	public final static int COMMAND_UNKNOWN = -1;
+	public final static String [] DASHARGS =
+	{"p","d","u","ld","ea","ep", "b", "h", "s", "unsecure"};
+	public final static int DASHARG_PORT = 0;
+	public final static int DASHARG_DATABASE = 1;
+	public final static int DASHARG_USER = 2;
+	public final static int DASHARG_LOADSYSIBM = 3;
+	public final static int DASHARG_ENCALG = 4;
+	public final static int DASHARG_ENCPRV = 5;
+	public final static int DASHARG_BOOTPASSWORD = 6;
+	public final static int DASHARG_HOST = 7;
+	public final static int DASHARG_SESSION = 8;
+	public final static int DASHARG_UNSECURE = 9;
 
 	// command protocol version - you need to increase this number each time
 	// the command protocol changes 
@@ -204,6 +205,7 @@ public final class NetworkServerControlImpl {
 	private String hostArg = DEFAULT_HOST;	
 	private InetAddress hostAddress;
 	private int sessionArg;
+	private boolean unsecureArg;
 
 	// Used to debug memory in SanityManager.DEBUG mode
 	private memCheck mc;
@@ -330,6 +332,17 @@ public final class NetworkServerControlImpl {
         }
     }
 
+    /**
+     * Get the host where we listen for connections.
+     */
+    public  String  getHost() { return hostArg; }
+
+    /**
+     * Return true if the customer forcibly overrode our decision to install a
+     * default SecurityManager.
+     */
+    public  boolean runningUnsecure() { return unsecureArg; }
+    
     // constructor
 	public NetworkServerControlImpl() throws Exception
 	{
@@ -1757,27 +1770,42 @@ public final class NetworkServerControlImpl {
 	}
 
 
+    /**
+     * Parse the command-line arguments. As a side-effect, fills in various instance
+     * fields. This method was carved out of executeWork() so that
+     * NetworkServerControl can figure out whether to install a security manager
+     * before the server actually comes up. This is part of the work for DERBY-2196.
+     *
+     * @param args	array of arguments indicating command to be executed
+     *
+     * @return the command to be executed
+     */
+    public int parseArgs(String args[]) throws Exception
+    {
+        // For convenience just use NetworkServerControlImpls log writer for user messages
+        logWriter = makePrintWriter(System.out);
+
+        int command = COMMAND_START; 
+        if (args.length > 0)
+            command = findCommand(args);
+        else
+        {
+            consolePropertyMessage("DRDA_NoArgs.U");
+        }
+
+        return command;
+    }
+
 	/**
 	 * Execute the command given on the command line
 	 *
-	 * @param args	array of arguments indicating command to be executed
+	 * @param command   The command to execute. The command itself was determined by an earlier call to parseArgs().
 	 *
 	 * @exception Exception	throws an exception if an error occurs
 	 * see class comments for more information
 	 */
-	public void executeWork(String args[]) throws Exception
+	public void executeWork(int command) throws Exception
 	{
-		// For convenience just use NetworkServerControlImpls log writer for user messages
-		logWriter = makePrintWriter(System.out);
-		
-		int command = 0; 
-		if (args.length > 0)
-			command = findCommand(args);
-		else
-		{
-			consolePropertyMessage("DRDA_NoArgs.U");
-		}
-
 		// if we didn't have a valid command just return - error already generated
 		if (command == COMMAND_UNKNOWN)
 			return;
@@ -1962,7 +1990,7 @@ public final class NetworkServerControlImpl {
 			if (DASHARGS[i].equals(args[pos].substring(1)))
 			{
 				dashArg = i;
-				pos++;
+				if ( dashArg != DASHARG_UNSECURE ) { pos++ ; }
 				break;
 			}
 		}
@@ -2038,6 +2066,11 @@ public final class NetworkServerControlImpl {
 				else
 					consolePropertyMessage("DRDA_MissingValue.U", "DRDA_Session.I");
 				break;
+
+			case DASHARG_UNSECURE:
+				unsecureArg = true;
+				break;
+
 			default:
 				//shouldn't get here
 		}
@@ -2878,6 +2911,18 @@ public final class NetworkServerControlImpl {
 		throw new Exception(UNEXPECTED_ERR);
 
 	}
+
+    /**
+     * Convenience routine so that NetworkServerControl can localize messages.
+     *
+     * @param msgProp	message key
+     * @param args		arguments to message
+     *
+     */
+    public String localizeMessage( String msgProp, String[] args )
+    {
+        return localizeMessage( msgProp, langUtil, args );
+    }
 
 	/**
 	 * Localize a message given a particular AppUI 

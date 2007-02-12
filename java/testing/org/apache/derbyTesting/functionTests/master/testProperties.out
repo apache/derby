@@ -1,16 +1,16 @@
 Start testProperties to test property priority
 Testing derby.properties Port 1528 
-org.apache.derby.drda.NetworkServerControl start 
+org.apache.derby.drda.NetworkServerControl start -unsecure 
 Successfully Connected
 org.apache.derby.drda.NetworkServerControl shutdown 
 Apache Derby Network Server - 10.3.0.0 alpha -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
 Testing System properties  Port 1529 
------Dderby.drda.portNumber=1529 org.apache.derby.drda.NetworkServerControl start 
+-----Dderby.drda.portNumber=1529 org.apache.derby.drda.NetworkServerControl start -unsecure 
 Successfully Connected
 org.apache.derby.drda.NetworkServerControl shutdown -p 1529 
 Apache Derby Network Server - 10.3.0.0 alpha -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
 Testing command line option. Port 1530
-org.apache.derby.drda.NetworkServerControl start -p 1530 
+org.apache.derby.drda.NetworkServerControl start -p 1530 -unsecure 
 Successfully Connected
 org.apache.derby.drda.NetworkServerControl shutdown -p 1530 
 Apache Derby Network Server - 10.3.0.0 alpha -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
@@ -18,7 +18,7 @@ Testing start server by specifying system properties without values
 First shutdown server started on default port by the test harness
 org.apache.derby.drda.NetworkServerControl shutdown -p 1527 
 Apache Derby Network Server - 10.3.0.0 alpha -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
------Dderby.drda.logConnections -Dderby.drda.traceAll -Dderby.drda.traceDirectory -Dderby.drda.keepAlive -Dderby.drda.timeSlice -Dderby.drda.host -Dderby.drda.portNumber -Dderby.drda.minThreads -Dderby.drda.maxThreads -Dderby.drda.startNetworkServer -Dderby.drda.debug org.apache.derby.drda.NetworkServerControl start 
+-----Dderby.drda.logConnections -Dderby.drda.traceAll -Dderby.drda.traceDirectory -Dderby.drda.keepAlive -Dderby.drda.timeSlice -Dderby.drda.host -Dderby.drda.portNumber -Dderby.drda.minThreads -Dderby.drda.maxThreads -Dderby.drda.startNetworkServer -Dderby.drda.debug org.apache.derby.drda.NetworkServerControl start -unsecure 
 ----- listing properties --
 derby.drda.maxThreads=0
 derby.drda.keepAlive=true
@@ -63,7 +63,7 @@ org.apache.derby.drda.NetworkServerControl
 No arguments given.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>]
+start [-h <host>] [-p <portnumber>] [-unsecure]
 shutdown [-h <host>][-p <portnumber>]
 ping [-h <host>][-p <portnumber>]
 sysinfo [-h <host>][-p <portnumber>]
@@ -77,7 +77,7 @@ org.apache.derby.drda.NetworkServerControl unknowncmd
 Command unknowncmd is unknown.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>]
+start [-h <host>] [-p <portnumber>] [-unsecure]
 shutdown [-h <host>][-p <portnumber>]
 ping [-h <host>][-p <portnumber>]
 sysinfo [-h <host>][-p <portnumber>]
@@ -91,7 +91,7 @@ org.apache.derby.drda.NetworkServerControl ping arg1
 Invalid number of arguments for command ping.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>]
+start [-h <host>] [-p <portnumber>] [-unsecure]
 shutdown [-h <host>][-p <portnumber>]
 ping [-h <host>][-p <portnumber>]
 sysinfo [-h <host>][-p <portnumber>]

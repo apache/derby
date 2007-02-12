@@ -80,7 +80,8 @@ public class testProperties
 									"-Dderby.drda.startNetworkServer",
 									"-Dderby.drda.debug",
 									"org.apache.derby.drda.NetworkServerControl",
-									"start"};
+									"start",
+									"-unsecure",};
     
     //No arguments
     private static String[] cmdWithoutArgs =
@@ -212,9 +213,35 @@ public class testProperties
 		else
 			cmdArr = new String[] {"org.apache.derby.drda.NetworkServerControl", cmd,"-p", portString};
 		
+        cmdArr = unsecure( cmd, cmdArr );
+        
         execCmdDumpResults(cmdArr, wait);
 	}	
-	
+
+    /**
+     * Add the "-unsecure" option to the arguments of the start command. This
+     * prevents the server from choking on the fact that authentication isn't
+     * required. This allows the test to go ahead and test what it intends to,
+     * viz., the precedence of various property-setting techniques.
+     * The authentication requirement and the "-unsecure" option were added as
+     * part of the work for DERBY-2196.
+     */
+    private static  String[]    unsecure( String cmd, String[] originalArgs )
+    {
+        if ( !cmd.equals( "start" ) ) { return originalArgs; }
+        else
+        {
+            int             count = originalArgs.length;
+            String[]    cooked = new String[ count + 1 ];
+
+            for ( int i = 0; i < count; i++ ) { cooked[ i ] = originalArgs[ i ]; }
+
+            cooked[ count ] = "-unsecure";
+
+            return cooked;
+        }
+    }
+
 	private static void waitForStart(String portString, int timeToWait) throws Exception
 	{
 		int waitTime = 0;

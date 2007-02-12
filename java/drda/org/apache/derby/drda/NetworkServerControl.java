@@ -23,6 +23,7 @@ package org.apache.derby.drda;
 
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.URL;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
 
@@ -167,7 +168,12 @@ public class NetworkServerControl{
 
 	
 	public final static int DEFAULT_PORTNUMBER = 1527;
-	private NetworkServerControlImpl serverImpl;
+
+	private final static String DERBYNET_JAR = "derbynet.jar";
+	private final static String POLICY_FILENAME = "server.policy";
+	private final static String POLICY_FILE_PROPERTY = "java.security.policy";
+
+    private NetworkServerControlImpl serverImpl;
 
 	// constructor
 
@@ -233,16 +239,48 @@ public class NetworkServerControl{
 	 */
     public static void main(String args[]) {
         NetworkServerControlImpl server = null;
+
+        //
+        // The following variable lets us preserve the error printing behavior
+        // seen before we started installing a security manager. Errors can be
+        // raised as we figure out whether we need to install a security manager
+        // and during the actual installation of the security manager. We need
+        // to print out these errors. The old error printing behavior assumed
+        // that all errors were generated inside NetworkServerControlImpl and
+        // were reported there.
+        //
+        boolean                                 printErrors = true;
+        
         try
         {
             server = new NetworkServerControlImpl();
-    		server.executeWork(args);
+            
+            int     command = server.parseArgs( args );
+
+            //
+            // In order to run secure-by-default, we install a security manager
+            // if one isn't already installed. This feature is described by DERBY-2196.
+            //
+            if ( needsSecurityManager( server, command ) )
+            {
+                verifySecurityState( server );
+                installSecurityManager( server );
+            }
+
+            //
+            // From this point on, NetworkServerControlImpl is responsible for
+            // printing errors.
+            //
+            printErrors = false;
+            server.executeWork( command );
         }
         catch (Exception e)
         {
 			//if there was an error, exit(1)
 			if ((e.getMessage() == null) ||
-				!e.getMessage().equals(NetworkServerControlImpl.UNEXPECTED_ERR))
+				!e.getMessage().equals(NetworkServerControlImpl.UNEXPECTED_ERR) ||
+				printErrors
+			)
 			{
 				if (server != null)
 					server.consoleExceptionPrint(e);
@@ -485,9 +523,155 @@ public class NetworkServerControl{
 	{
 		serverImpl.clientLocale = locale;
 	}
+
+    /**
+     * Return true if we need to install a Security Manager. All of the
+     * following must apply. See DERBY-2196.
+     *
+     * <ul>
+     * <li>The VM was booted with NetworkServerContro.main() as the
+     * entry point. This is handled by the fact that this method is only called
+     * by main().</li>
+     * <li>The VM isn't already running a SecurityManager.</li>
+     * <li>The command must be "start".</li>
+     * <li>The customer didn't specify the -unsecure flag on the startup command
+     * line.</li>
+     * </ul>
+     */
+    private static  boolean needsSecurityManager( NetworkServerControlImpl server, int command )
+        throws Exception
+    {
+        return
+            (
+             (System.getSecurityManager() == null) &&
+             (command == NetworkServerControlImpl.COMMAND_START) &&
+             (!server.runningUnsecure())
+             );
+   }
+    
+    /**
+     * Verify that all prerequisites are met before bringing up a security
+     * manager. See DERBY-2196.
+     */
+    private static  void verifySecurityState( NetworkServerControlImpl server )
+        throws Exception
+    {
+        //
+        // Authentication should be turned on. Otherwise, the user will
+        // be tricked into a false sense of security. Important security checks
+        // will be identity based.
+        //
+        if ( !Boolean.getBoolean( Property.REQUIRE_AUTHENTICATION_PARAMETER ) )
+        {
+            String  errorMessage = server.localizeMessage
+                (
+                 "DRDA_NoAuthentication.S",
+                 new String[]
+                    {
+                        Property.REQUIRE_AUTHENTICATION_PARAMETER,
+                        NetworkServerControlImpl.DASHARGS[  NetworkServerControlImpl.DASHARG_UNSECURE ] }
+                );
+
+            // this throws an exception and exits this method
+            server.consoleError( errorMessage );
+        }
+    }
+
+    
+    /**
+     * Install a SecurityManager governed by the Basic startup policy. See DERBY-2196.
+     */
+    private static  void installSecurityManager( NetworkServerControlImpl server )
+        throws Exception
+    {
+        //
+        // The Basic policy refers to some properties. Make sure they are set.
+        //
+        if ( System.getProperty( Property.SYSTEM_HOME_PROPERTY ) == null )
+        { System.setProperty( Property.SYSTEM_HOME_PROPERTY, System.getProperty( "user.dir" ) ); }
+
+        if ( System.getProperty( Property.DRDA_PROP_HOSTNAME ) == null )
+        { System.setProperty( Property.DRDA_PROP_HOSTNAME, server.getHost() ); }
+
+        //
+        // Forcibly set the following property. This is the parameter in
+        // the Basic policy which points at the directory where the embedded and
+        // network codesources. Do not let the customer
+        // override this
+        //
+        String      derbyInstallURL = getCodeSourcePrefix( server );
+
+        System.setProperty( Property.DERBY_INSTALL_URL, derbyInstallURL );
+        
+        //
+        // Now install a SecurityManager, using the Basic policy file.
+        //
+        String      policyFileURL = getPolicyFileURL();
+
+        System.setProperty( POLICY_FILE_PROPERTY, policyFileURL );
+        
+        SecurityManager     securityManager = new SecurityManager();
+
+        System.setSecurityManager( securityManager );
+
+        //
+        // Report success.
+        //
+        String  successMessage = server.localizeMessage( "DRDA_SecurityInstalled.I", null );
+        
+        server.consoleMessage( successMessage );
+    }
+
+    /**
+     *<p>
+     * Find the url of the library directory which holds derby.jar and
+     * derbynet.jar. The Basic policy assumes that both jar files live in the
+     * same directory.
+     * </p>
+     */
+    private static  String  getCodeSourcePrefix( NetworkServerControlImpl server )
+        throws Exception
+    {
+        String  derbyNetURL = NetworkServerControl.class.getProtectionDomain().getCodeSource().getLocation().toExternalForm();
+        int         idx = derbyNetURL.indexOf( DERBYNET_JAR );
+
+        //
+        // If the customer isn't running against jar files, our Basic policy
+        // won't work.
+        //
+        if ( idx < 0 )
+        {
+            String  errorMessage = server.localizeMessage( "DRDA_MissingNetworkJar.S", null );
+
+            // this throws an exception and exits this method
+            server.consoleError( errorMessage );
+        }
+
+        //
+        // Otherwise, we have the directory prefix for our url.
+        //
+        String  directoryPrefix = derbyNetURL.substring( 0, idx );
+
+        return directoryPrefix;
+    }
+
+    /**
+     *<p>
+     * Get the URL of the policy file. Typically, this will be some pointer into
+     * derbynet.jar.
+     * </p>
+     */
+    private static  String getPolicyFileURL()
+        throws Exception
+    {
+        String      resourceName =
+            NetworkServerControl.class.getPackage().getName().replace( '.', '/' ) +
+            '/' +
+            POLICY_FILENAME;
+        URL         resourceURL = NetworkServerControl.class.getClassLoader().getResource( resourceName );
+        String      stringForm = resourceURL.toExternalForm();
+
+        return stringForm;
+    }
+
 }
-
-
-
-
-
