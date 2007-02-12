@@ -758,6 +758,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.close();
         stmt2.close();
         commit();
+        conn2.close();
     }
     
     /* Fixtures that test batch updates with CallableStatements */
@@ -1472,5 +1473,6 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         rollback();
         conn2.rollback();
+        conn2.close();
     }
 }
