@@ -29,6 +29,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 import org.apache.derbyTesting.system.oe.client.Load;
+import org.apache.derbyTesting.system.oe.util.OEChecks;
 
 /**
  * Do some checks on the Order Entry database.
@@ -39,11 +40,16 @@ public class Checks extends JDBCPerfTestCase {
      * Warehouse scaling factor
      */
     private short scale = 1;
-
-    public Checks(String name) {
+    
+    /**
+     * Run checks on OE database
+     */
+    private OEChecks check = null;
+    
+    public Checks(String name)
+    {
         super(name);
     }
-
     /**
      * @param name -
      *            test name
@@ -56,6 +62,11 @@ public class Checks extends JDBCPerfTestCase {
 
     }
 
+    public void setUp() throws Exception
+    {
+        this.check = new OEChecks();
+        check.initialize(getConnection(),scale);
+    }
     /**
      * Return suite of tests that checks the row counts for all the tables in
      * the Order Entry bechmark.
@@ -247,7 +258,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testWarehouseRows() throws Exception {
-        checkCountStar("WAREHOUSE", scale);
+        check.testWarehouseRows();
     }
 
     /**
@@ -256,7 +267,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testStockRows() throws Exception {
-        checkCountStar("STOCK", Load.STOCK_COUNT_W * scale);
+        check.testStockRows();
     }
 
     /**
@@ -265,7 +276,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testOrdersRows() throws Exception {
-        checkCountStar("ORDERS", Load.ORDERS_COUNT_W * scale);
+        check.testOrdersRows();
     }
 
     /**
@@ -274,7 +285,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testDistrictRows() throws Exception {
-        checkCountStar("DISTRICT", Load.DISTRICT_COUNT_W * scale);
+        check.testDistrictRows();
     }
 
     /**
@@ -283,7 +294,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testCustomerRows() throws Exception {
-        checkCountStar("CUSTOMER", Load.CUSTOMER_COUNT_W * scale);
+        check.testCustomerRows();
     }
 
     /**
@@ -292,7 +303,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testItemRows() throws Exception {
-        checkCountStar("ITEM", Load.ITEM_COUNT);
+        check.testItemRows();
     }
 
     /**
@@ -301,7 +312,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testNewOrdersRows() throws Exception {
-        checkCountStar("NEWORDERS", Load.NEWORDERS_COUNT_W * scale);
+        check.testNewOrdersRows();
     }
 
     /**
@@ -310,7 +321,7 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testHistoryRows() throws Exception {
-        checkCountStar("HISTORY", Load.HISTORY_COUNT_W * scale);
+        check.testHistoryRows();
     }
 
     /**
@@ -319,61 +330,6 @@ public class Checks extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testOrderLineRows() throws Exception {
-        checkWithinOnePercent("ORDERLINE", Load.ORDERLINE_COUNT_WV * scale);
+        check.testOrderLineRows();
     }
-
-    /**
-     * Check if number of rows in table is as expected
-     * 
-     * @param table -
-     *            table on which to execute the query
-     * @param expected -
-     *            expected number of rows
-     * @throws Exception
-     */
-    private void checkCountStar(String table, int expected) throws Exception {
-        Assert.assertEquals("Number of rows loaded for " + table
-                + " not correct", expected, rowsInTable(table));
-
-    }
-
-    /**
-     * Return the number of rows in the table. A simple select count(*) from
-     * tableName
-     * 
-     * @param tableName -
-     *            name of the table
-     * @throws SQLException
-     */
-    private int rowsInTable(String tableName) throws SQLException {
-        Statement stmt = createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + tableName);
-        rs.next();
-        int count = rs.getInt(1);
-        rs.close();
-        stmt.close();
-
-        return count;
-    }
-
-    /**
-     * Check if number of rows in table is within one percent of expected value
-     * 
-     * @param tableName -
-     *            table on which to execute the query
-     * @param expected -
-     *            expected number of rows
-     * @throws Exception
-     */
-    private void checkWithinOnePercent(String tableName, int expected)
-            throws Exception {
-
-        double count = rowsInTable(tableName);
-        double low = ((double) expected) * 0.99;
-        double high = ((double) expected) * 1.01;
-        Assert.assertEquals("Initial rows" + count + " in " + tableName
-                + " is out of range.[" + low + "-" + high + "]", false,
-                ((count < low) || (count > high)));
-    }
-
 }
