@@ -33,6 +33,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -229,7 +230,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             fail("Expected batchExecute to fail");
         } catch (BatchUpdateException bue) {
             assertSQLState(expectedError, bue);
-            updateCount = ((BatchUpdateException)bue).getUpdateCounts();
+            updateCount = bue.getUpdateCounts();
             assertBatchUpdateCounts(expectedUpdateCount, updateCount);
         } 
     }
@@ -261,13 +262,11 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     // try executing a batch which nothing in it. Should work.
     public void testEmptyStatementBatch() throws SQLException {
         Statement stmt = createStatement();
-        int updateCount[];
-
+ 
         // try executing a batch which nothing in it. Should work.
         println("Positive Statement: clear the batch and run the empty batch");
         stmt.clearBatch();
-        updateCount = stmt.executeBatch();
-        assertEquals("expected updateCount of 0", 0, updateCount.length);
+        assertBatchUpdateCounts(new int[0], stmt.executeBatch());
 
         stmt.close();
         commit();
@@ -313,10 +312,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("expect 1 row with c1 = 3", 1, rs.getInt(1));
         rs.close();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("expect 2 rows total", 2, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 2);
         
         stmt.close();
 
@@ -328,21 +324,19 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         int updateCount[];
 
         Statement stmt = createStatement();
-        ResultSet rs;
 
         println("Positive Statement: 1000 statements batch");
         for (int i=0; i<1000; i++){
             stmt.addBatch("insert into t1 values(1)");
         }
         updateCount = stmt.executeBatch();
-        assertEquals("1000 statement in the batch, expect update count 1000", 
-            1000, updateCount.length);
+        
+        int[] expectedUpdateCount = new int[1000];
+        Arrays.fill(expectedUpdateCount, 1);
+        assertBatchUpdateCounts(expectedUpdateCount, updateCount);
+        
+        assertTableRowCount("T1", 1000);
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("1000 statement in the batch, expect 1000 rows",
-            1000, rs.getInt(1));
-        rs.close();
         stmt.close();
 
         commit();
@@ -353,7 +347,6 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         getConnection().setAutoCommit(true);    
         Statement stmt = createStatement();
-        ResultSet rs;
 
         // try batch with autocommit true
         println("Positive Statement: stmt testing with autocommit true");
@@ -362,10 +355,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.addBatch("delete from t1");
         assertBatchUpdateCounts(new int[] {1,1,2}, stmt.executeBatch());
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("expect 0 rows", 0,rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 0);
         
         stmt.close();
     }
@@ -374,7 +364,6 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     public void testCombinationsOfClearBatch() throws SQLException {
 
         Statement stmt = createStatement();
-        ResultSet rs;
 
         println("Positive Statement: add 3 statements, clear and execute batch");
         stmt.addBatch("insert into t1 values(2)");
@@ -382,12 +371,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.addBatch("insert into t1 values(2)");
         stmt.clearBatch();
 
-        assertEquals("Batch should be cleared, there should be no update count",
-            0, stmt.executeBatch().length);
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        JDBC.assertEmpty(rs);
-        rs.close();
+        // Batch should be cleared, there should be no update count
+        assertBatchUpdateCounts(new int[0], stmt.executeBatch());
+        assertTableRowCount("T1", 0);
 
         println("Positive Statement: add 3 statements, clear batch, " +
             "add 3 more statements and execute batch");
@@ -400,10 +386,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.addBatch("insert into t1 values(2)");
 
         assertBatchUpdateCounts(new int[] {1,1,1}, stmt.executeBatch());
-        rs = stmt.executeQuery("select count(*) from t1");
-        JDBC.assertFullResultSet(rs, new String[][] {{"3"}}, true);
+        assertTableRowCount("T1", 3);
 
-        rs.close();
         stmt.close();
         commit();
     }
@@ -512,7 +496,6 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     public void testStatementWithResultSetBatch() throws SQLException {
         
         Statement stmt = createStatement();
-        ResultSet rs;
 
         // trying select as the first statement
         println("Negative Statement: statement testing select as first " +
@@ -525,14 +508,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new int[] {-3, 1});
         
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        if (usingEmbedded())
-            assertEquals(
-                "There should be no rows in the table", 0, rs.getInt(1));
-        else if (usingDerbyNetClient())
-            assertEquals("There will be 1 row in the table", 1, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1",
+                usingEmbedded() ? 0 : 1);
         
         // trying select as the nth statement
         println("Negative Statement: " +
@@ -546,14 +523,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new int[] {1,-3,1});
             
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        if (usingEmbedded())
-            assertEquals(
-                "There should be 1 row in the table", 1, rs.getInt(1));
-        else if (usingDerbyNetClient())
-            assertEquals("There are 3 rows in the table", 3, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1",
+                usingEmbedded() ? 1 : 3);
 
         // trying select as the last statement
         println("Negative Statement: statement testing select" +
@@ -567,23 +538,13 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new int[] {1,1,-3});
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        if (usingEmbedded())
-            assertEquals(
-                "There should now be 3 rows in the table", 3, rs.getInt(1));
-        else if (usingDerbyNetClient())
-            assertEquals(
-                "There should now be 5 rows in the table", 5, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1",
+                usingEmbedded() ? 3 : 5);
 
         rollback();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be no rows in the table after rollback", 
-            0, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 0);
+
         stmt.close();
 
         commit();
@@ -594,7 +555,6 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         
         Statement stmt = createStatement();
         int[] updateCount=null;
-        ResultSet rs;
 
         // trying execute after addBatch
         println("Negative Statement:" +
@@ -614,10 +574,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         // do clearBatch so we can proceed
         stmt.clearBatch();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be no rows in the table", 0, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 0);
 
         // trying executeQuery after addBatch
         println("Negative Statement: " +
@@ -645,10 +602,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             rollback();
         }
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be no rows in the table", 0, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 0);
 
         println("Negative Statement: " +
             "statement testing executeUpdate in the middle of batch");
@@ -680,22 +634,12 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             stmt.clearBatch();
         }
         
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        if (usingEmbedded())
-            assertEquals("There should be no rows in the table", 
-                0, rs.getInt(1));
-        else if (usingDerbyNetClient())
-            assertEquals("There should be 3 rows in the table", 
-                3, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1",
+                usingEmbedded() ? 0 : 3);
 
         rollback();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be no rows in the table", 0, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 0);
         stmt.close();
 
         commit();
@@ -706,7 +650,6 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     public void testStatementWithErrorsBatch() throws SQLException {
         
         Statement stmt = createStatement();
-        ResultSet rs;
 
         stmt.executeUpdate("insert into t1 values(1)");
 
@@ -722,15 +665,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new int[] {-3,1});
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        if (usingEmbedded())
-            assertEquals("there should be 1 row in the table", 
-                    1, rs.getInt(1));
-        if (usingDerbyNetClient())
-            assertEquals("there should be 2 rows in the table", 
-                    2, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1",
+                usingEmbedded() ? 1 : 2);
 
         // trying update as the nth statement
         println("Negative Statement: statement testing overflow error" +
@@ -745,13 +681,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new int[] {1,-3,1});
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        if (usingEmbedded())
-            assertEquals("expected: 2 rows", 2, rs.getInt(1));
-        if (usingDerbyNetClient())
-            assertEquals("expected: 4 rows", 4, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1",
+                usingEmbedded() ? 2 : 4);
 
         // trying select as the last statement
         println("Negative Statement: statement testing overflow error" +
@@ -766,13 +697,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", stmt, new int[] {1,1,-3});
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        if (usingEmbedded())
-            assertEquals("expected: 4 rows", 4, rs.getInt(1));
-        if (usingDerbyNetClient())
-            assertEquals("expected: 6 rows", 6, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1",
+                usingEmbedded() ? 4 : 6);
         stmt.close();
 
         commit();
@@ -1015,10 +941,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertEquals("There should be 3 rows with c1 = 5", 3, rs.getInt(1));
         rs.close();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 3 rows", 3, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 3);
         stmt.close();
 
         commit();
@@ -1047,10 +970,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         
         rs.close();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 1 row", 1, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 1);
+
         stmt.close();
 
         commit();
@@ -1058,9 +979,6 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     
     // try executing a batch with 3 different parameter sets in it.
     public void testMultipleValueSetPreparedBatch() throws SQLException {
-
-        Statement stmt = createStatement();
-        ResultSet rs;
 
         // try prepared statement batch with just one set of values
         println("Positive Prepared Stat: " +
@@ -1077,12 +995,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertBatchUpdateCounts(new int[] {1,1,1}, pStmt.executeBatch());
 
         pStmt.close();
-
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 3 rows", 3, rs.getInt(1));
-        rs.close();
-        stmt.close();
+        
+        assertTableRowCount("T1", 3);
 
         commit();
     }
@@ -1116,10 +1030,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             2, rs.getInt(1));
         rs.close();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 2 rows", 2, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 2);
+
         stmt.close();
 
         commit();
@@ -1128,9 +1040,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     // try executing a batch with 1000 statements in it.
     public void test1000ValueSetPreparedBatch() throws SQLException {
         
-        Statement stmt = createStatement();
         int updateCount[];
-        ResultSet rs;
 
         println("Positive Prepared Stat: 1000 parameter set batch");
         PreparedStatement pStmt = 
@@ -1141,26 +1051,19 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         }
         updateCount = pStmt.executeBatch();
 
-        assertEquals("there were 1000 parameters set in the batch," +
-            " update count length should be 1000",
-            1000, updateCount.length);
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 1000 rows in the table",
-            1000, rs.getInt(1));
-        rs.close();
+        int[] expectedUpdateCount = new int[1000];
+        Arrays.fill(expectedUpdateCount, 1);
+        assertBatchUpdateCounts(expectedUpdateCount, updateCount);
+        
+        assertTableRowCount("T1", 1000);
 
         pStmt.close();
-        stmt.close();
         commit();
     }
 
     // try executing batches with various rollback and commit combinations.
     public void testPreparedStatRollbackAndCommitCombinations() 
     throws SQLException {
-
-        Statement stmt = createStatement();
-        ResultSet rs;
 
         println("Positive Prepared Stat: batch, rollback," +
             " batch and commit combinations");
@@ -1176,10 +1079,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         rollback();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 0 rows after rollback", 0, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 0);
 
         pStmt.setInt(1, 1);
         pStmt.addBatch();
@@ -1190,12 +1090,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertBatchUpdateCounts(new int[] {1,1}, pStmt.executeBatch());
 
         commit();
-
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 2 rows", 2, rs.getInt(1));
         
-        rs.close();
+        assertTableRowCount("T1", 2);
 
         // try batch and commit
         println("Positive Prepared Stat: batch and commit combinations");
@@ -1209,10 +1105,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         commit();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 4 rows", 4, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 4);
 
         // try batch, batch and rollback
         println("Positive Prepared Stat: batch, " +
@@ -1235,10 +1128,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
 
         rollback();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 4 rows", 4, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 4);
 
         // try batch, batch and commit
         println("Positive Prepared Stat: " +
@@ -1260,14 +1150,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         assertBatchUpdateCounts(new int[] {1,1}, pStmt.executeBatch());
 
         commit();
+        
+        assertTableRowCount("T1", 8);
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 8 rows", 8, rs.getInt(1));
-
-        rs.close();
         pStmt.close();
-        stmt.close();
 
         commit();
     }
@@ -1275,10 +1161,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     // try prepared statement batch with autocommit true
     public void testAutoCommitTruePreparedStatBatch() throws SQLException {
 
-        ResultSet rs;
-
         getConnection().setAutoCommit(true);    
-        Statement stmt = createStatement();
 
         // prepared statement batch with autocommit true
         println("Positive Prepared Stat: testing batch with autocommit true");
@@ -1294,23 +1177,16 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
          * update count length should be 3 */
         assertBatchUpdateCounts(new int[] {1,1,1}, pStmt.executeBatch());
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 3 rows in the table", 3, rs.getInt(1));
-        rs.close();
-        pStmt.close();
-        
-        stmt.close();
-        
+        assertTableRowCount("T1", 3);
+
+        pStmt.close();       
     }
     
     // try combinations of clear batch.
     public void testCombinationsOfClearPreparedStatBatch() 
     throws SQLException {
 
-        Statement stmt = createStatement();
         int updateCount[];
-        ResultSet rs;
 
         println("Positive Prepared Stat: add 3 statements, " +
             "clear batch and execute batch");
@@ -1342,17 +1218,12 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         pStmt.addBatch();
         pStmt.setInt(1, 3);
         pStmt.addBatch();
-        updateCount = pStmt.executeBatch();
 
-        assertEquals("there were 3 statements in the batch, " +
-            "update count should be 3",
-            3, updateCount.length);
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 3 rows in the table", 3, rs.getInt(1));
-        rs.close();
+        assertBatchUpdateCounts(new int[] {1,1,1}, pStmt.executeBatch());
+        
+        assertTableRowCount("T1", 3);
+
         pStmt.close();
-        stmt.close();
 
         commit();
     }
@@ -1363,8 +1234,6 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     // batch Updates. Following case should throw an exception for select.
     public void testPreparedStmtWithResultSetBatch() throws SQLException {
 
-        Statement stmt = createStatement();
-        ResultSet rs;
 
         println("Negative Prepared Stat: testing select in the batch");
         PreparedStatement pStmt = 
@@ -1380,12 +1249,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             assertBatchExecuteError("XJ117", pStmt, new int[] {-3});
         pStmt.close();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be no rows in the table",
-            0, rs.getInt(1));
-        rs.close();
-        stmt.close();
+        assertTableRowCount("T1", 0);
 
         commit();
     }
@@ -1393,10 +1257,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     // try executing a batch with regular statement intermingled.
     public void testPreparedStmtNonBatchStuffInBatch() throws SQLException {
         
-        Statement stmt = createStatement();
-
         int updateCount[] = null;
-        ResultSet rs;
 
         // trying execute in the middle of batch
         println("Negative Prepared Stat: " +
@@ -1418,15 +1279,11 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
                 assertSQLState("XJ068", sqle);
             else if (usingDerbyNetClient())
                 assertSQLState("XJ117", sqle);
-            // do clearBatch so we can proceed
-            stmt.clearBatch();
         }
-
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be no rows in the table", 
-            0, rs.getInt(1));
-        rs.close();
+        pStmt.close();
+        
+        
+        assertTableRowCount("T1", 0);
 
         // trying executeQuery in the middle of batch
         println("Negative Prepared Statement: " +
@@ -1448,15 +1305,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
                 assertSQLState("XJ068", sqle);
             else if (usingDerbyNetClient())
                 assertSQLState("XJ117", sqle);
-            // do clearBatch so we can proceed
-            stmt.clearBatch();
         }
+        pStmt.close();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be no rows in the table", 
-            0, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 0);
 
         //  trying executeUpdate in the middle of batch
         println("Negative Prepared Stat: " +
@@ -1478,17 +1330,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
                 assertSQLState("XJ068", sqle);
             else if (usingDerbyNetClient())
                 assertSQLState("X0Y79", sqle);
-            // do clearBatch so we can proceed
-            stmt.clearBatch();
         }
         pStmt.close();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be no rows in the table", 
-            0, rs.getInt(1));
-        rs.close();
-        stmt.close();
+        assertTableRowCount("T1", 0);
 
         commit();
     }
@@ -1497,7 +1342,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     public void testPreparedStmtWithErrorsBatch() throws SQLException {
 
         Statement stmt = createStatement();
-        ResultSet rs;
+
         PreparedStatement pStmt = null;
 
         stmt.executeUpdate("insert into t1 values(1)");
@@ -1514,11 +1359,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             assertBatchExecuteError("22003", pStmt, new int[] {});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", pStmt, new int[] {-3});
+        pStmt.close();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 1 row in the table", 1, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 1);
 
         println("Negative Prepared Stat: " +
             "testing overflow as nth set of values");
@@ -1536,11 +1379,9 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             assertBatchExecuteError("22003", pStmt, new int[] {1});
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", pStmt, new int[] {1,-3,1});
+        pStmt.close();
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 1 row in the table", 1, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 1);
 
         // trying select as the last statement
         println("Negative Prepared Stat: " +
@@ -1560,10 +1401,8 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
             assertBatchExecuteError("XJ208", pStmt, new int[] {1,1,-3});
 
-        rs = stmt.executeQuery("select count(*) from t1");
-        rs.next();
-        assertEquals("There should be 1 row in the table", 1, rs.getInt(1));
-        rs.close();
+        assertTableRowCount("T1", 1);
+        
         pStmt.close();
         stmt.close();
 
