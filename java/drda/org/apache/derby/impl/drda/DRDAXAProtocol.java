@@ -19,6 +19,10 @@
 
  */
 
+package org.apache.derby.impl.drda;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import javax.transaction.xa.*;
+
 /**
  * This class translates DRDA XA protocol from an application requester to XA
  * calls for Derby and then translates the results from Derby to DRDA
@@ -28,12 +32,6 @@
  * library requirements
  * @author kmarsden@Sourcery.Org
  */
-
-
-package org.apache.derby.impl.drda;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import javax.transaction.xa.*;
-
 
 class DRDAXAProtocol {
 
