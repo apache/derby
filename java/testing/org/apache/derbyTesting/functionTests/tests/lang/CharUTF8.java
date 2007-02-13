@@ -57,6 +57,7 @@ public class CharUTF8 {
 
 			Statement st2 = conn.createStatement();
 			st2.execute("CREATE TABLE TEST(id int not null primary key, body varchar(60))");
+            st2.close();
 			psSet = conn.prepareStatement("insert into test values(?,?)");
 			psGet = conn.prepareStatement("select body from test where id=?");  
 			
@@ -92,6 +93,8 @@ public class CharUTF8 {
 				System.out.println("FAIL: empty string returned as " + getBody(-1));
 			}
 
+            psSet.close();
+            psGet.close();
 
 			conn.close();
 

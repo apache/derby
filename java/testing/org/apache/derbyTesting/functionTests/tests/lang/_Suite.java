@@ -84,6 +84,10 @@ public class _Suite extends BaseTestCase  {
         // Add the NIST suite in from the nist package since
         // it is a SQL language related test.
         suite.addTest(NistScripts.suite());
+        
+        // Add the java tests that run using a master
+        // file (ie. partially converted).
+        suite.addTest(LangHarnessJavaTest.suite());
         		
 		// Tests that are compiled using 1.4 target need to
 		// be added this way, otherwise creating the suite

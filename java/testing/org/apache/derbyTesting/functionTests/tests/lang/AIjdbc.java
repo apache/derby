@@ -63,6 +63,8 @@ public class AIjdbc
 
 			// do a select from a view.
 			passed = testSelectView(conn) && passed;
+            
+            conn.close();
 		} 
 		catch (Throwable e) 
 		{
@@ -91,6 +93,7 @@ public class AIjdbc
 			s = conn.createStatement();
 			s.execute("create table tab1 (x int, y int generated always as identity,z char(2))");
 			s.execute("create view tab1_view (a,b) as select y,y+1 from tab1");
+            s.close();
 		}
 		catch (SQLException se)
 		{
@@ -133,6 +136,7 @@ public class AIjdbc
 			if (rsmd.isAutoIncrement(3))
 				throw new SQLException("column 2 is NOT ai!");
 			rs.close();
+            s.close();
 		}
 		catch (SQLException se)
 		{
@@ -161,6 +165,7 @@ public class AIjdbc
 				throw new SQLException("column 1 IS ai!");
 			if (rsmd.isAutoIncrement(2))
 				throw new SQLException("column 1 is NOT ai!");
+            s.close();
 		}
 		catch (SQLException sqle)
 		{
