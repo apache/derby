@@ -1,3 +1,8 @@
+echo
+echo The frameworks scripts have been deprecated. Please use the new scripts in
+echo the /bin directory. See the file frameworks.DEPRECATED.txt for more
+echo information
+echo
 
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

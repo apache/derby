@@ -38,7 +38,7 @@
 
 
   <!-- Files to be included with and excluded from the source distribution -->
-  <property name="src.top.includes" value="BUILDING.txt,README,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,index.html,published_api_overview.html"/>
+  <property name="src.top.includes" value="BUILDING.txt,README,CHANGES,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,frameworks.DEPRECATED.txt,index.html,published_api_overview.html"/>
   <property name="src.tools.includes" value="tools/ant/**,tools/j2ee/**,tools/jar/**,tools/java/**,tools/javadoc/**,tools/jdbc4/**,tools/testing/**,tools/release/build.xml"/>
   <property name="src.dirs.includes" value="frameworks/**,java/**,plugins/**,bin/**,maven/**"/>
   <property name="src.includes" value="${src.top.includes},${src.tools.includes},${src.dirs.includes}"/>
@@ -69,9 +69,9 @@
     <mkdir dir="${crlf.dir}"/>
     <mkdir dir="${lf.dir}"/>
     <fixcrlf srcdir="${basedir}" destdir="${crlf.dir}" eol="crlf"
-             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
+             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"/>
     <fixcrlf srcdir="${basedir}" destdir="${lf.dir}" eol="lf"
-             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
+             includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"/>
 
   </target>
 
@@ -81,7 +81,7 @@
     <zip destfile="${release.dir}/${derby.bin}.zip"
          compress="true">
       <!-- top-level -->
-      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
+      <zipfileset dir="${crlf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"
                   prefix="${derby.bin}/"/>
       <zipfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
@@ -133,7 +133,7 @@
     <tar destfile="${release.dir}/${derby.bin}.tar.gz"
          compression="gzip" longfile="gnu">
       <!-- top-level -->
-      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
+      <tarfileset dir="${lf.dir}" includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"
                   prefix="${derby.bin}/"/>
       <tarfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
