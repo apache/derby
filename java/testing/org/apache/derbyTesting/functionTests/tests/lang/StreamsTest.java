@@ -21,6 +21,13 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -294,30 +301,11 @@ class DummyReader extends java.io.Reader {
     
     private void whereAmI() {
         if (count == 0) {
-            readerStackLevel = -1;
-            try {
-                throw new Throwable();
-            } catch (Throwable e) {
-                try {
-                    readerStackLevel = e.getStackTrace().length;
-                    // System.out.println("================= stack array length
-                    // is: " + readerStackLevel);
-                    // e.printStackTrace();
-                } catch (NoSuchMethodError nme) {
-                    DummyOutputStream dos = new DummyOutputStream();
-                    DummyPrintStream dps = new DummyPrintStream(dos);
-                    e.printStackTrace(dps);
-                    dps.flush();
-                    // System.out.println("================= print to dop level
-                    // num is: " + dps.lines);
-                    readerStackLevel = dps.lines;
-                    // e.printStackTrace();
-                }
-            }
+            readerStackLevel = new Throwable().getStackTrace().length;
         }
     }
     
-    public int read() {
+    public int read() throws IOException {
         if (count == 0)
             return -1;
         
@@ -359,26 +347,9 @@ class DummyBinary extends java.io.InputStream {
         this.count = length;
     }
     
-    private void whereAmI() {
+    private void whereAmI()  {
         if (count == 0) {
-            readerStackLevel = -1;
-            try {
-                throw new Throwable();
-            } catch (Throwable e) {
-                try {
-                    readerStackLevel = e.getStackTrace().length;
-                    //	System.out.println("================= stack array length is: " + readerStackLevel);
-                    //	e.printStackTrace();
-                } catch (NoSuchMethodError nme) {
-                    DummyOutputStream dos = new DummyOutputStream();
-                    DummyPrintStream dps = new DummyPrintStream(dos);
-                    e.printStackTrace(dps);
-                    dps.flush();
-                    //	System.out.println("================= print to dop level num is: " + dps.lines);
-                    readerStackLevel = dps.lines;
-                    //	e.printStackTrace();
-                }
-            }
+            readerStackLevel = new Throwable().getStackTrace().length;
         }
     }
     
@@ -391,7 +362,7 @@ class DummyBinary extends java.io.InputStream {
         return content++;
     }
     
-    public int read(byte[] buf, int offset, int length) {
+    public int read(byte[] buf, int offset, int length)  {
         
         if (count == 0)
             return -1;
@@ -409,70 +380,5 @@ class DummyBinary extends java.io.InputStream {
     }
     
     public void close() {
-    }
-}
-
-class DummyOutputStream extends java.io.OutputStream {
-    public void close() {
-    }
-    
-    public void flush() {
-    }
-    
-    public void write(byte[] b) {
-    }
-    
-    public void write(byte[] b, int off, int len) {
-    }
-    
-    public void write(int b) {
-    }
-}
-
-class DummyPrintStream extends java.io.PrintStream {
-    int lines;
-    
-    public DummyPrintStream(DummyOutputStream dos) {
-        super(dos);
-    }
-    
-    public void println() {
-        lines++;
-    }
-    
-    public void println(String x) {
-        lines++;
-    }
-    
-    public void println(Object x) {
-        lines++;
-    }
-    
-    public void println(char[] x) {
-        lines++;
-    }
-    
-    public void println(double x) {
-        lines++;
-    }
-    
-    public void println(float x) {
-        lines++;
-    }
-    
-    public void println(long x) {
-        lines++;
-    }
-    
-    public void println(int x) {
-        lines++;
-    }
-    
-    public void println(char x) {
-        lines++;
-    }
-    
-    public void println(boolean x) {
-        lines++;
     }
 }
