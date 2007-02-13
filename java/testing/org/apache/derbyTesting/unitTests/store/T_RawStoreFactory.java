@@ -315,6 +315,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		P021();		// test preAllocate
 		P022();
 		P023(0);	// overflowThreshold test
+		P024(0);	// test page latching
 
 		// long row tests
 		P030(0);
@@ -3662,6 +3663,50 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		t_util.t_commit(t);
 		t.close();
 		PASS("P023");
+	}
+
+	/**
+	 * Test that latches are exclusive.
+	 *
+	 * @exception T_Fail Unexpected behaviour from the API
+	 * @exception StandardException Unexpected exception from the implementation
+	 */
+	protected void P024(long segment) throws StandardException, T_Fail
+	{
+		Transaction t = t_util.t_startTransaction();
+
+		long cid = t_util.t_addContainer(t, segment, 4096, 0, 1, false);
+
+		ContainerHandle c = t_util.t_openContainer(t, segment, cid, true);
+
+		Page page1 = t_util.t_getLastPage(c);
+		Page page2 = t_util.t_addPage(c);
+
+		long p1 = page1.getPageNumber();
+		long p2 = page2.getPageNumber();
+
+		// check that we cannot get any of the latched pages
+		t_util.t_checkGetLatchedPage(c, p1);
+		t_util.t_checkGetLatchedPage(c, p2);
+
+		page1.unlatch();
+
+		// check that we still cannot get page2
+		t_util.t_checkGetLatchedPage(c, p2);
+
+		// we should be able to get page1
+		page1 = t_util.t_getPage(c, p1);
+
+		page1.unlatch();
+		page2.unlatch();
+
+		// cleanup
+		t_util.t_dropContainer(t, segment, cid);
+
+		t_util.t_commit(t);
+		t.close();
+
+		PASS("P024");
 	}
 		
 	/**

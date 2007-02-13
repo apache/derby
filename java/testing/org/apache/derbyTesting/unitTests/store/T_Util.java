@@ -1133,6 +1133,43 @@ public class T_Util
 			throw T_Fail.testFailMsg("got a deallcated page back");
 	} 
 
+	/**
+	 * Check that it's not possible to get a page which is latched.
+	 *
+	 * @param c a container handle
+	 * @param pageNumber the page number to check
+	 * @exception StandardException if an unexpected error occurs
+	 * @exception T_Fail if the test fails
+	 */
+	public void t_checkGetLatchedPage(ContainerHandle c, long pageNumber)
+			throws StandardException, T_Fail {
+		// we expect to hang in getPage() so make sure we are interrupted
+		final Thread me = Thread.currentThread();
+		Runnable r = new Runnable() {
+				public void run() {
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) { }
+					me.interrupt();
+				}
+			};
+		Thread interrupter = new Thread(r);
+		interrupter.start();
+
+		try {
+			Page p = c.getPage(pageNumber);
+			throw T_Fail.testFailMsg("got latched page");
+		} catch (StandardException se) {
+			// expect thread interrupted exception
+			if (!se.getMessageId().equals("08000")) {
+				throw se;
+			}
+		}
+
+		try {
+			interrupter.join();
+		} catch (InterruptedException ie) { }
+	}
 
 	/**
 		Call page.insert() and ensure that the return record handle is not null.
