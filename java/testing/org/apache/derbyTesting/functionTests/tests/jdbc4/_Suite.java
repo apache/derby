@@ -70,6 +70,8 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(UnsupportedVetter.suite());
 		suite.addTest(XA40Test.suite());
         suite.addTest(VerifySignatures.suite());
+        suite.addTest (LobStreamTest.suite());
+        suite.addTest (BlobSetMethodsTest.suite());
 		
 		return suite;
 	}

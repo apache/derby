@@ -45,6 +45,7 @@ abstract class BaseStorageFactory implements StorageFactory
     protected String uniqueName;
     protected String canonicalName;
     private static final String TEMP_DIR_PREFIX = "derbytmp_";
+    private int counter = 0;
 
     /**
      * Most of the initialization is done in the init method.
@@ -267,12 +268,37 @@ abstract class BaseStorageFactory implements StorageFactory
 		File temp = File.createTempFile("derby", "tmp");
 		String parent = temp.getParent();
 		temp.delete();
-
 		return parent;
 	}
 
     public int getStorageFactoryVersion()
     {
         return StorageFactory.VERSION_NUMBER;
+    }
+
+    /**
+     * Create and returns a temporary file in temporary file system of database.
+     * @param prefix String to prefix the random name generator. It can be null
+     * @param suffix String to suffix the random name generator. ".tmp" will be
+     *               used if null.
+     * @return StorageFile
+     */
+    public StorageFile createTemporaryFile (String prefix, String suffix)
+                                                            throws IOException {
+        StorageFile tmpDir = getTempDir();
+        if (prefix == null)
+            prefix = "tmp";
+        if (suffix == null)
+            suffix = ".tmp";
+        StorageFile tmpFile = null;
+        synchronized (tmpDir) {
+            do {
+                String fileName = prefix + Integer.toString (counter++)
+                            + suffix;
+                tmpFile = newStorageFile (tmpDir, fileName);
+            } while (tmpFile.exists());
+            tmpFile.createNewFile();
+        }
+        return tmpFile;
     }
 }

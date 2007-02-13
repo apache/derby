@@ -263,4 +263,18 @@ abstract class CorruptBaseStorageFactory implements WritableStorageFactory
      */
 	abstract WritableStorageFactory getRealStorageFactory();
 
+    /**
+     * Create and returns a temporary file in temporary file system of database.
+     *
+     * @param prefix String to prefix the random name generator. It can be null
+     * @param suffix String to suffix the random name generator. ".tmp" will be
+     *               used if null.
+     * @return StorageFile
+     */
+    public StorageFile createTemporaryFile(String prefix, String suffix)
+                                                            throws IOException {
+        return new CorruptFile(realStorageFactory.createTemporaryFile(
+                prefix, suffix));
+    }
+
 }

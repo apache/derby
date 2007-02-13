@@ -221,4 +221,14 @@ public interface StorageFactory
      * @return the StorageFactory version supported by this implementation
      */
     public int getStorageFactoryVersion();
+
+    /**
+     * Create and returns a temporary file in temporary file system of database
+     * @param prefix String to prefix the random name generator. It can be null
+     * @param suffix String to suffix the random name generator. ".tmp" will be
+     *               used if null.
+     * @return StorageFile
+     */
+    public StorageFile createTemporaryFile (String prefix, String suffix)
+                                                            throws IOException;
 }

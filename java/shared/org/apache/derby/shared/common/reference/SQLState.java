@@ -936,6 +936,7 @@ public interface SQLState {
 	// MORE GENERIC LANGUAGE STUFF
 	String LANG_COLUMN_DEFAULT										   = "42Z09.U";
 	String LANG_STREAM												   = "42Z11.U";
+    String LANG_STREAM_CLOSED                                          = "42Z12";
 
 	// String LANG_UPDATABLE_VTI_BAD_GETMETADATA						   = "42Z14";
 

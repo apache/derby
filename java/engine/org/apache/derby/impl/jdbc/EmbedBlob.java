@@ -24,6 +24,7 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.Resetable;
@@ -71,8 +72,8 @@ import java.io.IOException;
 
 final class EmbedBlob extends ConnectionChild implements Blob
 {
-    // blob is either bytes or stream
-    private boolean         isBytes;
+    // blob is either materialized or still in stream
+    private boolean         materialized;
     private InputStream     myStream;
     
     /*
@@ -81,7 +82,6 @@ final class EmbedBlob extends ConnectionChild implements Blob
      */
     private long myLength = -1;
     
-    private byte[]          myBytes;
     // note: cannot control position of the stream since user can do a getBinaryStream
     private long            pos;
     // this stream sits on top of myStream
@@ -96,6 +96,8 @@ final class EmbedBlob extends ConnectionChild implements Blob
     //been invalidated by calling free() on it
     private boolean isValid = true;
 
+    private LOBStreamControl control;
+
      /**
      * This constructor is used to create a empty Blob object. It is used by the
      * Connection interface method createBlob().
@@ -107,11 +109,16 @@ final class EmbedBlob extends ConnectionChild implements Blob
      *
      */
     
-     EmbedBlob(byte [] blobBytes,EmbedConnection con) {
-         super(con);
-         myBytes = blobBytes;
-         isBytes = true;
-         myLength = myBytes.length;
+     EmbedBlob(byte [] blobBytes,EmbedConnection con) throws SQLException {
+        super(con);
+         try {
+             control = new LOBStreamControl (con.getDBName());
+             control.write (blobBytes, 0);
+             materialized = true;
+         }
+         catch (IOException e) {
+             throw Util.setStreamFailure (e);
+         }
      }
      
     /*
@@ -129,21 +136,27 @@ final class EmbedBlob extends ConnectionChild implements Blob
         myStream = dvd.getStream();
         if (myStream == null)
         {
-            isBytes = true;
+            materialized = true;
             // copy bytes into memory so that blob can live after result set
             // is closed
             byte[] dvdBytes = dvd.getBytes();
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(dvdBytes != null,"blob has a null value underneath");
-
-            myLength = dvdBytes.length;
-            myBytes = new byte[dvdBytes.length];
-            System.arraycopy(dvdBytes, 0, myBytes, 0, dvdBytes.length);
+            control = new LOBStreamControl (getEmbedConnection().getDBName());
+            try {
+                control.write (dvdBytes, pos);
+            }
+            catch (SQLException e) {
+                throw StandardException.newException (e.getSQLState());
+            }
+            catch (IOException e) {
+                throw StandardException.newException (null, e);
+            }
         }
         else
         {
-            isBytes = false;
+            materialized = false;
 
             /*
              We are expecting this stream to be a FormatIdInputStream with an
@@ -186,10 +199,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
     {
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(newPos >= 0);
-        if (isBytes)
+        if (materialized)
             pos = newPos;
-        else
-        {
+        else {
             // Always resets the stream to the beginning first, because user can
             // influence the state of the stream without letting us know.
             ((Resetable)myStream).resetStream();
@@ -211,16 +223,14 @@ final class EmbedBlob extends ConnectionChild implements Blob
     /*
         Reads one byte, either from the byte array or else from the stream.
     */
-    private int read()
-        throws IOException
-    {
+    private int read() throws IOException, SQLException {
         int c;
-        if (isBytes)
+        if (materialized)
         {
-            if (pos >= myBytes.length)
+            if (pos >= control.getLength())
                 return -1;
             else
-                c = myBytes[(int) pos];
+                c = control.read (pos);
         }
         else
             c = biStream.read();
@@ -242,7 +252,13 @@ final class EmbedBlob extends ConnectionChild implements Blob
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
-        
+        try {
+            if (materialized)
+                return control.getLength ();
+        }
+        catch (IOException e) {
+            throw Util.setStreamFailure (e);
+        }
         if (myLength != -1)
             return myLength;
         
@@ -331,18 +347,15 @@ final class EmbedBlob extends ConnectionChild implements Blob
                     SQLState.BLOB_NONPOSITIVE_LENGTH, new Integer(length));
 
             byte[] result;
-            // if we have a byte array, not a stream
-            if (isBytes)
-            {
-                // if blob length is less than pos bytes + 1, raise an exception
-                if (myBytes.length + 1 < startPos)
-                    throw StandardException.newException(
-                        SQLState.BLOB_POSITION_TOO_LARGE, new Long(startPos));
-                // cannot go over length of array
-                int lengthFromPos = myBytes.length - (int) startPos + 1;
-                int actualLength = length > lengthFromPos ? lengthFromPos : length;
-                result = new byte[actualLength];
-                System.arraycopy(myBytes, ((int) startPos) - 1, result, 0, actualLength);
+            // if the blob is materialized
+            if (materialized) {
+                 result = new byte [length];
+                 int sz = control.read (result, startPos - 1);
+                 if (sz < length) {
+                     byte [] tmparray = new byte [sz];
+                     System.arraycopy (result, 0, tmparray, 0, sz);
+                     result = tmparray;
+                 }
             }
             else // we have a stream
             {
@@ -413,9 +426,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
         try
         {
             // if we have byte array, not a stream
-            if (isBytes)
+            if (materialized)
             {
-                return new NewByteArrayInputStream(myBytes);
+                return control.getInputStream(0);
             }
             else
             { 
@@ -530,8 +543,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
      @return true if match, false otherwise
      */
     private boolean checkMatch(byte[] pattern)
-        throws IOException
-    {
+        throws IOException, SQLException {
        // check whether rest matches
        // might improve performance by reading more
         for (int i = 1; i < pattern.length; i++)
@@ -637,7 +649,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
      @return true if match, false otherwise
      */
     private boolean checkMatch(Blob pattern)
-        throws IOException
+        throws IOException, SQLException
     {
         // check whether rest matches
         // might improve performance by reading buffer at a time
@@ -692,7 +704,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
     */
     protected void finalize()
     {
-        if (!isBytes)
+        if (!materialized)
             ((Resetable)myStream).closeStream();
     }
 
@@ -722,14 +734,11 @@ final class EmbedBlob extends ConnectionChild implements Blob
     * @return the number of bytes written
     * @exception SQLException Feature not implemented for now.
 	*/
-	public int setBytes(long pos,
-					byte[] bytes)
-    throws SQLException
-	{
-		throw Util.notImplemented();
+	public int setBytes(long pos, byte[] bytes) throws SQLException {
+            return setBytes(pos, bytes, 0, bytes.length);
 	}
 
-	/**
+   /**
     * JDBC 3.0
     *
     * Writes all or part of the given array of byte array to the BLOB value that
@@ -747,15 +756,36 @@ final class EmbedBlob extends ConnectionChild implements Blob
     * @return the number of bytes written
     * @exception SQLException Feature not implemented for now.
 	*/
-	public int setBytes(long pos,
-					byte[] bytes, int offset,
-					int len)
-    throws SQLException
-	{
-		throw Util.notImplemented();
-	}
+    public int setBytes(long pos,
+            byte[] bytes,
+            int offset,
+            int len) throws SQLException {
+        checkValidity();
+        try {
+            if (materialized) {
+                if (pos - 1 > length())
+                    throw Util.generateCsSQLException(
+                            SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
+                if (pos < 1)
+                    throw Util.generateCsSQLException(
+                        SQLState.BLOB_BAD_POSITION, new Long(pos));
+                len = (int) control.write (bytes, offset, len, pos - 1);
+            }
+            else {
+                control = new LOBStreamControl (getEmbedConnection().getDBName());
+                control.copyData (myStream, length());
+                len = (int) control.write(bytes, offset, len, pos - 1);
+                myStream.close();
+                materialized = true;
+            }
+            return len;
+        }
+        catch (IOException e) {
+            throw Util.setStreamFailure (e);
+        }
+    }
 
-	/**
+   /**
     * JDBC 3.0
     *
     * Retrieves a stream that can be used to write to the BLOB value that this
@@ -765,10 +795,35 @@ final class EmbedBlob extends ConnectionChild implements Blob
     * @return a java.io.OutputStream object to which data can be written 
     * @exception SQLException Feature not implemented for now.
 	*/
-	public java.io.OutputStream setBinaryStream(long pos)
-    throws SQLException
-	{
-		throw Util.notImplemented();
+	public java.io.OutputStream setBinaryStream (long pos)
+                                    throws SQLException {
+            checkValidity ();
+            if (pos - 1 > length())
+                throw Util.generateCsSQLException(
+                    SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
+            if (pos < 1)
+                throw Util.generateCsSQLException(
+                    SQLState.BLOB_BAD_POSITION, new Long(pos));
+            try {
+                if (materialized) {
+                    return control.getOutputStream (pos - 1);
+                }
+                else {
+                    if (pos > length())
+                        throw Util.generateCsSQLException (
+                                                SQLState.BLOB_POSITION_TOO_LARGE);
+                    control = new LOBStreamControl (
+                                            getEmbedConnection().getDBName());
+                    control.copyData (myStream, pos - 1);
+                    myStream.close ();
+                    materialized = true;
+                    return control.getOutputStream(pos - 1);
+
+                }
+            }
+            catch (IOException e) {
+                throw Util.setStreamFailure (e);
+            }
 	}
 
 	/**
@@ -784,7 +839,23 @@ final class EmbedBlob extends ConnectionChild implements Blob
 	public void truncate(long len)
     throws SQLException
 	{
-		throw Util.notImplemented();
+            if (len > length())
+                throw Util.generateCsSQLException(
+                    SQLState.BLOB_NONPOSITIVE_LENGTH, new Long(pos));
+            try {
+                if (materialized) {
+                    control.truncate (len);
+                }
+                else {
+                    control = new LOBStreamControl (getEmbedConnection().getDBName());
+                    control.copyData (myStream, len);
+                    myStream.close();
+                    materialized = true;
+                }
+            }
+            catch (IOException e) {
+                throw Util.setStreamFailure (e);
+            }
 	}
 
     /////////////////////////////////////////////////////////////////////////
@@ -816,10 +887,17 @@ final class EmbedBlob extends ConnectionChild implements Blob
         //if it is a stream then close it.
         //if a array of bytes then initialize it to null
         //to free up space
-        if (!isBytes)
+        if (!materialized)
             ((Resetable)myStream).closeStream();
-        else
-            myBytes = null;
+        else {
+            try {
+                control.free ();
+                control = null;
+            }
+            catch (IOException e) {
+                throw Util.setStreamFailure (e);
+            }
+        }
     }
     
     /**
