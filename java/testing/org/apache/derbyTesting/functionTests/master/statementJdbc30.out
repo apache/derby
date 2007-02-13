@@ -2,18 +2,10 @@ Test statementJdbc30 starting
 trying stmt.getMoreResults(int) :
 trying stmt.executeUpdate(String, int) :
 trying stmt.executeUpdate(String, int[]) :
-PASS -- expected exception
-SQLSTATE(0A000): java.sql.SQLException: Feature not implemented: executeUpdate(String, int[]).
 trying stmt.executeUpdate(String, String[]) :
-PASS -- expected exception
-SQLSTATE(0A000): java.sql.SQLException: Feature not implemented: executeUpdate(String, String[]).
 trying stmt.execute(String, int) :
 trying stmt.execute(String, int[]) :
-PASS -- expected exception
-SQLSTATE(0A000): java.sql.SQLException: Feature not implemented: execute(String, int[]).
 trying stmt.execute(String, String[]) :
-PASS -- expected exception
-SQLSTATE(0A000): java.sql.SQLException: Feature not implemented: execute(String, String[]).
 trying stmt.getResultSetHoldability() :
 trying stmt.getGeneratedKeys() :
 Test statementJdbc30 finished

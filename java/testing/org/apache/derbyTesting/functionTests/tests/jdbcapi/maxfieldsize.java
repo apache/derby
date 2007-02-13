@@ -42,9 +42,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  */
 
 public class maxfieldsize { 
-    
-   
-    public static ResultSet rs;
 
 	static final int START_SECOND_HALF = 5;
 	static final int NUM_EXECUTIONS = 2 * START_SECOND_HALF;
@@ -76,7 +73,7 @@ public class maxfieldsize {
 			 ij.getPropertyArg(args);
 			 conn = ij.startJBMS();
 			 stmt = conn.createStatement();
-			 TestUtil.cleanUpTest(stmt, testObjects);
+
             //create a table, insert a row, do a select from the table,
 			 stmt.execute("create table tab1("+
                                            "c1 char(100) for bit data,"+
@@ -99,7 +96,7 @@ public class maxfieldsize {
 
 				System.out.println("Iteration #: " + loop);
 	            System.out.println("Max Field Size = "  + stmt.getMaxFieldSize());
-				rs = stmt.executeQuery("select * from tab1");
+				ResultSet rs = stmt.executeQuery("select * from tab1");
                 while (rs.next())
                 {
                     for(int i=1 ; i < 7 ; i++)
@@ -168,8 +165,6 @@ public class maxfieldsize {
 			System.out.println("Doing external sort");
 
 			testSort(conn, stmt);
-
-			TestUtil.cleanUpTest(stmt, testObjects);
 
 			stmt.close();
 			conn.close();
@@ -270,7 +265,7 @@ public class maxfieldsize {
 			 * out 1st and last 5 rows.  This should test streaming to/from
 			 * a work table.
 			 */
-			rs = stmt.executeQuery("select * from tab2 order by c0 desc");
+			ResultSet rs = stmt.executeQuery("select * from tab2 order by c0 desc");
 			for (int index = 0; index < 5000; index++)
 			{
 				rs.next();

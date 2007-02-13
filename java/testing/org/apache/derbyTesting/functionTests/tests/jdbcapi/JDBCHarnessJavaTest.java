@@ -93,7 +93,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
         
         // Tests that run ok in embedded but have a different client master file.
         "savepointJdbc30_JSR169",
-        "savepointJdbc30_XA",
         "prepStmtMetaData",
         
         // Tests that pass on embedded but fail on client
@@ -105,6 +104,9 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
      */
     private static final String[] JDBCAPI_TESTS_EMEBDDED_JDBC3 =
     {
+        // Tests that run ok in embedded but have a different client master file.
+        "savepointJdbc30_XA",
+        
         // Tests that pass on embedded but fail on client
         "parameterMetaDataJdbc30",
         "dataSourcePermissions",         

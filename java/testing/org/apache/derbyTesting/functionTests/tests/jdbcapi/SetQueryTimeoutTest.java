@@ -732,9 +732,6 @@ public class SetQueryTimeoutTest
         System.out.println("Test SetQueryTimeoutTest starting");
 
         Connection[] connections = new Connection[CONNECTIONS];
-        for (int i = 0; i < connections.length; ++i) {
-            connections[i] = null;
-        }
 
         try {
             // Load the JDBC Driver class

@@ -32,8 +32,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class derbyStress {
 	
-	private static String[] testObjects = {"table t1"};
-	
 	private static int numConn = 1;
 	private static int numRows = 100;
 	private static int numPreparedStmts = 2000; 
@@ -69,8 +67,6 @@ public class derbyStress {
 	
 	private static void createTables(Connection conn, int numRows) throws SQLException{
 		Statement stmt = conn.createStatement();
-		
-		TestUtil.cleanUpTest(stmt, testObjects);
 		
 		stmt.execute("create table t1 (lvc  LONG VARCHAR)");
 		stmt.close();
@@ -132,7 +128,6 @@ public class derbyStress {
 			ResultSet rs = stmt.executeQuery("values(1)");
 			// How silly! I forgot to close the result set.
 		}
-		TestUtil.cleanUpTest(stmt, testObjects);
 		conn.commit();
 		stmt.close();
 		conn.close();

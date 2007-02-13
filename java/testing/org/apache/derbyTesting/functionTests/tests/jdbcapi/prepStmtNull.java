@@ -70,6 +70,7 @@ public class prepStmtNull {
 
 		
 			pStmt.executeBatch();
+            pStmt.close();
 			con.commit();
 
 			stmt1 = con.createStatement();
@@ -80,7 +81,9 @@ public class prepStmtNull {
 			}
 			String[] testObjects = {"table nullTS"};
                         TestUtil.cleanUpTest(stmt1, testObjects);
+            stmt1.close();
    			con.commit();
+            con.close();
  		} catch(SQLException sqle) {
  		   dumpSQLExceptions(sqle);
  		   sqle.printStackTrace();
@@ -124,6 +127,7 @@ public class prepStmtNull {
 
 		
 			pStmt.executeBatch();
+            pStmt.close();
 			con.commit();
 
 			stmt1 = con.createStatement();
@@ -134,7 +138,9 @@ public class prepStmtNull {
 			}
 			String[] testObjects = {"table nullBlob"};
                         TestUtil.cleanUpTest(stmt1, testObjects);
+            stmt1.close();
    			con.commit();
+            con.close();
  		} catch(SQLException sqle) {
  		   dumpSQLExceptions(sqle);
  		   sqle.printStackTrace();
@@ -175,14 +181,19 @@ public class prepStmtNull {
                pStmt.setNull(1, Types.VARCHAR,"");
                pStmt.setBytes(2, b2);
                pStmt.execute();
+               pStmt.close();
 
                stmt1 = con.createStatement();
                rs = stmt1.executeQuery("select * from ClobBlob");
                while(rs.next()) {
                     System.out.println("ResultSet is: "+rs.getObject(1));
                }
+               rs.close();
                String[] testObjects = {"table ClobBlob"};
                TestUtil.cleanUpTest(stmt1, testObjects);
+               
+               stmt1.close();
+               con.close();
           } catch(SQLException sqle) {
                dumpSQLExceptions(sqle);
           } catch(Throwable e) {

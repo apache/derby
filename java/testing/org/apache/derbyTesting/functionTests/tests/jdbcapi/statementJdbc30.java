@@ -28,6 +28,7 @@ import java.sql.Statement;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 /**
  * Test of additional methods in JDBC3.0  methods in statement class.
@@ -74,7 +75,7 @@ public class statementJdbc30 {
 			try {
 				stmt.executeUpdate("insert into tab1 values(2, 3, 4.1)", columnIndexes);
 			} catch (SQLException ex) {
-				dumpExpectedSQLExceptions(ex);
+                BaseJDBCTestCase.assertSQLState("0A000", ex);
 			}
 
 			System.out.println("trying stmt.executeUpdate(String, String[]) :");
@@ -84,7 +85,7 @@ public class statementJdbc30 {
 			try {
 				stmt.executeUpdate("insert into tab1 values(2, 3, 4.1)", columnNames);
 			} catch (SQLException ex) {
-				dumpExpectedSQLExceptions(ex);
+                BaseJDBCTestCase.assertSQLState("0A000", ex);
 			}
 
 			System.out.println("trying stmt.execute(String, int) :");
@@ -94,14 +95,14 @@ public class statementJdbc30 {
 			try {
 				stmt.execute("insert into tab1 values(2, 3, 4.1)", columnIndexes);
 			} catch (SQLException ex) {
-				dumpExpectedSQLExceptions(ex);
+                BaseJDBCTestCase.assertSQLState("0A000", ex);
 			}
 
 			System.out.println("trying stmt.execute(String, String[]) :");
 			try {
 				stmt.execute("insert into tab1 values(2, 3, 4.1)", columnNames);
 			} catch (SQLException ex) {
-				dumpExpectedSQLExceptions(ex);
+                BaseJDBCTestCase.assertSQLState("0A000", ex);
 			}
 
 			System.out.println("trying stmt.getResultSetHoldability() :");
@@ -112,6 +113,7 @@ public class statementJdbc30 {
 
 			rs.close();
 			stmt.close();
+            con.commit();
 			con.close();
 
 		}
@@ -124,14 +126,5 @@ public class statementJdbc30 {
 		}
 
 		System.out.println("Test statementJdbc30 finished");
-    }
-
-	public static void dumpExpectedSQLExceptions (SQLException se) {
-		System.out.println("PASS -- expected exception");
-		while (se != null)
-		{
-			System.out.println("SQLSTATE("+se.getSQLState()+"): "+se);
-			se = se.getNextException();
-        }
     }
 }

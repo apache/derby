@@ -42,10 +42,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  */
 
 public class connectionJdbc20{ 
-   
-	static private boolean isDerbyNet = false;
-
-	static private String[] testObjects = {"TABLE TAB1"};
 
 	public static void main(String[] args) {
 		Connection conn, connreturn;
@@ -59,10 +55,9 @@ public class connectionJdbc20{
 			// make the initial connection.
 			 ij.getPropertyArg(args);
 			 conn = ij.startJBMS();
-			 isDerbyNet = TestUtil.isNetFramework();
+
 			 stmt = conn.createStatement();
-			// cleanup table, just in case
-			TestUtil.cleanUpTest(stmt, testObjects);
+
             //create a table, insert a row, do a select from the table,
 			 stmt.execute("create table tab1("+
                                            "c1 char(100) for bit data,"+
@@ -146,6 +141,7 @@ public class connectionJdbc20{
             }
             // try to get a statemet from a meta data result set
             stmt = rs.getStatement(); 
+            rs.close();
 
             // Try to get the Connection back from a Metadata
             System.out.println("Try to Get the connection back from metadata");
@@ -167,7 +163,6 @@ public class connectionJdbc20{
 
             cs.close();
 			conn.close();
-			TestUtil.cleanUpTest(stmt, testObjects);
 
 		}
 		catch (SQLException e) {

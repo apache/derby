@@ -31,6 +31,8 @@ import java.sql.Types;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Test of additional methods in JDBC2.0  methods in statement and 
@@ -160,7 +162,7 @@ public class statementJdbc20 {
 			}
 			catch (SQLException e)
 			{
-              dumpExpectedSQLExceptions(e);
+              BaseJDBCTestCase.assertSQLState("42X05", e);
 			}
 
 			// executeUpdate() not allowed on statements
@@ -175,6 +177,7 @@ public class statementJdbc20 {
 			}
 
 			stmt.close();
+            con.commit();
 			con.close();
 
 		}

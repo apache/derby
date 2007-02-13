@@ -1,6 +1,5 @@
 jdbcapi/bestrowidentifier.sql
 jdbcapi/checkDriver.java
-jdbcapi/derbyStress.java
 jdbcapi/nullSQLText.java
 jdbcapi/prepStmtMetaData.java
 jdbcapi/resultset.java
@@ -9,12 +8,8 @@ jdbcapi/users.sql
 jdbcapi/users2.sql
 jdbcapi/secureUsers.sql
 jdbcapi/secureUsers1.sql
-jdbcapi/maxfieldsize.java
 jdbcapi/LOBTest.java
 jdbcapi/parameterMapping.java
 jdbcapi/setTransactionIsolation.java
-jdbcapi/SetQueryTimeoutTest.java
-jdbcapi/prepStmtNull.java
 jdbcapi/testRelative.java
-jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/SURTest_ij.sql

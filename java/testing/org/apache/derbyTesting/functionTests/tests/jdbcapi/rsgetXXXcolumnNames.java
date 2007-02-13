@@ -104,6 +104,10 @@ public class rsgetXXXcolumnNames {
 			   System.out.println("Col col1: "+rs.getInt("col1"));
 			}
 			rs.close();
+            stmt1.close();
+            stmt.close();
+            con.commit();
+            con.close();
  		} catch(SQLException sqle) {
  		   dumpSQLExceptions(sqle);
  		   sqle.printStackTrace();

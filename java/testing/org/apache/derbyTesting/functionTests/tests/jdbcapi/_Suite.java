@@ -62,6 +62,10 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(BatchUpdateTest.suite());
 		suite.addTest(StreamTest.suite());
         
+        // Old harness .java tests that run using the HarnessJavaTest
+        // adapter and continue to use a single master file.
+        suite.addTest(JDBCHarnessJavaTest.suite());
+        
         if (JDBC.vmSupportsJDBC3())
         {
             // Class requires javax.sql.PooledConnection
