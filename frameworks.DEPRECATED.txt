@@ -1,0 +1,112 @@
+The scripts in the frameworks directory have been deprecated. Please begin
+using the scripts in the bin directory. The text in this document describes
+how to convert use of the frameworks scripts to the new scripts in /bin.
+
+In most cases, there are two environment variables which need to be set before
+the scripts in /bin can be used:
+
+DERBY_HOME = the path to the location of the Apache Derby installation
+JAVA_HOME = the path to the location of the Java Development Kit installation,
+            which provides the java executable for your platform.
+
+In some cases, the DERBY_OPTS variable needs to be set to include specific
+JVM system properties in order for the Derby tools to function properly.
+
+An alternative to using the set*CP scripts is to add derbyrun.jar from the Derby
+distribution to your classpath. This will put all of the Derby classes into your
+classpath. If you would like a minimal classpath that does not include all of
+the Derby classes and jars, use the set*CP scripts or set the classpath
+manually.
+
+derbyrun.jar can also be used to start the tools without setting any environment
+variables in your shell if you already have a java executable in your path. To
+see the syntax for using derbyrun.jar, execute 'java -jar derbyrun.jar' in the
+/lib directory, or provide the full path to derbyrun.jar, e.g.:
+
+java -jar /opt/derby/lib/derbyrun.jar
+
+Additional information on using the scripts and derbyrun.jar are provided in the
+Getting Started guide and the Tools and Utilities guide.
+
+frameworks/embedded/bin/dblook(.bat|.ksh):
+Use /bin/dblook(.bat) or 'java -jar derbyrun.jar dblook'. All dblook 
+command-line arguments can be provided to the new scripts. 
+
+frameworks/embedded/bin/ij(.bat|.ksh):
+Use /bin/ij(.bat) or 'java -jar derbyrun.jar ij'. The new scripts in /bin do not
+set the ij.protocol system property. To set this system property with the new 
+scripts, set the shell environment variable DERBY_OPTS=-Dij.protocol=jdbc:derby:
+to mimic the behavior of the frameworks scripts. Alternatively, use the PROTOCOL
+command inside ij to set the protocol to 'jdbc:derby:'.
+
+frameworks/embedded/setEmbeddedCP(.bat|.ksh):
+The new scripts setEmbeddedCP(.sh) perform the same function as the old
+setEmbeddedCP(.bat|.ksh). Make sure that the DERBY_HOME environment
+variable is set before calling this script.
+
+frameworks/embedded/sysinfo(.bat|.ksh):
+Use /bin/sysinfo(.bat) or 'java -jar derbyrun.jar sysinfo'. The sysinfo scripts
+accept arguments to org.apache.derby.tools.sysinfo that the frameworks scripts 
+did not. For example, the ClasspathTester, or -cp arguments, are now accepted by
+the sysinfo scripts in /bin.
+
+frameworks/NetworkServer/NetworkServerControl(.bat|.ksh):
+Use /bin/NetworkServerControl(.bat) or 'java -jar derbyrun.jar server'. As with
+the frameworks scripts, a usage message with the commands that 
+NetworkServerControl will accept are printed if no arguments are provided.
+
+frameworks/NetworkServer/dblook(.bat|.ksh):
+Use /bin/dblook(.bat) or 'java -jar derbyrun.jar dblook'. As with the previous
+scripts, the database URL must be provided with the -d option. If you provide
+no arguments or options, a usage message will be displayed.
+
+frameworks/NetworkServer/ij(.bat|.ksh):
+Use /bin/ij(.bat) or 'java -jar derbyrun.jar ij'. The new scripts in /bin do not
+set the ij.protocol or ij.driver system properties. To set these properties
+to ensure that ij uses the network client driver instead of the embedded driver,
+set the shell environment variable DERBY_OPTS as follows: 
+
+DERBY_OPTS="-Dij.driver=org.apache.derby.jdbc.ClientDriver -Dij.protocol=jdbc:derby://$IJ_HOST:$IJ_PORT/ -Dij.user=$IJ_USER -Dij.password=$IJ_PASSWORD"
+
+where the value of the environment variables that start with IJ_ are as follows:
+
+IJ_HOST is the machine name or 'localhost' for the local machine.
+IJ_PORT is the port on which the Derby network server is listening.
+IJ_USER is the username used to connect to the network server.
+IJ_PASSWORD is the password for the user specified in IJ_USER.
+
+Setting these properties will mimic the behavior of the frameworks scripts. 
+Alternatively, you can use the PROTOCOL and DRIVER commands to set the values
+for ij.protocol and ij.driver inside of ij. The username and password must be 
+provided via connection attributes.
+
+frameworks/NetworkServer/bin/setNetworkClientCP(.bat|.ksh):
+Use /bin/setNetworkClientCP(.bat). Make sure that the environment variable
+DERBY_HOME is set before running the script.
+
+frameworks/NetworkServer/bin/setNetworkServerCP(.bat|.ksh):
+Use /bin/setNetworkServerCP(.bat). Make sure that the environment variable
+DERBY_HOME is set before running the script.
+
+frameworks/NetworkServer/bin/startNetworkServer(.bat|.ksh):
+Use /bin/startNetworkServer(.bat) or 'java -jar derbyrun.jar server start'.
+The port and host parameters can be specified using the -h and -p options.
+The default is to only accept connections from localhost on port 1527. For
+more information on configuring the network server, please see the Server and
+Administration guide.
+
+frameworks/NetworkServer/bin/stopNetworkServer(.bat|.ksh):
+Use /bin/stopNetworkServer(.bat) or 'java -jar derbyrun.jar server stop'.
+The port and host parameters can be specified using the -h and -p options.
+The default is to only accept connections from localhost on port 1527. For
+more information on configuring the network server, please see the Server and
+Administration guide.
+
+frameworks/NetworkServer/bin/sysinfo(.bat|.ksh):
+Use '/bin/NetworkServerControl sysinfo' or 
+'java -jar derbyrun.jar server sysinfo'. The network server must be running in
+order to recieve system information from the server. The port and host 
+parameters can be specified using the -h and -p options. The default is to 
+only accept connections from localhost on port 1527. For more information on 
+configuring the network server, please see the Server and Administration guide.
+
