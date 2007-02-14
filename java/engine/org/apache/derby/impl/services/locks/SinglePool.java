@@ -339,7 +339,7 @@ public class SinglePool extends Hashtable
 		LockSpace ls = (LockSpace) get(compatabilitySpace);
 		if (ls == null)
 			return false;
-		return !ls.isEmpty();
+		return ls.areLocksHeld();
 	}
 
 	public boolean zeroDurationlockObject(Object compatabilitySpace, Lockable ref, Object qualifier, int timeout)
