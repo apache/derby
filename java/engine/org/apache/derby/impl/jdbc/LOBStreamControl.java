@@ -293,7 +293,7 @@ class LOBStreamControl {
     /**
      * Reads bytes starting from 'position' into bytes array.
      * starting from 'offset'
-     * @param b array into the bytes will be copied
+     * @param buff array into the bytes will be copied
      * @param off offset from where the array has to be populated
      * @param len number of bytes to read
      * @param pos initial postion before reading
@@ -366,7 +366,7 @@ class LOBStreamControl {
     /**
      * Copies bytes from stream to local storage.
      * @param inStream
-     * @param pos length to be copied
+     * @param length length to be copied
      * @throws IOException, SQLException
      */
     synchronized void copyData(InputStream inStream,
