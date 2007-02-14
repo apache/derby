@@ -1831,7 +1831,7 @@ abstract class FileContainer
                     // because the alloc page is still latched and the alloc 
                     // cache is invalidated.
                     //
-                    // However (beetle 3942) it is possible for the page to be 
+                    // However it is possible for the page to be 
                     // found by threads who specifically ask for this 
                     // pagenumber (e.g. HeapPostCommit).
                     // We may find that such a thread has latched the page. 
@@ -1842,7 +1842,7 @@ abstract class FileContainer
                     //
                     // We may instead find that we can latch the page, but that
                     // another thread has managed to get hold of it during the 
-                    // transfer and either deallocate it or otherwise change it
+                    // transfer and either deallocated it or otherwise change it
                     // (add rows, delete rows etc.)
                     //
                     // Since this doesn't happen very often, we retry in these 
@@ -1852,7 +1852,7 @@ abstract class FileContainer
                     // If the lock manager were changed to allow latches to be 
                     // transferred between transactions, wouldn't need to 
                     // unlatch to do the transfer, and would avoid having to 
-                    // retry in these cases (beetle 4011).
+                    // retry in these cases (DERBY-2337).
 
 				    page.unlatch();
 				    page = null;
