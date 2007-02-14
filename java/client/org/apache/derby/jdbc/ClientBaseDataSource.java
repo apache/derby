@@ -170,6 +170,13 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
    
     // serverName is not permitted in a properties object
 
+    //---------------------- client SSL ----------------
+
+    public static final boolean getSsl(Properties properties)
+    {
+        return Boolean.valueOf(properties.getProperty(Attribute.SSL_ATTR)).booleanValue();
+    }
+
     // ---------------------------- user -----------------------------------
     //
     // This property can be overwritten by specifing the

@@ -29,13 +29,13 @@ server:
 No arguments given.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>] [-unsecure]
-shutdown [-h <host>][-p <portnumber>]
-ping [-h <host>][-p <portnumber>]
-sysinfo [-h <host>][-p <portnumber>]
-runtimeinfo [-h <host>][-p <portnumber>]
-logconnections {on|off}[-h <host>][-p <portnumber>]
-maxthreads <max>[-h <host>][-p <portnumber>]
-timeslice <milliseconds>[-h <host>][-p <portnumber>]
-trace {on|off} [-s <session id>][-h <host>][-p <portnumber>]
-tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
+start [-h <host>] [-p <portnumber>] [-unsecure] [-ssl <sslmode>]
+shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+logconnections {on|off}[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]

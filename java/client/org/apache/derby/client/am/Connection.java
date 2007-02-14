@@ -136,6 +136,7 @@ public abstract class Connection implements java.sql.Connection,
     public org.apache.derby.jdbc.ClientBaseDataSource dataSource_;
     public String serverNameIP_;
     public int portNumber_;
+    public boolean useSSL_ = false;
 
     public java.util.Hashtable clientCursorNameCache_ = new java.util.Hashtable();
     public boolean canUseCachedConnectBytes_ = false;
@@ -194,11 +195,11 @@ public abstract class Connection implements java.sql.Connection,
         serverNameIP_ = dataSource.getServerName();
         portNumber_ = dataSource.getPortNumber();
 
-
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
                 serverNameIP_,
-                portNumber_);
+                portNumber_,
+                false /*TODO: SSL & Datasource*/);
     }
 
     // For jdbc 2 connections
@@ -223,11 +224,11 @@ public abstract class Connection implements java.sql.Connection,
         serverNameIP_ = dataSource.getServerName();
         portNumber_ = dataSource.getPortNumber();
 
-
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
                 serverNameIP_,
-                portNumber_);
+                portNumber_,
+                false /*TODO: SSL & Datasource*/);
     }
 
     // This is a callback method, called by subsystem - NetConnection
@@ -320,11 +321,13 @@ public abstract class Connection implements java.sql.Connection,
         loginTimeout_ = driverManagerLoginTimeout;
         serverNameIP_ = serverName;
         portNumber_ = portNumber;
+        useSSL_ = ClientDataSource.getSsl(properties);
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
                 serverNameIP_,
-                portNumber_);
+                portNumber_,
+                useSSL_);
     }
 
     // Users are advised to call the method close() on Statement and Connection objects when they are done with them.
@@ -1748,7 +1751,7 @@ public abstract class Connection implements java.sql.Connection,
                                                      String databaseName);
     //--------------------Abstract material factory methods-----------------
 
-    protected abstract Agent newAgent_(LogWriter logWriter, int loginTimeout, String serverName, int portNumber) throws SqlException;
+    protected abstract Agent newAgent_(LogWriter logWriter, int loginTimeout, String serverName, int portNumber, boolean useSSL) throws SqlException;
 
 
     protected abstract DatabaseMetaData newDatabaseMetaData_();

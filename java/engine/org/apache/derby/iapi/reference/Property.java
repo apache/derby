@@ -776,6 +776,18 @@ public interface Property {
 	public final static String DRDA_PROP_MAXTHREADS = "derby.drda.maxThreads";
 	public final static String DRDA_PROP_TIMESLICE = "derby.drda.timeSlice";
 
+
+    /**
+     * derby.drda.sslMode
+     * <BR>
+     * This property may be set to one of the following three values
+     * off: No Wire encryption
+     * on:  Encryption, but no SSL client authentication
+     * clientAuth: Encryption and with SSL client authentication
+     */
+
+    public final static String DRDA_PROP_SSL_MODE = "derby.drda.sslMode";
+
     /**
      * derby.drda.securityMechanism
      *<BR>

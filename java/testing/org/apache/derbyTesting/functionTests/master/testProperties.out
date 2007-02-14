@@ -21,6 +21,7 @@ Apache Derby Network Server - 10.3.0.0 alpha -(EXPECTED SUBVERSION INFO)  shutdo
 -----Dderby.drda.logConnections -Dderby.drda.traceAll -Dderby.drda.traceDirectory -Dderby.drda.keepAlive -Dderby.drda.timeSlice -Dderby.drda.host -Dderby.drda.portNumber -Dderby.drda.minThreads -Dderby.drda.maxThreads -Dderby.drda.startNetworkServer -Dderby.drda.debug org.apache.derby.drda.NetworkServerControl start -unsecure 
 ----- listing properties --
 derby.drda.maxThreads=0
+derby.drda.sslMode=off
 derby.drda.keepAlive=true
 derby.drda.minThreads=0
 derby.drda.portNumber=1527
@@ -36,6 +37,7 @@ org.apache.derby.drda.NetworkServerControl logconnections on -p 1527
 Log Connections changed to on.
 ----- listing properties --
 derby.drda.maxThreads=0
+derby.drda.sslMode=off
 derby.drda.keepAlive=true
 derby.drda.minThreads=0
 derby.drda.portNumber=1527
@@ -49,6 +51,7 @@ Trace turned off for all sessions.
 Trace turned off for all sessions.
 ----- listing properties --
 derby.drda.maxThreads=0
+derby.drda.sslMode=off
 derby.drda.keepAlive=true
 derby.drda.minThreads=0
 derby.drda.portNumber=1527
@@ -63,42 +66,42 @@ org.apache.derby.drda.NetworkServerControl
 No arguments given.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>] [-unsecure]
-shutdown [-h <host>][-p <portnumber>]
-ping [-h <host>][-p <portnumber>]
-sysinfo [-h <host>][-p <portnumber>]
-runtimeinfo [-h <host>][-p <portnumber>]
-logconnections {on |off}[-h <host>][-p <portnumber>]
-maxthreads <max>[-h <host>][-p <portnumber>]
-timeslice <milliseconds>[-h <host>][-p <portnumber>]
-trace {on |off} [-s <session id>][-h <host>][-p <portnumber>]
-tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
+start [-h <host>] [-p <portnumber>] [-unsecure] [-ssl <sslmode>]
+shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+logconnections {on |off}[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+trace {on |off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 org.apache.derby.drda.NetworkServerControl unknowncmd 
 Command unknowncmd is unknown.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>] [-unsecure]
-shutdown [-h <host>][-p <portnumber>]
-ping [-h <host>][-p <portnumber>]
-sysinfo [-h <host>][-p <portnumber>]
-runtimeinfo [-h <host>][-p <portnumber>]
-logconnections {on |off}[-h <host>][-p <portnumber>]
-maxthreads <max>[-h <host>][-p <portnumber>]
-timeslice <milliseconds>[-h <host>][-p <portnumber>]
-trace {on |off} [-s <session id>][-h <host>][-p <portnumber>]
-tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
+start [-h <host>] [-p <portnumber>] [-unsecure] [-ssl <sslmode>]
+shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+logconnections {on |off}[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+trace {on |off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 org.apache.derby.drda.NetworkServerControl ping arg1 
 Invalid number of arguments for command ping.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>] [-unsecure]
-shutdown [-h <host>][-p <portnumber>]
-ping [-h <host>][-p <portnumber>]
-sysinfo [-h <host>][-p <portnumber>]
-runtimeinfo [-h <host>][-p <portnumber>]
-logconnections {on |off}[-h <host>][-p <portnumber>]
-maxthreads <max>[-h <host>][-p <portnumber>]
-timeslice <milliseconds>[-h <host>][-p <portnumber>]
-trace {on |off} [-s <session id>][-h <host>][-p <portnumber>]
-tracedirectory <traceDirectory>[-h <host>][-p <portnumber>]
+start [-h <host>] [-p <portnumber>] [-unsecure] [-ssl <sslmode>]
+shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+logconnections {on |off}[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+trace {on |off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]
+tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 End test

@@ -1,6 +1,7 @@
 ----- listing properties --
 derby.drda.traceDirectory=MACHINE_SPECIFIC_DIR
 derby.drda.maxThreads=0
+derby.drda.sslMode=off
 derby.drda.keepAlive=true
 derby.drda.minThreads=0
 derby.drda.portNumber=1527
@@ -13,6 +14,7 @@ Properties with tracing on
 ----- listing properties --
 derby.drda.traceDirectory=MACHINE_SPECIFIC_DIR
 derby.drda.maxThreads=0
+derby.drda.sslMode=off
 derby.drda.trace.3=true
 derby.drda.keepAlive=true
 derby.drda.minThreads=0
@@ -26,6 +28,7 @@ Properties with tracing on
 ----- listing properties --
 derby.drda.traceDirectory=MACHINE_SPECIFIC_DIR
 derby.drda.maxThreads=0
+derby.drda.sslMode=off
 derby.drda.keepAlive=true
 derby.drda.minThreads=0
 derby.drda.portNumber=1527

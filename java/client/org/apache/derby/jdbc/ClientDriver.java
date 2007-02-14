@@ -157,7 +157,8 @@ public class ClientDriver implements java.sql.Driver {
 
     /**
      * Append attributes to the database name except for user/password 
-     * which are sent as part of the protocol.
+     * which are sent as part of the protocol, and SSL which is used 
+     * locally in the client.
      * Other attributes will  be sent to the server with the database name
      * Assumes augmentedProperties is not null
      * 
@@ -172,7 +173,8 @@ public class ClientDriver implements java.sql.Driver {
 		{
 			String key = (String) keys.nextElement();
 			if (key.equals(Attribute.USERNAME_ATTR) || 
-				key.equals(Attribute.PASSWORD_ATTR))
+                key.equals(Attribute.PASSWORD_ATTR) ||
+                key.equals(Attribute.SSL_ATTR))
 				continue;
 			longDatabase.append(";" + key + "=" + augmentedProperties.getProperty(key));
 		}

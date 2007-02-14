@@ -4,6 +4,7 @@ org.apache.derby.drda.NetworkServerControl sysinfo
 ----- listing properties --
 derby.drda.securityMechanism=USER_ONLY_SECURITY
 derby.drda.maxThreads=0
+derby.drda.sslMode=off
 derby.drda.keepAlive=true
 derby.drda.minThreads=0
 derby.drda.portNumber=1527
@@ -36,6 +37,7 @@ Testing Sysinfo (method)
 ----- listing properties --
 derby.drda.securityMechanism=USER_ONLY_SECURITY
 derby.drda.maxThreads=0
+derby.drda.sslMode=off
 derby.drda.keepAlive=true
 derby.drda.minThreads=0
 derby.drda.portNumber=1527
@@ -69,6 +71,7 @@ Testing Sysinfo (locale)
 ----- listing properties --
 derby.drda.securityMechanism=USER_ONLY_SECURITY
 derby.drda.maxThreads=0
+derby.drda.sslMode=off
 derby.drda.keepAlive=true
 derby.drda.minThreads=0
 derby.drda.portNumber=1527

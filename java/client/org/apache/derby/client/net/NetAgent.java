@@ -82,6 +82,8 @@ public class NetAgent extends Agent {
 
     String server_;
     int port_;
+    boolean useSSL_;
+
     public CcsidManager sourceCcsidManager_;
     public CcsidManager targetCcsidManager_;
     public Typdef typdef_;
@@ -106,12 +108,15 @@ public class NetAgent extends Agent {
              org.apache.derby.client.am.LogWriter netLogWriter,
              int loginTimeout,
              String server,
-             int port) throws SqlException {
+             int port,
+             boolean useSSL) throws SqlException {
         super(netConnection, netLogWriter);
 
         server_ = server;
         port_ = port;
         netConnection_ = netConnection;
+        useSSL_ = useSSL;
+
         if (server_ == null) {
             throw new DisconnectException(this, 
                 new ClientMessageId(SQLState.CONNECT_REQUIRED_PROPERTY_NOT_SET),
@@ -119,7 +124,7 @@ public class NetAgent extends Agent {
         }
 
         try {
-            socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port));
+            socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port, useSSL_));
         } catch (java.security.PrivilegedActionException e) {
             throw new DisconnectException(this,
                 new ClientMessageId(SQLState.CONNECT_UNABLE_TO_CONNECT_TO_SERVER),

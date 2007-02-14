@@ -21,16 +21,32 @@
 
 package org.apache.derby.client.net;
 
+import javax.net.SocketFactory;
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.SSLServerSocketFactory;
+
 public class OpenSocketAction implements java.security.PrivilegedExceptionAction {
     private String server_;
     private int port_;
+    private boolean useSSL_;
 
-    public OpenSocketAction(String server, int port) {
+    public OpenSocketAction(String server, int port, boolean useSSL) {
         server_ = server;
         port_ = port;
+        useSSL_ = useSSL;
     }
 
-    public Object run() throws java.net.UnknownHostException, java.io.IOException {
-        return new java.net.Socket(server_, port_);
+    public Object run() 
+        throws java.net.UnknownHostException, 
+               java.io.IOException {
+
+        SocketFactory sf;
+        if (useSSL_) {
+            sf = SSLSocketFactory.getDefault();
+        } else {
+            sf = SocketFactory.getDefault();
+        }
+        return sf.createSocket(server_, port_);
     }
 }

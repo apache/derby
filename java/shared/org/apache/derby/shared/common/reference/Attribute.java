@@ -222,6 +222,12 @@ public interface Attribute {
      * Client driver attribute.
      */    
     String CLIENT_RETIEVE_MESSAGE_TEXT = "retrieveMessageText";
+
+    /**
+       The attribute that is used to set client SSL mode.
+    */
+    String SSL_ATTR = "ssl";
+
 }
 
 

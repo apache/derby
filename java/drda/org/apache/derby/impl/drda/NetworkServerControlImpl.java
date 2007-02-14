@@ -33,6 +33,11 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import javax.net.SocketFactory;
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.net.UnknownHostException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -96,7 +101,7 @@ public final class NetworkServerControlImpl {
 	public final static int COMMAND_PROPERTIES = 10;
 	public final static int COMMAND_UNKNOWN = -1;
 	public final static String [] DASHARGS =
-	{"p","d","u","ld","ea","ep", "b", "h", "s", "unsecure"};
+	{"p","d","u","ld","ea","ep", "b", "h", "s", "unsecure", "ssl"};
 	public final static int DASHARG_PORT = 0;
 	public final static int DASHARG_DATABASE = 1;
 	public final static int DASHARG_USER = 2;
@@ -107,6 +112,7 @@ public final class NetworkServerControlImpl {
 	public final static int DASHARG_HOST = 7;
 	public final static int DASHARG_SESSION = 8;
 	public final static int DASHARG_UNSECURE = 9;
+	private final static int DASHARG_SSL = 10;
 
 	// command protocol version - you need to increase this number each time
 	// the command protocol changes 
@@ -292,13 +298,19 @@ public final class NetworkServerControlImpl {
 
 	// accessed by inner classes for privileged action
 	private String propertyFileName;
-	private Runnable acceptClients;
-	
+	private NetworkServerControlImpl thisControl = this;
 
 	// if the server is started from the command line, it should shutdown the
 	// databases it has booted.
 	private boolean shutdownDatabasesOnShutdown = false;
-	
+
+	// SSL related stuff
+	private static final int SSL_OFF = 0;
+	private static final int SSL_ON = 1;
+	private static final int SSL_CLIENT_AUTH = 2;
+
+	private int sslMode = SSL_OFF;
+
     /**
      * Can EUSRIDPWD security mechanism be used with 
      * the current JVM
@@ -567,6 +579,46 @@ public final class NetworkServerControlImpl {
 		starter.boot(false,null);
 	}
 
+	/**
+	 * Create the right kind of server socket
+	 */
+	
+	private ServerSocket createServerSocket()
+		throws IOException
+	{
+		if (hostAddress == null)
+			hostAddress = InetAddress.getByName(hostArg);
+		// Make a list of valid
+		// InetAddresses for NetworkServerControl
+		// admin commands.
+		buildLocalAddressList(hostAddress);
+											
+		// Create the right kind of socket
+		switch (getSSLMode()) {
+		case SSL_OFF:
+		default:
+			ServerSocketFactory sf =
+				ServerSocketFactory.getDefault();
+			return sf.createServerSocket(portNumber
+										 ,0,
+										 hostAddress);
+		case SSL_ON:
+			SSLServerSocketFactory ssf =
+				(SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
+			return ssf.createServerSocket(portNumber
+										  ,0,
+										  hostAddress);
+		case SSL_CLIENT_AUTH:
+			SSLServerSocketFactory ssf2 =
+				(SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
+			SSLServerSocket sss= (SSLServerSocket)ssf2.createServerSocket(portNumber
+																		  ,0,
+																		  hostAddress);
+			sss.setNeedClientAuth(true);
+			return sss;
+		}
+	}
+	
 
 	/**
 	 * Start a network server
@@ -589,54 +641,73 @@ public final class NetworkServerControlImpl {
 			mc = new memCheck(200000);
 			mc.start();
 		}
-        // Open a server socket listener      
-	    try{
-	    	serverSocket = (ServerSocket) AccessController.doPrivileged(
-								new PrivilegedExceptionAction() {
-										public Object run() throws IOException,UnknownHostException
-										{
-											if (hostAddress == null)
-												hostAddress = InetAddress.getByName(hostArg);
-											// Make a list of valid
-											// InetAddresses for NetworkServerControl
-											// admin commands.
-											buildLocalAddressList(hostAddress);
-											return new ServerSocket(portNumber
-																	,0,
-																	hostAddress);
-										}
-									}
-								);
+		// Open a server socket listener	  
+		try{
+			serverSocket = 
+				(ServerSocket) 
+				AccessController.doPrivileged(new PrivilegedExceptionAction() {
+						public Object run() throws IOException
+						{
+							return createServerSocket();
+						}
+					});
 		} catch (PrivilegedActionException e) {
 			Exception e1 = e.getException();
-	    	if (e1 instanceof IOException)
-            	consolePropertyMessage("DRDA_ListenPort.S", 
-									   new String [] {
-										   Integer.toString(portNumber), 
-										   hostArg}); 
+
+			// Test for UnknownHostException first since it's a
+			// subbclass of IOException (and consolePropertyMessage
+			// throws an exception when the severity is S (or U).
 			if (e1 instanceof UnknownHostException) {
 				consolePropertyMessage("DRDA_UnknownHost.S", hostArg);
-			}
-			else
+			} else if (e1 instanceof IOException) {
+				consolePropertyMessage("DRDA_ListenPort.S", 
+									   new String [] {
+										   Integer.toString(portNumber), 
+										   hostArg,
+										   // Since SocketException
+										   // is used for a phletora
+										   // of situations, we need
+										   // to communicate the
+										   // underlying exception
+										   // string to the user.
+										   e1.toString()}); 
+			} else {
 				throw e1;
+			}
 		} catch (Exception e) {
 		// If we find other (unexpected) errors, we ultimately exit--so make
 		// sure we print the error message before doing so (Beetle 5033).
 			throwUnexpectedException(e);
 		}
-		
-		consolePropertyMessage("DRDA_Ready.I", new String [] 
-                    {Integer.toString(portNumber), att_srvclsnm, versionString,
-					getFormattedTimestamp()});
+
+		switch (getSSLMode()) {
+		default:
+		case SSL_OFF:
+			consolePropertyMessage("DRDA_Ready.I", new String [] 
+				{Integer.toString(portNumber), att_srvclsnm, versionString,
+				 getFormattedTimestamp()});
+			break;
+		case SSL_ON:
+			consolePropertyMessage("DRDA_SSLReady.I", new String [] 
+				{Integer.toString(portNumber), att_srvclsnm, versionString,
+				 getFormattedTimestamp()});
+			break;
+		case SSL_CLIENT_AUTH:
+			consolePropertyMessage("DRDA_SSLClientAuthReady.I", new String [] 
+				{Integer.toString(portNumber), att_srvclsnm, versionString,
+				 getFormattedTimestamp()});
+			break;
+		}
 		
 		// We accept clients on a separate thread so we don't run into a problem
 		// blocking on the accept when trying to process a shutdown
-		acceptClients = (Runnable)new ClientThread(this, serverSocket);
-		Thread clientThread =  (Thread) AccessController.doPrivileged(
+		ClientThread clientThread =	 
+			(ClientThread) AccessController.doPrivileged(
 								new PrivilegedExceptionAction() {
 									public Object run() throws Exception
 									{
-										return new Thread(acceptClients);
+										return new ClientThread(thisControl, 
+																serverSocket);
 									}
 								}
 							);
@@ -2066,9 +2137,16 @@ public final class NetworkServerControlImpl {
 				else
 					consolePropertyMessage("DRDA_MissingValue.U", "DRDA_Session.I");
 				break;
-
 			case DASHARG_UNSECURE:
 				unsecureArg = true;
+				break;
+
+			case DASHARG_SSL:
+				if (pos < args.length) {
+					setSSLMode(getSSLModeValue(args[pos]));
+				} else {
+					setSSLMode(SSL_OFF);
+				}
 				break;
 
 			default:
@@ -2125,7 +2203,7 @@ public final class NetworkServerControlImpl {
 	{
 		
 		try {
-            clientSocket = (Socket) AccessController.doPrivileged(
+			clientSocket = (Socket) AccessController.doPrivileged(
 								new PrivilegedExceptionAction() {
 										
 									public Object run() throws UnknownHostException,IOException
@@ -2143,16 +2221,22 @@ public final class NetworkServerControlImpl {
 										else
 											connectAddress = hostAddress;
 
-										return new Socket(connectAddress, portNumber);
+										SocketFactory sf;
+										if (getSSLMode() > SSL_OFF) {
+											sf = SSLSocketFactory.getDefault();
+										} else {
+											sf = SocketFactory.getDefault();
+										}
+										return sf.createSocket(connectAddress, portNumber);
 									}
 								}
 							);
 		} catch (PrivilegedActionException pae) {
 			Exception e1 = pae.getException();
-        	if (e1 instanceof UnknownHostException) {
+			if (e1 instanceof UnknownHostException) {
 					consolePropertyMessage("DRDA_UnknownHost.S", hostArg);
 			}
-        	else if (e1 instanceof IOException) {
+			else if (e1 instanceof IOException) {
 					consolePropertyMessage("DRDA_NoIO.S",
 						new String [] {hostArg, (new Integer(portNumber)).toString()});
 			}
@@ -2606,6 +2690,10 @@ public final class NetworkServerControlImpl {
 			portNumber = getIntPropVal(Property.DRDA_PROP_PORTNUMBER, propval);
 		}
 
+		propval = PropertyUtil.getSystemProperty(
+			Property.DRDA_PROP_SSL_MODE);
+		setSSLMode(getSSLModeValue(propval));
+												 
 		propval = PropertyUtil.getSystemProperty( 
 			Property.DRDA_PROP_KEEPALIVE);
 		if (propval != null && 
@@ -2622,14 +2710,14 @@ public final class NetworkServerControlImpl {
 		}	
 		propval = PropertyUtil.getSystemProperty(
 						 NetworkServerControlImpl.DRDA_PROP_DEBUG);
-		if (propval != null  && StringUtil.SQLEqualsIgnoreCase(propval, "true"))
+		if (propval != null	 && StringUtil.SQLEqualsIgnoreCase(propval, "true"))
 			debugOutput = true;
 
-        propval = PropertyUtil.getSystemProperty( 
-                Property.DRDA_PROP_SECURITYMECHANISM);
-        if (propval != null){
-            setSecurityMechanism(propval);
-        }
+		propval = PropertyUtil.getSystemProperty( 
+				Property.DRDA_PROP_SECURITYMECHANISM);
+		if (propval != null){
+			setSecurityMechanism(propval);
+		}
 
 	}
 
@@ -2696,6 +2784,60 @@ public final class NetworkServerControlImpl {
         return SUPPORTS_EUSRIDPWD;
     }
     
+	/**
+	 * Get the SSL-mode from a string.
+	 * @param s the SSL-mode string ("off", "on"/"true" or
+	 * "clientAuth"
+	 * @return SSL_OFF, SSL_ON or SSL_CLIENT_AUTH. Will default to
+	 * SSL_OFF if the input does not match one of the four listed
+	 * above.
+	 **/
+
+	private int getSSLModeValue(String s)
+	{
+		if (s != null){
+			if (StringUtil.SQLEqualsIgnoreCase(s,"off")) {
+				return SSL_OFF;
+			} else if (StringUtil.SQLEqualsIgnoreCase(s,"on")) {
+				return SSL_ON;
+			} else if (StringUtil.SQLEqualsIgnoreCase(s,"true")) {
+				// "true" equivalent to "on"
+				return SSL_ON;
+			} else if (StringUtil.SQLEqualsIgnoreCase(s,"clientAuth")) {
+				return SSL_CLIENT_AUTH;
+			} else {
+				// Default
+				return SSL_OFF;
+			}
+		} else {
+			// Default
+			return SSL_OFF;
+		}
+	}
+
+	/**
+	 * Get the string value of the SSL-mode. This is the inverse of
+	 * getSSLModeValue.
+	 * @param i The SSL-mode value (SSL_OFF, SSL_ON or AAL_CLIENT_AUTH)
+	 * @return The string representation ("off","on" or
+	 * "clientAuth"). Will default to SSL_OFF for other values than
+	 * those listed above.
+	 */
+	
+	private String getSSLModeString(int i)
+	{
+		switch(i) {
+		case SSL_OFF:
+		default:
+			return "off";
+		case SSL_ON:
+			return "on";
+		case SSL_CLIENT_AUTH:
+			return "clientAuth";
+		}
+	}
+
+	
 	/**
 	 * Get integer property values
 	 *
@@ -3204,6 +3346,16 @@ public final class NetworkServerControlImpl {
 			maxThreads = value;
 		}
 	}
+
+	protected void setSSLMode(int mode)
+	{
+		sslMode = mode;
+	}
+
+	protected int getSSLMode() 
+	{
+		return sslMode;
+	}
 		
 	/**
 	 * Get the current value of whether to trace all the sessions
@@ -3291,101 +3443,7 @@ public final class NetworkServerControlImpl {
 			sendSQLMessage(writer, se, SQLERROR);
 	  	}
 	}
-	/**
-	 * Boot database 
-	 *
-	 * @param writer	connection to send message to
-	 * @param database 	database directory to connect to
-	 * @param bootPassword	boot password
-	 * @param encPrv	encryption provider
-	 * @param encAlg	encryption algorithm
-	 * @param user		user to use
-	 * @param password	password to use
-	 */
-	private void startDatabase(DDMWriter writer, String database,
-		String bootPassword, String encPrv, String encAlg, String user, 
-			String password) throws Exception
-	{
-		Properties p = new Properties();
-		if (bootPassword != null)
-			p.put(Attribute.BOOT_PASSWORD, bootPassword);
-		if (encPrv != null)
-			p.put(Attribute.CRYPTO_PROVIDER, encPrv);
-		if (encAlg != null)
-			p.put(Attribute.CRYPTO_ALGORITHM, encAlg);
-		if (user != null)
-			p.put(Attribute.USERNAME_ATTR, user);
-		if (password != null)
-			p.put(Attribute.PASSWORD_ATTR, password);
-	 	try {
-     		Class.forName(CLOUDSCAPE_DRIVER);
-		}
-		catch (Exception e) {
-			sendMessage(writer, ERROR, e.getMessage());
-			return;
-	  	}
-	 	try {
-			//Note, we add database to the url so that we can allow additional
-			//url attributes
-			Connection conn = DriverManager.getConnection(Attribute.PROTOCOL+database, p);
-			SQLWarning warn = conn.getWarnings();
-			if (warn != null)
-				sendSQLMessage(writer, warn, SQLWARNING);
-			else
-				sendOK(writer);
-			conn.close();
-	  	} catch (SQLException se) {
-			sendSQLMessage(writer, se, SQLERROR);
-	  	} catch (Exception e) {
-			sendMessage(writer, ERROR, e.getMessage());
-		}
-	}
-	/**
-	 * Shutdown a database 
-	 *
-	 * @param writer	connection to send message to
-	 * @param database 	database directory to shutdown to
-	 * @param user		user to use
-	 * @param password	password to use
-	 */
-	private void shutdownDatabase(DDMWriter writer, String database, String user, 
-		String password) throws Exception
-	{
 
-		StringBuffer url = new StringBuffer(Attribute.PROTOCOL + database);
-		if (user != null)
-			url.append(";user="+user);
-		if (password != null)
-			url.append(";password="+password);
-		url.append(";shutdown=true");
-	 	try {
-     		Class.forName(CLOUDSCAPE_DRIVER);
-		}
-		catch (Exception e) {
-			sendMessage(writer, ERROR, e.getMessage());
-			return;
-	  	}
-	 	try {
-			Connection conn = DriverManager.getConnection(url.toString());
-			SQLWarning warn = conn.getWarnings();
-			if (warn != null)
-				sendSQLMessage(writer, warn, SQLWARNING);
-			else
-				sendOK(writer);
-			conn.close();
-	  	} catch (SQLException se) {
-			//ignore shutdown error
-			String expectedState =
-				StandardException.
-					getSQLStateFromIdentifier(SQLState.SHUTDOWN_DATABASE);
-			if (!expectedState.equals(se.getSQLState()))
-			{
-				sendSQLMessage(writer, se, SQLERROR);
-				return;
-			}
-			sendOK(writer);
-	  	}
-	}
 	/**
 	 * Wrap SQL Error - display to console and raise exception
 	 *
@@ -3433,9 +3491,12 @@ public final class NetworkServerControlImpl {
 		//an empty string. Use default values in such cases.
 		if(startDRDA!=null && startDRDA.equals(""))
 			startDRDA = "false";
-		
+
 		retval.put(Property.START_DRDA, (startDRDA == null)? "false" : startDRDA);
 
+		// DERBY-2108 SSL
+		retval.put(Property.DRDA_PROP_SSL_MODE, getSSLModeString(getSSLMode()));
+		
         // if Property.DRDA_PROP_SECURITYMECHANISM has been set on server
         // then put it in retval else the default behavior is as though 
         // it is not set
