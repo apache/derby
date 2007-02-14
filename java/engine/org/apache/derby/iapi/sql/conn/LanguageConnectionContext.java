@@ -904,17 +904,6 @@ public interface LanguageConnectionContext extends Context {
 	  */
 	public	boolean	isTransactionPristine();
 
-    /**
-	  *	Get the lock handle for the current transaction.
-	  *
-	  *	@param	lockScope	SINGLE_TRANSACTION_LOCK or MULTI_TRANSACTION_LOCK
-	  *
-	  *	@return	the current lock handle
-	  *
-	  * @exception StandardException thrown if something goes wrong
-	  */
-	public	Object	getLockObject( int lockScope ) throws StandardException;
-
 	/**
 	  *	Get casing for delimited identifiers. This feature is here to
 	  *	support the Plugin.

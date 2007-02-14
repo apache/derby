@@ -2563,30 +2563,6 @@ public class GenericLanguageConnectionContext
 	}
 
     /**
-	  *	Get the lock handle for the current transaction.
-	  *
-	  *	@param	lockScope	SINGLE_TRANSACTION_LOCK or MULTI_TRANSACTION_LOCK
-	  *
-	  *	@return	the current lock handle
-	  *
-	  * @exception StandardException thrown if something goes wrong
-	  */
-	public	Object	getLockObject( int lockScope ) throws StandardException
-	{
-		switch( lockScope )
-		{
-		    case SINGLE_TRANSACTION_LOCK:
-				return getTransactionExecute().getLockObject();
-
-		    case MULTI_TRANSACTION_LOCK:
-				return new Object();
-
-		    default:
-				throw StandardException.newException(SQLState.NOT_IMPLEMENTED);
-		}
-	}
-
-    /**
      * Convert an identifier to the proper case for this connection. This method
      * is here to support the Plugin.
      *
