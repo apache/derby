@@ -76,7 +76,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * to re-install the security manager. So the passed in test
 	 * will be skipped.
 	 */
-	public static Test noSecurityManager(BaseTestCase test)
+	public static Test noSecurityManager(Test test)
 	{
 		if (externalSecurityManagerInstalled)
 			return new TestSuite();

@@ -30,7 +30,7 @@ import org.apache.derby.impl.drda.TestProto;
 
 public class testProtocol { 
 
-	private static final String DEFAULT_FILENAME = "protocol.tests";
+	private static final String DEFAULT_FILENAME = "extin/protocol.tests";
 	
 	// constructor
 	public testProtocol() {}
