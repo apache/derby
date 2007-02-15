@@ -73,7 +73,6 @@ lang/setOpPlan.sql
 lang/specjPlans.sql
 lang/SpillHash.java
 lang/staleplans.sql
-lang/stmtCache3.java
 lang/subquery.sql
 lang/subquery2.sql
 lang/subqueryFlattening.sql
