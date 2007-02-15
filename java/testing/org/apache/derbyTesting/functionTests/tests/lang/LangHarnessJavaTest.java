@@ -77,7 +77,7 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
         // "maxMemPerTab", TODO: investigate/convert
         // "outparams", TODO: investigate/convert
         // "procedure", TODO: uses TestUtil.isNetFramework()
-        "repeat", 
+        // "repeat", CONVERTED (StatementPlanCacheTest)
         "simpleThreadWrapper",
         // "SpillHash", TODO: calls System.exit
         // "stmtCache3", TODO: investigate/convert

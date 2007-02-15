@@ -19,6 +19,8 @@
 */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -153,6 +155,34 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
     }
     
     /**
+     * Check that the same plan can be shared across
+     * Statement, PreparedStatement and CallableStatement.
+     */
+    public void testAcrossStatementObjects() throws SQLException
+    {
+        String schema = this.getTestConfiguration().getUserName();
+        
+        String sql = sql = "CALL SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(0)";
+        Statement s = createStatement();
+        s.execute(sql);
+        s.close();
+        
+        assertTrue(sql, isPlanInCache(schema, sql));
+        
+        PreparedStatement ps = prepareStatement(sql);
+        assertTrue(sql, isPlanInCache(ps));
+               
+        CallableStatement cs = prepareCall(sql);      
+        assertTrue(sql, isPlanInCache(cs));
+             
+        // Check the prepared statement matches the callable
+        assertEquals(ps.toString(), cs.toString());
+        
+        ps.close();
+        cs.close();
+    }
+    
+    /**
      * Test that statements that fail to compile do not end up in the cache.
      */
     public void testCompileFailuresNotInCache() throws SQLException
@@ -229,6 +259,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
         
         for (int i = 0; i < firstCompileID.length; i++ )
         {
+            // Check caching is across statements
             PreparedStatement ps = isCall ?
                     prepareCall(sql[i]) : prepareStatement(sql[i]);
             PreparedStatement ps2 = isCall ?
@@ -238,6 +269,16 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
             assertEquals(sql[i], ps.toString(), ps2.toString());
             ps.close();
             ps2.close();
+            
+            // Check the caching is across connections
+            Connection c2 = openDefaultConnection();
+            PreparedStatement psD = isCall ?
+                    c2.prepareCall(sql[i]) : c2.prepareStatement(sql[i]);
+            
+            assertEquals(sql[i], firstCompileID[i], psD.toString());
+            psD.close();
+            c2.close();
+            
         }
         
         String schema = this.getTestConfiguration().getUserName();
