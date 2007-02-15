@@ -2332,7 +2332,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 
-    /*
+    /**
      * Make the transaction block the online backup.
      *
      * @param wait if <tt>true</tt>, waits until the transaction
@@ -2352,7 +2352,7 @@ public class Xact extends RawTransaction implements Limit  {
 		return backupBlocked;
 	}
 	
-	/*
+	/**
 	 * Unblock the backup, if it was blocked by some operation in 
 	 * this transaction. Unblocking is done at commit/abort of this 
 	 * transaction.
@@ -2651,20 +2651,20 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	
-	/* 
+	/**
 	 * Get string id of the transaction that would be when the Transaction
 	 * is IN active state.
 	 *
-	 *This transaction "name" will be the same id which is returned in
+	 * This transaction "name" will be the same id which is returned in
 	 * the TransactionInfo information if Tx is already in Active State.
 	 * If the Transaction is in IDLE state, Transaction ID is 
 	 * incremented when getActiveStateTxIdString() on raw transaction is called,
 	 * instead of the Tx ID being incremented when Transaction gets into
 	 * active state. The reason for incrementing the Tx ID earlier than when Tx
 	 * is actually goes into active state is some debug statement cases like 
-	 * log statement text. SQL  statements are wriited  to log before they are
-	 * actully executed; In such cases we would like to display the actual TX ID on which 
-	 * locks are acquired when the statement is executed.
+	 * log statement text. SQL statements are written to log before they are
+	 * actually executed; In such cases we would like to display the actual TX
+	 * ID on which locks are acquired when the statement is executed.
 	 * @return The a string which identifies the transaction.  
 	 */
 	public String getActiveStateTxIdString()

@@ -338,7 +338,7 @@ public abstract class RawTransaction extends Observable implements Transaction {
 		throws StandardException;
 
 	
-    /*
+    /**
      * Make the transaction block the online backup.
      *
      * @param wait if <tt>true</tt>, waits until the transaction

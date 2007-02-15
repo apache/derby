@@ -667,7 +667,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 			add(t, excludeMe);
 	}
 
-	/*
+	/**
 	**	Set the shortTranId, this is called by the log factory after recovery
 	*/
 	public void resetTranId()
@@ -843,7 +843,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 
 
-	/*
+	/**
 		remove the transaction Id an return false iff the transaction is found
 		in the table and it doesn't need exclusion from quiesce state
 	 */
@@ -914,7 +914,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		return null;
 	}
 
-	/*
+	/**
 		Return the transaction table to be logged with the checkpoint operation
 	 */
 	public Formatable getTransactionTable()
@@ -922,7 +922,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		return ttab;
 	}
 
-	/*
+	/**
 		Use this transaction table, which is gotten from a checkpoint
 		operation.  Use ONLY during recovery.
 	 */
@@ -966,13 +966,15 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	}
 
 
-	// @return false, if the Database creation finished
+	/**
+	 * @return false, if the Database creation finished
+	 */
 	public boolean inDatabaseCreation()
 	{
 		return inCreateNoLog;
 	}
 	
-	/*
+	/**
 	 * Return the module providing XAresource interface to the transaction 
      * table. 
      *

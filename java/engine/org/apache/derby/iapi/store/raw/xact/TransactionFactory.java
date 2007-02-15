@@ -60,7 +60,7 @@ public interface TransactionFactory extends Corruptable {
 	*/
 	public LockFactory getLockFactory();
 
-	/*
+	/**
 	 * Return the module providing XAresource interface to the transaction
      * table.
      *

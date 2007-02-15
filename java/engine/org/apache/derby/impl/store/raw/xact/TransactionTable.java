@@ -167,7 +167,7 @@ public class TransactionTable implements Formatable
 		}
 	}
 
-	/*
+	/**
 		remove the transaction Id an return false iff the transaction is found
 		in the table and it doesn't need exclusion during quiesce state
 	 */
