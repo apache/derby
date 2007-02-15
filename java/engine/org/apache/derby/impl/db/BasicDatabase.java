@@ -144,8 +144,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
         return Monitor.isDesiredCreateType(startParams, getEngineType());
 	}
 
-	protected Properties allParams;	// properties to be used *only* while booting.
-
 	public void boot(boolean create, Properties startParams)
 		throws StandardException
 	{
@@ -185,7 +183,10 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		myUUID = makeDatabaseID(create, startParams);
 
 
-		allParams = new DoubleProperties(getAllDatabaseProperties(), startParams);
+        // Add the database properties read from disk (not stored
+        // in service.properties) into the set seen by booting modules.
+		Properties allParams =
+            new DoubleProperties(getAllDatabaseProperties(), startParams);
 
 		if (pf != null)
 			pf.addPropertySetNotification(this);
@@ -196,12 +197,12 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
         
         dd = (DataDictionary)
             Monitor.bootServiceModule(create, this,
-                    DataDictionary.MODULE, startParams);
+                    DataDictionary.MODULE, allParams);
 
 		lcf = (LanguageConnectionFactory) Monitor.bootServiceModule(create, this, LanguageConnectionFactory.MODULE, allParams);
 		lf = (LanguageFactory) Monitor.bootServiceModule(create, this, LanguageFactory.MODULE, allParams);
 
-		bootResourceAdapter(create, startParams);
+		bootResourceAdapter(create, allParams);
 
 
 		// may also want to set up a check that we are a singleton,
@@ -229,8 +230,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 		active = true;
 
-		if (lastToBoot)
-			allParams = null; // should not be used anymore
 	}
 
 	public void stop() {
@@ -746,6 +745,10 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		af = (AccessFactory) Monitor.bootServiceModule(create, this, AccessFactory.MODULE, startParams);
 	}
 
+    /**
+     * Get the set of database properties from the set stored
+     * on disk outside of service.properties.
+     */
 	protected Properties getAllDatabaseProperties()
 		throws StandardException {
 
@@ -758,7 +761,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		return dbProps;
 	}
 
-	protected void bootResourceAdapter(boolean create, Properties startParams) {
+	protected void bootResourceAdapter(boolean create, Properties allParams) {
 
 		// Boot resource adapter - only if we are running Java 2 or
 		// beyondwith JDBC20 extension, JTA and JNDI classes in the classpath
