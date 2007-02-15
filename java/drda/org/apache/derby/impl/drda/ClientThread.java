@@ -95,26 +95,28 @@ final class ClientThread extends Thread {
 
                 } catch (javax.net.ssl.SSLException ssle) {
                     // SSLException is a subclass of
-                    // IOException, but we should not continue
-                    // if we get one. Print stack trace and...
+                    // IOException. Print stack trace and...
                     
                     parent.consoleExceptionPrintTrace(ssle);
                     
-                    // ... we need to shutdown the server, since SSL for
-                    // some reason will not work.
+                    // ... we need to do a controlled shutdown of the
+                    // server, since SSL for some reason will not
+                    // work.
                     
                     parent.directShutdown();
                     
                     return; // Exit the thread
                     
                 } catch (IOException ioe) {
-                    // IOException are ignored.  No console error message
-                    // if this was caused by a shutdown
+                    // IOException causes this thread to stop.  No
+                    // console error message if this was caused by a
+                    // shutdown
                     synchronized (parent.getShutdownSync()) {
                         if (!parent.getShutdown()) {
                             parent.consolePropertyMessage("DRDA_UnableToAccept.S");
                         }
                     }
+                    return; // Exit the thread
                 }
             } catch (Exception e) {
                 // Catch and log all other exceptions
