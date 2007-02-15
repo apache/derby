@@ -48,7 +48,6 @@ public class _Suite extends BaseTestCase  {
 
         // These really need to run standalone.
 		//suite.addTestSuite(AutoloadBooting.class);
-		//suite.addTestSuite(AutoloadTest.class);
         
 		suite.addTest(BlobTest.suite());
 		suite.addTest(CallableStatementTest.suite());
