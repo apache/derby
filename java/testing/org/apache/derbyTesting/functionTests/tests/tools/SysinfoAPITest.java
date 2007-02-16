@@ -26,26 +26,39 @@ import java.io.BufferedReader;
 import java.io.PipedReader;
 import java.io.PipedWriter;
 import java.io.PrintWriter;
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import org.apache.derby.tools.sysinfo;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  *  Test all the static public methods of the sysinfo class.
+ *  
+ *  Formerly named sysinfo_api. Currently disabled from running in
+ *  nightly regression tests when run from jar files, only the first
+ *  jar in the classpath properly reports its information through the 
+ *  sysinfo API.
  */
 
-public class sysinfo_api extends BaseJDBCTestCase {
+public class SysinfoAPITest extends BaseJDBCTestCase {
 
     DatabaseMetaData dm;
-
-    public sysinfo_api(String name) { 
+    
+    public SysinfoAPITest(String name) { 
         super(name); 
     }
+    
+    public static Test suite() {
+    	Test suite = new TestSuite(SysinfoAPITest.class, "Sysinfo API");
+    	
+    	return suite;
+    }
 
-    /*
-     *  getMajorVersion()
+    /**
+     *  Test various invocations of sysinfo.getMajorVersion()
      */
     public void testMajorVersion() {
         int dmMajor = dm.getDriverMajorVersion();
@@ -59,8 +72,8 @@ public class sysinfo_api extends BaseJDBCTestCase {
         assertEquals(-1, sysinfo.getMajorVersion(null));
     }
 
-    /*
-     *  getMinorVersion()
+    /**
+     *  Test various invocations of sysinfo.getMinorVersion()
      */
     public void testMinorVersion() {
         int dmMinor = dm.getDriverMinorVersion();
@@ -74,8 +87,8 @@ public class sysinfo_api extends BaseJDBCTestCase {
         assertEquals(-1, sysinfo.getMinorVersion(null));
     }
 
-    /*
-     *  getProductName()
+    /**
+     *  Test various invocations of sysinfo.getProductName()
      */
     public void testProductName() {
         assertEquals("Apache Derby", sysinfo.getProductName());
@@ -88,31 +101,47 @@ public class sysinfo_api extends BaseJDBCTestCase {
         assertEquals("<no name found>", sysinfo.getProductName(null));
     }
 
-    /*
-     *  getVersionString()
+    /**
+     *  Test various invocations of sysinfo.getVersionString()
+     * 
+     *  NOTE: sysinfo.getVersionString() returns the short version string.
+     *        We also chomp the version we get back from sysinfo to account
+     *        for alpha/beta differences.
      */
     public void testVersionString() throws SQLException {
-        String dmPv = dm.getDatabaseProductVersion();
-        assertEquals(dmPv, sysinfo.getVersionString());
-        assertEquals(dmPv, sysinfo.getVersionString(sysinfo.DBMS));
-        assertEquals(dmPv, sysinfo.getVersionString(sysinfo.TOOLS));
-        assertEquals(dmPv, sysinfo.getVersionString(sysinfo.NET));
-        assertEquals(dmPv, sysinfo.getVersionString(sysinfo.CLIENT));
+        String dmPv = dm.getDatabaseProductVersion().substring(0,sysinfo.getVersionString().indexOf(' '));
+        assertEquals(dmPv, sysinfo.getVersionString().substring(0,sysinfo.getVersionString().indexOf(' ')));
+        assertEquals(dmPv, sysinfo.getVersionString(sysinfo.DBMS).substring(0,sysinfo.getVersionString().indexOf(' ')));
+        assertEquals(dmPv, sysinfo.getVersionString(sysinfo.TOOLS).substring(0,sysinfo.getVersionString().indexOf(' ')));
+        assertEquals(dmPv, sysinfo.getVersionString(sysinfo.NET).substring(0,sysinfo.getVersionString().indexOf(' ')));
+        assertEquals(dmPv, sysinfo.getVersionString(sysinfo.CLIENT).substring(0,sysinfo.getVersionString().indexOf(' ')));
         // bad usage
         assertEquals("<no name found>", sysinfo.getVersionString("foo"));
         assertEquals("<no name found>", sysinfo.getVersionString(null));
     }
 
-    /*
-     * getBuildNumber()
+    /**
+     * Test various invocations of sysinfo.getBuildNumber()
      *
-     * Currently no test for sysinfo.getBuildNumber().
-     * There is not currently a way to get this information from another
-     * different public interface.
+     * Extract the build number from the Database Product Version.
+     * Compare with the result from sysinfo.getBuildNumber.
      */
+    public void testBuildNumber() throws SQLException {
+        String dmBn = dm.getDatabaseProductVersion();
+        dmBn = dmBn.substring(dmBn.indexOf('(') + 1,dmBn.indexOf(')'));
+        System.out.println(dmBn);
+        assertEquals(dmBn, sysinfo.getBuildNumber());
+        assertEquals(dmBn, sysinfo.getBuildNumber(sysinfo.DBMS));
+        assertEquals(dmBn, sysinfo.getBuildNumber(sysinfo.TOOLS));
+        assertEquals(dmBn, sysinfo.getBuildNumber(sysinfo.NET));
+        assertEquals(dmBn, sysinfo.getBuildNumber(sysinfo.CLIENT));
+        // bad usage
+        assertEquals("????", sysinfo.getBuildNumber("foo"));
+        assertEquals("????", sysinfo.getBuildNumber(null));
+    }
 
-    /*
-     * getInfo()
+    /**
+     * Test sysinfo.getInfo()
      *
      * Currently only tests getInfo() by comparing the first line with the
      * expected first line in English. Because so much of sysinfo changes from
@@ -133,9 +162,9 @@ public class sysinfo_api extends BaseJDBCTestCase {
         pipeR.close();
     }
 
-    /*
-     *  testSetup - get a DatabaseMetadata object with which to compare info
-     *              with sysinfo
+    /**
+     *  setUp - get a DatabaseMetadata object with which to compare
+     *          database information with what is reported by sysinfo
      */
     public void setUp() throws SQLException {
         dm = getConnection().getMetaData();
@@ -144,6 +173,12 @@ public class sysinfo_api extends BaseJDBCTestCase {
 
 }
 
+/**
+ * sysinfo_api_helper - a helper class which calls sysinfo.getInfo() and
+ *                      pushes the output into a PipedWriter so that we
+ *                      can read it with a PipedReader in testGetInfo().
+ *
+ */
 class sysinfo_api_helper extends Thread { 
     
     private static PipedWriter pipeW = new PipedWriter();
