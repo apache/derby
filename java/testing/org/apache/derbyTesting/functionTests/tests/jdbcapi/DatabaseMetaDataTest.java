@@ -2060,6 +2060,40 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             return Types.DECIMAL;
         if (type.equals("NUMERIC") || type.startsWith("NUMERIC("))
             return Types.NUMERIC;
+        
+        if (type.endsWith("FOR BIT DATA")) {
+           if (type.startsWith("CHAR"))
+               return Types.BINARY;
+           if (type.startsWith("CHARACTER"))
+            return Types.BINARY; 
+           
+           if (type.startsWith("VARCHAR"))
+               return Types.VARBINARY;
+           if (type.startsWith("CHARACTER VARYING"))
+               return Types.VARBINARY;
+           if (type.startsWith("CHAR VARYING"))
+               return Types.VARBINARY;           
+        }
+        
+        if ("LONG VARCHAR".equals(type))
+            return Types.LONGVARCHAR;
+        if ("LONG VARCHAR FOR BIT DATA".equals(type))
+            return Types.LONGVARBINARY;
+        
+        if (type.equals("CHAR") || type.startsWith("CHAR("))
+            return Types.CHAR;
+        if (type.equals("CHARACTER") || 
+                type.startsWith("CHARACTER("))
+            return Types.CHAR;
+        
+        if (type.equals("VARCHAR") || type.startsWith("VARCHAR("))
+            return Types.VARCHAR;
+        if (type.equals("CHARACTER VARYING") || 
+                type.startsWith("CHARACTER VARYING("))
+            return Types.VARCHAR;
+        if (type.equals("CHAR VARYING") || 
+                type.startsWith("CHAR VARYING("))
+            return Types.VARCHAR;
 
         if (type.equals("BLOB") || type.startsWith("BLOB("))
             return Types.BLOB;
@@ -2076,6 +2110,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         if ("XML".equals(type))
             return JDBC.SQLXML;
         
+        fail("Unexpected SQL type: " + type);
         return Types.NULL;
     }
 }
