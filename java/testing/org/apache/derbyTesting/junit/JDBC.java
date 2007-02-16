@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,11 @@ import junit.framework.Assert;
  *
  */
 public class JDBC {
+    
+    /**
+     * Types.SQLXML value without having to compile with JDBC4.
+     */
+    public static final int SQLXML = 2009;
 	
     /**
      * Tell if we are allowed to use DriverManager to create database
@@ -751,11 +757,12 @@ public class JDBC {
      * The compete ResultSet is walked for both ResultSets,
      * and they are both closed.
      * <BR>
-     * Columns are compared as primitive ints or longs or as
-     * Strings. Code needs more work to handle BLOB/CLOB columns.
+     * Columns are compared as primitive ints or longs, Blob,
+     * Clobs or as Strings.
+     * @throws IOException 
      */
     public static void assertSameContents(ResultSet rs1, ResultSet rs2)
-            throws SQLException {
+            throws SQLException, IOException {
         ResultSetMetaData rsmd = rs1.getMetaData();
         int columnCount = rsmd.getColumnCount();
         while (rs1.next()) {
@@ -768,6 +775,14 @@ public class JDBC {
                     break;
                 case Types.BIGINT:
                     Assert.assertEquals(rs1.getLong(col), rs2.getLong(col));
+                    break;
+                case Types.BLOB:
+                    BaseJDBCTestCase.assertEquals(rs1.getBlob(col),
+                            rs2.getBlob(col));
+                    break;
+                case Types.CLOB:
+                    BaseJDBCTestCase.assertEquals(rs1.getClob(col),
+                            rs2.getClob(col));
                     break;
                 default:
                     Assert.assertEquals(rs1.getString(col), rs2.getString(col));

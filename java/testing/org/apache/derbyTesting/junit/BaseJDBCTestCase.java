@@ -444,12 +444,10 @@ public abstract class BaseJDBCTestCase
         assertEquals("Clobs have different lengths",
                      c1.length(), c2.length());
         Reader r1 = c1.getCharacterStream();
+        assertNotNull(r1); // java.sql.Blob object cannot represent NULL
         Reader r2 = c2.getCharacterStream();
-        if (r1 == null || r2 == null) {
-            assertNull("Clob c2 has null-stream, clob c1 doesn't", r1);
-            assertNull("Clob c1 has null-stream, clob c2 doesn't", r2);
-            return;
-        }
+        assertNotNull(r2); // java.sql.Blob object cannot represent NULL
+
         long index = 1;
         int ch1 = r1.read();
         int ch2 = r2.read();

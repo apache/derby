@@ -20,6 +20,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -79,6 +80,7 @@ import org.apache.derby.shared.common.reference.JDBC40Translation;
  *  metadata continues to work at various points in the upgrade.
  */
 public class DatabaseMetaDataTest extends BaseJDBCTestCase {
+  
     /*
     ** Escaped function testing
     */
@@ -786,10 +788,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Execute dmd.getTables() but perform additional checking
      * of the ODBC variant.
+     * @throws IOException 
      */
     private ResultSet getDMDTables(DatabaseMetaData dmd,
             String catalog, String schema, String table, String[] tableTypes)
-        throws SQLException
+        throws SQLException, IOException
     {
         checkGetTablesODBC(catalog, schema, table, tableTypes);
         return dmd.getTables(catalog, schema, table, tableTypes);
@@ -799,8 +802,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test getTables() without modifying the database.
      * 
      * @throws SQLException
+     * @throws IOException 
      */
-    public void testGetTablesNoModify() throws SQLException {
+    public void testGetTablesNoModify() throws SQLException, IOException {
         
         DatabaseMetaData dmd = getDMD();
         
@@ -876,8 +880,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test getTables() with  modifying the database.
      * 
      * @throws SQLException
+     * @throws IOException 
      */
-    public void testGetTablesModify() throws SQLException {
+    public void testGetTablesModify() throws SQLException, IOException {
                 
         int totalTables = createTablesForTest(false);
         
@@ -994,9 +999,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Execute and check the ODBC variant of getTables which
      * uses a procedure to provide the same information to ODBC clients.
+     * @throws IOException 
      */
     private void checkGetTablesODBC(String catalog, String schema,
-            String table, String[] tableTypes) throws SQLException
+            String table, String[] tableTypes) throws SQLException, IOException
     {
         String tableTypesAsString = null;
         if (tableTypes != null) {
@@ -1356,8 +1362,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testGetTypeInfo() throws SQLException
     {
-	// SQLXML is the constant used to represent XML data type in derby
-	final int SQLXML = JDBC40Translation.SQLXML;
         // Client returns BOOLEAN type from the engine as SMALLINT
         int BOOLEAN = Types.BOOLEAN;      
         if (usingDerbyNetClient())
@@ -1430,7 +1434,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
           Types.INTEGER, Types.LONGVARBINARY, Types.LONGVARCHAR,
           Types.NUMERIC, Types.REAL, Types.SMALLINT,
           Types.TIME, Types.TIMESTAMP,  Types.VARBINARY,
-          Types.VARCHAR, SQLXML
+          Types.VARCHAR, JDBC.SQLXML
         };
         
         // Rows are returned from getTypeInfo in order of
@@ -1517,7 +1521,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             case Types.VARCHAR:
                 precision = 32672;
                 break;
-	    case SQLXML:
+	    case JDBC.SQLXML:
 		precision = 0;
 		break;
             }
@@ -1600,7 +1604,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             case Types.VARCHAR:
                 searchable = DatabaseMetaData.typeSearchable;
                 break;
-	    case SQLXML:
+	    case JDBC.SQLXML:
 		searchable = DatabaseMetaData.typePredNone;
 		break;
             default:
@@ -2020,5 +2024,58 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         
         return list;
+    }
+    
+    /**
+     * Given a valid SQL type return the corresponding
+     * JDBC type identifier from java.sql.Types.
+     * Will assert if the type is not known
+     * (in future, currently just return Types.NULL).
+     */
+    public static int getJDBCType(String type)
+    {
+        if ("SMALLINT".equals(type))
+            return Types.SMALLINT;
+        if ("INTEGER".equals(type) || "INT".equals(type))
+            return Types.INTEGER;
+        if ("BIGINT".equals(type))
+            return Types.BIGINT;
+        
+        if (type.equals("FLOAT") || type.startsWith("FLOAT("))
+            return Types.FLOAT;
+        if (type.equals("REAL"))
+            return Types.REAL;
+
+        if ("DOUBLE".equals(type) || "DOUBLE PRECISION".equals(type))
+            return Types.INTEGER;
+        
+        if ("DATE".equals(type))
+            return Types.DATE;
+        if ("TIME".equals(type))
+            return Types.TIME;
+        if ("TIMESTAMP".equals(type))
+            return Types.TIMESTAMP;
+        
+        if (type.equals("DECIMAL") || type.startsWith("DECIMAL("))
+            return Types.DECIMAL;
+        if (type.equals("NUMERIC") || type.startsWith("NUMERIC("))
+            return Types.NUMERIC;
+
+        if (type.equals("BLOB") || type.startsWith("BLOB("))
+            return Types.BLOB;
+        if (type.equals("BINARY LARGE OBJECT") || 
+                type.startsWith("BINARY LARGE OBJECT("))
+            return Types.BLOB;
+        
+        if (type.equals("CLOB") || type.startsWith("CLOB("))
+            return Types.CLOB;
+        if (type.equals("CHARACTER LARGE OBJECT") || 
+                type.startsWith("CHARACTER LARGE OBJECT("))
+            return Types.CLOB;
+
+        if ("XML".equals(type))
+            return JDBC.SQLXML;
+        
+        return Types.NULL;
     }
 }
