@@ -181,9 +181,9 @@ public class TriggerTest extends BaseJDBCTestCase {
         int jdbcType = DatabaseMetaDataTest.getJDBCType(type);
         int precision = DatabaseMetaDataTest.getPrecision(jdbcType, type);
 
-        // Can't directly insert into XML columns from JDBC.
+        // BUG DERBY-2350  - remove this check & return to see the issue.      
         if (jdbcType == JDBC.SQLXML)
-            return; // temp
+            return;
         
         // BUG DERBY-2349 - remove this check & return to see the issue.
         if (jdbcType == Types.BLOB)
@@ -193,6 +193,17 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         String ins1 = "INSERT INTO T_MAIN(V) VALUES (?)";
         String ins3 = "INSERT INTO T_MAIN(V) VALUES (?), (?), (?)";
+        
+        // Can't directly insert into XML columns from JDBC.
+        if (jdbcType == JDBC.SQLXML)
+        {
+            ins1 = "INSERT INTO T_MAIN(V) VALUES " +
+                    "XMLPARSE (DOCUMENT CAST (? AS CLOB) PRESERVE WHITESPACE)";
+            ins3 = "INSERT INTO T_MAIN(V) VALUES " +
+                    "XMLPARSE (DOCUMENT CAST (? AS CLOB) PRESERVE WHITESPACE)," +
+                    "XMLPARSE (DOCUMENT CAST (? AS CLOB) PRESERVE WHITESPACE)," +
+                    "XMLPARSE (DOCUMENT CAST (? AS CLOB) PRESERVE WHITESPACE)";
+        }
         
         PreparedStatement ps;
         ps = prepareStatement(ins1);
@@ -365,6 +376,12 @@ public class TriggerTest extends BaseJDBCTestCase {
                 precision = 256*1024;
             return new ReadOnceByteArrayInputStream(
                     randomBinary(r, r.nextInt(precision)));
+            
+        case JDBC.SQLXML:
+            // Not random yet, but was blocked by DEBRY-2350
+            // so just didn't put effort into generating 
+            // a random size XML document.
+            return new StringReaderWithLength("<a><b>text</b></a>");
             
              
        }
