@@ -21,6 +21,9 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -37,6 +40,8 @@ import java.util.Random;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
+import org.apache.derbyTesting.functionTests.util.streams.ReadOnceByteArrayInputStream;
+import org.apache.derbyTesting.functionTests.util.streams.StringReaderWithLength;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -100,7 +105,7 @@ public class TriggerTest extends BaseJDBCTestCase {
      */
     private void actionTypeTest(String type) throws SQLException, IOException
     {
-        System.out.println("type="+type);
+        println("actionTypeTest:"+type);
         Statement s = createStatement(); 
         
         actionTypesSetup(type);
@@ -174,25 +179,32 @@ public class TriggerTest extends BaseJDBCTestCase {
         actionTypesCompareMainToAction(1, type);
 
         int jdbcType = DatabaseMetaDataTest.getJDBCType(type);
+        int precision = DatabaseMetaDataTest.getPrecision(jdbcType, type);
 
         // Can't directly insert into XML columns from JDBC.
         if (jdbcType == JDBC.SQLXML)
             return; // temp
         
+        if (jdbcType == Types.BLOB)
+            return; // BUG
+        
         Random r = new Random();
         
+        String ins1 = "INSERT INTO T_MAIN(V) VALUES (?)";
+        String ins3 = "INSERT INTO T_MAIN(V) VALUES (?), (?), (?)";
+        
         PreparedStatement ps;
-        ps = prepareStatement("INSERT INTO T_MAIN(V) VALUES (?)");
-        ps.setObject(1, getRandomValue(r, jdbcType), jdbcType);
+        ps = prepareStatement(ins1);
+        setRandomValue(r, ps, 1, jdbcType, precision);
         ps.executeUpdate();
         ps.close();
 
         actionTypesCompareMainToAction(2, type);
 
-        ps = prepareStatement("INSERT INTO T_MAIN(V) VALUES (?), (?), (?)");
-        ps.setObject(1, getRandomValue(r, jdbcType), jdbcType);
-        ps.setObject(2, getRandomValue(r, jdbcType), jdbcType);
-        ps.setObject(3, getRandomValue(r, jdbcType), jdbcType);
+        ps = prepareStatement(ins3);
+        setRandomValue(r, ps, 1, jdbcType, precision);
+        setRandomValue(r, ps, 2, jdbcType, precision);
+        setRandomValue(r, ps, 3, jdbcType, precision);
         ps.executeUpdate();
         ps.close();
 
@@ -243,17 +255,47 @@ public class TriggerTest extends BaseJDBCTestCase {
         s2.close();
     }
     
+    public static void setRandomValue(Random r,
+            PreparedStatement ps, int column, int jdbcType, int precision)
+    throws SQLException, IOException
+    {
+        Object val = getRandomValue(r, jdbcType, precision);
+        if (val instanceof StringReaderWithLength) {
+            StringReaderWithLength rd = (StringReaderWithLength) val;
+            ps.setCharacterStream(column, rd, rd.getLength());
+        } else if (val instanceof InputStream) {
+            InputStream in = (InputStream) val;
+            ps.setBinaryStream(column, in, in.available());
+        } else
+            ps.setObject(column, val, jdbcType);
+    }
+    
     /**
      * Generate a random object (never null) for
      * a given JDBC type. Object is suitable for
      * PreparedStatement.setObject() either
      * with or without passing in jdbcType to setObject.
-     * 
-     * For character types a String object is returned.
-     * For binary types a byte[] is returned.
+     * <BR>
+     * For character types a String object or a
+     * StringReaderWithLength is returned.
+     * <BR>
+     * For binary types a byte[] or an instance of InputStream
+     * is returned. If an inputstream is returned then it can
+     * only be read once and in.available() returns the total
+     * number of bytes available to read.
+     * For BLOB types a random value is returned up to
+     * either the passed in precision or 256k. This is
+     * to provide a general purpose value that can be
+     * more than a page.
+     * <P>
+     * Caller should check the return type using instanceof
+     * and use setCharacterStream() for Reader objects and
+     * setBinaryStream for InputStreams.
      * (work in progress)
+     * @throws IOException 
      */
-    public static Object getRandomValue(Random r, int jdbcType)
+    public static Object getRandomValue(Random r, int jdbcType, 
+            int precision) throws IOException
     {
         switch (jdbcType)
         {
@@ -295,14 +337,37 @@ public class TriggerTest extends BaseJDBCTestCase {
             ts = ts % (4000L * 365L * 24L * 60L * 60L * 1000L);
             return new Timestamp(ts);
             
+        case Types.VARCHAR:
+        case Types.CHAR:
+            return randomString(r, r.nextInt(precision + 1));
+            
         case Types.LONGVARCHAR:
-            return randomString(r, r.nextInt(32701));
+            return new StringReaderWithLength(
+                    randomString(r, r.nextInt(32700 + 1)));
+            
+        case Types.CLOB:
+            if (precision > 256*1024)
+                precision = 256*1024;
+            return new StringReaderWithLength(
+                    randomString(r, r.nextInt(precision)));
+
+        case Types.BINARY:
+        case Types.VARBINARY:
+            return randomBinary(r, r.nextInt(precision + 1));
 
         case Types.LONGVARBINARY:
-            return randomBinary(r, r.nextInt(32701));
+            return new ReadOnceByteArrayInputStream(
+                    randomBinary(r, r.nextInt(32701)));
+            
+        case Types.BLOB:
+            if (precision > 256*1024)
+                precision = 256*1024;
+            return new ReadOnceByteArrayInputStream(
+                    randomBinary(r, r.nextInt(precision)));
+            
              
        }
-        
+            
         // fail("unexpected JDBC Type " + jdbcType);
         return null;
     }

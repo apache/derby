@@ -2021,6 +2021,34 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 
                 continue;
             }
+            
+            if (createParams.indexOf("scale") != -1)
+            {
+                int maxPrecision = rs.getInt("PRECISION");
+                StringBuffer sb = new StringBuffer();
+                int precision = rand.nextInt(maxPrecision) + 1;
+                sb.append(typeName);
+                sb.append("(");
+                sb.append(precision);
+                // Most DECIMAL usage does have a scale
+                // but randomly pick some that do not.
+                if (rand.nextInt(100) < 95) {
+                    sb.append(",");
+                    sb.append(rand.nextInt(precision+1));
+                }
+                sb.append(")");
+                list.add(sb.toString());
+                continue;
+            }
+            
+            if (createParams.indexOf("precision") != -1)
+            {
+                list.add(typeName);
+                continue;
+            }
+            
+            fail("unknown how to generate valid type for " + typeName
+                    + " CREATE_PARAMS=" + createParams);
         }
         
         return list;
@@ -2113,4 +2141,32 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         fail("Unexpected SQL type: " + type);
         return Types.NULL;
     }
+    
+    /**
+     * Given a valid SQL type return the corresponding
+     * precision/length for this specific value
+     * if the type is variable, e.g. CHAR(5) will
+     * return 5, but LONG VARCHAR will return 0.
+     */
+    public static int getPrecision(int jdbcType, String type)
+    {
+        switch (jdbcType)
+        {
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.CLOB:
+        case Types.BINARY:
+        case Types.VARBINARY:
+        case Types.BLOB:
+            int lp = type.indexOf('(');
+            int rp = type.indexOf(')');
+            int precision =
+                Integer.valueOf(type.substring(lp+1, rp)).intValue();
+            return precision;
+
+        default:
+            return 0;
+        }
+    }
+ 
 }
