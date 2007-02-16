@@ -185,8 +185,9 @@ public class TriggerTest extends BaseJDBCTestCase {
         if (jdbcType == JDBC.SQLXML)
             return; // temp
         
+        // BUG DERBY-2349 - remove this check & return to see the issue.
         if (jdbcType == Types.BLOB)
-            return; // BUG
+            return; 
         
         Random r = new Random();
         
