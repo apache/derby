@@ -39,10 +39,11 @@
 	jdk15           The JAVA_HOME of your 1.5 vm.
     jdk16           The JAVA_HOME of your 1.6 vm.
 
-	10.0.2.1_lib    Directory containing the released 10.0.2.1 jars.
-	10.1.1.0_lib    Directory containing the released 10.1.1.0 jars.
-	10.1.2.0_lib    Directory containing the released 10.1.2.0 jars.
-	trunk_lib       Directory containing jars built from the development mainline (trunk).
+       10.0.2.1_lib    Directory containing the released 10.0.2.1 jars.
+       10.1.1.0_lib    Directory containing the released 10.1.1.0 jars.
+       10.1.2.0_lib    Directory containing the released 10.1.2.0 jars.
+       10.2.2.0_lib    Directory containing the released 10.2.2.0 jars.
+       trunk_lib       Directory containing jars built from the development mainline (trunk).
 
 	db2jcc_lib      Directory containing the db2jcc jars (see trunk/java/testing/README.htm).
 
@@ -103,12 +104,14 @@
   <property name="SERVER_10.0.2.1" value="${10.0.2.1_lib}/derby.jar;${10.0.2.1_lib}/derbynet.jar;${TEST_JARS}"/>
   <property name="SERVER_10.1.1.0" value="${10.1.1.0_lib}/derby.jar;${10.1.1.0_lib}/derbynet.jar;${TEST_JARS}"/>
   <property name="SERVER_10.1.2.0" value="${10.1.2.0_lib}/derby.jar;${10.1.2.0_lib}/derbynet.jar;${TEST_JARS}"/>
+  <property name="SERVER_10.2.2.0" value="${10.2.2.0_lib}/derby.jar;${10.2.2.0_lib}/derbynet.jar;${TEST_JARS}"/>
   <property name="SERVER_TRUNK" value="${trunk_lib}/derby.jar;${trunk_lib}/derbynet.jar;${TEST_JARS}"/>
 
   <!-- legal values of clientClasspath -->
   <property name="CLIENT_DB2JCC" value="${db2jcc_lib}/db2jcc.jar;${db2jcc_lib}/db2jcc_license_c.jar"/>
   <property name="CLIENT_10.1.1.0" value="${10.1.1.0_lib}/derbyclient.jar"/>
   <property name="CLIENT_10.1.2.0" value="${10.1.2.0_lib}/derbyclient.jar"/>
+  <property name="CLIENT_10.2.2.0" value="${10.2.2.0_lib}/derbyclient.jar"/>
   <property name="CLIENT_TRUNK" value="${trunk_lib}/derbyclient.jar"/>
 
   <property name="FULL_TRUNK" value="${SERVER_TRUNK};${CLIENT_TRUNK}"/>
@@ -304,24 +307,35 @@
 	  <param name="fsvnVM" value="${fsvVM}"/>
 	  <param name="fsvnCP" value="${SERVER_TRUNK}"/>
 	  <param name="fsvnName" value="${fsvName}_serverTrunk"/>
+	  <param name="fsvnSecurity" value="-unsecure"/>
+    </antcall>
+
+	<antcall target="_forServerVersion">
+	  <param name="fsvnVM" value="${fsvVM}"/>
+	  <param name="fsvnCP" value="${SERVER_10.2.2.0}"/>
+	  <param name="fsvnName" value="${fsvName}_server10.2.2.0"/>
+	  <param name="fsvnSecurity" value=""/>
     </antcall>
 
 	<antcall target="_forServerVersion">
 	  <param name="fsvnVM" value="${fsvVM}"/>
 	  <param name="fsvnCP" value="${SERVER_10.1.2.0}"/>
 	  <param name="fsvnName" value="${fsvName}_server10.1.2.0"/>
+	  <param name="fsvnSecurity" value=""/>
     </antcall>
 
 	<antcall target="_forServerVersion">
 	  <param name="fsvnVM" value="${fsvVM}"/>
 	  <param name="fsvnCP" value="${SERVER_10.1.1.0}"/>
 	  <param name="fsvnName" value="${fsvName}_server10.1.1.0"/>
+	  <param name="fsvnSecurity" value=""/>
     </antcall>
 
 	<antcall target="_forServerVersion">
 	  <param name="fsvnVM" value="${fsvVM}"/>
 	  <param name="fsvnCP" value="${SERVER_10.0.2.1}"/>
 	  <param name="fsvnName" value="${fsvName}_server10.0.2.1"/>
+	  <param name="fsvnSecurity" value=""/>
     </antcall>
 
 	<!-- Done looping through servers -->
@@ -341,6 +355,7 @@
 	<antcall target="_startServer">
 	  <param name="svrVM" value="${fsvnVM}"/>
 	  <param name="srvClasspath" value="${fsvnCP}"/>
+	  <param name="srvSecurity" value="${fsvnSecurity}"/>
     </antcall>
 
 	<antcall target="_recreateDatabase"/>
@@ -387,6 +402,12 @@
 	  <param name="fcvnVM" value="${fcvVM}"/>
 	  <param name="fcvnCP" value="${CLIENT_TRUNK}"/>
 	  <param name="fcvnName" value="${fcvName}_clientTrunk"/>
+    </antcall>
+
+    <antcall target="_forClientVersion">
+	  <param name="fcvnVM" value="${fcvVM}"/>
+	  <param name="fcvnCP" value="${CLIENT_10.2.2.0}"/>
+	  <param name="fcvnName" value="${fcvName}_clientDerby10.2.2.0"/>
     </antcall>
 
     <antcall target="_forClientVersion">
@@ -499,7 +520,9 @@
        srvClasspath      Classpath to use.
   -->
   <target name="_startServer">
-
+<!-- Trace -->
+<echo> svrVM:${svrVM}, outDir:${outDir}, srvClasspath:${srvClasspath}, srvSecurity:${srvSecurity}. </echo>
+<!-- -->
     <exec
 	  executable="${svrVM}"
 	  dir="${outDir}"
@@ -510,6 +533,10 @@
 
 	  <arg value="org.apache.derby.drda.NetworkServerControl"/>
 	  <arg value="start"/>
+
+	  <!-- arg value="${srvSecurity}"/ Fails for srvSecurity blank with jvm1.4... -->
+	  <arg line="${srvSecurity}"/> 
+	  <!-- 'value' is the preferred arg according to http://ant.apache.org/manual/using.html#arg -->
 
 	</exec>
 
