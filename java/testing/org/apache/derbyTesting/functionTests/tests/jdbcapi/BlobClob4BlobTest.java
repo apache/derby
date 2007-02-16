@@ -74,6 +74,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         Statement stmt = createStatement();
         stmt.executeUpdate("DROP TABLE testClob");
         stmt.executeUpdate("DROP TABLE testBlob");
+        stmt.close();
         commit();
         super.tearDown();
     }
@@ -94,6 +95,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         ps.setCharacterStream(1, streamReader, clobLength);
         ps.executeUpdate();
         streamReader.close();
+        ps.close();
         commit();
 
         Statement stmt = createStatement();
@@ -367,6 +369,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             }
         }
         rs.close();
+        stmt.close();
     }
 
     /**
@@ -1169,6 +1172,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         ps.setInt(6, 1);
         ps.executeUpdate();
         streamIn.close();
+        ps.close();
         commit();
 
         stmt = createStatement();
@@ -1196,7 +1200,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         }
         stmt2.close();
         conn2.commit();
-        stmt.close();
+        conn2.close();
     }
 
     /**
@@ -1303,6 +1307,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 shortClob = rs.getClob(1);
         }
         rs.close();
+        stmt.close();
         commit();
         getConnection().close();
 
@@ -1517,7 +1522,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         insertDefaultData();
         Statement stmt = createStatement();
         ResultSet rs = stmt.executeQuery("select a, b from testClob");
-        byte[] buff = new byte[128];
+
         Clob[] clobArray = new Clob[10];
         int[] clobLengthArray = new int[10];
         int j = 0;
@@ -2104,19 +2109,21 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         Statement stmt2 = conn2.createStatement();
         stmt2.executeUpdate("update testBlob set a = null where b = 26");
         assertEquals("FAIL - blob was updated", 26, shortBlob.length());
-        stmt2.close();
 
         // should timeout waiting for the lock to do this
         try {
-            stmt2 = conn2.createStatement();
+            
             stmt2.executeUpdate(
                     "update testBlob set b = b + 1 where b = 10000");
             fail("FAIL - should have gotten lock timeout");
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
         }
+        stmt.close();
+        stmt2.close();
         commit();
         conn2.commit();
+        conn2.close();
     }
 
     /**
@@ -2143,6 +2150,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         ps.setInt(6, 1);
         ps.executeUpdate();
         streamIn.close();
+        ps.close();
         commit();
 
         stmt = createStatement();
@@ -2170,6 +2178,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt2.close();
         conn2.commit();
         stmt.close();
+        conn2.close();
     }
 
     /**
@@ -2191,6 +2200,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 shortBlob = rs.getBlob(1);
         }
         rs.close();
+        stmt.close();
         commit();
 
 
@@ -2364,7 +2374,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         insertDefaultData();
         Statement stmt = createStatement();
         ResultSet rs = stmt.executeQuery("select a,b from testBlob");
-        byte[] buff = new byte[128];
+
         Blob[] blobArray = new Blob[10];
         int[] blobLengthArray = new int[10];
         int j = 0;
