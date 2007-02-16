@@ -24,6 +24,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.HarnessJavaTest;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -68,7 +69,10 @@ public class NetHarnessJavaTest extends HarnessJavaTest {
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("jdbcapi: old harness java tests");
+        TestSuite suite = new TestSuite("derbynet: old harness java tests");
+        
+        if (!Derby.hasServer())
+            return suite;
 
         suite.addTest(TestConfiguration.clientServerDecorator(
         		         decorate(new NetHarnessJavaTest("executeUpdate"))));
