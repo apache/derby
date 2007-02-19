@@ -83,8 +83,8 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
     public static Test suite() {
         Test test;
         test = TestConfiguration.clientServerSuite(DRDAProtocolTest.class);
-        test = TestConfiguration.singleUseDatabaseDecorator(test, "FIRSTDB1", false);
-        test = TestConfiguration.singleUseDatabaseDecorator(test, "SECONDDB2", false);
+        test = TestConfiguration.additionalDatabaseDecorator(test, "FIRSTDB1");
+        test = TestConfiguration.additionalDatabaseDecorator(test, "SECONDDB2");
         return test;
     }
     

@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Hashtable;
 
 import junit.extensions.TestSetup;
 import junit.framework.Assert;
@@ -40,8 +41,17 @@ import junit.framework.TestSuite;
  * 
  * A configuration manages the pool of databases in use
  * in <code>usedDbNames</code> property. One of those databases
- * is supposed to be the default database. A new database name
- * is added to the pool by one of singleUseDatabaseDecorator functions.
+ * is supposed to be the default database. A new default database
+ * is added to the pool by <code>singleUseDatabaseDecorator</code> function.
+ * <br>
+ * Additional databases may be added by <code>additionalDatabaseDecorator</code>
+ * function. Each of the additional databases has its logical and physical name.
+ * Physical database name is automatically generated as 'singleUse/oneuseXX'
+ * where 'XX' is unique number. The logical database name is used to establish
+ * a connection to the database using
+ * a <code>TestConfiguration::openConnection(String logicalDatabaseName)</code>
+ * function.
+ * <br>
  * The database files are supposed to be local and they will be
  * removed by <code>DropDatabaseSetup</code>.
  *
@@ -269,7 +279,22 @@ public class TestConfiguration {
             
         return new ServerSetup(test, DEFAULT_HOSTNAME, DEFAULT_PORT);
     }
-    
+   
+
+    /**
+     * Generate the unique database name for single use.
+     */
+    private static synchronized String generateUniqueDatabaseName()
+    {
+        // Forward slash is ok, Derby treats database names
+        // as URLs and translates forward slash to the local
+        // separator.
+        String dbName = "singleUse/oneuse";
+        dbName = dbName.concat(Integer.toHexString(uniqueDB++));
+        return dbName;
+    }
+
+ 
     /**
      * Decorate a test to use a new database that is created upon the
      * first connection request to the database and shutdown & deleted at
@@ -285,36 +310,33 @@ public class TestConfiguration {
      */
     public static TestSetup singleUseDatabaseDecorator(Test test)
     {
-        // Forward slash is ok, Derby treats database names
-        // as URLs and translates forward slash to the local
-        // separator.
-        String dbName = "singleUse/oneuse";
-        // Synchronize on the literal name which will be invariant
-        // since it is interned.
-        synchronized (dbName) {
-            dbName = dbName.concat(Integer.toHexString(uniqueDB++));
-        }
+        String dbName = generateUniqueDatabaseName();
 
-        return new DatabaseChangeSetup(new DropDatabaseSetup(test), dbName, true);
+        return new DatabaseChangeSetup(new DropDatabaseSetup(test), dbName, dbName, true);
     }
     
     /**
      * Decorate a test to use a new database that is created upon the
      * first connection request to the database and shutdown & deleted at
      * tearDown. The configuration differs only from the current configuration
-     * by the list of used databases. The default database name is changed
-     * according the <code>defaultDb</code> parameter. The passed database name
-     * is added at the end of <code>usedDbNames</code>.
+     * by the list of used databases. 
+     * The passed database name is mapped to the generated database
+     * name 'singleUse/oneuseXX' where 'XX' is the unique number.
+     * (by generateUniqueDatabaseName). The generated database name is added
+     * at the end of <code>usedDbNames</code>.
      * This decorator expects the database file to be local so it
      * can be removed.
      * @param test Test to be decorated
-     * @param dbName The database name to be added to the list of used databases.
-     * @param defaultDb Indicates that the passed database name should be used as a default database.
+     * @param logicalDbName The logical database name. This name is used to identify
+     * the database in openConnection(String logicalDatabaseName) method calls.
      * @return decorated test.
      */
-    public static TestSetup singleUseDatabaseDecorator(Test test, String dbName, boolean defaultDb)
+    public static TestSetup additionalDatabaseDecorator(Test test, String logicalDbName)
     {
-        return new DatabaseChangeSetup(new DropDatabaseSetup(test), dbName, defaultDb);
+        return new DatabaseChangeSetup(new DropDatabaseSetup(test),
+                                       logicalDbName,
+                                       generateUniqueDatabaseName(),
+                                       false);
     }
     
     /**
@@ -379,7 +401,7 @@ public class TestConfiguration {
         };
         
         return changeUserDecorator(
-            new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, true),
+            new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true),
             "TEST_DBO", "");
     }
     
@@ -465,6 +487,7 @@ public class TestConfiguration {
     private TestConfiguration() {
         this.defaultDbName = DEFAULT_DBNAME;
         usedDbNames.add(DEFAULT_DBNAME);
+        logicalDbMapping.put(DEFAULT_DBNAME, DEFAULT_DBNAME);
         this.userName = DEFAULT_USER_NAME;
         this.userPassword = DEFAULT_USER_PASSWORD;
         this.hostName = null;
@@ -476,11 +499,33 @@ public class TestConfiguration {
  
     }
 
+    /**
+     * Obtain a new configuration identical to the passed one.
+     */
+    TestConfiguration(TestConfiguration copy)
+    {
+        this.defaultDbName = copy.defaultDbName;
+        this.usedDbNames.addAll(copy.usedDbNames);
+        logicalDbMapping.putAll(copy.logicalDbMapping);
+        this.userName = copy.userName;
+        this.userPassword = copy.userPassword;
+
+        this.isVerbose = copy.isVerbose;
+        this.port = copy.port;
+        
+        this.jdbcClient = copy.jdbcClient;
+        this.hostName = copy.hostName;
+        
+        this.url = copy.url;
+        initConnector(copy.connector);
+    }
+
     TestConfiguration(TestConfiguration copy, JDBCClient client,
             String hostName, int port)
     {
         this.defaultDbName = copy.defaultDbName;
         this.usedDbNames.addAll(copy.usedDbNames);        
+        logicalDbMapping.putAll(copy.logicalDbMapping);
         this.userName = copy.userName;
         this.userPassword = copy.userPassword;
 
@@ -494,7 +539,6 @@ public class TestConfiguration {
         initConnector(copy.connector);
     }
 
-    
     /**
      * Obtain a new configuration identical to the passed in
      * one except for the default user and password.
@@ -507,6 +551,7 @@ public class TestConfiguration {
     {
         this.defaultDbName = copy.defaultDbName;
         this.usedDbNames.addAll(copy.usedDbNames);
+        logicalDbMapping.putAll(copy.logicalDbMapping);
         this.userName = user;
         this.userPassword = password;
         this.passwordToken = passwordToken == null ?
@@ -521,6 +566,7 @@ public class TestConfiguration {
         this.url = copy.url;
         initConnector(copy.connector);
     }
+
     /**
      * Obtain a new configuration identical to the passed in
      * one except for the database name. The passed database name
@@ -532,10 +578,19 @@ public class TestConfiguration {
      * @param defaultDb Indicates that the passed <code>dbName</code> is supposed
      * to be used as the default database name.
      */
-    TestConfiguration(TestConfiguration copy, String dbName, boolean defaultDb)
+    TestConfiguration(TestConfiguration copy, String logicalDbName,
+                      String dbName, boolean defaultDb)
     {
         this.usedDbNames.addAll(copy.usedDbNames);
         this.usedDbNames.add(dbName);
+        logicalDbMapping.putAll(copy.logicalDbMapping);
+
+        // Can not use the same logical name for different database.
+        // If this assert will make failures it might be safely removed
+        // since having more physical databases accessible throught the same
+        // logical database name will access only the last physical database
+        Assert.assertTrue(logicalDbMapping.put(logicalDbName, dbName) == null);
+
         if (defaultDb) {
             this.defaultDbName = dbName;
         } else {
@@ -564,6 +619,8 @@ public class TestConfiguration {
         throws NumberFormatException {
 
         defaultDbName = props.getProperty(KEY_DBNAME, DEFAULT_DBNAME);
+        usedDbNames.add(defaultDbName);
+        logicalDbMapping.put(defaultDbName, defaultDbName);
         userName = props.getProperty(KEY_USER_NAME, DEFAULT_USER_NAME);
         userPassword = props.getProperty(KEY_USER_PASSWORD, 
                                          DEFAULT_USER_PASSWORD);
@@ -771,24 +828,30 @@ public class TestConfiguration {
     Connection openDefaultConnection(String user, String password)
         throws SQLException {
         return connector.openConnection(user, password);
-    }    
+    }
+
     /**
      * Open connection to the specified database.
      * If the database does not exist, it will be created.
      * A default username and password will be used for the connection.
-     * Requires that the test has been decorated with a
-     * singleUseDatabaseDecorator with the matching name.
+     * Requires that the test has been decorated with
+     * additionalDatabaseDecorator with the matching name.
+     * The physical database name may differ.
+     * @param logicalDatabaseName A logical database name as passed
+     * to <code>additionalDatabaseDecorator</code> function.
      * @return connection to specified database.
      */
-    Connection openConnection(String databaseName)
+    Connection openConnection(String logicalDatabaseName)
         throws SQLException {
+        String databaseName = (String) logicalDbMapping.get(logicalDatabaseName);
         if (usedDbNames.contains(databaseName))
             return connector.openConnection(databaseName);
         else
-            throw new SQLException("Database name \"" + databaseName + "\" is not in a list of used databases. "
-                                 + "Use method TestConfiguration.singleUseDatabaseDecorator first.");
+            throw new SQLException("Database name \"" + logicalDatabaseName
+                      + "\" is not in a list of used databases."
+                      + "Use method TestConfiguration.additionalDatabaseDecorator first.");
     }
-    
+
     /**
      * Shutdown the database for this configuration
      * assuming it is booted.
@@ -922,6 +985,8 @@ public class TestConfiguration {
     /** Holds the names of all other databases used in a test to perform a proper cleanup.
      * The <code>defaultDbName</code> is also contained here.  */
     private final ArrayList usedDbNames = new ArrayList();
+    /** Contains the mapping of logical database names to physical database names. */
+    private final Hashtable logicalDbMapping = new Hashtable();
     private final String url;
     private final String userName; 
     private final String userPassword; 

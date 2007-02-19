@@ -266,14 +266,14 @@ public abstract class BaseJDBCTestCase
      * If the database does not exist, it will be created.
      * A default username and password will be used for the connection.
      * Requires that the test has been decorated with a
-     * singleUseDatabaseDecorator with the matching name.
+     * additionalDatabaseDecorator with the matching name.
      * <BR>
      * The connection will be initialized by calling initializeConnection.
      * A sub-class may provide an implementation of initializeConnection
      * to ensure its connections are in a consistent state that is different
      * to the default.
      * @return connection to default database.
-     * @see TestConfiguration#singleUseDatabaseDecorator(Test, String, boolean)
+     * @see TestConfiguration#additionalDatabaseDecorator(Test, String)
      * @see BaseJDBCTestCase#initializeConnection(Connection)
      */
     public Connection openConnection(String databaseName)
