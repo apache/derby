@@ -224,8 +224,7 @@ public class TestConfiguration {
     
     /**
      * Create a suite for the passed test class that includes
-     * all the default fixtures from the class, wrapped
-     * in a single CleanDatabaseTestSetup.
+     * all the default fixtures from the class.
       */
     public static Test embeddedSuite(Class testClass)
     {
@@ -238,7 +237,6 @@ public class TestConfiguration {
      * all the default fixtures from the class, wrapped in
      * a derbyClientServerDecorator.
      * 
-     * @param withCleanDB True if the 
       */
     public static Test clientServerSuite(Class testClass)
     {           
