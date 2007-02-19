@@ -141,6 +141,16 @@ public class BlobSetMethodsTest extends BaseJDBCTestCase {
             //test truncate
             blob.truncate (BUFFER_SIZE);
             assertEquals (BUFFER_SIZE, blob.length());
+            //test truncate on small size blob
+            blob = con.createBlob();
+            data = new byte [100];
+            for (int i = 0; i < 100; i++) {
+                data [i] = (byte) i;
+            }
+            blob.setBytes (1, data);
+            assertEquals (blob.length(), 100);
+            blob.truncate (50);
+            assertEquals (blob.length(), 50);
             con.commit();
             stmt.close();
             pstmt.close();

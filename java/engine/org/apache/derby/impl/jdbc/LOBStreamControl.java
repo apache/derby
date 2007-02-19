@@ -351,6 +351,7 @@ class LOBStreamControl {
         if (isBytes) {
             byte [] tmpByte = new byte [(int) size];
             System.arraycopy(dataBytes, 0, tmpByte, 0, (int) size);
+            dataBytes = tmpByte;
         } else {
             if (size < Integer.MAX_VALUE && size < MAX_BUF_SIZE) {
                 dataBytes = new byte [(int) size];
