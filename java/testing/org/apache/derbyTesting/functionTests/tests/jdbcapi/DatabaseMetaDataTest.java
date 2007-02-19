@@ -2075,7 +2075,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             return Types.REAL;
 
         if ("DOUBLE".equals(type) || "DOUBLE PRECISION".equals(type))
-            return Types.INTEGER;
+            return Types.DOUBLE;
         
         if ("DATE".equals(type))
             return Types.DATE;
