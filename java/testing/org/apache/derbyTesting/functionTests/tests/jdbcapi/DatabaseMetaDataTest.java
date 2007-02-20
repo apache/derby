@@ -1253,6 +1253,18 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             assertEquals("DATA_TYPE",
                     Types.BINARY, rsmdt.getColumnType(col));                               
         }
+        else if (dmdColumnType == Types.NUMERIC && usingDerbyNetClient())
+        {
+            // DERBY-584 inconsistency in numeric & decimal
+            assertEquals("DATA_TYPE",
+                    Types.DECIMAL, rsmdt.getColumnType(col));
+            
+            assertEquals("TYPE_NAME",
+                    "DECIMAL", rsmdt.getColumnTypeName(col));
+                       
+            assertEquals("TYPE_NAME",
+                    "NUMERIC", rs.getString("TYPE_NAME"));
+        }
         else
         {
             assertEquals("DATA_TYPE",
