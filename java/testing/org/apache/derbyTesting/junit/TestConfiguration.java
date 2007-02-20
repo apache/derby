@@ -25,6 +25,7 @@ import java.security.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -312,7 +313,7 @@ public class TestConfiguration {
     {
         String dbName = generateUniqueDatabaseName();
 
-        return new DatabaseChangeSetup(new DropDatabaseSetup(test), dbName, dbName, true);
+        return new DatabaseChangeSetup(new DropDatabaseSetup(test, dbName), dbName, dbName, true);
     }
     
     /**
@@ -333,7 +334,7 @@ public class TestConfiguration {
      */
     public static TestSetup additionalDatabaseDecorator(Test test, String logicalDbName)
     {
-        return new DatabaseChangeSetup(new DropDatabaseSetup(test),
+        return new DatabaseChangeSetup(new DropDatabaseSetup(test, logicalDbName),
                                        logicalDbName,
                                        generateUniqueDatabaseName(),
                                        false);
@@ -763,12 +764,13 @@ public class TestConfiguration {
     }
     
     /**
-     * Return the names of all used databases.
+     * Return the physical name for a database
+     * given its logical name.
      * 
-     * @return The ArrayList containing the database names.
+     * @return Physical name of the database.
      */
-    public ArrayList getUsedDatabaseNames() {
-        return usedDbNames;
+    String getPhysicalDatabaseName(String logicalName) {
+        return (String) logicalDbMapping.get(logicalName);
     }
 
     /**

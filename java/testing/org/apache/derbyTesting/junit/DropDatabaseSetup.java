@@ -23,34 +23,40 @@ import java.io.File;
 import java.security.AccessController;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 /**
- * Shutdown and drop the current database at tearDown time.
+ * Shutdown and drop the database identified by the logical
+ * name passed in when creating this decorator.
  *
  */
-class DropDatabaseSetup extends BaseJDBCTestSetup {
+class DropDatabaseSetup extends TestSetup {
 
-    DropDatabaseSetup(Test test) {
+    private final String logicalDBName;
+    DropDatabaseSetup(Test test, String logicalDBName) {
         super(test);
+        this.logicalDBName = logicalDBName;
      }
     
     /**
-     * Drop the last database added to the list of used databases.
+     * Shutdown the database and then remove all of its files.
      */
     protected void tearDown() throws Exception {
         
+        TestConfiguration config = TestConfiguration.getCurrent();
+        
         // Ensure the database is booted
         // since that is what shutdownDatabase() requires.
-        getConnection().close();
-        super.tearDown();
-        
-        TestConfiguration.getCurrent().shutdownDatabase();
-
-        ArrayList usedDbs = TestConfiguration.getCurrent().getUsedDatabaseNames();
-        String dbName = (String) usedDbs.get(usedDbs.size()-1);
+        config.openConnection(logicalDBName).close();
+        String dbName = config.getPhysicalDatabaseName(logicalDBName);
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        JDBCDataSource.shutdownDatabase(ds);
+             
         dbName = dbName.replace('/', File.separatorChar);
         
         String dsh = BaseTestCase.getSystemProperty("derby.system.home");
@@ -93,11 +99,11 @@ class DropDatabaseSetup extends BaseJDBCTestSetup {
                 if (entry.isDirectory()) {
                     removeDir(entry);
                 } else {
-                    assertTrue(entry.delete());
+                    assertTrue(entry.getPath(), entry.delete());
                 }
             }
         }
 
-        assertTrue(dir.delete());
+        assertTrue(dir.getPath(), dir.delete());
     }
 }
