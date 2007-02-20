@@ -83,7 +83,6 @@ lang/triggerBeforeTrig.sql
 lang/triggerGeneral.sql
 lang/triggerRecursion.sql
 lang/triggerRefClause.sql
-lang/triggerStream.java
 lang/unaryArithmeticDynamicParameter.java
 lang/ungroupedAggregatesNegative.sql
 lang/updateCursor.java
