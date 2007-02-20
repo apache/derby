@@ -72,6 +72,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(StatementPlanCacheTest.suite());
         suite.addTest(StreamsTest.suite());
         suite.addTest(TimeHandlingTest.suite());
+        suite.addTest(TriggerTest.suite());
         suite.addTest(VTITest.suite());
         suite.addTest(SysDiagVTIMappingTest.suite());
         suite.addTest(UpdatableResultSetTest.suite());

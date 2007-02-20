@@ -33,9 +33,11 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
@@ -46,12 +48,19 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.XML;
 
 /**
  * Test triggers.
  *
  */
 public class TriggerTest extends BaseJDBCTestCase {
+   
+    /**
+     * Thread local that a trigger can access to
+     * allow recording information about the firing.
+     */
+    private static ThreadLocal TRIGGER_INFO = new ThreadLocal();
 
     public TriggerTest(String name) {
         super(name);
@@ -60,6 +69,8 @@ public class TriggerTest extends BaseJDBCTestCase {
     
     /**
      * Run only in embedded as TRIGGERs are server side logic.
+     * Also the use of a ThreadLocal to check state requires
+     * embedded. 
      * @return
      */
     public static Test suite() {
@@ -75,9 +86,228 @@ public class TriggerTest extends BaseJDBCTestCase {
     
     protected void tearDown() throws Exception
     {
+        TRIGGER_INFO.set(null);
+        
         JDBC.dropSchema(getConnection().getMetaData(),
                 getTestConfiguration().getUserName());
         super.tearDown();
+    }
+    
+    /**
+     * Test the firing order of triggers. Should be:
+     * 
+     * Before operations
+     * after operations
+     * 
+     * For multiple triggers within the same group (before or after)
+     * firing order is determined by create order.
+     * @throws SQLException 
+     *
+     */
+    public void testFiringOrder() throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE TABLE T(ID INT)");
+        s.executeUpdate("CREATE PROCEDURE TRIGGER_LOG_INFO(" +
+                "O VARCHAR(255)) " +
+                "NO SQL PARAMETER STYLE JAVA LANGUAGE JAVA " +
+                "EXTERNAL NAME " +
+                "'" + getClass().getName() + ".logTriggerInfo'");
+        
+        Random r = new Random();
+        // Randomly generate a number of triggers.
+        // There are 12 types (B/A, I/U/D, R,S)
+        // so pick enough triggers to get some
+        // distribution across all 12.
+        int triggerCount = r.nextInt(45) + 45;
+        for (int i = 0; i < triggerCount; i++)
+        {
+            StringBuffer sb = new StringBuffer();
+            sb.append("CREATE TRIGGER TR");
+            sb.append(i);
+            sb.append(" ");
+            
+            String before;
+            if (r.nextInt(2) == 0)
+                before = "NO CASCADE BEFORE";
+            else
+                before = "AFTER";
+            sb.append(before);
+            sb.append(" ");
+            
+            int type = r.nextInt(3);
+            String iud;
+            if (type == 0)
+                iud = "INSERT";
+            else if (type == 1)
+                iud = "UPDATE";
+            else
+                iud = "DELETE";
+            sb.append(iud);
+            
+            sb.append(" ON T FOR EACH ");
+            
+            String row;
+            if (r.nextInt(2) == 0)
+                row = "ROW";
+            else
+                row = "STATEMENT";
+            sb.append(row);
+            sb.append(" ");
+            
+            sb.append("CALL TRIGGER_LOG_INFO('");
+            sb.append(i);
+            sb.append(",");
+            sb.append(before);
+            sb.append(",");
+            sb.append(iud);
+            sb.append(",");
+            sb.append(row);
+            sb.append("')");
+
+            s.execute(sb.toString());
+        }
+        commit();
+        
+        TRIGGER_INFO.set(new ArrayList());
+        
+        // Check ordering with a single row.
+        s.execute("INSERT INTO T VALUES 1");
+        commit();
+        int fireCount = assertFiringOrder("INSERT", 1);
+        ((List) TRIGGER_INFO.get()).clear();
+        
+        s.execute("UPDATE T SET ID = 2");
+        commit();
+        fireCount += assertFiringOrder("UPDATE", 1);
+        ((List) TRIGGER_INFO.get()).clear();
+        
+        s.execute("DELETE FROM T");
+        commit();
+        fireCount += assertFiringOrder("DELETE", 1);
+        ((List) TRIGGER_INFO.get()).clear();
+           
+        assertEquals("All triggers fired?", triggerCount, fireCount);
+
+        // and now with multiple rows
+        s.execute("INSERT INTO T VALUES 1,2,3");
+        commit();
+        fireCount = assertFiringOrder("INSERT", 3);
+        ((List) TRIGGER_INFO.get()).clear();
+        
+        s.execute("UPDATE T SET ID = 2");
+        commit();
+        fireCount += assertFiringOrder("UPDATE", 3);
+        ((List) TRIGGER_INFO.get()).clear();
+        
+        s.execute("DELETE FROM T");
+        commit();
+        fireCount += assertFiringOrder("DELETE", 3);
+        ((List) TRIGGER_INFO.get()).clear();
+        
+        // cannot assume row triggers were created so can only
+        // say that at least all the triggers were fired.
+        assertTrue("Sufficient triggers fired?", fireCount >= triggerCount);
+        
+        
+        // and then with no rows
+        assertTableRowCount("T", 0);
+        s.execute("INSERT INTO T SELECT ID FROM T");
+        commit();
+        fireCount = assertFiringOrder("INSERT", 0);
+        ((List) TRIGGER_INFO.get()).clear();
+        
+        s.execute("UPDATE T SET ID = 2");
+        commit();
+        fireCount += assertFiringOrder("UPDATE", 0);
+        ((List) TRIGGER_INFO.get()).clear();
+        
+        s.execute("DELETE FROM T");
+        commit();
+        fireCount += assertFiringOrder("DELETE", 0);
+        ((List) TRIGGER_INFO.get()).clear();
+        
+        // can't assert anthing about fireCount, could be all row triggers.
+            
+        s.close();
+
+    }
+    
+    /**
+     * Look at the ordered information in the thread local
+     * and ensure it reflects correct sequenceing of
+     * triggers created in testFiringOrder.
+     * @param iud
+     * @return
+     */
+    private int assertFiringOrder(String iud, int modifiedRowCount)
+    {
+        List fires = (List) TRIGGER_INFO.get();
+        
+        int lastOrder = -1;
+        String lastBefore = null;
+        for (Iterator i = fires.iterator(); i.hasNext(); )
+        {
+            String info = i.next().toString();
+            StringTokenizer st = new StringTokenizer(info, ",");
+            assertEquals(4, st.countTokens());
+            st.hasMoreTokens();
+            int order = Integer.valueOf(st.nextToken()).intValue();
+            st.hasMoreTokens();
+            String before = st.nextToken();
+            st.hasMoreTokens();
+            String fiud = st.nextToken();
+            st.hasMoreTokens();
+            String row = st.nextToken();
+            
+            assertEquals("Incorrect trigger firing:"+info, iud, fiud);
+            if (modifiedRowCount == 0)
+               assertEquals("Row trigger firing on no rows",
+                       "STATEMENT", row);
+            
+            // First trigger.
+            if (lastOrder == -1)
+            {
+                lastOrder = order;
+                lastBefore = before;
+                continue;
+            }
+            
+            // Same trigger as last one.
+            if (lastBefore.equals(before))
+            {
+                // for multiple rows the trigger can match the previous one.
+                boolean orderOk =
+                    modifiedRowCount > 1 ? (order >= lastOrder) :
+                        (order > lastOrder);
+                assertTrue("matching triggers need to be fired in order creation:"
+                        +info, orderOk);
+                lastOrder = order;
+                continue;
+            }
+            
+            
+            // switching from a before trigger to an after trigger.
+            assertEquals("BEFORE before AFTER:"+info,
+                    "NO CASCADE BEFORE", lastBefore);
+            assertEquals("then AFTER:"+info,
+                    "AFTER", before);
+            
+            lastBefore = before;
+            lastOrder = order;
+            
+        }
+        
+        return fires.size();
+    }
+    
+    /**
+     * Record the trigger information in the thread local.
+     * @param info trigger information
+      */
+    public static void logTriggerInfo(String info)
+    {
+        ((List) TRIGGER_INFO.get()).add(info);  
     }
     
     /**
@@ -89,6 +319,20 @@ public class TriggerTest extends BaseJDBCTestCase {
     public void testTypesInActionStatement() throws SQLException, IOException
     {
         List types = DatabaseMetaDataTest.getSQLTypes(getConnection());
+        
+        if (!XML.classpathMeetsXMLReqs())
+            types.remove("XML");
+        
+        // JSR 169 doesn't support DECIMAL in triggers.
+        if (!JDBC.vmSupportsJDBC3())
+        {           
+            for (Iterator i = types.iterator(); i.hasNext(); )
+            {
+                String type = i.next().toString();
+                if (type.startsWith("DECIMAL") || type.startsWith("NUMERIC"))
+                    i.remove();
+            }
+        }
         
         for (Iterator i = types.iterator(); i.hasNext(); )
         {
@@ -111,6 +355,10 @@ public class TriggerTest extends BaseJDBCTestCase {
         actionTypesSetup(type);
         
         actionTypesInsertTest(type); 
+        
+        actionTypesUpdateTest(type);
+        
+        actionTypesDeleteTest(type);
                
         s.executeUpdate("DROP TABLE T_MAIN");
         s.executeUpdate("DROP TABLE T_ACTION_ROW");
@@ -152,6 +400,37 @@ public class TriggerTest extends BaseJDBCTestCase {
                 "FOR EACH STATEMENT " +      
                 "INSERT INTO T_ACTION_STATEMENT(A, V1, ID, V2) " +
                 "SELECT 'I', V, ID, V FROM N");
+        
+        // ON update copy the old and new value into the action table.
+        // Two identical actions,  per row and per statement.
+        s.executeUpdate("CREATE TRIGGER AUR " +
+                "AFTER UPDATE OF V ON T_MAIN " +
+                "REFERENCING NEW AS N OLD AS O " +
+                "FOR EACH ROW " +      
+                "INSERT INTO T_ACTION_ROW(A, V1, ID, V2) VALUES ('U', N.V, N.ID, O.V)");
+        
+        s.executeUpdate("CREATE TRIGGER AUS " +
+                "AFTER UPDATE OF V ON T_MAIN " +
+                "REFERENCING NEW_TABLE AS N OLD_TABLE AS O " +
+                "FOR EACH STATEMENT " +      
+                "INSERT INTO T_ACTION_STATEMENT(A, V1, ID, V2) " +
+                "SELECT 'U', N.V, N.ID, O.V FROM N,O WHERE O.ID = N.ID");
+        
+        // ON DELETE copy the old value into the action table.
+        // Two identical actions,  per row and per statement.
+        s.executeUpdate("CREATE TRIGGER ADR " +
+                "AFTER DELETE ON T_MAIN " +
+                "REFERENCING OLD AS O " +
+                "FOR EACH ROW " +      
+                "INSERT INTO T_ACTION_ROW(A, V1, ID, V2) VALUES ('D', O.V, O.ID, O.V)");
+        
+        s.executeUpdate("CREATE TRIGGER ADS " +
+                "AFTER DELETE ON T_MAIN " +
+                "REFERENCING OLD_TABLE AS O " +
+                "FOR EACH STATEMENT " +      
+                "INSERT INTO T_ACTION_STATEMENT(A, V1, ID, V2) " +
+                "SELECT 'D', O.V, O.ID, O.V FROM O");        
+        
 
         s.close();
         commit();
@@ -222,6 +501,154 @@ public class TriggerTest extends BaseJDBCTestCase {
 
         actionTypesCompareMainToAction(5, type);    
     }
+    
+    /**
+     * Test updates of the specified types in the action statement.
+     * @param type
+     * @throws SQLException
+     * @throws IOException
+     */
+    private void actionTypesUpdateTest(String type)
+        throws SQLException, IOException
+    {
+        int jdbcType = DatabaseMetaDataTest.getJDBCType(type);
+        int precision = DatabaseMetaDataTest.getPrecision(jdbcType, type);
+
+        // BUG DERBY-2350 - need insert case to work first
+        if (jdbcType == JDBC.SQLXML)
+            return;
+
+        // BUG DERBY-2349 - need insert case to work first
+        if (jdbcType == Types.BLOB)
+            return;
+        
+        Statement s = createStatement();
+        s.executeUpdate("UPDATE T_MAIN SET V = NULL WHERE ID = 2");
+        s.close();
+        commit();
+        actionTypesCompareMainToActionForUpdate(type, 2);
+
+        Random r = new Random();
+        
+        PreparedStatement ps = prepareStatement(
+            "UPDATE T_MAIN SET V = ? WHERE ID >= ? AND ID <= ?");
+        
+        // Single row update of row 3
+        setRandomValue(r, ps, 1, jdbcType, precision);
+        ps.setInt(2, 3);
+        ps.setInt(3, 3);
+        assertUpdateCount(ps, 1);
+        commit();
+        actionTypesCompareMainToActionForUpdate(type, 3);
+        
+        // Bug DERBY-2358 - skip multi-row updates for streaming input.
+        switch (jdbcType) {
+        case Types.BLOB:
+        case Types.CLOB:
+        case Types.LONGVARBINARY:
+        case Types.LONGVARCHAR:
+            ps.close();
+            return;
+        }
+        
+        // multi-row update of 4,5
+        setRandomValue(r, ps, 1, jdbcType, precision);
+        ps.setInt(2, 4);
+        ps.setInt(3, 5);
+        assertUpdateCount(ps, 2);
+        commit();
+        actionTypesCompareMainToActionForUpdate(type, 4);
+        actionTypesCompareMainToActionForUpdate(type, 5);
+
+        ps.close();
+        
+    }
+    
+    /**
+     * Compare the values for an update trigger.
+     * @param type
+     * @param id
+     * @throws SQLException
+     * @throws IOException
+     */
+    private void actionTypesCompareMainToActionForUpdate(String type,
+            int id) throws SQLException, IOException {
+        
+        String sqlMain = "SELECT M.V, R.V1 FROM T_MAIN M, T_ACTION_ROW R " +
+            "WHERE M.ID = ? AND R.A = 'I' AND M.ID = R.ID";
+        String sqlRow = "SELECT V1, V2 FROM T_ACTION_ROW " +
+            "WHERE A = 'U' AND ID = ?";
+        String sqlStmt = "SELECT V1, V2 FROM T_ACTION_STATEMENT " +
+            "WHERE A = 'U' AND ID = ?";
+        
+        if ("XML".equals(type)) {
+            // XMLSERIALIZE(V AS CLOB)
+            sqlMain = "SELECT XMLSERIALIZE(M.V AS CLOB), " +
+                "XMLSERIALIZE(R.V1 AS CLOB) FROM T_MAIN M, T_ACTION_ROW R " +
+                "WHERE M.ID = ? AND R.A = 'I' AND M.ID = R.ID";
+            sqlRow = "SELECT XMLSERIALIZE(V1 AS CLOB), " +
+                "XMLSERIALIZE(V2 AS CLOB) FROM T_ACTION_ROW " +
+                "WHERE A = 'U' AND ID = ?";
+            sqlStmt = "SELECT XMLSERIALIZE(V1 AS CLOB), " +
+                "XMLSERIALIZE(V2 AS CLOB) FROM T_ACTION_STATEMENT " +
+                "WHERE A = 'U' AND ID = ?";
+        }
+        
+        // Get the new value from main and old from the action table 
+        PreparedStatement psMain = prepareStatement(sqlMain);
+              
+        // new (V1) & old (V2) value as copied by the trigger
+        PreparedStatement psActionRow = prepareStatement(sqlRow);
+        PreparedStatement psActionStmt = prepareStatement(sqlStmt);
+        
+        psMain.setInt(1, id);
+        psActionRow.setInt(1, id);
+        psActionStmt.setInt(1, id);
+        
+        JDBC.assertSameContents(psMain.executeQuery(),
+                psActionRow.executeQuery());
+        JDBC.assertSameContents(psMain.executeQuery(),
+                psActionStmt.executeQuery());
+         
+        psMain.close();
+        psActionRow.close();
+        psActionStmt.close();
+        
+        commit();
+    }
+    
+    /**
+     * Test deletes with the specified types in the action statement.
+     * @param type
+     * @throws SQLException
+     * @throws IOException
+     */
+    private void actionTypesDeleteTest(String type)
+        throws SQLException, IOException
+    {
+        int jdbcType = DatabaseMetaDataTest.getJDBCType(type);
+        int precision = DatabaseMetaDataTest.getPrecision(jdbcType, type);
+
+        // BUG DERBY-2350 - need insert case to work first
+        if (jdbcType == JDBC.SQLXML)
+            return;
+
+        // BUG DERBY-2349 - need insert case to work first
+        if (jdbcType == Types.BLOB)
+            return;
+        
+        Statement s = createStatement();
+        // Single row delete
+        assertUpdateCount(s, 1, "DELETE FROM T_MAIN WHERE ID = 3");
+        commit();
+        
+        // multi-row delete
+        assertUpdateCount(s, 4, "DELETE FROM T_MAIN");
+        commit();
+        
+        s.close();
+    }
+    
     
     /**
      * Compare the contents of the main table to the action table.
