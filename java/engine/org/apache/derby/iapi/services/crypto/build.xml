@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 
-<project default="compile" basedir="../../../../../../../..">
+<project default="compile_crypto" basedir="../../../../../../../..">
 
 <!-- Set Properties -->
   <!-- User settings -->
@@ -35,8 +35,8 @@
 <!-- Targets -->
   <target name="compile_crypto">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -48,8 +48,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement location="${jce1_2_1}"/>
-        <pathelement path="${java13compile.classpath}"/>
+         <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/services/crypto/*.java"/>
     </javac>
