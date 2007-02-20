@@ -66,9 +66,9 @@ public class TestConfiguration {
     
     private final static String DEFAULT_USER_NAME = "APP";
     private final static String DEFAULT_USER_PASSWORD = "APP";
-    private final static int    DEFAULT_PORT = 1527;
+    public final static int    DEFAULT_PORT = 1527;
     private final static String DEFAULT_FRAMEWORK = "embedded";
-    private final static String DEFAULT_HOSTNAME = "localhost";
+    public final static String DEFAULT_HOSTNAME = "localhost";
             
     /**
      * Keys to use to look up values in properties files.

@@ -28,7 +28,7 @@ import junit.framework.Test;
  * configuration, it does not start any network server.
  *
  */
-final class ServerSetup extends ChangeConfigurationSetup {
+public final class ServerSetup extends ChangeConfigurationSetup {
 
     private final String host;
     private final int port;

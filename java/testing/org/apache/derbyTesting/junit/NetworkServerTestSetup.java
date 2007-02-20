@@ -24,6 +24,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -42,8 +43,22 @@ import org.apache.derby.drda.NetworkServerControl;
  */
 final public class NetworkServerTestSetup extends TestSetup {
 
+    /** Wait maximum 1 minute for server to start */
+    private static final long WAIT_TIME = 60000;
+    
+    /** Sleep for 50 ms before pinging the network server (again) */
+    private static final int SLEEP_TIME = 50;
+
+    private static  long    waitTime = WAIT_TIME;
+    
     private FileOutputStream serverOutput;
     private final boolean asCommand;
+
+    private final boolean useSeparateProcess;
+    private final boolean serverShouldComeUp;
+    private final InputStream[] inputStreamHolder;
+    private final String[]    systemProperties;
+    private final String[]    startupArgs;
     
     /**
      * Decorator this test with the NetworkServerTestSetup
@@ -51,6 +66,36 @@ final public class NetworkServerTestSetup extends TestSetup {
     public NetworkServerTestSetup(Test test, boolean asCommand) {
         super(test);
         this.asCommand = asCommand;
+
+        this.systemProperties = null;
+        this.startupArgs = null;
+        this.useSeparateProcess = false;
+        this.serverShouldComeUp = true;
+        this.inputStreamHolder = null;
+}
+
+     /**
+     * Decorator for starting up with specific command args.
+     */
+    public NetworkServerTestSetup
+        (
+         Test test,
+         String[] systemProperties,
+         String[] startupArgs,
+         boolean useSeparateProcess,
+         boolean serverShouldComeUp,
+         InputStream[] inputStreamHolder
+        )
+    {
+        super(test);
+        
+        this.asCommand = true;
+
+        this.systemProperties = systemProperties;
+        this.startupArgs = startupArgs;
+        this.useSeparateProcess = true;
+        this.serverShouldComeUp = serverShouldComeUp;
+        this.inputStreamHolder = inputStreamHolder;
     }
 
     /**
@@ -60,13 +105,15 @@ final public class NetworkServerTestSetup extends TestSetup {
         BaseTestCase.println("Starting network server:");
         
         networkServerController = getNetworkServerControl();
-        
-        if (asCommand)
-            startWithCommand();
+
+        if (useSeparateProcess)
+        { startSeparateProcess(); }
+        else if (asCommand)
+        { startWithCommand(); }
         else
-            startWithAPI();
+        { startWithAPI(); }
         
-        waitForServerStart(networkServerController);
+        if ( serverShouldComeUp ) { waitForServerStart(networkServerController); }
     }
 
     private void startWithAPI() throws Exception
@@ -89,7 +136,6 @@ final public class NetworkServerTestSetup extends TestSetup {
             });
             
             networkServerController.start(new PrintWriter(serverOutput));
-   
     }
     
     private void startWithCommand() throws Exception
@@ -101,17 +147,70 @@ final public class NetworkServerTestSetup extends TestSetup {
         new Thread(
         new Runnable() {
             public void run() {
-                org.apache.derby.drda.NetworkServerControl.main(
-                        new String[] {
-                                "start",
-                                "-h",
-                                config.getHostName(),
-                                "-p",
-                                Integer.toString(config.getPort())
-                        });                
+
+                String[]    args = getDefaultStartupArgs();
+                
+                org.apache.derby.drda.NetworkServerControl.main( args );
             }
             
         }, "NetworkServerTestSetup command").start();
+    }
+
+    private void startSeparateProcess() throws Exception
+    {
+        StringBuffer    buffer = new StringBuffer();
+        String              classpath = BaseTestCase.getSystemProperty( "java.class.path" );
+
+        buffer.append( "java -classpath " );
+        buffer.append( classpath );
+        buffer.append( " " );
+
+        int         count = systemProperties.length;
+        for ( int i = 0; i < count; i++ )
+        {
+            buffer.append( " -D" );
+            buffer.append( systemProperties[ i ] );
+        }
+
+        buffer.append( " org.apache.derby.drda.NetworkServerControl " );
+
+        String[]    defaultArgs = getDefaultStartupArgs();
+
+        count = defaultArgs.length;
+        for ( int i = 0; i < count; i++ )
+        {
+            buffer.append( " " );
+            buffer.append( defaultArgs[ i ] );
+        }
+
+        count = startupArgs.length;
+        for ( int i = 0; i < count; i++ )
+        {
+            buffer.append( " " );
+            buffer.append( startupArgs[ i ] );
+        }
+
+        final   String  command = buffer.toString();
+
+        Process     serverProcess = (Process) AccessController.doPrivileged
+            (
+             new PrivilegedAction()
+             {
+                 public Object run()
+                 {
+                     Process    result = null;
+                     try {
+                        result = Runtime.getRuntime().exec( command );
+                     } catch (Exception ex) {
+                         ex.printStackTrace();
+                     }
+                     
+                     return result;
+                 }
+             }
+            );
+
+        inputStreamHolder[ 0 ] = serverProcess.getInputStream();
     }
 
     /**
@@ -119,6 +218,7 @@ final public class NetworkServerTestSetup extends TestSetup {
      * appears to be running.
      */
     protected void tearDown() throws Exception {
+
         if (networkServerController != null) {
             boolean running = false;
             try {
@@ -130,22 +230,31 @@ final public class NetworkServerTestSetup extends TestSetup {
             if (running)
                 networkServerController.shutdown();
  
-            serverOutput.close();
+            if ( serverOutput != null ) { serverOutput.close(); }
             networkServerController = null;
             serverOutput = null;
         }
     }
     
+    /**
+     * Get the default command arguments for booting the network server.
+     */
+    public  static String[] getDefaultStartupArgs()
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+        
+        return new String[] {
+            "start",
+            "-h",
+            config.getHostName(),
+            "-p",
+            Integer.toString(config.getPort())
+        };
+    }
+    
     /* Network Server Control */
     private NetworkServerControl networkServerController;
-    
-    /** Wait maximum 1 minute for server to start */
-    private static final int WAIT_TIME = 60000;
-    
-    /** Sleep for 50 ms before pinging the network server (again) */
-    private static final int SLEEP_TIME = 50;
-    
-    
+        
     /*
      * Utility methods related to controlling network server.
      */
@@ -172,6 +281,16 @@ final public class NetworkServerTestSetup extends TestSetup {
             fail("Timed out waiting for network server to start");
     }
     
+     /**
+     * Set the number of milliseconds to wait before declaring server startup
+     * a failure.
+     * 
+     */
+    public static void setWaitTime( long newWaitTime )
+   {
+        waitTime = newWaitTime;
+    }
+    
     /**
      * Ping server for upto sixty seconds. If the server responds
      * in that time then return true, otherwise return false.
@@ -187,7 +306,7 @@ final public class NetworkServerTestSetup extends TestSetup {
                 networkServerController.ping();
                 return true;
             } catch (Exception e) {
-                if (System.currentTimeMillis() - startTime > WAIT_TIME) {
+                if (System.currentTimeMillis() - startTime > waitTime) {
                     return false;
                 }
             }

@@ -119,6 +119,14 @@ public final class SecurityManagerSetup extends TestSetup {
             BaseTestCase.setSystemProperty("java.security.policy", "");
     }
 	
+    /**
+     * Return the name of the default policy.
+     */
+    public static String getDefaultPolicy()
+    {
+        return "org/apache/derbyTesting/functionTests/util/derby_tests.policy";
+    }
+
 	/**
 	 * Install a SecurityManager with the default test policy
 	 * file:
@@ -127,9 +135,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	 */
 	static void installSecurityManager() throws PrivilegedActionException
 	{
-		installSecurityManager(
-				"org/apache/derbyTesting/functionTests/util/derby_tests.policy");
-				
+		installSecurityManager( getDefaultPolicy() );
 	}
 	
 	private static void installSecurityManager(String policyFile)

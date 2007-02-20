@@ -52,6 +52,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ClientSideSystemPropertiesTest.suite());
         suite.addTest(BadConnectionTest.suite());
         suite.addTest(NetHarnessJavaTest.suite());
+        suite.addTest(SecureServerTest.suite());
         
         // These tests references a client class directly
         // thus causing class not found exceptions if the
