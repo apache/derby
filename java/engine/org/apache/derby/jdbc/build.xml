@@ -82,8 +82,8 @@
 	
   <target name="compile_jdbc2" depends="compile_jsr169">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -95,7 +95,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java13compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/jdbc/AutoloadedDriver.java"/>
       <include name="${derby.dir}/jdbc/EmbeddedDriver.java"/>
@@ -109,8 +109,8 @@
 
  <target name="compile_jdbc3">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"

@@ -58,7 +58,7 @@ import java.sql.Types;
  *
  *	@author francois
  */
-public class EmbedPreparedStatement20
+public abstract class EmbedPreparedStatement20
 	extends org.apache.derby.impl.jdbc.EmbedPreparedStatement {
 
 	//////////////////////////////////////////////////////////////

@@ -68,7 +68,7 @@ import org.apache.derby.impl.jdbc.EmbedResultSet;
  *
  *	@author francois
  */
-public class EmbedCallableStatement20
+public abstract class EmbedCallableStatement20
 	extends org.apache.derby.impl.jdbc.EmbedCallableStatement 
 {
 
