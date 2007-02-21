@@ -163,8 +163,8 @@
 
   <target name="compilex">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -176,9 +176,8 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java13compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
         <pathelement location="${oro}"/>
-        <pathelement location="${jta1_2}"/>
       </classpath>
       <!--exclude name=""/-->
       <include name="${this.dir}/checkDataSource.java"/>

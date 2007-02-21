@@ -60,8 +60,8 @@
 
   <target name="compile_iapi_store_jdk13" depends="compile_iapi_store_jsr169">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -73,8 +73,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-		<pathelement location="${jta1_2}"/>
-        <pathelement path="${java13compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/store/access/xa/*.java"/>
     </javac>

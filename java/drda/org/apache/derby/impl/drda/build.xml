@@ -68,7 +68,6 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-      <pathelement location="${jta1_2}"/>
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/drda/DRDAXAProtocol.java"/>
