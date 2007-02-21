@@ -1,6 +1,23 @@
 /**
  * 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+ 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.IOException;
@@ -21,10 +38,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 
-import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * @author kmarsden
@@ -34,7 +50,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     private static boolean HAVE_BIG_DECIMAL;
 
     static {
-        if (BigDecimalHandler.representation != BigDecimalHandler.BIGDECIMAL_REPRESENTATION)
+        if (JDBC.vmSupportsJSR169())
             HAVE_BIG_DECIMAL = false;
         else
             HAVE_BIG_DECIMAL = true;
@@ -352,7 +368,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             }
 
             Statement s = conn.createStatement();
-
+            try {
+                s.execute("DROP TABLE PM.TYPE_AS");
+            }catch (SQLException seq) {
+            }
             s.execute("CREATE TABLE PM.TYPE_AS(VAL " + SQLTypes[type] + ")");
 
             PreparedStatement psi = conn
@@ -387,14 +406,103 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                psi.executeUpdate();
                getXXX(psq, type, false);
            }
+           setXXX(s, psi, psq, type);                            
 
             psi.close();
             psq.close();
             s.execute("DROP TABLE PM.TYPE_AS");
             conn.commit();
+            /*//          NOW PROCEDURE PARAMETERS
+            try {
+                s.execute("DROP PROCEDURE PMP.TYPE_AS");
+            }catch (SQLException seq) {
+            }
+            String procSQL;
+            if(HAVE_BIG_DECIMAL) {
+                procSQL = "CREATE PROCEDURE PMP.TYPE_AS(" +
+                "IN P1 " + SQLTypes[type] + 
+                ", INOUT P2 " + SQLTypes[type] +
+                ", OUT P3 " + SQLTypes[type] +
+                ") LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL " +
+                " EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.pmap'";
+            } else {
+                procSQL = "CREATE PROCEDURE PMP.TYPE_AS(" +
+                "IN P1 " + SQLTypes[type] + 
+                ", INOUT P2 " + SQLTypes[type] +
+                ", OUT P3 " + SQLTypes[type] +
+                ") LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL " +
+                 " EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.SimpleProcedureTest.pmap'";
+            }
+                 
+            try {
+                if (!HAVE_BIG_DECIMAL && SQLTypes[type].equals("DECIMAL(10,5)"))
+                    continue;
+                
+                s.execute(procSQL);
+            } catch (SQLException sqle) {
+                
+                System.out.println(sqle.getSQLState() + ":" + sqle.getMessage());
+                continue;
+            }
+
+            // For each JDBC type try to register the out parameters with that type.
+            for (int opt = 0; opt < jdbcTypes.length; opt++) {
+                int jopt = jdbcTypes[opt];
+                if (jopt == Types.NULL)
+                    continue;
+
+                CallableStatement csp = conn.prepareCall("CALL PMP.TYPE_AS(?, ?, ?)");
+                
+                boolean bothRegistered = true;
+                //System.out.print("INOUT " + sqlType + " registerOutParameter(" + TestUtil.getNameFromJdbcType(jopt) + ") ");
+                try {
+                    csp.registerOutParameter(2, jopt);
+                    //System.out.println("-- OK");
+                } catch (SQLException sqle) {
+                    System.out.println("-- " + sqle.getSQLState());
+                    bothRegistered = false;
+                }
+                //System.out.print("OUT " + sqlType + " registerOutParameter(" + TestUtil.getNameFromJdbcType(jopt) + ") ");
+                try {
+                    csp.registerOutParameter(3, jopt);
+                    //System.out.println("-- OK");
+                } catch (SQLException sqle) {
+                    System.out.println("-- " + sqle.getSQLState());
+                    bothRegistered = false;
+                }
+                
+                if (bothRegistered) {
+                            
+                    try {
+                        
+                        // set the IN value with an accepted value according to its type
+                        // set the INOUT value with an accepted value according to its registered type
+                        if (setValidValue(csp, 1, jdbcTypes[type]) && setValidValue(csp, 2, jopt)) {
+
+                            csp.execute();
+
+                            // now get the INOUT, OUT parameters according to their registered type.
+                            System.out.print("P2="); getOutValue(csp, 2, jopt); System.out.println("");
+                            System.out.print("P3="); getOutValue(csp, 3, jopt); System.out.println("");
+                        }
+                        
+                    }   catch (SQLException sqle) {
+                        dumpSQLExceptions(sqle);
+                    }
+                }
+
+                csp.close();
+                
+            }
+
+
+            s.execute("DROP PROCEDURE PMP.TYPE_AS");
+            s.close();
+            conn.commit();
+           }*/
         }
     }
-
+    
     /*
      * (non-Javadoc)
      * 
@@ -405,6 +513,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         Statement scb = createStatement();
         scb.execute("DROP TABLE PM.LOB_GET");
         scb.close();
+        commit();
 
     }
 
@@ -528,7 +637,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals(32.0,rs.getFloat(1),.000001);
+                    assertEquals(32.0,f,.000001);
                 }
                 worked = true;
 
@@ -700,10 +809,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 sqleResult = sqle;
                 // 22007 invalid date time conversion
                 worked = "22007".equals(sqle.getSQLState());
-                if (worked)
-                    System.out.print(sqle.getSQLState());
             } catch (Throwable t) {
-                System.out.print(t.toString());
+                //System.out.print(t.toString());
                 worked = false;
             }
             if (rs != null)
@@ -781,7 +888,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            System.out.print("  getAsciiStream=");
+            // getAsciiStream()
+            
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -789,12 +897,16 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             ;
             try {
                 InputStream is = rs.getAsciiStream(1);
-                // if the value is NULL speific checks are performed below.
-                if (!isNull || B6[13][type]) {
-                    System.out.print(is == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(is));
-                    System.out.print(" was null " + rs.wasNull());
+                boolean wn = rs.wasNull();
+                if (isNull) {
+                    assertTrue(wn);
+                    assertNull(is);
+                } else {
+                    assertFalse(wn);
+                    if (B6[13][type])
+                        assertNotNull(showFirstTwo(is));
                 }
+                    
                 worked = true;
 
             } catch (SQLException sqle) {
@@ -816,7 +928,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            System.out.print("  getBinaryStream=");
+            // getBinaryStream()
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -824,10 +936,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             ;
             try {
                 InputStream is = rs.getBinaryStream(1);
-                if (!isNull || B6[14][type]) {
-                    System.out.print(is == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(is));
-                    System.out.print(" was null " + rs.wasNull());
+                if (isNull) {
+                    assertTrue(rs.wasNull());
+                    assertNull(is);
+                    
+                }else  if ( B6[14][type]) {
+                    assertNotNull(showFirstTwo(is));
                 }
                 worked = true;
 
@@ -843,19 +957,23 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            System.out.print("  getCharacterStream=");
+            //getCharacterStream()
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
             ;
             try {
+               
                 Reader r = rs.getCharacterStream(1);
-                if (!isNull || B6[15][type]) {
-                    System.out.print(r == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(r));
-                    System.out.print(" was null " + rs.wasNull());
-                }
+                boolean wn = rs.wasNull();
+                if (isNull) {
+                    assertNull(r);
+                    assertTrue(wn);
+                } else if (B6[15][type]) {
+                    assertFalse(wn);
+                    assertNotNull(showFirstTwo(r));
+                                    }
                 worked = true;
 
             } catch (SQLException sqle) {
@@ -870,7 +988,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            System.out.print("  getClob=");
+            // getClob();
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -878,10 +996,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             ;
             try {
                 Clob clob = rs.getClob(1);
-                if (!isNull || B6[16][type]) {
-                    System.out.print(clob == null ? "null" : clob.getSubString(
-                            1, 10));
-                    System.out.print(" was null " + rs.wasNull());
+                boolean wn = rs.wasNull();
+                if (isNull) {
+                    assertNull(clob);
+                    assertTrue(wn);
+                } else if (B6[16][type]) {
+                    assertFalse(wn);
+                    assertNotNull(clob.getSubString(1, 10));
                 }
                 worked = true;
 
@@ -897,7 +1018,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            System.out.print("  getBlob=");
+            //getBlob()
+            
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -905,11 +1027,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             ;
             try {
                 Blob blob = rs.getBlob(1);
-                if (!isNull || B6[17][type]) {
-                    System.out.print(blob == null ? "null"
-                            : ParameterMappingTest.showFirstTwo(blob
+                boolean wn = rs.wasNull();
+                if (isNull) {
+                    assertTrue(wn);
+                    assertNull(blob);
+                } else if (B6[17][type]) {
+                    assertNotNull(showFirstTwo(blob
                                     .getBinaryStream()));
-                    System.out.print(" was null " + rs.wasNull());
                 }
                 worked = true;
 
@@ -925,7 +1049,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            System.out.print("  getUnicodeStream=");
+            //getUnicodeStream()
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -933,35 +1057,41 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             ;
             try {
                 InputStream is = rs.getUnicodeStream(1);
-                System.out.print(is == null ? "null" : "data");
-                System.out.print(" was null " + rs.wasNull());
+                boolean wn = rs.wasNull();
+                if (isNull) {
+                    assertTrue(wn);
+                    assertNull(is);
+                    
+                } else {
+                    assertFalse(wn);
+                    assertNotNull(is);
+                }
                 worked = true;
             } catch (NoSuchMethodError e) {
                 worked = true;
-                System.out
-                        .println("ResultSet.getUnicodeStream not present - correct for JSR169");
+                
             } catch (SQLException sqle) {
                 sqleResult = sqle;
                 worked = false;
             }
             rs.close();
-            if (TestUtil.HAVE_DRIVER_CLASS)
+            if (JDBC.vmSupportsJDBC2())
                 judge_getXXX(worked, sqleResult, 18, type);
         }
 
         // Check to see getObject returns the correct type
         {
-            System.out.print("  getObject=");
+            //getObject();
             ResultSet rs = ps.executeQuery();
             rs.next();
             SQLException sqleResult = null;
             ;
             try {
 
-                String msg;
+                boolean worked;
                 if (!SQLTypes[type].equals("DECIMAL(10,5)") || HAVE_BIG_DECIMAL) {
                     Object o = rs.getObject(1);
-
+                    boolean wn = rs.wasNull();
                     Class cgo = B3_GET_OBJECT[type];
 
                     String cname;
@@ -969,21 +1099,22 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         cname = "byte[]";
                     else
                         cname = cgo.getName();
-
-                    if (o == null) {
-                        msg = "null";
+                    if (isNull) {
+                        assertTrue(wn);
+                        assertNull(o);
+                        worked = true;
                     } else if (cgo.isInstance(o)) {
-                        msg = "CORRECT :" + cgo.getName();
+                        worked = true;
                     } else {
-                        msg = "FAIL NOT :" + cgo.getName() + " is "
-                                + o.getClass().getName();
+                        worked = false;
+                        fail("FAIL NOT :" + cgo.getName() + " is "
+                                + o.getClass().getName());
                     }
                 } else {
-                    msg = "ResultSet.getObject not called for DECIMAL type for JSR169";
+                    //"ResultSet.getObject not called for DECIMAL type for JSR169";
+                    worked = true;
                 }
-
-                System.out.print(msg);
-                System.out.println(" was null " + rs.wasNull());
+                assertTrue(worked);
 
             } catch (SQLException sqle) {
                 sqleResult = sqle;
@@ -1005,8 +1136,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     && "22005".equals(sqleResult.getSQLState()))
                 judge = false;
         }
-        if (!judge)
-            System.out.println("SPECIFIC CHECK OK");
+        
 
         return judge;
     }
@@ -1123,11 +1253,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setByte() ");
+                //setByte() 
                 psi.setByte(1, (byte) 98);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setByte");
 
                 worked = true;
 
@@ -1144,12 +1274,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setByte() as batch ");
                 psi.setByte(1, (byte) 98);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setByte");
+                
 
                 worked = true;
 
@@ -1165,11 +1295,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setShort() ");
+                // setShort()
                 psi.setShort(1, (short) 98);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setShort");
 
                 worked = true;
 
@@ -1186,12 +1316,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setShort() as batch ");
+                //setShort() as batch 
                 psi.setShort(1, (short) 98);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setShort");
+               
 
                 worked = true;
 
@@ -1207,11 +1338,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setInt() ");
+                //setInt() 
                 psi.setInt(1, 98);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setInt");
 
                 worked = true;
 
@@ -1228,12 +1359,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setInt() as batch ");
+                //setInt() as batch 
                 psi.setInt(1, 98);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setInt");
 
                 worked = true;
 
@@ -1249,11 +1380,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setLong() ");
+                //setLong() 
                 psi.setLong(1, 98L);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setLong");
 
                 worked = true;
 
@@ -1270,12 +1401,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setLong() as batch ");
+                //setLong() as batch 
                 psi.setLong(1, 98L);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setLong");
 
                 worked = true;
 
@@ -1292,11 +1423,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setFloat() ");
+                // setFloat() 
                 psi.setFloat(1, 98.4f);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setFloat");
 
                 worked = true;
 
@@ -1314,12 +1445,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setFloat() as batch ");
+                //setFloat() as batch 
                 psi.setFloat(1, 98.4f);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setFloat");
 
                 worked = true;
 
@@ -1336,11 +1467,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setDouble() ");
+                //setDouble() 
                 psi.setDouble(1, 98.5);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setDouble");
 
                 worked = true;
 
@@ -1358,12 +1489,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setDouble() as batch ");
+                //setDouble() as batch 
                 psi.setDouble(1, 98.5);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setDouble");
 
                 worked = true;
 
@@ -1381,11 +1512,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 SQLException sqleResult = null;
                 boolean worked;
                 try {
-                    System.out.print("  setBigDecimal() ");
-                    psi.setBigDecimal(1, new BigDecimal(99.0));
+                    // setBigDecimal() 
+                    psi.setBigDecimal(1, new BigDecimal(98.0));
                     psi.executeUpdate();
 
-                    getValidValue(psq, jdbcTypes[type]);
+                    getValidValue(psq, jdbcTypes[type],"setBigDecimal");
 
                     worked = true;
 
@@ -1402,12 +1533,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 SQLException sqleResult = null;
                 boolean worked;
                 try {
-                    System.out.print("  setBigDecimal() as batch ");
-                    psi.setBigDecimal(1, new BigDecimal(99.0));
+                    //setBigDecimal() as batch 
+                    psi.setBigDecimal(1, new BigDecimal(98.0));
                     psi.addBatch();
                     psi.executeBatch();
 
-                    getValidValue(psq, jdbcTypes[type]);
+                    getValidValue(psq, jdbcTypes[type],"setBigDecimal");
 
                     worked = true;
 
@@ -1424,11 +1555,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 SQLException sqleResult = null;
                 boolean worked;
                 try {
-                    System.out.print("  setBigDecimal(null) ");
+                    // setBigDecimal(null) 
                     psi.setBigDecimal(1, null);
                     psi.executeUpdate();
 
-                    getValidValue(psq, jdbcTypes[type]);
+                    getValidValue(psq, jdbcTypes[type],"setBigDecimal");
 
                     worked = true;
 
@@ -1446,12 +1577,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 SQLException sqleResult = null;
                 boolean worked;
                 try {
-                    System.out.print("  setBigDecimal(null) as batch ");
+                    //setBigDecimal(null) as batch 
                     psi.setBigDecimal(1, null);
                     psi.addBatch();
                     psi.executeBatch();
 
-                    getValidValue(psq, jdbcTypes[type]);
+                    getValidValue(psq, jdbcTypes[type],"setBigDecimal");
 
                     worked = true;
 
@@ -1469,11 +1600,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBoolean() ");
+                //setBoolean() 
                 psi.setBoolean(1, true);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBoolean");
 
                 worked = true;
 
@@ -1489,12 +1620,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBoolean() as batch ");
+                // setBoolean() as batch 
                 psi.setBoolean(1, true);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBoolean");
 
                 worked = true;
 
@@ -1510,11 +1641,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setString() ");
-                psi.setString(1, "97");
+                // setString() 
+                psi.setString(1, "98");
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setString");
 
                 worked = true;
 
@@ -1537,12 +1668,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setString() as batch ");
-                psi.setString(1, "97");
+                // setString() as batch
+                psi.setString(1, "98");
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setString");
 
                 worked = true;
 
@@ -1566,11 +1697,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setString(null) ");
+                // setString(null)
                 psi.setString(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setString");
 
                 worked = true;
 
@@ -1593,12 +1724,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setString(null) as batch ");
+                //  setString(null) as batch 
                 psi.setString(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setString");
 
                 worked = true;
 
@@ -1626,13 +1757,14 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBytes() ");
+                //setBytes() 
                 byte[] data = { (byte) 0x04, (byte) 0x03, (byte) 0xfd,
                         (byte) 0xc3, (byte) 0x73 };
                 psi.setBytes(1, data);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBytes");
+                
 
                 worked = true;
 
@@ -1648,14 +1780,14 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBytes() as batch");
+                // setBytes() as batch
                 byte[] data = { (byte) 0x04, (byte) 0x03, (byte) 0xfd,
                         (byte) 0xc3, (byte) 0x73 };
                 psi.setBytes(1, data);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBytes");
 
                 worked = true;
 
@@ -1672,11 +1804,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBytes(null) ");
+                //setBytes(null)
                 psi.setBytes(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBytes");
 
                 worked = true;
 
@@ -1693,12 +1825,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBytes(null) as batch");
+                //setBytes(null) as batch
                 psi.setBytes(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBytes");
 
                 worked = true;
 
@@ -1714,11 +1846,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setDate() ");
+                //setDate() 
                 psi.setDate(1, java.sql.Date.valueOf("2004-02-14"));
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setDate");
 
                 worked = true;
 
@@ -1734,12 +1866,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setDate() as batch ");
+                //  setDate() as batch
                 psi.setDate(1, java.sql.Date.valueOf("2004-02-14"));
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type], "setDate");
 
                 worked = true;
 
@@ -1756,11 +1888,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setDate(null) ");
+                //setDate(null) 
                 psi.setDate(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setDate");
 
                 worked = true;
 
@@ -1778,12 +1910,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setDate(null) as batch ");
+                // setDate(null) as batch 
                 psi.setDate(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setDate");
 
                 worked = true;
 
@@ -1800,11 +1932,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setTime() ");
+                //setTime() 
                 psi.setTime(1, java.sql.Time.valueOf("13:26:42"));
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setTime");
 
                 worked = true;
 
@@ -1820,12 +1952,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setTime() as batch ");
+                // setTime() as batch 
                 psi.setTime(1, java.sql.Time.valueOf("13:26:42"));
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setTime");
 
                 worked = true;
 
@@ -1842,11 +1974,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setTime(null) ");
+               // setTime(null) 
                 psi.setTime(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setTime");
 
                 worked = true;
 
@@ -1862,12 +1994,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setTime(null) as batch ");
+                // setTime(null) as batch 
                 psi.setTime(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setTime");
 
                 worked = true;
 
@@ -1883,12 +2015,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setTimestamp() ");
+                //setTimestamp() 
                 psi.setTimestamp(1, java.sql.Timestamp
                         .valueOf("2004-02-23 17:14:24.097625551"));
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setTimestamp");
 
                 worked = true;
 
@@ -1905,13 +2037,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setTimestamp() as batch ");
+                //  setTimestamp() as batch 
                 psi.setTimestamp(1, java.sql.Timestamp
                         .valueOf("2004-02-23 17:14:24.097625551"));
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setTimestamp");
 
                 worked = true;
 
@@ -1928,11 +2060,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setTimestamp(null) ");
+                // setTimestamp(null) 
                 psi.setTimestamp(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setTimestamp");
 
                 worked = true;
 
@@ -1949,12 +2081,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setTimestamp(null) as batch ");
+                // setTimestamp(null) as batch 
                 psi.setTimestamp(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setTimestamp");
 
                 worked = true;
 
@@ -1971,7 +2103,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setAsciiStream() ");
+                //setAsciiStream() 
                 byte[] data = new byte[6];
                 data[0] = (byte) 0x65;
                 data[1] = (byte) 0x67;
@@ -1984,7 +2116,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         .setAsciiStream(1, new java.io.ByteArrayInputStream(
                                 data), 6);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setAsciiStream");
 
                 worked = true;
 
@@ -2000,7 +2132,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setAsciiStream() as batch ");
+                //setAsciiStream() as batch 
                 byte[] data = new byte[6];
                 data[0] = (byte) 0x65;
                 data[1] = (byte) 0x67;
@@ -2014,7 +2146,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                                 data), 6);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setAsciiStream");
 
                 worked = true;
 
@@ -2031,10 +2163,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setAsciiStream(null) ");
+                //  setAsciiStream(null) 
                 psi.setAsciiStream(1, null, 0);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setAsciiStream");
 
                 worked = true;
 
@@ -2050,11 +2182,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setAsciiStream(null) as batch ");
+                //setAsciiStream(null) as batch 
                 psi.setAsciiStream(1, null, 0);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setAsciiStream");
 
                 worked = true;
 
@@ -2070,7 +2202,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBinaryStream() ");
+                // setBinaryStream() 
                 byte[] data = new byte[6];
                 data[0] = (byte) 0x82;
                 data[1] = (byte) 0x43;
@@ -2082,7 +2214,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.setBinaryStream(1, new java.io.ByteArrayInputStream(data),
                         6);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBinaryStream");
 
                 worked = true;
 
@@ -2098,7 +2230,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBinaryStream() as batch ");
+                //setBinaryStream() as batch 
                 byte[] data = new byte[6];
                 data[0] = (byte) 0x82;
                 data[1] = (byte) 0x43;
@@ -2111,7 +2243,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         6);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"getBinaryStream");
 
                 worked = true;
 
@@ -2128,10 +2260,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBinaryStream(null) ");
+                // setBinaryStream(null) 
                 psi.setBinaryStream(1, null, 0);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBinaryStream");
 
                 worked = true;
 
@@ -2147,11 +2279,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBinaryStream(null) as batch ");
+                //  setBinaryStream(null) as batch 
                 psi.setBinaryStream(1, null, 0);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBinaryStream");
 
                 worked = true;
 
@@ -2168,10 +2300,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setCharacterStream() ");
+                //setCharacterStream() 
                 psi.setCharacterStream(1, new java.io.StringReader("89"), 2);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setCharacterStream");
 
                 worked = true;
 
@@ -2187,11 +2319,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setCharacterStream() as batch ");
+                //setCharacterStream() as batch 
                 psi.setCharacterStream(1, new java.io.StringReader("89"), 2);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setCharacterStream");
 
                 worked = true;
 
@@ -2208,10 +2340,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setCharacterStream(null) ");
+                //setCharacterStream(null) 
                 psi.setCharacterStream(1, null, 0);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setCharacterStream");
 
                 worked = true;
 
@@ -2227,11 +2359,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setCharacterStream(null) as batch ");
+                //setCharacterStream(null) as batch
                 psi.setCharacterStream(1, null, 0);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setCharacterStream");
 
                 worked = true;
 
@@ -2248,7 +2380,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setClob() ");
+                //setClob()
 
                 ResultSet rsc = s
                         .executeQuery("SELECT C FROM PM.LOB_GET WHERE ID = 1");
@@ -2258,7 +2390,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
                 psi.setClob(1, tester);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setClob");
 
                 worked = true;
 
@@ -2274,7 +2406,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setClob() as batch ");
+                // setClob() as batch 
 
                 ResultSet rsc = s
                         .executeQuery("SELECT C FROM PM.LOB_GET WHERE ID = 1");
@@ -2285,7 +2417,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.setClob(1, tester);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setClob");
 
                 worked = true;
 
@@ -2302,11 +2434,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setClob(null) ");
+                //setClob(null) 
 
                 psi.setClob(1, null);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setClob");
 
                 worked = true;
 
@@ -2322,12 +2454,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setClob(null) as batch ");
+                //setClob(null) as batch 
 
                 psi.setClob(1, null);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setClob");
 
                 worked = true;
 
@@ -2342,7 +2474,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBlob() ");
+                //setBlob() 
 
                 ResultSet rsc = s
                         .executeQuery("SELECT B FROM PM.LOB_GET WHERE ID = 1");
@@ -2352,7 +2484,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
                 psi.setBlob(1, tester);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBlob");
 
                 worked = true;
 
@@ -2367,7 +2499,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBlob() as batch ");
+                // setBlob() as batch 
 
                 ResultSet rsc = s
                         .executeQuery("SELECT B FROM PM.LOB_GET WHERE ID = 1");
@@ -2378,7 +2510,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.setBlob(1, tester);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBlob");
 
                 worked = true;
 
@@ -2393,11 +2525,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBlob(null) ");
+                //Blob(null) 
 
                 psi.setBlob(1, null);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBlob");
 
                 worked = true;
 
@@ -2412,12 +2544,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setBlob(null) as batch ");
+                //setBlob(null) as batch 
 
                 psi.setBlob(1, null);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setBlob");
 
                 worked = true;
 
@@ -2446,13 +2578,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     psi.setUnicodeStream(1, new java.io.ByteArrayInputStream(
                             data), 6);
                 } catch (NoSuchMethodError e) {
-                    System.out
-                            .println("ResultSet.setUnicodeStream not present - correct for JSR169");
+                 //ResultSet.setUnicodeStream not present - correct for JSR169
                 }
 
-                if (TestUtil.HAVE_DRIVER_CLASS) {
+                if ( JDBC.vmSupportsJDBC2() ) {
                     psi.executeUpdate();
-                    getValidValue(psq, jdbcTypes[type]);
+                    getValidValue(psq, jdbcTypes[type],"setUnicodeStream");
                 }
                 worked = true;
 
@@ -2460,37 +2591,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 sqleResult = sqle;
                 worked = false;
             }
-            if (TestUtil.HAVE_DRIVER_CLASS)
+            if (JDBC.vmSupportsJDBC2())
                 judge_setXXX(worked, sqleResult, 14, type);
         }
-        {
-            s.execute("DELETE FROM PM.TYPE_AS");
-
-            SQLException sqleResult = null;
-            boolean worked;
-            try {
-                System.out.print("  setUnicodeStream(null) ");
-                try {
-                    psi.setUnicodeStream(1, null, 0);
-                } catch (NoSuchMethodError e) {
-                    System.out
-                            .println("ResultSet.setUnicodeStream not present - correct for JSR169");
-                }
-
-                if (TestUtil.HAVE_DRIVER_CLASS) {
-                    psi.executeUpdate();
-                    getValidValue(psq, jdbcTypes[type]);
-                }
-                worked = true;
-
-            } catch (SQLException sqle) {
-                sqleResult = sqle;
-                worked = false;
-            }
-            if (TestUtil.HAVE_DRIVER_CLASS)
-                judge_setXXX(worked, sqleResult, 14, type);
-        }
-
+        
         // setObject(null)
         {
             s.execute("DELETE FROM PM.TYPE_AS");
@@ -2499,10 +2603,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             boolean worked;
             try {
                 // should never work!
-                System.out.print("  setObject(null) ");
+                //  setObject(null) 
                 psi.setObject(1, null);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setObject");
 
                 worked = true;
 
@@ -2520,11 +2624,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             boolean worked;
             try {
                 // should never work!
-                System.out.print("  setObject(null) as batch ");
+                //setObject(null) as batch 
                 psi.setObject(1, null);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setObject");
 
                 worked = true;
 
@@ -2601,11 +2705,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setObject(" + className + ") ");
+                //setObject(" + className + ") 
                 psi.setObject(1, value);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type]);
-
+                getValidValue(psq, jdbcTypes[type],"setObject(" + className +")");
                 worked = true;
 
             } catch (SQLException sqle) {
@@ -2623,11 +2726,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setObject(" + className + ") as batch ");
+                //setObject(" + className + ") as batch 
                 psi.setObject(1, value);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type]);
+                getValidValue(psq, jdbcTypes[type],"setObject(" + className + ")");
 
                 worked = true;
 
@@ -2743,34 +2846,82 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
     }
 
-    private static boolean getValidValue(PreparedStatement ps, int jdbcType)
+    private static boolean getValidValue(PreparedStatement ps, int jdbcType,String method)
             throws SQLException, IOException {
 
         ResultSet rs = ps.executeQuery();
         rs.next();
 
         switch (jdbcType) {
-        case Types.SMALLINT:
-            System.out.print("getShort=" + rs.getShort(1) + " was null "
-                    + rs.wasNull());
+        case Types.SMALLINT: 
+        {
+            short val = rs.getShort(1);
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertEquals(0, val);
+            else if (method.equals("setBoolean"))
+                assertEquals(1,val);
+            else
+                assertEquals(98,val);
             return true;
+        }
         case Types.INTEGER:
-            System.out.print("getInt=" + rs.getInt(1) + " was null "
-                    + rs.wasNull());
+        {
+            int val = rs.getInt(1);
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertEquals(0, val);
+            else if (method.equals("setBoolean"))
+                assertEquals(1,val);
+            else
+                assertEquals(98,val);
             return true;
+        }
         case Types.BIGINT:
-            System.out.print("getLong=" + rs.getLong(1) + " was null "
-                    + rs.wasNull());
+        {
+            long val = rs.getLong(1);
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertEquals(0, val);
+            else if (method.equals("setBoolean"))
+                assertEquals(1,val);
+            else
+                assertEquals(98,val);
             return true;
+        }
         case Types.REAL:
-            System.out.print("getFloat=" + rs.getFloat(1) + " was null "
-                    + rs.wasNull());
+        {
+            float val = rs.getFloat(1);
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertEquals(0.0, val,.001);
+            else if (method.equals("setBoolean"))
+                assertEquals(1.0,val,.001);
+            else if (method.equals("setFloat"))
+                assertEquals(98.4,val,.001);
+            else if (method.equals("setDouble"))
+                assertEquals(98.5,val,.001);
+            else
+                assertEquals(98.0,val,.001);
             return true;
+        }
         case Types.FLOAT:
         case Types.DOUBLE:
-            System.out.print("getDouble=" + rs.getDouble(1) + " was null "
-                    + rs.wasNull());
+        {
+            double val = rs.getDouble(1);
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertEquals(0.0, val,.001);
+            else if (method.equals("setBoolean"))
+                assertEquals(1.0,val,.001);
+            else if (method.equals("setFloat"))
+                assertEquals(98.4,val,.001);
+            else if (method.equals("setDouble"))
+                assertEquals(98.5,val,.001);
+            else
+                assertEquals(98.0,val,.001);
             return true;
+        }
         case Types.DECIMAL:
             System.out.print("getBigDecimal="
                     + BigDecimalHandler.getBigDecimalString(rs, 1)
@@ -2863,7 +3014,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
         default:
             System.out.println("FAIL JDBC TYPE IN getValidValue "
-                    + TestUtil.sqlNameFromJdbc(jdbcType));
+                    + JDBC.sqlNameFromJdbc(jdbcType));
             return false;
         }
     }
@@ -2955,7 +3106,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
         default:
             System.out.println("FAIL JDBC TYPE IN getOutValue "
-                    + TestUtil.sqlNameFromJdbc(jdbcType));
+                    + JDBC.sqlNameFromJdbc(jdbcType));
             return false;
         }
     }
@@ -3011,13 +3162,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             else
                 dumpSQLExceptions(sqle);
         } catch (Exception e) {
-            // JCC may throw Illegal argument exception for
-            // String conversion error for date/time/timestamp
-            if (TestUtil.isJCCFramework()
-                    && e instanceof IllegalArgumentException)
-                System.out.println(e.getMessage());
-            else
-                System.out.println("FAIL: Unexpected Exception "
+            System.out.println("FAIL: Unexpected Exception "
                         + e.getMessage());
         }
     }
