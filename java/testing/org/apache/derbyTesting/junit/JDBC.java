@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.derby.iapi.reference.JDBC30Translation;
+
 import junit.framework.Assert;
 
 /**
@@ -830,5 +832,47 @@ public class JDBC {
 	{
 		return "\"" + schema + "\".\"" + name + "\"";
 	}
+         
+        /**
+         * Return Type name from jdbc type
+         * 
+         * @param jdbcType  jdbc type to translate
+         * @return
+         */
+        public static String sqlNameFromJdbc(int jdbcType) {
+                switch (jdbcType) {
+                        case Types.BIT          :  return "Types.BIT";
+                        case JDBC30Translation.SQL_TYPES_BOOLEAN  : return "Types.BOOLEAN";
+                        case Types.TINYINT      :  return "Types.TINYINT";
+                        case Types.SMALLINT     :  return "SMALLINT";
+                        case Types.INTEGER      :  return "INTEGER";
+                        case Types.BIGINT       :  return "BIGINT";
+
+                        case Types.FLOAT        :  return "Types.FLOAT";
+                        case Types.REAL         :  return "REAL";
+                        case Types.DOUBLE       :  return "DOUBLE";
+
+                        case Types.NUMERIC      :  return "Types.NUMERIC";
+                        case Types.DECIMAL      :  return "DECIMAL";
+
+                        case Types.CHAR         :  return "CHAR";
+                        case Types.VARCHAR      :  return "VARCHAR";
+                        case Types.LONGVARCHAR  :  return "LONG VARCHAR";
+         case Types.CLOB     :  return "CLOB";
+
+                        case Types.DATE                 :  return "DATE";
+                        case Types.TIME                 :  return "TIME";
+                        case Types.TIMESTAMP    :  return "TIMESTAMP";
+
+                        case Types.BINARY                       :  return "CHAR () FOR BIT DATA";
+                        case Types.VARBINARY            :  return "VARCHAR () FOR BIT DATA";
+                        case Types.LONGVARBINARY        :  return "LONG VARCHAR FOR BIT DATA";
+         case Types.BLOB             :  return "BLOB";
+
+                        case Types.OTHER                :  return "Types.OTHER";
+                        case Types.NULL         :  return "Types.NULL";
+                        default : return String.valueOf(jdbcType);
+                }
+        }
 
 }
