@@ -132,22 +132,21 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         topSuite.addTest(dsDecorator);
         fillDataSourceSuite(dsSuite, dsDecorator);
 
-        if (JDBC.vmSupportsJSR169()) {
-            // JSR169 doesn't support ConnectionPoolDataSource and XADataSource
-            return dsSuite;
+        // JDBC 3 required for ConnectionPoolDataSource and XADataSource
+        if (JDBC.vmSupportsJDBC3()) {
+            
+            TestSuite poolSuite = new TestSuite(
+                    "ClosedObjectTest ConnectionPoolDataSource");
+            PoolDataSourceDecorator poolDecorator =
+                new PoolDataSourceDecorator(poolSuite);
+            topSuite.addTest(poolDecorator);
+            fillDataSourceSuite(poolSuite, poolDecorator);
+    
+            TestSuite xaSuite = new TestSuite("ClosedObjectTest XA");
+            XADataSourceDecorator xaDecorator = new XADataSourceDecorator(xaSuite);
+            topSuite.addTest(xaDecorator);
+            fillDataSourceSuite(xaSuite, xaDecorator);
         }
-
-        TestSuite poolSuite = new TestSuite(
-                "ClosedObjectTest ConnectionPoolDataSource");
-        PoolDataSourceDecorator poolDecorator =
-            new PoolDataSourceDecorator(poolSuite);
-        topSuite.addTest(poolDecorator);
-        fillDataSourceSuite(poolSuite, poolDecorator);
-
-        TestSuite xaSuite = new TestSuite("ClosedObjectTest XA");
-        XADataSourceDecorator xaDecorator = new XADataSourceDecorator(xaSuite);
-        topSuite.addTest(xaDecorator);
-        fillDataSourceSuite(xaSuite, xaDecorator);
 
         return topSuite;
     }
@@ -682,7 +681,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @exception SQLException if an error occurs
          */
         public final void setUp() throws SQLException {
-            connection_ = newConnection();
+             connection_ = newConnection();
         }
 
         /**
