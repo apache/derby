@@ -32,7 +32,7 @@ import java.net.URL;
 	JDBC 2 brokered PreparedStatement. Forwards calls off to a real prepared statement
 	obtained through the BrokeredStatementControl getRealPreparedStatement method.
  */
-public class BrokeredPreparedStatement extends BrokeredStatement
+public abstract class BrokeredPreparedStatement extends BrokeredStatement
 	implements EnginePreparedStatement
 {
 

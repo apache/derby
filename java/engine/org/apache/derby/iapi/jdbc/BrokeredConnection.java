@@ -46,7 +46,7 @@ import org.apache.derby.shared.common.reference.SQLState;
  * This is a rudimentary connection that delegates
  * EVERYTHING to Connection.
  */
-public class BrokeredConnection implements EngineConnection
+public abstract class BrokeredConnection implements EngineConnection
 {
 	
 	// default for Derby
@@ -449,12 +449,12 @@ public class BrokeredConnection implements EngineConnection
 	public BrokeredStatement newBrokeredStatement(BrokeredStatementControl statementControl) throws SQLException {
 		return new BrokeredStatement(statementControl, getJDBCLevel());
 	}
-	public BrokeredPreparedStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql, Object generatedKeys) throws SQLException {
-		return new BrokeredPreparedStatement(statementControl, getJDBCLevel(), sql);
-	}
-	public BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
-		return new BrokeredCallableStatement(statementControl, getJDBCLevel(), sql);
-	}
+	public abstract BrokeredPreparedStatement
+        newBrokeredStatement(BrokeredStatementControl statementControl,
+                String sql, Object generatedKeys) throws SQLException;
+	public abstract BrokeredCallableStatement
+        newBrokeredStatement(BrokeredStatementControl statementControl,
+                String sql) throws SQLException;
 
 	/**
 	 *  set the DrdaId for this connection. The drdaID prints with the 

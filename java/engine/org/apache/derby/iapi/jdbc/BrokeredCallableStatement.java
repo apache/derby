@@ -31,7 +31,7 @@ import java.util.Map;
 /**
 	JDBC 2 brokered CallableStatement
  */
-public class BrokeredCallableStatement extends BrokeredPreparedStatement
+public abstract class BrokeredCallableStatement extends BrokeredPreparedStatement
           implements CallableStatement
 {
 

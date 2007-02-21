@@ -54,7 +54,7 @@ import java.util.Properties;
 	methods and sql types.
 */
 
-public class Driver20 extends InternalDriver implements Driver {
+public abstract class Driver20 extends InternalDriver implements Driver {
 
 	private static final String[] BOOLEAN_CHOICES = {"false", "true"};
 
@@ -149,10 +149,7 @@ public class Driver20 extends InternalDriver implements Driver {
 		return new EmbedResultSet20(conn, results, forMetaData, statement,
 								 isAtomic); 
 	}
-	public BrokeredConnection newBrokeredConnection(BrokeredConnectionControl control) {
-
-		return new BrokeredConnection(control);
-	}
+	public abstract BrokeredConnection newBrokeredConnection(BrokeredConnectionControl control);
     /**
      * <p>The getPropertyInfo method is intended to allow a generic GUI tool to 
      * discover what properties it should prompt a human for in order to get 
