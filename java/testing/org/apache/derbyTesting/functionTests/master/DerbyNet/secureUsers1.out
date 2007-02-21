@@ -51,7 +51,7 @@ ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid 
 ij> show connections;
 No connections available.
 ij> disconnect all;
-ij> -- Derby system shutdown - check user - should succeed
+ij> -- Derby system shutdown - check user (owner) - should succeed
 connect ';user=system;password=manager;shutdown=true';
 ERROR XJ015: Derby system shutdown.
 ij> 

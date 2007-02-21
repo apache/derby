@@ -403,7 +403,7 @@ public class TestConfiguration {
         
         return changeUserDecorator(
             new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true),
-            "TEST_DBO", "");
+            "TEST_DBO", "dummy"); // DRDA doesn't like empty pw
     }
     
     /**
@@ -493,6 +493,9 @@ public class TestConfiguration {
         this.userPassword = DEFAULT_USER_PASSWORD;
         this.hostName = null;
         this.port = -1;
+        this.isVerbose = Boolean.valueOf(
+            getSystemProperties().getProperty(KEY_VERBOSE)).
+            booleanValue();
         
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
         url = createJDBCUrlWithDatabaseName(defaultDbName);

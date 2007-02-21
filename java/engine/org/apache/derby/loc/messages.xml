@@ -844,6 +844,13 @@ Guide.
                 <arg>objectName</arg>
             </msg>
 
+            <msg>
+                <name>2850H</name>
+                <text>User '{0}' cannot shut down database '{1}'. Only database owner can perform this operation.</text>
+                <arg>authorizationID</arg>
+                <arg>databaseName</arg>
+            </msg>
+
         </family>
 
 

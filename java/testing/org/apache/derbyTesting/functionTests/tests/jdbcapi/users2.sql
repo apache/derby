@@ -17,7 +17,7 @@
 --
 -- Specifically test Derby users using DERBY scheme
 -- and by only looking at database properties for authentication
--- The only user at the system level is system/manager
+-- The only user only defined at the system level is mickey/mouse
 --
 
 -- check allowed users in wombat db.
@@ -46,13 +46,14 @@ connect 'wombat;user=system;password=manager';
 --
 autocommit off;
 prepare p2 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+execute p2 using 'values(''derby.user.system'', ''manager'')';
 execute p2 using 'values(''derby.user.kreg'', ''visualWhat?'')';
 execute p2 using 'values(''derby.user.jeff'', ''HomeRun61'')';
 execute p2 using 'values(''derby.user.ames'', ''AnyVolunteer?'')';
 execute p2 using 'values(''derby.user.jamie'', ''MrNamePlates'')';
 execute p2 using 'values(''derby.user.howardR'', ''IamBetterAtTennis'')';
 execute p2 using 'values(''derby.user.francois'', ''paceesalute'')';
-execute p2 using 'values(''derby.database.fullAccessUsers'', ''jeff,howardR,ames,francois,kreg'')';
+execute p2 using 'values(''derby.database.fullAccessUsers'', ''system,jeff,howardR,ames,francois,kreg'')';
 execute p2 using 'values(''derby.database.readOnlyAccessUsers'', ''jamie'')';
 execute p2 using 'values(''derby.database.defaultConnectionMode'', ''noAccess'')';
 execute p2 using 'values(''derby.database.propertiesOnly'', ''true'')';
@@ -105,13 +106,14 @@ connect 'myDB;user=system;password=manager';
 --
 autocommit off;
 prepare p4 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+execute p4 using 'values(''derby.user.system'', ''manager'')';
 execute p4 using 'values(''derby.user.kreg'', ''visualWhat?'')';
 execute p4 using 'values(''derby.user.dan'', ''MakeItFaster'')';
 execute p4 using 'values(''derby.user.ames'', ''AnyVolunteer?'')';
 execute p4 using 'values(''derby.user.jerry'', ''SacreBleu'')';
 execute p4 using 'values(''derby.user.jamie'', ''MrNamePlates'')';
 execute p4 using 'values(''derby.user.francois'', ''paceesalute'')';
-execute p4 using 'values(''derby.database.fullAccessUsers'', ''jerry,dan,kreg,ames,francois,jamie'')';
+execute p4 using 'values(''derby.database.fullAccessUsers'', ''system,jerry,dan,kreg,ames,francois,jamie'')';
 execute p4 using 'values(''derby.database.defaultConnectionMode'', ''noAccess'')';
 execute p4 using 'values(''derby.database.propertiesOnly'', ''true'')';
 commit;
@@ -166,6 +168,10 @@ connect 'myDB;user=howardR;password=IamBetterAtTennis';
 connect 'wombat;user=jerry;password=SacreBleu';
 connect 'wombat;user=jamie;password=MrNamePlates';
 
+-- users only defined at system level; not allowed:
+connect 'myDB;user=mickey;password=mouse';
+connect 'wombat;user=mickey;password=mouse';
+
 show connections;
 
 connect 'wombat;user=francois;password=paceesalute';
@@ -180,13 +186,18 @@ show connections;
 disconnect all;
 show connections;
 
--- Database shutdown - check user - should succeed
+-- Database shutdown - check user - should fail, not owner, cf DERBY-2264
 connect 'wombat;user=francois;password=paceesalute;shutdown=true';
+-- Database shutdown - check owner - should succeed
+connect 'wombat;user=system;password=manager;shutdown=true';
 
 -- beetle 5468
 disconnect all;
 
+-- Database shutdown - check user - should fail, not owner, cf DERBY-2264
 connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
+-- Database shutdown - check owner - should succeed
+connect 'myDB;user=system;password=manager;shutdown=true';
 
 -- beetle 5468
 disconnect all;

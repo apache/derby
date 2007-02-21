@@ -150,7 +150,7 @@ ij(CONNECTION1)> -- Database shutdown - check user - should succeed
 ----- beetle 5367
 connect 'wombat;user=francois;password=paceesalute;shutdown=true';
 ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
-ij(CONNECTION1)> connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
+ij(CONNECTION1)> connect 'myDB;user=dan;password=MakeItFaster;shutdown=true';
 ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'myDB' shutdown.
 ij(CONNECTION1)> show connections;
 CONNECTION0 - 	jdbc:derby://xxxFILTERED_HOSTNAMExxx:1527/wombat

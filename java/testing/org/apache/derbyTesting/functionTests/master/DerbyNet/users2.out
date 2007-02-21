@@ -1,23 +1,23 @@
 ij> --
---   Licensed to the Apache Software Foundation (ASF) under one or more
---   contributor license agreements.  See the NOTICE file distributed with
---   this work for additional information regarding copyright ownership.
---   The ASF licenses this file to You under the Apache License, Version 2.0
---   (the "License"); you may not use this file except in compliance with
---   the License.  You may obtain a copy of the License at
---
---      http://www.apache.org/licenses/LICENSE-2.0
---
---   Unless required by applicable law or agreed to in writing, software
---   distributed under the License is distributed on an "AS IS" BASIS,
---   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
---   See the License for the specific language governing permissions and
---   limitations under the License.
---
---
+-----   Licensed to the Apache Software Foundation (ASF) under one or more
+-----   contributor license agreements.  See the NOTICE file distributed with
+-----   this work for additional information regarding copyright ownership.
+-----   The ASF licenses this file to You under the Apache License, Version 2.0
+-----   (the "License"); you may not use this file except in compliance with
+-----   the License.  You may obtain a copy of the License at
+-----
+-----      http://www.apache.org/licenses/LICENSE-2.0
+-----
+-----   Unless required by applicable law or agreed to in writing, software
+-----   distributed under the License is distributed on an "AS IS" BASIS,
+-----   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-----   See the License for the specific language governing permissions and
+-----   limitations under the License.
+-----
+-----
 ----- Specifically test Derby users using DERBY scheme
 ----- and by only looking at database properties for authentication
------ The only user at the system level is system/manager
+----- The only user only defined at the system level is mickey/mouse
 -----
 ----- check allowed users in wombat db.
 ----- initial connection in sysprop was:
@@ -43,6 +43,8 @@ ij> --
 -----
 autocommit off;
 ij> prepare p2 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij> execute p2 using 'values(''derby.user.system'', ''manager'')';
+Statement executed.
 ij> execute p2 using 'values(''derby.user.kreg'', ''visualWhat?'')';
 Statement executed.
 ij> execute p2 using 'values(''derby.user.jeff'', ''HomeRun61'')';
@@ -55,7 +57,7 @@ ij> execute p2 using 'values(''derby.user.howardR'', ''IamBetterAtTennis'')';
 Statement executed.
 ij> execute p2 using 'values(''derby.user.francois'', ''paceesalute'')';
 Statement executed.
-ij> execute p2 using 'values(''derby.database.fullAccessUsers'', ''jeff,howardR,ames,francois,kreg'')';
+ij> execute p2 using 'values(''derby.database.fullAccessUsers'', ''system,jeff,howardR,ames,francois,kreg'')';
 Statement executed.
 ij> execute p2 using 'values(''derby.database.readOnlyAccessUsers'', ''jamie'')';
 Statement executed.
@@ -116,6 +118,8 @@ ij> --
 -----
 autocommit off;
 ij> prepare p4 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij> execute p4 using 'values(''derby.user.system'', ''manager'')';
+Statement executed.
 ij> execute p4 using 'values(''derby.user.kreg'', ''visualWhat?'')';
 Statement executed.
 ij> execute p4 using 'values(''derby.user.dan'', ''MakeItFaster'')';
@@ -128,7 +132,7 @@ ij> execute p4 using 'values(''derby.user.jamie'', ''MrNamePlates'')';
 Statement executed.
 ij> execute p4 using 'values(''derby.user.francois'', ''paceesalute'')';
 Statement executed.
-ij> execute p4 using 'values(''derby.database.fullAccessUsers'', ''jerry,dan,kreg,ames,francois,jamie'')';
+ij> execute p4 using 'values(''derby.database.fullAccessUsers'', ''system,jerry,dan,kreg,ames,francois,jamie'')';
 Statement executed.
 ij> execute p4 using 'values(''derby.database.defaultConnectionMode'', ''noAccess'')';
 Statement executed.
@@ -216,6 +220,11 @@ ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid 
 ij> connect 'wombat;user=jerry;password=SacreBleu';
 ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
 ij> connect 'wombat;user=jamie;password=MrNamePlates';
+ij> -- users only defined at system level; not allowed:
+connect 'myDB;user=mickey;password=mouse';
+ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
+ij> connect 'wombat;user=mickey;password=mouse';
+ERROR (no SQLState): Connection authorization failure occurred.  Reason: userid invalid.
 ij> show connections;
 CONNECTION0* - 	jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/wombat;user=jamie;password=MrNamePlates
 * = current connection
@@ -236,12 +245,19 @@ CONNECTION2* - 	jdbc:derby:net://xxxFILTERED_HOSTNAMExxx:1527/myDB;user=jerry;pa
 ij(CONNECTION2)> disconnect all;
 ij> show connections;
 No connections available.
-ij> -- Database shutdown - check user - should succeed
+ij> -- Database shutdown - check user - should fail, not owner, cf DERBY-2264
 connect 'wombat;user=francois;password=paceesalute;shutdown=true';
+ERROR 2850H: FRANCOISwombat2850H
+ij> -- Database shutdown - check owner - should succeed
+connect 'wombat;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> -- beetle 5468
 disconnect all;
-ij> connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
+ij> -- Database shutdown - check user - should fail, not owner, cf DERBY-2264
+connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
+ERROR 2850H: JERRYmyDB2850H
+ij> -- Database shutdown - check owner - should succeed
+connect 'myDB;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'myDB' shutdown.
 ij> -- beetle 5468
 disconnect all;

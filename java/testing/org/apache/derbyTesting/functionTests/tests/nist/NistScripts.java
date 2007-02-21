@@ -203,7 +203,7 @@ public final class NistScripts extends ScriptTestCase {
         
         // Setup user authentication
         test = DatabasePropertyTestSetup.builtinAuthentication(test,
-                new String[] {"HU","FLATER","SUN","CTS1","SULLIVAN1","SCHANZLE"},
+                new String[] {"APP", "HU","FLATER","SUN","CTS1","SULLIVAN1","SCHANZLE"},
                 "ni8s4T");
         
         // Lock timeout settings that were set for the old harness when

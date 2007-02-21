@@ -49,5 +49,5 @@ show connections;
 
 disconnect all;
 
--- Derby system shutdown - check user - should succeed
+-- Derby system shutdown - check user (owner) - should succeed
 connect ';user=system;password=manager;shutdown=true';

@@ -95,7 +95,7 @@ show connections;
 -- Database shutdown - check user - should succeed
 -- beetle 5367
 connect 'wombat;user=francois;password=paceesalute;shutdown=true';
-connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
+connect 'myDB;user=dan;password=MakeItFaster;shutdown=true';
 show connections;
 -- JBMS System shutdown - check user - should fail
 connect ';user=jamie;password=LetMeIn;shutdown=true';

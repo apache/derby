@@ -56,10 +56,14 @@ ij(CONNECTION2)> autocommit off;
 ij(CONNECTION2)> prepare p2 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
 ij(CONNECTION2)> execute p2 using 'values(''derby.authentication.provider'', ''BUILTIN'')';
 0 rows inserted/updated/deleted
+ij(CONNECTION2)> execute p2 using 'values(''derby.connection.requireAuthentication'', ''true'')';
+0 rows inserted/updated/deleted
 ij(CONNECTION2)> -- let's define users in this database (other than the ones
 -- known at the system level. This is for the test
 -- These 3 users will only be known in this database
-execute p2 using 'values(''derby.user.martin'', ''obfuscateIt'')';
+execute p2 using 'values(''derby.user.system'', ''manager'')';
+0 rows inserted/updated/deleted
+ij(CONNECTION2)> execute p2 using 'values(''derby.user.martin'', ''obfuscateIt'')';
 0 rows inserted/updated/deleted
 ij(CONNECTION2)> execute p2 using 'values(''derby.user.dan'', ''makeItFaster'')';
 0 rows inserted/updated/deleted
@@ -97,7 +101,7 @@ ERROR 08006: Database 'wombat' shutdown.
 ij> connect 'guestSchemeDB;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'guestSchemeDB' shutdown.
 ij> connect 'derbySchemeDB;user=system;password=manager;shutdown=true';
-ERROR 08004: Connection refused : Invalid authentication.
+ERROR 08006: Database 'derbySchemeDB' shutdown.
 ij> connect 'simpleSchemeDB;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'simpleSchemeDB' shutdown.
 ij> disconnect all;
@@ -112,7 +116,7 @@ WARNING 01J01: Database 'wombat' not created, connection made to existing databa
 ij> connect 'wombat;user=jeff;password=homeRun';
 ij(CONNECTION1)> connect 'wombat;user=howardR;password=takeItEasy';
 ij(CONNECTION2)> connect 'wombat;user=francois;password=paceesalute';
-ij(CONNECTION3)> -- Invalid ones:
+ij(CONNECTION3)> -- Jamie is allowed here, since he is user at system level
 connect 'wombat;user=Jamie;password=theHooligan';
 ij(CONNECTION4)> show connections;
 CONNECTION0
@@ -125,8 +129,8 @@ ij(CONNECTION4)> connect 'guestSchemeDB;user=kreg;password=IwasBornReady';
 ij(CONNECTION5)> connect 'guestSchemeDB;user=jeff;password=homeRun';
 ij(CONNECTION6)> connect 'guestSchemeDB;user=howardR;password=takeItEasy';
 ij(CONNECTION7)> connect 'guestSchemeDB;user=francois;password=paceesalute';
-ij(CONNECTION8)> -- Invalid ones:
-connect 'guestSchemeDB;user=Jamie;password=theHooligan';
+ij(CONNECTION8)> -- allowed: no authentication
+connect 'guestSchemeDB;user=bad;password=guy';
 ij(CONNECTION9)> show connections;
 CONNECTION0
 CONNECTION1
@@ -202,13 +206,14 @@ ERROR 08004: Connection refused : Invalid authentication.
 ij> show connections;
 No connections available.
 ij> -- Database shutdown - check user - should succeed
-connect 'wombat;user=jeff;password=homeRun;shutdown=true';
-ERROR 08006: Database 'wombat' shutdown.
-ij> connect 'guestSchemeDB;user=kreg;password=IwasBornReady;shutdown=true';
+connect 'guestSchemeDB;user=kreg;password=IwasBornReady;shutdown=true';
 ERROR 08006: Database 'guestSchemeDB' shutdown.
-ij> connect 'derbySchemeDB;user=mamta;password=ieScape;shutdown=true';
+ij> -- Database shutdown - authenticated, so must use owner
+connect 'wombat;user=system;password=manager;shutdown=true';
+ERROR 08006: Database 'wombat' shutdown.
+ij> connect 'derbySchemeDB;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'derbySchemeDB' shutdown.
-ij> connect 'simpleSchemeDB;user=jeff;password=homeRun;shutdown=true';
+ij> connect 'simpleSchemeDB;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'simpleSchemeDB' shutdown.
 ij> show connections;
 No connections available.

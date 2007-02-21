@@ -51,7 +51,7 @@ ERROR 08004: Connection authentication failure occurred.  Reason: userid or pass
 ij> show connections;
 No connections available.
 ij> disconnect all;
-ij> -- Derby system shutdown - check user - should succeed
+ij> -- Derby system shutdown - check user (owner) - should succeed
 connect ';user=system;password=manager;shutdown=true';
 ERROR XJ015: DERBY SQL error: SQLCODE: -1, SQLSTATE: XJ015, SQLERRMC: Derby system shutdown.
 ij> 

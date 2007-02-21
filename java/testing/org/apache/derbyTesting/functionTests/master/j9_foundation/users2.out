@@ -17,7 +17,7 @@ ij> --
 --
 -- Specifically test Derby users using DERBY scheme
 -- and by only looking at database properties for authentication
--- The only user at the system level is system/manager
+-- The only user only defined at the system level is mickey/mouse
 --
 -- check allowed users in wombat db.
 -- initial connection in sysprop was:
@@ -43,6 +43,8 @@ ij> --
 --
 autocommit off;
 ij> prepare p2 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij> execute p2 using 'values(''derby.user.system'', ''manager'')';
+0 rows inserted/updated/deleted
 ij> execute p2 using 'values(''derby.user.kreg'', ''visualWhat?'')';
 0 rows inserted/updated/deleted
 ij> execute p2 using 'values(''derby.user.jeff'', ''HomeRun61'')';
@@ -55,7 +57,7 @@ ij> execute p2 using 'values(''derby.user.howardR'', ''IamBetterAtTennis'')';
 0 rows inserted/updated/deleted
 ij> execute p2 using 'values(''derby.user.francois'', ''paceesalute'')';
 0 rows inserted/updated/deleted
-ij> execute p2 using 'values(''derby.database.fullAccessUsers'', ''jeff,howardR,ames,francois,kreg'')';
+ij> execute p2 using 'values(''derby.database.fullAccessUsers'', ''system,jeff,howardR,ames,francois,kreg'')';
 0 rows inserted/updated/deleted
 ij> execute p2 using 'values(''derby.database.readOnlyAccessUsers'', ''jamie'')';
 0 rows inserted/updated/deleted
@@ -116,6 +118,8 @@ ij> --
 --
 autocommit off;
 ij> prepare p4 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
+ij> execute p4 using 'values(''derby.user.system'', ''manager'')';
+0 rows inserted/updated/deleted
 ij> execute p4 using 'values(''derby.user.kreg'', ''visualWhat?'')';
 0 rows inserted/updated/deleted
 ij> execute p4 using 'values(''derby.user.dan'', ''MakeItFaster'')';
@@ -128,7 +132,7 @@ ij> execute p4 using 'values(''derby.user.jamie'', ''MrNamePlates'')';
 0 rows inserted/updated/deleted
 ij> execute p4 using 'values(''derby.user.francois'', ''paceesalute'')';
 0 rows inserted/updated/deleted
-ij> execute p4 using 'values(''derby.database.fullAccessUsers'', ''jerry,dan,kreg,ames,francois,jamie'')';
+ij> execute p4 using 'values(''derby.database.fullAccessUsers'', ''system,jerry,dan,kreg,ames,francois,jamie'')';
 0 rows inserted/updated/deleted
 ij> execute p4 using 'values(''derby.database.defaultConnectionMode'', ''noAccess'')';
 0 rows inserted/updated/deleted
@@ -216,6 +220,11 @@ ERROR 08004: Connection refused : Invalid authentication.
 ij> connect 'wombat;user=jerry;password=SacreBleu';
 ERROR 08004: Connection refused : Invalid authentication.
 ij> connect 'wombat;user=jamie;password=MrNamePlates';
+ij> -- users only defined at system level; not allowed:
+connect 'myDB;user=mickey;password=mouse';
+ERROR 08004: Connection refused : Invalid authentication.
+ij> connect 'wombat;user=mickey;password=mouse';
+ERROR 08004: Connection refused : Invalid authentication.
 ij> show connections;
 CONNECTION0*
 * = current connection
@@ -236,12 +245,19 @@ CONNECTION2*
 ij(CONNECTION2)> disconnect all;
 ij> show connections;
 No connections available.
-ij> -- Database shutdown - check user - should succeed
+ij> -- Database shutdown - check user - should fail, not owner, cf DERBY-2264
 connect 'wombat;user=francois;password=paceesalute;shutdown=true';
+ERROR 2850H: User 'FRANCOIS' cannot shut down database 'wombat'. Only database owner can perform this operation.
+ij> -- Database shutdown - check owner - should succeed
+connect 'wombat;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
 ij> -- beetle 5468
 disconnect all;
-ij> connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
+ij> -- Database shutdown - check user - should fail, not owner, cf DERBY-2264
+connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
+ERROR 2850H: User 'JERRY' cannot shut down database 'myDB'. Only database owner can perform this operation.
+ij> -- Database shutdown - check owner - should succeed
+connect 'myDB;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'myDB' shutdown.
 ij> -- beetle 5468
 disconnect all;

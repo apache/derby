@@ -273,6 +273,11 @@ public class EmbedConnection implements EngineConnection
 
 			// now we have the database connection, we can shut down
 			if (shutdown) {
+				if (!usingNoneAuth) {
+					// DERBY-2264: Only allow db owner to shut down if
+					// authentication is on.
+					checkIsDBOwner();
+				}
 				throw tr.shutdownDatabaseException();
 			}
 
@@ -304,23 +309,24 @@ public class EmbedConnection implements EngineConnection
 
 
 	/**
-	  Examine the attributes set provided and determine if this is a create
-	  boot. A boot is a create boot iff.
+	  Examine the attributes set provided for illegal boot
+	  combinations and determine if this is a create boot.
 
-	  <OL>
-	  <LI>create=true - This means create a standard database.
-	  <LI> createFrom = Path - creates database from backup if it does not exist.
-	  <LI> restoreFrom = Path - database is restored completley from backup.
-           if a database exists in the same place it is replaced by the version
-		   in the backup otherwise a new one is created using the backup copy.
-      <LI> rollForwardRecoveryFrom = Path  - rollforward is performed 
-      using the version backup and any active and archived log files.
-	  </OL>
+	  @return true iff the attribute <em>create=true</em> is provided. This
+	  means create a standard database.  In other cases, returns
+	  false.
 
 	  @param p the attribute set.
 
-	  @exception SQLException Ooops.
-	  */
+	  @exception SQLException Throw if more than one of
+	  <em>create</em>, <em>createFrom</em>, <em>restoreFrom</em> and
+	  <em>rollForwardRecoveryFrom</em> is used simultaneously. <br>
+
+	  Also, throw if (re)encryption is attempted with one of
+	  <em>createFrom</em>, <em>restoreFrom</em> and
+	  <em>rollForwardRecoveryFrom</em>.
+
+	*/
 	private boolean createBoot(Properties p) throws SQLException
 	{
 		int createCount = 0;
@@ -339,9 +345,10 @@ public class EmbedConnection implements EngineConnection
 		if(restoreCount > 1)
 			throw newSQLException(SQLState.CONFLICTING_RESTORE_ATTRIBUTES);
 	
-        // check if user has specified re-encryption attributes 
-        // in combination with create/restore/recover attributes.
-        // re-encryption is not allowed when restoring from backup. 
+        // check if user has specified re-encryption attributes in
+        // combination with createFrom/restoreFrom/rollForwardRecoveryFrom
+        // attributes.  Re-encryption is not
+        // allowed when restoring from backup.
         if (restoreCount != 0 && 
             (Boolean.valueOf(p.getProperty(
                             Attribute.DATA_ENCRYPTION)).booleanValue() ||
@@ -468,6 +475,24 @@ public class EmbedConnection implements EngineConnection
 		// to its implementation here, since it will always be present.
 		if (authenticationService instanceof NoneAuthenticationServiceImpl)
 			usingNoneAuth = true;
+	}
+
+	/**
+	 * Check if actual authenticationId is equal to the database owner's.
+	 *
+	 * @throws SQLException if actual authenticationId is different
+	 * from authenticationId of database owner.
+	 */
+	private void checkIsDBOwner() throws SQLException
+	{
+		final LanguageConnectionContext lcc = getLanguageConnection();
+		final String actualId = lcc.getAuthorizationId();
+		final String dbOwnerId = lcc.getDataDictionary().
+			getAuthorizationDatabaseOwner();
+		if (!actualId.equals(dbOwnerId)) {
+			throw newSQLException(SQLState.AUTH_NOT_DB_OWNER, 
+								  actualId, tr.getDBName());
+		}
 	}
 
     /**

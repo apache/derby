@@ -57,9 +57,11 @@ connect 'derbySchemeDB;create=true;user=system;password=manager';
 autocommit off;
 prepare p2 as 'CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?,?)';
 execute p2 using 'values(''derby.authentication.provider'', ''BUILTIN'')';
+execute p2 using 'values(''derby.connection.requireAuthentication'', ''true'')';
 -- let's define users in this database (other than the ones
 -- known at the system level. This is for the test
 -- These 3 users will only be known in this database
+execute p2 using 'values(''derby.user.system'', ''manager'')';
 execute p2 using 'values(''derby.user.martin'', ''obfuscateIt'')';
 execute p2 using 'values(''derby.user.dan'', ''makeItFaster'')';
 execute p2 using 'values(''derby.user.mamta'', ''ieScape'')';
@@ -104,7 +106,7 @@ connect 'wombat;create=true;user=kreg;password=IwasBornReady';
 connect 'wombat;user=jeff;password=homeRun';
 connect 'wombat;user=howardR;password=takeItEasy';
 connect 'wombat;user=francois;password=paceesalute';
--- Invalid ones:
+-- Jamie is allowed here, since he is user at system level
 connect 'wombat;user=Jamie;password=theHooligan';
 show connections;
 
@@ -112,8 +114,8 @@ connect 'guestSchemeDB;user=kreg;password=IwasBornReady';
 connect 'guestSchemeDB;user=jeff;password=homeRun';
 connect 'guestSchemeDB;user=howardR;password=takeItEasy';
 connect 'guestSchemeDB;user=francois;password=paceesalute';
--- Invalid ones:
-connect 'guestSchemeDB;user=Jamie;password=theHooligan';
+-- allowed: no authentication
+connect 'guestSchemeDB;user=bad;password=guy';
 show connections;
 
 connect 'derbySchemeDB;user=mamta;password=ieScape';
@@ -144,10 +146,12 @@ connect 'derbySchemeDB;shutdown=true';
 show connections;
 
 -- Database shutdown - check user - should succeed
-connect 'wombat;user=jeff;password=homeRun;shutdown=true';
 connect 'guestSchemeDB;user=kreg;password=IwasBornReady;shutdown=true';
-connect 'derbySchemeDB;user=mamta;password=ieScape;shutdown=true';
-connect 'simpleSchemeDB;user=jeff;password=homeRun;shutdown=true';
+
+-- Database shutdown - authenticated, so must use owner
+connect 'wombat;user=system;password=manager;shutdown=true';
+connect 'derbySchemeDB;user=system;password=manager;shutdown=true';
+connect 'simpleSchemeDB;user=system;password=manager;shutdown=true';
 
 show connections;
 
