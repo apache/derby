@@ -52,7 +52,6 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(BlobTest.suite());
 		suite.addTest(CallableStatementTest.suite());
 		suite.addTest(ClobTest.suite());
-		suite.addTest(ClosedObjectTest.suite());
 		suite.addTest(ConnectionTest.suite());
 		suite.addTest(DataSourceTest.suite());
 		suite.addTest(JDBC40TranslationTest.suite());

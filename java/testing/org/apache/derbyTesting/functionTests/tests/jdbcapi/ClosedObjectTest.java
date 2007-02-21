@@ -1,5 +1,5 @@
 /*
- * Derby - org.apache.derbyTesting.functionTests.tests.jdbc4.ClosedObjectTest
+ * Derby - org.apache.derbyTesting.functionTests.tests.jdbcapi.ClosedObjectTest
  *
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -18,19 +18,16 @@
  *
  */
 
-package org.apache.derbyTesting.functionTests.tests.jdbc4;
+package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
-import java.sql.SQLClientInfoException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.Properties;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
@@ -42,6 +39,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -103,9 +101,6 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         } catch (InvocationTargetException ite) {
             try {
                 throw ite.getCause();
-            } catch (SQLFeatureNotSupportedException fnse) {
-                // if we don't support the method, it is OK that we
-                // throw this exception
             } catch (SQLException sqle) {
                 decorator_.checkException(method_, sqle);
             }
@@ -137,6 +132,11 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         topSuite.addTest(dsDecorator);
         fillDataSourceSuite(dsSuite, dsDecorator);
 
+        if (JDBC.vmSupportsJSR169()) {
+            // JSR169 doesn't support ConnectionPoolDataSource and XADataSource
+            return dsSuite;
+        }
+
         TestSuite poolSuite = new TestSuite(
                 "ClosedObjectTest ConnectionPoolDataSource");
         PoolDataSourceDecorator poolDecorator =
@@ -165,31 +165,31 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
     private static void fillDataSourceSuite(TestSuite suite,
                                             DataSourceDecorator dsDecorator)
     {
-        TestSuite rsSuite = new TestSuite();
+        TestSuite rsSuite = new TestSuite("Closed ResultSet");
         ResultSetObjectDecorator rsDecorator =
             new ResultSetObjectDecorator(rsSuite, dsDecorator);
         suite.addTest(rsDecorator);
         fillObjectSuite(rsSuite, rsDecorator, ResultSet.class);
 
-        TestSuite stmtSuite = new TestSuite();
+        TestSuite stmtSuite = new TestSuite("Closed Statement");
         StatementObjectDecorator stmtDecorator =
             new StatementObjectDecorator(stmtSuite, dsDecorator);
         suite.addTest(stmtDecorator);
         fillObjectSuite(stmtSuite, stmtDecorator, Statement.class);
 
-        TestSuite psSuite = new TestSuite();
+        TestSuite psSuite = new TestSuite("Closed PreparedStatement");
         PreparedStatementObjectDecorator psDecorator =
             new PreparedStatementObjectDecorator(psSuite, dsDecorator);
         suite.addTest(psDecorator);
         fillObjectSuite(psSuite, psDecorator, PreparedStatement.class);
 
-        TestSuite csSuite = new TestSuite();
+        TestSuite csSuite = new TestSuite("Closed CallableStatement");
         CallableStatementObjectDecorator csDecorator =
             new CallableStatementObjectDecorator(csSuite, dsDecorator);
         suite.addTest(csDecorator);
         fillObjectSuite(csSuite, csDecorator, CallableStatement.class);
 
-        TestSuite connSuite = new TestSuite();
+        TestSuite connSuite = new TestSuite("Closed Connection");
         ConnectionObjectDecorator connDecorator =
             new ConnectionObjectDecorator(connSuite, dsDecorator);
         suite.addTest(connDecorator);
@@ -208,8 +208,9 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
                                         ObjectDecorator decorator,
                                         Class iface)
     {
-        for (Method m : iface.getMethods()) {
-            ClosedObjectTest cot = new ClosedObjectTest(m, decorator);
+        Method[] methods = iface.getMethods();
+        for (int i = 0; i < methods.length; i++) {
+            ClosedObjectTest cot = new ClosedObjectTest(methods[i], decorator);
             suite.addTest(cot);
         }
     }
@@ -316,13 +317,10 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          * @return <code>true</code> if an exception is expected
          */
         public boolean expectsException(Method method) {
-            final String[] exceptionLessMethods = {
-                "close",
-                "isClosed",
-                "isValid",
-            };
-            for (String name : exceptionLessMethods) {
-                if (name.equals(method.getName())) return false;
+            String name = method.getName();
+            if (name.equals("close") || name.equals("isClosed")
+                    || name.equals("isValid")) {
+                return false;
             }
             return true;
         }
@@ -341,6 +339,13 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
             if (!expectsException(method)) {
                 throw sqle;
             }
+
+            if (sqle.getSQLState().startsWith("0A")) {
+                // method is not supported, so we don't expect closed object
+                // exception
+                return;
+            }
+
             checkSQLState(method, sqle);
         }
 
@@ -637,12 +642,14 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
         protected void checkSQLState(Method method, SQLException sqle)
             throws SQLException
         {
-            if (sqle instanceof SQLClientInfoException &&
-                method.getName().equals("setClientInfo") &&
-                Arrays.asList(method.getParameterTypes())
-                .equals(Arrays.asList(new Class[] { Properties.class }))) {
-                // setClientInfo(Properties) should throw
-                // ClientInfoException, so this is OK
+            if (method.getName().equals("setClientInfo") &&
+                    method.getParameterTypes().length == 1 &&
+                    method.getParameterTypes()[0] == Properties.class) {
+                // setClientInfo(Properties) should throw SQLClientInfoException
+                if (!sqle.getClass().getName().equals(
+                            "java.sql.SQLClientInfoException")) {
+                    throw sqle;
+                }
             } else if (sqle.getSQLState().equals("08003")) {
                 // expected, connection closed
             } else {
@@ -718,6 +725,10 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
          */
         protected Connection newConnection_() throws SQLException {
             DataSource ds = JDBCDataSource.getDataSource();
+            // make sure the database is created when running the test
+            // standalone
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                                           "create=true");
             return ds.getConnection();
         }
     }

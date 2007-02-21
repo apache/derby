@@ -83,6 +83,7 @@ public class _Suite extends BaseTestCase  {
 			suite.addTest(LobStreamsTest.suite());
 			suite.addTest(ResultSetJDBC30Test.suite());
             suite.addTest(DatabaseMetaDataTest.suite());
+            suite.addTest(ClosedObjectTest.suite());
 		}
         
         return suite;
