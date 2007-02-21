@@ -1086,6 +1086,22 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 			return true;
 		}
 
+        public int setBytes(long arg0, byte[] arg1) throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
+        public int setBytes(long arg0, byte[] arg1, int arg2, int arg3) throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
+        public OutputStream setBinaryStream(long arg0) throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
+        public void truncate(long arg0) throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
 	}
 
 	/**
@@ -1155,6 +1171,27 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 			return true;
 		}
+
+        public int setString(long arg0, String arg1) throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
+        public int setString(long arg0, String arg1, int arg2, int arg3) throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
+        public OutputStream setAsciiStream(long arg0) throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
+        public Writer setCharacterStream(long arg0) throws SQLException {
+            throw new SQLException("not implemented for this test");
+        }
+
+        public void truncate(long arg0) throws SQLException {
+            throw new SQLException("not implemented for this test");
+            
+        }
 
 	}
 
