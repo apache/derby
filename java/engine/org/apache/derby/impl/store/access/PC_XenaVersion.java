@@ -22,21 +22,15 @@
 package org.apache.derby.impl.store.access;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.catalog.UUID;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.StreamCorruptedException;
-import java.util.Enumeration;
 import java.util.Properties;
 
 public class PC_XenaVersion implements Formatable

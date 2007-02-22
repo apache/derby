@@ -21,58 +21,41 @@
 
 package org.apache.derby.impl.store.access.btree;
 
-
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Storable;
 
-import org.apache.derby.iapi.services.stream.InfoStreams;
-
-
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
-import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
-import org.apache.derby.iapi.store.access.RowUtil;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.types.RowLocation;
-
 import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 import org.apache.derby.impl.store.access.conglomerate.GenericConglomerate;
 import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSpace;
 import org.apache.derby.impl.store.access.conglomerate.TemplateRow;
-
 
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 
 import java.util.Properties;
-
 
 /**
 
@@ -503,7 +486,7 @@ public abstract class BTree extends GenericConglomerate
 	/**
 	Drop this btree.
 	This must be done by a concrete implementation.
-	@see Conglomerate#drop
+	@see org.apache.derby.iapi.store.access.conglomerate.Conglomerate#drop
 
     @exception StandardException Standard exception policy.
 	**/
@@ -512,7 +495,7 @@ public abstract class BTree extends GenericConglomerate
 
 	/**
 	Load a b-tree.  This must be done by a concrete implementation.
-	@see Conglomerate#load
+	@see org.apache.derby.iapi.store.access.conglomerate.Conglomerate#load
 
     @exception StandardException Standard exception policy.
 	**/
@@ -567,7 +550,7 @@ public abstract class BTree extends GenericConglomerate
 	/**
 	Open a b-tree controller.
 	This must be done by a concrete implementation.
-	@see Conglomerate#open
+	@see org.apache.derby.iapi.store.access.conglomerate.Conglomerate#open
 
     @exception StandardException Standard exception policy.
 	**/

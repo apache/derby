@@ -27,9 +27,6 @@ import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
-import org.apache.derby.iapi.services.io.Storable;
-
-import org.apache.derby.iapi.types.Orderable;
 import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -38,7 +35,6 @@ import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 
 import org.apache.derby.iapi.store.access.Qualifier;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.ScanInfo;
 
 import org.apache.derby.iapi.store.raw.Page;
@@ -46,6 +42,9 @@ import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import java.util.Properties;
+
+// For JavaDoc references (i.e. @see)
+import org.apache.derby.iapi.store.access.ScanController;
 
 /**
 

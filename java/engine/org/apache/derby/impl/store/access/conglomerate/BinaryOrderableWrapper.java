@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.store.access.conglomerate;
 
-
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -29,11 +28,8 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.TypedFormat;
 
-import org.apache.derby.iapi.error.StandardException; 
-
 import org.apache.derby.iapi.store.access.BinaryOrderable;
 
-import java.io.Externalizable;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;

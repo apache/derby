@@ -25,12 +25,10 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.RowSource;
 import org.apache.derby.iapi.store.access.SortObserver;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.store.access.conglomerate.ScanControllerRowSource;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-import org.apache.derby.iapi.store.access.ScanController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -105,7 +103,7 @@ public class SortBufferRowSource extends Scan
 	}
 
 	/**
-	 * @see RowSource#needsToClone
+	 * @see org.apache.derby.iapi.store.access.RowSource#needsToClone
 	 */
 	public boolean needsToClone()
 	{
@@ -178,7 +176,7 @@ public class SortBufferRowSource extends Scan
      * This method will always throw an exception. 
      * (SQLState.SORT_IMPROPER_SCAN_METHOD)
      *
-     * @see ScanController#fetchWithoutQualify
+     * @see org.apache.derby.iapi.store.access.ScanController#fetchWithoutQualify
      **/
     public void fetchWithoutQualify(DataValueDescriptor[] result) 
         throws StandardException
@@ -190,7 +188,7 @@ public class SortBufferRowSource extends Scan
     /**
      * Fetch the row at the current position of the Scan.
      *
-     * @see ScanController#fetch
+     * @see org.apache.derby.iapi.store.access.ScanController#fetch
      **/
     public void fetch(DataValueDescriptor[] result) throws StandardException
 	{

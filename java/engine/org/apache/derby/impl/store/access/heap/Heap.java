@@ -34,7 +34,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -63,22 +62,15 @@ import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 
-import org.apache.derby.iapi.types.DataType;
-
 import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 import org.apache.derby.impl.store.access.conglomerate.GenericConglomerate;
 import org.apache.derby.impl.store.access.conglomerate.OpenConglomerate;
 import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSpace;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 
 /**
  * @format_id ACCESS_HEAP_V1_ID

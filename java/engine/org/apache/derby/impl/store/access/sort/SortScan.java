@@ -23,16 +23,11 @@ package org.apache.derby.impl.store.access.sort;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-import org.apache.derby.iapi.store.access.RowUtil;
-import org.apache.derby.iapi.store.access.ScanController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -126,7 +121,7 @@ public abstract class SortScan extends Scan
 
     /**
     Fetch the row at the current position of the Scan.
-	@see ScanController#fetch
+	@see org.apache.derby.iapi.store.access.ScanController#fetch
     **/
     public final void fetch(DataValueDescriptor[] result)
 		throws StandardException
@@ -164,7 +159,7 @@ public abstract class SortScan extends Scan
     This method will always throw an exception.
     (SQLState.SORT_IMPROPER_SCAN_METHOD)
     
-    @see ScanController#fetchWithoutQualify
+    @see org.apache.derby.iapi.store.access.ScanController#fetchWithoutQualify
     **/
     public final void fetchWithoutQualify(DataValueDescriptor[] result)
 		throws StandardException

@@ -25,17 +25,16 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.SortObserver;
-import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.raw.StreamContainerHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
+
+// For JavaDoc references (i.e. @see)
+import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 
 /**
 	A sort scan that is capable of merging as many merge runs
@@ -88,7 +87,7 @@ public class MergeScan extends SortScan
 
     /**
     Move to the next position in the scan.
-	@see ScanController#next
+	@see org.apache.derby.iapi.store.access.ScanController#next
     **/
     public boolean next()
 		throws StandardException
@@ -101,7 +100,7 @@ public class MergeScan extends SortScan
 
     /**
     Close the scan.
-	@see ScanController#close
+	@see org.apache.derby.iapi.store.access.ScanController#close
     **/
     public void close()
 	{

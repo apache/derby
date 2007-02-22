@@ -24,7 +24,6 @@ package org.apache.derby.impl.store.access.btree;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -35,13 +34,11 @@ import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.GenericScanController;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.ScanInfo;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
@@ -54,7 +51,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.RowLocation;
 
-import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 import org.apache.derby.impl.store.access.conglomerate.TemplateRow;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -2197,7 +2193,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 	/**
 	Return a row location object of the correct type to be
 	used in calls to fetchLocation.
-	@see GenericScanController#newRowLocationTemplate
+	@see org.apache.derby.iapi.store.access.GenericScanController#newRowLocationTemplate
 
 	@exception  StandardException  Standard exception policy.
 	**/

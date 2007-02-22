@@ -24,7 +24,6 @@ package org.apache.derby.impl.store.access.sort;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
 /**
@@ -64,7 +63,7 @@ public class SortBufferScan extends SortScan
 
     /**
     Move to the next position in the scan.
-	@see ScanController#next
+	@see org.apache.derby.iapi.store.access.ScanController#next
     **/
     public boolean next()
 		throws StandardException
@@ -99,7 +98,7 @@ public class SortBufferScan extends SortScan
 
     /**
     Close the scan.
-	@see ScanController#close
+	@see org.apache.derby.iapi.store.access.ScanController#close
     **/
     public void close()
 	{

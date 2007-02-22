@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.store.access.btree.index;
 
-
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -34,7 +33,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
@@ -43,19 +41,15 @@ import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.Page;
-import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -63,13 +57,13 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.impl.store.access.btree.BTree;
 import org.apache.derby.impl.store.access.btree.BTreeLockingPolicy;
 import org.apache.derby.impl.store.access.btree.LeafControlRow;
-import org.apache.derby.impl.store.access.btree.ControlRow;
 import org.apache.derby.impl.store.access.btree.OpenBTree;
-import org.apache.derby.impl.store.access.btree.WaitError;
 
-import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.cache.ClassSize;
+
+// For JavaDoc references (i.e. @see)
+import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 
 /*
  * @format_id ACCESS_B2I_V1_ID

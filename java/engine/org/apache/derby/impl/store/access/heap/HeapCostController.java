@@ -21,28 +21,19 @@
 
 package org.apache.derby.impl.store.access.heap;
 
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Property;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException; 
 
-import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-
-import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.StoreCostResult;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
-import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.impl.store.access.conglomerate.GenericCostController;
 import org.apache.derby.impl.store.access.conglomerate.OpenConglomerate;
-
-import org.apache.derby.iapi.store.access.RowUtil;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -177,7 +168,7 @@ public class HeapCostController
      *
 	 * @exception  StandardException  Standard exception policy.
      *
-	 * @see RowUtil
+	 * @see org.apache.derby.iapi.store.access.RowUtil
      **/
     public double getFetchFromRowLocationCost(
     FormatableBitSet      validColumns,
@@ -337,7 +328,7 @@ public class HeapCostController
      *
 	 * @exception  StandardException  Standard exception policy.
      *
-	 * @see RowUtil
+	 * @see org.apache.derby.iapi.store.access.RowUtil
      **/
 	public void getScanCost(
     int                     scan_type,

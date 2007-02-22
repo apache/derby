@@ -30,7 +30,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.Orderable;
 
 import org.apache.derby.iapi.types.DataType;
 

@@ -23,7 +23,6 @@ package org.apache.derby.impl.store.access.sort;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.SortObserver;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 

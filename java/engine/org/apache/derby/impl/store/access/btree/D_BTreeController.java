@@ -21,20 +21,10 @@
 
 package org.apache.derby.impl.store.access.btree;
 
-import org.apache.derby.iapi.reference.Property;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.diag.Diagnosticable;
 import org.apache.derby.iapi.services.diag.DiagnosticableGeneric;
 import org.apache.derby.iapi.services.diag.DiagnosticUtil;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.AccessFactory;
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.Page;
 
 import java.util.Properties;

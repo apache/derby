@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -37,13 +36,10 @@ import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
 import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
-import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.LogicalUndoable;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
@@ -62,8 +58,6 @@ import java.io.ObjectInput;
 import java.io.IOException;
 import java.io.ObjectOutput;
 import org.apache.derby.iapi.services.io.LimitObjectInput;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 /**
  * @format_id ACCESS_B2IUNDO_V1_ID

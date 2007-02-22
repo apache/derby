@@ -21,43 +21,32 @@
 
 package org.apache.derby.impl.store.access.heap;
 
-/**
+import org.apache.derby.iapi.error.StandardException;
 
-  A heap row location represents the location of a row in the heap.
-  <P>
-  It's implementad as a wrapper around a raw store record handle.
-
-**/
+import org.apache.derby.iapi.services.cache.ClassSize;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.CompressedNumber;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-import org.apache.derby.iapi.types.CloneableObject;
-import org.apache.derby.iapi.types.Orderable;
-import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.store.raw.RecordHandle;
-import org.apache.derby.iapi.store.raw.ContainerHandle;
-import org.apache.derby.iapi.store.raw.Transaction;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.services.cache.ClassSize;
+import org.apache.derby.iapi.store.raw.RecordHandle;
+import org.apache.derby.iapi.store.raw.ContainerHandle;
 
 import org.apache.derby.iapi.types.DataType;
-
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.RowLocation;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
 
 /**
+ * A heap row location represents the location of a row in the heap.
+ * <P>
+ * It is implementad as a wrapper around a raw store record handle.
+ * 
  * @format_id ACCESS_HEAP_ROW_LOCATION_V1_ID
  *
  * @purpose   Object used to store the location of a row within a Heap table.  

@@ -27,12 +27,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowUtil;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
@@ -40,13 +35,10 @@ import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
 import java.io.IOException; 
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import java.util.Hashtable;
 import java.util.Properties;
 
 /**

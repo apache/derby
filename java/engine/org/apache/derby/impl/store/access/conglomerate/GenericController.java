@@ -27,27 +27,13 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException; 
 
-import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
-import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
-import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.SpaceInfo;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
-import org.apache.derby.iapi.store.raw.Page;
-import org.apache.derby.iapi.store.raw.RecordHandle;
-import org.apache.derby.iapi.store.raw.Transaction;
-
 
 import org.apache.derby.iapi.types.RowLocation;
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
 import java.util.Properties; 
-
 
 /**
 **/

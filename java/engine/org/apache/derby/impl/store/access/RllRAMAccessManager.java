@@ -21,20 +21,10 @@
 
 package org.apache.derby.impl.store.access;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
 import org.apache.derby.iapi.error.StandardException; 
-
-import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.store.raw.LockingPolicy;
-
-import org.apache.derby.iapi.services.property.PropertyUtil;
-
-import java.util.Properties;
-
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
 

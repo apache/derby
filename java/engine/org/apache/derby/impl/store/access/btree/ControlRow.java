@@ -21,18 +21,13 @@
 
 package org.apache.derby.impl.store.access.btree;
 
-import java.io.PrintStream;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.TypedFormat;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowUtil;
@@ -47,7 +42,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.impl.store.access.StorableFormatId;
-
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 

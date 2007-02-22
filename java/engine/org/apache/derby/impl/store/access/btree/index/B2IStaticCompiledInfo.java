@@ -23,20 +23,14 @@ package org.apache.derby.impl.store.access.btree.index;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds; 
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
 
 import java.io.IOException;
 import java.io.ObjectInput;

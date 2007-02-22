@@ -21,55 +21,24 @@
 
 package org.apache.derby.impl.store.access.heap;
 
-
-/**
-
-  A heap scan object represents an instance of an scan on a heap conglomerate.
-
-**/
-
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
-import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
-import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
-import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.Qualifier;
-import org.apache.derby.iapi.store.access.RowUtil;
-import org.apache.derby.iapi.store.access.ScanInfo;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.SpaceInfo;
-import org.apache.derby.iapi.store.access.TransactionController;
 
-import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.impl.store.access.conglomerate.RowPosition;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
-import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.RowLocation;
 
-import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
-import org.apache.derby.impl.store.access.conglomerate.GenericScanController;
-import org.apache.derby.impl.store.access.conglomerate.RowPosition;
-
-import org.apache.derby.iapi.store.access.BackingStoreHashtable;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import java.util.Hashtable;
-import java.util.Vector;
-
+/**
+ * A heap scan object represents an instance of a scan on a heap conglomerate.
+ */
 class HeapCompressScan 
     extends HeapScan
 {

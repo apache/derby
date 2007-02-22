@@ -21,9 +21,7 @@
 
 package org.apache.derby.impl.store.access;
 
-import java.util.Properties;
 import org.apache.derby.iapi.services.cache.Cacheable;
-import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
@@ -89,7 +87,7 @@ class CacheableConglomerate implements Cacheable
 
 		@exception StandardException Standard Cloudscape Policy
 
-		@see CacheManager#find
+		@see org.apache.derby.iapi.services.cache.CacheManager#find
 
 	*/
 	public Cacheable setIdentity(Object key) throws StandardException
@@ -128,7 +126,7 @@ class CacheableConglomerate implements Cacheable
 	 * @exception StandardException If forCreate is true and the object cannot 
      * be created.
      *
-	 * @see CacheManager#create
+	 * @see org.apache.derby.iapi.services.cache.CacheManager#create
 	 **/
 	public Cacheable createIdentity(Object key, Object createParameter) 
         throws StandardException

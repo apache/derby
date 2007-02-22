@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.store.access.conglomerate.MethodFactory;
 import org.apache.derby.iapi.store.access.conglomerate.Sort;
 import org.apache.derby.iapi.store.access.conglomerate.SortFactory;
 
@@ -45,6 +44,9 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 
 import org.apache.derby.catalog.UUID;
+
+// For JavaDoc references (i.e. @see)
+import org.apache.derby.iapi.store.access.conglomerate.MethodFactory;
 
 /**
 

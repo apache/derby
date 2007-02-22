@@ -33,21 +33,16 @@ import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.StoreCostResult;
-import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
-import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.RowLocation;
-
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import java.util.Properties;
@@ -74,7 +69,7 @@ An optimal implementation will not get any locks on the underlying
 conglomerate, thus allowing concurrent access to the table by a executing
 query while another query is optimizing.
 <p>
-@see TransactionController#openStoreCost
+@see org.apache.derby.iapi.store.access.TransactionController#openStoreCost
 
 **/
 
@@ -289,7 +284,7 @@ public class BTreeCostController extends OpenBTree
      *
 	 * @exception  StandardException  Standard exception policy.
      *
-	 * @see RowUtil
+	 * @see org.apache.derby.iapi.store.access.RowUtil
      **/
     public double getFetchFromRowLocationCost(
     FormatableBitSet      validColumns,
@@ -345,7 +340,7 @@ public class BTreeCostController extends OpenBTree
      *
 	 * @exception  StandardException  Standard exception policy.
      *
-	 * @see RowUtil
+	 * @see org.apache.derby.iapi.store.access.RowUtil
      **/
     public double getFetchFromFullKeyCost(
     FormatableBitSet      validColumns,
@@ -502,7 +497,7 @@ public class BTreeCostController extends OpenBTree
      *
 	 * @exception  StandardException  Standard exception policy.
      *
-	 * @see RowUtil
+	 * @see org.apache.derby.iapi.store.access.RowUtil
      **/
 	public void getScanCost(
     int                     scan_type,

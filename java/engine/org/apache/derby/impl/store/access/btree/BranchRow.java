@@ -22,7 +22,6 @@
 package org.apache.derby.impl.store.access.btree;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -31,10 +30,7 @@ import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
 import org.apache.derby.iapi.types.SQLLongint;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
 
 /**
  * Implements row which is stored in the branch pages of a btree.  A non-suffix

@@ -21,13 +21,10 @@
 
 package org.apache.derby.impl.store.access.btree;
 
-import java.io.PrintStream;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.RowUtil;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;

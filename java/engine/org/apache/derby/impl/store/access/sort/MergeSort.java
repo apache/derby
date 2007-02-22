@@ -25,17 +25,13 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
-import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.ScanControllerRowSource;
 import org.apache.derby.iapi.store.access.conglomerate.Sort;
-import org.apache.derby.iapi.store.access.conglomerate.SortFactory;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 import org.apache.derby.iapi.types.CloneableObject;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.SortObserver;
@@ -49,7 +45,6 @@ import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.Orderable;
-import org.apache.derby.iapi.types.RowLocation;
 
 import java.util.Enumeration;
 import java.util.Properties;

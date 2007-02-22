@@ -54,7 +54,6 @@ import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
-import org.apache.derby.iapi.store.access.RowSource;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.SortController;
 import org.apache.derby.iapi.store.access.SortCostController;
@@ -85,10 +84,8 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import java.io.Serializable;
 
-
 // debugging
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;		  
 
 public class RAMTransaction 
     implements XATransactionController, TransactionManager

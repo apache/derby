@@ -26,14 +26,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.store.access.StoreCostController;
-import org.apache.derby.iapi.store.access.StoreCostResult;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.impl.sql.execute.RowUtil;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-
 
 /**
 
@@ -122,7 +116,7 @@ public abstract class GenericCostController
      *
 	 * @exception  StandardException  Standard exception policy.
      *
-	 * @see RowUtil
+	 * @see org.apache.derby.iapi.store.access.RowUtil
      **/
     public double getFetchFromFullKeyCost(
     FormatableBitSet validColumns,

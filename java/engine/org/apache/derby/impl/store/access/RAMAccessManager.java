@@ -35,7 +35,6 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -59,7 +58,6 @@ import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.catalog.UUID;
 
-import org.apache.derby.iapi.services.io.FormatableHashtable;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Attribute;
 
@@ -68,7 +66,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import java.io.File;
 import java.io.Serializable;
 
 

@@ -21,20 +21,13 @@
 
 package org.apache.derby.impl.store.access.btree.index;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException; 
-
-import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.Page;
-import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -42,10 +35,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.impl.store.access.btree.BTree;
 import org.apache.derby.impl.store.access.btree.BTreeLockingPolicy;
 import org.apache.derby.impl.store.access.btree.BTreeRowPosition;
-import org.apache.derby.impl.store.access.btree.ControlRow;
-import org.apache.derby.impl.store.access.btree.LeafControlRow;
 import org.apache.derby.impl.store.access.btree.OpenBTree;
-import org.apache.derby.impl.store.access.btree.WaitError;
 
 /**
 

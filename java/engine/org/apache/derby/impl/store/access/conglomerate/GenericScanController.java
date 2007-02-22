@@ -27,39 +27,27 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException; 
 
-import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
-import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowUtil;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.ScanInfo;
-import org.apache.derby.iapi.store.access.SpaceInfo;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
-import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.types.Orderable;
 import org.apache.derby.iapi.types.RowLocation;
-
 
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import java.util.Properties; 
-
 
 /**
 Generic class implementing shared ScanController methods.
@@ -1099,7 +1087,7 @@ public abstract class GenericScanController
 
 
     /**
-	@see ScanController#delete
+	@see org.apache.derby.iapi.store.access.ScanController#delete
 	**/
     public boolean delete()
 		throws StandardException
@@ -1353,7 +1341,7 @@ public abstract class GenericScanController
     }
 
     /**
-	@see ScanController#replace
+	@see org.apache.derby.iapi.store.access.ScanController#replace
 	**/
     public boolean replace(
     DataValueDescriptor[]   row, 
@@ -1454,7 +1442,7 @@ public abstract class GenericScanController
     Fetch the row at the current position of the Scan without applying the 
     qualifiers.
 	
-    @see ScanController#fetchWithoutQualify
+    @see org.apache.derby.iapi.store.access.ScanController#fetchWithoutQualify
 	**/
 	public void fetchWithoutQualify(DataValueDescriptor[] row)
 		throws StandardException
@@ -1465,7 +1453,7 @@ public abstract class GenericScanController
 	/**
     Fetch the row at the current position of the Scan.
 
-    @see ScanController#fetch
+    @see org.apache.derby.iapi.store.access.ScanController#fetch
 	**/
 	public void fetch(DataValueDescriptor[] row)
 		throws StandardException
@@ -1536,7 +1524,7 @@ public abstract class GenericScanController
 
 	/**
 	Fetch the location of the current position in the scan.
-	@see ScanController#fetchLocation
+	@see org.apache.derby.iapi.store.access.ScanController#fetchLocation
 
 	@exception  StandardException  Standard exception policy.
 	**/

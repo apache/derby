@@ -30,13 +30,15 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.ScanControllerRowSource;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 import org.apache.derby.iapi.store.access.SortObserver;
-import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.RowLocation;
 
 import java.util.Vector;
+
+// For JavaDoc references (i.e. @see)
+import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
 
 /**
 	Wrapping the output of a MergeScan in a RowSource for the benefit of the
