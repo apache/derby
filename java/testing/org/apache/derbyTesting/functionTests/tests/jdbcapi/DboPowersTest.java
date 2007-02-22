@@ -32,7 +32,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This JUnit tests enforcement of dbo (=database owner) powers, cf.
-* DERBY-2264.
+ * DERBY-2264.
  *
  * The tests are run in the cross product (cardinality 10) of contexts:
  *
@@ -43,7 +43,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * One could consider removing the client/server suite to speed up
  * this test as it does not add much value given the nature of the changes.
  *
-*/
+ */
 public class DboPowersTest extends BaseJDBCTestCase
 {
     /* test execution security context: one of three below */
@@ -54,7 +54,7 @@ public class DboPowersTest extends BaseJDBCTestCase
     
     /**
      * Create a new instance of DboPowersTest
-    *
+     *
      * @param name Fixture name
      * @param authLevel authentication level with which test is run
      */
@@ -65,7 +65,7 @@ public class DboPowersTest extends BaseJDBCTestCase
     }
 
     /**
-    * Construct top level suite in this JUnit test
+     * Construct top level suite in this JUnit test
      *
      * @return A suite containing embedded and client suites
      */
@@ -76,7 +76,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         suite.addTest(TestConfiguration.clientServerDecorator(
                           dboSuite("client")));
         return suite;
-   }
+    }
         
     /**
      *
@@ -87,7 +87,7 @@ public class DboPowersTest extends BaseJDBCTestCase
      * security levels no authentication, authentication, and
      * authentication plus sqlAuthorization, 
      * The latter two has an instance for dbo, and one for ordinary user,
-    * in all five incarnations of tests.
+     * in all five incarnations of tests.
      */
     private static Test dboSuite(String framework) 
     {
@@ -98,7 +98,7 @@ public class DboPowersTest extends BaseJDBCTestCase
              * work after DERBY-2264(!).
              */
             {"APP", "U1"}, 
-           /* authLevel == SQLAUTHORIZATION: sqlAuthorizationDecorator
+            /* authLevel == SQLAUTHORIZATION: sqlAuthorizationDecorator
              * decorator presumes TEST_DBO as dbo, so add it to set of
              * valid users. Uses a fresh db 'dbsqlauth', not 'wombat'.
              */
@@ -106,11 +106,11 @@ public class DboPowersTest extends BaseJDBCTestCase
         
         final String pwSuffix = "pwSuffix";
 
-        Test tests[] = new Test[3]; // one per authLevel
+        Test tests[] = new Test[SQLAUTHORIZATION+1]; // one per authLevel
 
         tests[NOAUTHENTICATION] = collectFixtures(NOAUTHENTICATION);
 
-        /** First decorate with users, then with authentication. Do this
+        /* First decorate with users, then with authentication. Do this
          * twice, once for authentication only, and once for
          * authentication and sqlAuthorization (see extra decorator
          * added below).
@@ -121,7 +121,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             // add decorator for different users authenticated
             TestSuite userSuite =  new TestSuite(
                 "userSuite:"+ (autLev == AUTHENTICATION ? "authentication"
-                              : "sqlAuthorization"));
+                               : "sqlAuthorization"));
 
             for (int userNo = 0; userNo < users.length; userNo++) {
                 userSuite.addTest
@@ -132,7 +132,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             }
         
             tests[autLev] = DatabasePropertyTestSetup.
-               builtinAuthentication(userSuite, users[autLev-1], pwSuffix);
+                builtinAuthentication(userSuite, users[autLev-1], pwSuffix);
         }
 
         TestSuite suite = new TestSuite("dboPowers:"+framework);
@@ -143,7 +143,7 @@ public class DboPowersTest extends BaseJDBCTestCase
         /* run test for all users with only authentication enabled */
         suite.addTest(tests[AUTHENTICATION]);
 
-       /* run test for all users with authentication and
+        /* run test for all users with authentication and
          * sqlAuthorization enabled
          */
         suite.addTest(
@@ -154,8 +154,10 @@ public class DboPowersTest extends BaseJDBCTestCase
     }
 
     /**
-    * Picks up individual test fixtures explicitly, since we need to
+     * Pick up individual test fixtures explicitly, since we need to
      * provide the context.
+     *
+     * @param authLevel tests to be run with this security level
      */
     private static TestSuite collectFixtures(int authLevel)
     {
@@ -165,7 +167,9 @@ public class DboPowersTest extends BaseJDBCTestCase
     }
 
     /**
-    * Test database shutdown power enforcement
+     * Test database shutdown power enforcement
+     *
+     * @throws SQLException
      */
     public void testShutDown() throws SQLException
     {
@@ -187,7 +191,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             if ("08006".equals(e.getSQLState())) {
                 // reboot if shutdown succeeded
                 JDBCDataSource.setBeanProperty(ds, "connectionAttributes", "");
-               ds.getConnection().close();
+                ds.getConnection().close();
             }
 
             vetShutdownException(user, e);
@@ -197,8 +201,10 @@ public class DboPowersTest extends BaseJDBCTestCase
     /**
      * Decide if the result of trying to shut down the database is
      * compliant with the semantics introduced by DERBY-2264.
+     *
+     * @throws SQLException
      */
-   private void vetShutdownException (String user, SQLException e)
+    private void vetShutdownException (String user, SQLException e)
     {
         switch (authLevel) {
         case NOAUTHENTICATION:
@@ -209,7 +215,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             if ("APP".equals(user)) {
                 assertSQLState("database shutdown, authentication, db owner", 
                                "08006", e);
-           } else {
+            } else {
                 assertSQLState("database shutdown restriction, authentication," +
                                " not db owner", "2850H", e);
             }
@@ -220,7 +226,7 @@ public class DboPowersTest extends BaseJDBCTestCase
                                "08006", e);
             } else {
                 assertSQLState("database shutdown restriction, " + 
-                              "SQL authorization, not db owner",
+                               "SQL authorization, not db owner",
                                "2850H", e);
             }
             break;
@@ -230,4 +236,3 @@ public class DboPowersTest extends BaseJDBCTestCase
         }
     }
 }
-

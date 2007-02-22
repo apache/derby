@@ -247,7 +247,7 @@ ij> show connections;
 No connections available.
 ij> -- Database shutdown - check user - should fail, not owner, cf DERBY-2264
 connect 'wombat;user=francois;password=paceesalute;shutdown=true';
-ERROR 2850H: User 'FRANCOIS' cannot shut down database 'wombat'. Only database owner can perform this operation.
+ERROR 2850H: User 'FRANCOIS' cannot shut down database 'wombat'. Only the database owner can perform this operation.
 ij> -- Database shutdown - check owner - should succeed
 connect 'wombat;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'wombat' shutdown.
@@ -255,7 +255,7 @@ ij> -- beetle 5468
 disconnect all;
 ij> -- Database shutdown - check user - should fail, not owner, cf DERBY-2264
 connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
-ERROR 2850H: User 'JERRY' cannot shut down database 'myDB'. Only database owner can perform this operation.
+ERROR 2850H: User 'JERRY' cannot shut down database 'myDB'. Only the database owner can perform this operation.
 ij> -- Database shutdown - check owner - should succeed
 connect 'myDB;user=system;password=manager;shutdown=true';
 ERROR 08006: Database 'myDB' shutdown.
