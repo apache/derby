@@ -101,7 +101,7 @@ public final class NetworkServerControlImpl {
 	public final static int COMMAND_PROPERTIES = 10;
 	public final static int COMMAND_UNKNOWN = -1;
 	public final static String [] DASHARGS =
-	{"p","d","u","ld","ea","ep", "b", "h", "s", "unsecure", "ssl"};
+	{"p","d","u","ld","ea","ep", "b", "h", "s", "noSecurityManager", "ssl"};
 	public final static int DASHARG_PORT = 0;
 	public final static int DASHARG_DATABASE = 1;
 	public final static int DASHARG_USER = 2;

@@ -9,7 +9,7 @@ org.apache.derby.drda.NetworkServerControl maxthreads -12
 Invalid value, -12, for maxthreads.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>] [-unsecure] [-ssl <sslmode>]
+start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]
 shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
@@ -30,7 +30,7 @@ org.apache.derby.drda.NetworkServerControl maxthreads a
 Invalid value, a, for maxthreads.
 Usage: NetworkServerControl <commands> 
 Commands:
-start [-h <host>] [-p <portnumber>] [-unsecure] [-ssl <sslmode>]
+start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]
 shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]

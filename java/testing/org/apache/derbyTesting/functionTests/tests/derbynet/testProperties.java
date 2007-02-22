@@ -81,7 +81,7 @@ public class testProperties
 									"-Dderby.drda.debug",
 									"org.apache.derby.drda.NetworkServerControl",
 									"start",
-									"-unsecure",};
+									"-noSecurityManager",};
     
     //No arguments
     private static String[] cmdWithoutArgs =
@@ -219,11 +219,11 @@ public class testProperties
 	}	
 
     /**
-     * Add the "-unsecure" option to the arguments of the start command. This
+     * Add the "-noSecurityManager" option to the arguments of the start command. This
      * prevents the server from choking on the fact that authentication isn't
      * required. This allows the test to go ahead and test what it intends to,
      * viz., the precedence of various property-setting techniques.
-     * The authentication requirement and the "-unsecure" option were added as
+     * The authentication requirement and the "-noSecurityManager" option were added as
      * part of the work for DERBY-2196.
      */
     private static  String[]    unsecure( String cmd, String[] originalArgs )
@@ -236,7 +236,7 @@ public class testProperties
 
             for ( int i = 0; i < count; i++ ) { cooked[ i ] = originalArgs[ i ]; }
 
-            cooked[ count ] = "-unsecure";
+            cooked[ count ] = "-noSecurityManager";
 
             return cooked;
         }

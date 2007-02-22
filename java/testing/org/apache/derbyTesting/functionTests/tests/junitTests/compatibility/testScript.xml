@@ -216,6 +216,7 @@
 	<antcall target="_startServer">
 	  <param name="svrVM" value="${serverVM}"/>
 	  <param name="srvClasspath" value="${serverClasspath}"/>
+	  <param name="srvSecurity" value="-noSecurityManager"/>
     </antcall>
 
 	<antcall target="_recreateDatabase"/>
@@ -302,7 +303,7 @@
 	  <param name="fsvnVM" value="${fsvVM}"/>
 	  <param name="fsvnCP" value="${SERVER_TRUNK}"/>
 	  <param name="fsvnName" value="${fsvName}_serverTrunk"/>
-	  <param name="fsvnSecurity" value="-unsecure"/>
+	  <param name="fsvnSecurity" value="-noSecurityManager"/>
     </antcall>
 
 	<antcall target="_forServerVersion">

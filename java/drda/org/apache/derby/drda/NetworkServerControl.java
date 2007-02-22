@@ -534,7 +534,7 @@ public class NetworkServerControl{
      * by main().</li>
      * <li>The VM isn't already running a SecurityManager.</li>
      * <li>The command must be "start".</li>
-     * <li>The customer didn't specify the -unsecure flag on the startup command
+     * <li>The customer didn't specify the -noSecurityManager flag on the startup command
      * line.</li>
      * </ul>
      */
