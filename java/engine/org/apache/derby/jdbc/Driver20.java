@@ -91,21 +91,15 @@ public abstract class Driver20 extends InternalDriver implements Driver {
 	 * @return A nested connection object.
 	 *
 	 */
-	public Connection getNewNestedConnection(EmbedConnection conn)
-	{
-		return new EmbedConnection(conn);
-	}
+	public abstract Connection getNewNestedConnection(EmbedConnection conn);
+
 
 	/*
 		Methods to be overloaded in sub-implementations such as
 		a tracing driver.
 	 */
-	public EmbedConnection getNewEmbedConnection(String url, Properties info)
-		 throws SQLException 
-	{
-		// make a new local connection with a new transaction resource
-		return new EmbedConnection(this, url, info);
-	}
+	public abstract EmbedConnection getNewEmbedConnection(String url, Properties info)
+		 throws SQLException;
 
 	/**
 	 	@exception SQLException if fails to create statement

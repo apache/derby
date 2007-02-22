@@ -86,12 +86,11 @@ import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
   <LI> JDBC 2.0
    </UL>
  * 
- *	@author djd
  *
  * @see TransactionResourceImpl
  *
  */
-public class EmbedConnection implements EngineConnection
+public abstract class EmbedConnection implements EngineConnection
 {
 
 	private static final StandardException exceptionClose = StandardException.closeException();
