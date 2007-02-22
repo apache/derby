@@ -244,11 +244,6 @@
 	  <param name="codeline" value="${SERVER_TRUNK}"/>
     </antcall>
 
-    <antcall target="_forEmbeddedVM"> <!-- Still OK with JVM 1.3 in embedded mode. -->
-	  <param name="eVM" value="${VM_1.3}"/>
-	  <param name="eName" value="VM-1.3"/>
-    </antcall>
-
     <antcall target="_forEmbeddedVM">
 	  <param name="eVM" value="${VM_1.4}"/>
 	  <param name="eName" value="VM-1.4"/>
