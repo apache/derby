@@ -25,6 +25,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.HarnessJavaTest;
 import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -81,8 +82,11 @@ public class NetHarnessJavaTest extends HarnessJavaTest {
         		         SecurityManagerSetup.noSecurityManager(
         		             decorate(new NetHarnessJavaTest("testProtocol")))));
 
-        suite.addTest(SecurityManagerSetup.noSecurityManager(
+        // Server does not run on J2ME
+        if (JDBC.vmSupportsJDBC3()) {
+            suite.addTest(SecurityManagerSetup.noSecurityManager(
         		         decorate(new NetHarnessJavaTest("DerbyNetNewServer"))));
+        }
         
         return new SupportFilesSetup(suite,
         	           new String[] {

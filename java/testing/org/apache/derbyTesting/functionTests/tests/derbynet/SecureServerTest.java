@@ -32,6 +32,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.ServerSetup;
@@ -146,10 +147,14 @@ public class SecureServerTest extends BaseTestCase
     {
         //NetworkServerTestSetup.setWaitTime( 10000L );
         
-        TestSuite       suite = new TestSuite();
+        TestSuite       suite = new TestSuite("SecureServerTest");
 
         // Server booting requires that we run from the jar files
         if ( !TestConfiguration.loadingFromJars() ) { return suite; }
+        
+        // Need derbynet.jar in the classpath!
+        if (!Derby.hasServer())
+            return suite;
 
         // O = Overriden
         // A = Authenticated
