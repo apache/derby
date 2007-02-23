@@ -849,16 +849,17 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		containerRowCount = rowCount;
 	}
 
-	/*
+	/**
 	** if the page size is different from the page buffer, then make a
 	** new page buffer and make subclass use the new page buffer
 	*/
-
 	protected void setPageArray(int pageSize)
 	{
 		if ((pageData == null) || (pageData.length != pageSize)) 
         {
-            // Give a chance for gc to release the old buffer
+            // Give a chance for garbage collection to free
+            // the old array before the new array is allocated.
+            // Just in case memory is low.
             pageData = null; 
 			pageData = new byte[pageSize];
 				
