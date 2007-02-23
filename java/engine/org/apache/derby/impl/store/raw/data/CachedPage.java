@@ -854,17 +854,13 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	** new page buffer and make subclass use the new page buffer
 	*/
 
-	protected void setPageArray(int pageSize) throws StandardException
+	protected void setPageArray(int pageSize)
 	{
 		if ((pageData == null) || (pageData.length != pageSize)) 
         {
+            // Give a chance for gc to release the old buffer
+            pageData = null; 
 			pageData = new byte[pageSize];
-
-			if (pageData == null || pageData.length != pageSize)
-            {
-				throw StandardException.newException(
-                        SQLState.DATA_OBJECT_ALLOCATION_FAILED, "PAGE");
-            }
 				
 			usePageBuffer(pageData);
 		}

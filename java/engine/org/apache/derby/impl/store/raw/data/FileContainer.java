@@ -996,11 +996,6 @@ abstract class FileContainer
 	{
 		// just write out the whole container header
 		byte[] array = new byte[CONTAINER_INFO_SIZE];
-		if (array == null || array.length != CONTAINER_INFO_SIZE)
-        {
-			throw StandardException.newException(
-                SQLState.DATA_OBJECT_ALLOCATION_FAILED, "byte[]");
-        }
 
 		try
 		{
