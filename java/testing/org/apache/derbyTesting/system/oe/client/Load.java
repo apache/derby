@@ -83,6 +83,17 @@ public interface Load {
      * @throws Exception
      */
     public void setupLoad(Connection conn, short scale) throws Exception;
+    
+    /**
+     * Set the number of total threads the loader is allowed to use
+     * to load data.
+     * If an implementation does not support multiple threads then
+     * the passed in value will be ignored.
+     * 
+     * @param threadCount Number of threads to use if loading supports
+     * multiple threading.
+     */
+    public void setThreadCount(int threadCount);
 
     /**
      * Follow the initial database population requirements in Section 4.3.3 
@@ -93,6 +104,6 @@ public interface Load {
      * 
      * @throws SQLException
      */
-    public void populateAllTables() throws SQLException;
+    public void populateAllTables() throws Exception;
 
 }

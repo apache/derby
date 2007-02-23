@@ -34,6 +34,7 @@ import org.apache.derbyTesting.junit.JDBCPerfTestCase;
  */
 public class Schema extends JDBCPerfTestCase {
 
+    private String scriptBase;
 
     /**
      * Create a test case with the given name.
@@ -42,7 +43,8 @@ public class Schema extends JDBCPerfTestCase {
      *            of the test case.
      */
     public Schema(String name) {
-        super(name);
+        super("testScript");
+        scriptBase = name;
     }
 
     /**
@@ -81,11 +83,15 @@ public class Schema extends JDBCPerfTestCase {
     /**
      * Run a Order Entry script.
      */
-    public void runTest() throws UnsupportedEncodingException,
+    public void testScript() throws UnsupportedEncodingException,
     SQLException, PrivilegedActionException, IOException {
 
-        String script = "org/apache/derbyTesting/system/oe/schema/" + getName();
+        String script = "org/apache/derbyTesting/system/oe/schema/" + scriptBase;
         int errorCount = runScript(script, "US-ASCII");
         assertEquals("Errors in script ", 0, errorCount);
+    }
+    
+    public String getName() {
+        return scriptBase;
     }
 }

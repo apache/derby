@@ -65,7 +65,7 @@ public class Populate extends JDBCPerfTestCase {
     /**
      * Warehouse scale factor
      */
-    private static short scale = 1;
+    static short scale = 1;
 
     /**
      * flag to indicate if we should create constraints before loading data
@@ -81,7 +81,7 @@ public class Populate extends JDBCPerfTestCase {
     /**
      * Load implementation used to populate the database
      */
-    private Load loader;
+    Load loader;
 
     /**
      * Create a test case with the given name.
@@ -126,7 +126,7 @@ public class Populate extends JDBCPerfTestCase {
      * parse arguments.
      * @param args arguments to parse
      */
-    private static void parseArgs(String[] args) {
+    static void parseArgs(String[] args) {
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("-scale")) {
@@ -162,7 +162,11 @@ public class Populate extends JDBCPerfTestCase {
      * 
      * @return the tests to run
      */
-    public static Test suite() throws Exception {
+    public static Test suite() {
+        return loaderSuite(Populate.class);
+    }
+    
+    static Test loaderSuite(Class loader) {
         TestSuite suite = new TestSuite("Order Entry");
 
         // Create Schema
@@ -171,7 +175,7 @@ public class Populate extends JDBCPerfTestCase {
             Schema.addConstraints(suite);
         
         // this will populate db
-        suite.addTest(new Populate("testLoad"));
+        suite.addTestSuite(loader);
 
         if (!createConstraintsBeforeLoad)
             Schema.addConstraints(suite);

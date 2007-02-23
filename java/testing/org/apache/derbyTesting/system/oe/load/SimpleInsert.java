@@ -43,7 +43,7 @@ public class SimpleInsert implements Load {
     /**
      * Seed value for random number generator.
      */
-    private long seed = System.currentTimeMillis();
+    long seed = System.currentTimeMillis();
 
     /**
      * Utility to generate random data per the TPC-C requirements
@@ -62,9 +62,7 @@ public class SimpleInsert implements Load {
      */
     public void setupLoad(Connection conn, short scale) throws SQLException {
 
-        this.conn = conn;
-        conn.setAutoCommit(false);
-        conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        setupConnection(conn, scale);
 
         Statement s = conn.createStatement();
         try {
@@ -81,10 +79,38 @@ public class SimpleInsert implements Load {
         // Section 2.1.6.1 of TPC-C spec
         int loadRandomFactor = random.randomInt(0, 255);
         s.execute("INSERT INTO C VALUES(" + loadRandomFactor + ", -1, -1, -1)");
-        random = new OERandom(loadRandomFactor, -1, -1, seed);
-        conn.commit();
-
+        s.close();
+        conn.commit();  
+        
+        setRandomGenerator();
+    }
+    
+    /**
+     * Set the connection up to the intended state.
+     * Intended for use by sub-classes.
+     */
+    void setupConnection(Connection conn, short scale) throws SQLException
+    {
+        this.conn = conn;
+        conn.setAutoCommit(false);
+        conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
         this.scale = scale;
+    }
+    
+    /**
+     * Setup the random number generator to be used for the load.
+     * @throws SQLException
+     */
+    void setRandomGenerator() throws SQLException
+    {
+        Statement s = conn.createStatement();
+        ResultSet rs = s.executeQuery("SELECT CLOAD FROM C");
+        rs.next();
+        int loadRandomFactor = rs.getInt(1);
+        rs.close();
+        random = new OERandom(loadRandomFactor, -1, -1, seed);
+        s.close();
+        conn.commit();
     }
 
     /**
@@ -93,26 +119,35 @@ public class SimpleInsert implements Load {
      * 
      * @throws SQLException
      */
-    public void populateAllTables() throws SQLException {
+    public void populateAllTables() throws Exception {
         // load item table
         itemTable(1, Load.ITEM_COUNT);
 
-        // for each row in warehouse table, load the stock,
-        // district table. For each row in district table, load
-        // the customer table. for each row in customer table, load
-        // the history, and order table.
-
         for (short w = 1; w <= scale; w++) {
-            warehouseTable(w);
-            // for each warehouse: load the stock table
-            stockTable(1, Load.STOCK_COUNT_W, w);
-            for (short d = 1; d <= Load.DISTRICT_COUNT_W; d++) {
-                districtTable(w, d);
-                customerTable(w, d);
-                orderTable(w, d);
-            }
+            populateForOneWarehouse(w);
         }
 
+    }
+    
+    /**
+     * Populate all the tables needed for a specific warehouse.
+     * for each row in warehouse table, load the stock,
+     * district table. For each row in district table, load
+     * the customer table. for each row in customer table, load
+     * the customer table. for each row in customer table, load
+     * @param w Warehouse to be populated.
+     * @throws SQLException
+     */
+    void populateForOneWarehouse(short w) throws SQLException
+    {
+        warehouseTable(w);
+        // for each warehouse: load the stock table
+        stockTable(1, Load.STOCK_COUNT_W, w);
+        for (short d = 1; d <= Load.DISTRICT_COUNT_W; d++) {
+            districtTable(w, d);
+            customerTable(w, d);
+            orderTable(w, d);
+        }
     }
 
     /**
@@ -410,6 +445,12 @@ public class SimpleInsert implements Load {
 
     public void setSeed(long seed) {
         this.seed = seed;
+    }
+
+    /**
+     * Ignore, this is a single threaded load.
+     */
+    public void setThreadCount(int threadCount) {
     }
 
 }
