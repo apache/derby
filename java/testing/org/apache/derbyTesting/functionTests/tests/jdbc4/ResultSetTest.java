@@ -1375,7 +1375,6 @@ public class ResultSetTest
     /**
      * Prepare commonly used statement to insert a row.
      *
-     * @param con connection to database
      * @param colName name of the column to insert into
      */
     private PreparedStatement prep(String colName)
@@ -1387,7 +1386,6 @@ public class ResultSetTest
     /**
      * Fetch the specified row for update.
      *
-     * @param con connection to database
      * @param colName name of the column to fetch
      * @param key identifier for row to fetch
      * @return a <code>ResultSet</code> with zero or one row, depending on
@@ -1405,7 +1403,6 @@ public class ResultSetTest
     /**
      * Fetch the specified row.
      *
-     * @param con connection to database
      * @param colName name of the column to fetch
      * @param key identifier for row to fetch
      * @return a <code>ResultSet</code> with zero or one row, depending on
