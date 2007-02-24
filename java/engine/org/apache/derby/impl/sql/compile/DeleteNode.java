@@ -65,7 +65,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
-import org.apache.derby.impl.sql.execute.DeleteConstantAction;
 import org.apache.derby.impl.sql.execute.FKInfo;
 
 import java.lang.reflect.Modifier;
