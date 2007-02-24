@@ -98,7 +98,7 @@ public class Populate extends JDBCPerfTestCase {
      * Do the initial setup required Initialize the appropriate implementation
      * for the Load phase.
      */
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         // Use simple insert statements to insert data.
         // currently only this form of load is present, once we have 
         // different implementations, the loading mechanism will need
