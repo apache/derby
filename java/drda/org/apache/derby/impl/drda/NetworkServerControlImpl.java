@@ -144,8 +144,8 @@ public final class NetworkServerControlImpl {
 	private final static String DEFAULT_LOCALE_COUNTRY="US";
 
 	// Check up to 10 seconds to see if shutdown occurred
-	private final static int SHUTDOWN_CHECK_ATTEMPTS = 20;
-	private final static int SHUTDOWN_CHECK_INTERVAL= 500;
+	private final static int SHUTDOWN_CHECK_ATTEMPTS = 100;
+	private final static int SHUTDOWN_CHECK_INTERVAL= 100;
 
 	// maximum reply size
 	private final static int MAXREPLY = 32767;
@@ -878,7 +878,6 @@ public final class NetworkServerControlImpl {
 		writeCommandHeader(COMMAND_SHUTDOWN);
 		send();
 		readResult();
-        closeSocket();
 		// Wait up to 10 seconds for things to really shut down
 		// need a quiet ping so temporarily disable the logwriter
 		PrintWriter savWriter = logWriter;
@@ -896,17 +895,21 @@ public final class NetworkServerControlImpl {
 		{
 			Thread.sleep(SHUTDOWN_CHECK_INTERVAL);
 			try {
-				ping();
+                pingWithNoOpen();
 			} catch (Exception e) 
 			{
-				// as soon as we can't ping return
-				if (ntry == SHUTDOWN_CHECK_ATTEMPTS)
-					consolePropertyMessage("DRDA_ShutdownError.S", new String [] {
-						Integer.toString(portNumber), 
-						hostArg}); 
+                // as soon as we can't ping return
 				break;
 			}
 		}
+        closeSocket();
+        
+        
+        if (ntry == SHUTDOWN_CHECK_ATTEMPTS)
+            consolePropertyMessage("DRDA_ShutdownError.S", new String [] {
+                Integer.toString(portNumber), 
+                hostArg}); 
+        
 		logWriter= savWriter;
 		return;
 	}
@@ -938,8 +941,23 @@ public final class NetworkServerControlImpl {
 		return true;
 	}
 
+    /**
+     * Ping opening an new socket and close it.
+     * @throws Exception
+     */
 	public void ping() throws Exception
 	{
+        setUpSocket();
+        pingWithNoOpen();
+        closeSocket();
+    }
+    
+    /**
+     * Ping the server using the client socket that is already open.
+     */
+    private void pingWithNoOpen() throws Exception
+    {
+    
 		// database no longer used, but don't change the protocol 
 		// in case we add
 		// authorization  later.
@@ -947,15 +965,13 @@ public final class NetworkServerControlImpl {
 		String user = null;
 		String password = null;
 
-			setUpSocket();
+			
 			writeCommandHeader(COMMAND_TESTCONNECTION);
 			writeLDString(database);
 			writeLDString(user);
 			writeLDString(password);
 			send();
 			readResult();
-            closeSocket();
-
 	}
 
 
