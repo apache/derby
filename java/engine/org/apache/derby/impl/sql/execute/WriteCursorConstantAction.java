@@ -47,6 +47,14 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
  *	This abstract class describes compiled constants that are passed into
  *	Delete, Insert, and Update ResultSets.
  *
+ *  This class and its sub-classes are not really implementations
+ *  of ConstantAction, since they are not executed.
+ *  
+ *  A better name for these classes would be 'Constants'.
+ *  E.g. WriteCursorConstants, DeleteConstants.
+ *  
+ *  Ideally one day the split will occur.
+ *
  *	@author Rick Hillegas
  */
 

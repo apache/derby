@@ -49,7 +49,7 @@ import org.apache.derby.iapi.reference.SQLState;
  *	@author jamie 
  */
 
-class SetSchemaConstantAction extends GenericConstantAction
+class SetSchemaConstantAction implements ConstantAction
 {
 
 	private final String					schemaName;

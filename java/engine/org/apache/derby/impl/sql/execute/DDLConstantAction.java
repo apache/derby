@@ -51,40 +51,8 @@ import org.apache.derby.iapi.store.access.TransactionController;
  *
  * @author jamie
  */
-public abstract class DDLConstantAction extends GenericConstantAction
+abstract class DDLConstantAction implements ConstantAction
 {
-	//TransactionController 		tc;
-	//protected LanguageConnectionContext 	lcc;
-	//DataDescriptorGenerator 	ddg;
-	//DataDictionary 				dd;
-	//DependencyManager			dm;
-
-	/**
-	 * Set up the "environment variables" for this
-	 * constant action.
-	 */
-	//protected void setEnvironmentVariables(Activation activation)
-	//{
-		/* find the language context.
-		 * NOTE: The activation could be null if
-		 * we are creating the SPSs for the metadata
-		 * queries in the background, so we get
-		 * the lcc from the ContextService.
-		 */
-		//lcc = (activation == null) ?
-		//		(LanguageConnectionContext)
-		//			ContextService.getContext(LanguageConnectionContext.CONTEXT_ID):
-		//		activation.getLanguageConnectionContext();
-
-
-        // Get the current transaction controller
-        //tc = lcc.getTransactionExecute();
-
-		//dd = lcc.getDataDictionary();
-		//dm = dd.getDependencyManager();
-		//ddg = dd.getDataDescriptorGenerator();
-//	}
-
 	/**
 	 * Get the schema descriptor for the schemaid.
 	 *

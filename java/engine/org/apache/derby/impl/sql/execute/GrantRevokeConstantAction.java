@@ -25,10 +25,11 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 import java.util.List;
 
-class GrantRevokeConstantAction extends GenericConstantAction
+class GrantRevokeConstantAction implements ConstantAction
 {
 	private boolean grant;
 	private PrivilegeInfo privileges;

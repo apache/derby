@@ -41,7 +41,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
  *	@author Jerry Brenner.
  */
 
-class SetTransactionIsolationConstantAction extends GenericConstantAction
+class SetTransactionIsolationConstantAction implements ConstantAction
 {
 
 	private final int isolationLevel;

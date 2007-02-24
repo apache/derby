@@ -44,7 +44,7 @@ import org.apache.derby.catalog.UUID;
  *	@author jamie 
  */
 
-class LockTableConstantAction extends GenericConstantAction
+class LockTableConstantAction implements ConstantAction
 {
 
 	private final String					fullTableName;

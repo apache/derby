@@ -33,7 +33,9 @@ import org.apache.derby.catalog.UUID;
  *	statements to describe what they should stuff into the catalogs.
  *	<p>
  *	An object satisfying this interface is put into the PreparedStatement
- *	and run at Execution time.
+ *	and run at Execution time. Thus ConstantActions may be shared
+ *  across threads and must not store connection/thread specific
+ *  information in any instance field.
  *
  *	@author Rick Hillegas
  */
