@@ -189,6 +189,7 @@ public abstract class Driver20 extends InternalDriver implements Driver {
 				{Attribute.CRYPTO_KEY_LENGTH, MessageId.CONN_CRYPTO_KEY_LENGTH},
 				{Attribute.CRYPTO_EXTERNAL_KEY, MessageId.CONN_CRYPTO_EXTERNAL_KEY},
 				{Attribute.TERRITORY, MessageId.CONN_LOCALE},
+				{Attribute.COLLATION, MessageId.CONN_COLLATION},
 				{Attribute.USERNAME_ATTR, MessageId.CONN_USERNAME_ATTR},
 				{Attribute.LOG_DEVICE, MessageId.CONN_LOG_DEVICE},
 				{Attribute.ROLL_FORWARD_RECOVERY_FROM, MessageId.CONN_ROLL_FORWARD_RECOVERY_FROM},

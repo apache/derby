@@ -5,6 +5,7 @@ encryptionAlgorithm - value: null - description: cryptographic algorithm - requi
 encryptionKeyLength - value: null - description: cryptographic key length - required false - choices null 
 encryptionKey - value: null - description: external cryptographic key - required false - choices null 
 territory - value: null - description: territory for the database - required false - choices null 
+collation - value: null - description: collation for chararcter datatypes - required false - choices null 
 user - value: null - description: user name - required false - choices null 
 logDevice - value: null - description: log directory path - required false - choices null 
 rollForwardRecoveryFrom - value: null - description: backup path for rollforward recovery - required false - choices null 
@@ -22,6 +23,7 @@ encryptionAlgorithm - value: null - description: cryptographic algorithm - requi
 encryptionKeyLength - value: null - description: cryptographic key length - required false - choices null 
 encryptionKey - value: null - description: external cryptographic key - required false - choices null 
 territory - value: null - description: territory for the database - required false - choices null 
+collation - value: null - description: collation for chararcter datatypes - required false - choices null 
 user - value: null - description: user name - required false - choices null 
 logDevice - value: null - description: log directory path - required false - choices null 
 rollForwardRecoveryFrom - value: null - description: backup path for rollforward recovery - required false - choices null 

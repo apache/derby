@@ -111,6 +111,7 @@ public interface MessageId {
 	String CONN_CRYPTO_EXTERNAL_KEY         = "J019"; // external cryptographic key
 	String CONN_BOOT_PASSWORD               = "J020"; // secret cryptographic key
 	String CONN_LOCALE                      = "J021"; // locale for the database
+	String CONN_COLLATION                   = "J031"; // collation info for the character datatypes
 	String CONN_USERNAME_ATTR               = "J022"; // user name
 	String CONN_PASSWORD_ATTR               = "J023"; // user password
 	String CONN_LOG_DEVICE                  = "J025"; // log directory path

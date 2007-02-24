@@ -842,6 +842,13 @@ public interface Property {
 	public static final String SERVICE_PROTOCOL = "derby.serviceProtocol";
 	public static final String SERVICE_LOCALE = "derby.serviceLocale";
 
+	public static final String COLLATION = "derby.database.collation";
+	// These are the 2 possible values for collation
+	public static final String UCS_BASIC_COLLATION =
+								"UCS_BASIC";
+	public static final String TERRITORY_BASED_COLLATION =
+								"TERRITORY_BASED";
+
     /**
      * db2j.storage.dataNotSyncedAtCheckPoint
      * <p>

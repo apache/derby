@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.Property;
@@ -671,7 +672,18 @@ public final class	DataDictionaryImpl
 					bootingTC.setProperty(Property.SQL_AUTHORIZATION_PROPERTY,"true",true);
 					usesSqlAuthorization=true;
 				}
-
+				// Get the collation attribute from the JDBC url. It can only have one of
+				// 2 possible values - UCS_BASIC or TERRITORY_BASED
+				// This attribute can only be specified at database create time.
+				String userDefinedCollation = startParams.getProperty(Attribute.COLLATION);		
+				if (userDefinedCollation == null)
+					userDefinedCollation = Property.UCS_BASIC_COLLATION;
+				else {//Invalid value handling
+					if (!userDefinedCollation.equalsIgnoreCase(Property.UCS_BASIC_COLLATION)
+							&& !userDefinedCollation.equalsIgnoreCase(Property.TERRITORY_BASED_COLLATION))
+						throw StandardException.newException(SQLState.INVALID_COLLATION, userDefinedCollation);
+					}
+				bootingTC.setProperty(Property.COLLATION,userDefinedCollation,true);
 			} else {
 				// Get the ids for non-core tables
 				loadDictionaryTables(bootingTC, ddg, startParams);
