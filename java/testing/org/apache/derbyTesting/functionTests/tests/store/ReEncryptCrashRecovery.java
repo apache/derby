@@ -584,7 +584,6 @@ public class ReEncryptCrashRecovery
     
     /**
      * Encrypt an un-encrypted atabase. 
-     * @param password boot password of the database.
      * @exception SQLException if any database exception occurs.
      */
     private Connection encryptDatabase() 
@@ -611,7 +610,7 @@ public class ReEncryptCrashRecovery
 
     /**
      * Boot the database. 
-     * @param passwordOrKey the password/key to use.  
+     * @param passwordKey the password/key to use.  
      * @exception SQLException if any database exception occurs.
      */
     Connection bootDatabase(int passwordKey)

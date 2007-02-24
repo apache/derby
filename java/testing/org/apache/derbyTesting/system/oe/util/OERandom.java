@@ -109,7 +109,6 @@ public class OERandom {
     
     /**
      * Return a random district [1..10]
-     * @return
      */
     public short district()
     {
@@ -118,7 +117,6 @@ public class OERandom {
     
     /**
      * Return a random carrier [1..10]
-     * @return
      */
     public short carrier()
     {
@@ -127,7 +125,6 @@ public class OERandom {
 
     /**
      * Return a random threshold for the stock level [10..20]
-     * @return
      */
     public int threshold()
     {

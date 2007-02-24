@@ -1133,7 +1133,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
     }
 
     /**
-     *  @see testLargeParameters_a()
+     *  @see #testLargeParameters_a()
      */
     public void testLargeParameters_b() throws Exception
     {

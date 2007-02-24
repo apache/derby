@@ -88,7 +88,6 @@ public class XATest {
     /**
      * Get the basic set of properties for an XADataSource.
      * Only sets databaseName to wombat.
-     * @return
      */
     private static Properties cleanProperties() {
         Properties dsAttrs = new Properties();

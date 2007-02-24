@@ -403,9 +403,7 @@ public abstract class BaseTest
      *   estimate_space_savings   = ret_info[4];
      * <p>
      *
-	 * @return the space information about the table.
      *
-	 * @exception  StandardException  Standard exception policy.
      **/
     protected static final int SPACE_INFO_IS_INDEX          = 0;
     protected static final int SPACE_INFO_NUM_ALLOC         = 1;

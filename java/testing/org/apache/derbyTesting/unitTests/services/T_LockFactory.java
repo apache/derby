@@ -36,7 +36,7 @@ import org.apache.derby.iapi.error.StandardException;
 	Protocol unit test for the LockManager.
 
 	@see LockFactory
-	@see org.apache.derbyTesting.unitTests.harness..UnitTest
+	@see org.apache.derbyTesting.unitTests.harness.UnitTest
 */
 
 public class T_LockFactory extends T_MultiIterations

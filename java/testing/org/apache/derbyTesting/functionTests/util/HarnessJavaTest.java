@@ -59,7 +59,6 @@ public abstract class HarnessJavaTest extends CanonTestCase {
     
     /**
      * Return the folder of the test, such as 'jdbcapi' or 'lang'.
-     * @return
      */
     protected abstract String getArea();
     

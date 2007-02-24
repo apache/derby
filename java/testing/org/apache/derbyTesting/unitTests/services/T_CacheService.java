@@ -123,7 +123,6 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
 	  
 	  'moduleName' to the name of the module to test. 
 
-	  @param testConfiguration the configuration for this test.
 	  */
 	protected String getModuleToTestProtocolName() {
 		return org.apache.derby.iapi.reference.Module.CacheFactory;

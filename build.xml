@@ -615,7 +615,7 @@
   <property name="javadoc.tool.jdk16" value="${jdk16}/bin/javadoc"/>
 
   <target name="javadoc"
-    depends="init-javadoc-tool,init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs"/>
+    depends="init-javadoc-tool,init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs,testingdocs"/>
 
   <target name="init-javadoc-tool" depends="init-javadoc-not-jdk16,init-javadoc-jdk16"/>
 
@@ -885,6 +885,23 @@
       <arg value="${jjtodoc}"/>
     </java>
 
+  </target>
+
+  <target name="testingdocs" depends="init-javadoc-tool,initjars">
+    <javadoc
+       executable="${javadoc.tool}"
+       packagenames="org.*"
+       access="private"
+       breakiterator="yes"
+       classpath="${out.dir};${java14compile.classpath};${jars.extras};${osgi};${junit}"
+       destdir="${out.javadoc.dir}/testing"
+       windowtitle="Apache Derby V${major}.${minor} Test Javadoc"
+       doctitle="Apache Derby V${major}.${minor} Test Javadoc"
+       Footer="${javadoc.Footer}"
+       bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,2007 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
+       source="1.4"
+       sourcepath="${derby.testing.src.dir}"
+       excludepackagenames="org.apache.derbyTesting.functionTests.tests.jdbc4"/>
   </target>
 
   <target name="cleandocs">

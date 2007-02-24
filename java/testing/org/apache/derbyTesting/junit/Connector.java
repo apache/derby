@@ -79,7 +79,7 @@ interface Connector {
     /**
      * Shutdown the running default database using user and password
      * defined by the configuration passed to setConfiguration.
-     * @return Nothing, exception is expected to be thrown with SQLState 08006
+     * Return nothing, exception is expected to be thrown with SQLState 08006
      */
     abstract void shutDatabase() throws SQLException;
    
@@ -87,7 +87,7 @@ interface Connector {
      * Shutdown the running derby engine (not the network server).
      * This method can only be called when the
      * engine is running embedded in this JVM.
-     * @return Nothing, exception is expected to be thrown with SQLState XJ015
+     * Return nothing, exception is expected to be thrown with SQLState XJ015
      */
     abstract void shutEngine() throws SQLException;
 }

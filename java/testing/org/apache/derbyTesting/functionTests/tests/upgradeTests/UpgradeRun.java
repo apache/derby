@@ -226,7 +226,7 @@ class UpgradeRun {
      * Create a class loader using jars in the specified location. Add all jars 
      * specified in jarFiles and the testing jar.
      * 
-     * @param jarLoc Location of jar files
+     * @param version the Derby version to create a classloader for.
      * @return class loader
      */
     private static ClassLoader createClassLoader(int[] version)

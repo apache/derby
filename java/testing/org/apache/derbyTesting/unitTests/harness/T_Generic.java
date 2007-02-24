@@ -179,7 +179,7 @@ public abstract class T_Generic implements UnitTest, ModuleControl
 	  within a unit test passed.
 
 	  <P>RESOLVE:Localize this.
-	  @param test the test which passed.
+	  @param testName the test which passed.
 	  @return true
 	  */
 	protected boolean PASS(String testName) {
@@ -214,7 +214,6 @@ public abstract class T_Generic implements UnitTest, ModuleControl
 	  
 	  'moduleName' to the name of the module to test. 
 
-	  @param testConfiguration the configuration for this test.
 	  */
 	protected abstract String getModuleToTestProtocolName();
 }

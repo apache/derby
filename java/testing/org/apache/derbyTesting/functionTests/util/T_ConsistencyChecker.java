@@ -91,8 +91,6 @@ public class T_ConsistencyChecker
 	 * @param schemaName	The schema name.
 	 * @param tableName		The table name.
 	 * 
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public static void deleteFirstHeapRow(String schemaName, String tableName)
@@ -122,8 +120,6 @@ public class T_ConsistencyChecker
 	 * @param schemaName	The schema name.
 	 * @param tableName		The table name.
 	 * 
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public static void reinsertFirstHeapRow(String schemaName, String tableName)
@@ -158,8 +154,6 @@ public class T_ConsistencyChecker
 	 * @param schemaName	The schema name.
 	 * @param tableName		The table name.
 	 * 
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public static void nullFirstHeapRow(String schemaName, String tableName)
@@ -196,8 +190,6 @@ public class T_ConsistencyChecker
 	 * @param tableName		The table name.
 	 * @param indexName		The specified index.
 	 * 
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public static void insertBadRowLocation(String schemaName, String tableName, String indexName)
@@ -247,8 +239,6 @@ public class T_ConsistencyChecker
 	 * @param firstColumn	First column #.
 	 * @param secondColumn	Second column #.
 	 * 
-	 * @return Nothing.
-	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public static void swapColumnsInFirstHeapRow(String schemaName, String tableName,

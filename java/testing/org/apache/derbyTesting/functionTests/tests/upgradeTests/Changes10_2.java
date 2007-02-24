@@ -75,11 +75,6 @@ public class Changes10_2 extends UpgradeChange {
      * same. The re-compile of the trigger on version changes
      * should automatically switch between the two implementations.
      *
-     * @param conn Connection
-     * @param phase Upgrade test phase
-     * @param dbMajor Major version of old release 
-     * @param dbMinor Minor version of old release
-     * @return true, if the test passes
      * @throws SQLException
      */
     public void testTriggerInternalVTI()

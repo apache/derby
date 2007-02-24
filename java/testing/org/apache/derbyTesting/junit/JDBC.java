@@ -837,7 +837,6 @@ public class JDBC {
          * Return Type name from jdbc type
          * 
          * @param jdbcType  jdbc type to translate
-         * @return
          */
         public static String sqlNameFromJdbc(int jdbcType) {
                 switch (jdbcType) {

@@ -213,10 +213,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
      *                             We expect a BatchUpdateException, and
      *                             verify it is so.
      *
-     * @param String               The sqlstate to look for.
-     * @param Statement            The Statement that contains the Batch to
+     * @param expectedError The sqlstate to look for.
+     * @param stmt The Statement that contains the Batch to
      *                             be executed.
-     * @param int[]                The expectedUpdateCount array.
+     * @param expectedUpdateCount The expectedUpdateCount array.
      */
     protected void assertBatchExecuteError( 
         String expectedError,

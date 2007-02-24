@@ -1374,7 +1374,6 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * clob because the method updateBlob(int, Blob) has not yet been
      * implemented for DerbyNetClient.
      *
-     * @param conn Connection
      * @throws SQLException
      */
     public void xTestGetClobBeforeAndAfterUpdate() throws SQLException {
@@ -1446,7 +1445,6 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * Test that the getClob() returns the correct value for the blob before and
      * after updating the Clob using the method updateCharacterStream().
      *
-     * @param conn Connection
      * @throws SQLException
      */
     public void xTestGetClobBeforeAndAfterUpdateStream() throws SQLException {

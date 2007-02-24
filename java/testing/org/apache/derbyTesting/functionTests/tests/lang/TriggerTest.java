@@ -71,7 +71,6 @@ public class TriggerTest extends BaseJDBCTestCase {
      * Run only in embedded as TRIGGERs are server side logic.
      * Also the use of a ThreadLocal to check state requires
      * embedded. 
-     * @return
      */
     public static Test suite() {
         return new CleanDatabaseTestSetup(
@@ -238,7 +237,7 @@ public class TriggerTest extends BaseJDBCTestCase {
      * and ensure it reflects correct sequenceing of
      * triggers created in testFiringOrder.
      * @param iud
-     * @return
+     * @return the number of triggers checked
      */
     private int assertFiringOrder(String iud, int modifiedRowCount)
     {

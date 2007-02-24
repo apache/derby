@@ -1021,14 +1021,14 @@ public class T_QualifierTest
         // make sure the expected result set is the same as the actual result
         // set.
 
-        Enumeration enum = result_set.elements();
+        Enumeration e = result_set.elements();
 
-        while (enum.hasMoreElements())
+        while (e.hasMoreElements())
         {
             Object   obj;
             DataValueDescriptor[] row = null;
 
-            if ((obj = enum.nextElement()) instanceof DataValueDescriptor[] )
+            if ((obj = e.nextElement()) instanceof DataValueDescriptor[] )
             {
                 row = (DataValueDescriptor[] ) obj;
                 key = ((SQLLongint)(row[2])).getLong();

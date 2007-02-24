@@ -52,7 +52,6 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
      * @param test Test to decorate
      * @param deadlockTime Time in seconds for derby.locks.deadlockTimeout.
      * @param waitTime Time in seconds for derby.locks.waitTimeout
-     * @return
      */
     public static Test setLockTimeouts(Test test, int deadlockTime, int waitTime)
     {

@@ -185,7 +185,7 @@ public class SecurityCheck {
 	 * Note that this inspection is through the declared type of exposed
 	 * references, not the actual runtime type. The actual runtime type
 	 * might expose other classes that should be inspected.
-	 * @param className
+	 * @param c the class to inspect
 	 * @throws ClassNotFoundException
 	 */
 	private static boolean inspectClass(Class c, String declared)

@@ -51,7 +51,7 @@ public class SURQueryMixTest extends SURBaseTest
 {
     /**
      * Constructor
-     * @param name model name of data model for this TestCase
+     * @param model name of data model for this TestCase
      * @param query to use for producing the resultset
      * @param cursorName name of cursor
      * @param positioned flag to determine if the Test should use positioned
@@ -345,13 +345,13 @@ public class SURQueryMixTest extends SURBaseTest
     
     /**
      * Tests navigation in ResultSet.
-     * @param ResultSet rs ResultSet to test navigation of. 
+     * @param rs ResultSet to test navigation of. 
      *                     Needs to be scrollable
-     * @param Map rows a sample of the rows which are in the ResultSet. Maps
+     * @param rows a sample of the rows which are in the ResultSet. Maps
      *                   position to a concatenation of the string values
-     * @param Set updatedRows a integer set of which rows that have been 
+     * @param updatedRows a integer set of which rows that have been 
      *            updated. Used to test rowUpdated()
-     * @param Set deletedRows a integer set of which rows that have been
+     * @param deletedRows a integer set of which rows that have been
      *            deleted. Used to test rowDeleted()
      */
     private void testNavigation(final ResultSet rs, final Map rows, 
@@ -538,7 +538,6 @@ public class SURQueryMixTest extends SURBaseTest
     
     /**
      * Run in client and embedded.
-     * @return
      */
     public static Test suite() 
     {   

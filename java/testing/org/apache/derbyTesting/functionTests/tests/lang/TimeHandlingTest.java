@@ -70,7 +70,6 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     /**
      * Runs the tests in the default embedded configuration and then
      * the client server configuration.
-     * @return
      */
     public static Test suite()
     {
@@ -117,7 +116,6 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      * Method for SQL SLEEP function. Sleeps for the time 
      * that will result in a change in
      * System.currentTimeMillis and a Derby TIME value.
-     * @return
      * @throws InterruptedException
      */
     public static int sleep() throws InterruptedException {
@@ -232,7 +230,6 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      * as a TIME and an INTEGER and thus checked for consistency
      * on a SELECT.
      * @param id
-     * @return
      */
     private Time getCodedTime(int id)
     {
@@ -503,7 +500,6 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      * @param columns Columns holding current values.
      * @param expectedCount Total number of values exected to see
      * (row count times column count)
-     * @return
      * @throws SQLException
      */
     private Object checkCurrentMultiple(int jdbcType, long start, long end, ResultSet rs,
@@ -924,8 +920,8 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     /**
      * Assert the SQL time portion of two SQL JDBC type
      * types are equal.
-     * @param tv
-     * @param tsv
+     * @param tv1 the first time to compare
+     * @param tv2 the second time to compare
      */
     private void assertTimeEqual(java.util.Date tv1, java.util.Date tv2)
     {

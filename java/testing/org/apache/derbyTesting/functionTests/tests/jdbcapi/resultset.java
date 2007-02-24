@@ -1153,7 +1153,6 @@ public class resultset {
      * 2) The ResultSet auto-commits when it completes and auto-commit is on. 
      * 
      * @param conn The Connection
-     * @param tableName
      * @throws SQLException
      */
     private static void testSingleRSAutoCommit(Connection conn) throws SQLException {

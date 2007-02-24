@@ -108,7 +108,8 @@ public class SimpleDiff
     public static String usage = "java SimpleDiff <file1> <file2>";
 
     /**
-        @param filename Name of file to be read
+        @param file1 Name of first file to be read
+        @param file2 Name of file with which to compare
         @return String array of file contents
         @exception IOException thrown by underlying calls
             to the file system

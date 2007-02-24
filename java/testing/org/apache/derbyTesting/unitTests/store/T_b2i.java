@@ -238,11 +238,10 @@ public class T_b2i extends T_MultiIterations
      * here to make tests a little more readable.  It currently just 
      * creates a heap table with "num_cols" SQLLongint columns.
      *
-	 * @return The identifier to be used to open the conglomerate later.
      *
      * @param num_cols the number of columns in the base table.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
 
     void createCongloms(

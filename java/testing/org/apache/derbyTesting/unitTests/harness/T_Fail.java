@@ -31,7 +31,7 @@ public class T_Fail extends Exception  {
 	/**
 	  Create a T_Fail exception which carries a message.
 
-	  @param messageId An Id for an error message for this exception.
+	  @param message An Id for an error message for this exception.
 	  */
 	private T_Fail(String message) {
 		super(message);

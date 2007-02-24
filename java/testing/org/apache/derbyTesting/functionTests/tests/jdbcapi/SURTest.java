@@ -1401,7 +1401,6 @@ public class SURTest extends SURBaseTest {
      *
      * @param rs An open updatable result set.
      * @param state A string describing the illegal state.
-     * @return No return value.
      */
     private void checkDetectabilityCallsOutsideRow(ResultSet rs, 
                                                    String state)
@@ -1580,7 +1579,6 @@ public class SURTest extends SURBaseTest {
     
     /**
      * Run the base suite in embedded and client mode.
-     * @return
      */
     public static Test suite() {
         TestSuite mainSuite = new TestSuite("SURTest");

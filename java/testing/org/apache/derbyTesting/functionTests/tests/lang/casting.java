@@ -811,7 +811,7 @@ public class casting {
 	 * Truncates (*) from typename
 	 * @param type - Type offset
 	 *
-	 * @returns  short name of type (e.g DECIMAL instead of DECIMAL(10,5)
+	 * @return  short name of type (e.g DECIMAL instead of DECIMAL(10,5)
 	 */
 
 	public static  String getShortTypeName(int type)
@@ -832,8 +832,8 @@ public class casting {
 
 	/**
 	 * Build a unique table name from the type
-	 * @param -  table offset
-	 * @returns  Table name in format <TYPE>_TAB. Replaces ' ' _;
+	 * @param type table offset
+	 * @return  Table name in format <TYPE>_TAB. Replaces ' ' _;
 	 */
 	public static  String getTableName(int type)
 	{

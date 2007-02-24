@@ -176,8 +176,6 @@ public interface Operations {
      *            Customer warehouse identifier
      * @param cd
      *            Customer district identifier
-     * @param c
-     *            Customer identifer.
      * @param customerLast
      *            Customer's last name.
      * @param amount

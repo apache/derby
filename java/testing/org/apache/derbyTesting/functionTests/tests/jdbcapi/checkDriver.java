@@ -300,7 +300,7 @@ public class checkDriver {
 
 	/**
 	 * Load the driver and check java.sql.Driver methods, 
-	 * @return
+	 * @return the driver that was loaded
 	 * @throws Exception
 	 */
 	private static Driver loadAndCheckDriverForFramework() throws Exception	

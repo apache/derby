@@ -1112,7 +1112,6 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
     /**
      * Runs the tests in the embedded and client server configuration
      * as the JDBC escape function testing is relevant for both drivers.
-     * @return
      */
 	public static Test suite() {
         return TestConfiguration.defaultSuite(MathTrigFunctionsTest.class);

@@ -139,7 +139,6 @@ public class IJRunScriptTest extends BaseJDBCTestCase {
      * for the script. Script is run using the UTF-8 encoding and
      * the output discarded.
      * @param script
-     * @return error count from ij.runScript.
      * @throws UnsupportedEncodingException
      * @throws SQLException
      */

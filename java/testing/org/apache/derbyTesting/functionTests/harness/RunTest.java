@@ -2918,7 +2918,7 @@ clp.list(System.out);
     /**
      * Install the default security manager in this JVM for this
      * test, used when useprocess is false.
-     * @return
+     * @return true if a security manager was installed
      * @throws ClassNotFoundException
      * @throws IOException
      */

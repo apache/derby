@@ -396,7 +396,8 @@ final public class BLOBTest extends BaseJDBCTestCase
      * Verifies that the blob is consistent
      * @param expectedVal the InputStream for the Blob should return this value
      *                    for every byte
-     * @param expecteSize the Blob should have this size
+     * @param expectedSize the BLOB should have this size
+     * @param blob the BLOB to check
      * @exception SQLException causes test to fail with error
      * @exception IOException causes test to fail with error
      */

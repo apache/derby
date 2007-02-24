@@ -37,8 +37,8 @@ public class FTFileUtil
 	/**
 	  Create a file.
 
-	  @param name the file's name.
-	  @length the number of bytes of test data in the file.
+	  @param fileName the file's name.
+	  @param length the number of bytes of test data in the file.
 	  @exception Exception oops.
 	  */
 	public static void mkFile(String fileName, int length) throws Exception
@@ -95,7 +95,7 @@ public class FTFileUtil
      * This method is  called by some tests through a SQL function:
      * fileExists(fileName varchar(128))returns VARCHAR(100)
      *
-     * @param name the file's name.
+     * @param fileName the file's name.
      * @return     <tt>"true"</tt> if the given file exists 
      *             <tt>"false"</tt> otherwise.
      * @exception Exception if any exception occurs 
@@ -127,7 +127,7 @@ public class FTFileUtil
     /**
      *	Remove a directory and all of its contents.
      *   
-     *  @param name the file's name.
+     *  @param directory the directory's name.
      * @return     <tt>true</tt> if the omplete directory was removed
      *             <tt>false</tt> otherwise.f false is returned then some of 
      *              the files in the directory may have been removed.
@@ -169,7 +169,7 @@ public class FTFileUtil
      * This method is  called by some tests through a SQL function:
      * removeDirectory(fileName varchar(128)) returns VARCHAR(100)
      *   
-     * @param name the file's name.
+     * @param directory the directory's name.
      * @return     <tt>"true"</tt> if the omplete directory was removed
      *             <tt>"false"</tt> otherwise.f false is returned then some of 
      *              the files in the directory may have been removed.

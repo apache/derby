@@ -465,7 +465,7 @@ public class UpgradeTester {
 	 *  
 	 * @param classLoader
 	 * @param prop
-	 * @return
+	 * @return a Connection to the database
 	 * @throws Exception
 	 */
 	private Connection getConnectionUsingDataSource(URLClassLoader classLoader, Properties prop) throws Exception{
@@ -976,7 +976,7 @@ public class UpgradeTester {
      * @param phase Upgrade test phase
      * @param grantRevokeSupported true if grant/revoke feature is supported in 
      * 								a specific version/upgrade phase.
-     * @return
+     * @return true if the exception is expected based on grant/revoke support
      */
     private boolean checkGrantRevokeException(SQLException sqle, int phase, 
     										boolean grantRevokeSupported) {
@@ -1441,7 +1441,7 @@ public class UpgradeTester {
 	 * Start the database
 	 * 
 	 * @param classLoader
-	 * @return
+	 * @return a Connection to the database
 	 * @throws Exception
 	 */
 	private Connection startDatabase(URLClassLoader classLoader) 
@@ -1462,7 +1462,7 @@ public class UpgradeTester {
 	/**
 	 * Shutdown and reconnect to the database
 	 * @param classLoader
-	 * @return
+	 * @return the new Connection to the database
 	 * @throws Exception
 	 */
 	private Connection restartDatabase(URLClassLoader classLoader) 

@@ -72,7 +72,6 @@ public class Checks extends JDBCPerfTestCase {
      * the Order Entry bechmark.
      * 
      * @param scale
-     * @return
      */
     public static Test checkAllRowCounts(short scale) {
         TestSuite suite = new TestSuite("Order Entry -Check Row Counts");
@@ -92,7 +91,6 @@ public class Checks extends JDBCPerfTestCase {
     
     /**
      * Consistency checks per Section 3.3.2 of TPC-C spec
-     * @return
      */
     public static Test consistencyChecks()
     {

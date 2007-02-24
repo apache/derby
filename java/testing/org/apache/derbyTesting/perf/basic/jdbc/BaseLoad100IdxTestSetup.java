@@ -61,7 +61,7 @@ public class BaseLoad100IdxTestSetup extends BaseLoad100TestSetup {
 
     /**
      * @param test name of test
-     * @param rowsToLoad number of rows to insert
+     * @param rowcount number of rows to insert
      * @param tableName name of the table to insert the rows into
      */
      public BaseLoad100IdxTestSetup(Test test,int rowcount, String tableName)

@@ -52,7 +52,6 @@ public abstract class ScriptTestCase extends CanonTestCase {
 	/**
 	 * Return the folder (last element of the package) where
 	 * the .sql script lives, e.g. lang.
-	 * @return
 	 */
 	protected String getArea() {
 		

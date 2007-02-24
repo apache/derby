@@ -77,7 +77,7 @@ public abstract class BaseJDBCTestCase
      * A sub-class may provide an implementation of initializeConnection
      * to ensure its connections are in a consistent state that is different
      * to the default.
-     * @see openDefaultConnection()
+     * @see #openDefaultConnection()
      */
     public Connection getConnection() throws SQLException
     {
@@ -563,7 +563,7 @@ public abstract class BaseJDBCTestCase
      * Assert that the query does not compile and throws
      * a SQLException with the expected state.
      * 
-     * @param sqlstate expected sql state.
+     * @param sqlState expected sql state.
      * @param query the query to compile.
      */
     public void assertCompileError(String sqlState, String query) {
@@ -604,7 +604,7 @@ public abstract class BaseJDBCTestCase
      * Assert that the number of rows in a table is an expected value.
      * Query uses a SELECT COUNT(*) FROM table.
      * 
-     * @param table Escaped name of table, will be used as-is.
+     * @param escapedTableName Escaped name of table, will be used as-is.
      * @param rowCount Number of rows expected in the table
      * @throws SQLException Error accessing the database.
      */
@@ -631,7 +631,7 @@ public abstract class BaseJDBCTestCase
      * that need binding and thus can be executed using a
      * simple Statement.execute() call.
      * 
-     * @param sqlstate expected sql state.
+     * @param sqlState expected sql state.
      * @param st Statement object on which to execute.
      * @param query the query to compile and execute.
      */
@@ -660,7 +660,7 @@ public abstract class BaseJDBCTestCase
      * Thus the only thing left to do is to call "execute()"
      * and look for the expected SQLException.
      * 
-     * @param sqlstate expected sql state.
+     * @param sqlState expected sql state.
      * @param pSt A PreparedStatement or CallableStatement on
      *  which to call "execute()".
      */

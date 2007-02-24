@@ -46,7 +46,6 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
     
     /**
      * Only run the fixtures in network server mode as that's what they are testing.
-     * @return
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("ShutDownDBWhenNSShutsDownTest");

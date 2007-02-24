@@ -147,7 +147,6 @@ public class T_Util
 		@exception StandardException Unexpected exception from the implementation
 
 		@see Page#recordExists
-		@see Page#fetch
 	*/
 	public static void t_checkFetch(Page page, RecordHandle rh, String data, int stringLen)
 		throws T_Fail, StandardException {
@@ -195,7 +194,6 @@ public class T_Util
 		@exception StandardException Unexpected exception from the implementation
 
 		@see Page#recordExists
-		@see Page#fetch
 	*/
 	public void t_checkFetch(ContainerHandle c, RecordHandle rh, String data)
 		throws T_Fail, StandardException {

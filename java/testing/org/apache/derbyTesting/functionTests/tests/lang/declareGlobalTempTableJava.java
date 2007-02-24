@@ -100,7 +100,7 @@ public class declareGlobalTempTableJava {
 	 * first persistent object in it. This used to cause null pointer 
 	 * exception (DERBY-1706).
 	 *
-	 * @param conn	The Connection
+	 * @param con1	The Connection
 	 * @param s		A Statement on the Connection
 	 *
 	 * @return	true if it succeeds, false if it doesn't
@@ -140,7 +140,7 @@ public class declareGlobalTempTableJava {
 	/**
 	 * Test various schema and grammar related cases
 	 *
-	 * @param conn	The Connection
+	 * @param con1	The Connection
 	 * @param s		A Statement on the Connection
 	 *
 	 * @return	true if it succeeds, false if it doesn't

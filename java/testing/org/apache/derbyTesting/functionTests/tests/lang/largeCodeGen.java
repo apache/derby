@@ -196,8 +196,7 @@ public class largeCodeGen extends BaseJDBCTestCase
 	/**
 	 * Test in clause with many parameters
 	 *
-	 * @param con
-	 * @param numParams - Number of parameters to test
+	 * @param numParams Number of parameters to test
 	 * @return true if the test fails
 	 * @throws SQLException
 	 */
@@ -345,7 +344,7 @@ public class largeCodeGen extends BaseJDBCTestCase
      * constants. Prepare and execute it and then rollback to leave
      * the table unchanged.
      * @param rowCount
-     * @return
+     * @return false if rollback succeeds, otherwise true
      * @throws SQLException
      */
     private boolean insertValues(int rowCount) throws SQLException {

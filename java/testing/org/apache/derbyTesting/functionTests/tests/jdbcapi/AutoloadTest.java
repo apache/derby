@@ -115,7 +115,6 @@ public class AutoloadTest extends BaseJDBCTestCase
     
     /**
      * Return the ordered set of tests when autoloading is enabled.
-     * @return
      */
     private static Test baseAutoLoadSuite(String which)
     {

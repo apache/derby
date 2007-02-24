@@ -76,9 +76,6 @@ public class DriverUtility {
 
     /**
      * Create a test case with the given name.
-     *
-     * @param name
-     *            of the test case.
      */
     public DriverUtility() {
 

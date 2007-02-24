@@ -301,7 +301,6 @@ public final class SecurityManagerSetup extends TestSetup {
      * approach to setting the properties. There are the
      * properties used to define the jar file location in
      * any policy files.
-     * @return
      */
     public static Properties getPolicyFilePropertiesForOldHarness()
     {
@@ -309,10 +308,10 @@ public final class SecurityManagerSetup extends TestSetup {
     }
 	
 	/**
-	 * Strip of the last token which will be the jar name.
+	 * Strip off the last token which will be the jar name.
 	 * The returned string includes the trailing slash.
 	 * @param url
-	 * @return
+	 * @return the jar name from the URL as a String
 	 */
 	private static String stripJar(URL url)
 	{

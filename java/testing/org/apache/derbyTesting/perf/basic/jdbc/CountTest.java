@@ -37,7 +37,6 @@ public class CountTest extends JDBCPerfTestCase {
 
     /**
      * Suite of tests to return.
-     * @return
      */
     public static Test suite()
     {

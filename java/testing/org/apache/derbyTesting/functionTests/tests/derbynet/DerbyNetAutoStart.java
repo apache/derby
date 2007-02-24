@@ -293,9 +293,9 @@ public class DerbyNetAutoStart
         int i;
         for( i = 0; i < vCmd.size(); i++)
             cmd[i] = (String) vCmd.elementAt(i);
-        for( Enumeration enum = systemProperties.keys(); enum.hasMoreElements();)
+        for( Enumeration e = systemProperties.keys(); e.hasMoreElements();)
         {
-            String propName = (String) enum.nextElement();
+            String propName = (String) e.nextElement();
             if( ! propName.equals( logFileProperty))
                 cmd[i++] = "-D" + propName + "=" + (String) systemProperties.get( propName);
         }

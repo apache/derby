@@ -104,8 +104,7 @@ public class TestRoutines {
 	
 	/**
 	 * TESTROUTINE.HAS_SECURITY_MANAGER()
-	 * Return 0 is no security manager is installed, 1 if one is.
-	 * @return
+	 * @return 0 if no security manager is installed, 1 if one is.
 	 */
 	public static int hasSecurityManager()
 	{

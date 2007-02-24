@@ -102,7 +102,7 @@ public class declareGlobalTempTableJavaJDBC30 {
 	 * Test temp tables with holdable cursors and with ON COMMIT DELETE ROWS and ON COMMIT PRESERVE ROWS
 	 * Test temp tables rollback behavior in combination with savepoints
 	 *
-	 * @param conn	The Connection
+	 * @param con	The Connection
 	 * @param s		A Statement on the Connection
 	 *
 	 * @return	true if it succeeds, false if it doesn't
@@ -1163,9 +1163,6 @@ public class declareGlobalTempTableJavaJDBC30 {
 	/**
 	 * Test that global temporary tables declared in a connection handle to pooled connection are dropped at connection handle close time
 	 * and are not available to next connection handle to the same pooled connection 
-	 *
-	 * @param conn	The Connection
-	 * @param s		A Statement on the Connection
 	 *
 	 * @return	true if it succeeds, false if it doesn't
 	 *

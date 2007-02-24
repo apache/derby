@@ -62,8 +62,7 @@ public final class JDBCClient {
             null); // No JDBC URLs
     
     /**
-     * Get the default embedded client for this JVM.
-     * @return
+     * Return the default embedded client for this JVM.
      */
     static JDBCClient getDefaultEmbedded()
     {
@@ -115,7 +114,6 @@ public final class JDBCClient {
     }
     /**
      * Is this Derby's network client.
-     * @return
      */
     public boolean isDerbyNetClient()
     {
@@ -123,7 +121,6 @@ public final class JDBCClient {
     }
     /**
      * Is this DB2's Universal JDBC 
-     * @return
      */
     public boolean isDB2Client()
     {

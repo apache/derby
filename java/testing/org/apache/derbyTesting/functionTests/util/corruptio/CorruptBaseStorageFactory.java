@@ -39,7 +39,6 @@ import java.io.SyncFailedException;
  * 
  * @see CorruptibleIo
  * @see WritableStorageFactory
- * @see StorageFactory
  * 
  */
 
@@ -74,7 +73,6 @@ abstract class CorruptBaseStorageFactory implements WritableStorageFactory
      *                      directory.
      *                      If null then the storage factory will only be used 
      *                      to deal with the directory containing the databases.
-     * @param create        If true then the database is being created.
      * @param tempDirName   The name of the temporary file directory set in 
      *                      properties. If null then a default directory should
      *                      be used. Each database should get a separate 

@@ -132,8 +132,6 @@ public class PropertyUtil {
      * Copy a set of properties from one Property to another.
      * <p>
      *
-	 * @return The identifier to be used to open the conglomerate later.
-     *
      * @param src_prop  Source set of properties to copy from.
      * @param dest_prop Dest Properties to copy into.
      *

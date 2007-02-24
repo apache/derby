@@ -49,9 +49,6 @@ public class OEChecks  {
     /**
      * Return suite of tests that OEChecks the row counts for all the tables in
      * the Order Entry bechmark.
-     * 
-     * @param scale
-     * @return
      */
     public void checkAllRowCounts() throws Exception {
         testWarehouseRows();

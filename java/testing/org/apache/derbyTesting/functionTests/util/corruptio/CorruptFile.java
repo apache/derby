@@ -134,8 +134,6 @@ class CorruptFile implements StorageFile {
      * equivalent to this one.</b>
      *
      * @return The pathname as a string.
-     *
-     * @see StorageFactory#getSeparator
      */
     public String getPath()
 	{
@@ -267,9 +265,7 @@ class CorruptFile implements StorageFile {
     }
     
     /**
-     * Creates an output stream from a file name.
-     *
-     * @param name The file name.
+     * Creates an output stream from realFile.
      *
      * @return an output stream suitable for writing to the file.
      *
@@ -303,9 +299,7 @@ class CorruptFile implements StorageFile {
     }
 
     /**
-     * Creates an input stream from a file name.
-     *
-     * @param name The file name.
+     * Creates an input stream from realFile
      *
      * @return an input stream suitable for reading from the file.
      *
@@ -322,9 +316,6 @@ class CorruptFile implements StorageFile {
      * This is used to ensure that two or more JVMs do not open the same 
      * database at the same time.
      *
-     * @param lockFile The name of the lock. In a file system implementation it
-     *                 will be the name of a lock file.
-     *
      * @return EXCLUSIVE_FILE_LOCK_NOT_AVAILABLE if the lock cannot be 
      *         acquired because it is already held.
      *         <br> EXCLUSIVE_FILE_LOCK if the lock was successfully acquired.
@@ -340,8 +331,6 @@ class CorruptFile implements StorageFile {
 	/**
      * Release the resource associated with an earlier acquired exclusive lock
      *
-     * @param lockFile the name of the lock file
-     *
      * @see #getExclusiveFileLock
      */
 	public synchronized void releaseExclusiveFileLock()
@@ -354,7 +343,6 @@ class CorruptFile implements StorageFile {
     /**
      * Get a random access (read/write) file.
      *
-     * @param name The name of the file.
      * @param mode "r", "rw", "rws", or "rwd". The "rws" and "rwd" modes specify
      *             that the data is to be written to persistent store, 
      *             consistent with the java.io.RandomAccessFile class 

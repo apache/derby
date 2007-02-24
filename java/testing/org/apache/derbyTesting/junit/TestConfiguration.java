@@ -248,7 +248,7 @@ public class TestConfiguration {
      * all the default fixtures from the class, wrapped in
      * a derbyClientServerDecorator.
      * 
-      */
+     */
     public static Test clientServerSuite(Class testClass)
     {           
         TestSuite suite = new TestSuite(testClass,
@@ -265,8 +265,7 @@ public class TestConfiguration {
      * <BR>
      * The previous TestConfiguration is restored at tearDown and
      * the network server is shutdown.
-     * @param tests
-     * @return
+     * @param suite the suite to decorate
      */
     public static Test clientServerDecorator(Test suite)
     {
@@ -471,7 +470,6 @@ public class TestConfiguration {
      * and not the JDBC 4 specific ones.
      * that
      * @param test
-     * @return
      */
     public static Test forceJDBC3Embedded(Test test)
     {
@@ -578,7 +576,7 @@ public class TestConfiguration {
      * If the <code>defaulDb</code> parameter is <code>true</code>
      * the new database name is used as a default database.
      * @param copy Configuration to copy.
-     * @param defaultDbName New database name
+     * @param dbName New database name
      * @param defaultDb Indicates that the passed <code>dbName</code> is supposed
      * to be used as the default database name.
      */
@@ -915,11 +913,10 @@ public class TestConfiguration {
 	}
     
     /**
-     * Is this JUnit test being run by the old harness.
+     * Returns true if this JUnit test being run by the old harness.
      * Temp method to ease the switch over by allowing
      * suites to alter their behaviour based upon the
      * need to still run under the old harness.
-     * @return
      */
     public static boolean runningInDerbyHarness()
     {

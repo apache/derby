@@ -205,7 +205,7 @@ public class TestUtil {
 		
 		@return url, assume localhost - unless set differently in System property - 
 		             and assume port 1527 for Network Tests
-		@see getJdbcUrlPrefix(String server, int port)
+		@see #getJdbcUrlPrefix(String server, int port)
 		
 	*/
     public static String getJdbcUrlPrefix()
@@ -697,8 +697,8 @@ public class TestUtil {
 	 * cases that used to insert strings into bit data tables
 	 * Converts using UTF-16BE just like the old casts used to.
 	 *
-	 * @ param s  String to convert  (e.g
-	 * @ resturns hex literal that can be inserted into a bit column.
+	 * @param s  String to convert  (e.g
+	 * @return hex literal that can be inserted into a bit column.
 	 */
 	public static String stringToHexLiteral(String s)
 	{

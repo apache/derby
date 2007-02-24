@@ -1065,9 +1065,8 @@ public class OnlineCompressTest extends BaseTest
      *     c        varchar(300)
      *
      * @param conn          Connection to use for sql execution.
-     * @param create_table  If true, create new table - otherwise load into
-     *                      existing table.
-     * @param tblname       table to use.
+     * @param schemaName the schema to use.
+     * @param table_name the table to use.
      * @param num_rows      number of rows to add to the table.
      *
 	 * @exception  StandardException  Standard exception policy.

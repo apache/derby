@@ -358,7 +358,7 @@ public class OnlineBackupTest1 {
 		 * Insert some rows into the specified table.
 		 * @param  tableName  name of the table that rows are inserted.
 		 * @param  rowCount   Number of rows to Insert.
-		 * @param  txStaus    Transacton status commit/rollback/open.
+		 * @param  txStatus    Transacton status commit/rollback/open.
 		 * @param  commitCount After how many inserts commit/rollbacku should happen.
 		 * @exception SQLException if any database exception occurs.
 		 */
@@ -388,7 +388,7 @@ public class OnlineBackupTest1 {
 
 		/**
 		 * commit/rollback the transaction. 
-		 * @param  txStaus    Transacton status commit/rollback/open.
+		 * @param  txStatus    Transacton status commit/rollback/open.
 		 * @exception SQLException if any database exception occurs.
 		 */
 		void endTransaction(int txStatus) throws SQLException
@@ -410,7 +410,7 @@ public class OnlineBackupTest1 {
 		 * update some rows in the table.
 		 * @param  tableName  name of the table that rows are updates.
 		 * @param  rowCount   Number of rows to update.
-		 * @param  txStaus    Transacton status commit/rollback/open.
+		 * @param  txStatus    Transacton status commit/rollback/open.
 		 * @param  commitCount After how many updates commit/rollback should
 		 *                      happen.
 		 * @exception SQLException if any database exception occurs.
