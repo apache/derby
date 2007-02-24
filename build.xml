@@ -892,6 +892,7 @@
   <target name="testing-javadoc-16" if="jdk16">
     <antcall target="testing-javadoc">
       <param name="derbyTesting.javadoc.excludes" value=""/>
+      <param name="derbyTesting.javadoc.vmlevel" value="1.6"/>
     </antcall>
   </target>
 
@@ -899,6 +900,7 @@
     <antcall target="testing-javadoc">
       <param name="derbyTesting.javadoc.excludes"
              value="org.apache.derbyTesting.functionTests.tests.jdbc4"/>
+      <param name="derbyTesting.javadoc.vmlevel" value="1.4"/>
     </antcall>
   </target>
 
@@ -914,7 +916,7 @@
        doctitle="Apache Derby V${major}.${minor} Test Javadoc"
        Footer="${javadoc.Footer}"
        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,2007 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
-       source="1.4"
+       source="${derbyTesting.javadoc.vmlevel}"
        sourcepath="${derby.testing.src.dir}"
        excludepackagenames="${derbyTesting.javadoc.excludes}"/>
   </target>
