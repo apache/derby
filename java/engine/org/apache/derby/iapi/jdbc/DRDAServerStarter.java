@@ -37,13 +37,46 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
+/**
+ * Class that starts the network server in its own daemon thread.
+ * Works in two situations.
+ * <BR>
+ * As a module in the engine's Monitor, booted if the
+ * property derby.drda.startNetworkServer is set to true.
+ * In this case the boot and shutdown is through the
+ * standard ModuleControl methods.
+ * <BR>
+ * Direct calls from the NetworkServerControlImpl start methods.
+ * This is to centralize the creation of the daemon thread in
+ * this class in the engine code, since the Monitor provides
+ * the thread. This means that NetworkServerControlImpl calls
+ * this class to create a thread which in turn calls back
+ * to NetworkServerControlImpl.runServer to start the server.
+ *
+ * @see ModuleControl#boot
+ * @see ModuleControl#stop
+ */
 public final class DRDAServerStarter implements ModuleControl, Runnable
 {
-
+    /**
+     * The instance of the NetworkServerControlImpl
+     * being used to run the server.
+     */
     private Object server;
-    private Method serverStartMethod;
-	private Method serverShutdownMethod;
-    private boolean loadSysIBM;
+    
+    /**
+     * Reflect reference to the method to run the server.
+     * NetworkServerControlImpl.blockingStart
+     */
+    private Method runServerMethod;
+    
+    /**
+     * Reflect reference to the method to directly
+     * shutdown the server.
+     * NetworkServerControlImpl.directShutdown
+     */
+    private Method serverShutdownMethod;
+
     private Thread serverThread;
     private static final String serverClassName = "org.apache.derby.impl.drda.NetworkServerControlImpl";
     private Class serverClass;
@@ -75,7 +108,24 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
             this.consoleWriter = consoleWriter;
 	}
 
-
+    /**
+     * Find the methods to start and shutdown the server.
+     * Perfomed through reflection so that the engine
+     * code is not dependent on the network server code.
+     * @param serverClass
+     * @throws NoSuchMethodException 
+     * @throws SecurityException 
+     */
+    private void findStartStopMethods(final Class serverClass)
+        throws SecurityException, NoSuchMethodException
+    {
+        // Methods are public so no need for privilege blocks.
+        runServerMethod = serverClass.getMethod(
+                "blockingStart", new Class[] { java.io.PrintWriter.class});
+               
+        serverShutdownMethod = serverClass.getMethod(
+                "directShutdown", null);
+    }
 
     public void boot(boolean create,
                      java.util.Properties properties)
@@ -121,19 +171,6 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 												   Integer.TYPE});}
 					  }
 				  );
-				serverStartMethod = (Method) AccessController.doPrivileged(
-				   new PrivilegedExceptionAction() {
-						   public Object run() throws NoSuchMethodException, SecurityException
-						   { return serverClass.getMethod( "blockingStart", new Class[] { java.io.PrintWriter.class});}
-					   }
-				   );
-				
-				serverShutdownMethod = (Method) AccessController.doPrivileged(
-				   new PrivilegedExceptionAction() {
-						   public Object run() throws NoSuchMethodException, SecurityException
-						   { return serverClass.getMethod( "directShutdown", null);}
-					   }
-				   );
             }
             catch( PrivilegedActionException e)
             {
@@ -144,6 +181,9 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
                 return;
 
             }
+            
+            findStartStopMethods(serverClass);
+            
 			if (listenAddress == null)
 				server = serverConstructor.newInstance( null);
 			else
@@ -165,7 +205,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
     {
         try
         {
-            serverStartMethod.invoke( server,
+            runServerMethod.invoke( server,
                                       new Object[] {consoleWriter });
         }
         catch( InvocationTargetException ite)
@@ -212,8 +252,6 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 		serverThread = null;
 		server = null;
 		serverClass = null;
-		serverStartMethod = null;
-		serverShutdownMethod = null;
 		listenAddress = null;
 		portNumber = -1;
 		consoleWriter = null;
