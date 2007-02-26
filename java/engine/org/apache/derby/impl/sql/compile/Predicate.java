@@ -175,7 +175,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		/* if this is for "in" operator node's dynamic start/stop key, relop is
 		 * null, and it's not comparing with constant, beetle 3858
 		 */
-		if (relop == null)
+		if (!isRelationalOpPredicate())
 			return false;
 
 		if (relop.compareWithKnownConstant(optTable, considerParameters))
@@ -190,7 +190,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	{
 		RelationalOperator relop = getRelop();
 
-		if (relop == null)
+		if (!isRelationalOpPredicate())
 			return -1;
 		
 		if (!(relop.getOperator() == RelationalOperator.EQUALS_RELOP))
@@ -237,12 +237,11 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	/** @see OptimizablePredicate#equalsComparisonWithConstantExpression */
 	public boolean equalsComparisonWithConstantExpression(Optimizable optTable)
 	{
-		RelationalOperator relop = getRelop();
 		boolean retval = false;
 
-		if (relop != null)
+		if (isRelationalOpPredicate())
 		{
-			retval = relop.equalsComparisonWithConstantExpression(optTable);
+			retval = getRelop().equalsComparisonWithConstantExpression(optTable);
 		}
 
 		return retval;
@@ -308,7 +307,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		boolean thisIsEquals = false, otherIsEquals = false;
 		boolean thisIsNotEquals = true, otherIsNotEquals = true;
 
-		if (getRelop() != null)		// this is not "in"
+		if (this.isRelationalOpPredicate()) // this is not "in"
 		{
 			int thisOperator = ((RelationalOperator)andNode.getLeftOperand()).getOperator();
 			thisIsEquals = (thisOperator == RelationalOperator.EQUALS_RELOP ||
@@ -316,7 +315,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 			thisIsNotEquals = (thisOperator == RelationalOperator.NOT_EQUALS_RELOP ||
 								   thisOperator == RelationalOperator.IS_NOT_NULL_RELOP);
 		}
-		if (otherPred.getRelop() != null)		// other is not "in"
+		if (otherPred.isRelationalOpPredicate()) // other is not "in"
 		{
 			int	otherOperator = ((RelationalOperator)(otherPred.getAndNode().getLeftOperand())).getOperator();
 			otherIsEquals = (otherOperator == RelationalOperator.EQUALS_RELOP ||
@@ -1298,5 +1297,32 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		exp = cRef.getSource().getExpression();
 		return ((exp instanceof VirtualColumnNode) ||
 			(exp instanceof ColumnReference));
+	}
+
+	/**
+	 * Return whether or not this predicate corresponds to a legitimate
+	 * relational operator.
+	 *
+	 * @return False if there is no relational operator for this predicate
+	 *  OR if this predicate is an internal "probe predicate" (in which
+	 *  case it "looks" like we have a relational operator but in truth
+	 *  it's a disguised IN-list operator). True otherwise.
+	 */
+	protected boolean isRelationalOpPredicate()
+	{
+		return ((getRelop() != null) && (getSourceInList() == null));
+	}
+
+	/**
+	 * If this predicate is an IN-list "probe predicate" then return
+	 * the InListOperatorNode from which it was built.  Otherwise
+	 * return null.
+	 */
+	protected InListOperatorNode getSourceInList()
+	{
+		RelationalOperator relop = getRelop();
+		if (relop instanceof BinaryRelationalOperatorNode)
+			return ((BinaryRelationalOperatorNode)relop).getInListOp();
+		return null;
 	}
 }

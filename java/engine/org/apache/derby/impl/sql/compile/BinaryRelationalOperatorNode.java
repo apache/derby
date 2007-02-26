@@ -75,6 +75,16 @@ public class BinaryRelationalOperatorNode
 	JBitSet optBaseTables;
 	JBitSet valNodeBaseTables;
 
+	/* If this BinRelOp was created for an IN-list "probe predicate"
+	 * then we keep a pointer to the original IN-list.  This serves
+	 * two purposes: 1) if this field is non-null then we know that
+	 * this BinRelOp is for an IN-list probe predicate; 2) if the
+	 * optimizer chooses a plan for which the probe predicate is
+	 * not usable as a start/stop key then we'll "revert" the pred
+	 * back to the InListOperatorNode referenced here.
+	 */
+	InListOperatorNode inListProbeSource = null;
+
 	public void init(Object leftOperand, Object rightOperand)
 	{
 		String methodName = "";
@@ -126,6 +136,29 @@ public class BinaryRelationalOperatorNode
 		}
 		super.init(leftOperand, rightOperand, operatorName, methodName);
 		btnVis = null;
+	}
+
+	/**
+	 * Same as init() above except takes a third argument that is
+	 * an InListOperatorNode.  This version is used during IN-list
+	 * preprocessing to create a "probe predicate" for the IN-list.
+	 * See InListOperatorNode.preprocess() for more.
+	 */
+	public void init(Object leftOperand, Object rightOperand, Object inListOp)
+	{
+		init(leftOperand, rightOperand);
+		this.inListProbeSource = (InListOperatorNode)inListOp;
+	}
+
+	/**
+	 * If this rel op was created for an IN-list probe predicate then return
+	 * the underlying InListOperatorNode.  Will return null if this rel
+	 * op is a "legitimate" relational operator (as opposed to a disguised
+	 * IN-list).
+	 */
+	protected InListOperatorNode getInListOp()
+	{
+		return inListProbeSource;
 	}
 
 	/** @see RelationalOperator#getColumnOperand */
@@ -738,6 +771,17 @@ public class BinaryRelationalOperatorNode
 	public boolean isQualifier(Optimizable optTable, boolean forPush)
 		throws StandardException
 	{
+		/* If this rel op is for an IN-list probe predicate then we never
+		 * treat it as a qualifer.  The reason is that if we treat it as
+		 * a qualifier then we could end up generating it as a qualifier,
+		 * which would lead to the generation of an equality qualifier
+		 * of the form "col = <val>" (where <val> is the first value in
+		 * the IN-list).  That would lead to wrong results (missing rows)
+		 * because that restriction is incorrect.
+		 */
+		if (inListProbeSource != null)
+			return false;
+
 		FromTable	ft;
 		ValueNode	otherSide = null;
 		JBitSet		tablesReferenced;
@@ -1169,12 +1213,22 @@ public class BinaryRelationalOperatorNode
 	/** @see ValueNode#isRelationalOperator */
 	public boolean isRelationalOperator()
 	{
-		return true;
+		/* If this rel op is for a probe predicate then we do not call
+		 * it a "relational operator"; it's actually a disguised IN-list
+		 * operator.
+		 */
+		return (inListProbeSource == null);
 	}
 	
+	/** @see ValueNode#isBinaryEqualsOperatorNode */
 	public boolean isBinaryEqualsOperatorNode()
 	{
-		return (operatorType == RelationalOperator.EQUALS_RELOP);
+		/* If this rel op is for a probe predicate then we do not treat
+		 * it as an "equals operator"; it's actually a disguised IN-list
+		 * operator.
+		 */
+		return (inListProbeSource == null) &&
+			(operatorType == RelationalOperator.EQUALS_RELOP);
 	}
 
 	/** @see ValueNode#optimizableEqualityNode */
@@ -1184,6 +1238,12 @@ public class BinaryRelationalOperatorNode
 		throws StandardException
 	{
 		if (operatorType != EQUALS_RELOP)
+			return false;
+
+		/* If this rel op is for a probe predicate then we do not treat
+		 * it as an equality node; it's actually a disguised IN-list node.
+		 */
+		if (inListProbeSource != null)
 			return false;
 
 		ColumnReference cr = getColumnOperand(optTable,

@@ -534,9 +534,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				** Skip over it if it's not a relational operator (this includes
 				** BinaryComparisonOperators and IsNullNodes.
 				*/
-				RelationalOperator relop = pred.getRelop();
-
-				if (relop == null)
+				if (!pred.isRelationalOpPredicate())
                 {
                     // possible OR clause, check for it.
 
@@ -548,7 +546,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
                 }
                 else
                 {
-                    if ( ! relop.isQualifier(optTable, pushPreds))
+                    if ( ! pred.getRelop().isQualifier(optTable, pushPreds))
                     {
                         // NOT a qualifier, go on to next predicate.
                         continue;
@@ -944,9 +942,9 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		{
 			Predicate	pred = (Predicate) elementAt(index);
 
-			RelationalOperator relop = pred.getRelop();
 			// Transfer each non-qualifier
-			if (relop == null || ! relop.isQualifier(optTable, false))
+			if (!pred.isRelationalOpPredicate() ||
+				!pred.getRelop().isQualifier(optTable, false))
 			{
 				pred.clearScanFlags();
 				removeElementAt(index);
@@ -2071,7 +2069,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			AndNode			andNode = predicate.getAndNode();
 
 			// Skip anything that's not a RelationalOperator
-			if (! (andNode.getLeftOperand() instanceof RelationalOperator))
+			if (!predicate.isRelationalOpPredicate())
 			{
 				continue;
 			}
@@ -3396,7 +3394,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			Predicate	pred = (Predicate) elementAt(index);
 			RelationalOperator relop = pred.getRelop();
 
-			if (relop != null)
+			if (pred.isRelationalOpPredicate())
 			{
 				if (relop.getOperator() == RelationalOperator.EQUALS_RELOP)
 				{
