@@ -234,8 +234,11 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		case C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE:
 			if (autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE)
 				return ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART;
-			else
+			else if (autoinc_create_or_modify_Start_Increment ==
+				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE)
 				return ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT;
+			else
+				return ColumnInfo.MODIFY_COLUMN_DEFAULT_VALUE;
 		case C_NodeTypes.MODIFY_COLUMN_TYPE_NODE:
 			return ColumnInfo.MODIFY_COLUMN_TYPE;
 		case C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE:

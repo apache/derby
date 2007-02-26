@@ -92,6 +92,7 @@ public class ColumnInfo implements Formatable
 	public static final int MODIFY_COLUMN_DEFAULT_RESTART	= 5;
 	//This indicates column is for ALTER TABLE to change the increment value of autoinc column 
 	public static final int MODIFY_COLUMN_DEFAULT_INCREMENT	= 6;
+	public static final int MODIFY_COLUMN_DEFAULT_VALUE	= 7;
 	// CONSTRUCTORS
 
 	/**
