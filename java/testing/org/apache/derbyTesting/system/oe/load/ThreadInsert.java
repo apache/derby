@@ -161,7 +161,6 @@ public class ThreadInsert extends SimpleInsert implements Runnable  {
      * Get the next warehouse to populate.
      * If all have been populated then -1 is returned.
      * Warehouse is one based.
-     * @return
      */
     synchronized short getNextWarehouse() {
         short next = nextWarehouse++;
