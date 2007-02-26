@@ -82,7 +82,7 @@ public class NetAgent extends Agent {
 
     String server_;
     int port_;
-    boolean useSSL_;
+    int clientSSLMode_;
 
     public CcsidManager sourceCcsidManager_;
     public CcsidManager targetCcsidManager_;
@@ -109,13 +109,13 @@ public class NetAgent extends Agent {
              int loginTimeout,
              String server,
              int port,
-             boolean useSSL) throws SqlException {
+             int clientSSLMode) throws SqlException {
         super(netConnection, netLogWriter);
 
         server_ = server;
         port_ = port;
         netConnection_ = netConnection;
-        useSSL_ = useSSL;
+        clientSSLMode_ = clientSSLMode;
 
         if (server_ == null) {
             throw new DisconnectException(this, 
@@ -124,7 +124,7 @@ public class NetAgent extends Agent {
         }
 
         try {
-            socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port, useSSL_));
+            socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port, clientSSLMode_));
         } catch (java.security.PrivilegedActionException e) {
             throw new DisconnectException(this,
                 new ClientMessageId(SQLState.CONNECT_UNABLE_TO_CONNECT_TO_SERVER),

@@ -172,9 +172,28 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     //---------------------- client SSL ----------------
 
-    public static final boolean getSsl(Properties properties)
+    public final static int SSL_OFF = 0;
+    public final static int SSL_BASIC = 1;
+    public final static int SSL_PEER_AUTHENTICATION = 2;
+    
+    public static final int getClientSSLMode(Properties properties)
     {
-        return Boolean.valueOf(properties.getProperty(Attribute.SSL_ATTR)).booleanValue();
+        String s = properties.getProperty(Attribute.SSL_ATTR);
+		if (s != null){
+			if (s.equalsIgnoreCase("off")) {
+				return SSL_OFF;
+            } else if (s.equalsIgnoreCase("basic")) {
+				return SSL_BASIC;
+			} else if (s.equalsIgnoreCase("peerAuthentication")) {
+				return SSL_PEER_AUTHENTICATION;
+			} else {
+				// Default
+				return SSL_OFF;
+			}
+		} else {
+			// Default
+			return SSL_OFF;
+		}
     }
 
     // ---------------------------- user -----------------------------------
@@ -879,7 +898,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static int TRACE_ALL = 0xFFFFFFFF;
 
     public final static int propertyDefault_traceLevel = TRACE_ALL;
-    
+
     protected int traceLevel = propertyDefault_traceLevel;
 
     /**

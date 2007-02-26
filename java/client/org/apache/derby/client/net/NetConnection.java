@@ -1081,14 +1081,14 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     //-------------------Abstract object factories--------------------------------
 
-    protected org.apache.derby.client.am.Agent newAgent_(org.apache.derby.client.am.LogWriter logWriter, int loginTimeout, String serverName, int portNumber, boolean useSSL)
+    protected org.apache.derby.client.am.Agent newAgent_(org.apache.derby.client.am.LogWriter logWriter, int loginTimeout, String serverName, int portNumber, int clientSSLMode)
             throws SqlException {
         return new NetAgent(this,
                 (NetLogWriter) logWriter,
                 loginTimeout,
                 serverName,
                 portNumber,
-                useSSL);
+                clientSSLMode);
     }
 
 
@@ -1653,9 +1653,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         return new org.apache.derby.client.am.SectionManager(collection, agent, databaseName);
     }
 
-    protected int getSocketAndInputOutputStreams(String server, int port, boolean useSSL) {
+    protected int getSocketAndInputOutputStreams(String server, int port, int clientSSLMode) {
         try {
-            netAgent_.socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port, useSSL));
+            netAgent_.socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port, clientSSLMode));
         } catch (java.security.PrivilegedActionException e) {
             Exception openSocketException = e.getException();
             if (netAgent_.loggingEnabled()) {

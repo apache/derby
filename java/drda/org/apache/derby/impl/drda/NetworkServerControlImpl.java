@@ -306,8 +306,8 @@ public final class NetworkServerControlImpl {
 
 	// SSL related stuff
 	private static final int SSL_OFF = 0;
-	private static final int SSL_ON = 1;
-	private static final int SSL_CLIENT_AUTH = 2;
+	private static final int SSL_BASIC = 1;
+	private static final int SSL_PEER_AUTHENTICATION = 2;
 
 	private int sslMode = SSL_OFF;
 
@@ -602,20 +602,21 @@ public final class NetworkServerControlImpl {
 			return sf.createServerSocket(portNumber
 										 ,0,
 										 hostAddress);
-		case SSL_ON:
+		case SSL_BASIC:
 			SSLServerSocketFactory ssf =
 				(SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
-			return ssf.createServerSocket(portNumber
-										  ,0,
-										  hostAddress);
-		case SSL_CLIENT_AUTH:
+			return (SSLServerSocket)ssf.createServerSocket(portNumber,
+														   0,
+														   hostAddress);
+		case SSL_PEER_AUTHENTICATION:
 			SSLServerSocketFactory ssf2 =
 				(SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
-			SSLServerSocket sss= (SSLServerSocket)ssf2.createServerSocket(portNumber
-																		  ,0,
-																		  hostAddress);
-			sss.setNeedClientAuth(true);
-			return sss;
+			SSLServerSocket sss2= 
+				(SSLServerSocket)ssf2.createServerSocket(portNumber,
+														 0,
+														 hostAddress);
+			sss2.setNeedClientAuth(true);
+			return sss2;
 		}
 	}
 	
@@ -687,12 +688,12 @@ public final class NetworkServerControlImpl {
 				{Integer.toString(portNumber), att_srvclsnm, versionString,
 				 getFormattedTimestamp()});
 			break;
-		case SSL_ON:
+		case SSL_BASIC:
 			consolePropertyMessage("DRDA_SSLReady.I", new String [] 
 				{Integer.toString(portNumber), att_srvclsnm, versionString,
 				 getFormattedTimestamp()});
 			break;
-		case SSL_CLIENT_AUTH:
+		case SSL_PEER_AUTHENTICATION:
 			consolePropertyMessage("DRDA_SSLClientAuthReady.I", new String [] 
 				{Integer.toString(portNumber), att_srvclsnm, versionString,
 				 getFormattedTimestamp()});
@@ -2222,7 +2223,11 @@ public final class NetworkServerControlImpl {
 			clientSocket = (Socket) AccessController.doPrivileged(
 								new PrivilegedExceptionAction() {
 										
-									public Object run() throws UnknownHostException,IOException
+									public Object run() 
+										throws UnknownHostException,
+											   IOException, 
+											   java.security.NoSuchAlgorithmException,
+											   java.security.KeyManagementException
 									{
 										if (hostAddress == null)
 											hostAddress = InetAddress.getByName(hostArg);
@@ -2238,10 +2243,17 @@ public final class NetworkServerControlImpl {
 											connectAddress = hostAddress;
 
 										SocketFactory sf;
-										if (getSSLMode() > SSL_OFF) {
+										switch(getSSLMode()) {
+										case SSL_BASIC:
+											sf = NaiveTrustManager.getSocketFactory();
+											break;
+										case SSL_PEER_AUTHENTICATION:
 											sf = SSLSocketFactory.getDefault();
-										} else {
+											break;
+										case SSL_OFF:
+										default:
 											sf = SocketFactory.getDefault();
+											break;
 										}
 										return sf.createSocket(connectAddress, portNumber);
 									}
@@ -2802,9 +2814,9 @@ public final class NetworkServerControlImpl {
     
 	/**
 	 * Get the SSL-mode from a string.
-	 * @param s the SSL-mode string ("off", "on"/"true" or
-	 * "clientAuth"
-	 * @return SSL_OFF, SSL_ON or SSL_CLIENT_AUTH. Will default to
+	 * @param s the SSL-mode string ("off"/"false", "on"/"true" or
+	 * "authenticate"/"auth"
+	 * @return SSL_OFF, SSL_BASIC or SSL_PEER_AUTHENTICATION. Will default to
 	 * SSL_OFF if the input does not match one of the four listed
 	 * above.
 	 **/
@@ -2814,13 +2826,9 @@ public final class NetworkServerControlImpl {
 		if (s != null){
 			if (StringUtil.SQLEqualsIgnoreCase(s,"off")) {
 				return SSL_OFF;
-			} else if (StringUtil.SQLEqualsIgnoreCase(s,"on")) {
-				return SSL_ON;
-			} else if (StringUtil.SQLEqualsIgnoreCase(s,"true")) {
-				// "true" equivalent to "on"
-				return SSL_ON;
-			} else if (StringUtil.SQLEqualsIgnoreCase(s,"clientAuth")) {
-				return SSL_CLIENT_AUTH;
+			} else if (StringUtil.SQLEqualsIgnoreCase(s,"basic")) {
+				return SSL_BASIC;
+			} else if (StringUtil.SQLEqualsIgnoreCase(s,"peerAuthentication")) {				return SSL_PEER_AUTHENTICATION;
 			} else {
 				// Default
 				return SSL_OFF;
@@ -2834,9 +2842,10 @@ public final class NetworkServerControlImpl {
 	/**
 	 * Get the string value of the SSL-mode. This is the inverse of
 	 * getSSLModeValue.
-	 * @param i The SSL-mode value (SSL_OFF, SSL_ON or AAL_CLIENT_AUTH)
+	 * @param i The SSL-mode value (SSL_OFF, SSL_BASIC or
+	 * SSL_PEER_AUTHENTICATION)
 	 * @return The string representation ("off","on" or
-	 * "clientAuth"). Will default to SSL_OFF for other values than
+	 * "autneticate"). Will default to SSL_OFF for other values than
 	 * those listed above.
 	 */
 	
@@ -2844,12 +2853,16 @@ public final class NetworkServerControlImpl {
 	{
 		switch(i) {
 		case SSL_OFF:
-		default:
 			return "off";
-		case SSL_ON:
-			return "on";
-		case SSL_CLIENT_AUTH:
-			return "clientAuth";
+		case SSL_BASIC:
+			return "basic";
+		case SSL_PEER_AUTHENTICATION:
+			return "peerAuthentication";
+		default: 
+			// Assumes no SSL encryption for faulty values Anyway,
+			// this should not happen thince the input values are
+			// strings...
+			return "off";
 		}
 	}
 

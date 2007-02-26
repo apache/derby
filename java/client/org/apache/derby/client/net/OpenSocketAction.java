@@ -22,31 +22,44 @@
 package org.apache.derby.client.net;
 
 import javax.net.SocketFactory;
-import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 
 public class OpenSocketAction implements java.security.PrivilegedExceptionAction {
     private String server_;
     private int port_;
-    private boolean useSSL_;
+    private int clientSSLMode_;
 
-    public OpenSocketAction(String server, int port, boolean useSSL) {
+    public OpenSocketAction(String server, int port, int clientSSLMode) {
         server_ = server;
         port_ = port;
-        useSSL_ = useSSL;
+        clientSSLMode_ = clientSSLMode;
     }
 
     public Object run() 
         throws java.net.UnknownHostException, 
-               java.io.IOException {
-
+               java.io.IOException,
+               java.security.NoSuchAlgorithmException,
+               java.security.KeyManagementException {
+        
         SocketFactory sf;
-        if (useSSL_) {
-            sf = SSLSocketFactory.getDefault();
-        } else {
+        switch (clientSSLMode_) {
+        case org.apache.derby.jdbc.ClientBaseDataSource.SSL_BASIC:
+            sf = NaiveTrustManager.getSocketFactory();
+            break;
+        case org.apache.derby.jdbc.ClientBaseDataSource.SSL_PEER_AUTHENTICATION:
+            sf = (SocketFactory)SSLSocketFactory.getDefault();
+            break;
+        case org.apache.derby.jdbc.ClientBaseDataSource.SSL_OFF:
             sf = SocketFactory.getDefault();
+            break;
+        default: 
+            // Assumes cleartext for undefined values
+            sf = SocketFactory.getDefault();
+            break;
         }
         return sf.createSocket(server_, port_);
     }
+
 }
