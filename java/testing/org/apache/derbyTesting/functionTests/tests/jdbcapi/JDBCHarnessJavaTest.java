@@ -49,7 +49,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             "connectionJdbc20",
             // "statementJdbc20", runs in embedded only
             "resultsetJdbc20",           
-            "StmtCloseFunTest",
             // "dataSourceReference", TODO: investigate failure/convert
             
             // from old jdbcapi.runall

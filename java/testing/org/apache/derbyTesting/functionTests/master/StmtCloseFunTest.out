@@ -1,9 +1,0 @@
-Statement Close Fun Test starting 
-Statement test begin
-Statement test end
-Prepared Statement test begin
-Prepared Statement test end
-Callable Statement test begin
-The result is 3
-Callable Statement test end
-Statement Close Fun Test finished
