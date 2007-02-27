@@ -177,7 +177,7 @@ public class TestConfiguration {
     
     
     /**
-     * Return a Test suite that contains all the text fixtures
+     * Return a Test suite that contains all the test fixtures
      * for the passed in class running in embedded and the
      * default client server configuration.
      * <BR>
