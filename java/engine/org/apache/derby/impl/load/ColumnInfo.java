@@ -48,13 +48,14 @@ import java.util.*;
 class ColumnInfo {
 
 	private ArrayList vtiColumnNames ;
-	private ArrayList insertColumnNames;
+    private ArrayList insertColumnNames;
     private ArrayList columnTypes ;
+    private ArrayList jdbcColumnTypes;
 	private int noOfColumns;
 	private ArrayList columnPositions;
 	private boolean createolumnNames = true;
 	private int expectedNumberOfCols ; //number of Columns that are suppose
-	                                       // to be in the file to imported  
+                                       // to be in the file to imported  
 	private Connection conn;
 	private String tableName;
 	private String schemaName;
@@ -81,6 +82,7 @@ class ColumnInfo {
 		vtiColumnNames = new ArrayList(1);
 		insertColumnNames = new ArrayList(1);
 		columnTypes = new ArrayList(1);
+        jdbcColumnTypes = new ArrayList(1);
 		noOfColumns = 0;
 		this.conn = conn;
 
@@ -187,7 +189,8 @@ class ColumnInfo {
 
 				insertColumnNames.add(columnName);
 				String sqlType = typeName + getTypeOption(typeName , columnSize , columnSize , decimalDigits);
-				columnTypes.add(noOfColumns , sqlType);
+				columnTypes.add(sqlType);
+                jdbcColumnTypes.add(new Integer(dataType));
 				noOfColumns++;
 			}else
 			{
@@ -210,8 +213,6 @@ class ColumnInfo {
 				 type == java.sql.Types.BIT ||
 				 type == java.sql.Types.JAVA_OBJECT ||
 				 type == java.sql.Types.OTHER ||
-				 type == java.sql.Types.CLOB ||
-				 type == java.sql.Types.BLOB ||
 				 type == StoredFormatIds.XML_TYPE_ID); 
 	}
 
@@ -363,6 +364,93 @@ class ColumnInfo {
 		return foundTable;
 	}
 
+
+    /*
+     * Returns the the expected vti data column types in a String format. 
+     * Format : (COLUMN NAME : TYPE [, COLUMN NAME : TYPE]*)
+     * eg: COLUMN1:1 (java.sql.Types.CHAR) , COLUMN2: -1(LONGVARCHAR) , 
+     * COLUMN3 : 2004 (BLOB)
+     */
+	public String getExpectedVtiColumnTypesAsString() {
+
+        StringBuffer vtiColumnTypes = new StringBuffer();
+        // expected types of data in the import file, based on 
+        // the how columns in the data file are  mapped to 
+        // the table  columns. 
+        boolean first = true;
+        for (int i =0 ; i < noOfColumns && i < vtiColumnNames.size(); i++) {
+            if (first) 
+                first = false;
+            else
+                vtiColumnTypes.append(",");
+
+            vtiColumnTypes.append(vtiColumnNames.get(i) + ":" + 
+                                  jdbcColumnTypes.get(i));
+        }   
+
+		if(first) {
+            // there is no information about column types.
+			return null;
+        }
+		else
+			return vtiColumnTypes.toString();
+	}
+
+
+    /*
+     * Get the expected vti data column types. This information was 
+     * passed earlies as string to the vti. This rourine extract the 
+     * information from the string.
+     * @param columnTypesStr  import data column type information , 
+     *                        encoded as string. 
+     * @param noOfColumns     number of columns in the import file.
+     * 
+     * @see getExpectedVtiColumnTypesAsString()
+     */
+    public static int[] getExpectedVtiColumnTypes(String columnTypesStr, 
+                                                  int noOfColumns) 
+    {
+
+        // extract the table column types. Break the comma seperated 
+        // column types into java.sql.Types int values from the columnTypes 
+        // string that got passed to the import VTI.
+
+        //eg: COLUMN1:1 (java.sql.Types.CHAR) , COLUMN2: -1(LONGVARCHAR) , 
+        //COLUMN3 : 2004 (BLOB)
+
+        int[] vtiColumnTypes = new int[noOfColumns];
+
+        // expected column type information is only available 
+        // for the columns that are being imported from the file.
+        // columns type information is not required when 
+        // a column in the data file is not one of the 
+        // imported column, just assume they are of VARCHAR type. 
+        
+        for (int i = 0 ; i < noOfColumns ; i++)
+            vtiColumnTypes[i] = java.sql.Types.VARCHAR;
+
+        StringTokenizer st = new StringTokenizer(columnTypesStr , ",");
+        while (st.hasMoreTokens()) 
+        {
+            String colTypeInfo = (st.nextToken()).trim();
+            int colTypeOffset = colTypeInfo.indexOf(":");
+
+            // column names format is "COLUMN" + columnNumner
+            int colIndex = (new Integer(colTypeInfo.substring(6, 
+                                        colTypeOffset))).intValue();
+            int colType = (new Integer(colTypeInfo.substring(
+                                          colTypeOffset+1))).intValue();
+
+            // column numbers start with 1. Check if user by mistake has 
+            // specified a column number that is large than than the 
+            // number of columns exist in the file, if that is the case
+            // don't assign the type.
+            if (colIndex <=  noOfColumns) 
+                vtiColumnTypes[colIndex-1] = colType;
+            
+        }
+        return vtiColumnTypes;
+    }
 }
 
 

@@ -24,6 +24,9 @@ package org.apache.derby.impl.load;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -36,36 +39,69 @@ import java.io.IOException;
 final class ExportWriteData extends ExportWriteDataAbstract
 	implements java.security.PrivilegedExceptionAction {
 
-  private String outputFileName;
-  // i18n support - instead of using DataOutputStream.writeBytes - use
-  // OutputStreamWriter.write with the correct codeset.
-  private OutputStreamWriter aStream;
+	private String outputFileName;
+	private String lobsFileName;
+	private boolean lobsInExtFile = false;
+	private long lobFileOffset = 0;
 
-  //writes data into the o/p file using control file properties
-  ExportWriteData(String outputFileName, ControlInfo controlFileReader)
-  throws Exception {
-    this.outputFileName = outputFileName;
-    this.controlFileReader = controlFileReader;
-    loadPropertiesInfo();
+	// i18n support - instead of using DataOutputStream.writeBytes - use
+	// OutputStreamWriter.write with the correct codeset.
+	private OutputStreamWriter aStream;
+	private OutputStreamWriter lobCharStream;
+	private BufferedOutputStream lobOutBinaryStream;
+	private ByteArrayOutputStream lobByteArrayStream;
 
-	try {
-		java.security.AccessController.doPrivileged(this);
-	} catch (java.security.PrivilegedActionException pae) {
-		throw pae.getException();
+    // temporary buffers userd to read/write the lob data.
+    private byte[] byteBuf; 
+    private char[] charBuf;
+
+	//writes data into the o/p file using control file properties
+	ExportWriteData(String outputFileName, ControlInfo controlFileReader)
+		throws Exception {
+		this.outputFileName = outputFileName;
+		this.controlFileReader = controlFileReader;
+		init();
+	}
+	
+	//writes data into the o/p file using control file properties
+	ExportWriteData(String outputFileName, 
+					String lobsFileName,
+					ControlInfo controlFileReader)
+		throws Exception {
+		this.outputFileName = outputFileName;
+		this.lobsFileName = lobsFileName;
+		this.controlFileReader = controlFileReader;
+		lobsInExtFile = true;
+        byteBuf = new byte[8192];
+        charBuf = new char[8192];
+		init();
 	}
 
-  }
+	private void init() throws Exception 
+	{
+		loadPropertiesInfo();
+		try {
+			java.security.AccessController.doPrivileged(this);
+		} catch (java.security.PrivilegedActionException pae) {
+			throw pae.getException();
+		}
+
+	}
 
   public final Object run() throws Exception {
-	  openFile();
+	  openFiles();
 	  return null;
   }
 
   //prepares the o/p file for writing
-  private void openFile() throws Exception {
+  private void openFiles() throws Exception {
     try {
       URL url = new URL(outputFileName);
       outputFileName = url.getFile();
+	  if (lobsInExtFile) {
+		  url = new URL(lobsFileName);
+		  lobsFileName = url.getFile();
+	  }
     } catch (MalformedURLException ex) {}
     FileOutputStream anOutputStream = new FileOutputStream(outputFileName);
     BufferedOutputStream buffered = new BufferedOutputStream(anOutputStream);
@@ -73,6 +109,22 @@ final class ExportWriteData extends ExportWriteDataAbstract
     aStream = dataCodeset == null ?
     		new OutputStreamWriter(buffered) :
     		new OutputStreamWriter(buffered, dataCodeset);    	        
+
+    // if lobs are exported to an external file, then 
+    // setup the required streams to write lob data.
+    if (lobsInExtFile) 
+    {
+        // setup streams to write large objects into the external file. 
+        FileOutputStream lobOutputStream = new FileOutputStream(lobsFileName);
+        lobOutBinaryStream = new BufferedOutputStream(lobOutputStream);
+
+        // helper stream to convert char data to binary, after conversion
+        // data is written to lobOutBinaryStream.
+        lobByteArrayStream = new ByteArrayOutputStream();
+        lobCharStream =  dataCodeset == null ?
+            new OutputStreamWriter(lobByteArrayStream) :
+            new OutputStreamWriter(lobByteArrayStream, dataCodeset);    	        
+	}
   }
 
   /**if control file says true for column definition, write it as first line of the
@@ -131,7 +183,108 @@ final class ExportWriteData extends ExportWriteDataAbstract
     }
   }
 
-  /**write the passed row into the data file
+
+	
+    /*
+     * Writes the binary data in the given input stream to an 
+     * external lob export file, and return it's location 
+     * information in the file as string. Location information 
+     * is written in the main export file. 
+     * @param istream   input streams that contains a binary column data.
+     * @return Location where the column data written in the external file. 
+     * @exception Exception  if any error occurs while writing the data.  
+     */
+    String writeBinaryColumnToExternalFile(InputStream istream) 
+        throws Exception
+    {
+        // read data from the input stream and write it to 
+        // the lob export file and also calculate the amount
+        // of data written in bytes. 
+
+        long blobSize = 0;
+        int noBytes = 0 ;
+        noBytes = istream.read(byteBuf) ;
+        while(noBytes != -1) 
+        {
+            lobOutBinaryStream.write(byteBuf, 0 , noBytes);
+            blobSize += noBytes;
+            noBytes = istream.read(byteBuf) ;
+        }
+
+        // close the input stream. 
+        istream.close();
+
+        // flush the output binary stream. 
+        lobOutBinaryStream.flush();
+				
+        // Encode a lob location information as string. This is 
+        // stored in the main export file. It will be used 
+        // to retrive this blob data on import. 
+        // Format is :  <fileName> : <lobOffset> : <size of lob>
+        String lobLocation = lobsFileName + ":" + 
+            lobFileOffset + ":" +  blobSize;
+		
+        // update the offset, this will be  where next 
+        // large object data  will be written. 
+        lobFileOffset += blobSize;
+
+        return lobLocation;
+    }
+
+    /*
+     * Writes the clob data in the given input Reader to an 
+     * external lob export file, and return it's location 
+     * information in the file as string. Location information 
+     * is written in the main export file. 
+     * @param ir   Reader that contains a clob column data.
+     * @return Location where the column data written in the external file. 
+     * @exception Exception  if any error occurs while writing the data.   
+     */
+    String writeCharColumnToExternalFile(Reader ir) 
+        throws Exception
+    {
+
+        // read data from the input stream and write it to 
+        // the lob export file and also calculate the amount
+        // of data written in bytes. 
+
+        long clobSize = 0;
+        int noChars = 0 ;
+        noChars = ir.read(charBuf) ;
+        while(noChars != -1) 
+		{
+            // characters data is converted to bytes using 
+            // the user specified code set. 
+            lobByteArrayStream.reset();
+            lobCharStream.write(charBuf, 0 , noChars);
+            lobCharStream.flush();
+			
+            clobSize += lobByteArrayStream.size();
+            lobByteArrayStream.writeTo(lobOutBinaryStream);
+            noChars  = ir.read(charBuf) ;
+        }
+
+        // close the input reader. 
+        ir.close();
+        // flush the output binary stream. 
+        lobOutBinaryStream.flush();
+
+        // Encode this lob location information as string. This will 
+        // be written to the main export file. It will be used 
+        // to retrive this blob data on import. 
+        // Format is :  <fileName> : <lobOffset> : <size of lob>
+        String lobLocation = lobsFileName + ":" + 
+            lobFileOffset + ":" +  clobSize;
+
+        // update the offset, this will be  where next 
+        // large object data  will be written. 		
+        lobFileOffset += clobSize;
+        return lobLocation;
+    }
+	
+
+
+    /**write the passed row into the data file
  	* @exception	Exception if there is an error
 	*/
   public void writeData(String[] oneRow, boolean[] isNumeric) throws Exception {
@@ -157,6 +310,18 @@ final class ExportWriteData extends ExportWriteDataAbstract
   public void noMoreRows() throws IOException {
     aStream.flush();
     aStream.close();
+    if (lobsInExtFile) {
+        // close the streams associated with lob data.
+        if (lobOutBinaryStream != null) {
+            lobOutBinaryStream.flush();
+            lobOutBinaryStream.close();
+        }
+        if (lobCharStream != null) 
+            lobCharStream.close();
+        if (lobByteArrayStream != null)
+            lobByteArrayStream.close();
+    }
+    
 //    System.err.print(new Date(System.currentTimeMillis()) + " ");
 //    System.err.println("Export finished");
 //    System.setErr(System.out);

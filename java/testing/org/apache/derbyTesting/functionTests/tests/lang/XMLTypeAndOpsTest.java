@@ -363,12 +363,6 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         assertStatementError(JDBC.vmSupportsJDBC4() ? "38000" : "42Z71", cSt);
 
         cSt = prepareCall(
-            " CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY ("
-            + "  'select xmlserialize(x as clob) from t1',"
-            + "  'xmlexport.del', null, null, null)");
-        assertStatementError("XIE0B", cSt);
-        
-        cSt = prepareCall(
             " CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ("
             + "  null, 'T1', 'shouldntmatter.del', null, null, null, 0)");
         assertStatementError("XIE0B", cSt);

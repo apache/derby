@@ -35,7 +35,8 @@ import java.util.*;
 public class Export extends ExportAbstract{
 
 	private String outputFileName;
-
+	/* Name of the file to  which large object data has to be exported */
+	private String lobsFileName;
 
 	private void doExport() throws SQLException
 	{
@@ -58,9 +59,9 @@ public class Export extends ExportAbstract{
 	}
 	
 	private Export(Connection con, String schemaName , 
-					   String tableName, String selectStatement ,
-					   String outputFileName, String characterDelimeter,
-					   String columnDelimeter, String codeset)
+				   String tableName, String selectStatement ,
+				   String outputFileName, String characterDelimeter, 
+				   String columnDelimeter, String codeset)
 		throws SQLException{
 		this.con = con;
 		this.schemaName = schemaName;
@@ -76,6 +77,24 @@ public class Export extends ExportAbstract{
 			throw LoadError.unexpectedError(ex);
 		}
 	}
+
+
+    /**
+     * Set the file name to which larg object data has to be exported, and 
+     * also set flag to indicate that large objects are exported to a 
+     * different file. 
+     * @param lobsFileName  the file to to which lob data has to be exported.
+     * @exception SQLException  if file name is null. 
+     */
+	private void setLobsExtFileName(String lobsFileName) throws SQLException
+	{
+		if (lobsFileName == null)
+			throw LoadError.dataFileNull();
+		this.lobsFileName = lobsFileName;
+		lobsInExtFile = true;
+	}
+
+
 
 	/**
 	 * SYSCS_EXPORT_TABLE  system Procedure from ij or from a Java application
@@ -103,6 +122,44 @@ public class Export extends ExportAbstract{
 		fex.doExport();
 	}
 
+
+	
+    /**
+     * SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE system procedure from ij 
+     * or from a Java application invokes  this method to perform 
+     * export of a table data to a file. Large object data is exported 
+     * to a different file and the reference to it is stored in the
+     *  main output file. 
+     * @param con	 The Cloudscape database connection URL for the 
+     *               database containing the table
+     * @param schemaName  schema name of the table data is being exported from
+     * @param tableName   Name of the Table from which data has to be exported.
+     * @param outputFileName  Name of the file to which data has to be exported.
+     * @param columnDelimeter  Delimiter that seperates columns 
+     *                         in the output file.
+     * @param characterDelimeter Delimiter that is used to quote 
+     *                           non-numeric types.
+     * @param codeset            Codeset that should be used to 
+     *                           write the data to the file/
+     * @param lobsFileName       Name of the file to which large object 
+     *                           data has to be exported.
+     * @exception SQL Exception on errors
+     */
+
+    public static void exportTable(Connection con, String schemaName, 
+                                   String tableName, String outputFileName,  
+                                   String columnDelimeter, String characterDelimeter,
+                                   String codeset, String lobsFileName)
+        throws SQLException {
+
+        Export fex = new Export(con, schemaName, tableName, null,
+                                outputFileName,	characterDelimeter,   
+                                columnDelimeter, codeset);
+        fex.setLobsExtFileName(lobsFileName);
+        fex.doExport();
+    }
+
+
 	
 	/**
 	 * SYSCS_EXPORT_QUERY  system Procedure from ij or from a Java application
@@ -127,13 +184,53 @@ public class Export extends ExportAbstract{
 	}
 
 
+
+    /**
+     * SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE system Procedure from ij 
+     * or from a Java application invokes this method to perform 
+     * export of the data retrieved by select  statement to a file.
+     * Large object data is exported to a different file  and the reference 
+     * to it is stored in the main output file. 
+     * @param con	 The Cloudscape database connection URL for 
+     *               the database containing the table
+     * @param selectStatement    select query that is used to export the data
+     * @param outputFileName Name of the file to  which data has to be exported.
+     * @param columnDelimeter  Delimiter that seperates columns in 
+     *                         the output file
+     * @param characterDelimeter  Delimiter that is used to quote 
+     *                            non-numeric types
+     * @param codeset Codeset that should be used to write the data to the file
+     * @param lobsFileName Name of the file to which 
+     *                     large object data has to be exported.
+     * @exception SQL Exception on errors
+     */
+    public static void exportQuery(Connection con, String selectStatement,
+                                   String outputFileName, String columnDelimeter, 
+                                   String characterDelimeter, String codeset, 
+                                   String lobsFileName)
+        throws SQLException {
+		
+        Export fex = new Export(con, null, null, selectStatement,
+                                outputFileName,characterDelimeter,
+                                columnDelimeter, codeset);
+        fex.setLobsExtFileName(lobsFileName);
+        fex.doExport();
+    }
+
+
 	/**
 	 * For internal use only
 	 * @exception	Exception if there is an error
 	 */
 	//returns the control file reader corresponding to the control file passed
 	protected ExportWriteDataAbstract getExportWriteData() throws Exception {
-		return new ExportWriteData(outputFileName, controlFileReader);
+		if (lobsInExtFile) 
+			return new ExportWriteData(outputFileName, 
+									   lobsFileName,
+									   controlFileReader);
+		else 
+			return new ExportWriteData(outputFileName,
+									   controlFileReader);
 	}
 }
 

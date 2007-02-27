@@ -132,20 +132,6 @@ public class importExport {
 				printExceptionMessage(ex) ;
 			}
 
-
-			System.out.println("testing datatypes that does not have Export Supprt");
-			try {
-				doExport("T3", null, null , null);
-			} catch (Exception ex) {
-				printExceptionMessage(ex);
-			}
-
-			try {
-				doImport("T1" , "T3" , null , null , null, 0);
-			} catch (Exception ex) {
-				printExceptionMessage(ex);
-			}
-				
 			//test less data case on the seconds line of input that 
 			//should throw end of file exception. 
 			try{
@@ -350,8 +336,6 @@ public class importExport {
 										   "COLUMN7 DOUBLE PRECISION , COLUMN8 INT , COLUMN9 BIGINT , COLUMN10 NUMERIC , " +
 										   "COLUMN11 REAL , COLUMN12 SMALLINT , COLUMN13 TIME , COLUMN14 TIMESTAMP , "+
 										   "COLUMN15 SMALLINT , COLUMN16 VARCHAR(1))"), 0);
-			verifyCount(
-						stmt.executeUpdate("CREATE TABLE T3 (C1 BLOB)"), 0);
 			verifyCount(
 						stmt.executeUpdate("create table T4 (   Account int,    Fname   char(30),"+
                         "Lname   char(30), Company varchar(35), Address varchar(40), City    varchar(20),"+

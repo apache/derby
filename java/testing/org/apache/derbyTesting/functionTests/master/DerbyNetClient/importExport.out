@@ -14,9 +14,6 @@ testing IE with delimiters(%, &) and Cp1252
 testing IE with delimiters(%, &) and UTF-16
 testing IE with delimiters(^, #) and WRONG ENCODEINGH
 An IOException occurred while writing data to the file.
-testing datatypes that does not have Export Supprt
-Column 'C1' in the table is of type BLOB, it is not supported by the import/export feature.   
-Column 'C1' in the table is of type BLOB, it is not supported by the import/export feature.   
 The exception 'java.sql.SQLException: Read endOfFile at unexpected place on line 2.' was thrown while evaluating an expression. SQLSTATE: XIE0E: Read endOfFile at unexpected place on line 2.
 PASS: finished testing import and export
 PASS: teardown complete

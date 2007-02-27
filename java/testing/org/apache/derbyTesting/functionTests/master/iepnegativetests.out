@@ -291,25 +291,6 @@ call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SYS', 'SYSTABLES' , 'extinout/t3.dat' ,
                                       ';', '^', 'utf-16', 1) ;
 ERROR 38000: The exception 'java.sql.SQLException: 'SYS.SYSTABLES' is a system table.  Users are not allowed to modify the contents of this table.' was thrown while evaluating an expression.
 ERROR 42Y25: 'SYS.SYSTABLES' is a system table.  Users are not allowed to modify the contents of this table.
-ij> ---not supported by db2 cloudscape import/export
-create table ntype(a int , ct CLOB(1024));
-0 rows inserted/updated/deleted
-ij> create table ntype1(bt BLOB(1024) , a int);
-0 rows inserted/updated/deleted
-ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
-                                 null, null, null) ;
-ERROR XIE0B: Column 'CT' in the table is of type CLOB, it is not supported by the import/export feature.   
-ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.ntype1',
-				   'extinout/ntype.dat' , 
-                                   null, null, null) ;
-ERROR XIE0B: Column 'BT' in the table is of type BLOB, it is not supported by the import/export feature.   
-ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
-                                 null, null, null, 0) ;
-ERROR XIE0B: Column 'CT' in the table is of type CLOB, it is not supported by the import/export feature.   
-ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'NTYPE1' , null , null, 
-                                 'extinout/ntype.dat' , 
-                                 null, null, null, 0) ;
-ERROR XIE0B: Column 'BT' in the table is of type BLOB, it is not supported by the import/export feature.   
 ij> --import should aquire a lock on the table
 create table parent(a int not null primary key);
 0 rows inserted/updated/deleted

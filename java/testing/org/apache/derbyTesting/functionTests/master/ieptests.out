@@ -939,5 +939,127 @@ ID         |AMOUNT     |ITEMNAME
 ij> drop table inventory.orderTable;
 0 rows inserted/updated/deleted
 ij> --end derby-390 related test cases.
+---DERBY-378 , Add support to import/export of lobs
+create table books(id int , name varchar(30) , abstract clob(90), pic blob(100));
+0 rows inserted/updated/deleted
+ij> create table imp_books(id int , name varchar(30),  abstract clob(90), pic blob(100));
+0 rows inserted/updated/deleted
+ij> insert into books values(1, 'effective java' , 
+                        'describes how to write " quality java " code', 
+                         cast (X'124594322143423214ab35f2e34c' as blob));
+1 row inserted/updated/deleted
+ij> insert into books values(2, 'Apache Derby ' , 
+                         'This books covers Apache Derby Database Engine', 
+                         cast (X'134594322143423214ab35f2e44d' as blob));
+1 row inserted/updated/deleted
+ij> insert into books values(3, 'Transaction Processing' , 
+                         'This books covers "Transaction" "processing" concepts', 
+                          cast (X'144594322143423214ab35f2e54e' as blob));
+1 row inserted/updated/deleted
+ij> select * from books;
+ID         |NAME                          |ABSTRACT                                                                                  |PIC                                                                                                                             
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |effective java                |describes how to write " quality java " code                                              |124594322143423214ab35f2e34c                                                                                                    
+2          |Apache Derby                  |This books covers Apache Derby Database Engine                                            |134594322143423214ab35f2e44d                                                                                                    
+3          |Transaction Processing        |This books covers "Transaction" "processing" concepts                                     |144594322143423214ab35f2e54e                                                                                                    
+ij> -- export lobs to an external file.
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE (null, 'BOOKS','extinout/books.dat', 
+                            null, null, null, 'extinout/books_lobs.dat') ;
+0 rows inserted/updated/deleted
+ij> -- import lobs stored in an external file. 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(null, 'IMP_BOOKS' , 
+                                      'extinout/books.dat', null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> select * from imp_books ;
+ID         |NAME                          |ABSTRACT                                                                                  |PIC                                                                                                                             
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |effective java                |describes how to write " quality java " code                                              |124594322143423214ab35f2e34c                                                                                                    
+2          |Apache Derby                  |This books covers Apache Derby Database Engine                                            |134594322143423214ab35f2e44d                                                                                                    
+3          |Transaction Processing        |This books covers "Transaction" "processing" concepts                                     |144594322143423214ab35f2e54e                                                                                                    
+ij> -- import only some columns;
+call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(null, 
+                                    'IMP_BOOKS' ,'ID, ABSTRACT, PIC', '1,3,4',
+                                    'extinout/books.dat', null, null, null, 1) ;
+0 rows inserted/updated/deleted
+ij> select * from imp_books;
+ID         |NAME                          |ABSTRACT                                                                                  |PIC                                                                                                                             
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |NULL                          |describes how to write " quality java " code                                              |124594322143423214ab35f2e34c                                                                                                    
+2          |NULL                          |This books covers Apache Derby Database Engine                                            |134594322143423214ab35f2e44d                                                                                                    
+3          |NULL                          |This books covers "Transaction" "processing" concepts                                     |144594322143423214ab35f2e54e                                                                                                    
+ij> -- import columns in different order, this will test reading lob data 
+-- from the file in a random order.
+call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(null, 
+                                    'IMP_BOOKS' ,'PIC, ID, ABSTRACT, NAME', '4,1,3,2',
+                                    'extinout/books.dat', null, null, null, 1) ;
+0 rows inserted/updated/deleted
+ij> select * from imp_books;
+ID         |NAME                          |ABSTRACT                                                                                  |PIC                                                                                                                             
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |effective java                |describes how to write " quality java " code                                              |124594322143423214ab35f2e34c                                                                                                    
+2          |Apache Derby                  |This books covers Apache Derby Database Engine                                            |134594322143423214ab35f2e44d                                                                                                    
+3          |Transaction Processing        |This books covers "Transaction" "processing" concepts                                     |144594322143423214ab35f2e54e                                                                                                    
+ij> -- export using a query. 
+call SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE('select * from books where id > 2', 
+             'extinout/books.dat' , null, null, null, 'extinout/books_lobs.dat') ;
+0 rows inserted/updated/deleted
+ij> delete from imp_books where id > 2;
+1 row inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(null, 'IMP_BOOKS' , 
+                                      'extinout/books.dat' ,
+                                      null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> select * from imp_books;
+ID         |NAME                          |ABSTRACT                                                                                  |PIC                                                                                                                             
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |effective java                |describes how to write " quality java " code                                              |124594322143423214ab35f2e34c                                                                                                    
+2          |Apache Derby                  |This books covers Apache Derby Database Engine                                            |134594322143423214ab35f2e44d                                                                                                    
+3          |Transaction Processing        |This books covers "Transaction" "processing" concepts                                     |144594322143423214ab35f2e54e                                                                                                    
+ij> -- export lob data also to given export file. This should write blob 
+-- data in  hex format and clob data in double-delimiter to 
+--  the export  file. 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'BOOKS','extinout/books.dat', 
+                                          null, null, null) ;
+0 rows inserted/updated/deleted
+ij> delete from imp_books;
+3 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'IMP_BOOKS' , 'extinout/books.dat' ,
+                                      null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> select * from imp_books;
+ID         |NAME                          |ABSTRACT                                                                                  |PIC                                                                                                                             
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |effective java                |describes how to write " quality java " code                                              |124594322143423214ab35f2e34c                                                                                                    
+2          |Apache Derby                  |This books covers Apache Derby Database Engine                                            |134594322143423214ab35f2e44d                                                                                                    
+3          |Transaction Processing        |This books covers "Transaction" "processing" concepts                                     |144594322143423214ab35f2e54e                                                                                                    
+ij> -- import only some columns;
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'IMP_BOOKS' ,
+                                     'ID, ABSTRACT, PIC', '1,3,4',
+                                    'extinout/books.dat', null, null, null, 1) ;
+0 rows inserted/updated/deleted
+ij> select * from imp_books;
+ID         |NAME                          |ABSTRACT                                                                                  |PIC                                                                                                                             
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |NULL                          |describes how to write " quality java " code                                              |124594322143423214ab35f2e34c                                                                                                    
+2          |NULL                          |This books covers Apache Derby Database Engine                                            |134594322143423214ab35f2e44d                                                                                                    
+3          |NULL                          |This books covers "Transaction" "processing" concepts                                     |144594322143423214ab35f2e54e                                                                                                    
+ij> -- export using a query. 
+call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from books where id > 2', 
+                                    'extinout/books.dat' , null, null, null) ;
+0 rows inserted/updated/deleted
+ij> delete from imp_books where id > 2;
+1 row inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE(null, 'IMP_BOOKS' , 'extinout/books.dat' ,
+                                  	    null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> select * from imp_books;
+ID         |NAME                          |ABSTRACT                                                                                  |PIC                                                                                                                             
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1          |NULL                          |describes how to write " quality java " code                                              |124594322143423214ab35f2e34c                                                                                                    
+2          |NULL                          |This books covers Apache Derby Database Engine                                            |134594322143423214ab35f2e44d                                                                                                    
+3          |Transaction Processing        |This books covers "Transaction" "processing" concepts                                     |144594322143423214ab35f2e54e                                                                                                    
+ij> --drop table imp_books;
+--drop table books;
+---END DERBY-378 , Add support to import/export of lobs
 ;
 ij> 

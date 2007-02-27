@@ -20,6 +20,8 @@
  */
 
 package org.apache.derby.impl.load;
+import java.io.InputStream;
+import java.io.Reader;
 
 abstract class ExportWriteDataAbstract {
 
@@ -64,6 +66,30 @@ abstract class ExportWriteDataAbstract {
 
   //write the passed row into the data file
   public abstract void writeData(String[] oneRow, boolean[] isNumeric) throws Exception;
+
+    /*
+     * Writes the binary data in the given input stream to an 
+     * external lob export file, and return it's location 
+     * information in the file as string. Location information 
+     * is written in the main export file. 
+     * @param istream   input streams that contains a binary column data.
+     * @return Location where the column data written in the external file. 
+     * @exception Exception  if any error occurs while writing the data.  
+     */
+    abstract String writeBinaryColumnToExternalFile(InputStream istream) 
+        throws Exception;
+    
+    /*
+     * Writes the clob data in the given input Reader to an 
+     * external lob export file, and return it's location 
+     * information in the file as string. Location information 
+     * is written in the main export file. 
+     * @param ir   Reader that contains a clob column data.
+     * @return Location where the column data written in the external file. 
+     * @exception Exception  if any error occurs while writing the data.   
+     */
+    abstract String writeCharColumnToExternalFile(Reader ir) 
+        throws Exception;
 
   //if nothing more to write, then close the file and write a message of completion
   //in message file

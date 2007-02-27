@@ -31,12 +31,17 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
   private final int numberOfColumns;
   private final String[] columnNames;
   private final int[] columnWidths;
+  // types of the table columns that the data is imported. 
+  private final int[] tableColumnTypes ; 
 
-  public ImportResultSetMetaData(int numberOfColumns, String[] columnNames,
-  int[] columnWidths) {
+  public ImportResultSetMetaData(int numberOfColumns, 
+                                 String[] columnNames,
+                                 int[] columnWidths, 
+                                 int[] tableColumnTypes) {
     this.numberOfColumns = numberOfColumns;
     this.columnNames = columnNames;
     this.columnWidths = columnWidths;
+    this.tableColumnTypes = tableColumnTypes;
   }
 
 	public int getColumnCount() {
@@ -44,12 +49,27 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
   }
 
 	public String getColumnName(int column) {
-    return columnNames[column-1];
+        return columnNames[column-1];
   }
 
 	public int getColumnType(int column) {
-    return java.sql.Types.VARCHAR;
-  }
+
+        // if the table column type is BLOB/CLOB , then the 
+        // data in the import files will converted to 
+        // BLOB/CLOB type objects. So the vti result column 
+        // type for blob/clob is same as  table column type. 
+        // Data for Other types is considered is of VARCHAR type, 
+        // and they are casted to table column type, if needed 
+        // while doing the select from the VTI. 
+
+		if (tableColumnTypes[column -1] ==  java.sql.Types.BLOB)
+			return java.sql.Types.BLOB;
+		else
+            if (tableColumnTypes[column -1] ==  java.sql.Types.CLOB)
+                return java.sql.Types.CLOB;
+            else
+                return java.sql.Types.VARCHAR;
+    }
 
 	public int isNullable(int column) {
     return columnNullableUnknown;
@@ -60,4 +80,5 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
     else
        return columnWidths[column-1];
   }
+
 }

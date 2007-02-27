@@ -204,23 +204,6 @@ call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24',
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SYS', 'SYSTABLES' , 'extinout/t3.dat' , 
                                       ';', '^', 'utf-16', 1) ;
 
-
----not supported by db2 cloudscape import/export
-create table ntype(a int , ct CLOB(1024));
-create table ntype1(bt BLOB(1024) , a int);
-
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
-                                 null, null, null) ;
-call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.ntype1',
-				   'extinout/ntype.dat' , 
-                                   null, null, null) ;
-
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NTYPE' , 'extinout/ntype.dat' , 
-                                 null, null, null, 0) ;
-call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'NTYPE1' , null , null, 
-                                 'extinout/ntype.dat' , 
-                                 null, null, null, 0) ;
-
 --import should aquire a lock on the table
 create table parent(a int not null primary key);
 insert into parent values (1) , (2) , (3) , (4) ;

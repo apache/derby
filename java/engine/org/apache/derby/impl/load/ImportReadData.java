@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import java.sql.SQLException;
 
 final class ImportReadData implements java.security.PrivilegedExceptionAction {
   //Read data from this file
@@ -101,7 +102,14 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
   protected char[] fieldStopDelimiter;
   protected int fieldStopDelimiterLength;
   protected boolean hasDelimiterAtEnd;
-  
+
+
+  // variables realted to reading lob data from files.
+  private ImportLobFile lobFile; // lob file object 
+  private String lobFileName; // current file name
+  private int lobOffset; // offset of the current large object
+  private int lobLength; //length of the current large object
+
 
   //load the control file properties info locally, since we need to refer to them
   //all the time while looking for tokens
@@ -270,6 +278,11 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
     if (streamOpenForReading) {
        bufferedReader.close();
        streamOpenForReading = false;
+    }
+
+    // close external lob file resources.
+    if (lobFile !=null) {
+        lobFile.close();
     }
   }
 
@@ -914,6 +927,77 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
       delimiterIndex = returnValue;
     }
   }
+
+	
+    /* following are the routines that are used to read lob data stored
+     * in a external import file for clob/blob columns, the reference 
+     * to external file is stored in the main import file.
+     */
+
+    /**
+     * Returns a clob columnn data stored at the specified location.
+     * @param lobLocationStr location of the clob data.
+     * @exception  SQLException  on any errors. 
+     */
+    String getClobColumnFromExtFile(String lobLocationStr) 
+        throws SQLException 
+    {
+		try {
+            initExternalLobFile(lobLocationStr);
+            return lobFile.getString(lobOffset,lobLength);
+		}catch(Exception ex) {
+			throw LoadError.unexpectedError(ex);
+		}
+	}
+
+    /**
+     * Returns a blob columnn data stored at the specified location as
+     * a java.sql.Blob object. 
+     * @param lobLocationStr location of the clob data.
+     * @exception  SQLException  on any errors. 
+     */
+    java.sql.Blob getBlobColumnFromExtFile(String lobLocationStr)
+        throws SQLException
+    {
+        initExternalLobFile(lobLocationStr);
+        return new ImportBlob(lobFile, lobOffset, lobLength);
+    }
+
+    /**
+     * Extract the file name, offset and length from the given lob 
+     * location and setup the file resources to read the data from 
+     * the file on first  invocaton. 
+     *
+     * @param lobLocationStr location of the clob data.
+     * @exception  SQLException  on any errors. 
+     */
+    private void initExternalLobFile(String lobLocationStr) 
+        throws SQLException 
+    {
+        
+		// extract file name, offset, and the length from the 
+		// given lob location. Lob location string format is 
+		// fileName:offset:length
+ 
+		int lengthIndex = lobLocationStr.lastIndexOf(":") ;
+		int offsetIndex = lobLocationStr.lastIndexOf(":", lengthIndex -1);
+
+		lobLength = Integer.parseInt(lobLocationStr.substring(lengthIndex + 1));
+		lobOffset = Integer.parseInt(lobLocationStr.substring(offsetIndex+1, 
+														lengthIndex));
+		lobFileName = lobLocationStr.substring(0 , offsetIndex);
+
+
+        if (lobFile == null) {
+            // open external file where the lobs are stored.
+            try {
+                lobFile = new ImportLobFile(lobFileName, 
+                                            controlFileReader.getDataCodeset());
+            }catch(Exception ex) {
+                throw LoadError.unexpectedError(ex);
+            }
+        }
+    }
 }
 
 

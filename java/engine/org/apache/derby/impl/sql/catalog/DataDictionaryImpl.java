@@ -9200,6 +9200,8 @@ public final class	DataDictionaryImpl
         create_10_1_system_procedures(tc, sysUtilUUID);
         // add 10.2 specific system procedures
         create_10_2_system_procedures(tc, sysUtilUUID);
+        // add 10.3 specific system procedures
+        create_10_3_system_procedures(tc, sysUtilUUID);
     }
 
     /**
@@ -9972,6 +9974,201 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                (TypeDescriptor) null,
+                tc);
+        }
+    }
+
+
+
+    /**
+     * Create system procedures added in version 10.3.
+     * <p>
+     * Create 10.3 system procedures, called by either code creating new
+     * database, or code doing hard upgrade from previous version.
+     * <p>
+     *
+     * @param sysUtilUUID   uuid of the SYSUTIL schema.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    void create_10_3_system_procedures(
+    TransactionController   tc,
+    UUID                    sysUtilUUID)
+        throws StandardException
+    {
+
+        /* SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
+         * IN TABLENAME    VARCHAR(128), IN FILENAME VARCHAR(32672) , 
+         * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
+         * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672) )
+         */
+		
+        {
+            // procedure argument names
+            String[] arg_names = {"schemaName", "tableName" , 
+                                  "fileName"," columnDelimiter", 
+                                  "characterDelimiter", "codeset", 
+                                  "lobsFileName"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 128), 
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 32672),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.CHAR, 1),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.CHAR, 1),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 32672)
+            };
+
+            createSystemProcedureOrFunction(
+               "SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+				0,
+				0,
+				RoutineAliasInfo.READS_SQL_DATA,
+                (TypeDescriptor) null,
+                tc);
+        }
+
+        
+        /* SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE(
+         * IN SELECTSTATEMENT  VARCHAR(32672), 
+         * IN FILENAME VARCHAR(32672) , 
+         * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
+         * IN CODESET VARCHAR(128))
+         */
+        {
+            // procedure argument names
+            String[] arg_names = {"selectStatement", "fileName",
+                                  " columnDelimiter", "characterDelimiter",
+                                  "codeset", "lobsFileName"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 32672), 
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 32672),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.CHAR, 1),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.CHAR, 1),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 32672)
+            };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.READS_SQL_DATA,
+                (TypeDescriptor) null,
+                tc);
+        }
+
+        		
+        /*  SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(IN SCHEMANAME VARCHAR(128), 
+         *  IN TABLENAME VARCHAR(128),  IN FILENAME VARCHAR(32762), 
+         *  IN COLUMNDELIMITER CHAR(1), IN CHARACTERDELIMITER  CHAR(1),  
+         *  IN CODESET VARCHAR(128) , IN  REPLACE SMALLINT)
+         */
+        {
+            // procedure argument names
+            String[] arg_names = {"schemaName", "tableName", "fileName",
+                                  " columnDelimiter", "characterDelimiter", 
+                                  "codeset", "replace"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 128), 
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 32672),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.CHAR, 1),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.CHAR, 1),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR,	128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.SMALLINT),
+            };
+
+            createSystemProcedureOrFunction(
+               "SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE",
+               sysUtilUUID,
+               arg_names,
+               arg_types,
+               0,
+               0,
+               RoutineAliasInfo.MODIFIES_SQL_DATA,
+               (TypeDescriptor) null,
+               tc);
+        }
+
+        /*  SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(IN SCHEMANAME VARCHAR(128), 
+         *  IN TABLENAME VARCHAR(128), IN INSERTCOLUMNLIST VARCHAR(32762), 
+         *  IN COLUMNINDEXES VARCHAR(32762), IN IN FILENAME VARCHAR(32762), 
+         *  IN COLUMNDELIMITER CHAR(1), IN CHARACTERDELIMITER  CHAR(1),  
+         *  IN CODESET VARCHAR(128) , IN  REPLACE SMALLINT)
+         */
+        {
+            // procedure argument names
+            String[] arg_names = {"schemaName", "tableName", 
+                                  "insertColumnList","columnIndexes",
+                                  "fileName", " columnDelimiter", 
+                                  "characterDelimiter", 
+                                  "codeset", "replace"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 128), 
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 32672),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 32672),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 32672),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.CHAR, 1),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.CHAR, 1),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR,	128),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.SMALLINT),
+            };
+
+
+            createSystemProcedureOrFunction(
+                "SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
                 (TypeDescriptor) null,
                 tc);
         }

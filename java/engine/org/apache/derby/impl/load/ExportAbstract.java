@@ -26,6 +26,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
 import java.util.Date;
+import java.io.InputStream;
+import java.io.Reader;
 
 /**
  * 
@@ -40,7 +42,7 @@ abstract class ExportAbstract {
   protected String entityName;  //this can be a plain table name or qualified with schema also
   protected String schemaName;
   protected String selectStatement ;
-  
+  protected boolean lobsInExtFile = false;
 
   //following makes the resultset using select * from entityName
   protected ResultSet resultSetForEntity() throws Exception {
@@ -52,15 +54,64 @@ abstract class ExportAbstract {
     return rs;
   }
 
-  //convert resultset data to string array
-  public String[] getOneRowAtATime(ResultSet rs) throws Exception {
+    /** convert resultset data for the current row to string array. 
+     * If large objects are being exported to an external file, 
+     * then write the lob  data into the external file and store 
+     * the lob data location  in the string array for that column.
+     * @param rs   resultset that contains the data to export.
+     * @param isLargeBinary  boolean array, whose elements will
+     *                      be true, if the column type is blob/or 
+     *                      other large binary type, otherwise false. 
+     * @param isLargeChar   boolean array, whose elements will
+     *                      be true, if the column type is clob/ 
+     *                      other large char type, otherwise false. 
+     * @return A string array of the row data to write to export file.
+     * @exception  Exception  if any errors during conversion. 
+     */
+    private String[] getOneRowAtATime(ResultSet rs, 
+                                      boolean[] isLargeBinary, 
+                                      boolean[] isLargeChar) 
+        throws Exception 
+	{
     int columnCount = exportResultSetForObject.getColumnCount();
 
 	ResultSetMetaData rsm=rs.getMetaData();
     if (rs.next()){
        String[] rowObjects = new String[columnCount];
        for (int colNum = 0; colNum < columnCount; colNum++) {
-       		rowObjects[colNum]=rs.getString(colNum + 1);
+           if (lobsInExtFile && 
+               (isLargeChar[colNum] || isLargeBinary[colNum])) 
+           {	
+               String LobExtLocation;
+               if (isLargeBinary[colNum]) {
+
+                   // get input stream that has the column value as a 
+                   // stream of uninterpreted bytes; if the value is SQL NULL, 
+                   // the return value  is null
+                   InputStream is = rs.getBinaryStream(colNum + 1);
+                   LobExtLocation = 
+                       exportWriteData.writeBinaryColumnToExternalFile(is);
+               } else {
+                   // It is clob data, get character stream that has 
+                   // the column value. if the value is SQL NULL, the 
+                   // return value  is null
+                   Reader ir = rs.getCharacterStream(colNum + 1);
+                   LobExtLocation  = 
+                       exportWriteData.writeCharColumnToExternalFile(ir);
+               }
+               rowObjects[colNum]= LobExtLocation;
+
+               // when lob data is written to the main export file, binary 
+               // data is written in hex format. getString() call on binary 
+               // columns returns the data in hex format, no special handling 
+               // required. In case of large char tpe like Clob, data 
+               // is written to main export file  similar to other char types. 
+               
+               // TODO : handling of Nulls. 
+           }
+		   else {
+			   rowObjects[colNum]=rs.getString(colNum + 1);
+           }
        }
        return rowObjects;
     }
@@ -85,26 +136,42 @@ abstract class ExportAbstract {
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			int ncols = rsmeta.getColumnCount();
 			boolean[] isNumeric = new boolean[ncols];
+			boolean[] isLargeChar = new boolean[ncols];
+			boolean[] isLargeBinary = new boolean[ncols];
 			for (int i = 0; i < ncols; i++) {
 				int ctype = rsmeta.getColumnType(i+1);
 				if (ctype == Types.BIGINT || ctype == Types.DECIMAL || ctype == Types.DOUBLE ||
 						ctype == Types.FLOAT ||ctype == Types.INTEGER || ctype == Types.NUMERIC ||
 						ctype == Types.REAL ||ctype == Types.SMALLINT || ctype == Types.TINYINT)
     				isNumeric[i] = true;
-				else
+				else 
 					isNumeric[i] = false;
+					
+				if (ctype == Types.CLOB)
+					isLargeChar[i] = true;
+				else 
+					isLargeChar[i]= false;
+				
+				if (ctype == Types.BLOB) 
+					isLargeBinary[i] = true;
+				else 
+					isLargeBinary[i] = false;
 			}
+
+
 			exportWriteData = getExportWriteData();
 			exportWriteData.writeColumnDefinitionOptionally(
 						exportResultSetForObject.getColumnDefinition(),
 						exportResultSetForObject.getColumnTypes());
 			exportWriteData.setColumnLengths(controlFileReader.getColumnWidths());
 
-       		//get one row at a time and write it to the output file
-       		String[] oneRow = getOneRowAtATime(rs);
+       		// get one row at a time and write it to the output file
+            String[] oneRow = getOneRowAtATime(rs, 
+                                               isLargeBinary, 
+                                               isLargeChar);
        		while (oneRow != null) {
          		exportWriteData.writeData(oneRow, isNumeric);
-         		oneRow = getOneRowAtATime(rs);
+                oneRow = getOneRowAtATime(rs, isLargeBinary, isLargeChar);
        		}
 		}
 	} finally {
@@ -115,6 +182,4 @@ abstract class ExportAbstract {
 			rs.close();
     }
   }
-
-
 }

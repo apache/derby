@@ -48,16 +48,20 @@ public class Import extends ImportAbstract{
 	 * @exception Exception on error 
 	 */
 	public Import(String inputFileName, String columnDelimiter,
-					  String characterDelimiter,  String codeset, 
-					  int noOfColumnsExpected) throws SQLException 
+                  String characterDelimiter,  String codeset, 
+                  int noOfColumnsExpected,  String columnTypes, 
+                  boolean lobsInExtFile) throws SQLException 
 	{
 
 		try{
 			this.inputFileName = inputFileName;
-			this.noOfColumnsExpected = noOfColumnsExpected;
+            this.noOfColumnsExpected = noOfColumnsExpected;
+            this.tableColumnTypesStr = columnTypes;
 			controlFileReader = new ControlInfo();
 			controlFileReader.setControlProperties(characterDelimiter,
 												   columnDelimiter, codeset);
+            this.lobsInExtFile = lobsInExtFile;
+
 			doImport();
 
 		}catch(Exception e)
@@ -88,20 +92,23 @@ public class Import extends ImportAbstract{
 	 * @param codeset           Codeset of the data in the file
 	 * @param replace          Indicates whether the data in table has to be replaced or
 	 *                         appended.(0 - append , > 0 Replace the data)
+     * @param lobsInExtFile true, if the lobs data is stored in an external file,
+     *                      and the reference to it is stored in the main import file.
  	 * @exception SQL Exception on errors
 	 */
 
 	public static void importTable(Connection connection, String schemaName, 
-                              String tableName, String inputFileName,  
-							  String columnDelimiter, String characterDelimiter,
-							  String codeset, short replace)
+                                   String tableName, String inputFileName,  
+                                   String columnDelimiter, 
+                                   String characterDelimiter,String codeset, 
+                                   short replace, boolean lobsInExtFile)
 		throws SQLException {
 
 
 		performImport(connection,  schemaName,  null, //No columnList 
 					  null , //No column indexes
 					  tableName, inputFileName, columnDelimiter, 
-					  characterDelimiter, codeset, replace);
+					  characterDelimiter, codeset, replace, lobsInExtFile);
 	}
 
 
@@ -123,21 +130,24 @@ public class Import extends ImportAbstract{
 	 * @param codeset           Codeset of the data in the file
 	 * @param replace          Indicates whether the data in table has to be replaced or
 	 *                         appended.(0 - append , > 0 Replace the data)
+     * @param lobsInExtFile true, if the lobs data is stored in an external file,
+     *                      and the reference is stored in the main import file.
  	 * @exception SQL Exception on errors
 	 */
 	public static void importData(Connection connection, String schemaName,
-								  String tableName, String insertColumnList, 
-								  String columnIndexes,
-								  String inputFileName, String columnDelimiter, 
-								  String characterDelimiter,
-								  String codeset, short replace)
+                                  String tableName, String insertColumnList, 
+                                  String columnIndexes, String inputFileName, 
+                                  String columnDelimiter, 
+                                  String characterDelimiter,
+                                  String codeset, short replace, 
+                                  boolean lobsInExtFile)
 		throws SQLException 
 	{
 		
 
 			performImport(connection,  schemaName,  insertColumnList,columnIndexes, 
 						  tableName, inputFileName, columnDelimiter, 
-						  characterDelimiter, codeset, replace);
+						  characterDelimiter, codeset, replace, lobsInExtFile);
 	}
 
 
@@ -149,13 +159,18 @@ public class Import extends ImportAbstract{
 	 * INTEGER)  from new org.apache.derby.impl.load.Import('extin/Tutor1.asc') as importvti;
 	 *
 	 */
-	private static void performImport(Connection connection, String schemaName, 
-									  String insertColumnList, String columnIndexes,
-									  String tableName, 
-									  String inputFileName,  String  columnDelimiter, 
-									  String characterDelimiter, String codeset, 
-									  short replace)
-		throws SQLException 
+	private static void performImport(Connection connection, 
+                                      String schemaName, 
+                                      String insertColumnList, 
+                                      String columnIndexes,
+                                      String tableName, 
+                                      String inputFileName,  
+                                      String  columnDelimiter, 
+                                      String characterDelimiter, 
+                                      String codeset, 
+                                      short replace, 
+                                      boolean lobsInExtFile)
+        throws SQLException 
 	{
 
 		if (connection == null)
@@ -193,7 +208,11 @@ public class Import extends ImportAbstract{
 		sb.append(",") ;
 		sb.append(	(codeset !=null ? "'" + codeset + "'" : null));
 		sb.append(", ");
-		sb.append( columnInfo.getExpectedNumberOfColumnsInFile());
+        sb.append( columnInfo.getExpectedNumberOfColumnsInFile());
+        sb.append(", ");
+        sb.append( "'" + columnInfo.getExpectedVtiColumnTypesAsString() + "'");
+        sb.append(", ");
+        sb.append(lobsInExtFile);
 		sb.append(" )") ;
 
 		String importvti = sb.toString();

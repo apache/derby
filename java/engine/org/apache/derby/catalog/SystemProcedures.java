@@ -1111,6 +1111,39 @@ public class SystemProcedures  {
 		conn.commit();
 	}
 
+
+    /**
+     * Export data from a table to given files. Large objects 
+     * are exported to a separate file and the reference to it is written 
+     * in the main export file. 
+     * <p>
+     * Will be called by system procedure:
+     * SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
+     * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
+     * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
+     * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672))
+     * @exception  StandardException  Standard exception policy.
+     **/
+    public static void SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE(
+    String  schemaName,
+    String  tableName,
+    String  fileName,
+    String  columnDelimiter,
+    String  characterDelimiter,
+    String  codeset,
+    String  lobsFileName)
+        throws SQLException
+    {
+        Connection conn = getDefaultConn();
+        Export.exportTable(conn, schemaName , tableName , fileName ,
+                           columnDelimiter , characterDelimiter, 
+                           codeset, lobsFileName);
+        //export finished successfully, issue a commit 
+        conn.commit();
+    }
+
+	
+
 	
 	/**
      * Export data from a  select statement to given file.
@@ -1139,6 +1172,43 @@ public class SystemProcedures  {
 		conn.commit();
 	}
 
+    
+
+    /**
+     * Export data from a  select statement to given file. Large objects 
+     * are exported to a separate file and the reference to it is written 
+     * in the main export file. 
+     * <p>
+     * Will be called as 
+     * SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE(IN SELECTSTATEMENT  VARCHAR(32672),
+     * IN FILENAME VARCHAR(32672) , 
+     * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
+     * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672))
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    public static void SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE(
+    String  selectStatement,
+    String  fileName,
+    String  columnDelimiter,
+    String  characterDelimiter,
+    String  codeset,
+    String  lobsFileName)
+        throws SQLException
+    {
+        Connection conn = getDefaultConn();
+        Export.exportQuery(conn, selectStatement, fileName ,
+                           columnDelimiter , characterDelimiter, 
+                           codeset, lobsFileName);
+
+        //export finished successfully, issue a commit 
+        conn.commit();
+    }
+
+
+
+
+
 	/**
      * Import  data from a given file to a table.
      * <p>
@@ -1162,7 +1232,8 @@ public class SystemProcedures  {
 		Connection conn = getDefaultConn();
 		try{
 			Import.importTable(conn, schemaName , tableName , fileName ,
-								   columnDelimiter , characterDelimiter, codeset, replace);
+                               columnDelimiter , characterDelimiter, codeset, 
+                               replace, false);
 		}catch(SQLException se)
 		{
 			//issue a rollback on any errors
@@ -1174,8 +1245,50 @@ public class SystemProcedures  {
 	}
 
 
+    /**
+     * Import  data from a given file to a table. Data for large object 
+     * columns is in an external file, the reference to it is in the main 
+     * input file. Read the lob data from the external file using the 
+     * lob location info in the main import file. 
+     * <p>
+     * Will be called by system procedure as
+     * SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
+     * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
+     * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
+     * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT)
+     * @exception  StandardException  Standard exception policy.
+     **/
+    public static void SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(
+    String  schemaName,
+    String  tableName,
+    String  fileName,
+    String  columnDelimiter,
+    String  characterDelimiter,
+    String  codeset,
+    short   replace)
+        throws SQLException
+    {
+        Connection conn = getDefaultConn();
+        try{
+            Import.importTable(conn, schemaName , tableName , fileName ,
+                               columnDelimiter , characterDelimiter, 
+                               codeset, replace, 
+                               true //lobs in external file
+                               );
+        }catch(SQLException se)
+        {
+            //issue a rollback on any errors
+            conn.rollback();
+            throw  se;
+        }
+        //import finished successfull, commit it.
+        conn.commit();
+    }
+
+
+
 	/**
-     * Import data from a given file into the specified table columns from the 
+      * Import data from a given file into the specified table columns from the 
 	 * specified columns in the file.
      * <p>
      * Will be called as 
@@ -1204,7 +1317,7 @@ public class SystemProcedures  {
 			Import.importData(conn, schemaName , tableName ,
 								  insertColumnList, columnIndexes, fileName,
 								  columnDelimiter, characterDelimiter, 
-								  codeset, replace);
+								  codeset, replace, false);
 		}catch(SQLException se)
 		{
 			//issue a rollback on any errors
@@ -1215,6 +1328,55 @@ public class SystemProcedures  {
 		//import finished successfull, commit it.
 		conn.commit();
 	}
+
+
+    /**
+     * Import data from a given file into the specified table columns 
+     * from the  specified columns in the file. Data for large object 
+     * columns is in an  external file, the reference to it is in the 
+     * main input file. Read the lob data from the external file using 
+     * the lob location info in the main import file. 
+     * <p>
+     * Will be called as 
+     * SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(IN SCHEMANAME VARCHAR(128), 
+     *               IN TABLENAME VARCHAR(128),
+     *               IN INSERTCOLUMNLIST VARCHAR(32762), 
+     *               IN COLUMNINDEXES VARCHAR(32762),
+     *               IN FILENAME VARCHAR(32762), IN COLUMNDELIMITER CHAR(1), 
+     *               IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
+     *               IN REPLACE SMALLINT)
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    public static void SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(
+    String  schemaName,
+    String  tableName,
+    String  insertColumnList,
+    String  columnIndexes,
+    String  fileName,
+    String  columnDelimiter,
+    String  characterDelimiter,
+    String  codeset,
+    short   replace)
+        throws SQLException
+    {
+        Connection conn = getDefaultConn();
+        try{
+            Import.importData(conn, schemaName , tableName ,
+                              insertColumnList, columnIndexes, fileName,
+                              columnDelimiter, characterDelimiter, 
+                              codeset, replace, true);
+        }catch(SQLException se)
+        {
+            //issue a rollback on any errors
+            conn.rollback();
+            throw  se;
+        }
+
+        //import finished successfull, commit it.
+        conn.commit();
+    }
+
 
 	/**
      * Perform bulk insert using the specificed vti .

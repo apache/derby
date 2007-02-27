@@ -45,6 +45,10 @@ abstract class ImportAbstract extends VTITemplate {
   ResultSetMetaData importResultSetMetaData;
   int noOfColumnsExpected;
 
+  protected boolean lobsInExtFile = false;
+
+  String tableColumnTypesStr;
+  int[] tableColumnTypes;
   private boolean wasNull;
 
 	static final String COLUMNNAMEPREFIX = "COLUMN";
@@ -71,10 +75,12 @@ abstract class ImportAbstract extends VTITemplate {
     columnNames = new String[numberOfColumns];
     loadColumnNames();
     nextRow = new String[numberOfColumns];
-
+    tableColumnTypes = ColumnInfo.getExpectedVtiColumnTypes(tableColumnTypesStr,
+                                                            numberOfColumns);
 	// get the ResultSetMetaData now as we know it's needed
 	importResultSetMetaData =
-		new ImportResultSetMetaData(numberOfColumns, columnNames, columnWidths);
+		new ImportResultSetMetaData(numberOfColumns, columnNames, columnWidths,
+                                    tableColumnTypes);
 
 
     //FIXME don't go through the resultset here. just for testing
@@ -84,6 +90,7 @@ abstract class ImportAbstract extends VTITemplate {
   void loadColumnNames() {
     for (int i=1; i<=numberOfColumns; i++)
       columnNames[i-1] = COLUMNNAMEPREFIX + i;
+
   }
 
 
@@ -130,14 +137,61 @@ abstract class ImportAbstract extends VTITemplate {
  	* @exception	SQLException if there is an error
 	*/
   public String getString(int columnIndex) throws SQLException {
-    if (columnIndex <= numberOfColumns) {
 
+    if (columnIndex <= numberOfColumns) {
 		String val = nextRow[columnIndex-1];
+		if (isColumnInExtFile(columnIndex)) {
+            // a clob column data is stored in an external 
+            // file, the reference to it is in the main file. 
+            // read the data from the external file using the 
+            // reference from the main file. 
+			val = importReadData.getClobColumnFromExtFile(val);
+        }
 		wasNull = (val == null);
-       return val;
+		return val;
     }
     else {
        throw LoadError.invalidColumnNumber(numberOfColumns);
     }
   }
+
+	
+    /**
+     * Returns <code> java.sql.Blob </code> type object that 
+     * contains the columnn data from the import file. 
+     * @param columnIndex number of the column. starts at 1.
+     * @exception SQLException if any occurs during create of the blob object.
+     */
+	public java.sql.Blob getBlob(int columnIndex) throws SQLException {
+
+		if (lobsInExtFile) 
+        {
+            // lob data is in another file, read from the external file.
+            return importReadData.getBlobColumnFromExtFile(
+                                         nextRow[columnIndex-1]);
+        } else {
+            // data is in the main export file, stored in hex format.
+            return new ImportBlob(nextRow[columnIndex-1]);
+        }
+	}
+
+
+    /**
+     * Check if for this column type, real data is stored in an 
+     * external file and only the reference is in the main import 
+     * file.
+     * @param colIndex number of the column. starts at 1.
+     * @return         true, if the column data in a different file 
+     *                 from the main import file , otherwise false.
+     */
+	private boolean isColumnInExtFile(int colIndex) 
+	{
+		if (lobsInExtFile && 
+            (tableColumnTypes[colIndex -1] == java.sql.Types.BLOB || 
+             tableColumnTypes[colIndex -1] == java.sql.Types.CLOB ))
+			return true;
+		else 
+			return false;
+
+	}
 }

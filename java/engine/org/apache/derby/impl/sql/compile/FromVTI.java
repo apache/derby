@@ -592,21 +592,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
 				numVTICols = 0;
 			}
 
-            try
-            {
-                for( int i = 1; i <= numVTICols; i++)
-                {
-                    int columnType = rsmd.getColumnType(i);
-                    if( columnType == Types.BLOB || columnType == Types.CLOB)
-                        throw StandardException.newException(SQLState.LANG_VTI_BLOB_CLOB_UNSUPPORTED, 
-                                                             getVTIName(), rsmd.getColumnName( i));
-                }
-            }
-            catch( SQLException sqle)
-            {
-                throw StandardException.unexpectedUserException(sqle);
-            }
-
 			resultColumns = (ResultColumnList) getNodeFactory().getNode(
 												C_NodeTypes.RESULT_COLUMN_LIST,
 												getContextManager());
