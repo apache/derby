@@ -853,6 +853,33 @@ public abstract class BaseJDBCTestCase
         }
     }
 
+    /**
+     * Compares two JDBC types to see if they are equivalent.
+     * DECIMAL and NUMERIC and DOUBLE and FLOAT are considered
+     * equivalent.
+     * @param expectedType Expected jdbctype from java.sql.Types
+     * @param type         Actual type from metadata
+     */
+    public static void assertEquivalentDataType(int expectedType, int type)
+    {
+     if (expectedType == type)
+         return;
+     if (expectedType == java.sql.Types.DECIMAL && 
+                 type == java.sql.Types.NUMERIC)
+         return;
+     if (expectedType == java.sql.Types.NUMERIC && 
+             type == java.sql.Types.DECIMAL)
+         return;
+     if (expectedType == java.sql.Types.DOUBLE && 
+                 type == java.sql.Types.FLOAT)
+         return;
+     if (expectedType == java.sql.Types.FLOAT && 
+             type == java.sql.Types.DOUBLE)
+     return;
+     fail("types:" + expectedType + " and " + type + " are not equivalent");
+     
+    }
+    
 } // End class BaseJDBCTestCase
 
 

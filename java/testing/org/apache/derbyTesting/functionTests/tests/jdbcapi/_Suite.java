@@ -61,6 +61,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(CharacterStreamsTest.suite());
 		suite.addTest(BatchUpdateTest.suite());
 		suite.addTest(StreamTest.suite());
+                suite.addTest(ParameterMappingTest.suite());
 		suite.addTest(DboPowersTest.suite());
         
         // Old harness .java tests that run using the HarnessJavaTest

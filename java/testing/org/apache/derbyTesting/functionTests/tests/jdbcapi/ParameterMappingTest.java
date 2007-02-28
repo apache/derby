@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.IOException;
@@ -38,9 +38,12 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 
-import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
+import junit.framework.Test;
+
+import org.apache.derbyTesting.junit.BigDecimalHandler;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * @author kmarsden
@@ -71,6 +74,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
     };
 
+    private static String[] validString = {null,"98","98","98",
+           "98","98", "98","98",null,null,null,
+           "98","98","98","0x4",
+           "0x4","0x4", "2004-02-14",
+           "00:00:00","2004-02-14 00:00:00","98","0x4"};
+    
     private static Class[] B3_GET_OBJECT;
 
     static {
@@ -129,184 +138,178 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
     private static final boolean X = true;
 
-    /**
-     * JDBC 3.0 spec Table B6 - Use of ResultSet getter Methods to Retrieve JDBC
-     * Data Types
-     */
-    public static final boolean[][] B6 = {
+        /**
+                JDBC 3.0 spec Table B6 - Use of ResultSet getter Methods to Retrieve JDBC Data Types
+        */
+        public static final boolean[][] B6 = {
 
-     // Types. T S I B R F D D N B B C V L B V L D T T C B
-            // I M N I E L O E U I O H A O I A O A I I L L
-            // N A T G A O U C M T O A R N N R N T M M O O
-            // Y L E I L A B I E   L R C G A B G E E E B B
-            // I L G N   T L M R   E   H V R I V     S
-            // N I E T     E A I   A   A A Y N A     T
-            // T N R         L C   N   R R   A R     A
-            //   T                       C   R B     M
-            //                           H   B I     P
-            //                           A   I N
-            //                           R   N
+// Types.             T  S  I  B  R  F  D  D  N  B  B  C  V  L  B  V  L  D  T  T  C  B
+//                    I  M  N  I  E  L  O  E  U  I  O  H  A  O  I  A  O  A  I  I  L  L
+//                    N  A  T  G  A  O  U  C  M  T  O  A  R  N  N  R  N  T  M  M  O  O
+//                    Y  L  E  I  L  A  B  I  E     L  R  C  G  A  B  G  E  E  E  B  B
+//                    I  L  G  N     T  L  M  R     E     H  V  R  I  V        S
+//                    N  I  E  T        E  A  I     A     A  A  Y  N  A        T
+//                    T  N  R              L  C     N     R  R     A  R        A
+//                    T                                      C     R  B        M
+//                                                           H     B  I        P
+//                                                           A     I  N
+//                                                           R     N  
 
-            /* 0 getByte */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 1 getShort */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 2 getInt */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 3 getLong */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 4 getFloat */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 5 getDouble */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 6 getBigDecimal */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _,
-                    _, _, _, _, _, _, _ },
-            /* 7 getBoolean */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 8 getString */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X,
-                    X, X, X, X, _, _ },
-            /* 9 getBytes */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X,
-                    X, _, _, _, _, _ },
-            /* 10 getDate */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _,
-                    X, _, X, _, _ },
-            /* 11 getTime */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _,
-                    _, X, X, _, _ },
-            /* 12 getTimestamp */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _,
-                    _, _, X, X, X, _, _ },
-            /* 13 getAsciiStream */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X,
-                    X, X, X, _, _, _, _, _ },
-            /* 14 getBinaryStream */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    X, X, X, _, _, _, _, _ },
-            /* 15 getCharStream */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, X,
-                    X, X, _, _, _, _, _ },
-            /* 16 getClob */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    _, _, _, _, X, _ },
-            /* 17 getBlob */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    _, _, _, _, _, X },
+/* 0 getByte*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 1 getShort*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 2 getInt*/           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 3 getLong*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 4 getFloat*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 5 getDouble*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 6 getBigDecimal*/    { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 7 getBoolean*/       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 8 getString*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _},
+/* 9 getBytes*/         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
+/*10 getDate*/          { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, _, X, _, _},
+/*11 getTime*/          { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X, X, _, _},
+/*12 getTimestamp*/     { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
+/*13 getAsciiStream*/   { _, _, _, _, _, _, _, _, _, _, _, X, X, X, X, X, X, _, _, _, _, _},
+/*14 getBinaryStream*/  { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
+/*15 getCharStream*/    { _, _, _, _, _, _, _, _, _, _, _, X, X, X, X, X, X, _, _, _, _, _},
+/*16 getClob */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _},
+/*17 getBlob */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X},
+                 
+/*18 getUnicodeStream */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+        };
 
-            /* 18 getUnicodeStream */{ _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    _, _, _, _, _, _, _, _, _ }, };
 
-    /**
-     * JDBC 3.0 Section 13.2.2.1 specifies that table B-2 is used to specify
-     * type mappings from the Java types (e.g. int as setInt) to the JDBC SQL
-     * Type (Types.INT).
-     * 
-     * This table does not include stream methods and does not include
-     * conversions specified elsewhere in the text, Namely
-     * 
-     * Section 16.3.2 setBinaryStream may be used to set a BLOB setAsciiStream
-     * and setCharacterStream may be used to set a CLOB
-     * 
-     * Thus this B2_MOD table is laid out like the B6 table and makes the
-     * assumptions that
-     *  - Any Java numeric type can be used to set any SQL numeric type - Any
-     * Java numeric type can be used to set any SQL CHAR type - Numeric and
-     * date/time java types can be converted to SQL Char values.
-     * 
-     * 
-     */
+        /**
+                JDBC 3.0 Section 13.2.2.1 specifies that table B-2 is used to specify type mappings
+                from the Java types (e.g. int as setInt) to the JDBC SQL Type (Types.INT).
 
-    // Types. T S I B R F D D N B B C V L B V L D T T C B
-    //        I M N I E L O E U I O H A O I A O A I I L L
-    //        N A T G A O U C M T O A R N N R N T M M O O
-    //        Y L E I L A B I E   L R C G A B G E E E B B
-    //        I L G N   T L M R   E   H V R I V S
-    //        N I E T     E A I   A   A A Y N A T
-    //        T N R         L C   N   R R   A R A
-    //          T                       C   R B M
-    //                                  H   B I P
-    //                                  A   I N
-    //                                  R   N
-    public static boolean[][] B2_MOD = {
-            /* 0 setByte */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 1 setShort */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 2 setInt */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 3 setLong */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 4 setFloat */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 5 setDouble */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 6 setBigDecimal */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _,
-                    _, _, _, _, _, _, _ },
-            /* 7 setBoolean */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 8 setString */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, X, X, X, _, _ },
-            /* 9 setBytes */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X,
-                    X, _, _, _, _, _ },
-            /* 10 setDate */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _,
-                    X, _, X, _, _ },
-            /* 11 setTime */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _,
-                    _, X, X, _, _ },
-            /* 12 setTimestamp */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _,
-                    _, _, X, X, X, _, _ },
-            /* 13 setAsciiStream */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X,
-                    _, _, _, _, _, _, X, _ },
-            /* 14 setBinaryStream */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    X, X, X, _, _, _, _, X },
-            /* 15 setCharStream */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _,
-                    _, _, _, _, _, X, _ },
-            /* 16 setClob */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    _, _, _, _, X, _ },
-            /* 17 setBlob */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    _, _, _, _, _, X },
+                This table does not include stream methods and does not include conversions
+                specified elsewhere in the text, Namely
 
-            /* 18 setUnicodeStream */{ _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    _, _, _, _, _, _, _, _, _ }, };
+                Section 16.3.2
+                        setBinaryStream may be used to set a BLOB
+                        setAsciiStream and setCharacterStream may be used to set a CLOB
 
-    /** Table B5 conversion of Objects using setObject */
-   //  Types. T S I B R F D D N B B C V L B V L D T T C B
-    //        I M N I E L O E U I O H A O I A O A I I L L
-    //        N A T G A O U C M T O A R N N R N T M M O O
-    //        Y L E I L A B I E   L R C G A B G E E E B B
-    //        I L G N   T L M R   E   H V R I V S
-    //        N I E T     E A I   A   A A Y N A T
-    //        T N R         L C   N   R R   A R A
-    //          T                       C   R B M
-    //                                  H   B I P
-    //                                  A   I N
-    //                                  R   N
-    public static boolean[][] B5 = {
-            /* 0 String */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X,
-                    X, X, X, _, _ },
-            /* 1 BigDecimal */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _,
-                    _, _, _, _, _, _, _ },
-            /* 2 Boolean */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 3 Integer */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _,
-                    _, _, _, _, _, _ },
-            /* 4 Long */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 5 Float */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 6 Double */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 7 byte[] */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X,
-                    _, _, _, _, _ },
-            /* 8 Date */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _,
-                    X, _, X, _, _ },
-            /* 9 Time */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _,
-                    _, X, _, _, _ },
-            /* 10 Timestamp */{ _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _,
-                    _, X, X, X, _, _ },
-            /* 11 Blob */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    _, _, _, _, X },
-            /* 12 Clob */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
-                    _, _, _, X, _ },
+                Thus this B2_MOD table is laid out like the B6 table and makes
+                the assumptions that
 
-            // Byte and Short were added to this table in JDBC 4.0. (See
-            // DERBY-1500.)
+                - Any Java numeric type can be used to set any SQL numeric type
+                - Any Java numeric type can be used to set any SQL CHAR type
+                - Numeric and date/time java types can be converted to SQL Char values.
 
-            /* 13 Byte */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ },
-            /* 14 Short */{ X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _,
-                    _, _, _, _, _ }, };
+                
+        */
 
+        // Types.             T  S  I  B  R  F  D  D  N  B  B  C  V  L  B  V  L  D  T  T  C  B
+        //                    I  M  N  I  E  L  O  E  U  I  O  H  A  O  I  A  O  A  I  I  L  L
+        //                    N  A  T  G  A  O  U  C  M  T  O  A  R  N  N  R  N  T  M  M  O  O
+        //                    Y  L  E  I  L  A  B  I  E     L  R  C  G  A  B  G  E  E  E  B  B
+        //                    I  L  G  N     T  L  M  R     E     H  V  R  I  V        S
+        //                    N  I  E  T        E  A  I     A     A  A  Y  N  A        T
+        //                    T  N  R              L  C     N     R  R     A  R        A
+        //                       T                                   C     R  B        M
+        //                                                           H     B  I        P
+        //                                                           A     I  N
+        //                                                           R     N  
+
+        public static boolean[][] B2_MOD = {
+/* 0 setByte*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 1 setShort*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 2 setInt*/           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 3 setLong*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 4 setFloat*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 5 setDouble*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 6 setBigDecimal*/    { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 7 setBoolean*/       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 8 setString*/        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, X, X, X, _, _},
+/* 9 setBytes*/         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
+/*10 setDate*/          { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, _, X, _, _},
+/*11 setTime*/          { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X, _, _, _},
+/*12 setTimestamp*/     { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
+/*13 setAsciiStream*/   { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _, _, X, _},
+/*14 setBinaryStream*/  { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X},
+/*15 setCharStream*/    { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _, _, X, _},
+/*16 setClob */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _},
+/*17 setBlob */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X},
+                 
+/*18 setUnicodeStream */{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+        };
+
+        /** Table B5 conversion of Objects using setObject*/
+
+// Types.             T  S  I  B  R  F  D  D  N  B  B  C  V  L  B  V  L  D  T  T  C  B
+//                    I  M  N  I  E  L  O  E  U  I  O  H  A  O  I  A  O  A  I  I  L  L
+//                    N  A  T  G  A  O  U  C  M  T  O  A  R  N  N  R  N  T  M  M  O  O
+//                    Y  L  E  I  L  A  B  I  E     L  R  C  G  A  B  G  E  E  E  B  B
+//                    I  L  G  N     T  L  M  R     E     H  V  R  I  V        S
+//                    N  I  E  T        E  A  I     A     A  A  Y  N  A        T
+//                    T  N  R              L  C     N     R  R     A  R        A
+//                    T                                      C     R  B        M
+//                                                           H     B  I        P
+//                                                           A     I  N
+//                                                           R     N  
+        public static boolean[][] B5 = {
+/* 0 String */          { X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, X, X, X, X, _, _},
+/* 1 BigDecimal */      { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 2 Boolean */         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 3 Integer */         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 4 Long */            { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 5 Float */           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 6 Double */          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/* 7 byte[] */          { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
+/* 8 Date */            { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, _, X, _, _},
+/* 9 Time */            { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X, _, _, _},
+/*10 Timestamp */       { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
+/*11 Blob   */          { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X},
+/*12 Clob */            { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _},
+
+//Byte and Short were added to this table in JDBC 4.0. (See DERBY-1500.)
+
+/*13 Byte */            { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/*14 Short */           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+        };
+
+     
+        public static final boolean[][]  allowRegisterOut = {
+     
+
+    //          Types.                T  S  I  B  R  F  D  D  N  B  B  C  V  L  B  V  L  D  T  T  C  B
+//                                    I  M  N  I  E  L  O  E  U  I  O  H  A  O  I  A  O  A  I  I  L  L
+//                                    N  A  T  G  A  O  U  C  M  T  O  A  R  N  N  R  N  T  M  M  O  O
+//                                    Y  L  E  I  L  A  B  I  E     L  R  C  G  A  B  G  E  E  E  B  B
+//                                    I  L  G  N     T  L  M  R     E     H  V  R  I  V        S
+//                                    N  I  E  T        E  A  I     A     A  A  Y  N  A        T
+//                                    T  N  R              L  C     N     R  R     A  R        A
+//                                       T                                   C     R  B        M
+//                                                                           H     B  I        P
+//                                                                           A     I  N
+//    param sqlType                                                          R     N  
+            /* 0 null    */         { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+            /* 1 SMALLINT*/         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+            /* 2 INTEGER*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+            /* 3 BIGINT */          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+            /* 4 REAL    */         { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+            /* 5 FLOAT     */       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+            /* 6 DOUBLE    */       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+            /* 7 DECIMAL*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+            /* 8 null     */        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, X, X, X, _, _},
+            /* 9 null*/             { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
+            /*10 null      */       { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, _, X, _, _},
+            /*11 CHAR(60) */        { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X, _, _, _},
+            /*12 VARCHAR(60) */     { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
+            /*13 LONG VARCHAR */    { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+            /*14 CHAR FOR BIT   */  { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
+            /*15 VARCHAR FOR BIT*/  { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
+            /*16 LONGVARCHAR FOR B*/{ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+            /*17 DATE */            { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _},
+            /*18 TIME */            { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _},
+            /*19 TIMESTAMP */       { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _},
+            /*20 CLOB         */    { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+            /*21 BLOB         */    { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
+                    };
+
+        
+            
+        
     /**
      * @param arg0
      */
@@ -339,8 +342,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         pscb.setInt(1, 1);
         {
             byte[] data = new byte[6];
-            data[0] = (byte) 0x32;
-            data[1] = (byte) 0x43;
+            data[0] = (byte) 0x4;
+            data[1] = (byte) 0x3;
             data[2] = (byte) 0x72;
             data[3] = (byte) 0x43;
             data[4] = (byte) 0x00;
@@ -364,13 +367,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             String sqlType = SQLTypes[type];
 
             if (sqlType == null || jdbcTypes[type] == Types.NULL) {
-                    continue;
+                continue;
             }
 
             Statement s = conn.createStatement();
             try {
                 s.execute("DROP TABLE PM.TYPE_AS");
-            }catch (SQLException seq) {
+            } catch (SQLException seq) {
             }
             s.execute("CREATE TABLE PM.TYPE_AS(VAL " + SQLTypes[type] + ")");
 
@@ -383,13 +386,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     .prepareStatement("SELECT VAL FROM PM.TYPE_AS");
             ResultSet rs = psq.executeQuery();
             ResultSetMetaData rsmd = rs.getMetaData();
-            //*******************************************************
-            // Commented out because of missing file/code on commit
-            // for DERBY-2333.
-            // Remember to delete this comment and uncomment the line
-            // below when the method implementation has been added!
-            //*******************************************************
-            //assertEquivalentDataType(jdbcTypes[type], rsmd.getColumnType(1));
+            assertEquivalentDataType(jdbcTypes[type], rsmd.getColumnType(1));
             rs.close();
             // For this data type
             // Test inserting a NULL value and then performing all the getXXX()
@@ -398,21 +395,22 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             // System.out.println(" NULL VALUE");
             getXXX(psq, type, true);
 
-           s.execute("DELETE FROM PM.TYPE_AS");
+            s.execute("DELETE FROM PM.TYPE_AS");
 
-           // For this data type
-           // Test inserting a valid value and then performing all the getXXX() calls on it.
-           if (setValidValue(psi, 1, jdbcTypes[type])) {
-               psi.executeUpdate();
-               getXXX(psq, type, false);
-           }
-           setXXX(s, psi, psq, type);                            
+            // For this data type
+            // Test inserting a valid value and then performing all the getXXX()
+            // calls on it.
+            if (setValidValue(psi, 1, jdbcTypes[type])) {
+                psi.executeUpdate();
+                getXXX(psq, type, false);
+            }
+            setXXX(s, psi, psq, type);
 
             psi.close();
             psq.close();
             s.execute("DROP TABLE PM.TYPE_AS");
             conn.commit();
-            /*//          NOW PROCEDURE PARAMETERS
+            //          NOW PROCEDURE PARAMETERS
             try {
                 s.execute("DROP PROCEDURE PMP.TYPE_AS");
             }catch (SQLException seq) {
@@ -431,86 +429,95 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 ", INOUT P2 " + SQLTypes[type] +
                 ", OUT P3 " + SQLTypes[type] +
                 ") LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL " +
-                 " EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.SimpleProcedureTest.pmap'";
+                " EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.SimpleProcedureTest.pmap'";
             }
-                 
+            
             try {
                 if (!HAVE_BIG_DECIMAL && SQLTypes[type].equals("DECIMAL(10,5)"))
                     continue;
-                
+                //System.out.println(procSQL);
                 s.execute(procSQL);
             } catch (SQLException sqle) {
-                
-                System.out.println(sqle.getSQLState() + ":" + sqle.getMessage());
+                // may get error that column is not allowed
+                if ("42962".equals(sqle.getSQLState()))
+                    continue;
+                else
+                    fail(sqle.getSQLState() + ":" + sqle.getMessage());
                 continue;
             }
-
+            
             // For each JDBC type try to register the out parameters with that type.
-            for (int opt = 0; opt < jdbcTypes.length; opt++) {
-                int jopt = jdbcTypes[opt];
-                if (jopt == Types.NULL)
-                    continue;
-
-                CallableStatement csp = conn.prepareCall("CALL PMP.TYPE_AS(?, ?, ?)");
-                
-                boolean bothRegistered = true;
-                //System.out.print("INOUT " + sqlType + " registerOutParameter(" + TestUtil.getNameFromJdbcType(jopt) + ") ");
-                try {
-                    csp.registerOutParameter(2, jopt);
-                    //System.out.println("-- OK");
-                } catch (SQLException sqle) {
-                    System.out.println("-- " + sqle.getSQLState());
-                    bothRegistered = false;
-                }
-                //System.out.print("OUT " + sqlType + " registerOutParameter(" + TestUtil.getNameFromJdbcType(jopt) + ") ");
-                try {
-                    csp.registerOutParameter(3, jopt);
-                    //System.out.println("-- OK");
-                } catch (SQLException sqle) {
-                    System.out.println("-- " + sqle.getSQLState());
-                    bothRegistered = false;
-                }
-                
-                if (bothRegistered) {
-                            
+                for (int opt = 0; opt < jdbcTypes.length; opt++) {
+                    int jopt = jdbcTypes[opt];
+                    if (jopt == Types.NULL)
+                        continue;
+                    
+                    CallableStatement csp = conn.prepareCall("CALL PMP.TYPE_AS(?, ?, ?)");
+                    
+                    boolean bothRegistered = true;
+                    //System.out.print("INOUT " + sqlType + " registerOutParameter(" + JDBC.sqlNameFromJdbc(jopt) + ") ");
                     try {
-                        
-                        // set the IN value with an accepted value according to its type
-                        // set the INOUT value with an accepted value according to its registered type
-                        if (setValidValue(csp, 1, jdbcTypes[type]) && setValidValue(csp, 2, jopt)) {
-
-                            csp.execute();
-
-                            // now get the INOUT, OUT parameters according to their registered type.
-                            System.out.print("P2="); getOutValue(csp, 2, jopt); System.out.println("");
-                            System.out.print("P3="); getOutValue(csp, 3, jopt); System.out.println("");
-                        }
-                        
-                    }   catch (SQLException sqle) {
-                        dumpSQLExceptions(sqle);
+                        csp.registerOutParameter(2, jopt);
+                    } catch (SQLException sqle) {
+                        assertFalse("INOUT " + sqlType + " registerOutParameter(" + JDBC.sqlNameFromJdbc(jopt) + 
+                                ") failed",allowRegisterOut[type][opt]);
+                        if (!"XCL25".equals(sqle.getSQLState()))
+                            fail("-- " + sqle.getSQLState());
+                        bothRegistered = false;
+                      }       
+                    //System.out.print("OUT " + sqlType + " registerOutParameter(" + TestUtil.getNameFromJdbcType(jopt) + ") ");
+                    try {
+                        csp.registerOutParameter(3, jopt);
+                    } catch (SQLException sqle) {
+                        if (!"XCL25".equals(sqle.getSQLState()))
+                            fail("-- " + sqle.getSQLState());
+                        assertFalse("OUT " + sqlType + " registerOutParameter(" + JDBC.sqlNameFromJdbc(jopt) + 
+                                "failed",allowRegisterOut[type][opt]);
+                        bothRegistered = false;
                     }
-                }
 
-                csp.close();
+                    if (bothRegistered) {
+                        
+                        try {
+
+                            // set the IN value with an accepted value according to its type
+                            // set the INOUT value with an accepted value according to its registered type
+                            if (setValidValue(csp, 1, jdbcTypes[type]) && setValidValue(csp, 2, jopt)) {
+                                
+                                csp.execute();
+                                
+                                // now get the INOUT, OUT parameters according to their registered type.
+                                getOutValue(csp, 2, jopt,type); 
+                                getOutValue(csp, 3, jopt,type);
+                        }
+
+                        } catch (SQLException sqle) {
+                            boolean expectedConversionError = ("22018".equals(sqle.getSQLState())|| 
+                                                               "22007".equals(sqle.getSQLState()));
+                            assertTrue("FAIL: Unexpected exception" + sqle.getSQLState() + ":" + sqle.getMessage(),
+                                    expectedConversionError);
+                        }
+                    }   
+
+                    csp.close();
+                    
+                 }      
+
                 
-            }
+                s.execute("DROP PROCEDURE PMP.TYPE_AS");
+                s.close();
+                conn.commit();
+         }      
+}
 
-
-            s.execute("DROP PROCEDURE PMP.TYPE_AS");
-            s.close();
-            conn.commit();
-           }*/
-        }
-    }
-    
     /*
      * (non-Javadoc)
      * 
      * @see org.apache.derbyTesting.junit.BaseJDBCTestCase#tearDown()
      */
     protected void tearDown() throws Exception {
-        rollback();
-        Statement scb = createStatement();
+        Connection conn = getConnection();
+        Statement scb = conn.createStatement();
         scb.execute("DROP TABLE PM.LOB_GET");
         scb.close();
         commit();
@@ -521,6 +528,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             throws SQLException, java.io.IOException {
 
         {
+         
             // getByte();
             ResultSet rs = ps.executeQuery();
             rs.next();
@@ -534,7 +542,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals(32,b);
+                    assertEquals(32, b);
                 }
                 worked = true;
 
@@ -559,7 +567,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals(32,s);
+                    assertEquals(32, s);
                 }
                 worked = true;
 
@@ -572,7 +580,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            //getInt()
+            // getInt()
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -582,11 +590,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 int i = rs.getInt(1);
                 boolean wn = rs.wasNull();
                 if (isNull) {
-                    assertTrue( wn);
+                    assertTrue(wn);
                 } else {
                     assertFalse(isNull);
                     assertEquals(32, i);
-                }    
+                }
                 worked = true;
             } catch (SQLException sqle) {
                 sqleResult = sqle;
@@ -597,7 +605,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            //getLong();
+            // getLong();
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -607,13 +615,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 long l = rs.getLong(1);
                 boolean wn = rs.wasNull();
                 if (isNull) {
-                    assertTrue(wn);                   
-                }
-                else { 
-                    assertEquals(32,l);
+                    assertTrue(wn);
+                } else {
+                    assertEquals(32, l);
                     assertFalse(wn);
                 }
-                    worked = true;
+                worked = true;
             } catch (SQLException sqle) {
                 sqleResult = sqle;
                 worked = false;
@@ -624,7 +631,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         {
             // getFloat()
-           
+
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -632,12 +639,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 float f = rs.getFloat(1);
                 boolean wn = rs.wasNull();
-            
+
                 if (isNull) {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals(32.0,f,.000001);
+                    assertEquals(32.0, f, .000001);
                 }
                 worked = true;
 
@@ -650,7 +657,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            //getDouble();
+            // getDouble();
             ResultSet rs = ps.executeQuery();
             rs.next();
             SQLException sqleResult = null;
@@ -662,10 +669,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals(32.0,d,.00001);
+                    assertEquals(32.0, d, .00001);
                 }
                 worked = true;
-           
+
             } catch (SQLException sqle) {
                 sqleResult = sqle;
                 worked = false;
@@ -675,7 +682,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         if (HAVE_BIG_DECIMAL) {
-            //  getBigDecimal()
+            // getBigDecimal()
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -687,9 +694,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 if (isNull) {
                     assertTrue(wn);
                     assertNull(bd);
-                }else {
+                } else {
                     assertFalse(wn);
-                    assertEquals("BigDecimal comparison failed",0, new BigDecimal("32.0").compareTo(bd));
+                    assertEquals("BigDecimal comparison failed", 0,
+                            new BigDecimal("32.0").compareTo(bd));
                 }
                 worked = true;
 
@@ -702,7 +710,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            //getBoolean()
+            // getBoolean()
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -712,7 +720,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 boolean b = rs.getBoolean(1);
                 boolean wn = rs.wasNull();
                 if (isNull) {
-                    assertTrue(wn);                    
+                    assertTrue(wn);
                 } else {
                     assertFalse(wn);
                     assertTrue(b);
@@ -740,9 +748,48 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 if (isNull) {
                     assertNull(s);
                     assertTrue(wn);
-                }else {
-                    //RESOLVE: Need better check
-                    assertNotNull(s);
+                } else {                    
+                    s = s.trim();
+                    int jdbcType = jdbcTypes[type];
+                    switch(jdbcType) {
+                    case java.sql.Types.SMALLINT:
+                    case java.sql.Types.INTEGER:
+                    case java.sql.Types.BIGINT:
+                    case java.sql.Types.CHAR:
+                    case java.sql.Types.VARCHAR:
+                    case java.sql.Types.LONGVARCHAR:
+                        assertEquals("32",s);
+                        break;
+                    case java.sql.Types.REAL:
+                    case java.sql.Types.FLOAT:
+                    case java.sql.Types.DOUBLE:
+                        assertEquals("32.0",s);
+                        break;
+                    case java.sql.Types.DECIMAL:
+                    case java.sql.Types.NUMERIC:
+                        assertEquals("32.00000",s);
+                        break;
+                    case java.sql.Types.VARBINARY:
+                    case java.sql.Types.BINARY:
+                        assertEquals("0403fdc373",s);
+                        break;
+                    case java.sql.Types.DATE:
+                        assertEquals("2004-02-14",s);
+                        break;
+                    case java.sql.Types.TIME:
+                        assertEquals("17:14:24",s);
+                        break;
+                    case java.sql.Types.TIMESTAMP:
+                        assertEquals("2004-02-14 17:14:24.097625551",s);
+                        break;
+                    case java.sql.Types.CLOB:
+                        assertEquals("67",s);
+                        break;
+                    case java.sql.Types.BLOB:
+                        assertEquals("8243cafe0032",s);
+                        break;
+                    }
+                    
                     assertFalse(wn);
                 }
                 worked = true;
@@ -768,13 +815,22 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 if (isNull) {
                     assertNull(data);
                     assertTrue(wn);
-                }else {
-                    //RESOLVE: Need better check
+                } else {
+                    int jdbcType = jdbcTypes[type];
+                    switch (jdbcType) {
+                    case java.sql.Types.BINARY:
+                    case java.sql.Types.VARBINARY:
+                    case java.sql.Types.LONGVARBINARY:
+                        assertEquals("0x4,0x3", showFirstTwo(data));
+                        break;
+                    case java.sql.Types.BLOB:
+                        assertEquals("0x82,0x43", showFirstTwo(data));
+                    }
                     assertNotNull(data);
                     assertFalse(wn);
                 }
                 worked = true;
-                
+
             } catch (SQLException sqle) {
                 sqleResult = sqle;
                 worked = false;
@@ -785,7 +841,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         {
             // getDate()
-         
+
             boolean worked;
             SQLException sqleResult = null;
             ;
@@ -793,16 +849,16 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 rs = ps.executeQuery();
                 rs.next();
-                Date d= rs.getDate(1);
+                Date d = rs.getDate(1);
                 boolean wn = rs.wasNull();
                 if (isNull) {
                     assertNull(d);
                     assertTrue(wn);
-                } else { 
-                    assertEquals("2004-02-14",d.toString());
+                } else {
+                    assertEquals("2004-02-14", d.toString());
                     assertNotNull(d);
                     assertFalse(wn);
-                }               
+                }
                 worked = true;
 
             } catch (SQLException sqle) {
@@ -810,7 +866,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 // 22007 invalid date time conversion
                 worked = "22007".equals(sqle.getSQLState());
             } catch (Throwable t) {
-                //System.out.print(t.toString());
+                // System.out.print(t.toString());
                 worked = false;
             }
             if (rs != null)
@@ -834,7 +890,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals("17:14:24",t.toString());
+                    assertEquals("17:14:24", t.toString());
                 }
                 worked = true;
 
@@ -843,7 +899,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 // 22007 invalid date time conversion
                 worked = "22007".equals(sqle.getSQLState());
             } catch (Throwable t) {
-                System.out.println(t);
+                // System.out.println(t);
                 worked = false;
             }
             if (rs != null)
@@ -857,7 +913,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             ;
             ResultSet rs = null;
             try {
-                //getTimestamp();
+                // getTimestamp();
                 rs = ps.executeQuery();
                 rs.next();
                 Timestamp ts = rs.getTimestamp(1);
@@ -866,10 +922,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertNull(ts);
                     assertTrue(wn);
                 } else {
-                    if (type == java.sql.Types.DATE)
-                        assertEquals("2004-02-14 00:00:00.0",ts.toString());
-                    else if (type == java.sql.Types.TIMESTAMP)
-                        assertEquals("2004-02-23 17:14:24.097625551", ts.toString());
+                    if (type == java.sql.Types.DATE
+                            || type == java.sql.Types.TIMESTAMP)
+                        assertEquals("2004-02-14 00:00:00.0", ts.toString());
                     assertFalse(rs.wasNull());
                 }
                 worked = true;
@@ -878,8 +933,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 sqleResult = sqle;
                 // 22007 invalid date time conversion
                 worked = "22007".equals(sqle.getSQLState());
-                } catch (Throwable t) {
-                System.out.println(t);    
+            } catch (Throwable t) {
+                // System.out.println(t);
                 worked = false;
             }
             if (rs != null)
@@ -889,7 +944,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         {
             // getAsciiStream()
-            
+
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -906,7 +961,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     if (B6[13][type])
                         assertNotNull(showFirstTwo(is));
                 }
-                    
+
                 worked = true;
 
             } catch (SQLException sqle) {
@@ -939,8 +994,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 if (isNull) {
                     assertTrue(rs.wasNull());
                     assertNull(is);
-                    
-                }else  if ( B6[14][type]) {
+
+                } else if (B6[14][type]) {
                     assertNotNull(showFirstTwo(is));
                 }
                 worked = true;
@@ -957,14 +1012,14 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            //getCharacterStream()
+            // getCharacterStream()
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
             ;
             try {
-               
+
                 Reader r = rs.getCharacterStream(1);
                 boolean wn = rs.wasNull();
                 if (isNull) {
@@ -973,7 +1028,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 } else if (B6[15][type]) {
                     assertFalse(wn);
                     assertNotNull(showFirstTwo(r));
-                                    }
+                }
                 worked = true;
 
             } catch (SQLException sqle) {
@@ -1018,8 +1073,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            //getBlob()
-            
+            // getBlob()
+
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -1032,8 +1087,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                     assertNull(blob);
                 } else if (B6[17][type]) {
-                    assertNotNull(showFirstTwo(blob
-                                    .getBinaryStream()));
+                    assertNotNull(showFirstTwo(blob.getBinaryStream()));
                 }
                 worked = true;
 
@@ -1049,7 +1103,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
 
         {
-            //getUnicodeStream()
+            // getUnicodeStream()
             ResultSet rs = ps.executeQuery();
             rs.next();
             boolean worked;
@@ -1061,7 +1115,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 if (isNull) {
                     assertTrue(wn);
                     assertNull(is);
-                    
+
                 } else {
                     assertFalse(wn);
                     assertNotNull(is);
@@ -1069,7 +1123,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 worked = true;
             } catch (NoSuchMethodError e) {
                 worked = true;
-                
+
             } catch (SQLException sqle) {
                 sqleResult = sqle;
                 worked = false;
@@ -1081,7 +1135,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         // Check to see getObject returns the correct type
         {
-            //getObject();
+            // getObject();
             ResultSet rs = ps.executeQuery();
             rs.next();
             SQLException sqleResult = null;
@@ -1111,7 +1165,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                                 + o.getClass().getName());
                     }
                 } else {
-                    //"ResultSet.getObject not called for DECIMAL type for JSR169";
+                    // "ResultSet.getObject not called for DECIMAL type for
+                    // JSR169";
                     worked = true;
                 }
                 assertTrue(worked);
@@ -1136,19 +1191,19 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     && "22005".equals(sqleResult.getSQLState()))
                 judge = false;
         }
-        
 
         return judge;
     }
 
     private static void judge_getXXX(boolean worked, SQLException sqleResult,
             int whichCall, int type) {
-       boolean validSQLState=false;
+        boolean validSQLState = false;
         // verify valid conversion worked
         if (B6[whichCall][type] && !worked)
             fail(" JDBC FAIL " + SQLTypes[type] + " " + sqleResult);
         else if (!worked) {
-            // make sure not implemented or conversion error was thrown if it didn't work
+            // make sure not implemented or conversion error was thrown if it
+            // didn't work
             String sqlState = sqleResult.getSQLState();
             if ("0A000".equals(sqlState))
                 validSQLState = true;
@@ -1163,9 +1218,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         "Wrong result column type for requested conversion") != -1)
                     validSQLState = true;
             }
-            assertTrue("FAIL: Expected conversion error but got "
-                        + sqleResult, validSQLState);
-           
+            assertTrue("FAIL: Expected conversion error but got " + sqleResult,
+                    validSQLState);
+
         }
 
     }
@@ -1177,6 +1232,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             msg = " JDBC MATCH(OK)";
         else if (worked)
             msg = " CLOUD EXT (OK)";
+        else if (sqleResult != null && "0A000".equals(sqleResult.getSQLState()))
+            msg = " Not Implemented (OK)";
         else if (B2_MOD[whichCall][type]) {
             if (sqleResult != null)
                 showException(sqleResult);
@@ -1186,8 +1243,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             if (msg == null)
                 return;
         }
-
-        System.out.println(msg);
+        if (msg.startsWith("JDBC FAIL"))
+            fail(" JDBC FAIL " + SQLTypes[type]);
     }
 
     private static void judge_setObject(boolean worked,
@@ -1197,6 +1254,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             msg = " JDBC MATCH(OK)";
         else if (worked)
             msg = " CLOUD EXT (OK)";
+        else if ("0A000".equals(sqleResult.getSQLState()))
+            msg = " Not Implemented (OK)";
         else if (B5[b5o][type]) {
             if (sqleResult != null)
                 showException(sqleResult);
@@ -1206,8 +1265,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             if (msg == null)
                 return;
         }
-
-        System.out.println(msg);
+        if (msg.startsWith("JDBC FAIL"))
+            fail(" JDBC FAIL " + SQLTypes[type]);
     }
 
     /**
@@ -1232,7 +1291,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     || "XCL12".equals(e.getSQLState())
                     || e.getMessage().indexOf("Illegal Conv") != -1) {
                 unknownException = false;
-                System.out.print("IC");
+                if ("0A000".equals(e.getSQLState())
+                        && e.getMessage().indexOf("setUnicodeStream") != -1)
+                    unknownException = false;
+
+                // System.out.print("IC");
                 break;
             }
             e = e.getNextException();
@@ -1253,11 +1316,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setByte() 
+                // setByte()
                 psi.setByte(1, (byte) 98);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setByte");
+                getValidValue(psq, jdbcTypes[type], "setByte");
 
                 worked = true;
 
@@ -1278,8 +1341,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setByte");
-                
+                getValidValue(psq, jdbcTypes[type], "setByte");
 
                 worked = true;
 
@@ -1299,7 +1361,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.setShort(1, (short) 98);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setShort");
+                getValidValue(psq, jdbcTypes[type], "setShort");
 
                 worked = true;
 
@@ -1316,13 +1378,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setShort() as batch 
+                // setShort() as batch
                 psi.setShort(1, (short) 98);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setShort");
-               
+                getValidValue(psq, jdbcTypes[type], "setShort");
 
                 worked = true;
 
@@ -1338,11 +1399,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setInt() 
+                // setInt()
                 psi.setInt(1, 98);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setInt");
+                getValidValue(psq, jdbcTypes[type], "setInt");
 
                 worked = true;
 
@@ -1359,12 +1420,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setInt() as batch 
+                // setInt() as batch
                 psi.setInt(1, 98);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setInt");
+                getValidValue(psq, jdbcTypes[type], "setInt");
 
                 worked = true;
 
@@ -1380,11 +1441,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setLong() 
+                // setLong()
                 psi.setLong(1, 98L);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setLong");
+                getValidValue(psq, jdbcTypes[type], "setLong");
 
                 worked = true;
 
@@ -1401,12 +1462,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setLong() as batch 
+                // setLong() as batch
                 psi.setLong(1, 98L);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setLong");
+                getValidValue(psq, jdbcTypes[type], "setLong");
 
                 worked = true;
 
@@ -1423,11 +1484,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setFloat() 
+                // setFloat()
                 psi.setFloat(1, 98.4f);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setFloat");
+                getValidValue(psq, jdbcTypes[type], "setFloat");
 
                 worked = true;
 
@@ -1445,12 +1506,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setFloat() as batch 
+                // setFloat() as batch
                 psi.setFloat(1, 98.4f);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setFloat");
+                getValidValue(psq, jdbcTypes[type], "setFloat");
 
                 worked = true;
 
@@ -1467,11 +1528,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setDouble() 
+                // setDouble()
                 psi.setDouble(1, 98.5);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setDouble");
+                getValidValue(psq, jdbcTypes[type], "setDouble");
 
                 worked = true;
 
@@ -1489,12 +1550,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setDouble() as batch 
+                // setDouble() as batch
                 psi.setDouble(1, 98.5);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setDouble");
+                getValidValue(psq, jdbcTypes[type], "setDouble");
 
                 worked = true;
 
@@ -1512,11 +1573,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 SQLException sqleResult = null;
                 boolean worked;
                 try {
-                    // setBigDecimal() 
+                    // setBigDecimal()
                     psi.setBigDecimal(1, new BigDecimal(98.0));
                     psi.executeUpdate();
 
-                    getValidValue(psq, jdbcTypes[type],"setBigDecimal");
+                    getValidValue(psq, jdbcTypes[type], "setBigDecimal");
 
                     worked = true;
 
@@ -1533,12 +1594,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 SQLException sqleResult = null;
                 boolean worked;
                 try {
-                    //setBigDecimal() as batch 
+                    // setBigDecimal() as batch
                     psi.setBigDecimal(1, new BigDecimal(98.0));
                     psi.addBatch();
                     psi.executeBatch();
 
-                    getValidValue(psq, jdbcTypes[type],"setBigDecimal");
+                    getValidValue(psq, jdbcTypes[type], "setBigDecimal");
 
                     worked = true;
 
@@ -1555,11 +1616,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 SQLException sqleResult = null;
                 boolean worked;
                 try {
-                    // setBigDecimal(null) 
+                    // setBigDecimal(null)
                     psi.setBigDecimal(1, null);
                     psi.executeUpdate();
 
-                    getValidValue(psq, jdbcTypes[type],"setBigDecimal");
+                    getValidValue(psq, jdbcTypes[type], "setBigDecimal");
 
                     worked = true;
 
@@ -1577,12 +1638,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 SQLException sqleResult = null;
                 boolean worked;
                 try {
-                    //setBigDecimal(null) as batch 
+                    // setBigDecimal(null) as batch
                     psi.setBigDecimal(1, null);
                     psi.addBatch();
                     psi.executeBatch();
 
-                    getValidValue(psq, jdbcTypes[type],"setBigDecimal");
+                    getValidValue(psq, jdbcTypes[type], "setBigDecimal");
 
                     worked = true;
 
@@ -1600,11 +1661,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setBoolean() 
+                // setBoolean()
                 psi.setBoolean(1, true);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setBoolean");
+                getValidValue(psq, jdbcTypes[type], "setBoolean");
 
                 worked = true;
 
@@ -1620,12 +1681,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setBoolean() as batch 
+                // setBoolean() as batch
                 psi.setBoolean(1, true);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setBoolean");
+                getValidValue(psq, jdbcTypes[type], "setBoolean");
 
                 worked = true;
 
@@ -1641,11 +1702,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setString() 
-                psi.setString(1, "98");
+                
+                psi.setString(1,validString[type]);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setString");
+                getValidValue(psq, jdbcTypes[type], "setString");
 
                 worked = true;
 
@@ -1654,7 +1715,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 worked = false;
             } catch (Throwable t) {
                 // JCC has some bugs
-                System.out.println(t.getMessage());
+                // System.out.println(t.getMessage());
                 worked = false;
                 sqleResult = null;
 
@@ -1669,11 +1730,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             boolean worked;
             try {
                 // setString() as batch
-                psi.setString(1, "98");
+               
+                psi.setString(1,validString[type]);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setString");
+                getValidValue(psq, jdbcTypes[type], "setString");
 
                 worked = true;
 
@@ -1682,7 +1744,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 worked = false;
             } catch (Throwable t) {
                 // JCC has some bugs
-                System.out.println(t.getMessage());
+                // System.out.println(t.getMessage());
                 worked = false;
                 sqleResult = null;
 
@@ -1701,7 +1763,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.setString(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setString");
+                getValidValue(psq, jdbcTypes[type], "setString");
 
                 worked = true;
 
@@ -1710,7 +1772,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 worked = false;
             } catch (Throwable t) {
                 // JCC has some bugs
-                System.out.println(t.getMessage());
+                // System.out.println(t.getMessage());
                 worked = false;
                 sqleResult = null;
 
@@ -1724,12 +1786,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //  setString(null) as batch 
+                // setString(null) as batch
                 psi.setString(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setString");
+                getValidValue(psq, jdbcTypes[type], "setString");
 
                 worked = true;
 
@@ -1738,7 +1800,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 worked = false;
             } catch (Throwable t) {
                 // JCC has some bugs
-                System.out.println(t.getMessage());
+                // System.out.println(t.getMessage());
                 worked = false;
                 sqleResult = null;
 
@@ -1757,14 +1819,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setBytes() 
+                // setBytes()
                 byte[] data = { (byte) 0x04, (byte) 0x03, (byte) 0xfd,
                         (byte) 0xc3, (byte) 0x73 };
                 psi.setBytes(1, data);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setBytes");
-                
+                getValidValue(psq, jdbcTypes[type], "setBytes");
 
                 worked = true;
 
@@ -1787,7 +1848,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setBytes");
+                getValidValue(psq, jdbcTypes[type], "setBytes");
 
                 worked = true;
 
@@ -1804,11 +1865,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setBytes(null)
+                // setBytes(null)
                 psi.setBytes(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setBytes");
+                getValidValue(psq, jdbcTypes[type], "setBytes");
 
                 worked = true;
 
@@ -1825,12 +1886,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setBytes(null) as batch
+                // setBytes(null) as batch
                 psi.setBytes(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setBytes");
+                getValidValue(psq, jdbcTypes[type], "setBytes");
 
                 worked = true;
 
@@ -1846,11 +1907,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setDate() 
+                // setDate()
                 psi.setDate(1, java.sql.Date.valueOf("2004-02-14"));
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setDate");
+                getValidValue(psq, jdbcTypes[type], "setDate");
 
                 worked = true;
 
@@ -1866,7 +1927,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //  setDate() as batch
+                // setDate() as batch
                 psi.setDate(1, java.sql.Date.valueOf("2004-02-14"));
                 psi.addBatch();
                 psi.executeBatch();
@@ -1888,11 +1949,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setDate(null) 
+                // setDate(null)
                 psi.setDate(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setDate");
+                getValidValue(psq, jdbcTypes[type], "setDate");
 
                 worked = true;
 
@@ -1910,12 +1971,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setDate(null) as batch 
+                // setDate(null) as batch
                 psi.setDate(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setDate");
+                getValidValue(psq, jdbcTypes[type], "setDate");
 
                 worked = true;
 
@@ -1932,11 +1993,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setTime() 
-                psi.setTime(1, java.sql.Time.valueOf("13:26:42"));
+                // setTime()
+                psi.setTime(1, java.sql.Time.valueOf("00:00:00"));
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setTime");
+                getValidValue(psq, jdbcTypes[type], "setTime");
 
                 worked = true;
 
@@ -1952,12 +2013,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setTime() as batch 
-                psi.setTime(1, java.sql.Time.valueOf("13:26:42"));
+                // setTime() as batch
+                psi.setTime(1, java.sql.Time.valueOf("00:00:00"));
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setTime");
+                getValidValue(psq, jdbcTypes[type], "setTime");
 
                 worked = true;
 
@@ -1974,11 +2035,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-               // setTime(null) 
+                // setTime(null)
                 psi.setTime(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setTime");
+                getValidValue(psq, jdbcTypes[type], "setTime");
 
                 worked = true;
 
@@ -1994,12 +2055,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setTime(null) as batch 
+                // setTime(null) as batch
                 psi.setTime(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setTime");
+                getValidValue(psq, jdbcTypes[type], "setTime");
 
                 worked = true;
 
@@ -2015,12 +2076,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setTimestamp() 
+                // setTimestamp()
                 psi.setTimestamp(1, java.sql.Timestamp
-                        .valueOf("2004-02-23 17:14:24.097625551"));
+                        .valueOf("2004-02-14 00:00:00.0"));
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setTimestamp");
+                getValidValue(psq, jdbcTypes[type], "setTimestamp");
 
                 worked = true;
 
@@ -2037,13 +2098,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //  setTimestamp() as batch 
+                // setTimestamp() as batch
                 psi.setTimestamp(1, java.sql.Timestamp
-                        .valueOf("2004-02-23 17:14:24.097625551"));
+                        .valueOf("2004-02-14 00:00:00.0"));
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setTimestamp");
+                getValidValue(psq, jdbcTypes[type], "setTimestamp");
 
                 worked = true;
 
@@ -2060,11 +2121,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setTimestamp(null) 
+                // setTimestamp(null)
                 psi.setTimestamp(1, null);
                 psi.executeUpdate();
 
-                getValidValue(psq, jdbcTypes[type],"setTimestamp");
+                getValidValue(psq, jdbcTypes[type], "setTimestamp");
 
                 worked = true;
 
@@ -2081,12 +2142,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setTimestamp(null) as batch 
+                // setTimestamp(null) as batch
                 psi.setTimestamp(1, null);
                 psi.addBatch();
                 psi.executeBatch();
 
-                getValidValue(psq, jdbcTypes[type],"setTimestamp");
+                getValidValue(psq, jdbcTypes[type], "setTimestamp");
 
                 worked = true;
 
@@ -2103,7 +2164,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setAsciiStream() 
+                // setAsciiStream()
                 byte[] data = new byte[6];
                 data[0] = (byte) 0x65;
                 data[1] = (byte) 0x67;
@@ -2116,7 +2177,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         .setAsciiStream(1, new java.io.ByteArrayInputStream(
                                 data), 6);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setAsciiStream");
+                getValidValue(psq, jdbcTypes[type], "setAsciiStream");
 
                 worked = true;
 
@@ -2132,7 +2193,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setAsciiStream() as batch 
+                // setAsciiStream() as batch
                 byte[] data = new byte[6];
                 data[0] = (byte) 0x65;
                 data[1] = (byte) 0x67;
@@ -2146,7 +2207,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                                 data), 6);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setAsciiStream");
+                getValidValue(psq, jdbcTypes[type], "setAsciiStream");
 
                 worked = true;
 
@@ -2163,10 +2224,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //  setAsciiStream(null) 
+                // setAsciiStream(null)
                 psi.setAsciiStream(1, null, 0);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setAsciiStream");
+                getValidValue(psq, jdbcTypes[type], "setAsciiStream");
 
                 worked = true;
 
@@ -2182,11 +2243,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setAsciiStream(null) as batch 
+                // setAsciiStream(null) as batch
                 psi.setAsciiStream(1, null, 0);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setAsciiStream");
+                getValidValue(psq, jdbcTypes[type], "setAsciiStream");
 
                 worked = true;
 
@@ -2202,10 +2263,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setBinaryStream() 
+                // setBinaryStream()
                 byte[] data = new byte[6];
-                data[0] = (byte) 0x82;
-                data[1] = (byte) 0x43;
+                data[0] = (byte) 0x4;
+                data[1] = (byte) 0x3;
                 data[2] = (byte) 0xca;
                 data[3] = (byte) 0xfe;
                 data[4] = (byte) 0x00;
@@ -2214,7 +2275,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.setBinaryStream(1, new java.io.ByteArrayInputStream(data),
                         6);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setBinaryStream");
+                getValidValue(psq, jdbcTypes[type], "setBinaryStream");
 
                 worked = true;
 
@@ -2230,10 +2291,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setBinaryStream() as batch 
+                // setBinaryStream() as batch
                 byte[] data = new byte[6];
-                data[0] = (byte) 0x82;
-                data[1] = (byte) 0x43;
+                data[0] = (byte) 0x4;
+                data[1] = (byte) 0x3;
                 data[2] = (byte) 0xca;
                 data[3] = (byte) 0xfe;
                 data[4] = (byte) 0x00;
@@ -2243,7 +2304,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         6);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"getBinaryStream");
+                getValidValue(psq, jdbcTypes[type], "getBinaryStream");
 
                 worked = true;
 
@@ -2260,10 +2321,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setBinaryStream(null) 
+                // setBinaryStream(null)
                 psi.setBinaryStream(1, null, 0);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setBinaryStream");
+                getValidValue(psq, jdbcTypes[type], "setBinaryStream");
 
                 worked = true;
 
@@ -2279,11 +2340,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //  setBinaryStream(null) as batch 
+                // setBinaryStream(null) as batch
                 psi.setBinaryStream(1, null, 0);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setBinaryStream");
+                getValidValue(psq, jdbcTypes[type], "setBinaryStream");
 
                 worked = true;
 
@@ -2300,10 +2361,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setCharacterStream() 
+                // setCharacterStream()
                 psi.setCharacterStream(1, new java.io.StringReader("89"), 2);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setCharacterStream");
+                getValidValue(psq, jdbcTypes[type], "setCharacterStream");
 
                 worked = true;
 
@@ -2319,11 +2380,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setCharacterStream() as batch 
+                // setCharacterStream() as batch
                 psi.setCharacterStream(1, new java.io.StringReader("89"), 2);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setCharacterStream");
+                getValidValue(psq, jdbcTypes[type], "setCharacterStream");
 
                 worked = true;
 
@@ -2340,10 +2401,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setCharacterStream(null) 
+                // setCharacterStream(null)
                 psi.setCharacterStream(1, null, 0);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setCharacterStream");
+                getValidValue(psq, jdbcTypes[type], "setCharacterStream");
 
                 worked = true;
 
@@ -2359,11 +2420,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setCharacterStream(null) as batch
+                // setCharacterStream(null) as batch
                 psi.setCharacterStream(1, null, 0);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setCharacterStream");
+                getValidValue(psq, jdbcTypes[type], "setCharacterStream");
 
                 worked = true;
 
@@ -2380,7 +2441,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setClob()
+                // setClob()
 
                 ResultSet rsc = s
                         .executeQuery("SELECT C FROM PM.LOB_GET WHERE ID = 1");
@@ -2390,7 +2451,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
                 psi.setClob(1, tester);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setClob");
+                getValidValue(psq, jdbcTypes[type], "setClob");
 
                 worked = true;
 
@@ -2406,7 +2467,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setClob() as batch 
+                // setClob() as batch
 
                 ResultSet rsc = s
                         .executeQuery("SELECT C FROM PM.LOB_GET WHERE ID = 1");
@@ -2417,7 +2478,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.setClob(1, tester);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setClob");
+                getValidValue(psq, jdbcTypes[type], "setClob");
 
                 worked = true;
 
@@ -2434,11 +2495,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setClob(null) 
+                // setClob(null)
 
                 psi.setClob(1, null);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setClob");
+                getValidValue(psq, jdbcTypes[type], "setClob");
 
                 worked = true;
 
@@ -2454,12 +2515,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setClob(null) as batch 
+                // setClob(null) as batch
 
                 psi.setClob(1, null);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setClob");
+                getValidValue(psq, jdbcTypes[type], "setClob");
 
                 worked = true;
 
@@ -2474,7 +2535,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setBlob() 
+                // setBlob()
 
                 ResultSet rsc = s
                         .executeQuery("SELECT B FROM PM.LOB_GET WHERE ID = 1");
@@ -2484,7 +2545,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
                 psi.setBlob(1, tester);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setBlob");
+                getValidValue(psq, jdbcTypes[type], "setBlob");
 
                 worked = true;
 
@@ -2499,7 +2560,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                // setBlob() as batch 
+                // setBlob() as batch
 
                 ResultSet rsc = s
                         .executeQuery("SELECT B FROM PM.LOB_GET WHERE ID = 1");
@@ -2510,7 +2571,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 psi.setBlob(1, tester);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setBlob");
+                getValidValue(psq, jdbcTypes[type], "setBlob");
 
                 worked = true;
 
@@ -2525,11 +2586,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //Blob(null) 
+                // Blob(null)
 
                 psi.setBlob(1, null);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setBlob");
+                getValidValue(psq, jdbcTypes[type], "setBlob");
 
                 worked = true;
 
@@ -2544,12 +2605,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setBlob(null) as batch 
+                // setBlob(null) as batch
 
                 psi.setBlob(1, null);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setBlob");
+                getValidValue(psq, jdbcTypes[type], "setBlob");
 
                 worked = true;
 
@@ -2565,10 +2626,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                System.out.print("  setUnicodeStream() ");
+                // setUnicodeStream()
                 byte[] data = new byte[6];
-                data[0] = (byte) 0x82;
-                data[1] = (byte) 0x43;
+                data[0] = (byte) 0x4;
+                data[1] = (byte) 0x3;
                 data[2] = (byte) 0xca;
                 data[3] = (byte) 0xfe;
                 data[4] = (byte) 0x00;
@@ -2578,12 +2639,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     psi.setUnicodeStream(1, new java.io.ByteArrayInputStream(
                             data), 6);
                 } catch (NoSuchMethodError e) {
-                 //ResultSet.setUnicodeStream not present - correct for JSR169
+                    // ResultSet.setUnicodeStream not present - correct for
+                    // JSR169
                 }
 
-                if ( JDBC.vmSupportsJDBC2() ) {
+                if (JDBC.vmSupportsJDBC2()) {
                     psi.executeUpdate();
-                    getValidValue(psq, jdbcTypes[type],"setUnicodeStream");
+                    getValidValue(psq, jdbcTypes[type], "setUnicodeStream");
                 }
                 worked = true;
 
@@ -2594,7 +2656,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             if (JDBC.vmSupportsJDBC2())
                 judge_setXXX(worked, sqleResult, 14, type);
         }
-        
+
         // setObject(null)
         {
             s.execute("DELETE FROM PM.TYPE_AS");
@@ -2603,10 +2665,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             boolean worked;
             try {
                 // should never work!
-                //  setObject(null) 
+                // setObject(null)
                 psi.setObject(1, null);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setObject");
+                getValidValue(psq, jdbcTypes[type], "setObject");
 
                 worked = true;
 
@@ -2614,8 +2676,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 sqleResult = sqle;
                 worked = false;
             }
-            System.out.println(worked ? " FAIL " : (" OK " + sqleResult
-                    .getMessage()));
+            if (worked)
+                fail("FAIL: setObject(null) not valid");
+
         }
         {
             s.execute("DELETE FROM PM.TYPE_AS");
@@ -2624,11 +2687,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             boolean worked;
             try {
                 // should never work!
-                //setObject(null) as batch 
+                // setObject(null) as batch
                 psi.setObject(1, null);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setObject");
+                getValidValue(psq, jdbcTypes[type], "setObject");
 
                 worked = true;
 
@@ -2636,43 +2699,43 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 sqleResult = sqle;
                 worked = false;
             }
-            System.out.println(worked ? " FAIL " : (" OK " + sqleResult
-                    .getMessage()));
+            if (worked)
+                fail("FAIL: setObject(1,null) did not throw exception");
         }
 
-        setXXX_setObject(s, psi, psq, type, "46", "java.lang.String", 0);
+        setXXX_setObject(s, psi, psq, type, validString[type], "java.lang.String", 0);
+        
         if (HAVE_BIG_DECIMAL)
-            setXXX_setObject(s, psi, psq, type, BigDecimal.valueOf(72L),
+            setXXX_setObject(s, psi, psq, type, BigDecimal.valueOf(98L),
                     "java.math.BigDecimal", 1);
         setXXX_setObject(s, psi, psq, type, Boolean.TRUE, "java.lang.Boolean",
                 2);
 
         // DERBY-1500: setObject() should work for Byte and Short too.
-        setXXX_setObject(s, psi, psq, type, new Byte((byte) 2),
-                "java.lang.Byte", 13);
-        setXXX_setObject(s, psi, psq, type, new Short((short) 11),
-                "java.lang.Short", 14);
+        setXXX_setObject(s, psi, psq, type, new Byte((byte) 98),
+                "java.lang.Byte", 1);
+        setXXX_setObject(s, psi, psq, type, new Short((short) 98),
+                "java.lang.Short", 2);
 
-        setXXX_setObject(s, psi, psq, type, new Integer(74),
+        setXXX_setObject(s, psi, psq, type, new Integer(98),
                 "java.lang.Integer", 3);
-        setXXX_setObject(s, psi, psq, type, new Long(79), "java.lang.Long", 4);
-        setXXX_setObject(s, psi, psq, type, new Float(76.3f),
+        setXXX_setObject(s, psi, psq, type, new Long(98), "java.lang.Long", 4);
+        setXXX_setObject(s, psi, psq, type, new Float(98.0f),
                 "java.lang.Float", 5);
-        setXXX_setObject(s, psi, psq, type, new Double(12.33d),
+        setXXX_setObject(s, psi, psq, type, new Double(98.0d),
                 "java.lang.Double", 6);
 
         {
-            byte[] data = { 0x32, 0x39 };
+            byte[] data = { 0x4, 0x3 };
             setXXX_setObject(s, psi, psq, type, data, "byte[]", 7);
         }
 
         setXXX_setObject(s, psi, psq, type,
                 java.sql.Date.valueOf("2004-02-14"), "java.sql.Date", 8);
-        setXXX_setObject(s, psi, psq, type, java.sql.Time.valueOf("13:26:42"),
+        setXXX_setObject(s, psi, psq, type, java.sql.Time.valueOf("00:00:00"),
                 "java.sql.Time", 9);
         setXXX_setObject(s, psi, psq, type, java.sql.Timestamp
-                .valueOf("2004-02-23 17:14:24.097625551"),
-                "java.sql.Timestamp", 10);
+                .valueOf("2004-02-14 00:00:00.0"), "java.sql.Timestamp", 10);
         s.getConnection().commit();
 
         if (!usingDerbyNetClient()) {
@@ -2705,18 +2768,16 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setObject(" + className + ") 
+                // setObject(" + className + ")
                 psi.setObject(1, value);
                 psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type],"setObject(" + className +")");
+                getValidValue(psq, jdbcTypes[type], "setObject(" + className
+                        + ")");
                 worked = true;
 
             } catch (SQLException sqle) {
                 sqleResult = sqle;
                 worked = false;
-            } catch (Throwable t) {
-                System.out.println("FAIL " + t.getMessage());
-                return;
             }
             judge_setObject(worked, sqleResult, b5o, type);
         }
@@ -2726,11 +2787,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult = null;
             boolean worked;
             try {
-                //setObject(" + className + ") as batch 
+                // setObject(" + className + ") as batch
                 psi.setObject(1, value);
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type],"setObject(" + className + ")");
+                getValidValue(psq, jdbcTypes[type], "setObject(" + className
+                        + ")");
 
                 worked = true;
 
@@ -2738,7 +2800,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 sqleResult = sqle;
                 worked = false;
             } catch (Throwable t) {
-                System.out.println("FAIL " + t.getMessage());
+                fail("FAIL " + t.getMessage());
                 return;
             }
             judge_setObject(worked, sqleResult, b5o, type);
@@ -2747,7 +2809,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
     private static void unexpectedException(SQLException sqle) {
 
-        System.out.print("FAIL unexpected exception - ");
+        fail("FAIL unexpected exception - ");
         showException(sqle);
         sqle.printStackTrace(System.out);
     }
@@ -2761,8 +2823,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             String msg = sqle.getMessage();
             if (msg == null)
                 msg = "?? no message ??";
-
-            System.out.print(" (" + state + "):" + msg);
+            sqle.printStackTrace();
+            fail(" (" + state + "):" + msg);
             sqle = sqle.getNextException();
         } while (sqle != null);
     }
@@ -2846,92 +2908,101 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
     }
 
-    private static boolean getValidValue(PreparedStatement ps, int jdbcType,String method)
-            throws SQLException, IOException {
+    private static boolean getValidValue(PreparedStatement ps, int jdbcType,
+            String method) throws SQLException, IOException {
 
         ResultSet rs = ps.executeQuery();
         rs.next();
 
         switch (jdbcType) {
-        case Types.SMALLINT: 
-        {
+        case Types.SMALLINT: {
             short val = rs.getShort(1);
             boolean wn = rs.wasNull();
+
             if (wn)
                 assertEquals(0, val);
-            else if (method.equals("setBoolean"))
-                assertEquals(1,val);
+            else if (isBooleanMethod(method))
+                assertEquals(1, val);
             else
-                assertEquals(98,val);
+                assertEquals(98, val);
             return true;
         }
-        case Types.INTEGER:
-        {
+        case Types.INTEGER: {
             int val = rs.getInt(1);
             boolean wn = rs.wasNull();
             if (wn)
                 assertEquals(0, val);
-            else if (method.equals("setBoolean"))
-                assertEquals(1,val);
+            else if (isBooleanMethod(method))
+                assertEquals(1, val);
             else
-                assertEquals(98,val);
+                assertEquals(98, val);
             return true;
         }
-        case Types.BIGINT:
-        {
+        case Types.BIGINT: {
             long val = rs.getLong(1);
             boolean wn = rs.wasNull();
             if (wn)
                 assertEquals(0, val);
-            else if (method.equals("setBoolean"))
-                assertEquals(1,val);
+            else if (isBooleanMethod(method))
+                assertEquals(1, val);
             else
-                assertEquals(98,val);
+                assertEquals(98, val);
             return true;
         }
-        case Types.REAL:
-        {
+        case Types.REAL: {
             float val = rs.getFloat(1);
             boolean wn = rs.wasNull();
             if (wn)
-                assertEquals(0.0, val,.001);
-            else if (method.equals("setBoolean"))
-                assertEquals(1.0,val,.001);
+                assertEquals(0.0, val, .001);
+            else if (isBooleanMethod(method))
+                assertEquals(1.0, val, .001);
             else if (method.equals("setFloat"))
-                assertEquals(98.4,val,.001);
+                assertEquals(98.4, val, .001);
             else if (method.equals("setDouble"))
-                assertEquals(98.5,val,.001);
+                assertEquals(98.5, val, .001);
             else
-                assertEquals(98.0,val,.001);
+                assertEquals(98.0, val, .001);
             return true;
         }
         case Types.FLOAT:
-        case Types.DOUBLE:
-        {
+        case Types.DOUBLE: {
             double val = rs.getDouble(1);
             boolean wn = rs.wasNull();
             if (wn)
-                assertEquals(0.0, val,.001);
-            else if (method.equals("setBoolean"))
-                assertEquals(1.0,val,.001);
+                assertEquals(0.0, val, .001);
+            else if (isBooleanMethod(method))
+                assertEquals(1.0, val, .001);
             else if (method.equals("setFloat"))
-                assertEquals(98.4,val,.001);
+                assertEquals(98.4, val, .001);
             else if (method.equals("setDouble"))
-                assertEquals(98.5,val,.001);
+                assertEquals(98.5, val, .001);
             else
-                assertEquals(98.0,val,.001);
+                assertEquals(98.0, val, .001);
             return true;
         }
-        case Types.DECIMAL:
-            System.out.print("getBigDecimal="
-                    + BigDecimalHandler.getBigDecimalString(rs, 1)
-                    + " was null " + rs.wasNull());
+        case Types.DECIMAL: {
+            String val = BigDecimalHandler.getBigDecimalString(rs, 1);
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertNull(val);
+            else if (isBooleanMethod(method))
+                assertEquals("1.00000", val);
+            else if (method.equals("setFloat"))
+                assertEquals("98.40000", val);
+            else if (method.equals("setDouble"))
+                assertEquals("98.50000", val);
+            else
+                assertEquals("98.00000", val);
             return true;
+        }
         case Types.CHAR:
         case Types.VARCHAR:
         case Types.LONGVARCHAR: {
             String s = rs.getString(1);
-            if (s != null) {
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertNull(s);
+            else {
                 // With IBM's DB2 universal driver.
                 // Setting a java.sql.Clob value works with
                 // a character column but sets the value to
@@ -2962,152 +3033,482 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     s = sb.toString();
 
                 }
+                checkValidStringValue(method, s);
             }
-            System.out.print("getString=" + s + " was null " + rs.wasNull());
             return true;
         }
         case Types.BINARY:
         case Types.VARBINARY: {
             byte[] data = rs.getBytes(1);
-            System.out.print("getBytes="
-                    + (data == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(data)));
-            System.out.print(" was null " + rs.wasNull());
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertNull(data);
+            else
+                assertEquals("0x4,0x3", showFirstTwo(data));
             return true;
         }
         case Types.LONGVARBINARY: {
             InputStream is = rs.getBinaryStream(1);
-            System.out.print("getBinaryStream="
-                    + (is == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(is)));
-            System.out.print(" was null " + rs.wasNull());
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertNull(is);
+            else
+                assertEquals("0x4,0x3", showFirstTwo(is));
             return true;
         }
+        case Types.DATE: {
+            Date d = rs.getDate(1);
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertNull(d);
+            else
+                assertEquals(Date.valueOf("2004-02-14"), d);
+            return true;
+        }
+        case Types.TIME: {
+            Time t = rs.getTime(1);
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertNull(t);
+            else
+                assertEquals(Time.valueOf("00:00:00"), t);
+            return true;
 
-        case Types.DATE:
-            System.out.print("getDate=" + rs.getDate(1) + " was null "
-                    + rs.wasNull());
+        }
+        case Types.TIMESTAMP: {
+            Timestamp ts = rs.getTimestamp(1);
+            boolean wn = rs.wasNull();
+            if (wn)
+                assertNull(rs.getTimestamp(1));
+            else
+                assertEquals(Timestamp.valueOf("2004-02-14 00:00:00.0"), ts);
             return true;
-        case Types.TIME:
-            System.out.print("getTime=" + rs.getTime(1) + " was null "
-                    + rs.wasNull());
-            return true;
-        case Types.TIMESTAMP:
-            System.out.print("getTimestamp=" + rs.getTimestamp(1)
-                    + " was null " + rs.wasNull());
-            return true;
+        }
         case Types.CLOB: {
             Clob clob = rs.getClob(1);
-            System.out.print("getClob="
-                    + (clob == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(clob.getCharacterStream())));
-            System.out.print(" was null " + rs.wasNull());
+            boolean wn = rs.wasNull();
+            if (wn)
+               assertNull(clob);
+            else {
+                char[] charray = new char[20];
+                int numchar = clob.getCharacterStream().read(charray);
+                String s = new String(charray,0,numchar);
+                if ("setString".equals(method))
+                    assertEquals("98",s);
+                else if ("setAsciiStream".equals(method))
+                    assertEquals("eg012d", s);
+                else if ("setCharacterStream".equals(method))
+                    assertEquals("89",s);
+                else if ("setClob".equals(method))
+                    assertEquals("72",s);
+                else if ("setObject(java.lang.String)".equals(method))
+                    assertEquals("98",s);
+                else if ("setObject(java.lang.Clob)".equals(method))
+                    assertEquals("72",s);
+            }
             return true;
         }
         case Types.BLOB: {
             Blob blob = rs.getBlob(1);
-            System.out.print("getBlob="
-                    + (blob == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(blob.getBinaryStream())));
-            System.out.print(" was null " + rs.wasNull());
+            boolean wn = rs.wasNull();
+            if (wn)
+              assertNull(blob);
+            else {
+                assertEquals("0x4,0x3", showFirstTwo(blob.getBinaryStream())); 
+            }
             return true;
         }
         default:
-            System.out.println("FAIL JDBC TYPE IN getValidValue "
+            fail("FAIL JDBC TYPE IN getValidValue "
                     + JDBC.sqlNameFromJdbc(jdbcType));
             return false;
         }
     }
 
+    private static void checkValidStringValue(String method, String s) {
+        s = s.trim();
+        if ("setBoolean".equals(method) ||
+                "setObject(java.lang.Boolean)".equals(method) )
+            assertEquals("1",s);
+        else if ("setBytes".equals(method) ||
+                ("setObject(byte[])".equals(method)))
+            assertEquals("EncodedString: > 1027 ",s.substring(0,22));
+        else if ("setFloat".equals(method))
+            assertEquals("98.4", s);
+        else if ("setDouble".equals(method))
+            assertEquals("98.5",s);
+        else if ("setDate".equals(method) ||
+                "setObject(java.sql.Date)".equals(method))
+            assertEquals("2004-02-14", s);
+        else if ("setTime".equals(method) ||
+                "setObject(java.sql.Time)".equals(method))
+            assertEquals("00:00:00",s);
+        else if ("setTimestamp".equals(method)||
+                "setObject(java.sql.Timestamp)".equals(method))
+            assertEquals("2004-02-14 00:00:00.0",s);
+        else if ("setAsciiStream".equals(method))
+            assertEquals("eg012d",s);
+        else if ("setCharacterStream".equals(method))
+            assertEquals("89",s);
+        else if ("setObject(java.lang.Float)".equals(method) ||
+                "setObject(java.lang.Double)".equals(method))
+               assertEquals("98.0",s);
+        else
+            assertEquals("98",s.trim());
+    }
+
+    private static boolean isBooleanMethod(String method) {
+        return method.equals("setBoolean")
+                || method.equals("setObject(java.lang.Boolean)");
+    }
+
     private static boolean getOutValue(CallableStatement cs, int param,
-            int jdbcType) throws SQLException, IOException {
+            int regJdbcType, int paramType) throws SQLException, IOException {
+        
+        int paramJdbcType= jdbcTypes[paramType];
+        switch (regJdbcType) {
+        case Types.BIT: {
+            boolean val = cs.getBoolean(param);
+            boolean wn = cs.wasNull();
+            if (!wn)
+                assertTrue(val);
 
-        switch (jdbcType) {
-        case Types.BIT:
-            System.out.print("cs.getBoolean=" + cs.getBoolean(param)
-                    + " was null " + cs.wasNull());
             return true;
-        case Types.TINYINT:
-            System.out.print("cs.getByte=" + cs.getByte(param) + " was null "
-                    + cs.wasNull());
+        }
+        case Types.TINYINT: {
+            // Check out and inout params for procedures
+            byte val = cs.getByte(param);
+            boolean wn = cs.wasNull();
+            if (!wn)
+                checkProcedureOutput(param, paramType, val);
             return true;
-
-        case Types.SMALLINT:
-            System.out.print("cs.getShort=" + cs.getShort(param) + " was null "
-                    + cs.wasNull());
+        }
+            
+        case Types.SMALLINT: {
+            short val = cs.getShort(param);
+            boolean wn = cs.wasNull();
+            if (!wn)
+                checkProcedureOutput(param, paramType, val);
             return true;
-        case Types.INTEGER:
-            System.out.print("cs.getInt=" + cs.getInt(param) + " was null "
-                    + cs.wasNull());
+        }
+    case Types.INTEGER: {
+            int val = cs.getInt(param);
+            boolean wn = cs.wasNull();
+            if (!wn)
+                checkProcedureOutput(param, paramType, val);
             return true;
-        case Types.BIGINT:
-            System.out.print("cs.getLong=" + cs.getLong(param) + " was null "
-                    + cs.wasNull());
+    }
+        case Types.BIGINT: {
+            long val = cs.getLong(param);
+            boolean wn = cs.wasNull();
+            if(!wn)
+                checkProcedureOutput(param, paramType, val);
             return true;
-        case Types.REAL:
-            System.out.print("cs.getFloat=" + cs.getFloat(param) + " was null "
-                    + cs.wasNull());
+        }
+        case Types.REAL: {
+            float val = cs.getFloat(param);
+            boolean wn = cs.wasNull();
+            if(!wn)
+                checkProcedureOutput(param, paramType, val);
             return true;
+        }
         case Types.FLOAT:
-        case Types.DOUBLE:
-            System.out.print("cs.getDouble=" + cs.getDouble(param)
-                    + " was null " + cs.wasNull());
+        case Types.DOUBLE: {
+            double val = cs.getDouble(param);
+            boolean wn = cs.wasNull();
+            if (!wn)
+                checkProcedureOutput(param, paramType, val);
             return true;
-        case Types.DECIMAL:
-            System.out.print("cs.getBigDecimal="
-                    + BigDecimalHandler
-                            .getBigDecimalString(cs, param, jdbcType)
-                    + " was null " + cs.wasNull());
-            return true;
+        }       
+        case Types.DECIMAL: {
+           String val = BigDecimalHandler.getBigDecimalString(cs, param, regJdbcType);
+           boolean wn = cs.wasNull();
+           if (!wn)
+               checkProcedureOutput(param,paramType,val);
+           return true;
+        }
         case Types.CHAR:
         case Types.VARCHAR:
-        case Types.LONGVARCHAR:
-            System.out.print("cs.getString=" + cs.getString(param)
-                    + " was null " + cs.wasNull());
+        case Types.LONGVARCHAR: {
+            String val = cs.getString(param);
+            boolean wn = cs.wasNull();
+            if (!wn)
+                checkProcedureOutput(param,paramType,val.trim());
             return true;
+        }
         case Types.BINARY:
         case Types.VARBINARY:
         case Types.LONGVARBINARY: {
             byte[] data = cs.getBytes(param);
-            System.out.print("cs.getBytes="
-                    + (data == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(data)));
-            System.out.print(" was null " + cs.wasNull());
+            boolean wn = cs.wasNull();
+            if (!wn)
+                checkProcedureOutput(param,paramType,data);
             return true;
         }
 
-        case Types.DATE:
-            System.out.print("cs.getDate=" + cs.getDate(param) + " was null "
-                    + cs.wasNull());
+        case Types.DATE: {
+            Date val = cs.getDate(param);
+            boolean wn = cs.wasNull();
+            if (!wn)
+                checkProcedureOutput(param,paramType,val);            
             return true;
-        case Types.TIME:
-            System.out.print("cs.getTime=" + cs.getTime(param) + " was null "
-                    + cs.wasNull());
+        }
+        case Types.TIME: {
+            Time val = cs.getTime(param);
+            boolean wn = cs.wasNull();
+            if (!wn)
+                checkProcedureOutput(param,paramType,val);
             return true;
-        case Types.TIMESTAMP:
-            System.out.print("cs.getTimestamp=" + cs.getTime(param)
-                    + " was null " + cs.wasNull());
+        }
+        case Types.TIMESTAMP: {
+            Timestamp val = cs.getTimestamp(param);
+            boolean wn = cs.wasNull();
+            if (!wn)
+                checkProcedureOutput(param,paramType,val);
             return true;
+        }
         case Types.CLOB: {
+            // clob not allowed for procedures
             Clob clob = cs.getClob(param);
-            System.out.print("cs.getClob="
-                    + (clob == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(clob.getCharacterStream())));
-            System.out.print(" was null " + cs.wasNull());
+            boolean wn = cs.wasNull();
             return true;
         }
         case Types.BLOB: {
+            // blob not allowed for procedures
             Blob blob = cs.getBlob(param);
-            System.out.print("cs.getBlob="
-                    + (blob == null ? "null" : ParameterMappingTest
-                            .showFirstTwo(blob.getBinaryStream())));
-            System.out.print(" was null " + cs.wasNull());
+            boolean wn = cs.wasNull();
             return true;
         }
         default:
-            System.out.println("FAIL JDBC TYPE IN getOutValue "
-                    + JDBC.sqlNameFromJdbc(jdbcType));
+            fail("FAIL JDBC TYPE IN getOutValue "
+                    + JDBC.sqlNameFromJdbc(regJdbcType));
             return false;
+        }
+    }
+
+    private static void checkProcedureOutput(int param, int paramType, byte val)
+    {
+        checkProcedureOutput(param,paramType,(long) val);
+    }
+    
+    private static void checkProcedureOutput(int param, int paramType, short val)
+    {
+        checkProcedureOutput(param,paramType,(long) val);
+    }
+
+    
+    private static void checkProcedureOutput(int param, int paramType, int val)
+    {
+        checkProcedureOutput(param,paramType,(long) val);
+    }
+
+    
+    private static void checkProcedureOutput(int param, int paramType, long val) {
+        switch (jdbcTypes[paramType]) {
+        case java.sql.Types.SMALLINT:
+           if (param == 2)
+               assertEquals(38,val);
+           else if (param == 3)
+               assertEquals(77,val);
+           break;
+        case java.sql.Types.INTEGER:
+            if (param == 2)
+                assertEquals(41,val);
+            else if (param == 3)
+                assertEquals(88,val);
+        break;
+        case java.sql.Types.BIGINT:
+            if (param == 2)
+                assertEquals(40,val);
+            else if (param == 3)
+                assertEquals(99,val);
+            break;
+        case java.sql.Types.FLOAT:
+            if (param == 2)
+                assertEquals(35,val);
+            else if (param == 3)
+                assertEquals(66,val);
+            break;
+        case java.sql.Types.REAL:
+            if (param == 2)
+                assertEquals(41,val);
+            else if (param == 3)
+                assertEquals(88,val);
+            break;
+        case java.sql.Types.DECIMAL:
+            if (param == 2)
+                assertEquals(34,val);
+            else if (param == 3)
+                assertEquals(84,val);
+            break;
+        case java.sql.Types.DOUBLE:
+            if (param == 2)
+                assertEquals(35,val);
+            else if (param == 3)
+                assertEquals(66,val);
+            break;
+        }
+    }
+    
+    private static void checkProcedureOutput(int param, int paramType, float val) {
+        checkProcedureOutput(param,paramType, (double) val);
+    }
+    
+    private static void checkProcedureOutput(int param, int paramType, double val) {
+        switch (jdbcTypes[paramType]) {
+        case java.sql.Types.SMALLINT:
+           if (param == 2)
+               assertEquals(38.0,val,.00001);
+           else if (param == 3)
+               assertEquals(77.0,val,.00001);
+           break;
+        case java.sql.Types.INTEGER:
+            if (param == 2)
+                assertEquals(41.0,val,.00001);
+            else if (param == 3)
+                assertEquals(88.0,val, .00001);
+        break;
+        case java.sql.Types.BIGINT:
+            if (param == 2)
+                assertEquals(40.0,val,.00001);
+            else if (param == 3)
+                assertEquals(99.0,val,.00001);
+            break;
+        case java.sql.Types.FLOAT:
+            if (param == 2)
+                assertEquals(35.9,val,.00001);
+            else if (param == 3)
+                assertEquals(66.8,val,.00001);
+            break;
+        case java.sql.Types.REAL:
+            if (param == 2)
+                assertEquals(41.9,val,.00001);
+            else if (param == 3)
+                assertEquals(88.8,val,.00001);
+            break;
+        case java.sql.Types.DECIMAL:
+            if (param == 2)
+                assertEquals(34.29999,val,.0001);
+            else if (param == 3)
+                assertEquals(84.09999,val,.0001);
+            break;
+        case java.sql.Types.DOUBLE:
+            if (param == 2)
+                assertEquals(35.9,val,.00001);
+            else if (param == 3)
+                assertEquals(66.8,val,.00001);
+            break;
+        }
+    }
+
+    
+    private static void checkProcedureOutput(int param, int paramType, String val) {
+        switch (jdbcTypes[paramType]) {
+        case java.sql.Types.SMALLINT:
+           if (param == 2)
+               assertEquals("38",val);
+           
+           else if (param == 3)
+               assertEquals("77",val);
+           break;
+        case java.sql.Types.INTEGER:
+            if (param == 2)
+                assertEquals("41",val);
+            else if (param == 3)
+                assertEquals("88",val);
+        break;
+        case java.sql.Types.BIGINT:
+            if (param == 2)
+                assertEquals("40",val);
+            else if (param == 3)
+                assertEquals("99",val);
+            break;
+        case java.sql.Types.FLOAT:
+            if (param == 2)
+                assertEquals("35.9",val);
+            else if (param == 3)
+                assertEquals("66.8",val);
+            break;
+        case java.sql.Types.REAL:
+            if (param == 2)
+                assertEquals("41.9",val);
+            else if (param == 3)
+                assertEquals("88.8",val);
+            break;
+        case java.sql.Types.DECIMAL:
+            if (param == 2)
+                assertEquals("34.29999",val);
+            else if (param == 3)
+                assertEquals("84.09999",val);
+            break;
+        case java.sql.Types.DOUBLE:
+            if (param == 2)
+                assertEquals("35.9",val);
+            else if (param == 3)
+                assertEquals("66.8",val);
+            break;
+        }
+    }
+
+    private static void checkProcedureOutput(int param, int paramType, byte[] val) {
+        if (param == 2)
+            assertEquals("0x4,0x3",showFirstTwo(val));
+        else if (param == 3)
+            assertEquals("0x9,0xfe",showFirstTwo(val));
+    }
+    
+    private static void checkProcedureOutput(int param, int paramType, Date val) {
+        switch (jdbcTypes[paramType]) {
+        case java.sql.Types.DATE:
+            if (param == 2)
+                assertEquals("2004-03-08", val.toString());
+            else if (param == 3)
+                assertEquals("2005-03-08", val.toString());
+            break;
+        case java.sql.Types.TIMESTAMP:
+            if (param == 2)
+                assertEquals("2004-03-12", val.toString());
+            else if (param == 3)
+                assertEquals("2004-04-12", val.toString());
+            break;
+        }
+    }
+    
+    private static void checkProcedureOutput(int param, int paramType, Time val) {
+        switch (jdbcTypes[paramType]) {
+        case java.sql.Types.TIME:
+            if (param == 2)
+                assertEquals("19:44:42", val.toString());
+            else if (param == 3)
+                assertEquals("20:44:42", val.toString());
+            break;
+        case java.sql.Types.TIMESTAMP:
+            if (param == 2)
+                assertEquals("21:14:24", val.toString());
+            else if (param == 3)
+                assertEquals("04:25:26", val.toString());
+            break;
+        }
+    }
+    private static void checkProcedureOutput(int param, int paramType, Timestamp val) {
+        switch (jdbcTypes[paramType]) {
+        case java.sql.Types.DATE:
+            if (param == 2)
+                assertEquals("2004-03-08 00:00:00.0",val.toString());
+            else if (param == 3)
+                assertEquals("2005-03-08 00:00:00.0", val.toString());
+            break;
+        case java.sql.Types.TIME:
+            // getTimestamp on time will use the current date, so can't check it explicitly
+            // just check not null  
+            assertNotNull(val);
+            break;
+        case java.sql.Types.TIMESTAMP:
+            if (param == 2)
+                assertEquals("2004-03-12 21:14:24.938222433", val.toString());
+            else if (param == 3)
+                assertEquals("2004-04-12 04:25:26.462983731", val.toString());
+            break;
         }
     }
 
@@ -3144,7 +3545,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         String sqlType = SQLTypes[type];
         try {
-            System.out.print(" setString(\"Invalid Value\") ");
             psi.setString(1, "Invalid Value");
             psi.executeUpdate();
             // Should have gotten exception. Test fails
@@ -3158,12 +3558,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     || "22005".equals(sqle.getSQLState())
                     || (sqle.getMessage().indexOf("Invalid data conversion") != -1)
                     || (sqle.getMessage().indexOf("Illegal Conversion") != -1))
-                System.out.println(" IC (Expected)");
+                ;
+            // System.out.println(" IC (Expected)");
             else
-                dumpSQLExceptions(sqle);
+                fail("FAIL:" + sqle.getMessage());
         } catch (Exception e) {
-            System.out.println("FAIL: Unexpected Exception "
-                        + e.getMessage());
+            fail("FAIL: Unexpected Exception " + e.getMessage());
         }
     }
 
@@ -3197,4 +3597,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         return "0x" + Integer.toHexString(((int) b1) & 0xff) + "," + "0x"
                 + Integer.toHexString(((int) b2) & 0xff);
     }
+    
+    public static Test suite() {
+        // Can't run for client for now, getting strange protocol error on tearDown
+        //return TestConfiguration.defaultSuite(ParameterMappingTest.class);
+        return TestConfiguration.embeddedSuite(ParameterMappingTest.class);
+    }
+    
 }
