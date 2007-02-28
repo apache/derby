@@ -310,6 +310,214 @@ select * from big where i in (1, 5, 7, 9, 13, 15, 17, 19, 23, 25, 27, 29, 31);
 -- check consistency of scans, etc.
 values ConsistencyChecker();
 
+-- Check various queries for which left column is part of an index.
+
+create table bt1 (i int, c char(5), de decimal(4, 1));
+create table bt2 (i int, d double, da date, t time, tp timestamp, vc varchar(10));
+
+insert into bt1 values (1, 'one', null), (2, 'two', 22.2), (3, 'three', null),
+  (7, 'seven', null), (8, 'eight', 2.8), (9, 'nine', null), (3, 'trois', 21.2);
+
+insert into bt1 (i) values 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20;
+update bt1 set c = cast (i as char(5)) where i >= 10;
+update bt1 set de = cast (i/2.8 as decimal(4,1)) where i >= 10 and 2 * (cast (i as double) / 2.0) - (i / 2) = i / 2; 
+
+insert into bt2 values (8, -800.0, '1992-03-22', '03:22:28', '2007-01-04 16:17:23.303', '2992-01-02');
+insert into bt2 values (1, 200.0, '1998-03-22', '13:22:28', '2007-01-04 16:17:36.912', '3999-08-08');
+insert into bt2 values (-8, 800, '3999-08-08', '02:28:22', '2007-01-05 16:03:52.364', '1992-01-02');
+insert into bt2 values (18, 180.00, '2007-02-23', '15:47:27', null, null);
+insert into bt2 values (22, 202.010, '2007-02-23', '15:47:27', null, null);
+insert into bt2 values (23, 322.002, null, '15:47:28', null, null);
+insert into bt2 values (28, 82, null, '15:47:28', '2007-02-23 15:47:27.544', null);
+
+create index ix_big_i on big (i);
+create index bt1_ixi on bt1 (i);
+create index bt1_ixde on bt1 (de);
+create index bt1_ixic on bt1 (i, c);
+create index bt2_ixd on bt2 (d);
+create index bt2_ixda on bt2 (da);
+create index bt2_ixvc on bt2 (vc);
+
+-- Simple cases, small table with index on IN col.
+select * from bt1 where i in (9, 2, 8);
+select i from bt1 where i in (9, 2, 8);
+
+-- Simple cases, small table, IN col is part of index but is
+-- not a leading column.
+select * from bt1 where c in ('a', 'two', 'three');
+select c from bt1 where c in ('a', 'two', 'three');
+
+-- Multiple rows matching a single IN value; make sure we get
+-- two rows for "3".
+select * from bt1 where i in (1, 2, 3);
+select * from bt1 where i in (8, 3);
+select i from bt1 where i in (8, 3) order by i;
+select * from bt1 where i in (8, 3) order by i;
+
+-- No row for minimum value; make sure we still get the rest.
+select * from bt1 where i in (-1, 1, 2, 3);
+select * from bt1 where i in (0, 1, 2, 3);
+select * from bt1 where i in (1, 2, -1, 3);
+
+-- Various examples with larger table and multiple IN lists
+-- on same column in single table.
+select * from big where i in (1, 2);
+select * from big where i in (1, 30);
+select * from big where i in (1, 30) and i = 1;
+select * from big where i in (1, 30) or i in (2, 29);
+select * from big where i in (1, 30) and i in (1, 2, 29);
+select * from big where i in (1, 30) and i in (1, 2, 29, 30);
+select * from big where i in (1, 2, 29, 30) and i in (1, 30);
+select * from big where i in (1, 30) and (i = 30 or i = 1);
+select * from big where i in (1, 30) and (i = 30 or i = 2);
+
+-- Multiple IN lists on different tables, plus join predicate.
+select count(*) from big, bt1 where big.i in (1, 3, 30) or bt1.i in (-1, 2, 3) and big.i = bt1.i;
+select * from big, bt1 where (big.i in (1, 3, 30) or bt1.i in (-1, 2, 3)) and big.i = bt1.i;
+select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (-1, 2, 3) and big.i = bt1.i;
+select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (2, 3) and big.i = bt1.i;
+
+-- Multiple IN lists for different cols in same table; we'll
+-- only use one as a "probe predicate"; the other ones should
+-- be enforced as regular restrictions.
+select * from bt1 where i in (2, 4, 6, 8) and de in (22.3, 2.8) and c in ('seven', 'eight', 'nine');
+
+-- Multiple IN lists on different tables, no join predicate, count only.
+select count(*) from big, bt1 where big.i in (1, 3, 30) or bt1.i in (-1, 2, 3);
+select count(*) from big, bt1 where big.i in (1, 3, 30) and bt1.i in (-1, 2, 3);
+select count(*) from big, bt1 where big.i in (1, 3, 30) and bt1.i in (2, 3);
+select count(*) from big b1, big b2 where b1.i in (1, 3, 30) and b2.i in (2, 3);
+select count(*) from big b1, big b2 where b1.i in (1, 3, 30) and b2.i in (-1,2, 3);
+
+-- Multiple IN lists on different tables, no join predicate, show rows.
+select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (-1, 2, 3) order by big.i, bt1.c;
+select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (2, 3) order by big.i, bt1.c;
+select * from big b1, big b2 where b1.i in (1, 3, 30) and b2.i in (2, 3) order by b1.i, b2.i;
+select * from big b1, big b2 where b1.i in (1, 3, 30) and b2.i in (-1,2, 3) order by b1.i, b2.i;
+
+-- IN lists with ORDER BY.
+select * from bt1 where i in (1, 8, 3, 3) order by i;
+select * from bt1 where i in (1, 8, 3, 3) order by i desc;
+select i from bt1 where i in (1, 29, 8, 3, 3) order by i;
+select i from bt1 where i in (1, 29, 8, 3, 3) order by i desc;
+select i from bt1 where i in (1, 8, 3, 3, 4, 5, 6, 7, 8, 9, 0) order by i;
+select c from bt1 where c in ('abc', 'de', 'fg', 'two', 'or', 'not', 'one', 'thre', 'zour', 'three') order by c;
+select i from big where i in (1, 29, 3, 8) order by i;
+select i from big where i in (1, 29, 3, 8) order by i desc;
+
+-- Prepared statement checks.
+
+-- Mix of constants and params.
+prepare p1 as 'select * from bt1 where i in (1, 8, 3, ?) order by i, c';
+execute p1 using 'values 3';
+prepare p1 as 'select * from big where i in (1, ?, 30)';
+execute p1 using 'values (2)';
+
+-- Execute statement more than once to make sure params are correctly assigned
+-- in subsequent executions.
+prepare p1 as 'select i from bt1 where i in (?, 9, ?) order by i desc';
+execute p1 using 'values (5, 2)';
+execute p1 using 'values (5, 2)'; 
+execute p1 using 'values (5, 2)'; 
+execute p1 using 'values (3, 2)'; 
+execute p1 using 'values (3, 3)'; 
+
+prepare p1 as 'select i from bt1 where i in (?, ?, 1)';
+execute p1 using 'values (4, 3)';
+execute p1 using 'values (4, 3)';
+
+prepare p1 as 'select * from bt1 where i in (?, ?, 1)';
+execute p1 using 'values (4, 3)';
+execute p1 using 'values (4, 3)';
+execute p1 using 'values (34, 39)';
+
+-- Null as a parameter.
+execute p1 using 'values (3, cast (null as int))';
+
+-- Multiple IN lists, one with constants, other with parameter.
+prepare p1 as 'select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (?, 2, 3) and big.i = bt1.i';
+execute p1 using 'values -1';
+execute p1 using 'values 1';
+
+-- Only parameter markers (no constants).
+prepare p1 as 'select * from bt1 where i in (?, ?)';
+execute p1 using 'values (2, 4)';
+execute p1 using 'values (-2, -4)';
+
+prepare p1 as 'select * from bt1 where c in (?, ?, ?)';
+execute p1 using 'values (''one'', ''two'', ''a'')';
+
+-- Should work with UPDATE statements as well.
+
+update bt1 set i = 22 where i in (2, 9);
+select * from bt1;
+update bt1 set i = 2 where c in ('two');
+update bt1 set i = 9 where c  in ('nine');
+select * from bt1;
+
+prepare p1 as 'update bt1 set i = 22 where i in (?, ?, ?, ?, ?)';
+execute p1 using 'values (-1, 2, 9, 41, 3)';
+select * from bt1;
+update bt1 set i = 2 where c in ('two');
+update bt1 set i = 9 where c in ('nine');
+update bt1 set i = 3 where c in ('three');
+update bt1 set i = 3 where c in ('trois');
+select * from bt1;
+
+-- Different (but compatible) types within IN list.
+select * from bt1 where de in (2.8, 2000.32);
+select * from bt1 where de in (28, 21892);
+select * from bt1 where de in (2.8, 1249102);
+select * from bt1 where de in (cast (28 as decimal(3,1)), 1249102);
+select * from bt1 where de in (values (cast (null as double)), 2.8, 1249102);
+
+-- Different (but compatible) types: leftOp vs IN list.
+select * from bt1 where i in (2.8, 4.23);
+select d from bt2 where d in (200, -800);
+select da from bt2 where da in ('2992-01-02', '3999-08-08', '1992-01-02');
+select t, vc from bt2 where vc in (cast ('2992-01-02' as date), cast ('1997-03-22' as date));
+select t, vc from bt2 where vc in (date('2992-01-02'), date('1997-03-22'));
+select t, vc from bt2 where vc in ('2992-01-02', cast ('1997-03-22' as date));
+select t, vc from bt2 where vc in (cast ('2992-01-02' as date), '1997-03-22');
+
+-- Duplicate IN-list values.  Should *not* see duplicate rows.
+select * from bt1 where i in (2, 2, 2, 3);
+select i from bt1 where i in (2, 2, 2, 3);
+select * from bt1 where i in (1, 8, 3, 3);
+select i from bt1 where i in (1, 29, 8, 3, 3);
+prepare p1 as 'select * from bt1 where i in (2, ?, ?, 2)';
+execute p1 using 'values (4, -1)';
+execute p1 using 'values (4, 3)';
+prepare p1 as 'select i from bt1 where i in (2, 5, ?, 2, 0, ?, 2)';
+execute p1 using 'values (4, -1)';
+execute p1 using 'values (4, 3)';
+
+-- IN-list in a subquery ("distinct" here keeps the subquery from
+-- being flattened).
+select * from (select distinct * from big where i in (1, 30)) x;
+
+-- Nested queries with unions and top-level IN list.
+create view v2 as select i from bt1 union select i from bt2;
+create view v3 as select de d from bt1 union select d from bt2;
+select * from V2, V3 where V2.i in (2,4) and V3.d in (4.3, 7.1, 22.2);
+select * from V2, V3 where V2.i in (2,3,4) and V3.d in (4.3, 7.1, 22.2);
+select * from V2 where V2.i in (2, 3, 4);
+
+-- OR rewrites.
+
+select * from bt1, (select i from bt2 where d = 2.2 or d = 8) x(j);
+select * from bt1, (select i from bt2 where d = 2.8 or d = 800) x(j);
+select * from bt1 where (i = 2 or i = 4 or i = 6 or i = 8) and (de = 22.3 or de = 2.8);
+select * from bt1 where (i = 2 or i = 4 or i = 6 or i = 8) and (de = 22.3 or de = 2.8) and (c = 'seven' or c = 'eight' or c = 'nine');
+
+-- Cleanup.
+
+drop view v2;
+drop view v3;
+drop table bt1;
+drop table bt2;
+drop index ix_big_i;
+
 -- beetle 4316, check "in" with self-reference and correlation, etc.
 
 create table t1 (c1 real, c2 real);

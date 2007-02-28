@@ -808,6 +808,704 @@ values ConsistencyChecker();
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 No open scans, etc.
 2 dependencies found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+ij> -- Check various queries for which left column is part of an index.
+create table bt1 (i int, c char(5), de decimal(4, 1));
+0 rows inserted/updated/deleted
+ij> create table bt2 (i int, d double, da date, t time, tp timestamp, vc varchar(10));
+0 rows inserted/updated/deleted
+ij> insert into bt1 values (1, 'one', null), (2, 'two', 22.2), (3, 'three', null),
+  (7, 'seven', null), (8, 'eight', 2.8), (9, 'nine', null), (3, 'trois', 21.2);
+7 rows inserted/updated/deleted
+ij> insert into bt1 (i) values 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20;
+11 rows inserted/updated/deleted
+ij> update bt1 set c = cast (i as char(5)) where i >= 10;
+11 rows inserted/updated/deleted
+ij> update bt1 set de = cast (i/2.8 as decimal(4,1)) where i >= 10 and 2 * (cast (i as double) / 2.0) - (i / 2) = i / 2;
+6 rows inserted/updated/deleted
+ij> insert into bt2 values (8, -800.0, '1992-03-22', '03:22:28', 'xxxxxxFILTERED-TIMESTAMPxxxxx', '2992-01-02');
+1 row inserted/updated/deleted
+ij> insert into bt2 values (1, 200.0, '1998-03-22', '13:22:28', 'xxxxxxFILTERED-TIMESTAMPxxxxx', '3999-08-08');
+1 row inserted/updated/deleted
+ij> insert into bt2 values (-8, 800, '3999-08-08', '02:28:22', 'xxxxxxFILTERED-TIMESTAMPxxxxx', '1992-01-02');
+1 row inserted/updated/deleted
+ij> insert into bt2 values (18, 180.00, '2007-02-23', '15:47:27', null, null);
+1 row inserted/updated/deleted
+ij> insert into bt2 values (22, 202.010, '2007-02-23', '15:47:27', null, null);
+1 row inserted/updated/deleted
+ij> insert into bt2 values (23, 322.002, null, '15:47:28', null, null);
+1 row inserted/updated/deleted
+ij> insert into bt2 values (28, 82, null, '15:47:28', 'xxxxxxFILTERED-TIMESTAMPxxxxx', null);
+1 row inserted/updated/deleted
+ij> create index ix_big_i on big (i);
+0 rows inserted/updated/deleted
+ij> create index bt1_ixi on bt1 (i);
+0 rows inserted/updated/deleted
+ij> create index bt1_ixde on bt1 (de);
+0 rows inserted/updated/deleted
+ij> create index bt1_ixic on bt1 (i, c);
+0 rows inserted/updated/deleted
+ij> create index bt2_ixd on bt2 (d);
+0 rows inserted/updated/deleted
+ij> create index bt2_ixda on bt2 (da);
+0 rows inserted/updated/deleted
+ij> create index bt2_ixvc on bt2 (vc);
+0 rows inserted/updated/deleted
+ij> -- Simple cases, small table with index on IN col.
+select * from bt1 where i in (9, 2, 8);
+I          |C    |DE    
+------------------------
+2          |two  |22.2  
+8          |eight|2.8   
+9          |nine |NULL  
+ij> select i from bt1 where i in (9, 2, 8);
+I          
+-----------
+2          
+8          
+9          
+ij> -- Simple cases, small table, IN col is part of index but is
+-- not a leading column.
+select * from bt1 where c in ('a', 'two', 'three');
+I          |C    |DE    
+------------------------
+2          |two  |22.2  
+3          |three|NULL  
+ij> select c from bt1 where c in ('a', 'two', 'three');
+C    
+-----
+two  
+three
+ij> -- Multiple rows matching a single IN value; make sure we get
+-- two rows for "3".
+select * from bt1 where i in (1, 2, 3);
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+2          |two  |22.2  
+3          |three|NULL  
+3          |trois|21.2  
+ij> select * from bt1 where i in (8, 3);
+I          |C    |DE    
+------------------------
+3          |three|NULL  
+3          |trois|21.2  
+8          |eight|2.8   
+ij> select i from bt1 where i in (8, 3) order by i;
+I          
+-----------
+3          
+3          
+8          
+ij> select * from bt1 where i in (8, 3) order by i;
+I          |C    |DE    
+------------------------
+3          |three|NULL  
+3          |trois|21.2  
+8          |eight|2.8   
+ij> -- No row for minimum value; make sure we still get the rest.
+select * from bt1 where i in (-1, 1, 2, 3);
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+2          |two  |22.2  
+3          |three|NULL  
+3          |trois|21.2  
+ij> select * from bt1 where i in (0, 1, 2, 3);
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+2          |two  |22.2  
+3          |three|NULL  
+3          |trois|21.2  
+ij> select * from bt1 where i in (1, 2, -1, 3);
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+2          |two  |22.2  
+3          |three|NULL  
+3          |trois|21.2  
+ij> -- Various examples with larger table and multiple IN lists
+-- on same column in single table.
+select * from big where i in (1, 2);
+I          |C         
+----------------------
+1          |1         
+2          |2         
+ij> select * from big where i in (1, 30);
+I          |C         
+----------------------
+1          |1         
+30         |30        
+ij> select * from big where i in (1, 30) and i = 1;
+I          |C         
+----------------------
+1          |1         
+ij> select * from big where i in (1, 30) or i in (2, 29);
+I          |C         
+----------------------
+1          |1         
+2          |2         
+29         |29        
+30         |30        
+ij> select * from big where i in (1, 30) and i in (1, 2, 29);
+I          |C         
+----------------------
+1          |1         
+ij> select * from big where i in (1, 30) and i in (1, 2, 29, 30);
+I          |C         
+----------------------
+1          |1         
+30         |30        
+ij> select * from big where i in (1, 2, 29, 30) and i in (1, 30);
+I          |C         
+----------------------
+1          |1         
+30         |30        
+ij> select * from big where i in (1, 30) and (i = 30 or i = 1);
+I          |C         
+----------------------
+1          |1         
+30         |30        
+ij> select * from big where i in (1, 30) and (i = 30 or i = 2);
+I          |C         
+----------------------
+30         |30        
+ij> -- Multiple IN lists on different tables, plus join predicate.
+select count(*) from big, bt1 where big.i in (1, 3, 30) or bt1.i in (-1, 2, 3) and big.i = bt1.i;
+1          
+-----------
+55         
+ij> select * from big, bt1 where (big.i in (1, 3, 30) or bt1.i in (-1, 2, 3)) and big.i = bt1.i;
+I          |C         |I          |C    |DE    
+-----------------------------------------------
+1          |1         |1          |one  |NULL  
+2          |2         |2          |two  |22.2  
+3          |3         |3          |three|NULL  
+3          |3         |3          |trois|21.2  
+ij> select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (-1, 2, 3) and big.i = bt1.i;
+I          |C         |I          |C    |DE    
+-----------------------------------------------
+3          |3         |3          |three|NULL  
+3          |3         |3          |trois|21.2  
+ij> select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (2, 3) and big.i = bt1.i;
+I          |C         |I          |C    |DE    
+-----------------------------------------------
+3          |3         |3          |three|NULL  
+3          |3         |3          |trois|21.2  
+ij> -- Multiple IN lists for different cols in same table; we'll
+-- only use one as a "probe predicate"; the other ones should
+-- be enforced as regular restrictions.
+select * from bt1 where i in (2, 4, 6, 8) and de in (22.3, 2.8) and c in ('seven', 'eight', 'nine');
+I          |C    |DE    
+------------------------
+8          |eight|2.8   
+ij> -- Multiple IN lists on different tables, no join predicate, count only.
+select count(*) from big, bt1 where big.i in (1, 3, 30) or bt1.i in (-1, 2, 3);
+1          
+-----------
+135        
+ij> select count(*) from big, bt1 where big.i in (1, 3, 30) and bt1.i in (-1, 2, 3);
+1          
+-----------
+9          
+ij> select count(*) from big, bt1 where big.i in (1, 3, 30) and bt1.i in (2, 3);
+1          
+-----------
+9          
+ij> select count(*) from big b1, big b2 where b1.i in (1, 3, 30) and b2.i in (2, 3);
+1          
+-----------
+6          
+ij> select count(*) from big b1, big b2 where b1.i in (1, 3, 30) and b2.i in (-1,2, 3);
+1          
+-----------
+6          
+ij> -- Multiple IN lists on different tables, no join predicate, show rows.
+select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (-1, 2, 3) order by big.i, bt1.c;
+I          |C         |I          |C    |DE    
+-----------------------------------------------
+1          |1         |3          |three|NULL  
+1          |1         |3          |trois|21.2  
+1          |1         |2          |two  |22.2  
+3          |3         |3          |three|NULL  
+3          |3         |3          |trois|21.2  
+3          |3         |2          |two  |22.2  
+30         |30        |3          |three|NULL  
+30         |30        |3          |trois|21.2  
+30         |30        |2          |two  |22.2  
+ij> select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (2, 3) order by big.i, bt1.c;
+I          |C         |I          |C    |DE    
+-----------------------------------------------
+1          |1         |3          |three|NULL  
+1          |1         |3          |trois|21.2  
+1          |1         |2          |two  |22.2  
+3          |3         |3          |three|NULL  
+3          |3         |3          |trois|21.2  
+3          |3         |2          |two  |22.2  
+30         |30        |3          |three|NULL  
+30         |30        |3          |trois|21.2  
+30         |30        |2          |two  |22.2  
+ij> select * from big b1, big b2 where b1.i in (1, 3, 30) and b2.i in (2, 3) order by b1.i, b2.i;
+I          |C         |I          |C         
+---------------------------------------------
+1          |1         |2          |2         
+1          |1         |3          |3         
+3          |3         |2          |2         
+3          |3         |3          |3         
+30         |30        |2          |2         
+30         |30        |3          |3         
+ij> select * from big b1, big b2 where b1.i in (1, 3, 30) and b2.i in (-1,2, 3) order by b1.i, b2.i;
+I          |C         |I          |C         
+---------------------------------------------
+1          |1         |2          |2         
+1          |1         |3          |3         
+3          |3         |2          |2         
+3          |3         |3          |3         
+30         |30        |2          |2         
+30         |30        |3          |3         
+ij> -- IN lists with ORDER BY.
+select * from bt1 where i in (1, 8, 3, 3) order by i;
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+3          |three|NULL  
+3          |trois|21.2  
+8          |eight|2.8   
+ij> select * from bt1 where i in (1, 8, 3, 3) order by i desc;
+I          |C    |DE    
+------------------------
+8          |eight|2.8   
+3          |trois|21.2  
+3          |three|NULL  
+1          |one  |NULL  
+ij> select i from bt1 where i in (1, 29, 8, 3, 3) order by i;
+I          
+-----------
+1          
+3          
+3          
+8          
+ij> select i from bt1 where i in (1, 29, 8, 3, 3) order by i desc;
+I          
+-----------
+8          
+3          
+3          
+1          
+ij> select i from bt1 where i in (1, 8, 3, 3, 4, 5, 6, 7, 8, 9, 0) order by i;
+I          
+-----------
+1          
+3          
+3          
+7          
+8          
+9          
+ij> select c from bt1 where c in ('abc', 'de', 'fg', 'two', 'or', 'not', 'one', 'thre', 'zour', 'three') order by c;
+C    
+-----
+one  
+three
+two  
+ij> select i from big where i in (1, 29, 3, 8) order by i;
+I          
+-----------
+1          
+3          
+8          
+29         
+ij> select i from big where i in (1, 29, 3, 8) order by i desc;
+I          
+-----------
+29         
+8          
+3          
+1          
+ij> -- Prepared statement checks.
+-- Mix of constants and params.
+prepare p1 as 'select * from bt1 where i in (1, 8, 3, ?) order by i, c';
+ij> execute p1 using 'values 3';
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+3          |three|NULL  
+3          |trois|21.2  
+8          |eight|2.8   
+ij> prepare p1 as 'select * from big where i in (1, ?, 30)';
+ij> execute p1 using 'values (2)';
+I          |C         
+----------------------
+1          |1         
+2          |2         
+30         |30        
+ij> -- Execute statement more than once to make sure params are correctly assigned
+-- in subsequent executions.
+prepare p1 as 'select i from bt1 where i in (?, 9, ?) order by i desc';
+ij> execute p1 using 'values (5, 2)';
+I          
+-----------
+9          
+2          
+ij> execute p1 using 'values (5, 2)';
+I          
+-----------
+9          
+2          
+ij> execute p1 using 'values (5, 2)';
+I          
+-----------
+9          
+2          
+ij> execute p1 using 'values (3, 2)';
+I          
+-----------
+9          
+3          
+3          
+2          
+ij> execute p1 using 'values (3, 3)';
+I          
+-----------
+9          
+3          
+3          
+ij> prepare p1 as 'select i from bt1 where i in (?, ?, 1)';
+ij> execute p1 using 'values (4, 3)';
+I          
+-----------
+1          
+3          
+3          
+ij> execute p1 using 'values (4, 3)';
+I          
+-----------
+1          
+3          
+3          
+ij> prepare p1 as 'select * from bt1 where i in (?, ?, 1)';
+ij> execute p1 using 'values (4, 3)';
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+3          |three|NULL  
+3          |trois|21.2  
+ij> execute p1 using 'values (4, 3)';
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+3          |three|NULL  
+3          |trois|21.2  
+ij> execute p1 using 'values (34, 39)';
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+ij> -- Null as a parameter.
+execute p1 using 'values (3, cast (null as int))';
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+3          |three|NULL  
+3          |trois|21.2  
+ij> -- Multiple IN lists, one with constants, other with parameter.
+prepare p1 as 'select * from big, bt1 where big.i in (1, 3, 30) and bt1.i in (?, 2, 3) and big.i = bt1.i';
+ij> execute p1 using 'values -1';
+I          |C         |I          |C    |DE    
+-----------------------------------------------
+3          |3         |3          |three|NULL  
+3          |3         |3          |trois|21.2  
+ij> execute p1 using 'values 1';
+I          |C         |I          |C    |DE    
+-----------------------------------------------
+1          |1         |1          |one  |NULL  
+3          |3         |3          |three|NULL  
+3          |3         |3          |trois|21.2  
+ij> -- Only parameter markers (no constants).
+prepare p1 as 'select * from bt1 where i in (?, ?)';
+ij> execute p1 using 'values (2, 4)';
+I          |C    |DE    
+------------------------
+2          |two  |22.2  
+ij> execute p1 using 'values (-2, -4)';
+I          |C    |DE    
+------------------------
+ij> prepare p1 as 'select * from bt1 where c in (?, ?, ?)';
+ij> execute p1 using 'values (''one'', ''two'', ''a'')';
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+2          |two  |22.2  
+ij> -- Should work with UPDATE statements as well.
+update bt1 set i = 22 where i in (2, 9);
+2 rows inserted/updated/deleted
+ij> select * from bt1;
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+22         |two  |22.2  
+3          |three|NULL  
+7          |seven|NULL  
+8          |eight|2.8   
+22         |nine |NULL  
+3          |trois|21.2  
+10         |10   |3.5   
+11         |11   |NULL  
+12         |12   |4.2   
+13         |13   |NULL  
+14         |14   |5.0   
+15         |15   |NULL  
+16         |16   |5.7   
+17         |17   |NULL  
+18         |18   |6.4   
+19         |19   |NULL  
+20         |20   |7.1   
+ij> update bt1 set i = 2 where c in ('two');
+1 row inserted/updated/deleted
+ij> update bt1 set i = 9 where c  in ('nine');
+1 row inserted/updated/deleted
+ij> select * from bt1;
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+2          |two  |22.2  
+3          |three|NULL  
+7          |seven|NULL  
+8          |eight|2.8   
+9          |nine |NULL  
+3          |trois|21.2  
+10         |10   |3.5   
+11         |11   |NULL  
+12         |12   |4.2   
+13         |13   |NULL  
+14         |14   |5.0   
+15         |15   |NULL  
+16         |16   |5.7   
+17         |17   |NULL  
+18         |18   |6.4   
+19         |19   |NULL  
+20         |20   |7.1   
+ij> prepare p1 as 'update bt1 set i = 22 where i in (?, ?, ?, ?, ?)';
+ij> execute p1 using 'values (-1, 2, 9, 41, 3)';
+4 rows inserted/updated/deleted
+ij> select * from bt1;
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+22         |two  |22.2  
+22         |three|NULL  
+7          |seven|NULL  
+8          |eight|2.8   
+22         |nine |NULL  
+22         |trois|21.2  
+10         |10   |3.5   
+11         |11   |NULL  
+12         |12   |4.2   
+13         |13   |NULL  
+14         |14   |5.0   
+15         |15   |NULL  
+16         |16   |5.7   
+17         |17   |NULL  
+18         |18   |6.4   
+19         |19   |NULL  
+20         |20   |7.1   
+ij> update bt1 set i = 2 where c in ('two');
+1 row inserted/updated/deleted
+ij> update bt1 set i = 9 where c in ('nine');
+1 row inserted/updated/deleted
+ij> update bt1 set i = 3 where c in ('three');
+1 row inserted/updated/deleted
+ij> update bt1 set i = 3 where c in ('trois');
+1 row inserted/updated/deleted
+ij> select * from bt1;
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+2          |two  |22.2  
+3          |three|NULL  
+7          |seven|NULL  
+8          |eight|2.8   
+9          |nine |NULL  
+3          |trois|21.2  
+10         |10   |3.5   
+11         |11   |NULL  
+12         |12   |4.2   
+13         |13   |NULL  
+14         |14   |5.0   
+15         |15   |NULL  
+16         |16   |5.7   
+17         |17   |NULL  
+18         |18   |6.4   
+19         |19   |NULL  
+20         |20   |7.1   
+ij> -- Different (but compatible) types within IN list.
+select * from bt1 where de in (2.8, 2000.32);
+I          |C    |DE    
+------------------------
+8          |eight|2.8   
+ij> select * from bt1 where de in (28, 21892);
+I          |C    |DE    
+------------------------
+ij> select * from bt1 where de in (2.8, 1249102);
+I          |C    |DE    
+------------------------
+8          |eight|2.8   
+ij> select * from bt1 where de in (cast (28 as decimal(3,1)), 1249102);
+I          |C    |DE    
+------------------------
+ij> select * from bt1 where de in (values (cast (null as double)), 2.8, 1249102);
+I          |C    |DE    
+------------------------
+8          |eight|2.8   
+ij> -- Different (but compatible) types: leftOp vs IN list.
+select * from bt1 where i in (2.8, 4.23);
+I          |C    |DE    
+------------------------
+ij> select d from bt2 where d in (200, -800);
+D                     
+----------------------
+-800.0                
+200.0                 
+ij> select da from bt2 where da in ('2992-01-02', '3999-08-08', '1992-01-02');
+DA        
+----------
+3999-08-08
+ij> select t, vc from bt2 where vc in (cast ('2992-01-02' as date), cast ('1997-03-22' as date));
+T       |VC        
+-------------------
+03:22:28|2992-01-02
+ij> select t, vc from bt2 where vc in (date('2992-01-02'), date('1997-03-22'));
+T       |VC        
+-------------------
+03:22:28|2992-01-02
+ij> select t, vc from bt2 where vc in ('2992-01-02', cast ('1997-03-22' as date));
+T       |VC        
+-------------------
+03:22:28|2992-01-02
+ij> select t, vc from bt2 where vc in (cast ('2992-01-02' as date), '1997-03-22');
+T       |VC        
+-------------------
+03:22:28|2992-01-02
+ij> -- Duplicate IN-list values.  Should *not* see duplicate rows.
+select * from bt1 where i in (2, 2, 2, 3);
+I          |C    |DE    
+------------------------
+2          |two  |22.2  
+3          |three|NULL  
+3          |trois|21.2  
+ij> select i from bt1 where i in (2, 2, 2, 3);
+I          
+-----------
+2          
+3          
+3          
+ij> select * from bt1 where i in (1, 8, 3, 3);
+I          |C    |DE    
+------------------------
+1          |one  |NULL  
+3          |three|NULL  
+3          |trois|21.2  
+8          |eight|2.8   
+ij> select i from bt1 where i in (1, 29, 8, 3, 3);
+I          
+-----------
+1          
+3          
+3          
+8          
+ij> prepare p1 as 'select * from bt1 where i in (2, ?, ?, 2)';
+ij> execute p1 using 'values (4, -1)';
+I          |C    |DE    
+------------------------
+2          |two  |22.2  
+ij> execute p1 using 'values (4, 3)';
+I          |C    |DE    
+------------------------
+2          |two  |22.2  
+3          |three|NULL  
+3          |trois|21.2  
+ij> prepare p1 as 'select i from bt1 where i in (2, 5, ?, 2, 0, ?, 2)';
+ij> execute p1 using 'values (4, -1)';
+I          
+-----------
+2          
+ij> execute p1 using 'values (4, 3)';
+I          
+-----------
+2          
+3          
+3          
+ij> -- IN-list in a subquery ("distinct" here keeps the subquery from
+-- being flattened).
+select * from (select distinct * from big where i in (1, 30)) x;
+I          |C         
+----------------------
+1          |1         
+30         |30        
+ij> -- Nested queries with unions and top-level IN list.
+create view v2 as select i from bt1 union select i from bt2;
+0 rows inserted/updated/deleted
+ij> create view v3 as select de d from bt1 union select d from bt2;
+0 rows inserted/updated/deleted
+ij> select * from V2, V3 where V2.i in (2,4) and V3.d in (4.3, 7.1, 22.2);
+I          |D                     
+----------------------------------
+2          |7.1                   
+2          |22.2                  
+ij> select * from V2, V3 where V2.i in (2,3,4) and V3.d in (4.3, 7.1, 22.2);
+I          |D                     
+----------------------------------
+2          |7.1                   
+2          |22.2                  
+3          |7.1                   
+3          |22.2                  
+ij> select * from V2 where V2.i in (2, 3, 4);
+I          
+-----------
+2          
+3          
+ij> -- OR rewrites.
+select * from bt1, (select i from bt2 where d = 2.2 or d = 8) x(j);
+I          |C    |DE    |J          
+------------------------------------
+ij> select * from bt1, (select i from bt2 where d = 2.8 or d = 800) x(j);
+I          |C    |DE    |J          
+------------------------------------
+1          |one  |NULL  |-8         
+2          |two  |22.2  |-8         
+3          |three|NULL  |-8         
+7          |seven|NULL  |-8         
+8          |eight|2.8   |-8         
+9          |nine |NULL  |-8         
+3          |trois|21.2  |-8         
+10         |10   |3.5   |-8         
+11         |11   |NULL  |-8         
+12         |12   |4.2   |-8         
+13         |13   |NULL  |-8         
+14         |14   |5.0   |-8         
+15         |15   |NULL  |-8         
+16         |16   |5.7   |-8         
+17         |17   |NULL  |-8         
+18         |18   |6.4   |-8         
+19         |19   |NULL  |-8         
+20         |20   |7.1   |-8         
+ij> select * from bt1 where (i = 2 or i = 4 or i = 6 or i = 8) and (de = 22.3 or de = 2.8);
+I          |C    |DE    
+------------------------
+8          |eight|2.8   
+ij> select * from bt1 where (i = 2 or i = 4 or i = 6 or i = 8) and (de = 22.3 or de = 2.8) and (c = 'seven' or c = 'eight' or c = 'nine');
+I          |C    |DE    
+------------------------
+8          |eight|2.8   
+ij> -- Cleanup.
+drop view v2;
+0 rows inserted/updated/deleted
+ij> drop view v3;
+0 rows inserted/updated/deleted
+ij> drop table bt1;
+0 rows inserted/updated/deleted
+ij> drop table bt2;
+0 rows inserted/updated/deleted
+ij> drop index ix_big_i;
+0 rows inserted/updated/deleted
 ij> -- beetle 4316, check "in" with self-reference and correlation, etc.
 create table t1 (c1 real, c2 real);
 0 rows inserted/updated/deleted
