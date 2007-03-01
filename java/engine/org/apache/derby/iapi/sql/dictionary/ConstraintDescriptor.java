@@ -643,14 +643,6 @@ public abstract class ConstraintDescriptor
 			}
 		}
 	}
-
-	/**
-     * Attempt to revalidate the dependent. Meaningless
-	 * for constraints.
-	 */
-	public void makeValid(LanguageConnectionContext lcc) 
-	{
-	}
 	
 	/** @see TupleDescriptor#getDescriptorName */
 	public String getDescriptorName() { return constraintName; }

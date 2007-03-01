@@ -169,10 +169,8 @@ public final class CurrentOfNode extends FromTable {
 		// and create a dependency on it
 
 		preStmt = getCursorStatement();
-		if ((preStmt!=null) && (! preStmt.upToDate())) {
-			preStmt.makeValid(getLanguageConnectionContext()); // need to have the query tree
-			if (! preStmt.isValid()) // can't make it valid, say not found
-				preStmt = null;
+		if (preStmt!=null) {
+			preStmt.rePrepare(getLanguageConnectionContext());
 		}
 
 		if (preStmt == null) {

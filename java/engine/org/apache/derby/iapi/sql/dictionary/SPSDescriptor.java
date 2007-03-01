@@ -1023,28 +1023,6 @@ public class SPSDescriptor extends TupleDescriptor
 	}
 
 	/**
-     * Attempt to revalidate the dependent. For prepared statements,
-	 * this could go through its dependencies and check that they
-	 * are up to date; if not, it would recompile the statement.
-	 * Any failure during this attempt should throw
-	 * StandardException.unableToRevalidate().
-	 *
-	 * @exception StandardException thrown if unable to make it valid
-	 */
-	public final synchronized void makeValid(LanguageConnectionContext lcc) 
-		throws StandardException
-	{
-		if (valid)
-		{
-			return;
-		}
-		prepareAndRelease(lcc);
-
-		updateSYSSTATEMENTS(lcc, RECOMPILE, null);
-		
-	}
-
-	/**
 	 * Invalidate and revalidate.  The functional equivalent
 	 * of calling makeInvalid() and makeValid(), except it
 	 * is optimized.

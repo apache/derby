@@ -70,18 +70,4 @@ public interface Dependent  extends Dependable
 	void makeInvalid(int action,
 					 LanguageConnectionContext lcc) 
 			throws StandardException;
-
-	/**
-		Attempt to revalidate the dependent. For prepared statements,
-		this could go through its dependencies and check that they
-		are up to date; if not, it would recompile the statement.
-		Any failure during this attempt should throw
-		DependencyStatementException.unableToRevalidate().
-
-		@param lcc		The LanguageConnectionContext
-
-		@exception StandardException thrown if unable to make it valid
-	 */
-	void makeValid(LanguageConnectionContext lcc) 
-		throws StandardException;
 }

@@ -250,13 +250,4 @@ public final class DefaultDescriptor
 				") not expected to get called");
 		}
 	}
-
-	/**
-     * Attempt to revalidate the dependent. Meaningless
-	 * for defaults.
-	 */
-	public void makeValid(LanguageConnectionContext lcc) 
-	{
-	}
-
 }

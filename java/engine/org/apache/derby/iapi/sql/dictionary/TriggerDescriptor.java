@@ -714,16 +714,6 @@ public class TriggerDescriptor extends TupleDescriptor
 		
 	}
 
-	/**
-     * Attempt to revalidate the dependent. Meaningless
-	 * for a trigger.
-	 *
-	 * @param 	lcc the language connection context
-	 */
-	public void makeValid(LanguageConnectionContext lcc) 
-	{
-	}
-
 
 	//////////////////////////////////////////////////////////////
 	//

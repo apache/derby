@@ -362,20 +362,6 @@ public final class ViewDescriptor extends TupleDescriptor
 
 	}
 
-	/**
-		Attempt to revalidate the dependent. For prepared statements,
-		this could go through its dependencies and check that they
-		are up to date; if not, it would recompile the statement.
-		Any failure during this attempt should throw
-		StandardException.unableToRevalidate().
-
-		@exception StandardException thrown if unable to make it valid
-	 */
-	public void makeValid(LanguageConnectionContext lcc) 
-		throws StandardException
-	{
-	}
-
 	//
 	// class interface
 	//

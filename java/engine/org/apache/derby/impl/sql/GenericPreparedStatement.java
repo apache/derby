@@ -206,8 +206,12 @@ public class GenericPreparedStatement
 
 	public void rePrepare(LanguageConnectionContext lcc) 
 		throws StandardException {
-		if (!upToDate())
-		    makeValid(lcc);
+		if (!upToDate()) {
+			PreparedStatement ps = statement.prepare(lcc);
+
+			if (SanityManager.DEBUG)
+				SanityManager.ASSERT(ps == this, "ps != this");
+		}
 	}
 
 	/**
@@ -755,31 +759,6 @@ recompileOutOfDatePlan:
 				notifyAll();
 			}
 		}
-	}
-
-	/**
-		Attempt to revalidate the dependent. For prepared statements,
-		this could go through its dependencies and check that they
-		are up to date; if not, it would recompile the statement.
-		Any failure during this attempt should throw
-		StandardException.unableToRevalidate().
-
-		@exception StandardException thrown if unable to make it valid
-	 */
-	public void makeValid(LanguageConnectionContext lcc) 
-		throws StandardException 
-	{
-		PreparedStatement ps;
-
-		// REMIND: will want to go through dependency list
-		// and check if we can make it valid just on faith,
-		// i.e. when it was marked 'possibly invalid' due
-		// to a rollback or some similar action.
-
-		// this ends up calling makeValid(qt, ac) below:
-		ps = statement.prepare(lcc);
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(ps == this, "ps != this");
 	}
 
 	/**
