@@ -115,12 +115,9 @@ public class ReuseFactory {
 			return new Long(i);
 	}
 
-    private static final Boolean staticFalse = new Boolean( false);
-    private static final Boolean staticTrue = new Boolean( true);
-
     public static Boolean getBoolean( boolean b)
     {
-        return b ? staticTrue : staticFalse;
+        return b ? Boolean.TRUE : Boolean.FALSE;
     }
 
 	private static final byte[] staticZeroLenByteArray = new byte[0];
