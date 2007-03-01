@@ -2969,13 +2969,8 @@ public class T_AccessFactory extends T_Generic
                 ";current_xact_after_nest = "  + current_xact_after_nest);
         }
 
-        if ((tc.getLockObject() != child_tc.getLockObject()) ||
-            !(tc.getLockObject().equals(child_tc.getLockObject())))
-
-        {
-			throw T_Fail.testFailMsg(
-                "(nestedUserTransaction) getLockObject should return same object from botht these calls.");
-        }
+        T_Fail.T_ASSERT(tc.getLockSpace() == child_tc.getLockSpace(),
+                        "getLockSpace() returned different object for child.");
 
         // the locks of the nested transaction should not conflict, so this
         // open should work.

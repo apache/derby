@@ -34,6 +34,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.services.daemon.Serviceable;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
@@ -2303,15 +2304,15 @@ public class RAMTransaction
         // above the access context, which is required for
         // error handling assumptions to be correct.
         //
-        // Note that the compatibility space for the nested transaction
-        // is "this", thus the new transaction shares the compatibility space
+        // Note that the nested transaction inherits the compatibility space
+        // from "this", thus the new transaction shares the compatibility space
         // of the current transaction.
         
 
         Transaction child_rawtran = 
             ((readOnly) ?
                 accessmanager.getRawStore().startNestedReadOnlyUserTransaction(
-                    this.getLockObject(), cm, 
+                    getLockSpace(), cm,
                     AccessFactoryGlobals.NESTED_READONLY_USER_TRANS) :
                 accessmanager.getRawStore().startNestedUpdateUserTransaction(
                     cm, AccessFactoryGlobals.NESTED_UPDATE_USER_TRANS));
@@ -2401,12 +2402,14 @@ public class RAMTransaction
 		return rawtran.getFileHandler();
 	}
 
-	/**
-		Return an object that when used as the compatability space *and*
-		group for a lock request, guarantees that the lock will be removed
-		on a commit or an abort.
-	*/
-	public Object getLockObject()
+    /**
+     * Return an object that when used as the compatibility space,
+     * <strong>and</strong> the object returned when calling
+     * <code>getOwner()</code> on that object is used as group for a lock
+     * request, guarantees that the lock will be removed on a commit or an
+     * abort.
+     */
+    public CompatibilitySpace getLockSpace()
     {
 		return rawtran.getCompatibilitySpace();
 	}

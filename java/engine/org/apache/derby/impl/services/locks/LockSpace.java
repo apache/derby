@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.locks;
 
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.Limit;
 
@@ -29,26 +30,30 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
 import java.util.Enumeration;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 
 /**
 
 	A LockSpace represents the complete set of locks held within
-	a single compatability space, broken into groups of locks.
+	a single compatibility space, broken into groups of locks.
 
-    A LockSpace contains a hashtable keyed by the group reference,
+    A LockSpace contains a HashMap keyed by the group reference,
     the data for each key is a HashMap of Lock's.
 
+    <p> A <code>LockSpace</code> can have an owner (for instance a
+    transaction). Currently, the owner is used by the virtual lock table to
+    find out which transaction a lock belongs to. Some parts of the code also
+    use the owner as a group object which guarantees that the lock is released
+    on a commit or an abort. The owner has no special meaning to the lock
+    manager and can be any object, including <code>null</code>. </p>
 */
-final class LockSpace {
+final class LockSpace implements CompatibilitySpace {
 
 	/** Map from group references to groups of locks. */
 	private final HashMap groups;
-	private final Object compatSpace;
-	// the object I live in
-	private final Dictionary holder;
+	/** Reference to the owner of this compatibility space. */
+	private final Object owner;
 
 	private HashMap spareGroups[] = new HashMap[3];
 
@@ -58,10 +63,23 @@ final class LockSpace {
 	private int    nextLimitCall;
 	private Limit  callback;
 
-	LockSpace(Dictionary holder, Object compatSpace) {
-		this.compatSpace = compatSpace;
-		this.holder = holder;
+	/**
+	 * Creates a new <code>LockSpace</code> instance.
+	 *
+	 * @param owner an object representing the owner of the compatibility space
+	 */
+	LockSpace(Object owner) {
 		groups = new HashMap();
+		this.owner = owner;
+	}
+
+	/**
+	 * Get the object representing the owner of the compatibility space.
+	 *
+	 * @return the owner of the compatibility space
+	 */
+	public Object getOwner() {
+		return owner;
 	}
 
 	/**
@@ -96,7 +114,7 @@ final class LockSpace {
 		if (groupSize > nextLimitCall) {
 
 			inLimit = true;
-			callback.reached(compatSpace, group, limit,
+			callback.reached(this, group, limit,
 				new LockList(java.util.Collections.enumeration(dl.keySet())), groupSize);
 			inLimit = false;
 
@@ -128,10 +146,9 @@ final class LockSpace {
 			lset.unlock((Lock) list.next(), 0);
 		}
 
-		if ((callbackGroup == null) && groups.isEmpty())
-			holder.remove(compatSpace);
-		else if (group.equals(callbackGroup))
+		if ((callbackGroup != null) && group.equals(callbackGroup)) {
 			nextLimitCall = limit;
+		}
 
 		saveGroup(dl);
 	}
@@ -187,11 +204,9 @@ final class LockSpace {
 		if (allUnlocked) {
 			groups.remove(group);
 			saveGroup(dl);
-			if ((callbackGroup == null) && groups.isEmpty())
-				holder.remove(compatSpace);
-			else if (group.equals(callbackGroup))
+			if ((callbackGroup != null) && group.equals(callbackGroup)) {
 				nextLimitCall = limit;
-
+			}
 		}
 	}
 
@@ -262,7 +277,7 @@ final class LockSpace {
 			if (control == null)
 				return 0;
 
-			Lock setLock = control.getLock(compatSpace, qualifier);
+			Lock setLock = control.getLock(this, qualifier);
 			if (setLock == null)
 				return 0;
 
@@ -279,11 +294,9 @@ final class LockSpace {
 			if (dl.isEmpty()) {
 				groups.remove(group);
 				saveGroup(dl);
-				if ((callbackGroup == null) && groups.isEmpty())
-					holder.remove(compatSpace);
-				else if (group.equals(callbackGroup))
+				if ((callbackGroup != null) && group.equals(callbackGroup)) {
 					nextLimitCall = limit;
-
+				}
 			}
 
 			return 1;
@@ -317,7 +330,7 @@ final class LockSpace {
 		if (dl == null)
 			return false;
 
-		Object heldLock = dl.get(new Lock(compatSpace, ref, qualifier));
+		Object heldLock = dl.get(new Lock(this, ref, qualifier));
 		return (heldLock != null);
 	}
 
@@ -331,14 +344,10 @@ final class LockSpace {
 		Clear a limit set by setLimit.
 	*/
 	synchronized void clearLimit(Object group) {
-
 		if (group.equals(callbackGroup)) {
 			callbackGroup = null;
 			nextLimitCall = limit = Integer.MAX_VALUE;
 			callback = null;
-
-			if (groups.isEmpty())
-				holder.remove(compatSpace);
 		}
 	}
 

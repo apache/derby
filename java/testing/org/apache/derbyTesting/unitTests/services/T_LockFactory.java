@@ -120,7 +120,7 @@ public class T_LockFactory extends T_MultiIterations
 	*/
 	void S001() throws StandardException, T_Fail {
 
-		Object cs = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Object g0 = new Object();	// create an object for a lock group
 		Lockable l0 = new T_L1();		// simple lockable
 
@@ -197,7 +197,7 @@ public class T_LockFactory extends T_MultiIterations
 
 	void S002() throws StandardException, T_Fail {
 
-		Object cs = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Object g0 = new Object();	// create an object for a lock group
 		Object g1 = new Object();
 		Lockable l0 = new T_L1();		// simple lockable
@@ -264,7 +264,7 @@ public class T_LockFactory extends T_MultiIterations
 
 	void S003() throws StandardException, T_Fail {
 
-		Object cs = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Object g0 = new Object();	// create an object for a lock group
 		Object g1 = new Object();
 		Lockable l0 = new T_L1();		// simple lockable
@@ -322,7 +322,7 @@ public class T_LockFactory extends T_MultiIterations
 
 	void S004() throws StandardException, T_Fail {
 
-		Object cs = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Object g0 = new Object();	// create an object for a lock group
 		Object g1 = new Object();
 		Object g2 = new Object();
@@ -398,8 +398,8 @@ public class T_LockFactory extends T_MultiIterations
 	*/
 	void S005() throws StandardException, T_Fail {
 
-		Object cs0 = new Object();	// create an object for the compatability space
-		Object cs1 = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs0 = lf.createCompatibilitySpace(null);
+		CompatibilitySpace cs1 = lf.createCompatibilitySpace(null);
 
 		Object g0 = new Object();	// create an object for a lock group
 		Object g1 = new Object();	// create an object for a lock group
@@ -469,7 +469,7 @@ public class T_LockFactory extends T_MultiIterations
 	*/
 	void S007() throws StandardException, T_Fail {
 
-		Object cs = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Object g0 = new Object();	// create an object for a lock group
 		Object g1 = new Object();	// create an object for a lock group
 		Lockable l0 = new T_L1();
@@ -693,7 +693,7 @@ public class T_LockFactory extends T_MultiIterations
 
 		@exception T_Fail	Number of locks is not as expected.
 	*/
-	void checkLockCount(Object cs, int expected) throws T_Fail {
+	void checkLockCount(CompatibilitySpace cs, int expected) throws T_Fail {
 		boolean expect = expected != 0;
 		boolean got = lf.areLocksHeld(cs);
 		if (got != expect)
@@ -706,7 +706,8 @@ public class T_LockFactory extends T_MultiIterations
 		@exception T_Fail	Number of locks is not as expected.
 	*/
 
-	void checkLockGroupCount(Object cs, Object group, int expected) throws T_Fail {
+	void checkLockGroupCount(CompatibilitySpace cs, Object group, int expected)
+			throws T_Fail {
 		boolean expect = expected != 0;
 		boolean got = lf.areLocksHeld(cs, group);
 		if (got != expect)

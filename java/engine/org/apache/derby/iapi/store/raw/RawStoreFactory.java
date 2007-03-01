@@ -23,6 +23,7 @@ package org.apache.derby.iapi.store.raw;
 
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.LockFactory;
 
 import org.apache.derby.iapi.services.property.PersistentSet;
@@ -611,7 +612,7 @@ public interface RawStoreFactory extends Corruptable {
 	*/
 
 	public Transaction startNestedReadOnlyUserTransaction(
-    Object         compatibilitySpace,
+    CompatibilitySpace compatibilitySpace,
     ContextManager contextMgr,
     String         transName)
         throws StandardException;

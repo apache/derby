@@ -77,7 +77,9 @@ public class T_TWC
 		switchTransactionContext();
 		try {
 		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(!lf.areLocksHeld(tran));
+			SanityManager.ASSERT(
+				!lf.areLocksHeld(tran.getCompatibilitySpace()),
+				"Transaction holds locks.");
 		} finally {
 			resetContext();
 		}

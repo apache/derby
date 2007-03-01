@@ -24,6 +24,7 @@ package org.apache.derby.iapi.store.raw.xact;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.LockFactory;
 
 import org.apache.derby.iapi.store.access.TransactionInfo;
@@ -106,7 +107,7 @@ public interface TransactionFactory extends Corruptable {
 	*/
 	public RawTransaction startNestedReadOnlyUserTransaction(
     RawStoreFactory rsf,
-    Object          compatibilitySpace,
+    CompatibilitySpace compatibilitySpace,
     ContextManager  contextMgr,
     String          transName)
         throws StandardException;

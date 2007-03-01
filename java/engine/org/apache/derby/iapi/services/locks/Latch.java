@@ -27,9 +27,9 @@ package org.apache.derby.iapi.services.locks;
 public interface Latch {
 
 	/**	
-		Get the compatability space the latch is held in.
+		Get the compatibility space the latch is held in.
 	*/
-	public Object getCompatabilitySpace();
+	public CompatibilitySpace getCompatabilitySpace();
 
 	/**
 		Gte the object the latch is held on.

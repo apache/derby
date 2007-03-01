@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.locks;
 
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.Latch;
 
@@ -192,7 +193,7 @@ public class LockControl implements Control {
 
     public boolean isGrantable(
     boolean noWaitersBeforeMe,
-    Object  compatabilitySpace, 
+    CompatibilitySpace compatibilitySpace,
     Object  qualifier)
     {
 		if (isUnlocked())
@@ -215,7 +216,7 @@ public class LockControl implements Control {
 				Lock gl = firstGrant == null ? (Lock) lgranted.get(index) : firstGrant;
 
                 boolean sameSpace = 
-                    (gl.getCompatabilitySpace().equals(compatabilitySpace));
+                    (gl.getCompatabilitySpace() == compatibilitySpace);
 
                 if (sameSpace && selfCompatible) 
                 {
@@ -267,7 +268,8 @@ public class LockControl implements Control {
 		1) The Lockable has just been unlocked, 
 	*/
 
-	public Lock addLock(LockSet ls, Object compatabilitySpace, Object qualifier) {
+	public Lock addLock(LockSet ls, CompatibilitySpace compatibilitySpace,
+						Object qualifier) {
 
 		if (SanityManager.DEBUG) {
 
@@ -303,7 +305,8 @@ public class LockControl implements Control {
 				Lock gl = firstGrant == null ? (Lock) granted.get(index) : firstGrant;
 
 
-				boolean sameSpace = (gl.getCompatabilitySpace().equals(compatabilitySpace));
+				boolean sameSpace =
+					(gl.getCompatabilitySpace() == compatibilitySpace);
 
 				// if it's one of our locks and we are always compatible with 
                 // our own locks then yes, we can be granted.
@@ -357,14 +360,15 @@ public class LockControl implements Control {
 		}
 
 		if (grantLock) {
-			lockItem = new Lock(compatabilitySpace, lref, qualifier);
+			lockItem = new Lock(compatibilitySpace, lref, qualifier);
 			grant(lockItem);
 			return lockItem;
 		}
 		
-		ActiveLock waitingLock = new ActiveLock(compatabilitySpace, lref, qualifier);
+		ActiveLock waitingLock =
+			new ActiveLock(compatibilitySpace, lref, qualifier);
 
-		// If the object is already locked by this compatability space
+		// If the object is already locked by this compatibility space
 		// then this lock can be granted by skipping other waiters.
 		if (spaceHasALock) {
 			waitingLock.canSkip = true;
@@ -571,7 +575,8 @@ public class LockControl implements Control {
 	/**
 		Find a granted lock matching this space and qualifier
 	*/
-	public final Lock getLock(Object compatabilitySpace, Object qualifier) {
+	public final Lock getLock(CompatibilitySpace compatibilitySpace,
+							  Object qualifier) {
 
 		if (isUnlocked())
 			return null;
@@ -585,7 +590,7 @@ public class LockControl implements Control {
 
 			Lock gl = firstGrant == null ? (Lock) lgranted.get(index) : firstGrant;
 
-            if (!gl.getCompatabilitySpace().equals(compatabilitySpace))
+            if (gl.getCompatabilitySpace() != compatibilitySpace)
 				continue;
 
 			if (gl.getQualifier() == qualifier)

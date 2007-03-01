@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.locks;
 
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.Latch;
 import java.util.List;
@@ -31,7 +32,8 @@ public interface Control {
 
 	public LockControl getLockControl();
 
-	public Lock getLock(Object compatabilitySpace, Object qualifier);
+	public Lock getLock(CompatibilitySpace compatibilitySpace,
+						Object qualifier);
 
 //EXCLUDE-START-lockdiag- 
 	/**
@@ -55,7 +57,9 @@ public interface Control {
 
 	public List getWaiting();
 
-	public boolean isGrantable(boolean otherWaiters, Object  compatabilitySpace, Object  qualifier);
+	public boolean isGrantable(boolean otherWaiters,
+							   CompatibilitySpace compatibilitySpace,
+							   Object qualifier);
 
 
 }

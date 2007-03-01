@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.locks;
 
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Latch;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
@@ -118,7 +119,7 @@ final class LockSet {
 	/**
 	 *	Lock an object within a specific compatibility space.
 	 *
-	 *	@param	compatabilitySpace Compatibility space.
+	 *	@param	compatibilitySpace Compatibility space.
 	 *	@param	ref Lockable reference.
 	 *	@param	qualifier Qualifier.
 	 *	@param	timeout Timeout in milli-seconds
@@ -128,7 +129,7 @@ final class LockSet {
 	 *	@exception	StandardException Standard Cloudscape policy.
 
 	*/
-	public Lock lockObject(Object compatabilitySpace, Lockable ref,
+	public Lock lockObject(CompatibilitySpace compatibilitySpace, Lockable ref,
 						   Object qualifier, int timeout)
 		throws StandardException
 	{		
@@ -154,7 +155,7 @@ final class LockSet {
 			if (gc == null) {
 
 				// object is not locked, can be granted
-				Lock gl = new Lock(compatabilitySpace, ref, qualifier);
+				Lock gl = new Lock(compatibilitySpace, ref, qualifier);
 
 				gl.grant();
 
@@ -181,7 +182,7 @@ final class LockSet {
                 }
 			}
 
-			lockItem = control.addLock(this, compatabilitySpace, qualifier);
+			lockItem = control.addLock(this, compatibilitySpace, qualifier);
 
 			if (lockItem.getCount() != 0) {
 				return lockItem;
@@ -300,7 +301,7 @@ forever:	for (;;) {
 
                         if (control.isGrantable(
                                 control.firstWaiter() == waitingLock,
-                                compatabilitySpace, 
+                                compatibilitySpace,
                                 qualifier)) {
 
                             // Yes, we are granted, put us on the granted queue.

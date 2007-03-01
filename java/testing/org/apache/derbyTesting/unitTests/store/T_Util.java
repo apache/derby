@@ -95,7 +95,7 @@ public class T_Util
 	 * check that transaction does not hold any lock
 	 */
 	public void t_checkNullLockCount(Transaction t) throws T_Fail {
-		if (lFactory.areLocksHeld(t))
+		if (lFactory.areLocksHeld(t.getCompatibilitySpace()))
 			throw T_Fail.testFailMsg("Previous action did not clean up all locks.");
 	}
 

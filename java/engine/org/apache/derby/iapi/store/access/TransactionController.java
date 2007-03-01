@@ -26,6 +26,7 @@ import java.util.Properties;
 import java.io.Serializable;
 
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.iapi.services.io.Storable;
 
@@ -1419,12 +1420,13 @@ public interface TransactionController
 	*/
 	public FileResource getFileHandler();
 
-	/**
-		Return an object that when used as the compatability space *and*
-		group for a lock request, guarantees that the lock will be removed
-		on a commit or an abort.
-	*/
-	public Object getLockObject();
+    /**
+     * Return an object that when used as the compatibility space for a lock
+     * request, <strong>and</strong> the group object is the one returned by a
+     * call to <code>getOwner()</code> on that object, guarantees that the lock
+     * will be removed on a commit or an abort.
+     */
+    public CompatibilitySpace getLockSpace();
 
     /**
      * Return static information about the conglomerate to be included in a

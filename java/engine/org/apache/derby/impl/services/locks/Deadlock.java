@@ -208,13 +208,7 @@ inner:		for (;;) {
 				break;
 			}
 
-			LockSpace ls = (LockSpace) factory.get(space);
-			if (ls == null) {
-				// space only holds latches, pick as victim
-				victim = space;
-				break;
-			}
-
+			LockSpace ls = (LockSpace) space;
 			int spaceCount = ls.deadlockCount(minLockCount);
 
 			if (spaceCount <= minLockCount) {

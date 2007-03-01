@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.locks;
 
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.Latch;
 
@@ -41,7 +42,7 @@ public class Lock implements Latch, Control {
 		Compatibility space the object is locked in.
 		MT - immutable - reference only
 	*/
-	private final Object	space;
+	private final CompatibilitySpace space;
 
 	/**
 		Object being locked.
@@ -56,7 +57,7 @@ public class Lock implements Latch, Control {
 
 	int count;
 
-	protected Lock(Object space, Lockable ref, Object qualifier) {
+	protected Lock(CompatibilitySpace space, Lockable ref, Object qualifier) {
 		super();
 		this.space = space;
 		this.ref = ref;
@@ -73,11 +74,11 @@ public class Lock implements Latch, Control {
 	}
 
 	/**
-		Return the compatability space this lock is held in
+		Return the compatibility space this lock is held in.
 
 		MT - Thread safe
 	*/
-	public final Object getCompatabilitySpace() {
+	public final CompatibilitySpace getCompatabilitySpace() {
 		return space;
 	}
 
@@ -148,7 +149,8 @@ public class Lock implements Latch, Control {
 		if (other instanceof Lock) {
 			Lock ol = (Lock) other;
 
-			return (space.equals(ol.space)) && ref.equals(ol.ref) && (qualifier == ol.qualifier);
+			return (space == ol.space) && ref.equals(ol.ref)
+				&& (qualifier == ol.qualifier);
 		}
 
 		return false;
@@ -162,9 +164,11 @@ public class Lock implements Latch, Control {
 		return new LockControl(this, ref);
 	}
 
-	public Lock getLock(Object compatabilitySpace, Object qualifier) {
-		if (space.equals(compatabilitySpace) && (this.qualifier == qualifier))
+	public Lock getLock(CompatibilitySpace compatibilitySpace,
+						Object qualifier) {
+		if ((space == compatibilitySpace) && (this.qualifier == qualifier)) {
 			return this;
+		}
 		return null;
 	}
 
@@ -216,11 +220,13 @@ public class Lock implements Latch, Control {
 		return null;
 	}
 
-    public boolean isGrantable(boolean noWaitersBeforeMe, Object compatabilitySpace, Object  requestQualifier)
+    public boolean isGrantable(boolean noWaitersBeforeMe,
+                               CompatibilitySpace compatibilitySpace,
+                               Object requestQualifier)
     {
-        boolean sameSpace = space.equals(compatabilitySpace);
-		if (sameSpace && ref.lockerAlwaysCompatible())
+		if ((space == compatibilitySpace) && ref.lockerAlwaysCompatible()) {
 			return true;
+		}
 
 		return ref.requestCompatible(requestQualifier, this.qualifier);
 	}

@@ -22,6 +22,7 @@
 package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.Latch;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
@@ -212,9 +213,10 @@ abstract class BaseContainer implements Lockable {
                     new Long(getContainerId()));
         }
 
+		CompatibilitySpace cs = ntt.getCompatibilitySpace();
 		// Latch this container, the commit will release the latch
 		ntt.getLockFactory().lockObject(
-                ntt, ntt, this, null, C_LockFactory.WAIT_FOREVER);
+                cs, ntt, this, null, C_LockFactory.WAIT_FOREVER);
 
 		try
 		{
@@ -302,8 +304,9 @@ abstract class BaseContainer implements Lockable {
         }
 
 		// Latch this container, the commit will release the latch
+		CompatibilitySpace cs = ntt.getCompatibilitySpace();
 		ntt.getLockFactory().lockObject(
-                ntt, ntt, this, null, C_LockFactory.WAIT_FOREVER);
+                cs, ntt, this, null, C_LockFactory.WAIT_FOREVER);
 
 		BasePage newPage = null;
 		try

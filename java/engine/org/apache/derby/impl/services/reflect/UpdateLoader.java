@@ -45,6 +45,7 @@ import java.security.AccessController;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 
 class UpdateLoader {
 
@@ -58,6 +59,7 @@ class UpdateLoader {
 	private int version;
     private boolean normalizeToUpper;
 	private DatabaseClasses parent;
+	private final CompatibilitySpace compat;
 
 	private boolean needReload;
 	private JarReader jarReader;
@@ -68,6 +70,7 @@ class UpdateLoader {
         this.normalizeToUpper = normalizeToUpper;
 		this.parent = parent;
 		lf = (LockFactory) Monitor.getServiceModule(parent, Module.LockFactory);
+		compat = lf.createCompatibilitySpace(this);
 
 		if (verbose) {
 			vs = Monitor.getStream();
@@ -160,7 +163,7 @@ class UpdateLoader {
 			throw new ClassNotFoundException(MessageService.getTextMessage(MessageId.CM_CLASS_LOAD_EXCEPTION, className, jl == null ? null : jl.getJarName(), se));
 		} finally {
 			if (unlockLoader) {
-				lf.unlock(this, this, classLoaderLock, ShExQual.SH);
+				lf.unlock(compat, this, classLoaderLock, ShExQual.SH);
 			}
 		}
 	}
@@ -207,7 +210,7 @@ class UpdateLoader {
 			return null;
 		} finally {
 			if (unlockLoader) {
-				lf.unlock(this, this, classLoaderLock, ShExQual.SH);
+				lf.unlock(compat, this, classLoaderLock, ShExQual.SH);
 			}
 		}
 	}
@@ -254,17 +257,20 @@ class UpdateLoader {
 		// engine, in which case tc will be null. In that case
 		// we lock the class loader only for the duration of
 		// the loadClass().
-		Object lockSpace = null;
+		CompatibilitySpace lockSpace = null;
 		
 		if (cfc != null) {
 			lockSpace = cfc.getLockSpace();
 		}
 		if (lockSpace == null)
-			lockSpace = this;
+			lockSpace = compat;
 
-		lf.lockObject(lockSpace, lockSpace, classLoaderLock, qualifier, C_LockFactory.TIMED_WAIT);
+		Object lockGroup = lockSpace.getOwner();
 
-		return (lockSpace == this);
+		lf.lockObject(lockSpace, lockGroup, classLoaderLock, qualifier,
+					  C_LockFactory.TIMED_WAIT);
+
+		return (lockGroup == this);
 	}
 
 	Class checkLoaded(String className, boolean resolve) {

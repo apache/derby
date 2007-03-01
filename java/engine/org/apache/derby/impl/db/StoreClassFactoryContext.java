@@ -24,6 +24,7 @@ package org.apache.derby.impl.db;
 import org.apache.derby.iapi.services.loader.ClassFactoryContext;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.JarReader;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.AccessFactory;
@@ -42,11 +43,12 @@ final class StoreClassFactoryContext extends ClassFactoryContext {
 		this.jarReader = jarReader;
 	}
 
-	public Object getLockSpace() throws StandardException {
+	public CompatibilitySpace getLockSpace() throws StandardException {
 		if (store == null)
 			return null;
-		return store.getTransaction(getContextManager()).getLockObject();	
+		return store.getTransaction(getContextManager()).getLockSpace();
 	}
+
 	public PersistentSet getPersistentSet() throws StandardException {
 		if (store == null)
 			return null;

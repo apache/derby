@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.store.raw;
 
 import org.apache.derby.iapi.services.daemon.Serviceable;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.store.access.FileResource;
@@ -55,7 +56,7 @@ public interface Transaction {
      *
 	 * @return The compatibility space of the transaction.
      **/
-    Object getCompatibilitySpace();
+    CompatibilitySpace getCompatibilitySpace();
 
 
 	/**

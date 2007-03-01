@@ -37,7 +37,7 @@ public interface Limit {
 	/**
 		Called by the lock factory when a limit has been reached.
 
-		@param compatabilitySpace lock space the limit was set for
+		@param compatibilitySpace lock space the limit was set for
 		@param group lock group the limit was set for
 		@param limit the limit's setting
 		@param lockList the list of Lockable's in the group
@@ -45,8 +45,8 @@ public interface Limit {
 
         @exception StandardException Standard Cloudscape error policy.
 	*/
-	public void reached(Object compatabilitySpace, Object group, int limit,
-		Enumeration lockList, int lockCount)
+	public void reached(CompatibilitySpace compatibilitySpace, Object group,
+						int limit, Enumeration lockList, int lockCount)
 		throws StandardException;
 
 }

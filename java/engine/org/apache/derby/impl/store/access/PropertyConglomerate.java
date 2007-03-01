@@ -28,6 +28,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.UserType;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.FormatableHashtable; 
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.ShExLockable;
 import org.apache.derby.iapi.services.locks.ShExQual;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
@@ -756,8 +757,10 @@ class PropertyConglomerate
 		// it. Thus readers see the old uncommited values. When this
 		// thread releases its exclusive lock the cached is cleared
 		// and the next reader will re-populate the cache.
-		Object csGroup = tc.getLockObject();
-		lf.lockObject(csGroup, csGroup, cachedLock, ShExQual.EX, C_LockFactory.TIMED_WAIT);
+		CompatibilitySpace cs = tc.getLockSpace();
+		Object csGroup = cs.getOwner();
+		lf.lockObject(cs, csGroup, cachedLock, ShExQual.EX,
+					  C_LockFactory.TIMED_WAIT);
 	}
 
 	/**
@@ -766,8 +769,9 @@ class PropertyConglomerate
 	  */
 	private boolean iHoldTheUpdateLock(TransactionController tc) throws StandardException
 	{
-		Object csGroup = tc.getLockObject();
-		return lf.isLockHeld(csGroup, csGroup, cachedLock, ShExQual.EX);
+		CompatibilitySpace cs = tc.getLockSpace();
+		Object csGroup = cs.getOwner();
+		return lf.isLockHeld(cs, csGroup, cachedLock, ShExQual.EX);
 	}
 }
 

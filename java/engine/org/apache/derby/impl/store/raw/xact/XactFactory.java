@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
@@ -250,7 +251,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
     RawStoreFactory rsf,
     ContextManager  cm,
     boolean         readOnly,
-    Object          compatibilitySpace,
+    CompatibilitySpace compatibilitySpace,
     String          xact_context_id,
     String          transName,
     boolean         excludeMe)
@@ -290,7 +291,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 	public RawTransaction startNestedReadOnlyUserTransaction(
     RawStoreFactory rsf,
-    Object          compatibilitySpace,
+    CompatibilitySpace compatibilitySpace,
     ContextManager  cm,
     String          transName)
         throws StandardException

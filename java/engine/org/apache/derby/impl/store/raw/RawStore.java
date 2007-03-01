@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.crypto.CipherFactoryBuilder;
 import org.apache.derby.iapi.services.crypto.CipherFactory;
 import org.apache.derby.iapi.services.crypto.CipherProvider;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
@@ -400,7 +401,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
 	public Transaction startNestedReadOnlyUserTransaction(
-    Object          compatibilitySpace,
+    CompatibilitySpace compatibilitySpace,
     ContextManager  contextMgr,
     String          transName)
         throws StandardException

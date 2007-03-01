@@ -25,6 +25,7 @@ import org.apache.derby.iapi.services.diag.Diagnosticable;
 import org.apache.derby.iapi.services.diag.DiagnosticUtil;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;
 
 import java.util.Properties;
@@ -116,40 +117,45 @@ public class D_LockControl implements Diagnosticable
 	** Debugging routines
 	*/
 
-	static void debugLock(String type, Object compatabilitySpace, Object group, Lockable ref, Object qualifier, int timeout) {
+	static void debugLock(String type, CompatibilitySpace compatibilitySpace,
+						  Object group, Lockable ref, Object qualifier,
+						  int timeout) {
 
 		if (SanityManager.DEBUG) {
 
 			SanityManager.DEBUG(Constants.LOCK_TRACE, type +
                 debugLockString(
-                    compatabilitySpace, group, ref, qualifier, timeout));
+                    compatibilitySpace, group, ref, qualifier, timeout));
 		}
 	}
-	static void debugLock(String type, Object compatabilitySpace, Object group) {
+	static void debugLock(String type, CompatibilitySpace compatibilitySpace,
+						  Object group) {
 
 		if (SanityManager.DEBUG) {
 
 			SanityManager.DEBUG(Constants.LOCK_TRACE, type +
-					debugLockString(compatabilitySpace, group));
+					debugLockString(compatibilitySpace, group));
 		}
 	}
-	static void debugLock(String type, Object compatabilitySpace, Object group, Lockable ref) {
+	static void debugLock(String type, CompatibilitySpace compatibilitySpace,
+						  Object group, Lockable ref) {
 
 		if (SanityManager.DEBUG) {
 
 			SanityManager.DEBUG(Constants.LOCK_TRACE, type +
-					debugLockString(compatabilitySpace, group, ref));
+					debugLockString(compatibilitySpace, group, ref));
 		}
 	}
 
 
-	static String debugLockString(Object compatabilitySpace, Object group) {
+	static String debugLockString(CompatibilitySpace compatibilitySpace,
+								  Object group) {
 
 		if (SanityManager.DEBUG) {
 
 			StringBuffer sb = new StringBuffer("");
 
-			debugAppendObject(sb, " CompatabilitySpace=", compatabilitySpace);
+			debugAppendObject(sb, " CompatibilitySpace=", compatibilitySpace);
 			debugAppendObject(sb, " Group=", group);
 
 			debugAddThreadInfo(sb);
@@ -161,14 +167,15 @@ public class D_LockControl implements Diagnosticable
 		}
 	}
 
-	static String debugLockString(Object compatabilitySpace, Object group, Lockable ref) {
+	static String debugLockString(CompatibilitySpace compatibilitySpace,
+								  Object group, Lockable ref) {
 
 		if (SanityManager.DEBUG) {
 
 			StringBuffer sb = new StringBuffer("");
 
 			debugAppendObject(sb, " Lockable ", ref);
-			debugAppendObject(sb, " CompatabilitySpace=", compatabilitySpace);
+			debugAppendObject(sb, " CompatibilitySpace=", compatibilitySpace);
 			debugAppendObject(sb, " Group=", group);
 
 			debugAddThreadInfo(sb);
@@ -181,7 +188,9 @@ public class D_LockControl implements Diagnosticable
 	}
 
 
-	static String debugLockString(Object compatabilitySpace, Object group, Lockable ref, Object qualifier, int timeout) {
+	static String debugLockString(CompatibilitySpace compatibilitySpace,
+								  Object group, Lockable ref,
+								  Object qualifier, int timeout) {
 
 		if (SanityManager.DEBUG) {
 
@@ -189,7 +198,7 @@ public class D_LockControl implements Diagnosticable
 
 			debugAppendObject(sb, " Lockable ", ref);
 			debugAppendObject(sb, " Qualifier=", qualifier);
-			debugAppendObject(sb, " CompatabilitySpace=", compatabilitySpace);
+			debugAppendObject(sb, " CompatibilitySpace=", compatibilitySpace);
 			debugAppendObject(sb, " Group=", group);
 
 			if (timeout >= 0) {

@@ -23,6 +23,7 @@ package org.apache.derby.iapi.services.loader;
 
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
@@ -55,7 +56,7 @@ public abstract class ClassFactoryContext extends ContextImpl {
      * Used when the classpath changes or a database
      * jar file is installed, removed or replaced.
      */
-	public abstract Object getLockSpace() throws StandardException;
+    public abstract CompatibilitySpace getLockSpace() throws StandardException;
 
     /**
      * Get the set of properties stored with this service.

@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.locks;
 
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
 
@@ -55,7 +56,7 @@ public final class ActiveLock extends Lock {
 	/**
 		If true then this lock can be granted even if
 		it is not the first lock request on the wait queue.
-		This can occur if the compatability space already holds
+		This can occur if the compatibility space already holds
 		a lock on the object.
 	*/
 	protected boolean canSkip;
@@ -66,7 +67,8 @@ public final class ActiveLock extends Lock {
 
 		MT - single thread required
 	*/
-	protected ActiveLock(Object space, Lockable ref, Object qualifier) {
+	protected ActiveLock(CompatibilitySpace space, Lockable ref,
+						 Object qualifier) {
 		super(space, ref, qualifier);
 	}
 

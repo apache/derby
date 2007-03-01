@@ -69,7 +69,7 @@ class T_User implements Runnable {
 
 	private void T001() throws StandardException, T_Fail {
 
-		Object cs = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Integer g0 = new Integer(1);	// create an object for a lock group
 
 		// check we have no locks held
@@ -112,7 +112,7 @@ class T_User implements Runnable {
 
 	private void T002() throws StandardException, T_Fail {
 
-		Object cs = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Integer g0 = new Integer(1);	// create an object for a lock group
 
 		// check we have no locks held
@@ -137,7 +137,7 @@ class T_User implements Runnable {
 
 	private void T003() throws StandardException, T_Fail {
 
-		Object cs = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Integer g0 = new Integer(1);	// create an object for a lock group
 
 		// check we have no locks held
@@ -156,7 +156,7 @@ class T_User implements Runnable {
 	}
 	private void T004() throws StandardException, T_Fail {
 
-		Object cs = new Object();	// create an object for the compatability space
+		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
 		Integer g0 = new Integer(1);	// create an object for a lock group
 
 		// check we have no locks held
@@ -185,7 +185,7 @@ class T_User implements Runnable {
 			throw T_Fail.testFailMsg("value corrupted in multi-user test, exapected " + value + ", got " + item.value);
 	}
 
-	void checkLockCount(Object cs, int expected) throws T_Fail {
+	void checkLockCount(CompatibilitySpace cs, int expected) throws T_Fail {
 		boolean expect = expected != 0;
 		boolean got = lf.areLocksHeld(cs);
 		if (got != expect)

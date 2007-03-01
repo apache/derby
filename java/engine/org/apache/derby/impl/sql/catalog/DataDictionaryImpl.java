@@ -129,6 +129,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.ShExLockable;
 import org.apache.derby.iapi.services.locks.ShExQual;
 import org.apache.derby.iapi.util.StringUtil;
@@ -812,7 +813,7 @@ public final class	DataDictionaryImpl
                 try
                 {
                     lockFactory.zeroDurationlockObject(
-                        lcc.getTransactionExecute().getLockObject(),
+                        lcc.getTransactionExecute().getLockSpace(),
                         cacheCoordinator,
                         ShExQual.SH,
                         C_LockFactory.WAIT_FOREVER);
@@ -874,10 +875,12 @@ public final class	DataDictionaryImpl
                             // waiting (while holding the dataDictionary 
                             // synchronization).
 
+                            CompatibilitySpace space =
+                                lcc.getTransactionExecute().getLockSpace();
+
                             lockGranted = 
                                 lockFactory.lockObject(
-                                    lcc.getTransactionExecute().getLockObject(),
-                                    lcc.getTransactionExecute().getLockObject(),
+                                    space, space.getOwner(),
                                     cacheCoordinator,
                                     ShExQual.SH,
                                     C_LockFactory.NO_WAIT);
@@ -939,10 +942,12 @@ public final class	DataDictionaryImpl
 					*/
 					if ((lcc.getStatementContext() != null) && lcc.getStatementContext().inUse())
 					{
-						int unlockCount = lockFactory.unlock(lcc.getTransactionExecute().getLockObject(),
-										lcc.getTransactionExecute().getLockObject(),
-										cacheCoordinator,
-										ShExQual.SH);
+						CompatibilitySpace space =
+							lcc.getTransactionExecute().getLockSpace();
+						int unlockCount =
+							lockFactory.unlock(
+								space, space.getOwner(),
+								cacheCoordinator, ShExQual.SH);
 						if (SanityManager.DEBUG)
 						{
 							if (unlockCount != 1)
@@ -1028,7 +1033,7 @@ public final class	DataDictionaryImpl
                     // up the stack.
 
                     lockFactory.zeroDurationlockObject(
-                        lcc.getTransactionExecute().getLockObject(),
+                        lcc.getTransactionExecute().getLockSpace(),
                         cacheCoordinator,
                         ShExQual.EX,
                         C_LockFactory.TIMED_WAIT);
@@ -1066,7 +1071,7 @@ public final class	DataDictionaryImpl
 
                         boolean lockGranted = 
                             lockFactory.zeroDurationlockObject(
-                                lcc.getTransactionExecute().getLockObject(),
+                                lcc.getTransactionExecute().getLockSpace(),
                                 cacheCoordinator,
                                 ShExQual.EX,
                                 C_LockFactory.NO_WAIT);

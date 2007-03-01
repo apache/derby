@@ -38,26 +38,35 @@ import java.util.Enumeration;
 public interface LockFactory extends PropertySetCallback {
 
 	/**
-		Lock an object within a compatability space
+	 * Create an object which can be used as a compatibility space. A
+	 * compatibility space object can only be used in the
+	 * <code>LockFactory</code> that created it.
+	 *
+	 * @param owner the owner of the compatibility space (typically a
+	 * transaction object). Might be <code>null</code>.
+	 * @return an object which represents a compatibility space
+	 */
+	public CompatibilitySpace createCompatibilitySpace(Object owner);
+
+	/**
+		Lock an object within a compatibility space
 		and associate the lock with a group object,
 		waits up to timeout milli-seconds for the object to become unlocked. A 
         timeout of 0 means do not wait for the lock to be unlocked.
 		Note the actual time waited is approximate.
 		<P>
 		A compatibility space in an space where lock requests are assumed to be
-        compatabile and granted by the lock manager if the trio
-        {compatabilitySpace, ref, qualifier} are equal (i.e. reference equality
-        for qualifier, equals() method
-		for compatabilitySpace and ref ). A typical reference to use for the compatability
-		space is a reference to an object representing a transaction.
+        compatible and granted by the lock manager if the trio
+        {compatibilitySpace, ref, qualifier} are equal (i.e. reference equality
+        for qualifier and compatibilitySpace, equals() method for ref).
 		Granted by the lock manager means that the Lockable object may or may 
         not be queried to see if the request is compatible.
 		<BR>
-		A compatability space is not assumed to be owned by a single thread.
+		A compatibility space is not assumed to be owned by a single thread.
 	
 
 
-		@param compatabilitySpace object defining compatability space (by value)
+		@param compatibilitySpace object defining compatibility space
 		@param group handle of group, must be private to a thread.
 		@param ref reference to object to be locked
 		@param qualifier A qualification of the request.
@@ -74,38 +83,45 @@ public interface LockFactory extends PropertySetCallback {
 		@exception StandardException Standard Cloudscape error policy.
 
 	*/
-	public boolean lockObject(Object compatabilitySpace, Object group, Lockable ref, Object qualifier, int timeout)
+	public boolean lockObject(CompatibilitySpace compatibilitySpace,
+							  Object group, Lockable ref, Object qualifier,
+							  int timeout)
 		throws StandardException;
 
 	/**
-		Unlock a single lock on a single object held within this compatability space
-		that was locked with the supplied qualifier.
+		Unlock a single lock on a single object held within this compatibility
+		space and locked with the supplied qualifier.
 
-		@param compatabilitySpace object defining compatability space (by value)
+		@param compatibilitySpace object defining compatibility space
 		@param group handle of group.
 		@param ref Reference to object to be unlocked.
 		@param qualifier qualifier of lock to be unlocked
 
 		@return number of locks released (one or zero).
 	*/
-	public int unlock(Object compatabilitySpace, Object group, Lockable ref, Object qualifier);
+	public int unlock(CompatibilitySpace compatibilitySpace, Object group,
+					  Lockable ref, Object qualifier);
 
 	/**
 		Unlock all locks in a group. 
 
+		@param compatibilitySpace object defining compatibility space
 		@param group handle of group that objects were locked with.
 	*/
-	public void unlockGroup(Object compatabilitySpace, Object group);
+	public void unlockGroup(CompatibilitySpace compatibilitySpace,
+							Object group);
 
 	/**
 		Unlock all locks on a group that match the passed in value.
 	*/
-	public void unlockGroup(Object compatabilitySpace, Object group, Matchable key);
+	public void unlockGroup(CompatibilitySpace compatibilitySpace,
+							Object group, Matchable key);
 
 	/**
 		Transfer a set of locks from one group to another.
 	*/
-	public void transfer(Object compatabilitySpace, Object oldGroup, Object newGroup);
+	public void transfer(CompatibilitySpace compatibilitySpace,
+						 Object oldGroup, Object newGroup);
 
 	/**
 		Returns true if locks held by anyone are blocking anyone else
@@ -113,21 +129,22 @@ public interface LockFactory extends PropertySetCallback {
 	public boolean anyoneBlocked();
 
 	/**
-		Return true if locks are held in this compatability space and
+		Return true if locks are held in this compatibility space and
 		 this group.
 
 		@param group handle of group that objects were locked with.
 
 	*/
-	public boolean areLocksHeld(Object compatabilitySpace, Object group);
+	public boolean areLocksHeld(CompatibilitySpace compatibilitySpace,
+								Object group);
 
 	/**
-		Return true if locks are held in this compatability space.
+		Return true if locks are held in this compatibility space.
 	*/
-	public boolean areLocksHeld(Object compatabilitySpace);
+	public boolean areLocksHeld(CompatibilitySpace compatibilitySpace);
 
 	/**
-		Lock an object with zero duration within a compatability space,
+		Lock an object with zero duration within a compatibility space,
 		waits up to timeout milli-seconds for the object to become unlocked. A 
         timeout of 0 means do not wait for the lock to be unlocked.
 		Note the actual time waited is approximate.
@@ -135,19 +152,17 @@ public interface LockFactory extends PropertySetCallback {
 		Zero duration means the lock is released as soon as it is obtained.
 		<P>
 		A compatibility space in an space where lock requests are assumed to be
-        compatabile and granted by the lock manager if the trio
-        {compatabilitySpace, ref, qualifier} are equal (i.e. reference equality
-        for qualifier, equals() method
-		for compatabilitySpace and ref ). A typical reference to use for the compatability
-		space is a reference to an object representing a transaction.
+        compatible and granted by the lock manager if the trio
+        {compatibilitySpace, ref, qualifier} are equal (i.e. reference equality
+        for qualifier and compatibilitySpace, equals() method for ref).
 		Granted by the lock manager means that the Lockable object may or may 
         not be queried to see if the request is compatible.
 		<BR>
-		A compatability space is not assumed to be owned by a single thread.
+		A compatibility space is not assumed to be owned by a single thread.
 	
 
 
-		@param compatabilitySpace object defining compatability space (by value)
+		@param compatibilitySpace object defining compatibility space
 		@param ref reference to object to be locked
 		@param qualifier A qualification of the request.
 		@param timeout the maximum time to wait in milliseconds, LockFactory.NO_WAIT means don't wait.
@@ -163,13 +178,16 @@ public interface LockFactory extends PropertySetCallback {
 		@exception StandardException Standard Cloudscape error policy.
 
 	*/
-	public boolean zeroDurationlockObject(Object compatabilitySpace, Lockable ref, Object qualifier, int timeout)
+	public boolean zeroDurationlockObject(CompatibilitySpace compatibilitySpace,
+										  Lockable ref, Object qualifier,
+										  int timeout)
 		throws StandardException;
 
 	/**
 		Check to see if a specific lock is held.
 	*/
-	public boolean isLockHeld(Object compatabilitySpace, Object group, Lockable ref, Object qualifier);
+	public boolean isLockHeld(CompatibilitySpace compatibilitySpace,
+							  Object group, Lockable ref, Object qualifier);
 
 	/**
 		Install a limit that is called when the size of the group exceeds
@@ -187,12 +205,13 @@ public interface LockFactory extends PropertySetCallback {
 		Only one limit may be in place for a group at any time.
 		@see Limit
 	*/
-	public void setLimit(Object compatabilitySpace, Object group, int limit, Limit callback);
+	public void setLimit(CompatibilitySpace compatibilitySpace, Object group,
+						 int limit, Limit callback);
 
 	/**
 		Clear a limit set by setLimit.
 	*/
-	public void clearLimit(Object compatabilitySpace, Object group); 
+	public void clearLimit(CompatibilitySpace compatibilitySpace, Object group);
 
 	/**
 		Make a virtual lock table for diagnostics.

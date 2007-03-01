@@ -300,7 +300,9 @@ public class LockTable extends VTITemplate implements VTICosting  {
 		}
 
 		attributes.put(VirtualLockTable.LOCKOBJ, lock);
-		attributes.put(VirtualLockTable.XACTID, lock.getCompatabilitySpace().toString());
+		Object owner = lock.getCompatabilitySpace().getOwner();
+		attributes.put(VirtualLockTable.XACTID,
+					   (owner == null) ? "<null>" : owner.toString());
 		attributes.put(VirtualLockTable.LOCKMODE, lock_type.toString());
 
 		attributes.put(VirtualLockTable.LOCKCOUNT, Integer.toString(lockCount));

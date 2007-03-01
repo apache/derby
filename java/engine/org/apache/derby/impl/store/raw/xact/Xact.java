@@ -70,6 +70,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 import org.apache.derby.iapi.util.ByteArray;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.reference.Property;
 
@@ -168,7 +169,7 @@ public class Xact extends RawTransaction implements Limit  {
 	protected final XactFactory		xactFactory;
 	protected final DataFactory		dataFactory;
 	protected final LogFactory		logFactory;
-	protected final Object   		compatibilitySpace;
+	private final CompatibilitySpace compatibilitySpace;
 
 	// these fields remain fixedfor the lifetime
 	private LockingPolicy defaultLocking;
@@ -258,7 +259,7 @@ public class Xact extends RawTransaction implements Limit  {
     LogFactory  logFactory, 
     DataFactory dataFactory,
     boolean     readOnly,
-    Object      compatibilitySpace) 
+    CompatibilitySpace compatibilitySpace)
     {
 
 		super();
@@ -268,8 +269,12 @@ public class Xact extends RawTransaction implements Limit  {
 		this.dataFactory = dataFactory;
 		this.readOnly    = readOnly;
 
-		this.compatibilitySpace = 
-            (compatibilitySpace == null ? this : compatibilitySpace);
+		if (compatibilitySpace == null) {
+			this.compatibilitySpace =
+				getLockFactory().createCompatibilitySpace(this);
+		} else {
+			this.compatibilitySpace = compatibilitySpace;
+		}
 
  		if (SanityManager.DEBUG)
 		{
@@ -532,7 +537,8 @@ public class Xact extends RawTransaction implements Limit  {
 			Property.DEFAULT_LOCKS_ESCALATION_THRESHOLD);
 
 
-		getLockFactory().setLimit(this, this, escalationThreshold, this);
+		getLockFactory().setLimit(
+			compatibilitySpace, this, escalationThreshold, this);
 
 	}
 
@@ -562,7 +568,7 @@ public class Xact extends RawTransaction implements Limit  {
      *
 	 * @return The compatibility space of the transaction.
      **/
-    public Object getCompatibilitySpace()
+    public final CompatibilitySpace getCompatibilitySpace()
     {
         if (SanityManager.DEBUG)
         {
@@ -1123,7 +1129,7 @@ public class Xact extends RawTransaction implements Limit  {
 				sanityCheck_xaclosed = true;
 		}
 
-		getLockFactory().clearLimit(this, this);
+		getLockFactory().clearLimit(compatibilitySpace, this);
 
 		if (SanityManager.DEBUG)
 		{
@@ -2381,8 +2387,8 @@ public class Xact extends RawTransaction implements Limit  {
 	** Methods of Limit
 	*/
 
-	public void reached(Object compatabilitySpace, Object group, int limit,
-		Enumeration lockList, int lockCount)
+	public void reached(CompatibilitySpace compatibilitySpace, Object group,
+						int limit, Enumeration lockList, int lockCount)
 		throws StandardException {
 
 		// Count row locks by table

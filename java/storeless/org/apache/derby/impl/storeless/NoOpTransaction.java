@@ -27,6 +27,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.Storable;
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
@@ -230,7 +231,7 @@ class NoOpTransaction implements TransactionController {
         return null;
     }
 
-    public Object getLockObject() {
+    public CompatibilitySpace getLockSpace() {
         // TODO Auto-generated method stub
         return null;
     }

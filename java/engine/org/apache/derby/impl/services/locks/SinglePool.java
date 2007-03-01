@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.locks;
 
+import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
 import org.apache.derby.iapi.services.locks.Lockable;
@@ -49,8 +50,7 @@ import java.util.Enumeration;
 	MT - Mutable - Container Object : Thread Aware
 */
 
-public class SinglePool extends Hashtable
-	implements  LockFactory
+public final class SinglePool implements LockFactory
 {
 	/**
 		The complete set of locks in the system
@@ -59,26 +59,6 @@ public class SinglePool extends Hashtable
 		MT - immutable - content dynamic : LockSet is ThreadSafe
 	*/
 	protected final LockSet			lockTable;
-
-	/**
-	    This is now in this object, it now extends Hashtable.
-		A hash table of all compatability spaces. Key is the object 
-        representing the compatability space, value is a LockSpace object. 
-        Addition and removal from the Hashtable is performed under the 
-        Hashtable's monitor. This requires holding this monitor while making 
-        calls to the thread safe methods of LockSpace. This is to ensure
-        that it is guaranteed that a LockSpace is only removed when it is 
-        empty and no-one is in the process of adding to it. No deadlocks are 
-        possible because the spaces reference is not visible outside this 
-        class and the LockSpace class does not call back into this class.
-
-		<BR>
-		MT - immutable - content dynamic : Java synchronized(spaces)
-
-		This class creates a LockSet and LockSpaces, both classes are thread 
-        safe.
-		
-	*/
 
 	/**
 		True if all deadlocks errors should be logged.
@@ -103,7 +83,8 @@ public class SinglePool extends Hashtable
 
 		@see LockFactory#lockObject
 	*/
-	protected Lock lockAnObject(Object compatabilitySpace, Object group,
+	protected Lock lockAnObject(CompatibilitySpace compatibilitySpace,
+								Object group,
 								Lockable ref, Object qualifier, int timeout)
 			throws StandardException
 	{
@@ -111,7 +92,7 @@ public class SinglePool extends Hashtable
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
 
 				D_LockControl.debugLock("Lock Request before Grant: ", 
-                    compatabilitySpace, group, ref, qualifier, timeout);
+                    compatibilitySpace, group, ref, qualifier, timeout);
 
                 if (SanityManager.DEBUG_ON(Constants.LOCK_STACK_TRACE))
                 {
@@ -127,7 +108,7 @@ public class SinglePool extends Hashtable
 		}
 
 		Lock lock = 
-            lockTable.lockObject(compatabilitySpace, ref, qualifier, timeout);
+            lockTable.lockObject(compatibilitySpace, ref, qualifier, timeout);
 
 		// See if NO_WAIT was passed in and the lock could not be granted.
 		if (lock == null) {
@@ -141,28 +122,24 @@ public class SinglePool extends Hashtable
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
 				D_LockControl.debugLock(
                     "Lock Request Granted: ", 
-                    compatabilitySpace, group, ref, qualifier, timeout);
+                    compatibilitySpace, group, ref, qualifier, timeout);
 			}
 		}
 
-		// find the space and atomically add lock to required group
-		synchronized (this) {
-
-			LockSpace ls = (LockSpace) get(compatabilitySpace);
-			if (ls == null)	{
-				 ls = new LockSpace(this, compatabilitySpace);
-				 put(compatabilitySpace, ls);
-			}
-
-			// we hold the spaces monitor while adding the lock to close 
-            // the window between finding the LockSpace and adding a lock 
-            // to it, thus ensuring the LockSpace is not removed from the 
-            // spaces Hashtable underneath us.
-
-			ls.addLock(group, lock);
-		}
+		((LockSpace) compatibilitySpace).addLock(group, lock);
 
 		return lock;
+	}
+
+	/**
+	 * Create an object which can be used as a compatibility space within this
+	 * lock manager.
+	 *
+	 * @param owner the owner of the compatibility space
+	 * @return an object which represents a compatibility space
+	 */
+	public CompatibilitySpace createCompatibilitySpace(Object owner) {
+		return new LockSpace(owner);
 	}
 
 	/**
@@ -175,11 +152,13 @@ public class SinglePool extends Hashtable
 
 		@see LockFactory#lockObject
 	*/
-	public boolean lockObject(Object compatabilitySpace, Object group, Lockable ref, Object qualifier, int timeout)
+	public boolean lockObject(CompatibilitySpace compatibilitySpace,
+							  Object group, Lockable ref, Object qualifier,
+							  int timeout)
 		throws StandardException {
 
 		Lock lock =
-			lockAnObject(compatabilitySpace, group, ref, qualifier, timeout);
+			lockAnObject(compatibilitySpace, group, ref, qualifier, timeout);
 
 		return lock != null;
 	}
@@ -193,20 +172,19 @@ public class SinglePool extends Hashtable
 		@see LockFactory#unlock
 	*/
 
-	public int unlock(Object compatabilitySpace, Object group, Lockable ref, Object qualifier)
+	public int unlock(CompatibilitySpace compatibilitySpace, Object group,
+					  Lockable ref, Object qualifier)
 	{
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
 				D_LockControl.debugLock("Lock Unlock: ", 
-                    compatabilitySpace, group, ref, qualifier, -1);
+                    compatibilitySpace, group, ref, qualifier, -1);
 			}
 		}
 
-		LockSpace ls = (LockSpace) get(compatabilitySpace);
-		if (ls == null)
-			return 0;
-
-		int count = ls.unlockReference(lockTable, ref, qualifier, group);
+		int count =
+			((LockSpace) compatibilitySpace).unlockReference(
+				lockTable, ref, qualifier, group);
 
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(
@@ -227,36 +205,30 @@ public class SinglePool extends Hashtable
 
 		@see LockFactory#unlockGroup
 	*/
-	public void unlockGroup(Object compatabilitySpace, Object group) {
+	public void unlockGroup(CompatibilitySpace compatibilitySpace,
+							Object group) {
 
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
-				D_LockControl.debugLock("Lock Unlock Group: ", compatabilitySpace, group);
+				D_LockControl.debugLock("Lock Unlock Group: ",
+										compatibilitySpace, group);
 			}
 		}
 
-		LockSpace ls = (LockSpace) get(compatabilitySpace);
-		if (ls == null)
-			return;
-
-		ls.unlockGroup(lockTable, group);
+		((LockSpace) compatibilitySpace).unlockGroup(lockTable, group);
 	}
 
-	public void unlockGroup(Object compatabilitySpace, Object group, Matchable key) {
+	public void unlockGroup(CompatibilitySpace compatibilitySpace, Object group,
+							Matchable key) {
 
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
-				D_LockControl.debugLock("Lock Unlock Group: ", compatabilitySpace, group);
+				D_LockControl.debugLock("Lock Unlock Group: ",
+										compatibilitySpace, group);
 			}
 		}
 
-		LockSpace ls = (LockSpace) get(compatabilitySpace);
-		if (ls == null)
-			return;
-
-		ls.unlockGroup(lockTable, group, key);
-
-
+		((LockSpace) compatibilitySpace).unlockGroup(lockTable, group, key);
 	}
 
 	/**
@@ -267,14 +239,15 @@ public class SinglePool extends Hashtable
 
 		@see LockFactory#transfer
 	*/
-	public void transfer(Object compatabilitySpace, Object oldGroup, Object newGroup) {
+	public void transfer(CompatibilitySpace compatibilitySpace, Object oldGroup,
+						 Object newGroup) {
 
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
 				StringBuffer sb = new StringBuffer("Lock Transfer:");
 
 				D_LockControl.debugAppendObject(
-                    sb, " CompatabilitySpace=", compatabilitySpace);
+                    sb, " CompatibilitySpace=", compatibilitySpace);
 				D_LockControl.debugAppendObject(sb, " Old Group=", oldGroup);
 				D_LockControl.debugAppendObject(sb, " New Group=", newGroup);
 
@@ -284,16 +257,7 @@ public class SinglePool extends Hashtable
 			}
 		}
 
-		LockSpace ls = (LockSpace) get(compatabilitySpace);
-		if (ls == null)
-			return;
-
-		// there is a window where someone could remove the LockSpace from the
-        // spaces Hashtable, since we do not hold the spaces' monitor. This is
-        // Ok as the LockSpace will have no locks and this method 
-        // will correctly do nothing.
-
-		ls.transfer(oldGroup, newGroup);
+		((LockSpace) compatibilitySpace).transfer(oldGroup, newGroup);
 	}
 
 	/**
@@ -313,18 +277,9 @@ public class SinglePool extends Hashtable
 
 		@see LockFactory#areLocksHeld
 	*/
-	public boolean areLocksHeld(Object compatabilitySpace, Object group) {
-
-		LockSpace ls = (LockSpace) get(compatabilitySpace);
-		if (ls == null)
-			return false;
-
-		// there is a window where someone could remove the LockSpace from the 
-        // spaces Hashtable, since we do not hold the spaces' monitor. This is 
-        // Ok as the LockSpace will have no locks and this method will 
-        // correctly return false.
-
-		return ls.areLocksHeld(group);
+	public boolean areLocksHeld(CompatibilitySpace compatibilitySpace,
+								Object group) {
+		return ((LockSpace) compatibilitySpace).areLocksHeld(group);
 	}
 
 	/**
@@ -335,21 +290,20 @@ public class SinglePool extends Hashtable
 
 		@see LockFactory#areLocksHeld
 	*/
-	public boolean areLocksHeld(Object compatabilitySpace) {
-		LockSpace ls = (LockSpace) get(compatabilitySpace);
-		if (ls == null)
-			return false;
-		return ls.areLocksHeld();
+	public boolean areLocksHeld(CompatibilitySpace compatibilitySpace) {
+		return ((LockSpace) compatibilitySpace).areLocksHeld();
 	}
 
-	public boolean zeroDurationlockObject(Object compatabilitySpace, Lockable ref, Object qualifier, int timeout)
+	public boolean zeroDurationlockObject(CompatibilitySpace compatibilitySpace,
+										  Lockable ref, Object qualifier,
+										  int timeout)
 		throws StandardException {
 
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
 
 				D_LockControl.debugLock("Zero Duration Lock Request before Grant: ", 
-                    compatabilitySpace, (Object) null, ref, qualifier, timeout);
+                    compatibilitySpace, (Object) null, ref, qualifier, timeout);
 
                 if (SanityManager.DEBUG_ON(Constants.LOCK_STACK_TRACE))
                 {
@@ -383,7 +337,7 @@ public class SinglePool extends Hashtable
 			// we can also grant this request now, as skipping
 			// over the waiters won't block them as we release
 			// the lock rightway.
-			if (control.isGrantable(true, compatabilitySpace, qualifier))
+			if (control.isGrantable(true, compatibilitySpace, qualifier))
 				return true;
 
 			// can't be granted and are not willing to wait.
@@ -392,13 +346,13 @@ public class SinglePool extends Hashtable
 		}
 
 		Lock lock = 
-            lockTable.lockObject(compatabilitySpace, ref, qualifier, timeout);
+            lockTable.lockObject(compatibilitySpace, ref, qualifier, timeout);
 
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
 				D_LockControl.debugLock(
                     "Zero Lock Request Granted: ", 
-                    compatabilitySpace, (Object) null, ref, qualifier, timeout);
+                    compatibilitySpace, (Object) null, ref, qualifier, timeout);
 			}
 		}
 
@@ -408,36 +362,23 @@ public class SinglePool extends Hashtable
 		return true;
 	}
 
-	public boolean isLockHeld(Object compatabilitySpace, Object group, Lockable ref, Object qualifier) {
-
-		LockSpace ls = (LockSpace) get(compatabilitySpace);
-		if (ls == null)
-			return false;
-
-		return ls.isLockHeld(group, ref, qualifier);
+	public boolean isLockHeld(CompatibilitySpace compatibilitySpace,
+							  Object group, Lockable ref, Object qualifier) {
+		return ((LockSpace) compatibilitySpace).isLockHeld(
+			group, ref, qualifier);
 	}
 
-	public synchronized void setLimit(Object compatabilitySpace, Object group, int limit, Limit callback) {
-
-		LockSpace ls = (LockSpace) get(compatabilitySpace);
-		if (ls == null)	{
-			 ls = new LockSpace(this, compatabilitySpace);
-			 put(compatabilitySpace, ls);
-		}
-
-		ls.setLimit(group, limit, callback);
-		
+	public void setLimit(CompatibilitySpace compatibilitySpace,
+						 Object group, int limit, Limit callback) {
+		((LockSpace) compatibilitySpace).setLimit(group, limit, callback);
 	}
 
 	/**
 		Clear a limit set by setLimit.
 	*/
-	public void clearLimit(Object compatabilitySpace, Object group) {
-		LockSpace ls = (LockSpace) get(compatabilitySpace);
-		if (ls == null)
-			return;
-
-		ls.clearLimit(group);
+	public void clearLimit(CompatibilitySpace compatibilitySpace, Object group)
+	{
+		((LockSpace) compatibilitySpace).clearLimit(group);
 	}
 
 //EXCLUDE-START-lockdiag- 
