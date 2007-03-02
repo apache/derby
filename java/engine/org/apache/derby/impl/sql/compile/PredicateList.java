@@ -202,8 +202,8 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			** BinaryComparisonOperators and IsNullNodes.
 			*/
 			RelationalOperator relop = pred.getRelop();
-			boolean isIn = false;
-			InListOperatorNode inNode = null;
+			InListOperatorNode inNode = pred.getSourceInList();
+			boolean isIn = (inNode != null);
 
 			if (relop == null)
 			{
@@ -601,8 +601,9 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			/* if it's "in" operator, we generate dynamic start and stop key
 			 * to improve index scan performance, beetle 3858.
 			 */
-			boolean isIn = false;
-			InListOperatorNode inNode = null;
+			InListOperatorNode inNode = pred.getSourceInList();
+			boolean isIn = (inNode != null);
+			boolean isInListProbePred = isIn;
 
 			if (relop == null)
 			{
@@ -633,6 +634,18 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 								(indexCol.getColumnNumber() != baseColumnPositions[indexPosition]) ||
 								inNode.selfReference(indexCol))
 							indexCol = null;
+						else if (isInListProbePred && (indexPosition > 0))
+						{
+							/* If the predicate is an IN-list probe predicate
+							 * then we only consider it to be useful if the
+							 * referenced column is the *first* one in the
+							 * index (i.e. if (indexPosition == 0)).  Otherwise
+							 * the predicate would be treated as a qualifier
+							 * for store, which could lead to incorrect
+							 * results.
+							 */
+							indexCol = null;
+						}
 					}
 				}
 				else
@@ -651,7 +664,19 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			** operand.
 			*/
 			if (indexCol == null)
+			{
+				/* If we're pushing predicates then this is the last time
+				 * we'll get here before code generation.  So if we have
+				 * any IN-list probe predicates that are not useful, we
+				 * need to "revert" them back to their original IN-list
+				 * form so that they can be generated as regular IN-list
+				 * restrictions.
+				 */
+				if (pushPreds && isInListProbePred)
+					pred.revertToSourceInList();
+
 				continue;
+			}
 
 			pred.setIndexPosition(indexPosition);
 
@@ -712,8 +737,9 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			RelationalOperator	relop             = thisPred.getRelop();
 			int                 thisOperator      = -1;
 
-			boolean             isIn              = false;
-			InListOperatorNode  inNode            = null;
+			InListOperatorNode  inNode            = thisPred.getSourceInList();
+			boolean             isIn              = (inNode != null);
+			boolean             isInListProbePred     = isIn;
 
 			if (relop == null)
 			{
@@ -834,7 +860,21 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
                  * qualifier.  Beetle 4316.
 				 */
 				if (isIn && ! thisPredMarked)
+				{
+					/* If we get here for an IN-list probe pred then we know
+					 * that we are *not* using the probe predicate as a
+					 * start/stop key.  We also know that we're in the middle
+					 * of modifying access paths (because pushPreds is true),
+					 * which means we are preparing to generate code.  Those
+					 * two facts together mean we have to "revert" the
+					 * probe predicate back to its original state so that
+					 * it can be generated as normal IN-list.
+					 */
+					if (isInListProbePred)
+						thisPred.revertToSourceInList();
+
 					continue;
+				}
 
 				/*
 				** Push the predicate down.  They get pushed down in the
@@ -850,9 +890,13 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				 * which can lead to an infinite recursion loop when we get to
 				 * restorePredicates(), and thus to stack overflow
 				 * (beetle 4974).
+				 *
+				 * Note: we don't do this if the predicate is an IN-list
+				 * probe predicate.  In that case we want to push the 
+				 * predicate down to the base table for special handling.
 				 */
 				Predicate predToPush;
-				if (isIn) 
+				if (isIn && !isInListProbePred)
                 {
 					AndNode andCopy = (AndNode) getNodeFactory().getNode(
 										C_NodeTypes.AND_NODE,
@@ -875,12 +919,15 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
 				if (optTable.pushOptPredicate(predToPush))
 				{
-					/* although we generated dynamic start and stop key for "in"
-					 * , we still need this predicate for further restriction
+					/* Although we generated dynamic start and stop keys
+					 * for "in", we still need this predicate for further
+					 * restriction--*unless* we're dealing with a probe
+					 * predicate, in which case the restriction is handled
+					 * via execution-time index probes (for more see
+					 * execute/TableScanResultSet.java).
 					 */
-					if (! isIn)
+					if (!isIn || isInListProbePred)
 						removeOptPredicate(thisPred);
-					// restore origin
 				}
 				else if (SanityManager.DEBUG)
 				{

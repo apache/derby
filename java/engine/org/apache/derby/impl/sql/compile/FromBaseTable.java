@@ -1309,6 +1309,11 @@ public class FromBaseTable extends FromTable
 			startGap = false;
 			stopGap = false;
 
+			/* If we have a probe predicate that is being used as a start/stop
+			 * key then ssKeySourceInList will hold the InListOperatorNode
+			 * from which the probe predicate was built.
+			 */
+			InListOperatorNode ssKeySourceInList = null;
 			for (int i = 0; i < predListSize; i++)
 			{
 				pred = baseTableRestrictionList.getOptPredicate(i);
@@ -1317,6 +1322,26 @@ public class FromBaseTable extends FromTable
 
 				if (startKey || stopKey)
 				{
+					/* A probe predicate is only useful if it can be used as
+					 * as a start/stop key for _first_ column in an index
+					 * (i.e. if the column position is 0).  That said, we only
+					 * allow a single start/stop key per column position in the
+					 * index (see orderUsefulPredicates() in PredicateList.java).
+					 * Those two facts combined mean that we should never have
+					 * more than one probe predicate start/stop key for a given
+					 * conglomerate.
+					 */
+					if (SanityManager.DEBUG)
+					{
+						SanityManager.ASSERT(
+							(ssKeySourceInList == null) ||
+								(((Predicate)pred).getSourceInList() == null),
+							"Found multiple probe predicate start/stop keys" +
+							" for conglomerate '" + cd.getConglomerateName() +
+							"' when at most one was expected.");
+					}
+
+					ssKeySourceInList = ((Predicate)pred).getSourceInList();
 					boolean knownConstant = pred.compareWithKnownConstant(this, true);
 
 					if (startKey)
@@ -1512,6 +1537,37 @@ public class FromBaseTable extends FromTable
 					optimizer.trace(Optimizer.COST_INCLUDING_EXTRA_START_STOP,
 									tableNumber, 0, 0.0, costEstimate);
 				}
+			}
+
+			/* If the start and stop key came from an IN-list "probe predicate"
+			 * then we need to adjust the cost estimate.  The probe predicate
+			 * is of the form "col = ?" and we currently have the estimated
+			 * cost of probing the index a single time for "?".  But with an
+			 * IN-list we don't just probe the index once; we're going to
+			 * probe it once for every value in the IN-list.  And we are going
+			 * to potentially return an additional row (or set of rows) for
+			 * each probe.  To account for this "multi-probing" we take the
+			 * costEstimate and multiply each of its fields by the size of
+			 * the IN-list.
+			 *
+			 * Note: If the IN-list has duplicate values then this simple
+			 * multiplication could give us an elevated cost (because we
+			 * only probe the index for each *non-duplicate* value in the
+			 * IN-list).  But for now, we're saying that's okay.
+			 */
+			if (ssKeySourceInList != null)
+			{
+				int listSize = ssKeySourceInList.getRightOperandList().size();
+				double rc = costEstimate.rowCount() * listSize;
+				double ssrc = costEstimate.singleScanRowCount() * listSize;
+
+				/* If multiplication by listSize returns more rows than are
+				 * in the scan then just use the number of rows in the scan.
+				 */
+				costEstimate.setCost(
+					costEstimate.getEstimatedCost() * listSize,
+					rc > initialRowCount ? initialRowCount : rc,
+					ssrc > initialRowCount ? initialRowCount : ssrc);
 			}
 
 			/*
@@ -2660,6 +2716,26 @@ public class FromBaseTable extends FromTable
 											nonStoreRestrictionList,
 											requalificationRestrictionList,
 											getDataDictionary());
+
+		/* Check to see if we are going to do execution-time probing
+		 * of an index using IN-list values.  We can tell by looking
+		 * at the restriction list: if there is an IN-list probe
+		 * predicate that is also a start/stop key then we know that
+		 * we're going to do execution-time probing.  In that case
+		 * we disable bulk fetching to minimize the number of non-
+		 * matching rows that we read from disk.  RESOLVE: Do we
+		 * really need to completely disable bulk fetching here,
+		 * or can we do something else?
+		 */
+		for (int i = 0; i < restrictionList.size(); i++)
+		{
+			Predicate pred = (Predicate)restrictionList.elementAt(i);
+			if ((pred.getSourceInList() != null) && pred.isStartKey())
+			{
+				disableBulkFetch();
+				break;
+			}
+		}
 
 		/*
 		** Consider turning on bulkFetch if it is turned
