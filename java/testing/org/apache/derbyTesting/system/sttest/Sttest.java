@@ -174,7 +174,6 @@ public class Sttest extends Thread {
 	public static void sttTop() throws SQLException, IOException,
 	InterruptedException, Exception, Throwable {
 		rand = new Random();
-		Datatypes.rand = rand;
 		//harder to actually delete rows when there are
 		//more connections, so repeat operation more often
 		delete_freq = 1 + connections_to_make % 5;

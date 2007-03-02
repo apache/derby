@@ -19,15 +19,15 @@
  *
  */
 package org.apache.derbyTesting.system.mailjdbc.utils;
+
 /**
- * This class is used all other classes for various tasks like insert, delete, backup etc
+ * This class is used all other classes for various tasks like insert, delete,
+ * backup etc
  */
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.InputStream;
+import java.io.Reader;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -38,11 +38,13 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Properties;
-
+import java.util.Random;
+import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.system.mailjdbc.MailJdbc;
 
 public class DbTasks extends Thread {
-	private static Process pr;
 
 	public static LogFile log = new LogFile("performance.out");
 
@@ -58,10 +60,12 @@ public class DbTasks extends Thread {
 
 	public static int blob_count = 0;
 
+	public static Random Rn = new Random();
+
 	public static Properties prop = new Properties();
 
 	public static void jdbcLoad(String driverType) {
-		String type = driverType;
+		setSystemProperty("derby.database.sqlAuthorization", "true");
 		if (driverType.equalsIgnoreCase("embedded")) {
 			setSystemProperty("driver", "org.apache.derby.jdbc.EmbeddedDriver");
 			MailJdbc.logAct
@@ -69,17 +73,21 @@ public class DbTasks extends Thread {
 			MailJdbc.logAct.logMsg("\n\n\tStarting the test in Embedded mode");
 			MailJdbc.logAct
 					.logMsg("\n\n*****************************************************");
-			//setting the properties like user, password etc for both the
+			// setting the properties like user, password etc for both the
 			// database and the backup datatbase
 			setSystemProperty("database", "jdbc:derby:mailsdb;create=true");
 			setSystemProperty("ij.user", "REFRESH");
 			setSystemProperty("ij.password", "Refresh");
-			setSystemProperty("backup_database",
-					"jdbc:derby:/mailjdbc/mailbackup/mailsdb");
 		} else {
 			setSystemProperty("driver", "org.apache.derby.jdbc.ClientDriver");
 			setSystemProperty("database",
 					"jdbc:derby://localhost:1527/mailsdb;create=true;user=REFRESH;password=Refresh");
+			MailJdbc.logAct
+					.logMsg(" \n*****************************************************");
+			MailJdbc.logAct
+					.logMsg("\n\n\tStarting the test in NetworkServer mode");
+			MailJdbc.logAct
+					.logMsg("\n\n*****************************************************");
 		}
 		try {
 			// Create the schema (tables)
@@ -108,7 +116,7 @@ public class DbTasks extends Thread {
 
 	public static Connection getConnection(String usr, String passwd) {
 		try {
-			//Returns the Connection object
+			// Returns the Connection object
 			Class.forName(System.getProperty("driver")).newInstance();
 			prop.setProperty("user", usr);
 			prop.setProperty("password", passwd);
@@ -126,9 +134,9 @@ public class DbTasks extends Thread {
 	}
 
 	public void readMail(Connection conn, String thread_name) {
-		//This function will be reading mails from the inbox.
-		//Getiing the number of rows in the table and getting the
-		//size of the attachment (Blob) for a randomly selected row
+		// This function will be reading mails from the inbox.
+		// Getiing the number of rows in the table and getting the
+		// size of the attachment (Blob) for a randomly selected row
 		Statement stmt = null;
 		Statement stmt1 = null;
 		int count = 0;
@@ -185,7 +193,7 @@ public class DbTasks extends Thread {
 			}
 		}
 		try {
-			int attach_id = (int) ((Math.random() * count));
+			int attach_id = Rn.nextInt(count - 1);
 			ResultSet rs = stmt
 					.executeQuery("select attachment from REFRESH.attach where id  = "
 							+ attach_id);
@@ -250,7 +258,7 @@ public class DbTasks extends Thread {
 
 	public synchronized void deleteMailByUser(Connection conn,
 			String thread_name) {
-		//Delete done by the user. Thre user will mark the mails to be deleted
+		// Delete done by the user. Thre user will mark the mails to be deleted
 		// and then
 		int id_count = 0;
 		try {
@@ -264,12 +272,12 @@ public class DbTasks extends Thread {
 			if (rs.next())
 				id_count = rs.getInt(1);
 			short to_delete = 1;
-			int id = (int) ((Math.random() * id_count));
+			int id = Rn.nextInt(id_count - 1);
 			long s_update = System.currentTimeMillis();
 			int delete_count = 0;
 			for (int i = 0; i < id; i++) {
 				updateUser.setShort(1, to_delete);
-				int for_id = (int) ((Math.random() * id_count));
+				int for_id = Rn.nextInt(id_count - 1);
 				updateUser.setInt(2, for_id);
 				int del = updateUser.executeUpdate();
 				delete_count = delete_count + del;
@@ -308,9 +316,9 @@ public class DbTasks extends Thread {
 
 	public void deleteMailByThread(Connection conn, String thread_name)
 			throws Exception {
-		//Deleting mails which are marked to be deleted
+		// Deleting mails which are marked to be deleted
 		try {
-			boolean saveAutoCommit = conn.getAutoCommit();
+			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 			PreparedStatement deleteThread = conn
 					.prepareStatement(Statements.deleteStr);
@@ -355,9 +363,9 @@ public class DbTasks extends Thread {
 	}
 
 	public void moveToFolders(Connection conn, String thread_name) {
-		//Changing the folder id of randomly selected rows
+		// Changing the folder id of randomly selected rows
 		try {
-			boolean saveAutoCommit = conn.getAutoCommit();
+			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 			Statement stmt = conn.createStatement();
 			PreparedStatement moveToFolder = conn
@@ -368,8 +376,8 @@ public class DbTasks extends Thread {
 						+ "no message in the REFRESH.INBOX to move");
 			else {
 				int count = rs.getInt(1);
-				int folder_id = (int) (Math.random() * 5);
-				int message_id = (int) (Math.random() * count);
+				int folder_id = Rn.nextInt(5 - 1);
+				int message_id = Rn.nextInt(count - 1);
 				moveToFolder.setInt(1, folder_id);
 				moveToFolder.setInt(2, message_id);
 				long s_folder = System.currentTimeMillis();
@@ -378,7 +386,6 @@ public class DbTasks extends Thread {
 				log.logMsg(LogFile.INFO + thread_name + " : "
 						+ "Time taken to move a mail to the folder :"
 						+ PerfTime.readableTime(e_folder - s_folder));
-				long s_fselect = System.currentTimeMillis();
 				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 						+ "Mail with id : " + message_id
 						+ " is moved to folder with id : " + folder_id);
@@ -411,13 +418,16 @@ public class DbTasks extends Thread {
 
 	public void insertMail(Connection conn, String thread_name)
 			throws Exception {
-		//Inserting rows to the inbox table. Making attach_id of randomly
+		// Inserting rows to the inbox table. Making attach_id of randomly
 		// selected rows to be one
-		//and for those rows inserting blobs in the attach table
+		// and for those rows inserting blobs in the attach table
 		Statement stmt = conn.createStatement();
-		int num = (int) (Math.random() * 10);
+		int num = Rn.nextInt(10 - 1);
+		System.out.println("num: " + num);
+		InputStream streamIn = null;
+		Reader streamReader = null;
 		try {
-			boolean saveAutoCommit = conn.getAutoCommit();
+			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 			PreparedStatement insertFirst = conn.prepareStatement(
 					Statements.insertStr, Statement.RETURN_GENERATED_KEYS);
@@ -426,7 +436,7 @@ public class DbTasks extends Thread {
 			long s_insert = System.currentTimeMillis();
 			for (int i = 0; i < num; i++) {
 				String new_name = new String(increment(name, 60));
-				String new_lname = new String(decrement(name, 60));
+				String new_lname = new String(decrement(l_name, 60));
 				insertFirst.setString(1, new_name);
 				insertFirst.setString(2, new_lname);
 				insertFirst.setTimestamp(3, new Timestamp(System
@@ -434,24 +444,23 @@ public class DbTasks extends Thread {
 				name = new_name;
 				l_name = new_lname;
 				try {
-					File inputfile = new File("l" + num + ".txt");
-					FileReader fr = new FileReader(inputfile);
-					BufferedReader br = new BufferedReader(fr);
-					insertFirst.setCharacterStream(4, fr, (int) inputfile
-							.length());
-				} catch (FileNotFoundException e) {
+					// to create a stream of random length between 200 bytes and 3MB
+					int clobLength = Rn.nextInt(3078000 - 200 + 1) + 200;
+					streamReader = new LoopingAlphabetReader(clobLength,
+							CharAlphabet.modernLatinLowercase());
+					insertFirst.setCharacterStream(4, streamReader, clobLength);
+				} catch (Exception e) {
 					MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 							+ "File not found Exception : " + e.getMessage());
 					errorPrint(e);
 					throw e;
 				}
-				int rand_num = (int) (Math.random() * 10);
+				int rand_num = Rn.nextInt(10 - 1);
 				if (i == rand_num) {
 					ResultSet rs = stmt
 							.executeQuery("select count(*) from REFRESH.INBOX where attach_id>0");
 					while (rs.next()) {
 						id_count = rs.getInt(1);
-						int attach_id = rs.getInt(1) + 1;
 						insertFirst.setInt(5, rs.getInt(1) + 1);
 					}
 
@@ -474,6 +483,8 @@ public class DbTasks extends Thread {
 			if (insertFirst != null)
 				insertFirst.close();
 			conn.commit();
+			streamReader.close();
+
 			long e_insert = System.currentTimeMillis();
 			log.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Time taken to insert " + num + "rows :"
@@ -502,7 +513,7 @@ public class DbTasks extends Thread {
 					.prepareStatement(Statements.insertStrAttach);
 			Statement stmt1 = conn.createStatement();
 			ResultSet rs = stmt1
-					.executeQuery("select id,attach_id from REFRESH.INBOX where attach_id> "
+					.executeQuery("select id,attach_id from REFRESH.INBOX where attach_id >"
 							+ id_count);
 			int row_count = 0;
 			long a_start = System.currentTimeMillis();
@@ -510,11 +521,10 @@ public class DbTasks extends Thread {
 				insertAttach.setInt(1, rs.getInt(1));
 				insertAttach.setInt(2, rs.getInt(2));
 				try {
-					File inputfile = new File("p" + num + ".jpg");
-					InputStream fileIn = new FileInputStream(inputfile); //"pic"+
-					// row_count+".jpg");
-					insertAttach.setBinaryStream(3, fileIn, (int) inputfile
-							.length());
+					// to create a stream of random length between 0 and 5M
+					int blobLength = Rn.nextInt(5130000 - 0 + 1) + 0;
+					streamIn = new LoopingAlphabetStream(blobLength);
+					insertAttach.setBinaryStream(3, streamIn, blobLength);
 				} catch (Exception e) {
 					MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 							+ "Exception : " + e.getMessage());
@@ -522,6 +532,7 @@ public class DbTasks extends Thread {
 					throw e;
 				}
 				int result_attach = insertAttach.executeUpdate();
+				streamIn.close();
 				if (result_attach != 0) {
 					blob_count = blob_count + 1;
 					row_count++;
@@ -562,8 +573,8 @@ public class DbTasks extends Thread {
 
 	public synchronized void deleteMailByExp(Connection conn, String thread_name) {
 		try {
-			//Deleting mails which are older than 1 day
-			boolean saveAutoCommit = conn.getAutoCommit();
+			// Deleting mails which are older than 1 day
+			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 			long s_delExp = System.currentTimeMillis();
 			Statement selExp = conn.createStatement();
@@ -604,15 +615,16 @@ public class DbTasks extends Thread {
 	}
 
 	public void Backup(Connection conn, String thread_name) {
-		//when the backup thread kicks in, it will use this function to
-		//take the periodic backups
+		// when the backup thread kicks in, it will use this function to
+		// take the periodic backups
 		long s_backup = System.currentTimeMillis();
 		try {
 			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(true);
 			CallableStatement cs = conn
 					.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(?, ?)");
-			cs.setString(1, "/mailjdbc/mailbackup");
+			cs.setString(1, System.getProperty("user.dir") + File.separator
+					+ "mailbackup");
 			cs.setInt(2, 1);
 			cs.execute();
 			cs.close();
@@ -636,9 +648,9 @@ public class DbTasks extends Thread {
 
 	public void compressTable(Connection conn, String tabname,
 			String thread_name)
-	//preiodically compresses the table to get back the free spaces available
+	// preiodically compresses the table to get back the free spaces available
 	// after
-	//the deletion of some rows
+	// the deletion of some rows
 	{
 		long s_compress = System.currentTimeMillis();
 		long dbsize = databaseSize("mailsdb/seg0");
@@ -676,15 +688,12 @@ public class DbTasks extends Thread {
 	}
 
 	public synchronized void checkDbSize(Connection conn, String thread_name)
-	//Will give the information about the size of the database in regular
+	// Will give the information about the size of the database in regular
 	// intervals
 	{
 		try {
-			long dbsize = 0;
 			int del_count = 0;
-			int row_count = 0;
 			int count = 0;
-			int new_const = 0;
 			int diff = 0;
 			ArrayList idArray = new ArrayList();
 			Integer id_element = new Integer(0);
@@ -735,7 +744,7 @@ public class DbTasks extends Thread {
 
 	public void grantRevoke(Connection conn, String thread_name) {
 		try {
-			//Giving appropriate permission to eahc threads
+			// Giving appropriate permission to eahc threads
 			saveAutoCommit = conn.getAutoCommit();
 			Statement stmt = conn.createStatement();
 			stmt.execute(Statements.grantSel1);
@@ -810,7 +819,7 @@ public class DbTasks extends Thread {
 	public static String decrement(String name, int maxLength) {
 		StringBuffer buff = new StringBuffer(name);
 
-		//if the String is '0', return the maximum String
+		// if the String is '0', return the maximum String
 		StringBuffer tempBuff = new StringBuffer();
 		if (name.length() == 1 && name.charAt(0) == firstChar()) {
 			for (int i = 0; i < maxLength; i++) {
@@ -819,7 +828,7 @@ public class DbTasks extends Thread {
 			return tempBuff.toString();
 		}
 
-		//if String is all '000...0', eliminate one '0' and set the rest to 'z'
+		// if String is all '000...0', eliminate one '0' and set the rest to 'z'
 		else {
 			boolean isAll0 = true;
 			for (int i = 0; i < buff.length(); i++) {
@@ -834,18 +843,18 @@ public class DbTasks extends Thread {
 					buff.setCharAt(i, lastChar());
 				}
 			}
-			//if the String is not all '000...0', loop starting with the last
+			// if the String is not all '000...0', loop starting with the last
 			// char
 			else {
 				for (int i = buff.length() - 1; i >= 0; i--) {
-					//if this char is not '0'
+					// if this char is not '0'
 					if (buff.charAt(i) > firstChar()) {
-						//decrement this char
+						// decrement this char
 						buff.setCharAt(i, previousChar(buff.charAt(i)));
 						break;
 					}
-					//Resetting the counter 000 -> zzz
-					//if this char is '0' and if the char before is not '0',
+					// Resetting the counter 000 -> zzz
+					// if this char is '0' and if the char before is not '0',
 					// set this char to 'z' and decrement the char before
 					else
 						buff.setCharAt(i, lastChar());
@@ -878,12 +887,12 @@ public class DbTasks extends Thread {
 
 	public static String increment(String name, int maxLength) {
 
-		//		if (name.length() > maxLength) {
-		//			//String greater than maxLength, so set it to '0'
-		//			return "0";
-		//		}
+		// if (name.length() > maxLength) {
+		// //String greater than maxLength, so set it to '0'
+		// return "0";
+		// }
 		StringBuffer buff = new StringBuffer(name);
-		//check if the String is all 'zzz...z'
+		// check if the String is all 'zzz...z'
 		boolean isAllZ = true;
 		for (int i = 0; i < name.length(); i++) {
 			if (name.charAt(i) != lastChar()) {
@@ -891,13 +900,13 @@ public class DbTasks extends Thread {
 				break;
 			}
 		}
-		//if the String is all 'zzz...z', check if it's the maximum length
+		// if the String is all 'zzz...z', check if it's the maximum length
 		if (isAllZ == true) {
 			if (name.length() >= maxLength) {
-				//String is all 'zzz...z' to maxLength, so set it to '0'
+				// String is all 'zzz...z' to maxLength, so set it to '0'
 				return "0";
 			} else {
-				//String is all 'zzz...z' but not maxLength, so set all to 0
+				// String is all 'zzz...z' but not maxLength, so set all to 0
 				// and append '0'
 				for (int i = 0; i < buff.length(); i++) {
 					buff.setCharAt(i, firstChar());
@@ -905,12 +914,12 @@ public class DbTasks extends Thread {
 				buff.append('0');
 			}
 		}
-		//if the String is not all 'zzz...z', loop starting with the last char
+		// if the String is not all 'zzz...z', loop starting with the last char
 		else {
 			for (int i = buff.length() - 1; i >= 0; i--) {
-				//if this char is not 'z'
+				// if this char is not 'z'
 				if (buff.charAt(i) < lastChar()) {
-					//increment this char
+					// increment this char
 					buff.setCharAt(i, nextChar(buff.charAt(i)));
 					break;
 				}
@@ -945,7 +954,7 @@ public class DbTasks extends Thread {
 		}
 	} // END errorPrint
 
-	//  Iterates through a stack of SQLExceptions
+	// Iterates through a stack of SQLExceptions
 	static void SQLExceptionPrint(SQLException sqle) {
 		while (sqle != null) {
 			System.out.println("\n---SQLException Caught---\n");

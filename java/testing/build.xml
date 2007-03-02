@@ -80,8 +80,10 @@
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/multi/stress"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/master"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.suites.dir}"/>
+    <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/mailjdbc"/>
     <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/oe"/>
     <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/optimizer"/>
+    <ant dir="${derby.testing.src.dir}/${derby.testing.system.dir}/sttest"/>
   	<ant dir="${derby.testing.src.dir}/${derby.testing.perf.dir}"/> 
   </target>
 
