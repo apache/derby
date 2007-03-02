@@ -153,10 +153,10 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 	    * @throws Exception
 	    */
 	public void testUpdate() throws SQLException {
-		PreparedStatement select = null;
-		PreparedStatement update = null;
+		PreparedStatement select;
+		PreparedStatement update;
 		Statement update2;
-		ResultSet cursor = null;
+		ResultSet cursor;
 
 		// these are basic tests without a where clause on the select.
 		// all rows are in and stay in the cursor's set when updated.
@@ -273,19 +273,24 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		update2.close();
 		// TEST: attempt to do positioned update before cursor execute'd
 		// TBD
-		if(cursor != null)
-			cursor.close();
+		
+		cursor.close();
 
 	}
-		/**
-	    *TEST closing a cursor will close the related update
-	    */
-	public void testbug4395() throws SQLException { 
-		bug4395("CS4395"); // Application provided cursor name
-		bug4395(null); // system provided cursor name
+
+	/**
+	 * Test that changing the cursor statement after the positioned
+	 * update is handled correctly when the positioned statement
+	 * is re-executed. In this case the list of update columns
+	 * in changed from all to a single column, while the update
+	 * statement is against two columns.
+	 */
+	public void testCursorChange1() throws SQLException { 
+		cursorChange1("CHANGE_ME"); // Application provided cursor name
+		cursorChange1(null); // system provided cursor name
 	}
 
-	private void bug4395(String cursorName) throws SQLException {
+	private void cursorChange1(String cursorName) throws SQLException {
 
 		PreparedStatement select = prepareStatement("select I, C from t for update");
 		if (cursorName != null)
@@ -314,8 +319,15 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		assertStatementError("42X31",update);
 
 		cursor.close();
-		cursor = selectdd.executeQuery();
+		
+		// now execute the original statement again and the positioned update
+		// will work.
+		cursor = select.executeQuery();
 		cursor.next();
+		update.setInt(1, 19);
+		update.setString(2, "switch back!");
+		assertUpdateCount(update, 1);
+
 		cursor.close();
 		update.close();
 		selectdd.close();
