@@ -98,6 +98,7 @@ public class _Suite extends BaseTestCase  {
 		if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169())
 		{
 		}
+        suite.addTest(ResultSetsFromPreparedStatementTest.suite());
 
 		return suite;
 	}
