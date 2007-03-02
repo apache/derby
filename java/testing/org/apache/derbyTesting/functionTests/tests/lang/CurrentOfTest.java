@@ -79,6 +79,60 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		commit();
 		super.tearDown();
 	}
+	
+	/**
+     * Test read only statements.
+	 */
+	public void testReadOnlyCursors() throws SQLException {
+		
+		String[] readOnlySQL = 
+		{
+            "select I, C from t for read only",
+            "select I, C from t for fetch only",
+            "values (1, 2, 3)",
+            
+            // TEST: Update of cursor with a union
+            "select I, C from t union all select I, C from t",
+            // TEST: Update of cursor with a join
+            "select t1.I, t1.C from t t1, t t2 where t1.I = t2.I",
+            // TEST: Update of cursor with a derived table
+            "select I, C from (select * from t) t1",
+            // TEST: Update of cursor with a subquery
+            "select I, C from t where I in (select I from t)"
+                   
+		};
+        
+        // NOTE: JDK 1.4 javadoc for ResultSet.getCursorName()
+        // says it will throw an execption if the statement
+        // cannot support a positioned update. However that
+        // line was removed in JavaSE 6 (JDBC 4) javadoc.
+        
+        for (int i = 0; i < readOnlySQL.length; i++)
+        {
+            // The system will not give a cursor name
+            // to a read only statement.
+            PreparedStatement select = prepareStatement(readOnlySQL[i]);
+            ResultSet cursor = select.executeQuery();
+            assertNull(readOnlySQL[i], cursor.getCursorName());
+            cursor.close();
+            
+            // but will if the user supplies one.
+            select.setCursorName("PLEASE_UPDATE");
+            cursor = select.executeQuery();
+            assertEquals(readOnlySQL[i], "PLEASE_UPDATE", cursor.getCursorName());
+            
+            // but the cursor is marked as read only so positioned
+            // statements will fail.
+            assertCompileError("42X23",
+                    "DELETE FROM T WHERE CURRENT OF PLEASE_UPDATE");
+            
+            assertCompileError("42X23",
+                "UPDATE T SET I = 3 WHERE CURRENT OF PLEASE_UPDATE");
+            
+            cursor.close();
+            select.close();
+        }
+	}
 	/**
     * Test delete with the current of statements.
     * Also do some negative testing to see whether correct
@@ -171,56 +225,6 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		select = prepareStatement("select I, C from t for update of I");
 		cursor = select.executeQuery(); // cursor is now open
 		assertCompileError("42X31", "update t set C = 'abcde' where current of "+ cursor.getCursorName());
-		cursor.close();
-		select.close();
-		
-		// TEST: Update of cursor declared READ ONLY
-		select = prepareStatement("select I, C from t for read only");
-		cursor = select.executeQuery(); // cursor is now open
-		assertNull(cursor.getCursorName());
-		
-		cursor.close();
-		select.close();
-		
-		// TEST: Update of cursor declared FETCH ONLY
-		select = prepareStatement("select I, C from t for fetch only");
-		cursor = select.executeQuery(); // cursor is now open
-		assertNull(cursor.getCursorName());
-		cursor.close();
-		select.close();
-
-		// TEST: Update of cursor with a union
-		select = prepareStatement("select I, C from t union all select I, C from t");
-		cursor = select.executeQuery(); // cursor is now open
-		assertNull(cursor.getCursorName());
-		cursor.close();
-		select.close();
-
-		// TEST: Update of cursor with a join
-		select = prepareStatement("select t1.I, t1.C from t t1, t t2 where t1.I = t2.I");
-		cursor = select.executeQuery(); // cursor is now open
-		assertNull(cursor.getCursorName());
-		cursor.close();
-		select.close();
-
-		// TEST: Update of cursor with a derived table
-		select = prepareStatement("select I, C from (select * from t) t1");
-		cursor = select.executeQuery(); // cursor is now open
-		assertNull(cursor.getCursorName());
-		cursor.close();
-		select.close();
-
-		// TEST: Update of cursor with a values clause
-		select = prepareStatement("values (1, 2, 3)");
-		cursor = select.executeQuery(); // cursor is now open
-		assertNull(cursor.getCursorName());
-		cursor.close();
-		select.close();
-
-		// TEST: Update of cursor with a subquery
-		select = prepareStatement("select I, C from t where I in (select I from t)");
-		cursor = select.executeQuery(); // cursor is now open
-		assertNull(cursor.getCursorName());
 		cursor.close();
 		select.close();
 
