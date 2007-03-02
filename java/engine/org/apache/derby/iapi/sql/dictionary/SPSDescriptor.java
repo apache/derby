@@ -21,56 +21,32 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
-import org.apache.derby.iapi.sql.conn.StatementContext;
-
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.sql.Statement;
-import org.apache.derby.iapi.sql.StorablePreparedStatement;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.Dependent;
-import org.apache.derby.iapi.sql.depend.Dependency;
-import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.depend.ProviderInfo;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.loader.GeneratedClass;
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.catalog.Dependable;
-import org.apache.derby.catalog.DependableFinder;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-
+import java.sql.Timestamp;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.sql.Timestamp;
+
+import org.apache.derby.catalog.Dependable;
+import org.apache.derby.catalog.DependableFinder;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.sql.Statement;
+import org.apache.derby.iapi.sql.StorablePreparedStatement;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.Dependent;
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.depend.ProviderInfo;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
  * A SPSDescriptor describes a Stored Prepared Statement.

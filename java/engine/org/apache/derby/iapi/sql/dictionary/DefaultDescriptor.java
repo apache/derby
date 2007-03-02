@@ -21,23 +21,18 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.depend.Dependent;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.catalog.DependableFinder;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Dependent;
-import org.apache.derby.iapi.sql.depend.Dependency;
 import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.catalog.UUID;
 
 /**
  * This interface is used to get information from a DefaultDescriptor.
