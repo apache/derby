@@ -1,22 +1,22 @@
 /*
- * 
+ *
  * Derby - Class org.apache.derbyTesting.system.sttest.Sttest
- * 
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
  * work for additional information regarding copyright ownership. The ASF
  * licenses this file to You under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *  
+ *
  */
 
 package org.apache.derbyTesting.system.sttest;
@@ -54,70 +54,70 @@ import org.apache.derbyTesting.system.sttest.utils.StStatus;
  * table is compressed, to keep performance from deteriorating.
  */
 public class Sttest extends Thread {
-	
+
 	static int loops = 200;
-	
+
 	static int rowcount = 0;
-	
+
 	static int testcount = 0;
-	
+
 	static int connections_to_make = 250;
-	
+
 	static Random rand;
-	
+
 	static boolean increase = true;
-	
+
 	static boolean not_finished = true;
-	
-	static int targetmax = 100000; //build up to 1GB database
-	
+
+	static int targetmax = 100000; // build up to 1GB database
+
 	static int targetmin = 90000;
-	
+
 	static int insertsize = 7;
-	
+
 	static int updatesize = 1;
-	
+
 	static int deletesize = 1;
-	
+
 	static boolean fatal = false;
-	
+
 	static int rows = 0;
-	
+
 	static boolean countlock = false;
-	
+
 	static int delete_freq = 1;
-	
+
 	static int locker_id = -1;
-	
+
 	static final int INIT = 0;
-	
+
 	static final int GROW = 1;
-	
+
 	static final int SHRINK = 2;
-	
+
 	static int mode = INIT;
-	
+
 	static int count_timer = 0;
-	
+
 	static int inserts_to_try = 0;
-	
-	static final int INITIAL_CONNECTIONS = 2; //initial connections should be
-	
+
+	static final int INITIAL_CONNECTIONS = 2; // initial connections should be
+
 	// low, otherwise deadlock will
 	// happen.
-	
+
 	static boolean startByIJ = false;
-	
+
 	static String dbURL = "jdbc:derby:testDB";
-	
+
 	static String driver = "org.apache.derby.jdbc.EmbeddedDriver";
-	
+
 	static StStatus status = null;
-	
+
 	int thread_id;
-	
+
 	int ind = 0;
-	
+
 	public static void main(String[] args) throws SQLException, IOException,
 	InterruptedException, Exception, Throwable {
 		System.getProperties().put("derby.locks.deadlockTimeout", "60");
@@ -125,8 +125,8 @@ public class Sttest extends Thread {
 		System.out.println("Test Sttest starting");
 		System.getProperties().put("derby.infolog.append", "true");
 		System.getProperties().put("derby.stream.error.logSeverityLevel", "0");
-		//get any properties user may have set in Sttest.properties file
-		//these will override any of those set above
+		// get any properties user may have set in Sttest.properties file
+		// these will override any of those set above
 		userProperties();
 		Class.forName(driver).newInstance();
 		if (Setup.doit(dbURL) == false)
@@ -134,7 +134,7 @@ public class Sttest extends Thread {
 		status = new StStatus();
 		sttTop();
 	}
-	
+
 	static void userProperties() throws Throwable {
 		FileInputStream fileIn = null;
 		try {
@@ -157,7 +157,7 @@ public class Sttest extends Thread {
 			prop = props.getProperty("driver");
 			if (prop != null)
 				driver = prop;
-			//allows us to get any other properties into the system
+			// allows us to get any other properties into the system
 			Properties sysprops = System.getProperties();
 			Enumeration list = props.propertyNames();
 			String s = null;
@@ -170,16 +170,17 @@ public class Sttest extends Thread {
 		System.out.println("dbURL = " + dbURL);
 		System.out.println("connections = " + connections_to_make);
 	}
-	
+
 	public static void sttTop() throws SQLException, IOException,
 	InterruptedException, Exception, Throwable {
 		rand = new Random();
-		//harder to actually delete rows when there are
-		//more connections, so repeat operation more often
+
+		Datatypes.Rn = rand;
+		// harder to actually delete rows when there are
+		// more connections, so repeat operation more often
 		delete_freq = 1 + connections_to_make % 5;
 		initial_data();
 		Date d = new Date();
-		System.out.println("updates starting, loop " + loops + " " + d);
 		status.firstMessage(connections_to_make, d);
 		// check memory in separate thread-- allows us to monitor
 		// usage during database calls
@@ -202,27 +203,27 @@ public class Sttest extends Thread {
 			throw (t);
 		}
 	}
-	
+
 	Sttest(int num) throws SQLException {
 		this.thread_id = num;
 	}
-	
+
 	static synchronized void reset_loops(int myloopcount) {
 		if (myloopcount == loops)
 			loops--;
 		// otherwise some other thread got there first and reset it
 	}
-	
+
 	// available to force synchronization of get_countlock(), ...
 	static synchronized void locksync() {
 		return;
 	}
-	
+
 	static synchronized boolean get_countlock() {
 		locksync();
 		return (countlock);
 	}
-	
+
 	static synchronized boolean set_countlock(boolean state) {
 		locksync();
 		if (state == true && countlock == true)
@@ -230,17 +231,16 @@ public class Sttest extends Thread {
 		countlock = state;
 		return (true);
 	}
-	
+
 	static synchronized void changerowcount(int in) {
 		rowcount += in;
 	}
-	
+
 	static synchronized void changerowcount2zero() {
 		rowcount = 0;
 	}
-	
+
 	static void initial_data() throws Exception, Throwable {
-		System.out.println("start initial data");
 		Connection conn = null;
 		int rows = 0;
 		try {
@@ -257,7 +257,6 @@ public class Sttest extends Thread {
 			conn.commit();
 			conn.close();
 		}
-		System.out.println("initial rowcount = " + rows);
 		rowcount = rows;
 		if (rows >= targetmin) {
 			mode = GROW;
@@ -265,7 +264,6 @@ public class Sttest extends Thread {
 			return;
 		}
 		inserts_to_try = targetmin - rows;
-		System.out.println("inserts_to_try: " + inserts_to_try);
 		Sttest testthreads[] = new Sttest[INITIAL_CONNECTIONS];
 		for (int i = 0; i < INITIAL_CONNECTIONS; i++) {
 			testthreads[i] = new Sttest(i);
@@ -278,7 +276,7 @@ public class Sttest extends Thread {
 		System.out.println("complete initial data");
 		return;
 	}
-	
+
 	public void run() {
 		Connection conn = null;
 		Date d = null;
@@ -311,7 +309,6 @@ public class Sttest extends Thread {
 				insertsize = 1;
 				deletesize = 12;
 				if (set_countlock(true) == true) {
-					System.out.println("t" + thread_id + " counting");
 					try {
 						checkrowcount(conn);
 						MemCheck.showmem();
@@ -339,7 +336,6 @@ public class Sttest extends Thread {
 				insertsize = 8;
 				deletesize = 1;
 				if (set_countlock(true) == true) {
-					System.out.println("t" + thread_id + " counting");
 					try {
 						checkrowcount(conn);
 						MemCheck.showmem();
@@ -364,19 +360,17 @@ public class Sttest extends Thread {
 				}
 			}
 			try {
-				System.out.println("Thread " + thread_id);
 				if (mode == INIT)
 					ind = 0;
 				else
 					ind = Math.abs(rand.nextInt() % 3);
-				System.out.println("ind=" + ind);
 				switch (ind) {
 				case 0:
 					ind2 = Math.abs(rand.nextInt() % insertsize);
-					System.out.println("t" + thread_id + " insert "
-							+ String.valueOf(ind2 + 1));
+					int addrows = 0;
 					for (int i = 0; i <= ind2; i++) {
 						Datatypes.add_one_row(conn, thread_id);
+						addrows++;
 						conn.commit();
 						if (mode == INIT) {
 							inserts_to_try--;
@@ -384,31 +378,30 @@ public class Sttest extends Thread {
 						yield();
 						changerowcount(1);
 					}
+					System.out.println(addrows + "  Rows inserted");
 					break;
 				case 1:
 					ind2 = Math.abs(rand.nextInt() % updatesize);
-					System.out.println("t" + thread_id + " update "
-							+ String.valueOf(ind2 + 1));
+					int updaterow = 0;
 					for (int i = 0; i <= ind2; i++) {
 						Datatypes.update_one_row(conn, thread_id);
+						updaterow++;
 						conn.commit();
 						yield();
 					}
+					System.out.println(updaterow + "  rows updated");
 					break;
 				case 2:
 					ind2 = Math.abs(rand.nextInt() % deletesize);
-					System.out.println("t" + thread_id + " delete "
-							+ String.valueOf(ind2 + 1));
 					int del_rows = 0;
 					del_rows = Datatypes.delete_some(conn, thread_id, ind2 + 1);
-					System.out.println("del_rows after calling delete_some:"
-							+ del_rows);
 					yield();
 					changerowcount(-1 * del_rows);
-					//commits are done inside delete_some()
+					// commits are done inside delete_some()
+					System.out.println(del_rows + " rows deleted");
 					break;
-				} //end switch
-				
+				} // end switch
+
 			} catch (SQLException se) {
 				if (se.getSQLState() == null)
 					se.printStackTrace();
@@ -446,7 +439,7 @@ public class Sttest extends Thread {
 					e.printStackTrace();
 				}
 			}
-		}//end while
+		}// end while
 		try {
 			conn.close();
 		} catch (Throwable e) {
@@ -454,7 +447,7 @@ public class Sttest extends Thread {
 		}
 		System.out.println("Thread finished: " + thread_id);
 	}
-	
+
 	static synchronized void checkrowcount(Connection conn)
 	throws java.lang.Exception {
 		int x = Datatypes.get_table_count(conn);
@@ -467,7 +460,7 @@ public class Sttest extends Thread {
 		}
 		conn.commit();
 	}
-	
+
 	static public Connection mystartJBMS() throws Throwable {
 		Connection conn = null;
 		if (startByIJ == true) {
@@ -477,14 +470,13 @@ public class Sttest extends Thread {
 				conn = DriverManager.getConnection(dbURL + ";create=false");
 				conn.setAutoCommit(false);
 				conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
-				System.out.println("got the connection in question");
 			} catch (SQLException se) {
 				System.out.println("connect failed  for " + dbURL);
 				JDBCDisplayUtil.ShowException(System.out, se);
 			}
 			return (conn);
 	}
-	
+
 	static synchronized void compress(Connection conn)
 	throws java.lang.Exception {
 		Statement s = null;
