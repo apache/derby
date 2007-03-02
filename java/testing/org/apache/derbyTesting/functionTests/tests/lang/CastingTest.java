@@ -592,7 +592,7 @@ public static String[][]SQLData =
             return "'" + str + "'";
     }
 
-    private static Test suite() {
+    public static Test suite() {
 
         return TestConfiguration.defaultSuite(CastingTest.class);
 
