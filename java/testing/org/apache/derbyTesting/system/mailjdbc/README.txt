@@ -86,11 +86,11 @@ For both conditions the performance of the database should be about the same.
 
 6. How to run the test
 
-1. Make the appropriate changes for derby client or jcc , if you are testing the netWorkServer
-2. Make sure you have java in your environment and put the Derby jars including the derbyTesting.jar in your classpath
-3. Then run java org.apche.derbyTesting.system.mailjdbc.MailJdbc embedded
+1. Make sure you have java in your environment and put the Derby jars including the derbyTesting.jar in your classpath
+2. Make sure to copy the derby.properties file provided under the directory org/apache/derbyTesting/system/mailjdbc
+3. Run java org.apache.derbyTesting.system.mailjdbc.MailJdbc embedded
  or
- java org.apche.derbyTesting.system.mailjdbc.MailJdbc NetworkServer
+ java org.apache.derbyTesting.system.mailjdbc.MailJdbc NetworkServer (To run in the NetworkServer mode you should start the n/w server manually)
 
 There are 2 output files. 
 1. Activity.out - which will give all the activities done by the test

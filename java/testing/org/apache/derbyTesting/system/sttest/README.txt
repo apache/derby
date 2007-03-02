@@ -80,11 +80,11 @@ The usual duration of this test is  2 weeks time without any major issues. You c
 
 6. How to run the test
 
-1. Make sure you have java in your environment and put the Derby jars including the derbyTesting.jar and resource.jar in your classpath
+1. Make sure you have java in your environment and put the Derby jars including the derbyTesting.jar in your classpath
 2. Then run 
-          java org.apche.derbyTesting.system.sttest.Sttest.java 
-   If you want to get the testoutpuy to a file then run 
-          java org.apche.derbyTesting.system.sttest.Sttest.java>sttest.out 2>&1
+          java org.apache.derbyTesting.system.sttest.Sttest.java 
+   If you want to get the test output to a file then run 
+          java org.apache.derbyTesting.system.sttest.Sttest.java>sttest.out 2>&1
    Which will print the output to a file called sttest.out including warnings and errors
  
 There is no explicit exit condition.  This test usually runs for more than 2 weeks. Check for ERROR and Exception in both the out files and derby.log.
