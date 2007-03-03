@@ -6,7 +6,7 @@
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
+ * (the "License"); you may not use this file ecept in compliance with
  * the License.  You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
@@ -89,6 +89,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		{
             "select I, C from t for read only",
             "select I, C from t for fetch only",
+            "select I, C FROM T ORDER BY 1",
             "values (1, 2, 3)",
             
             // TEST: Update of cursor with a union
@@ -195,6 +196,21 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		delete.close();
 		delete2.close();
 		select.close();
+        
+        // Test a cursor where not all the columns can be updated.
+        // Positioned DELETE is still allowed.
+        select = prepareStatement("SELECT I, C FROM T FOR UPDATE OF I");
+        cursor = select.executeQuery();
+        delete = prepareStatement("delete from t where current of "
+                + cursor.getCursorName());
+        assertTrue(cursor.next());
+        assertUpdateCount(delete, 1);
+        delete.close();
+        
+        
+        cursor.close();
+        select.close();
+        
 
 		// TEST: attempt to do positioned delete before cursor execute'd
 		// TBD
@@ -283,20 +299,129 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 	}
 
 	/**
-	 * Test that changing the cursor statement after the positioned
-	 * update is handled correctly when the positioned statement
-	 * is re-executed. In this case the list of update columns
-	 * in changed from all to a single column, while the update
-	 * statement is against two columns.
+	 * Change the current cursor from the one the positioned
+     * UPDATE and DELETE was compiled against to one that only has a
+     * subset of the columns being updatable.
 	 */
-	public void testCursorChange1() throws SQLException { 
-		cursorChange1("CHANGE_ME"); // Application provided cursor name
-		cursorChange1(null); // system provided cursor name
+	public void testCursorChangeUpdateList() throws SQLException {
+        
+        // Update will fail
+        cursorChange(
+                "42X31",
+                "select I, C from t for update",
+                "update t set i=i+19, c='OLD' || cast(i as CHAR(20)) where current of ",
+                "select I, C from t for update of I"
+                );
+        
+        // Delete will succeed.
+        cursorChange(
+                null,
+                "select I, C from t for update",
+                "DELETE FROM t WHERE CURRENT OF ",
+                "select I, C from t for update of I"
+                );
 	}
+    
+    /**
+     * Change the current cursor from the one the positioned
+     * UPDATE/DELETE was compiled against to one that is read only
+     * against the same table.
+     */
+    public void testCursorChangeToReadOnly() throws SQLException {
+    
+        cursorChange(
+            "42X23", // cursor is read only
+            "select I, C from t for update",
+            "update t set i=i+23 where current of ",
+            "select I, C from t for fetch only"
+            );
+        
+        cursorChange(
+                "42X23", // cursor is read only
+                "select I, C from t for update",
+                "DELETE FROM t WHERE CURRENT OF ",
+                "select I, C from t for fetch only"
+                );
+    }
 
-	private void cursorChange1(String cursorName) throws SQLException {
+    /**
+     * Change the current cursor from the one the positioned
+     * UPDATE was compiled against to one that is against
+     * a different table.
+     * 
+     * test FAILS - once fixed should be renamed to lose
+     * the FAIL prefix. Fails as the positioned update wor
+     */
+    public void testCursorChangeToDifferentTable() throws SQLException {
+        
+        Statement s = createStatement();
+        s.executeUpdate("INSERT INTO S(I,C) SELECT I,C FROM T");
+        s.close();
+        commit();
+           
+        cursorChange(
+            "42X29",  // this is the error testUpdate() sees.
+            "select I, C from t for update",
+            "update t set i=i+23 where current of ",
+            "SELECT I, C FROM S FOR UPDATE"
+            );
+        
+        cursorChange(
+            "42X28", // this is the error testDelete() sees.
+            "select I, C from t for update",
+            "DELETE FROM t WHERE CURRENT OF ",
+            "SELECT I, C FROM S FOR UPDATE"
+           );
+        
+    }    
+    
+    
+    /**
+     * Run cursorChange() with an application provided name
+     * and a system provided name.
+     * 
+     */
+    private void cursorChange(String sqlState,
+            String initialCursor,
+            String positionedStatement,
+            String changeToCursor) throws SQLException
+    {
+        // Since these tests delete rows we add a couple more to
+        // ensure any cursor we open has at least one row.
+        Statement s = createStatement();
+        s.executeUpdate("insert into t values (425, 'apache db derby')");
+        s.executeUpdate("insert into t values (280, 'derby-user users')");
+        s.close();
+        commit();
+        
+        cursorChange(sqlState, "CHANGE_ME", initialCursor, positionedStatement, changeToCursor);
+        cursorChange(sqlState, null, initialCursor, positionedStatement, changeToCursor);
+    }
+    
+    /**
+     * Test what happens to a positioned update when the cursor
+     * it is compiled against changes to the SQL provided, changeToSQL. 
+     * This test first prepares a cursor initialCursor 
+     * using with the given name (or system name if null is passed in)
+     * A cursor is opened and a positioned update is opened that updates.
+     * 
+     * If sqlState is null then no error is expected and thus the
+     * positioned statement must update a single row.
+     * Otherwise sqlState is the exected exception for the update.
+     * 
+     * If no error is expected then three rows will be either
+     * updated or deleted depending on the positioned statement.
+     * 
+     * If an error is expected then two rows will be updated
+     * or deleted.
+     */
+	private void cursorChange(String sqlState,
+            String cursorName,
+            String initialCursor,
+            String positionedStatement,
+            String changeToCursor) throws SQLException {
 
-		PreparedStatement select = prepareStatement("select I, C from t for update");
+		PreparedStatement select = prepareStatement(initialCursor);
 		if (cursorName != null)
 			select.setCursorName(cursorName);
 
@@ -304,23 +429,21 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 
 		// TEST: find the cursor during compilation
 		cursorName = cursor.getCursorName();
-		PreparedStatement update = prepareStatement("update t set i=i+?, c=? where current of "
-				+ cursorName);
-		cursor.next();
-		update.setInt(1, 10);
-		update.setString(2, "Dan was here");
+		PreparedStatement update = prepareStatement(
+                positionedStatement + cursorName);
+		assertTrue(cursor.next());
 		assertUpdateCount(update, 1);
 		cursor.close();
 
-		// now prepare the a cursor with the same name but only column I for
-		// update
-		PreparedStatement selectdd = prepareStatement("select I, C from t for update of I");
+		// now prepare the a cursor with the same name but different SQL.
+		PreparedStatement selectdd = prepareStatement(changeToCursor);
 		selectdd.setCursorName(cursorName);
 		cursor = selectdd.executeQuery();
-		cursor.next();
-		update.setInt(1, 7);
-		update.setString(2, "no update");
-		assertStatementError("42X31",update);
+		assertTrue(cursor.next());
+        if (sqlState != null)
+		    assertStatementError(sqlState,update);
+        else
+            assertUpdateCount(update, 1);
 
 		cursor.close();
 		
@@ -328,8 +451,6 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		// will work.
 		cursor = select.executeQuery();
 		cursor.next();
-		update.setInt(1, 19);
-		update.setString(2, "switch back!");
 		assertUpdateCount(update, 1);
 
 		cursor.close();
