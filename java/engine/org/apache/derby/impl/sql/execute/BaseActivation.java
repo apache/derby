@@ -1358,6 +1358,18 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		return row[rsNumber].getColumn(colId);
 	}
 
+    /**
+     * Check that a positioned statement is executing against a cursor
+     * from the same PreparedStatement (plan) that the positioned
+     * statement was original compiled against.
+     * 
+     * Only called from generated code for positioned UPDATE and DELETE
+     * statements. See CurrentOfNode.
+     * 
+     * @param cursorName Name of the cursor
+     * @param psName Object name of the PreparedStatement.
+     * @throws StandardException
+     */
 	protected void checkPositionedStatement(String cursorName, String psName)
 		throws StandardException {
 
