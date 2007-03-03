@@ -477,10 +477,9 @@ public final class CurrentOfNode extends FromTable {
 		  mb.push(cursorName);
 		  acb.pushThisAsActivation(mb);
 		  mb.push(resultSetNumber);
-		  mb.push(preStmt.getObjectName());
 		
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getCurrentOfResultSet",
-						ClassName.NoPutResultSet, 4);
+						ClassName.NoPutResultSet, 3);
 
 		mb.cast(ClassName.CursorResultSet);
 

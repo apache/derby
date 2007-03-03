@@ -1300,12 +1300,10 @@ public interface ResultSetFactory {
 		positioned update and delete, using the result set paradigm.
 
 		@param cursorName the name of the cursor providing the row.
-		@param activation the activation for this result set,
-			used to provide information about the result set.
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 	 */
 	NoPutResultSet getCurrentOfResultSet(String cursorName, Activation activation, 
-									int resultSetNumber, String psName);
+									int resultSetNumber);
 
 	/**
 	 * The Union interface is used to evaluate the union (all) of two ResultSets.

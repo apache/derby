@@ -49,7 +49,7 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
  *
  * @author ames
  */
-public class CurrentOfResultSet extends NoPutResultSetImpl
+class CurrentOfResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {
 
     private boolean next;
@@ -62,19 +62,17 @@ public class CurrentOfResultSet extends NoPutResultSetImpl
     // set in constructor and not altered during
     // life of object.
 	private final String cursorName;
-	private final String psName;
 
     //
     // class interface
     //
-    public CurrentOfResultSet(String cursorName, Activation activation, 
-							  int resultSetNumber, String psName)
+    CurrentOfResultSet(String cursorName, Activation activation, 
+							  int resultSetNumber)
 	{
 		super(activation, resultSetNumber, 0.0d, 0.0d);
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT( cursorName!=null, "current of scan must get cursor name");
         this.cursorName = cursorName;
-		this.psName = psName;
     }
 
 	//

@@ -969,9 +969,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@see ResultSetFactory#getCurrentOfResultSet
 	 */
 	public NoPutResultSet getCurrentOfResultSet(String cursorName, 
-	    Activation activation, int resultSetNumber, String psName)
+	    Activation activation, int resultSetNumber)
 	{
-		return new CurrentOfResultSet(cursorName, activation, resultSetNumber, psName);
+		return new CurrentOfResultSet(cursorName, activation, resultSetNumber);
 	}
 
 	/**
