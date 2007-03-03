@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 
 import java.util.Arrays;   // Used by testUpdateLongBinaryProc
 
+import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -103,6 +104,16 @@ import junit.framework.TestSuite;
  *   Calls a SQL procedure with input and output parameters of the BigDecimal 
  *   data type.
  *   Excluded from JSR169/j2ME tests because of the BigDecimal.
+ * <BR>
+ * xtestBatchUpdate()
+ *   Batches up calls to a SQL procedure that updates a value in a table.
+ *   Excluded from environments than don't have JDBC 2 DriverManager.
+ * <BR>
+ * xtestBatchUpdateError()
+ *   Batches up many calls to a SQL procedure that updates a value in a table;
+ *   one of the commands in the batch is expected to fail, but others should
+ *   succeed.
+ *   Excluded from environments than don't have JDBC 2 DriverManager.
  */
 public class CallableTest extends BaseJDBCTestCase {
 
@@ -172,7 +183,12 @@ public class CallableTest extends BaseJDBCTestCase {
         "OUT P7 DECIMAL(14,4), OUT P8 DECIMAL(14,4), " +
         "OUT P9 DECIMAL(14,4)) EXTERNAL NAME '" + 
         CallableTest.class.getName() + ".bigDecimalInAndOutProc' " +
-        "NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA"
+        "NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA",
+
+        "CREATE PROCEDURE BATCH_UPDATE_PROC " +
+        "(P1 INT, P2 INT) MODIFIES SQL DATA " +
+        "LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME '" +
+        CallableTest.class.getName() + ".batchUpdateProc'"
     };
 
     /**
@@ -190,6 +206,12 @@ public class CallableTest extends BaseJDBCTestCase {
         { "NUMERIC_BOUNDARIES_TABLE", 
           "CREATE TABLE NUMERIC_BOUNDARIES_TABLE " +
           "(maxcol NUMERIC(31,15), mincol NUMERIC(15,15), nulcol NUMERIC)"},
+
+        // BATCH_UPDATE is used by BATCH_UPDATE_PROC
+        { "BATCH_TABLE", 
+          "CREATE TABLE BATCH_TABLE " +
+          "(id int, tag varchar(32), " +
+          "idval int constraint idval_ck check (idval >= 0))"},
     };
 
     /**
@@ -224,6 +246,12 @@ public class CallableTest extends BaseJDBCTestCase {
             // Tests that require DriverManager.
             suite.addTest
                 (new CallableTest("xtestUpdateLongBinaryProc"));
+
+            // Tests that require DriverManager and batch update.
+            suite.addTest
+                (new CallableTest("xtestBatchUpdate"));
+            suite.addTest
+                (new CallableTest("xtestBatchUpdateError"));
 
             // Tests that get/set BigDecimal
             suite.addTest
@@ -522,6 +550,176 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Batches up calls to a SQL procedure that updates a value in a table.
+     * Uses DriverManager and Batch calls, so requires JDBC 2 support.
+     * @throws SQLException 
+     */
+    public void xtestBatchUpdate() throws SQLException
+    {
+        // Setup table data
+        Statement stmt = createStatement();
+        stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(1, 'STRING_1',10)");
+        stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(2, 'STRING_2',0)");
+        stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(3, 'STRING_3',0)");
+        stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(4, 'STRING_4a',0)");
+        stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(4, 'STRING_4b',0)");
+
+        // Setup batch to modify value to 10 * the id (makes verification easy).
+        CallableStatement cstmt = prepareCall("CALL BATCH_UPDATE_PROC(?,?)");
+        cstmt.setInt(1,2);  // Id 2's value will be updated to 20.
+        cstmt.setInt(2,20);
+        cstmt.addBatch();
+        cstmt.setInt(1,3);  // Id 3's value will be updated to 30.
+        cstmt.setInt(2,30);
+        cstmt.addBatch();
+        cstmt.setInt(1,4);  // Two rows will be updated to 40 for id 4.
+        cstmt.setInt(2,40);
+        cstmt.addBatch();
+        cstmt.setInt(1,5);  // No rows updated (no id 5).
+        cstmt.setInt(2,50);
+        cstmt.addBatch();
+
+        int[] updateCount=null;
+        try {
+            updateCount = cstmt.executeBatch();
+            assertEquals("updateCount length", 4, updateCount.length);
+
+            for(int i=0; i< updateCount.length; i++){
+                if (usingEmbedded()) {
+                    assertEquals("Batch updateCount", 0, updateCount[0]);
+                }
+                else if (usingDerbyNetClient()) {
+                    assertEquals("Batch updateCount", -1, updateCount[0]);
+                }
+            }
+        } catch (BatchUpdateException b) {
+            assertSQLState("Unexpected SQL State", b.getSQLState(), b);
+        }
+
+        // Retrieve the updated values and verify they are correct.
+        ResultSet rs = stmt.executeQuery(
+            "SELECT id, tag, idval FROM BATCH_TABLE order by id, tag");
+        assertNotNull("SELECT from BATCH_TABLE", rs);
+
+        while (rs.next())
+        {
+            assertEquals(rs.getString(2), rs.getInt(1)*10, rs.getInt(3));
+        }
+
+        rs.close();
+        stmt.close();
+        cstmt.close();
+    }
+
+
+    /**
+     * Batches up many calls to a SQL procedure that updates a value in a table.
+     * All calls should succeed, except for one that should fail with a check
+     * constraint violation.
+     * Uses DriverManager and Batch calls, so requires JDBC 2 support.
+     * @throws SQLException 
+     */
+    public void xtestBatchUpdateError() throws SQLException
+    {
+        // Setup table data
+        Statement stmt = createStatement();
+        stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(1, 'STRING_1',0)");
+        stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(2, 'STRING_2',0)");
+        stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(3, 'STRING_3',0)");
+        stmt.executeUpdate("INSERT INTO BATCH_TABLE VALUES(4, 'STRING_4',0)");
+
+        // Setup batch to modify values.
+        CallableStatement cstmt = prepareCall("CALL BATCH_UPDATE_PROC(?,?)");
+        cstmt.setInt(1,1);  // Set id 1's value to 10
+        cstmt.setInt(2,10);
+        cstmt.addBatch();
+        cstmt.setInt(1,2);  // Set id 2's value to -5 (should fail)
+        cstmt.setInt(2,-5);
+        cstmt.addBatch();
+        cstmt.setInt(1,3);  // Set id 3's value to 30.
+        cstmt.setInt(2,30);
+        cstmt.addBatch();
+        cstmt.setInt(1,4);  // Set id 4's value to 40.
+        cstmt.setInt(2,40);
+        cstmt.addBatch();
+
+        int[] updateCount=null;
+
+        try {
+            updateCount = cstmt.executeBatch();
+            fail("Expected batchExecute to fail");
+        } catch (BatchUpdateException b) {
+
+            if (usingEmbedded()) {
+                assertSQLState("38000", b.getSQLState(), b);
+            }
+            else if (usingDerbyNetClient()) {
+                assertSQLState("XJ208", b.getSQLState(), b);
+            }
+
+            updateCount = b.getUpdateCounts();
+
+            /* The updateCount is different for embedded and client because
+             * the embedded driver stops processing the batch after the
+             * failure, while the client driver continues processing (see
+             * DERBY-2301).
+             */
+            if (usingEmbedded()) {
+                assertEquals("updateCount length", 1, updateCount.length);
+                assertEquals("Batch updateCount", 0, updateCount[0]);
+            }
+            else if (usingDerbyNetClient()) {
+                assertEquals("updateCount length", 4, updateCount.length);
+                for(int i=0; i< updateCount.length; i++){
+                    if(i == 1) // The second command in the batch failed.
+                        assertEquals("Batch updateCount", -3, updateCount[i]);
+                    else
+                        assertEquals("Batch updateCount", -1, updateCount[i]);
+                }
+            }
+        }
+
+        // Make sure the right rows in the table were updated.
+        ResultSet rs = stmt.executeQuery(
+            "SELECT id, tag, idval FROM BATCH_TABLE order by id, tag");
+        assertNotNull("SELECT from BATCH_TABLE", rs);
+
+        while (rs.next())
+        {
+            /* Embedded and client results should be the same for the first
+             * two rows (the changed row for the first successful command in 
+             * the batch, followed by the unchanged row for the second command,
+             * which failed).
+             * After the first two rows, results are different because the
+             * rest of the commands in the batch executed for client, but not
+             * for embedded.
+             */
+            switch(rs.getInt(1)) 
+            {
+                case 1:
+                    assertEquals(rs.getString(2), 10, rs.getInt(3));
+                    break;
+                case 2:
+                    assertEquals(rs.getString(2), 0, rs.getInt(3));
+                    break;
+                default:
+                    if (usingEmbedded()) {
+                        assertEquals(rs.getString(2), 0, rs.getInt(3));
+                    }
+                    else if (usingDerbyNetClient()) {
+                        assertEquals(rs.getString(2), rs.getInt(1)*10, 
+                            rs.getInt(3));
+                    }
+                    break;
+            }
+        }
+
+        rs.close();
+        stmt.close();
+        cstmt.close();
+    }
+
+    /**
      * Calls a SQL procedure that populates OUT parameters with minimum, 
      * maximum, and null values fetched from a table with numeric columns. 
      * Pre-history: long, long ago this test was added to exercise a problem
@@ -596,12 +794,13 @@ public class CallableTest extends BaseJDBCTestCase {
      * xtestNumericTypesInAndOutProc, and
      * xtestNumericBoundariesProc, methods.
      */
-    public void assertDecimalSameValue(String msg, String val1, BigDecimal val2)
+    public void assertDecimalSameValue(String message, String expected_s, 
+        BigDecimal actual)
     {
-        BigDecimal expected = (new BigDecimal(val1));
-        assertTrue(msg + 
-            " expected:<" + val1 + "> but was:<" + val2.toString() + ">", 
-            expected.compareTo(val2)==0);
+        BigDecimal expected = (new BigDecimal(expected_s));
+        assertTrue(message + 
+            " expected:<" + expected + "> but was:<" + actual.toString() + ">", 
+            expected.compareTo(actual)==0);
     }
 
     // SQL ROUTINES (functions and procedures)
@@ -814,5 +1013,27 @@ public class CallableTest extends BaseJDBCTestCase {
         f2[0] = f1 + f2[0];
         d2[0] = d1 + d2[0];
         t2[0] = t1;
+    }
+
+    /**
+     * SQL procedure that updates data in a table for a given id.
+     * Used by xtestBatchUpdateProc.
+     *
+     * @param pk_param BigDecimal id of the value to be updated
+     * @exception SQLException if a database error occurs
+     */
+    public static void batchUpdateProc (int id, int id_newval)
+        throws SQLException
+    {
+        Connection conn = 
+            DriverManager.getConnection("jdbc:default:connection");
+        PreparedStatement ps = conn.prepareStatement
+            ("update BATCH_TABLE set idval=? where id=?");
+
+        ps.setInt(1, id_newval);
+        ps.setInt(2, id);
+        ps.executeUpdate();
+        ps.close();
+        conn.close();
     }
 }
