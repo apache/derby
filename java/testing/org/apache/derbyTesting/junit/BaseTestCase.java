@@ -21,7 +21,10 @@ package org.apache.derbyTesting.junit;
 
 import junit.framework.TestCase;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -29,6 +32,7 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.sql.SQLException;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import java.security.PrivilegedActionException;
 
@@ -338,4 +342,31 @@ public abstract class BaseTestCase
         assertEquals("Detailed messages of the throwable's are different",
                      t1.getMessage(), t2.getMessage());
     }
+    
+    /**
+     * Assert that two files in the filesystem are identical.
+     * 
+     * @param file1 the first file to compare
+     * @param file2 the second file to compare
+     */
+	public static void assertEquals(final File file1, final File file2) {
+		AccessController.doPrivileged
+        (new PrivilegedAction() {
+        	public Object run() {
+        		try {
+					InputStream f1 = new BufferedInputStream(new FileInputStream(file1));
+					InputStream f2 = new BufferedInputStream(new FileInputStream(file2));
+
+					assertEquals(f1, f2);
+				} catch (FileNotFoundException e) {
+					fail("FileNotFoundException in assertEquals(File,File): " + e.getMessage());
+					e.printStackTrace();
+				} catch (IOException e) {
+					fail("IOException in assertEquals(File, File): " + e.getMessage());
+					e.printStackTrace();
+				}
+				return null;
+        	}
+        });
+	}
 } // End class BaseTestCase
