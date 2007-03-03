@@ -23,5 +23,4 @@ lang/simpleScroll.sql
 lang/supersimple.sql
 store/holdCursorExternalSortJDBC30.sql
 store/holdCursorJDBC30.sql
-tools/importExport.java
 tools/ieptests.sql

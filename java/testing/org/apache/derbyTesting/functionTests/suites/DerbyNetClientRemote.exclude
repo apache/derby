@@ -27,8 +27,6 @@
 # derbynet/timeslice - tries to use NetworkServerControl statements
 # derbynet/DerbyNetAutoStart - tries to start networkserver
 # tools/ieptests - names files in extin dir, but they are on the server
-# tools/importExport - tries to confirm correct export by file-comparing the exported files,
-#	which may be on a different machine and thus not found.
 # lang/wisconsin - optimization is quite different when running remote server.
 # junitTests/derbyNet/CompatibilityTest.java - tries to start and shutdown the server.
 # jdbcapi/checkDataSource.java - test leaves things in a bad state, causing the subsequent
@@ -56,7 +54,6 @@ derbynet/testSecMec.java
 derbynet/timeslice.java
 derbynet/DerbyNetAutoStart.java
 tools/ieptests.sql
-tools/importExport.java
 lang/wisconsin.java
 junitTests/derbyNet/CompatibilityTest.java
 jdbcapi/checkDataSource.java
