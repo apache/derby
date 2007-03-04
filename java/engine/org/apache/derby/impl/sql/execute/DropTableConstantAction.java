@@ -193,7 +193,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 		while (descs.hasMoreElements())
 		{
 			TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
-			DropTriggerConstantAction.dropTriggerDescriptor(lcc, dm, dd, tc, trd, activation);	
+            trd.drop(lcc);
 		}
 
 		/* Drop all defaults */

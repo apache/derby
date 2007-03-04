@@ -766,7 +766,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				{
 					if (cascade)
 					{
-						DropTriggerConstantAction.dropTriggerDescriptor(lcc, dm, dd, tc, trd, activation);
+                        trd.drop(lcc);
 						activation.addWarning(
 							StandardException.newWarning(SQLState.LANG_TRIGGER_DROPPED,
 								trd.getName(), td.getName()));

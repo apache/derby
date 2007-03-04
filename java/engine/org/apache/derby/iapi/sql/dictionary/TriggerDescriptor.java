@@ -30,12 +30,14 @@ import java.sql.Timestamp;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.impl.sql.execute.DropTriggerConstantAction;
@@ -702,10 +704,7 @@ public class TriggerDescriptor extends TupleDescriptor
 			// types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
 			// make the TriggerDescriptor drop itself. 
 			case DependencyManager.REVOKE_PRIVILEGE:
-				DropTriggerConstantAction.dropTriggerDescriptor(
-					lcc, getDataDictionary().getDependencyManager(),
-					getDataDictionary(), lcc.getTransactionExecute(), this,
-					null);
+                drop(lcc);
 				break;
 
 			default:
@@ -713,6 +712,38 @@ public class TriggerDescriptor extends TupleDescriptor
 		}
 		
 	}
+    
+    public void drop(LanguageConnectionContext   lcc) throws StandardException
+    {
+        DataDictionary dd = getDataDictionary();
+        DependencyManager dm = getDataDictionary().getDependencyManager();
+        TransactionController tc = lcc.getTransactionExecute();
+
+        dm.invalidateFor(this, DependencyManager.DROP_TRIGGER, lcc);
+
+        // Drop the trigger
+        dd.dropTriggerDescriptor(this, tc);
+
+        // Clear the dependencies for the trigger 
+        dm.clearDependencies(lcc, this);
+
+        // Drop the spses
+        SPSDescriptor spsd = dd.getSPSDescriptor(this.getActionId());
+
+        // there shouldn't be any dependencies, but in case
+        // there are, lets clear them
+        dm.invalidateFor(spsd, DependencyManager.DROP_TRIGGER, lcc);
+        dm.clearDependencies(lcc, spsd);
+        dd.dropSPSDescriptor(spsd, tc);
+        
+        if (getWhenClauseId() != null)
+        {   
+            spsd = dd.getSPSDescriptor(getWhenClauseId());
+            dm.invalidateFor(spsd, DependencyManager.DROP_TRIGGER, lcc);
+            dm.clearDependencies(lcc, spsd);
+            dd.dropSPSDescriptor(spsd, tc);
+        }
+    }
 
 
 	//////////////////////////////////////////////////////////////

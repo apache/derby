@@ -51,6 +51,20 @@ import org.apache.derby.catalog.UUID;
 /**
  *	This class  describes actions that are ALWAYS performed for a
  *	CREATE VIEW Statement at Execution time.
+ *  A view is represented as:
+ *  <UL>
+ *  <LI> TableDescriptor with the name of the view and type VIEW_TYPE
+ *  <LI> Set of ColumnDescriptor's for the column names and types
+ *  <LI> ViewDescriptor describing the SQL query that makes up the view.
+ *  </UL>
+ *  Dependencies are created as:
+ *  <UL>
+ *  <LI> ViewDescriptor depends on the Providers that its compiled
+ *  query depends on.
+ *  <LI> ViewDescriptor depends on the privileges required to execute the view.
+ *  </UL>
+ *  Note there are no dependencies created between the ViewDescriptor, TableDecriptor
+ *  and the ColumnDescriptor's.
  *
  *	@author Jerry Brenner.
  */
@@ -72,14 +86,13 @@ class CreateViewConstantAction extends DDLConstantAction
 	 *	Make the ConstantAction for a CREATE VIEW statement.
 	 *
 	 *  @param schemaName			name for the schema that view lives in.
-	 *  @param tableName	Name of table.
-	 *  @param tableType	Type of table (e.g., BASE).
+	 *  @param tableName	Name of view.
+	 *  @param tableType	Type of table (ie. TableDescriptor.VIEW_TYPE).
 	 *	@param viewText		Text of query expression for view definition
 	 *  @param checkOption	Check option type
 	 *  @param columnInfo	Information on all the columns in the table.
 	 *  @param providerInfo Information on all the Providers
 	 *  @param compSchemaId 	Compilation Schema Id
-	 *		 (REMIND tableDescriptor ignored)
 	 */
 	CreateViewConstantAction(
 								String			schemaName,
@@ -117,7 +130,7 @@ class CreateViewConstantAction extends DDLConstantAction
 
 
 	/**
-	 *	This is the guts of the Execution-time logic for CREATE TABLE.
+	 *	This is the guts of the Execution-time logic for CREATE VIEW.
 	 *
 	 *	@see ConstantAction#executeConstantAction
 	 *
@@ -128,7 +141,6 @@ class CreateViewConstantAction extends DDLConstantAction
 	{
 		TableDescriptor 			td;
 		UUID 						toid;
-		SchemaDescriptor			schemaDescriptor;
 		ColumnDescriptor			columnDescriptor;
 		ViewDescriptor				vd;
 

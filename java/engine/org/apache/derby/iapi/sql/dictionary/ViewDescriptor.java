@@ -337,11 +337,9 @@ public final class ViewDescriptor extends TupleDescriptor
 			//make the ViewDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
 		    case DependencyManager.DROP_COLUMN:
-				dropViewWork(getDataDictionary(), 
-						getDataDictionary().getDependencyManager(), lcc,
-						lcc.getTransactionExecute(), 
+				drop(lcc, 
 						getDataDictionary().getTableDescriptor(uuid).getSchemaDescriptor(),
-						getDataDictionary().getTableDescriptor(uuid), false);
+						getDataDictionary().getTableDescriptor(uuid));
 
                                 lcc.getLastActivation().addWarning(
                                     StandardException.newWarning(
@@ -386,11 +384,14 @@ public final class ViewDescriptor extends TupleDescriptor
 		}
 	}
 
-	public void dropViewWork(DataDictionary dd, DependencyManager dm,
-							  LanguageConnectionContext lcc, TransactionController tc,
-							  SchemaDescriptor sd, TableDescriptor td, boolean cascade)
+	public void drop(LanguageConnectionContext lcc,
+							  SchemaDescriptor sd, TableDescriptor td)
 		throws StandardException
 	{
+        DataDictionary dd = getDataDictionary();
+        DependencyManager dm = dd.getDependencyManager();
+        TransactionController tc = lcc.getTransactionExecute();
+        
 		/* Drop the columns */
 		dd.dropAllColumnDescriptors(td.getUUID(), tc);
 

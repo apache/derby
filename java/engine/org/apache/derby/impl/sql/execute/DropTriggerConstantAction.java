@@ -89,8 +89,6 @@ public class DropTriggerConstantAction extends DDLSingleTableConstantAction
 
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
-		DependencyManager dm = dd.getDependencyManager();
-
 
 		/*
 		** Inform the data dictionary that we are about to write to it.
@@ -139,48 +137,7 @@ public class DropTriggerConstantAction extends DDLSingleTableConstantAction
 		** cursor referencing a table/trigger that the user is attempting to
 		** drop.) If no one objects, then invalidate any dependent objects.
 		*/
-		dropTriggerDescriptor(lcc, dm, dd, tc, triggerd, activation);
-	}
-
-	public static void dropTriggerDescriptor
-	(
-		LanguageConnectionContext	lcc,
-		DependencyManager 			dm,
-		DataDictionary				dd,
-		TransactionController		tc,
-		TriggerDescriptor			triggerd,
-		Activation					activation
-	) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(triggerd!=null, "trigger descriptor is null");
-		}
-
-		dm.invalidateFor(triggerd, DependencyManager.DROP_TRIGGER, lcc);
-
-		// Drop the trigger
-		dd.dropTriggerDescriptor(triggerd, tc);
-
-		// Clear the dependencies for the trigger 
-		dm.clearDependencies(lcc, triggerd);
-
-		// Drop the spses
-		SPSDescriptor spsd = dd.getSPSDescriptor(triggerd.getActionId());
-
-		// there shouldn't be any dependencies, but in case
-		// there are, lets clear them
-		dm.invalidateFor(spsd, DependencyManager.DROP_TRIGGER, lcc);
-		dm.clearDependencies(lcc, spsd);
-		dd.dropSPSDescriptor(spsd, tc);
-		
-		if (triggerd.getWhenClauseId() != null)
-		{	
-			spsd = dd.getSPSDescriptor(triggerd.getWhenClauseId());
-			dm.invalidateFor(spsd, DependencyManager.DROP_TRIGGER, lcc);
-			dm.clearDependencies(lcc, spsd);
-			dd.dropSPSDescriptor(spsd, tc);
-		}
+        triggerd.drop(lcc);
 	}
 
 	public String toString()

@@ -314,7 +314,7 @@ public class GenericConstantActionFactory
 	 *
 	 *  @param schemaName	Name of the schema that table lives in.
 	 *  @param tableName	Name of table.
-	 *  @param tableType	Type of table (e.g., BASE).
+	 *  @param tableType	Type of table (in this case TableDescriptor.VIEW_TYPE).
 	 *	@param viewText		Text of query expression for view definition
 	 *  @param checkOption	Check option type
 	 *  @param columnInfo	Information on all the columns in the table.

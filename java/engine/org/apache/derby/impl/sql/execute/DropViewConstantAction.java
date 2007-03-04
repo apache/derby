@@ -101,8 +101,6 @@ class DropViewConstantAction extends DDLConstantAction
 
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
-		DependencyManager dm = dd.getDependencyManager();
-		TransactionController tc = lcc.getTransactionExecute();
 
 		/*
 		** Inform the data dictionary that we are about to write to it.
@@ -133,6 +131,6 @@ class DropViewConstantAction extends DDLConstantAction
 
 		vd = dd.getViewDescriptor(td);
 
-		vd.dropViewWork(dd, dm, lcc, tc, sd, td, false);
+		vd.drop(lcc, sd, td);
 	}
 }
