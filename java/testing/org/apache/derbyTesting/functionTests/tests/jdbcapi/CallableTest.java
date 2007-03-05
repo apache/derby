@@ -50,70 +50,11 @@ import junit.framework.TestSuite;
  * Test the CallableStatement interface. 
  * <p>
  * This test converts the old derbynet/callable.java test to JUnit. It 
- * exercises the CallableStatement interface with various combinations of:
- *   - IN, OUT, and INOUT registered parameters
- *   - SQL functions and procedures
- *   - Different data types
- * <BR>
- * testTwoInOneOutProc()
- *   Calls a procedure that takes two input parameters and returns one output 
- *   (integers).
- * <BR>
- * testOneInOneOutFunc()
- *   Calls a function takes one input parameter and returns one output 
- *   (integers).
- * <BR>
- * testNoInOneOutFunc()
- *   Calls a function that doesn't take any parameters and returns one output 
- *   (integer).
- * <BR>
- * norun_testSystemOutPrintlnProc()
- *   Calls a procedure that just outputs a message with System.out.println.
- *   Converted from the original test, but initially disabled because of the
- *   message output to system out. Easily enabled by changing method name to
- *   testSystemOutPrintlnProc().
- * <BR>   
- * xtestNumericTypesInAndOutProc()
- *   Calls a SQL procedure with a variety of numeric IN/OUT parameters.
- *   Also tests overloading the external method.
- *   Excluded from JSR169/j2ME tests because of the BigDecimal.
- * <BR>
- * testNonNumericTypesInAndOutProc()
- *   Calls a SQL procedure with a variety of non-numeric IN/OUT parameters.
- *   Also tests overloading the external method.
- * <BR>
- * testManyTypesInoutProc()
- *   Calls a SQL procedure with a variety of INOUT parameters.
- * <BR>
- * xtestRegUserDefOutParameterError()
- *   Tries to register a user-defined OUT parameter, which should throw a
- *   not implemented exception. 
- *   Excluded from DB2 Client tests. The test should throw a not implemented
- *   exception with embedded and with Derby Network Client (DERBY-1184).
- * <BR>
- * xtestUpdateLongBinaryProc()
- *   Calls a SQL procedure that updates a long varbinary column in a table.
- *   Excluded from environments than don't have JDBC 2 DriverManager.
- * <BR>
- * xtestNumericBoundariesProc()
- *   Calls a SQL procedure that accesses minimum, maximum, and null values 
- *   in a table with numeric columns. 
- *   Excluded from environments than don't have JDBC 2 DriverManager.
- * <BR>
- * xtestBigDecimalInAndOutProc()
- *   Calls a SQL procedure with input and output parameters of the BigDecimal 
- *   data type.
- *   Excluded from JSR169/j2ME tests because of the BigDecimal.
- * <BR>
- * xtestBatchUpdate()
- *   Batches up calls to a SQL procedure that updates a value in a table.
- *   Excluded from environments than don't have JDBC 2 DriverManager.
- * <BR>
- * xtestBatchUpdateError()
- *   Batches up many calls to a SQL procedure that updates a value in a table;
- *   one of the commands in the batch is expected to fail, but others should
- *   succeed.
- *   Excluded from environments than don't have JDBC 2 DriverManager.
+ * exercises the CallableStatement interface with various combinations of
+ *
+ *   IN, OUT and INOUT registered parameters,
+ *   SQL functions and procedures, and
+ *   different data types.
  */
 public class CallableTest extends BaseJDBCTestCase {
 
@@ -806,8 +747,8 @@ public class CallableTest extends BaseJDBCTestCase {
     // SQL ROUTINES (functions and procedures)
 
     /** 
-     * SQL function that squares the value of the input arg, then adds the 
-     * input arg to that result.
+     * External code for the ONE_IN_ONE_OUT_FUNC SQL function, which squares 
+     * the value of the input arg, then adds the input arg to that result.
      *
      * @param p1 integer input argument to be used in calculation
      */
@@ -817,8 +758,8 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
-     * SQL procedure that sets the value of the third arg to the sum of the 
-     * first two.
+     * External code for the TWO_IN_ONE_OUT_PROC SQL procedure, which sets the 
+     * value of the third arg to the sum of the first two.
      *
      * @param p1 integer input parameter to be used in calculation
      * @param p2 integer input parameter to be used in calculation
@@ -830,7 +771,8 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
-     * SQL function that takes no parameters and returns the value 55.
+     * External code for the NO_IN_ONE_OUT_FUNC SQL function, which takes no 
+     * parameters and returns the value 55.
      */
     public static int noInOneOutFunc ()
     {
@@ -838,7 +780,8 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
-     * SQL procedure that outputs a message.
+     * External code for the SYSTEM_OUT_PRINTLN_PROC SQL procedure, which
+     * outputs a message to System out.
      */
     public static void systemOutPrintlnProc()
     {
@@ -846,8 +789,9 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
-     * SQL procedure that sets the value of the Long varbinary column in the
-     * LONGVARBINARY_TABLE table given the input parameter.
+     * External code for the UPDATE_LONGVARBINARY_PROC SQL procedure, which 
+     * sets the value of the Long varbinary column in the LONGVARBINARY_TABLE 
+     * table given the input parameter.
      *
      * @param in_param input parameter to be used for database update
      * @exception SQLException if a database error occurs
@@ -868,10 +812,12 @@ public class CallableTest extends BaseJDBCTestCase {
     } 
 
     /**
-     * SQL procedure that fetches max, min, and null values from a table
-     * with numeric columns.
+     * External code for the NUMERIC_BOUNDARIES_PROC SQL procedure, which 
+     * fetches max, min, and null values from a table with numeric columns.
      *
-     * @param in_param input parameter to be used for database update
+     * @param param1 output parameter that returns maxcol value
+     * @param param2 output parameter that returns mincol value
+     * @param param3 output parameter that returns nulcol value
      * @exception SQLException if a database error occurs
      */
     public static void numericBoundariesProc (BigDecimal[] param1,
@@ -902,8 +848,8 @@ public class CallableTest extends BaseJDBCTestCase {
 
 
     /**
-     * SQL procedure that tests INT and OUT parameters with the BigDecimal
-     * data type.
+     * External code for the BIGDECIMAL_IN_AND_OUT_PROC SQL procedure, which
+     * tests INT and OUT parameters with the BigDecimal data type.
      *
      * @param bd1   input parameter
      * @param bdr1  output parameter set to bd1 * bd2
@@ -931,7 +877,8 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
-     * SQL procedure that tests IN and OUT parameters with many numeric types.
+     * External code for the NUMERIC_TYPES_IN_AND_OUT_PROC SQL procedure, 
+     * which tests IN and OUT parameters with many numeric types.
      * Also tests method overload for manyTypesInAndOutProc.
      *
      * @param s     short      input parameter
@@ -962,7 +909,8 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
-     * SQL procedure that tests IN / OUT parameters with many non-numeric types.
+     * External code for the NON_NUMERIC_TYPES_IN_AND_OUT_PROC SQL procedure,
+     * which tests IN / OUT parameters with many non-numeric types.
      * Also tests method overload for manyTypesInAndOutProc.
      *
      * @param dt    date       input parameter
@@ -987,7 +935,8 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
-     * SQL procedure that tests INOUT parameters with many types.
+     * External code for the MANY_TYPES_INOUT_PROC SQL procedure, which tests 
+     * INOUT parameters with many types.
      *
      * @param s1    short  input parameter
      * @param s2    short  output parameter
@@ -999,8 +948,8 @@ public class CallableTest extends BaseJDBCTestCase {
      * @param f2    float  output parameter
      * @param d1    double input parameter
      * @param d2    double output parameter
-     * @param 11    time   input parameter
-     * @param 12    time   output parameter
+     * @param t1    time   input parameter
+     * @param t2    time   output parameter
      */
     public static void manyTypesInoutProc (
         short s1, short s2[], int p1, int p2[], long l1, long l2[],
@@ -1016,10 +965,12 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     /**
-     * SQL procedure that updates data in a table for a given id.
-     * Used by xtestBatchUpdateProc.
+     * External code for the BATCH_UPDATE_PROC SQL procedure, which updates 
+     * data in a table for a given id.
+     * Called by xtestBatchUpdateProc.
      *
-     * @param pk_param BigDecimal id of the value to be updated
+     * @param id Id to be updated
+     * @param id_newval New value to which the id should be updated
      * @exception SQLException if a database error occurs
      */
     public static void batchUpdateProc (int id, int id_newval)
