@@ -247,7 +247,7 @@ ij> show connections;
 No connections available.
 ij> -- Database shutdown - check user - should fail, not owner, cf DERBY-2264
 connect 'wombat;user=francois;password=paceesalute;shutdown=true';
-ERROR 2850H: DERBY SQL error: SQLCODE: -1, SQLSTATE: 2850H, SQLERRMC: FRANCOISwombat2850H
+ERROR 2850H: DERBY SQL error: SQLCODE: -1, SQLSTATE: 2850H, SQLERRMC: User 'FRANCOIS' cannot shut down database 'wombat'. Only the database owner can perform this operation.
 ij> -- Database shutdown - check owner - should succeed
 connect 'wombat;user=system;password=manager;shutdown=true';
 ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'wombat' shutdown.
@@ -255,7 +255,7 @@ ij> -- beetle 5468
 disconnect all;
 ij> -- Database shutdown - check user - should fail, not owner, cf DERBY-2264
 connect 'myDB;user=jerry;password=SacreBleu;shutdown=true';
-ERROR 2850H: DERBY SQL error: SQLCODE: -1, SQLSTATE: 2850H, SQLERRMC: JERRYmyDB2850H
+ERROR 2850H: DERBY SQL error: SQLCODE: -1, SQLSTATE: 2850H, SQLERRMC: User 'JERRY' cannot shut down database 'myDB'. Only the database owner can perform this operation.
 ij> -- Database shutdown - check owner - should succeed
 connect 'myDB;user=system;password=manager;shutdown=true';
 ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'myDB' shutdown.
