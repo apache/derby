@@ -61,7 +61,7 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             "maxfieldsize",
             //"LOBTest", TODO: investigate failure/convert
             // "parameterMapping", TODO: investigate failure/convert
-            // "setTransactionIsolation", TODO: investigate failure/convert
+            "setTransactionIsolation", 
             "SetQueryTimeoutTest",
             "prepStmtNull",
             // "testRelative", TODO: passes embedded, fails client - investigate failure/convert

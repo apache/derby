@@ -10,6 +10,5 @@ jdbcapi/secureUsers.sql
 jdbcapi/secureUsers1.sql
 jdbcapi/LOBTest.java
 jdbcapi/parameterMapping.java
-jdbcapi/setTransactionIsolation.java
 jdbcapi/testRelative.java
 jdbcapi/SURTest_ij.sql

@@ -240,21 +240,25 @@ public class setTransactionIsolation{
             ResultSet rs = s.executeQuery("select count(*) from t3");
             rs.next();
             int count = rs.getInt(1);
+            boolean passCommitCheck = false;
             switch (count) {
             case 1:
-                System.out.println("count="+ count + 
-                                   ", setTransactionIsolation() does not commit");
+                // Embedded doesn't commit
+                if (TestUtil.isEmbeddedFramework())
+                    passCommitCheck = true;
                 break;
             case 2:
-                System.out.println("count="+ count + 
-                                   ", setTransactionIsolation() commits");
+                // Client commits
+                if (TestUtil.isNetFramework())
+                    passCommitCheck = true;
                 break;
             default:
                 System.out.println("FAIL: count="+ count + 
                                    ", unexepected behaviour from testSetTransactionIsolationCommits");
                 break;
             }
-            rs.close();
+            System.out.println("passCommitCheck=" +passCommitCheck);
+            rs.close(); 
             s.close();
 		} catch (SQLException se) {
 			System.out.println(se.getMessage());
