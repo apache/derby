@@ -7,10 +7,15 @@ import java.sql.Statement;
 
 import junit.framework.Test;
 
+import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
+/**
+ * @author kmarsden
+ *
+ */
 public class CastingTest extends BaseJDBCTestCase {
 
     public CastingTest(String name) {
@@ -222,7 +227,31 @@ public static String[][]SQLData =
 
 
 };
-
+   /*
+    * explicitCastValues is a table of expected values for the testExplicitCasts fixture
+    * System.out.print statements in testExplicitCast were used to generate this table
+    * and  remain in comments in testExplicitCasts in case it needs to be regenerated.
+    */ 
+    private static final String[][] explicitCastValues = {
+    /*SMALLINT*/ {"0","0","0","0.00000","0.0","0.0","0                                                           ","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception"},
+    /*INTEGER*/ {"11","11","11","11.00000","11.0","11.0","11                                                          ","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception"},
+    /*BIGINT*/ {"22","22","22","22.00000","22.0","22.0","22                                                          ","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception"},
+    /*DECIMAL(10,5)*/ {"3","3","3","3.30000","3.3","3.3","3.30000                                                     ","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception"},
+    /*REAL*/ {"4","4","4","4.40000","4.4","4.400000095367432","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception"},
+    /*DOUBLE*/ {"5","5","5","5.50000","5.5","5.5","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception"},
+    /*CHAR(60)*/ {"0","11","22","3.30000","Exception","Exception","7                                                           ","8                                                           ","9                                                           ","Exception","Exception","Exception","13                                                          ","2000-01-01","15:30:20","2000-01-01 15:30:20.0","Exception"},
+    /*VARCHAR(60)*/ {"0","11","22","3.30000","Exception","Exception","7                                                           ","8","9","Exception","Exception","Exception","13","2000-01-01","15:30:20","2000-01-01 15:30:20.0","Exception"},
+    /*LONG VARCHAR*/ {"Exception","Exception","Exception","Exception","Exception","Exception","7                                                           ","8","9","Exception","Exception","Exception","13","Exception","Exception","Exception","Exception"},
+    /*CHAR(60) FOR BIT DATA*/ {"Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","10aa20202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020","10bb20202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020","10cc20202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020","Exception","Exception","Exception","Exception","01dd20202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020"},
+    /*VARCHAR(60) FOR BIT DATA*/ {"Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","10aa20202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020","10bb","10cc","Exception","Exception","Exception","Exception","01dd"},
+    /*LONG VARCHAR FOR BIT DATA*/ {"Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","10aa20202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020","10bb","10cc","Exception","Exception","Exception","Exception","01dd"},
+    /*CLOB(1k)*/ {"Exception","Exception","Exception","Exception","Exception","Exception","13                                                          ","13","13","Exception","Exception","Exception","13","Exception","Exception","Exception","Exception"},
+    /*DATE*/ {"Exception","Exception","Exception","Exception","Exception","Exception","2000-01-01                                                  ","2000-01-01","Exception","Exception","Exception","Exception","Exception","2000-01-01","Exception","Exception","Exception"},
+    /*TIME*/ {"Exception","Exception","Exception","Exception","Exception","Exception","15:30:20                                                    ","15:30:20","Exception","Exception","Exception","Exception","Exception","Exception","15:30:20","Exception","Exception"},
+    /*TIMESTAMP*/ {"Exception","Exception","Exception","Exception","Exception","Exception","2000-01-01 15:30:20.0                                       ","2000-01-01 15:30:20.0","Exception","Exception","Exception","Exception","Exception","2000-01-01","15:30:20","2000-01-01 15:30:20.0","Exception"},
+    /*BLOB(1k)*/ {"Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","01dd"}
+    };
+    
     protected void setUp() throws SQLException {
         Connection conn = getConnection();
         Statement scb = conn.createStatement();
@@ -235,19 +264,8 @@ public static String[][]SQLData =
                     + " )";
 
             scb.executeUpdate(createSQL);
+            
         }
-
-        scb.close();
-        conn.commit();
-    }
-
-    public void testAssignments() throws SQLException {
-
-        Connection conn = getConnection();
-
-        Statement scb = conn.createStatement();
-        ResultSet rs = null;
-
         // * testing literal inserts
 
         for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
@@ -265,6 +283,18 @@ public static String[][]SQLData =
                     
                 }
             }
+        scb.close();
+        conn.commit();
+    }
+
+    public void testAssignments() throws SQLException {
+
+        Connection conn = getConnection();
+
+        Statement scb = conn.createStatement();
+        ResultSet rs = null;
+
+     
         // Try to insert each sourceType into the targetType table
         for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
             for (int sourceType = 0; sourceType < SQLTypes.length; sourceType++) {
@@ -313,6 +343,7 @@ public static String[][]SQLData =
         for (int sourceType = 0; sourceType < SQLTypes.length; sourceType++) {
 
             String sourceTypeName = SQLTypes[sourceType];
+            //System.out.print("/*" + sourceTypeName + "*/ {");
             for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
                 for (int targetType = 0; targetType < SQLTypes.length; targetType++) {
                     String query = null;
@@ -329,15 +360,35 @@ public static String[][]SQLData =
                                 + SQLTypes[sourceType] + ") AS "
                                 + SQLTypes[targetType] + " )";
                         rs = s.executeQuery(query);
-                        JDBC.assertDrainResults(rs);
+                        rs.next();
+                        String val = rs.getString(1);
+                        if (dataOffset == 0)
+                            assertNull(val);
+                        else
+                        {
+                            //System.out.print("\"" + val + "\"");
+                            assertEquals(val,explicitCastValues[sourceType][targetType]);
+                        }
                         checkSupportedCast(sourceType, targetType);
                     } catch (SQLException se) {
+                        if (dataOffset != 0)
+                        {
+                            //System.out.print("\"Exception\"");
+                        }
                         String sqlState = se.getSQLState();
                         if (!isSupportedCast(sourceType, targetType)) {
                             assertTrue(isCastException(se));
                         } else
                             throw se;
                     }
+                    /*
+                    if (dataOffset > 0)
+                        if (targetType == SQLTypes.length -1)
+                            System.out.println("},");
+                        else 
+                            System.out.print(",");
+                     */
+
                 }
         }
 
@@ -362,7 +413,9 @@ public static String[][]SQLData =
                         + " WHERE c = " + SQLData[type][dataOffset];
 
                 rs = scb.executeQuery(compareSQL);
-                JDBC.assertDrainResults(rs);
+                //JDBC.assertDrainResults(rs);
+                // should return 1 row
+                assertTrue(rs.next());
             } catch (SQLException se) {
                 // literal comparisons are ok for everything but Lob and long
                 assertTrue(isLongType(type));
@@ -395,10 +448,10 @@ public static String[][]SQLData =
                                 + " WHERE c = CAST(" + convertString + " AS "
                                 + sourceTypeName + ")";
 
-                        // System.out.println(compareSQL);
+                    
                         rs = scb.executeQuery(compareSQL);
                         JDBC.assertDrainResults(rs);
-                        // JDBCDisplayUtil.DisplayResults(System.out,rs,conn);
+                        
                         checkSupportedComparison(sourceType, targetType);
 
                     } catch (SQLException se) {

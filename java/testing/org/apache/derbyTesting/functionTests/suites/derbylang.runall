@@ -8,7 +8,6 @@ lang/aggregateOptimization.sql
 lang/altertable.sql
 lang/authorize.sql
 lang/autoincrement.sql
-lang/casting.java
 lang/checkConstraint.sql
 lang/closed.java
 lang/coalesceTests.java
