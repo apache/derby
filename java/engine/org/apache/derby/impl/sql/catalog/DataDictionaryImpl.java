@@ -8490,6 +8490,11 @@ public final class	DataDictionaryImpl
      * @param return_type   null for procedure.  For functions the return type
      *                      of the function.
      *
+     * @param tc            an instance of the TransactionController
+     *
+     * @param procClass     the fully qualified name of the class that contains
+     *                      java definitions for the stored procedures
+     *
      * @return UUID 		UUID of system routine that got created.
      *
 	 * @exception  StandardException  Standard exception policy.
@@ -8503,7 +8508,8 @@ public final class	DataDictionaryImpl
 	int						num_result_sets,
     short                   routine_sql_control,
     TypeDescriptor          return_type,
-    TransactionController   tc)
+    TransactionController   tc,
+    String procClass)
         throws StandardException
     {
         int num_args = 0;
@@ -8519,9 +8525,6 @@ public final class	DataDictionaryImpl
                 SanityManager.ASSERT(arg_names.length == arg_types.length);
             }
         }
-
-        // Actual procedures are in this class:
-		String procClass = "org.apache.derby.catalog.SystemProcedures";
 
         // all args are only "in" arguments
         int[] arg_modes = null;
@@ -8573,6 +8576,55 @@ public final class	DataDictionaryImpl
             ads, null, DataDictionary.SYSALIASES_CATALOG_NUM, false, tc);
 
 		return routine_uuid;
+    }
+
+    /**
+     * Generic create procedure routine.
+     * Takes the input procedure and inserts it into the appropriate
+     * catalog.
+     *
+     * Assumes all arguments are "IN" type.
+     *
+     * @param routine_name  name of the routine in java and the SQL
+     *                      procedure name.
+     *
+     * @param arg_names     String array of procedure argument names in order.
+     *
+     * @param arg_types     Internal SQL types of the arguments
+     *
+     * @param routine_sql_control
+     *                      One of the RoutineAliasInfo constants:
+     *                          MODIFIES_SQL_DATA
+     *                          READS_SQL_DATA
+     *                          CONTAINS_SQL
+     *                          NO_SQL
+     *
+     * @param return_type   null for procedure.  For functions the return type
+     *                      of the function.
+     *
+     * @param tc            an instance of the TransactionController
+     *
+     * @return UUID         UUID of system routine that got created.
+     *
+     * @throws  StandardException  Standard exception policy.
+     **/
+    private final UUID createSystemProcedureOrFunction(
+    String                  routine_name,
+    UUID                    schema_uuid,
+    String[]                arg_names,
+    TypeDescriptor[]        arg_types,
+    int                     num_out_param,
+    int                     num_result_sets,
+    short                   routine_sql_control,
+    TypeDescriptor          return_type,
+    TransactionController   tc)
+        throws StandardException
+    {
+        UUID routine_uuid = createSystemProcedureOrFunction(routine_name,
+        schema_uuid, arg_names, arg_types,
+        num_out_param, num_result_sets, routine_sql_control,
+        return_type, tc, "org.apache.derby.catalog.SystemProcedures");
+        return routine_uuid;
     }
 
     /**
@@ -9207,6 +9259,9 @@ public final class	DataDictionaryImpl
         create_10_2_system_procedures(tc, sysUtilUUID);
         // add 10.3 specific system procedures
         create_10_3_system_procedures(tc, sysUtilUUID);
+        //create 10.3 functions used by LOB methods.
+        UUID sysIBMUUID = getSysIBMSchemaDescriptor().getUUID();
+        create_10_3_LOB_Specific_functions(tc, sysIBMUUID);
     }
 
     /**
@@ -9984,7 +10039,402 @@ public final class	DataDictionaryImpl
         }
     }
 
+    /**
+     * Create system procedures added in version 10.3.
+     * Create 10.3 system procedures related to the LOB Methods ,
+     * called by either code creating new
+     * database, or code doing hard upgrade from previous version.
+     *
+     * @param tc            an instance of the TransactionController class.
+     * @param sysUtilUUID   uuid of the SYSUTIL schema.
+     *
+     * @throws StandardException  Standard exception policy.
+     **/
+    private void create_10_3_LOB_Specific_functions(
+        TransactionController   tc,
+        UUID                    schema_uuid)
+        throws StandardException {
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = null;
 
+            TypeDescriptor[] arg_types = null;
+
+            routine_uuid = createSystemProcedureOrFunction(
+                "CLOBCREATELOCATOR",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER, Integer.MAX_VALUE),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR"};
+
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER)};
+
+            routine_uuid = createSystemProcedureOrFunction(
+                "CLOBRELEASELOCATOR",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                null,
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","SEARCHSTR","POS"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARCHAR),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "CLOBGETPOSITIONFROMSTRING",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","SEARCHLOCATOR","POS"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "CLOBGETPOSITIONFROMLOCATOR",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "CLOBGETLENGTH",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","POS","LEN"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "CLOBGETSUBSTRING",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","POS","LEN","REPLACESTR"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARCHAR)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "CLOBSETSTRING",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                null,
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","LEN"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "CLOBTRUNCATE",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                null,
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+
+        //Now create the Stored procedures required for BLOB
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = null;
+
+            TypeDescriptor[] arg_types = null;
+
+            routine_uuid = createSystemProcedureOrFunction(
+                "BLOBCREATELOCATOR",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER, Integer.MAX_VALUE),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR"};
+
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER)};
+
+            routine_uuid = createSystemProcedureOrFunction(
+                "BLOBRELEASELOCATOR",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                null,
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","SEARCHBYTES","POS"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARBINARY),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "BLOBGETPOSITIONFROMBYTES",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","SEARCHLOCATOR","POS"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "BLOBGETPOSITIONFROMLOCATOR",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "BLOBGETLENGTH",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","POS","LEN"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "BLOBGETBYTES",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARBINARY, Limits.DB2_VARCHAR_MAXWIDTH),
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","POS","LEN","REPLACEBYTES"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.VARBINARY)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "BLOBSETBYTES",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                null,
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+        {
+            UUID routine_uuid = null;
+            String[] arg_names = {"LOCATOR","LEN"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.INTEGER),
+                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    Types.BIGINT)
+            };
+            routine_uuid = createSystemProcedureOrFunction(
+                "BLOBTRUNCATE",
+                schema_uuid,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                null,
+                tc,
+                "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+    }
 
     /**
      * Create system procedures added in version 10.3.

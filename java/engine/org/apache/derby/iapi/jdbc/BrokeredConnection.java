@@ -615,4 +615,25 @@ public abstract class BrokeredConnection implements EngineConnection
         return holdability;
         
     }
+	/**
+	* Dummy implementation for method in EngineConnection.
+        *
+	* @param LOBReference The object which contains the LOB object that
+	*                     that is added to the HashMap.
+	* @return an integer that represents the locator that has been
+	*         allocated to this LOB.
+	*/
+	public int addLOBMapping(Object LOBReference) { return -1;}
+
+	/**
+	* Dummy implementation for method in EngineConnection.
+	*/
+	public void clearLOBMapping() {}
+
+	/**
+	* Dummy implementation for method in EngineConnection.
+	* @param key the integer that represents the LOB locator value.
+	* @return the LOB Object corresponding to this locator.
+	*/
+	public Object getLOBMapping(int key) { return null;}
 }

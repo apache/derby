@@ -1500,6 +1500,7 @@ public interface SQLState {
     String IO_ERROR_UPON_LOB_FREE = "XJ214.S";
     String LOB_OBJECT_INVALID = "XJ215.S";
     String LOB_OBJECT_LENGTH_UNKNOWN_YET = "XJ216.S";
+    String LOB_LOCATOR_INVALID = "XJ217.S";
     
     //XN - Network-level messages
     String NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK         = "XN001.S";

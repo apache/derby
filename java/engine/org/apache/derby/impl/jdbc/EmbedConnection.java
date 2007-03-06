@@ -52,12 +52,16 @@ import java.sql.ResultSet;
 */
 import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import java.util.HashMap;
 import java.util.Properties;
+import java.util.Iterator;
 
 import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
 
@@ -117,6 +121,8 @@ public abstract class EmbedConnection implements EngineConnection
 
 	final TransactionResourceImpl tr; // always access tr thru getTR()
 
+	private HashMap lobHashMap = null;
+	private int lobHMKey = 0;
 
 	//////////////////////////////////////////////////////////
 	// STATE (copied to new nested connections, but nesting
@@ -950,6 +956,7 @@ public abstract class EmbedConnection implements EngineConnection
 			try
 			{
 		    	getTR().commit();
+		    	clearLOBMapping();
 			}
             catch (Throwable t)
 			{
@@ -985,6 +992,7 @@ public abstract class EmbedConnection implements EngineConnection
 			try
 			{
 		    	getTR().rollback();
+		    	clearLOBMapping();
 			} catch (Throwable t) {
 				throw handleException(t);
 			}
@@ -2057,4 +2065,118 @@ public abstract class EmbedConnection implements EngineConnection
     }
 
 
+	/**
+	*
+	* Constructs an object that implements the <code>Clob</code> interface. The object
+	* returned initially contains no data.  The <code>setAsciiStream</code>,
+	* <code>setCharacterStream</code> and <code>setString</code> methods of
+	* the <code>Clob</code> interface may be used to add data to the <code>Clob</code>.
+	*
+	* @return An object that implements the <code>Clob</code> interface
+	* @throws SQLException if an object that implements the
+	* <code>Clob</code> interface can not be constructed, this method is
+	* called on a closed connection or a database access error occurs.
+	*
+	*/
+	public Clob createClob() throws SQLException {
+		checkIfClosed();
+		return new EmbedClob("", this);
+	}
+
+	/**
+	*
+	* Constructs an object that implements the <code>Blob</code> interface. The object
+	* returned initially contains no data.  The <code>setBinaryStream</code> and
+	* <code>setBytes</code> methods of the <code>Blob</code> interface may be used to add data to
+	* the <code>Blob</code>.
+	*
+	* @return  An object that implements the <code>Blob</code> interface
+	* @throws SQLException if an object that implements the
+	* <code>Blob</code> interface can not be constructed, this method is
+	* called on a closed connection or a database access error occurs.
+	*
+	*/
+	public Blob createBlob() throws SQLException {
+		checkIfClosed();
+		return new EmbedBlob(new byte[0], this);
+	}
+
+	/**
+	* Add the locator and the corresponding LOB object into the
+	* HashMap
+	*
+	* @param lobHashMap The object which contains the LOB object that
+	*                     that is added to the HashMap.
+	* @return an integer that represents the locator that has been
+	*         allocated to this LOB.
+	*/
+	public int addLOBMapping(Object LOBReference) {
+		int loc = getIncLOBKey();
+		getlobHMObj().put(new Integer(loc), LOBReference);
+		return loc;
+	}
+
+	/**
+	* Remove the key(LOCATOR) from the hash table.
+	* @param key an integer that represents the locator that needs to be
+	*            removed from the table.
+	*/
+	public void removeLOBMapping(int key) {
+		getlobHMObj().remove(new Integer(key));
+	}
+
+	/**
+	* Get the LOB reference corresponding to the locator.
+	* @param key the integer that represents the LOB locator value.
+	* @return the LOB Object corresponding to this locator.
+	*/
+	public Object getLOBMapping(int key) {
+		return getlobHMObj().get(new Integer(key));
+	}
+
+	/**
+	* Clear the HashMap of all entries.
+	* Called when a commit or rollback of the transaction
+	* happens.
+	*/
+	public void clearLOBMapping() throws SQLException {
+
+		//free all the lob resources in the HashMap
+		//initialize the locator value to 0 and
+		//the hash table object to null.
+		if (lobHashMap != null) {
+			for (Iterator e = getlobHMObj().keySet().iterator();
+				e.hasNext() ;) {
+				Object obj = e.next();
+				if (obj instanceof Clob)  {
+					EmbedClob temp = (EmbedClob)obj;
+					temp.free();
+				}
+				if (obj instanceof Blob) {
+					EmbedBlob temp = (EmbedBlob)obj;
+					temp.free();
+				}
+			}
+		}
+		getlobHMObj().clear();
+	}
+
+	/**
+	* Return the current locator value
+	* @return an integer that represents the most recent locator value.
+	*/
+	private int getIncLOBKey() {
+		return ++rootConnection.lobHMKey;
+	}
+
+	/**
+	* Return the Hash Map in the root connection
+	* @return the HashMap that contains the locator to LOB object mapping
+	*/
+	public HashMap getlobHMObj() {
+		if (rootConnection.lobHashMap == null) {
+			rootConnection.lobHashMap = new HashMap();
+		}
+		return rootConnection.lobHashMap;
+	}
 }

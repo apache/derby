@@ -143,6 +143,36 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
           "org.apache.derby.catalog.SystemProcedures." +
           "SYSCS_GET_RUNTIMESTATISTICS", new GeneratedId() },
+        { null, "SYSIBM", "BLOBCREATELOCATOR",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "BLOBCREATELOCATOR", new GeneratedId() },
+        { null, "SYSIBM", "BLOBGETBYTES",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "BLOBGETBYTES", new GeneratedId() },
+        { null, "SYSIBM", "BLOBGETLENGTH",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "BLOBGETLENGTH", new GeneratedId() },
+        { null, "SYSIBM", "BLOBGETPOSITIONFROMBYTES",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "BLOBGETPOSITIONFROMBYTES", new GeneratedId() },
+        { null, "SYSIBM", "BLOBGETPOSITIONFROMLOCATOR",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "BLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
+        { null, "SYSIBM", "CLOBCREATELOCATOR",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "CLOBCREATELOCATOR", new GeneratedId() },
+        { null, "SYSIBM", "CLOBGETLENGTH",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "CLOBGETLENGTH", new GeneratedId() },
+        { null, "SYSIBM", "CLOBGETPOSITIONFROMLOCATOR",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "CLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
+        { null, "SYSIBM", "CLOBGETPOSITIONFROMSTRING",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "CLOBGETPOSITIONFROMSTRING", new GeneratedId() },
+        { null, "SYSIBM", "CLOBGETSUBSTRING",
+          "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+          "CLOBGETSUBSTRING", new GeneratedId() },
     };
 
     public void testGetFunctionsNullNullNull() throws SQLException {
@@ -175,6 +205,36 @@ public class TestDbMetaData extends BaseJDBCTestCase {
             { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
               "org.apache.derby.catalog.SystemProcedures." +
               "SYSCS_GET_RUNTIMESTATISTICS", new GeneratedId() },
+            { null, "SYSIBM", "BLOBCREATELOCATOR",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "BLOBCREATELOCATOR", new GeneratedId() },
+            { null, "SYSIBM", "BLOBGETBYTES",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "BLOBGETBYTES", new GeneratedId() },
+            { null, "SYSIBM", "BLOBGETLENGTH",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "BLOBGETLENGTH", new GeneratedId() },
+            { null, "SYSIBM", "BLOBGETPOSITIONFROMBYTES",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "BLOBGETPOSITIONFROMBYTES", new GeneratedId() },
+            { null, "SYSIBM", "BLOBGETPOSITIONFROMLOCATOR",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "BLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
+            { null, "SYSIBM", "CLOBCREATELOCATOR",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "CLOBCREATELOCATOR", new GeneratedId() },
+            { null, "SYSIBM", "CLOBGETLENGTH",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "CLOBGETLENGTH", new GeneratedId() },
+            { null, "SYSIBM", "CLOBGETPOSITIONFROMLOCATOR",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "CLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
+            { null, "SYSIBM", "CLOBGETPOSITIONFROMSTRING",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "CLOBGETPOSITIONFROMSTRING", new GeneratedId() },
+            { null, "SYSIBM", "CLOBGETSUBSTRING",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "CLOBGETSUBSTRING", new GeneratedId() },
         };
         JDBC.assertFullResultSet(rs, sysFunctions, false);
     }
@@ -191,6 +251,30 @@ public class TestDbMetaData extends BaseJDBCTestCase {
             { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
               "org.apache.derby.catalog.SystemProcedures." +
               "SYSCS_GET_RUNTIMESTATISTICS", new GeneratedId() },
+            { null, "SYSIBM", "BLOBGETBYTES",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "BLOBGETBYTES", new GeneratedId() },
+            { null, "SYSIBM", "BLOBGETLENGTH",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "BLOBGETLENGTH", new GeneratedId() },
+            { null, "SYSIBM", "BLOBGETPOSITIONFROMBYTES",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "BLOBGETPOSITIONFROMBYTES", new GeneratedId() },
+            { null, "SYSIBM", "BLOBGETPOSITIONFROMLOCATOR",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "BLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
+            { null, "SYSIBM", "CLOBGETLENGTH",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "CLOBGETLENGTH", new GeneratedId() },
+            { null, "SYSIBM", "CLOBGETPOSITIONFROMLOCATOR",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "CLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
+            { null, "SYSIBM", "CLOBGETPOSITIONFROMSTRING",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "CLOBGETPOSITIONFROMSTRING", new GeneratedId() },
+            { null, "SYSIBM", "CLOBGETSUBSTRING",
+              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
+              "CLOBGETSUBSTRING", new GeneratedId() },
         };
         JDBC.assertFullResultSet(rs, getFunctions, false);
     }
