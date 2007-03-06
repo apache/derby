@@ -137,7 +137,7 @@ final class LockSpace implements CompatibilitySpace {
 		Unlock all the locks in a group and then remove the group.
 	*/
 
-	synchronized void unlockGroup(LockSet lset, Object group) {
+	synchronized void unlockGroup(LockTable lset, Object group) {
 		HashMap dl = (HashMap) groups.remove(group);
 		if (dl == null)
 			return;
@@ -184,7 +184,7 @@ final class LockSpace implements CompatibilitySpace {
 	/**
 		Unlock all locks in the group that match the key
 	*/
-	synchronized void unlockGroup(LockSet lset, Object group, Matchable key) {
+	synchronized void unlockGroup(LockTable lset, Object group, Matchable key) {
 		HashMap dl = (HashMap) groups.get(group);
 		if (dl == null)
 			return; //  no group at all
@@ -264,29 +264,17 @@ final class LockSpace implements CompatibilitySpace {
 
 	}
 
-	synchronized int unlockReference(LockSet lset, Lockable ref, Object qualifier, Object group) {
+	synchronized int unlockReference(LockTable lset, Lockable ref,
+									 Object qualifier, Object group) {
 
 		// look for locks matching our reference and qualifier.
 		HashMap dl = (HashMap) groups.get(group);
 		if (dl == null)
 			return 0;
 
-		Lock lockInGroup;
-		synchronized (lset) {
-			Control control = lset.getControl(ref);
-			if (control == null)
-				return 0;
-
-			Lock setLock = control.getLock(this, qualifier);
-			if (setLock == null)
-				return 0;
-
-			lockInGroup = (Lock) dl.remove(setLock);
-			if (lockInGroup == null)
-				return 0;
-			setLock = null;
-
-			lset.unlock(lockInGroup, 1);
+		Lock lockInGroup = lset.unlockReference(this, ref, qualifier, dl);
+		if (lockInGroup == null) {
+			return 0;
 		}
 
 		if (lockInGroup.getCount() == 1) {

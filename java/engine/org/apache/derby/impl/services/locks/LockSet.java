@@ -34,7 +34,6 @@ import org.apache.derby.iapi.services.diag.DiagnosticUtil;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Enumeration;
@@ -70,7 +69,7 @@ import java.util.Map;
 	@see LockControl
 */
 
-final class LockSet {
+final class LockSet implements LockTable {
 	/*
 	** Fields
 	*/
@@ -85,8 +84,8 @@ final class LockSet {
 		<BR>
 		MT - immutable
 	*/
-	protected int deadlockTimeout = Property.DEADLOCK_TIMEOUT_DEFAULT * 1000;
-	protected int waitTimeout = Property.WAIT_TIMEOUT_DEFAULT * 1000;
+	private int deadlockTimeout = Property.DEADLOCK_TIMEOUT_DEFAULT * 1000;
+	private int waitTimeout = Property.WAIT_TIMEOUT_DEFAULT * 1000;
 
 //EXCLUDE-START-lockdiag- 
 
@@ -487,7 +486,7 @@ forever:	for (;;) {
 		item.
 
 	*/
-	void unlock(Latch item, int unlockCount) {
+	public void unlock(Latch item, int unlockCount) {
 
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
@@ -567,13 +566,148 @@ forever:	for (;;) {
 			nextGrant.wakeUp(Constants.WAITING_LOCK_GRANT);
 		}
 	}
+
+    /**
+     * Unlock an object once if it is present in the specified group. Also
+     * remove the object from the group.
+     *
+     * @param space the compatibility space
+     * @param ref a reference to the locked object
+     * @param qualifier qualifier of the lock
+     * @param group a map representing the locks in a group
+     * @return the corresponding lock in the group map, or <code>null</code> if
+     * the object was not unlocked
+     */
+    public synchronized Lock unlockReference(CompatibilitySpace space,
+                                             Lockable ref, Object qualifier,
+                                             Map group) {
+
+        Control control = getControl(ref);
+        if (control == null) {
+            return null;
+        }
+
+        Lock setLock = control.getLock(space, qualifier);
+        if (setLock == null) {
+            return null;
+        }
+
+        Lock lockInGroup = (Lock) group.remove(setLock);
+        if (lockInGroup != null) {
+            unlock(lockInGroup, 1);
+        }
+
+        return lockInGroup;
+    }
+
+    /**
+     * Lock an object and release the lock immediately. Equivalent to
+     * <pre>
+     * Lock lock = lockTable.lockObject(space, ref, qualifier, timeout);
+     * lockTable.unlock(lock, 1);
+     * </pre>
+     * except that the implementation is more efficient.
+     *
+     * @param space the compatibility space
+     * @param ref a reference to the locked object
+     * @param qualifier qualifier of the lock
+     * @param timeout maximum time to wait in milliseconds
+     * (<code>LockFactory.NO_WAIT</code> means don't wait)
+     * @return <code>true</code> if the object was locked, or
+     * <code>false</code>if the timeout was <code>NO_WAIT</code> and the lock
+     * couldn't be obtained immediately
+     * @exception StandardException if the lock could not be obtained
+     */
+    public boolean zeroDurationLockObject(
+        CompatibilitySpace space, Lockable ref, Object qualifier, int timeout)
+            throws StandardException {
+
+        if (SanityManager.DEBUG) {
+            if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
+                D_LockControl.debugLock(
+                    "Zero Duration Lock Request before Grant: ",
+                    space, null, ref, qualifier, timeout);
+                if (SanityManager.DEBUG_ON(Constants.LOCK_STACK_TRACE)) {
+                    // The following will print the stack trace of the lock
+                    // request to the log.
+                    Throwable t = new Throwable();
+                    java.io.PrintWriter istream =
+                        SanityManager.GET_DEBUG_STREAM();
+                    istream.println("Stack trace of lock request:");
+                    t.printStackTrace(istream);
+                }
+            }
+        }
+
+        // Very fast zeroDurationLockObject() for unlocked objects.
+        // If no entry exists in the lock manager for this reference
+        // then it must be unlocked.
+        // If the object is locked then we perform a grantable
+        // check, skipping over any waiters.
+        // If the caller wants to wait and the lock cannot
+        // be granted then we do the slow join the queue and
+        // release the lock method.
+
+        synchronized (this) {
+            Control control = getControl(ref);
+            if (control == null) {
+                return true;
+            }
+
+            // If we are grantable, ignoring waiting locks then
+            // we can also grant this request now, as skipping
+            // over the waiters won't block them as we release
+            // the lock rightway.
+            if (control.isGrantable(true, space, qualifier)) {
+                return true;
+            }
+
+            // can't be granted and are not willing to wait.
+            if (timeout == C_LockFactory.NO_WAIT) {
+                return false;
+            }
+        }
+
+        Lock lock = lockObject(space, ref, qualifier, timeout);
+
+        if (SanityManager.DEBUG) {
+            if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
+                D_LockControl.debugLock(
+                    "Zero Lock Request Granted: ",
+                    space, null, ref, qualifier, timeout);
+            }
+        }
+
+        // and simply unlock it once
+        unlock(lock, 1);
+
+        return true;
+    }
+
+    /**
+     * Set the deadlock timeout.
+     *
+     * @param timeout deadlock timeout in milliseconds
+     */
+    public void setDeadlockTimeout(int timeout) {
+        deadlockTimeout = timeout;
+    }
+
+    /**
+     * Set the wait timeout.
+     *
+     * @param timeout wait timeout in milliseconds
+     */
+    public void setWaitTimeout(int timeout) {
+        waitTimeout = timeout;
+    }
 	
 	/*
 	** Non public methods
 	*/
 //EXCLUDE-START-lockdiag- 
 
-	void setDeadlockTrace(boolean val)
+	public void setDeadlockTrace(boolean val)
 	{
 		// set this without synchronization
 		deadlockTrace = val;
@@ -611,11 +745,11 @@ forever:	for (;;) {
     }
 
     /**
-     * Add all waiters in this lock table to a <code>Dictionary</code> object.
+     * Add all waiters in this lock table to a <code>Map</code> object.
      * <br>
      * MT - must be synchronized on this <code>LockSet</code> object.
      */
-    void addWaiters(Dictionary waiters) {
+    public void addWaiters(Map waiters) {
         for (Iterator it = locks.values().iterator(); it.hasNext(); ) {
             Control control = (Control) it.next();
             control.addWaiters(waiters);
@@ -623,11 +757,10 @@ forever:	for (;;) {
     }
 
 //EXCLUDE-START-lockdiag- 
-	/*
+	/**
 	 * make a shallow clone of myself and my lock controls
 	 */
-	/* package */
-	synchronized Map shallowClone()
+	public synchronized Map shallowClone()
 	{
 		HashMap clone = new HashMap();
 
@@ -653,7 +786,7 @@ forever:	for (;;) {
 	 * <BR>
 	 * MT - must be synchronized on this <code>LockSet</code> object.
 	 */
-	void oneMoreWaiter() {
+	public void oneMoreWaiter() {
 		blockCount++;
 	}
 
@@ -662,11 +795,11 @@ forever:	for (;;) {
 	 * <BR>
 	 * MT - must be synchronized on this <code>LockSet</code> object.
 	 */
-	void oneLessWaiter() {
+	public void oneLessWaiter() {
 		blockCount--;
 	}
 
-	synchronized boolean anyoneBlocked() {
+	public synchronized boolean anyoneBlocked() {
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(
 				blockCount >= 0, "blockCount should not be negative");
@@ -680,7 +813,7 @@ forever:	for (;;) {
 	 * <br>
 	 * MT - must be synchronized on this <code>LockSet</code> object.
 	 */
-	public final Control getControl(Lockable ref) {
+	private final Control getControl(Lockable ref) {
 		return (Control) locks.get(ref);
 	}
 }

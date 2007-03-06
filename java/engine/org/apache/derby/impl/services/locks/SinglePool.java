@@ -58,7 +58,7 @@ public final class SinglePool implements LockFactory
 		<BR>
 		MT - immutable - content dynamic : LockSet is ThreadSafe
 	*/
-	protected final LockSet			lockTable;
+	protected final LockTable lockTable;
 
 	/**
 		True if all deadlocks errors should be logged.
@@ -298,68 +298,8 @@ public final class SinglePool implements LockFactory
 										  Lockable ref, Object qualifier,
 										  int timeout)
 		throws StandardException {
-
-		if (SanityManager.DEBUG) {
-			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
-
-				D_LockControl.debugLock("Zero Duration Lock Request before Grant: ", 
-                    compatibilitySpace, (Object) null, ref, qualifier, timeout);
-
-                if (SanityManager.DEBUG_ON(Constants.LOCK_STACK_TRACE))
-                {
-                    // The following will print the stack trace of the lock
-                    // request to the log.  
-                    Throwable t = new Throwable();
-                   java.io.PrintWriter istream = SanityManager.GET_DEBUG_STREAM();
-
-                    istream.println("Stack trace of lock request:");
-                    t.printStackTrace(istream);
-                }
-			}
-		}
-
-		// Very fast zeroDurationlockObject() for unlocked objects.
-		// If no entry exists in the lock manager for this reference
-		// then it must be unlocked.
-		// If the object is locked then we perform a grantable
-		// check, skipping over any waiters.
-		// If the caller wants to wait and the lock cannot
-		// be granted then we do the slow join the queue and
-		// release the lock method.
-		synchronized (lockTable) {
-
-			Control control = lockTable.getControl(ref);
-			if (control == null) {
-				return true;
-			}
-
-			// If we are grantable, ignoring waiting locks then
-			// we can also grant this request now, as skipping
-			// over the waiters won't block them as we release
-			// the lock rightway.
-			if (control.isGrantable(true, compatibilitySpace, qualifier))
-				return true;
-
-			// can't be granted and are not willing to wait.
-			if (timeout == C_LockFactory.NO_WAIT)
-				return false;
-		}
-
-		Lock lock = 
-            lockTable.lockObject(compatibilitySpace, ref, qualifier, timeout);
-
-		if (SanityManager.DEBUG) {
-			if (SanityManager.DEBUG_ON(Constants.LOCK_TRACE)) {
-				D_LockControl.debugLock(
-                    "Zero Lock Request Granted: ", 
-                    compatibilitySpace, (Object) null, ref, qualifier, timeout);
-			}
-		}
-
-		// and simply unlock it once
-		lockTable.unlock(lock, 1);
-
-		return true;
+		return lockTable.zeroDurationLockObject(
+			compatibilitySpace, ref, qualifier, timeout);
 	}
 
 	public boolean isLockHeld(CompatibilitySpace compatibilitySpace,
@@ -458,9 +398,11 @@ public final class SinglePool implements LockFactory
 		String svalue = (String) value;
 
 		if (key.equals(Property.DEADLOCK_TIMEOUT))
-			lockTable.deadlockTimeout = getWaitValue(svalue,  Property.DEADLOCK_TIMEOUT_DEFAULT);
+			lockTable.setDeadlockTimeout(
+				getWaitValue(svalue,  Property.DEADLOCK_TIMEOUT_DEFAULT));
 		else if (key.equals(Property.LOCKWAIT_TIMEOUT))
-			lockTable.waitTimeout = getWaitValue(svalue,  Property.WAIT_TIMEOUT_DEFAULT);
+			lockTable.setWaitTimeout(
+				getWaitValue(svalue,  Property.WAIT_TIMEOUT_DEFAULT));
 		else if (key.equals(Property.DEADLOCK_MONITOR)) {
 			deadlockMonitor = PropertyUtil.booleanProperty(Property.DEADLOCK_MONITOR, svalue, false) ?
 				StandardException.REPORT_ALWAYS : StandardException.REPORT_DEFAULT;

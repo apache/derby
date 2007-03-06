@@ -25,6 +25,7 @@ import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.Latch;
 import java.util.List;
+import java.util.Map;
 
 public interface Control {
 
@@ -49,7 +50,7 @@ public interface Control {
 
 	public boolean unlock(Latch lockInGroup, int unlockCount);
 
-	public void addWaiters(java.util.Dictionary waiters);
+	public void addWaiters(Map waiters);
 
 	public Lock getFirstGrant();
 

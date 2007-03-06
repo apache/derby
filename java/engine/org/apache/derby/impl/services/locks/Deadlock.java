@@ -50,7 +50,9 @@ class Deadlock  {
 	 * <BR>
 	 * MT - must be synchronized on the <code>LockSet</code> object.
 	 */
-	static Object[] look(SinglePool factory, LockSet set, LockControl control, ActiveLock startingLock, byte deadlockWake) {
+	static Object[] look(SinglePool factory, LockTable set,
+						 LockControl control, ActiveLock startingLock,
+						 byte deadlockWake) {
 
 		// step one, get a list of all waiters
 		Dictionary waiters = Deadlock.getWaiters(set);
@@ -180,7 +182,7 @@ inner:		for (;;) {
 		grants.remove(grants.size() - 1);
 	}
 
-	private static Hashtable getWaiters(LockSet set) {
+	private static Hashtable getWaiters(LockTable set) {
 		Hashtable waiters = new Hashtable();
 		set.addWaiters(waiters);
 		return waiters;

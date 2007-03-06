@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.locks.Latch;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.util.List;
+import java.util.Map;
 
 /**
 	A Lock represents a granted or waiting lock request.
@@ -208,7 +209,7 @@ public class Lock implements Latch, Control {
 
 		return false;
 	}
-	public void addWaiters(java.util.Dictionary waiters) {
+	public void addWaiters(Map waiters) {
 	}
 	public Lock getFirstGrant() {
 		return this;

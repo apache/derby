@@ -27,10 +27,10 @@ import org.apache.derby.iapi.services.locks.Latch;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import java.util.Dictionary;
 import java.util.Stack;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 /**
 	A LockControl contains a reference to the item being locked
@@ -268,7 +268,7 @@ public class LockControl implements Control {
 		1) The Lockable has just been unlocked, 
 	*/
 
-	public Lock addLock(LockSet ls, CompatibilitySpace compatibilitySpace,
+	public Lock addLock(LockTable ls, CompatibilitySpace compatibilitySpace,
 						Object qualifier) {
 
 		if (SanityManager.DEBUG) {
@@ -412,7 +412,7 @@ public class LockControl implements Control {
 	/**
 		Get the next waiting lock (if any).
 	*/
-	ActiveLock getNextWaiter(ActiveLock item, boolean remove, LockSet ls) {
+	ActiveLock getNextWaiter(ActiveLock item, boolean remove, LockTable ls) {
 
 		ActiveLock nextWaitingLock = null;
 
@@ -505,7 +505,7 @@ public class LockControl implements Control {
 		Give up waiting up on a lock
 	*/
 
-	protected void giveUpWait(Object item, LockSet ls) {
+	protected void giveUpWait(Object item, LockTable ls) {
 
 		int count = removeWaiter(waiting, item, ls);
 		if (item == lastPossibleSkip)
@@ -526,7 +526,7 @@ public class LockControl implements Control {
 	*/
 
 	/**
-		Add the waiters of this lock into this Dictionary object.
+		Add the waiters of this lock into this Map object.
 		<BR>
 		Each waiting thread gets two entries in the hashtable
 		<OL>
@@ -534,7 +534,7 @@ public class LockControl implements Control {
 		<LI>key=ActiveLock - value={LockControl for first waiter|ActiveLock of previosue waiter}
 		</OL>
 	*/
-	public void addWaiters(Dictionary waiters) {
+	public void addWaiters(Map waiters) {
 		
 		if ((waiting == null) || waiting.isEmpty())
 			return;
@@ -616,11 +616,11 @@ public class LockControl implements Control {
 	 *
 	 * @param waiting	The list of waiters to add to
 	 * @param lockItem	The lock request
-	 * @param ls		The LockSet
+	 * @param ls		The lock table
 	 */
 	private void addWaiter(List waiting,
 						Lock lockItem,
-						LockSet ls) {
+						LockTable ls) {
 
 		// Add lock to the waiting list
 		waiting.add(lockItem);
@@ -633,11 +633,11 @@ public class LockControl implements Control {
 	 * Remove and return the first lock request from a list of waiters.
 	 *
 	 * @param waiting	The list of waiters to pop from
-	 * @param ls		The LockSet
+	 * @param ls		The lock table
 	 *
 	 * @return	The removed lock request
 	 */
-	private Object popFrontWaiter(List waiting, LockSet ls) {
+	private Object popFrontWaiter(List waiting, LockTable ls) {
 		// Maintain count of waiters
 		ls.oneLessWaiter();
 
@@ -652,13 +652,13 @@ public class LockControl implements Control {
 	 *
 	 * @param waiting	The list of waiters to pop from
 	 * @param index		The index at which to remove the lock request
-	 * @param ls		The LockSet
+	 * @param ls		The lock table
 	 *
 	 * @return	The removed lock request
 	 */
 	private Object removeWaiter(List waiting,
 								int index,
-								LockSet ls) {
+								LockTable ls) {
 		// Maintain count of waiters
 		ls.oneLessWaiter();
 
@@ -671,13 +671,13 @@ public class LockControl implements Control {
 	 *
 	 * @param waiting	The list of waiters to pop from
 	 * @param item		The item to remove
-	 * @param ls		The LockSet
+	 * @param ls		The lock table
 	 *
 	 * @return	The number of items removed
 	 */
 	private int removeWaiter(List waiting,
 								Object item,
-								LockSet ls) {
+								LockTable ls) {
 		// Maintain count of waiters
 		ls.oneLessWaiter();
 
