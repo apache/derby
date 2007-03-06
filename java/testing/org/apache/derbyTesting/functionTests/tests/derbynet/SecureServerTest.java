@@ -39,10 +39,7 @@ import org.apache.derbyTesting.junit.ServerSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
 /**
  * This Junit test class tests whether the server comes up under a security
@@ -95,7 +92,7 @@ public class SecureServerTest extends BaseTestCase
 
     private static final Outcome FAILED_NO_AUTHENTICATION = new Outcome( false, authenticationFailure() );
     private static final Outcome RUNNING_SECURITY_NOT_BOOTED = new Outcome( true, "" );
-    private static final Outcome RUNNING_SECURITY_BOOTED = new Outcome( true, getTextMessage( "DRDA_SecurityInstalled.I" ) );
+    private static final Outcome RUNNING_SECURITY_BOOTED = new Outcome( true,  serverBootedOK() );
 
         
     // startup state
@@ -108,7 +105,6 @@ public class SecureServerTest extends BaseTestCase
     // helper state for intercepting server error messages
     private InputStream[]  _inputStreamHolder;
 
-    private static  LocalizedResource   _messageResolver;
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -238,8 +234,7 @@ public class SecureServerTest extends BaseTestCase
 
         if ( setUnsecureOption )
         {
-            list.add
-                ( '-' + NetworkServerControlImpl.DASHARGS[ NetworkServerControlImpl.DASHARG_UNSECURE ] );
+            list.add( "-noSecurityManager" );
         }
         
         String[]    result = new String[ list.size() ];
@@ -328,36 +323,18 @@ public class SecureServerTest extends BaseTestCase
         return new String( inputBuffer, 0, bytesRead );
     }
 
-    private static  LocalizedResource   getMessageResolver()
-    {
-        if ( _messageResolver == null )
-        {
-            _messageResolver = new LocalizedResource( null, null, "org.apache.derby.loc.drda.messages" );
-        }
-
-        return _messageResolver;
-    }
-
-    private static  String  getTextMessage( String key )
-    {
-        return getTextMessage( key, new String[]{} );
-    }
-    private static  String  getTextMessage( String key, Object[] args )
-    {
-        return getMessageResolver().getTextMessage( key, args );
-    }
-    
     private static  String  authenticationFailure()
     {
-        return getTextMessage
-            (
-             "DRDA_NoAuthentication.S",
-             new String[]
-                {
-                    Property.REQUIRE_AUTHENTICATION_PARAMETER,
-                    NetworkServerControlImpl.DASHARGS[  NetworkServerControlImpl.DASHARG_UNSECURE ]
-                }
-             );
+        return "Network Server startup failed. " +
+            "User authentication should be enabled " +
+            "before the Network Server installs a security manager. " +
+            "Please either set the 'derby.connection.requireAuthentication' " +
+            "system property to true or run the network server with the '-noSecurityManager' option.";
+    }
+
+    private static  String  serverBootedOK()
+    {
+        return "Security manager installed using the Basic server security policy.";
     }
 
     private boolean serverCameUp()
