@@ -1211,7 +1211,9 @@ public abstract class EmbedConnection implements EngineConnection
      * isolation level using one of the TRANSACTION_* values.
      *
      * <P><B>Note:</B> setTransactionIsolation causes the current
-     * transaction to commit
+     * transaction to commit if the isolation level is changed. Otherwise, if
+     * the requested isolation level is the same as the current isolation
+     * level, this method is a no-op.
      *
      * @param level one of the TRANSACTION_* isolation values with the
      * exception of TRANSACTION_NONE; some databases may not support
