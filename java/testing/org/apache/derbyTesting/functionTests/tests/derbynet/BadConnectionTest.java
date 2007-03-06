@@ -38,11 +38,19 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class BadConnectionTest extends BaseJDBCTestCase
 {
-	
+	private static String host;
+	private static int port;
+
 	public void setUp() throws SQLException
 	{
 		// get the default connection so the driver is loaded.
+		//
+		// host and port are set here, if set at the time the
+		// class is instantiated, they will get the default 
+		// embedded 'port' of -1.
 		Connection c = getConnection();
+		host = TestConfiguration.getCurrent().getHostName();
+		port = TestConfiguration.getCurrent().getPort();
 		c.close();
 	}
 	
@@ -53,7 +61,8 @@ public class BadConnectionTest extends BaseJDBCTestCase
 	public void testNoUserOrPassword()
 	{
 		try {
-			Connection c = DriverManager.getConnection("jdbc:derby://localhost:1527/testbase");
+			Connection c = DriverManager.getConnection(
+					"jdbc:derby://" + host + ":" + port + "/testbase");
 		} catch (SQLException e) {
 			assertSQLState("08004", e);
 			assertEquals(-4499, e.getErrorCode());
@@ -70,7 +79,8 @@ public class BadConnectionTest extends BaseJDBCTestCase
 			Properties p = new Properties();
 			p.put("user", "admin");
 			p.put("password", "admin");
-			Connection c = DriverManager.getConnection("jdbc:derby://localhost:1527/testbase", p);
+			Connection c = DriverManager.getConnection(
+					"jdbc:derby://" + host + ":" + port + "/testbase", p);
 		} catch (SQLException e)
 		{
 			assertSQLState("08004", e);
@@ -88,7 +98,8 @@ public class BadConnectionTest extends BaseJDBCTestCase
 	public void testBadConnectionAttribute()
 	{
 		try {
-			Connection c = DriverManager.getConnection("jdbc:derby://localhost:1527/badAttribute;upgrade=notValidValue");
+			Connection c = DriverManager.getConnection(
+					"jdbc:derby://" + host + ":" + port + "/badAttribute;upgrade=notValidValue");
 		} catch (SQLException e)
 		{
 			assertSQLState("XJ05B", e);
