@@ -32,7 +32,6 @@ import java.lang.reflect.Array;
   formatId streams.
  
   @version 0.1
-  @author Rick Hillegas
  */
 public abstract class ArrayUtil
 {

@@ -41,7 +41,6 @@ import org.apache.derby.iapi.types.DataValueFactory;
 /**
  * Factory for creating a SYSDEPENDSS row.
  *
- * @author jerry
  */
 
 public class SYSDEPENDSRowFactory extends CatalogRowFactory

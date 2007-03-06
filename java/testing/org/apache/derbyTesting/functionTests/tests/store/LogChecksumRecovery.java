@@ -31,7 +31,6 @@ import org.apache.derby.tools.ij;
  * and perform some updates after a successfully boot. 
  * This test should be run after the store/LogChecksumSetup.java.
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  * @see LogChecksumSetup
  */

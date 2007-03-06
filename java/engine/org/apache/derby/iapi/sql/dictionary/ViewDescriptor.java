@@ -54,7 +54,6 @@ import org.apache.derby.impl.sql.execute.DropTriggerConstantAction;
  * </ol>
  *
  * @version 0.1
- * @author Jeff Lichtman
  */
 
 public final class ViewDescriptor extends TupleDescriptor

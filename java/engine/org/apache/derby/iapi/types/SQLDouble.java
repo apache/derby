@@ -75,7 +75,6 @@ import java.sql.SQLException;
  * check for those values where they can occur on operations, so the
  * set* operations do not check for them coming in.
  *
- * @author ames
  */
 public final class SQLDouble extends NumberDataType
 {

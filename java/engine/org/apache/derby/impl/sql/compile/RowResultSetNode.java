@@ -62,7 +62,6 @@ import java.util.Vector;
 /**
  * A RowResultSetNode represents the result set for a VALUES clause.
  *
- * @author Jerry Brenner
  */
 
 public class RowResultSetNode extends FromTable

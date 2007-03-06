@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
  * <p>
  *
  * @version 0.1
- * @author Ames
  */
 
 

@@ -36,7 +36,6 @@ import java.io.ObjectOutput;
  *	signatures.
  *
  *
- * @author Rick
  */
 public final class JSQLType implements Formatable
 {

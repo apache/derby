@@ -27,7 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
  * This is a table name reference that can be retrieved from
  * an active cursor.  
  *
- * @author jamie
  */
 public interface ExecCursorTableReference
 {

@@ -46,7 +46,6 @@ import java.util.Vector;
 /**
  * This node represents a binary arithmetic operator, like + or *.
  *
- * @author Jeff Lichtman
  */
 
 public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode

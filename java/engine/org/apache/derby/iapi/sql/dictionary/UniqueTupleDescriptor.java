@@ -27,7 +27,6 @@ import org.apache.derby.catalog.UUID;
  * Simple interface for Tuple Descriptors that have
  * UUIDS.
  *
- * @author jamie
  */
 public interface UniqueTupleDescriptor
 {

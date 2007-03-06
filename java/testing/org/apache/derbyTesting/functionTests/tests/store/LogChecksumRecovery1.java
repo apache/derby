@@ -30,7 +30,6 @@ import org.apache.derby.tools.ij;
  * updates statements executed in LogChecksumRecovery.java.
  * This test should be run after the store/LogChecksumRecovery.java.
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  * @see LogChecksumSetup
  * @see LogChecksumRecovery

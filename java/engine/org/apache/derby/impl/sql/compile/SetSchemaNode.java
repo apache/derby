@@ -46,7 +46,6 @@ import java.util.Vector;
  * because it is basically easier than generating
  * the code from scratch.
  *
- * @author jamie
  */
 
 public class SetSchemaNode extends MiscellaneousStatementNode

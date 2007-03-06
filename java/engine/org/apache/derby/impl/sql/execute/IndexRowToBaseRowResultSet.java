@@ -63,7 +63,6 @@ import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
  * Normally, the input result set will be a TableScanResultSet scanning an
  * index conglomerate.
  *
- * @author jeff
  */
 class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {

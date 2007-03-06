@@ -34,7 +34,6 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
  * <p>
  * It is used for deferred DML processing.
  *
- * @author jamie
  */
 public interface TemporaryRowHolder
 {

@@ -36,7 +36,6 @@ import org.apache.derby.iapi.error.StandardException;
  * The following is defined by the sub classes (bit and char)
  *		concatenate()
  * 
- * @author	jamie
  */
 public interface ConcatableDataValue extends DataValueDescriptor, VariableSizeDataValue
 {

@@ -47,7 +47,6 @@ import java.lang.reflect.Modifier;
  * NotNodes which exist above comparison operators so that the optimizer
  * will see a query tree in CNF.
  *
- * @author Jerry Brenner
  */
 
 public final class NotNode extends UnaryLogicalOperatorNode

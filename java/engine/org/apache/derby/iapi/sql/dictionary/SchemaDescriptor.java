@@ -32,7 +32,6 @@ import org.apache.derby.catalog.Dependable;
  * This class represents a schema descriptor
  *
  * @version 0.1
- * @author Jeff Lichtman
  */
 
 public final class SchemaDescriptor extends TupleDescriptor 

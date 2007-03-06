@@ -51,7 +51,6 @@ import java.util.Vector;
  * a Class (as opposed to an Object).  Field references can be 
  * made in DML (as expressions).
  *
- * @author Jerry Brenner
  */
 
 public final class StaticClassFieldReferenceNode extends JavaValueNode

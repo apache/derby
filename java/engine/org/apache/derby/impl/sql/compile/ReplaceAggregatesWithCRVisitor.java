@@ -30,7 +30,6 @@ import org.apache.derby.iapi.error.StandardException;
 /**
  * Replace all aggregates with result columns.
  *
- * @author jamie
  */
 public class ReplaceAggregatesWithCRVisitor implements Visitor
 {

@@ -40,7 +40,6 @@ import org.apache.derby.iapi.types.RowLocation;
  * Takes 2 NoPutResultSets and a join filter and returns
  * the join's rows satisfying the filter as a result set.
  *
- * @author ames
  */
 abstract class JoinResultSet extends NoPutResultSetImpl
 	implements CursorResultSet

@@ -36,7 +36,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * A DropTriggerNode is the root of a QueryTree that represents a DROP TRIGGER
  * statement.
  *
- * @author Jamie
  */
 public class DropTriggerNode extends DDLStatementNode
 {

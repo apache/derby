@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for JoinResultSet.
 
-  @author jerry
 
 */
 public abstract class RealJoinResultSetStatistics 

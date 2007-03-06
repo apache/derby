@@ -51,7 +51,6 @@ import java.util.Enumeration;
  *	This class  describes actions that are ALWAYS performed for a
  *	DROP INDEX Statement at Execution time.
  *
- *	@author Jeff Lichtman	Cribbed from DropTableConstantAction
  */
 
 class DropIndexConstantAction extends IndexConstantAction

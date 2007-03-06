@@ -62,7 +62,6 @@ import org.apache.derby.impl.sql.execute.TriggerInfo;
  * A DMLStatement for a table modification: to wit, INSERT
  * UPDATE or DELETE.
  *
- * @author Jamie
  */
 
 abstract class DMLModStatementNode extends DMLStatementNode

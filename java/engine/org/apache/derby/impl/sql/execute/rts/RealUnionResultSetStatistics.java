@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for UnionResultSet.
 
-  @author jerry
 
 */
 public class RealUnionResultSetStatistics 

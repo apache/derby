@@ -39,7 +39,6 @@ import java.io.IOException;
  *	for referenced columns in a table.
  *
  *
- * @author Tingjian Ge
  */
 
 public class DDColumnDependableFinder extends DDdependableFinder

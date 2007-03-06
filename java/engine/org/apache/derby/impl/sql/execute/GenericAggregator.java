@@ -47,7 +47,6 @@ import java.sql.Statement;
 /**
  * Adaptor that sits between execution layer and aggregates.
  *
- * @author jamie
  */
 class GenericAggregator 
 {

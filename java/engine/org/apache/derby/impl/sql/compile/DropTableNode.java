@@ -32,7 +32,6 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  * A DropTableNode is the root of a QueryTree that represents a DROP TABLE
  * statement.
  *
- * @author Jerry Brenner
  */
 
 public class DropTableNode extends DDLStatementNode

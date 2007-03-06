@@ -32,7 +32,6 @@ import org.apache.derby.iapi.error.StandardException;
  * Since the ResulSet operations must also be supported by
  * cursor result sets, we extend that interface here as well.
  *
- * @author ames
  */
 public interface CursorResultSet extends ResultSet {
 

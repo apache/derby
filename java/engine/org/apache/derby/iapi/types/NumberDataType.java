@@ -39,7 +39,6 @@ import org.apache.derby.iapi.types.*;
  * of types for supported implicit conversions among them.
  *
  * @see DataType
- * @author ames
  */
 public abstract class NumberDataType extends DataType 
 									 implements NumberDataValue

@@ -83,7 +83,6 @@ import org.apache.derby.impl.sql.catalog.DDColumnDependableFinder;
  *	This class  describes actions that are ALWAYS performed for an
  *	ALTER TABLE Statement at Execution time.
  *
- *	@author Jerry Brenner.
  */
 
 class AlterTableConstantAction extends DDLSingleTableConstantAction

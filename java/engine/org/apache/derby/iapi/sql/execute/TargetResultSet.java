@@ -35,7 +35,6 @@ import org.apache.derby.iapi.types.RowLocation;
  * or update.  This is useful because bulk insert is upside down -
  * the insert is done via the store.
  *
- * @author jerry
  */
 public interface TargetResultSet extends ResultSet
 {

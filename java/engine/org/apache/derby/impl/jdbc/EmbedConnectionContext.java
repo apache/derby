@@ -35,7 +35,6 @@ import java.sql.SQLException;
 import java.util.Vector;
 import java.util.Enumeration;
 /**
-	@author djd
  */
 class EmbedConnectionContext extends ContextImpl 
 		implements ConnectionContext

@@ -46,7 +46,6 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * @author kmarsden
  * 
  */
 public class ParameterMappingTest extends BaseJDBCTestCase {

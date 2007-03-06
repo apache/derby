@@ -35,7 +35,6 @@ import org.apache.derby.tools.ij;
  * by setting derby.debug.true=testMaxLogFileNumber in the properties file.
  * In Non debug mode, this tests just acts as a plain log recovery test.
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  */
 

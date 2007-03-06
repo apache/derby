@@ -55,7 +55,6 @@ import java.util.Enumeration;
 /**
  * A NewInvocationNode represents a new object() invocation.
  *
- * @author Jerry Brenner
  */
 public class NewInvocationNode extends MethodCallNode
 {

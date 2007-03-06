@@ -36,7 +36,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for IndexRowToBaseRowResultSet.
 
-  @author jerry
 
 */
 public class RealIndexRowToBaseRowStatistics 

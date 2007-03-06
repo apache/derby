@@ -38,7 +38,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 /**
-	@author ames
 */
 public class CachedStatement implements Cacheable {
 

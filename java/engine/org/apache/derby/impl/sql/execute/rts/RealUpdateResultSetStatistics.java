@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for UpdateResultSet.
 
-  @author jerry
 
 */
 public class RealUpdateResultSetStatistics 

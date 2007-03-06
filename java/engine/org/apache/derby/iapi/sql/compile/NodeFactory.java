@@ -43,7 +43,6 @@ import org.apache.derby.impl.sql.compile.ResultSetNode;
 	<p>
 	There is expected to be only one of these configured per database.
 
-   @author Rick Hillegas
  */
 
 public abstract class NodeFactory

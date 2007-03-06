@@ -39,7 +39,6 @@ import java.util.Vector;
 /**
  * This node represents a unary arithmetic operator
  *
- * @author Manish Khettry
  */
 
 public class UnaryArithmeticOperatorNode extends UnaryOperatorNode

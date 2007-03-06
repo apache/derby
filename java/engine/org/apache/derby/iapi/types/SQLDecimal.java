@@ -64,7 +64,6 @@ import java.sql.Types;
  * and simply return a 0-length array for the stored form
  * when the value is null.
  *
- * @author jamie
  */
 public final class SQLDecimal extends NumberDataType implements VariableSizeDataValue
 {

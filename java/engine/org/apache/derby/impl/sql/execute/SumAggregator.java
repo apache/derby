@@ -33,7 +33,6 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
  * Aggregator for SUM().  Defers most of its work
  * to OrderableAggregator.
  *
- * @author jamie
  */
 public  class SumAggregator 
 	extends OrderableAggregator

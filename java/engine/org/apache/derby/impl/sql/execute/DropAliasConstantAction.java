@@ -39,7 +39,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
  *	This class  describes actions that are ALWAYS performed for a
  *	DROP ALIAS Statement at Execution time.
  *
- *	@author Jerry Brenner.
  */
 
 class DropAliasConstantAction extends DDLConstantAction

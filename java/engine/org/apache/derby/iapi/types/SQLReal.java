@@ -76,7 +76,6 @@ import java.sql.SQLException;
  * This is modeled after SQLSmallint.
  * @see SQLSmallint
  *
- * @author ames
  */
 public final class SQLReal
 	extends NumberDataType

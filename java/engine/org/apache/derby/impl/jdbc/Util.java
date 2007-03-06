@@ -53,7 +53,6 @@ import java.io.PrintWriter;
 	to ensure that failed asserts at this level will behave
 	well in a JDBC environment.
 
-	@author ames
 */
 //In the past, this class was sent on the wire to the client and because it
 //has the message protcol stuff and also the detailed stack trace as one

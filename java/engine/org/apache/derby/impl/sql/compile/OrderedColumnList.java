@@ -30,7 +30,6 @@ import java.util.Hashtable;
 /**
  * List of OrderedColumns
  *
- * @author Jamie
  */
 public abstract class OrderedColumnList extends QueryTreeNodeVector
 {

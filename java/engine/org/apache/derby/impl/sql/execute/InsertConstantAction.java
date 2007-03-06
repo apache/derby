@@ -54,7 +54,6 @@ import java.util.Properties;
  *	This class  describes compiled constants that are passed into
  *	InsertResultSets.
  *
- *	@author Rick Hillegas
  */
 
 public class InsertConstantAction extends WriteCursorConstantAction

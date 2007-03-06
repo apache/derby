@@ -39,7 +39,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  * Test the new class ParameterMetaData in jdbc 30.
  * Testing both callable and prepared statements meta data
  *
- * @author mamta
  */
 
 

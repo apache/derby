@@ -31,7 +31,6 @@ import java.sql.*;
  * Tests of this class needs to be decorated by a DBSetup
  * and SURDataModelSetup.
  * 
- * @author Andreas Korneliussen 
  */
 abstract public class SURBaseTest extends BaseJDBCTestCase {
     

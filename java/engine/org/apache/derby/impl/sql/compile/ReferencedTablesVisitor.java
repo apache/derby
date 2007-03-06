@@ -32,7 +32,6 @@ import org.apache.derby.iapi.util.JBitSet;
 /**
  * Build a JBitSet of all of the referenced tables in the tree.
  *
- * @author jerry
  */
 public class ReferencedTablesVisitor implements Visitor 
 {

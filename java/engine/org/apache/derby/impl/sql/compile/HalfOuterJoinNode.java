@@ -54,7 +54,6 @@ import java.util.Properties;
  * Right outer joins are always transformed into left outer joins during
  * preprocessing for simplicity.
  *
- * @author Jerry Brenner
  */
 
 public class HalfOuterJoinNode extends JoinNode

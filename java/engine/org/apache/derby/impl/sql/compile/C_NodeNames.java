@@ -32,7 +32,6 @@ package	org.apache.derby.impl.sql.compile;
  * WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
  * THEM TO $WS/tools/release/config/dbms/cloudscapenodes.properties
  *
- * @author ames
  */
 
 public interface C_NodeNames

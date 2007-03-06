@@ -62,7 +62,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  * with its methods being public for exposure by its subtypes.
  * <p>
  *
- * @author ames
  */
 abstract class NoRowsResultSetImpl implements ResultSet
 {

@@ -41,7 +41,6 @@ import java.text.DecimalFormat;
 /**
   ResultSetStatistics implemenation for BasicNoPutResultSetImpl.
 
-  @author jerry
 
 */
 abstract class RealBasicNoPutResultSetStatistics

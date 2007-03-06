@@ -38,7 +38,6 @@ import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
  * By the time we get to code generation, all VirtualColumnNodes should stand only 
  * for references to columns in a base table within a FromBaseTable.
  *
- * @author Jeff Lichtman
  */
 
 public class VirtualColumnNode extends ValueNode

@@ -23,7 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.demo;
 
 
 /**
- * @author janet
  **/
 public class RunClassPathTester { 
 

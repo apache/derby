@@ -47,7 +47,6 @@ import org.apache.derby.iapi.types.RowLocation;
  * Takes two result sets and returns their union (all).
  * (Any duplicate elimination is performed above this ResultSet.)
  *
- * @author ames
  */
 class UnionResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {

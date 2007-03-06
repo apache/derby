@@ -48,7 +48,6 @@ import java.util.Vector;
  * A FromList represents the list of tables in a FROM clause in a DML
  * statement.  It extends QueryTreeNodeVector.
  *
- * @author Jeff Lichtman
  */
 
 public class FromList extends QueryTreeNodeVector implements OptimizableList

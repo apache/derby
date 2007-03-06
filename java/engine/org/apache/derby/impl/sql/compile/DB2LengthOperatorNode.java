@@ -48,7 +48,6 @@ import java.util.Vector;
 /**
  * This node represents a unary DB2 compatible length operator
  *
- * @author Jack Klebanoff
  */
 
 public final class DB2LengthOperatorNode extends UnaryOperatorNode

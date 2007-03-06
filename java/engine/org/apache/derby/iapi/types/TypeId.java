@@ -55,7 +55,6 @@ import java.sql.Types;
  * which defines type id equality.
 
  *
- * @author Jeff Lichtman
  */
 
 public final class TypeId implements Formatable

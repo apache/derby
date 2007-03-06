@@ -41,7 +41,6 @@ import java.sql.Types;
 /**
  * This class implements TypeCompiler for the SQL BOOLEAN datatype.
  *
- * @author Jerry Brenner
  */
 
 public class BooleanTypeCompiler extends BaseTypeCompiler

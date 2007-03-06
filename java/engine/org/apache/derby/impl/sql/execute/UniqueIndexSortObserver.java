@@ -37,7 +37,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  * Unique index aggregator.  Enforces uniqueness when
  * creating a unique index or constraint.
  *
- * @author jerry
  */
 class UniqueIndexSortObserver extends BasicSortObserver 
 {

@@ -60,7 +60,6 @@ import java.security.PrivilegedAction;
  *   5.	All the old version of  the container (o<cid>.dat) files are removed
  *      after a successful checkpoint with a new key or on a rollback.
  *   
- * 	@author  Suresh Thalamati
  */
 
 public class EncryptData implements PrivilegedAction {

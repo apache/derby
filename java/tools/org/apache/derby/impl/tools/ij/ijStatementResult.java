@@ -32,7 +32,6 @@ import java.sql.SQLWarning;
  * is either an update count or result set depending
  * on what was executed.
  *
- * @author ames
  */
 class ijStatementResult extends ijResultImpl {
 

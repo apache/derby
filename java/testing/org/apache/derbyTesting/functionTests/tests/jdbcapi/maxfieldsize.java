@@ -38,7 +38,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 /**
  *This Program Test SetMaxFieldsize()/getMaxFieldsize().
  *and the getXXX calls that are affected.
- * @author - suresht
  */
 
 public class maxfieldsize { 

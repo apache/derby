@@ -58,7 +58,6 @@ import org.apache.derby.catalog.UUID;
  * A CreateViewNode is the root of a QueryTree that represents a CREATE VIEW
  * statement.
  *
- * @author Jerry Brenner
  */
 
 public class CreateViewNode extends DDLStatementNode

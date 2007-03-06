@@ -35,7 +35,6 @@ import org.apache.derby.iapi.reference.SQLState;
  * A DropSchemaNode is the root of a QueryTree that represents 
  * a DROP SCHEMA statement.
  *
- * @author jamie
  */
 
 public class DropSchemaNode extends DDLStatementNode

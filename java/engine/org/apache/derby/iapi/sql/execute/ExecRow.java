@@ -36,7 +36,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  * to the Storage row interface and additional methods for manipulating
  * Rows in execution's ResultSets.
  *
- * @author ames
  */
 public interface ExecRow extends Row {
 

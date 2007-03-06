@@ -54,7 +54,6 @@ import org.apache.derby.impl.tools.ij.ijException;
 	to write to is always passed in, along with the
 	JDBC objects to display.
 
-	@author ames
  */
 public class JDBCDisplayUtil {
 

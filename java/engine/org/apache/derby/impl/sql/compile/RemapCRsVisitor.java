@@ -31,7 +31,6 @@ import org.apache.derby.iapi.error.StandardException;
  * Remap/unremap the CRs to the underlying
  * expression.
  *
- * @author jerry
  */
 public class RemapCRsVisitor implements Visitor
 {

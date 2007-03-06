@@ -53,7 +53,6 @@ import org.apache.derby.iapi.services.info.JVMInfo;
  * methods in this factory, so they can instrumented to do whatever is 
  * required for testing.
  * 
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  * @see CorruptibleIo
  * @see WritableStorageFactory

@@ -64,7 +64,6 @@ import java.util.Vector;
  * A MethodCallNode represents a Java method call.  Method calls can be done
  * through DML (as expressions) or through the CALL statement.
  *
- * @author Jeff Lichtman
  */
 
 abstract class MethodCallNode extends JavaValueNode

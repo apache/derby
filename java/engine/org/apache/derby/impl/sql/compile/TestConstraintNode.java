@@ -41,7 +41,6 @@ import java.util.Vector;
  * A TestConstraintNode is used to determine when a constraint
  * has been violated.
  *
- * @author jeff
  */
 
 public class TestConstraintNode extends UnaryLogicalOperatorNode

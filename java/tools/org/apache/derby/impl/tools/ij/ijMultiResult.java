@@ -33,7 +33,6 @@ import java.util.Vector;
  * is either an update count or result set depending
  * on what was executed.
  *
- * @author ames
  */
 class ijMultiResult extends ijResultImpl {
 

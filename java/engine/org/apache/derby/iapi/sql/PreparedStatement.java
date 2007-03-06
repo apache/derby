@@ -36,7 +36,6 @@ import java.sql.SQLWarning;
  * The PreparedStatement interface provides methods to execute prepared
  * statements, store them, and get metadata about them.
  *
- *	@author Jeff Lichtman
  */
 public interface PreparedStatement
 	extends Dependent, Provider

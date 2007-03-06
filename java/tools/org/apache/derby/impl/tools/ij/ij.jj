@@ -95,7 +95,6 @@ import java.util.Locale;
 	If there is no object to display, then a null is
 	returned.
 
-	@author ames
  */
 class ij {
 	static final String PROTOCOL_PROPERTY = "ij.protocol";

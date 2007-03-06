@@ -47,7 +47,6 @@ import java.util.Properties;
  * This implementation of the protocol is for stubbing out
  * the RunTimeStatistics feature at execution time..
  *
- * @author jerry
  */
 public class EmptyResultSetStatisticsFactory 
 		implements ResultSetStatisticsFactory

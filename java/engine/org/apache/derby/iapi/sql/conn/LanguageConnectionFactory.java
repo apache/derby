@@ -67,7 +67,6 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
  *
  * @see org.apache.derby.iapi.sql.LanguageFactory
  *
- * @author ames
  */
 public interface LanguageConnectionFactory {
 	/**

@@ -41,7 +41,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
  * There is a Statement factory in the Connection interface in the Database
  * module, which uses the one provided in LanguageFactory.
  *
- *	@author Jeff Lichtman
  */
 public interface Statement
 {

@@ -35,7 +35,6 @@ import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
  * Since the ResulSet operations must also be supported by
  * NoPutResultSets, we extend that interface here as well.
  *
- * @author jerry
  */
 public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource 
 {

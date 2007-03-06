@@ -35,7 +35,6 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 	This factoring enables sharing the functionality for
 	single and dual connection ij runs.
 
-	@author jerry
  */
 class utilMain14 extends utilMain
 {

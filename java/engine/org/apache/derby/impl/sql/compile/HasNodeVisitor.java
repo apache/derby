@@ -35,7 +35,6 @@ import org.apache.derby.iapi.error.StandardException;
  * of the target node is passed in as a constructor
  * parameter.
  *
- * @author jamie
  */
 public class HasNodeVisitor implements Visitor
 {

@@ -44,7 +44,6 @@ import java.sql.Types;
  * This node is the superclass  for all binary comparison operators, such as =,
  * <>, <, etc.
  *
- * @author Jeff Lichtman
  */
 
 public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode

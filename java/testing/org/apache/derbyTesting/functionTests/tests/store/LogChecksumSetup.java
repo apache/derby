@@ -41,7 +41,6 @@ import org.apache.derby.tools.ij;
  *             util.corruptio.CorruptDiskStorageFactory
  *  database=jdbc:derby:csf:wombat
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  * @see CorruptibleIo
  */

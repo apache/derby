@@ -39,7 +39,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 /**
  * Test of backup restore through java program JDBC calls.
  * Enhanced the test from bug5229 repro.
- * @author suresht
  */
 
 public class backupRestore1

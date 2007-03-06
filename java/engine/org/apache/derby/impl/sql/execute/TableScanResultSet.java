@@ -70,7 +70,6 @@ import java.util.Hashtable;
  * construction that are done in the open & next calls, to
  * improve performance.
  *
- * @author ames
  */
 class TableScanResultSet extends NoPutResultSetImpl
 	implements CursorResultSet, Cloneable

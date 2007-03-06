@@ -65,7 +65,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  * optimizer select bulk reads, then this should
  * probably be rolled into TableScanResultSet.
  *
- * @author jamie
  */
 class BulkTableScanResultSet extends TableScanResultSet
 	implements CursorResultSet

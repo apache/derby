@@ -31,7 +31,6 @@ import java.sql.ResultSetMetaData;
 
 /**
 	A set of static utility methods for data types.
- * @author djd
  */
 public abstract class DataTypeUtilities  {
 

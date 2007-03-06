@@ -44,7 +44,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * we get to code generation, all BaseColumnNodes should stand only for columns
  * in base tables.
  *
- * @author Jeff Lichtman
  */
 
 public class BaseColumnNode extends ValueNode

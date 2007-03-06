@@ -90,7 +90,6 @@ import java.util.Vector;
 /**
  * An CastNode represents a cast expressionr.
  *
- * @author Jerry Brenner
  */
 
 public class CastNode extends ValueNode

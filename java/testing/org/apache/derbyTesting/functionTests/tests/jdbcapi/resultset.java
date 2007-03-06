@@ -58,7 +58,6 @@ import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
  * ResultSetMetaData objects returned.
  * 
  * @see org.apache.derbyTesting.functionTests.util.SecurityCheck
- * @author ames
  */
 
 public class resultset {

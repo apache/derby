@@ -68,7 +68,6 @@ import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 /**
  * Prepared statement that can be made persistent.
- * @author jamie
  */
 public class GenericStorablePreparedStatement
 	extends GenericPreparedStatement implements Formatable, StorablePreparedStatement

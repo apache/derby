@@ -43,7 +43,6 @@ import java.util.Vector;
 /**
  * This sort observer performs aggregation.
  *
- * @author jamie
  */
 public class AggregateSortObserver extends BasicSortObserver
 {

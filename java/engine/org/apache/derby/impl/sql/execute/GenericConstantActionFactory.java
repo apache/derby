@@ -68,7 +68,6 @@ import java.sql.Timestamp;
  *    operations. For this reason, the ConstantActionFactory rather than
  *    the ResultSetFactory checks if the these operations are allowed.
  *
- * @author Rick
  */
 public class GenericConstantActionFactory
 {

@@ -35,7 +35,6 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  * A DropIndexNode is the root of a QueryTree that represents a DROP INDEX
  * statement.
  *
- * @author Jeff Lichtman
  */
 
 public class DropIndexNode extends DDLStatementNode

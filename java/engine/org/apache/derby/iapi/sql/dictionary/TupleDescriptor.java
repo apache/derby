@@ -37,8 +37,6 @@ import org.apache.derby.impl.sql.catalog.DDColumnDependableFinder;
  * This is the superclass of all Descriptors. Users of DataDictionary should use
  * the specific descriptor.
  *
- * @author Rick
- * @author Manish
  */
 
 public class TupleDescriptor

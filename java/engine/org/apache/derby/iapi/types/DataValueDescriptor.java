@@ -93,7 +93,6 @@ import java.util.Calendar;
  * <p>
  * getStream() 
  * 
- * @author Jeff Lichtman
  */
 
 public interface DataValueDescriptor extends Storable, Orderable

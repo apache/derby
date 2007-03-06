@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for NestedLoopJoinResultSet.
 
-  @author jerry
 
 */
 public class RealNestedLoopJoinStatistics 

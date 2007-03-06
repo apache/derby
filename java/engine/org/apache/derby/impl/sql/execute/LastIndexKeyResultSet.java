@@ -54,7 +54,6 @@ import java.util.Properties;
  * Return the last key in an index.  Used to perform
  * max().
  *
- * @author jamie
  */
 class LastIndexKeyResultSet extends NoPutResultSetImpl
 {

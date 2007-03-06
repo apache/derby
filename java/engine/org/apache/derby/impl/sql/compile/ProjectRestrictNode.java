@@ -77,7 +77,6 @@ import java.util.Set;
  *
  * NOTE: A ProjectRestrictNode extends FromTable since it can exist in a FromList.
  *
- * @author Jeff Lichtman
  */
 
 public class ProjectRestrictNode extends SingleChildResultSetNode

@@ -34,7 +34,6 @@ import org.apache.derby.iapi.reference.ClassName;
 /**
  * Defintion for the COUNT()/COUNT(*) aggregates.
  *
- * @author jamie
  */
 public class CountAggregateDefinition 
 		implements AggregateDefinition 

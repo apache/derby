@@ -47,7 +47,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 /**
  * Extends checkDataSource to provide testing of JDBC 3.0 specific
  * methods for the embedded DataSource implementations.
- * @author djd
  *
  */
 public class checkDataSource30 extends checkDataSource

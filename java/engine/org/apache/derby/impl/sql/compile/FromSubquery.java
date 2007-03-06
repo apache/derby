@@ -45,7 +45,6 @@ import java.util.Properties;
  * to make the selected structure match that
  * of the insert target table.
  *
- * @author Jeff Lichtman
  */
 public class FromSubquery extends FromTable
 {

@@ -43,7 +43,6 @@ import java.io.IOException;
  * This is a simple class used to store the run time information
  * about a constraint.
  *
- * @author jamie
  */
 public class ConstraintInfo implements ConsInfo
 {

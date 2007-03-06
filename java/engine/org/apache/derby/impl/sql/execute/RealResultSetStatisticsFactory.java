@@ -121,7 +121,6 @@ import java.util.Properties;
  * objects should we decided to provide a configuration without
  * the run time statistics feature.
  *
- * @author jerry
  */
 public class RealResultSetStatisticsFactory 
 		implements ResultSetStatisticsFactory

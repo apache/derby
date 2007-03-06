@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.SQLState;
 /**
   ResultSetStatistics implemenation for DeleteVTIResultSet.
 
-  @author jerry
 
 */
 public class RealDeleteVTIResultSetStatistics

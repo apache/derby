@@ -52,7 +52,6 @@ import java.io.InputStream;
  * a description of what this class is supposed to do.
  *
  * @version 0.1
- * @author Jeff Lichtman
  */
 
 public class DataDescriptorGenerator 

@@ -47,7 +47,6 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
  * An execution context is expected to be on the stack for the
  * duration of the connection.
  *
- * @author ames
  */
 class GenericExecutionContext
 	extends ContextImpl 

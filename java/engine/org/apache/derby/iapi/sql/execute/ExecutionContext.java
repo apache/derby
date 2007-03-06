@@ -32,7 +32,6 @@ import org.apache.derby.iapi.sql.ResultSet;
  * the current connection. It also provides execution services
  * for statement atomicity.
  *
- * @author ames
  */
 public interface ExecutionContext extends Context {
 

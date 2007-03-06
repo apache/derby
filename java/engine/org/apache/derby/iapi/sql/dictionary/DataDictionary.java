@@ -57,7 +57,6 @@ import java.util.Vector;
  * store to know about).
  *
  * @version 0.1
- * @author Jeff Lichtman
  */
 
 public interface DataDictionary

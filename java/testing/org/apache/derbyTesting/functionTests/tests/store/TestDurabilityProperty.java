@@ -62,7 +62,6 @@ import java.util.Properties;
  * database booted with derby.system.durability=test set, then shutdown
  * and database booted without derby.system.durability=test
  * 
- * @author Sunitha Kambhampati 
  * @version 1.0
  */
 public class TestDurabilityProperty {

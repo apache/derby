@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for ScrollInsensitiveResultSet.
 
-  @author jerry
 
 */
 public class RealScrollInsensitiveResultSetStatistics 

@@ -35,7 +35,6 @@ import java.util.Iterator;
 /**
  * Tests for variants of scrollable updatable resultsets.
  *
- * @author Andreas Korneliussen
  */
 public class SURTest extends SURBaseTest {
     

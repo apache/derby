@@ -41,7 +41,6 @@ import org.apache.derby.iapi.types.TypeId;
 /**
  * This node type represents a ? parameter.
  *
- * @author Jeff Lichtman
  */
 
 public class ParameterNode extends ValueNode

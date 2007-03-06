@@ -33,7 +33,6 @@ import java.sql.SQLWarning;
  * They are already cleared from the underlying
  * objects, doing clearSQLWarnings here is redundant.
  *
- * @author ames
  */
 class ijWarningResult extends ijResultImpl {
 

@@ -36,7 +36,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  * Testing both callable and prepared statements meta data
  *
  * Do not put tests in this file that are not compatible with JSR169
- * @author mamta
  */
 
 

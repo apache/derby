@@ -22,7 +22,6 @@
  * <p>
  * Machinery shared across Derby DRDA clients and server.
  * </p>
- * @author Rick
  */
 
 package org.apache.derby.iapi.reference;

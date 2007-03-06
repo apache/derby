@@ -44,7 +44,6 @@ import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
  * is driven off its format identifier.
  *
  *
- * @author Rick
  */
 
 public class DDdependableFinder implements	DependableFinder, Formatable

@@ -37,7 +37,6 @@ import org.apache.derby.catalog.UUID;
  *  across threads and must not store connection/thread specific
  *  information in any instance field.
  *
- *	@author Rick Hillegas
  */
 
 public interface ConstantAction

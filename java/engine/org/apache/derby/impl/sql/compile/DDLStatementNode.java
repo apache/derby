@@ -45,7 +45,6 @@ import org.apache.derby.catalog.UUID;
  * A DDLStatementNode represents any type of DDL statement: CREATE TABLE,
  * CREATE INDEX, ALTER TABLE, etc.
  *
- * @author Jeff Lichtman
  */
 
 abstract class DDLStatementNode extends StatementNode

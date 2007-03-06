@@ -38,7 +38,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 /**
 	Mapper of ValueRow into ExecIndexRow. 
 
-	@author ames
  */
 class IndexValueRow implements ExecIndexRow {
 

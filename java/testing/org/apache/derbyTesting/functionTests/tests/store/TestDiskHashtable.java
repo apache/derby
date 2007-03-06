@@ -53,7 +53,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  *
  * Created: Wed Feb 09 15:44:12 2005
  *
- * @author <a href="mailto:klebanof@us.ibm.com">Jack Klebanoff</a>
  * @version 1.0
  */
 public class TestDiskHashtable 

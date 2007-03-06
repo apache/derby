@@ -13,7 +13,6 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * @author kmarsden
  *
  */
 public class CastingTest extends BaseJDBCTestCase {

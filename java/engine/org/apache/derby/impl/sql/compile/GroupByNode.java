@@ -67,7 +67,6 @@ import org.apache.derby.impl.sql.execute.AggregatorInfoList;
  *		be needed. </LI>
  * </UL>
  *
- * @author jerry, aggregates by jamie
  *
  */
 public class GroupByNode extends SingleChildResultSetNode

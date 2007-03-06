@@ -42,7 +42,6 @@ import java.util.Locale;
 
 	Not the most recent Like -- missing the unit tests
 
-	@author ames
  */
 public class Like {
 	private static final char anyChar = '_';

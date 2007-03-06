@@ -41,7 +41,6 @@ import org.apache.derby.catalog.UUID;
  *	This class describes actions that are ALWAYS performed for a
  *	LOCK TABLE Statement at Execution time.
  *
- *	@author jamie 
  */
 
 class LockTableConstantAction implements ConstantAction

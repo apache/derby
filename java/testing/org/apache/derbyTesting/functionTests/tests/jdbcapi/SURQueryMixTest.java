@@ -45,7 +45,6 @@ import junit.framework.TestSuite;
  * scrolling (navigation), updates (using updateXXX() and updateRow() or
  * positioned updates), deletion of records (using deleteRow() or positioned 
  * deletes) of ResultSets.
- * @author Andreas Korneliussen
  */
 public class SURQueryMixTest extends SURBaseTest
 {

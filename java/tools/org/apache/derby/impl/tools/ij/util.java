@@ -50,7 +50,6 @@ import java.util.Locale;
 	well as display some internal ij structures.
 
 	@see org.apache.derby.tools.JDBCDisplayUtil
-	@author ames
  */
 public final class util implements java.security.PrivilegedAction {
 	

@@ -94,7 +94,6 @@ import org.apache.derby.iapi.util.StringUtil;
  * a language system needs that is specific to a particular
  * connection. Alot of these are other factories.
  *
- * @author ames
  */
 public class GenericLanguageConnectionFactory
 	implements LanguageConnectionFactory, CacheableFactory, PropertySetCallback, ModuleControl, ModuleSupportable {

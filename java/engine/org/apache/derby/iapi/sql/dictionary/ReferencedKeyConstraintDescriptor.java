@@ -32,7 +32,6 @@ import org.apache.derby.catalog.UUID;
  * A ReferencedConstraintDeescriptor is a primary key or a unique
  * key that is referenced by a foreign key.
  *
- * @author Jamie
  */
 public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 {

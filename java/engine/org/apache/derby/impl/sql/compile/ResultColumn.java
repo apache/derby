@@ -72,7 +72,6 @@ import java.util.Vector;
  * So, a ResultColumn has to be bound differently depending on the type of
  * statement it appears in.
  *
- * @author Jeff Lichtman
  */
 
 public class ResultColumn extends ValueNode 

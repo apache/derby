@@ -33,7 +33,6 @@ import java.sql.SQLWarning;
  * do a "next" on the result set.  It's up to them
  * to make sure that doesn't happen.
  *
- * @author ames
  */
 public class ijRowResult extends ijResultImpl {
 

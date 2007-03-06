@@ -48,7 +48,6 @@ import java.util.Vector;
  * The CurrentDatetimeOperator operator is for the builtin CURRENT_DATE,
  * CURRENT_TIME, and CURRENT_TIMESTAMP operations.
  *
- * @author ames
  */
 public class CurrentDatetimeOperatorNode extends ValueNode {
 

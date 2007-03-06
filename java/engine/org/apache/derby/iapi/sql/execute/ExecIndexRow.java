@@ -25,7 +25,6 @@ package org.apache.derby.iapi.sql.execute;
  * This is an extension of ExecRow for use
  * with indexes and sorting.
  *
- * @author jeff after ames
  */
 public interface ExecIndexRow extends ExecRow  {
 

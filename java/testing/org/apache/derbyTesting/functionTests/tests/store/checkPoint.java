@@ -40,7 +40,6 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  * If modified time is more than what it was in the last lookup
  * means , we know that checkpoint occured.
  * Other thing that is counted is in this program is number of log switches.
- * @author suresht
  */
 
 public class checkPoint

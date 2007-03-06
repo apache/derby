@@ -27,7 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
  * A Visitable is something that can be visited by
  * a Visitor
  *
- * @author jamie
  */
 public interface Visitable
 {

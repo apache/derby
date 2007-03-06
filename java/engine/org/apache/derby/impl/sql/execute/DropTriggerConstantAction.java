@@ -40,7 +40,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
  *	This class  describes actions that are ALWAYS performed for a
  *	DROP TRIGGER Statement at Execution time.
  *
- *	@author Jamie
  */
 public class DropTriggerConstantAction extends DDLSingleTableConstantAction
 {

@@ -26,7 +26,6 @@
  * the accumulator in suite().
  * </p>
  *
- * @author Rick
  */
 
 package org.apache.derbyTesting.functionTests.tests.junitTests.compatibility;

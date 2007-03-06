@@ -43,7 +43,6 @@ import java.sql.Timestamp;
 	Condenses run information down, prints out result stats,
 	and shows details of failures (.diff files).
 
-	@author ames
 **/
 public class GenerateReport {
 

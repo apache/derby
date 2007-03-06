@@ -34,7 +34,6 @@ import java.io.InputStream;
 
 /**
  * Tests reading and updating binary large objects (BLOBs).
- * @author Andreas Korneliussen
  */
 final public class BLOBTest extends BaseJDBCTestCase
 {

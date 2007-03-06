@@ -44,7 +44,6 @@ import org.apache.derby.catalog.UUID;
  *	This class describes actions that are ALWAYS performed for a
  *	CREATE SCHEMA Statement at Execution time.
  *
- *	@author jamie 
  */
 
 class CreateSchemaConstantAction extends DDLConstantAction

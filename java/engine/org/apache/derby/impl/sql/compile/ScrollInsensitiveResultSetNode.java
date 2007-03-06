@@ -57,7 +57,6 @@ import java.util.Properties;
  * functionality for any 
  * child result set that needs one.
  *
- * @author Jerry Brenner
  */
 
 public class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode

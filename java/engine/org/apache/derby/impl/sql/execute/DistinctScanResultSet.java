@@ -66,7 +66,6 @@ import java.util.Vector;
  * Eliminates duplicates while scanning the underlying conglomerate.
  * (Assumes no predicates, for now.)
  *
- * @author jerry
  */
 class DistinctScanResultSet extends HashScanResultSet
 {

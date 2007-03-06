@@ -38,7 +38,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  *This Program Test getConnection()/getStatement().
- * @author - suresht
  */
 
 public class connectionJdbc20{ 

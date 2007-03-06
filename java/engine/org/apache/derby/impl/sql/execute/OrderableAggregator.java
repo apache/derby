@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
  * Abstract aggregator for Orderable aggregates (max/min).
  *
- * @author jamie
  */
 abstract class OrderableAggregator extends SystemAggregator
 {

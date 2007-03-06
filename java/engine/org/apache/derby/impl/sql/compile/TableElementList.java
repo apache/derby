@@ -58,7 +58,6 @@ import java.util.Vector;
  * A TableElementList represents the list of columns and other table elements
  * such as constraints in a CREATE TABLE or ALTER TABLE statement.
  *
- * @author Jeff Lichtman
  */
 
 public class TableElementList extends QueryTreeNodeVector

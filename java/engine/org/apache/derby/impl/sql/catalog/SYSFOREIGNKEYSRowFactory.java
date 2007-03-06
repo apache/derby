@@ -43,7 +43,6 @@ import org.apache.derby.iapi.types.DataValueFactory;
 /**
  * Factory for creating a SYSFOREIGNKEYS row.
  *
- * @author jerry
  */
 
 public class SYSFOREIGNKEYSRowFactory extends CatalogRowFactory

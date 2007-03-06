@@ -25,7 +25,6 @@ limitations under the License.
  * for re-use by Derby JUnit tests. JUnit tests should extend this class.
  * </p>
  *
- * @author Rick
  */
 
 package org.apache.derbyTesting.functionTests.util;

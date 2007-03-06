@@ -110,7 +110,6 @@ import java.util.Set;
  * get things into the correct format for the UpdateResultSet.
  * See CurrentOfNode for more information.
  *
-* @author Jeff Lichtman
  */
 
 public class FromBaseTable extends FromTable

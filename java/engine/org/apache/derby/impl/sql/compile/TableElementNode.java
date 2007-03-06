@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * a single table element such as a column or constraint in a CREATE TABLE
  * or ALTER TABLE statement.
  *
- * @author Jeff Lichtman
  */
 
 public class TableElementNode extends QueryTreeNode

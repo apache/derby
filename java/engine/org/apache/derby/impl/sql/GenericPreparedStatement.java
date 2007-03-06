@@ -89,7 +89,6 @@ import java.util.List;
  * <p>
  * Stored prepared statements extend this implementation
  *
- * @author ames
  */
 public class GenericPreparedStatement
 	implements ExecPreparedStatement

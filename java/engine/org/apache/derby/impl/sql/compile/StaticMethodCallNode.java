@@ -108,7 +108,6 @@ import java.lang.reflect.Modifier;
 	}
 
  *
- * @author Jerry Brenner
  */
 public class StaticMethodCallNode extends MethodCallNode
 {

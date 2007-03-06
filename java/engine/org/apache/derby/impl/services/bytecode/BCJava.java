@@ -132,7 +132,6 @@ import java.util.Hashtable;
 	</ol>
 	@see org.apache.derby.iapi.services.compiler.JavaFactory
 
-	@author ames
  */
 public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
 

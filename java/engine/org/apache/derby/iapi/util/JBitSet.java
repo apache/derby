@@ -37,7 +37,6 @@ import java.util.BitSet;
  * We want to make it look like JBitSet extends BitSet, so we need to
  * provide wrapper methods for all of BitSet's methods.
  *
- * @author Jerry Brenner
  */
 public final class JBitSet
 {

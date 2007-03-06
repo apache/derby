@@ -72,7 +72,6 @@ import java.util.Vector;
 	the connection, they should be pushed onto the execution context
 	so that they can be found again by subsequent actions during the session.
 
-	@author ames
  */
 public class GenericExecutionFactory
 	implements ModuleControl, ModuleSupportable, ExecutionFactory {

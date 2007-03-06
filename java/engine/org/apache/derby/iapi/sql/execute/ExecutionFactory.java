@@ -54,7 +54,6 @@ import org.apache.derby.catalog.UUID;
 	LanguageConnectionContext.
 
 	@see org.apache.derby.iapi.sql.conn.LanguageConnectionContext
-	@author ames
  */
 public interface ExecutionFactory {
 

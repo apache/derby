@@ -67,7 +67,6 @@ import java.lang.reflect.InvocationTargetException;
  * java.io.*Writer's (assuming the Writer interface
  * remains stable in JDK1.1)
  *
- * @author ames
  */
 public final class SingleStream
 implements InfoStreams, ModuleControl, java.security.PrivilegedAction

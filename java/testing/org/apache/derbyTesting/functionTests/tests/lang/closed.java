@@ -43,7 +43,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 	under other handlers (such as weblogic) may produce different results due
 	to how they cache data and reuse client-side objects.
 
-	@author ames
  */
 public class closed implements Runnable {
 

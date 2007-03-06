@@ -38,7 +38,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
  *	This class  describes actions that are ALWAYS performed for a
  *	DROP VIEW Statement at Execution time.
  *
- *	@author Jerry Brenner.
  */
 
 class DropViewConstantAction extends DDLConstantAction

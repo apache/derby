@@ -32,7 +32,6 @@ package org.apache.derby.iapi.services.stream;
  * <p>
  * 
  * @see HeaderPrintWriter
- * @author ames
  */
 public interface InfoStreams {
 

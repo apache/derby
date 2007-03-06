@@ -66,7 +66,6 @@ import org.apache.derby.catalog.UUID;
  *  Note there are no dependencies created between the ViewDescriptor, TableDecriptor
  *  and the ColumnDescriptor's.
  *
- *	@author Jerry Brenner.
  */
 
 class CreateViewConstantAction extends DDLConstantAction

@@ -59,7 +59,6 @@ import java.util.Vector;
 /**
  * A CreateAliasNode represents a CREATE ALIAS statement.
  *
- * @author Jerry Brenner
  */
 
 public class CreateAliasNode extends DDLStatementNode

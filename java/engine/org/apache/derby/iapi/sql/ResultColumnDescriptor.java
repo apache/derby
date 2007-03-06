@@ -26,7 +26,6 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 /**
  * A ResultColumnDescriptor describes a result column in a ResultSet.
  *
- * @author Jeff Lichtman
  */
 
 public interface ResultColumnDescriptor

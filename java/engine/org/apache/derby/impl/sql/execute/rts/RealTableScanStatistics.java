@@ -41,7 +41,6 @@ import java.util.Properties;
 /**
   ResultSetStatistics implemenation for TableScanResultSet.
 
-  @author jerry
 
 */
 public class RealTableScanStatistics 

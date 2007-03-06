@@ -87,7 +87,6 @@ import java.util.Hashtable;
  * If they are not compatible, we throw an exception telling the user that
  * the Activation is out of date, and they need to get a new one.
  *
- * @author Jeff Lichtman
  */
 
 final class GenericActivationHolder implements Activation

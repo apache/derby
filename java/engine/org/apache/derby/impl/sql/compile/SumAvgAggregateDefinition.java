@@ -43,7 +43,6 @@ import org.apache.derby.iapi.reference.ClassName;
 /**
  * Defintion for the SUM()/AVG() aggregates.
  *
- * @author jamie
  */
 public class SumAvgAggregateDefinition
 		implements AggregateDefinition 

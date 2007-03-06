@@ -41,7 +41,6 @@ import java.sql.Timestamp;
 /**
   RunTimeStatistics implemenation.
 
-  @author jerry
 
 */
 public final class RunTimeStatisticsImpl implements RunTimeStatistics

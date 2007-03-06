@@ -73,7 +73,6 @@ import java.util.Vector;
  * the resultColumns in the selectList will contain the names of the columns
  * being inserted into or updated.
  *
- * @author Jeff Lichtman
  */
 
 public class JoinNode extends TableOperatorNode

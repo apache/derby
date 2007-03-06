@@ -41,7 +41,6 @@ import java.io.IOException;
  * descriptor that is intended for generic use.  It
  * can be seralized and attached to plans.
  *
- * @author jamie
  */
 public final class GenericColumnDescriptor
 	implements ResultColumnDescriptor, Formatable

@@ -35,7 +35,6 @@ import org.apache.derby.iapi.error.StandardException;
  *
  * @see ResultSet
  *
- * @author Jeff Lichtman
  * @see org.apache.derby.iapi.sql.execute.ExecRow
  */
 

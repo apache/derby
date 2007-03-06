@@ -40,7 +40,6 @@ import java.sql.Timestamp;
 	want to reuse the CurrentDatetime object for additional
 	executions of the statement.
 
-	@author ames
  */
 public class CurrentDatetime {
 

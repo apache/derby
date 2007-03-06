@@ -45,7 +45,6 @@ import java.util.Properties;
 	The LanguageFactory provides system-wide services that
 	are available on the Database API.
 
-	@author ames
  */
 public class GenericLanguageFactory implements LanguageFactory, ModuleControl
 {

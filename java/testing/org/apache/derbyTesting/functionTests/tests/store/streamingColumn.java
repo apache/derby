@@ -43,7 +43,6 @@ import java.util.Properties;
 /**
  * Test of JDBC result set Stream calls.
  *
- * @author djd
  */
 
 public class streamingColumn { 

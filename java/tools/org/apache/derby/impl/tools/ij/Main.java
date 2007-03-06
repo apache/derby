@@ -54,7 +54,6 @@ import java.util.*;
  * This was written to facilitate a test harness for language
  * functionality tests.
  *
- * @author ames
  *
  */
 public class Main {

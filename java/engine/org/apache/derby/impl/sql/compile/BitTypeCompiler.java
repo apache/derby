@@ -45,7 +45,6 @@ import org.apache.derby.iapi.reference.JDBC20Translation;
 /**
  * This class implements TypeCompiler for the SQL BIT datatype.
  *
- * @author Jamie
  */
 
 public class BitTypeCompiler extends BaseTypeCompiler

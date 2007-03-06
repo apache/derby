@@ -39,7 +39,6 @@ import org.apache.derby.iapi.reference.ClassName;
 /**
  * Defintion for the MAX()/MIN() aggregates.
  *
- * @author jamie
  */
 public class MaxMinAggregateDefinition 
 		implements AggregateDefinition 

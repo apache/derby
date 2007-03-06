@@ -43,7 +43,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *
  * Created: Fri Jan 28 13:58:03 2005
  *
- * @author <a href="mailto:klebanof@us.ibm.com">Jack Klebanoff</a>
  * @version 1.0
  */
 

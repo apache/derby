@@ -34,7 +34,6 @@ import org.apache.derby.tools.ij;
  * where an error occurred if two threads try to create the schema in
  * parallel.
  * 
- * @author oystein.grovlen@sun.com
  */
 
 public class ConcurrentImplicitCreateSchema

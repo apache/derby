@@ -55,7 +55,6 @@ import java.util.Properties;
  * subclasses of this node type called "BinaryTableOperatorNode" and
  * "UnaryTableOperatorNode".
  *
- * @author Jeff Lichtman
  */
 
 abstract class TableOperatorNode extends FromTable

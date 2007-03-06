@@ -48,7 +48,6 @@ import org.apache.derby.iapi.services.uuid.UUIDFactory;
 * A Filter to qualify tuples coming from a scan of SYSDEPENDS.
 * Tuples qualify if they have the right providerID.
 *
-* @author Rick
 */
 public class DropDependencyFilter implements TupleFilter
 {

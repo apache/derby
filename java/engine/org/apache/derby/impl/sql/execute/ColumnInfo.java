@@ -48,7 +48,6 @@ import java.io.IOException;
  *	for CREATE TABLE statements.
  *
  *	@version 0.1
- *	@author Rick Hillegas
  */
 
 public class ColumnInfo implements Formatable

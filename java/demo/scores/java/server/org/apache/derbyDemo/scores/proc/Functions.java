@@ -34,7 +34,6 @@ import org.apache.derbyDemo.scores.util.*;
  * Functions used by the Scores application.
  * </p>
  *
- * @author Rick Hillegas
  */
 public class Functions
 {

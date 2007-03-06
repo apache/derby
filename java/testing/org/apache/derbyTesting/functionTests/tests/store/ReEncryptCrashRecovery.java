@@ -43,7 +43,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *  
  * In Non debug mode, this tests does not do anything.
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  */
 

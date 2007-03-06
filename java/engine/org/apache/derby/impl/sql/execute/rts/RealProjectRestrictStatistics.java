@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for ProjectRestrictResultSet.
 
-  @author jerry
 
 */
 public class RealProjectRestrictStatistics 

@@ -42,7 +42,6 @@ import org.apache.derby.impl.sql.CursorTableReference;
  * precisely, a table expression that returns rows to the client).  In the
  * latter case, the cursor does not have a name.
  *
- * @author Jeff Lichtman
  */
 
 public class CursorNode extends DMLStatementNode

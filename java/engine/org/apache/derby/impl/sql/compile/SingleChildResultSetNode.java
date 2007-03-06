@@ -55,7 +55,6 @@ import java.util.Vector;
 /**
  * A SingleChildResultSetNode represents a result set with a single child.
  *
- * @author Jerry Brenner
  */
 
 abstract class SingleChildResultSetNode extends FromTable

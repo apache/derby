@@ -30,7 +30,6 @@ import org.apache.derbyDemo.scores.util.*;
  * Procedures used by the Scores application.
  * </p>
  *
- * @author Rick Hillegas
  */
 public  class   Procedures
 {

@@ -52,7 +52,6 @@ import java.util.Properties;
  * the scalar aggregates when scanning the source during the 
  * first call to next().
  *
- * @author jerry (broken out from SortResultSet)
  */
 class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 {

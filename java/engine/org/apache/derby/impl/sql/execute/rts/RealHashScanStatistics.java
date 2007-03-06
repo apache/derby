@@ -42,7 +42,6 @@ import java.util.Properties;
 /**
   ResultSetStatistics implemenation for HashScanResultSet.
 
-  @author jerry
 
 */
 public class RealHashScanStatistics

@@ -67,7 +67,6 @@ import java.sql.SQLException;
 /**
  * Generic aggregation utilities.
  *
- * @author jamie
  */
 abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 {

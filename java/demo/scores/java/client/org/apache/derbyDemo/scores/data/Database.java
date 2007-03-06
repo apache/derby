@@ -33,7 +33,6 @@ import org.apache.derbyDemo.scores.util.*;
  * embedded Derby. Could be extended for use against another server.
  * </p>
  *
- * @author Rick Hillegas
  */
 public  class   Database
 {

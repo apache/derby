@@ -62,7 +62,6 @@ import java.util.Properties;
  * first column in the list is the most significant in the ordering,
  * and the last column in the list is the least significant.
  *
-	@author ames
  */
 public class OrderByList extends OrderedColumnList
 						implements RequiredRowOrdering {

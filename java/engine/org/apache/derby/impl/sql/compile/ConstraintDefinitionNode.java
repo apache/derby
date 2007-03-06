@@ -45,7 +45,6 @@ import java.util.Properties;
  * A ConstraintDefintionNode is a class for all nodes that can represent
  * constraint definitions.
  *
- * @author Jerry Brenner
  */
 
 public class ConstraintDefinitionNode extends TableElementNode

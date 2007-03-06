@@ -36,7 +36,6 @@ import org.apache.derby.catalog.UUID;
  *
  * UUIDS.
  *
- * @author jamie
  */
 public interface UniqueSQLObjectDescriptor extends UniqueTupleDescriptor
 {

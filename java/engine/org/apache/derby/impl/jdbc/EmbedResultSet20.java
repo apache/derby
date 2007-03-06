@@ -58,7 +58,6 @@ import java.net.URL;
    </UL>
  *      @see org.apache.derby.impl.jdbc.EmbedResultSet
  *
- *      @author francois
  */
 
 public class EmbedResultSet20

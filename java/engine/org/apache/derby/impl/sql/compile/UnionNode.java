@@ -51,7 +51,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  * A UnionNode represents a UNION in a DML statement.  It contains a boolean
  * telling whether the union operation should eliminate duplicate rows.
  *
- * @author Jeff Lichtman
  */
 
 public class UnionNode extends SetOperatorNode

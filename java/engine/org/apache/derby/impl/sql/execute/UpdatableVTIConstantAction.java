@@ -55,7 +55,6 @@ import java.util.Properties;
  *	This class  describes compiled constants that are passed into
  *	Updatable VTIResultSets.
  *
- *	@author Jerry Brenner
  */
 
 public class UpdatableVTIConstantAction extends WriteCursorConstantAction

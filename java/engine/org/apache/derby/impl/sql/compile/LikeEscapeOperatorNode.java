@@ -114,7 +114,6 @@ import java.util.Vector;
 
 
  *
- * @author ames
  * 		converted to TernaryOperatorNode by been
  */
 

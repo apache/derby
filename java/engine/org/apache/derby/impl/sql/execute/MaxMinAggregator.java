@@ -37,7 +37,6 @@ import java.io.IOException;
  *
  * @see OrderableAggregator
  *
- * @author jamie
  */
 public final class MaxMinAggregator 
 	extends OrderableAggregator

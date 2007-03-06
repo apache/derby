@@ -104,7 +104,6 @@ import java.text.DateFormat;
  * it creates the datadictionary object for the database, which all users
  * will then interact with?
  *
- * @author ames
  */
 
 public class BasicDatabase implements ModuleControl, ModuleSupportable, PropertySetCallback, Database, JarReader

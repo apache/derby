@@ -42,7 +42,6 @@ import java.util.Vector;
 /**
  * This node represents a unary upper or lower operator
  *
- * @author Jerry
  */
 
 public class SimpleStringOperatorNode extends UnaryOperatorNode

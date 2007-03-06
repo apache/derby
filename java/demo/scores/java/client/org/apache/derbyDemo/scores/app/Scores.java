@@ -32,7 +32,6 @@ import java.sql.*;
  * an educational testing schema.
  * </p>
  *
- * @author Rick Hillegas
  */
 public  class   Scores
 {

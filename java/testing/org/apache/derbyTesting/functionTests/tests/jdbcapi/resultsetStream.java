@@ -46,7 +46,6 @@ import java.io.StringReader;
 /**
  * Test of JDBC result set Stream calls.
  *
- * @author djd
  */
 
 

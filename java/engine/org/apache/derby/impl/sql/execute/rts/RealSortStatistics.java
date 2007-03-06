@@ -40,7 +40,6 @@ import java.util.Properties;
 /**
   ResultSetStatistics implemenation for SortResultSet.
 
-  @author jerry
 
 */
 public class RealSortStatistics 

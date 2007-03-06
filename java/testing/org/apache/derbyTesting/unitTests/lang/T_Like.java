@@ -38,7 +38,6 @@ import java.util.Properties;
 /**
 	@see Like
 
-	@author ames
  */
 public class T_Like extends T_Generic
 {

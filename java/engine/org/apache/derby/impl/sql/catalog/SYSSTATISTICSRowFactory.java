@@ -49,7 +49,6 @@ import java.sql.Timestamp;
  * Factory for creating a SYSSTATISTICS row.
  *
  * @version 0.1
- * @author manish
  *
  */
 

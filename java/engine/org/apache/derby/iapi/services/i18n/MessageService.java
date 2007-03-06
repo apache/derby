@@ -38,7 +38,6 @@ import java.text.MessageFormat;
  * keys; the preferred form of resource bundle is a property file mapping
  * keys to messages.
  *
- * @author ames
  */
 public final class MessageService {
 

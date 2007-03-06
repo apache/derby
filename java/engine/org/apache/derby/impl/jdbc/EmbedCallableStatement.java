@@ -44,7 +44,6 @@ import java.util.Calendar;
 /**
  * Local implementation.
  *
- * @author ames
  */
 public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 	implements CallableStatement

@@ -50,7 +50,6 @@ import org.apache.derby.iapi.types.RowLocation;
  * ones that do, we have it implement CursorResultSet and give
  * reasonable answers.
  *
- * @author ames
  */
 class RowResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {

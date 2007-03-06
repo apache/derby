@@ -47,7 +47,6 @@ import org.apache.derby.iapi.reference.JDBC20Translation;
 /**
  * This class implements TypeCompiler for the SQL char datatypes.
  *
- * @author Jeff Lichtman
  */
 
 public final class CharTypeCompiler extends BaseTypeCompiler

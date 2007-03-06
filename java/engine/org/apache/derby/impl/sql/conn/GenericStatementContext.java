@@ -58,7 +58,6 @@ import java.sql.SQLException;
  * GenericStatementContext is pushed/popped around a statement prepare and execute
  * so that any statement specific clean up can be performed.
  *
- * @author jerry
  *
  */
 final class GenericStatementContext 

@@ -46,8 +46,6 @@ import java.util.Properties;
  *
  *
  * @version 0.2
- * @author Rick Hillegas 
- * @author Manish Khettry
  */
 
 public abstract	class CatalogRowFactory

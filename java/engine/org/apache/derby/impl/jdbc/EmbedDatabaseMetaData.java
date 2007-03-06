@@ -85,7 +85,6 @@ import java.io.InputStream;
  * probably doesn't make sense to allow an instruction to specify a query.
  *
  * @see <a href="http://java.sun.com/products/jdbc/download.html#corespec30">JDBC 3.0 Specification</a>
- * @author ames
  */
 public class EmbedDatabaseMetaData extends ConnectionChild 
 	implements DatabaseMetaData, java.security.PrivilegedAction {

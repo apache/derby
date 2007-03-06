@@ -29,7 +29,6 @@ import org.apache.derby.iapi.sql.StatementType;
 /**
  * A foreign key.
  *
- * @author Jamie
  */
 public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 {

@@ -28,7 +28,6 @@ import org.apache.derby.iapi.error.StandardException;
 /**
  * 	A TupleFilter is used to qualify rows from a tuple stream.
  *
- * @author Rick
  */
 public interface TupleFilter
 {

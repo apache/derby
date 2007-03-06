@@ -31,7 +31,6 @@ import java.sql.SQLException;
  * Interface-ized from EmbedConnectionContext.  Some basic
  * connection attributes that can be obtained from jdbc.
  *
- * @author jamie
  */
 public interface ConnectionContext 
 {

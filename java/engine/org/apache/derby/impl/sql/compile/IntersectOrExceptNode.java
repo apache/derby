@@ -55,7 +55,6 @@ import java.util.BitSet;
 /**
  * A IntersectOrExceptNode represents an INTERSECT or EXCEPT DML statement.
  *
- * @author Jack Klebanoff
  */
 
 public class IntersectOrExceptNode extends SetOperatorNode

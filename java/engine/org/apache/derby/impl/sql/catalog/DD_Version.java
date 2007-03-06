@@ -75,7 +75,6 @@ import java.util.Properties;
  * other way around.  So they can introduce new classes,
  * etc.
  *
- * @author Rick
  */
 
 public	class DD_Version implements	Formatable

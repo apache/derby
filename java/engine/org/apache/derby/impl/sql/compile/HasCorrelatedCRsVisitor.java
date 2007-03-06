@@ -33,7 +33,6 @@ import org.apache.derby.iapi.error.StandardException;
  * Find out if we have an correlated column reference
  * anywhere below us.  Stop traversal as soon as we find one.
  *
- * @author jamie
  */
 public class HasCorrelatedCRsVisitor implements Visitor
 {

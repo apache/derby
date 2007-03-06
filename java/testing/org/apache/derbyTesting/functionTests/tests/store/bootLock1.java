@@ -37,7 +37,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 /**
  *Just make a connection to wombat , 
  * Used by bootLock.java to invoke a different jvm and make a connection to wombat 
- * @author suresht
  */
 
 public class bootLock1 { 

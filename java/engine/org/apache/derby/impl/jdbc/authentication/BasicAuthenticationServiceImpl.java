@@ -56,7 +56,6 @@ import java.util.Dictionary;
  * case, only users defined as database properties for the current database
  * will be considered.
  *
- * @author Francois
  */
 public final class BasicAuthenticationServiceImpl
 	extends AuthenticationServiceBase implements UserAuthenticator {

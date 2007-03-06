@@ -40,7 +40,6 @@ import java.util.Properties;
 /**
   ResultSetStatistics implemenation for HashTableResultSet.
 
-  @author jerry
 
 */
 public class RealHashTableStatistics

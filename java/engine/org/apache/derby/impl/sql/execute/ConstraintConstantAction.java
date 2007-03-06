@@ -45,7 +45,6 @@ import org.apache.derby.iapi.types.NumberDataValue;
  *	constraint creation at Execution time.
  *
  *	@version 0.1
- *	@author Jerry Brenner
  */
 
 public abstract class ConstraintConstantAction extends DDLSingleTableConstantAction 

@@ -40,7 +40,6 @@ import org.apache.derby.iapi.types.TypeId;
 /**
  * Factory for creating a SYSVIEWS row.
  *
- * @author jerry
  */
 
 public class SYSVIEWSRowFactory extends CatalogRowFactory

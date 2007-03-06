@@ -55,7 +55,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  * This class  describes actions that are ALWAYS performed for a
  * RENAME TABLE/COLUMN/INDEX Statement at Execution time.
  *
- * @author Mamta Satoor.
  */
 
 class RenameConstantAction extends DDLSingleTableConstantAction

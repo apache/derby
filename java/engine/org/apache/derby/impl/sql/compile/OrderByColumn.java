@@ -40,7 +40,6 @@ import org.apache.derby.iapi.util.ReuseFactory;
  * We need to make sure that the named columns are
  * columns in that query, and that positions are within range.
  *
- * @author ames
  */
 public class OrderByColumn extends OrderedColumn {
 

@@ -59,7 +59,6 @@ import org.apache.derby.iapi.types.DataValueFactory;
  *  in a new database.
  *
  *
- * @author jerry
  */
 
 class SYSALIASESRowFactory extends CatalogRowFactory

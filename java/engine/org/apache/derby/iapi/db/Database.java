@@ -48,7 +48,6 @@ import java.util.Locale;
  * this file.  They have been moved to old_Database.java.  old_Database.java is
  * checked into the codeline but is not built, it is there for reference </B>
  *
- * @author Jeff Lichtman
  */
 
 public interface Database extends org.apache.derby.database.Database, LocaleFinder

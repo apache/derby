@@ -45,7 +45,6 @@ import org.apache.derby.iapi.util.JBitSet;
  * statement updates the rows in a base table corresponding to the rows in its
  * result set.
  *
- * @author Jeff Lichtman
  */
 
 abstract class DMLStatementNode extends StatementNode

@@ -43,7 +43,6 @@ import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
  * fit into the well defined categores: 
  * SET (non-transaction).
  *
- * @author Jerry Brenner
  */
 
 abstract class MiscellaneousStatementNode extends StatementNode

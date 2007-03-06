@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 
 /**
- * @author ames
  */
 class ijConnectionResult extends ijResultImpl {
 

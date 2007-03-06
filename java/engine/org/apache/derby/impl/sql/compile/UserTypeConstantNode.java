@@ -69,7 +69,6 @@ import java.sql.Types;
 	when NULL is inserted into or supplied as the update value for
 	a usertype column.
 
-	@author ames
  */
 public class UserTypeConstantNode extends ConstantNode {
 	/*

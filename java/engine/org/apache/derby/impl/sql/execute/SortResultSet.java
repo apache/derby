@@ -109,7 +109,6 @@ import java.util.Enumeration;
  * clones on duplicate rows that are going to be discarded
  * anyway.
  *
- * @author ames, rewrite for aggregates by jamie, aggregate removal by jerry
  */
 class SortResultSet extends NoPutResultSetImpl
 	implements CursorResultSet 

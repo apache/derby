@@ -43,7 +43,6 @@ import java.util.Hashtable;
 
 /**
  * Code to support Timeout error output.
- * @author gavin
  */
 
 public final class Timeout

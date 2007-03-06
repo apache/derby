@@ -54,7 +54,6 @@ import java.util.StringTokenizer;
 
 /**
 	Abstract factory class and api for JDBC objects.
-	@author djd
 */
 
 public abstract class InternalDriver implements ModuleControl {

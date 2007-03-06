@@ -33,7 +33,6 @@ import java.io.IOException;
  * Abstract aggregator that is extended by all internal
  * (system) aggregators.
  *
- * @author jamie
  */
 abstract class SystemAggregator implements ExecAggregator
 {

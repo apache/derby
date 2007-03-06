@@ -32,7 +32,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * that is auxiliary to sysconstraints.
  *
  * @version 0.1
- * @author Jerry Brenner
  */
 
 public abstract class SubConstraintDescriptor extends TupleDescriptor

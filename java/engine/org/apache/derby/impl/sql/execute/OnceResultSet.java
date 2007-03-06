@@ -48,7 +48,6 @@ import org.apache.derby.iapi.error.StandardException;
  * NOTE: A row with a single column containing null will be returned from
  * getNextRow() if the underlying subquery ResultSet is empty.
  *
- * @author jerry
  */
 public class OnceResultSet extends NoPutResultSetImpl
 {

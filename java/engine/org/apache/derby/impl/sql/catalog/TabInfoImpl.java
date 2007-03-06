@@ -57,7 +57,6 @@ import java.util.Properties;
 * A poor mans structure used in DataDictionaryImpl.java.
 * Used to save heapId, name pairs for non core tables.
 *
-* @author jamie
 */
 class TabInfoImpl
 {

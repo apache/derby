@@ -91,7 +91,6 @@ import java.util.Map;
  * <p>
  * The generic impl does not provide statement caching.
  *
- * @author ames
  *
  */
 public class GenericLanguageConnectionContext

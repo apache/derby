@@ -62,7 +62,6 @@ import java.util.Vector;
  * A ValueNode is an abstract class for all nodes that can represent data
  * values, that is, constants, columns, and expressions.
  *
- * @author Jeff Lichtman
  */
 
 public abstract class ValueNode extends QueryTreeNode

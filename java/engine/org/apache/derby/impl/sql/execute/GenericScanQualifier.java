@@ -37,7 +37,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  *  scans.
  *
  *	@version 0.1
- *	@author Jerry Brenner
  */
 
 public class GenericScanQualifier implements ScanQualifier

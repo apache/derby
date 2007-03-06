@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * A TransactionStatementNode represents any type of Transaction statement: 
  * SET TRANSACTION, COMMIT, and ROLLBACK.
  *
- * @author Ames Carlson
  */
 
 abstract class TransactionStatementNode extends StatementNode

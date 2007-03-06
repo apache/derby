@@ -78,7 +78,6 @@ import java.util.Vector;
  * the hash table.  When a collision occurs, the store builds a Vector with
  * the colliding DataValueDescriptor[]s.
  *
- * @author jerry
  */
 public class HashScanResultSet extends NoPutResultSetImpl
 	implements CursorResultSet

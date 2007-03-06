@@ -43,7 +43,6 @@ import org.apache.derby.iapi.sql.dictionary.DDUtils;
 /**
  * A FKConstraintDefintionNode represents table constraint definitions.
  *
- * @author jamie
  */
 
 public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode

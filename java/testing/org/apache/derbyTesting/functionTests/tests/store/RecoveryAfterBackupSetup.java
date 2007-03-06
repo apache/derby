@@ -33,7 +33,6 @@ import org.apache.derby.tools.ij;
  * end without shutting down the database.  The succeeding test,
  * RecoveryAfterBackup, will then do recovery of the database.
  * 
- * @author oystein.grovlen@sun.com
  * @see RecoveryAfterBackup
  */
 

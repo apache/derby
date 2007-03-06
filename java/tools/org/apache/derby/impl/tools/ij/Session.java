@@ -39,7 +39,6 @@ import java.util.Hashtable;
 	This is separated out to localize database objects and
 	also group objects by session.
 
-	@author ames
  */
 class Session {
 	static final String DEFAULT_NAME="CONNECTION";

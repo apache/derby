@@ -54,7 +54,6 @@ import java.util.Properties;
  * A MaterializeResultSetNode represents a materialization result set for any 
  * child result set that needs one.
  *
- * @author Jerry Brenner
  */
 
 public class MaterializeResultSetNode extends SingleChildResultSetNode

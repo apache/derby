@@ -39,7 +39,6 @@ import java.io.IOException;
  * This is a common superclass for the various impls.
  * Saving class files is a common thing to do.
  *
- * @author ames
  */
 public abstract class GClass implements ClassBuilder {
 

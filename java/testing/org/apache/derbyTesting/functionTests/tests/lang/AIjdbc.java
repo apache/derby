@@ -37,7 +37,6 @@ import org.apache.derby.tools.JDBCDisplayUtil;
 /**
 	Test execution of JDBC method, isAutoincrement.
 
-	@author manish
  */
 public class AIjdbc
 {

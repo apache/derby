@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.SQLState;
 /**
   ResultSetStatistics implemenation for DeleteResultSet.
 
-  @author jerry
 
 */
 public class RealDeleteResultSetStatistics 

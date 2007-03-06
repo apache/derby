@@ -24,7 +24,6 @@
  * Run the compatibility tests against the embedded server.
  * </p>
  *
- * @author Rick
  */
 package org.apache.derbyTesting.functionTests.tests.junitTests.derbyNet;
 

@@ -56,7 +56,6 @@ import java.util.Properties;
  * A NormalizeResultSetNode represents a normalization result set for any 
  * child result set that needs one.
  *
- * @author Jerry Brenner
  */
 
 public class NormalizeResultSetNode extends SingleChildResultSetNode

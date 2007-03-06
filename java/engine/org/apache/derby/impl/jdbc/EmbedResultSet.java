@@ -89,7 +89,6 @@ import java.util.Calendar;
    <UL>
    <LI> JSR 169
    </UL>
- * @author ames
  */
 
 public abstract class EmbedResultSet extends ConnectionChild 

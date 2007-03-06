@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.SQLState;
 /**
   ResultSetStatistics implemenation for DistinctScalarAggregateResultSet.
 
-  @author jerry
 
 */
 public class RealDistinctScalarAggregateStatistics 

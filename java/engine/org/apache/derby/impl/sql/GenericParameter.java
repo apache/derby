@@ -54,7 +54,6 @@ import java.lang.reflect.Array;
 /**
  * A parameter.  Originally lifted from ParameterValueSet.
  *
- * @author jamie 
  */
 final class GenericParameter
 {

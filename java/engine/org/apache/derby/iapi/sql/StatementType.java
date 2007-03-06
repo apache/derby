@@ -24,7 +24,6 @@ package org.apache.derby.iapi.sql;
 /**
  * Different types of statements
  *
- * @author jamie
  */
 public interface StatementType
 {

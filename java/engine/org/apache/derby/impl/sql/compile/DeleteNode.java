@@ -88,7 +88,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
  * The from table will be derived from the cursor specification of
  * the named cursor.
  *
- * @author Jeff Lichtman
  */
 
 public class DeleteNode extends DMLModStatementNode

@@ -25,7 +25,6 @@ package org.apache.derby.iapi.sql;
  * The ResultDescription interface provides methods to get metadata on the
  * results returned by a statement.
  *
- * @author Jeff Lichtman
  */
 
 public interface ResultDescription

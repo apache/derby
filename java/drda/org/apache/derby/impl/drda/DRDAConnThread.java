@@ -21,7 +21,6 @@
  * This class translates DRDA protocol from an application requester to JDBC
  * for Cloudscape and then translates the results from Cloudscape to DRDA
  * for return to the application requester.
- * @author ge, marsden, peachey
  */
 package org.apache.derby.impl.drda;
 

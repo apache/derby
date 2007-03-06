@@ -36,7 +36,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for VTIResultSet.
 
-  @author jerry
 
 */
 public class RealVTIStatistics 

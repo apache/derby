@@ -78,7 +78,6 @@ import java.util.Vector;
  * top level predicate and whose rightOperand is true.  It extends 
  * QueryTreeNodeVector.
  *
- * @author Jerry Brenner
  */
 
 public class PredicateList extends QueryTreeNodeVector implements OptimizablePredicateList

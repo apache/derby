@@ -90,7 +90,6 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
  * appropriately.  This includes coercing them to be some superclass or
  * interface that they already are.
  *
- * @author ames
  */
 public interface JavaFactory {
 

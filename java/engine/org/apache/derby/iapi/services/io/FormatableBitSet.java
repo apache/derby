@@ -31,7 +31,6 @@ import java.io.IOException;
 /**
  * FormatableBitSet is implemented as a packed array of bytes.
  *
- * @author Jamie -- originally coded by Jeff
  */
 
 public final class FormatableBitSet implements Formatable, Cloneable

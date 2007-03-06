@@ -79,7 +79,6 @@ import java.io.Serializable;
  * This is the common superclass of ActivationClassBuilder and
  * FilterClassBuilder. See the documentation on ActivationClassBuilder.
  *
- * @author Rick	Extracted out of ActivationClassBuilder
  */
 abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 {

@@ -52,7 +52,6 @@ import org.apache.derby.iapi.services.uuid.UUIDFactory;
  *
  *
  * @version 0.1
- * @author Rick Hillegas (extracted from DataDictionaryImpl).
  */
 
 class SYSTABLESRowFactory extends CatalogRowFactory

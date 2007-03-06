@@ -86,7 +86,6 @@ import java.util.Properties;
  * much like a FromBaseTable, using the information about
  * the target table of the cursor to provide information.
  *
- * @author ames
  */
 public final class CurrentOfNode extends FromTable {
 

@@ -58,7 +58,6 @@ import java.util.Properties;
 /**
  * Factory for creating a SYSCONGLOMERATES row.
  *
- * @author ames
  */
 
 public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory

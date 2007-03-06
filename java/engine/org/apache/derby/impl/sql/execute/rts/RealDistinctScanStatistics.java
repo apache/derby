@@ -34,7 +34,6 @@ import java.util.Properties;
 /**
   ResultSetStatistics implemenation for DistinctScanResultSet.
 
-  @author jerry
 
 */
 public class RealDistinctScanStatistics

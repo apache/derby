@@ -91,7 +91,6 @@ import java.lang.reflect.Modifier;
 /**
  * A FromVTI represents a VTI in the FROM list of a DML statement.
  *
- * @author Jerry Brenner
  */
 public class FromVTI extends FromTable implements VTIEnvironment
 {

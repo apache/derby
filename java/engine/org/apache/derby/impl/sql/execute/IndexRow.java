@@ -40,7 +40,6 @@ import java.io.IOException;
 /**
 	Basic implementation of ExecIndexRow.
 
-	@author jeff
  */
 public class IndexRow extends ValueRow implements ExecIndexRow
 {

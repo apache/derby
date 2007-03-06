@@ -37,7 +37,6 @@ import java.util.Vector;
  * of the target node is passed in as a constructor
  * parameter.
  *
- * @author jamie
  */
 public class CollectNodesVisitor implements Visitor
 {

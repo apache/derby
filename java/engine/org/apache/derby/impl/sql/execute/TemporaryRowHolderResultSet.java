@@ -56,7 +56,6 @@ import java.sql.Timestamp;
  * may be returned to users, hence the extra junk from the ResultSet
  * interface.
  *
- * @author jamie
  */
 class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cloneable
 {

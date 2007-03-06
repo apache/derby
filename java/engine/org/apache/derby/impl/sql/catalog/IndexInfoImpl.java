@@ -33,7 +33,6 @@ import org.apache.derby.catalog.UUID;
 * A poor mans structure used in DataDictionaryImpl.java.
 * Used to save information about system indexes.
 *
-* @author jerry
 */
 class IndexInfoImpl
 {

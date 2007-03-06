@@ -51,7 +51,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 /**
  * This class implements TypeId for the SQL numeric datatype.
  *
- * @author Jeff Lichtman
  */
 
 public final class NumericTypeCompiler extends BaseTypeCompiler

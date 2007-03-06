@@ -35,7 +35,6 @@ import java.util.Vector;
  * It provides a wrapper for java.util.Vector. All
  * lists of query tree nodes inherit from QueryTreeNodeVector.
  *
- * @author Jerry Brenner
  */
 
 abstract class QueryTreeNodeVector extends QueryTreeNode

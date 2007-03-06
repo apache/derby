@@ -30,7 +30,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  * online backup  in a separate thread. And functions to 
  * create/restore/rollforard recovery from the backup. 
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  */
 

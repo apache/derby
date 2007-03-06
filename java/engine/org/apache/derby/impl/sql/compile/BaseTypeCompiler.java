@@ -51,7 +51,6 @@ import java.sql.Types;
 /**
  * This is the base implementation of TypeCompiler
  *
- * @author Jeff
  */
 
 abstract class BaseTypeCompiler implements TypeCompiler

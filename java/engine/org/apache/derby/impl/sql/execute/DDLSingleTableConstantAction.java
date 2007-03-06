@@ -30,7 +30,6 @@ import org.apache.derby.catalog.UUID;
  * DROP VIEW.  An example of DDL that does not affect
  * a table is CREATE STATEMENT or DROP SCHEMA.
  *
- * @author jamie
  */
 abstract class DDLSingleTableConstantAction extends DDLConstantAction 
 {

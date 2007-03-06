@@ -48,7 +48,6 @@ import org.apache.derby.catalog.types.DefaultInfoImpl;
 /**
  * A ModifyColumnNode represents a modify column in an ALTER TABLE statement.
  *
- * @author Jerry Brenner
  */
 
 public class ModifyColumnNode extends ColumnDefinitionNode

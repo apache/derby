@@ -40,7 +40,6 @@ import java.util.Properties;
  * any authentication request, as JBMS system was not instructed to have any
  * particular authentication scheme to be loaded at boot-up time.
  *
- * @author Francois
  */
 public final class NoneAuthenticationServiceImpl
 	extends AuthenticationServiceBase implements UserAuthenticator {

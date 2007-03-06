@@ -81,7 +81,6 @@ import java.util.Set;
  * code generation for a a ResultSetNode will create a "new" call to a
  * constructor for a ResultSet.
  *
- * @author Jeff Lichtman
  */
 
 public abstract class ResultSetNode extends QueryTreeNode

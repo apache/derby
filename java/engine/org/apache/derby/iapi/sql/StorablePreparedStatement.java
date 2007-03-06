@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.loader.GeneratedClass;
  * The Statement interface is an extension of exec prepared statement
  * that has some stored prepared specifics.
  *
- * @author jamie
  */
 public interface StorablePreparedStatement extends ExecPreparedStatement
 {

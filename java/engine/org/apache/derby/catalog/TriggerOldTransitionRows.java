@@ -45,7 +45,6 @@ import java.math.BigDecimal;
  * interface.  You can only use this class in a JDK 1.2 runtime 
  * environment if no JDBC 2.0 calls are made against it.
  *
- * @author jamie
  */
 public class TriggerOldTransitionRows extends org.apache.derby.vti.UpdatableVTITemplate
 {

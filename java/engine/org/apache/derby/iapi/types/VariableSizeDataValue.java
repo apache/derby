@@ -30,7 +30,6 @@ import org.apache.derby.iapi.error.StandardException;
  * The following methods are defined herein:
  *		setWidth()
  *
- * @author	jamie
  */
 public interface VariableSizeDataValue 
 {

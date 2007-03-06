@@ -57,7 +57,6 @@ import java.sql.ResultSet;
         new methods can safely be added into implementation.
    </UL>
 
- * @author ames
  */
 public class EmbedStatement extends ConnectionChild
     implements EngineStatement {

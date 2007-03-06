@@ -47,7 +47,6 @@ import java.util.Map;
  * implementations in this package.  This implementation 
  * of ResultDescription may be used by anyone.
  *
- * @author ames
  */
 public final class GenericResultDescription
 	implements ResultDescription, Formatable

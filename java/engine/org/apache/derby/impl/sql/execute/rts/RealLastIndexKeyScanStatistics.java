@@ -40,7 +40,6 @@ import java.util.Properties;
 /**
   ResultSetStatistics implemenation for RealLastIndexKeyScanResultSet.
 
-  @author jamie
 
 */
 public class RealLastIndexKeyScanStatistics 

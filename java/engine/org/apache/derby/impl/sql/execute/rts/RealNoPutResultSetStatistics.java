@@ -32,7 +32,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for NoPutResultSetImpl.
 
-  @author jerry
 
 */
 abstract class RealNoPutResultSetStatistics 

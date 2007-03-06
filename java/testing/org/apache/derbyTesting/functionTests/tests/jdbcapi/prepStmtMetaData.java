@@ -37,7 +37,6 @@ import org.apache.derby.tools.ij;
  * Test of prepared statement getMetaData for statements that don't produce a
  * result set
  *
- * @author peachey
  */
 
 public class prepStmtMetaData { 

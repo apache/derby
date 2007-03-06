@@ -27,7 +27,6 @@ import java.util.StringTokenizer;
 /**
   <p>This class is for JDK1.4.
 
-  @author ames
  */
 public class jdk14 extends jvm {
 

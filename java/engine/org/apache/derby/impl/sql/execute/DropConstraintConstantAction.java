@@ -63,7 +63,6 @@ import org.apache.derby.catalog.UUID;
  *	drop constraint at Execution time.
  *
  *	@version 0.1
- *	@author Jerry Brenner
  */
 
 public class DropConstraintConstantAction extends ConstraintConstantAction

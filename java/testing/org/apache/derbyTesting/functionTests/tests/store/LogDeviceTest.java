@@ -33,7 +33,6 @@ import java.io.IOException;
 /*
  * This class tests create database with transaction 
  * log at non-default location specified as absolute path.
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  */
 

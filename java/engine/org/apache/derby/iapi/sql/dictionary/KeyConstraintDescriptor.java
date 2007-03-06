@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * constraint.
  *
  * @version 0.1
- * @author Jerry Brenner
  */
 
 public abstract class KeyConstraintDescriptor extends ConstraintDescriptor

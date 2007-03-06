@@ -64,7 +64,6 @@ import org.apache.derby.iapi.types.RowLocation;
 /**
  * DataDictionary implementation that does nothing!
  * Used for the storeless system.
- * @author djd
  *
  */
 public class EmptyDictionary implements DataDictionary, ModuleSupportable {

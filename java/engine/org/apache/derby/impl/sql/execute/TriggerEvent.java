@@ -28,7 +28,6 @@ package org.apache.derby.impl.sql.execute;
  * TriggerEvent in TriggerEvents for each event 
  * found in this file.
  * 
- * @author jamie
  */
 public class TriggerEvent
 {

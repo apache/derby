@@ -44,7 +44,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 /**
  * Test of scroll cursors.
  *
- * @author Jerry Brenner
  */
 
 public class scrollCursors2 { 

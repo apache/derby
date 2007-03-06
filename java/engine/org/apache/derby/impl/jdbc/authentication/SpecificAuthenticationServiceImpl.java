@@ -40,7 +40,6 @@ import java.util.Properties;
  * It calls the specific User authentication scheme defined by the user/
  * administrator.
  *
- * @author Francois
  */
 public class SpecificAuthenticationServiceImpl
 	extends AuthenticationServiceBase {

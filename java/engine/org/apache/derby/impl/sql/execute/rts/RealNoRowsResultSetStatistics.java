@@ -34,7 +34,6 @@ import java.util.Vector;
 /**
   ResultSetStatistics implemenation for NoPutResultSetImpl.
 
-  @author jerry
 
 */
 abstract class RealNoRowsResultSetStatistics

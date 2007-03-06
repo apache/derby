@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.context.*;
 /**
  * Validate BC calls.
  *
- * @author jamie
  */
 class d_BCValidate
 {

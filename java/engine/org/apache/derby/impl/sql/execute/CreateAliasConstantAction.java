@@ -43,7 +43,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
  *	CREATE FUNCTION, PROCEDURE or SYNONYM Statement at execution time.
  *  These SQL objects are stored in the SYS.SYSALIASES table.
  *
- *	@author Jerry Brenner.
  */
 class CreateAliasConstantAction extends DDLConstantAction
 {

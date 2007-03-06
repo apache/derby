@@ -27,7 +27,6 @@ import java.util.StringTokenizer;
 /**
   <p>This class is for IBM's jdk 1.4.
 
-  @author ames
  */
 public class ibm14 extends jvm {
 

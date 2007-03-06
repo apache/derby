@@ -29,7 +29,6 @@ import org.apache.derby.impl.sql.compile.IntersectOrExceptNode;
 /**
   ResultSetStatistics implementation for SetOpResultSet.
 
-  @author yip
 
 */
 public class RealSetOpResultSetStatistics 

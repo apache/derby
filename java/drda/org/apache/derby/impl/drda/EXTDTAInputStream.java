@@ -36,7 +36,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.impl.jdbc.Util;
 
 /**
- * @author marsden
  * 
  * EXTDTAObjectHolder provides Externalized Large Object representation that
  * does not hold locks until the end of the transaction (DERBY-255)

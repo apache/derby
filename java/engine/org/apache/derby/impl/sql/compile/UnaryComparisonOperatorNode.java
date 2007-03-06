@@ -51,7 +51,6 @@ import java.util.Vector;
  * This node is the superclass  for all unary comparison operators, such as is null
  * and is not null.
  *
- * @author Jerry Brenner
  */
 
 public class UnaryComparisonOperatorNode extends UnaryOperatorNode

@@ -85,7 +85,6 @@ import java.io.IOException;
  * <li> public String getOldReferencingName();
  * <li> public String getNewReferencingName();
  * </ol>
- * @author Jamie
  */
 public class TriggerDescriptor extends TupleDescriptor
 	implements UniqueSQLObjectDescriptor, Provider, Dependent, Formatable 

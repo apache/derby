@@ -46,7 +46,6 @@ import org.apache.derby.iapi.reference.JDBC20Translation;
 /**
  * This class implements TypeCompiler for the SQL LOB types.
  *
- * @author Jonas S Karlsson
  */
 
 public class CLOBTypeCompiler extends BaseTypeCompiler

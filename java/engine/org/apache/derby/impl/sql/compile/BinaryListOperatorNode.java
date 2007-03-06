@@ -45,7 +45,6 @@ import java.util.Vector;
  * operand on the left of the operator and a list of operands on the right.
  * This covers operators such as IN and BETWEEN.
  *
- * @author Jerry Brenner
  */
 
 public abstract class BinaryListOperatorNode extends ValueNode

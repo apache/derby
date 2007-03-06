@@ -43,7 +43,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  *Testing for FileLocks that prevent Derby Double Boot.
- * @author suresht
  */
 
 public class bootLock { 

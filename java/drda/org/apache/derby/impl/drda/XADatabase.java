@@ -41,7 +41,6 @@ import org.apache.derby.iapi.jdbc.EngineConnection;
 /**
  * This class contains database state specific to XA,
  * specifically the XAResource that will be used for XA commands.
- * @author kmarsden@Sourcery.Org
  */
 
 class XADatabase extends Database {

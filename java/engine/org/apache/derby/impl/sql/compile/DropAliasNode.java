@@ -43,7 +43,6 @@ import org.apache.derby.catalog.AliasInfo;
 /**
  * A DropAliasNode  represents a DROP ALIAS statement.
  *
- * @author Jerry Brenner
  */
 
 public class DropAliasNode extends DDLStatementNode

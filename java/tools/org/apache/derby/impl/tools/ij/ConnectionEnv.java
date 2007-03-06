@@ -38,7 +38,6 @@ import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 /**
 	To enable multi-user use of ij.Main2
 
-	@author jerry
  */
 class ConnectionEnv {
 	Hashtable sessions = new Hashtable();

@@ -51,7 +51,6 @@ import java.sql.SQLWarning;
  * <li> finished->open</li>
  * </ul>
  *
- * @author Jeff Lichtman
  */
 
 public interface ResultSet

@@ -41,7 +41,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  * present.  This test was made to recreate the problem in DERBY-298.
  * The test should be run after store/RecoveryAfterBackupSetup.java.
  * 
- * @author oystein.grovlen@sun.com
  * @see RecoveryAfterBackupSetup
  */
 public class RecoveryAfterBackup

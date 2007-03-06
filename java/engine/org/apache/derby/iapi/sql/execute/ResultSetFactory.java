@@ -40,7 +40,6 @@ import org.apache.derby.iapi.store.access.Qualifier;
  * should implement a method that does the lookup and salts
  * away this factory for the activation to use as it needs it.
  *
- * @author ames
  */
 public interface ResultSetFactory {
 	/**

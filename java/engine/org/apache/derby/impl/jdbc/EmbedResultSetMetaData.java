@@ -55,7 +55,6 @@ import java.sql.ResultSet;
    any other Connection or ResultSet specific method then
    this sharing must be removed.
  *
- * @author ames
  */
 public class EmbedResultSetMetaData
 	implements ResultSetMetaData {

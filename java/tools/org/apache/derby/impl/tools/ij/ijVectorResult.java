@@ -27,7 +27,6 @@ import java.sql.SQLWarning;
 /**
  * This is an impl for a simple Vector of strings.
  *
- * @author ames
  */
 class ijVectorResult extends ijResultImpl {
 

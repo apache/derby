@@ -50,7 +50,6 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
  *
  * @see ParameterValueSet
  *
- * @author Jeff Lichtman
  */
 
 final class GenericParameterValueSet implements ParameterValueSet 

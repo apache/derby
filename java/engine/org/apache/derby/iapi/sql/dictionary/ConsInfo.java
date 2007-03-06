@@ -30,7 +30,6 @@ import org.apache.derby.iapi.error.StandardException;
  *	to be the protocol version of ConstraintInfo.
  *
  * @version 0.1
- * @author Rick Hillegas
  */
 
 public interface ConsInfo	extends	Formatable

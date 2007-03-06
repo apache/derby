@@ -31,7 +31,6 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  * A CreateSchemaNode is the root of a QueryTree that 
  * represents a CREATE SCHEMA statement.
  *
- * @author jamie
  */
 
 public class CreateSchemaNode extends DDLStatementNode

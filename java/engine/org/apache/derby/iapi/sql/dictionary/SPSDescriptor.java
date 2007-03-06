@@ -66,7 +66,6 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
  * just to be on the safe side.
  *
  *
- * @author jamie
  */
 public class SPSDescriptor extends TupleDescriptor
 	implements UniqueSQLObjectDescriptor, Dependent, Provider

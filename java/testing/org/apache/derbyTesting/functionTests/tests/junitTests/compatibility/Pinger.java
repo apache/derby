@@ -23,7 +23,6 @@
  * Ping the server, waiting till it comes up.
  * </p>
  *
- * @author Rick
  */
 package org.apache.derbyTesting.functionTests.tests.junitTests.compatibility;
 

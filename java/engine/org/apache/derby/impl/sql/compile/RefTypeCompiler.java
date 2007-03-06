@@ -41,7 +41,6 @@ import org.apache.derby.iapi.reference.ClassName;
 /**
  * This class implements TypeCompiler for the SQL REF datatype.
  *
- * @author Jeff Lichtman
  */
 
 public class RefTypeCompiler extends BaseTypeCompiler

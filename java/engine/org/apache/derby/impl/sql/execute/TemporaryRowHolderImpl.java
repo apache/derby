@@ -52,7 +52,6 @@ import java.util.Properties;
  * <p>
  * It is used for deferred DML processing.
  *
- * @author jamie
  */
 class TemporaryRowHolderImpl implements TemporaryRowHolder
 {

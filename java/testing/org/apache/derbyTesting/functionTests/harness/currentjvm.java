@@ -27,7 +27,6 @@ import java.util.StringTokenizer;
 /**
   <p>This class is for whatever java is in the current classpath
 
-  @author ames
  */
 
 public class currentjvm extends jvm {

@@ -52,7 +52,6 @@ import org.apache.derby.iapi.util.ByteArray;
  * expression constructs write the code that they represent,
  * and they walk over the statements and expressions in the appropriate order.
  *
- * @author ames
  */
 public interface ClassBuilder {
 

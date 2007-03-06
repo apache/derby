@@ -67,7 +67,6 @@ import java.util.zip.CRC32;
 	@end_format
 	</PRE>
 
-	@author  Suresh Thalamati
 	@see Loggable
 */
 

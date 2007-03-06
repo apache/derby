@@ -40,7 +40,6 @@ import java.util.Vector;
  * This is the most basic sort observer.  It
  * handles distinct sorts and non-distinct sorts.
  *
- * @author jamie
  */
 public class BasicSortObserver implements SortObserver
 {

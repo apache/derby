@@ -37,7 +37,6 @@ import java.io.File;
  * for example a commit will flush the log buffers. Otherwise class garbage 
  * collector can reinitialize the values. 
  * 
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  * @see WritableStorageFactory
  * @see StorageFactory

@@ -53,7 +53,6 @@ import org.apache.derby.iapi.util.StringUtil;
  * In the future, it may implement caching of nodes, as well, to avoid
  * memory management and garbage collection.
  *
- * @author Jeff Lichtman
  */
 
 public class NodeFactoryImpl extends NodeFactory implements ModuleControl, ModuleSupportable

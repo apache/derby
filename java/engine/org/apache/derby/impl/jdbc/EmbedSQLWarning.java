@@ -40,7 +40,6 @@ import java.sql.SQLWarning;
 	to ensure that failed asserts at this level will behave
 	well in a JDBC environment.
 
-	@author ames
 */
 public class EmbedSQLWarning extends SQLWarning {
 

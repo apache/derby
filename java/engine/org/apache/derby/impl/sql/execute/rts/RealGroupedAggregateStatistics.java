@@ -32,7 +32,6 @@ import java.util.Properties;
 /**
   ResultSetStatistics implemenation for GroupedAggregateResultSet.
 
-  @author jerry
 
 */
 public class RealGroupedAggregateStatistics 

@@ -33,7 +33,6 @@ import java.util.Vector;
  * This is a wrapper for results coming out of the
  * ij parser.
  *
- * @author ames
  *
  */
 interface ijResult {

@@ -61,7 +61,6 @@ import java.util.Enumeration;
  * the scalar aggregates when scanning the source during the 
  * first call to next().
  *
- * @author jerry (broken out from SortResultSet)
  */
 class ScalarAggregateResultSet extends GenericAggregateResultSet
 	implements CursorResultSet 

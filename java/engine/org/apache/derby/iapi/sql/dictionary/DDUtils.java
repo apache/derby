@@ -34,7 +34,6 @@ import java.util.Enumeration;
  *	Static Data dictionary utilities.
  *
  * @version 0.1
- * @author Rick Hillegas
  */
 
 public	class	DDUtils

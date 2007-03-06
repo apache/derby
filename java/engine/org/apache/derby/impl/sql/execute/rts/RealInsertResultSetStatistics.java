@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for InsertResultSet.
 
-  @author jerry
 
 */
 public class RealInsertResultSetStatistics

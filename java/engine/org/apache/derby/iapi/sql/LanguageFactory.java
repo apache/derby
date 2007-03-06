@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.loader.ClassInspector;
  * as a System Module (not a service module).  That could change,
  * but for now this is valid for any database. 
  *
- * @author Jeff Lichtman
  */
 public interface LanguageFactory
 {

@@ -27,7 +27,6 @@ import org.apache.derby.catalog.UUID;
  * A TableKey represents a immutable unique identifier for a SQL object.
  * It has a schemaid and a name	. 
  *
- * @author Jamie -- lifed from Comp/TableName
  */
 
 final class TableKey 

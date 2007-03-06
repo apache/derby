@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for NormalizeResultSet.
 
-  @author jerry
 
 */
 public class RealNormalizeResultSetStatistics 

@@ -35,7 +35,6 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  * the result set and either complain (throw an exception)
  * or let it through.
  *
- * @author jamie
  */
 public interface ExecutionStmtValidator
 {

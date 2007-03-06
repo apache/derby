@@ -32,7 +32,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *	SET TRANSACTION statements. The real Execution-time logic lives inside the
  *	executeConstantAction() method of the Execution constant.
  *
- *	@author Jerry Brenner
  */
 
 class SetTransactionResultSet extends MiscResultSet

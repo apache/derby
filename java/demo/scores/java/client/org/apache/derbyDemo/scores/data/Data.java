@@ -30,7 +30,6 @@ import org.apache.derbyDemo.scores.util.*;
  * Data used by Scores application
  * </p>
  *
- * @author Rick Hillegas
  */
 public  class   Data
 {

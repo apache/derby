@@ -41,7 +41,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * A DropViewNode is the root of a QueryTree that represents a DROP VIEW
  * statement.
  *
- * @author Jerry Brenner
  */
 
 public class DropViewNode extends DDLStatementNode

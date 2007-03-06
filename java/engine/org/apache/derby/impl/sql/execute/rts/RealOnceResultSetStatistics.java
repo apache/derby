@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for OnceResultSet.
 
-  @author jerry
 
 */
 public class RealOnceResultSetStatistics 

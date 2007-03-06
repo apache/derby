@@ -35,7 +35,6 @@ import java.io.IOException;
 	Not sure what to tell callers about 0-based versus 1-based numbering.
 	Assume 0-based for now.
 
-	@author ames
  */
 public class IndexColumnOrder implements ColumnOrdering, Formatable
 {

@@ -40,7 +40,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 /**
  * Call the specified expression, ignoring the return, if any.
  *
- * @author jerry
  */
 class CallStatementResultSet extends NoRowsResultSetImpl
 {

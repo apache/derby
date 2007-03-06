@@ -44,7 +44,6 @@ import org.apache.derby.iapi.types.DataValueFactory;
 /**
  * Factory for creating a SYSCHECKS row.
  *
- * @author jerry
  */
 
 class SYSCHECKSRowFactory extends CatalogRowFactory

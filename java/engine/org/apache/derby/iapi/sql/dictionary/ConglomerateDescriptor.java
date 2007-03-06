@@ -45,7 +45,6 @@ import org.apache.derby.iapi.services.monitor.Monitor;
  * ConglomerateDescriptor remains to be seen.
  *
  * @version 0.1
- * @author Jeff Lichtman
  */
 
 public final class ConglomerateDescriptor extends TupleDescriptor

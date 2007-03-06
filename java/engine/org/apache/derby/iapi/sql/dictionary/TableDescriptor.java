@@ -92,7 +92,6 @@ import java.util.Iterator;
 		</ol>
 	<p>
 	*
-	* @author Jeff Lichtman
 	*/
 
 public class TableDescriptor extends TupleDescriptor

@@ -50,7 +50,6 @@ import java.util.Properties;
  *	This class  describes compiled constants that are passed into
  *	DeleteResultSets.
  *
- *	@author Rick Hillegas
  */
 
 public class DeleteConstantAction extends WriteCursorConstantAction

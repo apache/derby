@@ -84,7 +84,6 @@ import java.util.Vector;
  * The from table will be derived from the cursor specification of
  * the named cursor.
  *
- * @author Jeff Lichtman
  */
 
 public final class UpdateNode extends DMLModStatementNode

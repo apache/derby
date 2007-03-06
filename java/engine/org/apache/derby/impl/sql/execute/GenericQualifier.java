@@ -36,7 +36,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 /**
  *	This is the implementation for Qualifier.  It is used for generated scans.
  *
- *	@author Jeff Lichtman
  */
 
 public class GenericQualifier implements Qualifier

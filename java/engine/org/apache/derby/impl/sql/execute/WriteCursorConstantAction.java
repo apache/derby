@@ -55,7 +55,6 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
  *  
  *  Ideally one day the split will occur.
  *
- *	@author Rick Hillegas
  */
 
 abstract	class WriteCursorConstantAction implements ConstantAction, Formatable

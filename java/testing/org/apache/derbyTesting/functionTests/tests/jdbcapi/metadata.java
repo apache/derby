@@ -45,7 +45,6 @@ import org.apache.derby.tools.ij;
  * results match a previously stored "master".  Thus this test cannot actually
  * discern whether it passes or not.
  *
- * @author alan
  */
 
 public class metadata extends metadata_test {

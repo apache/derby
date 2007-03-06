@@ -42,7 +42,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  * A SetTransactionIsolationNode is the root of a QueryTree that represents a SET
  * TRANSACTION ISOLATION command
  *
- * @author Jerry Brenner
  */
 
 public class SetTransactionIsolationNode extends TransactionStatementNode

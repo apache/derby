@@ -50,7 +50,6 @@ import java.util.Properties;
  * A CreateTableNode is the root of a QueryTree that represents a CREATE TABLE or DECLARE GLOBAL TEMPORARY TABLE
  * statement.
  *
- * @author Jeff Lichtman
  */
 
 public class CreateTableNode extends DDLStatementNode

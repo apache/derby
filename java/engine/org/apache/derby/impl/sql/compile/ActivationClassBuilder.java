@@ -76,7 +76,6 @@ import java.util.Hashtable;
  * We could also verify methods as they are
  * added, to have 0 parameters, ...
  *
- * @author ames
  */
 class ActivationClassBuilder	extends	ExpressionClassBuilder
 {

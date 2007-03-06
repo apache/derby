@@ -26,7 +26,6 @@ import org.apache.derby.iapi.sql.Activation;
 /**
  * CursorActivation includes an additional method used on cursors.
  *
- * @author ames
  */
 public interface CursorActivation extends Activation {
 

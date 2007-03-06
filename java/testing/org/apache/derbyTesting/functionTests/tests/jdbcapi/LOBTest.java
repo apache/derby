@@ -44,7 +44,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derby.tools.JDBCDisplayUtil;
 
 /**
- * @author Jonas S Karlsson
  */
 
 public class LOBTest {

@@ -35,7 +35,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 /**
  * Testing concurrency behaviour in derby when creating the resultsets with
  * different parameters.
- * @author Andreas Korneliussen
  */
 public class ConcurrencyTest extends SURBaseTest {
     

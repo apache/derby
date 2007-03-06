@@ -66,7 +66,6 @@ import java.util.Vector;
  *
  * NOTE: A DistinctNode extends FromTable since it can exist in a FromList.
  *
- * @author ames
  */
 public class DistinctNode extends SingleChildResultSetNode
 {

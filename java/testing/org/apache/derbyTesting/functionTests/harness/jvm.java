@@ -63,7 +63,6 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
     -Dprop=name       define property; can be specified more than once
   </pre>
 
-  @author ames
  */
 
 

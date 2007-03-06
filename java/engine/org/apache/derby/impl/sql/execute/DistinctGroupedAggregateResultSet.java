@@ -64,7 +64,6 @@ import java.util.Enumeration;
  * additional code for distinct grouped aggregates, especially when we support
  * multiple distinct aggregates.
  *
- * @author jerry (broken out from SortResultSet)
  */
 class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 {

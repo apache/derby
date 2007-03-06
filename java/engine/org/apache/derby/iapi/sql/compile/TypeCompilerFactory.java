@@ -26,7 +26,6 @@ import org.apache.derby.iapi.types.TypeId;
 /**
  * Factory interface for the compilation part of datatypes.
  *
- * @author Jeff Lichtman
  */
 
 public interface TypeCompilerFactory

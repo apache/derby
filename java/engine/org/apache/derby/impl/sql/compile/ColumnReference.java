@@ -47,7 +47,6 @@ import java.util.Vector;
  * a base table, a column in a view (which could expand into a complex
  * expression), or a column in a subquery in the FROM clause.
  *
- * @author Jerry Brenner
  */
 
 public class ColumnReference extends ValueNode

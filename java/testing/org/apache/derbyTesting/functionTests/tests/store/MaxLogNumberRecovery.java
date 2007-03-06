@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * test does the setup, so it should be run before this test. 
  * In Non debug mode, this tests just acts as a plain log recovery test.
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  * @see MaxLogNumber
  */

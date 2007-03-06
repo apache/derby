@@ -37,7 +37,6 @@ import org.apache.derby.iapi.reference.SQLState;
  * and an object name separated by a dot. This class is mis-named: it is used to
  * represent the names of other object types in addition to tables.
  *
- * @author Jerry Brenner
  */
 
 public class TableName extends QueryTreeNode

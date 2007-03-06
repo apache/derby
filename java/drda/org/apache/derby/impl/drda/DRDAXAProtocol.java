@@ -30,7 +30,6 @@ import javax.transaction.xa.*;
  * This class requires the use of javax.transaction.xa classes from j2ee,
  * so is separated from DRDAConnThread, because of the additional
  * library requirements
- * @author kmarsden@Sourcery.Org
  */
 
 class DRDAXAProtocol {

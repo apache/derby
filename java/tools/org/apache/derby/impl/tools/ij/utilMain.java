@@ -57,7 +57,6 @@ import java.lang.reflect.*;
 	This factoring enables sharing the functionality for
 	single and dual connection ij runs.
 
-	@author jerry
  */
 public class utilMain implements java.security.PrivilegedAction {
 

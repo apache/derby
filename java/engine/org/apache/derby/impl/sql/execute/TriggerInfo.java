@@ -49,7 +49,6 @@ import java.util.Vector;
  * about a foreign key.  Used by DML to figure out what to
  * check.
  *
- * @author jamie
  */
 public final class TriggerInfo implements Formatable 
 {

@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *	This class is the superclass for the classes that describe actions 
  *  that are ALWAYS performed for a CREATE/DROP INDEX Statement at Execution time.
  *
- *	@author Jerry Brenner
  */
 
 public abstract class IndexConstantAction extends DDLSingleTableConstantAction

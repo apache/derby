@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * abstract class for group by and order by
  * columns.
  *
- * @author jamie
  */
 public abstract class OrderedColumn extends QueryTreeNode 
 {

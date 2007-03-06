@@ -51,7 +51,6 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
  * 
  * A procedure is always represented by a MethodCallNode.
  *
- * @author Jerry Brenner
  */
 public class CallStatementNode extends DMLStatementNode
 {	

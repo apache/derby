@@ -53,7 +53,6 @@ import java.util.Vector;
 /**
  * This node represents a concatenation comparison operator
  *
- * @author Jerry Brenner -- modified by jamie for bit and bit
  *							varying.
  */
 

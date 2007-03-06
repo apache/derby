@@ -53,7 +53,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 /**
 	Basic implementation of ExecRow.
 
-	@author ames
  */
 public class ValueRow implements ExecRow, Formatable
 {

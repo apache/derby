@@ -28,7 +28,6 @@ import org.apache.derby.iapi.store.access.StoreCostResult;
  * ordering of rows in the ResultSet, and the estimated number of rows in
  * this ResultSet.
  *
- * @author Jeff Lichtman
  */
 
 public interface CostEstimate extends StoreCostResult

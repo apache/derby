@@ -49,7 +49,6 @@ import java.util.HashMap;
  * The class contains a boolean telling whether the operation should eliminate
  * duplicate rows.
  *
- * @author Jeff Lichtman
  */
 
 abstract class SetOperatorNode extends TableOperatorNode

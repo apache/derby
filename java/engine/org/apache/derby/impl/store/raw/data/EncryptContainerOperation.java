@@ -59,7 +59,6 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
  *	@end_format
  *  </PRE>
  *
- *	@author  Suresh Thalamati
  *  @see Undoable
  */
 public class EncryptContainerOperation implements Undoable

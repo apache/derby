@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.SQLState;
 /**
   ResultSetStatistics implemenation for HashJoinResultSet.
 
-  @author jerry
 
 */
 public class RealHashJoinStatistics 

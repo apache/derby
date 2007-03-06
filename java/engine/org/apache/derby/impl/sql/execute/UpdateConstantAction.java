@@ -52,7 +52,6 @@ import java.util.Properties;
  *	This class  describes compiled constants that are passed into
  *	UpdateResultSets.
  *
- *	@author Rick Hillegas
  */
 
 public class UpdateConstantAction extends WriteCursorConstantAction

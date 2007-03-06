@@ -37,7 +37,6 @@ import java.io.InputStream;
  *  2. a length (length) field which is the actual size of the BLOB
  *  3. the data field (data), which is the actual BLOB data.
  *
- * @author Andreas Korneliussen
  */
 final public class BLOBDataModelSetup extends BaseJDBCTestSetup
 {

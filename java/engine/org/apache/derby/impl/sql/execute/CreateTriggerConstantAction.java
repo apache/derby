@@ -57,7 +57,6 @@ import java.sql.Timestamp;
  * This class  describes actions that are ALWAYS performed for a
  * CREATE TRIGGER Statement at Execution time.  
  *
- *	@author Jamie
  */
 class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 {

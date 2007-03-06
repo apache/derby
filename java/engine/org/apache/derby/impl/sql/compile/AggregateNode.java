@@ -60,7 +60,6 @@ import java.util.Vector;
  * An Aggregate Node is a node that reprsents a set function/aggregate.
  * It used for all system aggregates as well as user defined aggregates.
  *
- * @author jamie
  */
 
 public class AggregateNode extends UnaryOperatorNode

@@ -59,7 +59,6 @@ import java.util.Properties;
  *	This class  describes actions that are ALWAYS performed for a
  *	CREATE TABLE Statement at Execution time.
  *
- *	@author Rick Hillegas	Extracted code from CreateTableResultSet.
  */
 
 class CreateTableConstantAction extends DDLConstantAction

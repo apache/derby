@@ -25,7 +25,6 @@ package org.apache.derby.impl.sql.compile;
  * Rudimentary structure for containing information about
  * a REFERENCING clause for a trigger.
  *
- * @author jamie
  */
 public class TriggerReferencingStruct 
 {

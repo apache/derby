@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for ScalarAggregateResultSet.
 
-  @author jerry
 
 */
 public class RealScalarAggregateStatistics 

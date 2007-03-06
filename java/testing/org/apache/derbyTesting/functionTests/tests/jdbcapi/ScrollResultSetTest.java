@@ -31,7 +31,6 @@ import java.sql.*;
 /**
  * Tests scrollable result sets
  *
- * @author Fernanda Pizzorno
  *
  * Tests:
  * - testNextOnLastRowForwardOnly: tests that the result set is closed when all

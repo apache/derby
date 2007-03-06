@@ -28,7 +28,6 @@ package org.apache.derby.impl.sql.execute.rts;
  * This interface extends Formatable so that all objects which implement
  * this interface can be easily saved to the database.
  *
- * @author jerry
  */
 public interface ResultSetStatistics 
 {

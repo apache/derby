@@ -27,7 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
  * A visitor is an object that traverses the querytree
  * and performs some action. 
  *
- * @author jamie
  */
 public interface Visitor
 {

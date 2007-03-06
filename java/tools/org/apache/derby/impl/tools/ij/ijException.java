@@ -31,7 +31,6 @@ import java.io.IOException;
 	At this time, all messages are hard-coded in this file. A more
 	serviceable solution may need to be found.
 
-	@author ames.
  */
 
 public class ijException extends RuntimeException {

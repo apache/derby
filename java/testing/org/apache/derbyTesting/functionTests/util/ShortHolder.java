@@ -27,7 +27,6 @@ import java.io.Serializable;
  * This class holds a short.  This class exists for basic testing of
  * user-defined types in JSQL.
  *
- * @author	Jeff Lichtman
  */
 
 public class ShortHolder implements Serializable

@@ -33,7 +33,6 @@ import java.io.ObjectInput;
 import java.io.IOException;
 /**
  * 
- * @author jamie
  */
 public class CursorTableReference
 	implements ExecCursorTableReference, Formatable

@@ -27,7 +27,6 @@
 	If a protocol error message needs to send more than 
 	SVRCOD, an ERRCD and CODPNT arg it should be subclassed
 
-	@author marsden
 */
 
 package org.apache.derby.impl.drda;

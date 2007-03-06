@@ -43,7 +43,6 @@ import java.io.Reader;
 	There are no escaped characters, i.e. "\n" is considered to
 	be two characters, '\' and 'n'.
 
-	@author ames
  */
 
 public class StatementFinder {

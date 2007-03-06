@@ -41,7 +41,6 @@ import org.apache.derby.tools.ij;
  * especially if the backup path refers to another database directory.  
  *
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  */
 

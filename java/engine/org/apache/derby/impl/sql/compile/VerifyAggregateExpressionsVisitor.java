@@ -38,7 +38,6 @@ import org.apache.derby.iapi.error.StandardException;
  * expressions - in this case, the only column references allowed outside of
  * an aggregate are grouping columns.
  *
- * @author jamie, from code written by jerry
  */
 public class VerifyAggregateExpressionsVisitor implements Visitor
 {

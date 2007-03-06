@@ -32,7 +32,6 @@ import java.sql.*;
  *
  * DERBY-1087
  *
- * @author Fernanda Pizzorno
  */
 public class URCoveringIndexTest extends BaseJDBCTestCase {
     

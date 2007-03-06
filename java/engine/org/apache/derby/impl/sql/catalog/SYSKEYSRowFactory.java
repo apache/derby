@@ -40,7 +40,6 @@ import org.apache.derby.iapi.types.DataValueFactory;
 /**
  * Factory for creating a SYSKEYS row.
  *
- * @author jerry
  */
 
 public class SYSKEYSRowFactory extends CatalogRowFactory

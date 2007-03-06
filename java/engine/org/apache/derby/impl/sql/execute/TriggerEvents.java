@@ -26,7 +26,6 @@ package org.apache.derby.impl.sql.execute;
  * each known trigger event.  Use these rather
  * than constructing a new TriggerEvent.
  *
- * @author jamie
  */
 public class TriggerEvents
 {

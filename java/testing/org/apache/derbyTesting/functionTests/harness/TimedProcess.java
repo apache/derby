@@ -26,7 +26,6 @@ package org.apache.derbyTesting.functionTests.harness;
  * that forcibly terminates the process if it does not
  * complete within the specified time.
  *
- * @author Phil Lopez
  * 
  */
 public class TimedProcess

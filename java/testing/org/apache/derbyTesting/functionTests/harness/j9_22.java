@@ -29,7 +29,6 @@ import java.util.Properties;
 /**
   <p>This class is for IBM's J9 jdk 1.3.1 subset - 2.2
 
-  @author myrna
  */
 public class j9_22 extends jvm {
 

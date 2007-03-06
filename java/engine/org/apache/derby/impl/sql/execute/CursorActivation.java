@@ -26,7 +26,6 @@ package org.apache.derby.impl.sql.execute;
  * In the family of activation support classes,
  * this one provides an activation with a cursor name.
  *
- * @author ames
  */
 public abstract class CursorActivation 
 	extends BaseActivation

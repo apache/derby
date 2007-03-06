@@ -28,7 +28,6 @@ import java.io.*;
  * Utility class for logging messages.
  * </p>
  *
- * @author Rick Hillegas
  */
 public  class   Logger
 {

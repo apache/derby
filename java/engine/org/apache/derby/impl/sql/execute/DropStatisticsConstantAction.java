@@ -37,7 +37,6 @@ import org.apache.derby.catalog.UUID;
 /**
  * this class drops all statistics for a particular table or index.
  *
- * @author manish.
  */
 
 class DropStatisticsConstantAction extends DDLConstantAction

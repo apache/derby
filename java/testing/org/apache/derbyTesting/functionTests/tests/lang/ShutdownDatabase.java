@@ -58,7 +58,6 @@ package org.apache.derbyTesting.functionTests.tests.lang;
    </li>
    </ul>
    
-   @author Tomohito Nakayama
 */
 
 import java.sql.Connection;

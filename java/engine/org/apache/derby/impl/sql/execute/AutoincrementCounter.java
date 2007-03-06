@@ -46,7 +46,6 @@ import org.apache.derby.iapi.reference.SQLState;
  * user must call either  <i>update</i> or <i>reset(false)</i>. The value of a
  * counter can be changed by either calling reset or update. 
 
- * @author manish
  */
 public class AutoincrementCounter 
 {

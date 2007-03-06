@@ -42,7 +42,6 @@ import java.util.Vector;
  * A GroupByList represents the list of expressions in a GROUP BY clause in
  * a SELECT statement.
  *
- * @author Jeff Lichtman
  */
 
 public class GroupByList extends OrderedColumnList

@@ -29,7 +29,6 @@ import java.util.Properties;
 /**
   <p>This class is for IBM's J9 jdk 1.3.
 
-  @author ge
  */
 public class j9_13 extends jvm {
 

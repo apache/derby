@@ -39,7 +39,6 @@ import java.util.Properties;
     WORK IN PROGRESS
 
 
-	@author djd
 */
 
 public class Driver169 extends InternalDriver {

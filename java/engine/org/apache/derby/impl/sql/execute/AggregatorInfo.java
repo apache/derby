@@ -37,7 +37,6 @@ import java.io.IOException;
  * than externalizable because it isn't particularly complicated
  * and presumbably we don't need version control on plans.
  *
- * @author jamie
  */
 public class AggregatorInfo implements Formatable 
 {

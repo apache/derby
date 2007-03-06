@@ -32,7 +32,6 @@ import org.apache.derby.iapi.error.StandardException;
  * statement.  It gets replaced with the appropriate set of columns
  * at bind time.
  *
- * @author Jerry Brenner
  */
 
 public class AllResultColumn extends ResultColumn

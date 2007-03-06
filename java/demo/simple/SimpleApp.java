@@ -48,7 +48,6 @@ import java.util.Properties;
  *    * derbyclient (will use the Net client driver to access Network Server)
  *    * jccjdbcclient (if Derby is running embedded in the JCC Server framework)
  *
- * @author janet
  */
 public class SimpleApp
 {

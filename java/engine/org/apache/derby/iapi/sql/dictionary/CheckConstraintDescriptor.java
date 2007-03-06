@@ -28,7 +28,6 @@ import org.apache.derby.iapi.sql.StatementType;
 /**
  * This class represents a check constraint descriptor.
  *
- * @author jamie
  */
 public class CheckConstraintDescriptor extends ConstraintDescriptor
 {

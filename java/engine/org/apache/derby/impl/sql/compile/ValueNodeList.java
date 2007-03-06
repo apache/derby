@@ -48,7 +48,6 @@ import java.util.Vector;
  * (eg, IN list, NOT IN list or BETWEEN) in a DML statement.  
  * It extends QueryTreeNodeVector.
  *
- * @author Jerry Brenner
  */
 
 public class ValueNodeList extends QueryTreeNodeVector

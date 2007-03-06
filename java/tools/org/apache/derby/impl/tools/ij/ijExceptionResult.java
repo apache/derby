@@ -29,7 +29,6 @@ import java.sql.SQLWarning;
  * JDBC statements. Used by Async to capture its result
  * for WaitFor.
  *
- * @author ames
  */
 class ijExceptionResult extends ijResultImpl {
 

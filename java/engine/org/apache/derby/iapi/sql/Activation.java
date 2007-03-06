@@ -68,7 +68,6 @@ import java.util.Hashtable;
  * There are no fixed implementations of Activation for statements;
  * a statement has an activation generated for it when it is compiled.
  *
- * @author Jeff Lichtman
  */
 
 public interface Activation

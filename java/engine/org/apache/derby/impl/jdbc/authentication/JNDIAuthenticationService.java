@@ -40,7 +40,6 @@ import java.util.Properties;
  * The user can configure its own JNDI provider by setting the
  * system or database property derby.authentication.provider .
  *
- * @author Francois
  */
 
 public class JNDIAuthenticationService

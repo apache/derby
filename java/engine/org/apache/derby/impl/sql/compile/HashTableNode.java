@@ -68,7 +68,6 @@ import java.util.Properties;
 /**
  * A HashTableNode represents a result set where a hash table is built.
  *
- * @author Jerry Brenner
  */
 
 public class HashTableNode extends SingleChildResultSetNode

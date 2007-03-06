@@ -43,7 +43,6 @@ import org.apache.derby.impl.sql.execute.ConstraintConstantAction;
  * A AlterTableNode represents a DDL statement that alters a table.
  * It contains the name of the object to be created.
  *
- * @author Jerry Brenner
  */
 
 public class AlterTableNode extends DDLStatementNode

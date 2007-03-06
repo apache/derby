@@ -61,7 +61,6 @@ import java.sql.Types;
  * There will be a ColumnDefinitionNode for each column in a CREATE TABLE
  * statement, and for the column in an ALTER TABLE ADD COLUMN statement.
  *
- * @author Jeff Lichtman
  */
 
 public class ColumnDefinitionNode extends TableElementNode

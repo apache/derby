@@ -36,7 +36,6 @@ import java.util.List;
  * Execution extends prepared statement to add methods it needs
  * for execution purposes (that should not be on the Database API).
  *
- *	@author ames
  */
 public interface ExecPreparedStatement 
 	extends PreparedStatement {

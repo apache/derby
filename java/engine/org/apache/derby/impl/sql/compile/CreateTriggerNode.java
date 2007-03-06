@@ -47,7 +47,6 @@ import org.apache.derby.iapi.types.TypeId;
  * that represents a CREATE TRIGGER
  * statement.
  *
- * @author jamie
  */
 
 public class CreateTriggerNode extends DDLStatementNode

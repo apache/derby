@@ -58,7 +58,6 @@ import java.sql.Timestamp;
  *
  *
  * @version 0.1
- * @author Jamie
  */
 
 public class SYSTRIGGERSRowFactory extends CatalogRowFactory

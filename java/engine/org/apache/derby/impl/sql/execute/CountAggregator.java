@@ -34,7 +34,6 @@ import java.io.IOException;
 
 /**
  * Aggregator for COUNT()/COUNT(*).  
- * @author jamie
  */
 public final class CountAggregator 
 	extends SystemAggregator

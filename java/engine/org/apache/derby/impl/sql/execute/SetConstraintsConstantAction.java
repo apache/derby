@@ -56,7 +56,6 @@ import org.apache.derby.iapi.types.RowLocation;
  * to distinguish SET_CONSTRAINTS from ALTER_TABLE for
  * error messages.
  *
- *	@author jamie
  */
 class SetConstraintsConstantAction extends DDLConstantAction
 {

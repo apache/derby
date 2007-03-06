@@ -63,7 +63,6 @@ import java.util.HashMap;
  * @see FromSubquery
  * @see ProjectRestrictNode
  *
- * @author Jeff Lichtman
  */
 abstract class FromTable extends ResultSetNode implements Optimizable
 {

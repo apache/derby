@@ -49,7 +49,6 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
  * <li>getAliasId</li>
  * </ol>
  *
- * @author Jerry Brenner
  */
 
 public final class AliasDescriptor 

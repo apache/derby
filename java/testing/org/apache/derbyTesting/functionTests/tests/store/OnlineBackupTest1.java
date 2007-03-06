@@ -32,7 +32,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  * This class tests online backup when dml/ddl actions
  * are running in parallel to the backup thread. 
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  */
 

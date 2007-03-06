@@ -45,7 +45,6 @@ import org.apache.derby.iapi.types.DataValueFactory;
 /**
  * Factory for creating a SYSCONTRAINTS row.
  *
- * @author jerry
  */
 
 public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory

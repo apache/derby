@@ -49,7 +49,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
  * Abstract class that has actions that are across
  * all DDL actions.
  *
- * @author jamie
  */
 abstract class DDLConstantAction implements ConstantAction
 {

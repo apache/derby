@@ -58,7 +58,6 @@ import java.util.Properties;
  * the end of optimization, once we have determined that a sort
  * is required.
  *
- * @author jerry
  */
 public class OrderByNode extends SingleChildResultSetNode
 {

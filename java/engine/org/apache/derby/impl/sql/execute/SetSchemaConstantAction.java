@@ -46,7 +46,6 @@ import org.apache.derby.iapi.reference.SQLState;
  *	This class describes actions that are ALWAYS performed for a
  *	SET SCHEMA Statement at Execution time.
  *
- *	@author jamie 
  */
 
 class SetSchemaConstantAction implements ConstantAction

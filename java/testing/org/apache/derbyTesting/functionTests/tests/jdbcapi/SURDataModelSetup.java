@@ -37,7 +37,6 @@ import java.util.Collections;
 /**
  * This class is a decorator for the Scrollable Updatable Resultset
  * tests.  It sets up a datamodel and populates it with data.
- * @author Andreas Korneliussen
  */
 public class SURDataModelSetup extends BaseJDBCTestSetup
 {  

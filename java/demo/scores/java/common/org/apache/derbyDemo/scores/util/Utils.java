@@ -29,7 +29,6 @@ import java.sql.*;
  * Utility methods for the Scores application
  * </p>
  *
- * @author Rick Hillegas
  */
 public  class   Utils
 {

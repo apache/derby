@@ -28,7 +28,6 @@ import org.apache.derby.iapi.reference.SQLState;
 /**
  * Utilities for dealing with statements.
  *
- * @author jeff
  */
 public class StatementUtil
 {

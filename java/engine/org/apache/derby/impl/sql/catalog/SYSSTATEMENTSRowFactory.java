@@ -65,7 +65,6 @@ import java.util.Properties;
  *
  *
  * @version 0.1
- * @author Jamie
  */
 
 public class SYSSTATEMENTSRowFactory extends CatalogRowFactory

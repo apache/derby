@@ -36,7 +36,6 @@ import java.util.Vector;
 /**
  * A GroupByColumn is a column in the GROUP BY clause.
  *
- * @author jerry
  */
 public class GroupByColumn extends OrderedColumn 
 {

@@ -27,7 +27,6 @@ import java.util.Properties;
 /**
   <p>This class is for IBM's J9 jdk 1.3., foundation class library; v 2.2 (wctme5.7)
 
-  @author mayrna
  */
 public class j9_foundation extends jvm {
 

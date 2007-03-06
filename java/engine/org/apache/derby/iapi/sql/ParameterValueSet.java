@@ -32,7 +32,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  * they are all passed at once can reduce the communication overhead between
  * client and server.
  *
- * @author Jeff Lichtman
  */
 public interface ParameterValueSet
 {

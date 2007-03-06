@@ -50,7 +50,6 @@ import java.util.Hashtable;
 /**
  * A Predicate represents a top level predicate.
  *
- * @author Jerry Brenner
  */
 
 public final class Predicate extends QueryTreeNode implements OptimizablePredicate,

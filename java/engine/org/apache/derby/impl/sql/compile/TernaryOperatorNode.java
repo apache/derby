@@ -57,7 +57,6 @@ import java.util.Vector;
  * Java operators are not represented here: the JSQL language allows Java
  * methods to be called from expressions, but not Java operators.
  *
- * @author Jerry Brenner
  */
 
 public class TernaryOperatorNode extends ValueNode

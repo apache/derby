@@ -43,7 +43,6 @@ import java.util.*;
  * double/real explicit casting is also not allowd , scalar fuction DOUBLE is
  * used in those cases.
  *  
- * @author suresht
  */
 class ColumnInfo {
 

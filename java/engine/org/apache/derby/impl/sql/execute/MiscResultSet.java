@@ -31,7 +31,6 @@ import org.apache.derby.iapi.sql.Activation;
  *	Misc statements. The real Execution-time logic lives inside the
  *	executeConstantAction() method of the Execution constant.
  *
- *	@author jamie
  */
 
 class MiscResultSet extends NoRowsResultSetImpl

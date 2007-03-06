@@ -62,7 +62,6 @@ import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
  * query tree nodes inherit from QueryTreeNode except for those that extend
  * QueryTreeNodeVector.
  *
- * @author Jeff Lichtman
  */
 
 public abstract class QueryTreeNode implements Visitable

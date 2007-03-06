@@ -24,7 +24,6 @@
  * This test is only run embedded because we manually bring the server up and down.
  * </p>
  *
- * @author Rick
  */
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;

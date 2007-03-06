@@ -55,7 +55,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *
  *
  * @version 0.1
- * @author Jamie
  */
 
 public class SYSSCHEMASRowFactory extends CatalogRowFactory

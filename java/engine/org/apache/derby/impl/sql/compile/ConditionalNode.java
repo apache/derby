@@ -62,7 +62,6 @@ import java.util.Vector;
  * boolean expression on the "left" of the operator and a list of expressions on 
  * the "right". This is used to represent the java conditional (aka immediate if).
  *
- * @author Jerry Brenner
  */
 
 public class ConditionalNode extends ValueNode

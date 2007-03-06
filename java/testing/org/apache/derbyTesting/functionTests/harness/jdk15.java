@@ -27,7 +27,6 @@ import java.util.StringTokenizer;
 /**
   <p>This class is for JDK1.5.
 
-  @author ames
  */
 public class jdk15 extends jvm {
 

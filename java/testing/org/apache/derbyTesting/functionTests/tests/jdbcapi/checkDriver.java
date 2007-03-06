@@ -33,7 +33,6 @@ import java.util.Properties;
 import org.apache.derby.tools.JDBCDisplayUtil;
 
 /**
- * @author marsden
  *
  * This test tests java.sql.Driver methods.
  * Right now it just tests acceptsURL and some attributes  

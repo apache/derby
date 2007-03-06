@@ -32,7 +32,6 @@ import java.util.Vector;
 /**
  * This is an empty impl for reuse of code.
  *
- * @author ames
  */
 abstract class ijResultImpl implements ijResult {
 	public boolean isConnection() { return false; }

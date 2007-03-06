@@ -46,7 +46,6 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  * test directories.  When Java 6 can be used, it will be possible to
  * turn on write access at the end of the test.
  *
- * @author oystein.grovlen@sun.com
  */
 
 public class TurnsReadOnly

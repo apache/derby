@@ -37,7 +37,6 @@ import org.apache.derby.iapi.sql.depend.Provider;
 /**
  * This interface is used to get information from a DefaultDescriptor.
  *
- * @author Jerry
  */
 
 public final class DefaultDescriptor 

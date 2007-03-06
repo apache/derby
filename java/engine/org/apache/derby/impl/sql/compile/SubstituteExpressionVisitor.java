@@ -28,7 +28,6 @@ import org.apache.derby.iapi.sql.compile.Visitor;
  * Replaces a <em>source</em> expression with a <em>target</em>
  * expression.  
  * 
- * @author manish
  */
 class SubstituteExpressionVisitor implements Visitor 
 {

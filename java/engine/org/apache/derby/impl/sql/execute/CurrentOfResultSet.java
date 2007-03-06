@@ -47,7 +47,6 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
  * <p>
  * This result set returns only one row.
  *
- * @author ames
  */
 class CurrentOfResultSet extends NoPutResultSetImpl
 	implements CursorResultSet {

@@ -33,7 +33,6 @@ import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
  * A MaterializeSubqueryNode is used to replace the nodes for a subquery, to facilitate
  * code generation for materialization if possible.  See beetle 4373 for details.
  *
- * @author Tingjian Ge
  */
 class MaterializeSubqueryNode extends ResultSetNode
 {

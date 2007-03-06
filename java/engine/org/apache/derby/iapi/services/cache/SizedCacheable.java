@@ -30,7 +30,6 @@ package org.apache.derby.iapi.services.cache;
  * @see Cacheable
  * @see CacheFactory
  *
- * @author Jack Klebanoff
  */
 
 public interface SizedCacheable extends Cacheable

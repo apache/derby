@@ -55,7 +55,6 @@ import java.util.Properties;
  *
  *
  * @version 0.1
- * @author Rick Hillegas (extracted from DataDictionaryImpl).
  */
 
 class SYSFILESRowFactory extends CatalogRowFactory

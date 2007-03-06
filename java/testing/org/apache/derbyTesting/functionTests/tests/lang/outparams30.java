@@ -28,7 +28,6 @@ import java.math.BigDecimal;
  * These are moved to this class to enable tests using other procedures
  * in outparams.java to run in J2ME/CDC/FP.
  *   
- * @author deepa
  *
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates

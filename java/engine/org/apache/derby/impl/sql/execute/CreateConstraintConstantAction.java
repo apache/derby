@@ -61,7 +61,6 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
  *	constraint creation at Execution time.
  *
  *	@version 0.1
- *	@author Jerry Brenner
  */
 
 public class CreateConstraintConstantAction extends ConstraintConstantAction

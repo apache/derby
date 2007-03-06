@@ -44,7 +44,6 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
  * A CreateIndexNode is the root of a QueryTree that represents a CREATE INDEX
  * statement.
  *
- * @author Jeff Lichtman
  */
 
 public class CreateIndexNode extends DDLStatementNode

@@ -33,7 +33,6 @@ import java.io.File;
  * Methods in this class functon similar to java.io.RandomAccessFile except
  * when modified to perform the corruptios.
  *
- * @author <a href="mailto:suresh.thalamati@gmail.com">Suresh Thalamati</a>
  * @version 1.0
  * @see java.io.RandomAccessFile
  * @see StorageRandomAccessFile

@@ -34,7 +34,6 @@ import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
  * ResultSetStatisticsFactory provides a wrapper around all of
  * the result sets statistics objects needed in building the run time statistics.
  *
- * @author jerry
  */
 public interface ResultSetStatisticsFactory 
 {

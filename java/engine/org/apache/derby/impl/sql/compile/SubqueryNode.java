@@ -97,7 +97,6 @@ import java.util.Vector;
  * We change it to:
  *	<UL> where x = (SELECT true FROM (SELECT MAX(x) FROM z) WHERE SQLCOL1 = y) </UL>
  *
- * @author Jeff Lichtman
  */
 
 public class SubqueryNode extends ValueNode

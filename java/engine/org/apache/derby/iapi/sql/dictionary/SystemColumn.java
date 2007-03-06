@@ -29,7 +29,6 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
  *
  *
  * @version 0.1
- * @author Rick Hillegas
  */
 
 public interface SystemColumn

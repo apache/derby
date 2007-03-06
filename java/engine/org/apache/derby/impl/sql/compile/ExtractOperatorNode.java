@@ -44,7 +44,6 @@ import java.util.Vector;
  * This node represents a unary extract operator, used to extract
  * a field from a date/time. The field value is returned as an integer.
  *
- * @author ames
  */
 public class ExtractOperatorNode extends UnaryOperatorNode {
 

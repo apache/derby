@@ -71,7 +71,6 @@ import java.util.Properties;
  * the ones you need.  So the first time you touch it could
  * be painful ... that might be a problem for execution.
  *
- * @author ames
  */
 public class GenericResultSetFactory implements ResultSetFactory 
 {

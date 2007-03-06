@@ -74,7 +74,6 @@ import java.util.Date;
  * SHA-1 digest is single hash (one way) digest and is considered very
  * secure (160 bits).
  *
- * @author Francois
  */
 public abstract class AuthenticationServiceBase
 	implements AuthenticationService, ModuleControl, ModuleSupportable, PropertySetCallback {

@@ -35,7 +35,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for MaterializedResultSet.
 
-  @author jerry
 
 */
 public class RealMaterializedResultSetStatistics 

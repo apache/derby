@@ -54,7 +54,6 @@ import org.apache.derby.iapi.types.RowLocation;
  * and triggers to be executed based on the c's and t's
  * compiled into the update plan.
  *
- * @author ames
  */
 class UpdateResultSet extends DMLWriteResultSet
 {

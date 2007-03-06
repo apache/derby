@@ -50,7 +50,6 @@ import java.lang.reflect.Modifier;
 /**
  * An InListOperatorNode represents an IN list.
  *
- * @author Jerry Brenner
  */
 
 public final class InListOperatorNode extends BinaryListOperatorNode

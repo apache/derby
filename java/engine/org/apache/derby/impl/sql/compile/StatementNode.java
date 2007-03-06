@@ -55,7 +55,6 @@ import java.lang.reflect.Modifier;
  * <p>
  * StatementNode controls the class generation for query tree nodes.
  *
- * @author Jeff Lichtman
  */
 
 /*

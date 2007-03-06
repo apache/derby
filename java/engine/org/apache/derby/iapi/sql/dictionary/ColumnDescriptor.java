@@ -53,7 +53,6 @@ import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
  * <li>setColumnName</li>
  * <li>setPosition</li>
  *</ol>
- * @author Jeff Lichtman
  */
 
 public final class ColumnDescriptor extends TupleDescriptor

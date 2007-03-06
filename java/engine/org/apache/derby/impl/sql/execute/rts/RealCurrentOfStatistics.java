@@ -32,7 +32,6 @@ import java.io.IOException;
 /**
   ResultSetStatistics implemenation for CurrentOfResultSet.
 
-  @author jerry
 
 */
 public class RealCurrentOfStatistics 

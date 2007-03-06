@@ -56,7 +56,6 @@ import java.sql.Types;
  * This class represents the 6 binary operators: LessThan, LessThanEquals,
  * Equals, NotEquals, GreaterThan and GreaterThanEquals.
  *
- * @author Manish Khettry
  */
 
 public class BinaryRelationalOperatorNode

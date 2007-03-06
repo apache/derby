@@ -24,7 +24,6 @@
  * servers across Derby version levels and supported VMs.
  * </p>
  *
- * @author Rick
  */
 
 package org.apache.derbyTesting.functionTests.tests.junitTests.compatibility;

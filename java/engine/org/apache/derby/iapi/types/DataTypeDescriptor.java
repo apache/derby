@@ -54,7 +54,6 @@ import java.sql.Types;
  * This is an implementation of DataTypeDescriptor from the generic language
  * datatype module interface.
  *
- * @author Jeff Lichtman
  * @version 1.0
  */
 

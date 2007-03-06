@@ -36,7 +36,6 @@ import java.lang.reflect.*;
  *  as ResultSet.getBigDecimal(..).
  *  
  * 
- *  * @author deepa
  *
  */
 public class BigDecimalHandler {

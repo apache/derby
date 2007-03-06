@@ -64,7 +64,6 @@ import org.apache.derby.iapi.types.TypeId;
  *	This class  describes actions that are ALWAYS performed for a
  *	CREATE TABLE Statement at Execution time.
  *
- *	@author Jeff Lichtman	Cribbed from from CreateTableConstantAction
  */
 
 class CreateIndexConstantAction extends IndexConstantAction

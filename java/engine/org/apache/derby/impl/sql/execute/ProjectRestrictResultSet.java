@@ -52,7 +52,6 @@ import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
  * Takes a table and a table filter and returns
  * the table's rows satisfying the filter as a result set.
  *
- * @author ames
  */
 class ProjectRestrictResultSet extends NoPutResultSetImpl
 	implements CursorResultSet 

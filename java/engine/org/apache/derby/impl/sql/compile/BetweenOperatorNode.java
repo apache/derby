@@ -42,7 +42,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
  * A BetweenOperatorNode represents a BETWEEN clause. The between values are
  * represented as a 2 element list in order to take advantage of code reuse.
  *
- * @author Jerry Brenner
  */
 
 public class BetweenOperatorNode extends BinaryListOperatorNode

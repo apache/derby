@@ -58,7 +58,6 @@ import java.sql.SQLWarning;
  * for example).
  * CompilerContext objects are private to a LanguageConnectionContext.
  *
- * @author ames
  *
  * History:
  *	5/22/97 Moved getExternalInterfaceFactory() to LanguageConnectionContext

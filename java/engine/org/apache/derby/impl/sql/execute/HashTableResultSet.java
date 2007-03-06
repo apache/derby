@@ -65,7 +65,6 @@ import java.util.Vector;
 /**
  * Builds a hash table on the underlying result set tree.
  *
- * @author jerry
  */
 class HashTableResultSet extends NoPutResultSetImpl
 	implements CursorResultSet 

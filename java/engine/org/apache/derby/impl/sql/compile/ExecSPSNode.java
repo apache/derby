@@ -61,7 +61,6 @@ import java.util.Enumeration;
  * it effectively replaces itself with the appropriate
  * prepared statement).
  *
- * @author jamie
  */
 
 public class ExecSPSNode extends StatementNode 

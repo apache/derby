@@ -52,7 +52,6 @@ import org.apache.derby.iapi.services.info.PropertyNames;
  * - The current packaging includes derby.jar, derbynet.jar and
  *   derbytools.jar. The locale jars for Derby are not included yet.
  *
- * @author Rajesh Kartha
  */
 public class DerbyEclipsePlugin{
 	/*

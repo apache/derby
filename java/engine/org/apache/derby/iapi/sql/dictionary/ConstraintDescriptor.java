@@ -44,7 +44,6 @@ import org.apache.derby.impl.sql.execute.DropConstraintConstantAction;
  * column.
  *
  * @version 0.1
- * @author Jeff Lichtman
  */
 
 public abstract class ConstraintDescriptor 

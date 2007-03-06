@@ -42,7 +42,6 @@ import java.util.Vector;
 /**
  * This node represents a unary XXX_length operator
  *
- * @author Jeff Lichtman
  */
 
 public final class LengthOperatorNode extends UnaryOperatorNode

@@ -40,7 +40,6 @@ import org.apache.derbyTesting.functionTests.util.JDBCTestDisplayUtil;
  * result set.  Also test comments in SQL text that is
  * passed to an "execute" call.
  *
- * @author peachey
  */
 
 public class nullSQLText { 

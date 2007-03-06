@@ -46,7 +46,6 @@ import org.apache.derby.iapi.sql.StatementType;
  * A RenameNode is the root of a QueryTree that represents a
  * RENAME TABLE/COLUMN/INDEX statement.
  *
- * @author Mamta Satoor
  */
 
 public class RenameNode extends DDLStatementNode

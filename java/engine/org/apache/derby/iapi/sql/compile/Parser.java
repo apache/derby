@@ -38,7 +38,6 @@ import org.apache.derby.impl.sql.compile.StatementNode;
  * used (unlike static parsers, for which one must call ReInit() between calls
  * to the parser).
  *
- * @author Jeff Lichtman
  */
 
 

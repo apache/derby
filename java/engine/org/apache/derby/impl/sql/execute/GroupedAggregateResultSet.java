@@ -66,7 +66,6 @@ import java.util.Enumeration;
  * the grouped aggregates when scanning the source during the 
  * first call to next().
  *
- * @author jerry (broken out from SortResultSet)
  */
 class GroupedAggregateResultSet extends GenericAggregateResultSet
 	implements CursorResultSet {

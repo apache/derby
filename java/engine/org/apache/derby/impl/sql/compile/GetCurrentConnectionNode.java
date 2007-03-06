@@ -62,7 +62,6 @@ import java.util.Vector;
  * we may want to allow user to specify which of their connections
  * they want.  Assume that we will use a String.
  *
- * @author Jerry Brenner
  */
 
 public final class GetCurrentConnectionNode extends JavaValueNode

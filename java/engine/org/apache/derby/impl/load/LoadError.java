@@ -31,7 +31,6 @@ import org.apache.derby.iapi.error.PublicAPI;
  * These exceptions are thrown by the import and export modules.
  * 
  *
- * @author Mamta Satoor
 	@see SQLException
  */
 class LoadError {

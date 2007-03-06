@@ -46,7 +46,6 @@ import org.apache.derby.iapi.error.StandardException;
  * materialized or not. 
  * @see org.apache.derby.iapi.store.access.Qualifier 
  *
- * @author jamie
  */
 public class HasVariantValueNodeVisitor implements Visitor
 {

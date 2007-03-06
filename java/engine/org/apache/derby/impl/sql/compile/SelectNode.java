@@ -60,7 +60,6 @@ import java.util.HashSet;
  * the resultColumns in the selectList will contain the names of the columns
  * being inserted into or updated.
  *
- * @author Jeff Lichtman
  */
 
 public class SelectNode extends ResultSetNode

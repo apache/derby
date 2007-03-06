@@ -57,7 +57,6 @@ import java.util.Enumeration;
  *	This class  describes actions that are ALWAYS performed for a
  *	DROP TABLE Statement at Execution time.
  *
- *	@author Rick Hillegas	Extracted code from DropTableResultSet.
  */
 
 class DropTableConstantAction extends DDLSingleTableConstantAction

@@ -37,7 +37,6 @@ import java.io.IOException;
  * A basic holder for information about cursors
  * for execution.
  * 
- * @author jamie
  */
 public class CursorInfo
 	implements Formatable

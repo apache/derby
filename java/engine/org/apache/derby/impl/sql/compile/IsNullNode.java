@@ -50,7 +50,6 @@ import java.sql.Types;
  * This node represents either a unary 
  * IS NULL or IS NOT NULL comparison operator
  *
- * @author Jerry Brenner
  */
 
 public final class IsNullNode extends UnaryComparisonOperatorNode

@@ -36,7 +36,6 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  * A LockTableNode is the root of a QueryTree that represents a LOCK TABLE command:
  *	LOCK TABLE <TableName> IN SHARE/EXCLUSIVE MODE
  *
- * @author Jerry Brenner
  */
 
 public class LockTableNode extends MiscellaneousStatementNode
