@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 /**
  * Test of prepared statement getMetaData for statements that don't produce a
@@ -129,13 +130,37 @@ public class prepStmtMetaData {
 			dumpRSMetaData(met);
 			executeStmt(con,"alter table bug4579 add column c12 int");
 			met = ps.getMetaData();
-			System.out.println("bug 4579 and 5338 : Result meta data for select * after alter table but w/o execute query");
-			dumpRSMetaData(met);
+                        System.out.println(" Result meta data for select * after alter table but w/o execute query");
+                        int numCols = met.getColumnCount();
+                        // DERBY-2402 Client does not report added columns.
+                        // Take out embedded check when DERBY-2402 is fixed
+                        if (TestUtil.isEmbeddedFramework())
+                        {
+                            if (numCols != 2)
+                                System.out.println("FAIL: Expected 2 columns but got only " + numCols);
+                            if (!met.getColumnLabel(1).equals("C11") ||
+                                    !met.getColumnLabel(2).equals("C12"))
+                                    System.out.println("FAIL: Unexpected column label");
+                        }
+			//dumpRSMetaData(met);
 			executeStmt(con,"alter table bug4579 add column c13 int");
 			ps.execute();
 			met = ps.getMetaData();
-			System.out.println("bug 4579 and 5338 : Result meta data for select * after alter table and execute query");
-			dumpRSMetaData(met);
+                        numCols = met.getColumnCount();
+			System.out.println("Result meta data for select * after alter table and execute query");
+                         // DERBY-2402 Client does not report added columns.
+                        // Take out embedded check when DERBY-2402 is fixed
+                        if (TestUtil.isEmbeddedFramework())
+                        {
+                          if (numCols != 3)
+                                System.out.println("FAIL: Expected 3 columns but got only " + numCols);
+                          if (!met.getColumnLabel(1).equals("C11") ||
+                                  !met.getColumnLabel(2).equals("C12") ||
+                                  !met.getColumnLabel(3).equals("C13"))
+                              System.out.println("FAIL: Unexpected column value");
+                          
+                        }
+                        //dumpRSMetaData(met);
 			ps.close();
 
 			// clean up

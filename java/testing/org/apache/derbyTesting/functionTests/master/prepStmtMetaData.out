@@ -19,8 +19,6 @@ ResultSetMetaData is Null or empty
 ResultSetMetaData is Null or empty
 bug 4579 and 5338 : Result meta data for select *
 C11
-bug 4579 and 5338 : Result meta data for select * after alter table but w/o execute query
-C11,C12
-bug 4579 and 5338 : Result meta data for select * after alter table and execute query
-C11,C12,C13
+ Result meta data for select * after alter table but w/o execute query
+Result meta data for select * after alter table and execute query
 Test prepStmtMetaData finished
