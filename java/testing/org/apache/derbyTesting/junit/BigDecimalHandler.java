@@ -308,7 +308,7 @@ public class BigDecimalHandler {
 	 * 
 	 * @param ps PreparedStatement 
 	 * @param parameterIndex Parameter Index
-	 * @param bdString String to be used in setObject method
+	 * @param objectString String to be used in setObject method
 	 * @throws SQLException
 	 */
 	public static void setObjectString(PreparedStatement ps, int parameterIndex, String objectString) throws SQLException{
@@ -328,8 +328,7 @@ public class BigDecimalHandler {
 	
 	/** This method checks that the SQL type can be converted to Decimal
 	 * 
-	 * @param rs ResultSet
-	 * @param columnIndex Column Index
+	 * @param type the SQL type to check
 	 * @return true if the SQL type is convertible to DECIMAL, false otherwise.
 	 * @throws SQLException
 	 */

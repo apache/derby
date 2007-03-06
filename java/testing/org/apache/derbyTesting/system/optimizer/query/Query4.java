@@ -35,7 +35,6 @@ public class Query4 extends GenericQuery {
 	}
 
 	/**
-	 * @param args
 	 */
 	public void generateQueries() {
 		queries

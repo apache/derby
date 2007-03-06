@@ -229,7 +229,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      * an exception is thrown. Assertion failures are intercepted and
      * 'dumpDiff' is used to print the differences between the RS and
      * the expected values to System.err.
-     * @param assertString a message from the caller
+     * @param message a message from the caller
      * @param expected array of row vectors
      * @param returned the resultset to verify
      */
