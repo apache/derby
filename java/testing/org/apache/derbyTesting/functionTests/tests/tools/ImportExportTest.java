@@ -48,10 +48,12 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	public static Test suite() {
         TestSuite suite = new TestSuite("ImportExportTest");
 
-        //if (JDBC.vmSupportsJSR169())
-        //{
-        //	return new TestSuite();
-        //}
+        // disabled on weme6.1 due at the moment due 
+        // to problems with security exceptions.
+        if (JDBC.vmSupportsJSR169())
+        {
+        	return new TestSuite();
+        }
         suite.addTest(baseSuite("ImportExportTest:embedded"));
 
         suite.addTest(
