@@ -7322,6 +7322,12 @@ class DRDAConnThread extends Thread {
 				case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
 						writer.writeLDBytes((byte[]) val, index);
 					break;
+                case DRDAConstants.DRDA_TYPE_NLOBLOC:
+                case DRDAConstants.DRDA_TYPE_NCLOBLOC:
+                    // Get locator for LOB
+                    int locator = database.getConnection().addLOBMapping(val);
+                    writer.writeInt(locator);
+                    break;
 				default:
 					if (SanityManager.DEBUG) 
 						trace("ndrdaType is: "+ndrdaType);

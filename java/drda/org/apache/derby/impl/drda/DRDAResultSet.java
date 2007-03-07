@@ -246,7 +246,11 @@ class DRDAResultSet
 	 */
 	protected int getRsDRDAType(int index)
 	{
-		return rsDRDATypes[index -1];
+        if ((outovr_drdaType != null) && (outovr_drdaType[index-1] != 0)) {
+            // Override with requested type.  0 means use default
+            return outovr_drdaType[index-1];
+        }
+        return rsDRDATypes[index -1];
 	}
 	
 

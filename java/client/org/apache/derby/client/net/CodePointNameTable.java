@@ -53,6 +53,7 @@ class CodePointNameTable extends java.util.Hashtable {
         put(new Integer(CodePoint.EXCSQLIMM), "EXCSQLIMM");
         put(new Integer(CodePoint.EXCSQLSTT), "EXCSQLSTT");
         put(new Integer(CodePoint.OPNQRY), "OPNQRY");
+        put(new Integer(CodePoint.OUTOVR), "OUTOVR");
         put(new Integer(CodePoint.PRPSQLSTT), "PRPSQLSTT");
         put(new Integer(CodePoint.RDBCMM), "RDBCMM");
         put(new Integer(CodePoint.RDBRLLBCK), "RDBRLLBCK");

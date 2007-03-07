@@ -629,6 +629,19 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         int numVars = resultSetMetaData.columns_;
         int[][] lidAndLengths = new int[numVars][2]; //everything initialized to "default triplet"
 
+        for (int i=0; i<numVars; ++i) {
+            switch (resultSetMetaData.types_[i]) {
+                case java.sql.Types.BLOB:
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBLOC;
+                    lidAndLengths[i][1] = 4;
+                    break;
+                case java.sql.Types.CLOB:
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NCLOBLOC;
+                    lidAndLengths[i][1] = 4;
+                    break;
+            }
+        }
+
         return lidAndLengths;
     }
 

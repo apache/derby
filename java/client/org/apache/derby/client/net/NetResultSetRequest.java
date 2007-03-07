@@ -268,11 +268,16 @@ public class NetResultSetRequest extends NetStatementRequest
         updateLengthBytes(); // for cntqry
     }
 
-    private void buildOUTOVR(ResultSet resultSet,
+    private void buildOUTOVR(NetResultSet resultSet,
                              ColumnMetaData resultSetMetaData,
                              boolean firstOutovrBuilt,
                              boolean hasLobs) throws SqlException {
-        return;
+        if (false && hasLobs) {  // Disable use of locators for now
+            if (!firstOutovrBuilt) {
+                buildOUTOVR(resultSet, resultSetMetaData);
+                resultSet.firstOutovrBuilt_ = true;
+            }
+        }
     }
 
     private void buildRTNEXTDTA(int rtnextdta) throws SqlException {
