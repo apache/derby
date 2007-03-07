@@ -39,6 +39,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BigDecimalHandler;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -3599,8 +3600,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     
     public static Test suite() {
         // Can't run for client for now, getting strange protocol error on tearDown
+        // DERBY-2381
         //return TestConfiguration.defaultSuite(ParameterMappingTest.class);
-        return TestConfiguration.embeddedSuite(ParameterMappingTest.class);
+        // Don't run for JSR169 until DERBY-2403 is resolved.
+        if (JDBC.vmSupportsJDBC2())
+            return TestConfiguration.embeddedSuite(ParameterMappingTest.class);
+        else
+            return  new TestSuite("ParameterMapping");
     }
     
 }
