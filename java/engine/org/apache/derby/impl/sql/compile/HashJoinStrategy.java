@@ -300,7 +300,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 	}
 
 	/** @see JoinStrategy#resultSetMethodName */
-	public String resultSetMethodName(boolean bulkFetch) {
+	public String resultSetMethodName(boolean bulkFetch, boolean multiprobe) {
 		return "getHashScanResultSet";
 	}
 
@@ -333,9 +333,40 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 							int lockMode,
 							boolean tableLocked,
 							int isolationLevel,
-                            int maxMemoryPerTable
+							int maxMemoryPerTable,
+							boolean genInListVals
 							)
-						throws StandardException {
+						throws StandardException
+	{
+		/* If we're doing a Hash join then we shouldn't have any IN-list
+		 * probe predicates in the store restriction list.  The reason
+		 * is that those predicates are one-sided and thus if they
+		 * make it this far they will be pushed down to the base table
+		 * as restrictions on the rows read from disk.  That would be
+		 * wrong because a probe predicate is of the form "col = <val>"
+		 * where <val> is the first value in the IN-list.  But that's
+		 * not correct--we need to return all rows having any value that
+		 * appears in the IN-list (not just those rows matching the
+		 * first value).  Checks elsewhere in the code should ensure
+		 * that no probe predicates have made it this far, but if we're
+		 * running in SANE mode it doesn't hurt to verify.
+		 */
+		if (SanityManager.DEBUG)
+		{
+			Predicate pred = null;
+			for (int i = storeRestrictionList.size() - 1; i >= 0; i--)
+			{
+				pred = (Predicate)storeRestrictionList.getOptPredicate(i);
+				if (pred.getSourceInList() != null)
+				{
+					SanityManager.THROWASSERT("Found IN-list probing " +
+						"(" + pred.binaryRelOpColRefsToString() +
+						") while generating HASH join, which should " +
+						"not happen.");
+				}
+			}
+		}
+
 		ExpressionClassBuilder acb = (ExpressionClassBuilder) acbi;
 
 		fillInScanArgs1(tc,

@@ -51,6 +51,8 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
+import org.apache.derby.iapi.types.DataValueDescriptor;
+
 import java.util.Properties;
 /**
  * ResultSetFactory provides a wrapper around all of
@@ -723,6 +725,62 @@ public class GenericResultSetFactory implements ResultSetFactory
 								oneRowScan,
 								optimizerEstimatedRowCount,
 								optimizerEstimatedCost);
+	}
+
+	/**
+		Multi-probing scan that probes an index for specific values contained
+		in the received probe list.
+
+		All index rows for which the first column equals probeVals[0] will
+		be returned, followed by all rows for which the first column equals
+		probeVals[1], and so on.  Assumption is that we only get here if
+		probeVals has at least one value.
+
+		@see ResultSetFactory#getMultiProbeTableScanResultSet
+		@exception StandardException thrown on error
+	 */
+	public NoPutResultSet getMultiProbeTableScanResultSet(
+                        			Activation activation,
+									long conglomId,
+									int scociItem,
+									GeneratedMethod resultRowAllocator,
+									int resultSetNumber,
+									GeneratedMethod startKeyGetter,
+									int startSearchOperator,
+									GeneratedMethod stopKeyGetter,
+									int stopSearchOperator,
+									boolean sameStartStopPosition,
+									Qualifier[][] qualifiers,
+									DataValueDescriptor [] probeVals,
+									boolean probeValsAreSorted,
+									String tableName,
+									String userSuppliedOptimizerOverrides,
+									String indexName,
+									boolean isConstraint,
+									boolean forUpdate,
+									int colRefItem,
+									int indexColItem,
+									int lockMode,
+									boolean tableLocked,
+									int isolationLevel,
+									boolean oneRowScan,
+									double optimizerEstimatedRowCount,
+									double optimizerEstimatedCost)
+			throws StandardException
+	{
+		/* Incremental development: For now we should never actually get to
+		 * this method, so just return null.  When the appropriate execution
+		 * logic is in place (i.e. MultiProbeTableScanResultSet exists) then
+		 * we will add a call to create an instance of the result set here.
+		 */
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.THROWASSERT("Tried to instantiate " +
+				"MultiProbeTableScanResultSet, which does not " +
+				"yet exist (DERBY-47 incremental development).");
+		}
+
+		return (NoPutResultSetImpl)null;
 	}
 
 	/**

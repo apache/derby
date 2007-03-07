@@ -30,6 +30,7 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
  * ResultSetFactory provides a wrapper around all of
@@ -985,6 +986,51 @@ public interface ResultSetFactory {
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost)
 			throws StandardException;
+
+	/**
+		A multi-probe result set, used for probing an index with one or more
+		target values (probeValues) and returning the matching rows.  This
+		type of result set is useful for IN lists as it allows us to avoid
+		scannning an entire, potentially very large, index for a mere handful
+		of rows (DERBY-47).
+
+		All arguments are the same as for TableScanResultSet, plus the
+		following:
+
+		@param probeVals List of values with which to probe the underlying
+			table. Should not be null.
+		@param probeValsAreSorted Whether or not the values in probeVals are
+			sorted.
+	 */
+	NoPutResultSet getMultiProbeTableScanResultSet(
+			                    Activation activation,
+								long conglomId,
+								int scociItem,
+								GeneratedMethod resultRowAllocator,
+								int resultSetNumber,
+								GeneratedMethod startKeyGetter,
+								int startSearchOperator,
+								GeneratedMethod stopKeyGetter,
+								int stopSearchOperator,
+								boolean sameStartStopPosition,
+								Qualifier[][] qualifiers,
+								DataValueDescriptor [] probeVals,
+								boolean probeValsAreSorted,
+								String tableName,
+								String userSuppliedOptimizerOverrides,
+								String indexName,
+								boolean isConstraint,
+								boolean forUpdate,
+								int colRefItem,
+								int indexColItem,
+								int lockMode,
+								boolean tableLocked,
+								int isolationLevel,
+								boolean oneRowScan,
+								double optimizerEstimatedRowCount,
+								double optimizerEstimatedCost)
+			throws StandardException;
+
 	/**
 		An index row to base row result set gets an index row from its source
 		and uses the RowLocation in its last column to get the row from the

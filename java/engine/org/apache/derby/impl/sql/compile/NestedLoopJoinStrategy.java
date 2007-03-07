@@ -171,9 +171,11 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 	}
 
 	/** @see JoinStrategy#resultSetMethodName */
-	public String resultSetMethodName(boolean bulkFetch) {
+	public String resultSetMethodName(boolean bulkFetch, boolean multiprobe) {
 		if (bulkFetch)
 			return "getBulkTableScanResultSet";
+		else if (multiprobe)
+			return "getMultiProbeTableScanResultSet";
 		else
 			return "getTableScanResultSet";
 	}
@@ -207,7 +209,8 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 							int lockMode,
 							boolean tableLocked,
 							int isolationLevel,
-                            int maxMemoryPerTable
+							int maxMemoryPerTable,
+							boolean genInListVals
 							)
 						throws StandardException {
 		ExpressionClassBuilder acb = (ExpressionClassBuilder) acbi;
@@ -223,7 +226,17 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 			}
 		}
 
-		if (bulkFetch > 1)
+		/* If we're going to generate a list of IN-values for index probing
+		 * at execution time then we push TableScanResultSet arguments plus
+		 * two additional arguments: 1) the list of IN-list values, and 2)
+		 * a boolean indicating whether or not the IN-list values are already
+		 * sorted.
+		 */
+		if (genInListVals)
+		{
+			numArgs = 26;
+		}
+		else if (bulkFetch > 1)
 		{
 			numArgs = 25;
 		}
@@ -237,6 +250,31 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 										storeRestrictionList,
 										acb,
 										resultRowAllocator);
+
+		if (genInListVals)
+			((PredicateList)storeRestrictionList).generateInListValues(acb, mb);
+
+		if (SanityManager.DEBUG)
+		{
+			/* If we're not generating IN-list values with which to probe
+			 * the table then storeRestrictionList should not have any
+			 * IN-list probing predicates.  Make sure that's the case.
+			 */
+			if (!genInListVals)
+			{
+				Predicate pred = null;
+				for (int i = storeRestrictionList.size() - 1; i >= 0; i--)
+				{
+					pred = (Predicate)storeRestrictionList.getOptPredicate(i);
+					if (pred.getSourceInList() != null)
+					{
+						SanityManager.THROWASSERT("Found IN-list probing " +
+							"predicate (" + pred.binaryRelOpColRefsToString() +
+							") when no such predicates were expected.");
+					}
+				}
+			}
+		}
 
 		fillInScanArgs2(mb,
 						innerTable,

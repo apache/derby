@@ -143,6 +143,11 @@ public class FromBaseTable extends FromTable
 	 */
 	boolean			bulkFetchTurnedOff;
 	
+	/* Whether or not we are going to do execution time "multi-probing"
+	 * on the table scan for this FromBaseTable.
+	 */
+	boolean			multiProbing = false;
+
 	private double	singleScanRowCount;
 
 	private FormatableBitSet referencedCols;
@@ -2732,6 +2737,7 @@ public class FromBaseTable extends FromTable
 			if ((pred.getSourceInList() != null) && pred.isStartKey())
 			{
 				disableBulkFetch();
+				multiProbing = true;
 				break;
 			}
 		}
@@ -3121,7 +3127,8 @@ public class FromBaseTable extends FromTable
 		int nargs = getScanArguments(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
-			trulyTheBestJoinStrategy.resultSetMethodName(bulkFetch != UNSET),
+			trulyTheBestJoinStrategy.resultSetMethodName(
+				(bulkFetch != UNSET), multiProbing),
 			ClassName.NoPutResultSet, nargs);
 
 		/* If this table is the target of an update or a delete, then we must 
@@ -3442,7 +3449,8 @@ public class FromBaseTable extends FromTable
 																getLockMode(),
 											(tableDescriptor.getLockGranularity() == TableDescriptor.TABLE_LOCK_GRANULARITY),
 											getCompilerContext().getScanIsolationLevel(),
-											ap.getOptimizer().getMaxMemoryPerTable()
+											ap.getOptimizer().getMaxMemoryPerTable(),
+											multiProbing
 											);
 
 		return nargs;

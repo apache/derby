@@ -86,6 +86,20 @@ public class ParameterNode extends ValueNode
 	private ValueNode returnOutputParameter;
 
 	/**
+	 * If this parameter node was created as part of a "probe predicate"
+	 * for an InListOperatorNode then it does not actually correspond to
+	 * a specific value--we just created it as a start-key place-holder
+	 * for IN-list values at execution time.  In order to serve that
+	 * purpose we need to generate some value that can be used as the
+	 * place-holder.  Since this parameter node is "fake" and does not
+	 * correspond to an actual parameter, we can't really generate it;
+	 * so the following field holds some legitimate ValueNode--either a
+	 * constant node or a "real" parameter node--that we can generate to
+	 * serve as the place-holder.
+	 */
+	private ValueNode valToGenerate;
+
+	/**
 	 * Constructor for use by the NodeFactory
 	 */
 	public ParameterNode()
@@ -322,6 +336,15 @@ public class ParameterNode extends ValueNode
 											MethodBuilder mb)
 									throws StandardException
 	{
+		/* If we were given a specific ValueNode to generate then
+		 * just use that.
+		 */
+		if (valToGenerate != null)
+		{
+			valToGenerate.generateExpression(acb, mb);
+			return;
+		}
+
 		DataTypeDescriptor dtd = getTypeServices();
 		if ((dtd != null) && dtd.getTypeId().isXMLTypeId()) {
 		// We're a parameter that corresponds to an XML column/target,
@@ -491,5 +514,17 @@ public class ParameterNode extends ValueNode
     protected boolean isEquivalent(ValueNode o)
     {
     	return false;
+    }
+
+    /**
+     * Save the received ValueNode locally so that we can generate it
+     * (in place of "this") at generation time.  See the preprocess()
+     * method of InListOperatorNode for more on how this is used.
+     *
+     * @param The ValueNode to generate in place of this ParameterNode.
+     */
+    protected void setValueToGenerate(ValueNode vn)
+    {
+        valToGenerate = vn;
     }
 }

@@ -397,14 +397,48 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		resultTypeName = getTypeCompiler().interfaceName();
 
 		// Generate the code to build the array
-		LocalField arrayField =
-			acb.newFieldDeclaration(Modifier.PRIVATE, rightInterfaceType);
+		LocalField arrayField = generateListAsArray(acb, mb);
 
-		/* The array gets created in the constructor.
-		 * All constant elements in the array are initialized
-		 * in the constructor.  All non-constant elements, if any,
-		 * are initialized each time the IN list is evaluated.
-		 */
+		/*
+		** Call the method for this operator.
+		*/
+		/*
+		** Generate (field = <left expression>).  This assignment is
+		** used as the receiver of the method call for this operator,
+		** and the field is used as the left operand:
+		**
+		**	(field = <left expression>).method(field, <right expression>...)
+		*/
+
+		//LocalField receiverField =
+		//	acb.newFieldDeclaration(Modifier.PRIVATE, receiverType);
+
+		leftOperand.generateExpression(acb, mb);
+		mb.dup();
+		//mb.putField(receiverField); // instance for method call
+		/*mb.getField(receiverField);*/ mb.upCast(leftInterfaceType); // first arg
+		mb.getField(arrayField); // second arg
+		mb.push(isOrdered); // third arg
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType, methodName, resultTypeName, 3);
+	}
+
+	/**
+	 * Generate the code to create an array of DataValueDescriptors that
+	 * will hold the IN-list values at execution time.  The array gets
+	 * created in the constructor.  All constant elements in the array
+	 * are initialized in the constructor.  All non-constant elements,
+	 * if any, are initialized each time the IN list is evaluated.
+	 *
+	 * @param acb The ExpressionClassBuilder for the class we're generating
+	 * @param mb The MethodBuilder the expression will go into
+	 */
+	protected LocalField generateListAsArray(ExpressionClassBuilder acb,
+		MethodBuilder mb) throws StandardException
+	{
+		int listSize = rightOperandList.size();
+		LocalField arrayField = acb.newFieldDeclaration(
+			Modifier.PRIVATE, ClassName.DataValueDescriptor + "[]");
+
 		/* Assign the initializer to the DataValueDescriptor[] field */
 		MethodBuilder cb = acb.getConstructor();
 		cb.pushNewArray(ClassName.DataValueDescriptor, listSize);
@@ -455,7 +489,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 
 			setArrayMethod.getField(arrayField); // first arg
 			((ValueNode) rightOperandList.elementAt(index)).generateExpression(acb, setArrayMethod);
-			setArrayMethod.upCast(receiverType); // second arg
+			setArrayMethod.upCast(ClassName.DataValueDescriptor); // second arg
 			setArrayMethod.setArrayElement(index);
 		}
 
@@ -472,29 +506,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			mb.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null, nonConstantMethod.getName(), "void", 0);
 		}
 
-		/*
-		** Call the method for this operator.
-		*/
-		/*
-		** Generate (field = <left expression>).  This assignment is
-		** used as the receiver of the method call for this operator,
-		** and the field is used as the left operand:
-		**
-		**	(field = <left expression>).method(field, <right expression>...)
-		*/
-
-		//LocalField receiverField =
-		//	acb.newFieldDeclaration(Modifier.PRIVATE, receiverType);
-
-		leftOperand.generateExpression(acb, mb);
-		mb.dup();
-		//mb.putField(receiverField); // instance for method call
-		/*mb.getField(receiverField);*/ mb.upCast(leftInterfaceType); // first arg
-		mb.getField(arrayField); // second arg
-		mb.push(isOrdered); // third arg
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType, methodName, resultTypeName, 3);
-
-
+		return arrayField;
 	}
 
 
@@ -580,4 +592,14 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 
 		}
 	}
+
+	/**
+	 * Return whether or not the IN-list values for this node are ordered.
+	 * This is used for determining whether or not we need to do an execution-
+	 * time sort.
+	 */
+	protected boolean isOrdered()
+	{
+		return isOrdered;
+	} 
 }

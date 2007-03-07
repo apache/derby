@@ -179,10 +179,11 @@ public interface JoinStrategy {
 	/**
 	 * Get the name of the result set method for base table scans
 	 *
-	 * @param bulkFetch		True means bulk fetch is being done on the inner
-	 *						table
+	 * @param bulkFetch True means bulk fetch is being done on the inner table
+	 * @param multiprobe True means we are probing the inner table for rows
+	 *  matching a specified list of values.
 	 */
-	String resultSetMethodName(boolean bulkFetch);
+	String resultSetMethodName(boolean bulkFetch, boolean multiprobe);
 
 	/**
 	 * Get the name of the join result set method for the join
@@ -215,6 +216,8 @@ public interface JoinStrategy {
 	 *						as always using table locking
 	 * @param isolationLevel		Isolation level specified (or not) for scans
 	 * @param maxMemoryPerTable	Max memory per table
+	 * @param genInListVals Whether or not we are going to generate IN-list
+	 *  values with which to probe the inner table.
 	 *
 	 * @return	Count of the expressions pushed to use as the parameters to the
 	 *			result set for the inner table
@@ -233,8 +236,9 @@ public interface JoinStrategy {
 							int indexColItem,
 							int lockMode,
 							boolean tableLocked,
-                            int isolationLevel,
-                            int maxMemoryPerTable
+							int isolationLevel,
+							int maxMemoryPerTable,
+							boolean genInListVals
 							)
 					throws StandardException;
 

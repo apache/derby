@@ -1324,18 +1324,4 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 			return ((BinaryRelationalOperatorNode)relop).getInListOp();
 		return null;
 	}
-
-	/**
-	 * If this predicate is an IN-list "probe predicate" then "revert"
-	 * it back to its original IN-list form.  This turns out to be
-	 * very easy: we just set the left operand of andNode to be the
-	 * original InListOperatorNode (if non-null).
-	 */
-	protected void revertToSourceInList()
-	{
-		InListOperatorNode ilon = getSourceInList();
-		if (ilon != null)
-			andNode.setLeftOperand(ilon);
-		return;
-	}
 }

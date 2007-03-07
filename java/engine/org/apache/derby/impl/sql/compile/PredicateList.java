@@ -539,7 +539,15 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
                     if (!pred.isPushableOrClause(optTable))
                     {
-                        // NOT an OR or AND, so go on to next predicate.
+                        /* NOT an OR or AND, so go on to next predicate.
+                         *
+                         * Note: if "pred" (or any predicates in the tree
+                         * beneath "pred") is an IN-list probe predicate
+                         * then we'll "revert" it to its original form
+                         * (i.e. to the source InListOperatorNode from
+                         * which it originated) as part of code generation.
+                         * See generateExpression() in BinaryOperatorNode.
+                         */
                         continue;
                     }
                 }
@@ -553,6 +561,17 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
                 }
 
 				pred.markQualifier();
+
+				if (SanityManager.DEBUG)
+				{
+					if (pred.getSourceInList() != null)
+					{
+						SanityManager.THROWASSERT("Found an IN-list probe " +
+							"predicate (" + pred.binaryRelOpColRefsToString() +
+							") that was marked as a qualifier, which should " +
+							"not happen.");
+					}
+				}
 
 				if (pushPreds)
 				{
@@ -666,14 +685,12 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			{
 				/* If we're pushing predicates then this is the last time
 				 * we'll get here before code generation.  So if we have
-				 * any IN-list probe predicates that are not useful, we
+				 * any IN-list probe predicates that are not useful, we'll
 				 * need to "revert" them back to their original IN-list
 				 * form so that they can be generated as regular IN-list
-				 * restrictions.
+				 * restrictions.  That "revert" operation happens in
+				 * the generateExpression() method of BinaryOperatorNode.
 				 */
-				if (pushPreds && isInListProbePred)
-					pred.revertToSourceInList();
-
 				continue;
 			}
 
@@ -867,11 +884,10 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					 * which means we are preparing to generate code.  Those
 					 * two facts together mean we have to "revert" the
 					 * probe predicate back to its original state so that
-					 * it can be generated as normal IN-list.
+					 * it can be generated as normal IN-list.  That "revert"
+					 * operation happens from within the generateExpression()
+					 * method of BinaryOperatorNode.java.
 					 */
-					if (isInListProbePred)
-						thisPred.revertToSourceInList();
-
 					continue;
 				}
 
@@ -923,7 +939,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					 * restriction--*unless* we're dealing with a probe
 					 * predicate, in which case the restriction is handled
 					 * via execution-time index probes (for more see
-					 * execute/TableScanResultSet.java).
+					 * execute/MultiProbeTableScanResultSet.java).
 					 */
 					if (!isIn || isInListProbePred)
 						removeOptPredicate(thisPred);
@@ -2808,6 +2824,75 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
     }
 
 	/**
+	 * If there is an IN-list probe predicate in this list then generate
+	 * the corresponding IN-list values as a DataValueDescriptor array,
+	 * to be used for probing at execution time.  Also generate a boolean
+	 * value indicating whether or not the values are already in sorted
+	 * order.
+	 *
+	 * Assumption is that by the time we get here there is at most one
+	 * IN-list probe predicate in this list.
+	 *
+	 * @param acb The ActivationClassBuilder for the class we're building
+	 * @param exprFun The MethodBuilder for the method we're building
+	 */
+	protected void generateInListValues(ExpressionClassBuilder acb,
+		MethodBuilder mb) throws StandardException
+	{
+		int size = size();
+		InListOperatorNode ilon = null;
+		for (int index = size - 1; index >= 0; index--)
+		{
+			Predicate pred = (Predicate)elementAt(index);
+			ilon = pred.getSourceInList();
+
+			// Don't do anything if it's not an IN-list probe predicate.
+			if (ilon == null)
+				continue;
+
+			/* We're going to generate the relevant code for the probe
+			 * predicate below, so we no longer need it to be in the
+			 * list.  Remove it now.
+			 */
+			removeOptPredicate(pred);
+
+			/* This list is a store restriction list for a specific base
+			 * table, and we can only have one probe predicate per base
+			 * table (any others, if any, will be "reverted" back to
+			 * their original InListOperatorNodes and generated as
+			 * qualifiers). So make sure there are no other probe preds
+			 * in this list.
+			 */
+			if (SanityManager.DEBUG)
+			{
+				for (int i = 0; i < index; i++)
+				{
+					pred = (Predicate)elementAt(i);
+					if (pred.getSourceInList() != null)
+					{
+						SanityManager.THROWASSERT("Found multiple probe " +
+							"predicates for IN-list when only one was " +
+							"expected.");
+					}
+				}
+			}
+
+			break;
+		}
+
+		if (ilon != null)
+		{
+			mb.getField(ilon.generateListAsArray(acb, mb));
+			mb.push(ilon.isOrdered());
+		}
+		else
+		{
+			mb.pushNull(ClassName.DataValueDescriptor + "[]");
+			mb.push(false);
+		}
+	}
+
+	/**
 	 * @see OptimizablePredicateList#generateQualifiers
 	 *
 	 * @exception StandardException		Thrown on error
@@ -3333,6 +3418,25 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		boolean[]	isAscending = optTable.getTrulyTheBestAccessPath().
 								getConglomerateDescriptor().
 									getIndexDescriptor().isAscending();
+
+		/* If the predicate is an IN-list probe predicate then we are
+		 * using it as a start/stop key "placeholder", to be over-ridden
+		 * at execution time.  Put differently, we want to generate
+		 * "column = ?" as a start/stop key and then use the "?" value
+		 * as a placeholder into which we'll plug the various IN values
+		 * at execution time.
+		 *
+		 * In that case "isIn" will be false here, which is fine: there's
+		 * no need to generate dynamic start/stop keys like we do for
+		 * "normal" IN lists because we're just using the key as a place-
+		 * holder.  So by generating the probe predicate ("column = ?")
+		 * as a normal one-sided start/stop key, we get our requisite
+		 * execution-time placeholder and that's that.  For more on how
+		 * we use this "placeholder", see MultiProbeTableScanResultSet.
+		 *
+		 * Note that we generate the corresponding IN-list values
+		 * separately (see generateInListValues() in this class).
+		 */
 		boolean isIn = pred.getAndNode().getLeftOperand() instanceof InListOperatorNode;
 
 		/*

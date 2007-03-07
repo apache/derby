@@ -474,6 +474,31 @@ public class BinaryOperatorNode extends ValueNode
 											MethodBuilder mb)
 		throws StandardException
 	{
+		/* If this BinaryOperatorNode was created as a part of an IN-list
+		 * "probe predicate" then we do not want to generate the relational
+		 * operator itself; instead we want to generate the underlying
+		 * IN-list for which this operator node was created.
+		 *
+		 * We'll get here in situations where the optimizer chooses a plan
+		 * for which the probe predicate is *not* a useful start/stop key
+		 * and thus is not being used for execution-time index probing.
+		 * In this case we are effectively "reverting" the probe predicate
+		 * back to the InListOperatorNode from which it was created.  Or put
+		 * another way, we are "giving up" on index multi-probing and simply
+		 * generating the original IN-list as a regular restriction.
+		 */
+		if (this instanceof BinaryRelationalOperatorNode)
+		{
+			InListOperatorNode ilon =
+				((BinaryRelationalOperatorNode)this).getInListOp();
+
+			if (ilon != null)
+			{
+				ilon.generateExpression(acb, mb);
+				return;
+			}
+		}
+
 		String		resultTypeName;
 		String		receiverType;
 
