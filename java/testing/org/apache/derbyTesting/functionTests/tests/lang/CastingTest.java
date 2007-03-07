@@ -1,13 +1,11 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import junit.framework.Test;
 
-import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -252,8 +250,7 @@ public static String[][]SQLData =
     };
     
     protected void setUp() throws SQLException {
-        Connection conn = getConnection();
-        Statement scb = conn.createStatement();
+        Statement scb = createStatement();
 
         for (int type = 0; type < SQLTypes.length; type++) {
             String typeName = SQLTypes[type];
@@ -283,29 +280,24 @@ public static String[][]SQLData =
                 }
             }
         scb.close();
-        conn.commit();
+        commit();
     }
 
     public void testAssignments() throws SQLException {
 
-        Connection conn = getConnection();
+        Statement scb = createStatement();
 
-        Statement scb = conn.createStatement();
-        ResultSet rs = null;
-
-     
         // Try to insert each sourceType into the targetType table
         for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
             for (int sourceType = 0; sourceType < SQLTypes.length; sourceType++) {
                 String sourceTypeName = SQLTypes[sourceType];
                 for (int targetType = 0; targetType < SQLTypes.length; targetType++) {
                     try {
-                        String convertString = null;
                         String targetTableName = getTableName(targetType);
 
                         // For assignments Character types use strings that can
                         // be converted to the targetType.
-                        convertString = getCompatibleString(sourceType,
+                        String convertString = getCompatibleString(sourceType,
                                 targetType, dataOffset);
 
                         String insertValuesString = " VALUES CAST("
@@ -327,16 +319,12 @@ public static String[][]SQLData =
             }
 
         scb.close();
-        conn.commit();
-        conn.close();
-
+        commit();
     }
 
     public void testExplicitCasts() throws SQLException {
 
-        Connection conn = getConnection();
-        Statement s = conn.createStatement();
-        ResultSet rs = null;
+        Statement s = createStatement();
 
         // Try Casts from each type to the
         for (int sourceType = 0; sourceType < SQLTypes.length; sourceType++) {
@@ -345,22 +333,22 @@ public static String[][]SQLData =
             //System.out.print("/*" + sourceTypeName + "*/ {");
             for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
                 for (int targetType = 0; targetType < SQLTypes.length; targetType++) {
-                    String query = null;
                     try {
-                        String convertString = null;
                         String targetTypeName = SQLTypes[targetType];
                         // For casts from Character types use strings that can
                         // be converted to the targetType.
 
-                        convertString = getCompatibleString(sourceType,
+                        String convertString = getCompatibleString(sourceType,
                                 targetType, dataOffset);
 
-                        query = "VALUES CAST (CAST (" + convertString + " AS "
+                        String query =
+                            "VALUES CAST (CAST (" + convertString + " AS "
                                 + SQLTypes[sourceType] + ") AS "
                                 + SQLTypes[targetType] + " )";
-                        rs = s.executeQuery(query);
+                        ResultSet rs = s.executeQuery(query);
                         rs.next();
                         String val = rs.getString(1);
+                        rs.close();
                         if (dataOffset == 0)
                             assertNull(val);
                         else
@@ -391,15 +379,13 @@ public static String[][]SQLData =
                 }
         }
 
-        conn.commit();
+        commit();
 
     }
 
     public void testComparisons() throws SQLException {
 
-        Connection conn = getConnection();
-        Statement scb = conn.createStatement();
-        ResultSet rs = null;
+        Statement scb = createStatement();
 
         // Comparison's using literals
 
@@ -411,10 +397,11 @@ public static String[][]SQLData =
                 String compareSQL = "SELECT distinct c FROM " + tableName
                         + " WHERE c = " + SQLData[type][dataOffset];
 
-                rs = scb.executeQuery(compareSQL);
+                ResultSet rs = scb.executeQuery(compareSQL);
                 //JDBC.assertDrainResults(rs);
                 // should return 1 row
                 assertTrue(rs.next());
+                rs.close();
             } catch (SQLException se) {
                 // literal comparisons are ok for everything but Lob and long
                 assertTrue(isLongType(type));
@@ -427,12 +414,11 @@ public static String[][]SQLData =
                 String sourceTypeName = SQLTypes[sourceType];
                 for (int targetType = 0; targetType < SQLTypes.length; targetType++) {
                     try {
-                        String convertString = null;
                         String targetTableName = getTableName(targetType);
 
                         // For assignments Character types use strings that can
                         // be converted to the targetType.
-                        convertString = getCompatibleString(sourceType,
+                        String convertString = getCompatibleString(sourceType,
                                 targetType, dataOffset);
 
                         // Make sure table has just compatible data
@@ -448,7 +434,7 @@ public static String[][]SQLData =
                                 + sourceTypeName + ")";
 
                     
-                        rs = scb.executeQuery(compareSQL);
+                        ResultSet rs = scb.executeQuery(compareSQL);
                         JDBC.assertDrainResults(rs);
                         
                         checkSupportedComparison(sourceType, targetType);
@@ -463,14 +449,12 @@ public static String[][]SQLData =
                 }
             }
         scb.close();
-        conn.commit();
+        commit();
 
     }
 
     protected void tearDown() throws SQLException, Exception {
-        super.tearDown();
-        Connection conn = getConnection();
-        Statement scb = conn.createStatement();
+        Statement scb = createStatement();
 
         for (int type = 0; type < SQLTypes.length; type++) {
             String typeName = SQLTypes[type];
@@ -482,8 +466,8 @@ public static String[][]SQLData =
         }
 
         scb.close();
-        conn.commit();
-        conn.close();
+        commit();
+        super.tearDown();
     }
 
     /**
