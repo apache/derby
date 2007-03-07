@@ -33,9 +33,9 @@ public class ZipInfoProperties // extends Properties
 	private final ProductVersionHolder	version;
     /**
         full path to zip (or expanded zip)
-        C:/cloudscape/lib/tools.zip
+        C:/derby/lib/tools.zip
             -or-
-        D:\myWorkDir\cloudscape\lib\ *expanded*
+        D:\myWorkDir\derby\lib\ *expanded*
 
         The base name (at the end) should be the same as the zipNameString
      */

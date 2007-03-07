@@ -710,16 +710,16 @@ class DRDAStatement
 	 * For dyamic packages The package name is encoded as follows
 	 * SYS(S/L)(H/N)xyy 
 	 * where 'S' represents Small package and 'L' large 
-	 *                      (ignored by cloudscape) 
+	 *                      (ignored by Derby) 
 	 * Where 'H' represents WITH HOLD, and 'N' represents NO WITH HOLD. 
 	 *                      (May be overridden by SQLATTR for WITH
 	 *                       HOLD")
 	 *
-	 * Where 'www' is the package iteration (ignored by cloudcape)
+	 * Where 'www' is the package iteration (ignored by Derby)
 	 * Where 'x' is the isolation level: 0=NC, 1=UR, 2=CS, 3=RS, 4=RR 
 	 * Where 'yy' is the package iteration 00 through FF 
 	 * Where 'zz' is unique for each platform
-	 * Happilly, these values correspond precisely to the internal cloudscape
+	 * Happilly, these values correspond precisely to the internal Derby
 	 * isolation levels  in ExecutionContext.java
 	 * x   Isolation Level                                           
 	 * --  ---------------------

@@ -19,7 +19,7 @@
 */
 /**
  * This class translates DRDA protocol from an application requester to JDBC
- * for Cloudscape and then translates the results from Cloudscape to DRDA
+ * for Derby and then translates the results from Derby to DRDA
  * for return to the application requester.
  */
 package org.apache.derby.impl.drda;
@@ -1246,7 +1246,7 @@ class DRDAConnThread extends Thread {
 	  	} catch (SQLException se) {
 			String sqlState = se.getSQLState();
 			// need to set the security check code based on the reason the connection     
-			// was denied, Cloudscape doesn't say whether the userid or password caused
+			// was denied, Derby doesn't say whether the userid or password caused
 			// the problem, so we will just return userid invalid
 			databaseAccessException = se;
 			for (; se != null; se = se.getNextException())
@@ -1263,7 +1263,7 @@ class DRDAConnThread extends Thread {
 		}
 		catch (Exception e)
 		{
-			// If cloudscape has shut down for some reason,
+			// If Derby has shut down for some reason,
 			// we will send  an agent error and then try to 
 			// get the driver loaded again.  We have to get
 			// rid of the client first in case they are holding
@@ -1740,7 +1740,7 @@ class DRDAConnThread extends Thread {
                         }
                     }
 					break;
-                //optional (currently required for Cloudscape - needed for
+                //optional (currently required for Derby - needed for
                 //          DERBY-528 as well)
 				case CodePoint.RDBNAM:
 					String dbname = parseRDBNAM();
@@ -3530,7 +3530,7 @@ class DRDAConnThread extends Thread {
 		String attrs = parseEncodedString();
 		if (SanityManager.DEBUG)
 			trace("sqlattr = '" + attrs+"'");
-		//let Cloudscape handle any errors in the types it doesn't support
+		//let Derby handle any errors in the types it doesn't support
 		//just set the attributes
 
 		boolean validAttribute = false;
@@ -3626,7 +3626,7 @@ class DRDAConnThread extends Thread {
 	 *  PKGNAMCSN - RDB Package Name, Consistency Token and Section Number - required
 	 *  OUTEXP - Output expected
 	 *  NBRROW - Number of rows to be inserted if it's an insert
-	 *  PRCNAM - procedure name if specified by host variable, not needed for Cloudscape
+	 *  PRCNAM - procedure name if specified by host variable, not needed for Derby
 	 *  QRYBLKSZ - query block size
 	 *  MAXRSLCNT - max resultset count
 	 *  MAXBLKEXT - Max number of extra blocks
@@ -4877,7 +4877,7 @@ class DRDAConnThread extends Thread {
                         }
 
 						if (canIgnoreStmt(sqlStmt)) {
-						// We _know_ Cloudscape doesn't recognize this
+						// We _know_ Derby doesn't recognize this
 						// statement; don't bother trying to execute it.
 						// NOTE: at time of writing, this only applies
 						// to "SET CLIENT" commands, and it was decided
@@ -5477,7 +5477,7 @@ class DRDAConnThread extends Thread {
 	}
 
 	/**
-	 * Translate from Cloudscape exception severity to SVRCOD
+	 * Translate from Derby exception severity to SVRCOD
 	 *
 	 * @param e SQLException
 	 */
@@ -8076,7 +8076,7 @@ class DRDAConnThread extends Thread {
             // database level).
             // 
             // if monitor is never setup by any ModuleControl, getMonitor
-            // returns null and no cloudscape database has been booted. 
+            // returns null and no Derby database has been booted. 
             if (Monitor.getMonitor() != null)
                 databaseObj = (org.apache.derby.iapi.db.Database)
                     Monitor.findService(Property.DATABASE_MODULE, dbName);

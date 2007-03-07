@@ -561,7 +561,7 @@ public final class NetworkServerControlImpl {
 	/**
 	 * Start a network server.  Launches a separate thread with 
 	 * DRDAServerStarter.  Want to use Monitor.startModule,
-	 * so it can all get shutdown when cloudscape shuts down, but 
+	 * so it can all get shutdown when Derby shuts down, but 
 	 * can't get it working right now.
 	 *
 	 * @param consoleWriter   PrintWriter to which server console will be 
@@ -771,13 +771,13 @@ public final class NetworkServerControlImpl {
 
 		if (shutdownDatabasesOnShutdown) {
 
-			// Shutdown Cloudscape
+			// Shutdown Derby
 			try {
 				if (cloudscapeDriver != null)
 					cloudscapeDriver.connect("jdbc:derby:;shutdown=true",
 											 (Properties) null);
 			} catch (SQLException sqle) {
-				// If we can't shutdown cloudscape. Perhaps authentication is
+				// If we can't shutdown Derby. Perhaps authentication is
 				// set to true or some other reason. We will just print a
 				// message to the console and proceed.
 				String expectedState =
@@ -798,7 +798,7 @@ public final class NetworkServerControlImpl {
     }
 	
 	/** 
-	 * Load Cloudscape and save driver for future use.
+	 * Load Derby and save driver for future use.
 	 * We can't call Driver Manager when the client connects, 
 	 * because they might be holding the DriverManager lock.
 	 *
@@ -811,7 +811,7 @@ public final class NetworkServerControlImpl {
 	protected void startNetworkServer() throws Exception
 	{
 
-		// we start the cloudscape server here.
+		// we start the Derby server here.
 		boolean restartCheck = this.restartFlag;
 		synchronized (serverStartSync) {
 
@@ -1702,7 +1702,7 @@ public final class NetworkServerControlImpl {
 	 * Send SQL Exception from server to client after processing a command
 	 *
 	 * @param writer	writer to use for sending message
-	 * @param se		Cloudscape exception
+	 * @param se		Derby exception
 	 * @param type		type of exception, SQLERROR or SQLWARNING
 	 *
 	 * @throws Exception if a problem occurs sending message
@@ -1840,9 +1840,9 @@ public final class NetworkServerControlImpl {
 	}
 
 	/**
-	 * Get Cloudscape information
+	 * Get Derby information
 	 *
-	 * @return system information for Cloudscape
+	 * @return system information for Derby
 	 *
 	 * @throws IOException if a problem occurs encoding string
 	 */
@@ -3476,7 +3476,7 @@ public final class NetworkServerControlImpl {
 	/**
 	 * Wrap SQL Error - display to console and raise exception
 	 *
-	 * @param messageKey	Cloudscape SQL Exception message id
+	 * @param messageKey	Derby SQL Exception message id
 	 *
 	 * @exception Exception raises exception for message
 	 */
@@ -3489,7 +3489,7 @@ public final class NetworkServerControlImpl {
 	/**
 	 * Wrap SQL Warning - display to console and raise exception
 	 *
-	 * @param messageKey	Cloudscape SQL Exception message id
+	 * @param messageKey	Derby SQL Exception message id
 	 *
 	 * @exception Exception raises exception for message
 	 */

@@ -864,7 +864,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * settings in connectionAttributes and properties of the DataSource will lead to
      * unexpected behaviour. 
      *
-     * @param prop set to the list of Cloudscape connection attributes separated by semi-colons.   E.g., to specify an
+     * @param prop set to the list of Derby connection attributes separated by semi-colons.   E.g., to specify an
      *             encryption bootPassword of "x8hhk2adf", and set upgrade to true, do the following: <PRE>
      *             ds.setConnectionAttributes("bootPassword=x8hhk2adf;upgrade=true"); </PRE> See Derby documentation for
      *             complete list.

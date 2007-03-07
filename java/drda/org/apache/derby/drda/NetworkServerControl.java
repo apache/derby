@@ -309,7 +309,7 @@ public class NetworkServerControl{
 	 * <P>
 	 *  Note: an alternate method to starting the Network Server with the API,
 	 *  is to use the derby.drda.startNetworkServer property in 
-	 *  cloudscape.properties.
+	 *  derby.properties.
 	 *  
 	 * 
 	 * @param consoleWriter   PrintWriter to which server console will be 

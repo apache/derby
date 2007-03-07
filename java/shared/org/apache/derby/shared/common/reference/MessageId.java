@@ -100,7 +100,7 @@ public interface MessageId {
 	** Connectivity
 	*/
 	String CONN_DATABASE_IDENTITY			= "J004"; // database identity
-	String CONN_SHUT_DOWN_CLOUDSCAPE		= "J005"; // shut down Cloudscape
+	String CONN_SHUT_DOWN_CLOUDSCAPE		= "J005"; // shut down Derby
 	String CONN_CREATE_DATABASE				= "J007"; // create database
 	String CONN_NO_DETAILS					= "J008"; // no details
     String CONN_DATA_ENCRYPTION             = "J010"; // encrypt database on disk
@@ -157,7 +157,7 @@ public interface MessageId {
 	String AUTH_INVALID					= "A020"; // authentication failed due to invalid password or whatever
 
 	/*
-	** cloudscape Interface in com.ibm.db2j.core.*
+	** Derby interface in org.apache.derby.iapi.*
 	** These messages are thrown in both the server and the client side.
 	*/
 	String CORE_JDBC_DRIVER_UNREGISTERED= "I015"; // JDBCDriver is not registered with the JDBC driver manager

@@ -77,7 +77,7 @@ import org.apache.derby.iapi.tools.i18n.*;
     java org.apache.derby.tools.sysinfo
   </PRE>
   Alternatively, you can use SysInfo within your program to display
-  Cloudscape information; a Cloudscape version string is returned by this Java code:
+  Derby information; a Derby version string is returned by this Java code:
   <PRE>
     new Main().toString();
   </PRE>
@@ -89,7 +89,7 @@ public final class Main {
 
   /**
     Application entry point for SysInfo.   This will print out
-    the Cloudscape product information as well as a snapshot of
+    the Derby product information as well as a snapshot of
     the System properties.
   */
   public static void main(String args[]) {

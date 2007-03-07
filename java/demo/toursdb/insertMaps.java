@@ -42,12 +42,12 @@ public class insertMaps {
 		try {
 			Connection connCS = null;
 
-			System.out.println("Loading the Cloudscape jdbc driver...");
+			System.out.println("Loading the Derby jdbc driver...");
 			Class.forName(CSdriver).newInstance();
 	
-			System.out.println("Getting Cloudscape database connection...");
+			System.out.println("Getting Derby database connection...");
 			connCS = DriverManager.getConnection(dbURLCS);
-			System.out.println("Successfully got the Cloudscape database connection...");
+			System.out.println("Successfully got the Derby database connection...");
 
 			PreparedStatement ps = null;
 

@@ -1032,7 +1032,7 @@ public interface SQLState {
 	String LANG_TRIGGER_RECURSION_EXCEEDED                             = "54038";
 	String LANG_TOO_MANY_PARAMETERS_FOR_STORED_PROC                    = "54023";
 
-	//following 1 does not match the DB2 sql state, it is a Cloudscape specific behavior which is not compatible with DB2
+	//following 1 does not match the DB2 sql state, it is a Derby specific behavior which is not compatible with DB2
 	String LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES = "XCL51.S";
 
 	// org.apache.derby.impl.sql.execute.rts
@@ -1324,7 +1324,7 @@ public interface SQLState {
 	String LANG_NO_TRUNCATE_ON_FK_REFERENCE_TABLE                      = "XCL48.S";
 	String LANG_NO_TRUNCATE_ON_ENABLED_DELETE_TRIGGERS                 = "XCL49.S";
 
-    // Initial release of DB2 Cloudscape does not support upgrade
+    // Initial release of Apache Derby did not support upgrade
 	String LANG_CANT_UPGRADE_DATABASE                                 = "XCL50.S";
 
     String LANG_STATEMENT_CANCELLED_OR_TIMED_OUT                       = "XCL52.S";

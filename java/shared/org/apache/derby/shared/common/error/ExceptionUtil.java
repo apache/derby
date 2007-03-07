@@ -31,7 +31,7 @@ public class ExceptionUtil
      *  org.apache.derby.shared.common.reference.SQLState to
 	 *  a SQLState five character string.
      *
-	 *	@param messageID - the sql state id of the message from cloudscape
+	 *	@param messageID - the sql state id of the message from Derby
 	 *	@return String 	 - the 5 character code of the SQLState ID to returned to the user 
 	*/
 	public static String getSQLStateFromIdentifier(String messageID) {
