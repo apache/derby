@@ -22,10 +22,9 @@
 package org.apache.derby.database;
 
 /*
-  The org.apache.derby.iapi.db.Database interface is all the externally available
-  methods on a database.  These are methods that might be called from an
-  SQL-J CALL statement. It is extended by com.ibm.db2j.impl.Database.DatabaseInterface.Database
-  which adds internal methods which are only called from within cloudscape code.
+  The org.apache.derby.iapi.db.Database interface is all the externally 
+  available methods on a database.  These are methods that might be called from 
+  an SQL-J CALL statement. 
 
   The Javadoc comment that follows is for external consumption.
 */
@@ -131,7 +130,7 @@ public interface Database
 
 	/**
 	  * Freeze the database temporarily so a backup can be taken.
-	  * <P>Please see Cloudscape on line documentation on backup and restore.
+	  * <P>Please see the Derby documentation on backup and restore.
 	  *
 	  * @exception SQLException Thrown on error
 	  */
@@ -139,7 +138,7 @@ public interface Database
 
 	/**
 	  * Unfreeze the database after a backup has been taken.
-	  * <P>Please see Cloudscape on line documentation on backup and restore.
+	  * <P>Please see the Derby documentation on backup and restore.
 	  *
 	  * @exception SQLException Thrown on error
 	  */

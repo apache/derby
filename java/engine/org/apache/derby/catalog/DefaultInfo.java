@@ -22,7 +22,7 @@
 package org.apache.derby.catalog;
 
 /**
- <p>An interface for describing a default for a column or parameter in Cloudscape systems.</p>
+ <p>An interface for describing a default for a column or parameter in Derby systems.</p>
  */
 public interface DefaultInfo
 {

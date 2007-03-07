@@ -64,7 +64,7 @@ import java.util.Enumeration;
 
 	</UL>
 	<P>
-	The internal identifier of a cached statement matches the toString() method of a PreparedStatement object for a Cloudscape database.
+	The internal identifier of a cached statement matches the toString() method of a PreparedStatement object for a Derby database.
 
 	<P>
 	This class also provides a static method to empty the statement cache, StatementCache.emptyCache()

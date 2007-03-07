@@ -53,7 +53,7 @@ final class XATransactionState extends ContextImpl {
 	final XAXactId			xid;	
 	/**
 		When an XAResource suspends a transaction (end(TMSUSPEND)) it must be resumed
-		using the same XAConnection. This has been the traditional Cloudscape behaviour,
+		using the same XAConnection. This has been the traditional Cloudscape/Derby behaviour,
 		though there does not seem to be a specific reference to this behaviour in
 		the JTA spec. Note that while the transaction is suspended by this XAResource,
 		another XAResource may join the transaction and suspend it after the join.

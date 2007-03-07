@@ -63,9 +63,9 @@ import java.sql.Types;
 	<LI>GLOBAL_XID varchar(140) - nullable.  The global transaction id, only
 	set if this transaction is a participant in a distributed transaction.</LI>
 	<LI>USERNAME varchar(128) - nullable.  The user name, or APP by default.
-	May appear null if the transaction is started by Cloudscape.</LI>
+	May appear null if the transaction is started by Derby.</LI>
 	<LI>TYPE varchar(30) - not nullable. UserTransaction or an internal
-	transaction spawned by Cloudscape.</LI>
+	transaction spawned by Derby.</LI>
 	<LI>STATUS varchar(8) - not nullable.  IDLE or ACTIVE.  A transaction is
 	IDLE only when it is first created or right after it commits.  Any
 	transaction that holds or has held any resource in the database is ACTIVE.

@@ -99,7 +99,7 @@ public final class EmbeddedSimpleDataSource implements DataSource {
 	private String shutdownDatabase;
 
 	/**
-	 * Cloudscape specific connection attributes.
+	 * Derby specific connection attributes.
 	 * 
 	 * @serial
 	 */
@@ -111,7 +111,7 @@ public final class EmbeddedSimpleDataSource implements DataSource {
 	transient private int loginTimeout;
 
 	// Unlike a DataSource, LocalDriver is shared by all
-	// Cloudscape databases in the same jvm.
+	// Derby databases in the same jvm.
 	transient private InternalDriver driver;
 
 	transient private String jdbcurl;
@@ -148,7 +148,7 @@ public final class EmbeddedSimpleDataSource implements DataSource {
 	 * specifies that there is no timeout. When a data source object is created,
 	 * the login timeout is initially zero.
 	 * <P>
-	 * Cloudscape ignores this property.
+	 * Derby ignores this property.
 	 * 
 	 * @param seconds
 	 *            the data source login time limit
@@ -327,7 +327,7 @@ public final class EmbeddedSimpleDataSource implements DataSource {
 	}
 
 	/**
-	 * Set this property to pass in more Cloudscape specific connection URL
+	 * Set this property to pass in more Derby specific connection URL
 	 * attributes.
 	<BR>
    Any attributes that can be set using a property of this DataSource implementation
@@ -336,7 +336,7 @@ public final class EmbeddedSimpleDataSource implements DataSource {
    unexpected behaviour. 
    	 * 
 	 * @param prop
-	 *            set to the list of Cloudscape connection attributes separated
+	 *            set to the list of Derby connection attributes separated
 	 *            by semi-colons. E.g., to specify an encryption bootPassword of
 	 *            "x8hhk2adf", and set upgrade to true, do the following:
 	 * 
@@ -346,14 +346,14 @@ public final class EmbeddedSimpleDataSource implements DataSource {
 	 * 
 	 * </PRE>
 	 * 
-	 * See Cloudscape's documentation for complete list.
+	 * See Derby's documentation for complete list.
 	 */
 	public final void setConnectionAttributes(String prop) {
 		connectionAttributes = prop;
 		update();
 	}
 
-	/** @return Cloudscape specific connection URL attributes */
+	/** @return Derby specific connection URL attributes */
 	public final String getConnectionAttributes() {
 		return connectionAttributes;
 	}

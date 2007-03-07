@@ -78,7 +78,7 @@ public class SystemProcedures  {
     public  static String SQLERRMC_MESSAGE_DELIMITER = new String(new char[] {(char)20,(char)20,(char)20});
 
 	/**
-	  Method used by Cloudscape Network Server to get localized message (original call
+	  Method used by Derby Network Server to get localized message (original call
 	  from jcc.
 
 	  @param sqlcode	sqlcode, not used.
@@ -181,7 +181,7 @@ public class SystemProcedures  {
 
 	/**
 	 *  Get the DatabaseMetaData for the current connection for use in
-	 *  mapping the jcc SYSIBM.* calls to the Cloudscape DatabaseMetaData methods 
+	 *  mapping the jcc SYSIBM.* calls to the Derby DatabaseMetaData methods 
 	 *
 	 *  @return The DatabaseMetaData object of the current connection
 	 */

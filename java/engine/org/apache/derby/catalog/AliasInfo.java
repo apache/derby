@@ -23,9 +23,9 @@ package org.apache.derby.catalog;
 
 /**
  *
- * An interface for describing an alias in Cloudscape systems.
+ * An interface for describing an alias in Derby systems.
  * 
- * In a Cloudscape system, an alias can be one of the following:
+ * In a Derby system, an alias can be one of the following:
  * <ul>
  * <li>method alias
  * <li>class alias

@@ -76,8 +76,8 @@ import org.apache.derby.shared.common.reference.JDBC40Translation;
       <LI> procedureNullableUnknown - nullability unknown
       </UL>
         <LI><B>REMARKS</B> String => comment describing parameter/column
-        <LI><B>METHOD_ID</B> Short => cloudscape extra column (overloading)
-        <LI><B>PARAMETER_ID</B> Short => cloudscape extra column (output order)
+        <LI><B>METHOD_ID</B> Short => Derby extra column (overloading)
+        <LI><B>PARAMETER_ID</B> Short => Derby extra column (output order)
   </OL>
 
 */

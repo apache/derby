@@ -33,7 +33,7 @@ import java.sql.SQLException;
 import org.apache.derby.iapi.error.PublicAPI;
 
 /**
-  This utility class provides static methods for managing user authorization in a Cloudscape database.
+  This utility class provides static methods for managing user authorization in a Derby database.
   
    <p>This class can only be used within an SQL-J statement, a Java procedure or a server side Java method.
    <p>This class can be accessed using the class alias <code> USERUTILITY </code> in SQL-J statements.

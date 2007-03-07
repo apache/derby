@@ -147,7 +147,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements
 					Database database = null;
 
 					// if monitor is never setup by any ModuleControl, getMonitor
-					// returns null and no cloudscape database has been booted. 
+					// returns null and no Derby database has been booted. 
 					if (Monitor.getMonitor() != null)
 						database = (Database)
 							Monitor.findService(Property.DATABASE_MODULE, dbName);

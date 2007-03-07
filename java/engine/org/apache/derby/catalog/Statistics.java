@@ -26,7 +26,7 @@ package org.apache.derby.catalog;
  <P>
  This interface is used in the column SYS.SYSSTATISTICS.STATISTICS. It
  encapsulates information collected by the UPDATE STATISTICS command
- and is used internally by the Cloudscape optimizer to estimate cost 
+ and is used internally by the Derby optimizer to estimate cost 
  and selectivity of different query plans.
  <p>
 */

@@ -23,7 +23,7 @@ package org.apache.derby.catalog;
 
 /**
  *
- * An interface for describing types in Cloudscape systems.
+ * An interface for describing types in Derby systems.
  *	
  *	
  *	<p>The values in system catalog DATATYPE columns are of type

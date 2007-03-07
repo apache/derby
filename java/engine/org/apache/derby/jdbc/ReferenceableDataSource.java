@@ -43,9 +43,9 @@ import java.util.Enumeration;
 
 /** 
 
-	Cloudscape DataSource implementation base class.
+        Derby DataSource implementation base class.
 	ReferenceableDataSource provides support for JDBC standard DataSource attributes and acts
-	as the ObjectFactory to generate Cloudscape DataSource implementations.
+	as the ObjectFactory to generate Derby DataSource implementations.
 	<P>
 	The standard attributes provided by this class are:
 	<UL>
@@ -56,7 +56,7 @@ import java.util.Enumeration;
 	<LI>user
 	</UL>
 	<BR>
-	See the specific Cloudscape DataSource implementation for details on their meaning.
+	See the specific Derby DataSource implementation for details on their meaning.
 	<BR>
 	See the JDBC 3.0 specification for more details.
 
@@ -198,7 +198,7 @@ public class ReferenceableDataSource implements
 	 * When a data source object is created, the login timeout is
 	 * initially zero.
 	 <P>
-		Cloudscape ignores this property.
+		Derby ignores this property.
 	 * @param seconds the data source login time limit
 	 * @exception SQLException if a database access error occurs.
 	 */
@@ -259,7 +259,7 @@ public class ReferenceableDataSource implements
 	 */
 
 	/**
-		Re-Create Cloudscape datasource given a reference.
+		Re-Create Derby datasource given a reference.
 
 		@param obj The possibly null object containing location or reference
 		information that can be used in creating an object. 
@@ -270,7 +270,7 @@ public class ReferenceableDataSource implements
 		@param environment The possibly null environment that is used in
 		creating the object. 
 
-		@return One of the Cloudscape datasource object created; null if an
+		@return One of the Derby datasource object created; null if an
 		object cannot be created. 
 
 		@exception Exception  if this object factory encountered an exception
@@ -388,7 +388,7 @@ public class ReferenceableDataSource implements
 	}
 
 	/**
-		Return a connection for the Cloudscape family of data source implementations.
+		Return a connection for the Derby family of data source implementations.
 	*/
 	java.sql.Connection getConnection(String username, String password, boolean requestPassword) throws SQLException {
 		return null;

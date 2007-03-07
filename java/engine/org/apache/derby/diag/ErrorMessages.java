@@ -58,7 +58,7 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
  * (The code returned by getSQLState() in SQLException.)</LI>
  * <LI>MESSAGE--VARCHAR(32672) - nullable.  The error message<br>
  * (The code returned by getMessage() in SQLException.)</LI>
- * <LI>SEVERITY--INTEGER - nullable.  The Cloudscape code for the severity.<br>
+ * <LI>SEVERITY--INTEGER - nullable.  The Derby code for the severity.<br>
  * (The code returned by getErrorCode() in SQLException.)</LI>
  * </UL>
  * 

@@ -108,7 +108,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
 		The normal way of instantiating a LockTable, equivalent to
 		LockTable(org.apache.derby.diag.LockTable->TABLE_AND_ROWLOCK).
 		Only shows row and table lock and not latches.  Latches are generally
-		held for very short duration and are not of interest to Cloudscape
+		held for very short duration and are not of interest to Derby 
 		users.  Only under abnormal circumstances will one be interested in
 		looking at latches.
 	 */
@@ -138,7 +138,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
 	/**
 		@see java.sql.ResultSet#next
 		@exception SQLException if no transaction context can be found, or other
-		Cloudscape internal errors are encountered.
+		Derby internal errors are encountered.
 	 */
 	public boolean next() throws SQLException
 	{

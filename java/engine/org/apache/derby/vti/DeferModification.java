@@ -160,7 +160,7 @@ public interface DeferModification
         throws SQLException;
 
     /**
-     * This VTI method is called by Cloudscape when a VTI modification (insert, update, or delete)
+     * This VTI method is called by Derby when a VTI modification (insert, update, or delete)
      * is executed. It is called after the VTI has been instantiated but before any rows are read,
      * inserted, updated, or deleted.
      *

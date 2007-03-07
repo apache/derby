@@ -23,7 +23,7 @@ package org.apache.derby.catalog;
 
 /**
 
- An interface for accessing Cloudscape UUIDs, unique identifiers.
+ An interface for accessing Derby UUIDs, unique identifiers.
 		
 	<p>The values in the
 	system catalog held in ID columns with a type of CHAR(36) are the

@@ -154,7 +154,7 @@ public abstract class InternalDriver implements ModuleControl {
 				return connContext.getNestedConnection(false);
 				
 			}
-			// there is no cloudscape connection, so
+			// there is no Derby connection, so
 			// return null, as we are not the driver to handle this
 			return null;
 		}
