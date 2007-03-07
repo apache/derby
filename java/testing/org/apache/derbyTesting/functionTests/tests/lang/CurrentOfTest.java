@@ -27,6 +27,7 @@ import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /** This tests the current of statements, i.e.
@@ -72,11 +73,8 @@ public class CurrentOfTest extends BaseJDBCTestCase {
      * Tear-down the fixture by removing the tables
      */
 	protected void tearDown() throws Exception {
-		Statement stmt = createStatement();
-		stmt.executeUpdate("drop table t");
-		stmt.executeUpdate("drop table s");
-		stmt.close();
-		commit();
+        JDBC.dropSchema(getConnection().getMetaData(),
+                getTestConfiguration().getUserName());
 		super.tearDown();
 	}
 	
@@ -297,6 +295,132 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		cursor.close();
 
 	}
+    
+    /**
+     * Test the positioned update correctly recompiles when an index is added.
+     */
+    public void testUpdateRecompileCreateIndex() throws Exception
+    {
+        recompile("UPDATE T SET I = I + 1 WHERE CURRENT OF ",
+                "CREATE INDEX IT ON T(I)", null);
+    }
+    
+    /**
+     * Test the positioned update correctly recompiles when the
+     * definition of a function is changed.
+     */
+    public void testUpdateRecompileChangeFunction() throws Exception
+    {
+        Statement s = createStatement();
+        s.execute("CREATE FUNCTION F(V INTEGER) RETURNS INTEGER " +
+                "NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA " +
+                "EXTERNAL NAME '" + getClass().getName() + ".doubleValue'");
+        commit();
+        String changeSQL = "CREATE FUNCTION F(V INTEGER) RETURNS INTEGER " +
+            "NO SQL LANGUAGE JAVA PARAMETER STYLE JAVA " +
+            "EXTERNAL NAME '" + getClass().getName() + ".tripleValue'";
+        int firstI = recompile("UPDATE T SET I = F(I) WHERE CURRENT OF ",
+                "DROP FUNCTION F", changeSQL);
+        
+        String[][] values = new String[][]
+              {{"3"}, {"180"}, {"456"}, {"1956"}};
+        
+        if (firstI == 180)
+        {
+            // 180 doubled to 360
+            // 456 tripled to 1368
+            values[1] = new String[] {"360"};
+            values[2] = new String[] {"1368"};
+        }
+        else
+        {
+            // 456 doubled to 912
+            // 180 tripled to 540
+            values[1] = new String[] {"540"};
+            values[2] = new String[] {"912"};
+             
+        }
+
+        JDBC.assertFullResultSet(s.executeQuery("SELECT I FROM T ORDER BY I"),
+                values);
+        
+        s.close();
+    }    
+    /**
+     * Test the positioned delete correctly recompiles when an index is added.
+     */
+    public void testDeleteRecompileCreateIndex()  throws Exception
+    {
+        recompile("DELETE FROM T WHERE CURRENT OF ",
+                "CREATE INDEX IT ON T(I)", null);
+    }
+    
+    /**
+     * Execute a select and then the positioned statement against it.
+     * Then execute the changeSQL that should force a recompile of the
+     * positioned statement. Then execute the positioned statement
+     * again and finally check all is ok with check table.
+     * 
+     * The positioned statements are executed against the rows that
+     * have I=180 and I=456.
+     * 
+     * @return the value of I for the first row that had the positioned
+     * statement executed against it, ie. before the change SQl was executed.
+     */
+    private int recompile(String positionedSQL, String changeSQL1, String changeSQL2)
+         throws SQLException
+    {
+        Statement s = createStatement();
+        PreparedStatement select = prepareStatement("select I, C from t for update");
+        ResultSet cursor = select.executeQuery();
+        
+        
+        PreparedStatement update = prepareStatement(
+                positionedSQL + cursor.getCursorName());
+        
+        // Execute the positioned statement against one row,
+        // either i=180 or 456, which ever comes first.
+        int firstRowI = -1;
+        while (cursor.next())
+        {
+            int i = cursor.getInt(1);
+            if (i == 180 || i == 456) {
+                update.execute();
+                firstRowI = i;
+                break;
+            }
+        }
+        assertTrue(firstRowI == 180 || firstRowI == 456);
+ 
+        s.execute(changeSQL1);
+        if (changeSQL2 != null)
+            s.execute(changeSQL2);
+        
+        // And one more execute against one more row
+        // either 180 or 456.
+        int secondRowI = -1;
+        while (cursor.next())
+        {
+            int i = cursor.getInt(1);
+            if (i == 180 || i == 456) {
+                update.execute();
+                secondRowI = i;
+                break;
+            }
+        }
+        assertTrue(firstRowI !=secondRowI);
+        assertTrue(secondRowI == 180 || secondRowI == 456);
+        
+        update.close();
+        cursor.close();
+        select.close();
+        commit();
+        s.close();
+        
+        assertCheckTable("T");
+        
+        return firstRowI;
+    }
 
 	/**
 	 * Change the current cursor from the one the positioned
@@ -459,4 +583,17 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		select.close();
 
 	}
+    
+    /*
+    ** Routines
+    */
+    
+    public static int doubleValue(int i)
+    {
+        return i * 2;
+    }
+    public static int tripleValue(int i)
+    {
+        return i * 3;
+    }
 }

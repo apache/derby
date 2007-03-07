@@ -588,6 +588,22 @@ public abstract class BaseJDBCTestCase
     }
     
     /**
+     * Check the table using SYSCS_UTIL.SYSCS_CHECK_TABLE.
+     */
+    public void assertCheckTable(String table) throws SQLException
+    {
+        PreparedStatement ps = prepareStatement(
+                "VALUES SYSCS_UTIL.SYSCS_CHECK_TABLE(?, ?)");
+        
+        ps.setString(1, getTestConfiguration().getUserName());
+        ps.setString(2, table);
+        
+        ResultSet rs = ps.executeQuery();
+        JDBC.assertSingleValueResultSet(rs, "1");
+        ps.close();
+    }
+    
+    /**
      * Assert that the number of rows in a table is an expected value.
      * Query uses a SELECT COUNT(*) FROM "table".
      * 
