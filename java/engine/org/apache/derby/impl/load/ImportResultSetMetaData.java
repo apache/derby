@@ -54,21 +54,58 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
 
 	public int getColumnType(int column) {
 
-        // if the table column type is BLOB/CLOB , then the 
-        // data in the import files will converted to 
-        // BLOB/CLOB type objects. So the vti result column 
-        // type for blob/clob is same as  table column type. 
-        // Data for Other types is considered is of VARCHAR type, 
-        // and they are casted to table column type, if needed 
-        // while doing the select from the VTI. 
+        /* By default all the data in the import file is assumed
+         * to be in varchar format. Appropriate casting is applied 
+         * while executing the select on the import VTI. Using this 
+         * approach import vti does not have to do the data conversion, 
+         * casting will do that. 
+         *
+         * But for some types like binary types there is no casting 
+         * support from varchar or the data in the file is hex format, 
+         * so data  needs to be converted to binary format first. And 
+         * incase of blobs/clobs stored in an exteranl file memory usage 
+         * will  be less if data is supplied as stream, instead of 
+         * materializing the column data as one string. For these
+         * types import vti result set will return resultset column
+         * type is same as the column type of the import table. Data 
+         * for the blob, clob or binary type columns is returned by 
+         * the getXXX() calls used by the VTI Resultset to read the 
+         * data for that particular type. For example, Blob data 
+         * is read using getBlob() method, which will return a 
+         * Blob object that contains the data in the import file 
+         * for a column. 
+         */
 
-		if (tableColumnTypes[column -1] ==  java.sql.Types.BLOB)
-			return java.sql.Types.BLOB;
-		else
-            if (tableColumnTypes[column -1] ==  java.sql.Types.CLOB)
-                return java.sql.Types.CLOB;
-            else
-                return java.sql.Types.VARCHAR;
+        int colType;
+        switch (tableColumnTypes[column -1])
+        {
+        case java.sql.Types.BLOB: 
+            // blob 
+            colType = java.sql.Types.BLOB;
+            break;
+        case java.sql.Types.CLOB: 
+            // clob 
+            colType = java.sql.Types.CLOB;
+            break;
+        case java.sql.Types.LONGVARBINARY: 
+            // LONG VARCHAR FOR BIT DATA
+            colType = java.sql.Types.LONGVARBINARY; 
+            break;
+        case java.sql.Types.VARBINARY: 
+            // VARCHAR FOR BIT DATA
+            colType = java.sql.Types.VARBINARY;
+            break;
+        case java.sql.Types.BINARY: 
+            // CHAR FOR BIT DATA 
+            colType = java.sql.Types.BINARY;
+            break;
+        default: 
+            // all other data in the import file is 
+            // assumed to be in varchar format.
+            colType = java.sql.Types.VARCHAR;
+        }
+
+        return colType;
     }
 
 	public int isNullable(int column) {

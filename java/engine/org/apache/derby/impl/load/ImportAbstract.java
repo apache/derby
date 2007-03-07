@@ -26,6 +26,7 @@ import java.sql.SQLWarning;
 import java.sql.ResultSetMetaData;
 import org.apache.derby.vti.VTITemplate;
 import java.util.ArrayList;
+import org.apache.derby.iapi.util.StringUtil;
 
 /**
  * 
@@ -174,6 +175,32 @@ abstract class ImportAbstract extends VTITemplate {
             return new ImportBlob(nextRow[columnIndex-1]);
         }
 	}
+
+
+    /**
+     * Returns byte array that contains the columnn data 
+     * from the import file. 
+     * @param columnIndex number of the column. starts at 1.
+     * @exception SQLException if any error occurs.
+     */
+	public byte[] getBytes(int columnIndex) throws SQLException {
+        
+        // This method is called to import data into 
+        // LONG VARCHAR FOR BIT DATA VARCHAR FOR BIT DATA,  
+        // and CHAR FOR BIT DATA  type columns. Data for 
+        // these type of columns expected to be in the  
+        // main import file in hex format.  
+
+        // convert the binary data in the hex format to a byte array.
+        String hexData = nextRow[columnIndex-1];
+        // if hex data is null, then column value is SQL NULL
+        wasNull = (hexData == null);
+        byte[] data = null;
+        if (hexData != null) 
+            data = StringUtil.fromHexString(hexData, 0, hexData.length());
+        return data;
+	}
+
 
 
     /**

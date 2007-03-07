@@ -208,8 +208,7 @@ class ColumnInfo {
 	//return true if the given type is supported by import/export
 	public  static final boolean importExportSupportedType(int type){
 
-		return !(type == java.sql.Types.BINARY ||
-				 type == java.sql.Types.BIT ||
+		return !(type == java.sql.Types.BIT ||
 				 type == java.sql.Types.JAVA_OBJECT ||
 				 type == java.sql.Types.OTHER ||
 				 type == StoredFormatIds.XML_TYPE_ID); 

@@ -362,16 +362,23 @@ class ControlInfo
 		}
 		
 		
-		//A delimiter is not valid or is used more than once.
+        // check for the invalid delimiters. A delimiter is not valid it 
+        // is used more than once, i.e same character is used 
+        // character data delimiter and also as a column delimiter. 
+        // An hex decimal character (0-9, a-f ,A-F ) is not a 
+        // valid delimiter, because binary data can be imported/exported 
+        // as hex string.
+
 		if(colDel == charDel || 
 		   colDel == '.' ||
 		   Character.isSpaceChar(colDel) ||  
-		   Character.isSpaceChar(charDel)
-		   )
+		   Character.isSpaceChar(charDel) ||
+           Character.digit(colDel, 16) != -1 ||
+           Character.digit(charDel, 16) != -1 )
 		{
 			throw LoadError.delimitersAreNotMutuallyExclusive();
 		}
-
+        
 	}
 }
 
