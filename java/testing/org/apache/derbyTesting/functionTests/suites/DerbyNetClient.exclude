@@ -1,5 +1,4 @@
 # excluding TestErrorStreamTarget.java since it's not relevant for clients
-# excluding scrollCursors2.java because updatable resultsets & scroll sensitive cursors are not supported
 # excluding statementJdbc20.java because this tests fetch_reverse throughout the test
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/dataSourceReference.java - client side only tests, tests all data sources

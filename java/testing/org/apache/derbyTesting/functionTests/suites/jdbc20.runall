@@ -1,5 +1,4 @@
 lang/scrollCursors1.sql
-lang/scrollCursors2.java
 lang/scrollCursors3.sql
 jdbcapi/getCurConnJdbc20.sql
 jdbcapi/dataSourceReference.java

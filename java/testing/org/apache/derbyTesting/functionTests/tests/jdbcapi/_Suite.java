@@ -61,7 +61,6 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(CharacterStreamsTest.suite());
 		suite.addTest(BatchUpdateTest.suite());
 		suite.addTest(StreamTest.suite());
-                suite.addTest(ParameterMappingTest.suite());
 		suite.addTest(DboPowersTest.suite());
 		suite.addTest(BlobStoredProcedureTest.suite());
 		suite.addTest(ClobStoredProcedureTest.suite());
@@ -71,6 +70,14 @@ public class _Suite extends BaseTestCase  {
         // adapter and continue to use a single master file.
         suite.addTest(JDBCHarnessJavaTest.suite());
         
+        if (JDBC.vmSupportsJDBC2())
+        {
+            // Tests that do not run under JSR169
+            // DERBY-2403 blocks ParameterMappingTest from running
+            // under JSR169
+            suite.addTest(ParameterMappingTest.suite());
+        
+        }
         if (JDBC.vmSupportsJDBC3())
         {
             // Class requires javax.sql.PooledConnection
