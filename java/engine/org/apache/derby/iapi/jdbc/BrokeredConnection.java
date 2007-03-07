@@ -623,17 +623,28 @@ public abstract class BrokeredConnection implements EngineConnection
 	* @return an integer that represents the locator that has been
 	*         allocated to this LOB.
 	*/
-	public int addLOBMapping(Object LOBReference) { return -1;}
+	public int addLOBMapping(Object LOBReference) {
+		//This call is forwarded to the implementation in the EmbedConnection
+		//class and hence the actual implementation here is not necessary.
+		return -1;
+	}
 
 	/**
 	* Dummy implementation for method in EngineConnection.
 	*/
-	public void clearLOBMapping() {}
+	public void clearLOBMapping() {
+		//This call is forwarded to the implementation in the EmbedConnection
+		//class and hence the actual implementation here is not necessary.
+	}
 
 	/**
 	* Dummy implementation for method in EngineConnection.
 	* @param key the integer that represents the LOB locator value.
 	* @return the LOB Object corresponding to this locator.
 	*/
-	public Object getLOBMapping(int key) { return null;}
+	public Object getLOBMapping(int key) {
+		//This call is forwarded to the implementation in the EmbedConnection
+		//class and hence the actual implementation here is not necessary.
+		return null;
+	}
 }
