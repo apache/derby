@@ -243,13 +243,13 @@ public class setTransactionIsolation{
             boolean passCommitCheck = false;
             switch (count) {
             case 1:
-                // Embedded doesn't commit
-                if (TestUtil.isEmbeddedFramework())
+                // Embedded and JCC don't commit
+                if (TestUtil.isEmbeddedFramework() || TestUtil.isJCCFramework())
                     passCommitCheck = true;
                 break;
             case 2:
                 // Client commits
-                if (TestUtil.isNetFramework())
+                if (TestUtil.isDerbyNetClientFramework())
                     passCommitCheck = true;
                 break;
             default:
