@@ -3592,7 +3592,7 @@ public abstract class EmbedResultSet extends ConnectionChild
         synchronized (getConnectionSynchronization()) {
             checksBeforeInsert();
             setupContextStack();
-            LanguageConnectionContext lcc = null;
+            LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
             StatementContext statementContext = null;
             try {
                 /*
@@ -3607,8 +3607,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 boolean foundOneColumnAlready = false;
                 StringBuffer insertSQL = new StringBuffer("INSERT INTO ");
                 StringBuffer valuesSQL = new StringBuffer("VALUES (");
-                CursorActivation activation = getEmbedConnection().
-                        getLanguageConnection().lookupCursorActivation(getCursorName());
+                CursorActivation activation = lcc.lookupCursorActivation(getCursorName());
 
                 ExecCursorTableReference targetTable = 
                         activation.getPreparedStatement().getTargetTable();
@@ -3638,8 +3637,6 @@ public abstract class EmbedResultSet extends ConnectionChild
                 insertSQL.append(") ");
                 valuesSQL.append(") ");
                 insertSQL.append(valuesSQL);
-
-                lcc = getEmbedConnection().getLanguageConnection();
 
                 // Context used for preparing, don't set any timeout (use 0)
                 statementContext = lcc.pushStatementContext(
@@ -3698,7 +3695,7 @@ public abstract class EmbedResultSet extends ConnectionChild
         checkNotOnInsertRow();
         
         setupContextStack();
-        LanguageConnectionContext lcc = null;
+        LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
         StatementContext statementContext = null;
         try {
             if (currentRowHasBeenUpdated == false) //nothing got updated on this row 
@@ -3707,7 +3704,7 @@ public abstract class EmbedResultSet extends ConnectionChild
             //now construct the update where current of sql
             boolean foundOneColumnAlready = false;
             StringBuffer updateWhereCurrentOfSQL = new StringBuffer("UPDATE ");
-            CursorActivation activation = getEmbedConnection().getLanguageConnection().lookupCursorActivation(getCursorName());
+            CursorActivation activation = lcc.lookupCursorActivation(getCursorName());
 
 
             ExecCursorTableReference targetTable = activation.getPreparedStatement().getTargetTable();
@@ -3728,7 +3725,6 @@ public abstract class EmbedResultSet extends ConnectionChild
             //using quotes around the cursor name to preserve case sensitivity
             updateWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
                     quoteSqlIdentifier(getCursorName()));
-            lcc = getEmbedConnection().getLanguageConnection();
 
             // Context used for preparing, don't set any timeout (use 0)
             statementContext = lcc.pushStatementContext(isAtomic, false, updateWhereCurrentOfSQL.toString(), null, false, 0L);
@@ -3785,19 +3781,17 @@ public abstract class EmbedResultSet extends ConnectionChild
 
             setupContextStack();
             
-            LanguageConnectionContext lcc = null;
+            LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
             StatementContext statementContext = null;
             
             //now construct the delete where current of sql
             try {
                 StringBuffer deleteWhereCurrentOfSQL = new StringBuffer("DELETE FROM ");
-                CursorActivation activation = getEmbedConnection().getLanguageConnection().lookupCursorActivation(getCursorName());
+                CursorActivation activation = lcc.lookupCursorActivation(getCursorName());
                 deleteWhereCurrentOfSQL.append(getFullBaseTableName(activation.getPreparedStatement().getTargetTable()));//get the underlying (schema.)table name
                 //using quotes around the cursor name to preserve case sensitivity
                 deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
                         quoteSqlIdentifier(getCursorName()));
-
-                lcc = getEmbedConnection().getLanguageConnection();
                 
                 // Context used for preparing, don't set any timeout (use 0)
                 statementContext = lcc.pushStatementContext(isAtomic, false, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
