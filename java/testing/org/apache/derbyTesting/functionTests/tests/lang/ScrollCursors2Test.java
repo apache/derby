@@ -33,6 +33,7 @@ import java.sql.Statement;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class ScrollCursors2Test extends BaseJDBCTestCase {
@@ -201,14 +202,10 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
             assertEquals(1, rs.getFetchSize());
 
         rs.setFetchSize(5);
-        if (rs.getFetchSize() != 5) {
-            fail("getFetchSize() expected to return 5");
-        }
-
-        if (rs.getFetchDirection() != ResultSet.FETCH_FORWARD) {
-            fail("getFetchDirection() expected to return FETCH_FORWARD, not "
-                    + rs.getFetchDirection());
-        }
+        assertEquals(5,rs.getFetchSize());
+      
+        assertEquals(ResultSet.FETCH_FORWARD,rs.getFetchDirection());
+            
 
         rs.close();
         s_f_r.close();
@@ -217,24 +214,17 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         // We should have gotten no warnings and a read only forward only cursor
         warning = conn.getWarnings();
-        while (warning != null) {
-            System.out.println("warning = " + warning);
-            warning = warning.getNextWarning();
-        }
+        assertNull(warning);
+        
         conn.clearWarnings();
 
         // Verify that result set from statement is
         // scroll insensitive and read only
         rs = ps_f_r.executeQuery();
-        if (rs.getType() != ResultSet.TYPE_FORWARD_ONLY) {
-            System.out.println("cursor type = " + rs.getType() + ", not "
-                    + ResultSet.TYPE_FORWARD_ONLY);
-        }
-        if (rs.getConcurrency() != ResultSet.CONCUR_READ_ONLY) {
-            System.out.println("concurrency = " + rs.getConcurrency()
-                    + ", not " + ResultSet.CONCUR_READ_ONLY);
-        }
-
+        assertEquals(ResultSet.TYPE_FORWARD_ONLY, rs.getType());
+        
+        assertEquals(ResultSet.CONCUR_READ_ONLY,rs.getConcurrency());
+        
         // Verify that first() doesn't work
         try {
             rs.first();
@@ -278,22 +268,10 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
         assertEquals(5, s_f_r.getMaxRows());
 
         rs = s_f_r.executeQuery("values 1, 2, 3, 4, 5, 6");
-        if (rs == null) {
-            fail("rs expected to be non-null.");
-        }
         // Iterate straight thru RS, expect only 5 rows.
-        for (int index = 1; index < 6; index++) {
-            if (!rs.next()) {
-                fail("rs.next() failed, index = " + index);
-                break;
-            }
-        }
-        // We should not see another row (only 5, not 6)
-        if (rs.next()) {
-            fail("rs.next() failed, should not have seen 6th row.");
-            passed = false;
-        }
-        rs.close();
+        assertNotNull(rs);
+        JDBC.assertDrainResults(rs, 5);
+        
         s_f_r.close();
 
     }
@@ -357,7 +335,7 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      * @exception SQLException
      *                Thrown if some unexpected error happens
      */
-    public void scrollInsensitivePositive() throws SQLException {
+    public void testScrollInsensitivePositive() throws SQLException {
         Connection conn = getConnection();
         boolean passed = true;
         PreparedStatement ps_i_r = null;
@@ -511,7 +489,7 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      * @exception SQLException
      *                Thrown if some unexpected error happens
      */
-    public void scrollInsensitiveNegative() throws SQLException {
+    public void testScrollInsensitiveNegative() throws SQLException {
         Connection conn = getConnection();
         boolean passed = true;
         ResultSet rs;
@@ -571,9 +549,9 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
             assertEquals("XJ062", sqle.getSQLState());
 
         }
-
+        rs.close();
         s_i_r.close();
-
+        
     }
 
     /**
@@ -582,69 +560,8 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      * @exception SQLException
      *                Thrown if some unexpected error happens
      */
-    public void testScrollInsensitiveNegative() throws SQLException {
-        Connection conn = getConnection();
-        ResultSet rs;
-        SQLWarning warning;
-        Statement s_i_r = null; // insensitive, read only
-
-        s_i_r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-                ResultSet.CONCUR_READ_ONLY);
-
-        // We should not have gotten any warnings
-        // and should have gotten a scroll insensitive cursor
-        warning = conn.getWarnings();
-        assertNull(warning);
-        conn.clearWarnings();
-
-        // Verify that setMaxRows(-1) fails
-        try {
-            s_i_r.setMaxRows(-1);
-            // Should never get here
-            fail("setMaxRows(-1) expected to fail");
-        } catch (SQLException sqle) {
-            /* Check to be sure the exception is the one we expect */
-            assertEquals("XJ063", sqle.getSQLState());
-
-        }
-        // Verify maxRows still 0
-        assertEquals(0, s_i_r.getMaxRows());
-
-        // Empty result set
-        rs = s_i_r.executeQuery("select * from t where 1=0");
-        // isBeforeFirst() and isAfterLast() should always return false
-        // when result set is empty
-        assertFalse(rs.isBeforeFirst());
-        assertFalse(rs.next());
-        assertFalse(rs.previous());
-        assertFalse(rs.isAfterLast());
-        assertFalse(rs.isFirst());
-        assertFalse(rs.isLast());
-        assertFalse(rs.relative(0));
-        assertFalse(rs.relative(1));
-        assertFalse(rs.relative(-1));
-        assertFalse(rs.absolute(0));
-        assertFalse(rs.absolute(1));
-        assertFalse(rs.absolute(-1));
-
-        rs.close();
-        // End of empty result set tests
-
-        // Non-empty result set
-        rs = s_i_r.executeQuery("select * from t");
-        // Negative fetch size
-        try {
-            rs.setFetchSize(-5);
-            fail("setFetchSize(-5) expected to fail");
-        } catch (SQLException sqle) {
-            /* Check to be sure the exception is the one we expect */
-            assertEquals("XJ062", sqle.getSQLState());
-        }
-
-        s_i_r.close();
-
-    }
-
+    
+    
     /**
      * CallableStatement tests.
      * 
@@ -775,7 +692,7 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      * @exception SQLException
      *                Thrown if some unexpected error happens
      */
-    public void scrollVerifyMaxRowWithFetchSize(int maxRows, int fetchSize)
+    private void scrollVerifyMaxRowWithFetchSize(int maxRows, int fetchSize)
             throws SQLException {
         Connection conn = getConnection();
         ResultSet rs;
