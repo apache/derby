@@ -1506,7 +1506,7 @@ public class EmbedStatement extends ConnectionChild
 			java.sql.ResultSet rs = param[0];
 			param[0] = null;
 
-			// ignore non-cloudscape result sets or results sets from another connection
+			// ignore non-Derby result sets or results sets from another connection
 			if (!(rs instanceof EmbedResultSet))
 				continue;
 

@@ -363,7 +363,7 @@ public class Xact extends RawTransaction implements Limit  {
 
 		@see RawTransaction#logAndDo 
 		
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public void logAndUndo(Compensation compensation, LogInstant undoInstant, LimitObjectInput in)
 		 throws StandardException
@@ -525,7 +525,7 @@ public class Xact extends RawTransaction implements Limit  {
 
 	/**
 		The default value for LOCKS_ESCALATION_THRESHOLD
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	 */
 	public void setup(PersistentSet set)
 		throws StandardException {
@@ -651,7 +651,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 	
 	/** 
-	  @exception StandardException  Standard cloudscape exception policy
+	  @exception StandardException  Standard Derby exception policy
 	*/
 	public LogInstant commit() throws StandardException
 	{
@@ -659,7 +659,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/** 
-	  @exception StandardException  Standard cloudscape exception policy
+	  @exception StandardException  Standard Derby exception policy
 	*/
 	public LogInstant commitNoSync(int commitflag) throws StandardException
 	{
@@ -697,7 +697,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/** 
-	  @exception StandardException  Standard cloudscape exception policy
+	  @exception StandardException  Standard Derby exception policy
 	  @see Transaction#commit
 	*/
 
@@ -846,7 +846,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/** 
-	  @exception StandardException  Standard cloudscape exception policy
+	  @exception StandardException  Standard Derby exception policy
 	  @see Transaction#commit
 	*/
 	private LogInstant commit(int commitflag) 
@@ -867,7 +867,7 @@ public class Xact extends RawTransaction implements Limit  {
 
 
 	/** 
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#abort
 	*/
 	public void abort() throws StandardException {
@@ -1073,7 +1073,7 @@ public class Xact extends RawTransaction implements Limit  {
 	/**
         If this transaction is not idle, abort it.  After this call close().
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
         Thrown if the transaction is not idle.
 
 		
@@ -1087,12 +1087,12 @@ public class Xact extends RawTransaction implements Limit  {
     }
 
 	/**
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@exception StandardException Thrown if the transaction is not idle, the
 		transaction remains open.
 		@see Transaction#close
 
-		@exception StandardException	Standard cloudscape policy
+		@exception StandardException	Standard Derby policy
 	*/
 	public void close() throws StandardException {
 
@@ -1168,7 +1168,7 @@ public class Xact extends RawTransaction implements Limit  {
 		If the passed in operation is null, then do nothing (after logging the
 		beginXact if needed).
 
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#logAndDo 
 	*/
 	public void logAndDo(Loggable operation) throws StandardException {
@@ -1251,7 +1251,7 @@ public class Xact extends RawTransaction implements Limit  {
 		Return a record handle that is initialized to the given page number and
         record id.
 
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 
 		@param segmentId    segment where the RecordHandle belongs.
 		@param containerId  container where the RecordHandle belongs.
@@ -1268,7 +1268,7 @@ public class Xact extends RawTransaction implements Limit  {
 //     }
 
 	/** 
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#openContainer 
 	*/
 	public ContainerHandle openContainer(ContainerKey containerId,  int mode)
@@ -1278,7 +1278,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/** 
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#openContainer 
 	*/
 	public ContainerHandle openContainer(ContainerKey containerId, LockingPolicy locking, int mode)
@@ -1295,7 +1295,7 @@ public class Xact extends RawTransaction implements Limit  {
 	/**
 		Open a container that may already have been dropped.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 		@see RawTransaction#openDroppedContainer
 	*/
 	public RawContainerHandle openDroppedContainer(ContainerKey containerId, LockingPolicy locking)
@@ -1327,7 +1327,7 @@ public class Xact extends RawTransaction implements Limit  {
 
 
 	/** 
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#addContainer 
 	*/
 	public long addContainer(long segmentId, long containerid, int mode, Properties tableProperties, int temporaryFlag)
@@ -1339,7 +1339,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/** 
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#addAndLoadStreamContainer
 	*/
 	public long addAndLoadStreamContainer(long segmentId, Properties tableProperties, RowSource rowSource)
@@ -1352,7 +1352,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/** 
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#openStreamContainer
 	*/
 	public StreamContainerHandle openStreamContainer(
@@ -1370,7 +1370,7 @@ public class Xact extends RawTransaction implements Limit  {
 
 	/**
 		@see Transaction#dropStreamContainer
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void dropStreamContainer(long segmentId, long containerId)
 		throws StandardException {
@@ -1387,7 +1387,7 @@ public class Xact extends RawTransaction implements Limit  {
         are trying to create a container, and no valid container is found
         in the database.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 		@see RawTransaction#reCreateContainerForRedoRecovery
 	 */
 	public void reCreateContainerForRedoRecovery
@@ -1402,7 +1402,7 @@ public class Xact extends RawTransaction implements Limit  {
 
 	/**
 		@see Transaction#dropContainer
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void dropContainer(ContainerKey containerId)
 		throws StandardException {
@@ -1413,7 +1413,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/**
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#setSavePoint
 	*/
 	public int setSavePoint(String name, Object kindOfSavepoint) 
@@ -1458,7 +1458,7 @@ public class Xact extends RawTransaction implements Limit  {
     // defined in the transaction. If yes, then throw an exception
 
 	/**
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#setSavePoint
 	*/
 	private void throwExceptionIfSQLSavepointNotAllowed(Object kindOfSavepoint)
@@ -1486,7 +1486,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/**
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#releaseSavePoint
 	*/
 	public int releaseSavePoint(String name, Object kindOfSavepoint) 
@@ -1517,7 +1517,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/** 
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 		@see Transaction#rollbackToSavePoint
 	*/
 	public int rollbackToSavePoint(String name, Object kindOfSavepoint) 
@@ -2154,7 +2154,7 @@ public class Xact extends RawTransaction implements Limit  {
 		otherwise it is left in the stack (at the top).
 
 		@return true if any work is rolled back, false if no work is rolled back
-		@exception StandardException	Standard cloudscape policy
+		@exception StandardException	Standard Derby policy
 		@exception StandardException Thrown if a error of severity less than TransactionException#SEVERITY
 		is encountered during the rollback of this savepoint.
 	*/
@@ -2207,7 +2207,7 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/**
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	 */
 	public RawTransaction startNestedTopTransaction() throws StandardException {
 

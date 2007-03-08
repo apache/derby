@@ -110,7 +110,7 @@ public final class InvalidatePageOperation extends PhysicalPageOperation
 		Mark the page as being invalidated
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 
 		@see org.apache.derby.iapi.store.raw.Loggable#doMe
 	*/
@@ -147,7 +147,7 @@ public final class InvalidatePageOperation extends PhysicalPageOperation
 	/**
 	 * restore the before image of the page
 	 *
-	 * @exception StandardException Standard Cloudscape Error Policy
+	 * @exception StandardException Standard Derby Error Policy
 	 * @exception IOException problem reading the complete log record from the
 	 * input stream
 	 */

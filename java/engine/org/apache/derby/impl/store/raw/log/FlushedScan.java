@@ -119,7 +119,7 @@ public class FlushedScan implements StreamLogScan {
 		@return the length of the data written into data, or -1 if the end of the
 		scan has been reached.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public LogRecord getNextRecord(ArrayInputStream input, 
 								   TransactionId tranId, 

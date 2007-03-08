@@ -1280,7 +1280,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * marked as invalide and they will get recompiled internally on their next
 	 * execution. This is okay because truncate makes the number of rows to zero
 	 * it may be good idea to recompile them becuase plans are likely to be
-	 * incorrect. Recompile is done internally by cloudscape, user does not have
+	 * incorrect. Recompile is done internally by Derby, user does not have
 	 * any effect.
 	 */
 	private void truncateTable(Activation activation)

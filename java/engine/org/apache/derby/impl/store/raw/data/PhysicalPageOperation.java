@@ -97,7 +97,7 @@ public abstract class PhysicalPageOperation extends PageBasicOperation implement
 
 	  @return the compensation operation that will rollback this change 
 
-	  @exception StandardException Standard Cloudscape policy.
+	  @exception StandardException Standard Derby policy.
 
 	  @see PageBasicOperation
 	  @see Undoable#generateUndo
@@ -138,7 +138,7 @@ public abstract class PhysicalPageOperation extends PageBasicOperation implement
 		@param in			optional data for the rollback operation
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 	*/
 	abstract public void undoMe(Transaction xact, BasePage undoPage,
 								   LogInstant CLRinstant, LimitObjectInput in) 

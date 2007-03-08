@@ -131,7 +131,7 @@ public abstract class LogicalPageOperation
 		be rolled back (redo only), overwrite this function to return null.
 
 		@see LogicalUndo
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 		@exception IOException Method may read from ObjectInput
 	*/
 
@@ -318,7 +318,7 @@ public abstract class LogicalPageOperation
 
 	  @return the compensation operation that will rollback this change 
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException Method may read from ObjectInput
 
 	  @see PageBasicOperation
@@ -409,7 +409,7 @@ public abstract class LogicalPageOperation
 		@param in			optional data for the rollback operation
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 	*/
 	abstract public void undoMe(Transaction xact, BasePage undoPage, int undoRecordId,
 								LogInstant CLRinstant, LimitObjectInput in) 

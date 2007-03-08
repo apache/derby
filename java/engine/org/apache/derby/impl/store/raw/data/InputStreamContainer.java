@@ -115,7 +115,7 @@ final class InputStreamContainer extends FileContainer  {
 		occurs then ...
 
 		@see org.apache.derby.iapi.services.cache.Cacheable#clean
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public final void clean(boolean forRemove) throws StandardException {
 

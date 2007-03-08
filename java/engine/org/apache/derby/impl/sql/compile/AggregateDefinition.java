@@ -28,8 +28,7 @@ import java.sql.SQLException;
 /**
  * An AggregateDefinition defines an aggregate.
  * 
- * It is used
- * by Cloudscape during query compilation to determine what 
+ * It is used by Derby during query compilation to determine what 
  * Aggregator is used to aggregate a particular data type 
  * and what datatype the Aggregator will emit.  A single 
  * AggregateDefinition may map to one or more Aggregators 

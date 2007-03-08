@@ -213,7 +213,7 @@ public class D_HeapController extends DiagnosticableGeneric
      *
 	 * @return A string with diagnostic information about the object.
      *
-     * @exception StandardException  Standard cloudscape exception policy
+     * @exception StandardException  Standard Derby exception policy
      **/
     public String diag()
         throws StandardException

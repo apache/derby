@@ -48,7 +48,7 @@ public class D_BaseContainerHandle extends DiagnosticableGeneric
      * <p>
      *
 	 * @return A string of the form TABLE(conglomerate_id, container_id).
-     * @exception StandardException Standard Cloudscape Error
+     * @exception StandardException Standard Derby Error
 	 **/
     public String diag()
         throws StandardException

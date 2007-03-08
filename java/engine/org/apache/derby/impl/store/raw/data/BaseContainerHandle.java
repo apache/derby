@@ -170,7 +170,7 @@ public class BaseContainerHandle extends Observable
 
 		@see BaseContainer#addPage
 		@see ContainerHandle#addPage
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Page addPage() throws StandardException 
     {
@@ -188,7 +188,7 @@ public class BaseContainerHandle extends Observable
         will usually mean releasing any free pages located at the end of the
         file using the java truncate() interface.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public void compressContainer() throws StandardException 
     {
@@ -218,7 +218,7 @@ public class BaseContainerHandle extends Observable
 
 		@see BaseContainer#addPage
 		@see ContainerHandle#addPage
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Page addPage(int flag) throws StandardException {
 
@@ -284,7 +284,7 @@ public class BaseContainerHandle extends Observable
 		Remove a page from the container.  
 
 		@see ContainerHandle#removePage
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void removePage(Page page) throws StandardException
 	{
@@ -427,7 +427,7 @@ public class BaseContainerHandle extends Observable
 
 	/**
 		@see ContainerHandle#getEstimatedRowCount
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public long getEstimatedRowCount(int flag) throws StandardException
 	{
@@ -438,7 +438,7 @@ public class BaseContainerHandle extends Observable
 
 	/**
 		@see ContainerHandle#setEstimatedRowCount
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public void setEstimatedRowCount(long count, int flag) 
         throws StandardException
@@ -450,7 +450,7 @@ public class BaseContainerHandle extends Observable
 
 	/**
 		@see ContainerHandle#getEstimatedPageCount
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public long getEstimatedPageCount(int flag) 
         throws StandardException
@@ -462,7 +462,7 @@ public class BaseContainerHandle extends Observable
 
 	/**
 		@see ContainerHandle#flushContainer
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public void flushContainer() 
         throws StandardException
@@ -480,7 +480,7 @@ public class BaseContainerHandle extends Observable
 
 	/**
 		@see ContainerHandle#compactRecord
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public void compactRecord(RecordHandle record) 
         throws StandardException
@@ -518,7 +518,7 @@ public class BaseContainerHandle extends Observable
 	/**
 		Get the container status.  
 
-		@exception StandardException Standard Cloudscape error policy		
+		@exception StandardException Standard Derby error policy		
 		@see RawContainerHandle#getContainerStatus
 	*/
 	public int getContainerStatus() throws StandardException
@@ -531,7 +531,7 @@ public class BaseContainerHandle extends Observable
 	/**
 		remove the container
 
-		@exception StandardException Standard Cloudscape error policy		
+		@exception StandardException Standard Derby error policy		
 		@see RawContainerHandle#removeContainer
 	*/
 	public void removeContainer(LogInstant instant) throws StandardException
@@ -566,7 +566,7 @@ public class BaseContainerHandle extends Observable
 
 
 	/**
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 		@see RawContainerHandle#dropContainer
 	*/
 	public void dropContainer(LogInstant instant, boolean drop) 
@@ -578,7 +578,7 @@ public class BaseContainerHandle extends Observable
 	}
 
 	/**
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 		@see RawContainerHandle#getContainerVersion
 	*/
 	public long getContainerVersion() 
@@ -595,7 +595,7 @@ public class BaseContainerHandle extends Observable
 		Caller must be prepared to handle freed, deallocated,or alloc page
 		Called by recovery ONLY.
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	*/
 	public Page getAnyPage(long pageNumber) throws StandardException
 	{
@@ -651,7 +651,7 @@ public class BaseContainerHandle extends Observable
 		Log all information necessary to recreate the container during a load
 		tran.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public ByteArray logCreateContainerInfo() 
         throws StandardException
@@ -665,7 +665,7 @@ public class BaseContainerHandle extends Observable
 		Return a record handle that is initialized to the given page number and
         record id.
 
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 
 		@param pageNumber   the page number of the RecordHandle.
 		@param recordId     the record id of the RecordHandle.
@@ -786,7 +786,7 @@ public class BaseContainerHandle extends Observable
 
 		@param waitForLock if true, wait on lock, otherwise, get lock no wait.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public boolean useContainer(
     boolean droppedOK, 
@@ -937,7 +937,7 @@ public class BaseContainerHandle extends Observable
 	   checkpoint is taken after any log record is sent to the log stream but
 	   before the container is actually dirtied.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public void preDirty(boolean preDirtyOn) throws StandardException 
     {
@@ -950,7 +950,7 @@ public class BaseContainerHandle extends Observable
 
 	/**
 		@see ContainerHandle#isTemporaryContainer
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public boolean isTemporaryContainer() throws StandardException 
     {

@@ -30,7 +30,7 @@ package	org.apache.derby.impl.sql.compile;
  * Class.forName calls.
  *
  * WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
- * THEM TO $WS/tools/release/config/dbms/cloudscapenodes.properties
+ * THEM TO tools/jar/DBMSnodes.properties
  *
  */
 
@@ -40,7 +40,7 @@ public interface C_NodeNames
 	// The names are in alphabetic order.
 	//
     // WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
-    // THEM TO $WS/tools/release/config/dbms/cloudscapenodes.properties
+    // THEM TO tools/jar/DBMSnodes.properties
 
 	static final String AGGREGATE_NODE_NAME = "org.apache.derby.impl.sql.compile.AggregateNode";
 

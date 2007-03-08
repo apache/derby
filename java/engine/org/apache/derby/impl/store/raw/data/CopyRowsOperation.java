@@ -157,7 +157,7 @@ public class CopyRowsOperation extends PhysicalPageOperation {
 	 */
 	/**
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby error policy.		
 	  
 		@see org.apache.derby.iapi.store.raw.Loggable#doMe
 	*/
@@ -184,7 +184,7 @@ public class CopyRowsOperation extends PhysicalPageOperation {
 	    to undo this operation, purge all records that were copied over.
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@see PhysicalPageOperation#undoMe
 	 */
 	public void undoMe(Transaction xact, BasePage undoPage,
@@ -215,7 +215,7 @@ public class CopyRowsOperation extends PhysicalPageOperation {
 	 * restore the before image of the page
 	 *
 	 * @exception IOException problem reading the complete log record from the input stream
-	 * @exception StandardException Standard Cloudscape Error Policy
+	 * @exception StandardException Standard Derby Error Policy
 	 */
 	public void restoreMe(Transaction xact, BasePage undoPage,
 					   LogInstant CLRInstant, LimitObjectInput in)
@@ -239,7 +239,7 @@ public class CopyRowsOperation extends PhysicalPageOperation {
 		Write the rows that are to be copied into this page
 
 		@exception IOException Can be thrown by any of the methods of ObjectOutput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 
 	*/
 	private void writeOptionalDataToBuffer(RawTransaction t, BasePage srcPage, int srcSlot)

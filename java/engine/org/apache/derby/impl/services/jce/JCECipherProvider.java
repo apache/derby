@@ -194,7 +194,7 @@ class JCECipherProvider implements CipherProvider
 	/**
 		@see CipherProvider#encrypt
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int encrypt(byte[] cleartext, int offset, int length,
 					   byte[] ciphertext, int outputOffset)
@@ -274,7 +274,7 @@ class JCECipherProvider implements CipherProvider
 	/**
 		@see CipherProvider#decrypt
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int decrypt(byte[] ciphertext, int offset, int length,
 					   byte[] cleartext, int outputOffset)

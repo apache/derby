@@ -64,7 +64,7 @@ class d_BCValidate
 				if (declaringClass.startsWith("org.apache.derby.exe."))
 					return;
 
-				// only validate against Cloudscape engine or Java classes. Not user defined classes
+				// only validate against Derby engine or Java classes. Not user defined classes
 				int p;
 				for (p = 0; p < csPackages.length; p++) {
 					if (declaringClass.startsWith(csPackages[p]))

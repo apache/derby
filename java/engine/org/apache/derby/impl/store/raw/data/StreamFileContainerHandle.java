@@ -190,7 +190,7 @@ final class StreamFileContainerHandle
 	/**
 		remove the stream container
 
-		@exception StandardException Standard Cloudscape error policy		
+		@exception StandardException Standard Derby error policy		
 		@see StreamContainerHandle#removeContainer
 	 */
 	public void removeContainer() throws StandardException {
@@ -257,14 +257,14 @@ final class StreamFileContainerHandle
 	** in other packages that are specific implementations of Data, ie.
 	** a directory at the level
 	**
-	** com.ibm.db2j.impl.Database.Storage.RawStore.Data.*
+	** org.apache.derby.impl.store.raw.data.*
 	*/
 
 	/**
 		Attach me to a container. If this method returns false then
 		I cannot be used anymore, and any reference to me must be discarded.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public boolean useContainer() throws StandardException {
 

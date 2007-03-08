@@ -36,7 +36,7 @@ import org.apache.derby.iapi.error.PublicAPI;
 class LoadError {
 	
 	/**
-	 Raised if, the Cloudscape database connection is null.
+	 Raised if, the Derby database connection is null.
 	*/
 
 	static SQLException connectionNull() {

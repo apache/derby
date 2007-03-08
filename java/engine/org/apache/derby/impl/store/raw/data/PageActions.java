@@ -52,7 +52,7 @@ public interface PageActions
      * @param delete			set the delete status to this value
      * @param undo				logical undo logic if necessary
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      * @see org.apache.derby.iapi.store.raw.Page#deleteAtSlot
      **/
 	public void actionDelete(
@@ -84,7 +84,7 @@ public interface PageActions
      * @return the next column to update in the row or,
      *         -1 if the update has been completed.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      *
      * @see org.apache.derby.iapi.store.raw.Page#updateAtSlot
      **/
@@ -114,7 +114,7 @@ public interface PageActions
      * @param num_rows		how many rows to purge
      * @param recordIds		the recordIDs of the record (an array of num_rows)
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      *
      * @see org.apache.derby.iapi.store.raw.Page#purgeAtSlot
      **/
@@ -143,7 +143,7 @@ public interface PageActions
      *                      logic resides.   Null if logical undo is not 
      *                      necessary.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      *
      * @see org.apache.derby.iapi.store.raw.Page#updateFieldAtSlot
      *
@@ -174,7 +174,7 @@ public interface PageActions
      *                          not necessary.
      * @param insertFlag		see Page value for insertFlag
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      *
      * @see org.apache.derby.iapi.store.raw.Page#insertAtSlot
      **/
@@ -209,7 +209,7 @@ public interface PageActions
      * @param recordIds		    an array of record ids to use in the 
      *                          destination page
      *
-     * @exception StandardException Standard Cloudscape policy.
+     * @exception StandardException Standard Derby policy.
      **/
 	public void actionCopyRows(
     RawTransaction  t, 
@@ -233,7 +233,7 @@ public interface PageActions
      * @param t             	The transaction
      * @param page				that page to be invalidated
      *
-     * @exception StandardException Standard Cloudscape policy.  
+     * @exception StandardException Standard Derby policy.  
      **/
 	public void actionInvalidatePage(
     RawTransaction  t, 
@@ -254,7 +254,7 @@ public interface PageActions
      *                          initialized.
      * @param pageFormatId		The format Id of the page being initialized.
      *
-     * @exception StandardException Standard Cloudscape policy.
+     * @exception StandardException Standard Derby policy.
      **/
 	public void actionInitPage(
     RawTransaction  t, 

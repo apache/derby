@@ -312,7 +312,7 @@ class RowChangerImpl	implements	RowChanger
 		switch (isolationLevel)
 		{
 			// Even though we preserve the isolation level at READ UNCOMMITTED,
-			// Cloudscape Store will overwrite it to READ COMMITTED for update.
+			// Store will overwrite it to READ COMMITTED for update.
 			case ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL:
 				isolationLevel = 
                     TransactionController.ISOLATION_READ_UNCOMMITTED;

@@ -584,7 +584,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		@see Loggable#needsRedo
 		@see FileLogger#redo
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void recover(
     RawStoreFactory     rsf, 
@@ -1389,7 +1389,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	/**
 		checkpoint with pre-start transaction
 
-		@exception StandardException Cloudscape Standard Error Policy 
+		@exception StandardException Derby Standard Error Policy 
 	*/
 	protected boolean checkpointWithTran(RawTransaction cptran, 
 							   RawStoreFactory rsf,
@@ -1628,7 +1628,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		@param where flush log up to here
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void flush(LogInstant where) throws StandardException
 	{
@@ -1654,7 +1654,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		<P>MT - not needed, wrapper method
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void flushAll() throws StandardException
 	{
@@ -1685,7 +1685,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		@return true if the log file is of the current version and of the
 		correct format
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	private boolean verifyLogFormat(StorageFile logFileName, long number)
 		 throws StandardException 
@@ -1717,7 +1717,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		@return true if the log file is of the current version and of the
 		correct format
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	private boolean verifyLogFormat(StorageRandomAccessFile log, long number) 
 		 throws StandardException
@@ -2515,7 +2515,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		Return the directory the log should go.
 
 		<P> MT- read only
-		@exception StandardException Cloudscape Standard Error Policy
+		@exception StandardException Derby Standard Error Policy
 	*/
 	public StorageFile getLogDirectory() throws StandardException
 	{
@@ -2615,7 +2615,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		<P> MT- read only
 
 		@exception IOException cannot access the log
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected LogScan openBackwardsScan(long startAt, LogInstant stopAt)  
 		 throws IOException, StandardException
@@ -2639,7 +2639,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		<P> MT- read only
 
 		@exception IOException cannot access the log
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected LogScan openBackwardsScan(LogInstant stopAt)
 		 throws IOException, StandardException
@@ -2684,7 +2684,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			Otherwise, stop at the end of the log
 
 		@exception IOException cannot access the log
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected LogScan openForwardsScan(long startAt, LogInstant stopAt)  
 		 throws IOException, StandardException
@@ -2722,7 +2722,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		<P> MT- read only
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException cannot access the log at the new position.
 	*/
 	protected StorageRandomAccessFile getLogFileAtBeginning(long filenumber)
@@ -2741,7 +2741,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		@return null if file does not exist or of the wrong format
 		@exception IOException cannot access the log at the new position.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected StorageRandomAccessFile getLogFileAtPosition(long logInstant)
 		 throws IOException, StandardException
@@ -3925,7 +3925,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	  Open a forward scan of the transaction log.
 
 	  <P> MT- read only
-	  @exception StandardException  Standard cloudscape exception policy
+	  @exception StandardException  Standard Derby exception policy
 	*/
 	public LogScan openForwardsFlushedScan(LogInstant startAt)
 		 throws StandardException
@@ -3941,7 +3941,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	/**
 	  Get a forwards scan
 
-	  @exception StandardException Standard Cloudscape error policy
+	  @exception StandardException Standard Derby error policy
 	  */
 	public LogScan openForwardsScan(LogInstant startAt,LogInstant stopAt)
 		 throws StandardException
@@ -4071,7 +4071,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 	/**
 		@see RawStoreFactory#encrypt
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int encrypt(byte[] cleartext, int offset, int length, 
 						  byte[] ciphertext, int outputOffset)
@@ -4083,7 +4083,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 	/**
 		@see RawStoreFactory#decrypt
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int decrypt(byte[] ciphertext, int offset, int length,
 							 byte[] cleartext, int outputOffset)
@@ -4135,7 +4135,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 	/**
 	 * Backup restore - stop sending log record to the log stream
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 */
 	public void freezePersistentStore() throws StandardException
 	{
@@ -4149,7 +4149,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 	/**
 	 * Backup restore - start sending log record to the log stream
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 */
 	public void unfreezePersistentStore() throws StandardException
 	{

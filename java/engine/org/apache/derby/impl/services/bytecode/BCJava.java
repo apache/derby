@@ -156,7 +156,7 @@ public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
 	/**
 		Start this module. We need a read/write version of the class utilities
 
-		@exception StandardException standard cloudscape policy
+		@exception StandardException standard Derby policy
 	 */
 	public void boot(boolean create, Properties properties) throws StandardException {
 

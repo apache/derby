@@ -479,7 +479,7 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 	**
 	** @return Nothing.
 	**
-	** @exception	standard cloudscape exception
+	** @exception	standard Derby exception
 	*/
 	private void initializeScalarAggregation(ExecRow row)
 		throws StandardException

@@ -58,7 +58,7 @@ class TempRAFContainer extends RAFContainer {
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Cacheable setIdentity(Object key) throws StandardException {
 
@@ -74,7 +74,7 @@ class TempRAFContainer extends RAFContainer {
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Cacheable createIdentity(Object key, Object createParameter) throws StandardException {
 
@@ -89,7 +89,7 @@ class TempRAFContainer extends RAFContainer {
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void removeContainer(LogInstant instant, boolean leaveStub) throws StandardException
 	{
@@ -122,7 +122,7 @@ class TempRAFContainer extends RAFContainer {
 		Write the page, if it's within range of the current page range of the container.
 		If we do write it then don't request that it be synced.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void writePage(long pageNumber, byte[] pageData, boolean syncPage) throws IOException, StandardException {
 		if (!this.getDroppedState()) {
@@ -148,7 +148,7 @@ class TempRAFContainer extends RAFContainer {
 		Add a page without locking the container, only one user will be accessing this
 		table at a time.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Page addPage(BaseContainerHandle handle, boolean isOverflow) throws StandardException {
 
@@ -162,7 +162,7 @@ class TempRAFContainer extends RAFContainer {
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void truncate(BaseContainerHandle handle) throws StandardException {
 

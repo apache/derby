@@ -374,7 +374,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	 * Return the module providing XAresource interface to the transaction
      * table.
      *
-	 * @exception StandardException Standard cloudscape exception policy.
+	 * @exception StandardException Standard Derby exception policy.
 	 */
 	public /* XAResourceManager */ Object getXAResourceManager()
         throws StandardException
@@ -1046,7 +1046,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 	/**
 	 * Get JBMS properties relavent to raw store
-	 * @exception StandardException Standard Cloudscape Error Policy
+	 * @exception StandardException Standard Derby Error Policy
 	 */
 	public void getRawStoreProperties(PersistentSet set)
 		 throws StandardException
@@ -1060,7 +1060,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	*/
 	/**
 		Freeze persistent store.  Reads can still happen, only cannot write.
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public void freezePersistentStore() throws StandardException
 	{
@@ -1072,7 +1072,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 	/**
 		Freeze persistent store.  Reads can still happen, only cannot write.
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public void unfreezePersistentStore() throws StandardException
 	{
@@ -1280,7 +1280,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 		@see CipherProvider#encrypt
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int encrypt(byte[] cleartext, int offset, int length,
 					   byte[] ciphertext, int outputOffset, 
@@ -1310,7 +1310,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 		@see CipherProvider#decrypt
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int decrypt(byte[] ciphertext, int offset, int length,
 					   byte[] cleartext, int outputOffset) 

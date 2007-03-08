@@ -524,7 +524,7 @@ public class AllocPage extends StoredPage
 		also. Else check to make sure epage's original container info is of the
 		same length
 
-		@exception StandardException Cloudscape standard error policy
+		@exception StandardException standard Derby error policy
 	*/
 	public static void WriteContainerInfo(byte[] containerInfo,
 										  byte[] epage,
@@ -859,7 +859,7 @@ public class AllocPage extends StoredPage
 	/**
 		Chain the next page number and offset underneath a log record
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void chainNextAllocPage(LogInstant instant,
 									  long newAllocPageNum,

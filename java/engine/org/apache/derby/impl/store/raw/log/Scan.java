@@ -111,7 +111,7 @@ public class Scan implements StreamLogScan {
 		   first not-flushed log record. Like any forward scan, we expect a scan
 		   positioned at the beginning of the next log record.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException cannot access the log at the new position.
 	*/
 	public Scan(LogToFile logFactory, long startAt, LogInstant stopAt, byte direction)
@@ -184,7 +184,7 @@ public class Scan implements StreamLogScan {
 		@return the next LogRecord, or null if the end of the
 		scan has been reached.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public LogRecord getNextRecord(ArrayInputStream input, 
 							 TransactionId tranId, 
@@ -1087,7 +1087,7 @@ public class Scan implements StreamLogScan {
 
 		@param instant the position to reset to
 		@exception IOException scan cannot access the log at the new position.
-		@exception StandardException cloudscape standard error policy
+		@exception StandardException standard Derby error policy
 	*/
 
 	public void resetPosition(LogInstant instant) 

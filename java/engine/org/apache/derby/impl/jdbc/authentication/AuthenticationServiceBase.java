@@ -59,7 +59,7 @@ import java.util.Date;
 /**
  * This is the authentication service base class.
  * <p>
- * There can be 1 Authentication Service for the whole Cloudscape
+ * There can be 1 Authentication Service for the whole Derby
  * system and/or 1 authentication per database.
  * In a near future, we intend to allow multiple authentication services
  * per system and/or per database.

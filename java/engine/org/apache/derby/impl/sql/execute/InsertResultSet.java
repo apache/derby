@@ -384,7 +384,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	}
 	
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void open() throws StandardException
 	{
@@ -694,7 +694,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		 * multiple row insert, or insert with sub-select, the return value is non-
 		 * deterministic, and is the previous return value of the IDENTITY_VAL_LOCAL
 		 * function, before the insert statement.  Also, DB2 can have at most 1 identity
-		 * column per table.  The return value won't be affected either if Cloudscape
+		 * column per table.  The return value won't be affected either if Derby
 		 * table has more than one identity columns.
 		 */
 		setIdentity = (! autoincrementGenerated) && isSourceRowResultSet();

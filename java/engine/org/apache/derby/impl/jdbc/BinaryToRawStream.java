@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.EOFException;
 
 /**
-	Converts a stream containing the Cloudscape stored binary form
+	Converts a stream containing the Derby stored binary form
 	to one that just contains the application's data.
 	Simply read and save the length information.
 */

@@ -143,7 +143,7 @@ public class GenericStatement
 		 *         b) add the prepared statement to the cache.
 		 *
 		 * In cases where the statement cache has been disabled (by setting the
-		 * relevant cloudscape property) then the value of cacheMe is irrelevant.
+		 * relevant Derby property) then the value of cacheMe is irrelevant.
 		 */ 
 		boolean foundInCache = false;
 		if (preparedStmt == null) 

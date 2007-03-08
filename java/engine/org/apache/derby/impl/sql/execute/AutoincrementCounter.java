@@ -193,7 +193,7 @@ public class AutoincrementCounter
 	 * @param	dd			DataDictionary to use.
 	 * @param	tableUUID	I might have the table name but I need more
 	 * information 
-	 * @exception	StandardException standard cloudscape exception.
+	 * @exception	StandardException standard Derby exception.
 	 */
 	public void flushToDisk(TransactionController tc, DataDictionary dd,
 							UUID tableUUID)

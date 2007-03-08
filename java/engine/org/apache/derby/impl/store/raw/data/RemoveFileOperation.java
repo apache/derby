@@ -136,7 +136,7 @@ public class RemoveFileOperation implements Undoable
 
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public boolean needsRedo(Transaction xact)
 		 throws StandardException

@@ -473,7 +473,7 @@ abstract class BaseMonitor
 	/**
 		Set the locale for the service *outside* of boot time.
 
-		@exception StandardException Standard Cloudscape error.
+		@exception StandardException Standard Derby error.
 	*/
 	public Locale setLocale(Object serviceModule, String userDefinedLocale)
 		throws StandardException {
@@ -501,7 +501,7 @@ abstract class BaseMonitor
 		Set the locale for the service at boot time. The passed in
 		properties must be the one passed to the boot method.
 
-		@exception StandardException Standard Cloudscape error.
+		@exception StandardException Standard Derby error.
 	*/
 	public Locale setLocale(Properties serviceProperties, String userDefinedLocale)
 		throws StandardException {

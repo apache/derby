@@ -83,7 +83,7 @@ public class Import extends ImportAbstract{
 	/**
 	 * SYSCS_IMPORT_TABLE  system Procedure from ij or from a Java application
 	 * invokes  this method to perform import to a table from a file.
-	 * @param connection	 The Cloudscape database connection URL for the database containing the table
+	 * @param connection	 The Derby database connection URL for the database containing the table
 	 * @param schemaName	The name of the schema where table to import exists 
 	 * @param tableName     Name of the Table the data has to be imported to.
 	 * @param inputFileName Name of the file from which data has to be imported.
@@ -117,7 +117,7 @@ public class Import extends ImportAbstract{
 	/**
 	 * SYSCS_IMPORT_DATA  system Procedure from ij or from a Java application
 	 * invokes  this method to perform import to a table from a file.
-	 * @param connection	 The Cloudscape database connection URL for the database containing the table
+	 * @param connection	 The Derby database connection URL for the database containing the table
 	 * @param schemaName	The name of the schema where table to import exists 
 	 * @param tableName     Name of the Table the data has to be imported to.
 	 * @param insertColumnList  Comma Seperated column name list to which data

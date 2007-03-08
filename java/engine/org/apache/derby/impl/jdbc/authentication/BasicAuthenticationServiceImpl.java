@@ -43,7 +43,7 @@ import java.io.Serializable;
 import java.util.Dictionary;
 
 /**
- * This authentication service is the basic Cloudscape User authentication
+ * This authentication service is the basic Derby user authentication
  * level support.
  *
  * It is activated upon setting derby.authentication.provider database

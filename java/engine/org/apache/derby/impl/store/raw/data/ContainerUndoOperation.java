@@ -117,7 +117,7 @@ public class ContainerUndoOperation extends ContainerBasicOperation
 		@param in			optional data
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby error policy.
 
 		@see ContainerOperation#generateUndo
 	 */

@@ -6269,7 +6269,7 @@ public final class	DataDictionaryImpl
 		}
 		</PRE>
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void createDictionaryTables(Properties params, TransactionController tc,
 			DataDescriptorGenerator ddg)
@@ -6421,7 +6421,7 @@ public final class	DataDictionaryImpl
 
 
         // Add the following system Schema's to be compatible with DB2, 
-        // currently Cloudscape does not use them, but by creating them as
+        // currently Derby does not use them, but by creating them as
         // system schema's it will insure applications can't create them,
         // drop them, or create objects in them.  This set includes:
         //     SYSCAT
@@ -6534,7 +6534,7 @@ public final class	DataDictionaryImpl
 	 *	@param	sd			Schema to create catalogs in.
 	 *	@param	tc			Transaction context.
 	 *
-	 *	@exception StandardException Standard Cloudscape error policy
+	 *	@exception StandardException Standard Derby error policy
 	 */
 	public	void	makeCatalog( TabInfoImpl					ti,
 								 SchemaDescriptor			sd,
@@ -6568,7 +6568,7 @@ public final class	DataDictionaryImpl
 	  *	@param	nullability				true if nullable 
 	  *	@param	tc						Transaction controller
 	  *
-	  *	@exception StandardException Standard Cloudscape error policy
+	  *	@exception StandardException Standard Derby error policy
 	  */
 	public void upgrade_setNullability(CatalogRowFactory rowFactory,
 									   int columnNumber,
@@ -6606,7 +6606,7 @@ public final class	DataDictionaryImpl
 	  *	@param	newColumnIDs			Array of 1-based column ids.
 	  *	@param	tc						Transaction controller
 	  *
-	  *	@exception StandardException Standard Cloudscape error policy
+	  *	@exception StandardException Standard Derby error policy
 	  */
 	public	void	upgrade_addColumns( CatalogRowFactory		rowFactory,
 										int[]					newColumnIDs,
@@ -6675,7 +6675,7 @@ public final class	DataDictionaryImpl
 	  *	@param	newColumnIDs			Array of 1-based column ids.
 	  *	@param	tc						Transaction controller
 	  *
-	  *	@exception StandardException Standard Cloudscape error policy
+	  *	@exception StandardException Standard Derby error policy
 	  */
 	public	void	upgrade_addInvisibleColumns
 	(
@@ -6701,7 +6701,7 @@ public final class	DataDictionaryImpl
 	  *	@param	conglomID				heap id
 	  *	@param	tc						Transaction controller
 	  *
-	  *	@exception StandardException Standard Cloudscape error policy
+	  *	@exception StandardException Standard Derby error policy
 	  */
 	private	void	widenConglomerate
 	(
@@ -6937,7 +6937,7 @@ public final class	DataDictionaryImpl
 	/**
 	 *	Infrastructure work for indexes on catalogs.
 	 *
-	   @exception StandardException Standard Cloudscape error policy
+	   @exception StandardException Standard Derby error policy
 
 	 */
 	private void bootStrapSystemIndexes(
@@ -7201,7 +7201,7 @@ public final class	DataDictionaryImpl
 	/**
 	 *	Populate SYSDUMMY1 table with a single row.
 	 *
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 */
 	protected void populateSYSDUMMY1(
 							TransactionController tc)
@@ -7216,7 +7216,7 @@ public final class	DataDictionaryImpl
 	/**
 	 * Clear all of the DataDictionary caches.
 	 *
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 */
 	public void clearCaches() throws StandardException
 	{
@@ -7313,7 +7313,7 @@ public final class	DataDictionaryImpl
 	  *
 	  *	@return	a ColumnDes*criptor
 	  *
-	  *	@exception StandardException Standard Cloudscape error policy
+	  *	@exception StandardException Standard Derby error policy
 	  */
 	private	ColumnDescriptor	makeColumnDescriptor( SystemColumn		column,
             int columnPosition,
@@ -7339,7 +7339,7 @@ public final class	DataDictionaryImpl
 	 *
 	 *	@return	Conglomerate id.
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	 */
 	private long createConglomerate(String name, TransactionController tc,
 									ExecRow rowTemplate,

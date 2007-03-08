@@ -79,7 +79,7 @@ public final class SinglePool implements LockFactory
 		<BR>
 		MT - thread safe
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 		@see LockFactory#lockObject
 	*/
@@ -148,7 +148,7 @@ public final class SinglePool implements LockFactory
 		<BR>
 		MT - thread safe
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 		@see LockFactory#lockObject
 	*/

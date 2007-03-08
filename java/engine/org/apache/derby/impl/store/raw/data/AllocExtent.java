@@ -337,7 +337,7 @@ public class AllocExtent implements Externalizable
 	/**
 		Allocate this page - this is called underneath the log record
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void allocPage(long pagenum) throws StandardException
 	{
@@ -405,7 +405,7 @@ public class AllocExtent implements Externalizable
 	    Deallocate logical page pagenum - this is called underneath the log record.
 		pagenum must be a page managed by this extent and it must be valid
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void deallocPage(long pagenum) throws StandardException
 	{
@@ -681,7 +681,7 @@ public class AllocExtent implements Externalizable
 
 		An exception is always thrown if pagenum is a free page
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	protected long getPageOffset(long pagenum, int pagesize, boolean deallocOK) throws StandardException
 	{

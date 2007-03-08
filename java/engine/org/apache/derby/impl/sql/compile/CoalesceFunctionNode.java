@@ -55,7 +55,7 @@ import java.util.Vector;
  * I have constructed following table based on various tables and information under "Rules for result data types"
  * This table has FOR BIT DATA TYPES broken out into separate columns for clarity
  *
- * Note that are few differences between Cloudscape and DB2
+ * Note that are few differences between Derby and DB2
  * 1)there are few differences between what datatypes are consdiered compatible
  * In DB2, CHAR FOR BIT DATA datatypes are compatible with CHAR datatypes
  * ie in addition to following table, CHAR is compatible with CHAR FOR BIT DATA, VARCHAR FOR BIT DATA and LONG VARCHAR FOR BIT DATA
@@ -64,13 +64,13 @@ import java.util.Vector;
  * ie in addition to following table, CHAR FOR BIT DATA is compatible with DATE, TIME, TIMESTAMP
  * ie in addition to following table, VARCHAR FOR BIT DATA is compatible with DATE, TIME, TIMESTAMP
  *
- * 2)few datatypes donot have matching precision in Cloudscape and DB2
- * In DB2, precision of TIME is 8. In Cloudscape, precision of TIME is 0.
- * In DB2, precision,scale of TIMESTAMP is 26,6. In Cloudscape, precision of TIMESTAMP is 0,0.
- * In DB2, precision of DOUBLE is 15. In Cloudscape, precision of DOUBLE is 52.
- * In DB2, precision of REAL is 23. In Cloudscape, precision of REAL is 7.
+ * 2)few datatypes donot have matching precision in Derby and DB2
+ * In DB2, precision of TIME is 8. In Derby, precision of TIME is 0.
+ * In DB2, precision,scale of TIMESTAMP is 26,6. In Derby, precision of TIMESTAMP is 0,0.
+ * In DB2, precision of DOUBLE is 15. In Derby, precision of DOUBLE is 52.
+ * In DB2, precision of REAL is 23. In Derby, precision of REAL is 7.
  * In DB2, precision calculation equation is incorrect when we have int and decimal arguments.
- * The equation should be p=x+max(w-x,10) since precision of integer is 10 in both db2 and cloudscape. Instead, DB2 has p=x+max(w-x,11) 
+ * The equation should be p=x+max(w-x,10) since precision of integer is 10 in both DB2 and Derby. Instead, DB2 has p=x+max(w-x,11) 
  *
  * Types.             S  I  B  D  R  D  C  V  L  C  V  L  C  D  T  T  B
  *                    M  N  I  E  E  O  H  A  O  H  A  O  L  A  I  I  L

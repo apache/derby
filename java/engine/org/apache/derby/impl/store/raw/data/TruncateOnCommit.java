@@ -84,7 +84,7 @@ public class TruncateOnCommit extends ContainerHandleActionOnCommit {
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void doIt(BaseContainerHandle handle)
 		throws StandardException {

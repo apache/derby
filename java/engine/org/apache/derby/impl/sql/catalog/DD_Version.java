@@ -256,7 +256,7 @@ public	class DD_Version implements	Formatable
 	  * @param	fromMajorVersionNumber	version of the on-disk database
 	    @param  lastSoftUpgradeVersion last engine to perform a soft upgrade that made changes.
 	  *
-	  *	@exception StandardException  Standard Cloudscape error policy.
+	  *	@exception StandardException  Standard Derby error policy.
 	  */
 	private	void	applySafeChanges(TransactionController tc, int fromMajorVersionNumber, int lastSoftUpgradeVersion)
 		throws StandardException
@@ -321,7 +321,7 @@ public	class DD_Version implements	Formatable
 	  * @param	fromMajorVersionNumber	version of the on-disk database
 	  * @param	aid	 AuthorizationID of current user to be made Database Owner
 	  *
-	  *	@exception StandardException  Standard Cloudscape error policy.
+	  *	@exception StandardException  Standard Derby error policy.
 	  */
 	private	void	doFullUpgrade(TransactionController tc, int fromMajorVersionNumber, String aid)
 		throws StandardException
@@ -406,7 +406,7 @@ public	class DD_Version implements	Formatable
 	 *
 	 * @param tc the xact
 	 *
-	 * @exception StandardException  Standard Cloudscape error policy.
+	 * @exception StandardException  Standard Derby error policy.
 	 */
 	private void handleMinorRevisionChange(TransactionController tc, DD_Version fromVersion, boolean softUpgradeRun) 
 		throws StandardException
@@ -463,7 +463,7 @@ public	class DD_Version implements	Formatable
 	 * remove stored prepared statements in all system schemas
 	 * (including SYSIBM)
 	 *
-	 * @exception StandardException  Standard Cloudscape error policy.
+	 * @exception StandardException  Standard Derby error policy.
 	 */
 	protected void dropJDBCMetadataSPSes(TransactionController tc, boolean removeSYSIBMonly)
 		throws StandardException
@@ -495,7 +495,7 @@ public	class DD_Version implements	Formatable
 	/**
  	 * Make a catalog.
 	 *	@param	tc	TransactionController
-	 *	@exception StandardException  Standard Cloudscape error policy.
+	 *	@exception StandardException  Standard Derby error policy.
 	 */
 	protected void makeSystemCatalog(TransactionController tc,
 									 TabInfoImpl ti)
@@ -511,7 +511,7 @@ public	class DD_Version implements	Formatable
 	  its indexes.
 	  @param	tc TransactionController
 	  @param    td Table descriptor for the catalog to drop. 
-	  @exception StandardException  Standard Cloudscape error policy.
+	  @exception StandardException  Standard Derby error policy.
 	  */
 	protected void
 	dropSystemCatalogDescription(TransactionController tc, TableDescriptor td)
@@ -532,7 +532,7 @@ public	class DD_Version implements	Formatable
  	 * Drop a System catalog.
 	 *	@param	tc	TransactionController
 	 *  @param  crf CatalogRowFactory for the catalog to drop.
-	 *	@exception StandardException  Standard Cloudscape error policy.
+	 *	@exception StandardException  Standard Derby error policy.
 	 */
 	protected void dropSystemCatalog(TransactionController tc,
 							 CatalogRowFactory crf)

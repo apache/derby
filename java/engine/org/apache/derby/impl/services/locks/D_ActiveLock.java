@@ -29,7 +29,7 @@ import org.apache.derby.iapi.error.StandardException;
 public class D_ActiveLock extends D_Lock  {
 
 	/**
-		@exception StandardException Standard cloudscape policy
+		@exception StandardException Standard Derby policy
 	*/
     public String diag()
         throws StandardException

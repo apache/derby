@@ -162,7 +162,7 @@ class RAFContainer4 extends RAFContainer {
      *
      *  <BR> MT - thread safe
      *  @exception IOException exception reading page
-     *  @exception StandardException Standard Cloudscape error policy
+     *  @exception StandardException Standard Derby error policy
      */
     protected void readPage(long pageNumber, byte[] pageData)
          throws IOException, StandardException
@@ -227,7 +227,7 @@ class RAFContainer4 extends RAFContainer {
      *
      *  <BR> MT - thread safe
      *
-     *  @exception StandardException Standard Cloudscape error policy
+     *  @exception StandardException Standard Derby error policy
      *  @exception IOException IO error accessing page
      */
     protected void writePage(long pageNumber, byte[] pageData, boolean syncPage)

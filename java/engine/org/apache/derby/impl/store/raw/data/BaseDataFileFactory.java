@@ -529,7 +529,7 @@ public class BaseDataFileFactory
 	/**
 		Database creation finished
 
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 	*/
 	public void createFinished() throws StandardException
 	{
@@ -562,7 +562,7 @@ public class BaseDataFileFactory
 
 	/**
 		@see DataFactory#openDroppedContainer
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public RawContainerHandle openDroppedContainer(
     RawTransaction  t, 
@@ -581,7 +581,7 @@ public class BaseDataFileFactory
 
 	/**
 		@see DataFactory#openContainer
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	private RawContainerHandle openContainer(
     RawTransaction  t, 
@@ -754,7 +754,7 @@ public class BaseDataFileFactory
 	}
 
 	/** Add a container with a specified page size to a segment.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public long addContainer(
     RawTransaction  t, 
@@ -900,7 +900,7 @@ public class BaseDataFileFactory
 	}
 
 	/** Add and load a stream container
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public long addAndLoadStreamContainer(
     RawTransaction  t, 
@@ -926,7 +926,7 @@ public class BaseDataFileFactory
 		open an exsisting streamContainer
 
 		@see DataFactory#openStreamContainer
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public StreamContainerHandle openStreamContainer(
     RawTransaction  t, 
@@ -962,7 +962,7 @@ public class BaseDataFileFactory
 		<P>
 		This call will remove the container.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void dropStreamContainer(
     RawTransaction  t, 
@@ -1001,7 +1001,7 @@ public class BaseDataFileFactory
 
 		called ONLY during recovery load tran.
 
-		@exception StandardException Standard Cloudscape Error policy
+		@exception StandardException Standard Derby Error policy
 	 */
 	public void reCreateContainerForRedoRecovery(
     RawTransaction  t, 
@@ -1040,7 +1040,7 @@ public class BaseDataFileFactory
 		and all its pages deallocated. The container will be fully removed
 		at the commit time of the transaction.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void dropContainer(
     RawTransaction  t, 
@@ -1412,7 +1412,7 @@ public class BaseDataFileFactory
 		Not implemented in this class - subclass who deals with side log must
 		override this.
 
-		@exception StandardException Cloudscape Standard Error Policy
+		@exception StandardException Derby Standard Error Policy
 	*/
 	private void syncSideLog(long bipLocation)
 		 throws StandardException
@@ -1474,7 +1474,7 @@ public class BaseDataFileFactory
 	 *	This page is going from clean to dirty, this is a chance for the
 	 *	sub class to do something if so desired
 	 *
-	 * @exception StandardException Standard Cloudscape Error Policy
+	 * @exception StandardException Standard Derby Error Policy
 	 */
 	private void pageToDirty(RawTransaction t, StoredPage page)
 		 throws StandardException
@@ -1486,7 +1486,7 @@ public class BaseDataFileFactory
 	 * Get the loggable page action that is associated with this implementation
 	 *
 	 * @return the PageActions
-	 * @exception StandardExceptions Standard Cloudscape Error Policy
+	 * @exception StandardExceptions Standard Derby Error Policy
 	 */
 	private PageActions getLoggablePageActions() throws StandardException
 	{
@@ -2256,7 +2256,7 @@ public class BaseDataFileFactory
 	/**
 		Called after recovery is performed.
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	*/
 	public void postRecovery() throws StandardException 
     {

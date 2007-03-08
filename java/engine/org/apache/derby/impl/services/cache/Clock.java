@@ -199,7 +199,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 
 		@param key the key to the object
 		@return a cacheable object that is kept in the cache.
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Cacheable find(Object key) throws StandardException {
 		CachedItem item;
@@ -409,7 +409,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 		@param key the key to the object
 		@return a cacheable object that is kept in the cache.  
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Cacheable create(Object key, Object createParameter) throws StandardException {
 
@@ -554,7 +554,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 		remove state of the item, the actual removal of the cacheable is
 		synchronized on the cachedItem itself.
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public void remove(Cacheable entry) throws StandardException {
 
@@ -678,7 +678,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 	/**
 		MT - synchronization provided by caller
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public void shutdown() throws StandardException {
 
@@ -849,7 +849,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 
 		// However, if the cache contains a large number of invalid
 		// items then we should see if we can avoid growing.
-		// This avoids simple use of Cloudscape looking like
+		// This avoids simple use of Derby looking like
 		// a memory leak, as the page cache fills the holders array
 		// with page objects including the 4k (or 32k) pages.
 		// size() is the number of valid entries in the hash table
@@ -1658,7 +1658,7 @@ innerscan:
      *
      * @param newSize the new maximum cache size
      *
-     * @exception StandardException Cloudscape Standard error policy
+     * @exception StandardException Standard Derby error policy
      */
 	public void resize( long newSize) throws StandardException
     {

@@ -104,7 +104,7 @@ public class B2IUndo implements LogicalUndo, Formatable
 	 * @param in        data stored in the log stream that contains the record 
      *                  data necessary to restore the row.
      *
-     * @exception StandardException Standard Cloudscape error policy
+     * @exception StandardException Standard Derby error policy
 	 * @exception IOException Method may read from InputStream
      *
 	 */

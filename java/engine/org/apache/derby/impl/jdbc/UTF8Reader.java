@@ -151,7 +151,7 @@ public final class UTF8Reader extends Reader
 	}
 
 	/*
-	** Methods just for Cloudscape's JDBC driver
+	** Methods just for Derby's JDBC driver
 	*/
 
 	public int readInto(StringBuffer sb, int len) throws IOException {

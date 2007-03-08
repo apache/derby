@@ -593,7 +593,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
                 // look for first character
                 byte[] b;
                 try
-                { // pattern is not necessarily a cloudscape Blob
+                { // pattern is not necessarily a Derby Blob
                     b = pattern.getBytes(1,1);
                 }
                 catch (SQLException e)

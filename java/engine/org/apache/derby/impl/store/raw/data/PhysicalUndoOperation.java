@@ -118,7 +118,7 @@ public class PhysicalUndoOperation extends PageBasicOperation implements Compens
 		@param in			optional data
 
 		@exception IOException Can be thrown by any of the methods of InputStream.
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 
 	 */
 	public final void doMe(Transaction xact, LogInstant instant, LimitObjectInput in) 

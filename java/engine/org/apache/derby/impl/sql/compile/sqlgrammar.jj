@@ -10684,10 +10684,10 @@ dateTimeLiteral() throws StandardException :
 	ValueNode	constantNode;
 }
 {
-// RESOLVE: There is an incompatibility between Cloudscape and DB2 here. The DB2 SQL parser does not recognize
-// JDBC date/time escapes. They are handled in a JDBC pre-processor. However embedded Cloudscape does not have
-// a separate pre-processor. JDBC date/time escapes are handled by the Cloudscape SQL parser. This will only
-// be visible if Cloudscape is accessed through a non-JDBC pathway. (ODBC?) In that case Cloudscape will allow
+// RESOLVE: There is an incompatibility between Derby and DB2 here. The DB2 SQL parser does not recognize
+// JDBC date/time escapes. They are handled in a JDBC pre-processor. However embedded Derby does not have
+// a separate pre-processor. JDBC date/time escapes are handled by the Derby SQL parser. This will only
+// be visible if Derby is accessed through a non-JDBC pathway. (ODBC?) In that case Derby will allow
 // the JDBC date/time escape while DB2 will not.
 	(
 		( <LEFT_BRACE> constantNode = escapedDateTimeLiteral() <RIGHT_BRACE> )
@@ -10860,7 +10860,7 @@ constraintNameDefinition() throws StandardException :
 }
 
 /*
- * DB2 requires column check constraints to refer to only that column. Cloudscape currently
+ * DB2 requires column check constraints to refer to only that column. Derby
  * doesn't care if check constraints are column level or table level. For DB2 compatibility
  * check that column check constraints only refer to that column.
  */
@@ -11334,7 +11334,7 @@ valueSpecification() throws StandardException :
 	<NULLIF> <LEFT_PAREN> leftExpression = additiveExpression(null, 0, false) <COMMA> rightExpression = additiveExpression(null, 0, false) <RIGHT_PAREN>
 	{
 		// "NULLIF(L, R)" is the same as "L=R ? untyped NULL : L"
-		// An impl assumption here is that Cloudscape can promote CHAR to any comparable datatypes such as numeric
+		// An impl assumption here is that Derby can promote CHAR to any comparable datatypes such as numeric
 		ContextManager cm = getContextManager();
 		ValueNodeList thenElseList = (ValueNodeList) nodeFactory.getNode(C_NodeTypes.VALUE_NODE_LIST, cm);
 

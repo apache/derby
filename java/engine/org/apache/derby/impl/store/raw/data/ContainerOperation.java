@@ -150,7 +150,7 @@ public class ContainerOperation extends ContainerBasicOperation implements Undoa
 		If we are in load tran, and the operation is a create, the container
 		may not (should not?) exist yet.  We need to recreate it.
 
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby error policy.
 	 */
 	protected RawContainerHandle findContainerForRedoRecovery(
     RawTransaction xact)
@@ -170,7 +170,7 @@ public class ContainerOperation extends ContainerBasicOperation implements Undoa
 	}
 
 	/** 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public final void doMe(Transaction tran, LogInstant instant, 
 						   LimitObjectInput in)
@@ -215,7 +215,7 @@ public class ContainerOperation extends ContainerBasicOperation implements Undoa
 		@param CLRInstant the log instant of the CLR
 		@param in optional data
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void undoMe(Transaction tran, RawContainerHandle hdl,
 					   LogInstant CLRInstant, LimitObjectInput in)
@@ -249,7 +249,7 @@ public class ContainerOperation extends ContainerBasicOperation implements Undoa
 
 	/**
 		@see org.apache.derby.iapi.store.raw.Undoable
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Compensation generateUndo(Transaction tran, LimitObjectInput in)
 		 throws StandardException

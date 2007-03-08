@@ -625,7 +625,7 @@ public class B2I extends BTree
 	Bulk Load a B-tree secondary index.
 
 	@see Conglomerate#load
-	@exception StandardException Standard Cloudscape Error policy.
+	@exception StandardException Standard Derby Error policy.
 	raise SQLState.STORE_CONGLOMERATE_DUPLICATE_KEY_EXCEPTION if a duplicate 
     key is detected in the load.
 	**/

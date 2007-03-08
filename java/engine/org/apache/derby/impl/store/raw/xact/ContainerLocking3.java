@@ -50,7 +50,7 @@ public class ContainerLocking3 extends NoLocking {
 		Obtain a Container shared or exclusive lock	until
 		the end of the nested transaction.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public boolean lockContainer(
     Transaction     t, 

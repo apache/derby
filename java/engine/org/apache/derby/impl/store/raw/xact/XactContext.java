@@ -67,7 +67,7 @@ final class XactContext extends ContextImpl {
 
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void cleanupOnError(Throwable error) throws StandardException {
 

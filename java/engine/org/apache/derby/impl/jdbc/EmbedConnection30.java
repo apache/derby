@@ -122,7 +122,7 @@ public class EmbedConnection30 extends EmbedConnection
 
 	/**
 	 * Creates a savepoint with the given name(if it is a named savepoint else we will generate a name
-	 * becuase Cloudscape only supports named savepoints internally) in the current transaction and
+	 * because Derby only supports named savepoints internally) in the current transaction and
 	 * returns the new Savepoint object that represents it.
 	 *
 	 * @param name  A String containing the name of the savepoint. Will be null if this is an unnamed savepoint
@@ -174,7 +174,7 @@ public class EmbedConnection30 extends EmbedConnection
 				verifySavepointCommandIsAllowed();
 				verifySavepointArg(savepoint);
 				//Need to cast and get the name because JDBC3 spec doesn't support names for
-				//unnamed savepoints but Cloudscape keeps names for named & unnamed savepoints.
+				//unnamed savepoints but Derby keeps names for named & unnamed savepoints.
 				getLanguageConnection().internalRollbackToSavepoint(((EmbedSavepoint30)savepoint).getInternalName(),true, savepoint);
 			} catch (StandardException e) {
 				throw handleException(e);
@@ -205,7 +205,7 @@ public class EmbedConnection30 extends EmbedConnection
 				verifySavepointCommandIsAllowed();
 				verifySavepointArg(savepoint);
 				//Need to cast and get the name because JDBC3 spec doesn't support names for
-				//unnamed savepoints but Cloudscape keeps name for named & unnamed savepoints.
+				//unnamed savepoints but Derby keeps name for named & unnamed savepoints.
 				getLanguageConnection().releaseSavePoint(((EmbedSavepoint30)savepoint).getInternalName(), savepoint);
 			} catch (StandardException e) {
 				throw handleException(e);

@@ -41,7 +41,7 @@ class SetTransactionResultSet extends MiscResultSet
 	 *
 	 *  @param activation		Describes run-time environment.
 	 *
-	 *  @exception StandardException Standard Cloudscape error policy.
+	 *  @exception StandardException Standard Derby error policy.
      */
     SetTransactionResultSet(Activation activation)
 		 throws StandardException

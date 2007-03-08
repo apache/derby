@@ -430,7 +430,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 
 	/**
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@see Page#fetchFieldFromSlot
 	 */
 	public final RecordHandle fetchFieldFromSlot(
@@ -491,7 +491,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	}
 
 	/** @see Page#insertAtSlot
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	 */
 	public RecordHandle insertAtSlot(
     int                     slot, 
@@ -598,7 +598,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	}
 
 	/** @see Page#insert
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	 */
 	public final RecordHandle insert(
     Object[]   row, 
@@ -628,7 +628,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		If handle is supplied then the record at that hanlde will be updated
 		to indicate it is a partial row and it has an overflow portion.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public RecordHandle insertAllowOverflow(
     int                     slot, 
@@ -903,7 +903,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param handle			handle of the record for long row
 		@param overflowHandle	the overflow (continuation) pointer for the long row
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract void updateOverflowDetails(RecordHandle handle, RecordHandle overflowHandle)
 		throws StandardException;
@@ -916,7 +916,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param handle			handle of the record for long row
 		@param overflowHandle	the overflow (continuation) pointer for the long row
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract void updateFieldOverflowDetails(RecordHandle handle, RecordHandle overflowHandle)
 		throws StandardException;
@@ -931,7 +931,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param overflowHandle	the overflow (continuation) pointer
 								to the beginning of the long column
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract int appendOverflowFieldHeader(DynamicByteArrayOutputStream logBuffer, RecordHandle overflowHandle)
 		throws StandardException, IOException;
@@ -947,7 +947,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		throws StandardException;
 
 	/** @see Page#updateAtSlot
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception StandardException	StandardException.newException(SQLState.UPDATE_DELETED_RECORD
 		if the record is already deleted
 		@exception StandardException	StandardException.newException(SQLState.CONTAINER_READ_ONLY
@@ -994,7 +994,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		throws	StandardException;
 
 	/** @see Page#updateFieldAtSlot
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception StandardException	StandardException.newException(SQLState.UPDATE_DELETED_RECORD
 		if the record is already deleted
 		@exception StandardException	StandardException.newException(SQLState.CONTAINER_READ_ONLY
@@ -1529,7 +1529,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		Get an exclusive latch on the page.
 		<BR>
 		MT - thread safe
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 	*/
 	void setExclusive(BaseContainerHandle requester)
 		throws StandardException {
@@ -1771,7 +1771,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		<BR>
 		MT - latched
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public abstract boolean entireRecordOnPage(int slot) 
 		 throws StandardException;
@@ -1813,7 +1813,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		<BR>
 		MT - latched
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException IO error accessing page
 	*/
 	public int setDeleteStatus(int slot, boolean delete) throws StandardException, IOException {
@@ -1829,7 +1829,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	/**
 		Mark this page as being deallocated
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	*/
 	public void deallocatePage() throws StandardException
 	{
@@ -1850,7 +1850,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 	/**
 		Mark this page as being allocated and initialize it to a pristine page
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	*/
 	public void initPage(int initFlag, long pageOffset) 
 		 throws StandardException 
@@ -2123,7 +2123,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	  @param handle Handle to deleted or non-deleted record
 	  @see ContainerHandle#compactRecord
 
-	  @exception StandardException	Standard Cloudscape error policy
+	  @exception StandardException	Standard Derby error policy
 	*/
 	public void compactRecord(RecordHandle handle) throws StandardException
 	{
@@ -2292,7 +2292,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
      * @return  false if a qualifier_list is provided and the row does not 
      *          qualifier (no row read in that case), else true.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      **/
 	protected abstract boolean restoreRecordFromSlot(
     int                     slot, 
@@ -2310,7 +2310,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		<BR> MT - latched, page is latched when this methods is called.
 
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	protected abstract void restorePortionLongColumn(OverflowInputStream fetchStream)
 		throws StandardException, IOException;
@@ -2320,7 +2320,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched, page is latched when this methods is called.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract int newRecordId() throws StandardException;
 
@@ -2329,7 +2329,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched, page is latched when this methods is called.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract int newRecordIdAndBump() throws StandardException;
 
@@ -2341,7 +2341,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched, page is latched when this methods is called.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	protected abstract int newRecordId(int recordId) throws StandardException;
 
@@ -2351,7 +2351,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched, page is latched when this methods is called.
 
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 	*/
 	public abstract boolean spaceForCopy(int num_rows, int[] spaceNeeded)
 		 throws StandardException;
@@ -2362,7 +2362,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched, page is latched when this methods is called.
 
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 	*/
 	public abstract int getTotalSpace(int slot) throws StandardException;
 
@@ -2408,7 +2408,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched - page latch must be held
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException object exceeds the available data in the stream.
 
 	*/
@@ -2432,7 +2432,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param headRowHandle	the recordHandle of the head row piece, used
 						for post commit cleanup for update. 
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract void logRecord(int slot, int flag, int recordId,
 								   FormatableBitSet validColumns, OutputStream out,
@@ -2467,7 +2467,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param realSpaceOnPage	Being used in conjunction with realStartColumn,
 								to indicate the real free space left on the page.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract int logRow(
     int                     slot, 
@@ -2493,7 +2493,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param fieldNumber Number of the field (starts at 0).
 		@param out		Where to write the logged form.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract void logField(int slot, int fieldNumber, OutputStream out)
 		throws StandardException, IOException;
@@ -2507,7 +2507,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param column column version of the field.
 		@param out		Where to write the logged form.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract void logColumn(
     int                     slot, 
@@ -2527,7 +2527,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param column		column version of the field.
 		@param out			Where to write the logged form.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public abstract int logLongColumn(
     int                     slot, 
@@ -2543,7 +2543,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched - page latch must be held
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException Thrown by InputStream methods potential I/O errors
 		while writing the page
 		
@@ -2558,7 +2558,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched - page latch must be held
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException Thrown by InputStream methods and potential I/O errors
 		while writing the page.
 	*/
@@ -2572,7 +2572,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched - page latch must be held
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException Thrown by InputStream methods and potential I/O errors
 		while writing the page.
 	*/
@@ -2585,7 +2585,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		<BR> MT - latched - page latch must be held
 		
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException Thrown by InputStream methods
 
 	*/
@@ -2602,7 +2602,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param slot the slot to delete or undelete
 		@param delete set delete status to this value 
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException IO error accessing page
 	*/
 	public abstract void setDeleteStatus(LogInstant instant, int slot, boolean delete)
@@ -2616,7 +2616,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param slot the slot to purge
 		@param recordId the id of the record that is to be purged
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException Thrown by potential I/O errors
 		while writing the page.
 	*/
@@ -2627,7 +2627,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	/**
 		Subclass implementation of compactRecord.
 		@see BasePage#compactRecord
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	protected abstract void compactRecord(RawTransaction t, int slot, int recordId)
 		 throws StandardException;
@@ -2640,7 +2640,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@param instant the log instant of the log record
 		@param status the page status
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public abstract void setPageStatus(LogInstant instant, byte status)
 		throws StandardException;
@@ -2651,7 +2651,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		All subtypes are expected to overwrite this method if it has something to clean up
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public abstract void initPage(LogInstant instant, byte status, 
 								  int recordId, boolean overflow, boolean reuse)
@@ -2659,7 +2659,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 	/**
 		Set the reserved space for this row to value.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public abstract void setReservedSpace(LogInstant instant, int slot, int value) 
 		 throws StandardException, IOException;

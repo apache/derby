@@ -40,7 +40,7 @@ import java.util.Properties;
 import java.sql.SQLException;
 
 /**
- * This is the Cloudscape LDAP authentication scheme implementation.
+ * This is the Derby LDAP authentication scheme implementation.
  *
  * JNDI system/environment properties can be set at the database
  * level as database properties. They will be picked-up and set in
@@ -58,7 +58,7 @@ import java.sql.SQLException;
  * hard to tell/guess in advance a users' full DN's.
  *
  * NOTE: In a future release, we will cache/maintain the user DN within
- * the the cloudscape database or system to avoid the initial lookup.
+ * the the Derby database or system to avoid the initial lookup.
  * Also note that LDAP search/retrieval operations are usually very fast.
  *
  * The default LDAP url is ldap:/// (ldap://localhost:389/)
@@ -85,7 +85,7 @@ extends JNDIAuthenticationSchemeBase
 	private static final String[] attrDN = {"dn"};								;
 
 	//
-	// Cloudscape LDAP Configuration properties
+	// Derby LDAP Configuration properties
 	//
 	private static final String LDAP_SEARCH_BASE =
 								"derby.authentication.ldap.searchBase";

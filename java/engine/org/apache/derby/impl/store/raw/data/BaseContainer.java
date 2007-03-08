@@ -173,7 +173,7 @@ abstract class BaseContainer implements Lockable {
         will usually mean releasing any free pages located at the end of the
         file using the java truncate() interface.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public void compressContainer(BaseContainerHandle handle)
         throws StandardException
@@ -264,7 +264,7 @@ abstract class BaseContainer implements Lockable {
 
 		The user transaction is used to latch the newly created page.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Page addPage(BaseContainerHandle handle, boolean isOverflow) throws StandardException {
 		
@@ -399,7 +399,7 @@ abstract class BaseContainer implements Lockable {
 		@param handle the container handle that has opened the container and latched the page
 		@param page the latched page that is to be deallocated
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void removePage(BaseContainerHandle handle, BasePage page) 
 		 throws StandardException
@@ -441,7 +441,7 @@ abstract class BaseContainer implements Lockable {
 		Get the special dealloc lock on the page - the lock is gotten by the
 		transaction that owns the container handle
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected boolean getDeallocLock(BaseContainerHandle handle, 
 									 RecordHandle deallocLock, 
@@ -478,7 +478,7 @@ abstract class BaseContainer implements Lockable {
 
 	/**
 		Get an allocation page and latch it.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected Page getAllocPage(BaseContainerHandle handle, long pageNumber, boolean wait)
 		 throws StandardException
@@ -488,7 +488,7 @@ abstract class BaseContainer implements Lockable {
 
 	/**
 		Get any page and latch it .
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected Page getAnyPage(BaseContainerHandle handle, long pageNumber, boolean wait)
 		 throws StandardException
@@ -499,7 +499,7 @@ abstract class BaseContainer implements Lockable {
 
 	/**
 		Get the first valid page. Result is latched.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected Page getFirstPage(BaseContainerHandle handle) throws StandardException
 	{
@@ -508,7 +508,7 @@ abstract class BaseContainer implements Lockable {
 
 	/**
 		Get the next valid page and latch it
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected Page getNextPage(BaseContainerHandle handle, long pageNumber)
         throws StandardException
@@ -653,7 +653,7 @@ abstract class BaseContainer implements Lockable {
 		Return a BasePage that represents the given page number in this container.
         The resulting page is latched.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract BasePage getPage(BaseContainerHandle handle, long pageNumber,
         boolean wait) throws StandardException;
@@ -661,7 +661,7 @@ abstract class BaseContainer implements Lockable {
 	/**
 		Return a BasePage that represents the given alloc page number in this container.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract BasePage getAllocPage(long pageNumber) throws StandardException;
 
@@ -669,7 +669,7 @@ abstract class BaseContainer implements Lockable {
 		Return a BasePage that represents any page - alloc page, valid page, free page,
 		dealloced page etc.  The only requirement is that the page is initialized...
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	*/
 	protected abstract BasePage getAnyPage(BaseContainerHandle handle, long pageNumber)
 		 throws StandardException;
@@ -720,7 +720,7 @@ abstract class BaseContainer implements Lockable {
 		Log all information on the container creation necessary to recreate teh
 		container during a load tran.
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	 */
 	 protected abstract ByteArray logCreateContainerInfo()
 		 throws StandardException;
@@ -730,28 +730,28 @@ abstract class BaseContainer implements Lockable {
 		Get only a valid, non-overflow page.  If page number is either invalid
 		or overflow, returns null
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	 */
 	protected abstract BasePage getHeadPage(BaseContainerHandle handle,
         long pagenumber, boolean wait) throws StandardException;
 
 	/**
 		Get the first page in the container.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract BasePage getFirstHeadPage(BaseContainerHandle handle,
         boolean wait) throws StandardException;
 
 	/**
 		Get the next page in the container.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract BasePage getNextHeadPage(BaseContainerHandle handle,
         long pageNumber, boolean wait) throws StandardException;
 
 	/**
 		Get a potentially suitable page for insert and latch it.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	protected abstract BasePage getPageForInsert(BaseContainerHandle handle,
 												 int flag)
@@ -770,7 +770,7 @@ abstract class BaseContainer implements Lockable {
 	/**
 		Create a new page in the container.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract BasePage newPage(BaseContainerHandle userhandle,
 										RawTransaction t,
@@ -786,7 +786,7 @@ abstract class BaseContainer implements Lockable {
 	/**
 		Deallocate a page from the container.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract void deallocatePage(BaseContainerHandle userhandle,
 										   BasePage page) throws StandardException;
@@ -814,21 +814,21 @@ abstract class BaseContainer implements Lockable {
 		@param leaveStub if true, leave a stub.  If false, remove everything
 		@see org.apache.derby.iapi.store.raw.data.RawContainerHandle#removeContainer
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract void removeContainer(LogInstant instant, boolean leaveStub) throws StandardException;
 
 	/**
 		Get the logged container version.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract long getContainerVersion() throws StandardException;
 
 	/**
 		Flush all outstanding changes in this container to persistent storage.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract void flushAll() throws StandardException;
 
@@ -850,19 +850,19 @@ abstract class BaseContainer implements Lockable {
 	*/
 	/**
 		@see ContainerHandle#getEstimatedRowCount
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public abstract long getEstimatedRowCount(int flag) throws StandardException;
 
 	/**
 		@see ContainerHandle#setEstimatedRowCount
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public abstract void setEstimatedRowCount(long count, int flag) throws StandardException;
 
 	/**
 		@see ContainerHandle#getEstimatedPageCount
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public abstract long getEstimatedPageCount(BaseContainerHandle handle, int flag) throws StandardException;
 

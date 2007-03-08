@@ -210,7 +210,7 @@ public abstract class EmbedResultSet extends ConnectionChild
     private boolean[] streamUsedFlags;
     
 	/**
-	 * This class provides the glue between the Cloudscape
+	 * This class provides the glue between the Derby
 	 * resultset and the JDBC resultset, mapping calls-to-calls.
 	 */
 	public EmbedResultSet(EmbedConnection conn, ResultSet resultsToWrap,

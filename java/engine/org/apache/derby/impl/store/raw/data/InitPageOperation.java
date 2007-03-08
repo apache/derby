@@ -139,7 +139,7 @@ public final class InitPageOperation extends PhysicalPageOperation
 		Mark the page as valid, and clear out any crud from the page
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 
 		@see org.apache.derby.iapi.store.raw.Loggable#doMe
 	*/
@@ -165,7 +165,7 @@ public final class InitPageOperation extends PhysicalPageOperation
 		This routine is called as the last resort of find page, the container
 		handle has already been found and it is not dropped.
 
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 	*/
 	protected BasePage getPageForRedoRecovery(Transaction xact)
 		 throws StandardException
@@ -217,7 +217,7 @@ public final class InitPageOperation extends PhysicalPageOperation
 	/** 
 	 * restore the before image of the page
 	 *
-	 * @exception StandardException Standard Cloudscape Error Policy
+	 * @exception StandardException Standard Derby Error Policy
 	 * @exception IOException problem reading the complete log record from the
 	 * input stream
 	 */

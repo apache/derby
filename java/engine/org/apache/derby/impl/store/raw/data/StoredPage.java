@@ -1407,7 +1407,7 @@ public class StoredPage extends CachedPage
      * @return  false if a qualifier_list is provided and the row does not 
      *          qualifier (no row read in that case), else true.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      **/
 	protected boolean restoreRecordFromSlot(
     int                     slot, 
@@ -3189,7 +3189,7 @@ public class StoredPage extends CachedPage
 
 		@param slot the slot number where the current piece of overflow column
 		is at.
-		@exception StandardException Cloudscape Standard Error Policy
+		@exception StandardException Derby Standard Error Policy
 	 */
     /**
      * Return the next recordHandle in a long column chain.
@@ -3546,7 +3546,7 @@ public class StoredPage extends CachedPage
 
 		<P>
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException			RESOLVE
 
 	*/
@@ -4307,7 +4307,7 @@ public class StoredPage extends CachedPage
 		@param limitInput the limit input stream
 		@param objectInput the object input stream
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException  I/O exception in reading meta data.
 	*/
 
@@ -5858,7 +5858,7 @@ public class StoredPage extends CachedPage
      * field header followed the data of the column as defined by the data 
      * itself.  See this class's description for the specifics of the header.
      *
-     * @exception StandardException	    Standard Cloudscape error policy
+     * @exception StandardException	    Standard Derby error policy
      * @exception IOException			RESOLVE
      **/
 	public void logColumn(
@@ -5930,7 +5930,7 @@ public class StoredPage extends CachedPage
      * @param column    the object form of the column to log 
      * @param out       where to log to the column to.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      * @exception IOException	    I/O exception from writing to an array.
      *
      * @see BasePage#logColumn
@@ -6516,7 +6516,7 @@ public class StoredPage extends CachedPage
      * preceeded by a  compressed int that gives the length of the following 
      * data.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      * @exception IOException	    on error writing to log stream.
      *
      * @see BasePage#logRecord
@@ -6664,7 +6664,7 @@ public class StoredPage extends CachedPage
 		Find the field in the record and then write out the complete
 		field, i.e. header and data.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException			RESOLVE
 
 		@see BasePage#logField
@@ -6697,7 +6697,7 @@ public class StoredPage extends CachedPage
 
 	/**
 		Override insertAtSlot to provide long row support.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public RecordHandle insertAtSlot(
     int                   slot, 
@@ -6729,7 +6729,7 @@ public class StoredPage extends CachedPage
 
 	/**
 		Update field at specified slot
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public RecordHandle updateFieldAtSlot(
     int                 slot, 
@@ -6766,7 +6766,7 @@ public class StoredPage extends CachedPage
 
 	/**
 		Get the number of fields on the row at slot
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public int fetchNumFieldsAtSlot(int slot) throws StandardException
 	{
@@ -6820,7 +6820,7 @@ public class StoredPage extends CachedPage
      *
      * @return the number of rows processed.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      *
      **/
 	public int moveRecordForCompressAtSlot(
@@ -6973,7 +6973,7 @@ public class StoredPage extends CachedPage
 		which may or may not be cleaned up the the client of raw store when it 
         was deallocated.
 
-		@exception StandardException Cloudscape Standard Error Policy
+		@exception StandardException Derby Standard Error Policy
 	 */
 	public void initPage(LogInstant instant, byte status, int recordId, 
 						 boolean overflow, boolean reuse)
@@ -7000,7 +7000,7 @@ public class StoredPage extends CachedPage
 
 	/**
 		Set page status
-		@exception StandardException Cloudscape Standard Error Policy
+		@exception StandardException Derby Standard Error Policy
 	*/
 	public void setPageStatus(LogInstant instant, byte status)
 		 throws StandardException
@@ -7014,7 +7014,7 @@ public class StoredPage extends CachedPage
 
 	/**
 		Set the row reserved space.
-		@exception StandardException Cloudscape Standard Error Policy
+		@exception StandardException Derby Standard Error Policy
 	 */
 	public void setReservedSpace(LogInstant instant, int slot, int value)
 		 throws StandardException, IOException
@@ -7061,7 +7061,7 @@ public class StoredPage extends CachedPage
 	/**
 		Store a record at the given slot.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException			RESOLVE
 	*/
 	public void storeRecord(LogInstant instant, int slot, boolean insert, ObjectInput in)
@@ -7506,7 +7506,7 @@ public class StoredPage extends CachedPage
 		when this method returns, ie. it only moves data that
 		has an offset greater then this.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException			RESOLVE
 	*/
 	private void createSpaceForUpdate(int slot, int offset, int oldLength, int newLength)
@@ -7610,7 +7610,7 @@ public class StoredPage extends CachedPage
 	/**
 		storeField
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException			RESOLVE
 	*/
 	public void storeField(LogInstant instant, int slot, int fieldNumber, ObjectInput in)
@@ -7647,7 +7647,7 @@ public class StoredPage extends CachedPage
 		This method will reserve at least specified "spaceToReserve" bytes for the record
 		in the slot.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException			RESOLVE
 	*/
 	public void reserveSpaceForSlot(LogInstant instant, int slot, int spaceToReserve)
@@ -7745,7 +7745,7 @@ public class StoredPage extends CachedPage
 	/**
 		Set the deleted status
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException			RESOLVE
 		@see BasePage#setDeleteStatus
 	*/
@@ -7776,7 +7776,7 @@ public class StoredPage extends CachedPage
 	/**
 		purgeRecord from page.  Move following slots up by one.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception IOException			RESOLVE
 	*/
 	public void purgeRecord(LogInstant instant, int slot, int recordId)
@@ -8097,7 +8097,7 @@ public class StoredPage extends CachedPage
 
 	/**
 		Get the overflow page for a record that has already overflowed.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected StoredPage getOverflowPage(long pageNumber) throws StandardException
 	{
@@ -8116,7 +8116,7 @@ public class StoredPage extends CachedPage
 
 	/**
 		Get an empty overflow page.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected BasePage getNewOverflowPage() throws StandardException
 	{
@@ -8133,7 +8133,7 @@ public class StoredPage extends CachedPage
 
 	/**
 		Get the overflow slot for a record that has already overflowed.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected static int getOverflowSlot(BasePage overflowPage, StoredRecordHeader recordHeader)
 		throws StandardException
@@ -8153,7 +8153,7 @@ public class StoredPage extends CachedPage
 
 	/**
 		Get a overflow page that potentially can handle a new overflowed record.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public BasePage getOverflowPageForInsert(
     int                     currentSlot, 
@@ -8165,7 +8165,7 @@ public class StoredPage extends CachedPage
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public BasePage getOverflowPageForInsert(
     int                     currentSlot, 
@@ -8251,7 +8251,7 @@ slotScan:
 		@param slot Slot of the original record on its original page
 		@param row new version of the data
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void updateOverflowed(
     RawTransaction          t, 
@@ -8286,7 +8286,7 @@ slotScan:
 	/**
 		Update a record handle to point to an overflowed record portion.
 		Note that the record handle need not be the current page.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void updateOverflowDetails(RecordHandle handle, RecordHandle overflowHandle)
 		throws StandardException
@@ -8322,7 +8322,7 @@ slotScan:
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void updateFieldOverflowDetails(RecordHandle handle, RecordHandle overflowHandle)
 		throws StandardException
@@ -8346,7 +8346,7 @@ slotScan:
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public int appendOverflowFieldHeader(DynamicByteArrayOutputStream logBuffer, RecordHandle overflowHandle)
 		throws StandardException, IOException
@@ -8423,7 +8423,7 @@ slotScan:
 	/**
 		Perform an update.
 
-		@exception StandardException Standard cloudscape policy
+		@exception StandardException Standard Derby policy
 	*/
 	public void doUpdateAtSlot(
     RawTransaction          t, 
@@ -8880,7 +8880,7 @@ slotScan:
 
 	/**
 		@see BasePage#compactRecord
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	protected void compactRecord(RawTransaction t, int slot, int id) 
 		 throws StandardException 

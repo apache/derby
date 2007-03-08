@@ -48,7 +48,7 @@ public class D_Xact extends DiagnosticableGeneric
      * <p>
      *
 	 * @return A string with diagnostic information about the object.
-     * @exception StandardException Standard Cloudscape Error
+     * @exception StandardException Standard Derby Error
      *
      **/
     public String diag()

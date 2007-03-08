@@ -194,7 +194,7 @@ public abstract class ContainerBasicOperation implements Loggable
 		missing container in load tran should override this method to return
 		the recreated container
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	protected RawContainerHandle findContainerForRedoRecovery(
     RawTransaction tran) 
@@ -205,7 +205,7 @@ public abstract class ContainerBasicOperation implements Loggable
 	
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public boolean needsRedo(Transaction xact)
 		 throws StandardException

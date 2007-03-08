@@ -783,7 +783,7 @@ public class ColumnDefinitionNode extends TableElementNode
 			case StoredFormatIds.TIME_TYPE_ID:
 			case StoredFormatIds.TIMESTAMP_TYPE_ID:
 			// For these types, validity checks will be performed
-			// by Cloudscape at insertion time--see beetle 5585 regarding
+			// by Derby at insertion time--see beetle 5585 regarding
 			// the need to do such checks here instead of later.  For now,
 			// just assume we're okay.
 				return true;
@@ -791,9 +791,9 @@ public class ColumnDefinitionNode extends TableElementNode
 			default:
 			// All other default type checks either 
 			// (TINYINT, NATIONAL_CHAR, etc), or 2) require a DB2 cast-
-			// function (ex. blob(...), which Cloudscape doesn't
+			// function (ex. blob(...), which Derby doesn't
 			// support yet--see Beetle 5281), and so they are not
-			// valid for Cloudscape running in DB2 compatibility mode.
+			// valid for Derby running in DB2 compatibility mode.
 				return false;
 
 		}

@@ -129,7 +129,7 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 	/**
 	 * CurrentDatetimeOperatorNode is used in expressions.
 	 * The expression generated for it invokes a static method
-	 * on a special Cloudscape type to get the system time and
+	 * on a special Derby type to get the system time and
 	 * wrap it in the right java.sql type, and then wrap it
 	 * into the right shape for an arbitrary value, i.e. a column
 	 * holder. This is very similar to what constants do.

@@ -47,7 +47,7 @@ public class LoggableAllocActions implements AllocationActions {
 		@param undoStatus		on undo, set the allocation status of the page
 								this value 
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public void actionAllocatePage(RawTransaction t, BasePage allocPage, 
 								   long pageNumber, int doStatus, int undoStatus)
@@ -72,7 +72,7 @@ public class LoggableAllocActions implements AllocationActions {
 		@param pageNumber		the next allocation page's number 
 		@param pageOffset		the next allocation page's page offset
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public void actionChainAllocPage(RawTransaction t, BasePage allocPage, 
 								long pageNumber, long pageOffset)

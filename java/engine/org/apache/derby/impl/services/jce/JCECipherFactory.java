@@ -186,7 +186,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 		and encrypting the secretKey 
 		@return hexadecimal string of the encrypted secretKey
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	private String encryptKey(byte[] secretKey, byte[] bootPassword)
 		 throws StandardException
@@ -247,7 +247,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 	    retrieve the encryptedKey, generate the muck from the boot password and generate an appropriate IV using
 	    the muck,and using the key and IV decrypt the encryptedKey 
 	    @return decrypted key  
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	private byte[] decryptKey(String encryptedKey, int encodedKeyCharLength, byte[] bootPassword)
 		 throws StandardException
@@ -298,7 +298,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 		Generate a Key object using the input secretKey that can be used by
 		JCECipherProvider to encrypt or decrypt.
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	private SecretKey generateKey(byte[] secretKey) throws StandardException
 	{
@@ -488,7 +488,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
             // jce environment is not 1.2.1.  The ExemptionMechanism class
             // exists in jce1.2.1 and not in jce1.2, so try and load the
             // class and if you can't find it don't allow the encryption.
-            // This is a requirement from the government to give cloudscape
+            // This is a requirement from the government to give Cloudscape
             // export clearance for 3.6.  Note that the check is not needed
             // if no provider/algo is specified, in that case we default to
             // a DES weak encryption algorithm which also is allowed for

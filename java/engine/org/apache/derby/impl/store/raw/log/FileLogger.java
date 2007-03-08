@@ -197,7 +197,7 @@ public class FileLogger implements Logger {
 		@return the instant in the log that can be used to identify the log
 		record
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	*/
 	public synchronized LogInstant logAndDo(RawTransaction xact, Loggable operation) 
 		 throws StandardException 
@@ -446,7 +446,7 @@ public class FileLogger implements Logger {
 		@return the instant in the log that can be used to identify the log
 		record
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	 */
 	public LogInstant logAndUndo(RawTransaction xact, 
 								 Compensation compensation,
@@ -855,7 +855,7 @@ public class FileLogger implements Logger {
 		@param undoStopAt	the last log record that should be rolled back
 		@param undoStartAt	the first log record that should be rolled back
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 
 		@see Logger#undo
 	  */
@@ -1112,7 +1112,7 @@ public class FileLogger implements Logger {
 		after the last log record).  This is used to determine where the log
 		truly ends
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException error reading log file
 		@exception ClassNotFoundException log file corrupted
 
@@ -1599,7 +1599,7 @@ public class FileLogger implements Logger {
 		more log operation in the log scan
 
 		@exception IOException	Error reading the log file
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception ClassNotFoundException log corrupted
 	 */
 	protected Loggable readLogRecord(StreamLogScan scan, int size)

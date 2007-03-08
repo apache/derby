@@ -77,7 +77,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 
 	/**
 	  MT - not needed, no work is done
-	  @exception StandardException Cloudscape Standard Error Policy
+	  @exception StandardException Standard Derby Error Policy
 	*/
 	public void recover(RawStoreFactory rawStoreFactory,
 						DataFactory dataFactory,
@@ -241,7 +241,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 
 	/**
 	 * Backup restore - stop sending log record to the log stream
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 */
 	public void freezePersistentStore() throws StandardException
 	{
@@ -250,7 +250,7 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 
 	/**
 	 * Backup restore - start sending log record to the log stream
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 */
 	public void unfreezePersistentStore() throws StandardException
 	{

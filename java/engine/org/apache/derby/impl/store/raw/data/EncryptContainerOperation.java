@@ -152,7 +152,7 @@ public class EncryptContainerOperation implements Undoable
      * @param instant   log instant for this operation.
      * @param in        unused by this log operation.
      *
-     * @exception StandardException Standard Cloudscape error policy
+     * @exception StandardException Standard Derby error policy
      */
     public final void doMe(Transaction tran, LogInstant instant, 
                            LimitObjectInput in)
@@ -173,7 +173,7 @@ public class EncryptContainerOperation implements Undoable
        that existed before the start of the database encryption is put back.
         
        @param tran the transaction that is undoing this operation
-       @exception StandardException Standard Cloudscape error policy
+       @exception StandardException Standard Derby error policy
     */
     public void undoMe(Transaction tran) throws StandardException
     {
@@ -192,7 +192,7 @@ public class EncryptContainerOperation implements Undoable
      * encryption.
      * @param tran	the transaction doing the compensating
 	 * @param in	optional input; not used by this operation.
-     * @exception StandardException Standard Cloudscape error policy
+     * @exception StandardException Standard Derby error policy
      */
     public Compensation generateUndo(Transaction tran, LimitObjectInput in)
         throws StandardException

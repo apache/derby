@@ -34,7 +34,7 @@ import java.sql.SQLWarning;
 	messages can be localized.
 
 	REMIND: May want to investigate putting some of this in the protocol
-	side, for the errors that any Cloudscape JDBC driver might return.
+	side, for the errors that any Derby JDBC driver might return.
 
 	The ASSERT mechanism is a wrapper of the basic services,
 	to ensure that failed asserts at this level will behave

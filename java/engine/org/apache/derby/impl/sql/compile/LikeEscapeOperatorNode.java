@@ -64,12 +64,12 @@ import java.util.Vector;
 
 
 	constant or parameter LIKE pattern with prefix followed by optional wild card
-	e.g. Cloudscape%
+	e.g. Derby%
 
 	CHAR(n), VARCHAR(n) where n < 255
 
-		>=   prefix padded with '\u0000' to length n -- e.g. Cloudscape\u0000\u0000
-		<=   prefix appended with '\uffff' -- e.g. Cloudscape\uffff
+		>=   prefix padded with '\u0000' to length n -- e.g. Derby\u0000\u0000
+		<=   prefix appended with '\uffff' -- e.g. Derby\uffff
 		
 		[ can eliminate LIKE if constant. ]
 
@@ -102,7 +102,7 @@ import java.util.Vector;
 	Note that the Unicode value is '\uffff' is defined as not a character value
 	and can be used by a program for any purpose. We use it to set an upper
 	bound on a character range with a less than predicate. We only need a single
-	'\uffff' appended because the string 'Cloudscape\uffff\uffff' is not a valid
+	'\uffff' appended because the string 'Derby\uffff\uffff' is not a valid
 	String because '\uffff' is not a valid character.
 		
 

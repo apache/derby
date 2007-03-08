@@ -155,7 +155,7 @@ public final class PurgeOperation extends PhysicalPageOperation {
 		Apply the purge operation to the page.
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 
 		@see org.apache.derby.iapi.store.raw.Loggable#doMe
 	*/
@@ -183,7 +183,7 @@ public final class PurgeOperation extends PhysicalPageOperation {
 		Undo the purge operation on the page.
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 
 		@see PhysicalPageOperation#undoMe
 	*/
@@ -206,7 +206,7 @@ public final class PurgeOperation extends PhysicalPageOperation {
 	/**
 	 * restore the before image of the page
 	 *
-	 * @exception StandardException Standard Cloudscape Error Policy
+	 * @exception StandardException Standard Derby Error Policy
 	 * @exception IOException problem reading the complete log record from the
 	 * input stream
 	 */
@@ -232,7 +232,7 @@ public final class PurgeOperation extends PhysicalPageOperation {
 		Write out the purged record from the page.  Used for undo only.
 
 		@exception IOException Can be thrown by any of the methods of ObjectOutput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 	*/
 	private void writeOptionalDataToBuffer(RawTransaction t, boolean needDataLogged)
 		throws StandardException, IOException

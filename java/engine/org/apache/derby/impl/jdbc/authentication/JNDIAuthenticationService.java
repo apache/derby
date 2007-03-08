@@ -35,7 +35,7 @@ import java.util.Properties;
  * This is the JNDI Authentication Service base class.
  * <p>
  * It instantiates the JNDI authentication scheme defined by the user/
- * administrator. Cloudscape supports LDAP JNDI providers.
+ * administrator. Derby supports LDAP JNDI providers.
  * <p>
  * The user can configure its own JNDI provider by setting the
  * system or database property derby.authentication.provider .

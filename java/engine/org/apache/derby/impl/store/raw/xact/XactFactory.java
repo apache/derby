@@ -218,7 +218,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 	/**
 		Database creation finished
-		@exception StandardException standard cloudscape error policy
+		@exception StandardException standard Derby error policy
 	*/
 	public void createFinished() throws StandardException
 	{
@@ -532,7 +532,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 		Used only in recovery.
 
-		@exception StandardException Cloudscape Standard Error policy
+		@exception StandardException Derby Standard Error policy
 	*/
 	public void handlePreparedXacts(
     RawStoreFactory rsf)
@@ -696,7 +696,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		not be allowed to be active during a quiesce state.
 
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 	*/
 	protected void pushTransactionContext(ContextManager cm, String contextName, 
@@ -979,7 +979,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	 * Return the module providing XAresource interface to the transaction 
      * table. 
      *
-	 * @exception StandardException Standard cloudscape exception policy.
+	 * @exception StandardException Standard Derby exception policy.
 	 */
 	public /* XAResourceManager */ Object getXAResourceManager()
         throws StandardException

@@ -88,11 +88,11 @@ public final class ReflectClassesJava2 extends DatabaseClasses
 	    // when trying to find our own classes for aggregates.
 	    // 1) If using the URLClassLoader a ClassNotFoundException may be 
 	    //    thrown (Beetle 5002).
-	    // 2) If cloudscape is loaded with JNI, getContextClassLoader()
+	    // 2) If Derby is loaded with JNI, getContextClassLoader()
 	    //    may return null. (Beetle 5171)
 	    //
 	    // If this happens we need to user the class loader of this object
-	    // (the classLoader that loaded Cloudscape). 
+	    // (the classLoader that loaded Derby). 
 	    // So we call Class.forName to ensure that we find the class.
         try {
         	ClassLoader cl;

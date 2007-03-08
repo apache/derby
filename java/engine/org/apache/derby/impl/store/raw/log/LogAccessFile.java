@@ -704,7 +704,7 @@ public class LogAccessFile
             {
 
                 // Try to handle case where user application is throwing
-                // random interrupts at cloudscape threads, retry in the case
+                // random interrupts at Derby threads, retry in the case
                 // of IO exceptions 5 times.  After that hope that it is 
                 // a real disk problem - an IO error in a write to the log file
                 // is going to take down the whole system, so seems worthwhile

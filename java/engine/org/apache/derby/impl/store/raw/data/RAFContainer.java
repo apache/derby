@@ -118,7 +118,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 	/**
 		Set container's identity
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Cacheable setIdentity(Object key) throws StandardException {
 
@@ -135,7 +135,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public Cacheable createIdentity(Object key, Object createParameter) throws StandardException {
 
@@ -157,7 +157,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	/**
 		Remove the container
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void removeContainer(LogInstant instant, boolean leaveStub)
 		 throws StandardException
@@ -218,7 +218,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 		<BR> MT - thread safe
 		@exception IOException exception reading page
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void readPage(long pageNumber, byte[] pageData)
 		 throws IOException, StandardException
@@ -248,7 +248,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 		<BR> MT - thread safe
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException IO error accessing page
 	*/
 	protected void writePage(long pageNumber, byte[] pageData, boolean syncPage)
@@ -720,7 +720,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	/**
 		flush the cache to ensure all of my pages are written to disk
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void flushAll() throws StandardException {
 

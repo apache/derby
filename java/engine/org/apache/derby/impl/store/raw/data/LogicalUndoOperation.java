@@ -156,7 +156,7 @@ public class LogicalUndoOperation extends PageBasicOperation implements Compensa
 		@param in			optional data
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 
 	 */
 	public final void doMe(Transaction xact, LogInstant instant, LimitObjectInput in) 

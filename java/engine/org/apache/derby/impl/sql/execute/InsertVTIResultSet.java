@@ -72,7 +72,7 @@ class InsertVTIResultSet extends DMLVTIResultSet
 	}
 	
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected void openCore() throws StandardException
 	{

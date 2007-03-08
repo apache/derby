@@ -694,7 +694,7 @@ recompileOutOfDatePlan:
 
 		@param	action	The action causing the invalidation
 
-	 	@exception StandardException Standard Cloudscape error policy.
+	 	@exception StandardException Standard Derby error policy.
 	 */
 	public void makeInvalid(int action, LanguageConnectionContext lcc)
 		 throws StandardException

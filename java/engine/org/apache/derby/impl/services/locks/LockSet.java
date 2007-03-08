@@ -125,7 +125,7 @@ final class LockSet implements LockTable {
 	 *
 	 *	@return	Object that represents the lock.
 	 *
-	 *	@exception	StandardException Standard Cloudscape policy.
+	 *	@exception	StandardException Standard Derby policy.
 
 	*/
 	public Lock lockObject(CompatibilitySpace compatibilitySpace, Lockable ref,

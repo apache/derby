@@ -166,7 +166,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 	 * @return always true, higher levels have already checked the page number 
      *         is valid for an open.
      *
-     * @exception StandardException Standard Cloudscape policy.
+     * @exception StandardException Standard Derby policy.
      *
      * @see Cacheable#setIdentity
      **/

@@ -552,7 +552,7 @@ abstract class FileContainer
      * passed in identity, this object will no identity until after this 
      * method returns.
      *
-     * @exception StandardException Cloudscape Standard error policy
+     * @exception StandardException Derby Standard error policy
      **/
 	abstract void createContainer(ContainerKey newIdentity) 
         throws StandardException;
@@ -630,7 +630,7 @@ abstract class FileContainer
      *     derby.storage.pageReservedSpace
      *     derby.storage.minimumRecordSize
      *     derby.storage.reusableRecordId
-	 *     cloudsacpe.storage.initialPages
+     *     derby.storage.initialPages
      * <p>
      * To get the value of a particular property add it to the property list,
      * and on return the value of the property will be set to it's current 
@@ -706,7 +706,7 @@ abstract class FileContainer
 
 		<BR> MT - single thread required - Enforced by caller.
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 		@exception IOException error in reading the header from file
 	*/
 	protected void readHeader(DataInput fileData) 
@@ -787,7 +787,7 @@ abstract class FileContainer
 		The container Header array must be written by or of
 		the same format as put together by writeHeaderFromArray.
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 		@exception IOException error in reading the header from file
 	*/
 	private void readHeaderFromArray(byte[] a)
@@ -861,7 +861,7 @@ abstract class FileContainer
 	/**
 		Write the container header to a page array (the first allocation page)
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 		@exception IOException error in writing the header to file
 	*/
 	protected void writeHeader(byte[] pageData)
@@ -883,7 +883,7 @@ abstract class FileContainer
 
 		<BR> MT - single thread required - Enforced by caller
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 		@exception IOException error in writing the header to file
 	 */
 	protected void writeHeader(DataOutput fileData, boolean create, byte[] epage)
@@ -989,7 +989,7 @@ abstract class FileContainer
 		Log all information on the container creation necessary to recreate the
 		container during a load tran.
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	 */
 	protected ByteArray logCreateContainerInfo() 
 		 throws  StandardException
@@ -1211,7 +1211,7 @@ abstract class FileContainer
 		@param page the page to be deallocated.  It is latched upon entry and
 		will be unlatched by the caller of this function
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	*/
 	protected void deallocatePage(BaseContainerHandle handle, BasePage page)
 		 throws StandardException
@@ -1338,7 +1338,7 @@ abstract class FileContainer
 	  #param allocHandle - the container handle opened by the ntt, 
 						use this to latch the alloc page
 
-	  @exception StandardException Standard Cloudscape error policy 
+	  @exception StandardException Standard Derby error policy 
 	*/
 	protected void compressContainer(
     RawTransaction      ntt,
@@ -1507,7 +1507,7 @@ abstract class FileContainer
 	  #param allocHandle - the container handle opened by the ntt, 
 						use this to latch the alloc page
 
-	  @exception StandardException Standard Cloudscape error policy 
+	  @exception StandardException Standard Derby error policy 
 	*/
 	protected BasePage newPage(BaseContainerHandle userHandle,
 							   RawTransaction ntt,
@@ -2275,7 +2275,7 @@ abstract class FileContainer
 		@param reuse is true if we are reusing a page that has 
 				already been initialized once
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	*/
 	protected BasePage initPage(BaseContainerHandle allochandle, 
 								PageKey pkey,
@@ -2383,7 +2383,7 @@ abstract class FileContainer
 
 		<BR> MT - thread safe
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	private BasePage getUserPage(BaseContainerHandle handle, long pageNumber,
         boolean overflowOK, boolean wait)
@@ -2459,7 +2459,7 @@ abstract class FileContainer
 
 		<BR> MT - thread safe
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected BasePage getPage(BaseContainerHandle handle, long pageNumber,
         boolean wait)
@@ -2473,7 +2473,7 @@ abstract class FileContainer
 	/**
 		Get any old page - turn off all validation
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	*/
 	protected BasePage getAnyPage(BaseContainerHandle handle, long pageNumber) throws StandardException
 	{
@@ -2658,7 +2658,7 @@ abstract class FileContainer
 		Get an alloc page - only accessible to the raw store 
 		(container and recovery)
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	 */
 	protected BasePage getAllocPage(long pageNumber) throws StandardException 
 	{
@@ -2689,7 +2689,7 @@ abstract class FileContainer
 		Get only a valid, non-overflow page.  If page number is either invalid
 		or overflow, returns null
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	 */
 	protected BasePage getHeadPage(BaseContainerHandle handle, long pageNumber,
         boolean wait)
@@ -2702,7 +2702,7 @@ abstract class FileContainer
 	/**
 		Get the first valid page in the container
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	 */
 	protected BasePage getFirstHeadPage(BaseContainerHandle handle, boolean wait)
 		 throws StandardException
@@ -2712,7 +2712,7 @@ abstract class FileContainer
 
 	/**
 		Get the next page in the container.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected BasePage getNextHeadPage(BaseContainerHandle handle,
         long pageNumber, boolean wait)
@@ -2882,7 +2882,7 @@ abstract class FileContainer
 
 	/**
 		Get a potentially suitable page for insert and latch it.
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	protected BasePage getPageForInsert(BaseContainerHandle handle,
 										int flag)
@@ -3077,7 +3077,7 @@ abstract class FileContainer
 
 	/**
 		@see ContainerHandle#getEstimatedPageCount
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public long getEstimatedPageCount(BaseContainerHandle handle, int flag)
 		 throws StandardException 
@@ -3109,7 +3109,7 @@ abstract class FileContainer
 
 		<BR> MT - thread safe
 		@exception IOException error reading page
-		@exception StandardException standard cloudscape error message
+		@exception StandardException standard Derby error message
 	*/
 	protected abstract void readPage(long pageNumber, byte[] pageData)
 		 throws IOException, StandardException;
@@ -3120,7 +3120,7 @@ abstract class FileContainer
 
 		<BR> MT - thread safe
 		@exception IOException error writing page
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	protected abstract void writePage(long pageNumber, byte[] pageData, boolean syncPage) 
 		throws IOException, StandardException;
@@ -3133,7 +3133,7 @@ abstract class FileContainer
 
 		<BR>MT - MT safe.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	protected void decryptPage(byte[] pageData, int pageSize)
 		 throws StandardException
@@ -3165,7 +3165,7 @@ abstract class FileContainer
 		<BR> MT - not safe, call within synchronized block and only use the
 		returned byte array withing synchronized block. 
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	protected byte[] encryptPage(byte[] pageData, 
                                  int pageSize, 

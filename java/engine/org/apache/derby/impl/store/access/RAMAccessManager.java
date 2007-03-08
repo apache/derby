@@ -611,7 +611,7 @@ public abstract class RAMAccessManager
 
 	/**
 	Database creation finished.  Tell RawStore.
-	@exception StandardException cloudscape standard error policy
+	@exception StandardException standard Derby error policy
 	*/
 	public void createFinished() throws StandardException
 	{
@@ -985,7 +985,7 @@ public abstract class RAMAccessManager
         rawstore = (RawStoreFactory) Monitor.bootServiceModule(
             create, this, RawStoreFactory.MODULE, serviceProperties);
 
-		// Note: we also boot this module here since we may start cloudscape
+		// Note: we also boot this module here since we may start Derby
 		// system from store access layer, as some of the unit test case,
 		// not from JDBC layer.(See
 		// /protocol/Database/Storage/Access/Interface/T_AccessFactory.java)

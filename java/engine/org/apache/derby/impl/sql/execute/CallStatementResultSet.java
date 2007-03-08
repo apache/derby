@@ -60,7 +60,7 @@ class CallStatementResultSet extends NoRowsResultSetImpl
 	}
 
 	/**
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void open() throws StandardException
 	{

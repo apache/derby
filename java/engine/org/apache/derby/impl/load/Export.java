@@ -99,7 +99,7 @@ public class Export extends ExportAbstract{
 	/**
 	 * SYSCS_EXPORT_TABLE  system Procedure from ij or from a Java application
 	 * invokes  this method to perform export of  a table data to a file.
-	 * @param con	 The Cloudscape database connection URL for the database containing the table
+	 * @param con	 The Derby database connection URL for the database containing the table
 	 * @param schemaName	schema name of the table data is being exported from
 	 * @param tableName     Name of the Table from which  data has to be exported.
 	 * @param outputFileName Name of the file to  which data has to be exported.
@@ -130,7 +130,7 @@ public class Export extends ExportAbstract{
      * export of a table data to a file. Large object data is exported 
      * to a different file and the reference to it is stored in the
      *  main output file. 
-     * @param con	 The Cloudscape database connection URL for the 
+     * @param con	 The Derby database connection URL for the 
      *               database containing the table
      * @param schemaName  schema name of the table data is being exported from
      * @param tableName   Name of the Table from which data has to be exported.
@@ -164,7 +164,7 @@ public class Export extends ExportAbstract{
 	/**
 	 * SYSCS_EXPORT_QUERY  system Procedure from ij or from a Java application
 	 * invokes  this method to perform export of the data retrieved by select statement to a file.
-	 * @param con	 The Cloudscape database connection URL for the database containing the table
+	 * @param con	 The Derby database connection URL for the database containing the table
 	 * @param selectStatement    select query that is used to export the data
 	 * @param outputFileName Name of the file to  which data has to be exported.
 	 * @param columnDelimeter  Delimiter that seperates columns in the output file
@@ -191,7 +191,7 @@ public class Export extends ExportAbstract{
      * export of the data retrieved by select  statement to a file.
      * Large object data is exported to a different file  and the reference 
      * to it is stored in the main output file. 
-     * @param con	 The Cloudscape database connection URL for 
+     * @param con	 The Derby database connection URL for 
      *               the database containing the table
      * @param selectStatement    select query that is used to export the data
      * @param outputFileName Name of the file to  which data has to be exported.

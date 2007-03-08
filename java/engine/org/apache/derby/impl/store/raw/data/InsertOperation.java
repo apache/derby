@@ -164,7 +164,7 @@ public final class InsertOperation extends LogicalPageOperation
 	 */
 	/**
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 	  
 		@see org.apache.derby.iapi.store.raw.Loggable#doMe
 	*/
@@ -183,7 +183,7 @@ public final class InsertOperation extends LogicalPageOperation
 		All logical undo logic has already been taken care of by generateUndo.
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 
 		@see LogicalPageOperation#undoMe
 	*/
@@ -252,7 +252,7 @@ public final class InsertOperation extends LogicalPageOperation
 		Restore the row stored in the optional data of the log record.
 
 		@exception IOException error reading from log stream
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void restoreLoggedRow(Object[] row, LimitObjectInput in)
 		throws StandardException, IOException
@@ -286,7 +286,7 @@ public final class InsertOperation extends LogicalPageOperation
 	/**
 	 * restore the before image of the page
 	 *
-	 * @exception StandardException Standard Cloudscape Error Policy
+	 * @exception StandardException Standard Derby Error Policy
 	 * @exception IOException problem reading the complete log record from the
 	 * input stream
 	 */
@@ -336,7 +336,7 @@ public final class InsertOperation extends LogicalPageOperation
 		Writes out the row that is to be inserted as the optional data.
 
 		@exception IOException Can be thrown by any of the methods of ObjectOutput
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 	*/
 	private void writeOptionalDataToBuffer(
     RawTransaction          t, 

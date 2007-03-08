@@ -152,7 +152,7 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 	/** Returns true if this op should be redone during recovery redo,
 	    if so, get and latched the page.
 
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 	 */
 	public final boolean needsRedo(Transaction xact)
 		 throws StandardException
@@ -220,7 +220,7 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 		WARNING: If a log operation extends this class, and the operation has optional data,
 		it MUST overwrite this method to return a ByteArray that contains the optional data. 
 
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 	*/
 	public ByteArray getPreparedLog() throws StandardException
 	{
@@ -270,7 +270,7 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 		@return null if container is dropped and committed (possibly
 		stubbified), else return the latched page
 
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 	 */
 	public final BasePage findpage(Transaction xact) throws StandardException 
 	{
@@ -362,7 +362,7 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 		Subclass (e.g., init page) that wishes to do something about missing
 		pages in load tran should override this method to return the page
 
-		@exception StandardException Cloudscape Standard error policy
+		@exception StandardException Derby Standard error policy
 	 */
 	protected BasePage getPageForRedoRecovery(Transaction xact)
 		 throws StandardException
@@ -397,7 +397,7 @@ public abstract class PageBasicOperation implements Loggable, RePreparable
 		@param in			optional data for the rollback operation
 
 		@exception IOException Can be thrown by any of the methods of ObjectInput.
-		@exception StandardException Standard Cloudscape policy.		
+		@exception StandardException Standard Derby policy.		
 	*/
 	abstract public void restoreMe(Transaction xact, BasePage undoPage,
 								LogInstant CLRinstant, LimitObjectInput in) 

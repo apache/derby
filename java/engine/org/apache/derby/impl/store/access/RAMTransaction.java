@@ -864,7 +864,7 @@ public class RAMTransaction
 		Create a conglomerate and populate it with rows from rowSource.
 
 		@see TransactionController#createAndLoadConglomerate
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	*/
     public long createAndLoadConglomerate(
     String                  implementation,
@@ -893,7 +893,7 @@ public class RAMTransaction
 		recreate a conglomerate and populate it with rows from rowSource.
 
 		@see TransactionController#createAndLoadConglomerate
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	*/
     public long recreateAndLoadConglomerate(
     String                  implementation,
@@ -1232,7 +1232,7 @@ public class RAMTransaction
 
 	    @return true The number of rows loaded.
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public long loadConglomerate(
     long                    conglomId,
@@ -1255,7 +1255,7 @@ public class RAMTransaction
 		@param conglomId the conglomerate Id
 		@param rowSource where the rows to be loaded comes from 
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public void loadConglomerate(
     long                    conglomId,

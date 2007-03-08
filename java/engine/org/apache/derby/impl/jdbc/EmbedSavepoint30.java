@@ -110,7 +110,7 @@ final class EmbedSavepoint30 extends ConnectionChild
    		return savepointName.substring(2);
     }
 
-    //Cloudscape internally keeps name for both named and unnamed savepoints
+    // Derby internally keeps name for both named and unnamed savepoints
     String getInternalName() {
    		return savepointName;
     }
