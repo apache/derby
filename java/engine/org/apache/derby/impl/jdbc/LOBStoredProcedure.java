@@ -73,8 +73,8 @@ public class LOBStoredProcedure {
      * @param searchLiteral a String whose occurence inside the Clob needs to
      *                      be found starting from pos.
      *
-     * @param pos an integer that represents the position inside the Clob from
-     *            which the search needs to begin.
+     * @param fromPosition an integer that represents the position inside
+     *         the Clob from which the search needs to begin.
      *
      * @return an integer that represents the position inside the Clob of the
      *         first occurrence of the sub-string from the given starting
@@ -99,8 +99,8 @@ public class LOBStoredProcedure {
      * @param searchLocator a Locator representing a Clob whose occurence inside
      *                      the Clob needs to be found starting from pos.
      *
-     * @param pos an integer that represents the position inside the Clob from
-     *            which the search needs to begin.
+     * @param fromPosition an integer that represents the position inside
+     *         the Clob from which the search needs to begin.
      *
      * @return an integer that represents the position inside the Clob of the
      *         first occurrence of the sub-string from the given starting
@@ -129,8 +129,6 @@ public class LOBStoredProcedure {
     /**
      * returns the String starting from pos and of len length
      * from the LOB corresponding to LOCATOR.
-     * @param LOCATOR_TYPE an integer that defines if the LOCATOR is
-     *                     a CLOB or a BLOB locator.
      * @param LOCATOR an integer that represents the LOCATOR used
      *                to retrieve an instance of the LOB.
      * @param pos a long that represents the position from which
@@ -314,7 +312,6 @@ public class LOBStoredProcedure {
      * @param len the number of bytes that need to be used in replacement.
      * @param replaceBytes the byte array that contains the bytes that needs to
      *                     be used for replacement.
-     * @return the number of bytes that have been replaced.
      * @throws a SQLException.
      *
      */

@@ -687,8 +687,6 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      * @param fetchSize
      *            The fetchSize value to use
      * 
-     * @return Whether or not we were successful.
-     * 
      * @exception SQLException
      *                Thrown if some unexpected error happens
      */

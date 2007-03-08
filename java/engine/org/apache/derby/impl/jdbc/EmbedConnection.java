@@ -2105,7 +2105,7 @@ public abstract class EmbedConnection implements EngineConnection
 	* Add the locator and the corresponding LOB object into the
 	* HashMap
 	*
-	* @param lobHashMap The object which contains the LOB object that
+	* @param LOBReference The object which contains the LOB object that
 	*                     that is added to the HashMap.
 	* @return an integer that represents the locator that has been
 	*         allocated to this LOB.

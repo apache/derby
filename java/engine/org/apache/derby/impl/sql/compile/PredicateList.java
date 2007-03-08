@@ -2834,7 +2834,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	 * IN-list probe predicate in this list.
 	 *
 	 * @param acb The ActivationClassBuilder for the class we're building
-	 * @param exprFun The MethodBuilder for the method we're building
+	 * @param mb The MethodBuilder for the method we're building
 	 */
 	protected void generateInListValues(ExpressionClassBuilder acb,
 		MethodBuilder mb) throws StandardException
