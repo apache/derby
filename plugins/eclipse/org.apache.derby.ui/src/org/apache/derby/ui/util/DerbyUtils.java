@@ -21,6 +21,7 @@
 
 package org.apache.derby.ui.util;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +32,11 @@ import org.apache.derby.ui.properties.DerbyProperties;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Platform; 
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -55,6 +57,7 @@ import org.osgi.framework.Constants;
 
 
 public class DerbyUtils {
+	private final static String PLUGIN_ROOT = "ECLIPSE_HOME/plugins/";
 	
 	private static ManifestElement[] getElements(String bundleName) throws BundleException {
 		String requires = (String)Platform.getBundle(bundleName).getHeaders().get(Constants.BUNDLE_CLASSPATH);
@@ -70,30 +73,28 @@ public class DerbyUtils {
 			elements_ui=getElements(CommonNames.UI_PATH);
 			
 			Bundle bundle=Platform.getBundle(CommonNames.CORE_PATH);
-			URL pluginURL = bundle.getEntry("/");
-			URL jarURL=null;
-			URL localURL=null;
+			URL pluginURL = FileLocator.resolve(FileLocator.find(bundle, new Path("/"), null));
+			String pluginName = new File(pluginURL.getPath()).getName();
 
 			newRawCP=new IClasspathEntry[rawCP.length + (elements_core.length) + (elements_ui.length-1)];
 			System.arraycopy(rawCP, 0, newRawCP, 0, rawCP.length);
 			
 			//Add the CORE jars
 			int oldLength=rawCP.length;
-			 for(int i=0;i<elements_core.length;i++){
-				jarURL= new URL(pluginURL,elements_core[i].getValue());
-				localURL=Platform.asLocalURL(jarURL);
-				newRawCP[oldLength+i]=JavaCore.newLibraryEntry(new Path(localURL.getPath()), null, null);
+			for(int i=0;i<elements_core.length;i++){
+				// add JAR as var type entry relative to the eclipse plugins dir, so the entry is portable 
+				newRawCP[oldLength+i]=JavaCore.newVariableEntry(new Path(PLUGIN_ROOT+pluginName+"/"+elements_core[i].getValue()), null, null);				
 				
 			}
 			 // Add the UI jars
 			bundle=Platform.getBundle(CommonNames.UI_PATH);
-			pluginURL = bundle.getEntry("/");
+			pluginURL = FileLocator.resolve(FileLocator.find(bundle, new Path("/"), null));
+			pluginName = new File(pluginURL.getPath()).getName();
 			oldLength=oldLength+elements_core.length -1; 
 			for(int i=0;i<elements_ui.length;i++){
 				if(!(elements_ui[i].getValue().toLowerCase().equals("ui.jar"))){
-					jarURL= new URL(pluginURL,elements_ui[i].getValue());
-					localURL=Platform.asLocalURL(jarURL);
-					newRawCP[oldLength+i]=JavaCore.newLibraryEntry(new Path(localURL.getPath()), null, null);
+					// add JAR as var type entry relative to the eclipse plugins dir, so the entry is portable
+					newRawCP[oldLength+i]=JavaCore.newVariableEntry(new Path(PLUGIN_ROOT+pluginName+"/"+elements_ui[i].getValue()), null, null);
 				}
 			}					
 			return newRawCP;
