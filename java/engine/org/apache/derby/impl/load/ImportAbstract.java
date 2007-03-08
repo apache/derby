@@ -27,6 +27,10 @@ import java.sql.ResultSetMetaData;
 import org.apache.derby.vti.VTITemplate;
 import java.util.ArrayList;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.error.StandardException;
+
 
 /**
  * 
@@ -196,8 +200,18 @@ abstract class ImportAbstract extends VTITemplate {
         // if hex data is null, then column value is SQL NULL
         wasNull = (hexData == null);
         byte[] data = null;
-        if (hexData != null) 
+        if (hexData != null) {
             data = StringUtil.fromHexString(hexData, 0, hexData.length());
+            // fromHexString() returns null if the hex string is invalid one.
+            // It is invalid if the data string length is not multiple of 2 
+            // or the data string contains non-hex characters. 
+            if (data == null) {
+                throw PublicAPI.wrapStandardException(
+                      StandardException.newException(
+                      SQLState.IMPORTFILE_HAS_INVALID_HEXSTRING, 
+                      hexData));
+            }
+        }
         return data;
 	}
 

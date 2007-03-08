@@ -3846,6 +3846,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>tableName</arg>
             </msg>
 
+            <msg>
+                <name>XIE0N.S</name>
+                <text>An invalid hexadecimal string '{0}' detected in the import file.</text>
+                <arg>hexString</arg>
+            </msg>
+
         </family>
 
 

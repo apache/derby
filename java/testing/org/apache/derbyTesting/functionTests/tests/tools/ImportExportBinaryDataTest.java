@@ -77,6 +77,11 @@ public class ImportExportBinaryDataTest extends BaseJDBCTestCase {
                               "C_BD CHAR(4) FOR BIT DATA," + 
                               "C_VBD VARCHAR(10) FOR BIT DATA, " +
                               "C_LVBD LONG VARCHAR FOR BIT DATA)");
+                    // Create a table that holds some invalid hex strings. 
+                    s.execute("CREATE TABLE hex_tab(id int," +
+                              "C1 varchar(20)," + 
+                              "C2 varchar(20)," +
+                              "C3 varchar(20))");
                 }
             };
     }
@@ -212,6 +217,70 @@ public class ImportExportBinaryDataTest extends BaseJDBCTestCase {
         }
     }
 
+
+    /* 
+     * Tests import procedures with invalid hex strings in 
+     * the import file. 
+     */
+    public void testImportWitgInvalidHexStrings() 
+        throws SQLException   
+    {
+        Statement s = createStatement();
+        // Insert row with correctly formed hex strings.  
+        s.executeUpdate("insert into hex_tab " + 
+                        "values(1, 'A121', '3122A1F20B', 'B1C201DA')");
+
+        // Insert row with an invalid hex string, because 
+        // it's length is not a multiple of 2 (B1C201A) , 
+        s.executeUpdate("insert into hex_tab " + 
+                        "values(2, 'A121', '3122A1F20B', 'B1C201A')");
+
+        // Insert row with an invalid hex string that contains 
+        // a non-hex character (3122A1F20Z). 
+        s.executeUpdate("insert into hex_tab " + 
+                        "values(3, '', '3122A1F20Z', 'B1C201DA')");
+
+        // Insert row with an invalid hex string that contains 
+        // a delimiter character (A1\"21). 
+        s.executeUpdate("insert into hex_tab " + 
+                        "values(3, 'A1\"21', '3122A1F20Z', 'B1C201DA')");
+        s.close();
+
+        // export the invalid hex strings from the table to a file. 
+        doExportTable("APP", "HEX_TAB", fileName, null, null , null);
+
+
+        // attempt to import the invalid hex string data into a table 
+        // with binary columns. It should fail.
+ 
+        try {
+            // import should fail because of invalied hex string length
+            doImportTable("APP", "BIN_TAB_IMP", fileName, null, null, null, 0);
+            fail("import did not fail on data with invalid hex string");
+        } catch (SQLException e) {
+             assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0N", e);
+        }
+
+        try {
+            // import should fail because hex string contains invalid 
+            // hex chatacters.
+            doImportData(null, "BIN_TAB_IMP", "ID, C_VBD", "1,3",
+                         fileName, null, null, null, 1);
+            fail("import did not fail on data with invalid hex strings");
+        } catch (SQLException e) {
+            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0N", e);
+        }
+        
+        try {
+            // import should fail because hex string contains invalid 
+            // hex chatacters.
+            doImportData(null, "BIN_TAB_IMP", "ID, C_VBD", "1,2",
+                         fileName, null, null, null, 1);
+            fail("import did not fail on data with invalid hex strings");
+        } catch (SQLException e) {
+            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0N", e);
+        }
+    }
 
 
     /* 

@@ -1700,5 +1700,6 @@ public interface SQLState {
 	String DELIMITERS_ARE_NOT_MUTUALLY_EXCLUSIVE                   ="XIE0J.S";
 	String PERIOD_AS_CHAR_DELIMITER_NOT_ALLOWED                    ="XIE0K.S";
 	String TABLE_NOT_FOUND                                         ="XIE0M.S";
+	String IMPORTFILE_HAS_INVALID_HEXSTRING                        ="XIE0N.S";
 }
 
