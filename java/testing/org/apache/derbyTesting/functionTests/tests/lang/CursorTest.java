@@ -153,16 +153,60 @@ public class CursorTest extends BaseJDBCTestCase {
         
         s.setCursorName("myselect3");
         rs = s.executeQuery("select * from t for update of i");
+        assertEquals("myselect3", rs.getCursorName());
         rs.close();
         s.close();
     }
+    
+    /**
+     * Test that Statement.setCursorName affects only the next
+     * execution and not any open ResultSet.
+     */
+    public void derby2417testSetCursorNextExecute() throws SQLException
+    {   
+        // Assert setCursorName only affects the next execution.
+        // For statements
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery("select * from t for update");
+        s.setCursorName("AFTER_EXECUTE");
+        assertFalse("AFTER_EXECUTE".equals(rs.getCursorName()));
+        rs.close();
+        rs = s.executeQuery("select * from t");
+        assertEquals("AFTER_EXECUTE", rs.getCursorName());
+        s.setCursorName("CHANGE_AGAIN");
+        assertEquals("AFTER_EXECUTE", rs.getCursorName());
+        rs.close();
+        rs = s.executeQuery("select * from t");
+        assertEquals("CHANGE_AGAIN", rs.getCursorName());
+        s.close();
+        
+        // And prepared statements
+        PreparedStatement ps = prepareStatement("select * from t for update");
+        rs = ps.executeQuery();
+        ps.setCursorName("AFTER_EXECUTE");
+        assertFalse("AFTER_EXECUTE".equals(rs.getCursorName()));
+        rs.close();
+        rs = ps.executeQuery();
+        assertEquals("AFTER_EXECUTE", rs.getCursorName());
+        ps.setCursorName("CHANGE_AGAIN");
+        assertEquals("AFTER_EXECUTE", rs.getCursorName());
+        rs.close();
+        rs = ps.executeQuery();
+        assertEquals("CHANGE_AGAIN", rs.getCursorName());
+        ps.close();        
+   
+    }
 
     public static Test suite() {
-        //TestSuite suite = new TestSuite("CursorTestJunit");
-        //suite.addTestSuite(CursorTest.class);
-        //return suite;
-         return TestConfiguration.defaultSuite(CursorTest.class);
-
+        TestSuite suite = new TestSuite("CursorTest");
+        
+        suite.addTest(TestConfiguration.defaultSuite(CursorTest.class));
+        
+        // DERBY-2417 client throws exception for setCursorName
+        // on Statement with active ResultSet.
+        suite.addTest(new CursorTest("derby2417testSetCursorNextExecute"));
+        
+        return suite;
     }
 
     protected void setUp() throws SQLException {
