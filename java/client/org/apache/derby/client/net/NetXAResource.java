@@ -246,6 +246,10 @@ public class NetXAResource implements XAResource {
             conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
         }
         if (rc != XAResource.XA_OK) {
+            // The corresponding XA connection association state
+            // is changed by setXaStateForXAException inside the call
+            // to throwXAException according the error code of the XAException
+            // to be thrown.
             throwXAException(rc, false);
         }else {
         	conn_.setXAState(Connection.XA_T0_NOT_ASSOCIATED);
