@@ -38,7 +38,7 @@ public interface ClassFactory {
 	/**
 		Add a generated class to the class manager's class repository.
 
-		@exception 	StandardException	Standard Cloudscape error policy
+		@exception 	StandardException	Standard Derby error policy
 
 	*/
 	public GeneratedClass loadGeneratedClass(String fullyQualifiedName, ByteArray classDump)
@@ -70,7 +70,7 @@ public interface ClassFactory {
 	/**
 		Was the passed in class loaded by a ClassManager.
 
-		@return true if the class was loaded by a Cloudscape class manager,
+		@return true if the class was loaded by a Derby class manager,
 		false it is was loaded by the system class loader, or another class loader.
 	*/
 	public boolean isApplicationClass(Class theClass);

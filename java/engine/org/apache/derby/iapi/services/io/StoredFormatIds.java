@@ -48,7 +48,7 @@ package org.apache.derby.iapi.services.io;
 
   <P>When you add a format id to this file, please include the list
   of interfaces an implementaion must support when it supports
-  the format id. When Cloudscape code reads a stored form it returns an 
+  the format id. When Derby code reads a stored form it returns an 
   object of a Class which supports the stored form. A reader may
   cast this object to any interface listed in this file. It is an error for
   the reader to cast the object to a class or interface not listed in this
@@ -58,7 +58,7 @@ package org.apache.derby.iapi.services.io;
   states the name of the class. The first implementation of a format defines
   the stored form.
 
-  <P>This interface defines all the format ids for Cloudscape software.
+  <P>This interface defines all the format ids for Derby.
   If you define a format id please be sure to declare it in this
   file. If you remove support for a one please document that the
   format id is deprecated. Never remove or re-use a format id.

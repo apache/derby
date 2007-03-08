@@ -27,12 +27,8 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 /**
   <P>
   This  class provides static methods for controlling the
-  optimizer tracing in a Cloudscape database.
+  optimizer tracing in a Derby database.
   
-  <P>
-  <i>
-  Cloudscape reserves the right to change, rename, or remove this interface
-  at any time. </i>
   */
 public class OptimizerTrace
 {

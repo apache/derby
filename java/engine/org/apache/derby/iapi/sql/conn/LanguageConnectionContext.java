@@ -237,7 +237,7 @@ public interface LanguageConnectionContext extends Context {
 		 throws StandardException;
 
 	/**
-		Do a commit, as internally needed by Cloudscape.  E.g.
+		Do a commit, as internally needed by Derby.  E.g.
 	 	a commit for sync, or a commit for autocommit.  Skips
 		checks that a user isn't doing something bad like issuing
 		a commit in a nested xact.
@@ -279,7 +279,7 @@ public interface LanguageConnectionContext extends Context {
 
 
 	/**
-		Do a rollback, as internally needed by Cloudscape.  E.g.
+		Do a rollback, as internally needed by Derby.  E.g.
 	 	a rollback for sync, or a rollback for an internal error.  Skips
 		checks that a user isn't doing something bad like issuing
 		a rollback in a nested xact.

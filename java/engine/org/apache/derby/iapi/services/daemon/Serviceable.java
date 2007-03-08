@@ -72,7 +72,7 @@ public interface Serviceable {
 		serviceASAP, although no harm is done if this still maintains that this
 		should be serviced ASAP ...
 
-	    @exception StandardException  Standard cloudscape exception policy
+	    @exception StandardException  Standard Derby exception policy
 
 		<P>MT - depends on the work.  Be wary of multiple DaemonService thread
 		calling at the same time if you subscribe or enqueue multiple times.

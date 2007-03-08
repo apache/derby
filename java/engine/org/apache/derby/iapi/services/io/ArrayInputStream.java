@@ -365,7 +365,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
     }
 
     /**
-     * read in a cloudscape UTF formated string into a char[].
+     * read in a Derby UTF formated string into a char[].
      * <p>
      * This routine inline's the code to read a UTF format string from a
      * byte[] array (pageData), into a char[] array.  The string will
@@ -374,7 +374,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      * a new char[] will be alocated and returned to the caller by putting
      * it into rawData_array[0].
      * <p>
-     * To see detailed description of the cloudscape UTF format see
+     * To see detailed description of the Derby UTF format see
      * the writeExternal() routine of SQLChar.
      * <p>
      * The routine returns the number of char's read into the returned
@@ -395,7 +395,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public final int readCloudscapeUTF(char[][] rawData_array) 
+    public final int readDerbyUTF(char[][] rawData_array) 
         throws IOException
 	{
         // copy globals locally, to give compiler chance to optimize.

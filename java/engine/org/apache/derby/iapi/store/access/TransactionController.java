@@ -407,7 +407,7 @@ public interface TransactionController
 
 	All temporary conglomerate is removed by store when the
 	conglomerate controller is destroyed, or if it is dropped by an explicit
-	dropConglomerate.  If cloudscape reboots, all temporary
+	dropConglomerate.  If Derby reboots, all temporary
 	conglomerates are removed.
 
 	@exception  StandardException  if the conglomerate could
@@ -1505,7 +1505,7 @@ public interface TransactionController
 
     @see org.apache.derby.iapi.store.raw.Loggable
     @see org.apache.derby.iapi.store.raw.Transaction#logAndDo
-    @exception StandardException  Standard cloudscape exception policy
+    @exception StandardException  Standard Derby exception policy
 	**/
 	public void logAndDo(Loggable operation) throws StandardException;
 
@@ -1874,7 +1874,7 @@ public interface TransactionController
                     A JDBC Savepoint object value for kindOfSavepoint would mean it is JDBC savepoint
     @return returns savepoint position in the stack.
 
-	@exception StandardException  Standard cloudscape exception policy.  A 
+	@exception StandardException  Standard Derby exception policy.  A 
                                   statement level exception is thrown if
                                   no savepoint exists with the given name.
 	**/
@@ -1907,7 +1907,7 @@ public interface TransactionController
 	  A JDBC Savepoint object value for kindOfSavepoint would mean it is JDBC savepoint
     @return returns savepoint position in the stack.
 
-	@exception StandardException  Standard cloudscape exception policy.  A 
+	@exception StandardException  Standard Derby exception policy.  A 
                                   statement level exception is thrown if
                                   no savepoint exists with the given name.
 	**/
@@ -1931,7 +1931,7 @@ public interface TransactionController
 	  A JDBC Savepoint object value for kindOfSavepoint would mean it is JDBC savepoint
 	@return returns savepoint position in the stack.
 
-	@exception StandardException  Standard cloudscape exception policy.  A 
+	@exception StandardException  Standard Derby exception policy.  A 
                                   statement level exception is thrown if
                                   no savepoint exists with the given name.
 	**/

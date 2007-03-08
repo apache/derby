@@ -107,7 +107,7 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 
 	/**
 	 * Get a Resource Adapter - only used by XA system.  There is one and only
-	 * one resource adapter per cloudscape database.
+	 * one resource adapter per Derby database.
 	 *
 	 * @return the resource Adapter for the database, null if no resource
 	 * adapter is available for this database. Returned as an Object

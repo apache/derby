@@ -128,7 +128,7 @@ public interface LogFactory extends Corruptable {
 
 		@return the LogScan.
 
-		@exception StandardException StandardCloudscape error policy
+		@exception StandardException Standard Derby error policy
 	    NOTE: This will be removed after the LogSniffer Rewrite.
 	*/
 	LogScan openForwardsFlushedScan(LogInstant startAt)
@@ -144,7 +144,7 @@ public interface LogFactory extends Corruptable {
 		if startAt is a LogInstant which is not in the log.
 		@param groupsIWant - log record groups the scanner wants.
 		@return the LogScan.
-		@exception StandardException StandardCloudscape error policy
+		@exception StandardException Standard Derby error policy
 		*/
 	ScanHandle openFlushedScan(DatabaseInstant startAt, int groupsIWant)
 		 throws StandardException;
@@ -162,7 +162,7 @@ public interface LogFactory extends Corruptable {
  		if stopAt is a LogInstant which is not in the log.
 		@return the LogScan.
 
-		@exception StandardException StandardCloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	LogScan openForwardsScan(LogInstant startAt,LogInstant stopAt)
 		 throws StandardException;
@@ -177,13 +177,13 @@ public interface LogFactory extends Corruptable {
 
 	/**
 		Stop making any change to the persistent store
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 	 */
 	public void freezePersistentStore() throws StandardException;
 		 
 	/**
 		Can start making change to the persistent store again
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 	 */
 	public void unfreezePersistentStore() throws StandardException;
 
@@ -195,14 +195,14 @@ public interface LogFactory extends Corruptable {
 
 	/**
 		Get JBMS properties relavent to the log factory
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public void getLogFactoryProperties(PersistentSet set) 
 		 throws StandardException;
 
 	 /**
 		Return the location of the log directory.
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	  */
 	public StorageFile getLogDirectory() throws StandardException;
 

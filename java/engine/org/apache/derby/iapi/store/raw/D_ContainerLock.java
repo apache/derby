@@ -45,7 +45,7 @@ public class D_ContainerLock extends DiagnosticableGeneric
      *
 	 * @return A string of the form: ContainerKey(segment_id, container_id)
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      **/
     public String diag()
         throws StandardException

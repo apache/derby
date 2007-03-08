@@ -42,7 +42,7 @@ public interface GeneratedClass {
 		constructor of the represneted class.
 		(Similar to java.lang.Class.newInstance).
 
-		@exception 	StandardException	Standard Cloudscape error policy
+		@exception 	StandardException	Standard Derby error policy
 
 	*/
 	public Object newInstance(Context context)
@@ -52,7 +52,7 @@ public interface GeneratedClass {
 		Obtain a handle to the method with the given name
 		that takes no arguments.
 
-		@exception 	StandardException	Standard Cloudscape error policy
+		@exception 	StandardException	Standard Derby error policy
 	*/
 	public GeneratedMethod getMethod(String simpleName)
 		throws StandardException;

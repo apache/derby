@@ -633,7 +633,7 @@ public class SQLChar
     {
         arg_passer[0]        = rawData;
 
-        rawLength = in.readCloudscapeUTF(arg_passer);
+        rawLength = in.readDerbyUTF(arg_passer);
 
         rawData = arg_passer[0];
 

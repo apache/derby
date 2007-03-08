@@ -189,7 +189,7 @@ public interface ContainerHandle
 
 		@see Page#unlatch
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception StandardException If a page could not be allocated.
 	*/
 	public Page addPage() throws StandardException;
@@ -202,7 +202,7 @@ public interface ContainerHandle
         will usually mean releasing any free pages located at the end of the
         file using the java truncate() interface.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public void compressContainer() throws StandardException;
 
@@ -228,7 +228,7 @@ public interface ContainerHandle
 
 		@see Page#unlatch
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception StandardException If a page could not be allocated.
 
 	*/
@@ -269,7 +269,7 @@ public interface ContainerHandle
 		@see LockingPolicy
 		@see RecordHandle
 
-		@exception StandardException Standard Cloudscape error policy 
+		@exception StandardException Standard Derby error policy 
 	*/
 	public void removePage(Page page) throws StandardException;
 
@@ -288,7 +288,7 @@ public interface ContainerHandle
         valid (i.e, it has been deallocated or freed or never initialized)
 		Note that an overflow page will be returned since it is a valid page.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public Page getPage(long pageNumber)
 		throws StandardException;
@@ -300,7 +300,7 @@ public interface ContainerHandle
 		@return the required Page or null if the page does not exist or the page
 		is already latched.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 
 	*/
 	public Page getPageNoWait(long pageNumber) throws StandardException;
@@ -324,7 +324,7 @@ public interface ContainerHandle
         valid (i.e, it has been deallocated, freed, never initialized, or is
         an allocation page or overflow page)
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public Page getUserPageNoWait(long pageNumber) throws StandardException;
 	/**
@@ -346,7 +346,7 @@ public interface ContainerHandle
         valid (i.e, it has been deallocated, freed, never initialized, or is
         an allocation page or overflow page)
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public Page getUserPageWait(long pageNumber) throws StandardException;
 
@@ -367,7 +367,7 @@ public interface ContainerHandle
 		the pages.
 
 		@return latched page or null if there is no page in the container
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 
 		@see ContainerHandle#getPage
 	*/
@@ -410,7 +410,7 @@ public interface ContainerHandle
 		then the behavior of this routine is undefined.
 
 		@return latched page or null if there is no next page in the container
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 
 		@see ContainerHandle#getPage
 	*/
@@ -430,7 +430,7 @@ public interface ContainerHandle
 
 		@param flag a GET_PAGE_* flag.
 
-		@exception StandardException Standard Cloudscape error policy 
+		@exception StandardException Standard Derby error policy 
 	*/
 	public Page getPageForInsert(int flag) 
 		 throws StandardException;
@@ -513,7 +513,7 @@ public interface ContainerHandle
 		overflow rows.  This number is a rough estimate and may be grossly off.
 
 		@param flag different flavors of row count (reserved for future use)
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	 */
 	public long getEstimatedRowCount(int flag) throws StandardException;
 
@@ -528,7 +528,7 @@ public interface ContainerHandle
 		@param count the estimated number of rows in the container.
 		@param flag different flavors of row count (reserved for future use)
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	 */
 	public void setEstimatedRowCount(long count, int flag) throws StandardException;
 
@@ -539,7 +539,7 @@ public interface ContainerHandle
 
 		@param flag different flavors of page count (reserved for future use)
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	 */
 	public long getEstimatedPageCount(int flag) throws StandardException;
 
@@ -548,7 +548,7 @@ public interface ContainerHandle
 		Flush all dirty pages of the container to disk.  Used mainly for
 		UNLOGGED or CREATE_UNLOGGED operation.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	public void flushContainer() throws StandardException;
 
@@ -566,7 +566,7 @@ public interface ContainerHandle
 		Return a record handle that is initialized to the given segment id,
         container id, page number and record id.
 
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 
 		@param pageNumber   the page number of the RecordHandle.
 		@param recordId     the record id of the RecordHandle.
@@ -582,13 +582,13 @@ public interface ContainerHandle
 		or compact it.
 
 		@param record	The record handle, the record must have been locked execlusively already.
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 	*/
 	public void compactRecord(RecordHandle record) throws StandardException;
 
 	/**
 		Return true if this containerHandle refers to a temporary container.
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 	 */
 	public boolean isTemporaryContainer() throws StandardException;
 
@@ -599,7 +599,7 @@ public interface ContainerHandle
 
 	/**
 	   Backup the container to the specified path.
-	   @exception StandardException	Standard Cloudscape error policy
+	   @exception StandardException	Standard Derby error policy
 	*/
 	public void backupContainer(String backupContainerPath) throws StandardException;
 }

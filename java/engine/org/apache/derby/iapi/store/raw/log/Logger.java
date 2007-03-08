@@ -54,7 +54,7 @@ public interface Logger {
 		@param operation	the loggable operation that describes the change
 		@return LogInstant that is the LogInstant of the loggable operation 
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	   */ 
 	public LogInstant logAndDo(RawTransaction xact, Loggable operation)
 		 throws StandardException; 
@@ -79,7 +79,7 @@ public interface Logger {
 
 		@return LogInstant that is the LogInstant of the compensation operation
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	   */ 
 	public LogInstant logAndUndo(RawTransaction xact,
 								 Compensation operation, LogInstant undoInstant,
@@ -145,7 +145,7 @@ public interface Logger {
 				to be rolled back.  
 				If null, then rollback starts from the end of the log.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	  */
 	public void undo(RawTransaction t,
 					 TransactionId undoId,

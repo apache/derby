@@ -29,7 +29,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- *	Type descriptor which wraps all 3 kinds of types supported in Cloudscape's
+ *	Type descriptor which wraps all 3 kinds of types supported in Derby's
  *	JSQL language: SQL types, Java primitives, Java classes.
  *
  *	This interface was originally added to support the serializing of WorkUnit

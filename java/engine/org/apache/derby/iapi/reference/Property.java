@@ -154,25 +154,25 @@ public interface Property {
 	/**
         derby.database.forceDatabaseLock
 		<BR>
-        Cloudscape attempts to prevent two instances of Cloudscape from booting
+        Derby attempts to prevent two instances of Derby from booting
         the same database with the use of a file called db.lck inside the 
         database directory.
 
-        On some platforms, Cloudscape can successfully prevent a second 
-        instance of Cloudscape from booting the database, and thus prevents 
+        On some platforms, Derby can successfully prevent a second 
+        instance of Derby from booting the database, and thus prevents 
         corruption. If this is the case, you will see an SQLException like the
         following:
 
         ERROR XJ040: Failed to start database 'toursDB', see the next exception
         for details.
-        ERROR XSDB6: Another instance of Cloudscape may have already booted the
+        ERROR XSDB6: Another instance of Derby may have already booted the
         database C:\databases\toursDB.
 
         The error is also written to the information log.
 
-        On other platforms, Cloudscape issues a warning message if an instance
-        of Cloudscape attempts to boot a database that may already have a
-        running instance of Cloudscape attached to it.
+        On other platforms, Derby issues a warning message if an instance
+        of Derby attempts to boot a database that may already have a
+        running instance of Derby attached to it.
         However, it does not prevent the second instance from booting, and thus
         potentially corrupting, the database.
 
@@ -180,15 +180,12 @@ public interface Property {
         occurred.
 
 
-        NOTE: When you are using Cloudview, error messages appear in the 
-        console or operating system window from which Cloudview was started.
-
         The warning message looks like this:
 
-        WARNING: Cloudscape (instance 80000000-00d2-3265-de92-000a0a0a0200) is
+        WARNING: Derby (instance 80000000-00d2-3265-de92-000a0a0a0200) is
         attempting to boot the database /export/home/sky/wombat even though
-        Cloudscape (instance 80000000-00d2-3265-8abf-000a0a0a0200) may still be
-        active. Only one instance of Cloudscape
+        Derby (instance 80000000-00d2-3265-8abf-000a0a0a0200) may still be
+        active. Only one instance of Derby 
         should boot a database at a time. Severe and non-recoverable corruption
         can result and may have already occurred.
 
@@ -197,24 +194,24 @@ public interface Property {
         This warning is primarily a Technical Support aid to determine the 
         cause of corruption. However, if you see this warning, your best 
         choice is to close the connection and exit the JVM. This minimizes the
-        risk of a corruption. Close all instances of Cloudscape, then restart
-        one instance of Cloudscape and shut down the database properly so that
+        risk of a corruption. Close all instances of Derby, then restart
+        one instance of Derby and shut down the database properly so that
         the db.lck file can be removed. The warning message continues to appear
-        until a proper shutdown of the Cloudscape system can delete the db.lck
+        until a proper shutdown of the Derby system can delete the db.lck
         file.
 
         If the "derby.database.forceDatabaseLock" property is set to true
-        then this default behavior is altered on systems where cloudscape cannot
+        then this default behavior is altered on systems where Derby cannot
         prevent this dual booting.  If the to true, then if the platform does
-        not provide the ability for cloudscape to guarantee no double boot, and
-        if cloudscape finds a db.lck file when it boots, it will throw an 
+        not provide the ability for Derby to guarantee no double boot, and
+        if Derby finds a db.lck file when it boots, it will throw an 
         exception (TODO - mikem - add what exception), leave the db.lck file
         in place and not boot the system.  At this point the system will not 
         boot until the db.lck file is removed by hand.  Note that this 
         situation can arise even when 2 VM's are not accessing the same
-        cloudscape system.  Also note that if the db.lck file is removed by 
+        Derby system.  Also note that if the db.lck file is removed by 
         hand while a VM is still accessing a derby.database, then there 
-        is no way for cloudscape to prevent a second VM from starting up and 
+        is no way for Derby to prevent a second VM from starting up and 
         possibly corrupting the database.  In this situation no warning 
         message will be logged to the error log.
 
@@ -369,8 +366,8 @@ public interface Property {
     public static final int IDX_PAGE_SIZE_BUMP_THRESHOLD = 1024;
 
     /**
-     * In cloudscape products which support Row Level Locking (rll), use this 
-     * property to disable rll.  Application's which use rll will use more 
+     * Derby supports Row Level Locking (rll),  but you can use this 
+     * property to disable rll.  Applications which use rll will use more 
      * system resources, so if an application knows that it does not need rll 
      * then it can use this system property to force all locking in the system 
      * to lock at the table level.
@@ -657,10 +654,10 @@ public interface Property {
 	public static final String AUTHENTICATION_PROVIDER_PARAMETER =
 								"derby.authentication.provider";
 
-	// This is the user property used by Cloudscape and LDAP schemes
+	// This is the user property used by Derby and LDAP schemes
 	public static final String USER_PROPERTY_PREFIX = "derby.user.";
 
-	// These are the different built-in providers Cloudscape supports
+	// These are the different built-in providers Derby supports
 
 	public static final String AUTHENTICATION_PROVIDER_BUILTIN =
 								"BUILTIN";
@@ -737,8 +734,8 @@ public interface Property {
     /**
      * derby.drda.startNetworkServer
      *<BR>
-     * If true then we will attempt to start a DRDA network server when Cloudscape boots,
-     * turning the current JVM into a server.
+     * If true then we will attempt to start a DRDA network server when Derby 
+     * boots, turning the current JVM into a server.
      *<BR>
      * Default: false
      */

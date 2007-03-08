@@ -64,7 +64,7 @@ public interface CipherProvider
 		If cleartext and ciphertext are the same array, caller must be careful
 		to not overwrite the cleartext before it is scrambled.
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	int encrypt(byte[] cleartext, int offset, int length,
 				byte[] ciphertext, int outputOffset)
@@ -86,7 +86,7 @@ public interface CipherProvider
 		If cleartext and ciphertext are the same array, caller must be careful
 		to not overwrite the ciphertext before it is un-scrambled.
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	int decrypt(byte[] ciphertext, int offset, int length,
 				byte[] cleartext, int outputOffset)

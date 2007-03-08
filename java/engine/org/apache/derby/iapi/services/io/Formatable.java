@@ -24,7 +24,7 @@ package org.apache.derby.iapi.services.io;
 import java.io.Externalizable;
 
 /**
-  Cloudscape interface for creating a stored form for
+  Derby interface for creating a stored form for
   an object and re-constructing an equivalent object
   from this stored form. The object which creates the
   stored form and the re-constructed object need not be

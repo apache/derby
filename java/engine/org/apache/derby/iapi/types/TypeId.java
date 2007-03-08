@@ -110,7 +110,7 @@ public final class TypeId implements Formatable
         public static final int VARBIT_MAXWIDTH         = Limits.DB2_VARCHAR_MAXWIDTH;
         public static final int LONGVARBIT_MAXWIDTH = Limits.DB2_LONGVARCHAR_MAXWIDTH;
 
-        // not supposed to be limited! 4096G should be ok(?), if Cloudscape can handle...
+        // not supposed to be limited! 4096G should be ok(?), if Derby can handle...
         public static final int BLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
         public static final int CLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
         public static final int NCLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
@@ -610,7 +610,7 @@ public final class TypeId implements Formatable
 
                 TypeId ret = null;
 
-                // Types defined below here are SQL types and non-JDBC types that are supported by Cloudscape
+                // Types defined below here are SQL types and non-JDBC types that are supported by Derby
                 if (SQLTypeName.equals(TypeId.NCLOB_NAME)) {
                         ret = NCLOB_ID;
                         if (ret == null)
@@ -974,9 +974,9 @@ public final class TypeId implements Formatable
         }
         /**
          * JDBC has its own idea of type identifiers which is different from
-         * the Cloudscape internal type ids.  The JDBC type ids are defined
+         * the Derby internal type ids.  The JDBC type ids are defined
          * as public final static ints in java.sql.Types.  This method translates
-         * a Cloudscape internal TypeId to a JDBC type id. For java objects this
+         * a Derby internal TypeId to a JDBC type id. For java objects this
          * returns JAVA_OBJECT in Java2 and OTHER in JDK 1.1. For Boolean datatypes,
          * this returns Type.BOOLEAN in JDK1.4 and Type.BIT for jdks prior to 1.4
          *

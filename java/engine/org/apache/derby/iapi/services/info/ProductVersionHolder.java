@@ -27,7 +27,7 @@ import java.util.Properties;
 
 
 /**
-  Class to hold a cloudscape Product version.
+  Class to hold a Derby Product version.
 
   This class includes the following product version features.
 

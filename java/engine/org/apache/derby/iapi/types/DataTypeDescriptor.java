@@ -912,7 +912,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 * SQL types. For example Types.NUMERIC and Types.DECIMAL are
 	 * equivalent
 	 *
-	 * @param existingType  JDBC type id of Cloudscape data type
+	 * @param existingType  JDBC type id of Derby data type
 	 * @param jdbcTypeId   JDBC type id passed in from application.
 	 *
 	 * @return boolean true if types are equivalent, false if not

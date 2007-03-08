@@ -57,9 +57,7 @@ public final class SchemaDescriptor extends TupleDescriptor
 	*/
     /**
      * STD_SYSTEM_SCHEMA_NAME is the name of the system schema in databases that
-     * use ANSI standard identifier casing. In LSA and in Cloudscape target 
-     * databases the name will use the same case as the source database 
-     * identifiers.
+     * use ANSI standard identifier casing. 
      *
      * See org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext#getSystemSchemaName
      */
@@ -70,7 +68,7 @@ public final class SchemaDescriptor extends TupleDescriptor
     /*
      * Names of system schemas.
      * The following schemas exist in a standard empty DB2 database.  For
-     * now creating them in the cloudscape database but not actually putting
+     * now creating them in the Derby database but not actually putting
      * any objects in them.  Users should not be able to create any objects
      * in these schemas.
      **/
@@ -86,22 +84,20 @@ public final class SchemaDescriptor extends TupleDescriptor
     public static final	String	STD_SQLJ_SCHEMA_NAME      = "SQLJ";
      
     /**
-     * This schema is for cloudscape specific system diagnostic procedures and 
+     * This schema is for Derby specific system diagnostic procedures and 
      * functions which are not available in DB2.  
      **/
     public static final	String	STD_SYSTEM_DIAG_SCHEMA_NAME     = "SYSCS_DIAG";
 
     /**
-     * This schema is for cloudscape specific system diagnostic procedures and 
+     * This schema is for Derby specific system diagnostic procedures and 
      * functions which are not available in DB2.  
      **/
     public static final	String	STD_SYSTEM_UTIL_SCHEMA_NAME     = "SYSCS_UTIL";
 
     /**
      * STD_DEFAULT_SCHEMA_NAME is the name of the default schema in databases 
-     * that use ANSI standard identifier casing. In LSA and in Cloudscape 
-     * target databases the name will use the same case as the source database 
-     * identifiers.
+     * that use ANSI standard identifier casing. 
      *
      * See org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext#getDefaultSchemaName
      */

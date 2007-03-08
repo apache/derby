@@ -24,7 +24,7 @@ package org.apache.derby.iapi.services.diag;
 /**
 
 The Diagnostic framework is meant to provide a way to include as much
-diagnostic capability within the distributed release of the cloudscape
+diagnostic capability within the distributed release of the Derby
 product without adversely affecting the runtime speed or foot print of
 a running configuration that needs not use this information.
 

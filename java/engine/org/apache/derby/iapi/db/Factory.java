@@ -29,7 +29,7 @@ import java.sql.SQLException;
 /**
  *  <P>
  *  Callers of these methods must be within the context of a
- *  Cloudscape statement execution otherwise a SQLException will be thrown.
+ *  Derby statement execution otherwise a SQLException will be thrown.
  *  <BR>
  *  There are two basic ways to call these methods.
  *  <OL>

@@ -80,7 +80,7 @@ public interface DataFactory extends Corruptable {
 		then will return a null handle if the container is dropped.
 
 		@return the handle to the opened container
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 	 */
 	public ContainerHandle openContainer(RawTransaction t,
@@ -94,7 +94,7 @@ public interface DataFactory extends Corruptable {
 		Only internal raw store code should call this, e.g. recovery.
 
 		@see #openContainer
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public RawContainerHandle openDroppedContainer(RawTransaction t,
 												   ContainerKey containerId,
@@ -115,7 +115,7 @@ public interface DataFactory extends Corruptable {
 
 		@return the containerId of the newly created container
 
-		@exception StandardException Standard Cloudscape Error policy
+		@exception StandardException Standard Derby Error policy
 
 	 */
 	public long addContainer(
@@ -138,7 +138,7 @@ public interface DataFactory extends Corruptable {
 
 		@return the containerId of the newly created stream container
 
-		@exception StandardException Standard Cloudscape Error policy
+		@exception StandardException Standard Derby Error policy
 
 	 */
 	public long addAndLoadStreamContainer(RawTransaction t, long segmentId,
@@ -150,7 +150,7 @@ public interface DataFactory extends Corruptable {
 
 		@return a valid StreamContainerHandle or null if the container does not exist.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 
 	*/
 	public StreamContainerHandle openStreamContainer(
@@ -163,7 +163,7 @@ public interface DataFactory extends Corruptable {
 	/**
 		Drop and remove a stream container.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public void dropStreamContainer(RawTransaction t, long segmentId, long containerId)
 		throws StandardException;
@@ -174,7 +174,7 @@ public interface DataFactory extends Corruptable {
         Used if container is found to not exist during redo recovery of
         log records creating the container.
 
-		@exception StandardException Standard Cloudscape Error policy
+		@exception StandardException Standard Derby Error policy
 	 */
 	public void reCreateContainerForRedoRecovery(RawTransaction t,
 			long segmentId, long containerId, ByteArray containerInfo)
@@ -209,7 +209,7 @@ public interface DataFactory extends Corruptable {
 		Return a record handle that is initialized to the given page number and
         record id.
 
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 
 		@param segmentId    segment where the RecordHandle belongs.
 		@param containerId  container where the RecordHandle belongs.
@@ -224,7 +224,7 @@ public interface DataFactory extends Corruptable {
 	/**
 		Database creation finished
 
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 	*/
 	public void createFinished() throws StandardException;
 
@@ -251,7 +251,7 @@ public interface DataFactory extends Corruptable {
 
 	/**
 		Reclaim space used by this factory.  Called by post commit daemon.
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public int reclaimSpace(Serviceable work, ContextManager contextMgr)
 		 throws StandardException;
@@ -259,7 +259,7 @@ public interface DataFactory extends Corruptable {
 	/**
 		Called after recovery is performed.
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	*/
 	public void postRecovery() throws StandardException;
 
@@ -267,7 +267,7 @@ public interface DataFactory extends Corruptable {
 		Encrypt cleartext into ciphertext.
 
 		@see org.apache.derby.iapi.services.crypto.CipherProvider#encrypt
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int encrypt(byte[] cleartext, int offset, int length,
 					   byte[] ciphertext, int outputOffset, 
@@ -278,7 +278,7 @@ public interface DataFactory extends Corruptable {
 		Decrypt cleartext from ciphertext.
 
 		@see org.apache.derby.iapi.services.crypto.CipherProvider#decrypt
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int decrypt(byte[] ciphertext, int offset, int length,
 					   byte[] cleartext, int outputOffset)
@@ -315,7 +315,7 @@ public interface DataFactory extends Corruptable {
 
 	/**
 	 * Backup restore - stop writing dirty pages or container to disk
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 */
 	public void freezePersistentStore() throws StandardException;
 
@@ -327,7 +327,7 @@ public interface DataFactory extends Corruptable {
 	/**
 	 * Backup restore - don't allow the persistent store to be frozen - or if
 	 * it is already frozen, block.   A write is about to commence.
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 */
 	public void writeInProgress() throws StandardException;
 
@@ -363,7 +363,7 @@ public interface DataFactory extends Corruptable {
 	 * during recovery. Crash recovery  uses these files to identify the dropped
 	 * containers.   Stub files(d*.dat) gets creates  when a
 	 * table/index(containers) dropped.
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 **/
     public void removeDroppedContainerFileStubs(LogInstant redoLWM) throws StandardException;
 

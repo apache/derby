@@ -81,7 +81,7 @@ public interface Cacheable  {
 
 		@return an object reference if the object can take on the identity, null otherwise.
 
-		@exception StandardException Standard Cloudscape Policy
+		@exception StandardException Standard Derby Policy
 
 		@see CacheManager#find
 
@@ -164,7 +164,7 @@ public interface Cacheable  {
 		responsibility of the object implementing Cacheable to ensure any users of the
 		object do not conflict with the clean call.
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 
 	*/
 	public void clean(boolean forRemove) throws StandardException;

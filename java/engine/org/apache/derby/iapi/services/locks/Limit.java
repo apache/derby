@@ -43,7 +43,7 @@ public interface Limit {
 		@param lockList the list of Lockable's in the group
 		@param lockCount the number of locks in the group
 
-        @exception StandardException Standard Cloudscape error policy.
+        @exception StandardException Standard Derby error policy.
 	*/
 	public void reached(CompatibilitySpace compatibilitySpace, Object group,
 						int limit, Enumeration lockList, int lockCount)

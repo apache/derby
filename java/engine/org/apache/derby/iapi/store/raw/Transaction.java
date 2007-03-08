@@ -66,7 +66,7 @@ public interface Transaction {
 
 		Will not be called for transactions early in the boot process, ie. before
 		the property conglomerate is set up.
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public void setup(PersistentSet set)
 		throws StandardException;
@@ -200,7 +200,7 @@ public interface Transaction {
 
 		@see RawStoreFactory#startTransaction
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception StandardException A transaction level exception is 
         thrown if the transaction is not idle.
 
@@ -213,7 +213,7 @@ public interface Transaction {
 
 		@see RawStoreFactory#startTransaction
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception StandardException A transaction level exception is 
         thrown if the transaction is not idle.
 
@@ -236,7 +236,7 @@ public interface Transaction {
                     A JDBC Savepoint object value for kindOfSavepoint would mean it is JDBC savepoint
 
 		@return returns total number of savepoints in the stack.
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 		@exception StandardException
         A statement level exception is thrown if a savepoint already 
         exists in the current transaction with the same name.
@@ -257,7 +257,7 @@ public interface Transaction {
                     A JDBC Savepoint object value for kindOfSavepoint would mean it is JDBC savepoint
 
 		@return returns total number of savepoints in the stack.
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 		@exception StandardException
         A statement level exception is thrown if a savepoint already
         exists in the current transaction with the same name.
@@ -280,7 +280,7 @@ public interface Transaction {
                     A JDBC Savepoint object value for kindOfSavepoint would mean it is JDBC savepoint
 
 		@return returns total number of savepoints in the stack.
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 		@exception StandardException
         A statement level exception is thrown if no savepoint exists with 
         the given name.
@@ -304,7 +304,7 @@ public interface Transaction {
 
 		@return a valid ContainerHandle or null if the container does not exist.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 
 	*/
 	public ContainerHandle openContainer(ContainerKey containerId,  int mode)
@@ -326,7 +326,7 @@ public interface Transaction {
 
 		@return a valid ContainerHandle or null if the container does not exist.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 
 	*/
 
@@ -373,7 +373,7 @@ public interface Transaction {
 		This id is only valid within this RawStoreFactory.  Returns a negative 
         number if a container could not be allocated.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 	*/
 	public long addContainer(
@@ -397,7 +397,7 @@ public interface Transaction {
 		and all its pages deallocated. The container will be fully removed
 		at the commit time of the transaction.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 	*/
 	public void dropContainer(ContainerKey containerId)
@@ -420,7 +420,7 @@ public interface Transaction {
 		and all its pages deallocated. The container will be fully removed
 		at the commit time of the transaction.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 	*/
 	public long addAndLoadStreamContainer(
@@ -433,7 +433,7 @@ public interface Transaction {
 
 		@return a valid StreamContainerHandle or null if the container does not exist.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 
 	*/
 	public StreamContainerHandle openStreamContainer(
@@ -449,7 +449,7 @@ public interface Transaction {
 		<P>
 		This call will remove the container.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 	*/
 	public abstract void dropStreamContainer(long segmentId, long containerId)
@@ -467,7 +467,7 @@ public interface Transaction {
 
 		@see Loggable
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 
 	*/
 	public void logAndDo(Loggable operation) throws StandardException;

@@ -136,7 +136,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
                 SanityManager.THROWASSERT( "Network server starter module booted twice.");
             return;
         }
-        // Load the server class indirectly so that Cloudscape does not require the network code
+        // Load the server class indirectly so that Derby does not require the network code
         try
         {
             serverClass = Class.forName( serverClassName);

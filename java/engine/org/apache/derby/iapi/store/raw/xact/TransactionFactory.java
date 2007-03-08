@@ -65,7 +65,7 @@ public interface TransactionFactory extends Corruptable {
 	 * Return the module providing XAresource interface to the transaction
      * table.
      *
-	 * @exception StandardException Standard cloudscape exception policy.
+	 * @exception StandardException Standard Derby exception policy.
 	 */
 	public /* XAResourceManager */ Object getXAResourceManager()
         throws StandardException;
@@ -82,7 +82,7 @@ public interface TransactionFactory extends Corruptable {
 
 		@see RawStoreFactory#startTransaction
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public RawTransaction startTransaction(
     RawStoreFactory rsf,
@@ -103,7 +103,7 @@ public interface TransactionFactory extends Corruptable {
 
 		@see RawStoreFactory#startNestedReadOnlyUserTransaction
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public RawTransaction startNestedReadOnlyUserTransaction(
     RawStoreFactory rsf,
@@ -124,7 +124,7 @@ public interface TransactionFactory extends Corruptable {
 
 		@see RawStoreFactory#startNestedUpdateUserTransaction
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public RawTransaction startNestedUpdateUserTransaction(
     RawStoreFactory rsf,
@@ -148,7 +148,7 @@ public interface TransactionFactory extends Corruptable {
 
 		@see RawStoreFactory#startGlobalTransaction
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public RawTransaction startGlobalTransaction(
     RawStoreFactory rsf,
@@ -167,7 +167,7 @@ public interface TransactionFactory extends Corruptable {
 		@see RawStoreFactory#findUserTransaction
 		@see RawStoreFactory#startTransaction
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public RawTransaction findUserTransaction(
         RawStoreFactory rsf,
@@ -181,7 +181,7 @@ public interface TransactionFactory extends Corruptable {
 
 		@see RawStoreFactory#startTransaction(ContextManager, String)
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public RawTransaction startNestedTopTransaction(RawStoreFactory rsf, ContextManager contextMgr) throws StandardException;
 
@@ -193,7 +193,7 @@ public interface TransactionFactory extends Corruptable {
 
 		@see RawStoreFactory#startTransaction
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public RawTransaction startInternalTransaction(RawStoreFactory rsf, ContextManager contextMgr) throws StandardException;
 
@@ -208,7 +208,7 @@ public interface TransactionFactory extends Corruptable {
 
 	/**
 		Reset any resettable transaction Id 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public void resetTranId() throws StandardException;
 
@@ -228,7 +228,7 @@ public interface TransactionFactory extends Corruptable {
 
 		Used only in recovery.
 
-		@exception StandardException Cloudscape Standard Error policy
+		@exception StandardException Derby Standard Error policy
 	*/
 	public void handlePreparedXacts(
     RawStoreFactory rsf)
@@ -240,7 +240,7 @@ public interface TransactionFactory extends Corruptable {
 		passed in transaction.  Used only in recovery.
 
 		@param recoveryTransaction the transaction used to rollback
-		@exception StandardException Cloudscape Standard Error policy
+		@exception StandardException Derby Standard Error policy
 	*/
 	public void rollbackAllTransactions(RawTransaction recoveryTransaction, 
 										RawStoreFactory rsf)
@@ -284,7 +284,7 @@ public interface TransactionFactory extends Corruptable {
 	/**
 		Database creation finished
 
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 	*/
 	public void createFinished() throws StandardException;
 
@@ -298,7 +298,7 @@ public interface TransactionFactory extends Corruptable {
 		Use this transaction table, which is gotten from a checkpoint
 		operation.  Use ONLY during recovery.
 
-		@exception StandardException Standard cloudscape exception policy.
+		@exception StandardException Standard Derby exception policy.
 	 */
 	public void useTransactionTable(Formatable transactionTable) 
 		 throws StandardException; 

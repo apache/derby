@@ -50,7 +50,7 @@ public interface LogicalUndoable extends Undoable
 		method should only be called by LogicalUndo to extract information from
 		the log record.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public ContainerHandle getContainer() throws StandardException;
 
@@ -71,7 +71,7 @@ public interface LogicalUndoable extends Undoable
 		the correct column number and type, the log operation will restore the
 		row with the optional data stored in the log record.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 		@exception IOException Method may read from in
 
 		@see LogicalUndo

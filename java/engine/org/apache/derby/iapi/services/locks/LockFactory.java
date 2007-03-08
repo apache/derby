@@ -80,7 +80,7 @@ public interface LockFactory extends PropertySetCallback {
 		@exception org.apache.derby.iapi.error.StandardException Another thread interupted this thread while
 		it was waiting for the lock. This will be a StandardException with a nested java.lang.InterruptedException exception,
 		(message id will be LockFactory.InterruptedExceptionId)
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 
 	*/
 	public boolean lockObject(CompatibilitySpace compatibilitySpace,
@@ -175,7 +175,7 @@ public interface LockFactory extends PropertySetCallback {
 		@exception org.apache.derby.iapi.error.StandardException Another thread interupted this thread while
 		it was waiting for the lock. This will be a StandardException with a nested java.lang.InterruptedException exception,
 		(message id will be LockFactory.InterruptedExceptionId)
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 
 	*/
 	public boolean zeroDurationlockObject(CompatibilitySpace compatibilitySpace,

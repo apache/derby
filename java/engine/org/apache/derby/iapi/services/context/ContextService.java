@@ -76,7 +76,7 @@ public final class ContextService //OLD extends Hashtable
 		fast access to a list of candidate contexts. If one of the contexts has its activeThread
 		equal to the current thread then it is the current context manager.
 
-		If the thread has pushed multiple contexts (e.g. open a new non-nested Cloudscape connection
+		If the thread has pushed multiple contexts (e.g. open a new non-nested Derby connection
 		from a server side method) then threadContextList will contain a Stack. The value for each cm
 		will be a push order, with higher numbers being more recently pushed.
 

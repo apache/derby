@@ -67,7 +67,7 @@ public interface CipherFactory
 		@param mode is either ENCRYPT or DECRYPT.  The CipherProvider can only
 				do encryption or decryption but not both.
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	CipherProvider createNewCipher(int mode)
 		 throws StandardException;

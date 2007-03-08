@@ -268,7 +268,7 @@ public interface Page
      *
      * @return A RecordHandle representing the new record.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      * @exception StandardException The container was not opened in update mode.
      * @exception StandardException Row cannot fit on the page or row is null.
      **/
@@ -318,7 +318,7 @@ public interface Page
      *
      * @return the number of rows processed.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      *
      * @see LockingPolicy
      **/
@@ -343,7 +343,7 @@ public interface Page
      *
      * @return the number of fields in the record
      *
-     * @exception StandardException	Standard Cloudscape error policy, a 
+     * @exception StandardException	Standard Derby error policy, a 
      *                              statement level exception is thrown if the 
      *                              record handle does not match a record on 
      *                              the page.
@@ -375,7 +375,7 @@ public interface Page
      *
      * @return the slot number
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      **/
     int getSlotNumber(RecordHandle handle) 
         throws StandardException;
@@ -393,7 +393,7 @@ public interface Page
      *
      * @return the record handle.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      **/
 	RecordHandle getRecordHandleAtSlot(int slot) 
         throws StandardException;
@@ -485,7 +485,7 @@ public interface Page
      * @return A RecordHandle representing the new record, or null if the row 
      *         will not fit on a non-empty page.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      * @exception StandardException The container was not opened in update mode.
      * @exception StandardException The row cannot fit on the page
      *
@@ -619,7 +619,7 @@ public interface Page
      *
      * @return A handle to the record.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      *
      * @see LockingPolicy
      **/
@@ -656,7 +656,7 @@ public interface Page
 
 		@return the Handle to the record that is locked
 
-		@exception StandardException	Standard Cloudscape error policy, a 
+		@exception StandardException	Standard Derby error policy, a 
                                         statement level exception is thrown if
                                         the slot is not on the page.
 
@@ -683,7 +683,7 @@ public interface Page
      *
      * @param slot slot of record to be tested.
      *
-     * @exception StandardException	Standard Cloudscape error policy, a 
+     * @exception StandardException	Standard Derby error policy, a 
      *                              statement level exception is thrown if the 
      *                              slot is not on the page.
      **/
@@ -718,7 +718,7 @@ public interface Page
 
 		@return a Handle to the updated record.
 
-		@exception StandardException	Standard Cloudscape error policy, a
+		@exception StandardException	Standard Derby error policy, a
                                         statement level exception is thrown if
 		                                the slot is not on the page, or if the 
                                         record is deleted, or if the fieldId 
@@ -757,7 +757,7 @@ public interface Page
      *
      * @return the number of fields in the record
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      **/
 	public int fetchNumFieldsAtSlot(int slot)
 		 throws StandardException;
@@ -787,7 +787,7 @@ public interface Page
      *                  the access code where the logical undo logic resides.
      *                  Null if logical undo is not necessary.
      * 
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      * @exception StandardException The container was not opened in update mode.
      * @exception StandardException A statement level exception is thrown when 
      *                              trying to delete an already deleted record,
@@ -860,7 +860,7 @@ public interface Page
 	 * @param needDataLogged    if set to true data is logged for purges else 
      *                          only headers.
 	 *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      * @see LockingPolicy
      **/
 	public void purgeAtSlot(
@@ -920,7 +920,7 @@ public interface Page
      * @param num_rows copy and purge this many rows from this page
      * @param dest_slot copying into this slot of destPage
      *
-     * @exception StandardException Standard Cloudscape error policy
+     * @exception StandardException Standard Derby error policy
      **/
 	public void copyAndPurge(
     Page    destPage, 
@@ -947,7 +947,7 @@ public interface Page
 		@param validColumns a bit map of which columns in the row is valid.
 		ValidColumns will not be changed by RawStore.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 		@exception StandardException The container was not opened in update mode.
 		@exception StandardException if the slot is not on the page.
 
@@ -991,7 +991,7 @@ public interface Page
 		<BR>
 		MT - latched
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 
 	public int recordCount() throws StandardException;
@@ -1002,7 +1002,7 @@ public interface Page
 		 <BR>
 		MT - latched
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 
 	public int nonDeletedRecordCount() throws StandardException;
@@ -1082,7 +1082,7 @@ public interface Page
 		Set the time stamp to what is on page at this instance.  No op if this
 		page does not support time stamp.
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	void setTimeStamp(PageTimeStamp ts) throws StandardException;
 
@@ -1102,7 +1102,7 @@ public interface Page
 		@param ts the time stamp gotten from an earlier call to this page's
 		getTimeStamp
 		@return true if timestamp is the same
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 
 		@see PageTimeStamp
 	*/

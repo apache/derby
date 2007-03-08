@@ -169,7 +169,7 @@ public interface ParameterValueSet
 	/**
 		Check that there are not output parameters defined
 		by the parameter set. If there are unknown parameter
-		types they are forced to input types. i.e. Cloudscape static method
+		types they are forced to input types. i.e. Derby static method
 		calls with parameters that are array.
 
 		@return true if a declared Java Procedure INOUT or OUT parameter is in the set, false otherwise.

@@ -87,7 +87,7 @@ public interface LockingPolicy {
         False should only be returned if the waitForLock policy was set to
         "false," and the lock was unavailable.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 
 		@see ContainerHandle
 
@@ -120,7 +120,7 @@ public interface LockingPolicy {
         @param forUpdate    Should container be locked for update, or read?
 
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 
 		@see Page
 
@@ -145,7 +145,7 @@ public interface LockingPolicy {
         False should only be returned if the waitForLock argument was set to
         "false," and the lock was unavailable.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 
 		@see Page
 	*/
@@ -171,7 +171,7 @@ public interface LockingPolicy {
         False should only be returned if the waitForLock argument was set to
         "false," and the lock was unavailable.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 
 		@see Page
 	*/
@@ -185,7 +185,7 @@ public interface LockingPolicy {
 	/**
 		Called after a record has been fetched.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 
   		@see Page
 

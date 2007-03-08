@@ -33,7 +33,7 @@ This class has 2 direct subclasses.
 <LI> org.apache.derby.iapi.store.access.xa.XAXactId : 
 this class is a specific implementation of the JTA Xid interface
 <LI> org.apache.derby.impl.store.access.GlobalXactId : 
-this class represents internal cloudscape transaction ids
+this class represents internal Derby transaction ids
 </UL>
 <P>
 The main reason for this class is to ensure that equality etc. works in a

@@ -54,27 +54,27 @@ public interface RawContainerHandle extends ContainerHandle {
 
 	/** 
 		Return the status of the container - one of NORMAL, DROPPED, COMMITTED_DROP.
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public int getContainerStatus() throws StandardException;
 
 	/**
 		Remove the container.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public void removeContainer(LogInstant instant) throws StandardException;
 
 	/**
 		If drop is true, drop the container.  if drop is false, un-drop the
 		container
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public void dropContainer(LogInstant instant, boolean drop) throws StandardException;
 
 	/**
 		Get the logged container version
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public long getContainerVersion() throws StandardException;
 
@@ -82,7 +82,7 @@ public interface RawContainerHandle extends ContainerHandle {
 		Return a Page that represents any page - alloc page, valid page, free page, 
 		dealloced page etc.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public Page getAnyPage(long pageNumber) throws StandardException;
 
@@ -95,7 +95,7 @@ public interface RawContainerHandle extends ContainerHandle {
         Used during redo recovery while trying to apply log records which
         are creating the page.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public Page reCreatePageForRedoRecovery(
     int     pageFormat, 
@@ -107,7 +107,7 @@ public interface RawContainerHandle extends ContainerHandle {
 		Log all information necessary to recreate the container during a load
 		tran.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public ByteArray logCreateContainerInfo() throws StandardException;
 
@@ -117,7 +117,7 @@ public interface RawContainerHandle extends ContainerHandle {
 	   checkpoint is taken after any log record is sent to the log stream but
 	   before the container is actually dirtied.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public void preDirty(boolean preDirtyOn) throws StandardException;
 
@@ -126,7 +126,7 @@ public interface RawContainerHandle extends ContainerHandle {
      * Create encrypted version of the container with the 
      * user specified encryption properties.  
      * @param newFilePath file to store the new encrypted version of the container
-	 * @exception StandardException	Standard Cloudscape error policy
+	 * @exception StandardException	Standard Derby error policy
      */
 	public void encryptContainer(String newFilePath) throws StandardException;
 

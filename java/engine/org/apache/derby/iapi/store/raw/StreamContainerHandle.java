@@ -85,7 +85,7 @@ public interface StreamContainerHandle {
 
 		@param row Row to be filled in with information from the record.
 
-		@exception StandardException	Standard Cloudscape error policy
+		@exception StandardException	Standard Derby error policy
 	*/
 	boolean fetchNext(DataValueDescriptor[] row) throws StandardException;
 
@@ -105,7 +105,7 @@ public interface StreamContainerHandle {
 	/**
 		remove the stream container
 
-		@exception StandardException Standard Cloudscape error policy		
+		@exception StandardException Standard Derby error policy		
 	 */
 	public void removeContainer() throws StandardException;
 }

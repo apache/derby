@@ -65,7 +65,7 @@ public interface Loggable extends Formatable {
 		@param in			optional data
 
 		@exception IOException Can be thrown by any of the methods of in.
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 	*/
 	public void doMe(Transaction xact, LogInstant instant, LimitObjectInput in)
 		 throws StandardException, IOException;
@@ -81,7 +81,7 @@ public interface Loggable extends Formatable {
 		which contains optional data that will be available in to doMe() 
         methods.
 
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 	
 	*/
 	public ByteArray getPreparedLog() throws StandardException;
@@ -109,7 +109,7 @@ public interface Loggable extends Formatable {
 		@param xact		The transaction trying to redo this operation
 		@return true if operation needs redoing, false if not.
 
-		@exception StandardException Standard Cloudscape policy.
+		@exception StandardException Standard Derby policy.
 
 		@see Loggable#releaseResource
 	*/

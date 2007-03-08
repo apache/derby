@@ -85,7 +85,7 @@ public interface ModuleFactory
 		Set the locale for the service at boot time. The passed-in
 		properties must be the one passed to the boot method.
 
-		@exception StandardException	Cloudscape error.
+		@exception StandardException	Derby error.
 	 */
 	public Locale setLocale(Properties serviceProperties,
 							String userDefinedLocale)

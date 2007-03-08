@@ -711,7 +711,7 @@ public	class	DDUtils
 	**   one path and tries to update  through another path. 
 	**   Nothing in standard that say whether we are suppose to delete the row
 	**   or update the row.  DB2UDB raises error when we try to create the
-	**   foreign key fkey4, cloudscape also does the same.
+	**   foreign key fkey4, Derby also does the same.
 	** 
 	**   How we catch the error case ?
 	**   Point to note here is the table(t4) we are  adding the foreign key does

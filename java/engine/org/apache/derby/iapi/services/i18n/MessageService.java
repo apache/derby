@@ -105,8 +105,7 @@ public final class MessageService {
 	}
 
 	/**
-	  Method used by Cloudscape Network Server to get localized message (original call
-	  from jcc.
+	  Method used by Derby Network Server to get localized message
 
 	  @param sqlcode	sqlcode, not used.
 	  @param errmcLen	sqlerrmc length
@@ -198,7 +197,7 @@ public final class MessageService {
 	}
 	
 	/**
-	  Method used by Cloudscape Network Server to get localized message 
+	  Method used by Derby Network Server to get localized message 
 
 	  @param locale		locale
 	  @param messageId	message id

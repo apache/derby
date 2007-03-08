@@ -171,7 +171,7 @@ import java.io.PrintStream;
 	<LI>The properties set of the service (i.e. that passed into Monitor.createPersistentService()
 	or Monitor.startService()).
 	<LI>The System (JVM) properties set (i.e. java.lang.System.getProperties()).
-	<LI>The application properties set (i.e. obtained from the cloudscape.properties file).
+	<LI>The application properties set (i.e. obtained from the derby.properties file).
 	<LI>The default implementation properties set (i.e. obtained from the
 	/org/apache/derby/modules.properties resource).
 	</OL>

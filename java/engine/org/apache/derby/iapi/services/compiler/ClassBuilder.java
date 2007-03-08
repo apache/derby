@@ -75,7 +75,7 @@ public interface ClassBuilder {
 		Fully create the bytecode and load the
 		class using the ClassBuilder's ClassFactory.
 
-		@exception StandardException Standard Cloudscape policy
+		@exception StandardException Standard Derby policy
 	*/
 	GeneratedClass getGeneratedClass() throws StandardException;
 

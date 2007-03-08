@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.services.io;
 /**
-  Cloudscape interface for identifying the format id for the
+  Derby interface for identifying the format id for the
   stored form of an object. Objects of different classes may
   have the same format id if:
 

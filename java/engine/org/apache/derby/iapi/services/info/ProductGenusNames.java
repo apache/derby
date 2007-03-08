@@ -22,23 +22,22 @@
 package org.apache.derby.iapi.services.info;
 
 /**
-  Holder class for cloudscape genus names.
+  Holder class for Derby genus names.
 
   <P>
-  A product genus defines a product's category (tools, DBMS etc). For
-  some categories, Cloudscape ships more than one product. Each product,
-  within the genus has a unique product species.
+  A product genus defines a product's category (tools, DBMS etc). 
+  Currently, Derby only ships one jar file per genus. The info file
+  defined in this file is used by sysinfo to determine version information.
 
   <P>
-  A correct run time environment should include at most one Cloudscape
-  product of a given genus. This helps avoid situations in which the
-  environment loads classes from more than one product. a user runs
-  with a mix of classes from different
+  A correct run time environment should include at most one Derby
+  jar file of a given genus. This helps avoid situations in which the
+  environment loads classes from more than one version. 
 
   <P>
-  Please not that the list provided here serves to document product
-  genus names and to facile consistent naming in code. Because the
-  list of supported Cloudscape genus names will change with time, the
+  Please note that the list provided here serves to document product
+  genus names and to facilitate consistent naming in code. Because the
+  list of supported Derby genus names may change with time, the
   code in this package does *NOT* restrict users to the product genus
   names listed here.
   */

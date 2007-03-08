@@ -42,7 +42,7 @@ public class D_RowLock extends DiagnosticableGeneric
     /**
 		Return the string for the qualifier.
      *
-     * @exception StandardException	Standard Cloudscape error policy
+     * @exception StandardException	Standard Derby error policy
      **/
     public String diag()
         throws StandardException

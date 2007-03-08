@@ -322,7 +322,7 @@ public class StringUtil
 	}
 
 	// The functions below are used for uppercasing SQL in a consistent manner.
-	// Cloudscape will uppercase Turkish to the English locale to avoid i
+	// Derby will uppercase Turkish to the English locale to avoid i
 	// uppercasing to an uppercase dotted i. In future versions, all 
 	// casing will be done in English.   The result will be that we will get
 	// only the 1:1 mappings  in 

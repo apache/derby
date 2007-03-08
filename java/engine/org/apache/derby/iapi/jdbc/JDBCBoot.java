@@ -32,7 +32,7 @@ import java.util.Properties;
 import java.io.PrintStream;
 
 /**
-	A class to boot a cloudscape system that includes a JDBC driver.
+	A class to boot a Derby system that includes a JDBC driver.
 	Should be used indirectly through JDBCDriver or JDBCServletBoot
 	or any other useful booting mechanism that comes along.
 */
@@ -71,7 +71,7 @@ public class JDBCBoot {
             /* The network server starter module is started differently from other modules because
              * 1. its start is conditional, depending on a system property, and PropertyUtil.getSystemProperty
              *    does not work until the Monitor has started,
-             * 2. we do not want the server to try to field requests before Cloudscape has booted, and
+             * 2. we do not want the server to try to field requests before Derby has booted, and
              * 3. if the module fails to start we want to log a message to the error log and continue as
              *    an embedded database.
              */

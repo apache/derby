@@ -68,7 +68,7 @@ public interface RowSource {
         nextRow call.  In this case the client should severe all references to 
         the row after returning it from getNextRowFromRowSource().
 
-		@exception StandardException Cloudscape Standard Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public DataValueDescriptor[] getNextRowFromRowSource() 
         throws StandardException;

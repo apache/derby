@@ -410,7 +410,7 @@ public interface RawStoreFactory extends Corruptable {
         @param transName is the name of the transaction. Thsi name will be displayed
         by the transactiontable VTI.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 		@see Transaction
 		@see org.apache.derby.iapi.services.context.Context
@@ -471,7 +471,7 @@ public interface RawStoreFactory extends Corruptable {
         @param local_id   The branch qualifier of the Xid - ie. 
                           Xid.getBranchQaulifier()
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 		@see Transaction
 		@see org.apache.derby.iapi.services.context.Context
@@ -496,7 +496,7 @@ public interface RawStoreFactory extends Corruptable {
                           this name.
         The name is displayed in the transactiontable VTI.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 		@see #startTransaction
 	*/
@@ -549,7 +549,7 @@ public interface RawStoreFactory extends Corruptable {
         and the context is popped off the stack.
 		</UL>
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 		@see Transaction
 		@see org.apache.derby.iapi.services.context.Context
@@ -604,7 +604,7 @@ public interface RawStoreFactory extends Corruptable {
         @param transName is the name of the transaction. This name will be 
         displayed by the transactiontable VTI.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 		@see Transaction
 		@see org.apache.derby.iapi.services.context.Context
@@ -663,7 +663,7 @@ public interface RawStoreFactory extends Corruptable {
         @param transName is the name of the transaction. This name will be 
         displayed by the transactiontable VTI.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 		@see Transaction
 		@see org.apache.derby.iapi.services.context.Context
@@ -683,7 +683,7 @@ public interface RawStoreFactory extends Corruptable {
 
 	/**
 	  * Freeze the database temporarily so a backup can be taken.
-	  * <P>Please see cloudscape on line documentation on backup and restore.
+	  * <P>Please see Derby on line documentation on backup and restore.
 	  *
 	  * @exception StandardException Thrown on error
 	  */
@@ -691,7 +691,7 @@ public interface RawStoreFactory extends Corruptable {
 
 	/**
 	  * Unfreeze the database after a backup has been taken.
-	  * <P>Please see cloudscape on line documentation on backup and restore.
+	  * <P>Please see Derby on line documentation on backup and restore.
 	  *
 	  * @exception StandardException Thrown on error
 	  */
@@ -699,7 +699,7 @@ public interface RawStoreFactory extends Corruptable {
 
 	/**
 	  * Backup the database to backupDir.  
-	  * <P>Please see cloudscape on line documentation on backup and restore.
+	  * <P>Please see Derby on line documentation on backup and restore.
 	  *
 	  * @param backupDir the name of the directory where the backup should be
       *                  stored.
@@ -761,14 +761,14 @@ public interface RawStoreFactory extends Corruptable {
 		The raw store does not guarentee that a checkpoint will indeed have
 		happened by the time this routine returns.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 	public void checkpoint() throws StandardException;
 
 
 	/**
 		Idle the raw store as much as possible. 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 
 	*/
 	public void idle() throws StandardException;
@@ -777,7 +777,7 @@ public interface RawStoreFactory extends Corruptable {
 	    Get a flushed scan.
 		@param start The instant for the beginning of the scan.
 		@param groupsIWant log record groups the caller wants to scan.
-		@exception StandardException StandardCloudscape error policy
+		@exception StandardException StandardDerby error policy
 		*/
 	ScanHandle openFlushedScan(DatabaseInstant start, int groupsIWant) 
 		 throws StandardException;
@@ -809,21 +809,21 @@ public interface RawStoreFactory extends Corruptable {
 	 * Return the module providing XAresource interface to the transaction 
      * table. 
      *
-	 * @exception StandardException Standard cloudscape exception policy.
+	 * @exception StandardException Standard Derby exception policy.
 	 */
 	public /* XAResourceManager */ Object getXAResourceManager()
         throws StandardException;
 
 	/*
 	 * the database creation phase is finished
-	 * @exception StandardException Standard cloudscape exception policy.
+	 * @exception StandardException Standard Derby exception policy.
 	 */
 	public void createFinished() throws StandardException;
 
 	/**
 	 * Get JBMS properties relavent to raw store
 	 *
-	 * @exception StandardException Standard cloudscape exception policy.
+	 * @exception StandardException Standard Derby exception policy.
 	 */
 	public void getRawStoreProperties(PersistentSet tc) 
 		 throws StandardException; 
@@ -835,14 +835,14 @@ public interface RawStoreFactory extends Corruptable {
 	/**
 	 * Freeze the database from altering any persistent storage.
 	 *
-	 * @exception StandardException Standard cloudscape exception policy.
+	 * @exception StandardException Standard Derby exception policy.
 	 */
 	public void freezePersistentStore() throws StandardException;
 
 	/**
 	 * Unfreeze the database, persistent storage can now be altered.
 	 *
-	 * @exception StandardException Standard cloudscape exception policy.
+	 * @exception StandardException Standard Derby exception policy.
 	 */
 	public void unfreezePersistentStore() throws StandardException;
 
@@ -850,7 +850,7 @@ public interface RawStoreFactory extends Corruptable {
 		Encrypt cleartext into ciphertext.
 
 		@see org.apache.derby.iapi.services.crypto.CipherProvider#encrypt
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int encrypt(byte[] cleartext, int offset, int length, 
 					   byte[] ciphertext, int outputOffset,
@@ -861,7 +861,7 @@ public interface RawStoreFactory extends Corruptable {
 		Decrypt cleartext from ciphertext.
 
 		@see org.apache.derby.iapi.services.crypto.CipherProvider#decrypt
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public int decrypt(byte[] ciphertext, int offset, int length, 
 					   byte[] cleartext, int outputOffset) 
@@ -882,7 +882,7 @@ public interface RawStoreFactory extends Corruptable {
 		Change the boot password.  Return the encrypted form of the secret key.
 		The new value must be a String of the form: oldBootPassword, newBootPassword
 
-		@exception StandardException Standard Cloudscape Error Policy
+		@exception StandardException Standard Derby Error Policy
 	 */
 	public Serializable changeBootPassword(Properties properties, Serializable changePassword)
 		 throws StandardException ;

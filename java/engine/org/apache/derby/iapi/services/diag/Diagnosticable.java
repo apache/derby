@@ -52,7 +52,7 @@ public interface Diagnosticable
      *
 	 * @return A string with diagnostic information about the object.
      *
-     * @exception StandardException  Standard cloudscape exception policy
+     * @exception StandardException  Standard Derby exception policy
      **/
     public String diag() throws StandardException;
 
@@ -86,7 +86,7 @@ public interface Diagnosticable
      * be provided by a real implementation.
      * <p>
      *
-     * @exception StandardException  Standard cloudscape exception policy
+     * @exception StandardException  Standard Derby exception policy
      **/
     public void diag_detail(Properties prop) throws StandardException;
 }

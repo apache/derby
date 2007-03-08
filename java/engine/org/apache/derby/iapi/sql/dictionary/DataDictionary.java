@@ -178,7 +178,7 @@ public interface DataDictionary
 	/**
 	 * Clear all of the DataDictionary caches.
 	 *
-	 * @exception StandardException Standard Cloudscape error policy
+	 * @exception StandardException Standard Derby error policy
 	 */
 	public void clearCaches() throws StandardException;
 

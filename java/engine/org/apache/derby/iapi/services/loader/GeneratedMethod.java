@@ -38,7 +38,7 @@ public interface GeneratedMethod {
 
 		Returns the value returned by the method.
 
-		@exception 	StandardException	Standard Cloudscape error policy
+		@exception 	StandardException	Standard Derby error policy
 	*/
 
 	public Object invoke(Object ref)

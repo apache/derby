@@ -40,7 +40,7 @@ public interface CacheManager {
      *
      * @param newSize the new maximum cache size
      *
-     * @exception StandardException Cloudscape Standard error policy
+     * @exception StandardException Standard Derby error policy
      */
 	public void resize( long newSize) throws StandardException;
 
@@ -77,7 +77,7 @@ public interface CacheManager {
 
 		@return A reference to an object in the cache, or null if the object cannot be found.
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 
 		@see Cacheable#setIdentity
 
@@ -106,7 +106,7 @@ public interface CacheManager {
 			}
 			
 		</PRE>
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public Cacheable findCached(Object key) throws StandardException;
 
@@ -164,7 +164,7 @@ public interface CacheManager {
 
 		@return A reference to an object in the cache.
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 
 		@see Cacheable#createIdentity
 
@@ -193,7 +193,7 @@ public interface CacheManager {
 		<BR>
 		After this call the caller must throw away the reference to item.
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public void remove(Cacheable entry) throws StandardException;
 
@@ -208,7 +208,7 @@ public interface CacheManager {
 		@see Cacheable#clean
 		@see Cacheable#isDirty
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public void cleanAll() throws StandardException;
 
@@ -221,7 +221,7 @@ public interface CacheManager {
         be able to handle a partial key, e.g. a page has PageKey but a clean 
         may pass a ContainerKey which will discard all pages in that container.
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 	*/
 	public void clean(Matchable partialKey) throws StandardException;
 
@@ -247,7 +247,7 @@ public interface CacheManager {
 		and then cleanAll() and ageOut() are called. The cache remains
 		in existence until the last kept object has been unkept.
 
-		@exception StandardException Standard Cloudscape error policy.
+		@exception StandardException Standard Derby error policy.
 
 	*/
 	public void shutdown() throws StandardException;

@@ -37,7 +37,7 @@ import org.apache.derby.iapi.error.StandardException;
 	global transactions, i.e., it does not know of in-doubt global transactions
 	re-created by recovery.
 
-	<P>	The following is an overall design of the JTA implementation in cloudscape,
+	<P>	The following is an overall design of the JTA implementation in Derby,
 	most of it has little to do with the ResourceAdapter interface itself.
 	<P><B>Design Overview </B>
 

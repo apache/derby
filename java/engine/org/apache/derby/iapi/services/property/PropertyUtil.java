@@ -160,7 +160,7 @@ public class PropertyUtil {
 		</OL>
 
 		<P>
-		This method can be used by a system that is not running Cloudscape,
+		This method can be used by a system that is not running Derby,
 		just to maintain the same lookup logic and security manager concerns
 		for finding derby.properties and reading system properties.
 
@@ -263,7 +263,7 @@ public class PropertyUtil {
 	/**
 		Get a property only looking in the Persistent Transactional (database) set.
 
-		@exception StandardException Standard Cloudscape error handling. 
+		@exception StandardException Standard Derby error handling. 
 	*/
 	public static String getDatabaseProperty(PersistentSet set, String key) 
 		throws StandardException {
@@ -284,7 +284,7 @@ public class PropertyUtil {
 
 		@return the value of the property or defaultValue if it does not exist.
 
-		@exception StandardException Standard Cloudscape error handling. 
+		@exception StandardException Standard Derby error handling. 
 	*/
 	public static String getServiceProperty(PersistentSet set, String key, String defaultValue) 
 		throws StandardException {
@@ -324,7 +324,7 @@ public class PropertyUtil {
 
 		@return the value of the property or null if it does not exist.
 
-			@exception StandardException Standard Cloudscape error handling. 
+			@exception StandardException Standard Derby error handling. 
 	*/
 	public static String getServiceProperty(PersistentSet set, String key)
 		throws StandardException {
@@ -350,7 +350,7 @@ public class PropertyUtil {
 
 		@return true of the property is set to 'true, TRUE', false otherwise
 
-		@exception StandardException Standard Cloudscape error handling. 
+		@exception StandardException Standard Derby error handling. 
 	*/
 	public static boolean getServiceBoolean(PersistentSet set, String key, boolean defValue) 
 		throws StandardException {
@@ -376,7 +376,7 @@ public class PropertyUtil {
 		@return value of the property if set subject to min and max, defaultValue if
 		it is not set or set to a non-integer value.
 
-		@exception StandardException Standard Cloudscape error handling. 
+		@exception StandardException Standard Derby error handling. 
 
 	*/
 	public static int getServiceInt(PersistentSet set, String key, int min, int max, int defaultValue)
@@ -392,7 +392,7 @@ public class PropertyUtil {
 		@return value of the property if set subject to min and max, defaultValue if
 		it is not set or set to a non-integer value.
 
-		@exception StandardException Standard Cloudscape error handling. 
+		@exception StandardException Standard Derby error handling. 
 
 	*/
 	public static int getServiceInt(PersistentSet set, Properties props, String key, int min, int max, int defaultValue)

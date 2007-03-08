@@ -187,7 +187,7 @@ public class StandardException extends Exception
 	/**
 		Convert a message identifer from org.apache.derby.iapi.reference.SQLState to
 		a SQLState five character string.
-	 *	@param messageID - the sql state id of the message from cloudscape
+	 *	@param messageID - the sql state id of the message from Derby
 	 *	@return String 	 - the 5 character code of the SQLState ID to returned to the user 
 	*/
 	public static String getSQLStateFromIdentifier(String messageID) {
@@ -453,8 +453,8 @@ public class StandardException extends Exception
 	public static StandardException unexpectedUserException(Throwable t)
 	{
 		/*
-		** If we have a SQLException that isn't a Util
-		** (i.e. it didn't come from cloudscape), then we check
+		** If we have a SQLException that isn't an EmbedSQLException
+		** (i.e. it didn't come from Derby), then we check
 		** to see if it is a valid user defined exception range 
 		** (38001-38XXX).  If so, then we convert it into a 
 		** StandardException without further ado.
@@ -503,7 +503,7 @@ public class StandardException extends Exception
 			**    standard java exception, e.g. NullPointerException
 			**    SQL Exception - from some server-side JDBC
 			**    3rd party exception - from some application
-			**    some cloudscape exception that is not a standard exception.
+			**    some Derby exception that is not a standard exception.
 			**    
 			**    
 			** We don't want to call t.toString() here, because the JVM is
@@ -516,22 +516,23 @@ public class StandardException extends Exception
 			**
 			** The above is because our test canons contain the text of
 			** error messages.
-			**
-			** In addition we don't want to place the class name in an
-			** exception when the class is from cloudscape because
-			** the class name changes in obfuscated builds. Thus for
-			** exceptions that are in a package below com.ibm.db2j
+			** 
+			** In the past we didn't want to place the class name in
+			** an exception because Cloudscape builds were
+			** obfuscated, so the class name would change from build
+                        ** to build. This is no longer true for Derby, but for
+			** exceptions that are Derby's, i.e. EmbedSQLException,
 			** we use toString(). If this returns an empty or null
-			** then we use the class name to make tracking the problem
-			** down easier, though the lack of a message should be seen
-			** as a bug.
+			** then we use the class name to make tracking the 
+                        ** problem down easier, though the lack of a message 
+			** should be seen as a bug.
 			*/
 			String	detailMessage;
-			boolean cloudscapeException = false;
+			boolean derbyException = false;
 
 			if (t instanceof EmbedSQLException) {
 				detailMessage = ((EmbedSQLException) t).toString();
-				cloudscapeException = true;
+				derbyException = true;
 			}
 			else {
 				detailMessage = t.getMessage();
@@ -550,7 +551,7 @@ public class StandardException extends Exception
 			}
 			else {
 
-				if (!cloudscapeException) {
+				if (!derbyException) {
 					detailMessage = t.getClass().getName() + ": " + detailMessage;
 				}
 			}

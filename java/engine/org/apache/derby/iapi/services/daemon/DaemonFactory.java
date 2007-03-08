@@ -59,7 +59,7 @@ public interface DaemonFactory
 	/**
 		Create a new DaemonService with the default daemon timer delay.
 
-		@exception StandardException Standard cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	 */
 	public DaemonService createNewDaemon(String name) throws StandardException;
 }

@@ -120,7 +120,7 @@ public abstract class RawTransaction extends Observable implements Transaction {
 
 		@see Compensation
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public abstract void logAndUndo(Compensation compensation, LogInstant undoInstant, 
 									LimitObjectInput in) 
@@ -198,7 +198,7 @@ public abstract class RawTransaction extends Observable implements Transaction {
 		logical operations. Transactions that need to disallow logical 
         operations should hide this method.
 
-		@exception StandardException Standard Cloudscape error policy,
+		@exception StandardException Standard Derby error policy,
 	*/
 	public void checkLogicalOperationOk() throws StandardException {
 	}
@@ -249,7 +249,7 @@ public abstract class RawTransaction extends Observable implements Transaction {
 		A nested top transaction conflicts on the logical locks of its "parent"
         transaction.
 
-		@exception StandardException Standard Cloudscape error policy
+		@exception StandardException Standard Derby error policy
 	*/
 
 	public abstract RawTransaction startNestedTopTransaction() throws StandardException;
@@ -267,7 +267,7 @@ public abstract class RawTransaction extends Observable implements Transaction {
 		code always check for committed drop status.  Anybody else wanting to
 		use this interface must keep this in mind.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	*/
 	public abstract RawContainerHandle openDroppedContainer
 		(ContainerKey containerId, LockingPolicy locking)
@@ -279,7 +279,7 @@ public abstract class RawTransaction extends Observable implements Transaction {
         Used during redo recovery when processing log records trying to 
         create a container, but no container is found in the db.
 
-		@exception StandardException  Standard cloudscape exception policy
+		@exception StandardException  Standard Derby exception policy
 	 */
 	public abstract void reCreateContainerForRedoRecovery
 		(long segmentId, long containerId, ByteArray containerInfo)
