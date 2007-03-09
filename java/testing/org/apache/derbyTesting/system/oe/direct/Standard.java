@@ -20,14 +20,17 @@
 package org.apache.derbyTesting.system.oe.direct;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.derbyTesting.system.oe.client.Display;
 import org.apache.derbyTesting.system.oe.client.Operations;
@@ -76,6 +79,41 @@ public class Standard implements Operations {
                 ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_READ_ONLY,
                 ResultSet.CLOSE_CURSORS_AT_COMMIT);
+    }
+    
+    /**
+     * Map of SQL text to its PreparedStatement.
+     * This allows the SQL text to be in-line with
+     * code that sets the parameters and looks at 
+     * the results. Map is on the identity of the SQL
+     * string which assumes they are all constants
+     * (and hence interned). Assumption is that this
+     * will provide for a quicker lookup than by text
+     * since the statements can be many characters.
+     * Only the new order transaction uses this map
+     * now, the others should be converted as need arises
+     * to have a simple, single model. Then the setup methods
+     * can be removed.
+     * 
+     * May also allow easier sharing with other implementations
+     * such as a Java procedure which could have a different
+     * prepareStatement method.
+     */
+    private Map statements = new IdentityHashMap();
+    
+    /**
+     * Prepare a statement, looking in the map first.
+     * If the statement does not exist in the map then
+     * it is prepared and put into the map for future use.
+     */
+    PreparedStatement prepareStatement(String sql) throws SQLException {
+        PreparedStatement ps = (PreparedStatement) statements.get(sql);
+        if (ps != null)
+            return ps;
+        
+        ps = prepare(sql);
+        statements.put(sql, ps);
+        return ps;
     }
     
     /*
@@ -561,14 +599,199 @@ public class Standard implements Operations {
     }
     
     public void setupNewOrder() throws Exception {
-        // TODO Auto-generated method stub
+        
 
     }
+    private static final String[] STOCK_INFO = {
+    "SELECT S_QUANTITY, S_DIST_01, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+    "SELECT S_QUANTITY, S_DIST_02, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+    "SELECT S_QUANTITY, S_DIST_03, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+    "SELECT S_QUANTITY, S_DIST_04, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+    "SELECT S_QUANTITY, S_DIST_05, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+    "SELECT S_QUANTITY, S_DIST_06, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+    "SELECT S_QUANTITY, S_DIST_07, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+    "SELECT S_QUANTITY, S_DIST_08, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+    "SELECT S_QUANTITY, S_DIST_09, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+    "SELECT S_QUANTITY, S_DIST_10, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
+       };
+    
     public void newOrder(Display display, Object displayData, short w, short d,
             int c, int[] items, short[] quantities, short[] supplyW)
             throws Exception {
-        // TODO Auto-generated method stub
+        
+        // This transaction is subject to deadlocks since the
+        // stock table is read and then updated, and multiple
+        // stock items are read and updated in a random order.
+        // to avoid the deadlocks, the items are sorted here.
+        // If some engine did not require sorting then it could
+        // provide a different implementation of this class with
+        // the sort method a no-op.
+        sortOrderItems(items, quantities, supplyW);
 
+        
+        try {
+            // Get the warehouse tax
+            PreparedStatement psWarehouseTax = prepareStatement(
+                "SELECT W_TAX FROM WAREHOUSE WHERE W_ID = ?");
+            psWarehouseTax.setShort(1, w);
+            ResultSet rs = psWarehouseTax.executeQuery();
+            BigDecimal warehouseTax = (BigDecimal) rs.getObject(1);
+            reset(psWarehouseTax);
+            
+            // Get the district tax and order number including the update.            
+            PreparedStatement psDistrictUpdate = prepareStatement(
+                "UPDATE DISTRICT SET D_NEXT_O_ID = D_NEXT_O_ID + 1 " +
+                "WHERE D_W_ID = ? AND D_ID = ?");
+            psDistrictUpdate.setShort(1, w);
+            psDistrictUpdate.setShort(2, d);
+            psDistrictUpdate.executeUpdate();
+            reset(psDistrictUpdate);
+
+            PreparedStatement psDistrict = prepareStatement(
+                "SELECT D_NEXT_O_ID - 1, D_TAX " +
+                "FROM DISTRICT WHERE D_W_ID = ? AND D_ID = ?");
+            psDistrict.setShort(1, w);
+            psDistrict.setShort(2, d);
+            rs = psDistrict.executeQuery();
+            rs.next();
+            int orderNumber = rs.getInt(1);
+            BigDecimal districtTax = (BigDecimal) rs.getObject(2);
+            reset(psDistrict);
+            
+            PreparedStatement psCustomer = prepareStatement(
+                "SELECT C_LAST, C_DISCOUNT, C_CREDIT " +
+                "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+            psCustomer.setShort(1, w);
+            psCustomer.setShort(2, d);
+            psCustomer.setInt(3, c);
+            rs = psCustomer.executeQuery();
+            rs.next();
+            // TODO fetch data
+            reset(psCustomer);
+            
+            // See if all the items are from the local warehouse.
+            short allLocal = 1;
+            for (int i = 0; i < supplyW.length; i++)
+            {
+                if (supplyW[i] != w)
+                {
+                    allLocal = 0;
+                    break;
+                }
+            }
+            
+            PreparedStatement psOrder = prepareStatement(
+                "INSERT INTO ORDERS VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, NULL, ?, ?)");
+            psOrder.setInt(1, orderNumber);
+            psOrder.setShort(2, d);
+            psOrder.setShort(3, w);
+            psOrder.setInt(4, c);
+            psOrder.setShort(5, (short) items.length);
+            psOrder.setShort(6, allLocal);
+            psOrder.executeUpdate();
+            reset(psOrder);
+
+            PreparedStatement psNewOrder = prepareStatement(
+                "INSERT INTO NEWORDERS VALUES(?, ?, ?)"); 
+            psNewOrder.setInt(1, orderNumber);
+            psNewOrder.setShort(2, d);
+            psNewOrder.setShort(3, w);
+            psNewOrder.executeUpdate();
+            reset(psNewOrder);
+            
+            /*
+             * Now all the processing for the order line items.
+             */
+            PreparedStatement psOrderLine = prepareStatement(
+                "INSERT INTO ORDERLINE(OL_W_ID, OL_D_ID, OL_O_ID, OL_NUMBER, " +
+                "OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DIST_INFO, " +
+                "OL_DELIVERY_D) VALUES (?, ?, ?, ?, ?, ?, ?, " +
+                "CAST (? AS DECIMAL(5,2)) * CAST (? AS SMALLINT), ?, NULL)");
+            
+            // These are constant across the order items
+            psOrderLine.setShort(1, w);
+            psOrderLine.setShort(2, d);
+            psOrderLine.setInt(3, orderNumber);
+            
+            PreparedStatement psItemPrice = prepareStatement(
+                    "SELECT I_PRICE, I_NAME, I_DATA FROM ITEM WHERE I_ID = ?");
+            
+            PreparedStatement psStockUpdate = prepareStatement(
+                    "UPDATE STOCK SET S_ORDER_CNT = S_ORDER_CNT + 1, " +
+                    "S_YTD = S_YTD + ?, S_REMOTE_CNT = S_REMOTE_CNT + ?, " +
+                    "S_QUANTITY = ? WHERE S_I_ID = ? AND S_W_ID = ?");
+
+            for (int i = 0; i < items.length; i++)
+            {
+                // Item details
+                psItemPrice.setInt(1, items[i]);
+                rs = psItemPrice.executeQuery();
+                rs.next();
+                BigDecimal itemPrice = (BigDecimal) rs.getObject(1);
+                String itemName = rs.getString(2);
+                String itemData = rs.getString(3);
+                rs.close();
+                
+                // SELECT S_QUANTITY, S_DIST_XX, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?
+                PreparedStatement psStockInfo = prepareStatement(STOCK_INFO[d-1]);
+                psStockInfo.setInt(1, items[i]);
+                psStockInfo.setShort(2, w);
+                rs = psStockInfo.executeQuery();
+                rs.next();
+                int stockQuantity = rs.getInt(1);
+                String stockDistInfo = rs.getString(2);
+                String stockData = rs.getString(3);
+                reset(psStockInfo);
+
+                psStockUpdate.setInt(1, quantities[i]);
+                psStockUpdate.setInt(2, w == supplyW[i] ? 0 : 1);
+                
+                if ((stockQuantity - quantities[i]) > 10)
+                    stockQuantity -= quantities[i];
+                else
+                    stockQuantity = (stockQuantity - quantities[i] + 91);
+                psStockUpdate.setInt(3, stockQuantity);
+                psStockUpdate.setInt(4, items[i]);
+                psStockUpdate.setShort(5, w);
+                psStockUpdate.executeUpdate();
+
+
+                psOrderLine.setShort(4, (short) (i + 1));
+                psOrderLine.setInt(5, items[i]);
+                psOrderLine.setShort(6, supplyW[i]);
+                psOrderLine.setShort(7, quantities[i]);
+                psOrderLine.setObject(8, itemPrice, Types.DECIMAL);
+                psOrderLine.setShort(9, quantities[i]);
+                psOrderLine.setString(10, stockDistInfo);
+                psOrderLine.executeUpdate();
+            }
+            
+            reset(psOrderLine);
+            reset(psItemPrice);
+            reset(psOrderLine);
+            reset(psStockUpdate);
+            
+            // get the sum of the order. This is done as a select rather than
+            // directly in this code so that all the DECIMAL arithmetic is made
+            // using the SQL engine (since this is a test of Derby).
+            //
+
+            PreparedStatement psTotal = prepareStatement(
+                "SELECT SUM(OL_AMOUNT) FROM ORDERLINE " +
+                "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?");
+
+            psTotal.setShort(1, w);
+            psTotal.setShort(2, d);
+            psTotal.setInt(3, orderNumber);
+            rs = psTotal.executeQuery();
+            rs.next();
+            BigDecimal orderTotal = (BigDecimal) rs.getObject(1);
+            reset(psTotal);
+ 
+            conn.commit();
+        } catch (SQLException e) {
+            conn.rollback();
+        }
     }
     
     private PreparedStatement sdSchedule;
@@ -764,6 +987,13 @@ public class Standard implements Operations {
                 close((PreparedStatement) f.get(this));
             }
         }
+        
+        for (Iterator i = statements.keySet().iterator(); i.hasNext(); )
+        {
+            String sql = (String) i.next();
+            PreparedStatement ps = (PreparedStatement) statements.get(sql);
+            ps.close();
+        }
     }
     
     /**
@@ -806,5 +1036,55 @@ public class Standard implements Operations {
         address.setZip(rs.getString(col));
         
         return address;
+    }
+    
+    
+    public void sortOrderItems(int[] items, short[] quantities, short[] supplyW) {
+
+        OrderItem4Sort[] list = new OrderItem4Sort[items.length];
+
+        for (int i = 0; i < items.length; i++)
+        {
+            list[i] = new OrderItem4Sort(items[i], quantities[i], supplyW[i]);
+        }
+
+        java.util.Arrays.sort(list);
+
+        for (int i = 0; i < items.length; i++)
+        {
+            items[i] = list[i].i;
+            quantities[i] = list[i].q;
+            supplyW[i] = list[i].w;
+        }
+    }
+}
+
+class OrderItem4Sort implements Comparable {
+
+    final int i;
+    final short q;
+    final short w;
+
+    OrderItem4Sort(int i, short q, short w)
+    {
+        this.i = i;
+        this.q = q;
+        this.w = w;
+    }
+
+
+    public int compareTo(Object o) {
+
+        OrderItem4Sort oo = (OrderItem4Sort) o;
+
+        if (w < oo.w)
+            return -1;
+        if (w > oo.w)
+            return 1;
+        if (i < oo.i)
+            return -1;
+        if (i > oo.i)
+            return 1;
+        return 0;
     }
 }

@@ -149,6 +149,30 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
     public void testNewOrder() throws Exception
     {
         ops.setupNewOrder();
+        for (int x = 0; x < 50; x++)
+        {
+            int itemCount = rand.randomInt(5, 15);
+            int[] items = new int[itemCount];
+            short[] quantities = new short[itemCount];
+            short[] supplyW = new short[itemCount];
+            
+            // rollback 1% of the transactions
+            boolean willFail = rand.randomInt(1, 100) == 1;
+
+            for (int i = 0 ; i < itemCount; i++) {
+                if (willFail && (i == (itemCount - 1)))
+                    items[i] = 500000; // some invalid value
+                else
+                    items[i] = rand.NURand8191();
+
+                quantities[i] = (short) rand.randomInt(1, 10);
+                supplyW[i] = w;
+            }
+
+            ops.newOrder(this, null, w, rand.district(),
+                rand.NURand1023(),  items, quantities, supplyW);
+            
+        }
     }
     public void testScheduleDelivery() throws Exception
     {
