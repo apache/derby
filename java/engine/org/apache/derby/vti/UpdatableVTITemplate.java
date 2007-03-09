@@ -21,39 +21,35 @@
 
 package org.apache.derby.vti;
 
-import org.apache.derby.iapi.reference.JDBC20Translation;
-
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.math.BigDecimal;
-import java.sql.Blob;
-import java.sql.Ref;
-import java.sql.Clob;
-import java.sql.Array;
-
-import java.io.Reader;
-
 import java.util.Calendar;
 
-import java.io.InputStream;
+import org.apache.derby.iapi.reference.JDBC20Translation;
 
 /**
 
-   An abstract implementation of PreparedStatement (JDK1.1/JDBC 1.2) that is useful
+   An abstract implementation of PreparedStatement (JDBC 3.0) that is useful
 	when writing a read-write (updatable) virtual table interface (VTI).
 	
 	This class implements
-	the methods of the JDBC1.2 version of PreparedStatement plus the 
-	JDBC2.0 getMetaData() method, each one throwing a SQLException
+	the methods of the JDBC3.0 version of PreparedStatement
+    each one throwing a SQLException
 	with the name of the method. A concrete subclass can then just implement
 	the methods not implemented here and override any methods it needs
 	to implement for correct functionality.
@@ -686,4 +682,44 @@ public abstract class UpdatableVTITemplate implements PreparedStatement
 	public void setArray(int i, Array x) throws SQLException {
 		throw new SQLException("setArray");
 	}
+
+    public void setURL(int arg0, URL arg1) throws SQLException {
+        throw new SQLException("setURL");    
+    }
+
+    public boolean getMoreResults(int arg0) throws SQLException {
+        throw new SQLException("getMoreResults");
+    }
+
+    public ResultSet getGeneratedKeys() throws SQLException {
+        throw new SQLException("getGeneratedKeys");
+    }
+
+    public int executeUpdate(String arg0, int arg1) throws SQLException {
+        throw new SQLException("executeUpdate");
+    }
+
+    public int executeUpdate(String arg0, int[] arg1) throws SQLException {
+        throw new SQLException("executeUpdate");
+    }
+
+    public int executeUpdate(String arg0, String[] arg1) throws SQLException {
+        throw new SQLException("executeUpdate");
+    }
+
+    public boolean execute(String arg0, int arg1) throws SQLException {
+        throw new SQLException("execute");
+    }
+
+    public boolean execute(String arg0, int[] arg1) throws SQLException {
+        throw new SQLException("execute");
+    }
+
+    public boolean execute(String arg0, String[] arg1) throws SQLException {
+        throw new SQLException("execute");
+    }
+
+    public int getResultSetHoldability() throws SQLException {
+        throw new SQLException("getResultSetHoldability");
+    }
 }
