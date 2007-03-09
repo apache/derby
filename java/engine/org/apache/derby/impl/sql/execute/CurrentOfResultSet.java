@@ -323,7 +323,7 @@ class CurrentOfResultSet extends NoPutResultSetImpl
 		}
 
 		if (cursor == null || cursor.isClosed()) {
-			throw StandardException.newException(SQLState.LANG_CURSOR_CLOSED, cursorName);	
+			throw StandardException.newException(SQLState.LANG_CURSOR_NOT_FOUND, cursorName);	
 		}
 	}
 

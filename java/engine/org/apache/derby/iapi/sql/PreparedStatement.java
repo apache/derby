@@ -38,7 +38,7 @@ import java.sql.SQLWarning;
  *
  */
 public interface PreparedStatement
-	extends Dependent, Provider
+	extends Dependent
 {
 
 	/**

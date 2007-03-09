@@ -720,11 +720,6 @@ recompileOutOfDatePlan:
 
 			DependencyManager dm = lcc.getDataDictionary().getDependencyManager();
 
-			if (!alreadyInvalid)
-			{
-				dm.invalidateFor(this, action, lcc);
-			}
-
 			/* Clear out the old dependencies on this statement as we
 			 * will build the new set during the reprepare in makeValid().
 			 */

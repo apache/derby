@@ -165,18 +165,15 @@ public final class CurrentOfNode extends FromTable {
 		throws StandardException {
 
 		// verify that the cursor exists
-		// and create a dependency on it
 
 		preStmt = getCursorStatement();
-		if (preStmt!=null) {
-			preStmt.rePrepare(getLanguageConnectionContext());
-		}
 
 		if (preStmt == null) {
 			throw StandardException.newException(SQLState.LANG_CURSOR_NOT_FOUND, 
 						cursorName);
 		}
 		
+        preStmt.rePrepare(getLanguageConnectionContext());
 
 		// verify that the cursor is updatable (UPDATE is responsible
 		// for checking that the right columns are updatable)
@@ -185,8 +182,6 @@ public final class CurrentOfNode extends FromTable {
 			String printableString = (cursorName == null) ? "" : cursorName;
 			throw StandardException.newException(SQLState.LANG_CURSOR_NOT_UPDATABLE, printableString);
 		}
-
-		getCompilerContext().createDependency(preStmt);
 
 		ExecCursorTableReference refTab = preStmt.getTargetTable();
 		String schemaName = refTab.getSchemaName();
