@@ -422,7 +422,7 @@ ij> execute p1;
 1 row inserted/updated/deleted
 ij> close c1;
 ij> execute p1;
-ERROR XCL07: Cursor 'C1' is closed. Verify that autocommit is OFF.
+ERROR 42X30: Cursor 'C1' not found. Verify that autocommit is OFF.
 ij> -- clean up
 autocommit on;
 ij> drop table x;

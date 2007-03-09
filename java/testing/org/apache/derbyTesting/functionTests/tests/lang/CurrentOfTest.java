@@ -174,14 +174,14 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		if (usingEmbedded())
 			assertStatementError("24000", delete);
 		else
-			assertStatementError("XCL07", delete);
+			assertStatementError("42X30", delete);
 		
 		
 		// TEST: delete off a closed cursor
 		// Once this is closed then the cursor no longer exists.
 		cursor.close();
 		if (usingEmbedded())
-			assertStatementError("XCL07", delete);
+			assertStatementError("42X30", delete);
 		else 
 			assertStatementError("XCL16", delete);
 		
@@ -282,7 +282,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		// TEST: update off a closed cursor
 		cursor.close();
 		select.close();
-		assertStatementError("XCL07", update);
+		assertStatementError("42X30", update);
 		update.close();
 
 		// TEST: no cursor with that name exists

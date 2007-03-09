@@ -524,7 +524,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
             fail("FAIL - deleteRow should have failed, positioned " +
                     "after last row");
         } catch (SQLException e) {
-            String sqlState = usingEmbedded() ? "24000" : "XCL07";
+            String sqlState = usingEmbedded() ? "24000" : "42X30";
             assertSQLState(sqlState, e);
         }
         
@@ -1858,14 +1858,14 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         // this delete row will fire the delete trigger which will delete all
         // the rows from the table and from the resultset
         rs.deleteRow();
-        try {
-            assertFalse("FAIL - row not found", rs.next());
+        assertFalse("FAIL - row not found", rs.next());
+        try {           
             rs.deleteRow();
             fail("FAIL - there should have be no more rows in the resultset " +
                     "at this point because delete trigger deleted all the " +
                     "rows");
         } catch (SQLException e) {
-            String sqlState = usingEmbedded() ? "24000" : "XCL07";
+            String sqlState = usingEmbedded() ? "24000" : "42X30";
             assertSQLState(sqlState, e);
         }
         rs.close();
@@ -1942,13 +1942,13 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         // this delete row will cause the delete cascade constraint to delete
         // all the rows from the table and from the resultset
         rs.deleteRow();
-        try {
-            assertFalse("FAIL - row not found", rs.next());
+        assertFalse("FAIL - row not found", rs.next());
+        try {      
             rs.deleteRow();
             fail("FAIL - there should have be no more rows in the resultset " +
                     "at this point because of the delete cascade");
         } catch (SQLException e) {
-            String sqlState = usingEmbedded() ? "24000" : "XCL07";
+            String sqlState = usingEmbedded() ? "24000" : "42X30";
             assertSQLState(sqlState, e);
         }
         rs.close();

@@ -277,7 +277,7 @@ C11        |C12
 -----------------------
 ij> close jdk4;
 ij> delete from t1 where current of jdk4;
-ERROR XCL07: Cursor 'JDK4' is closed. Verify that autocommit is OFF.
+ERROR 42X30: Cursor 'JDK4' not found. Verify that autocommit is OFF.
 ij> select * from t1;
 C11        |C12        
 -----------------------
