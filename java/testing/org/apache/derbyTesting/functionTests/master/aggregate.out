@@ -947,7 +947,10 @@ ij> -- should raise an error
 select a, count( a ) as a
 from bug280
 group by a;
-ERROR X0A00: The select list mentions column 'A' twice. This is not allowed in queries with GROUP BY or HAVING clauses. Try aliasing one of the conflicting columns to a unique name.
+A          |A          
+-----------------------
+1          |3          
+2          |2          
 ij> -- should return same results as first query (but with extra column)
 select a, count( a ), a
 from bug280

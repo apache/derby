@@ -1838,4 +1838,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 								   dependentScan);
 	}
 
+	public void setRestriction(ValueNode restriction) {
+		this.restriction = restriction;
+	}
+
 }

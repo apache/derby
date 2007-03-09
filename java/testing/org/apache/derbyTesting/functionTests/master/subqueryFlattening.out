@@ -66,8 +66,6 @@ C1         |C2         |C3
 1          |2          |3          
 ij> -- group by in subquery
 select * from outer1 o where c1 <= (select c1 from idx1 i group by c1);
-C1         |C2         |C3         
------------------------------------
 ERROR 21000: Scalar subquery is only allowed to return a single row.
 ij> -- otherwise flattenable subquery under an or 
 -- subquery returns no rows

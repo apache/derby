@@ -746,8 +746,6 @@ I          |S     |C                             |VC                            
 -----------------------------------------------------------------------------------------------------
 0          |0     |0                             |0                             |0                   
 ij> select * from s where i = (select min(i) from s group by i);
-I          |S     |C                             |VC                            |B                   
------------------------------------------------------------------------------------------------------
 ERROR 21000: Scalar subquery is only allowed to return a single row.
 ij> -- tests for distinct expression subquery
 create table dist1 (c1 int);

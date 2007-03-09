@@ -52,6 +52,8 @@ import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
@@ -4545,5 +4547,45 @@ public class FromBaseTable extends FromTable
 		this.raDependentScan = dependentScan;
 	}
 
+	/**
+	 * Accept a visitor, and call v.visit()
+	 * on child nodes as necessary.  
+	 * 
+	 * @param v the visitor
+	 *
+	 * @exception StandardException on error
+	 */
+	public Visitable accept(Visitor v) 
+	
+		throws StandardException
+	{
+
+	        Visitable returnNode = super.accept(v);
+
+		if (v.skipChildren(this))
+		{
+			return returnNode;
+		}
+
+
+
+		if (nonStoreRestrictionList != null && !v.stopTraversal()) {
+			nonStoreRestrictionList.accept(v);
+		}
+		
+		if (restrictionList != null & !v.stopTraversal()) {
+			restrictionList.accept(v);
+		}
+
+		if (nonBaseTableRestrictionList != null && !v.stopTraversal()) {
+			nonBaseTableRestrictionList.accept(v);
+		}
+
+		if (requalificationRestrictionList != null && !v.stopTraversal()) {
+			requalificationRestrictionList.accept(v);
+		}
+		
+		return returnNode;
+	}
 
 }

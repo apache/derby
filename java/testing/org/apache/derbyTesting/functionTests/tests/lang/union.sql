@@ -381,3 +381,17 @@ select nullif('x','x') as f0, f1 from a
    select nullif('x','x') as f0, nullif(1,1) as f1 from b; 
 drop table a;
 drop table b;
+
+-- DERBY-681. Check union with group by/having
+create table o (name varchar(20), ord int);
+create table a (ord int, amount int);
+
+create view v1 (vx, vy) 
+as select name, sum(ord) from o where ord > 0 group by name, ord
+    having ord <= ANY (select ord from a);
+
+select vx, vy from v1
+     union select vx, sum(vy) from v1 group by vx, vy having (vy / 2) > 15;
+drop view v1;
+drop table o;
+drop table a;

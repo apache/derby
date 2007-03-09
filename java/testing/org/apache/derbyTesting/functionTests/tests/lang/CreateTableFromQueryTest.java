@@ -148,6 +148,18 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
             new String [] {"NO", "NO"},
             new String [] {"INTEGER", "CHAR"});
     }
+    
+    public void testCreateTableWithGroupByInQuery() throws Exception 
+    {
+        positiveTest(
+            "create table t3 (x, y) as " +
+            " (select v, sum(i) from t1 where i > 0 " +
+            " group by i, v having i <= " +
+            " ANY (select a from t2)) with no data",
+            new String[] {"X", "Y"},
+            new String[] {"NO", "YES"},
+            new String[] {"VARCHAR", "INTEGER"});
+    }
 
     /**
      * Test error when base table does not exist.

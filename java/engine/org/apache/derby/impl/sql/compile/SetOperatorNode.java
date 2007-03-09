@@ -577,8 +577,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 		/* Verify that both sides of the union have the same # of columns in their
 		 * RCL.
 		 */
-		if (leftResultSet.getResultColumns().size() !=
-			rightResultSet.getResultColumns().size())
+		if (leftResultSet.getResultColumns().visibleSize() !=
+			rightResultSet.getResultColumns().visibleSize())
 		{
 			throw StandardException.newException(SQLState.LANG_UNION_UNMATCHED_COLUMNS,
                                                  getOperatorName());

@@ -203,3 +203,20 @@ DROP SCHEMA TEST_SCHEMA RESTRICT;
 -- DERBY-2018
 -- expect error
 CREATE VIEW v1(c1) AS VALUES NULL;
+
+-- DERBY-681
+create table o (name varchar(20), ord int);
+create table a (ord int, amount int);
+
+create view v1 (vx, vy) 
+as select name, sum(ord) from o where ord > 0 group by name, ord;
+
+create view v2 (vx, vy) as
+  select name, sum(ord) from o where ord > 0 group by name, ord
+    having ord <= ANY (select ord from a);
+drop view v2;
+drop view v1;
+drop table a;
+drop table o;
+
+

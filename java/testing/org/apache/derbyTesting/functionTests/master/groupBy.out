@@ -50,7 +50,7 @@ ij> -- having clause
 
 -- cannot contain column references which are not grouping columns
 select a from t1 group by a having c = 1;
-ERROR 42X04: Column 'C' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C' is not a column in the target table.
+ERROR 42X24: Column C is referenced in the HAVING clause but is not in the GROUP BY list.
 ij> select a from t1 o group by a having a = (select a from t1 where b = b.o);
 ERROR 42X04: Column 'B.O' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'B.O' is not a column in the target table.
 ij> -- ?s in group by
@@ -340,8 +340,8 @@ ij> -- subset in same order
 select i, dt, b from t group by i, dt, b order by i, dt;
 I          |DT        |B   
 ---------------------------
-0          |1992-01-01|ffff
 0          |1992-01-01|12af
+0          |1992-01-01|ffff
 0          |1992-09-09|12af
 1          |1992-01-01|12af
 NULL       |NULL      |NULL
@@ -577,7 +577,7 @@ ij> -- column references in having clause not allowed if no group by
 select * from t1 having c1 = 1;
 ERROR 42Y35: Column reference 'T1.C1' is invalid. When the SELECT list contains at least one aggregate then all entries must be valid aggregate expressions.  
 ij> select 1 from t1 having c1 = 1;
-ERROR 42X04: Column 'C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C1' is not a column in the target table.
+ERROR 42X24: Column C1 is referenced in the HAVING clause but is not in the GROUP BY list.
 ij> -- correlated subquery in having clause
 select * from t1 t1_outer 
 having 1 = (select 1 from t1 where c1 = t1_outer.c1);

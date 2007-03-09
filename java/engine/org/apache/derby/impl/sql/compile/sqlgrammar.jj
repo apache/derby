@@ -335,88 +335,6 @@ public class SQLParser
 											"TRUE");
 	}
 
-	/*
-	** Make sure that a select list in a parser-rewritten tree does
-	** not contain two columns by the same name. This is the patch
-	** to bug 280. In this case, the bind phase cannot tell the
-	** difference between the two columns and so the query may
-	** return wrong results.
-	**
-	** This issue is caused by parser rewriting of group by/having clauses
-	** into table expressions. (See function tableExpression() in this file)
-	** There is an improvement request filed under DERBY-681 to eliminate this
-	** rewrite, after which it should be possible to allow multiple columns to
-	** have same name in the select list.
-	*/
-	private	void	vetSelectList280( ResultColumnList selectList )
-		throws StandardException
-	{
-		Hashtable	allNames = new Hashtable();
-		int			count = selectList.size();
-
-		for ( int i = 0; i < count; i++ )
-		{
-			ResultColumn	rc = (ResultColumn) selectList.elementAt( i );
-			String			duplicateName = ambiguousDuplicateName( allNames, rc );
-
-			if ( duplicateName != null )
-			{
-				throw StandardException.newException
-				( SQLState.LANG_UNBINDABLE_REWRITE, duplicateName );
-			}
-
-		}
-	}
-
-	// allow two references to the same column. disallow aliasing
-	// two different expressions to the same name. returns the
-	// ambiguous column name if two result columns cannot be distinguished.
-	private	String	ambiguousDuplicateName( Hashtable allNames, ResultColumn rc )
-		throws StandardException
-	{
-		String			columnName = rc.getName();
-		ValueNode		newExpression = rc.getExpression();
-
-		// no column name means that the compiler will generate a
-		// unique name. that's ok and avoids bug 280
-		if ( columnName == null ) { return null; }
-
-		ValueNode		oldExpression = (ValueNode) allNames.get( columnName );
-
-		// no problem yet if we haven't seen this column
-		if ( oldExpression == null )
-		{
-			allNames.put( columnName, newExpression );
-			return null;
-		}
-
-		// if the two identically named references aren't both the
-		// same table column, then the bug occurs
-		if (
-				!(newExpression instanceof ColumnReference) ||
-				!(oldExpression instanceof ColumnReference)
-		   )
-		{ return columnName; }
-
-		ColumnReference		 newCR = (ColumnReference) newExpression;
-		ColumnReference		 oldCR = (ColumnReference) oldExpression;
-		TableName			 newTableName = newCR.getTableNameNode();
-		TableName			 oldTableName = oldCR.getTableNameNode();
-
-		if (
-				( (newTableName == null) && (oldTableName == null) ) ||
-				( (newTableName != null) && (newTableName.equals( oldTableName )) )
-		   )
-		{
-			// same table but different column aliased to same column name
-			if ( !newCR.getColumnName().equals( oldCR.getColumnName() ) )
-			{ return columnName; }
-			else { return null; }
-		}
-
-		// different tables
-		return null;
-	}
 
 	/**
 		Check that the current mode supports internal extensions.
@@ -878,6 +796,7 @@ public class SQLParser
 										fromList, /* FROM list */
 					  					whereClause, /* WHERE clause */
 										null, /* GROUP BY list */
+										null, /* having clause */
 										getContextManager());
 
 		StatementNode retval =
@@ -917,6 +836,7 @@ public class SQLParser
 										fromList, /* FROM list */
 					  					whereClause, /* WHERE clause */
 										null, /* GROUP BY list */
+										null, /* having clause */
 										getContextManager());
 
 		StatementNode retval =
@@ -8447,6 +8367,21 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 	[ groupByList = groupByClause() ]
 	[ havingClause = havingClause() ]
 	{
+ 
+		// fix for HAVING without GROUP BY, makes sure we get one
+		// aggregate operator by adding a count(*), this fixes beetle 5853, 5890
+		if (havingClause != null && groupByList == null) {
+			ValueNode vn = (ValueNode) nodeFactory.getNode(
+								C_NodeTypes.AGGREGATE_NODE,
+								null,
+								org.apache.derby.impl.sql.compile.CountAggregateDefinition.class,
+								Boolean.FALSE, // distinct Boolean.TRUE?
+								"COUNT(*)",
+								getContextManager());
+			AggregateNode n = (AggregateNode) vn;
+			n.replaceAggregatesWithColumnReferences(selectList, 0);			
+		}
+		
 		selectNode = (SelectNode) nodeFactory.getNode(
 							C_NodeTypes.SELECT_NODE,
 							selectList,
@@ -8454,115 +8389,14 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 							fromList,
 							whereClause,
 							groupByList,
+							havingClause,
 							getContextManager());
 
-		/* A SELECT with a GROUP BY or HAVING clause is the one instance where the
-		 * parser will generate a tree that does not exactly match the query.
-		 * The resulting tree is an outer SelectNode with the HAVING clause
-		 * as its WHERE clause and a FromList containing a single FromSubquery -
-		 * the user SELECT, minus the HAVING clause.
-		 * The outer SELECT gets a SELECT *.
-		 * The FromSubquery will have a null name, something that the user cannot do,
-		 * to enable the binding of any correlated columns in the HAVING clause.
-		 */
-		if (groupByList != null || havingClause != null)
-		{
-			vetSelectList280( selectList );
-
-			FromSubquery		fromSubquery;
-			ResultColumnList	outerRCL =
-										(ResultColumnList) nodeFactory.getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
-
-			/* Wrap the user SELECT in a FromSubquery */
-			fromList = (FromList) nodeFactory.getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
-			fromSubquery = (FromSubquery) nodeFactory.getNode(
-													C_NodeTypes.FROM_SUBQUERY,
-													selectNode, 
-													null,
-													null,
-													null,
-													getContextManager());
-			fromList.addElement(fromSubquery);
-
-			/* Pull any aggregates out of the HAVING clause and append them to 
-			 * SELECT list in the user's select, replacing the aggregates in
-			 * the HAVING clause with ColumnReferences to the aggregate.
-			 * Do NOT replace anything below a ResultSetNode.  This means that
-			 * we'll replace
-			 * 		FROM x HAVING max(x.x) > 2
-			 * but not
-			 *		FROM x HAVING x.x = (select max(y.y) from y)
-			 * Aggregates under a SELECT are all fixed up correctly
-			 * later, but here we need to get the aggregates that
-			 * aren't under result sets.
-			 *
-			 * Appended ResultColumns marked as generated so the wrapper
-			 * select won't see them when the * is expanded.
-			 *
-			 * RESOLVE - someday we should try to find matching aggregates
-			 * instead of just adding them.
-             *
-             * NOTE: This rewriting of the query tree makes the handling of an ORDER BY
-             * clause difficult. See OrderByColumn.pullUpOrderByColumn. It makes specific
-             * assumptions about the structure of the generated query tree. Do not make
-             * any changes to this transformation without carefully considering the
-             * OrderByColumn pullUpOrderByColumn and bindOrderByColumn methods.
-			 */
-			if (havingClause != null)
-			{
-				ReplaceAggregatesWithCRVisitor visitor = 
-					new ReplaceAggregatesWithCRVisitor(selectList, ResultSetNode.class);
-				havingClause = (ValueNode)havingClause.accept(visitor);
-				
-				// fix for HAVING without GROUP BY, makes sure we get one
-				// aggregate operator by adding a count(*), this fixes beetle 5853, 5890
-				if (groupByList == null) {
-					ValueNode vn = (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.AGGREGATE_NODE,
-								null,
-								org.apache.derby.impl.sql.compile.CountAggregateDefinition.class,
-								Boolean.FALSE, // distinct Boolean.TRUE?
-								"COUNT(*)",
-								getContextManager());
-					AggregateNode n = (AggregateNode) vn;
-					n.replaceAggregatesWithColumnReferences(selectList, 0);
-				}
-			}
-
-			outerRCL.addResultColumn((ResultColumn) nodeFactory.getNode(
-												C_NodeTypes.ALL_RESULT_COLUMN,
-												null,
-												getContextManager()));
-			// wrap another selectNode on the outside of the subquery
-			selectNode = (SelectNode) nodeFactory.getNode(
-										C_NodeTypes.SELECT_NODE,
-										outerRCL,	/* SELECT * from user SELECT */
-										null, 		/* AGGREGATE list */
-										fromList,
-										havingClause,
-										null,		/* GROUP BY list */
-										getContextManager());
-
-			/* Mark the wrapping FromSubquery and SelectNode as appropriate */
-			if (groupByList != null)
-			{
-				fromSubquery.markAsForGroupByClause();
-				selectNode.markAsForGroupByClause();
-			}
-			if (havingClause != null)
-			{
-				fromSubquery.markAsForHavingClause();
-				selectNode.markAsForHavingClause();
-			}
-		}
 		return selectNode;
 	}
 }
+
+
 
 /*
  * <A NAME="fromClause">fromClause</A>

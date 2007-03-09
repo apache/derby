@@ -136,7 +136,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (5):
+Project-Restrict ResultSet (4):
 Number of opens = 1
 Rows seen = 7
 Rows filtered = 0
@@ -149,65 +149,52 @@ projection = true
 	restriction time (milliseconds) = 0
 	projection time (milliseconds) = 0
 Source result set:
-	Project-Restrict ResultSet (4):
+	Grouped Aggregate ResultSet:
 	Number of opens = 1
-	Rows seen = 7
-	Rows filtered = 0
-	restriction = false
-	projection = true
+	Rows input = 9
+	Has distinct aggregate = false
+	In sorted order = false
+	Sort information: 
+		Number of rows input=9
+		Number of rows output=7
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-		restriction time (milliseconds) = 0
-		projection time (milliseconds) = 0
 	Source result set:
-		Grouped Aggregate ResultSet:
+		Project-Restrict ResultSet (3):
 		Number of opens = 1
-		Rows input = 9
-		Has distinct aggregate = false
-		In sorted order = false
-		Sort information: 
-			Number of rows input=9
-			Number of rows output=7
+		Rows seen = 9
+		Rows filtered = 0
+		restriction = false
+		projection = true
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
 		Source result set:
-			Project-Restrict ResultSet (3):
+			Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
 			Number of opens = 1
 			Rows seen = 9
 			Rows filtered = 0
-			restriction = false
-			projection = true
+			Fetch Size = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Table Scan ResultSet for T1 at serializable isolation level using share table locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 9
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched={0}
-					Number of columns fetched=1
-					Number of pages visited=1
-					Number of rows qualified=9
-					Number of rows visited=9
-					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of pages visited=1
+				Number of rows qualified=9
+				Number of rows visited=9
+				Scan type=heap
+				start position: 
+null				stop position: 
+null				qualifiers:
 None
 ij> -- min optimization
 create index i1 on t1(c1);
@@ -667,7 +654,7 @@ Source result set:
 			Number of opens = 1
 			Rows seen = 0
 			Rows filtered = 0
-			Fetch Size = 1
+			Fetch Size = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
@@ -752,7 +739,7 @@ Source result set:
 			Number of opens = 1
 			Rows seen = 1
 			Rows filtered = 0
-			Fetch Size = 1
+			Fetch Size = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
@@ -838,7 +825,7 @@ Source result set:
 			Number of opens = 1
 			Rows seen = 3
 			Rows filtered = 0
-			Fetch Size = 1
+			Fetch Size = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
@@ -925,7 +912,7 @@ Source result set:
 			Number of opens = 1
 			Rows seen = 5
 			Rows filtered = 0
-			Fetch Size = 1
+			Fetch Size = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
@@ -1016,7 +1003,7 @@ Source result set:
 			Number of opens = 1
 			Rows seen = 5
 			Rows filtered = 0
-			Fetch Size = 1
+			Fetch Size = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
@@ -1701,7 +1688,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (5):
+Project-Restrict ResultSet (4):
 Number of opens = 1
 Rows seen = 5
 Rows filtered = 0
@@ -1714,66 +1701,53 @@ projection = true
 	restriction time (milliseconds) = 0
 	projection time (milliseconds) = 0
 Source result set:
-	Project-Restrict ResultSet (4):
+	Grouped Aggregate ResultSet:
 	Number of opens = 1
-	Rows seen = 5
-	Rows filtered = 0
-	restriction = false
-	projection = true
+	Rows input = 5
+	Has distinct aggregate = false
+	In sorted order = true
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-		restriction time (milliseconds) = 0
-		projection time (milliseconds) = 0
 	Source result set:
-		Grouped Aggregate ResultSet:
+		Project-Restrict ResultSet (3):
 		Number of opens = 1
-		Rows input = 5
-		Has distinct aggregate = false
-		In sorted order = true
+		Rows seen = 5
+		Rows filtered = 0
+		restriction = false
+		projection = true
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
 		Source result set:
-			Project-Restrict ResultSet (3):
+			Index Scan ResultSet for X using index IX at read committed isolation level using instantaneous share row locking chosen by the optimizer
 			Number of opens = 1
 			Rows seen = 5
 			Rows filtered = 0
-			restriction = false
-			projection = true
+			Fetch Size = 16
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				restriction time (milliseconds) = 0
-				projection time (milliseconds) = 0
-			Source result set:
-				Index Scan ResultSet for X using index IX at read committed isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 5
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched={0}
-					Number of columns fetched=1
-					Number of deleted rows visited=0
-					Number of pages visited=1
-					Number of rows qualified=5
-					Number of rows visited=5
-					Scan type=btree
-					Tree height=1
-					start position: 
+				next time in milliseconds/row = 0
+			scan information: 
+				Bit set of columns fetched={0}
+				Number of columns fetched=1
+				Number of deleted rows visited=0
+				Number of pages visited=1
+				Number of rows qualified=5
+				Number of rows visited=5
+				Scan type=btree
+				Tree height=1
+				start position: 
 	None
-					stop position: 
+				stop position: 
 	None
-					qualifiers:
+				qualifiers:
 None
 ij> -- could do max optimization on this, but we don't 
 -- really know much about qualifications

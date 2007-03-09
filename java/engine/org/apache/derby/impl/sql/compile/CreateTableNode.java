@@ -280,7 +280,7 @@ public class CreateTableNode extends DDLStatementNode
 			
 			if (resultColumns != null)
 			{
-				if (resultColumns.size() != qeRCL.size())
+				if (resultColumns.size() != qeRCL.visibleSize())
 				{
 					throw StandardException.newException(
 							SQLState.LANG_TABLE_DEFINITION_R_C_L_MISMATCH,
@@ -295,6 +295,10 @@ public class CreateTableNode extends DDLStatementNode
 			for (int index = 0; index < qeRCL.size(); index++)
 			{
 				ResultColumn rc = (ResultColumn) qeRCL.elementAt(index);
+				if (rc.isGenerated()) 
+			        {
+				    continue;
+				}
 				/* Raise error if column name is system generated. */
 				if (rc.isNameGenerated())
 				{

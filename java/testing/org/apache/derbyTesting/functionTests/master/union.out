@@ -971,4 +971,23 @@ ij> drop table a;
 0 rows inserted/updated/deleted
 ij> drop table b;
 0 rows inserted/updated/deleted
+ij> -- DERBY-681. Check union with group by/having
+create table o (name varchar(20), ord int);
+0 rows inserted/updated/deleted
+ij> create table a (ord int, amount int);
+0 rows inserted/updated/deleted
+ij> create view v1 (vx, vy) 
+as select name, sum(ord) from o where ord > 0 group by name, ord
+    having ord <= ANY (select ord from a);
+0 rows inserted/updated/deleted
+ij> select vx, vy from v1
+     union select vx, sum(vy) from v1 group by vx, vy having (vy / 2) > 15;
+VX                  |2          
+--------------------------------
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> drop table o;
+0 rows inserted/updated/deleted
+ij> drop table a;
+0 rows inserted/updated/deleted
 ij> 

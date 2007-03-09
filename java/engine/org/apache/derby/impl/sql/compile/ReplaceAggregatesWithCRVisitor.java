@@ -47,8 +47,14 @@ public class ReplaceAggregatesWithCRVisitor implements Visitor
 	 */
 	public ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, int tableNumber)
 	{
+		this(rcl, tableNumber, null);
+	}
+
+	public ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, int tableNumber, Class skipOverClass)
+	{
 		this.rcl = rcl;
 		this.tableNumber = tableNumber;
+		this.skipOverClass = skipOverClass;
 	}
 
 	/**

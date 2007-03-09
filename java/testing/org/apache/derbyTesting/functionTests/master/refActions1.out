@@ -216,26 +216,6 @@ ij> select * from db2test.emp where exists ( select max(mgrname) from
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 1          |ASHOK     |NULL      |K51 
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
 10         |BOBBIE    |HAMID     |K55 
 13         |DAN       |ROGER     |K52 
 17         |DON       |GUY       |K55 
@@ -284,26 +264,6 @@ ij> select * from db2test.emp where exists ( select max(mgrname) from
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 1          |ASHOK     |NULL      |K51 
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
 10         |BOBBIE    |HAMID     |K55 
 13         |DAN       |ROGER     |K52 
 17         |DON       |GUY       |K55 
@@ -356,26 +316,6 @@ ij> select * from db2test.vemp order by 2, 3, 4;
 VC0        |VNAME     |VMGRNAME  |VDNO
 --------------------------------------
 1          |ASHOK     |NULL      |K51 
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
 10         |BOBBIE    |HAMID     |K55 
 13         |DAN       |ROGER     |K52 
 17         |DON       |GUY       |K55 
@@ -678,9 +618,6 @@ ij> select * from db2test.dept where exists ( select max(mgrname) from
 C0         |DNO|DNAME     
 --------------------------
 3          |K51|CS        
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
 2          |K52|OFC       
 1          |K55|DB        
 ij> delete from db2test.dept where exists ( select max(mgrname) from
@@ -3231,7 +3168,7 @@ ij> select * from db2test.emp e
                   where e4.name = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                    where e.mgrname = 'JOHN'))))) order by 2, 3, 4;
-ERROR 42X04: Column 'E4.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E4.NAME' is not a column in the target table.
+ERROR 42X24: Column E4.NAME is referenced in the HAVING clause but is not in the GROUP BY list.
 ij> -- select should get -119;
 delete from db2test.emp 
   where dno in (select dno from db2test.emp5 e5
@@ -3242,7 +3179,7 @@ delete from db2test.emp
                   where e4.name = e2.mgrname group by dno having
                   e2.dno in (select dno from db2test.emp  e1
                   where db2test.emp.mgrname = 'JOHN')))));
-ERROR 42X04: Column 'E4.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'E4.NAME' is not a column in the target table.
+ERROR 42X24: Column E4.NAME is referenced in the HAVING clause but is not in the GROUP BY list.
 ij> select * from db2test.emp order by dno, name, mgrname;
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
@@ -4429,26 +4366,6 @@ ij> select * from db2test.emp where exists ( select max(mgrname) from
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 1          |ASHOK     |NULL      |K51 
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
 10         |BOBBIE    |HAMID     |K55 
 13         |DAN       |ROGER     |K52 
 17         |DON       |GUY       |K55 
@@ -4498,26 +4415,6 @@ ij> select * from db2test.emp where exists ( select max(mgrname) from
 C0         |NAME      |MGRNAME   |DNO 
 --------------------------------------
 1          |ASHOK     |NULL      |K51 
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
 10         |BOBBIE    |HAMID     |K55 
 13         |DAN       |ROGER     |K52 
 17         |DON       |GUY       |K55 
@@ -4571,26 +4468,6 @@ ij> select * from db2test.vemp order by 2, 3, 4;
 VC0        |VNAME     |VMGRNAME  |VDNO
 --------------------------------------
 1          |ASHOK     |NULL      |K51 
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
 10         |BOBBIE    |HAMID     |K55 
 13         |DAN       |ROGER     |K52 
 17         |DON       |GUY       |K55 
@@ -4933,9 +4810,6 @@ ij> select * from db2test.dept where exists ( select max(mgrname) from
 C0         |DNO|DNAME     
 --------------------------
 3          |K51|CS        
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
-WARNING 01003: Null values were eliminated from the argument of a column function.
 2          |K52|OFC       
 1          |K55|DB        
 ij> delete from db2test.dept where exists ( select max(mgrname) from

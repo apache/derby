@@ -774,7 +774,7 @@ public interface SQLState {
 	String LANG_NOT_COMPARABLE                                         = "42818";
 	String LANG_NON_BOOLEAN_WHERE_CLAUSE                               = "42X19";
 	String LANG_CURSOR_NOT_UPDATABLE                                   = "42X23";
-	//	String LANG_UNARY_MINUS_BAD_TYPE                                   = "42X24";
+	String LANG_INVALID_COL_HAVING_CLAUSE                              = "42X24";
 	String LANG_UNARY_FUNCTION_BAD_TYPE                                = "42X25";
 	String LANG_TYPE_DOESNT_EXIST                                      = "42X26";
 	String LANG_CURSOR_DELETE_MISMATCH                                 = "42X28";

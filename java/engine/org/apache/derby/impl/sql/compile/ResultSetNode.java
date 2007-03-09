@@ -314,7 +314,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 			throws StandardException
 	{
 		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(resultColumns.size() <= typeColumns.size(),
+			SanityManager.ASSERT(resultColumns.visibleSize() <= typeColumns.size(),
 				"More columns in ResultColumnList than in base table");
 
 		/* Look for ? parameters in the result column list */
@@ -832,7 +832,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 		 * we won't be able to project out any of them.
 		 */
 		prRCList.genVirtualColumnNodes(this, resultColumns, false);
-
 		/* Finally, we create the new ProjectRestrictNode */
 		return (ResultSetNode) getNodeFactory().getNode(
 								C_NodeTypes.PROJECT_RESTRICT_NODE,
@@ -1444,12 +1443,16 @@ public abstract class ResultSetNode extends QueryTreeNode
 		prRCList = resultColumns;
 		resultColumns = resultColumns.copyListAndObjects();
 
+		// Remove any columns that were generated.
+		prRCList.removeGeneratedGroupingColumns();
+
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the NormalizeResultSetNode's ResultColumnList.  (VirtualColumnNodes include
 		 * pointers to source ResultSetNode, this, and source ResultColumn.)
 		 */
 		prRCList.genVirtualColumnNodes(this, resultColumns);
 
+		
 		/* Finally, we create the new NormalizeResultSetNode */
 		nrsn = (NormalizeResultSetNode) getNodeFactory().getNode(
 								C_NodeTypes.NORMALIZE_RESULT_SET_NODE,

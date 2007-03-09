@@ -320,14 +320,14 @@ public final class InsertNode extends DMLModStatementNode
 		*/
 		if (targetColumnList != null)
 		{
-			if (resultSet.getResultColumns().size() > targetColumnList.size())
+			if (resultSet.getResultColumns().visibleSize() > targetColumnList.size())
 				throw StandardException.newException(SQLState.LANG_DB2_INVALID_COLS_SPECIFIED); 
 			resultSet.bindUntypedNullsToResultColumns(targetColumnList);
 			resultSet.setTableConstructorTypes(targetColumnList);
 		}
 		else
 		{
-			if (resultSet.getResultColumns().size() > resultColumnList.size())
+			if (resultSet.getResultColumns().visibleSize() > resultColumnList.size())
 				throw StandardException.newException(SQLState.LANG_DB2_INVALID_COLS_SPECIFIED); 
 			resultSet.bindUntypedNullsToResultColumns(resultColumnList);
 			resultSet.setTableConstructorTypes(resultColumnList);
@@ -336,7 +336,7 @@ public final class InsertNode extends DMLModStatementNode
 		/* Bind the columns of the result set to their expressions */
 		resultSet.bindResultColumns(fromList);
 
-		int resCols = resultSet.getResultColumns().size();
+		int resCols = resultSet.getResultColumns().visibleSize();
 		DataDictionary dd = getDataDictionary();
 		if (targetColumnList != null)
 		{
@@ -404,7 +404,7 @@ public final class InsertNode extends DMLModStatementNode
 			** table.
 			*/
 			for (int position = 0;
-				position < resultSet.getResultColumns().size();
+				position < resultSet.getResultColumns().visibleSize();
 				position++)
 			{
 				colMap[position] = position;

@@ -1357,6 +1357,12 @@ Guide.
                 <arg>cursorName</arg>
             </msg>
 
+			<msg>
+				<name>42X24</name>
+				<text>Column {0} is referenced in the HAVING clause but is not in the GROUP BY list.</text>
+				<arg>columnName</arg>
+			</msg>
+			
             <msg>
                 <name>42X25</name>
                 <text>The '{0}' function is not allowed on the '{1}' type.</text>

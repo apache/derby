@@ -197,6 +197,12 @@ public class GroupByList extends OrderedColumnList
 				* has a matching entry in the SELECT list.
 				*/
 				groupingCol.setColumnPosition(selectRCL.size());
+				
+				// a new hidden or generated column is added to this RCL
+				// i.e. that the size() of the RCL != visibleSize(). 
+				// Error checking done later should be aware of this 
+				// special case.
+				selectRCL.setCountMismatchAllowed(true);
 
 				/*
 				** Track the number of columns that we have added

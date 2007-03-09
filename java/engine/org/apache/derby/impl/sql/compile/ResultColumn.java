@@ -1434,6 +1434,10 @@ public class ResultColumn extends ValueNode
   			newResultColumn.setAutoincrement();
   		if (isGroupingColumn()) 
   			newResultColumn.markAsGroupingColumn();
+  		
+  		if (isGenerated()) {
+  			newResultColumn.markGenerated();
+  		}
   		return newResultColumn;
 	}
 

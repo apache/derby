@@ -390,4 +390,24 @@ ij> -- DERBY-2018
 -- expect error
 CREATE VIEW v1(c1) AS VALUES NULL;
 ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
+ij> -- DERBY-681
+create table o (name varchar(20), ord int);
+0 rows inserted/updated/deleted
+ij> create table a (ord int, amount int);
+0 rows inserted/updated/deleted
+ij> create view v1 (vx, vy) 
+as select name, sum(ord) from o where ord > 0 group by name, ord;
+0 rows inserted/updated/deleted
+ij> create view v2 (vx, vy) as
+  select name, sum(ord) from o where ord > 0 group by name, ord
+    having ord <= ANY (select ord from a);
+0 rows inserted/updated/deleted
+ij> drop view v2;
+0 rows inserted/updated/deleted
+ij> drop view v1;
+0 rows inserted/updated/deleted
+ij> drop table a;
+0 rows inserted/updated/deleted
+ij> drop table o;
+0 rows inserted/updated/deleted
 ij> 

@@ -340,9 +340,12 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *		  Only FromSubquery needs to call this flavor since
 	 *		  it can have ambiguous references in its own list.
 	 *
-	 * @param cr					The ColumnReference to resolve
-	 * @param exposedTableName		Exposed table name for FromTable
-	 *
+	 * @param cr					   The ColumnReference to resolve
+	 * @param exposedTableName		   Exposed table name for FromTable
+	 * @param considerGeneratedColumns Also consider columns that are generated.
+	 *   One example of this is group by where columns are added to the select list
+	 *   if they are referenced in the group by but are not present in the select
+	 *   list.
 	 * @return	the column that matches that name.
 	 *
 	 * @exception StandardException	Thrown on error
@@ -350,7 +353,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 	public ResultColumn getAtMostOneResultColumn(
 								ColumnReference cr,
-								String exposedTableName)
+								String exposedTableName,
+								boolean considerGeneratedColumns)
 		throws StandardException
 	{
 		int				size = size();
@@ -361,8 +365,11 @@ public class ResultColumnList extends QueryTreeNodeVector
 		{
 			ResultColumn resultColumn = (ResultColumn) elementAt(index);
 
-			if (columnName.equals( resultColumn.getName()) )
+			if (columnName.equals( resultColumn.getName()))
 			{
+				if (resultColumn.isGenerated() && !considerGeneratedColumns) {
+					continue;
+				}
 				/* We should get at most 1 match */
 				if (retRC != null)
 				{
@@ -1570,7 +1577,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	public void copyTypesAndLengthsToSource(ResultColumnList sourceRCL) throws StandardException
 	{
 		/* Source and target can have different lengths. */
-		int size = (size() > sourceRCL.size()) ? size() : sourceRCL.size();
+		int size = Math.min(size(), sourceRCL.size());
 		for (int index = 0; index < size; index++)
 		{
 			ResultColumn sourceRC = (ResultColumn) sourceRCL.elementAt(index);
@@ -1747,10 +1754,27 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 			newList.addResultColumn(newResultColumn);
 		}
-
+        newList.copyOrderBySelect(this);
 		return newList;
 	}
 
+	/**
+	 * Remove any columns that may have been added for an order by clause.
+	 * In a query like:
+	 * <pre>select a from t order by b</pre> b is added to the select list
+	 * However in the final projection, after the sort is complete, b will have
+	 * to be removed. 
+	 *
+	 */
+	public void removeOrderByColumns() 
+	{
+		int idx = size() - 1;
+		for (int i = 0; i < orderBySelect; i++, idx--) {
+			removeElementAt(idx);
+		}
+		orderBySelect = 0;
+	}
+	
 	/**
 	 * Walk the list and replace ResultColumn.expression with a new 
 	 * VirtualColumnNode.  This is useful when propagating a ResultColumnList
@@ -1949,7 +1973,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 		if (derivedRCL.size() != size() &&
 		    ! derivedRCL.getCountMismatchAllowed())
 		{
-			throw StandardException.newException(SQLState.LANG_DERIVED_COLUMN_LIST_MISMATCH, tableName);
+			if (visibleSize() != derivedRCL.size()) {
+				throw StandardException.newException(SQLState.LANG_DERIVED_COLUMN_LIST_MISMATCH, tableName);
+			}
 		}
 
 		/* Check the uniqueness of the column names within the derived list */
@@ -2131,7 +2157,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 		if (SanityManager.DEBUG)
 		{
-			if (size() != otherRCL.size())
+			if (visibleSize() != otherRCL.visibleSize())
 			{
 				SanityManager.THROWASSERT(
 							"size() = (" +
@@ -3971,5 +3997,48 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 */
 	protected void markInitialSize() {
 		initialListSize = size();
+	}
+
+	/**
+	 * @return the number of generated columns in this RCL.
+	 */
+	int numGeneratedColumnsForGroupBy()
+	{
+		int numGenerated = 0;
+		int sz = size();
+		for (int i = sz - 1; i >= 0; i--) {
+			ResultColumn rc = (ResultColumn) elementAt(i);
+			if (rc.isGenerated() && rc.isGroupingColumn())
+			{
+				numGenerated++;
+			}
+		}
+		return numGenerated;
+	}
+	
+	/**
+	 * Remove any generated columns from this RCL.
+	 */
+	void removeGeneratedGroupingColumns()
+	{
+		int sz = size();
+		for (int i = sz - 1; i >= 0; i--) 
+		{
+			ResultColumn rc = (ResultColumn) elementAt(i);
+			if (rc.isGenerated() && rc.isGroupingColumn()) 
+			{
+				removeElementAt(i);
+			}
+		}
+	}
+	
+	/**
+	 * @return the number of columns that will be visible during execution. 
+	 * During compilation we can add columns for a group by/order by but these
+	 * to an RCL but these are projected out during query execution. 
+	 */
+	public int visibleSize() 
+	{
+		return size() - orderBySelect - numGeneratedColumnsForGroupBy(); 
 	}
 }

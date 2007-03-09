@@ -73,7 +73,7 @@ public class SelectNode extends ResultSetNode
 	/* Aggregate Vectors for select and where clauses */
 	Vector	selectAggregates ;
 	Vector	whereAggregates;
-
+	Vector  havingAggregates;
 	/**
 	 * The ValueNode for the WHERE clause must represent a boolean
 	 * expression.  The binding phase will enforce this - the parser
@@ -88,6 +88,11 @@ public class SelectNode extends ResultSetNode
 	 */
 	GroupByList	groupByList;
 
+	/** User specified a group by without aggregates and we turned 
+	 * it into a select distinct 
+	 */
+	private boolean wasGroupBy;
+	
 	/* List of columns in ORDER BY list */
 	OrderByList orderByList;
 	boolean		orderByQuery ;
@@ -95,9 +100,10 @@ public class SelectNode extends ResultSetNode
 	/* PredicateLists for where clause */
 	PredicateList wherePredicates;
 
-	/* SubqueryLists for select and where clauses */
+	/* SubqueryLists for select where and having clauses */
 	SubqueryList  selectSubquerys;
 	SubqueryList  whereSubquerys;
+	SubqueryList  havingSubquerys;
 
 	/* Whether or not we are only binding the target list */
 	private boolean bindTargetListOnly;
@@ -112,24 +118,15 @@ public class SelectNode extends ResultSetNode
 	/* Copy of fromList prior to generating join tree */
 	private FromList preJoinFL;
 
-	/**
-	 * Initializer for a SelectNode.
-	 *
-	 * @param selectList	The result column list for the SELECT statement
-	 * @param aggregateVector	The aggregate vector for this SELECT 
-	 * @param fromList	The FROM list for the SELECT statement
-	 * @param whereClause	An expression representing the WHERE clause.
-	 *			It must be a boolean expression, but this is
-	 *			not checked until binding.
-	 * @param groupByList	The GROUP BY list, if any.
-	 * @exception StandardException		Thrown on error
-	 */
-
+	ValueNode havingClause;
+	
+	private int nestingLevel;
 	public void init(Object selectList,
 			  Object aggregateVector,
 			  Object fromList,
 			  Object whereClause,
-			  Object groupByList)
+			  Object groupByList,
+			  Object havingClause)
 			throws StandardException
 	{
 		/* RESOLVE - remove aggregateList from constructor.
@@ -142,6 +139,7 @@ public class SelectNode extends ResultSetNode
 		this.whereClause = (ValueNode) whereClause;
 		this.originalWhereClause = (ValueNode) whereClause;
 		this.groupByList = (GroupByList) groupByList;
+		this.havingClause = (ValueNode)havingClause;
 		bindTargetListOnly = false;
 	}
 
@@ -423,13 +421,8 @@ public class SelectNode extends ResultSetNode
 						   FromList fromListParam) 
 					throws StandardException
 	{
-		int fromListParamSize = fromListParam.size();
 		int fromListSize = fromList.size();
-		int nestingLevel;
-		FromList fromListClone = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
+		
 
 		wherePredicates = (PredicateList) getNodeFactory().getNode(
 											C_NodeTypes.PREDICATE_LIST,
@@ -567,6 +560,16 @@ public class SelectNode extends ResultSetNode
 			getCompilerContext().popCurrentPrivType();
 		}
 
+		if (havingClause != null) {
+			havingAggregates = new Vector();
+			havingSubquerys = (SubqueryList) getNodeFactory().getNode(
+					C_NodeTypes.SUBQUERY_LIST,
+					getContextManager());
+			havingClause.bindExpression(
+					fromListParam, havingSubquerys, havingAggregates);
+			havingClause = havingClause.checkIsBoolean();
+		}
+		
 		/* Restore fromList */
 		for (int index = 0; index < fromListSize; index++)
 		{
@@ -964,6 +967,11 @@ public class SelectNode extends ResultSetNode
 			groupByList.preprocess(numTables, fromList, whereSubquerys, wherePredicates);
 		}
 		
+		if (havingClause != null) {
+			havingClause = havingClause.preprocess(
+					numTables, fromList, havingSubquerys, wherePredicates);
+		}
+		
 		/* Pull apart the expression trees */
 		if (whereClause != null)
 		{
@@ -1008,16 +1016,18 @@ public class SelectNode extends ResultSetNode
 			}
 		}
 
-		/* A valid group by without any aggregates is equivalent to 
-		 * a distinct without the group by.  We do the transformation
+		/* A valid group by without any aggregates or a having clause
+		 * is equivalent to a distinct without the group by.  We do the transformation
 		 * in order to simplify the group by code.
 		 */
 		if (groupByList != null &&
+			havingClause == null &&
 			selectAggregates.size() == 0 &&
 			whereAggregates.size() == 0)
 		{
 			isDistinct = true;
 			groupByList = null;
+			wasGroupBy = true;
 		}
 
 		/* Consider distinct elimination based on a uniqueness condition.
@@ -1087,8 +1097,9 @@ public class SelectNode extends ResultSetNode
 					 * preserve the expected order.
 					 */
 					newTop = genProjectRestrictForReordering();
-					orderByList.resetToSourceRCs();
+ 					orderByList.resetToSourceRCs();
 					resultColumns = orderByList.reorderRCL(resultColumns);
+					newTop.getResultColumns().removeOrderByColumns();
 					orderByList = null;
 				}
 				orderByAndDistinctMerged = true;
@@ -1308,12 +1319,20 @@ public class SelectNode extends ResultSetNode
 		if (((selectAggregates != null) && (selectAggregates.size() > 0)) 
 			|| (groupByList != null))
 		{
+			Vector aggs = selectAggregates;
+			if (havingAggregates != null && !havingAggregates.isEmpty()) {
+				havingAggregates.addAll(selectAggregates);
+				aggs = havingAggregates;
+			}
 			GroupByNode gbn = (GroupByNode) getNodeFactory().getNode(
 												C_NodeTypes.GROUP_BY_NODE,
 												prnRSN,
 												groupByList,
-												selectAggregates,
+												aggs,
+												havingClause,
+												havingSubquerys,
 												null,
+												new Integer(nestingLevel),
 												getContextManager());
 			gbn.considerPostOptimizeOptimizations(originalWhereClause != null);
 			gbn.assignCostEstimate(optimizer.getOptimizedCost());
@@ -1408,15 +1427,18 @@ public class SelectNode extends ResultSetNode
 												getContextManager());
 				prnRSN.costEstimate = costEstimate.cloneMe();
 			}
-
+			
+			// There may be columns added to the select projection list
+			// a query like:
+			// select a, b from t group by a,b order by a+b
+			// the expr a+b is added to the select list.  
 			int orderBySelect = this.getResultColumns().getOrderBySelect();
 			if (orderBySelect > 0)
 			{
 				ResultColumnList selectRCs = prnRSN.getResultColumns().copyListAndObjects();
-				int wholeSize = selectRCs.size();
-				for (int i = wholeSize - 1; orderBySelect > 0; i--, orderBySelect--)
-					selectRCs.removeElementAt(i);
-				selectRCs.genVirtualColumnNodes(prnRSN, prnRSN.getResultColumns());
+				
+				selectRCs.removeOrderByColumns();
+				selectRCs.genVirtualColumnNodes(prnRSN, prnRSN.getResultColumns());				
 				prnRSN = (ResultSetNode) getNodeFactory().getNode(
 								C_NodeTypes.PROJECT_RESTRICT_NODE,
 								prnRSN,
@@ -1428,6 +1450,32 @@ public class SelectNode extends ResultSetNode
 								null,
 								getContextManager());
 			}
+		}
+
+		
+		if (wasGroupBy && resultColumns.numGeneratedColumnsForGroupBy() > 0) {
+			// This case takes care of columns generated for group by's which 
+			// will need to be removed from the final projection. Note that the
+			// GroupByNode does remove generated columns but in certain cases
+			// we dispense with a group by and replace it with a distinct instead.
+			// So in a query like:
+			// select c1 from t group by c1, c2
+			// we would have added c2 to the projection list which will have to be 
+			// projected out.
+			
+			ResultColumnList newSelectList = prnRSN.getResultColumns().copyListAndObjects(); 
+			newSelectList.removeGeneratedGroupingColumns();
+			newSelectList.genVirtualColumnNodes(prnRSN, prnRSN.getResultColumns());
+			prnRSN = (ResultSetNode) getNodeFactory().getNode(
+						C_NodeTypes.PROJECT_RESTRICT_NODE,
+						prnRSN,
+						newSelectList,
+						null,
+						null,
+						null,
+						null,
+						null,
+						getContextManager());
 		}
 
 		if (!(orderByList != null && orderByList.getSortNeeded()) && orderByQuery)
@@ -1683,6 +1731,10 @@ public class SelectNode extends ResultSetNode
 		{
 			whereSubquerys.optimize(dataDictionary, costEstimate.rowCount());
 		}
+		
+		if (havingSubquerys != null && havingSubquerys.size() > 0) {
+			havingSubquerys.optimize(dataDictionary, costEstimate.rowCount());
+		}
 
 		return this;
 	}
@@ -1775,6 +1827,10 @@ public class SelectNode extends ResultSetNode
 		if (whereSubquerys != null && whereSubquerys.size() > 0)
 		{
 			whereSubquerys.modifyAccessPaths();
+		}
+		
+		if (havingSubquerys != null && havingSubquerys.size() > 0) {
+			havingSubquerys.modifyAccessPaths();
 		}
 
 		/* Build a temp copy of the current FromList for sort elimination, etc. */
@@ -2183,6 +2239,10 @@ public class SelectNode extends ResultSetNode
 			wherePredicates = (PredicateList)wherePredicates.accept(v);
 		}		
 
+		if (havingClause != null && !v.stopTraversal()) {
+			havingClause = (ValueNode)havingClause.accept(v);
+		}
+		
 		return returnNode;
 	}
 }

@@ -41,12 +41,27 @@ import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
+
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.impl.sql.execute.AggregatorInfo;
 import org.apache.derby.impl.sql.execute.AggregatorInfoList;
+
+
+
+import org.apache.derby.impl.sql.compile.MaxMinAggregateDefinition;
+import java.util.Iterator;
+import java.util.Vector;
 
 
 /**
@@ -103,6 +118,10 @@ public class GroupByNode extends SingleChildResultSetNode
 	// Is the source in sorted order
 	private boolean isInSortedOrder;
 
+	private ValueNode havingClause;
+	
+	private SubqueryList havingSubquerys;
+	
 	/**
 	 * Intializer for a GroupByNode.
 	 *
@@ -112,24 +131,34 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *		the query block.  Since aggregation is done
 	 *		at the same time as grouping, we need them
 	 *		here.
+	 * @param havingClause The having clause.
+	 * @param havingSubquerys subqueries in the having clause.
 	 * @param tableProperties	Properties list associated with the table
-	 *
+	 * @param nestingLevel nestingLevel of this group by node. This is used for 
+	 *     error checking of group by queries with having clause.
 	 * @exception StandardException		Thrown on error
 	 */
 	public void init(
-						Object  bottomPR,
+						Object bottomPR,
 						Object groupingList,
-						Object	aggregateVector,
-						Object tableProperties)
+						Object aggregateVector,
+						Object havingClause,
+						Object havingSubquerys,
+						Object tableProperties,
+						Object nestingLevel)
 			throws StandardException
 	{
 		super.init(bottomPR, tableProperties);
-
+		setLevel(((Integer)nestingLevel).intValue());
+		this.havingClause = (ValueNode)havingClause;
+		this.havingSubquerys = (SubqueryList)havingSubquerys;
 		/* Group by without aggregates gets xformed into distinct */
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(((Vector) aggregateVector).size() > 0,
-				"aggregateVector expected to be non-empty");
+//			Aggregage vector can be null if we have a having clause.
+//          select c1 from t1 group by c1 having c1 > 1;			
+//			SanityManager.ASSERT(((Vector) aggregateVector).size() > 0,
+//			"aggregateVector expected to be non-empty");
 			if (!(childResult instanceof Optimizable))
 			{
 				SanityManager.THROWASSERT("childResult, " + childResult.getClass().getName() +
@@ -271,14 +300,31 @@ public class GroupByNode extends SingleChildResultSetNode
 		/*
 		** Get the new PR, put above the GroupBy.  
 		*/
+		ResultColumnList rclNew = (ResultColumnList)getNodeFactory().getNode(
+				                                                 C_NodeTypes.RESULT_COLUMN_LIST,
+				                                                 getContextManager());
+		int sz = resultColumns.size();
+		for (int i = 0; i < sz; i++) 
+		{
+			ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+			if (!rc.isGenerated()) {
+				rclNew.addElement(rc);
+			}
+		}
+
+		// if any columns in the source RCL were generated for an order by
+		// remember it in the new RCL as well. After the sort is done it will
+		// have to be projected out upstream.
+		rclNew.copyOrderBySelect(resultColumns);
+		
 		parent = (FromTable) getNodeFactory().getNode(
 										C_NodeTypes.PROJECT_RESTRICT_NODE,
 										this, 	// child
-										resultColumns,		// result column list
-										null,				// restriction
+										rclNew,
+										null, //havingClause,
 										null,				// restriction list
 										null,				// project subqueries
-										null,				// restrict subqueries
+										havingSubquerys,
 										tableProperties,
 										getContextManager());
 
@@ -359,8 +405,36 @@ public class GroupByNode extends SingleChildResultSetNode
 						vc,
 						AggregateNode.class);
 			parent.getResultColumns().accept(se);
+			
+			// Since we always need a PR node on top of the GB 
+			// node to perform projection we can use it to perform 
+			// the having clause restriction as well. 
+			// To evaluate the having clause correctly, we need to 
+			// convert each aggregate and expression to point 
+			// to the appropriate result column in the group by node. 
+			// This is no different from the transformations we do to 
+			// correctly evaluate aggregates and expressions in the 
+			// projection list. 
+			// 
+			//
+			// For this query:
+			// SELECT c1, SUM(c2), MAX(c3)
+			//    FROM t1 
+			//    HAVING c1+max(c3) > 0;
 
-			// finally reset gbc to its new position.
+			// PRSN RCL -> (ptr(gbn:rcl[0]), ptr(gbn:rcl[1]), ptr(gbn:rcl[4]))
+			// Restriction: (> (+ ptr(gbn:rcl[0]) ptr(gbn:rcl[4])) 0)
+			//              |
+			// GBN (RCL) -> (C1, SUM(C2), <input>, <aggregator>, MAX(C3), <input>, <aggregator>
+			//              |
+			//       FBT (C1, C2)
+			if (havingClause != null) {
+				SubstituteExpressionVisitor havingSE =
+					new SubstituteExpressionVisitor(
+							gbc.getColumnExpression(),
+							vc, null);
+				havingClause.accept(havingSE);
+			}
 			gbc.setColumnPosition(bottomRCL.size());
 		}
 	}
@@ -368,8 +442,9 @@ public class GroupByNode extends SingleChildResultSetNode
 	/**
 	 * Add a whole slew of columns needed for 
 	 * aggregation. Basically, for each aggregate we add
-	 * 2 columns: the aggregate input expression
-	 * and the aggregator column.  The input expression is
+	 * 3 columns: the aggregate input expression
+	 * and the aggregator column and a column where the aggregate 
+	 * result is stored.  The input expression is
 	 * taken directly from the aggregator node.  The aggregator
 	 * is the run time aggregator.  We add it to the RC list
 	 * as a new object coming into the sort node.
@@ -389,7 +464,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *	<LI> create a new RC in the GROUPBY RCL and set it to 
 	 *		 point to the bottom RC </LI>
 	 *	<LI> reset the top PR ref to point to the new GROUPBY
-	 *		 RC	
+	 *		 RC</LI></UL>	
 	 *
 	 * For each aggregate in aggregateVector <UL>
 	 *	<LI> create RC in FROM TABLE.  Fill it with 
@@ -400,8 +475,41 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *		to point to FROM TABLE RC </LI>
 	 *	<LI> create RC in GROUPBY for agg result</LI>
 	 *	<LI> create RC in GROUPBY for aggregator</LI>
-	 *	<LI> replace Agg with reference to RC for agg result </LI>
-	 *
+	 *	<LI> replace Agg with reference to RC for agg result </LI></UL>.
+	 * <P>
+	 * For a query like,
+	 * <pre>
+	  select c1, sum(c2), max(c3)
+	  from t1 
+	  group by c1;
+	  </pre>
+	 * the query tree ends up looking like this:
+	   <pre>
+	    ProjectRestrictNode RCL -> (ptr to GBN(column[0]), ptr to GBN(column[1]), ptr to GBN(column[4]))
+	              |
+	    GroupByNode RCL->(C1, SUM(C2), <agg-input>, <aggregator>, MAX(C3), <agg-input>, <aggregator>)
+	              |
+	    ProjectRestrict RCL->(C1, C2, C3)
+	              |
+	    FromBaseTable
+	    </pre>
+	 * 
+	 * The RCL of the GroupByNode contains all the unagg (or grouping columns)
+	 * followed by 3 RC's for each aggregate in this order: the final computed
+	 * aggregate value, the aggregate input and the aggregator function.
+	 * <p>
+	 * The Aggregator function puts the results in the first of the 3 RC's 
+	 * and the PR resultset in turn picks up the value from there.
+	 * <p>
+	 * The notation (ptr to GBN(column[0])) basically means that it is
+	 * a pointer to the 0th RC in the RCL of the GroupByNode. 
+	 * <p>
+	 * The addition of these unagg and agg columns to the GroupByNode and 
+	 * to the PRN is performed in addUnAggColumns and addAggregateColumns. 
+	 * <p>
+	 * Note that that addition of the GroupByNode is done after the
+	 * query is optimized (in SelectNode#modifyAccessPaths) which means a 
+	 * fair amount of patching up is needed to account for generated group by columns.
 	 * @exception standard exception
 	 */
 	private void addNewColumnsForAggregation()
@@ -411,6 +519,32 @@ public class GroupByNode extends SingleChildResultSetNode
 		if (groupingList != null)
 		{
 			addUnAggColumns();
+		}
+		if (havingClause != null) {
+			// we have replaced group by expressions in the having clause.
+			// there should be no column references in the having clause 
+			// referencing this table. Skip over aggregate nodes.
+			//   select a, sum(b) from t group by a having a+c > 1 
+			//  is not valid because of column c.
+			// 
+			// it is allright to have columns from parent or child subqueries;
+			//   select * from p where p.p1 in 
+			//      (select c.c1 from c group by c.c1 having count(*) = p.p2
+			CollectNodesVisitor collectNodesVisitor = 
+				new CollectNodesVisitor(ColumnReference.class, AggregateNode.class);
+			havingClause.accept(collectNodesVisitor);
+			for (Iterator it = collectNodesVisitor.getList().iterator();
+			     it.hasNext(); ) 
+			{
+				ColumnReference cr = (ColumnReference)it.next();
+				
+				if (!cr.getGeneratedToReplaceAggregate() && 
+						cr.getSourceLevel() == level) {
+					throw StandardException.newException(
+							SQLState.LANG_INVALID_COL_HAVING_CLAUSE, 
+							cr.getSQLColumnName());						
+				}
+			}
 		}
 		addAggregateColumns();
 	}
@@ -449,9 +583,27 @@ public class GroupByNode extends SingleChildResultSetNode
 					(ResultColumnList) getNodeFactory().getNode(
 							C_NodeTypes.RESULT_COLUMN_LIST,
 							getContextManager()),
-				((FromTable) childResult).getTableNumber());
+				((FromTable) childResult).getTableNumber(),
+				ResultSetNode.class);
 		parent.getResultColumns().accept(replaceAggsVisitor);
 
+		
+		if (havingClause != null) 
+		{
+			// replace aggregates in the having clause with column references.
+			replaceAggsVisitor = new ReplaceAggregatesWithCRVisitor(
+					(ResultColumnList) getNodeFactory().getNode(
+							C_NodeTypes.RESULT_COLUMN_LIST,
+							getContextManager()),					
+					((FromTable)childResult).getTableNumber());
+			havingClause.accept(replaceAggsVisitor);
+			// make having clause a restriction list in the parent 
+			// project restrict node.
+			ProjectRestrictNode parentPRSN = (ProjectRestrictNode)parent;
+			parentPRSN.setRestriction(havingClause);
+		}
+
+		
 		/*
 		** For each aggregate
 		*/

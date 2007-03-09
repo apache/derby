@@ -70,6 +70,12 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                         {2,11,202}});
 
         verifyQueryResults(
+                "Q1_2",
+                "select c1,c2,sum(c3) from test group by c2,c1 having c1=1 and c2=10 and sum(c3) > 40",
+                new int[][] {
+                        {1,10,100}});
+
+        verifyQueryResults(
                 "Q2",
                 "select c1+c2, sum(c3) from test group by c1,c2",
                 new int[][] {
@@ -106,6 +112,14 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                         {8,12,1},
                         {10,12,1},
                         {9,13,2}});
+
+        // having clause with expression. same as last query with an additional restriction.
+        verifyQueryResults(
+                "Q6b",
+                "select c2-c1, c1+c2, count(*) from test group by c1+c2, c2-c1 having (c2-c1)+count(*)>10",
+                new int[][] {
+                        {10,12,1},
+                        {9,13,2}});
     }
     
     
@@ -123,6 +137,11 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 "select a+1, sum(b) from (select c1+1  a , c2+1 b from test) t group by a+1",
                 new int[][] {
                         {3,23}, {4,35}});
+
+        verifyQueryResults(
+                "Q2",
+                "select a+1, sum(b) from (select c1+1  a , c2+1 b from test) t group by a+1 having a+1 > 3",
+                new int[][] {{4,35}});
         
         verifyQueryResults(
                 "Q3",
@@ -130,6 +149,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 "(select c1+1 a, max(c2) b from test group by c1+1) t " +
                 "group by b/2",
                 new int[][] {{5,5}});
+
     }
     
 
@@ -214,6 +234,13 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 "select rtrim(c1) from t2 group by rtrim(c1)",
                 new String[][] { {"123"},
                                  {"abc"} });
+        
+       // rtrim in having clause as well.
+        verifyQueryResults(
+                "rtrim_having",
+                "select rtrim(c1) from t2 group by rtrim(c1) having rtrim(c1) like 'ab%'",
+                new String[][] { {"abc"} });
+        
 
         // locate (2-args)
         verifyQueryResults(

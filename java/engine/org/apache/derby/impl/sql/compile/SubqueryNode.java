@@ -678,7 +678,7 @@ public class SubqueryNode extends ValueNode
 		 *    an expression subquery on the right side
 		 *	  of a BinaryComparisonOperatorNode.
 		 *  o There are no aggregates in the select list
-		 *  o There is no group by clause
+		 *  o There is no group by clause or having clause.
 		 *  o There is a uniqueness condition that ensures
 		 *	  that the flattening of the subquery will not
 		 *	  introduce duplicates into the result set.
@@ -697,6 +697,7 @@ public class SubqueryNode extends ValueNode
 		{
 			SelectNode	select = (SelectNode) resultSet;
 			if ((select.getAggregateVector(IN_SELECT_LIST).size() == 0) &&
+			    (select.havingClause == null) &&
 				(! select.getGeneratedForGroupbyClause()))
 			{
 				ValueNode origLeftOperand = leftOperand;

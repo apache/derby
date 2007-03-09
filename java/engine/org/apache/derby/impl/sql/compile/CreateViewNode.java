@@ -193,7 +193,7 @@ public class CreateViewNode extends DDLStatementNode
 		 */
 		if (resultColumns != null)
 		{
-			if (resultColumns.size() != qeRCL.size())
+			if (resultColumns.size() != qeRCL.visibleSize())
 			{
 				throw StandardException.newException(SQLState.LANG_VIEW_DEFINITION_R_C_L_MISMATCH,
 								getFullName());

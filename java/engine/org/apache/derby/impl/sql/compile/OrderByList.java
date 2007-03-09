@@ -266,6 +266,7 @@ public class OrderByList extends OrderedColumnList
 		/* And ends with the non-ordering columns */
 		newRCL.destructiveAppend(resultColumns);
 		newRCL.resetVirtualColumnIds();
+		newRCL.copyOrderBySelect(resultColumns);
 		return newRCL;
 	}
 
