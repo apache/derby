@@ -555,14 +555,6 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
     }
 
     /**
-     * Negative tests for scroll insensitive cursor.
-     * 
-     * @exception SQLException
-     *                Thrown if some unexpected error happens
-     */
-    
-    
-    /**
      * CallableStatement tests.
      * 
      * @exception SQLException
