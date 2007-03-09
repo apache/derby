@@ -50,8 +50,8 @@
 <!-- compile classes  -->
 <target name="compile">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -64,7 +64,6 @@
       excludes="**/*40.java" 
       destdir="${out.dir}">
       <classpath>
-          <pathelement path="${jce1_2_1}"/>
           <pathelement path="${java14compile.classpath}"/>
       </classpath>
     </javac>
@@ -88,7 +87,6 @@
       includes="**/*40.java" 
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${jce1_2_1}"/>
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint"/>

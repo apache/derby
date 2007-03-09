@@ -30,6 +30,7 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
 import java.sql.ResultSet;
@@ -721,5 +722,9 @@ public abstract class UpdatableVTITemplate implements PreparedStatement
 
     public int getResultSetHoldability() throws SQLException {
         throw new SQLException("getResultSetHoldability");
+    }
+
+    public ParameterMetaData getParameterMetaData() throws SQLException {
+        throw new SQLException("getParameterMetaData");
     }
 }

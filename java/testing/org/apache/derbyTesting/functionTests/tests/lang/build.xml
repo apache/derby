@@ -67,8 +67,8 @@
 
   <target name="compilet1" >
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -98,8 +98,8 @@
   </target>
   <target name="compilet2" depends="compilet1">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"
@@ -148,8 +148,8 @@
 	base level -->
 	<target name="compilett4" depends="compilet3" >
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"

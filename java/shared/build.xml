@@ -52,28 +52,6 @@
 <!-- compile classes  -->
   <target name="compile">
     <javac
-      source="1.3"
-      target="1.3"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.shared.src.dir}"
-      includes="org/apache/derby/shared/**"
-      destdir="${out.dir}">
-      <classpath>
-          <pathelement path="${jce1_2_1}"/>
-          <pathelement path="${jta1_2}"/>
-          <pathelement path="${compile.classpath}"/>
-      </classpath>
-      <include name="org/apache/derby/shared/**"/>
-      <exclude name="org/apache/derby/shared/common/reference/JDBC30Translation.java"/>
-    </javac>
-    <javac
       source="1.4"
       target="1.4"
       bootclasspath="${empty}"
@@ -88,9 +66,9 @@
       includes="org/apache/derby/shared/**"
       destdir="${out.dir}">
       <classpath>
-          <pathelement path="${java14compile.classpath}"/>
+          <pathelement path="${compile.classpath}"/>
       </classpath>
-      <include name="org/apache/derby/shared/common/reference/JDBC30Translation.java"/>
+      <include name="org/apache/derby/shared/**"/>
     </javac>
 </target>
   

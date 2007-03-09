@@ -56,12 +56,12 @@
     <target name="engine_j2se" depends="engine_169"
             description="Build Derby engine">
     <ant dir="${derby.engine.dir}/iapi"/>
+    <ant dir="${derby.engine.dir}/vti"/>
     <ant dir="${derby.engine.dir}/impl"/>
     <ant dir="${derby.engine.dir}/jdbc"/>
     <ant dir="${derby.engine.dir}/osgi"/>
     <ant dir="${derby.engine.dir}/catalog"/>
     <ant dir="${derby.engine.dir}/diag"/>
-    <ant dir="${derby.engine.dir}/vti"/>
       	<copy todir="${out.dir}/${derby.dir}">
           <fileset dir="${derby.engine.dir}">
             <include name="modules.properties"/>

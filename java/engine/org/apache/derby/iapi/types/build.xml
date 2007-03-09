@@ -39,8 +39,8 @@
     <!-- relies on several XML classes that are part of 1.4 but  -->
     <!-- that aren't in 1.3.                                     -->
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -57,8 +57,8 @@
       <include name="${derby.dir}/iapi/types/SqlXmlUtil.java"/>
     </javac>
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"

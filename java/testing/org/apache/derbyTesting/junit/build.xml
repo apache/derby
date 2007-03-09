@@ -79,8 +79,8 @@
 	  <include name="${derby.testing.junit.dir}/JAXPFinder.java"/>
     </javac>
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="true"

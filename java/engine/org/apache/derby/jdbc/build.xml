@@ -39,8 +39,8 @@
 <!-- first build all non-special (non jdbc2.0) targets-->
   <target name="compile_jsr169">
     <javac
-      source="1.3"
-      target="1.3"
+      source="1.4"
+      target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -61,8 +61,8 @@
   </target>
 	  <target name="compile_jsr169_opt">
 	    <javac
-	      source="1.3"
-	      target="1.3"
+	      source="1.4"
+	      target="1.4"
 	      bootclasspath="${empty}"
 	      nowarn="on"
 	      debug="${debug}"
