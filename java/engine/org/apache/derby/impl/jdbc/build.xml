@@ -59,28 +59,12 @@
 	  <exclude name="${derby.dir}/impl/jdbc/*30.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*40.java"/>
 	  <exclude name="${derby.dir}/impl/jdbc/LOBStoredProcedure.java"/>
+
+	  <include name="${derby.dir}/impl/jdbc/authentication/**"/>
+	  <exclude name="${derby.dir}/impl/jdbc/authentication/JNDI**"/>
+	  <exclude name="${derby.dir}/impl/jdbc/authentication/LDAP**"/>
    </javac>
     <copy file="metadata.properties" tofile="${out.dir}/org/apache/derby/impl/jdbc/metadata.properties"/>
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/impl/jdbc/authentication/**"/>
-      <exclude name="${derby.dir}/impl/jdbc/authentication/JNDI**"/>
-      <exclude name="${derby.dir}/impl/jdbc/authentication/LDAP**"/>
-    </javac>
     </target>
   	<target name="compile_jsr169_opt">
   	    <javac
@@ -102,7 +86,7 @@
         <include name="${derby.dir}/impl/jdbc/*169.java"/>
     </javac>
   	</target>
-  <target name="compile_jdbc2" depends="compile_jsr169">
+  <target name="compile_jdbc3" depends="compile_jsr169">
     <javac
       source="1.4"
       target="1.4"
@@ -120,51 +104,14 @@
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
 	  <include name="${derby.dir}/impl/jdbc/*20.java"/>
-    </javac>
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java14compile.classpath}"/>
-      </classpath>
+  	  <include name="${derby.dir}/impl/jdbc/*30.java"/>
+  	  <include name="${derby.dir}/impl/jdbc/LOBStoredProcedure.java"/>
       <include name="${derby.dir}/impl/jdbc/authentication/JNDI**"/>
       <include name="${derby.dir}/impl/jdbc/authentication/LDAP**"/>
-   </javac>
-  </target>
-
-  <target name="compile_jdbc3" depends="compile_jdbc2">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir};${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java14compile.classpath}"/>
-      </classpath>
-	  <include name="${derby.dir}/impl/jdbc/*30.java"/>
-	  <include name="${derby.dir}/impl/jdbc/LOBStoredProcedure.java"/>
     </javac>
   </target>
 
-<target name="compile_jdbc4" if="jdk16">
+<target name="compile_jdbc4" depends="compile_jdbc3" if="jdk16">
     <javac
       source="1.6"
       target="1.6"
@@ -178,7 +125,7 @@
         optimize="${optimize}"
         proceed="${proceed}"
         verbose="${verbose}"
-        srcdir="${derby.engine.src.dir};${derby.engine.src.dir}"
+        srcdir="${derby.engine.src.dir}"
         destdir="${out.dir}">
         <classpath>
             <pathelement path="${java16compile.classpath}"/>

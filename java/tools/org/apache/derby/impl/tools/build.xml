@@ -71,7 +71,6 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${compile.classpath}"/>
-        <pathelement path="${jta1_2}"/>
       </classpath>
       <include name="${derby.dir}/impl/tools/**"/>
       <exclude name="${derby.dir}/impl/tools/ij/mtGrammar.java"/>
@@ -80,28 +79,7 @@
     </javac>
    </target>
 
-  <target name="compile_tools_impl_mt" depends="compile_tools_impl">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.tools.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java14compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/impl/tools/ij/mtGrammar.java"/>
-    </javac>
-  </target>
-
-  <target name="compile_tools_impl_jdk14" depends="compile_tools_impl_mt">
+  <target name="compile_tools_impl_jdk14" depends="compile_tools_impl">
     <javac
       source="1.4"
       target="1.4"

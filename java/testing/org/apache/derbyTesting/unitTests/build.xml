@@ -69,7 +69,6 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${jta1_2}"/>
         <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
