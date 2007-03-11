@@ -60,7 +60,7 @@ public class DTSClassInfo extends FormatableInstanceGetter {
                 case StoredFormatIds.SQL_NCLOB_ID: return new SQLNClob();
                 case StoredFormatIds.XML_ID: return new XML();
                 case StoredFormatIds.SQL_CHAR_WITH_NON_DEFAULT_COLLATION_ID: 
-                	return new SQLCharWithNonDefaultCollation();
+                	return new CollatorSQLChar();
 
                 /* Type ids */
                 case StoredFormatIds.BIT_TYPE_ID: 
