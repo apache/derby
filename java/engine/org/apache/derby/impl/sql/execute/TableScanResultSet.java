@@ -447,10 +447,41 @@ class TableScanResultSet extends NoPutResultSetImpl
 	protected void openScanController(TransactionController tc)
 		throws StandardException
 	{
+		openScanController(tc, (DataValueDescriptor)null);
+	}
+
+	/*
+	** Does the work of openScanController.
+	**
+	** @param tc transaction controller; will open one if null.
+	** @param probeValue If non-null then we will open the scan controller
+	**  and position it using the received probeValue as the start key.
+	**  Otherwise we'll use whatever value is in startPosition (if non-
+	**  null) as the start key.
+	*/
+	protected void openScanController(TransactionController tc,
+		DataValueDescriptor probeValue) throws StandardException
+	{
 		DataValueDescriptor[] startPositionRow = 
             startPosition == null ? null : startPosition.getRowArray();
 		DataValueDescriptor[] stopPositionRow = 
             stopPosition == null ? null : stopPosition.getRowArray();
+
+		/* If we have a probe value then we do the "probe" by positioning
+		 * the scan at the first row matching the value.  The way to do
+		 * that is to use the value as a start key, which is what will
+		 * happen if we plug it into "startPositionRow".  So in this case
+		 * startPositionRow functions as a "place-holder" for the probe
+		 * value.  Note: if we have a probe value then we want to use it
+		 * as the start key AND as the stop key.  In that case the value
+		 * of "sameStartStopPosition" would have been true when we created
+		 * this result set, and thus we've already set stopPosition equal
+		 * to startPosition as part of openCore(). So by putting the probe
+		 * value into startPositionRow, we're also putting it into
+		 * stopPositionRow, which is what we want.
+		 */
+		if (probeValue != null)
+			startPositionRow[0] = probeValue;
 
 		// Clear the Qualifiers's Orderable cache 
 		if (qualifiers != null)
@@ -507,13 +538,42 @@ class TableScanResultSet extends NoPutResultSetImpl
 	/*
 	** reopen the scan controller
 	*/
-	private void reopenScanController()
+	protected void reopenScanController() throws StandardException
+	{
+		reopenScanController((DataValueDescriptor)null);
+	}
+
+	/*
+	** Does the work of reopenScanController.
+	**
+	** @param probeValue If non-null then we will open the scan controller
+	**  and position it using the received probeValue as the start key.
+	**  Otherwise we'll use whatever value is in startPosition (if non-
+	**  null) as the start key.
+	*/
+	protected void reopenScanController(DataValueDescriptor probeValue)
 		throws StandardException
 	{
 		DataValueDescriptor[] startPositionRow = 
             startPosition == null ? null : startPosition.getRowArray();
 		DataValueDescriptor[] stopPositionRow = 
             stopPosition == null ? null : stopPosition.getRowArray();
+
+		/* If we have a probe value then we do the "probe" by using the
+		 * value as a start and stop key.  See openScanController() for
+		 * details.  Note that in this case we do *not* want to reset
+		 * the rowsThisScan variable because we are going to be doing
+		 * multiple "probes" for a single scan.  Logic to detect when
+		 * when we've actually started a new scan (as opposed to just
+		 * repositioning an existing scan based on a probe value) is
+		 * in MultiProbeTableScanResultSet.reopenScanController(),
+		 * and that method will then take care of resetting the variable
+		 * (if needed) for probing scans.
+		 */
+		if (probeValue != null)
+			startPositionRow[0] = probeValue;
+		else
+			rowsThisScan = 0;
 
 		// Clear the Qualifiers's Orderable cache 
 		if (qualifiers != null)
@@ -530,8 +590,6 @@ class TableScanResultSet extends NoPutResultSetImpl
 
 		/* Remember that we opened the scan */
 		scanControllerOpened = true;
-
-		rowsThisScan = 0;
 	}
 
 	/**

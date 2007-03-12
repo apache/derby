@@ -35,6 +35,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 
 import java.io.InputStream;
+import java.lang.Comparable;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -64,7 +65,7 @@ import java.util.Calendar;
  *
  */
 public abstract class DataType
-	implements DataValueDescriptor, CloneableObject
+	implements DataValueDescriptor, CloneableObject, Comparable
 {
 	/*
 	 * DataValueDescriptor Interface
@@ -831,6 +832,42 @@ public abstract class DataType
 			if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT("Invalid Operator");
 			return false;
+		}
+	}
+
+	/**
+	 * Wrapper method for the "compare(DataValueDescriptor)" method of
+	 * this class.  Allows sorting of an array of DataValueDescriptors
+	 * using the JVMs own sorting algorithm.  Currently used for
+	 * execution-time sorting of IN-list values to allow proper handling
+	 * (i.e. elimination) of duplicates.
+	 *
+	 * @see java.lang.Comparable#compareTo
+	 */
+	public int compareTo(Object otherDVD)
+	{
+		DataValueDescriptor other = (DataValueDescriptor)otherDVD;
+		try {
+
+			// Use compare method from the dominant type.
+			if (typePrecedence() < other.typePrecedence())
+				return (-1 * other.compare(this));
+
+			return compare(other);
+
+		} catch (StandardException se) {
+
+			if (SanityManager.DEBUG)
+			{
+				SanityManager.THROWASSERT("Encountered error while " +
+					"trying to compare two DataValueDescriptors: " +
+					se.getMessage());
+			}
+
+			/* In case of an error in insane mode, just treat the
+			 * values as "equal".
+			 */
+			return 0;
 		}
 	}
 

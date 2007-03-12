@@ -740,7 +740,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getMultiProbeTableScanResultSet(
-                        			Activation activation,
+									Activation activation,
 									long conglomId,
 									int scociItem,
 									GeneratedMethod resultRowAllocator,
@@ -768,19 +768,36 @@ public class GenericResultSetFactory implements ResultSetFactory
 									double optimizerEstimatedCost)
 			throws StandardException
 	{
-		/* Incremental development: For now we should never actually get to
-		 * this method, so just return null.  When the appropriate execution
-		 * logic is in place (i.e. MultiProbeTableScanResultSet exists) then
-		 * we will add a call to create an instance of the result set here.
-		 */
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Tried to instantiate " +
-				"MultiProbeTableScanResultSet, which does not " +
-				"yet exist (DERBY-47 incremental development).");
-		}
+		StaticCompiledOpenConglomInfo scoci = (StaticCompiledOpenConglomInfo)
+			activation.getPreparedStatement().getSavedObject(scociItem);
 
-		return (NoPutResultSetImpl)null;
+		return new MultiProbeTableScanResultSet(
+								conglomId,
+								scoci,
+								activation,
+								resultRowAllocator,
+								resultSetNumber,
+								startKeyGetter,
+								startSearchOperator,
+								stopKeyGetter,
+								stopSearchOperator,
+								sameStartStopPosition,
+								qualifiers,
+								probeVals,
+								probeValsAreSorted,
+								tableName,
+								userSuppliedOptimizerOverrides,
+								indexName,
+								isConstraint,
+								forUpdate,
+								colRefItem,
+								indexColItem,
+								lockMode,
+								tableLocked,
+								isolationLevel,
+								oneRowScan,
+								optimizerEstimatedRowCount,
+								optimizerEstimatedCost);
 	}
 
 	/**
