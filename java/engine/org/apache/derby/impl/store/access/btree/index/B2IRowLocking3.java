@@ -377,7 +377,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
             // wait on the left page, which we could not get before. 
             prev_leaf = (LeafControlRow) 
-                ControlRow.Get(open_btree, previous_pageno);
+                ControlRow.get(open_btree, previous_pageno);
 
             latches_released = true;
         }
@@ -462,7 +462,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
                 // wait on the left page, which we could not get before. 
                 prev_leaf = (LeafControlRow) 
-                    ControlRow.Get(open_btree, previous_pageno);
+                    ControlRow.get(open_btree, previous_pageno);
 
                 latches_released = true;
             }

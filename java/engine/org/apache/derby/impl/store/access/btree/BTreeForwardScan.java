@@ -336,7 +336,7 @@ public class BTreeForwardScan extends BTreeScan
                     //           or partial match if partial key.
                     // ret <  0: key is less    than row on page.
                     //
-                    int ret = ControlRow.CompareIndexRowToKey(
+                    int ret = ControlRow.compareIndexRowToKey(
                                 fetch_row,
                                 init_stopKeyValue,
                                 fetch_row.length,

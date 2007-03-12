@@ -121,7 +121,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         try
         {
 
-            if ((controlRow = ControlRow.Get(open_btree, pageno)) == null)
+            if ((controlRow = ControlRow.get(open_btree, pageno)) == null)
                 return(false);
 
             LeafControlRow leaf       = (LeafControlRow) controlRow;
@@ -331,7 +331,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
             // Get the root page back, and perform a split following the
             // to-be-inserted key.  The split releases the root page latch.
-            root = ControlRow.Get(split_open_btree, BTree.ROOTPAGEID);
+            root = ControlRow.get(split_open_btree, BTree.ROOTPAGEID);
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(root.page.isLatched());
@@ -423,7 +423,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                 SanityManager.ASSERT(this.container != null);
 
             targetleaf = (LeafControlRow)
-                ControlRow.Get(this, BTree.ROOTPAGEID).search(sp);
+                ControlRow.get(this, BTree.ROOTPAGEID).search(sp);
 
 
             // Row locking - first lock row previous to row being inserted:
@@ -742,7 +742,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                 {
                     // verify that the row inserted is >= than previous row.
                     int compare_result =
-                        ControlRow.CompareIndexRowFromPageToKey(
+                        ControlRow.compareIndexRowFromPageToKey(
                             leaf,
                             insert_slot - 1,
                             scratch_template,
@@ -837,7 +837,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                 (ControlRow.SPLIT_FLAG_LAST_ON_PAGE | 
                     ControlRow.SPLIT_FLAG_LAST_IN_TABLE));
 
-        new_leaf = (LeafControlRow) ControlRow.Get(this, new_leaf_pageno);
+        new_leaf = (LeafControlRow) ControlRow.get(this, new_leaf_pageno);
 
         // The leaf must be the rightmost leaf in the table, the first time
         // the root grows from leaf to branch it will be a leaf with many
@@ -1173,7 +1173,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             // Btree must just have been created and empty, so there must
             // be one root leaf page which is empty except for the control row.
             current_leaf = 
-                (LeafControlRow) ControlRow.Get(this, BTree.ROOTPAGEID);
+                (LeafControlRow) ControlRow.get(this, BTree.ROOTPAGEID);
             int current_insert_slot = 1;
 
             if (SanityManager.DEBUG)

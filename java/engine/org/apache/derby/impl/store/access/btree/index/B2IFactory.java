@@ -232,7 +232,7 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
             }
 
             // The conglomerate is located in the control row on the root page.
-            root = ControlRow.Get(container, BTree.ROOTPAGEID);
+            root = ControlRow.get(container, BTree.ROOTPAGEID);
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(root.getPage().isLatched());

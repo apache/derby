@@ -144,7 +144,7 @@ public class BranchControlRow extends ControlRow
      * Perform page specific initialization.
      * <p>
      **/
-    protected final void ControlRowInit()
+    protected final void controlRowInit()
     {
         child_pageno_buf = new SQLLongint();
     }
@@ -212,7 +212,7 @@ public class BranchControlRow extends ControlRow
 
         // Get the root page back, and perform a split following the
         // branch row which would not fit.
-        ControlRow root = ControlRow.Get(open_btree, BTree.ROOTPAGEID);
+        ControlRow root = ControlRow.get(open_btree, BTree.ROOTPAGEID);
 
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(root.page.isLatched());
@@ -621,7 +621,7 @@ public class BranchControlRow extends ControlRow
 				growRoot(open_btree, template, this);
 
 				parent = (BranchControlRow)
-                    ControlRow.Get(open_btree, BTree.ROOTPAGEID);
+                    ControlRow.get(open_btree, BTree.ROOTPAGEID);
 
 
 				return(parent.splitFor(
@@ -712,7 +712,7 @@ public class BranchControlRow extends ControlRow
 			// Allocate a new branch page and link it to the
 			// right of the current page.
 			BranchControlRow newbranch =
-                BranchControlRow.Allocate(open_btree, childpage,
+                BranchControlRow.allocate(open_btree, childpage,
                     this.getLevel(), parent);
 			newbranch.linkRight(open_btree, this);
 
@@ -835,7 +835,7 @@ public class BranchControlRow extends ControlRow
 			// Decide whether we're following the current page or the new page.
 			BranchControlRow pagetofollow;
 
-            if (CompareIndexRowToKey(
+            if (compareIndexRowToKey(
                     splitrow, 
                     split_branch_row.getRow(),
                     split_branch_row.getRow().length - 1, 0,
@@ -1192,7 +1192,7 @@ public class BranchControlRow extends ControlRow
             // rows from the root, and remain at the old root's level.
             // Its parent is the root.
             branch =
-                BranchControlRow.Allocate(
+                BranchControlRow.allocate(
                     open_btree, leftchild, root.getLevel(), root);
 
             // Copy all the index rows from the root to the new branch.
@@ -1245,7 +1245,7 @@ public class BranchControlRow extends ControlRow
      *
      * @exception StandardException Standard exception policy.
      */
-    private static BranchControlRow Allocate(
+    private static BranchControlRow allocate(
     OpenBTree         open_btree,
     ControlRow        leftchild,
     int               level,
@@ -1411,7 +1411,7 @@ public class BranchControlRow extends ControlRow
                 child_pageno_buf);
 
             child_control_row =
-                ControlRow.Get(open_btree, child_pageno_buf.getLong());
+                ControlRow.get(open_btree, child_pageno_buf.getLong());
         }
 
         return(child_control_row);
@@ -1431,7 +1431,7 @@ public class BranchControlRow extends ControlRow
     public ControlRow getLeftChild(OpenBTree open_btree)
             throws StandardException
     {
-         return(ControlRow.Get(open_btree, this.getLeftChildPageno()));
+         return(ControlRow.get(open_btree, this.getLeftChildPageno()));
     }
 
     /**
@@ -1456,7 +1456,7 @@ public class BranchControlRow extends ControlRow
         // last branch row to find the rightmost child.
         right_child = 
             (num_slots == 1 ? 
-                ControlRow.Get(open_btree, this.getLeftChildPageno()) :
+                ControlRow.get(open_btree, this.getLeftChildPageno()) :
                 getChildPageAtSlot(open_btree, (num_slots - 1)));
 
         return(right_child);

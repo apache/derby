@@ -401,7 +401,7 @@ public class D_BTreeController extends DiagnosticableGeneric
         try
         {
             tree_height = open_btree.getHeight();
-            root = ControlRow.Get(open_btree, BTree.ROOTPAGEID);
+            root = ControlRow.get(open_btree, BTree.ROOTPAGEID);
 
             // Allocate a LevelInfo array with one entry per level of the tree.
             level_info = new LevelInfo[tree_height];

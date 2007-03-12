@@ -118,7 +118,7 @@ class BTreePostCommit implements Serviceable
 
         // Get the root page back, and perform a split following the
         // to-be-inserted key.  The split releases the root page latch.
-        root = ControlRow.Get(open_btree, BTree.ROOTPAGEID);
+        root = ControlRow.get(open_btree, BTree.ROOTPAGEID);
 
         root.shrinkFor(open_btree, shrink_row);
 
@@ -303,7 +303,7 @@ class BTreePostCommit implements Serviceable
             // The following can fail either if it can't get the latch or
             // somehow the page requested no longer exists.  In either case
             // the post commit work will just skip it.
-            control_row = ControlRow.GetNoWait(open_btree, pageno);
+            control_row = ControlRow.getNoWait(open_btree, pageno);
 
             if (control_row != null)
             {

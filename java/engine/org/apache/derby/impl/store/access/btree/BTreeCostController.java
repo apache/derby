@@ -539,7 +539,7 @@ public class BTreeCostController extends OpenBTree
                     template, this, true);
 
                 control_row =
-                    ControlRow.Get(this, BTree.ROOTPAGEID).search(sp);
+                    ControlRow.get(this, BTree.ROOTPAGEID).search(sp);
 
                 control_row.release();
                 control_row = null;
@@ -564,7 +564,7 @@ public class BTreeCostController extends OpenBTree
                         template, this, true);
 
                 control_row =
-                    ControlRow.Get(this, BTree.ROOTPAGEID).search(sp);
+                    ControlRow.get(this, BTree.ROOTPAGEID).search(sp);
 
                 control_row.release();
                 control_row = null;

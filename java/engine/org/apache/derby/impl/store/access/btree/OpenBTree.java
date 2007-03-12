@@ -286,7 +286,7 @@ public class OpenBTree
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(this.init_conglomerate.format_ids != null);
 
-            root = ControlRow.Get(this, BTree.ROOTPAGEID);
+            root = ControlRow.get(this, BTree.ROOTPAGEID);
 
             int actualpages = root.checkConsistency(this, null, true);
 
@@ -564,7 +564,7 @@ public class OpenBTree
 
         try
         {
-            root = ControlRow.Get(this, BTree.ROOTPAGEID);
+            root = ControlRow.get(this, BTree.ROOTPAGEID);
 
             int height = root.getLevel() + 1;
 
@@ -611,7 +611,7 @@ public class OpenBTree
                     "p_tree", "BTREE Dump: btree " + this.init_conglomerate);
             }
 
-            root = ControlRow.Get(this, BTree.ROOTPAGEID);
+            root = ControlRow.get(this, BTree.ROOTPAGEID);
             root.printTree(this);
         }
         finally

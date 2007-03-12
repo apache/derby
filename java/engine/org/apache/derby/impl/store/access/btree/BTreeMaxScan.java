@@ -298,7 +298,7 @@ public class BTreeMaxScan extends BTreeScan
         {
             // Find the starting page and row slot, must start at root and
             // search either for leftmost leaf, or search for specific key.
-            ControlRow root = ControlRow.Get(this, BTree.ROOTPAGEID); 
+            ControlRow root = ControlRow.get(this, BTree.ROOTPAGEID); 
 
             // include search of tree in page visited stats.
             stat_numpages_visited += root.getLevel() + 1;

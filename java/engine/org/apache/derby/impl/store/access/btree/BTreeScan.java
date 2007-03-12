@@ -361,7 +361,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         {
             // Find the starting page and row slot, must start at root and
             // search either for leftmost leaf, or search for specific key.
-            ControlRow root = ControlRow.Get(this, BTree.ROOTPAGEID); 
+            ControlRow root = ControlRow.get(this, BTree.ROOTPAGEID); 
 
             // include search of tree in page visited stats.
             stat_numpages_visited += root.getLevel() + 1;
@@ -527,7 +527,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         {
             // Find the starting page and row slot, must start at root and
             // search either for leftmost leaf, or search for specific key.
-            ControlRow root = ControlRow.Get(this, BTree.ROOTPAGEID); 
+            ControlRow root = ControlRow.get(this, BTree.ROOTPAGEID); 
 
             // include search of tree in page visited stats.
             stat_numpages_visited += root.getLevel() + 1;
@@ -1077,7 +1077,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 SanityManager.ASSERT(pos.current_scan_pageno != 0);
 
             pos.current_leaf = (LeafControlRow)
-                ControlRow.Get(this, pos.current_rh.getPageNumber());
+                ControlRow.get(this, pos.current_rh.getPageNumber());
             pos.current_slot =
                 pos.current_leaf.page.getSlotNumber(pos.current_rh);
         }
@@ -1104,7 +1104,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             do
             {
                 pos.current_leaf = (LeafControlRow)
-                    ControlRow.Get(this, BTree.ROOTPAGEID).search(sp);
+                    ControlRow.get(this, BTree.ROOTPAGEID).search(sp);
 
                 if (sp.resultExact || missing_row_for_key_ok)
                 {

@@ -133,7 +133,7 @@ public class B2IUndo implements LogicalUndo, Formatable
         {
 
             // Need Conglomerate to create templates - get from the root page.
-            root = ControlRow.Get(container, BTree.ROOTPAGEID);
+            root = ControlRow.get(container, BTree.ROOTPAGEID);
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(root.getPage().isLatched());
@@ -191,7 +191,7 @@ public class B2IUndo implements LogicalUndo, Formatable
 
             // Get the page where the record was originally, before splits
             // could have possibly moved it.
-            control_row = ControlRow.Get(open_btree, rechandle.getPageNumber());
+            control_row = ControlRow.get(open_btree, rechandle.getPageNumber());
 
             // init compare_result, if record doesn't exist do the search 
             compare_result = 1;
@@ -218,7 +218,7 @@ public class B2IUndo implements LogicalUndo, Formatable
                 // compare the 2 rows, and if they are the same then the raw 
                 // store has the right page and record and there is no work to
                 // be done (this is usual case).
-                compare_result = ControlRow.CompareIndexRowToKey(
+                compare_result = ControlRow.compareIndexRowToKey(
                     template, logged_index_row_template, 
                     logged_index_row_template.length, 1, 
                     open_btree.getColumnSortOrderInfo());
@@ -242,7 +242,7 @@ public class B2IUndo implements LogicalUndo, Formatable
                 control_row.release();
                 control_row = null;
                 control_row = 
-                    ControlRow.Get(open_btree, BTree.ROOTPAGEID).search(sp);
+                    ControlRow.get(open_btree, BTree.ROOTPAGEID).search(sp);
 
                 if (!sp.resultExact)
                 {

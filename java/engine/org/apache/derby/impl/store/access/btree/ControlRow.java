@@ -469,7 +469,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 			return null;
 
 		// Try to get the control row without waiting
-		cr = ControlRow.GetNoWait(btree, pageno);
+		cr = ControlRow.getNoWait(btree, pageno);
 		if (cr == null)
 			throw new WaitError();
 
@@ -528,7 +528,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 		if (pageno == ContainerHandle.INVALID_PAGE_NUMBER)
 			return null;
 		else
-			return ControlRow.Get(open_btree, pageno);
+			return ControlRow.get(open_btree, pageno);
 	}
 
 	// This method will have to update the row.
@@ -814,13 +814,13 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 
     @exception StandardException Standard exception policy.
 	 **/
-	public static ControlRow Get(OpenBTree open_btree, long pageNumber)
+	public static ControlRow get(OpenBTree open_btree, long pageNumber)
 		throws StandardException
 	{
-        return(ControlRow.Get(open_btree.container, pageNumber));
+        return(ControlRow.get(open_btree.container, pageNumber));
 	}
 
-	public static ControlRow Get(ContainerHandle container, long pageNumber)
+	public static ControlRow get(ContainerHandle container, long pageNumber)
 		throws StandardException
 	{
         if (SanityManager.DEBUG)
@@ -841,7 +841,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
         }
 
 		// Return the corresponding control row.
-		return GetControlRowForPage(container, page);
+		return getControlRowForPage(container, page);
 	}
 
 	/**
@@ -850,7 +850,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 
     @exception StandardException Standard exception policy.
 	**/
-	public static ControlRow GetNoWait(
+	public static ControlRow getNoWait(
     OpenBTree       open_btree, 
     long            pageNumber)
 		throws StandardException
@@ -863,10 +863,10 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 
 		// Got the page without waiting.  Return the corresponding
 		// control row.
-		return GetControlRowForPage(open_btree.container, page);
+		return getControlRowForPage(open_btree.container, page);
 	}
 
-	protected static ControlRow GetControlRowForPage(
+	protected static ControlRow getControlRowForPage(
     ContainerHandle container,
     Page            page)
         throws StandardException
@@ -906,7 +906,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
         cr.page = page;
 
         // call page specific initialization.
-        cr.ControlRowInit();
+        cr.controlRowInit();
 
         // cache this Control row with the page in the cache.
 		page.setAuxObject(cr);
@@ -1015,7 +1015,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
         {
 			// Compare the index row to the key.
 			compare_ret = 
-                CompareIndexRowFromPageToKey(
+                compareIndexRowFromPageToKey(
                     this,
                     midslot,
                     params.template, params.searchKey, 
@@ -1145,7 +1145,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
         {
 			// Compare the index row to the key.
 			compare_ret = 
-                CompareIndexRowFromPageToKey(
+                compareIndexRowFromPageToKey(
                     this,
                     midslot,
                     params.template, params.searchKey, 
@@ -1238,7 +1238,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 
     @exception StandardException Standard exception policy.
 	**/
-	public static int CompareIndexRowFromPageToKey(
+	public static int compareIndexRowFromPageToKey(
     ControlRow              indexpage,
     int                     slot,
     DataValueDescriptor[]   indexrow, 
@@ -1314,7 +1314,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 		return 0;
 	}
 
-	public static int CompareIndexRowToKey(
+	public static int compareIndexRowToKey(
     DataValueDescriptor[]   indexrow, 
     DataValueDescriptor[]   key,
     int                     nCompareCols, 
@@ -1457,7 +1457,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
                SanityManager.ASSERT(btree.getConglomerate().nUniqueColumns <= 
                                     btree.getConglomerate().nKeyFields);
                int compare_result = 
-                   CompareIndexRowToKey(
+                   compareIndexRowToKey(
                        lesser, greater,
                        btree.getConglomerate().nUniqueColumns, 0,
                        btree.getConglomerate().ascDescInfo);
@@ -1522,7 +1522,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
                         (FetchDescriptor) null, true); 
 
                 int r = 
-                    CompareIndexRowToKey(
+                    compareIndexRowToKey(
                         left_lastrow, right_firstrow,
                         btree.getConglomerate().nUniqueColumns,
                         0, btree.getConglomerate().ascDescInfo);
@@ -1845,7 +1845,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
      * <p>
      *
      **/
-    protected abstract void ControlRowInit();
+    protected abstract void controlRowInit();
 
     /**
      * Is the current page the leftmost leaf of tree?

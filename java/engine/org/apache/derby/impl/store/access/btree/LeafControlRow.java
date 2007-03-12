@@ -115,7 +115,7 @@ public class LeafControlRow extends ControlRow
      * 
      * @exception StandardException Standard exception policy.
      */
-    private static LeafControlRow Allocate(
+    private static LeafControlRow allocate(
     OpenBTree   btree, 
     ControlRow  parent)
         throws StandardException
@@ -194,7 +194,7 @@ public class LeafControlRow extends ControlRow
      * Perform page specific initialization.
      * <p>
      **/
-    protected final void ControlRowInit()
+    protected final void controlRowInit()
     {
     }
 
@@ -564,7 +564,7 @@ public class LeafControlRow extends ControlRow
             // At this point, this page has been unlatched.  So code below this
             // point must not access this object's fields.
             
-            ControlRow new_root = ControlRow.Get(open_btree, BTree.ROOTPAGEID);
+            ControlRow new_root = ControlRow.get(open_btree, BTree.ROOTPAGEID);
 
             return(
                 new_root.splitFor(open_btree, template, null, splitrow, flag));
@@ -663,7 +663,7 @@ public class LeafControlRow extends ControlRow
 
         // Create a new leaf page under the parent.
         LeafControlRow newleaf = 
-            LeafControlRow.Allocate(open_btree, parent_page);
+            LeafControlRow.allocate(open_btree, parent_page);
 
         // Now that we know the page number of the new child page update
         // the branch row to be inserted with the correct value.
@@ -855,7 +855,7 @@ public class LeafControlRow extends ControlRow
 
         // Allocate a new leaf page under the existing leaf root.
 
-        newleaf = LeafControlRow.Allocate(open_btree, leafroot);
+        newleaf = LeafControlRow.allocate(open_btree, leafroot);
 
         // Test fail after allocation
         if (SanityManager.DEBUG)
