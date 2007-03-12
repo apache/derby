@@ -7556,6 +7556,12 @@ class DRDAConnThread extends Thread {
 	{
 		if (session == null)
 			return;
+
+        /* DERBY-2220: Rollback the current XA transaction if it is
+           still associated with the connection. */
+        if (xaProto != null)
+            xaProto.rollbackCurrentTransaction();
+
 		server.removeFromSessionTable(session.connNum);
 		try {
 			session.close();

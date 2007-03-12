@@ -37,6 +37,9 @@ class DRDAXAProtocol {
 	private DRDAConnThread connThread;
 	private DDMReader reader;
 	private DDMWriter writer;
+    /** Holds the Xid of the global transaction associated with
+      * the corresponding DRDAConnThread (and connection itself). */
+    private Xid xid;
 
 
 	DRDAXAProtocol(DRDAConnThread connThread)
@@ -44,7 +47,7 @@ class DRDAXAProtocol {
 		this.connThread = connThread;
 		reader = connThread.getReader();
 		writer = connThread.getWriter();
-
+        xid = null;
 	}
 
 
@@ -142,7 +145,7 @@ class DRDAXAProtocol {
 				break;
 			case CodePoint.SYNCTYPE_ROLLBACK:
 				//rollback sync type
-				rollbackTransaction(xid);
+				rollbackTransaction(xid, true);
 				break;
 			case CodePoint.SYNCTYPE_INDOUBT:
 				//recover sync type
@@ -239,6 +242,7 @@ class DRDAXAProtocol {
 		try {
 			if (xid.getFormatId() != -1)
 				xaResource.start(xid,xaflags);
+            this.xid = xid;
 		} catch (XAException xe)
 		{
 			xaRetVal = processXAException(xe);
@@ -319,24 +323,29 @@ class DRDAXAProtocol {
 	}
 
 	/**
-	 * Rollback transaction
+	 * Rollback transaction. Optionally send SYNCCRD response.
 	 * @param xid  Xid for rollback for global transaction.
 	 *             If xid formatid is -1 it represents a local transaction
+     * @param sendSYNCCRD Indicates whether the function should
+     *                    send a SYNCCRD response
 	 */
-	private void rollbackTransaction(Xid xid) throws DRDAProtocolException
+	private void rollbackTransaction(Xid xid, boolean sendSYNCCRD) throws DRDAProtocolException
 	{
 		boolean local  = ( xid.getFormatId() == -1);
 		if (local)
-			rollbackLocalTransaction();
+			rollbackLocalTransaction(sendSYNCCRD);
 		else
-			rollbackXATransaction(xid);
+			rollbackXATransaction(xid, sendSYNCCRD);
 	}
 	
 	/**
-	 * Rollback a local transaction
+	 * Rollback a local transaction. Optionally send SYNCCRD response.
 	 *
+     * @param sendSYNCCRD Indicates whether the function should
+     *                    send a SYNCCRD response
+	 * @throws DRDAProtocolException
 	 */
-	private void rollbackLocalTransaction() throws DRDAProtocolException
+	private void rollbackLocalTransaction(boolean sendSYNCCRD) throws DRDAProtocolException
 	{
 		int xaRetVal = XAResource.XA_OK;
 		try {
@@ -351,18 +360,21 @@ class DRDAXAProtocol {
 			}
 			
 		}
-		writeSYNCCRD(CodePoint.SYNCTYPE_COMMITTED, 
-					 xaRetVal, null);
-
+        if (sendSYNCCRD) {
+            writeSYNCCRD(CodePoint.SYNCTYPE_COMMITTED,
+                         xaRetVal, null);
+        }
 	}
 
 	/**
-	 *  Rollback the xa transaction. Send SYNCCRD response.
+	 *  Rollback the xa transaction. Optionally send SYNCCRD response.
 	 * 
 	 *  @param xid - XID 
+     *  @param sendSYNCCRD Indicates whether the function should
+     *                     send a SYNCCRD response
 	 *  @throws DRDAProtocolException
 	 */
-	private void rollbackXATransaction(Xid xid) throws DRDAProtocolException
+	private void rollbackXATransaction(Xid xid, boolean sendSYNCCRD) throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();
 		int xaRetVal = xaResource.XA_OK;
@@ -377,9 +389,10 @@ class DRDAXAProtocol {
 		{
 			xaRetVal = processXAException(xe);
 		}
-		writeSYNCCRD(CodePoint.SYNCTYPE_ROLLBACK,
-					 xaRetVal, null);
-		
+        if (sendSYNCCRD) {
+            writeSYNCCRD(CodePoint.SYNCTYPE_ROLLBACK,
+                         xaRetVal, null);
+        }
 	}
 
 	/**
@@ -396,6 +409,7 @@ class DRDAXAProtocol {
 
 		try {
 			xaResource.end(xid,xaflags);
+            xid = null;
 			if (SanityManager.DEBUG)
 			{
 				connThread.trace("ended XA transaction. xid =  " + xid +
@@ -658,15 +672,44 @@ class DRDAXAProtocol {
 		return xaRetVal;
 	}
 
+    /**
+     * This function rollbacks the current global transaction associated
+     * with the XAResource or a local transaction. The function should
+     * be called only in exceptional cases - like client socket
+     * is closed. */
+    void rollbackCurrentTransaction()
+    {
+        if (xid != null) {
+            boolean local  = ( xid.getFormatId() == -1);
+            try {
+                // if the transaction is not local disassociate the transaction from
+                // the connection first because the rollback can not be performed
+                // on a transaction associated with the XAResource
+                try {
+                    if (!local) {
+                        XAResource xaResource = getXAResource();
+                        // this will throw the XAException (because TMFAIL
+                        // will throw an exception)
+                        xaResource.end(xid, XAResource.TMFAIL);
+                    }
+                } catch (XAException e) {
+                    // do not print out the exception generally thrown
+                    // when TMFAIL flag is present
+                    if (e.errorCode < XAException.XA_RBBASE
+                        || e.errorCode > XAException.XA_RBEND) {
+                        connThread.getServer().consoleExceptionPrint(e);
+                    }
+                }
+                rollbackTransaction(xid, false);
+            } catch  (DRDAProtocolException e) {
+                // because we do not dump any DRDA stuff to the socket
+                // the exception can not be thrown in this case
+                // However, we will dump the exception to the console
+                connThread.getServer().consoleExceptionPrint(e);
+            }
+            xid = null;
+        }
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
 
