@@ -78,6 +78,6 @@ class BasicDependency implements Dependency {
 	//
 	// class implementation
 	//
-	protected Provider	provider;
-	protected Dependent	dependent;
+	private final Provider	provider;
+	private final Dependent	dependent;
 }

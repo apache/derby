@@ -21,53 +21,34 @@
 
 package org.apache.derby.impl.sql.depend;
 
-import	org.apache.derby.catalog.Dependable;
-import	org.apache.derby.catalog.DependableFinder;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.ListIterator;
 
+import org.apache.derby.catalog.DependableFinder;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.context.ContextService;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Parser;
-import org.apache.derby.impl.sql.compile.CreateViewNode;
-
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 import org.apache.derby.iapi.sql.conn.StatementContext;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Dependency;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.sql.depend.ProviderList;
-
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-
-import org.apache.derby.impl.sql.catalog.DDColumnDependableFinder;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import org.apache.derby.iapi.reference.MessageId;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.ListIterator;
-import java.util.List;
+import org.apache.derby.impl.sql.compile.CreateViewNode;
 
 /**
 	The dependency manager tracks needs that dependents have of providers.
@@ -79,6 +60,33 @@ public class BasicDependencyManager implements DependencyManager {
      * DataDictionary for this database.
      */
     private final DataDictionary dd;
+    
+    /**
+     * Map of in-memory dependencies for Dependents.
+     * In-memory means that one or both of the Dependent
+     * or Provider are non-persistent (isPersistent() returns false).
+     * 
+     * Key is the UUID of the Dependent (from getObjectID()).
+     * Value is a List containing Dependency objects, each
+     * of whihc links the same Dependent to a Provider.
+     * Dependency objects in the List are unique.
+     * 
+     */
+    private final Hashtable dependents = new Hashtable();
+    
+    /**
+     * Map of in-memory dependencies for Providers.
+     * In-memory means that one or both of the Dependent
+     * or Provider are non-persistent (isPersistent() returns false).
+     * 
+     * Key is the UUID of the Provider (from getObjectID()).
+     * Value is a List containing Dependency objects, each
+     * of which links the same Provider to a Dependent.
+     * Dependency objects in the List are unique.
+     * 
+     */    
+    private final Hashtable providers = new Hashtable();
+
 
 	//
 	// DependencyManager interface
@@ -1369,8 +1377,4 @@ public class BasicDependencyManager implements DependencyManager {
 	private static List newSList(List list) {
 		return java.util.Collections.synchronizedList(new java.util.LinkedList(list));
 	}
-
-	private	DataDictionary dataDictionary = null;
-	protected Hashtable dependents = new Hashtable();
-	protected Hashtable providers = new Hashtable();
 }
