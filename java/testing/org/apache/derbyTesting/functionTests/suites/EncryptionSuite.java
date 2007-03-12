@@ -22,7 +22,6 @@ package org.apache.derbyTesting.functionTests.suites;
 
 import java.sql.SQLException;
 
-import org.apache.derbyTesting.functionTests.tests.jdbcapi.LobStreamsTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
