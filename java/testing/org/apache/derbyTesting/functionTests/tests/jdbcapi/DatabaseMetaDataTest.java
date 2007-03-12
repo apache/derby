@@ -1663,10 +1663,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             boolean hasScale = true;
             switch (type)
             {
-            case Types.DECIMAL:
-            case Types.NUMERIC:
-                maxScale = 32767; // 31; BUG DERBY-2262
-                break;
+        case Types.DECIMAL:
+        case Types.NUMERIC:
+            maxScale = 31; // Max Scale for Decimal & Numeric is 31: Derby-2262
+            break;
             case Types.TIMESTAMP:
                 maxScale = 6;
                 break;
