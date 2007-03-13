@@ -86,9 +86,6 @@ public class CollatorSQLChar
 	/**
 	 * Set the RuleBasedCollator for this instance of CollatorSQLChar. It will
 	 * be used to do the collation.
-	 * 
-	 * @return an array of collation elements for the string
-	 * @throws StandardException
 	 */
 	private void setCollator(RuleBasedCollator rbc)
 	{
