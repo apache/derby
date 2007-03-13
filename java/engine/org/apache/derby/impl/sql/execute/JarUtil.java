@@ -21,25 +21,6 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.impl.sql.execute.JarDDL;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.store.access.FileResource;
-import org.apache.derby.catalog.UUID;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,37 +29,52 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.store.access.FileResource;
+import org.apache.derby.iapi.util.IdUtil;
 
-class JarUtil
+
+public class JarUtil
 {
 	//
 	//State passed in by the caller
+    private LanguageConnectionContext lcc;
 	private String schemaName;
 	private String sqlName;
 
 	//Derived state
-	private LanguageConnectionContext lcc;
+	
 	private FileResource fr;
 	private DataDictionary dd;
 	private DataDescriptorGenerator ddg;
 	
 	//
 	//State derived from the caller's context
-	private JarUtil(String schemaName, String sqlName)
+	private JarUtil(LanguageConnectionContext lcc,
+            String schemaName, String sqlName)
 		 throws StandardException
 	{
 		this.schemaName = schemaName;
 		this.sqlName = sqlName;
 
-        lcc = (LanguageConnectionContext)
-			ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+        this.lcc = lcc;
 		fr = lcc.getTransactionExecute().getFileHandler();
 		dd = lcc.getDataDictionary();
 		ddg = dd.getDataDescriptorGenerator();
 	}
 
 	/**
-	  Add a jar file to the current connection's database.
+	  install a jar file to the current connection's database.
 
 	  @param schemaName the name for the schema that holds the jar file.
 	  @param sqlName the sql name for the jar file.
@@ -87,11 +83,12 @@ class JarUtil
 
 	  @exception StandardException Opps
 	  */
-	static long
-	add(String schemaName, String sqlName, String externalPath)
+	public static long
+	install(LanguageConnectionContext lcc,
+            String schemaName, String sqlName, String externalPath)
 		 throws StandardException
 	{
-		JarUtil jutil = new JarUtil(schemaName, sqlName);
+		JarUtil jutil = new JarUtil(lcc, schemaName, sqlName);
 		InputStream is = null;
 		
 		try {
@@ -130,7 +127,7 @@ class JarUtil
         try {
             notifyLoader(false);
             dd.invalidateAllSPSPlans();
-            final String jarExternalName = JarDDL.mkExternalName(schemaName,
+            final String jarExternalName = JarUtil.mkExternalName(schemaName,
                     sqlName, fr.getSeparatorChar());
 
             long generationId = setJar(jarExternalName, is, true, 0L);
@@ -155,11 +152,11 @@ class JarUtil
      * @exception StandardException
      *                Opps
      */
-	static void
-	drop(String schemaName, String sqlName)
+	public static void
+	drop(LanguageConnectionContext lcc, String schemaName, String sqlName)
 		 throws StandardException
 	{
-		JarUtil jutil = new JarUtil(schemaName,sqlName);
+		JarUtil jutil = new JarUtil(lcc, schemaName,sqlName);
 		jutil.drop();
 	}
 
@@ -211,7 +208,7 @@ class JarUtil
 
 			dd.dropFileInfoDescriptor(fid);
 
-			fr.remove(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()),
+			fr.remove(JarUtil.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()),
 				fid.getGenerationId());
 		} finally {
 			notifyLoader(true);
@@ -230,12 +227,12 @@ class JarUtil
 
 	  @exception StandardException Opps
 	  */
-	static long
-	replace(String schemaName, String sqlName,
+	public static long
+	replace(LanguageConnectionContext lcc, String schemaName, String sqlName,
 			String externalPath)
 		 throws StandardException
 	{
-		JarUtil jutil = new JarUtil(schemaName,sqlName);
+		JarUtil jutil = new JarUtil(lcc, schemaName,sqlName);
 		InputStream is = null;
 		
 
@@ -280,7 +277,7 @@ class JarUtil
 			dd.invalidateAllSPSPlans();
 			dd.dropFileInfoDescriptor(fid);
             final String jarExternalName =
-                JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar());
+                JarUtil.mkExternalName(schemaName, sqlName, fr.getSeparatorChar());
 
 			//
 			//Replace the file.
@@ -384,5 +381,21 @@ class JarUtil
         } catch (PrivilegedActionException e) {
             throw (StandardException) e.getException();
         }
+    }
+    
+    /**
+      Make an external name for a jar file stored in the database.
+      */
+    public static String mkExternalName(String schemaName, String sqlName, char separatorChar)
+    {
+        StringBuffer sb = new StringBuffer(30);
+
+        sb.append(FileResource.JAR_DIRECTORY_NAME);
+        sb.append(separatorChar);
+        sb.append(schemaName);
+        sb.append(separatorChar);
+        sb.append(sqlName);
+        sb.append(".jar");
+        return sb.toString();
     }
 }

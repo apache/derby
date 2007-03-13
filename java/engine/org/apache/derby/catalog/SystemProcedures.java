@@ -21,34 +21,30 @@
 
 package org.apache.derby.catalog;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.NoSuchElementException;
+import java.util.Random;
+import java.util.StringTokenizer;
 
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.db.Factory;
+import org.apache.derby.iapi.db.PropertyInfo;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-import java.sql.ResultSet;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.DatabaseMetaData;
-import java.util.StringTokenizer;
-import java.util.NoSuchElementException;
-import java.util.Random;
-
-import org.apache.derby.jdbc.InternalDriver;
-import org.apache.derby.iapi.db.Factory;
-import org.apache.derby.iapi.db.PropertyInfo;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.sql.conn.ConnectionUtil;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.load.Export;
 import org.apache.derby.impl.load.Import;
-import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
-
-import org.apache.derby.impl.sql.execute.JarDDL;
-import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.iapi.error.PublicAPI;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
+import org.apache.derby.impl.sql.execute.JarUtil;
+import org.apache.derby.jdbc.InternalDriver;
 
 
 /**
@@ -969,26 +965,28 @@ public class SystemProcedures  {
 		throws SQLException {
 
 		try {
+            
+            LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
 			String[] st = IdUtil.parseQualifiedName(jar.trim(), true);
 
-			String schemaName = null;
-			String sqlName = null;
-
-			switch (st.length) {
-			case 1:
-				schemaName = null;
+			String schemaName;
+			String sqlName;
+            
+            if (st.length == 1)
+            {
+				schemaName = lcc.getCurrentSchemaName();
 				sqlName = st[0];
-				break;
-			case 2:
-				schemaName = st[0];
+            }
+            else
+            {
+                schemaName = st[0];
 				sqlName = st[1];
-			default:
-				; // RESOLVE
 			}
 
 			checkJarSQLName(sqlName);
-			JarDDL.add(schemaName, sqlName, url);
+            
+            JarUtil.install(lcc, schemaName, sqlName, url);
 		} 
 		catch (StandardException se) {
 			throw PublicAPI.wrapStandardException(se);
@@ -1009,26 +1007,29 @@ public class SystemProcedures  {
 		throws SQLException {
 
 		try {
+            
+            LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
 			String[] st = IdUtil.parseQualifiedName(jar.trim(), true);
 
-			String schemaName = null;
-			String sqlName = null;
-
-			switch (st.length) {
-			case 1:
-				schemaName = null;
-				sqlName = st[0];
-				break;
-			case 2:
-				schemaName = st[0];
-				sqlName = st[1];
-			default:
-				; // RESOLVE
-			}
+            String schemaName;
+            String sqlName;
+            
+            if (st.length == 1)
+            {
+                schemaName = lcc.getCurrentSchemaName();
+                sqlName = st[0];
+            }
+            else
+            {
+                schemaName = st[0];
+                sqlName = st[1];
+            }
 
 			checkJarSQLName(sqlName);
-			JarDDL.replace(schemaName, sqlName, url);
+            
+            JarUtil.replace(lcc,
+                    schemaName, sqlName, url);
 		} 
 		catch (StandardException se) {
 			throw PublicAPI.wrapStandardException(se);
@@ -1046,27 +1047,29 @@ public class SystemProcedures  {
 		throws SQLException {
 
 		try {
+            
+            LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
 			String[] st = IdUtil.parseQualifiedName(jar.trim(), true);
 
-			String schemaName = null;
-			String sqlName = null;
-
-			switch (st.length) {
-			case 1:
-				schemaName = null;
-				sqlName = st[0];
-				break;
-			case 2:
-				schemaName = st[0];
-				sqlName = st[1];
-			default:
-				; // RESOLVE
-			}
+            String schemaName;
+            String sqlName;
+            
+            if (st.length == 1)
+            {
+                schemaName = lcc.getCurrentSchemaName();
+                sqlName = st[0];
+            }
+            else
+            {
+                schemaName = st[0];
+                sqlName = st[1];
+            }
 
 			checkJarSQLName(sqlName);
+            
+            JarUtil.drop(lcc, schemaName, sqlName);
 
-			JarDDL.drop(schemaName, sqlName);
 		} 
 		catch (StandardException se) {
 			throw PublicAPI.wrapStandardException(se);

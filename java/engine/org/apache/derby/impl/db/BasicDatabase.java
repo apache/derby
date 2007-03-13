@@ -69,6 +69,7 @@ import org.apache.derby.iapi.services.property.PropertySetCallback;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.impl.sql.execute.JarUtil;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.catalog.UUID;
 
@@ -805,7 +806,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
         ContextManager cm = ContextService.getFactory().getCurrentContextManager();
 		FileResource fr = af.getTransaction(cm).getFileHandler();
 
-		String externalName = org.apache.derby.impl.sql.execute.JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar());
+		String externalName = JarUtil.mkExternalName(schemaName, sqlName, fr.getSeparatorChar());
 
 		return fr.getAsFile(externalName, generationId);
 	}

@@ -811,56 +811,6 @@ public class GenericConstantActionFactory
 										);
 	}
 
-	/**
-	 * Make the ConstantAction to Add a jar file to a database.
-	 *
-	 *	@param	schemaName			The SchemaName for the jar file.
-	 *	@param	sqlName			    The sqlName for the jar file.
-	 *  @param  externalPath            The name of the file that holds the jar.
-	 *  @exception StandardException Ooops
-	 */
-	public	ConstantAction getAddJarConstantAction(
-														 String schemaName,
-														 String sqlName,
-														 String externalPath)
-		 throws StandardException
-	{
-		getAuthorizer().authorize(Authorizer.JAR_WRITE_OP);
-		return new AddJarConstantAction(schemaName,sqlName,externalPath);
-	}
-	/**
-	 * Make the ConstantAction to replace a jar file in a database.
-	 *
-	 *	@param	schemaName			The SchemaName for the jar file.
-	 *	@param	sqlName			    The sqlName for the jar file.
-	 *  @param  externalPath            The name of the file that holds the new jar.
-	 *  @exception StandardException Ooops
-	 */
-	public	ConstantAction getReplaceJarConstantAction(
-														 String schemaName,
-														 String sqlName,
-														 String externalPath)
-		 throws StandardException
-	{
-		getAuthorizer().authorize(Authorizer.JAR_WRITE_OP);
-		return new ReplaceJarConstantAction(schemaName,sqlName,externalPath);
-	}
-	/**
-	 * Make the ConstantAction to drop a jar file from a database.
-	 *
-	 *	@param	schemaName			The SchemaName for the jar file.
-	 *	@param	sqlName			    The sqlName for the jar file.
-	 *  @exception StandardException Ooops
-	 */
-	public	ConstantAction getDropJarConstantAction(
-														  String schemaName,
-														  String sqlName)
-		 throws StandardException
-	{
-		getAuthorizer().authorize(Authorizer.JAR_WRITE_OP);
-		return new DropJarConstantAction(schemaName,sqlName);
-	}
-
 	static protected Authorizer getAuthorizer()
 	{
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
