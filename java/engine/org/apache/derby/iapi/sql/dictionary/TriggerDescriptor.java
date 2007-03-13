@@ -789,7 +789,7 @@ public class TriggerDescriptor extends TupleDescriptor
 		
 	}
 
-	protected DataDictionary getDataDictionary() throws StandardException
+	protected DataDictionary getDataDictionary()
 	{
 		/*
  		  note: we need to do this since when this trigger is read back from

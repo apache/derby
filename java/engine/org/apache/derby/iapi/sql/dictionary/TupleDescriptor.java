@@ -91,7 +91,7 @@ public class TupleDescriptor
 		this.dataDictionary = dataDictionary;
 	}
 
-	protected DataDictionary getDataDictionary() throws StandardException
+	protected DataDictionary getDataDictionary()
 	{
 		return dataDictionary;
 	}
