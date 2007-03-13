@@ -638,11 +638,7 @@ public class LockControl implements Control {
 	 * @return	The removed lock request
 	 */
 	private Object popFrontWaiter(List waiting, LockTable ls) {
-		// Maintain count of waiters
-		ls.oneLessWaiter();
-
-		// Remove and return the first lock request
-		return waiting.remove(0);
+		return removeWaiter(waiting, 0, ls);
 	}
 
 
