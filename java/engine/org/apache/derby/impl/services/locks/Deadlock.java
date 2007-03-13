@@ -50,7 +50,7 @@ class Deadlock  {
 	 * <BR>
 	 * MT - must be synchronized on the <code>LockSet</code> object.
 	 */
-	static Object[] look(SinglePool factory, LockTable set,
+	static Object[] look(AbstractPool factory, LockTable set,
 						 LockControl control, ActiveLock startingLock,
 						 byte deadlockWake) {
 
@@ -188,7 +188,8 @@ inner:		for (;;) {
 		return waiters;
 	}
 
-	private static Object[] handle(SinglePool factory, Stack chain, int start, Dictionary waiters, byte deadlockWake) {
+	private static Object[] handle(AbstractPool factory, Stack chain, int start,
+								   Dictionary waiters, byte deadlockWake) {
 
 		// If start is zero then the space that started looking for the
 		// deadlock is activly involved in the deadlock.
@@ -235,7 +236,8 @@ inner:		for (;;) {
 
 	}
 
-	static StandardException buildException(SinglePool factory, Object[] data) {
+	static StandardException buildException(AbstractPool factory,
+											Object[] data) {
 
 		Stack chain = (Stack) data[0];
 		Dictionary waiters = (Dictionary) data[1];
