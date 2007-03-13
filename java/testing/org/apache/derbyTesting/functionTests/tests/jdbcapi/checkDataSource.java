@@ -21,7 +21,9 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -46,6 +48,7 @@ import javax.transaction.xa.Xid;
 
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
@@ -715,8 +718,15 @@ public class checkDataSource
 				System.out.println("; wrong, unexpected exception: " + e.toString());
 		}
 		
+                testBadConnectionAttributeSyntax();
+                
 		if (TestUtil.isDerbyNetClientFramework())
+                {
 			testClientDSConnectionAttributes();
+                        testClientTraceFileDSConnectionAttribute();
+                        testClientMessageTextDSConnectionAttribute();
+                        testClientDescriptionDSConnectionAttribute();
+                }
 		
 		// skip testDSRequestAuthentication for  client because of this issue: 
 		// DERBY-1131 : Deprecate  Derby DataSource property attributesAsPassword
@@ -788,6 +798,147 @@ public class checkDataSource
 			printState("(After 1st global rollback) local", conn);
 	}
 
+        public void testBadConnectionAttributeSyntax() throws SQLException {
+            if (TestUtil.isDerbyNetClientFramework())
+            {
+                System.out.println("client datasources");
+                Connection conn;
+                
+                System.out.println("DataSource - bad connattr syntax");
+                ClientDataSource ds = new ClientDataSource();
+                ds.setDatabaseName("wombat");
+                ds.setConnectionAttributes("bad");
+                try {
+                    conn = ds.getConnection();
+                    conn.close();
+                    System.out.println("FAIL - should have seen an error");
+                } catch (SQLException e) {
+                    if (!e.getSQLState().equals("XJ212"))
+                    {
+                        System.out.println("FAIL - bad syntax does not cause error XJ212");
+                        e.printStackTrace();
+                    }
+                } 
+                ds.setConnectionAttributes(null);
+
+                System.out.println("ConnectionPoolDataSource - bad connatr syntax");
+                ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+                cpds.setDatabaseName("wombat");
+                cpds.setConnectionAttributes("bad");
+                try {
+                    conn = cpds.getConnection();
+                    conn.close();
+                    System.out.println("FAIL - should have seen an error");
+                } catch (SQLException e) {
+                    if (!e.getSQLState().equals("XJ212"))
+                    {
+                        System.out.println("FAIL - bad syntax does not cause error XJ212");
+                        e.printStackTrace();
+                    }
+                } 
+                cpds.setConnectionAttributes(null);
+
+                ClientXADataSource xads = new ClientXADataSource();
+                System.out.println("XADataSource - bad connattr syntax");
+                xads.setDatabaseName("wombat");
+                xads.setConnectionAttributes("bad");
+                try {
+                    conn = xads.getConnection();
+                    conn.close();
+                    System.out.println("FAIL - should have seen an error");
+                } catch (SQLException e) {
+                    if (!e.getSQLState().equals("XJ212"))
+                    {
+                        System.out.println("FAIL - bad syntax does not cause error XJ212");
+                        e.printStackTrace();
+                    }
+                } 
+                xads.setConnectionAttributes(null);
+            }
+            else
+            {   
+                System.out.println("embedded datasources");
+                Connection conn;
+             
+                System.out.println("DataSource - bad connattr syntax");
+                if (TestUtil.HAVE_DRIVER_CLASS)
+                {
+                    EmbeddedDataSource ds = new EmbeddedDataSource();
+                    ds.setDatabaseName("wombat");
+                    ds.setConnectionAttributes("bad");
+                    try {
+                        // TODO: this gives XJ028 - url is badly formed, whereas
+                        // all other datasources give XJ212 - invalid syntax for connatr.
+                        // is this ok?
+                        conn = ds.getConnection();
+                        conn.close();
+                        System.out.println("FAIL - should have seen an error");
+                    } catch (SQLException e) {
+                        if (!e.getSQLState().equals("XJ028"))
+                        {
+                            System.out.println("FAIL - bad syntax does not cause error XJ028");
+                            System.out.println("instead, it gives sqlstate: "
+                                    + e.getSQLState());
+                            e.printStackTrace();
+                        }
+                    } 
+                    ds.setConnectionAttributes(null);
+                }
+                else
+                {
+                    EmbeddedSimpleDataSource ds = new EmbeddedSimpleDataSource();
+                    ds.setDatabaseName("wombat");
+                    ds.setConnectionAttributes("bad");
+                    try {
+                        conn = ds.getConnection();
+                        conn.close();
+                        System.out.println("FAIL - should have seen an error");
+                    } catch (SQLException e) {
+                        if (!e.getSQLState().equals("XJ212"))
+                        {
+                            System.out.println("FAIL - bad syntax does not cause error XJ212");
+                            e.printStackTrace();
+                        }
+                    } 
+                    ds.setConnectionAttributes(null);
+                }
+
+                System.out.println("ConnectionPoolDataSource - bad connatr syntax");
+                ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+                cpds.setDatabaseName("wombat");
+                cpds.setConnectionAttributes("bad");
+                try {
+                    conn = cpds.getConnection();
+                    conn.close();
+                    System.out.println("FAIL - should have seen an error");
+                } catch (SQLException e) {
+                    if (!e.getSQLState().equals("XJ212"))
+                    {
+                        System.out.println("FAIL - bad syntax does not cause error XJ212");
+                        e.printStackTrace();
+                    }
+                } 
+                cpds.setConnectionAttributes(null);
+
+                ClientXADataSource xads = new ClientXADataSource();
+                System.out.println("XADataSource - bad connattr syntax");
+                xads.setDatabaseName("wombat");
+                xads.setConnectionAttributes("bad");
+                try {
+                    conn = xads.getConnection();
+                    conn.close();
+                    System.out.println("FAIL - should have seen an error");
+                } catch (SQLException e) {
+                    if (!e.getSQLState().equals("XJ212"))
+                    {
+                        System.out.println("FAIL - bad syntax does not cause error XJ212");
+                        e.printStackTrace();
+                    }
+                } 
+                xads.setConnectionAttributes(null);
+            }
+        }
+        
 	protected void showXAException(String tag, XAException xae) {
 
 		System.out.println(tag + " : XAException - " + xae.getMessage());
@@ -1475,7 +1626,272 @@ public class checkDataSource
 		xads.setConnectionAttributes(null);
 		xads.setDatabaseName(null);
 	}
-	
+        
+	/**
+	 * Check that traceFile connection attribute functions correctly.
+         * tracefile was tested in checkDriver, but not for DataSources.
+	 * tracefile= was used in datasourcepermissions_net, but that's 
+	 * incorrect syntax. Note that we're not checking the contents of
+	 * the tracefile.
+	 *  
+	 * @throws SQLException
+	 */
+	private static void testClientTraceFileDSConnectionAttribute() throws SQLException {
+
+	    String DERBY_SYSTEM_HOME = System.getProperty("derby.system.home");
+	    String traceDirectory = DERBY_SYSTEM_HOME + File.separator;
+	    String traceFile;
+            String coretraceFile;
+            
+	    // DataSource
+	    ClientDataSource ds = new ClientDataSource();
+            ds.setDatabaseName("wombat");
+            
+            System.out.println("DataSource - connectionAttribute=traceFile=filename");
+            coretraceFile = "trace1.out";
+            traceFile = traceDirectory + coretraceFile;
+            ds.setConnectionAttributes("traceFile="+traceFile);
+            dsConnectionRequests(ds);
+            assertTraceFileExists(traceFile, coretraceFile);
+            ds.setConnectionAttributes(null);
+
+            System.out.println("DataSource - setTraceFile property");
+            coretraceFile = "trace2.out";
+            traceFile = traceDirectory + coretraceFile;
+            ds.setTraceFile(traceFile);
+	    dsConnectionRequests(ds);
+	    assertTraceFileExists(traceFile, coretraceFile);
+            ds.setTraceFile(null);
+	    ds.setDatabaseName(null);
+
+	    // now with ConnectionPoolDataSource
+	    ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+            cpds.setDatabaseName("wombat");
+
+            System.out.println("ConnectionPoolDataSource - connectionAttribute=traceFile=filename");
+            coretraceFile = "trace3.out";
+            traceFile = traceDirectory + coretraceFile;
+	    cpds.setConnectionAttributes("traceFile="+traceFile);
+	    dsConnectionRequests((ConnectionPoolDataSource)cpds);
+            // TODO: log bug - trace3.out does not get created
+	    assertTraceFileExists(traceFile, coretraceFile);
+            cpds.setConnectionAttributes(null);
+
+            System.out.println("ConnectionPoolDataSource - setTraceFile property");
+            coretraceFile = "trace4.out";
+            traceFile = traceDirectory + coretraceFile;
+	    cpds.setTraceFile(traceFile);
+	    dsConnectionRequests((ConnectionPoolDataSource)cpds);
+	    assertTraceFileExists(traceFile, coretraceFile);
+            cpds.setTraceFile(null);
+	    cpds.setDatabaseName(null);
+
+	    // now with XADataSource
+	    ClientXADataSource xads = new ClientXADataSource();
+            xads.setDatabaseName("wombat");
+            
+	    System.out.println("XADataSource - connectionAttribute=traceFile=filename");
+            coretraceFile = "trace5.out";
+            traceFile = traceDirectory + coretraceFile;
+	    xads.setConnectionAttributes("traceFile="+traceFile);
+	    dsConnectionRequests((XADataSource) xads);
+            // TODO: log bug, like trace3.out, trace5.out does not get created
+            assertTraceFileExists(traceFile, coretraceFile);
+	    xads.setConnectionAttributes(null);
+
+            System.out.println("XADataSource - setTraceFile property");
+            coretraceFile = "trace6.out";
+            traceFile = traceDirectory + coretraceFile;
+	    xads.setTraceFile(traceFile);
+	    dsConnectionRequests((XADataSource)xads);
+	    assertTraceFileExists(traceFile, coretraceFile);
+            xads.setTraceFile(null);
+	    xads.setDatabaseName(null);
+	}
+        
+        /**
+         * Check that trace file exists in <framework> directory
+         * 
+         * @param filename Name of trace file
+         */
+        private static void assertTraceFileExists(
+                String filename, String corefileName) 
+        {
+                File traceFile = new File(filename);
+                //System.out.println("user.dir=" + System.getProperty("user.dir"));
+                //System.out.println("fullpath = " + traceFile.getAbsolutePath());
+                boolean exists = traceFile.exists();
+                if (! exists)
+                        // new Exception("FAILED trace file: " + filename + " does not exist").printStackTrace(System.out);
+                    new Exception("FAILED trace file: " + corefileName + " does not exist").printStackTrace(System.out); 
+                else
+                        System.out.println(" trace file exists");
+                        
+        }
+        
+        /**
+         * Check that messageText connection attribute functions correctly.
+         * retrievemessagetext was tested in checkdriver, and derbynet/testij,
+         * but not tested for datasources, and in datasourcepermissions_net,
+         * but as it has nothing to do with permissions/authentication,
+         * this test seems a better place for it. 
+         *  
+         * @throws SQLException
+         */
+        private static void testClientMessageTextDSConnectionAttribute() throws SQLException {
+
+            String retrieveMessageTextProperty = "retrieveMessageText";
+            Connection conn;
+
+            // DataSource
+            System.out.println("DataSource - retrieveMessageTextProperty");
+            ClientDataSource ds = new ClientDataSource();
+            ds.setDatabaseName("wombat");
+            ds.setConnectionAttributes(retrieveMessageTextProperty + "=false");
+            dsConnectionRequests(ds);
+            conn = ds.getConnection();
+            checkMessageText(conn,"false");
+            conn.close();
+            // now try with retrieveMessageText = true
+            ds.setConnectionAttributes(retrieveMessageTextProperty + "=true");
+            dsConnectionRequests(ds);
+            conn = ds.getConnection();
+            checkMessageText(conn,"true");
+            ds.setConnectionAttributes(null);
+            conn.close();
+                
+            // now with ConnectionPoolDataSource
+            System.out.println("ConnectionPoolDataSource - retrieveMessageTextProperty");
+            ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+            cpds.setDatabaseName("wombat");
+            cpds.setConnectionAttributes(
+                    retrieveMessageTextProperty + "=false");
+            dsConnectionRequests((ConnectionPoolDataSource)cpds);
+            conn = cpds.getConnection();
+            checkMessageText(conn,"false");
+            conn.close();
+            cpds.setConnectionAttributes(
+                    retrieveMessageTextProperty + "=true");
+            dsConnectionRequests((ConnectionPoolDataSource)cpds);
+            conn = cpds.getConnection();
+            checkMessageText(conn,"true");
+            cpds.setConnectionAttributes(null);
+            conn.close();
+
+            // now with XADataSource
+            ClientXADataSource xads = new ClientXADataSource();
+            System.out.println("XADataSource - retrieveMessageTextProperty");
+            xads.setDatabaseName("wombat");
+            xads.setConnectionAttributes(
+                    retrieveMessageTextProperty + "=false");
+            dsConnectionRequests((XADataSource) xads);
+            conn = xads.getConnection();
+            checkMessageText(conn,"false");
+            conn.close();
+            xads.setConnectionAttributes(
+                    retrieveMessageTextProperty + "=true");
+            dsConnectionRequests((XADataSource) xads);
+            conn = xads.getConnection();
+            checkMessageText(conn,"true");
+            conn.close();
+            xads.setConnectionAttributes(null);
+        }
+
+        public static void checkMessageText(Connection conn, String
+                retrieveMessageTextValue) throws SQLException
+                {
+            System.out.println("** checkMessageText() with retrieveMessageText= " +
+                    retrieveMessageTextValue);
+
+            try {
+                conn.createStatement().executeQuery("SELECT * FROM APP.NOTTHERE");
+            }
+            catch (SQLException e)
+            {
+                String expectedSQLState = "42X05";
+                String sqlState = e.getSQLState();
+                if (sqlState == null || ! sqlState.equals(expectedSQLState))
+                {
+                    System.out.println("Incorrect SQLState.  Got: " + sqlState +
+                            " should be: " + expectedSQLState);
+                    throw e;
+                }
+                if (retrieveMessageTextValue.equals("true") )
+                {
+                    if (e.getMessage().indexOf("does not exist") != -1)
+                        System.out.println("PASS: Message Text retrieved properly");
+                    else
+                    {
+                        System.out.println("FAIL: Message text was not retrieved");
+                        throw e;
+                    }
+                }
+                else
+//                  retrieveMessageTextValue is false
+                    if (e.getMessage().indexOf("does not exist") == -1)
+                    {
+                        System.out.println("PASS: Message text not retrieved");
+                    }
+                    else
+                    {
+                        System.out.println("FAIL: Message Text should not have been retrieved");
+                        throw e;
+                    }
+
+            }
+        }
+
+        /**
+         * Check that messageText connection attribute functions correctly.
+         * retrievemessagetext was tested in checkdriver, and derbynet/testij,
+         * but not tested for datasources, and in datasourcepermissions_net,
+         *  but as it has nothing to do with permissions/authentication,
+         *  this test seems a better place for it. 
+         *  
+         * @throws SQLException
+         */
+        private static void testClientDescriptionDSConnectionAttribute() throws SQLException, Exception {
+
+            // DataSource
+            String setDescription = "Everything you ever wanted to know about this datasource";
+            String getDescription;
+            Connection conn;
+            
+            System.out.println("DataSource - setDescription");
+            ClientDataSource ds = new ClientDataSource();
+            ds.setDatabaseName("wombat");
+            ds.setDescription(setDescription);
+            conn = ds.getConnection();
+            getDescription = ds.getDescription();
+            if (!setDescription.equals(getDescription))
+                throw new Exception("getDescription() " + getDescription 
+                        + " does not match setDescription() ");
+            ds.setDescription(null);
+            conn.close();
+
+            System.out.println("ConnectionPoolDataSource - setDescription");
+            ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+            cpds.setDatabaseName("wombat");
+            cpds.setDescription(setDescription);
+            conn = cpds.getConnection();
+            getDescription = cpds.getDescription();
+            if (!setDescription.equals(getDescription))
+                throw new Exception("getDescription() " + getDescription + " does not match setDescription() ");
+            conn.close();
+            cpds.setDescription(null);
+
+            ClientXADataSource xads = new ClientXADataSource();
+            System.out.println("XADataSource - setDescription");
+            xads.setDatabaseName("wombat");
+            xads.setDescription(setDescription);
+            conn = xads.getConnection();
+            getDescription = xads.getDescription();
+            if (!setDescription.equals(getDescription))
+                throw new Exception("getDescription() " + getDescription + " does not match setDescription() ");
+            conn.close();
+            xads.setDescription(null);
+        }
+
 	private static void dsConnectionRequests(DataSource ds) {
 		
 		SecurityCheck.inspect(ds, "javax.sql.DataSource");
