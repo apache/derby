@@ -749,14 +749,6 @@ final class CrossConverters {
         switch (targetType) {
         case Types.BLOB:
             return source;
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-            try {
-                return source.getBytes(1L, (int) source.length());
-            } catch (java.sql.SQLException e) {
-                throw new SqlException(e);                        
-            }
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
@@ -814,10 +806,6 @@ final class CrossConverters {
         switch (targetType) {
         case Types.CLOB:
             return source;
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
-            return source.toString();
         default:
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
