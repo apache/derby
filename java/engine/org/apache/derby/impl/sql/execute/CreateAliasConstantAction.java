@@ -39,9 +39,10 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
- *	This class  describes actions that are ALWAYS performed for a
+ *	This class performs actions that are ALWAYS performed for a
  *	CREATE FUNCTION, PROCEDURE or SYNONYM Statement at execution time.
- *  These SQL objects are stored in the SYS.SYSALIASES table.
+ *  These SQL objects are stored in the SYS.SYSALIASES table and
+ *  represented as AliasDescriptors.
  *
  */
 class CreateAliasConstantAction extends DDLConstantAction
@@ -141,9 +142,34 @@ class CreateAliasConstantAction extends DDLConstantAction
 	/**
 	 *	This is the guts of the Execution-time logic for
      *  CREATE FUNCTION, PROCEDURE or SYNONYM.
-     *  Each will result in a row inserted into SYS.SYSALIASES.
-	 *
-	 *	@see ConstantAction#executeConstantAction
+     *  <P>
+     *  A routine (function or procedure) is represented as:
+     *  <UL>
+     *  <LI> AliasDescriptor
+     *  </UL>
+     *  Routine dependencies are created as:
+     *  <UL>
+     *  <LI> None
+     *  </UL>
+     *  
+     *  <P>
+     *  A synonym is represented as:
+     *  <UL>
+     *  <LI> AliasDescriptor
+     *  <LI> TableDescriptor
+     *  </UL>
+     *  Synonym dependencies are created as:
+     *  <UL>
+     *  <LI> None
+     *  </UL>
+     *  
+     *  In both cases a SchemaDescriptor will be created if
+     *  needed. No dependency is created on the SchemaDescriptor.
+     *  
+	 * @see ConstantAction#executeConstantAction
+     * @see AliasDescriptor
+     * @see TableDescriptor
+     * @see SchemaDescriptor
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -272,6 +298,6 @@ class CreateAliasConstantAction extends DDLConstantAction
 		}
 
 		dd.addDescriptor(ads, null, DataDictionary.SYSALIASES_CATALOG_NUM,
-						 false, lcc.getTransactionExecute());
+						 false, tc);
 	}
 }

@@ -21,10 +21,15 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.Dependable;
 
@@ -358,5 +363,60 @@ public final class SchemaDescriptor extends TupleDescriptor
 	public String getDescriptorType()
 	{
 		return "Schema";
+    }
+    
+    /**
+     * Drop this schema.
+     * Drops the schema if it is empty. If the schema was
+     * the current default then the current default will be
+     * reset through the language connection context.
+     * @throws StandardException Schema could not be dropped.
+     */
+	public void drop(LanguageConnectionContext lcc) throws StandardException
+	{
+        DataDictionary dd = getDataDictionary();
+        DependencyManager dm = dd.getDependencyManager();
+        TransactionController tc = lcc.getTransactionExecute();
+       
+	    //If user is attempting to drop SESSION schema and there is no physical SESSION schema, then throw an exception
+	    //Need to handle it this special way is because SESSION schema is also used for temporary tables. If there is no
+	    //physical SESSION schema, we internally generate an in-memory SESSION schema in order to support temporary tables
+	    //But there is no way for the user to access that in-memory SESSION schema. Following if will be true if there is
+	    //no physical SESSION schema and hence getSchemaDescriptor has returned an in-memory SESSION schema
+	    if (getSchemaName().equals(SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME)
+                && (getUUID() == null))
+	        throw StandardException.newException(SQLState.LANG_SCHEMA_DOES_NOT_EXIST, getSchemaName());
+	    
+	    /*
+	     ** Make sure the schema is empty.
+	     ** In the future we want to drop everything
+	     ** in the schema if it is CASCADE.
+	     */
+	    if (!dd.isSchemaEmpty(this))
+	    {
+	        throw StandardException.newException(SQLState.LANG_SCHEMA_NOT_EMPTY, getSchemaName());
+	    } 
+	    
+	    /* Prepare all dependents to invalidate.  (This is there chance
+	     * to say that they can't be invalidated.  For example, an open
+	     * cursor referencing a table/view that the user is attempting to
+	     * drop.) If no one objects, then invalidate any dependent objects.
+	     */
+	    dm.invalidateFor(this, DependencyManager.DROP_SCHEMA, lcc);
+	    
+	    dd.dropSchemaDescriptor(getSchemaName(), tc);
+	    
+	    /*
+	     ** If we have dropped the current default schema,
+	     ** then we will set the default to null.  The
+	     ** LCC is free to set the new default schema to 
+	     ** some system defined default.
+	     */
+	    SchemaDescriptor currentDefault = lcc.getDefaultSchema();
+	    if ((currentDefault != null) &&
+                getSchemaName().equals(currentDefault.getSchemaName()))
+	    {
+	        lcc.setDefaultSchema((SchemaDescriptor)null);
+	    }        
 	}
 }

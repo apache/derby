@@ -21,7 +21,10 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -327,5 +330,59 @@ public final class AliasDescriptor
     public boolean isPersistent()
     {
         return !getSchemaUUID().toString().equals(SchemaDescriptor.SYSFUN_SCHEMA_UUID);
+    }
+   
+    /**
+     * Drop the routine or synonym.
+     * For a routine its permission descriptors will be dropped as well.
+     * For a synonym its TableDescriptor will be dropped as well.
+     * @param lcc
+     * @throws StandardException
+     */
+    public void drop(LanguageConnectionContext lcc) throws StandardException {
+        
+        DataDictionary dd = getDataDictionary();
+        TransactionController tc = lcc.getTransactionExecute();
+        DependencyManager dm = dd.getDependencyManager();
+        
+        
+        /* Prepare all dependents to invalidate.  (This is their chance
+         * to say that they can't be invalidated.  For example, an open
+         * cursor referencing a table/view that the user is attempting to
+         * drop.) If no one objects, then invalidate any dependent objects.
+         * We check for invalidation before we drop the descriptor
+         * since the descriptor may be looked up as part of
+         * decoding tuples in SYSDEPENDS.
+         */
+        int invalidationType = 0;
+        switch (getAliasType())
+        {
+        case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
+        case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
+            invalidationType = DependencyManager.DROP_METHOD_ALIAS;
+            break;
+            
+        case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
+            invalidationType = DependencyManager.DROP_SYNONYM;
+            break;
+        }
+        
+        dm.invalidateFor(this, invalidationType, lcc);
+        
+        if (getAliasType() == AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
+        {
+            SchemaDescriptor sd = dd.getSchemaDescriptor(schemaID, tc);
+            
+            // Drop the entry from SYSTABLES as well.
+            DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
+            TableDescriptor td = ddg.newTableDescriptor(aliasName, sd,
+                    TableDescriptor.SYNONYM_TYPE, TableDescriptor.DEFAULT_LOCK_GRANULARITY);
+            dd.dropTableDescriptor(td, sd, tc);
+        }
+        else
+            dd.dropAllRoutinePermDescriptors(getUUID(), tc);
+        
+        /* Drop the alias */
+        dd.dropAliasDescriptor(this, tc);
     }
 }

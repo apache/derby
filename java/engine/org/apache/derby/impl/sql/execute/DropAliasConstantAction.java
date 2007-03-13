@@ -21,23 +21,19 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
- *	This class  describes actions that are ALWAYS performed for a
- *	DROP ALIAS Statement at Execution time.
+ *	This class performs actions that are ALWAYS performed for a
+ *	DROP FUNCTION/PROCEDURE/SYNONYM statement at execution time.
+ *  All of these SQL objects are represented by an AliasDescriptor.
  *
  */
 
@@ -45,7 +41,6 @@ class DropAliasConstantAction extends DDLConstantAction
 {
 
 	private SchemaDescriptor	sd;
-	private final String schemaName;
 	private final String				aliasName;
 	private final char				nameSpace;
 
@@ -63,7 +58,6 @@ class DropAliasConstantAction extends DDLConstantAction
 	DropAliasConstantAction(SchemaDescriptor sd, String aliasName, char nameSpace)
 	{
 		this.sd = sd;
-		this.schemaName = sd.getSchemaName();
 		this.aliasName = aliasName;
 		this.nameSpace = nameSpace;
 	}
@@ -92,9 +86,6 @@ class DropAliasConstantAction extends DDLConstantAction
 	{
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
-		TransactionController tc = lcc.getTransactionExecute();
-		DependencyManager dm = dd.getDependencyManager();
-
 
 		/*
 		** Inform the data dictionary that we are about to write to it.
@@ -107,11 +98,6 @@ class DropAliasConstantAction extends DDLConstantAction
 		*/
 		dd.startWriting(lcc);
 
-		if (sd == null) {
-			sd = dd.getSchemaDescriptor(schemaName, lcc.getTransactionExecute(), true);
-		}
-
-
 		/* Get the alias descriptor.  We're responsible for raising
 		 * the error if it isn't found 
 		 */
@@ -122,43 +108,8 @@ class DropAliasConstantAction extends DDLConstantAction
 		{
 			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, ad.getAliasType(nameSpace),  aliasName);
 		}
-
-		/* Prepare all dependents to invalidate.  (This is their chance
-		 * to say that they can't be invalidated.  For example, an open
-		 * cursor referencing a table/view that the user is attempting to
-		 * drop.) If no one objects, then invalidate any dependent objects.
-		 * We check for invalidation before we drop the descriptor
-		 * since the descriptor may be looked up as part of
-		 * decoding tuples in SYSDEPENDS.
-		 */
-		int invalidationType = 0;
-		switch (ad.getAliasType())
-		{
-			case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
-			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
-				invalidationType = DependencyManager.DROP_METHOD_ALIAS;
-				break;
-
-			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
-				invalidationType = DependencyManager.DROP_SYNONYM;
-				break;
-		}
-
-		dm.invalidateFor(ad, invalidationType, lcc);
-
-		if (ad.getAliasType() == AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
-		{
-			// Drop the entry from SYSTABLES as well.
-			DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
-			TableDescriptor td = ddg.newTableDescriptor(aliasName, sd,
-				TableDescriptor.SYNONYM_TYPE, TableDescriptor.DEFAULT_LOCK_GRANULARITY);
-			dd.dropTableDescriptor(td, sd, tc);
-		}
-		else
-			dd.dropAllRoutinePermDescriptors(ad.getUUID(), tc);
-			
-		/* Drop the alias */
-		dd.dropAliasDescriptor(ad, tc);
+        
+        ad.drop(lcc);
 
 	}
 }
