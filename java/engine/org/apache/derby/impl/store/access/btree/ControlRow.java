@@ -75,7 +75,7 @@ will have to be given to the appropriate storage format for these values.
 The implementation relies on the existance of page "auxiliary" pointers 
 which keep Object versions of the control row.
 <P>
-@see ControlRow#Get
+@see ControlRow#get
 @see ControlRow#release
 
 **/
