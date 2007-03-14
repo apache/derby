@@ -26,10 +26,6 @@ import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.C_LockFactory;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 
 /**
 	A Lock represents a granted or waiting lock request.

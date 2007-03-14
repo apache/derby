@@ -37,7 +37,7 @@ import java.util.Map;
 	MT - Mutable - Immutable identity : Thread Aware
 */
 
-public class Lock implements Latch, Control {
+class Lock implements Latch, Control {
 
 	/**
 		Compatibility space the object is locked in.
