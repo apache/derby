@@ -314,7 +314,37 @@ public class TestConfiguration {
 
         return new DatabaseChangeSetup(new DropDatabaseSetup(test, dbName), dbName, dbName, true);
     }
-    
+
+    /**
+     * Decorate a test to use a new database that is created upon the
+     * first connection request to the database and deleted at
+     * tearDown. In contrast to plain singleUseDatabaseDecorator, the
+     * database is expected to be shutdown by the test.  The
+     * configuration differs only from the current configuration by
+     * the list of used databases. The new database name is generated
+     * automatically as 'singleUse/oneuseXX' where 'XX' is the unique
+     * number. The generated database name is added at the end of
+     * <code>usedDbNames</code> and assigned as a default database
+     * name.  This decorator expects the database file to be local so
+     * it can be removed.
+     * @param test Test to be decorated
+     * @return decorated test.
+     */
+    public static TestSetup singleUseDatabaseDecoratorNoShutdown(Test test)
+    {
+        String dbName = generateUniqueDatabaseName();
+
+        return new DatabaseChangeSetup(
+            new DropDatabaseSetup(test, dbName)
+            {
+                protected void tearDown() throws Exception {
+                    // test responsible for shutdown
+                    removeDatabase();
+                }
+            },
+            dbName, dbName, true);
+    }
+
     /**
      * Decorate a test to use a new database that is created upon the
      * first connection request to the database and shutdown & deleted at
@@ -404,7 +434,45 @@ public class TestConfiguration {
             new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true),
             "TEST_DBO", "dummy"); // DRDA doesn't like empty pw
     }
+
+
+    /**
+     * Same as sqlAuthorizationDecorator, except that the database is dropped
+     * at teardown and the test is responsible for shutting down the database.
+     *
+     * @param test Test to be decorated
+     * @return decorated test.
+     *
+     * @see TestConfiguration#sqlAuthorizationDecorator(Test test)
+     */
+    public static Test sqlAuthorizationDecoratorSingleUse(Test test)
+    {
+        // Set the SQL authorization mode as a database property
+        // with a modified DatabasePropertyTestSetup that does not
+        // reset it.
+        final Properties sqlAuth = new Properties();
+        sqlAuth.setProperty("derby.database.sqlAuthorization", "true");
+        Test setSQLAuthMode = new DatabasePropertyTestSetup(test,
+                                                            sqlAuth, true) {
+                protected void tearDown() { }
+            };
+
+
+        setSQLAuthMode = new DatabaseChangeSetup(
+            new DropDatabaseSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL) {
+                protected void tearDown() throws Exception {
+                    // test responsible for shutdown
+                    removeDatabase();
+                }
+            },
+            DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true);
+
+        return changeUserDecorator(setSQLAuthMode,
+                                   "TEST_DBO",
+                                   "dummy"); // DRDA doesn't like empty pw
+    }
     
+
     /**
      * Utility version of sqlAuthorizationDecorator that also sets
      * up authentication. A combination of

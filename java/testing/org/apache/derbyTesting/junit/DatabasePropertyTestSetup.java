@@ -132,6 +132,60 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
     }
     
     /**
+     * Decorate a test so that the database has authentication enabled
+     * using the BUILTIN provider and the set of users passed in.
+     * The password for each user is set to the user's name with
+     * the value of passwordToken appended.
+     * <BR>
+     * The decorated test can use BaseJDBCTestCase.openUserConnection(String user)
+     * method to simplify using authentication.
+     * <P>
+     * Assumption is that no authentication was enabled upon entry.
+     * <P>
+     * Current user is set to the first user in the list users[0].
+     * <P>
+     * In contrast to plain builtinAuthentication, here the
+     * authentication nor users are *NOT* removed by the decorator's
+     * tearDown method.
+     * @param test Test to be decorated.
+     * @param users Set of users for authentication.
+     * @return Decorated test.
+     */
+    public static Test builtinAuthenticationNoTeardown(Test test, String[] users,
+            String passwordToken)
+    {
+        final Properties userProps = new Properties();
+        final Properties authProps = new Properties();
+
+        authProps.setProperty("derby.connection.requireAuthentication", "true");
+        authProps.setProperty("derby.authentication.provider", "BUILTIN");
+
+        for (int i = 0; i < users.length; i++)
+        {
+            String user = users[i];
+            userProps.setProperty("derby.user." + user,
+                    TestConfiguration.getPassword(user, passwordToken));
+        }
+
+        test = getNoTeardownInstance(test, authProps, true);
+        test = new ChangeUserSetup(test, users[0],
+                TestConfiguration.getPassword(users[0], passwordToken),
+                passwordToken);
+        test = getNoTeardownInstance(test, userProps, false);
+        return test;
+    }
+
+    private static DatabasePropertyTestSetup getNoTeardownInstance(
+        Test test, Properties p, boolean staticp)
+    {
+        return new DatabasePropertyTestSetup(test, p, staticp) {
+                protected void tearDown()
+                        throws java.lang.Exception {
+                }
+            };
+    }
+
+    /**
      * Decorate a test so that it sets a single database property
      * at setUp and resets it at tearDown. Shorthand for
      * using DatabasePropertyTestSetup when only a single property is needed.

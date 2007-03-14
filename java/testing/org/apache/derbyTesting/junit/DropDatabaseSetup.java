@@ -37,7 +37,7 @@ import junit.framework.Test;
  */
 class DropDatabaseSetup extends TestSetup {
 
-    private final String logicalDBName;
+    final String logicalDBName;
     DropDatabaseSetup(Test test, String logicalDBName) {
         super(test);
         this.logicalDBName = logicalDBName;
@@ -56,18 +56,25 @@ class DropDatabaseSetup extends TestSetup {
         String dbName = config.getPhysicalDatabaseName(logicalDBName);
         DataSource ds = JDBCDataSource.getDataSource(dbName);
         JDBCDataSource.shutdownDatabase(ds);
-             
+
+        removeDatabase();
+    }
+
+    void removeDatabase()
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+        String dbName = config.getPhysicalDatabaseName(logicalDBName);
         dbName = dbName.replace('/', File.separatorChar);
-        
         String dsh = BaseTestCase.getSystemProperty("derby.system.home");
-        if (dsh == null)
+        if (dsh == null) {
             fail("not implemented");
-        else
+        } else {
             dbName = dsh + File.separator + dbName;
-        
+        }
         removeDirectory(dbName);
-    } 
-    
+    }
+
+
     static void removeDirectory(String path)
     {
         final File dir = new File(path);

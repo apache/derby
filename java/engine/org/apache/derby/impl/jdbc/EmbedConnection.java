@@ -119,7 +119,7 @@ public abstract class EmbedConnection implements EngineConnection
 	//////////////////////////////////////////////////////////
 	DatabaseMetaData dbMetadata;
 
-	final TransactionResourceImpl tr; // always access tr thru getTR()
+	TransactionResourceImpl tr; // always access tr thru getTR()
 
 	private HashMap lobHashMap = null;
 	private int lobHMKey = 0;
@@ -215,16 +215,37 @@ public abstract class EmbedConnection implements EngineConnection
 
 			// See if user wants to create a new database.
 			boolean	createBoot = createBoot(info);	
+
+			// DERBY-2264: keeps track of whether we do a plain boot before an
+			// (re)encryption boot to (possibly) authenticate first. We can not
+			// authenticate before we have booted, so in order to enforce data
+			// base owner powers over encryption, we need a plain boot, then
+			// authenticate, then, if all is well, boot with (re)encryption.
+			// Encryption at create time is not checked.
+			boolean isTwoPhaseEncryptionBoot = (!createBoot &&
+												isEncryptionBoot(info));
+
+			// Save original properties if we modified them for
+			// isTwoPhaseEncryptionBoot.
+			Properties savedInfo = null;
+
 			if (database != null)
 			{
 				// database already booted by someone else
 				tr.setDatabase(database);
+				isTwoPhaseEncryptionBoot = false;
 			}
 			else if (!shutdown)
 			{
-				// Return false iff the monitor cannot handle a service of the type
-				// indicated by the proptocol within the name.  If that's the case
-				// then we are the wrong driver.
+				if (isTwoPhaseEncryptionBoot) {
+					savedInfo = info;
+					info = removeEncryptionProps((Properties)info.clone());
+				}
+
+				// Return false iff the monitor cannot handle a service of the
+				// type indicated by the proptocol within the name.  If that's
+				// the case then we are the wrong driver.
+
 				if (!bootDatabase(info))
 				{
 					tr.clearContextInError();
@@ -236,7 +257,8 @@ public abstract class EmbedConnection implements EngineConnection
 
 			if (createBoot && !shutdown)
 			{
-				// if we are shutting down don't attempt to boot or create the database
+				// if we are shutting down don't attempt to boot or create the
+				// database
 
 				if (tr.getDatabase() != null) {
 					addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.DATABASE_EXISTS, getDBName()));
@@ -276,12 +298,47 @@ public abstract class EmbedConnection implements EngineConnection
 			// the rest.
 			tr.startTransaction();
 
+			if (isTwoPhaseEncryptionBoot) {
+				// DERBY-2264: shutdown and boot again with encryption
+				// attributes active. This is restricted to the database owner.
+				if (!usingNoneAuth) {
+					// a failure here leaves database booted, but no
+					// (re)encryption has taken place and the connection is
+					// rejected.
+					checkIsDBOwner(OP_ENCRYPT);
+				}
+
+				// shutdown and reboot using saved properties which
+				// include the (re)encyption attributes
+				info = savedInfo;
+				handleException(tr.shutdownDatabaseException());
+				restoreContextStack();
+				tr = new TransactionResourceImpl(driver, url, info);
+				active = true;
+				setupContextStack();
+
+				if (!bootDatabase(info))
+				{
+					if (SanityManager.DEBUG) {
+						SanityManager.THROWASSERT(
+							"bootDatabase failed after initial plain boot " +
+							"for (re)encryption");
+					}
+					tr.clearContextInError();
+					setInactive();
+					return;
+				}
+				// don't need to check user credentials again, did
+				// that on first plain boot, so just start
+				tr.startTransaction();
+			}
+
 			// now we have the database connection, we can shut down
 			if (shutdown) {
 				if (!usingNoneAuth) {
-					// DERBY-2264: Only allow db owner to shut down if
+					// DERBY-2264: Only allow database owner to shut down if
 					// authentication is on.
-					checkIsDBOwner();
+					checkIsDBOwner(OP_SHUTDOWN);
 				}
 				throw tr.shutdownDatabaseException();
 			}
@@ -354,14 +411,8 @@ public abstract class EmbedConnection implements EngineConnection
         // combination with createFrom/restoreFrom/rollForwardRecoveryFrom
         // attributes.  Re-encryption is not
         // allowed when restoring from backup.
-        if (restoreCount != 0 && 
-            (Boolean.valueOf(p.getProperty(
-                            Attribute.DATA_ENCRYPTION)).booleanValue() ||
-             p.getProperty(Attribute.NEW_BOOT_PASSWORD) != null ||
-             p.getProperty(Attribute.NEW_CRYPTO_EXTERNAL_KEY) != null
-             )) 
-        {
-            throw newSQLException(SQLState.CONFLICTING_RESTORE_ATTRIBUTES);
+        if (restoreCount != 0 && isEncryptionBoot(p)) {
+			throw newSQLException(SQLState.CONFLICTING_RESTORE_ATTRIBUTES);
         }
 
 
@@ -375,6 +426,37 @@ public abstract class EmbedConnection implements EngineConnection
 		//retuns true only for the  create flag not for restore flags
 		return (createCount - restoreCount) == 1;
 	}
+
+	/**
+	 * Examine boot properties and determine if a boot with the given
+	 * attributes would entail an encryption operation.
+	 *
+	 * @param p the attribute set
+	 * @return true if a boot will encrypt or re-encrypt the database
+	 */
+	private boolean isEncryptionBoot(Properties p)
+	{
+		return ((Boolean.valueOf(
+					 p.getProperty(Attribute.DATA_ENCRYPTION)).booleanValue()) ||
+				(p.getProperty(Attribute.NEW_BOOT_PASSWORD) != null)           ||
+				(p.getProperty(Attribute.NEW_CRYPTO_EXTERNAL_KEY) != null));
+	}
+
+
+	/**
+	 * Remove any encryption properties from the given properties
+	 *
+	 * @param p the attribute set
+	 * @return clone sans encryption properties
+	 */
+	private Properties removeEncryptionProps(Properties p)
+	{
+		p.remove(Attribute.DATA_ENCRYPTION);
+		p.remove(Attribute.NEW_BOOT_PASSWORD);
+		p.remove(Attribute.NEW_CRYPTO_EXTERNAL_KEY);
+		return p;
+	}
+
 
 	/**
 	 * Create a new connection based off of the 
@@ -482,21 +564,38 @@ public abstract class EmbedConnection implements EngineConnection
 			usingNoneAuth = true;
 	}
 
+	/* Enumerate operations controlled by database owner powers */
+	private static final int OP_ENCRYPT = 0;
+	private static final int OP_SHUTDOWN = 1;
 	/**
 	 * Check if actual authenticationId is equal to the database owner's.
 	 *
+	 * @param operation attempted operation which needs database owner powers
 	 * @throws SQLException if actual authenticationId is different
 	 * from authenticationId of database owner.
 	 */
-	private void checkIsDBOwner() throws SQLException
+	private void checkIsDBOwner(int operation) throws SQLException
 	{
 		final LanguageConnectionContext lcc = getLanguageConnection();
 		final String actualId = lcc.getAuthorizationId();
 		final String dbOwnerId = lcc.getDataDictionary().
 			getAuthorizationDatabaseOwner();
 		if (!actualId.equals(dbOwnerId)) {
-			throw newSQLException(SQLState.AUTH_NOT_DB_OWNER, 
-								  actualId, tr.getDBName());
+			switch (operation) {
+			case OP_ENCRYPT:
+				throw newSQLException(SQLState.AUTH_ENCRYPT_NOT_DB_OWNER,
+									  actualId, tr.getDBName());
+			case OP_SHUTDOWN:
+				throw newSQLException(SQLState.AUTH_SHUTDOWN_NOT_DB_OWNER,
+									  actualId, tr.getDBName());
+			default:
+				if (SanityManager.DEBUG) {
+					SanityManager.THROWASSERT(
+						"illegal checkIsDBOwner operation");
+				}
+				throw newSQLException(
+					SQLState.AUTH_DATABASE_CONNECTION_REFUSED);
+			}
 		}
 	}
 
