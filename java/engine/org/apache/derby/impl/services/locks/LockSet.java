@@ -35,7 +35,6 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
@@ -93,9 +92,6 @@ final class LockSet implements LockTable {
 	// Only one thread should be setting it at one time.
 	private boolean deadlockTrace;
 
-	private Hashtable lockTraces; // rather than burden each lock with
-								  // its stack trace, keep a look aside table
-								  // that maps a lock to a stack trace
 //EXCLUDE-END-lockdiag- 
 
 	// The number of waiters for locks
@@ -272,18 +268,9 @@ final class LockSet implements LockTable {
         ActiveLock waitingLock = (ActiveLock) lockItem;
         lockItem = null;
 
-        if (deadlockTrace)
-        {
-            // we want to keep a stack trace of this thread just before it goes
-            // into wait state, no need to synchronized because Hashtable.put
-            // is synchronized and the new throwable is local to this thread.
-            lockTraces.put(waitingLock, new Throwable());
-        }
-
         int earlyWakeupCount = 0;
         long startWaitTime = 0;
 
-		try {
 forever:	for (;;) {
 
                 byte wakeupReason = waitingLock.waitForGrant(actualTimeout);
@@ -467,15 +454,6 @@ forever:	for (;;) {
 
 
             } // for(;;)
-        } finally {
-            if (deadlockTrace)
-            {
-                    // I am out of the wait state, either I got my lock or I 
-                    // am the one who is going to detect the deadlock, don't 
-                    // need the stack trace anymore.
-                    lockTraces.remove(waitingLock);
-            }
-        }
 	}
 
 	/**
@@ -711,15 +689,6 @@ forever:	for (;;) {
 	{
 		// set this without synchronization
 		deadlockTrace = val;
-
-		if (val && lockTraces == null)
-        {
-			lockTraces = new Hashtable();
-        }
-		else if (!val && lockTraces != null)
-		{
-			lockTraces = null;
-		}
 	}			
 //EXCLUDE-END-lockdiag- 
 
