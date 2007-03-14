@@ -2385,7 +2385,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (8):
+Project-Restrict ResultSet (6):
 Number of opens = 1
 Rows seen = 0
 Rows filtered = 0
@@ -2408,100 +2408,74 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 	Left result set:
-		Project-Restrict ResultSet (4):
+		Index Row to Base Row ResultSet for TABLE1:
 		Number of opens = 1
 		Rows seen = 0
-		Rows filtered = 0
-		restriction = true
-		projection = true
+		Columns accessed from heap = {0}
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-			restriction time (milliseconds) = 0
-			projection time (milliseconds) = 0
-		Source result set:
-			Index Row to Base Row ResultSet for TABLE1:
-			Number of opens = 1
+			Index Scan ResultSet for TABLE1 using index TABLE1IDX at serializable isolation level using share row locking chosen by the optimizer
+			Number of opens = 3
 			Rows seen = 0
-			Columns accessed from heap = {0}
+			Rows filtered = 0
+			Fetch Size = 1
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				Index Scan ResultSet for TABLE1 using index TABLE1IDX at serializable isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 0
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of deleted rows visited=0
-					Number of pages visited=1
-					Number of rows qualified=0
-					Number of rows visited=0
-					Scan type=btree
-					Tree height=1
-					start position: 
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=3
+				Number of rows qualified=0
+				Number of rows visited=0
+				Scan type=btree
+				Tree height=1
+				start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					stop position: 
+				stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					qualifiers:
+				qualifiers:
 None
 	Right result set:
-		Project-Restrict ResultSet (7):
+		Index Row to Base Row ResultSet for TABLE2:
 		Number of opens = 1
 		Rows seen = 0
-		Rows filtered = 0
-		restriction = true
-		projection = true
+		Columns accessed from heap = {0}
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-			restriction time (milliseconds) = 0
-			projection time (milliseconds) = 0
-		Source result set:
-			Index Row to Base Row ResultSet for TABLE2:
-			Number of opens = 1
+			Index Scan ResultSet for TABLE2 using index TABLE2IDX at serializable isolation level using share row locking chosen by the optimizer
+			Number of opens = 3
 			Rows seen = 0
-			Columns accessed from heap = {0}
+			Rows filtered = 0
+			Fetch Size = 1
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				Index Scan ResultSet for TABLE2 using index TABLE2IDX at serializable isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 0
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of deleted rows visited=0
-					Number of pages visited=1
-					Number of rows qualified=0
-					Number of rows visited=0
-					Scan type=btree
-					Tree height=1
-					start position: 
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=3
+				Number of rows qualified=0
+				Number of rows visited=0
+				Scan type=btree
+				Tree height=1
+				start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					stop position: 
+				stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					qualifiers:
+				qualifiers:
 None
 ij> prepare s as 'select * from test.view0 where b in (?, ?, ?)';
 ij> execute s using 'values (1,2,3)';
@@ -2526,7 +2500,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (8):
+Project-Restrict ResultSet (6):
 Number of opens = 1
 Rows seen = 0
 Rows filtered = 0
@@ -2549,100 +2523,74 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 	Left result set:
-		Project-Restrict ResultSet (4):
+		Index Row to Base Row ResultSet for TABLE1:
 		Number of opens = 1
 		Rows seen = 0
-		Rows filtered = 0
-		restriction = true
-		projection = true
+		Columns accessed from heap = {0}
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-			restriction time (milliseconds) = 0
-			projection time (milliseconds) = 0
-		Source result set:
-			Index Row to Base Row ResultSet for TABLE1:
-			Number of opens = 1
+			Index Scan ResultSet for TABLE1 using index TABLE1IDX at serializable isolation level using share row locking chosen by the optimizer
+			Number of opens = 3
 			Rows seen = 0
-			Columns accessed from heap = {0}
+			Rows filtered = 0
+			Fetch Size = 1
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				Index Scan ResultSet for TABLE1 using index TABLE1IDX at serializable isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 0
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of deleted rows visited=0
-					Number of pages visited=1
-					Number of rows qualified=0
-					Number of rows visited=0
-					Scan type=btree
-					Tree height=1
-					start position: 
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=3
+				Number of rows qualified=0
+				Number of rows visited=0
+				Scan type=btree
+				Tree height=1
+				start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					stop position: 
+				stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					qualifiers:
+				qualifiers:
 None
 	Right result set:
-		Project-Restrict ResultSet (7):
+		Index Row to Base Row ResultSet for TABLE2:
 		Number of opens = 1
 		Rows seen = 0
-		Rows filtered = 0
-		restriction = true
-		projection = true
+		Columns accessed from heap = {0}
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-			restriction time (milliseconds) = 0
-			projection time (milliseconds) = 0
-		Source result set:
-			Index Row to Base Row ResultSet for TABLE2:
-			Number of opens = 1
+			Index Scan ResultSet for TABLE2 using index TABLE2IDX at serializable isolation level using share row locking chosen by the optimizer
+			Number of opens = 3
 			Rows seen = 0
-			Columns accessed from heap = {0}
+			Rows filtered = 0
+			Fetch Size = 1
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-				Index Scan ResultSet for TABLE2 using index TABLE2IDX at serializable isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 0
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of deleted rows visited=0
-					Number of pages visited=1
-					Number of rows qualified=0
-					Number of rows visited=0
-					Scan type=btree
-					Tree height=1
-					start position: 
+			scan information: 
+				Bit set of columns fetched=All
+				Number of columns fetched=2
+				Number of deleted rows visited=0
+				Number of pages visited=3
+				Number of rows qualified=0
+				Number of rows visited=0
+				Scan type=btree
+				Tree height=1
+				start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					stop position: 
+				stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-					qualifiers:
+				qualifiers:
 None
 ij> -- This select should use index for first two selects, table scan for the third
 select a from test.view1 where b=25;

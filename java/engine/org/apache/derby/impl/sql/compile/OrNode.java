@@ -132,8 +132,38 @@ public class OrNode extends BinaryLogicalOperatorNode
 				// Is the operator an =
 				if (!left.isRelationalOperator())
 				{
-					convert = false;
-					break;
+					/* If the operator is an IN-list disguised as a relational
+					 * operator then we can still convert it--we'll just
+					 * combine the existing IN-list ("left") with the new IN-
+					 * list values.  So check for that case now.
+					 */ 
+
+					if (SanityManager.DEBUG)
+					{
+						/* At the time of writing the only way a call to
+						 * left.isRelationalOperator() would return false for
+						 * a BinaryRelationalOperatorNode was if that node
+						 * was for an IN-list probe predicate.  That's why we
+						 * we can get by with the simple "instanceof" check
+						 * below.  But if we're running in SANE mode, do a
+						 * quick check to make sure that's still valid.
+					 	 */
+						BinaryRelationalOperatorNode bron = null;
+						if (left instanceof BinaryRelationalOperatorNode)
+						{
+ 							bron = (BinaryRelationalOperatorNode)left;
+							if (bron.getInListOp() == null)
+							{
+								SanityManager.THROWASSERT(
+								"isRelationalOperator() unexpectedly returned "
+								+ "false for a BinaryRelationalOperatorNode.");
+							}
+						}
+					}
+
+					convert = (left instanceof BinaryRelationalOperatorNode);
+					if (!convert)
+						break;
 				}
 
 				if (!(((RelationalOperator)left).getOperator() == RelationalOperator.EQUALS_RELOP))
@@ -142,11 +172,11 @@ public class OrNode extends BinaryLogicalOperatorNode
 					break;
 				}
 
-				BinaryRelationalOperatorNode beon = (BinaryRelationalOperatorNode)left;
+				BinaryRelationalOperatorNode bron = (BinaryRelationalOperatorNode)left;
 
-				if (beon.getLeftOperand() instanceof ColumnReference)
+				if (bron.getLeftOperand() instanceof ColumnReference)
 				{
-					cr = (ColumnReference) beon.getLeftOperand();
+					cr = (ColumnReference) bron.getLeftOperand();
 					if (tableNumber == -1)
 					{
 						tableNumber = cr.getTableNumber();
@@ -159,9 +189,9 @@ public class OrNode extends BinaryLogicalOperatorNode
 						break;
 					}
 				}
-				else if (beon.getRightOperand() instanceof ColumnReference)
+				else if (bron.getRightOperand() instanceof ColumnReference)
 				{
-					cr = (ColumnReference) beon.getRightOperand();
+					cr = (ColumnReference) bron.getRightOperand();
 					if (tableNumber == -1)
 					{
 						tableNumber = cr.getTableNumber();
@@ -191,14 +221,30 @@ public class OrNode extends BinaryLogicalOperatorNode
 				for (ValueNode vn = this; vn instanceof OrNode; vn = ((OrNode) vn).getRightOperand())
 				{
 					OrNode on = (OrNode) vn;
-					BinaryRelationalOperatorNode beon = (BinaryRelationalOperatorNode) on.getLeftOperand();
-					if (beon.getLeftOperand() instanceof ColumnReference)
+					BinaryRelationalOperatorNode bron =
+						(BinaryRelationalOperatorNode) on.getLeftOperand();
+					if (bron.getInListOp() != null)
 					{
-						vnl.addValueNode(beon.getRightOperand());
+						/* If we have an OR between multiple IN-lists on the same
+						 * column then just combine them into a single IN-list.
+						 * Ex.
+						 *
+						 *   select ... from T1 where i in (2, 3) or i in (7, 10)
+						 *
+						 * effectively becomes:
+						 *
+						 *   select ... from T1 where i in (2, 3, 7, 10).
+						 */
+						vnl.destructiveAppend(
+							bron.getInListOp().getRightOperandList());
+					}
+					else if (bron.getLeftOperand() instanceof ColumnReference)
+					{
+						vnl.addValueNode(bron.getRightOperand());
 					}
 					else
 					{
-						vnl.addValueNode(beon.getLeftOperand());
+						vnl.addValueNode(bron.getLeftOperand());
 					}
 				}
 

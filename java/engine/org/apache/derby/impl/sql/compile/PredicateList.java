@@ -1499,11 +1499,26 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				// <column> <relop> <value> AND TRUE
 				if (andNode.getLeftOperand() instanceof BinaryRelationalOperatorNode)
 				{
+					/* If the operator is a binary relational operator that was
+					 * created for a probe predicate then we have to make a
+					 * copy of the underlying IN-list as well, so that we can
+					 * give it the correct left operand (i.e. the new Column
+					 * Reference node).  Then we pass that copy into the new
+					 * relational operator node.
+					 */
+					InListOperatorNode ilon = opNode.getInListOp();
+					if (ilon != null)
+					{
+						ilon = ilon.shallowCopy();
+						ilon.setLeftOperand(newCRNode);
+					}
+
 					BinaryRelationalOperatorNode newRelop = (BinaryRelationalOperatorNode)
 							getNodeFactory().getNode(
 										opNode.getNodeType(),
 										newCRNode,
 										opNode.getRightOperand(),
+										ilon,
 										getContextManager());
 					newRelop.bindComparisonOperator();
 					leftOperand = newRelop;

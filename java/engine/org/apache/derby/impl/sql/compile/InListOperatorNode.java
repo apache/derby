@@ -31,6 +31,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -89,6 +90,27 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	}
 
 	/**
+	 * Create a shallow copy of this InListOperatorNode whose operands are
+	 * the same as this node's operands.  Copy over all other necessary
+	 * state, as well.
+	 */
+	protected InListOperatorNode shallowCopy() throws StandardException
+	{
+		InListOperatorNode ilon =
+			 (InListOperatorNode)getNodeFactory().getNode(
+				C_NodeTypes.IN_LIST_OPERATOR_NODE,
+				leftOperand,
+				rightOperandList,
+				getContextManager());
+
+		ilon.copyFields(this);
+		if (isOrdered)
+			ilon.markAsOrdered();
+
+		return ilon;
+	}
+
+	/**
 	 * Preprocess an expression tree.  We do a number of transformations
 	 * here (including subqueries, IN lists, LIKE and BETWEEN) plus
 	 * subquery flattening.
@@ -129,95 +151,190 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			return equal;
 		}
 		else if ((leftOperand instanceof ColumnReference) &&
-				 rightOperandList.containsAllConstantNodes())
+				 rightOperandList.containsOnlyConstantAndParamNodes())
 		{
-			/* When sorting or choosing min/max in the list, if types are not an exact
-			 * match, we use the left operand's type as the "judge", assuming that they
-			 * are compatible, as also the case with DB2.
+			/* At this point we have an IN-list made up of constant and/or
+			 * parameter values.  Ex.:
+			 *
+			 *  select id, name from emp where id in (34, 28, ?)
+			 *
+			 * Since the optimizer does not recognize InListOperatorNodes
+			 * as potential start/stop keys for indexes, it (the optimizer)
+			 * may estimate that the cost of using any of the indexes would
+			 * be too high.  So we could--and probably would--end up doing
+			 * a table scan on the underlying base table. But if the number
+			 * of rows in the base table is significantly greater than the
+			 * number of values in the IN-list, scanning the base table can
+			 * be overkill and can lead to poor performance.  And further,
+			 * choosing to use an index but then scanning the entire index
+			 * can be slow, too. DERBY-47.
+			 *
+			 * What we do, then, is create an "IN-list probe predicate",
+			 * which is an internally generated equality predicate with a
+			 * parameter value on the right.  So for the query shown above
+			 * the probe predicate would be "id = ?".  We then replace
+			 * this InListOperatorNode with the probe predicate during
+			 * optimization.  The optimizer in turn recognizes the probe
+			 * predicate, which is disguised to look like a typical binary
+			 * equality, as a potential start/stop key for any indexes.
+			 * This start/stop key potential then factors into the estimated
+			 * cost of probing the indexes, which leads to a more reasonable
+			 * estimate and thus makes it more likely that the optimizer
+			 * will choose to use an index vs a table scan.  That done, we
+			 * then use the probe predicate to perform multiple execution-
+			 * time "probes" on the index--instead of doing a range index
+			 * scan--which eliminates unnecessary scanning. For more see
+			 * execute/MultiProbeTableScanResultSet.java.
+			 *
+			 * With this approach we know that regardless of how large the
+			 * base table is, we'll only have to probe the index a max of
+			 * N times, where "N" is the size of the IN-list. If N is
+			 * significantly less than the number of rows in the table, or
+			 * is significantly less than the number of rows between the
+			 * min value and the max value in the IN-list, this selective
+			 * probing can save us a lot of time.
+			 *
+			 * Note: We will do fewer than N probes if there are duplicates
+			 * in the list.
+			 *
+			 * Note also that, depending on the relative size of the IN-list
+			 * verses the number of rows in the table, it may actually be
+			 * better to just do a table scan--especially if there are fewer
+			 * rows in the table than there are in the IN-list.  So even though
+			 * we create a "probe predicate" and pass it to the optimizer, it
+			 * (the optimizer) may still choose to do a table scan.  If that
+			 * happens then we'll "revert" the probe predicate back to its
+			 * original form (i.e. to this InListOperatorNode) during code
+			 * generation, and then we'll use it as a regular IN-list
+			 * restriction when it comes time to execute.
 			 */
-			TypeId judgeTypeId = leftOperand.getTypeServices().getTypeId();
-			DataValueDescriptor judgeODV = null;  //no judge, no argument
-			if (! rightOperandList.allSamePrecendence(judgeTypeId.typePrecedence()))
-				judgeODV = (DataValueDescriptor) judgeTypeId.getNull();
 
-			//Sort the list in ascending order
-			rightOperandList.sortInAscendingOrder(judgeODV);
-			isOrdered = true;
+			boolean allConstants = rightOperandList.containsAllConstantNodes();
 
-			/* If the leftOperand is a ColumnReference
-			 * and the IN list is all constants, then we generate
-			 * an additional BETWEEN clause of the form:
-			 *	CRClone BETWEEN minValue and maxValue
+			/* If we have all constants then sort them now.  This allows us to
+			 * skip the sort at execution time (we have to sort them so that
+			 * we can eliminate duplicate IN-list values).  If we have one
+			 * or more parameter nodes then we do *not* sort the values here
+			 * because we do not (and cannot) know what values the parameter(s)
+			 * will have.  In that case we'll sort the values at execution
+			 * time. 
 			 */
-			ValueNode leftClone = leftOperand.getClone();
-			ValueNode minValue = (ValueNode) rightOperandList.elementAt(0);  //already sorted
-			ValueNode maxValue = (ValueNode) rightOperandList.elementAt(rightOperandList.size() - 1);
-
-			/* Handle the degenerate case where 
-			 * the min and the max are the same value.
-			 */
-			DataValueDescriptor minODV =
-				 ((ConstantNode) minValue).getValue();
-			DataValueDescriptor maxODV =
-				 ((ConstantNode) maxValue).getValue();
-			if ((judgeODV == null && minODV.compare(maxODV) == 0) ||
-				(judgeODV != null && judgeODV.equals(minODV, maxODV).equals(true)))
+			if (allConstants)
 			{
-				BinaryComparisonOperatorNode equal = 
-					(BinaryComparisonOperatorNode) getNodeFactory().getNode(
-						C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-						leftOperand, 
-						minValue,
-						getContextManager());
-				/* Set type info for the operator node */
-				equal.bindComparisonOperator();
-				return equal;
+				/* When sorting or choosing min/max in the list, if types
+				 * are not an exact match, we use the left operand's type
+				 * as the "judge", assuming that they are compatible, as
+				 * also the case with DB2.
+				 */
+				TypeId judgeTypeId = leftOperand.getTypeServices().getTypeId();
+				DataValueDescriptor judgeODV = null;  //no judge, no argument
+				if (!rightOperandList.allSamePrecendence(
+					judgeTypeId.typePrecedence()))
+				{
+					judgeODV = (DataValueDescriptor) judgeTypeId.getNull();
+				}
+ 
+				// Sort the list in ascending order
+				rightOperandList.sortInAscendingOrder(judgeODV);
+				isOrdered = true;
+
+				ValueNode minValue = (ValueNode)rightOperandList.elementAt(0);
+				ValueNode maxValue =
+					(ValueNode)rightOperandList.elementAt(
+						rightOperandList.size() - 1);
+
+				/* Handle the degenerate case where the min and the max
+				 * are the same value.
+				 */
+				DataValueDescriptor minODV =
+					((ConstantNode) minValue).getValue();
+				DataValueDescriptor maxODV =
+					 ((ConstantNode) maxValue).getValue();
+
+				if (((judgeODV == null) && (minODV.compare(maxODV) == 0)) ||
+					((judgeODV != null)
+						&& judgeODV.equals(minODV, maxODV).equals(true)))
+				{
+					BinaryComparisonOperatorNode equal = 
+						(BinaryComparisonOperatorNode)getNodeFactory().getNode(
+							C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
+							leftOperand, 
+							minValue,
+							getContextManager());
+					/* Set type info for the operator node */
+					equal.bindComparisonOperator();
+					return equal;
+				}
 			}
 
-			// Build the Between
-			ValueNodeList vnl = (ValueNodeList) getNodeFactory().getNode(
-													C_NodeTypes.VALUE_NODE_LIST,
-													getContextManager());
-			vnl.addValueNode(minValue);
-			vnl.addValueNode(maxValue);
-
-			BetweenOperatorNode bon = 
-				(BetweenOperatorNode) getNodeFactory().getNode(
-									C_NodeTypes.BETWEEN_OPERATOR_NODE,
-									leftClone,
-									vnl,
-									getContextManager());
-
-			/* The transformed tree has to be normalized:
-			 *				AND
-			 *			   /   \
-			 *		IN LIST    AND
-			 *				   /   \
-			 *				  >=	AND
-			 *						/   \
-			 *					   <=	TRUE
+			/* Create a parameter node to serve as the right operand of
+			 * the probe predicate.  We intentionally use a parameter node
+			 * instead of a constant node because the IN-list has more than
+			 * one value (some of which may be unknown at compile time, i.e.
+			 * if they are parameters), so we don't want an estimate based
+			 * on any single literal.  Instead we want a generic estimate
+			 * of the cost to retrieve the rows matching some _unspecified_
+			 * value (namely, one of the values in the IN-list, but we
+			 * don't know which one).  That's exactly what a parameter
+			 * node gives us.
+			 *
+			 * Note: If the IN-list only had a single value then we would
+			 * have taken the "if (rightOperandList.size() == 1)" branch
+			 * above and thus would not be here.
+			 *
+			 * We create the parameter node based on the first value in
+			 * the list.  This is arbitrary and should not matter in the
+			 * big picture.
 			 */
+			ValueNode srcVal = (ValueNode) rightOperandList.elementAt(0);
+			ParameterNode pNode =
+				(ParameterNode) getNodeFactory().getNode(
+					C_NodeTypes.PARAMETER_NODE,
+					new Integer(0),
+					null, // default value
+					getContextManager());
 
-			/* Create the AND */
-			AndNode newAnd;
+			DataTypeDescriptor pType = srcVal.getTypeServices();
+			pNode.setDescriptors(new DataTypeDescriptor [] { pType });
+			pNode.setType(pType);
 
-			newAnd = (AndNode) getNodeFactory().getNode(
-									C_NodeTypes.AND_NODE,
-									this,
-									bon.preprocess(numTables,
-												   outerFromList,
-												   outerSubqueryList,
-												   outerPredicateList),
-									getContextManager());
-			newAnd.postBindFixup();
-
-			/* Mark this node as transformed so that we don't get
-			 * calculated into the selectivity mulitple times.
+			/* If we choose to use the new predicate for execution-time
+			 * probing then the right operand will function as a start-key
+			 * "place-holder" into which we'll store the different IN-list
+			 * values as we iterate through them.  This means we have to
+			 * generate a valid value for the parameter node--i.e. for the
+			 * right side of the probe predicate--in order to have a valid
+			 * execution-time placeholder.  To do that we pass the source
+			 * value from which we found the type down to the new, "fake"
+			 * parameter node.  Then, when it comes time to generate the
+			 * parameter node, we'll just generate the source value as our
+			 * place-holder.  See ParameterNode.generateExpression().
+			 *
+			 * Note: the actual value of the "place-holder" does not matter
+			 * because it will be clobbered by the various IN-list values
+			 * (which includes "srcVal" itself) as we iterate through them
+			 * during execution.
 			 */
-			setTransformed();
+			pNode.setValueToGenerate(srcVal);
 
-			// Return new AndNode
-			return newAnd;
+			/* Finally, create the "column = ?" equality that serves as the
+			 * basis for the probe predicate.  We store a reference to "this"
+			 * node inside the probe predicate so that, if we later decide
+			 * *not* to use the probe predicate for execution time index
+			 * probing, we can revert it back to its original form (i.e.
+			 * to "this").
+			 */
+			BinaryComparisonOperatorNode equal = 
+				(BinaryComparisonOperatorNode) getNodeFactory().getNode(
+					C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
+					leftOperand, 
+					pNode,
+					this,
+					getContextManager());
+
+			/* Set type info for the operator node */
+			equal.bindComparisonOperator();
+			return equal;
 		}
 		else
 		{
@@ -591,6 +708,15 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			mb.callMethod(VMOpcode.INVOKESTATIC, ClassName.BaseExpressionActivation, methodName, ClassName.DataValueDescriptor, 6);
 
 		}
+	}
+
+	/**
+	 * Indicate that the IN-list values for this node are ordered (i.e. they
+	 * are all constants and they have been sorted).
+	 */
+	protected void markAsOrdered()
+	{
+		isOrdered = true;
 	}
 
 	/**

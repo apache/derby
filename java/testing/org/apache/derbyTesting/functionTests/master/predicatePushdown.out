@@ -2555,8 +2555,8 @@ Source result set:
 						Left result set:
 							Project-Restrict ResultSet (6):
 							Number of opens = 1
-							Rows seen = 3
-							Rows filtered = 1
+							Rows seen = 5
+							Rows filtered = 3
 							restriction = true
 							projection = false
 								constructor time (milliseconds) = 0
@@ -2568,7 +2568,7 @@ Source result set:
 							Source result set:
 								Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 1
-								Rows seen = 3
+								Rows seen = 5
 								Rows filtered = 0
 								Fetch Size = 1
 									constructor time (milliseconds) = 0
@@ -2580,27 +2580,18 @@ Source result set:
 									Bit set of columns fetched=All
 									Number of columns fetched=2
 									Number of pages visited=1
-									Number of rows qualified=3
+									Number of rows qualified=5
 									Number of rows visited=5
 									Scan type=heap
 									start position: 
 null									stop position: 
 null									qualifiers:
-Column[0][0] Id: 0
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 						Right result set:
 							Project-Restrict ResultSet (8):
 							Number of opens = 1
-							Rows seen = 3
-							Rows filtered = 1
+							Rows seen = 5
+							Rows filtered = 3
 							restriction = true
 							projection = false
 								constructor time (milliseconds) = 0
@@ -2612,7 +2603,7 @@ Negate comparison result: true
 							Source result set:
 								Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 1
-								Rows seen = 3
+								Rows seen = 5
 								Rows filtered = 0
 								Fetch Size = 1
 									constructor time (milliseconds) = 0
@@ -2624,22 +2615,13 @@ Negate comparison result: true
 									Bit set of columns fetched=All
 									Number of columns fetched=2
 									Number of pages visited=1
-									Number of rows qualified=3
+									Number of rows qualified=5
 									Number of rows visited=5
 									Scan type=heap
 									start position: 
 null									stop position: 
 null									qualifiers:
-Column[0][0] Id: 0
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 			Right result set:
 				Sort ResultSet:
 				Number of opens = 4
@@ -3010,8 +2992,8 @@ Left result set:
 			Left result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 1
-				Rows seen = 3
-				Rows filtered = 1
+				Rows seen = 5
+				Rows filtered = 3
 				restriction = true
 				projection = false
 					constructor time (milliseconds) = 0
@@ -3023,7 +3005,7 @@ Left result set:
 				Source result set:
 					Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 1
-					Rows seen = 3
+					Rows seen = 5
 					Rows filtered = 0
 					Fetch Size = 1
 						constructor time (milliseconds) = 0
@@ -3035,27 +3017,18 @@ Left result set:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of pages visited=1
-						Number of rows qualified=3
+						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
 						start position: 
 null						stop position: 
 null						qualifiers:
-Column[0][0] Id: 0
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 			Right result set:
 				Project-Restrict ResultSet (7):
 				Number of opens = 1
-				Rows seen = 3
-				Rows filtered = 1
+				Rows seen = 5
+				Rows filtered = 3
 				restriction = true
 				projection = false
 					constructor time (milliseconds) = 0
@@ -3067,7 +3040,7 @@ Negate comparison result: true
 				Source result set:
 					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 1
-					Rows seen = 3
+					Rows seen = 5
 					Rows filtered = 0
 					Fetch Size = 1
 						constructor time (milliseconds) = 0
@@ -3079,22 +3052,13 @@ Negate comparison result: true
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of pages visited=1
-						Number of rows qualified=3
+						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
 						start position: 
 null						stop position: 
 null						qualifiers:
-Column[0][0] Id: 0
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 Right result set:
 	Sort ResultSet:
 	Number of opens = 4

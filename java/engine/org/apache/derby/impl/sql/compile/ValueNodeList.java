@@ -411,6 +411,29 @@ public class ValueNodeList extends QueryTreeNodeVector
 	}
 
 	/**
+	 * Does this list *only* contain constant and/or parameter nodes?
+	 *
+	 * @return boolean	True if every node in this list is either a constant
+	 *  node or parameter node.
+	 */
+	public boolean containsOnlyConstantAndParamNodes()
+	{
+		int size = size();
+
+		for (int index = 0; index < size; index++)
+		{
+			ValueNode vNode = (ValueNode)elementAt(index);
+			if (!vNode.requiresTypeFromContext() &&
+			    !(vNode instanceof ConstantNode))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Sort the entries in the list in ascending order.
 	 * (All values are assumed to be constants.)
 	 *

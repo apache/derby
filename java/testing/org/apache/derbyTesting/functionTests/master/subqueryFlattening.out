@@ -3516,7 +3516,7 @@ Source result set:
 				restriction time (milliseconds) = 0
 				projection time (milliseconds) = 0
 			Source result set:
-				Hash Exists Join ResultSet:
+				Nested Loop Exists Join ResultSet:
 				Number of opens = 1
 				Rows seen from the left = 6
 				Rows seen from the right = 4
@@ -3555,8 +3555,8 @@ None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
-					Rows seen = 2
-					Rows filtered = 0
+					Rows seen = 3
+					Rows filtered = 1
 					restriction = true
 					projection = false
 						constructor time (milliseconds) = 0
@@ -3566,12 +3566,11 @@ None
 						restriction time (milliseconds) = 0
 						projection time (milliseconds) = 0
 					Source result set:
-						Hash Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share table locking: 
+						Index Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share row locking chosen by the optimizer
 						Number of opens = 6
-						Hash table size = 3
-						Hash key is column number 0
-						Rows seen = 2
+						Rows seen = 3
 						Rows filtered = 0
+						Fetch Size = 1
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
@@ -3581,32 +3580,21 @@ None
 							Bit set of columns fetched={0, 1}
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=1
+							Number of pages visited=6
 							Number of rows qualified=3
 							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
 							start position: 
-	None
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
 							stop position: 
-	None
-							scan qualifiers:
-Column[0][0] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-							next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
+							qualifiers:
+None
 ij> -- NOT EXISTS is flattened
 SELECT COUNT(*) FROM
 ( SELECT ID FROM DOCS WHERE
@@ -3687,7 +3675,7 @@ Source result set:
 				restriction time (milliseconds) = 0
 				projection time (milliseconds) = 0
 			Source result set:
-				Hash Exists Join ResultSet:
+				Nested Loop Exists Join ResultSet:
 				Number of opens = 1
 				Rows seen from the left = 6
 				Rows seen from the right = 4
@@ -3726,8 +3714,8 @@ None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
-					Rows seen = 2
-					Rows filtered = 0
+					Rows seen = 3
+					Rows filtered = 1
 					restriction = true
 					projection = false
 						constructor time (milliseconds) = 0
@@ -3737,12 +3725,11 @@ None
 						restriction time (milliseconds) = 0
 						projection time (milliseconds) = 0
 					Source result set:
-						Hash Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share table locking: 
+						Index Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share row locking chosen by the optimizer
 						Number of opens = 6
-						Hash table size = 3
-						Hash key is column number 0
-						Rows seen = 2
+						Rows seen = 3
 						Rows filtered = 0
+						Fetch Size = 1
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
@@ -3752,32 +3739,21 @@ None
 							Bit set of columns fetched={0, 1}
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=1
+							Number of pages visited=6
 							Number of rows qualified=3
 							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
 							start position: 
-	None
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
 							stop position: 
-	None
-							scan qualifiers:
-Column[0][0] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-							next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
+							qualifiers:
+None
 ij> -- EXISTS is flattened
 SELECT COUNT(*) FROM
 ( SELECT ID FROM DOCS WHERE
@@ -3858,7 +3834,7 @@ Source result set:
 				restriction time (milliseconds) = 0
 				projection time (milliseconds) = 0
 			Source result set:
-				Hash Exists Join ResultSet:
+				Nested Loop Exists Join ResultSet:
 				Number of opens = 1
 				Rows seen from the left = 6
 				Rows seen from the right = 2
@@ -3897,8 +3873,8 @@ None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
-					Rows seen = 2
-					Rows filtered = 0
+					Rows seen = 3
+					Rows filtered = 1
 					restriction = true
 					projection = false
 						constructor time (milliseconds) = 0
@@ -3908,12 +3884,11 @@ None
 						restriction time (milliseconds) = 0
 						projection time (milliseconds) = 0
 					Source result set:
-						Hash Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share table locking: 
+						Index Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share row locking chosen by the optimizer
 						Number of opens = 6
-						Hash table size = 3
-						Hash key is column number 0
-						Rows seen = 2
+						Rows seen = 3
 						Rows filtered = 0
+						Fetch Size = 1
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
@@ -3923,32 +3898,21 @@ None
 							Bit set of columns fetched={0, 1}
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=1
+							Number of pages visited=6
 							Number of rows qualified=3
 							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
 							start position: 
-	None
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
 							stop position: 
-	None
-							scan qualifiers:
-Column[0][0] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-							next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
+							qualifiers:
+None
 ij> -- IN is flattened
 SELECT count(ID) FROM DOCS WHERE ID IN (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4008,7 +3972,7 @@ Source result set:
 			restriction time (milliseconds) = 0
 			projection time (milliseconds) = 0
 		Source result set:
-			Hash Exists Join ResultSet:
+			Nested Loop Exists Join ResultSet:
 			Number of opens = 1
 			Rows seen from the left = 6
 			Rows seen from the right = 2
@@ -4047,8 +4011,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
-				Rows seen = 2
-				Rows filtered = 0
+				Rows seen = 3
+				Rows filtered = 1
 				restriction = true
 				projection = false
 					constructor time (milliseconds) = 0
@@ -4058,12 +4022,11 @@ None
 					restriction time (milliseconds) = 0
 					projection time (milliseconds) = 0
 				Source result set:
-					Hash Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share table locking: 
+					Index Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share row locking chosen by the optimizer
 					Number of opens = 6
-					Hash table size = 3
-					Hash key is column number 0
-					Rows seen = 2
+					Rows seen = 3
 					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -4073,32 +4036,21 @@ None
 						Bit set of columns fetched={0, 1}
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=6
 						Number of rows qualified=3
 						Number of rows visited=6
 						Scan type=btree
 						Tree height=1
 						start position: 
-	None
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
 						stop position: 
-	None
-						scan qualifiers:
-Column[0][0] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
+						qualifiers:
+None
 ij> -- ANY is flattened
 SELECT count(ID) FROM DOCS WHERE ID > ANY (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4197,8 +4149,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
-				Rows seen = 4
-				Rows filtered = 0
+				Rows seen = 15
+				Rows filtered = 11
 				restriction = true
 				projection = false
 					constructor time (milliseconds) = 0
@@ -4210,7 +4162,7 @@ None
 				Source result set:
 					Index Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share row locking chosen by the optimizer
 					Number of opens = 6
-					Rows seen = 4
+					Rows seen = 15
 					Rows filtered = 0
 					Fetch Size = 1
 						constructor time (milliseconds) = 0
@@ -4223,7 +4175,7 @@ None
 						Number of columns fetched=2
 						Number of deleted rows visited=0
 						Number of pages visited=6
-						Number of rows qualified=4
+						Number of rows qualified=15
 						Number of rows visited=17
 						Scan type=btree
 						Tree height=1
@@ -4234,16 +4186,7 @@ None
 	Ordered null semantics on the following columns: 
 0 
 						qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 ij> -- ANY is flattened
 SELECT count(ID) FROM DOCS WHERE ID <> ANY (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4268,7 +4211,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (7):
+Project-Restrict ResultSet (8):
 Number of opens = 1
 Rows seen = 1
 Rows filtered = 0
@@ -4290,7 +4233,7 @@ Source result set:
 		close time (milliseconds) = 0
 	Index Key Optimization = false
 	Source result set:
-		Project-Restrict ResultSet (6):
+		Project-Restrict ResultSet (7):
 		Number of opens = 1
 		Rows seen = 6
 		Rows filtered = 0
@@ -4340,12 +4283,12 @@ Source result set:
 					qualifiers:
 None
 			Right result set:
-				Project-Restrict ResultSet (5):
+				Project-Restrict ResultSet (6):
 				Number of opens = 6
-				Rows seen = 6
-				Rows filtered = 0
+				Rows seen = 7
+				Rows filtered = 1
 				restriction = true
-				projection = false
+				projection = true
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
@@ -4353,45 +4296,41 @@ None
 					restriction time (milliseconds) = 0
 					projection time (milliseconds) = 0
 				Source result set:
-					Index Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share table locking chosen by the optimizer
+					Index Row to Base Row ResultSet for COLLS:
 					Number of opens = 6
-					Rows seen = 6
-					Rows filtered = 0
-					Fetch Size = 1
+					Rows seen = 7
+					Columns accessed from heap = {0}
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched={0, 1}
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=6
-						Number of rows qualified=6
-						Number of rows visited=19
-						Scan type=btree
-						Tree height=1
-						start position: 
-	None
-						stop position: 
-	None
-						qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][2] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+						Index Scan ResultSet for COLLS using index NEW_INDEX3 at serializable isolation level using share row locking chosen by the optimizer
+						Number of opens = 6
+						Rows seen = 7
+						Rows filtered = 0
+						Fetch Size = 1
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							next time in milliseconds/row = 0
+						scan information: 
+							Bit set of columns fetched=All
+							Number of columns fetched=2
+							Number of deleted rows visited=0
+							Number of pages visited=6
+							Number of rows qualified=7
+							Number of rows visited=7
+							Scan type=btree
+							Tree height=1
+							start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+							stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+							qualifiers:
+None
 ij> -- ALL is flattened, what's not?
 SELECT count(ID) FROM DOCS WHERE ID = ALL (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4416,7 +4355,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (7):
+Project-Restrict ResultSet (8):
 Number of opens = 1
 Rows seen = 1
 Rows filtered = 0
@@ -4438,7 +4377,7 @@ Source result set:
 		close time (milliseconds) = 0
 	Index Key Optimization = false
 	Source result set:
-		Project-Restrict ResultSet (6):
+		Project-Restrict ResultSet (7):
 		Number of opens = 1
 		Rows seen = 0
 		Rows filtered = 0
@@ -4488,12 +4427,12 @@ Source result set:
 					qualifiers:
 None
 			Right result set:
-				Project-Restrict ResultSet (5):
+				Project-Restrict ResultSet (6):
 				Number of opens = 6
-				Rows seen = 6
-				Rows filtered = 0
+				Rows seen = 7
+				Rows filtered = 1
 				restriction = true
-				projection = false
+				projection = true
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
@@ -4501,45 +4440,41 @@ None
 					restriction time (milliseconds) = 0
 					projection time (milliseconds) = 0
 				Source result set:
-					Index Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share table locking chosen by the optimizer
+					Index Row to Base Row ResultSet for COLLS:
 					Number of opens = 6
-					Rows seen = 6
-					Rows filtered = 0
-					Fetch Size = 1
+					Rows seen = 7
+					Columns accessed from heap = {0}
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched={0, 1}
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=6
-						Number of rows qualified=6
-						Number of rows visited=19
-						Scan type=btree
-						Tree height=1
-						start position: 
-	None
-						stop position: 
-	None
-						qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][2] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+						Index Scan ResultSet for COLLS using index NEW_INDEX3 at serializable isolation level using share row locking chosen by the optimizer
+						Number of opens = 6
+						Rows seen = 7
+						Rows filtered = 0
+						Fetch Size = 1
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							next time in milliseconds/row = 0
+						scan information: 
+							Bit set of columns fetched=All
+							Number of columns fetched=2
+							Number of deleted rows visited=0
+							Number of pages visited=6
+							Number of rows qualified=7
+							Number of rows visited=7
+							Scan type=btree
+							Tree height=1
+							start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+							stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+							qualifiers:
+None
 ij> -- ALL is flattened, what's not?
 SELECT count(ID) FROM DOCS WHERE ID < ALL (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4638,8 +4573,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
-				Rows seen = 5
-				Rows filtered = 0
+				Rows seen = 17
+				Rows filtered = 12
 				restriction = true
 				projection = false
 					constructor time (milliseconds) = 0
@@ -4651,7 +4586,7 @@ None
 				Source result set:
 					Index Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share row locking chosen by the optimizer
 					Number of opens = 6
-					Rows seen = 5
+					Rows seen = 17
 					Rows filtered = 0
 					Fetch Size = 1
 						constructor time (milliseconds) = 0
@@ -4664,27 +4599,18 @@ None
 						Number of columns fetched=2
 						Number of deleted rows visited=0
 						Number of pages visited=6
-						Number of rows qualified=5
+						Number of rows qualified=17
 						Number of rows visited=18
 						Scan type=btree
 						Tree height=1
 						start position: 
 	None
 						stop position: 
-	> on first 2 column(s).
+	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-0 1 
+0 
 						qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 ij> -- ALL is flattened, what's not?
 SELECT count(ID) FROM DOCS WHERE ID <> ALL (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4744,7 +4670,7 @@ Source result set:
 			restriction time (milliseconds) = 0
 			projection time (milliseconds) = 0
 		Source result set:
-			Hash Exists Join ResultSet:
+			Nested Loop Exists Join ResultSet:
 			Number of opens = 1
 			Rows seen from the left = 6
 			Rows seen from the right = 4
@@ -4783,8 +4709,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
-				Rows seen = 2
-				Rows filtered = 0
+				Rows seen = 3
+				Rows filtered = 1
 				restriction = true
 				projection = false
 					constructor time (milliseconds) = 0
@@ -4794,12 +4720,11 @@ None
 					restriction time (milliseconds) = 0
 					projection time (milliseconds) = 0
 				Source result set:
-					Hash Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share table locking: 
+					Index Scan ResultSet for COLLS using constraint NEW_KEY2 at serializable isolation level using share row locking chosen by the optimizer
 					Number of opens = 6
-					Hash table size = 3
-					Hash key is column number 0
-					Rows seen = 2
+					Rows seen = 3
 					Rows filtered = 0
+					Fetch Size = 1
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -4809,32 +4734,21 @@ None
 						Bit set of columns fetched={0, 1}
 						Number of columns fetched=2
 						Number of deleted rows visited=0
-						Number of pages visited=1
+						Number of pages visited=6
 						Number of rows qualified=3
 						Number of rows visited=6
 						Scan type=btree
 						Tree height=1
 						start position: 
-	None
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
 						stop position: 
-	None
-						scan qualifiers:
-Column[0][0] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+0 
+						qualifiers:
+None
 ij> -- Now test nullable correlated columns
 drop table colls;
 0 rows inserted/updated/deleted
@@ -4984,8 +4898,8 @@ None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
-					Rows seen = 2
-					Rows filtered = 0
+					Rows seen = 3
+					Rows filtered = 1
 					restriction = true
 					projection = false
 						constructor time (milliseconds) = 0
@@ -4997,9 +4911,9 @@ None
 					Source result set:
 						Hash Scan ResultSet for COLLS at serializable isolation level using share table locking: 
 						Number of opens = 6
-						Hash table size = 3
+						Hash table size = 6
 						Hash key is column number 0
-						Rows seen = 2
+						Rows seen = 3
 						Rows filtered = 0
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
@@ -5010,22 +4924,13 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of pages visited=1
-							Number of rows qualified=5
+							Number of rows qualified=9
 							Number of rows visited=9
 							Scan type=heap
 							start position: 
 null							stop position: 
 null							scan qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 							next qualifiers:
 Column[0][0] Id: 0
 Operator: =
@@ -5151,8 +5056,8 @@ None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
-					Rows seen = 2
-					Rows filtered = 0
+					Rows seen = 3
+					Rows filtered = 1
 					restriction = true
 					projection = false
 						constructor time (milliseconds) = 0
@@ -5164,9 +5069,9 @@ None
 					Source result set:
 						Hash Scan ResultSet for COLLS at serializable isolation level using share table locking: 
 						Number of opens = 6
-						Hash table size = 3
+						Hash table size = 6
 						Hash key is column number 0
-						Rows seen = 2
+						Rows seen = 3
 						Rows filtered = 0
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
@@ -5177,22 +5082,13 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of pages visited=1
-							Number of rows qualified=5
+							Number of rows qualified=9
 							Number of rows visited=9
 							Scan type=heap
 							start position: 
 null							stop position: 
 null							scan qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 							next qualifiers:
 Column[0][0] Id: 0
 Operator: =
@@ -5297,8 +5193,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
-				Rows seen = 2
-				Rows filtered = 0
+				Rows seen = 3
+				Rows filtered = 1
 				restriction = true
 				projection = false
 					constructor time (milliseconds) = 0
@@ -5310,9 +5206,9 @@ None
 				Source result set:
 					Hash Scan ResultSet for COLLS at serializable isolation level using share table locking: 
 					Number of opens = 6
-					Hash table size = 3
+					Hash table size = 6
 					Hash key is column number 0
-					Rows seen = 2
+					Rows seen = 3
 					Rows filtered = 0
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
@@ -5323,22 +5219,13 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of pages visited=1
-						Number of rows qualified=5
+						Number of rows qualified=9
 						Number of rows visited=9
 						Scan type=heap
 						start position: 
 null						stop position: 
 null						scan qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 						next qualifiers:
 Column[0][0] Id: 0
 Operator: =
@@ -5443,8 +5330,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (6):
 				Number of opens = 6
-				Rows seen = 15
-				Rows filtered = 11
+				Rows seen = 16
+				Rows filtered = 12
 				restriction = true
 				projection = true
 					constructor time (milliseconds) = 0
@@ -5456,15 +5343,15 @@ None
 				Source result set:
 					Index Row to Base Row ResultSet for COLLS:
 					Number of opens = 6
-					Rows seen = 15
-					Columns accessed from heap = {1}
+					Rows seen = 16
+					Columns accessed from heap = {0}
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for COLLS using index NEW_INDEX2 at serializable isolation level using share row locking chosen by the optimizer
-						Number of opens = 6
-						Rows seen = 15
+						Index Scan ResultSet for COLLS using index NEW_INDEX3 at serializable isolation level using share row locking chosen by the optimizer
+						Number of opens = 9
+						Rows seen = 16
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -5476,15 +5363,16 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=6
-							Number of rows qualified=15
-							Number of rows visited=17
+							Number of pages visited=9
+							Number of rows qualified=16
+							Number of rows visited=21
 							Scan type=btree
 							Tree height=1
 							start position: 
-	None
-							stop position: 
 	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+							stop position: 
+	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
 							qualifiers:
 None
@@ -5512,7 +5400,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (10):
+Project-Restrict ResultSet (9):
 Number of opens = 1
 Rows seen = 1
 Rows filtered = 0
@@ -5544,7 +5432,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Source result set:
-				Project-Restrict ResultSet (8):
+				Project-Restrict ResultSet (7):
 				Number of opens = 6
 				Rows seen = 12
 				Rows filtered = 6
@@ -5805,8 +5693,8 @@ None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 7
-					Rows seen = 2
-					Rows filtered = 0
+					Rows seen = 3
+					Rows filtered = 1
 					restriction = true
 					projection = false
 						constructor time (milliseconds) = 0
@@ -5818,9 +5706,9 @@ None
 					Source result set:
 						Hash Scan ResultSet for COLLS at serializable isolation level using share table locking: 
 						Number of opens = 7
-						Hash table size = 3
+						Hash table size = 6
 						Hash key is column number 0
-						Rows seen = 2
+						Rows seen = 3
 						Rows filtered = 0
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
@@ -5831,22 +5719,13 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of pages visited=1
-							Number of rows qualified=5
+							Number of rows qualified=9
 							Number of rows visited=9
 							Scan type=heap
 							start position: 
 null							stop position: 
 null							scan qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 							next qualifiers:
 Column[0][0] Id: 0
 Operator: =
@@ -5972,8 +5851,8 @@ None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 7
-					Rows seen = 2
-					Rows filtered = 0
+					Rows seen = 3
+					Rows filtered = 1
 					restriction = true
 					projection = false
 						constructor time (milliseconds) = 0
@@ -5985,9 +5864,9 @@ None
 					Source result set:
 						Hash Scan ResultSet for COLLS at serializable isolation level using share table locking: 
 						Number of opens = 7
-						Hash table size = 3
+						Hash table size = 6
 						Hash key is column number 0
-						Rows seen = 2
+						Rows seen = 3
 						Rows filtered = 0
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
@@ -5998,22 +5877,13 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of pages visited=1
-							Number of rows qualified=5
+							Number of rows qualified=9
 							Number of rows visited=9
 							Scan type=heap
 							start position: 
 null							stop position: 
 null							scan qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 							next qualifiers:
 Column[0][0] Id: 0
 Operator: =
@@ -6118,8 +5988,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 7
-				Rows seen = 2
-				Rows filtered = 0
+				Rows seen = 3
+				Rows filtered = 1
 				restriction = true
 				projection = false
 					constructor time (milliseconds) = 0
@@ -6131,9 +6001,9 @@ None
 				Source result set:
 					Hash Scan ResultSet for COLLS at serializable isolation level using share table locking: 
 					Number of opens = 7
-					Hash table size = 3
+					Hash table size = 6
 					Hash key is column number 0
-					Rows seen = 2
+					Rows seen = 3
 					Rows filtered = 0
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
@@ -6144,22 +6014,13 @@ None
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of pages visited=1
-						Number of rows qualified=5
+						Number of rows qualified=9
 						Number of rows visited=9
 						Scan type=heap
 						start position: 
 null						stop position: 
 null						scan qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 						next qualifiers:
 Column[0][0] Id: 0
 Operator: =
@@ -6264,8 +6125,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (6):
 				Number of opens = 7
-				Rows seen = 15
-				Rows filtered = 11
+				Rows seen = 19
+				Rows filtered = 15
 				restriction = true
 				projection = true
 					constructor time (milliseconds) = 0
@@ -6277,15 +6138,15 @@ None
 				Source result set:
 					Index Row to Base Row ResultSet for COLLS:
 					Number of opens = 7
-					Rows seen = 15
-					Columns accessed from heap = {1}
+					Rows seen = 19
+					Columns accessed from heap = {0}
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						Index Scan ResultSet for COLLS using index NEW_INDEX2 at serializable isolation level using share row locking chosen by the optimizer
-						Number of opens = 7
-						Rows seen = 15
+						Index Scan ResultSet for COLLS using index NEW_INDEX3 at serializable isolation level using share row locking chosen by the optimizer
+						Number of opens = 10
+						Rows seen = 19
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -6297,15 +6158,16 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=6
-							Number of rows qualified=15
-							Number of rows visited=17
+							Number of pages visited=10
+							Number of rows qualified=19
+							Number of rows visited=25
 							Scan type=btree
 							Tree height=1
 							start position: 
-	None
-							stop position: 
 	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+							stop position: 
+	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
 							qualifiers:
 None
@@ -6333,7 +6195,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (10):
+Project-Restrict ResultSet (9):
 Number of opens = 1
 Rows seen = 1
 Rows filtered = 0
@@ -6365,7 +6227,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Source result set:
-				Project-Restrict ResultSet (8):
+				Project-Restrict ResultSet (7):
 				Number of opens = 7
 				Rows seen = 13
 				Rows filtered = 6

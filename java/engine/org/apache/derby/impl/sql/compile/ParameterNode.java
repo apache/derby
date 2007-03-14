@@ -337,7 +337,8 @@ public class ParameterNode extends ValueNode
 									throws StandardException
 	{
 		/* If we were given a specific ValueNode to generate then
-		 * just use that.
+		 * just use that.  See, in particular, the preprocess method
+		 * of InListOperatorNode.
 		 */
 		if (valToGenerate != null)
 		{

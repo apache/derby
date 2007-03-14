@@ -1189,16 +1189,7 @@ Left result set:
 						start position: 
 null						stop position: 
 null						qualifiers:
-Column[0][0] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 0
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+None
 			Right result set:
 				Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 5
@@ -1498,16 +1489,7 @@ Left result set:
 						start position: 
 null						stop position: 
 null						qualifiers:
-Column[0][0] Id: 0
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+None
 			Right result set:
 				Hash Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking: 
 				Number of opens = 655
