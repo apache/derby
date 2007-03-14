@@ -1,7 +1,6 @@
 jdbcapi/bestrowidentifier.sql
 jdbcapi/checkDriver.java
 jdbcapi/nullSQLText.java
-jdbcapi/resultset.java
 jdbcapi/resultsetStream.java
 jdbcapi/users.sql
 jdbcapi/users2.sql

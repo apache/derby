@@ -70,7 +70,7 @@ public class CastingTest extends BaseJDBCTestCase {
     public static int TIMESTAMP_OFFSET = 15;
     public static int BLOB_OFFSET = 16;
 
-
+    // Note: This array is accessed in lang.NullIfTest
     public static String[] SQLTypes =
     {
             "SMALLINT",
@@ -212,6 +212,7 @@ public static String[][]SQLData =
     // Comparisons table
     // Comparison's are different than assignments because
     // Long types cannot be compared.
+    // Note: This table is referenced in NullIfTest.java
     public static final boolean[][]  T_147b = {
             
 //Types.                 S  I  B  D  R  D  C  V  L  C  V  L  C  D  T  T  B

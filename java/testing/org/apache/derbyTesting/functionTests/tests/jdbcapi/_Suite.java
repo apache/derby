@@ -65,6 +65,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(BlobStoredProcedureTest.suite());
 		suite.addTest(ClobStoredProcedureTest.suite());
                 suite.addTest(CallableTest.suite());
+                suite.addTest(ResultSetMiscTest.suite());
         
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.

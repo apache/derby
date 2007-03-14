@@ -80,6 +80,7 @@ public class _Suite extends BaseTestCase  {
 	suite.addTest(CursorTest.suite());
         suite.addTest(CastingTest.suite());
         suite.addTest(ScrollCursors2Test.suite());
+        suite.addTest(NullIfTest.suite());
 
         // Add the XML tests, which exist as a separate suite
         // so that users can "run all XML tests" easily.
