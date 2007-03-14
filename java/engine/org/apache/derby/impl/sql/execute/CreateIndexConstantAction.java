@@ -61,9 +61,9 @@ import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.TypeId;
 
 /**
- *	This class  describes actions that are ALWAYS performed for a
- *	CREATE TABLE Statement at Execution time.
- *
+ * ConstantAction to create an index either through
+ * a CREATE INDEX statement or as a backing index to
+ * a constraint.
  */
 
 class CreateIndexConstantAction extends IndexConstantAction
@@ -71,7 +71,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 
 	private boolean			unique;
 	private String			indexType;
-	private long			conglomId;
 	private String[]		columnNames;
 	private boolean[]		isAscending;
 	private boolean			isConstraint;
@@ -83,7 +82,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 
 	// CONSTRUCTORS
 	/**
-	 *	Make the ConstantAction for a CREATE INDEX statement.
+	 *	Make the ConstantAction to create an index.
 	 *
 	 *  @param unique		True means it will be a unique index
 	 *  @param indexType	The type of index (BTREE, for example)
@@ -91,7 +90,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 	 *  @param indexName	Name of the index
 	 *  @param tableName	Name of table the index will be on
 	 *  @param tableId		UUID of table
-	 *  @param conglomId	Conglomerate ID of the index, if known in advance
 	 *  @param columnNames	Names of the columns in the index, in order
 	 *	@param isAscending	Array of booleans telling asc/desc on each column
 	 *  @param isConstraint	TRUE if index is backing up a constraint, else FALSE
@@ -105,7 +103,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 								String			indexName,
 								String			tableName,
 								UUID			tableId,
-								long			conglomId,
 								String[]		columnNames,
 								boolean[]		isAscending,
 								boolean			isConstraint,
@@ -115,7 +112,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 		super(tableId, indexName, tableName, schemaName);
 		this.unique = unique;
 		this.indexType = indexType;
-		this.conglomId= conglomId;
 		this.columnNames = columnNames;
 		this.isAscending = isAscending;
 		this.isConstraint = isConstraint;
@@ -140,8 +136,18 @@ class CreateIndexConstantAction extends IndexConstantAction
 
 
 	/**
-	 *	This is the guts of the Execution-time logic for CREATE INDEX.
-	 *
+	 *	This is the guts of the Execution-time logic for 
+     *  creating an index.
+     *
+     *  <P>
+     *  A index is represented as:
+     *  <UL>
+     *  <LI> ConglomerateDescriptor.
+     *  </UL>
+     *  No dependencies are created.
+   	 *
+     *  @see ConglomerateDescriptor
+     *  @see SchemaDescriptor
 	 *	@see ConstantAction#executeConstantAction
 	 *
 	 * @exception StandardException		Thrown on failure
@@ -290,6 +296,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 		// check if we have similar indices already for this table
 		ConglomerateDescriptor[] congDescs = td.getConglomerateDescriptors();
 		boolean duplicate = false;
+        long conglomId = 0;
 
 		for (int i = 0; i < congDescs.length; i++)
 		{

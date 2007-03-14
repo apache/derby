@@ -775,7 +775,6 @@ public class TableElementList extends QueryTreeNodeVector
 									indexName,
 									tableName,
 									((td != null) ? td.getUUID() : (UUID) null),
-									0, // conglomId
 									columnNames,
 									isAscending,
 									isConstraint,

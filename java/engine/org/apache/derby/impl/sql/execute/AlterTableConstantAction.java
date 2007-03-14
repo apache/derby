@@ -1649,7 +1649,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					 */
 					ConglomerateDescriptor cd = td.getConglomerateDescriptor
 												(indexConglomerateNumbers[i]);
-					DropIndexConstantAction.dropIndex(dm, dd, tc, cd, td, activation.getLanguageConnectionContext());
+					cd.drop(activation.getLanguageConnectionContext(), td);
 
 					compressIRGs[i] = null;		// mark it
 					continue;

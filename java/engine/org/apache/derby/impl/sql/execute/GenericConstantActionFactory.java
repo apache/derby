@@ -198,7 +198,6 @@ public class GenericConstantActionFactory
 	 *  @param indexName	Name of the index
 	 *  @param tableName	Name of table the index will be on
 	 *	@param tableId		UUID of table.
-	 *  @param conglomId	Conglomerate ID of the index, if known in advance
 	 *  @param columnNames	Names of the columns in the index, in order
 	 *  @param isAscending	Array of booleans telling asc/desc on each column
 	 *  @param isConstraint	TRUE if index is backing up a constraint, else FALSE
@@ -213,7 +212,6 @@ public class GenericConstantActionFactory
 		String			indexName,
 		String			tableName,
 		UUID			tableId,
-		long			conglomId,
 		String[]		columnNames,
 		boolean[]		isAscending,
 		boolean			isConstraint,
@@ -223,7 +221,7 @@ public class GenericConstantActionFactory
 	{
 		return	new CreateIndexConstantAction
 			( unique, indexType, schemaName, indexName, tableName, tableId,
-			  conglomId, columnNames, isAscending, isConstraint,
+			  columnNames, isAscending, isConstraint,
 			  conglomerateUUID, properties );
 	}
 

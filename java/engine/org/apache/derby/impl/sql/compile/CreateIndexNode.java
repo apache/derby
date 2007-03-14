@@ -244,7 +244,6 @@ public class CreateIndexNode extends DDLStatementNode
 	 */
 	public ConstantAction	makeConstantAction() throws StandardException
 	{
-        long 					conglomId = 0;
 		SchemaDescriptor		sd = getSchemaDescriptor();
 
 		int columnCount = columnNames.length;
@@ -295,7 +294,6 @@ public class CreateIndexNode extends DDLStatementNode
 											  indexName.getTableName(),
 											  tableName.getTableName(),
 											  td.getUUID(),
-											  conglomId,
 											  columnNames,
 											  isAscending,
 											  false,

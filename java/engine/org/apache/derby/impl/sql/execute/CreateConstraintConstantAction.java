@@ -127,7 +127,26 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 
 	/**
 	 *	This is the guts of the Execution-time logic for CREATE CONSTRAINT.
-	 *
+	 *  <P>
+	 *  A constraint is represented as:
+	 *  <UL>
+	 *  <LI> ConstraintDescriptor.
+	 *  </UL>
+	 *  If a backing index is required then the index will
+	 *  be created through an CreateIndexConstantAction setup
+	 *  by the compiler.
+	 *  <BR>
+	 *  Dependencies are created as:
+	 *  <UL>
+	 *  <LI> ConstraintDescriptor depends on all the providers collected
+     *  at compile time and passed into the constructor.
+	 *  <LI> For a FOREIGN KEY constraint ConstraintDescriptor depends
+     *  on the ConstraintDescriptor for the referenced constraints
+     *  and the privileges required to create the constraint.
+	 *  </UL>
+
+	 *  @see ConstraintDescriptor
+	 *  @see CreateIndexConstantAction
 	 *	@see ConstantAction#executeConstantAction
 	 *
 	 * @exception StandardException		Thrown on failure
@@ -214,7 +233,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 		 * constraint's name, if no name was specified.
 		 */
 		UUIDFactory uuidFactory = dd.getUUIDFactory();
-
+        
 		/* Create the index, if there's one for this constraint */
 		if (indexAction != null)
 		{
@@ -225,6 +244,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				indexAction.setIndexName(backingIndexName);
 			}
 			else { backingIndexName = indexAction.getIndexName(); }
+
 
 			/* Create the index */
 			indexAction.executeConstantAction(activation);
@@ -259,10 +279,6 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			indexId = conglomDesc.getUUID();
 		}
 
-		// if no constraintId was specified, we should generate one. this handles
-		// the two cases of Source creation and Target replication. At the source
-		// database, we allocate a new UUID. At the Target, we just use the UUID that
-		// the Source sent along.
 		UUID constraintId = uuidFactory.createUUID();
 
 		/* Now, lets create the constraint descriptor */
@@ -417,7 +433,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	 *
 	 * @return true/false
 	 */
-	public boolean isForeignKeyConstraint()
+	boolean isForeignKeyConstraint()
 	{ 
 		return (constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT);
 	}
@@ -475,12 +491,6 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	//
 	///////////////////////////////////////////////////////////////////////
 
-	/**
-	  *	Get the names of the columns touched by this constraint.
-	  *
-	  *	@return	the array of touched column names.
-	  */
-    public	String[]	getColumnNames() { return columnNames; }
 
 
 	/**
@@ -488,7 +498,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	  *
 	  *	@return	constraint text
 	  */
-    public	String	getConstraintText() { return constraintText; }
+    String	getConstraintText() { return constraintText; }
 
 	public String toString()
 	{

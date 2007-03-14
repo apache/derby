@@ -21,12 +21,16 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
 
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -37,12 +41,19 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 /**
  * The ConglomerateDescriptor class is used to get information about
  * conglomerates for the purpose of optimization.
+ * 
+ * A ConglomerateDescriptor can map to a base table, an index
+ * or a index backing a constraint. Multiple ConglomerateDescriptors
+ * can map to a single underlying store conglomerate, such as when
+ * multiple index definitions share a physical file.
  *
  * NOTE: The language module does not have to know much about conglomerates
  * with this architecture. To get the cost of using a conglomerate, all it
  * has to do is pass the ConglomerateDescriptor to the access methods, along
  * with the predicate. What the access methods need from a
  * ConglomerateDescriptor remains to be seen.
+ * 
+ * 
  *
  * @version 0.1
  */
@@ -53,7 +64,7 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 	// Implementation
 	private long	conglomerateNumber;
 	private String	name;
-	private String[]	columnNames;
+	private transient String[]	columnNames;
 	private final boolean	indexable;
 	private final boolean	forConstraint;
 	private final IndexRowGenerator	indexRowGenerator;
@@ -330,5 +341,38 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 
 	/** @see TupleDescriptor#getDescriptorName */
 	public String getDescriptorName() { return name; }
+    
+	public void drop(LanguageConnectionContext lcc,
+	        TableDescriptor td)
+	throws StandardException
+	{     
+        DataDictionary dd = getDataDictionary();
+        DependencyManager dm = dd.getDependencyManager();
+        TransactionController tc = lcc.getTransactionExecute();
+        
+        // invalidate any prepared statements that
+        // depended on the index (including this one)
+        dm.invalidateFor(this, DependencyManager.DROP_INDEX, lcc);
+	    
+        // only drop the conglomerate if no similar index but with different
+	    // name. Get from dd in case we drop other dup indexes with a cascade operation	    
+	    if (dd.getConglomerateDescriptors(getConglomerateNumber()).length == 1)
+	    {
+	        /* Drop statistics */
+	        dd.dropStatisticsDescriptors(td.getUUID(), getUUID(), tc);
+	        
+	        /* Drop the conglomerate */
+	        tc.dropConglomerate(getConglomerateNumber());
+        }	    
+	    
+	    /* Drop the conglomerate descriptor */
+	    dd.dropConglomerateDescriptor(this, tc);
+	    
+	    /* 
+	     ** Remove the conglomerate descriptor from the list hanging off of the
+	     ** table descriptor
+	     */
+	    td.removeConglomerateDescriptor(this);
+	}
 	
 }

@@ -113,7 +113,6 @@ class DropIndexConstantAction extends IndexConstantAction
 
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
-		DependencyManager dm = dd.getDependencyManager();
 		TransactionController tc = lcc.getTransactionExecute();
 
 		/*
@@ -172,13 +171,7 @@ class DropIndexConstantAction extends IndexConstantAction
 			throw StandardException.newException(SQLState.LANG_INDEX_NOT_FOUND_DURING_EXECUTION, fullIndexName);
 		}
 
-		/* Prepare all dependents to invalidate.  (This is there chance
-		 * to say that they can't be invalidated.)
-		 * We check for invalidation before we drop the conglomerate descriptor
-		 * since the conglomerate descriptor may be looked up as part of
-		 * decoding tuples in SYSDEPENDS.
-		 */
-		dropIndex(dm, dd, tc, cd, td, activation.getLanguageConnectionContext());
+		cd.drop(lcc, td);
 	}
 
 	public static void dropIndex(DependencyManager 	dm,
