@@ -33,21 +33,11 @@ import java.text.CollationElementIterator;
 import java.text.RuleBasedCollator;
 
 /**
- * CollatorSQLChar satisfies the DataValueDescriptor
- * interfaces (i.e., OrderableDataType). It implements an String holder,
- * e.g. for storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction.
- * <p>
- * Because OrderableDataType is a subclass of DataType,
- * CollatorSQLChar can play a role in either a DataType/ValueRow
- * or a OrderableDataType/KeyRow, interchangeably.
- * 
- * This class differs from SQLChar based on how the 2 classes use different
- * collations to collate their data. SQLChar uses Derby's default collation
- * which is UCS_BASIC. Whereas, this class uses the RuleBasedCollator object 
- * that was passed to it in it's constructor and that RuleBasedCollator object  
- * decides the collation.
+ * CollatorSQLChar class differs from SQLChar based on how the 2 classes use 
+ * different collations to collate their data. SQLChar uses Derby's default 
+ * collation which is UCS_BASIC. Whereas, this class uses the RuleBasedCollator  
+ * object that was passed to it in it's constructor and that RuleBasedCollator   
+ * object decides the collation.
  * 
  * In Derby 10.3, this class will be passed a RuleBasedCollator which is based 
  * on the database's territory. In future releases of Derby, this class can be 
@@ -55,15 +45,19 @@ import java.text.RuleBasedCollator;
  * just passing an appropriate RuleBasedCollator object for that kind of 
  * collation.
  */
-public class CollatorSQLChar
-	extends SQLChar
+public class CollatorSQLChar extends SQLChar
 {
-	//Use this object for collation
-	RuleBasedCollator rbc;
-	//Following is the array holding a series of collation elements for the 
-	//string. It will be used in the like method 
+	/** Use this object for collation on character datatypes */
+	RuleBasedCollator collatorForCharacterDatatypes;
+	/**
+	 * Following is the array holding a series of collation elements for the
+	 * string. It will be used in the like method 
+	 */
 	private int[]	collationElementsForString;
-	//number of valid collation elements in the array above. 
+	/** 
+	 * Number of valid collation elements in the array above. Note that this 
+	 * might be smaller than the actual size of the array above
+	 */
 	private int		countOfCollationElements;
 
 	/*
@@ -77,19 +71,19 @@ public class CollatorSQLChar
 	{
 	}
 
-	public CollatorSQLChar(String val, RuleBasedCollator rbc)
+	public CollatorSQLChar(String val, RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		super(val);
-		this.rbc = rbc;
+		this.collatorForCharacterDatatypes = collatorForCharacterDatatypes;
 	}
 
 	/**
 	 * Set the RuleBasedCollator for this instance of CollatorSQLChar. It will
 	 * be used to do the collation.
 	 */
-	private void setCollator(RuleBasedCollator rbc)
+	private void setCollator(RuleBasedCollator collatorForCharacterDatatypes)
 	{
-		this.rbc = rbc;
+		this.collatorForCharacterDatatypes = collatorForCharacterDatatypes;
 	}
 
 	/**
@@ -124,7 +118,7 @@ public class CollatorSQLChar
 
 		collationElementsForString = new int[getLength()];
 
-		CollationElementIterator cei = rbc.getCollationElementIterator(getString());
+		CollationElementIterator cei = collatorForCharacterDatatypes.getCollationElementIterator(getString());
 		int nextInt;
 		while ((nextInt = cei.next()) != CollationElementIterator.NULLORDER)
 		{
@@ -162,6 +156,9 @@ public class CollatorSQLChar
 
 	/**
 	 * This method implements the like function for char (with no escape value).
+	 * The difference in this method and the same method in superclass is that
+	 * here we use special Collator object to do the comparison rather than
+	 * using the Collator object associated with the default jvm locale.
 	 *
 	 * @param pattern		The pattern to use
 	 *
@@ -180,7 +177,7 @@ public class CollatorSQLChar
 				getCountOfCollationElements(),
 				patternSQLChar.getCollationElementsForString(),
 				patternSQLChar.getCountOfCollationElements(),
-				rbc);
+				collatorForCharacterDatatypes);
 
 		return SQLBoolean.truthValue(this,
 									 pattern,
@@ -198,7 +195,7 @@ public class CollatorSQLChar
 	{
 		try
 		{
-			return new CollatorSQLChar(getString(), rbc);
+			return new CollatorSQLChar(getString(), collatorForCharacterDatatypes);
 		}
 		catch (StandardException se)
 		{
@@ -214,7 +211,7 @@ public class CollatorSQLChar
 	public DataValueDescriptor getNewNull()
 	{
 		CollatorSQLChar result = new CollatorSQLChar();
-		result.setCollator(rbc);
+		result.setCollator(collatorForCharacterDatatypes);
 		return result;
 	}
 
