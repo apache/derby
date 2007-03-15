@@ -173,6 +173,23 @@ public class JDBCDataSource {
         }   
     }
     
+    /**
+     * Clear a String Java bean property by setting it to null.
+     * @param ds ds DataSource to have property cleared
+     * @param property name of property.
+     */
+    public static void clearStringBeanProperty(Object ds, String property)
+    {
+        String setterName = getSetterName(property);
+        try {
+            Method setter = ds.getClass().getMethod(setterName,
+                    new Class[] {String.class});
+            setter.invoke(ds, new Object[] {null});
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }   
+    }
+    
     private static String getSetterName(String attribute) {
         return "set" + Character.toUpperCase(attribute.charAt(0))
                 + attribute.substring(1);

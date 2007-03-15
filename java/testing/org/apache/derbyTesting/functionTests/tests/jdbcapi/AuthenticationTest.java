@@ -845,44 +845,24 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     }
     
     public void assertConnectionFail(String dbName) throws SQLException {
-        // this method needs to create DataSources without relying on
-        // the JDBC methods, because those use a default user/pwd
-        // (APP, APP).
+        
+        // Get the default data source but clear the user and
+        // password set by the configuration.
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        
+        // Reset to no user/password though client requires
+        // a valid name, so reset to the default
         if (usingDerbyNetClient())
-        {
-            ClientDataSource ds = new ClientDataSource();
-            ds.setDatabaseName(dbName);
-            try {
-                ds.getConnection();
-                fail("expected connection to fail");
-            } catch (SQLException e) {
-                assertSQLState("08004", e);
-            }
-        }
-        else if (usingEmbedded()) 
-        {
-            if (JDBC.vmSupportsJSR169())
-            {
-                EmbeddedSimpleDataSource ds = new EmbeddedSimpleDataSource();
-                ds.setDatabaseName(dbName);
-                try {
-                    ds.getConnection();
-                    fail("expected connection to fail");
-                } catch (SQLException e) {
-                    assertSQLState("08004", e);
-                }
-            }
-            else
-            {
-                EmbeddedDataSource ds = new EmbeddedDataSource();
-                ds.setDatabaseName(dbName);
-                try {
-                    ds.getConnection();
-                    fail("expected connection to fail");
-                } catch (SQLException e) {
-                    assertSQLState("08004", e);
-                }
-            }
-        }
+            JDBCDataSource.setBeanProperty(ds, "user", "APP");
+        else
+            JDBCDataSource.clearStringBeanProperty(ds, "user");
+        JDBCDataSource.clearStringBeanProperty(ds, "password");
+        
+        try {
+            ds.getConnection();
+            fail("expected connection to fail");
+        } catch (SQLException e) {
+            assertSQLState("08004", e);
+        }       
     }
 }
