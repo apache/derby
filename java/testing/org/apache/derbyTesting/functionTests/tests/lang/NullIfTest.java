@@ -35,60 +35,13 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import org.apache.derbyTesting.functionTests.tests.lang.CastingTest;
 
 public class NullIfTest extends BaseJDBCTestCase {
-
-        private static String VALID_DATE_STRING = "'2000-01-01'";
-        private static String VALID_TIME_STRING = "'15:30:20'";
-        private static String VALID_TIMESTAMP_STRING = "'2000-01-01 15:30:20'";
-        private static String NULL_VALUE="NULL";
-
-        private static String[] ColumnNames =
-        {
-                "SMALLINTCOL",
-                "INTEGERCOL",
-                "BIGINTCOL",
-                "DECIMALCOL",
-                "REALCOL",
-                "DOUBLECOL",
-                "CHARCOL",
-                "VARCHARCOL",
-                "LONGVARCHARCOL",
-                "CHARFORBITCOL",
-                "VARCHARFORBITCOL",
-                "LVARCHARFORBITCOL",
-                "CLOBCOL",
-                "DATECOL",
-                "TIMECOL",
-                "TIMESTAMPCOL",
-                "BLOBCOL",
-
-        };
-
-        private static String[][]SQLData =
-        {
-                {NULL_VALUE, "0","1","2"},       // SMALLINT
-                {NULL_VALUE,"0","1","21"},       // INTEGER
-                {NULL_VALUE,"0","1","22"},       // BIGINT
-                {NULL_VALUE,"0.0","1.0","23.0"},      // DECIMAL(10,5)
-                {NULL_VALUE,"0.0","1.0","24.0"},      // REAL,
-                {NULL_VALUE,"0.0","1.0","25.0"},      // DOUBLE
-                {NULL_VALUE,"'0'","'aa'","'2.0'"},      // CHAR(60)
-                {NULL_VALUE,"'0'","'aa'",VALID_TIME_STRING},      //VARCHAR(60)",
-                {NULL_VALUE,"'0'","'aa'",VALID_TIMESTAMP_STRING},      // LONG VARCHAR
-                {NULL_VALUE,"X'10aa'",NULL_VALUE,"X'10aaaa'"},  // CHAR(60)  FOR BIT DATA
-                {NULL_VALUE,"X'10aa'",NULL_VALUE,"X'10aaba'"},  // VARCHAR(60) FOR BIT DATA
-                {NULL_VALUE,"X'10aa'",NULL_VALUE,"X'10aaca'"},  //LONG VARCHAR FOR BIT DATA
-                {NULL_VALUE,"'13'","'14'",NULL_VALUE},     //CLOB(1k)
-                {NULL_VALUE,VALID_DATE_STRING,VALID_DATE_STRING,NULL_VALUE},        // DATE
-                {NULL_VALUE,VALID_TIME_STRING,VALID_TIME_STRING,VALID_TIME_STRING},        // TIME
-                {NULL_VALUE,VALID_TIMESTAMP_STRING,VALID_TIMESTAMP_STRING,VALID_TIMESTAMP_STRING},   // TIMESTAMP
-                {NULL_VALUE,NULL_VALUE,NULL_VALUE,NULL_VALUE}                 // BLOB
-        };
-        
+       
         private static String[][][] nullIfResults  ={
         /*SMALLINT*/ {/*SMALLINT*/ {null,null,null,null},/*INTEGER*/ {null,null,null,"2"},/*BIGINT*/ {null,null,null,"2"},/*DECIMAL(10,5)*/ {null,null,null,"2"},/*REAL*/ {null,null,null,"2"},/*DOUBLE*/ {null,null,null,"2"},/*CHAR(60)*/ {"Exception","Exception","Exception","Exception"},/*VARCHAR(60)*/ {"Exception","Exception","Exception","Exception"},/*LONG VARCHAR*/ {"Exception","Exception","Exception","Exception"},/*CHAR(60) FOR BIT DATA*/ {"Exception","Exception","Exception","Exception"},/*VARCHAR(60) FOR BIT DATA*/ {"Exception","Exception","Exception","Exception"},/*LONG VARCHAR FOR BIT DATA*/ {"Exception","Exception","Exception","Exception"},/*CLOB(1k)*/ {"Exception","Exception","Exception","Exception"},/*DATE*/ {"Exception","Exception","Exception","Exception"},/*TIME*/ {"Exception","Exception","Exception","Exception"},/*TIMESTAMP*/ {"Exception","Exception","Exception","Exception"},/*BLOB(1k)*/ {"Exception","Exception","Exception","Exception"}},
         /*INTEGER*/ {/*SMALLINT*/ {null,null,null,"21"},/*INTEGER*/ {null,null,null,null},/*BIGINT*/ {null,null,null,"21"},/*DECIMAL(10,5)*/ {null,null,null,"21"},/*REAL*/ {null,null,null,"21"},/*DOUBLE*/ {null,null,null,"21"},/*CHAR(60)*/ {"Exception","Exception","Exception","Exception"},/*VARCHAR(60)*/ {"Exception","Exception","Exception","Exception"},/*LONG VARCHAR*/ {"Exception","Exception","Exception","Exception"},/*CHAR(60) FOR BIT DATA*/ {"Exception","Exception","Exception","Exception"},/*VARCHAR(60) FOR BIT DATA*/ {"Exception","Exception","Exception","Exception"},/*LONG VARCHAR FOR BIT DATA*/ {"Exception","Exception","Exception","Exception"},/*CLOB(1k)*/ {"Exception","Exception","Exception","Exception"},/*DATE*/ {"Exception","Exception","Exception","Exception"},/*TIME*/ {"Exception","Exception","Exception","Exception"},/*TIMESTAMP*/ {"Exception","Exception","Exception","Exception"},/*BLOB(1k)*/ {"Exception","Exception","Exception","Exception"}},
@@ -190,14 +143,14 @@ public class NullIfTest extends BaseJDBCTestCase {
         for (int firstColumnType = 0; firstColumnType < CastingTest.SQLTypes.length; firstColumnType++) {
 
             StringBuffer nullIfString = new StringBuffer("SELECT NULLIF("
-                    + ColumnNames[firstColumnType]);
+                    + JDBC.allDataTypesColumnNames[firstColumnType]);
             for (int secondColumnType = 0; secondColumnType < CastingTest.SQLTypes.length; secondColumnType++) {
 
                 int row = 0;
                 try {
                     StringBuffer completeNullIfString = new StringBuffer(
                             nullIfString.toString() + ","
-                                    + ColumnNames[secondColumnType]);
+                                    + JDBC.allDataTypesColumnNames[secondColumnType]);
                     ResultSet rs = s.executeQuery(completeNullIfString
                             + ") from AllDataTypesTable");
                     while (rs.next()) {
@@ -248,7 +201,7 @@ public class NullIfTest extends BaseJDBCTestCase {
         for (int secondColumnType = 0; secondColumnType < CastingTest.SQLTypes.length; secondColumnType++) {
 
             String nullIfString = new String("SELECT NULLIF(?,"
-                    + ColumnNames[secondColumnType]
+                    + JDBC.allDataTypesColumnNames[secondColumnType]
                     + ") from AllDataTypesTable");
             int row = 0;
             try {
@@ -350,34 +303,10 @@ public class NullIfTest extends BaseJDBCTestCase {
              * 
              */
             protected void decorateSQL(Statement s) throws SQLException {
-                try {
-                    s.executeUpdate("DROP TABLE AllDataTypesTable");
-                } catch (SQLException se) {
-                }
-
-                StringBuffer createSQL = new StringBuffer(
-                        "create table AllDataTypesTable (");
-                for (int type = 0; type < CastingTest.SQLTypes.length - 1; type++) {
-                    createSQL.append(ColumnNames[type] + " " + CastingTest.SQLTypes[type]
-                            + ",");
-                }
-                createSQL.append(ColumnNames[CastingTest.SQLTypes.length - 1] + " "
-                        + CastingTest.SQLTypes[CastingTest.SQLTypes.length - 1] + ")");
-                s.executeUpdate(createSQL.toString());
-
-                for (int row = 0; row < SQLData[0].length; row++) {
-                    createSQL = new StringBuffer(
-                            "insert into AllDataTypesTable values(");
-                    for (int type = 0; type < CastingTest.SQLTypes.length - 1; type++) {
-                        createSQL.append(SQLData[type][row] + ",");
-                    }
-                    createSQL.append(SQLData[CastingTest.SQLTypes.length - 1][row] + ")");
-                    
-                    s.executeUpdate(createSQL.toString());
-                }
-
-                s.close();
+                JDBC.createAndPopulateAllDataTypesTable(s);
             }
+
+         
         };
     }
 

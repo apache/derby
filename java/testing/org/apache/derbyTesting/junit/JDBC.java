@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derbyTesting.functionTests.tests.lang.CastingTest;
 
 import junit.framework.Assert;
 
@@ -839,39 +840,121 @@ public class JDBC {
          * @param jdbcType  jdbc type to translate
          */
         public static String sqlNameFromJdbc(int jdbcType) {
-                switch (jdbcType) {
-                        case Types.BIT          :  return "Types.BIT";
-                        case JDBC30Translation.SQL_TYPES_BOOLEAN  : return "Types.BOOLEAN";
-                        case Types.TINYINT      :  return "Types.TINYINT";
-                        case Types.SMALLINT     :  return "SMALLINT";
-                        case Types.INTEGER      :  return "INTEGER";
-                        case Types.BIGINT       :  return "BIGINT";
+            switch (jdbcType) {
+            case Types.BIT          :  return "Types.BIT";
+            case Types.BOOLEAN  : return "Types.BOOLEAN";
+            case Types.TINYINT      :  return "Types.TINYINT";
+            case Types.SMALLINT     :  return "SMALLINT";
+            case Types.INTEGER      :  return "INTEGER";
+            case Types.BIGINT       :  return "BIGINT";
+            
+            case Types.FLOAT        :  return "Types.FLOAT";
+            case Types.REAL         :  return "REAL";
+            case Types.DOUBLE       :  return "DOUBLE";
+            
+            case Types.NUMERIC      :  return "Types.NUMERIC";
+            case Types.DECIMAL      :  return "DECIMAL";
+            
+            case Types.CHAR         :  return "CHAR";
+            case Types.VARCHAR      :  return "VARCHAR";
+            case Types.LONGVARCHAR  :  return "LONG VARCHAR";
+            case Types.CLOB         :  return "CLOB";
+            
+            case Types.DATE         :  return "DATE";
+            case Types.TIME         :  return "TIME";
+            case Types.TIMESTAMP    :  return "TIMESTAMP";
+            
+            case Types.BINARY       :  return "CHAR () FOR BIT DATA";
+            case Types.VARBINARY    :  return "VARCHAR () FOR BIT DATA";
+            case Types.LONGVARBINARY:  return "LONG VARCHAR FOR BIT DATA";
+            case Types.BLOB         :  return "BLOB";
 
-                        case Types.FLOAT        :  return "Types.FLOAT";
-                        case Types.REAL         :  return "REAL";
-                        case Types.DOUBLE       :  return "DOUBLE";
-
-                        case Types.NUMERIC      :  return "Types.NUMERIC";
-                        case Types.DECIMAL      :  return "DECIMAL";
-
-                        case Types.CHAR         :  return "CHAR";
-                        case Types.VARCHAR      :  return "VARCHAR";
-                        case Types.LONGVARCHAR  :  return "LONG VARCHAR";
-         case Types.CLOB     :  return "CLOB";
-
-                        case Types.DATE                 :  return "DATE";
-                        case Types.TIME                 :  return "TIME";
-                        case Types.TIMESTAMP    :  return "TIMESTAMP";
-
-                        case Types.BINARY                       :  return "CHAR () FOR BIT DATA";
-                        case Types.VARBINARY            :  return "VARCHAR () FOR BIT DATA";
-                        case Types.LONGVARBINARY        :  return "LONG VARCHAR FOR BIT DATA";
-         case Types.BLOB             :  return "BLOB";
-
-                        case Types.OTHER                :  return "Types.OTHER";
-                        case Types.NULL         :  return "Types.NULL";
-                        default : return String.valueOf(jdbcType);
+            case Types.OTHER        :  return "Types.OTHER";
+            case Types.NULL         :  return "Types.NULL";
+            default : return String.valueOf(jdbcType);
                 }
         }
 
+        public static String VALID_DATE_STRING = "'2000-01-01'";
+        public static String VALID_TIME_STRING = "'15:30:20'";
+        public static String VALID_TIMESTAMP_STRING = "'2000-01-01 15:30:20'";
+        public static String NULL_VALUE="NULL";
+
+        public static String[] allDataTypesColumnNames =
+        {
+                "SMALLINTCOL",
+                "INTEGERCOL",
+                "BIGINTCOL",
+                "DECIMALCOL",
+                "REALCOL",
+                "DOUBLECOL",
+                "CHARCOL",
+                "VARCHARCOL",
+                "LONGVARCHARCOL",
+                "CHARFORBITCOL",
+                "VARCHARFORBITCOL",
+                "LVARCHARFORBITCOL",
+                "CLOBCOL",
+                "DATECOL",
+                "TIMECOL",
+                "TIMESTAMPCOL",
+                "BLOBCOL",
+
+        };
+
+        private static String[][]allDataTypesSQLData =
+        {
+                {NULL_VALUE, "0","1","2"},       // SMALLINT
+                {NULL_VALUE,"0","1","21"},       // INTEGER
+                {NULL_VALUE,"0","1","22"},       // BIGINT
+                {NULL_VALUE,"0.0","1.0","23.0"},      // DECIMAL(10,5)
+                {NULL_VALUE,"0.0","1.0","24.0"},      // REAL,
+                {NULL_VALUE,"0.0","1.0","25.0"},      // DOUBLE
+                {NULL_VALUE,"'0'","'aa'","'2.0'"},      // CHAR(60)
+                {NULL_VALUE,"'0'","'aa'",VALID_TIME_STRING},      //VARCHAR(60)",
+                {NULL_VALUE,"'0'","'aa'",VALID_TIMESTAMP_STRING},      // LONG VARCHAR
+                {NULL_VALUE,"X'10aa'",NULL_VALUE,"X'10aaaa'"},  // CHAR(60)  FOR BIT DATA
+                {NULL_VALUE,"X'10aa'",NULL_VALUE,"X'10aaba'"},  // VARCHAR(60) FOR BIT DATA
+                {NULL_VALUE,"X'10aa'",NULL_VALUE,"X'10aaca'"},  //LONG VARCHAR FOR BIT DATA
+                {NULL_VALUE,"'13'","'14'",NULL_VALUE},     //CLOB(1k)
+                {NULL_VALUE,VALID_DATE_STRING,VALID_DATE_STRING,NULL_VALUE},        // DATE
+                {NULL_VALUE,VALID_TIME_STRING,VALID_TIME_STRING,VALID_TIME_STRING},        // TIME
+                {NULL_VALUE,VALID_TIMESTAMP_STRING,VALID_TIMESTAMP_STRING,VALID_TIMESTAMP_STRING},   // TIMESTAMP
+                {NULL_VALUE,NULL_VALUE,NULL_VALUE,NULL_VALUE}                 // BLOB
+        };
+ 
+        /**
+         * Create a table AllDataTypesTable and populate with data
+         * @param s
+         * @throws SQLException
+         */
+        public  static void createAndPopulateAllDataTypesTable(Statement s) throws SQLException {
+            try {
+                s.executeUpdate("DROP TABLE AllDataTypesTable");
+            } catch (SQLException se) {
+            }
+
+            StringBuffer createSQL = new StringBuffer(
+                    "create table AllDataTypesTable (");
+            for (int type = 0; type < CastingTest.SQLTypes.length - 1; type++) {
+                createSQL.append(allDataTypesColumnNames[type] + " " + CastingTest.SQLTypes[type]
+                        + ",");
+            }
+            createSQL.append(allDataTypesColumnNames[CastingTest.SQLTypes.length - 1] + " "
+                    + CastingTest.SQLTypes[CastingTest.SQLTypes.length - 1] + ")");
+            s.executeUpdate(createSQL.toString());
+
+            for (int row = 0; row < allDataTypesSQLData[0].length; row++) {
+                createSQL = new StringBuffer(
+                        "insert into AllDataTypesTable values(");
+                for (int type = 0; type < CastingTest.SQLTypes.length - 1; type++) {
+                    createSQL.append(allDataTypesSQLData[type][row] + ",");
+                }
+                createSQL.append(allDataTypesSQLData[CastingTest.SQLTypes.length - 1][row] + ")");
+                
+                s.executeUpdate(createSQL.toString());
+            }
+
+            s.close();
+        }
 }
