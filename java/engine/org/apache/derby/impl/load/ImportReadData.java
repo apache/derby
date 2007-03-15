@@ -944,7 +944,14 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
     {
 		try {
             initExternalLobFile(lobLocationStr);
-            return lobFile.getString(lobOffset,lobLength);
+            if (lobLength == -1 ){
+                // lob length -1 indicates columnn value is a NULL, 
+                // just return null. 
+                return null;
+            } else {
+                return lobFile.getString(lobOffset,lobLength);
+            }
+            
 		}catch(Exception ex) {
 			throw LoadError.unexpectedError(ex);
 		}
@@ -960,7 +967,14 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
         throws SQLException
     {
         initExternalLobFile(lobLocationStr);
-        return new ImportBlob(lobFile, lobOffset, lobLength);
+        if (lobLength == -1) {
+            // lob length -1 indicates columnn value is a NULL, 
+            // just return null. 
+            return null;
+        }
+        else {
+            return new ImportBlob(lobFile, lobOffset, lobLength);
+        }
     }
 
     /**
@@ -974,19 +988,22 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
     private void initExternalLobFile(String lobLocationStr) 
         throws SQLException 
     {
-        
 		// extract file name, offset, and the length from the 
 		// given lob location. Lob location string format is 
-		// fileName:offset:length
+        // <code > <fileName>.<lobOffset>.<size of lob>/ </code>.
+        // For a NULL blob, size will be  -1
  
-		int lengthIndex = lobLocationStr.lastIndexOf(":") ;
-		int offsetIndex = lobLocationStr.lastIndexOf(":", lengthIndex -1);
+        int lengthIndex = lobLocationStr.lastIndexOf(".") ;
+        int offsetIndex = lobLocationStr.lastIndexOf(".", 
+                                                     lengthIndex -1);
 
-		lobLength = Integer.parseInt(lobLocationStr.substring(lengthIndex + 1));
-		lobOffset = Integer.parseInt(lobLocationStr.substring(offsetIndex+1, 
-														lengthIndex));
-		lobFileName = lobLocationStr.substring(0 , offsetIndex);
-
+        lobLength = Integer.parseInt(lobLocationStr.substring(
+                                     lengthIndex + 1, 
+                                     lobLocationStr.length() -1));
+        lobOffset = Integer.parseInt(lobLocationStr.substring(
+                                     offsetIndex+1, 
+                                     lengthIndex));
+        lobFileName = lobLocationStr.substring(0 , offsetIndex);
 
         if (lobFile == null) {
             // open external file where the lobs are stored.

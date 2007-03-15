@@ -169,15 +169,47 @@ abstract class ImportAbstract extends VTITemplate {
      */
 	public java.sql.Blob getBlob(int columnIndex) throws SQLException {
 
+        java.sql.Blob blob = null;
 		if (lobsInExtFile) 
         {
             // lob data is in another file, read from the external file.
-            return importReadData.getBlobColumnFromExtFile(
+            blob = importReadData.getBlobColumnFromExtFile(
                                          nextRow[columnIndex-1]);
         } else {
             // data is in the main export file, stored in hex format.
-            return new ImportBlob(nextRow[columnIndex-1]);
+            String hexData = nextRow[columnIndex-1];
+            byte[] data = null;
+            if (hexData != null) {
+                // Derby export calls Resultset.getString() method
+                // when blob column data is not exported to an 
+                // external file. Derby getString() method return 
+                // the data in hex format for binary types, by 
+                // calling  StringUtil.toHexString(). If the data 
+                // is being imported from a file that exported 
+                // from non-derby source, hex data is expected to be 
+                // same format as one written using 
+                // StringUtil.toHexString(). StringUtil.fromHexString() 
+                // is used to covert the hex data  to byte array. 
+
+                data = StringUtil.fromHexString(
+                               hexData, 0, hexData.length());
+                // fromHexString() returns null if the hex string 
+                // is invalid one. It is invalid if the data string 
+                // length is not multiple of 2 or the data string 
+                // contains non-hex characters. 
+                if (data == null) {
+                    throw PublicAPI.wrapStandardException(
+                      StandardException.newException(
+                      SQLState.IMPORTFILE_HAS_INVALID_HEXSTRING, 
+                      hexData));
+                }
+
+                blob = new ImportBlob(data);                
+            }
         }
+        
+        wasNull = (blob == null);
+        return blob;
 	}
 
 
@@ -201,6 +233,16 @@ abstract class ImportAbstract extends VTITemplate {
         wasNull = (hexData == null);
         byte[] data = null;
         if (hexData != null) {
+            // Derby export calls Resultset.getString() method
+            // to write binary data types.  Derby getString() 
+            // method return the data in hex format for binary types,
+            // by  calling  StringUtil.toHexString(). If the data 
+            // is being imported from a file that is exported 
+            // from non-derby source, hex data is expected to be 
+            // same format as one written using 
+            // StringUtil.toHexString(). StringUtil.fromHexString() 
+            // is used to covert the hex data  to byte array. 
+
             data = StringUtil.fromHexString(hexData, 0, hexData.length());
             // fromHexString() returns null if the hex string is invalid one.
             // It is invalid if the data string length is not multiple of 2 

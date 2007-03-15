@@ -23,6 +23,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
@@ -401,11 +403,17 @@ public abstract class BaseJDBCTestCase
                      b1.length(), b2.length());
         InputStream is1 = b1.getBinaryStream();
         InputStream is2 = b2.getBinaryStream();
+
         if (is1 == null || is2 == null) {
             assertNull("Blob b2 has null-stream, blob b1 doesn't", is1);
             assertNull("Blob b1 has null-stream, blob b2 doesn't", is2);
             return;
         }
+        
+        // wrap buffered stream around the binary stream
+        is1 = new BufferedInputStream(is1);
+        is2 = new BufferedInputStream(is2);
+ 
         long index = 1;
         int by1 = is1.read();
         int by2 = is2.read();
@@ -447,6 +455,10 @@ public abstract class BaseJDBCTestCase
         assertNotNull(r1); // java.sql.Blob object cannot represent NULL
         Reader r2 = c2.getCharacterStream();
         assertNotNull(r2); // java.sql.Blob object cannot represent NULL
+
+        // wrap buffered reader around the character stream
+        r1 = new BufferedReader(r1);
+        r2 = new BufferedReader(r2);
 
         long index = 1;
         int ch1 = r1.read();

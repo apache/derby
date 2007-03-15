@@ -41,7 +41,7 @@ import org.apache.derbyTesting.junit.JDBC;
  * CHAR FOR BIT DATA, VARCHAR FOR BIT DATA,  LONG VARCHAR FOR BIT DATA.
  */
 
-public class ImportExportBinaryDataTest extends BaseJDBCTestCase {
+public class ImportExportBinaryDataTest extends ImportExportBaseTest {
 
     String fileName; // file used to perform import/export.
 
@@ -306,109 +306,6 @@ public class ImportExportBinaryDataTest extends BaseJDBCTestCase {
         s2.close();
     }
     
-
-    /**
-     * Perform export using SYSCS_UTIL.SYSCS_EXPORT_TABLE procedure.
-     */
-    private void doExportTable(String schemaName, 
-                               String tableName, 
-                               String fileName, 
-                               String colDel , 
-                               String charDel, 
-                               String codeset) throws SQLException 
-    {
-        String expsql = 
-            "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (? , ? , ? , ?, ? , ?)";
-        PreparedStatement ps = prepareStatement(expsql);
-        ps.setString(1, schemaName);
-        ps.setString(2, tableName);
-        ps.setString(3, fileName);
-        ps.setString(4, colDel);
-        ps.setString(5, charDel);
-        ps.setString(6, codeset);
-        ps.execute();
-        ps.close();
-    }
-
-    
-
-    /**
-     * Perform export using SYSCS_UTIL.SYSCS_EXPORT_QUERY procedure.
-     */
-    private void doExportQuery(String query,
-                               String fileName,
-                               String colDel , 
-                               String charDel, 
-                               String codeset) 
-        throws SQLException 
-    {
-        String expsql = 
-            "call SYSCS_UTIL.SYSCS_EXPORT_QUERY(? , ? , ? , ?, ?)";
-        PreparedStatement ps = prepareStatement(expsql);
-        ps.setString(1, query);
-        ps.setString(2, fileName);
-        ps.setString(3, colDel);
-        ps.setString(4, charDel);
-        ps.setString(5, codeset);
-        ps.execute();
-        ps.close();
-    }
-
-    /**
-     * Perform import using SYSCS_UTIL.SYSCS_IMPORT_TABLE procedure.
-     */
-    private void doImportTable(String schemaName,
-                               String tableName, 
-                               String fileName, 
-                               String colDel, 
-                               String charDel , 
-                               String codeset, 
-                               int replace) throws SQLException 
-    {
-        String impsql = 
-            "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement ps = prepareStatement(impsql);
-        ps.setString(1 , schemaName);
-        ps.setString(2, tableName);
-        ps.setString(3, fileName);
-        ps.setString(4 , colDel);
-        ps.setString(5 , charDel);
-        ps.setString(6 , codeset);
-        ps.setInt(7, replace);
-        ps.execute();
-        ps.close();
-    }
-
-
-    /**
-     *  Perform import using SYSCS_UTIL.SYSCS_IMPORT_DATA procedure.
-     */
-    private void doImportData(String schemaName,
-                              String tableName, 
-                              String insertCols,
-                              String colIndexes, 
-                              String fileName,
-                              String colDel, 
-                              String charDel , 
-                              String codeset, 
-                              int replace) throws SQLException 
-    {
-        String impsql = 
-            "call SYSCS_UTIL.SYSCS_IMPORT_DATA(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement ps = prepareStatement(impsql);
-        ps.setString(1, schemaName);
-        ps.setString(2, tableName);
-        ps.setString(3, insertCols);
-        ps.setString(4, colIndexes);
-        ps.setString(5, fileName);
-        ps.setString(6 , colDel);
-        ps.setString(7 , charDel);
-        ps.setString(8 , codeset);
-        ps.setInt(9, replace);
-        ps.execute();
-        ps.close();
-    }
-
     
     /*
      * Insert data to the into the table, whose data will be exported.

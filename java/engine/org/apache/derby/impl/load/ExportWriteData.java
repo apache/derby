@@ -203,30 +203,41 @@ final class ExportWriteData extends ExportWriteDataAbstract
 
         long blobSize = 0;
         int noBytes = 0 ;
-        noBytes = istream.read(byteBuf) ;
-        while(noBytes != -1) 
-        {
-            lobOutBinaryStream.write(byteBuf, 0 , noBytes);
-            blobSize += noBytes;
+        if (istream != null ) {
             noBytes = istream.read(byteBuf) ;
+            while(noBytes != -1) 
+            {
+                lobOutBinaryStream.write(byteBuf, 0 , noBytes);
+                blobSize += noBytes;
+                noBytes = istream.read(byteBuf) ;
+            }
+
+            // close the input stream. 
+            istream.close();
+
+            // flush the output binary stream. 
+            lobOutBinaryStream.flush();
+        } else {
+            // stream is null, column value must be  SQL NULL.
+            // set the size to -1, on import columns will 
+            // be interepreted as NULL, filename and offset are 
+            // ignored.
+            blobSize = -1;
         }
-
-        // close the input stream. 
-        istream.close();
-
-        // flush the output binary stream. 
-        lobOutBinaryStream.flush();
 				
         // Encode a lob location information as string. This is 
         // stored in the main export file. It will be used 
         // to retrive this blob data on import. 
-        // Format is :  <fileName> : <lobOffset> : <size of lob>
-        String lobLocation = lobsFileName + ":" + 
-            lobFileOffset + ":" +  blobSize;
+        // Format is : <code > <fileName>.<lobOffset>.<size of lob>/ </code>.
+        // For a NULL blob, size will be written as -1
+
+        String lobLocation = lobsFileName + "." + 
+            lobFileOffset + "." +  blobSize + "/";
 		
         // update the offset, this will be  where next 
         // large object data  will be written. 
-        lobFileOffset += blobSize;
+        if (blobSize != -1)
+            lobFileOffset += blobSize;
 
         return lobLocation;
     }
@@ -250,35 +261,45 @@ final class ExportWriteData extends ExportWriteDataAbstract
 
         long clobSize = 0;
         int noChars = 0 ;
-        noChars = ir.read(charBuf) ;
-        while(noChars != -1) 
-		{
-            // characters data is converted to bytes using 
-            // the user specified code set. 
-            lobByteArrayStream.reset();
-            lobCharStream.write(charBuf, 0 , noChars);
-            lobCharStream.flush();
+        if (ir != null ) {
+            noChars = ir.read(charBuf) ;
+            while(noChars != -1) 
+            {
+                // characters data is converted to bytes using 
+                // the user specified code set. 
+                lobByteArrayStream.reset();
+                lobCharStream.write(charBuf, 0 , noChars);
+                lobCharStream.flush();
 			
-            clobSize += lobByteArrayStream.size();
-            lobByteArrayStream.writeTo(lobOutBinaryStream);
-            noChars  = ir.read(charBuf) ;
-        }
+                clobSize += lobByteArrayStream.size();
+                lobByteArrayStream.writeTo(lobOutBinaryStream);
+                noChars  = ir.read(charBuf) ;
+            }
 
-        // close the input reader. 
-        ir.close();
-        // flush the output binary stream. 
-        lobOutBinaryStream.flush();
+            // close the input reader. 
+            ir.close();
+            // flush the output binary stream. 
+            lobOutBinaryStream.flush();
+        } else {
+            // reader is null, the column value must be  SQL NULL.
+            // set the size to -1, on import columns will 
+            // be interepreted as NULL, filename and offset are 
+            // ignored.
+            clobSize = -1;
+        }
 
         // Encode this lob location information as string. This will 
         // be written to the main export file. It will be used 
         // to retrive this blob data on import. 
-        // Format is :  <fileName> : <lobOffset> : <size of lob>
-        String lobLocation = lobsFileName + ":" + 
-            lobFileOffset + ":" +  clobSize;
+        // Format is : <code > <fileName>.<lobOffset>.<size of lob>/ </code>.
+        // For a NULL blob, size will be written as -1
+        String lobLocation = lobsFileName + "." + 
+            lobFileOffset + "." +  clobSize + "/";
 
         // update the offset, this will be  where next 
         // large object data  will be written. 		
-        lobFileOffset += clobSize;
+        if (clobSize != -1)
+            lobFileOffset += clobSize;
         return lobLocation;
     }
 	

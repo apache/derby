@@ -62,13 +62,12 @@ class ImportBlob implements java.sql.Blob {
 
     /**
      * Create a import Blob object, whose value is the give hex data string.  
-     * @param hexData  data in the hex format, that this blob object contains. 
+     * @param data  byte array that contains the blob data. 
      */
-    public ImportBlob(String hexData) 
+    public ImportBlob(byte[] data) 
     {
-        // convert the given blob data in the hex format to a byte array.
-        blobData = StringUtil.fromHexString(hexData, 0, hexData.length());
-        blobLength = blobData.length;
+        blobData = data;
+        blobLength = data.length;
     }
 
 
