@@ -29,6 +29,7 @@ import java.sql.Statement;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
@@ -149,6 +150,7 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
 
     }
 
+    
     /**
      * Check the metatdata for a prepared statement that does not return a
      * ResultSet is empty
@@ -173,6 +175,185 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         ps.close();
     }
 
+    public void testAllDataTypesMetaData()  throws SQLException
+    {
+        Connection conn = getConnection();
+        Statement s = conn.createStatement();
+        JDBC.createAndPopulateAllDataTypesTable(s);
+        PreparedStatement ps = conn.prepareStatement("SELECT * from AllDataTypesTable");
+        ResultSetMetaData rsmd = ps.getMetaData();
+        int colCount = rsmd.getColumnCount();
+        assertEquals(17, colCount);
+        // Column 1 SMALLINT
+        assertEquals("",rsmd.getCatalogName(1));
+        assertEquals("java.lang.Integer", rsmd.getColumnClassName(1));
+        assertEquals(6, rsmd.getColumnDisplaySize(1));
+        assertEquals("SMALLINTCOL", rsmd.getColumnLabel(1));
+        assertEquals(java.sql.Types.SMALLINT,rsmd.getColumnType(1));
+        assertEquals("SMALLINT", rsmd.getColumnTypeName(1));
+        assertEquals(5,rsmd.getPrecision(1));
+        assertEquals(0, rsmd.getScale(1));
+        assertEquals("APP", rsmd.getSchemaName(1));
+        assertEquals("ALLDATATYPESTABLE",rsmd.getTableName(1));
+        assertFalse(rsmd.isAutoIncrement(1));
+        assertFalse(rsmd.isCurrency(1));
+        assertFalse(rsmd.isDefinitelyWritable(1));
+        assertEquals(ResultSetMetaData.columnNullable, rsmd.isNullable(1));
+        // DERBY-142 client returns incorrect value for isReadOnly
+        if (usingEmbedded())
+            assertFalse(rsmd.isReadOnly(1));
+        assertTrue(rsmd.isSearchable(1));
+        assertTrue(rsmd.isSigned(1));
+        assertFalse(rsmd.isWritable(1));
+        // COLUMN 2 INTEGER
+        assertEquals("java.lang.Integer", rsmd.getColumnClassName(2));
+        assertEquals(11, rsmd.getColumnDisplaySize(2));
+        assertEquals("INTEGERCOL", rsmd.getColumnLabel(2));
+        assertEquals(java.sql.Types.INTEGER,rsmd.getColumnType(2));
+        assertEquals("INTEGER", rsmd.getColumnTypeName(2));
+        assertEquals(10,rsmd.getPrecision(2));
+        assertEquals(0, rsmd.getScale(2));       
+        // COLUMN 3 BIGINT
+        assertEquals("java.lang.Long", rsmd.getColumnClassName(3));
+        assertEquals(20, rsmd.getColumnDisplaySize(3));
+        assertEquals("BIGINTCOL", rsmd.getColumnLabel(3));
+        assertEquals(java.sql.Types.BIGINT,rsmd.getColumnType(3));
+        assertEquals("BIGINT", rsmd.getColumnTypeName(3));
+        assertEquals(19,rsmd.getPrecision(3));
+        assertEquals(0, rsmd.getScale(3));
+        // COLUMN 4 DECIMAL
+        assertEquals("java.math.BigDecimal", rsmd.getColumnClassName(4));
+        assertEquals(12, rsmd.getColumnDisplaySize(4));
+        assertEquals("DECIMALCOL", rsmd.getColumnLabel(4));
+        assertEquals(java.sql.Types.DECIMAL,rsmd.getColumnType(4));
+        assertEquals("DECIMAL", rsmd.getColumnTypeName(4));
+        assertEquals(10,rsmd.getPrecision(4));
+        assertEquals(5, rsmd.getScale(4));
+        // COLUMN 5 REAL
+        assertEquals("java.lang.Float", rsmd.getColumnClassName(5));
+        assertEquals(13, rsmd.getColumnDisplaySize(5));
+        assertEquals("REALCOL", rsmd.getColumnLabel(5));
+        assertEquals(java.sql.Types.REAL,rsmd.getColumnType(5));
+        assertEquals("REAL", rsmd.getColumnTypeName(5));
+        assertEquals(7,rsmd.getPrecision(5));
+        assertEquals(0, rsmd.getScale(5));
+        
+        // COLUMN 6 DOUBLE
+        assertEquals("java.lang.Double", rsmd.getColumnClassName(6));
+        assertEquals(22, rsmd.getColumnDisplaySize(6));
+        assertEquals("DOUBLECOL", rsmd.getColumnLabel(6));
+        assertEquals(java.sql.Types.DOUBLE,rsmd.getColumnType(6));
+        assertEquals("DOUBLE", rsmd.getColumnTypeName(6));
+        assertEquals(15,rsmd.getPrecision(6));
+        assertEquals(0, rsmd.getScale(6));
+        
+        // COLUMN 7 CHAR (60)
+        assertEquals("java.lang.String", rsmd.getColumnClassName(7));
+        assertEquals(60, rsmd.getColumnDisplaySize(7));
+        assertEquals("CHARCOL", rsmd.getColumnLabel(7));
+        assertEquals(java.sql.Types.CHAR,rsmd.getColumnType(7));
+        assertEquals("CHAR", rsmd.getColumnTypeName(7));
+        assertEquals(60,rsmd.getPrecision(7));
+        assertEquals(0, rsmd.getScale(7));
+        
+        // COLUMN 8 VARCHAR (60)
+        assertEquals("java.lang.String", rsmd.getColumnClassName(8));
+        assertEquals(60, rsmd.getColumnDisplaySize(8));
+        assertEquals("VARCHARCOL", rsmd.getColumnLabel(8));
+        assertEquals(java.sql.Types.VARCHAR,rsmd.getColumnType(8));
+        assertEquals("VARCHAR", rsmd.getColumnTypeName(8));
+        assertEquals(60,rsmd.getPrecision(8));
+        assertEquals(0, rsmd.getScale(8));
+        
+        // COLUMN 9  LONG VARCHAR
+        assertEquals("java.lang.String", rsmd.getColumnClassName(9));
+        assertEquals(32700, rsmd.getColumnDisplaySize(9));
+        assertEquals("LONGVARCHARCOL", rsmd.getColumnLabel(9));
+        assertEquals(java.sql.Types.LONGVARCHAR,rsmd.getColumnType(9));
+        assertEquals("LONG VARCHAR", rsmd.getColumnTypeName(9));
+        assertEquals(32700,rsmd.getPrecision(9));
+        assertEquals(0, rsmd.getScale(9));
+        
+        // COLUMN 10 CHAR FOR BIT DATA
+        assertEquals("byte[]", rsmd.getColumnClassName(10));
+        assertEquals(120, rsmd.getColumnDisplaySize(10));
+        assertEquals("CHARFORBITCOL", rsmd.getColumnLabel(10));
+        assertEquals(java.sql.Types.BINARY,rsmd.getColumnType(10));
+        if (usingEmbedded())
+            assertEquals("CHAR () FOR BIT DATA", rsmd.getColumnTypeName(10));
+        else
+            assertEquals("CHAR FOR BIT DATA", rsmd.getColumnTypeName(10));
+        assertEquals(60,rsmd.getPrecision(10));
+        assertEquals(0, rsmd.getScale(10));
+        
+        // COLUMN 11 VARCHAR FOR BIT DATA
+        assertEquals("byte[]", rsmd.getColumnClassName(11));
+        assertEquals(120, rsmd.getColumnDisplaySize(11));
+        assertEquals("VARCHARFORBITCOL", rsmd.getColumnLabel(11));
+        assertEquals(java.sql.Types.VARBINARY,rsmd.getColumnType(11));
+        if (usingEmbedded())
+            assertEquals("VARCHAR () FOR BIT DATA", rsmd.getColumnTypeName(11));
+        else
+            assertEquals("VARCHAR FOR BIT DATA", rsmd.getColumnTypeName(11));
+        assertEquals(60,rsmd.getPrecision(11));
+        assertEquals(0, rsmd.getScale(11));
+    
+        // COLUMN 12 LONG VARCHAR FOR BIT DATA
+        assertEquals("byte[]", rsmd.getColumnClassName(12));
+        assertEquals(65400, rsmd.getColumnDisplaySize(12));
+        assertEquals("LVARCHARFORBITCOL", rsmd.getColumnLabel(12));
+        assertEquals(java.sql.Types.LONGVARBINARY,rsmd.getColumnType(12));
+        assertEquals("LONG VARCHAR FOR BIT DATA", rsmd.getColumnTypeName(12));
+        assertEquals(32700,rsmd.getPrecision(12));
+        assertEquals(0, rsmd.getScale(12));
+        
+        // COLUMN 13 CLOB
+        assertEquals("java.sql.Clob", rsmd.getColumnClassName(13));
+        assertEquals(1024, rsmd.getColumnDisplaySize(13));
+        assertEquals("CLOBCOL", rsmd.getColumnLabel(13));
+        assertEquals(java.sql.Types.CLOB,rsmd.getColumnType(13));
+        assertEquals("CLOB", rsmd.getColumnTypeName(13));
+        assertEquals(1024,rsmd.getPrecision(13));
+        assertEquals(0, rsmd.getScale(13));
+        
+        // COLUMN 14 DATE
+        assertEquals("java.sql.Date", rsmd.getColumnClassName(14));
+        assertEquals(10, rsmd.getColumnDisplaySize(14));
+        assertEquals("DATECOL", rsmd.getColumnLabel(14));
+        assertEquals(java.sql.Types.DATE,rsmd.getColumnType(14));
+        assertEquals("DATE", rsmd.getColumnTypeName(14));
+        assertEquals(10,rsmd.getPrecision(14));
+        assertEquals(0, rsmd.getScale(14));
+
+        // COLUMN 15 TIME
+        assertEquals("java.sql.Time", rsmd.getColumnClassName(15));
+        assertEquals(8, rsmd.getColumnDisplaySize(15));
+        assertEquals("TIMECOL", rsmd.getColumnLabel(15));
+        assertEquals(java.sql.Types.TIME,rsmd.getColumnType(15));
+        assertEquals("TIME", rsmd.getColumnTypeName(15));
+        assertEquals(8,rsmd.getPrecision(15));
+        assertEquals(0, rsmd.getScale(15));
+        
+        // COLUMN 16 TIMESTAMP
+        assertEquals("java.sql.Timestamp", rsmd.getColumnClassName(16));
+        assertEquals(26, rsmd.getColumnDisplaySize(16));
+        assertEquals("TIMESTAMPCOL", rsmd.getColumnLabel(16));
+        assertEquals(java.sql.Types.TIMESTAMP,rsmd.getColumnType(16));
+        assertEquals("TIMESTAMP", rsmd.getColumnTypeName(16));
+        assertEquals(26,rsmd.getPrecision(16));
+        assertEquals(6, rsmd.getScale(16));
+
+        // COLUMN 17 BLOB
+        assertEquals("java.sql.Blob", rsmd.getColumnClassName(17));
+        assertEquals(2048, rsmd.getColumnDisplaySize(17));
+        assertEquals("BLOBCOL", rsmd.getColumnLabel(17));
+        assertEquals(java.sql.Types.BLOB,rsmd.getColumnType(17));
+        assertEquals("BLOB", rsmd.getColumnTypeName(17));
+        assertEquals(1024,rsmd.getPrecision(17));
+        assertEquals(0, rsmd.getScale(17));
+    
+    }
+    
     /**
      * Assert that ResultSetMetaData is null or empty
      * 
