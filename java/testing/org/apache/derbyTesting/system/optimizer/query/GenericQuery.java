@@ -66,13 +66,15 @@ public  class GenericQuery {
 	public String getDescription(){
 		return description;
 	}
-	public void  executeQueries(boolean prepare) throws SQLException{
+	public void  executeQueries(boolean prepare,boolean verbose) throws SQLException{
 		rowsExpected=new int[queries.size()]; //initialize the array with correct size
 		String query="";
 		if(prepare){	
-			System.out.println("=====================> Using java.sql.PreparedStatement <====================");					
+			if (verbose)
+				System.out.println("=====================> Using java.sql.PreparedStatement <====================");					
 		}else{
-			System.out.println("=====================> Using java.sql.Statement <====================");
+			if (verbose)
+				System.out.println("=====================> Using java.sql.Statement <====================");
 			
 		}
 		try{
@@ -108,12 +110,14 @@ public  class GenericQuery {
 						rowsReturned++;
 					}
 					long time_taken=(System.currentTimeMillis() - start);
-					System.out.println("Time required to execute:");
-					System.out.println(query);
-					System.out.println("Total Rows returned = "+rowsReturned);
+					if (verbose){
+						System.out.println("Time required to execute:");
+						System.out.println(query);
+						System.out.println("Total Rows returned = "+rowsReturned);
 					
-					System.out.println("==> "+time_taken+" milliseconds "+" OR "+TestUtils.getTime(time_taken));
-					times[i]=TestUtils.getTime(time_taken);
+						System.out.println("==> "+time_taken+" milliseconds "+" OR "+TestUtils.getTime(time_taken));
+							times[i]=TestUtils.getTime(time_taken);
+					}
 					rs.close();
 					if(prepare){
 						pstmt.close();

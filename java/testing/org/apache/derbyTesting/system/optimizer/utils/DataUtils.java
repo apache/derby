@@ -36,9 +36,10 @@ import org.apache.derbyTesting.system.optimizer.StaticValues;
 
 
 public class DataUtils {
-	public static void dropObjects(Connection conn) throws SQLException {
+	public static void dropObjects(Connection conn, boolean verbose) throws SQLException {
 		Statement stmt = null;
-		System.out.println("Dropping existing Tables and Views...");
+		if (verbose)
+			System.out.println("Dropping existing Tables and Views...");
 		for (int i=0;i<TestViews.dropViews.size();i++){
 			try{
 				stmt = conn.createStatement();
@@ -62,13 +63,15 @@ public class DataUtils {
 			}
 		}// end for
 	}
-	public static void createObjects(Connection conn) throws SQLException {
+	public static void createObjects(Connection conn,boolean verbose) throws SQLException {
 		Statement stmt = null;
-		System.out.println("Creating Tables...");
+		if (verbose)
+			System.out.println("Creating Tables...");
 		for (int i = 1; i <= StaticValues.NUM_OF_TABLES; i++) {
 			try {
 				String tableName = StaticValues.TABLE_NAME + i;
-				System.out.println(" Creating Table - "+tableName);
+				if (verbose)
+					System.out.println(" Creating Table - "+tableName);
 				stmt = conn.createStatement();
 				stmt.execute(StaticValues.CREATE_TABLE+ tableName+ StaticValues.TABLE_COLS);
 				
@@ -77,13 +80,14 @@ public class DataUtils {
 				if (!sqe.getSQLState().equalsIgnoreCase("X0Y32")) {
 					throw sqe;
 				} else {
-					System.out.println("Table " + StaticValues.TABLE_NAME + i
+							System.out.println("Table " + StaticValues.TABLE_NAME + i
 							+ " exists");
 				}
 
 			}
 		}// end for
-		System.out.println("Creating Views...");
+		if (verbose)
+			System.out.println("Creating Views...");
 		for (int i=0;i<TestViews.createViews.size();i++){
 			try{
 				stmt = conn.createStatement();
@@ -95,7 +99,7 @@ public class DataUtils {
 		}
 	}
 
-	public static void insertData(Connection conn){
+	public static void insertData(Connection conn,boolean verbose){
 		try{
 			String commonString = "String value for the ";
 			String valueForString = commonString + "varchar column ";
@@ -111,13 +115,15 @@ public class DataUtils {
 					totalRows = rs.getInt(1);
 				}
 				if (totalRows >= StaticValues.NUM_OF_ROWS) {
-					System.out.println(" InsertData.insert_data() => "
+					if (verbose)
+						System.out.println(" InsertData.insert_data() => "
 							+ totalRows + " exists in table " + tableName
 							+ "...");
 
 				}else{
 					if(totalRows>0){
-						System.out.println("Dropping existing indexes from table: "
+						if (verbose)
+							System.out.println("Dropping existing indexes from table: "
 								+ tableName);
 						try {
 							stmt.executeUpdate("DROP INDEX " + tableName
@@ -135,7 +141,8 @@ public class DataUtils {
 								throw sqe;
 							}
 						}
-						System.out.println("Rows deleted from " + tableName + "= "
+						if (verbose)
+							System.out.println("Rows deleted from " + tableName + "= "
 								+ stmt.executeUpdate("DELETE FROM " + tableName));
 					}
 					PreparedStatement ps = conn
@@ -173,13 +180,15 @@ public class DataUtils {
 					}
 					ps.close();
 					conn.commit();
-					System.out.println("Inserted " + (k - 1) + " rows into "
+					if (verbose)
+						System.out.println("Inserted " + (k - 1) + " rows into "
 							+ tableName + " in "
 							+ (System.currentTimeMillis() - start)
 							+ " milliseconds");
 					conn.setAutoCommit(true);
 
-					System.out.println("Creating indexes for table: "
+					if (verbose)
+						System.out.println("Creating indexes for table: "
 							+ tableName);
 
 					stmt.executeUpdate("CREATE INDEX " + tableName

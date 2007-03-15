@@ -30,15 +30,15 @@ Each query is run for StaticValues.ITER  iterations and timed using the
 java.sql.Statement and java.sql.PreparedStatement to identify the query preparation and 
 execution times.
  
-The test settings are located on the org.apache.derbyTesting.system.langtest.StaticValues
+The test settings are located on the org.apache.derbyTesting.system.optimizer.StaticValues
 class. The test creates 64 tables with different column types and populates them with 
 the a specified number of rows (org.apache.derbyTesting.system.langtest.StaticValues.NUM_OF_ROWS).
 
 PACKAGING:
 ==========
-The test resides under the org.apache.derbyTesting.system.langtest package. The main
-class to invoke is org.apache.derbyTesting.system.langtest.RunLangTest. All the
-variable settings used in the test are set in the org.apache.derbyTesting.system.langtest.StaticValues 
+The test resides under the org.apache.derbyTesting.system.optimizer package. The main
+class to invoke is org.apache.derbyTesting.system.optimizer.RunOptimizerTest. All the
+variable settings used in the test are set in the org.apache.derbyTesting.system.optimizer.StaticValues 
 class. The query classes reside in the 'query' package while some initializer and generic utility 
 classes belong to the 'utils' package.
 
@@ -46,7 +46,7 @@ HOW TO RUN:
 ===========
 Usage:
 
-java org.apache.derbyTesting.system.langtest.RunLangTest -reset|-qlist
+java org.apache.derbyTesting.system.optimizer.RunOptimizerTest -reset|-qlist
 -reset = Reset the database and begin run
 -qlist = Run only test queries from the 'query.list' file provided
 -verbose = Run in the verbose mode to print all the queries being run
@@ -58,12 +58,12 @@ Query1=select col1, max_view_8bc1 from sum_view_8a right join max_view_8b on col
 
 No arguments will run all the default test queries, provided via classes
  
-Set the 'derby.langtest.mode' to 'client' to run this test using the 
+Set the 'derby.optimizertest.mode' to 'client' to run this test using the 
 DerbyClient against a Derby Network Server running on port 1527
 
 SETTINGS:
 =========
-The test settings are located on the org.apache.derbyTesting.system.langtest.StaticValues
+The test settings are located on the org.apache.derbyTesting.system.optimizer.StaticValues
 class:
 NUM_OF_ROWS=1000; 	//Total number of rows expected in each table
 NUM_OF_TABLES=64; 	//Total number of tables to be created. This value should not get changed since all the views are depended 
@@ -79,7 +79,7 @@ The test also takes the following arguments:
 No arguments will run all the default test queries, provided via classes
  
 To run the test using the DerbyClient against a Derby Network Server running on port 1527
-set the 'derby.langtest.mode' System property to 'client' .
+set the 'derby.optimizertest.mode' System property to 'client' .
 
 KNOWN ISSUES:
 =============
