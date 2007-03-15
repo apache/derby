@@ -1,6 +1,6 @@
 /*
  
- Derby - Class org.apache.derbyTesting.system.langtest.RunLangTest
+ Derby - Class org.apache.derbyTesting.system.optimizer.RunOptimizerTest
  
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements.  See the NOTICE file distributed with
@@ -31,11 +31,11 @@ import org.apache.derbyTesting.system.optimizer.utils.DataUtils;
 import org.apache.derbyTesting.system.optimizer.utils.TestViews;
 /**
  * 
- * Class RunLangTest: The main class that runs this test. 
+ * Class RunOptimizerTest: The main class that runs this test. 
  * 
  * To run the test use:
  * 
- * java org.apache.derbyTesting.system.langtest.RunLangTest -reset|-qlist
+ * java org.apache.derbyTesting.system.optimizer.RunOptimizerTest -reset|-qlist
  * -reset = Reset the database and begin run
  * -qlist = Run only test queries from the 'query.list' file provided
  * No arguments will run all the default test queries, provided via classes
@@ -45,7 +45,7 @@ import org.apache.derbyTesting.system.optimizer.utils.TestViews;
  * DerbyClient against a Derby Network Server running on port 1527
  */
 
-public class RunLangTest {
+public class RunOptimizerTest {
 
 	public static void main(String[] args) {
 		Connection conn = null;
@@ -122,7 +122,7 @@ public class RunLangTest {
 	}
 	private static void printUsage(){
 		System.out.println("Usage:");
-		System.out.println("\njava org.apache.derbyTesting.system.langtest.RunLangTest -reset|-qlist\n");
+		System.out.println("\njava org.apache.derbyTesting.system.optimizer.RunOptimizerTest -reset|-qlist\n");
 		System.out.println("-reset = Reset the database and begin run");
 		System.out.println("-qlist = Run only test queries from the 'query.list' file provided");
 		System.out.println("\nNo arguments will run all the default test queries available in this test case.\n");
