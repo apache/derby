@@ -3999,6 +3999,21 @@ public class ResultColumnList extends QueryTreeNodeVector
 		initialListSize = size();
 	}
 
+	private int numGeneratedColumns() 
+	{
+		int numGenerated = 0;
+		int sz = size();
+		for (int i = sz - 1; i >= 0; i--) 
+		{
+			ResultColumn rc = (ResultColumn) elementAt(i);
+			if (rc.isGenerated()) 
+			{
+				numGenerated++;
+			}
+		}
+		return numGenerated;
+	}
+		
 	/**
 	 * @return the number of generated columns in this RCL.
 	 */
@@ -4039,6 +4054,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 */
 	public int visibleSize() 
 	{
-		return size() - orderBySelect - numGeneratedColumnsForGroupBy(); 
+		return size() - orderBySelect - numGeneratedColumns();
 	}
 }

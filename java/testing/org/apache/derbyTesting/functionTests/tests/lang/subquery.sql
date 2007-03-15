@@ -416,6 +416,19 @@ values ConsistencyChecker();
 -- reset autocommit
 autocommit on;
 
+-- subquery with groupby and having clause
+select distinct vc, i from t as myt1
+      where s <= (select max(myt1.s) from t as myt2
+          where myt1.vc = myt2.vc and myt1.s <= myt2.s
+          group by s
+          having count(distinct s) <= 3); 
+
+-- subquery with having clause but no groupby
+select distinct vc, i from t as myt1
+      where s <= (select max(myt1.s) from t as myt2
+          where myt1.vc = myt2.vc and myt1.s <= myt2.s
+          having count(distinct s) <= 3); 
+
 -- drop the tables
 drop table li;
 drop table s;

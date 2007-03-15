@@ -437,7 +437,7 @@ public class SubqueryNode extends ValueNode
 		/* The parser does not enforce the fact that a subquery can only return
 		 * a single column, so we must check here.
 		 */
-		if (resultColumns.size() != 1)
+		if (resultColumns.visibleSize() != 1)
 		{
 			throw StandardException.newException(SQLState.LANG_NON_SINGLE_COLUMN_SUBQUERY);
 		}
@@ -697,8 +697,7 @@ public class SubqueryNode extends ValueNode
 		{
 			SelectNode	select = (SelectNode) resultSet;
 			if ((select.getAggregateVector(IN_SELECT_LIST).size() == 0) &&
-			    (select.havingClause == null) &&
-				(! select.getGeneratedForGroupbyClause()))
+			    (select.havingClause == null))
 			{
 				ValueNode origLeftOperand = leftOperand;
 

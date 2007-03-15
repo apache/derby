@@ -858,6 +858,27 @@ No open scans, etc.
 2 dependencies found                                                                                        
 ij> -- reset autocommit
 autocommit on;
+ij> -- subquery with groupby and having clause
+select distinct vc, i from t as myt1
+      where s <= (select max(myt1.s) from t as myt2
+          where myt1.vc = myt2.vc and myt1.s <= myt2.s
+          group by s
+          having count(distinct s) <= 3);
+VC                            |I          
+------------------------------------------
+0                             |0          
+1                             |1          
+2                             |2          
+ij> -- subquery with having clause but no groupby
+select distinct vc, i from t as myt1
+      where s <= (select max(myt1.s) from t as myt2
+          where myt1.vc = myt2.vc and myt1.s <= myt2.s
+          having count(distinct s) <= 3);
+VC                            |I          
+------------------------------------------
+0                             |0          
+1                             |1          
+2                             |2          
 ij> -- drop the tables
 drop table li;
 0 rows inserted/updated/deleted
