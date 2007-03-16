@@ -55,6 +55,18 @@ class UpgradeRun {
             //"derbytools.jar"
             };
     
+    
+    /**
+     * Set of additional databases for tests that
+     * require a one-off database. The additional
+     * database decorator wraps all the tests and phases.
+     * They are only created if a test opens a
+     * connection against them.
+     */
+    static final String[] ADDITIONAL_DBS = {
+        "NO_ENCRYPT_10_2"
+    };
+    
     private static String getTextVersion(int[] iv)
     {
         String version = iv[0] + "." + iv[1] +
@@ -115,6 +127,12 @@ class UpgradeRun {
         }
           
         TestSetup setup = TestConfiguration.singleUseDatabaseDecorator(suite);
+        
+        for (int i = 0; i < ADDITIONAL_DBS.length; i++)
+        {
+            setup = TestConfiguration.additionalDatabaseDecorator(setup,
+                    ADDITIONAL_DBS[i]);
+        }
         
         Properties preReleaseUpgrade = new Properties();
         preReleaseUpgrade.setProperty(

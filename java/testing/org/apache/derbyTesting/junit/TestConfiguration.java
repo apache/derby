@@ -914,7 +914,7 @@ public class TestConfiguration {
      */
     Connection openConnection(String logicalDatabaseName)
         throws SQLException {
-        String databaseName = (String) logicalDbMapping.get(logicalDatabaseName);
+        String databaseName = getPhysicalDatabaseName(logicalDatabaseName);
         if (usedDbNames.contains(databaseName))
             return connector.openConnection(databaseName);
         else

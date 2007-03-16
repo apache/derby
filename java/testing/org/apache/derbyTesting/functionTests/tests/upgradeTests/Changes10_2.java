@@ -26,10 +26,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.sql.DataSource;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 
 /**
  * Upgrade test cases for changes made in 10.2.
@@ -330,6 +333,62 @@ public class Changes10_2 extends UpgradeChange {
 
             rs.close();
             s.close();
+            break;
+        }
+    }
+    
+    /**
+     * Run the change encryption test against a
+     * non-encrypted database.
+     * 
+     * @throws SQLException
+     */
+    public void testChangeEncryptionFromNone() throws SQLException
+    {
+        changeEncryption("NO_ENCRYPT_10_2");
+    }
+    
+    
+    /**
+     * Test that changing the encryption is only allowed if
+     * the database has been hard-upgraded. This test can
+     * work against an existing encrypted or un-encrypted database.
+     * This test assumes it has its own single use database, which
+     * will not be booted by the general upgrade test setup.
+     * @throws SQLException
+     */
+    private void changeEncryption(String logicalDBName) throws SQLException
+    {
+        DataSource ds = JDBCDataSource.getDataSourceLogical(logicalDBName);
+        
+        switch (getPhase())
+        {
+        case PH_CREATE:
+            // create the database if it was not already created.
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+            ds.getConnection().close();
+            break;
+        case PH_SOFT_UPGRADE:
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                    "dataEncryption=true;bootPassword=xyz1234abc");
+            
+            try {
+                ds.getConnection();
+                fail("open re-encrypted connection in soft upgrade");
+            } catch (SQLException e) {
+                assertSQLState("XJ040", e);
+                e = e.getNextException();
+                assertNotNull(e);
+                assertSQLState("XCL47", e);
+            }
+            break;
+            
+            
+        case PH_POST_SOFT_UPGRADE:
+        case PH_HARD_UPGRADE:
+            // Should be able to successfully connect to it
+            // using the old setup.
+            ds.getConnection().close();
             break;
         }
     }

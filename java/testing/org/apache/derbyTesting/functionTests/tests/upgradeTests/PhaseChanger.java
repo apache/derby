@@ -29,6 +29,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Decorator that sets the phase of the upgrade process
@@ -89,20 +90,13 @@ final class PhaseChanger extends TestSetup {
             break;
         }
         
-        try {
-            ds.getConnection().close();
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            do {
-                e.printStackTrace();
-                e = e.getNextException();
-            } while (e != null);
-            //throw e;
-        }
+        // Ensure the database exists or upgrade it.
+        ds.getConnection().close();
+
     }
     
     /**
-     * Shutdown the database and reset the class loader.
+     * Shutdown the database(s) and reset the class loader.
      * @throws InterruptedException 
      */
     protected void tearDown() throws InterruptedException
@@ -110,6 +104,25 @@ final class PhaseChanger extends TestSetup {
         if (phase != UpgradeChange.PH_POST_HARD_UPGRADE) {
             DataSource ds = JDBCDataSource.getDataSource();
             JDBCDataSource.shutdownDatabase(ds);
+
+            for (int i = 0; i < UpgradeRun.ADDITIONAL_DBS.length; i++)
+            {
+                ds = JDBCDataSource.getDataSourceLogical(
+                        UpgradeRun.ADDITIONAL_DBS[i]);
+                
+                boolean shutdown = true;
+                try {
+                    ds.getConnection().close();
+                } catch (SQLException e) {
+                    // if the database was never created
+                    // don't bother shutting it down.
+                    if ("XJ004".equals(e.getSQLState()))
+                        shutdown = false;
+                }
+                
+                if (shutdown)
+                    JDBCDataSource.shutdownDatabase(ds);
+            }
         }
         
        

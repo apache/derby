@@ -59,6 +59,26 @@ public class JDBCDataSource {
     }
     
     /**
+     * Return a DataSource corresponding to one
+     * of the logical databases in the current configuration.
+     */
+    public static javax.sql.DataSource
+         getDataSourceLogical(String logicalDatabasename)
+    {
+        // default DataSource
+        javax.sql.DataSource ds = getDataSource();
+        
+        TestConfiguration current = TestConfiguration.getCurrent();
+        String physicalName =
+            current.getPhysicalDatabaseName(logicalDatabasename);
+        
+        // Override the database name
+        setBeanProperty(ds, "databaseName", physicalName);
+        
+        return ds;
+    }
+    
+    /**
      * Create a new DataSource object setup from the passed in TestConfiguration.
      * The getConnection() method will return a connection identical to
      * TestConfiguration.openDefaultConnection().
