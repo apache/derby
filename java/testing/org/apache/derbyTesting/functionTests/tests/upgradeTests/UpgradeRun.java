@@ -66,7 +66,8 @@ class UpgradeRun {
      * The databases are shutdown at the end of each phase.
      */
     static final String[] ADDITIONAL_DBS = {
-        "NO_ENCRYPT_10_2"
+        "NO_ENCRYPT_10_2",
+        "ENCRYPT_10_2"
     };
     
     private static String getTextVersion(int[] iv)

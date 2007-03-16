@@ -339,39 +339,22 @@ public class Changes10_2 extends UpgradeChange {
     
     /**
      * Run the change encryption test against a
-     * non-encrypted database.
-     * 
-     * @throws SQLException
-     */
-    public void testChangeEncryptionFromNone() throws SQLException
-    {
-        changeEncryption("NO_ENCRYPT_10_2", false);
-    }
-    
-    
-    /**
-     * Test that changing the encryption is only allowed if
-     * the database has been hard-upgraded. This test can
-     * work against an existing encrypted or un-encrypted database.
+     * non-encrypted database. Test that changing the encryption
+     * is only allowed if the database has been hard-upgraded. 
      * This test assumes it has its own single use database, which
      * will not be booted by the general upgrade test setup.
      * @throws SQLException
      */
-    private void changeEncryption(String logicalDBName,
-            boolean encryptOldDB) throws SQLException
+
+    public void testChangeEncryptionFromNone() throws SQLException
     {
-        DataSource ds = JDBCDataSource.getDataSourceLogical(logicalDBName);
+        DataSource ds = JDBCDataSource.getDataSourceLogical("NO_ENCRYPT_10_2");
         
         switch (getPhase())
         {
         case PH_CREATE:
             // create the database if it was not already created.
             JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
-            if (encryptOldDB)
-            {
-                JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
-                    "dataEncryption=true;bootPassword=old1234dbPhraSe");
-            }
             ds.getConnection().close();
             break;
         case PH_SOFT_UPGRADE:
@@ -422,6 +405,82 @@ public class Changes10_2 extends UpgradeChange {
             // And connect successfully.
             JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
                        "bootPassword=haRD1234upGrAde");
+            ds.getConnection().close();
+            break;
+        }
+    }
+    /**
+     * Run the change encryption test against a
+     * encrypted database. Test that changing the encryption
+     * is only allowed if the database has been hard-upgraded. 
+     * This test assumes it has its own single use database, which
+     * will not be booted by the general upgrade test setup.
+     * @throws SQLException
+     */
+
+    public void testChangeEncryptionFromEncryptedDatabase() throws SQLException
+    {
+        DataSource ds = JDBCDataSource.getDataSourceLogical("ENCRYPT_10_2");
+        
+        switch (getPhase())
+        {
+        case PH_CREATE:
+            // create the database encrypted
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                 "dataEncryption=true;bootPassword=old862phRase");
+            ds.getConnection().close();
+            break;
+        case PH_SOFT_UPGRADE:
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                    "bootPassword=old862phRase;newBootPassword=new902pHrAse");
+            
+            try {
+                ds.getConnection();
+                fail("open re-encrypted connection in soft upgrade");
+            } catch (SQLException e) {
+                assertSQLState("XJ040", e);
+                e = e.getNextException();
+                assertNotNull(e);
+                assertSQLState("XCL47", e);
+            }
+            break;
+            
+            
+        case PH_POST_SOFT_UPGRADE:
+            // Should be able to successfully connect to it
+            // using the old setup.
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                 "bootPassword=old862phRase");
+            ds.getConnection().close();
+            break;
+            
+        case PH_HARD_UPGRADE:
+            // On hard upgrade should be able to connect to it
+            // changing the encryption.
+            // Note we have to explicitly upgrade additional databases.
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+            "upgrade=true;bootPassword=old862phRase;newBootPassword=hard924pHrAse");
+            ds.getConnection().close();
+            
+            // Shutdown the database.
+            JDBCDataSource.clearStringBeanProperty(ds, "connectionAttributes");
+            JDBCDataSource.shutdownDatabase(ds);
+            
+            // Reboot with no boot password, should fail
+            try {
+                ds.getConnection();
+                fail("open re-encrypted connection without password");
+            } catch (SQLException e) {
+                assertSQLState("XJ040", e);
+                e = e.getNextException();
+                assertNotNull(e);
+                assertSQLState("XBM06", e);
+            }
+            
+            // And connect successfully.
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                       "bootPassword=hard924pHrAse");
             ds.getConnection().close();
             break;
         }

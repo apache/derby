@@ -115,8 +115,9 @@ final class PhaseChanger extends TestSetup {
                     ds.getConnection().close();
                 } catch (SQLException e) {
                     // if the database was never created
-                    // don't bother shutting it down.
-                    if ("XJ004".equals(e.getSQLState()))
+                    // don't bother shutting it down
+                    String sqlState = e.getSQLState();
+                    if ("XJ004".equals(sqlState) || "XJ040".equals(sqlState))
                         shutdown = false;
                 }
                 
