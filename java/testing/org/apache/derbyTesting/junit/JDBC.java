@@ -34,7 +34,9 @@ import junit.framework.Assert;
 
 /**
  * JDBC utility methods for the JUnit tests.
- *
+ * Note that JSR 169 is a subset of JDBC 3 and
+ * JDBC 3 is a subset of JDBC 4.
+ * The base level for the Derby tests is JSR 169.
  */
 public class JDBC {
     
@@ -78,10 +80,12 @@ public class JDBC {
         }    	
     }
  	/**
- 	 * <p>
 	 * Return true if the virtual machine environment
-	 * supports JDBC4 or later.
-	 * </p>
+	 * supports JDBC4 or later. JDBC 4 is a superset
+     * of JDBC 3 and of JSR169.
+     * <BR>
+     * This method returns true in a JDBC 4 environment
+     * and false in a JDBC 3 or JSR 169 environment.
 	 */
 	public static boolean vmSupportsJDBC4()
 	{
@@ -89,10 +93,12 @@ public class JDBC {
 	       && HAVE_SQLXML;
 	}
  	/**
- 	 * <p>
 	 * Return true if the virtual machine environment
-	 * supports JDBC3 or later.
-	 * </p>
+	 * supports JDBC3 or later. JDBC 3 is a super-set of JSR169
+     * and a subset of JDBC 4.
+     * <BR>
+     * This method will return true in a JDBC 3 or JDBC 4
+     * environment, but false in a JSR169 environment.
 	 */
 	public static boolean vmSupportsJDBC3()
 	{
@@ -112,10 +118,12 @@ public class JDBC {
 	}
 
 	/**
- 	 * <p>
 	 * Return true if the virtual machine environment
-	 * supports JSR169 (JDBC 3 subset).
-	 * </p>
+	 * supports JSR169. JSR169 is a subset of JDBC 3
+     * and hence a subset of JDBC 4 as well.
+     * <BR>
+     * This method returns true only in a JSR 169
+     * environment.
 	 */
 	public static boolean vmSupportsJSR169()
 	{
