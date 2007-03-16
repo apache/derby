@@ -228,7 +228,7 @@ public class JDBCDataSource {
         } catch (SQLException e) {
              BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
         } finally {
-            setBeanProperty(ds, "shutdownDatabase", "");
+            clearStringBeanProperty(ds, "shutdownDatabase");
         }
     }
 }

@@ -61,7 +61,9 @@ class UpgradeRun {
      * require a one-off database. The additional
      * database decorator wraps all the tests and phases.
      * They are only created if a test opens a
-     * connection against them.
+     * connection against them. In hard upgrade the test
+     * must explictly upgrade the database.
+     * The databases are shutdown at the end of each phase.
      */
     static final String[] ADDITIONAL_DBS = {
         "NO_ENCRYPT_10_2"

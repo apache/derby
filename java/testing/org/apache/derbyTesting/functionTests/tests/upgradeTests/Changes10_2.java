@@ -345,7 +345,7 @@ public class Changes10_2 extends UpgradeChange {
      */
     public void testChangeEncryptionFromNone() throws SQLException
     {
-        changeEncryption("NO_ENCRYPT_10_2");
+        changeEncryption("NO_ENCRYPT_10_2", false);
     }
     
     
@@ -357,7 +357,8 @@ public class Changes10_2 extends UpgradeChange {
      * will not be booted by the general upgrade test setup.
      * @throws SQLException
      */
-    private void changeEncryption(String logicalDBName) throws SQLException
+    private void changeEncryption(String logicalDBName,
+            boolean encryptOldDB) throws SQLException
     {
         DataSource ds = JDBCDataSource.getDataSourceLogical(logicalDBName);
         
@@ -366,6 +367,11 @@ public class Changes10_2 extends UpgradeChange {
         case PH_CREATE:
             // create the database if it was not already created.
             JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+            if (encryptOldDB)
+            {
+                JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                    "dataEncryption=true;bootPassword=old1234dbPhraSe");
+            }
             ds.getConnection().close();
             break;
         case PH_SOFT_UPGRADE:
@@ -385,9 +391,37 @@ public class Changes10_2 extends UpgradeChange {
             
             
         case PH_POST_SOFT_UPGRADE:
-        case PH_HARD_UPGRADE:
             // Should be able to successfully connect to it
             // using the old setup.
+            ds.getConnection().close();
+            break;
+            
+        case PH_HARD_UPGRADE:
+            // On hard upgrade should be able to connect to it
+            // changing the encryption.
+            // Note we have to explicitly upgrade additional databases.
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+            "upgrade=true;dataEncryption=true;bootPassword=haRD1234upGrAde");
+            ds.getConnection().close();
+            
+            // Shutdown the database.
+            JDBCDataSource.clearStringBeanProperty(ds, "connectionAttributes");
+            JDBCDataSource.shutdownDatabase(ds);
+            
+            // Reboot with no boot password, should fail
+            try {
+                ds.getConnection();
+                fail("open re-encrypted connection without password");
+            } catch (SQLException e) {
+                assertSQLState("XJ040", e);
+                e = e.getNextException();
+                assertNotNull(e);
+                assertSQLState("XBM06", e);
+            }
+            
+            // And connect successfully.
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                       "bootPassword=haRD1234upGrAde");
             ds.getConnection().close();
             break;
         }

@@ -52,10 +52,30 @@ class DropDatabaseSetup extends TestSetup {
         
         // Ensure the database is booted
         // since that is what shutdownDatabase() requires.
-        config.openConnection(logicalDBName).close();
-        String dbName = config.getPhysicalDatabaseName(logicalDBName);
-        DataSource ds = JDBCDataSource.getDataSource(dbName);
-        JDBCDataSource.shutdownDatabase(ds);
+        boolean shutdown;
+        try {
+            config.openConnection(logicalDBName).close();
+            shutdown = true;
+        } catch (SQLException e) {
+            // If the database cannot be booted due
+            // to some restrictions such as authentication
+            // or encrypted (ie here we don't know the 
+            // correct authentication tokens, then it's
+            // ok since we just want it shutdown anyway!
+            if ("XJ040".equals(e.getSQLState()))
+            {
+                shutdown = false;
+            }
+            else
+            {
+                throw e;
+            }
+        }
+        if (shutdown)
+        {
+            DataSource ds = JDBCDataSource.getDataSourceLogical(logicalDBName);
+            JDBCDataSource.shutdownDatabase(ds);
+        }
 
         removeDatabase();
     }
