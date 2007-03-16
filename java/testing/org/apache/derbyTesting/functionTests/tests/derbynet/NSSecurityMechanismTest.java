@@ -352,7 +352,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
 
         // shut down the server
         server.shutdown();
-        Thread.sleep(1000);
+        Thread.sleep(500);
         } catch (Exception e) {
             if (!(e.getMessage().substring(0,17).equals("DRDA_InvalidValue")))
             {
@@ -383,7 +383,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             server2.start(null);
             // TODO: sleep ridiculously long, otherwise getting 08001 errors
             //       even when the server is up.
-            Thread.sleep(120000);
+            Thread.sleep(80000);
             
             if (derby_drda_securityMechanism.equals("") ||
                 derby_drda_securityMechanism.equals("INVALID_VALUE"))
@@ -805,7 +805,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
                     getJDBCUrl(urlAttributes), "Test:", 
                     getExpectedValueFromAll(expectedValues, k, j, 4));
                 getDataSourceConnection(USER_ATTRIBUTE[k],PWD_ATTRIBUTE[j],
-                    "TEST_DS("+urlAttributes+")", 
                     getExpectedValueFromAll(expectedValues, k, j, 4));
 
                 for (int i = 0; i < SECMEC_ATTRIBUTE.length; i++) {
@@ -882,7 +881,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @param msg message to print for testcase
      */
     public void getDataSourceConnection(
-        String user, String password,String msg, String expectedValue)
+        String user, String password, String expectedValue)
     {
         Connection conn;
         DataSource ds = getDS(user, password);
@@ -996,9 +995,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             fail("should not have failed");
         }
         
-        // TODO: using this with ibm15 results in 42X05 - table does not exist
-        //assertTableRowCount("sys.systables", 1);
-        
         if(rs != null)
             rs.close();
         if(stmt != null)
@@ -1096,7 +1092,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         try
         {
             println("Turning ON Derby BUILTIN authentication");
-            Connection conn = getConnectionWithSecMec(
+            Connection conn = getDataSourceConnectionWithSecMec(
                 "neelima", "lee", new Short(SECMEC_USRSSBPWD));
             if (conn == null)
                 return; // Exception would have been raised
@@ -1151,7 +1147,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
                 "TEST_DS - USRSSBPWD + BUILTIN (T4):", expectedValues[3]);
 
             // Prepare to turn OFF Derby BUILTIN authentication
-            conn = getConnectionWithSecMec("neelima", "lee",
+            conn = getDataSourceConnectionWithSecMec("neelima", "lee",
                 new Short(SECMEC_USRSSBPWD));
             if (conn == null)
                 return; // Exception would have been raised
@@ -1180,9 +1176,8 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         }
     }
     
-    public Connection getConnectionWithSecMec(String user,
-        String password,
-        Short secMec)
+    public Connection getDataSourceConnectionWithSecMec(
+        String user, String password, Short secMec)
     {
         Connection conn = null;
         String securityMechanismProperty = "SecurityMechanism";
@@ -1200,13 +1195,13 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         catch (SQLException sqle)
         {
             // Exceptions expected in certain cases depending on JCE used for 
-            // running the test.
-            dumpSQLException(sqle.getNextException());
-            assertSQLState("11111", sqle);
+            // running the test, but in this case, we don't expect any
+            // sqlexceptions
+            fail("did not expect an sqlexception.");
         }
         catch (Exception e)
         {
-            fail("did not expect exception");
+            fail("did not expect exception.");
         }
         return conn;
     }

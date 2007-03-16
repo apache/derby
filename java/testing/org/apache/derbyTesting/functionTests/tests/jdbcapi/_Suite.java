@@ -49,14 +49,14 @@ public class _Suite extends BaseTestCase  {
 
 		suite.addTest(ConcurrencyTest.suite());
 		suite.addTest(HoldabilityTest.suite());
-        suite.addTest(LobLengthTest.suite()); 
+		suite.addTest(LobLengthTest.suite()); 
 		suite.addTest(ProcedureTest.suite());
 		suite.addTest(SURQueryMixTest.suite());
 		suite.addTest(SURTest.suite());
 		suite.addTest(UpdatableResultSetTest.suite());
 		suite.addTest(UpdateXXXTest.suite());
 		suite.addTest(URCoveringIndexTest.suite());
-        suite.addTest(ResultSetCloseTest.suite());
+		suite.addTest(ResultSetCloseTest.suite());
 		suite.addTest(BlobClob4BlobTest.suite());
 		suite.addTest(CharacterStreamsTest.suite());
 		suite.addTest(BatchUpdateTest.suite());
@@ -64,42 +64,32 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(DboPowersTest.suite());
 		suite.addTest(BlobStoredProcedureTest.suite());
 		suite.addTest(ClobStoredProcedureTest.suite());
-                suite.addTest(CallableTest.suite());
-                suite.addTest(ResultSetMiscTest.suite());
-                suite.addTest(PrepStmtMetaDataTest.suite());
+		suite.addTest(CallableTest.suite());
+		suite.addTest(ResultSetMiscTest.suite());
+		suite.addTest(PrepStmtMetaDataTest.suite());
+		suite.addTest(ScrollResultSetTest.suite());
+		suite.addTest(LobStreamsTest.suite());
+		suite.addTest(ResultSetJDBC30Test.suite());
+		suite.addTest(DatabaseMetaDataTest.suite());
+		suite.addTest(ClosedObjectTest.suite());
         
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.
         suite.addTest(JDBCHarnessJavaTest.suite());
         
-        if (JDBC.vmSupportsJDBC2())
+        if (JDBC.vmSupportsJDBC3())
         {
             // Tests that do not run under JSR169
             // DERBY-2403 blocks ParameterMappingTest from running
             // under JSR169
             suite.addTest(ParameterMappingTest.suite());
-        
-        }
-        if (JDBC.vmSupportsJDBC3())
-        {
+
             // Class requires javax.sql.PooledConnection
             // even to load, even though the suite method
             // is correctly implemented.
             suite.addTest(DataSourcePropertiesTest.suite());
         }
 		
-		// Tests that are compiled using 1.4 target need to
-		// be added this way, otherwise creating the suite
-		// will throw an invalid class version error
-		if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169())
-		{
-			suite.addTest(ScrollResultSetTest.suite());
-			suite.addTest(LobStreamsTest.suite());
-			suite.addTest(ResultSetJDBC30Test.suite());
-            suite.addTest(DatabaseMetaDataTest.suite());
-            suite.addTest(ClosedObjectTest.suite());
-		}
-        
         return suite;
 	}
 }

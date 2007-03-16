@@ -562,6 +562,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         conn1.close();
     }
     
+    // verify that the return value is the expected value, and 
+    // we have the expected number of rows returning from the query
+    // in this test, it will be one of the user names through
+    // use of CURRENT_USER, SESSION_USER etc.
     protected void assertUserValue(
         String[] expected, String user, String password, String sql)
     throws SQLException
@@ -587,6 +591,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertUserValue(expected, user, (user + PASSWORD_SUFFIX), sql);
     }
     
+    // get a connection using ds.getConnection(user, password)
     protected void assertConnectionOK(
          String dbName, String user, String password)
     throws SQLException
@@ -600,7 +605,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         }
     }
     
-    // getConnection(), using setConnectionAttributes
+    // get a connection, using setUser / setPassword, and ds.getConnection()
     protected void assertConnectionWOUPOK(
         String dbName, String user, String password)
     throws SQLException
@@ -630,7 +635,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         }
     }
 
-    // connection without user and password
+    // same action as with assertConnectionFail, but using ds.getConnection()
+    // instead of ds.getConnection(user, password). So, setting user and
+    // password using appropriate ds.set method.
     protected void assertConnectionWOUPFail(
         String expectedError, String dbName, String user, String password) 
     throws SQLException 
@@ -678,6 +685,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         }
     }
 
+    // same action as with assertShutdownOK, but using ds.getConnection()
+    // instead of ds.getConnection(user, password). So, setting user and
+    // password using appropriate ds.set method.
     protected void assertShutdownWOUPOK(
         String dbName, String user, String password)
     throws SQLException {
@@ -748,7 +758,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     throws SQLException
     {
         // with DerbyNetClient there is no Datasource setShutdownDatabase 
-        // method so can't use the setBeanProperty
+        // method so can't use the same setBeanProperty as with embedded
         if (usingEmbedded()) 
         {
             DataSource ds = JDBCDataSource.getDataSource(dbName);
@@ -819,6 +829,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         if (usingEmbedded())
         {
             DataSource ds = JDBCDataSource.getDataSource();
+            JDBCDataSource.clearStringBeanProperty(ds, "databaseName");
             JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
             JDBCDataSource.setBeanProperty(ds, "user", user);
             JDBCDataSource.setBeanProperty(ds, "password", password);
@@ -833,6 +844,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         {
             ClientDataSource ds = 
                 (ClientDataSource)JDBCDataSource.getDataSource();
+            JDBCDataSource.clearStringBeanProperty(ds, "databaseName");
             ds.setConnectionAttributes(
                 "shutdown=true;user=" + user + ";password=" + password);
             try {
