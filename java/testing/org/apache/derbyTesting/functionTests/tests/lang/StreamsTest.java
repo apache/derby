@@ -301,7 +301,17 @@ class DummyReader extends java.io.Reader {
     
     private void whereAmI() {
         if (count == 0) {
-            readerStackLevel = new Throwable().getStackTrace().length;
+            // see DERBY-2318 - some jvms report a line like:
+            // at java.lang.Throwable<init>. Ignore all Throwable lines
+            // for the count.
+            if ((new Throwable().getStackTrace().toString()).indexOf(
+                    "java.lang.Throwable".toLowerCase()) >=0)
+            {
+                readerStackLevel = 
+                    new Throwable().getStackTrace().length - 1;
+            }
+            else
+                readerStackLevel = new Throwable().getStackTrace().length;
         }
     }
     
@@ -349,7 +359,17 @@ class DummyBinary extends java.io.InputStream {
     
     private void whereAmI()  {
         if (count == 0) {
-            readerStackLevel = new Throwable().getStackTrace().length;
+            // see DERBY-2318 - some jvms report a line like:
+            // at java.lang.Throwable<init>. Ignore all Throwable lines
+            // for the count.
+            if ((new Throwable().getStackTrace().toString()).indexOf(
+                    "java.lang.Throwable".toLowerCase()) >=0)
+            {
+                readerStackLevel = 
+                    new Throwable().getStackTrace().length - 1;
+            }
+            else
+                readerStackLevel = new Throwable().getStackTrace().length;
         }
     }
     
