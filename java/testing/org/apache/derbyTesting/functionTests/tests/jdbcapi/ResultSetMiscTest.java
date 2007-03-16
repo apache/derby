@@ -498,8 +498,8 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
     /**
      * Setup up and run the auto-commit tests.
      * 
-     * @param conn
-     *            The Connection
+     * 
+     *         
      * @throws SQLException
      */
     public void testAutoCommit() throws SQLException {
@@ -725,9 +725,9 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
 
     /**
      * 
-     * @param numLocks
-     *            Number of locks expeced. 0 for none
-     * @throws Exception
+     * 
+     * @return true if locks are held.
+     * @throws SQLException
      */
     private boolean locksHeld() throws SQLException {
 
