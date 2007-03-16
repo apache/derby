@@ -366,8 +366,13 @@ to specify your environment and options:
     - build.compiler
 
       This variable defines the java compiler to be used for build. 
-      The default value of this variable is set to use the standard java 
-      compiler for build. 
+      The default value of this variable is set to use the 'modern' java 
+      compiler for build. The default 'modern' compiler will be the one
+      from the JDK used to run ant, typically from the setting of JAVA_HOME.
+      One can determine which JDK ant is using by running ant -verbose
+      and looking for the line that starts with:
+        Detected Java version:
+      early in the output.  
 
     - proceed
 
