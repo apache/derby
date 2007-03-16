@@ -26,6 +26,7 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
@@ -561,7 +562,11 @@ public class NetworkServerControl{
         // be tricked into a false sense of security. Important security checks
         // will be identity based.
         //
-        if ( !Boolean.getBoolean( Property.REQUIRE_AUTHENTICATION_PARAMETER ) )
+        String      authenticationProperty =
+            PropertyUtil.getSystemProperty( Property.REQUIRE_AUTHENTICATION_PARAMETER );
+        boolean     authenticationRequired = Boolean.valueOf( authenticationProperty ).booleanValue();
+        
+        if ( !authenticationRequired )
         {
             String  errorMessage = server.localizeMessage
                 (
@@ -587,10 +592,10 @@ public class NetworkServerControl{
         //
         // The Basic policy refers to some properties. Make sure they are set.
         //
-        if ( System.getProperty( Property.SYSTEM_HOME_PROPERTY ) == null )
-        { System.setProperty( Property.SYSTEM_HOME_PROPERTY, System.getProperty( "user.dir" ) ); }
+        if ( PropertyUtil.getSystemProperty( Property.SYSTEM_HOME_PROPERTY ) == null )
+        { System.setProperty( Property.SYSTEM_HOME_PROPERTY, PropertyUtil.getSystemProperty( "user.dir" ) ); }
 
-        if ( System.getProperty( Property.DRDA_PROP_HOSTNAME ) == null )
+        if ( PropertyUtil.getSystemProperty( Property.DRDA_PROP_HOSTNAME ) == null )
         { System.setProperty( Property.DRDA_PROP_HOSTNAME, server.getHost() ); }
 
         //

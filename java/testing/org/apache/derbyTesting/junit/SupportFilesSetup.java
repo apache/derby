@@ -64,6 +64,8 @@ public class SupportFilesSetup extends TestSetup {
     
     private String[] readOnly;
     private String[] readWrite;
+    private String[] readOnlyTargetFileNames;
+    private String[] readWriteTargetFileNames;
 
     /**
      * Create all the folders but don't copy any resources.
@@ -79,7 +81,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public SupportFilesSetup(Test test, String[] readOnly)
     {
-        this(test, readOnly, (String[]) null);
+        this(test, readOnly, (String[]) null, (String[]) null, (String[]) null);
     }
     
     /**
@@ -89,16 +91,30 @@ public class SupportFilesSetup extends TestSetup {
    */
     public SupportFilesSetup(Test test, String[] readOnly, String[] readWrite)
     {
+        this(test, readOnly, readWrite, (String[]) null, (String[]) null);
+    }
+    
+    /**
+     * Create all the folders, copy a set of resources into
+     * the read only folder and copy a set of resources into
+     * the read write folder. If specified, use the specific target file
+     * supplied by the caller.
+     */
+    public SupportFilesSetup
+        (Test test, String[] readOnly, String[] readWrite, String[] readOnlyTargetFileNames, String[] readWriteTargetFileNames)
+    {
         super(test);
         this.readOnly = readOnly;
         this.readWrite = readWrite;
+        this.readOnlyTargetFileNames = readOnlyTargetFileNames;
+        this.readWriteTargetFileNames = readWriteTargetFileNames;
     }
     
     protected void setUp() throws PrivilegedActionException, IOException
     {
-        privCopyFiles("extin", readOnly);
-        privCopyFiles("extinout", readWrite);
-        privCopyFiles("extout", (String[]) null);
+        privCopyFiles("extin", readOnly, readOnlyTargetFileNames);
+        privCopyFiles("extinout", readWrite, readWriteTargetFileNames);
+        privCopyFiles("extout", (String[]) null, (String[]) null);
     }
     
     protected void tearDown()
@@ -108,21 +124,21 @@ public class SupportFilesSetup extends TestSetup {
         DropDatabaseSetup.removeDirectory("extout");
     }
     
-    private void privCopyFiles(final String dirName, final String[] resources)
+    private void privCopyFiles(final String dirName, final String[] resources, final String[] targetNames)
     throws PrivilegedActionException
     {
         AccessController.doPrivileged
         (new java.security.PrivilegedExceptionAction(){
             
             public Object run() throws IOException, PrivilegedActionException { 
-              copyFiles(dirName, resources);
+              copyFiles(dirName, resources, targetNames);
               return null;
             }
         });
 
     }
     
-    private void copyFiles(String dirName, String[] resources)
+    private void copyFiles(String dirName, String[] resources, String[] targetNames)
         throws PrivilegedActionException, IOException
     {
         File dir = new File(dirName);
@@ -136,10 +152,20 @@ public class SupportFilesSetup extends TestSetup {
             String name =
                 "org/apache/derbyTesting/".concat(resources[i]);
             
-            String baseName = name.substring(name.lastIndexOf('/') + 1);
+            String baseName;
+
+            if ( targetNames == null )
+            {
+                // by default, just the same file name as the source file
+                baseName = name.substring(name.lastIndexOf('/') + 1);
+            }
+            else
+            {
+                // we let the caller override the target file name
+                baseName = targetNames[ i ];
+            }
             
-            
-            URL url = BaseTestCase.getTestResource(name);
+                        URL url = BaseTestCase.getTestResource(name);
             assertNotNull(name, url);
             
             InputStream in = BaseTestCase.openTestResource(url);

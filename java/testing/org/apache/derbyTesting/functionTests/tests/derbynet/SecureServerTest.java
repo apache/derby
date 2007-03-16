@@ -36,6 +36,7 @@ import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.ServerSetup;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -98,6 +99,7 @@ public class SecureServerTest extends BaseTestCase
     // startup state
     private boolean _unsecureSet;
     private boolean _authenticationRequired;
+    private boolean _useCustomDerbyProperties;
 
     // expected outcomes
     private Outcome _outcome;
@@ -116,6 +118,7 @@ public class SecureServerTest extends BaseTestCase
         (
          boolean unsecureSet,
          boolean authenticationRequired,
+         boolean useCustomDerbyProperties,
 
          Outcome    outcome
         )
@@ -124,6 +127,7 @@ public class SecureServerTest extends BaseTestCase
 
          _unsecureSet =  unsecureSet;
          _authenticationRequired =  authenticationRequired;
+         _useCustomDerbyProperties = useCustomDerbyProperties;
 
          _outcome = outcome;
 
@@ -154,14 +158,16 @@ public class SecureServerTest extends BaseTestCase
 
         // O = Overriden
         // A = Authenticated
+        // C = using Custom properties
         //
-        //      .addTest( decorateTest( S,      O,       A,     Outcome ) );
+        //      .addTest( decorateTest( O,        A,       C,    Outcome ) );
         //
 
-        suite.addTest( decorateTest( false,  false, FAILED_NO_AUTHENTICATION ) );
-        suite.addTest( decorateTest( false,  true, RUNNING_SECURITY_BOOTED ) );
-        suite.addTest( decorateTest( true,  false, RUNNING_SECURITY_NOT_BOOTED ) );
-        suite.addTest( decorateTest( true,  true, RUNNING_SECURITY_NOT_BOOTED ) );
+        suite.addTest( decorateTest( false,  false, false, FAILED_NO_AUTHENTICATION ) );
+        suite.addTest( decorateTest( false,  false, true, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( false,  true, false, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( true,  false, false, RUNNING_SECURITY_NOT_BOOTED ) );
+        suite.addTest( decorateTest( true,  true, false, RUNNING_SECURITY_NOT_BOOTED ) );
         
         return suite;
     }
@@ -191,7 +197,8 @@ public class SecureServerTest extends BaseTestCase
         (
          boolean unsecureSet,
          boolean authenticationRequired,
-
+         boolean useCustomDerbyProperties,
+         
          Outcome outcome
         )
     {
@@ -199,11 +206,12 @@ public class SecureServerTest extends BaseTestCase
             (
              unsecureSet,
              authenticationRequired,
+             useCustomDerbyProperties,
 
              outcome
             );
 
-        String[]        startupProperties = getStartupProperties( authenticationRequired );
+        String[]        startupProperties = getStartupProperties( authenticationRequired, useCustomDerbyProperties );
         String[]        startupArgs = getStartupArgs( unsecureSet );
 
         TestSetup   testSetup = new NetworkServerTestSetup
@@ -215,6 +223,19 @@ public class SecureServerTest extends BaseTestCase
              secureServerTest._outcome.serverShouldComeUp(),
              secureServerTest._inputStreamHolder
              );
+
+        // if using the custom derby.properties, copy the custom properties to a visible place
+        if ( useCustomDerbyProperties )
+        {
+            testSetup = new SupportFilesSetup
+                (
+                 testSetup,
+                 null,
+                 new String[] { "functionTests/tests/derbynet/SecureServerTest.derby.properties" },
+                 null,
+                 new String[] { "derby.properties" }
+                 );
+        }
 
         testSetup = new ServerSetup( testSetup, TestConfiguration.DEFAULT_HOSTNAME, TestConfiguration.DEFAULT_PORT );
 
@@ -249,13 +270,18 @@ public class SecureServerTest extends BaseTestCase
      * Return a set of startup properties suitable for SystemPropertyTestSetup.
      * </p>
      */
-    private static  String[]  getStartupProperties( boolean authenticationRequired )
+    private static  String[]  getStartupProperties( boolean authenticationRequired, boolean useCustomDerbyProperties )
     {
         ArrayList       list = new ArrayList();
 
         if ( authenticationRequired )
         {
             list.add( "derby.connection.requireAuthentication=true" );
+        }
+
+        if ( useCustomDerbyProperties )
+        {
+            list.add( "derby.system.home=extinout" );
         }
 
         String[]    result = new String[ list.size() ];
@@ -298,8 +324,9 @@ public class SecureServerTest extends BaseTestCase
         StringBuffer    buffer = new StringBuffer();
 
         buffer.append( "SecureServerTest( " );
-        buffer.append( "Opened = " ); buffer.append( _unsecureSet); buffer.append( ", " );
-        buffer.append( "Authenticated= " ); buffer.append( _authenticationRequired );
+        buffer.append( "Opened = " ); buffer.append( _unsecureSet);
+        buffer.append( ", Authenticated= " ); buffer.append( _authenticationRequired );
+        buffer.append( ", CustomDerbyProperties= " ); buffer.append( _useCustomDerbyProperties );
         buffer.append( " )" );
 
         return buffer.toString();
