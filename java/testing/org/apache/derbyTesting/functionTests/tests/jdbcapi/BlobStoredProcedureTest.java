@@ -31,6 +31,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import junit.framework.Assert;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -61,7 +62,13 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
      * @return the test suite created.
      */
     public static Test suite() {
-        return TestConfiguration.defaultSuite(BlobStoredProcedureTest.class);
+        if (JDBC.vmSupportsJSR169()) {
+            return new TestSuite("empty: client not supported on JSR169");
+        }
+        else {
+            return TestConfiguration.defaultSuite(
+                    BlobStoredProcedureTest.class);
+        }
     }
 
     /**
