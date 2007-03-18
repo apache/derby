@@ -41,7 +41,9 @@ import org.apache.derby.iapi.util.Operator;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Collection;
 import java.util.Properties;
 
 
@@ -97,12 +99,13 @@ import java.util.Properties;
 
 */
 
-final class Clock extends Hashtable implements CacheManager, Serviceable {
+final class Clock implements CacheManager, Serviceable {
 
 	/*
 	** Fields
 	*/
 	public final CacheStat			stat;
+	private final HashMap cache_;
 	private DaemonService		cleaner;	// the background worker thread who is going to
 									// do pre-flush for this cache. 
 	private final ArrayList		holders;
@@ -146,16 +149,12 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 		it will not grow.  If the cache is full, an exception will be thrown
 
 	*/
-	Clock(CacheableFactory holderFactory,
-                  String name,
-                  int initialSize,
-                  long maximumSize,
-                  boolean useByteCount)
-    {
-        super(initialSize, (float) 0.95);
+	Clock(CacheableFactory holderFactory, String name,
+		  int initialSize, long maximumSize, boolean useByteCount) {
+		cache_ = new HashMap(initialSize, (float) 0.95);
 		this.maximumSize = maximumSize;
 		this.holderFactory = holderFactory;
-        this.useByteCount = useByteCount;
+		this.useByteCount = useByteCount;
 
 		if (SanityManager.DEBUG) {
 		  if (SanityManager.DEBUG_ON(ClockFactory.CacheTrace)) {
@@ -224,7 +223,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 				if (!active)
 					return null;
 	
-				item = (CachedItem) get(key);
+				item = (CachedItem) cache_.get(key);
 	
 				if (item != null) {
 					item.keepAfterSearch();
@@ -262,7 +261,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 					SanityManager.ASSERT(item != null, "found null item");
 	
 				synchronized (this) {
-					CachedItem inCacheItem = (CachedItem) get(key);
+					CachedItem inCacheItem = (CachedItem) cache_.get(key);
 	
 					if (inCacheItem != null) {
 						// some-one beat us to adding an item into the cache,
@@ -273,14 +272,16 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 						item.keepAfterSearch();
 					} else {
 						// yes, we really are the ones to add it
-						put(key, item);
+						cache_.put(key, item);
 						add = true;
 						if (SanityManager.DEBUG) {
 
 							if (SanityManager.DEBUG_ON("memoryLeakTrace")) {
 
-								if (size() > ((11 * maximumSize) / 10))
-									System.out.println("memoryLeakTrace:Cache:" + name + " " + size());
+								if (cache_.size() > ((11 * maximumSize) / 10))
+									System.out.println
+										("memoryLeakTrace:Cache:" + name +
+										 " " + cache_.size());
 							}
 						}
 					}
@@ -341,7 +342,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 			if (!active)
 				return null;
 		
-			item = (CachedItem) get(key);
+			item = (CachedItem) cache_.get(key);
 
 			if (item == null) {
 				stat.findCachedMiss++;
@@ -390,7 +391,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
                     if( keys[i] == null)
                         return;
                     
-                    item = (CachedItem) get(keys[i]);
+                    item = (CachedItem) cache_.get(keys[i]);
                     if( null != item)
                         item.setUsed( true);
                 }
@@ -423,21 +424,23 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 			if (!active)
 				return null;
 
-			if (get(key) != null) {
+			if (cache_.get(key) != null) {
 
 				item.unkeepForCreate();
 
 				throw StandardException.newException(SQLState.OBJECT_EXISTS_IN_CACHE, this.name, key);
 			}
 
-			put(key, item);
+			cache_.put(key, item);
 
 			if (SanityManager.DEBUG) {
 
 				if (SanityManager.DEBUG_ON("memoryLeakTrace")) {
 
-					if (size() > ((11 * maximumSize) / 10))
-						System.out.println("memoryLeakTrace:Cache:" + name + " " + size());
+					if (cache_.size() > ((11 * maximumSize) / 10))
+						System.out.println
+							("memoryLeakTrace:Cache:" + name + " " +
+							 cache_.size());
 				}
 			}
 		}
@@ -481,7 +484,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 
 		synchronized (this) {
 
-			item = (CachedItem) get(entry.getIdentity());
+			item = (CachedItem) cache_.get(entry.getIdentity());
 
 			if (SanityManager.DEBUG) {
 				SanityManager.ASSERT(item != null, "item null");
@@ -493,7 +496,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 
 			if (removeItem) {
 				
-				remove(entry.getIdentity());
+				cache_.remove(entry.getIdentity());
 
 				// we keep the item here to stop another thread trying to evict it
 				// while we are destroying it.
@@ -529,7 +532,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 
 			if (removeItem) {
 				
-				remove(item.getEntry().getIdentity());
+				cache_.remove(item.getEntry().getIdentity());
 
 				// we keep the item here to stop another thread trying to evict it
 				// while we are destroying it.
@@ -568,7 +571,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 
 			
 
-			item = (CachedItem) get(entry.getIdentity());
+			item = (CachedItem) cache_.get(entry.getIdentity());
 
 			if (SanityManager.DEBUG) {
 				SanityManager.ASSERT(item != null);
@@ -582,7 +585,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 			removeNow = item.unkeep();	
 
 			if (removeNow) {
-				remove(entry.getIdentity());
+				cache_.remove(entry.getIdentity());
 				item.keepForClean();
 			}
 		}
@@ -801,7 +804,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 			boolean	notifyWaiters;
 			synchronized (this) {
 
-				Object removed = remove(key);
+				Object removed = cache_.remove(key);
 				if (SanityManager.DEBUG) {
 					SanityManager.ASSERT(removed == item);
 				}
@@ -810,7 +813,7 @@ final class Clock extends Hashtable implements CacheManager, Serviceable {
 					// put the actual key into the hash table, not the one that was passed in
 					// for the find or create. This is because the caller may re-use the key
 					// for another cache operation, which would corrupt our hashtable
-					put(entry.getIdentity(), item);
+					cache_.put(entry.getIdentity(), item);
                     if( useByteCount)
                         currentByteCount += ((SizedCacheable) entry).getSize() - origEntrySize;
 					item.setValidState(true);
@@ -1292,7 +1295,7 @@ restartClock:
 
         if( useByteCount)
             shrink = ((SizedCacheable) item.getEntry()).getSize();
-		remove(item.getEntry().getIdentity());				
+		cache_.remove(item.getEntry().getIdentity());
 		item.setValidState(false);
         validItemCount--;
 		item.getEntry().clearIdentity();
@@ -1845,4 +1848,28 @@ innerscan:
 		clockHand = validItems + 1;
 
     } // end of trimToSize
+
+	/**
+	 * Tell if a key exists in the cache.
+	 * @param k the key to test for
+	 * @return true if k is a key in the cache
+	 */
+	public synchronized boolean containsKey(Object k) {
+		return cache_.containsKey(k);
+	}
+
+	/**
+	 * Return a Collection of the Cacheables currently in the
+	 * cache. The Collection is a snapshot (copy) so external
+	 * synchronization isn't required. Part of the CacheManager
+	 * interface.
+	 * @return a Collection of the cache elements.
+	 */
+	public synchronized Collection values() {
+		ArrayList al = new ArrayList();
+		for (Iterator i = cache_.values().iterator(); i.hasNext();){
+			al.add(((CachedItem)i.next()).getEntry());
+		}
+		return al;
+	}
 }

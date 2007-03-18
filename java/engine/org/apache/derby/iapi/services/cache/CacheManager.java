@@ -27,6 +27,8 @@ import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.util.Matchable;
 import org.apache.derby.iapi.util.Operator;
 
+import java.util.Collection;
+
 public interface CacheManager {
 
     /**
@@ -303,4 +305,13 @@ public interface CacheManager {
      * @param operator
      */
     public void scan( Matchable filter, Operator operator);
+
+	/**
+	 * Return a Collection of the Cacheables currently in the
+	 * cache. The Collection should be a copy so that external
+	 * synchronization isn't required.
+	 *
+	 * @return a Collection of all the elements in the cache
+	 */
+	public Collection values();
 }

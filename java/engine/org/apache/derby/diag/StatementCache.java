@@ -39,11 +39,12 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import org.apache.derby.impl.sql.conn.CachedStatement;
-import org.apache.derby.impl.services.cache.CachedItem;
 
 
 import java.util.Vector;
-import java.util.Enumeration;
+
+import java.util.Iterator;
+import java.util.Collection;
 
 /**
 	StatementCache is a virtual table that shows the contents of the SQL statement cache.
@@ -95,24 +96,19 @@ public final class StatementCache extends VTITemplate {
 	public StatementCache() throws SQLException {
 
 		org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext lcc =
-			(org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext) ConnectionUtil.getCurrentLCC();
+			(org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext)
+			ConnectionUtil.getCurrentLCC();
 
 		if (lcc.statementCache != null) {
-
-			java.util.Hashtable stmtCache = (java.util.Hashtable) lcc.statementCache;
-			data = new Vector(stmtCache.size());
-			for (Enumeration e = stmtCache.elements(); e.hasMoreElements(); ) {
-
-
-				CachedItem ci = (CachedItem) e.nextElement();
-				CachedStatement cs = (CachedStatement) ci.getEntry();
-
-				GenericPreparedStatement ps = (GenericPreparedStatement) cs.getPreparedStatement();
-
+			final Collection values = lcc.statementCache.values();
+			data = new Vector(values.size());
+			for (Iterator i = values.iterator(); i.hasNext(); ) {
+				final CachedStatement cs = (CachedStatement) i.next();
+				final GenericPreparedStatement ps =
+					(GenericPreparedStatement) cs.getPreparedStatement();
 				data.addElement(ps);
 			}
 		}
-
 	}
 
 	public boolean next() {

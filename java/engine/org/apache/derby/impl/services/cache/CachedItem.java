@@ -65,7 +65,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 	@see org.apache.derby.impl.services.cache
 	@see Cacheable
 */
-public final class CachedItem {
+final class CachedItem {
 	/*
 	** Fields
 	*/
