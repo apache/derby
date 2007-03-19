@@ -112,9 +112,6 @@ public class SelectNode extends ResultSetNode
 
 	private boolean orderByAndDistinctMerged;
 
-	private boolean generatedForGroupByClause;
-	private boolean generatedForHavingClause;
-
 	/* Copy of fromList prior to generating join tree */
 	private FromList preJoinFL;
 
@@ -159,8 +156,6 @@ public class SelectNode extends ResultSetNode
 				(groupByList != null ? groupByList.toString() : "null") + "\n" +
 				"orderByList: " + 
 				(orderByList != null ? orderByList.toString() : "null") + "\n" +
-				"generatedForGroupByClause: " +generatedForGroupByClause +"\n" +
-				"generatedForHavingClause: " + generatedForHavingClause + "\n" +
 				super.toString();
 		}
 		else
@@ -187,32 +182,6 @@ public class SelectNode extends ResultSetNode
 	boolean hasDistinct()
 	{
 		return isDistinct;
-	}
-
-	/**
-	 * Mark this SelectNode as being generated for a GROUP BY clause.
-	 */
-	public void markAsForGroupByClause()
-	{
-		generatedForGroupByClause = true;
-	}
-
-	/**
-	 * Return whether or not this SelectNode was generated for a GROUP BY clause.
-	 *
-	 * @return boolean	Whether or not this SelectNode was generated for a GROUP BY clause.
-	 */
-	public boolean getGeneratedForGroupbyClause()
-	{
-		return generatedForGroupByClause;
-	}
-
-	/**
-	 * Mark this SelectNode as being generated for a HAVING clause.
-	 */
-	public void markAsForHavingClause()
-	{
-		generatedForHavingClause = true;
 	}
 
 	/**
@@ -364,24 +333,10 @@ public class SelectNode extends ResultSetNode
 				return selectAggregates;
 
 			case ValueNode.IN_WHERE_CLAUSE:
-				if (generatedForHavingClause)
-				{
-					return null;
-				}
-				else
-				{
-					return whereAggregates;
-				}
+				return whereAggregates;
 
 			case ValueNode.IN_HAVING_CLAUSE:
-				if (generatedForHavingClause)
-				{
-					return whereAggregates;
-				}
-				else
-				{
-					return null;
-				}
+				return null;
 
 			default:
 				if (SanityManager.DEBUG)
@@ -542,8 +497,7 @@ public class SelectNode extends ResultSetNode
 			** in the WHERE clause at all.
 			** Note: a similar check is made in JoinNode.
 			*/
-			if ((whereAggregates.size() > 0) &&
-					!generatedForHavingClause)
+			if (whereAggregates.size() > 0)
 			{
 				throw StandardException.newException(SQLState.LANG_NO_AGGREGATES_IN_WHERE_CLAUSE);
 			}
@@ -777,14 +731,6 @@ public class SelectNode extends ResultSetNode
 					throws StandardException
 	{
 		if (! ((ResultColumn) resultColumns.elementAt(0) instanceof AllResultColumn) )
-		{
-			return;
-		}
-
-		/* Select * always okay when SelectNode generated to wrap
-		 * GROUP BY or HAVING.
-		 */
-		if (generatedForGroupByClause || generatedForHavingClause)
 		{
 			return;
 		}
@@ -1255,7 +1201,7 @@ public class SelectNode extends ResultSetNode
 		}
 
 		/* Don't flatten if selectNode contains a group by or having clause */
-		if ((groupByList != null) || generatedForHavingClause)
+		if ((groupByList != null) || (havingClause != null))
 		{
 			return false;
 		}
@@ -1933,7 +1879,7 @@ public class SelectNode extends ResultSetNode
 			return false;
 		}
 
-		if (groupByList != null || generatedForHavingClause)
+		if (groupByList != null || havingClause != null)
 		{
 			return false;
 		}

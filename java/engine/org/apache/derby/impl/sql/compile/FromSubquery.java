@@ -21,12 +21,8 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
@@ -34,7 +30,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import java.util.Properties;
 
 /**
  * A FromSubquery represents a subquery in the FROM list of a DML statement.
@@ -48,8 +43,6 @@ import java.util.Properties;
  */
 public class FromSubquery extends FromTable
 {
-	boolean			generatedForGroupByClause;
-	boolean			generatedForHavingClause;
 	ResultSetNode	subquery;
 
 	/**
@@ -82,10 +75,7 @@ public class FromSubquery extends FromTable
 	{
 		if (SanityManager.DEBUG)
 		{
-			return
-			  "generatedForGroupByClause: " + generatedForGroupByClause + "\n" +
-			  "generatedForHavingClause: " + generatedForHavingClause + "\n" +
-			  super.toString();
+			return  super.toString();
 		}
 		else
 		{
@@ -123,29 +113,6 @@ public class FromSubquery extends FromTable
 		return subquery;
 	}
 
-	/**
-	 * Mark this FromSubquery as being generated for a GROUP BY clause.
-	 * (This node represents the SELECT thru GROUP BY clauses.  We
-	 * appear in the FromList of a SelectNode generated to represent
-	 * the result of the GROUP BY.  This allows us to add ResultColumns
-	 * to the SelectNode for the user's query.
-	 */
-	public void markAsForGroupByClause()
-	{
-		generatedForGroupByClause = true;
-	}
-
-	/**
-	 * Mark this FromSubquery as being generated for a HAVING clause.
-	 * (This node represents the SELECT thru GROUP BY clauses.  We
-	 * appear in the FromList of a SelectNode generated to represent
-	 * the actual HAVING clause.
-	 */
-	public void markAsForHavingClause()
-	{
-		generatedForHavingClause = true;
-	}
-
 	/** 
 	 * Determine whether or not the specified name is an exposed name in
 	 * the current query block.
@@ -162,14 +129,7 @@ public class FromSubquery extends FromTable
 	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
-		if (generatedForGroupByClause || generatedForHavingClause)
-		{
-			return subquery.getFromTableByName(name, schemaName, exactMatch);
-		}
-		else 
-		{
-			return super.getFromTableByName(name, schemaName, exactMatch);
-		}
+		return super.getFromTableByName(name, schemaName, exactMatch);
 	}
 
 	/**
@@ -249,15 +209,10 @@ public class FromSubquery extends FromTable
 		FromList			nestedFromList;
 
 		/* From subqueries cannot be correlated, so we pass an empty FromList
-		 * to subquery.bindExpressions() and .bindResultColumns(). However,
-		 * the parser rewrites queries which have GROUP BY and HAVING clauses.
-		 * For these rewritten pseudo-subqueries, we need to pass in the outer FromList
-		 * which contains correlated tables.
+		 * to subquery.bindExpressions() and .bindResultColumns()
 		 */
-		if ( generatedForGroupByClause || generatedForHavingClause )
-		{ nestedFromList = fromListParam; }
-		else { nestedFromList = emptyFromList; }
 		
+		nestedFromList = emptyFromList;
 		subquery.bindExpressions(nestedFromList);
 		subquery.bindResultColumns(nestedFromList);
 
@@ -323,84 +278,11 @@ public class FromSubquery extends FromTable
 
 		columnsTableName = columnReference.getTableName();
 
-		/* We have 5 cases here:
-		 *  1.  ColumnReference was generated to replace an aggregate.
-		 *		(We are the wrapper for a HAVING clause and the ColumnReference
-		 *		was generated to reference the aggregate which was pushed down into
-		 *		the SELECT list in the user's query.)  
-		 *		Just do what you would expect.  Try to resolve the
-		 *		ColumnReference against our RCL if the ColumnReference is unqualified
-		 *		or if it is qualified with our exposed name.
-		 *	2.	We are the wrapper for a GROUP BY and a HAVING clause and
-		 *		either the ColumnReference is qualified or it is in
-		 *		the HAVING clause.  For example:
-		 *			select a from t1 group by a having t1.a = 1
-		 *			select a as asdf from t1 group by a having a = 1
-		 *		We need to match against the underlying FromList and then find
-		 *		the grandparent ResultColumn in our RCL so that we return a
-		 *		ResultColumn from the correct ResultSetNode.  It is okay not to
-		 *		find a matching grandparent node.  In fact, this is how we ensure
-		 *		the correct semantics for ColumnReferences in the HAVING clause
-		 *		(which must be bound against the GROUP BY list.)
-		 *  3.	We are the wrapper for a HAVING clause without a GROUP BY and
-		 *		the ColumnReference is from the HAVING clause.  ColumnReferences
-		 *		are invalid in this case, so we return null.
-		 *  4.  We are the wrapper for a GROUP BY with no HAVING.  This has
-		 *		to be a separate case because of #5 and the following query:
-		 *			select * from (select c1 from t1) t, (select c1 from t1) tt
-		 *			group by t1.c1, tt.c1
-		 *		(The correlation names are lost in the generated FromSuquery.)
-		 *  5.  Everything else - do what you would expect.  Try to resolve the
-		 *		ColumnReference against our RCL if the ColumnReference is unqualified
-		 *		or if it is qualified with our exposed name.
-		 */
+		// post 681, 1 may be no longer needed. 5 is the default case
+		// now but what happens if the condition is false? Investigate.
 		if (columnReference.getGeneratedToReplaceAggregate()) // 1
 		{
 			resultColumn = resultColumns.getResultColumn(columnReference.getColumnName());
-		}
-		else if (generatedForGroupByClause && generatedForHavingClause &&
-			     (columnsTableName != null || 
-			      columnReference.getClause() != ValueNode.IN_SELECT_LIST)) // 2
-		{
-			if (SanityManager.DEBUG)
-			{
-				SanityManager.ASSERT(correlationName == null,
-					"correlationName expected to be null");
-				SanityManager.ASSERT(subquery instanceof SelectNode,
-					"subquery expected to be instanceof SelectNode, not " +
-					subquery.getClass().getName());
-			}
-
-			SelectNode		select = (SelectNode) subquery;
-
-			resultColumn = select.getFromList().bindColumnReference(columnReference);
-
-			/* Find and return the matching RC from our RCL.
-			 * (Not an error if no match found.  Let ColumnReference deal with it.
-			 */
-			if (resultColumn != null)
-			{
-				/* Is there a matching resultColumn in the subquery's RCL? */
-				resultColumn = subquery.getResultColumns().findParentResultColumn(
-												resultColumn);
-				if (resultColumn != null)
-				{
-					/* Is there a matching resultColumn in our RCL? */
-					resultColumn = resultColumns.findParentResultColumn(
-												resultColumn);
-				}
-			}
-		}
-		else if ((generatedForHavingClause && ! generatedForGroupByClause) // 3
-			 && (columnReference.getClause() != ValueNode.IN_SELECT_LIST) )
-		{
-		    resultColumn = null;
-		}
-		else if (generatedForGroupByClause) // 4
-		{
-		        resultColumn = resultColumns.getResultColumn(
-								     columnsTableName,
-								     columnReference.getColumnName());
 		}
 		else if (columnsTableName == null || columnsTableName.equals(correlationName)) // 5?
 		{
@@ -677,14 +559,8 @@ public class FromSubquery extends FromTable
 			 */
 			TableName tableName;
 
-			if (correlationName == null && generatedForGroupByClause)
-			{
-				tableName = makeTableName(null, resultColumn.getTableName());
-			}
-			else
-			{
-				tableName = exposedName;
-			}
+			tableName = exposedName;
+
 			valueNode = (ValueNode) getNodeFactory().getNode(
 											C_NodeTypes.COLUMN_REFERENCE,
 											columnName,

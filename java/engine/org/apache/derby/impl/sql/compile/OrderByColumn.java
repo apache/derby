@@ -197,34 +197,6 @@ public class OrderByColumn extends OrderedColumn {
 	{
         ResultColumnList targetCols = target.getResultColumns();
 
-        // If the target is generated for a select node then we must also pull the order by column
-        // into the select list of the subquery.
-        if((target instanceof SelectNode) && ((SelectNode) target).getGeneratedForGroupbyClause())
-        {
-            if( SanityManager.DEBUG)
-                SanityManager.ASSERT( target.getFromList().size() == 1
-                                      && (target.getFromList().elementAt(0) instanceof FromSubquery)
-                                      && targetCols.size() == 1
-                                      && targetCols.getResultColumn(1) instanceof AllResultColumn,
-                                      "Unexpected structure of selectNode generated for a group by clause");
-
-            ResultSetNode subquery = ((FromSubquery) target.getFromList().elementAt(0)).getSubquery();
-            pullUpOrderByColumn( subquery);
-            if( resultCol == null) // The order by column is referenced by number
-                return;
-
-            // ResultCol is in the subquery's ResultColumnList. We have to transform this OrderByColumn
-            // so that it refers to the column added to the subquery. We assume that the select list
-            // in the top level target is a (generated) AllResultColumn node, so the this order by expression
-            // does not have to be pulled into the the top level ResultColumnList.  Just change this
-            // OrderByColumn to be a reference to the added column. We cannot use an integer column
-            // number because the subquery can have a '*' in its select list, causing the column
-            // number to change when the '*' is expanded.
-            resultCol = null;
-            targetCols.copyOrderBySelect( subquery.getResultColumns());
-            return;
-        }
-
         if(expression instanceof ColumnReference){
 
 			ColumnReference cr = (ColumnReference) expression;
