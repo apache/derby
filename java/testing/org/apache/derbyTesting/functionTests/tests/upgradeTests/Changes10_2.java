@@ -57,6 +57,13 @@ public class Changes10_2 extends UpgradeChange {
         
         suite.addTestSuite(Changes10_2.class);
         
+        // Encryption only support on J2SE or higher.
+        if (JDBC.vmSupportsJDBC3())
+        {
+            suite.addTest(new Changes10_2("changeEncryptionFromNone"));
+            suite.addTest(new Changes10_2("changeEncryptionFromEncryptedDatabase"));
+        }
+        
         return suite;
     }
 
@@ -346,7 +353,7 @@ public class Changes10_2 extends UpgradeChange {
      * @throws SQLException
      */
 
-    public void testChangeEncryptionFromNone() throws SQLException
+    public void changeEncryptionFromNone() throws SQLException
     {
         DataSource ds = JDBCDataSource.getDataSourceLogical("NO_ENCRYPT_10_2");
         
@@ -418,7 +425,7 @@ public class Changes10_2 extends UpgradeChange {
      * @throws SQLException
      */
 
-    public void testChangeEncryptionFromEncryptedDatabase() throws SQLException
+    public void changeEncryptionFromEncryptedDatabase() throws SQLException
     {
         DataSource ds = JDBCDataSource.getDataSourceLogical("ENCRYPT_10_2");
         
