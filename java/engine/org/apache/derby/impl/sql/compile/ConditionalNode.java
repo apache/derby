@@ -125,6 +125,235 @@ public class ConditionalNode extends ValueNode
 		thenElseList.setClause(clause);
 	}
 
+	private boolean isCastNode(ValueNode node) {
+		if (node.getNodeType() == C_NodeTypes.CAST_NODE)
+			return true;
+		else
+			return false;
+	}
+
+	private boolean isCastToChar(CastNode node) {
+		if (node.castTarget.getTypeName().equals(TypeId.CHAR_NAME))
+			return true;
+		else
+			return false;
+	}
+
+	/**
+	 * Checks to see if the provided node represents
+	 * a parsing of an SQL NULL.
+	 *
+	 * @param node  The node to check.
+	 * @return      True if this node represents a SQL NULL, false otherwise.
+	 */
+	private boolean isNullNode(ValueNode node) {
+		if (isCastNode(node) &&
+			(((CastNode)node).castOperand instanceof UntypedNullConstantNode))
+			return true;
+		else
+			return false;
+	}
+
+ 	/**
+	 * Checks to see if the provided node represents
+	 * a ConditionalNode.
+	 *
+	 * @param node    The node to check.
+	 * @return        True if this node is a CondtionalNode, false otherwise.
+	 */
+	private boolean isConditionalNode(ValueNode node) {
+		if (node.getNodeType() == C_NodeTypes.CONDITIONAL_NODE)
+			return true;
+		else
+			return false;
+	}
+
+	private boolean shouldCast(ValueNode newNode, ValueNode oldNode)
+	throws StandardException
+	{
+		return shouldCast(newNode.getTypeServices(), oldNode.getTypeServices());
+	}
+
+	private boolean shouldCast(DataTypeDescriptor newType, ValueNode oldNode)
+	throws StandardException
+	{
+		return shouldCast(newType, oldNode.getTypeServices());
+	}
+
+	private boolean shouldCast(ValueNode newNode, DataTypeDescriptor oldType)
+	throws StandardException
+	{
+		return shouldCast(newNode.getTypeServices(), oldType);
+	}
+
+	/**
+	 * Checks to see if oldType should be casted to the newType.
+	 * Returns TRUE if the two DataTypeDescriptors have different
+	 * TypeID's or if the oldType is NULL.  Returns FALSE if the newType is
+	 * NULL or if the two Types are identical.
+	 *
+	 * @param newType    The type to cast oldType to if they're different.
+	 * @param oldType    The type that should be casted to the newType if
+	 *                   they're different.
+	 * @return           False if the newType is null or they have the same
+	 *                   TypeId, true otherwise.
+	 */
+	private boolean shouldCast(DataTypeDescriptor newType,
+		DataTypeDescriptor oldType) throws StandardException
+	{
+		if ((newType != null) &&
+			((oldType == null) ||
+			 (!oldType.getTypeId().equals(newType.getTypeId()))))
+			return true;
+		else
+			return false;
+	}
+
+	/**
+	 * This method is a 'prebind.'  We need to determine what the types of
+	 * the nodes are going to be before we can set all the SQLParsed NULL's
+	 * to the appropriate type.  After we bind, however, we want to ignore
+	 * the SQLParsed NULL's which will be bound to CHAR.  Also, we might
+	 * have to delve into the CASE Expression tree.
+	 *
+	 * @param thenElseList    The thenElseList (recursive method)
+	 * @param fromList        The fromList (required for Column References).
+	 *
+	 * @exception             StandardException Thrown on error.
+	 */
+	private DataTypeDescriptor findType(ValueNodeList thenElseList,
+		FromList fromList) throws StandardException
+	{
+		/* We need to "prebind" because we want the Types.  Provide
+		 * dummy SubqueryList and AggreateList (we don't care)
+		 */
+
+		ValueNode thenNode =
+			((ValueNode)thenElseList.elementAt(0)).bindExpression(
+				fromList, new SubqueryList(), new Vector());
+
+		ValueNode elseNode =
+			((ValueNode)thenElseList.elementAt(1)).bindExpression(
+				fromList, new SubqueryList(), new Vector());
+
+		DataTypeDescriptor thenType = thenNode.getTypeServices();
+		DataTypeDescriptor elseType = elseNode.getTypeServices();
+		DataTypeDescriptor theType = null;
+
+		/* If it's not a Cast Node or a Conditional Node, then we'll
+		 * use this type.
+		 */
+		if ((thenType != null) && !isCastNode(thenNode)
+			&& !isConditionalNode(thenNode))
+		{
+			return thenType;
+		}
+
+		/* If it's not cast to CHAR it isn't a SQL parsed NULL, so
+		 * we can use it.
+		 */
+		if (isCastNode(thenNode) && !isCastToChar((CastNode)thenNode))
+			return ((CastNode)thenNode).castTarget;
+
+		/* If we get here, we can't use the THEN node type, so we'll
+		 * use the ELSE node type
+		 */
+		if ((elseType != null) && !isCastNode(elseNode)
+			&& !isConditionalNode(elseNode))
+		{
+			return elseType;
+		}
+
+		if (isCastNode(elseNode) && !isCastToChar((CastNode)elseNode))
+			return ((CastNode)elseNode).castTarget;
+
+		/* If we get here, it means that we've got a conditional and a
+		 * SQL parsed NULL or two conditionals.
+		 */
+		if (isConditionalNode(thenNode))
+		{
+			theType =
+				findType(((ConditionalNode)thenNode).thenElseList, fromList);
+		}
+
+		if (theType != null) return theType;
+
+		// Two conditionals and the first one was all SQL parsed NULLS.
+		if (isConditionalNode(elseNode))
+		{
+			theType =
+				findType(((ConditionalNode)elseNode).thenElseList, fromList);
+		}
+
+		if (theType != null) return theType;
+		return null;
+	}
+	/**
+	 * This recursive method will hunt through the ValueNodeList thenElseList
+	 * looking for SQL NULL's.  If it finds any, it casts them to the provided
+	 * castType.
+	 *
+	 * @param thenElseList    The thenElseList to update.
+	 * @param castType        The type to cast SQL parsed NULL's too.
+	 *
+	 * @exception             StandardException Thrown on error.
+	 */
+	private void recastNullNodes(ValueNodeList thenElseList,
+	                           DataTypeDescriptor castType)
+	 throws StandardException {
+
+		// Don't do anything if we couldn't find a castType.
+		if (castType == null) return;
+
+		ValueNode thenNode = (ValueNode)thenElseList.elementAt(0);
+		ValueNode elseNode = (ValueNode)thenElseList.elementAt(1);
+
+		// check if the "then" node is NULL
+		if (isNullNode(thenNode) && shouldCast(castType, thenNode)) {
+			thenElseList.setElementAt(recastNullNode(thenNode, castType), 0);
+		// otherwise recurse if it's a conditional
+		} else if (isConditionalNode(thenNode)) {
+			recastNullNodes(((ConditionalNode)thenNode).thenElseList, castType);
+		}
+		// check if the "else node is NULL
+		if (isNullNode(elseNode) && shouldCast(castType, elseNode)) {
+			thenElseList.setElementAt(recastNullNode(elseNode, castType), 1);
+		// otherwise recurse if it's a conditional
+		} else if (isConditionalNode(elseNode)) {
+			recastNullNodes(((ConditionalNode)elseNode).thenElseList, castType);
+		}
+	}
+
+	/**
+	 * recastNullNode casts the nodeToCast node to the typeToUse.
+	 *
+	 * recastNullNode is called by recastNullNodes.  It is called when the
+	 * nodeToCast is an UntypedNullConstantNode that's been cast by the
+	 * SQLParser to a CHAR.  The node needs to be recasted to the same type
+	 * of the other nodes in order to prevent the type compatibility error
+	 * 42X89 from occuring.  SQL Standard requires that:
+	 *
+	 *  VALUES CASE WHEN 1=2 THEN 3 ELSE NULL END
+	 *
+	 * returns NULL and not an error message.
+	 *
+	 * @param nodeToCast    The node that represents a SQL NULL value.
+	 * @param typeToUse     The type which the nodeToCast should be
+	 *                      recasted too.
+	 *
+	 * @exception StandardException Thrown on error.
+	 */
+	private QueryTreeNode recastNullNode(ValueNode nodeToCast,
+		DataTypeDescriptor typeToUse) throws StandardException
+	{
+		QueryTreeNode cast = getNodeFactory().getNode(
+					C_NodeTypes.CAST_NODE,
+					((CastNode)nodeToCast).castOperand,
+					typeToUse,
+					getContextManager());
+		return cast;
+	}
+
 	/**
 	 * Bind this expression.  This means binding the sub-expressions,
 	 * as well as figuring out what the return type is for this expression.
@@ -168,7 +397,10 @@ public class ConditionalNode extends ValueNode
 								bcon.getLeftOperand().getTypeServices(), true),
 						getContextManager());
 			thenElseList.setElementAt(cast,0);
-		}
+		} else {
+			recastNullNodes(thenElseList, findType(thenElseList, fromList));
+ 		}
+
 		thenElseList.bindExpression(fromList,
 			subqueryList,
 			aggregateVector);
