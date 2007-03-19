@@ -237,9 +237,9 @@ public class SecureServerTest extends BaseTestCase
                  );
         }
 
-        testSetup = new ServerSetup( testSetup, TestConfiguration.DEFAULT_HOSTNAME, TestConfiguration.DEFAULT_PORT );
+        Test        test = TestConfiguration.defaultServerDecorator( testSetup );
 
-        Test        test = SecurityManagerSetup.noSecurityManager( testSetup );
+        test = SecurityManagerSetup.noSecurityManager( test );
 
         return test;
     }

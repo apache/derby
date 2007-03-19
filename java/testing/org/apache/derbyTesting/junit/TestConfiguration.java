@@ -255,6 +255,7 @@ public class TestConfiguration {
                 suiteName(testClass)+":client");
         return clientServerDecorator(suite);
     }
+
     /**
      * Return a decorator for the passed in tests that sets the
      * configuration for the client to be Derby's JDBC client
@@ -269,14 +270,27 @@ public class TestConfiguration {
      */
     public static Test clientServerDecorator(Test suite)
     {
+        Test test = new NetworkServerTestSetup(suite, false);
+            
+        return defaultServerDecorator(test);
+    }
+   
+    /**
+     * Decorate a test to use suite's default host and port.
+     */
+    public static Test defaultServerDecorator(Test test)
+    {
         // Need to have network server and client and not
         // running in J2ME (JSR169).
         if (!(Derby.hasClient() && Derby.hasServer())
                 || JDBC.vmSupportsJSR169())
             return new TestSuite("empty: no network server support");
-                   
-        Test test = new NetworkServerTestSetup(suite, false);
-            
+
+        //
+        // This looks bogus to me. Shouldn't this get the hostname and port
+        // which are specific to this test run (perhaps overridden on the
+        // command line)?
+        //
         return new ServerSetup(test, DEFAULT_HOSTNAME, DEFAULT_PORT);
     }
    
