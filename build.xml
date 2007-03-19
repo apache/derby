@@ -1597,43 +1597,7 @@
 
   </target>
 
-  <target name="gump_split_1" depends="insane,init,state,parsers,shared">
-    <ant dir="${derby.engine.src.dir}" target="engine_169"/>
-    <ant dir="${derby.engine.dir}/iapi" target="compile_iapi_error"/>
-    <ant dir="${derby.engine.dir}/iapi/jdbc" target="compile_iapi_jdbc_jsr169"/>
-    <ant dir="${derby.engine.dir}/iapi/jdbc" target="compile_iapi_jdbc_stmt"/>
-  </target>
-
-  <target name="gump_split_2">
-    <ant dir="${derby.engine.dir}/iapi/jdbc" target="compile_iapi_jdbc_jdbc2"/>
-  </target>
-
-  <target name="gump_split_3">
-    <ant dir="${derby.engine.dir}/iapi" target="compile_iapi_jdbc"/>
-    <ant dir="${derby.engine.dir}/impl" target="compile"/>
-    <ant dir="${derby.engine.dir}/impl/jdbc" target="compile_jsr169"/>
-  </target>
-
-  <target name="gump_split_4">
-    <ant dir="${derby.engine.dir}/impl/jdbc" target="compile_jdbc2"/>
-  </target>
-
-  <target name="gump_split_5">
-    <ant dir="${derby.engine.dir}/impl"/>
-    <ant dir="${derby.engine.dir}/jdbc" target="compile_jsr169"/>
-  </target>
-  
-  <target name="gump_split_6">
-    <ant dir="${derby.engine.dir}/jdbc" target="compile_jdbc2"/>
-  </target>
-
-  <target name="gump_split_7" depends="buildsource"/>
-  
-  <target name="gump_split_8">
-    <ant dir="${derby.testing.src.dir}/${derby.testing.dir}/functionTests/tests/junitTests/compatibility" target="compilex"/>
-  </target>
-  
-  <target name="gump_split_9" depends="all,buildjars,javadoc"/>
+  <target name="gump_all" depends="all,buildjars,javadoc"/>
 
   <target name="snapshot" depends="clobber,snapshotError,init,initjars">
     <antcall target="insane"/>
