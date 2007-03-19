@@ -46,6 +46,7 @@ public class OrderByColumn extends OrderedColumn {
 	private ResultColumn	resultCol;
 	private boolean			ascending = true;
 	private ValueNode expression;
+	private OrderByList     list;
     /**
      * If this sort key is added to the result column list then it is at result column position
      * 1 + resultColumnList.size() - resultColumnList.getOrderBySelect() + addedColumnOffset
@@ -140,14 +141,25 @@ public class OrderByColumn extends OrderedColumn {
 	/**
 	 * Bind this column.
 	 *
+	 * During binding, we may discover that this order by column was pulled
+	 * up into the result column list, but is now a duplicate, because the
+	 * actual result column was expanded into the result column list when "*"
+	 * expressions were replaced with the list of the table's columns. In such
+	 * a situation, we will end up calling back to the OrderByList to
+	 * adjust the addedColumnOffset values of the columns; the "oblist"
+	 * parameter exists to allow that callback to be performed.
+	 *
 	 * @param target	The result set being selected from
+	 * @param oblist    OrderByList which contains this column
 	 *
 	 * @exception StandardException		Thrown on error
 	 * @exception StandardException		Thrown when column not found
 	 */
-	public void bindOrderByColumn(ResultSetNode target)
+	public void bindOrderByColumn(ResultSetNode target, OrderByList oblist)
 				throws StandardException 
 	{
+		this.list = oblist;
+
 		if(expression instanceof ColumnReference){
 		
 			ColumnReference cr = (ColumnReference) expression;
@@ -201,8 +213,8 @@ public class OrderByColumn extends OrderedColumn {
 
 			ColumnReference cr = (ColumnReference) expression;
 
-			resultCol = targetCols.getOrderByColumn(cr.getColumnName(),
-                                                    cr.getTableNameNode());
+			resultCol = targetCols.findResultColumnForOrderBy(
+                    cr.getColumnName(), cr.getTableNameNode());
 
 			if(resultCol == null){
 				resultCol = (ResultColumn) getNodeFactory().getNode(C_NodeTypes.RESULT_COLUMN,
@@ -333,9 +345,10 @@ public class OrderByColumn extends OrderedColumn {
 
 		ResultColumnList	targetCols = target.getResultColumns();
 
-		resultCol = targetCols.getOrderByColumn(cr.getColumnName(),
+		resultCol = targetCols.getOrderByColumnToBind(cr.getColumnName(),
 							cr.getTableNameNode(),
-							sourceTableNumber);
+							sourceTableNumber,
+							this);
         /* Search targetCols before using addedColumnOffset because select list wildcards, '*',
          * are expanded after pullUpOrderByColumn is called. A simple column reference in the
          * order by clause may be found in the user specified select list now even though it was
@@ -353,4 +366,36 @@ public class OrderByColumn extends OrderedColumn {
 
 	}
 
+	/**
+	 * Reset addedColumnOffset to indicate that column is no longer added
+	 *
+	 * An added column is one which was artificially added to the result
+	 * column list due to its presence in the ORDER BY clause, as opposed to
+	 * having been explicitly selected by the user. Since * is not expanded
+	 * until after the ORDER BY columns have been pulled up, we may add a
+	 * column, then later decide it is a duplicate of an explicitly selected
+	 * column. In that case, this method is called, and it does the following:
+	 * - resets addedColumnOffset to -1 to indicate this is not an added col
+	 * - calls back to the OrderByList to adjust any other added cols
+	 */
+	void clearAddedColumnOffset()
+	{
+		list.closeGap(addedColumnOffset);
+		addedColumnOffset = -1;
+	}
+	/**
+	 * Adjust addedColumnOffset to reflect that a column has been removed
+	 *
+	 * This routine is called when a previously-added result column has been
+	 * removed due to being detected as a duplicate. If that added column had
+	 * a lower offset than our column, we decrement our offset to reflect that
+	 * we have just been moved down one slot in the result column list.
+	 *
+	 * @param gap   offset of the column which has just been removed from list
+	 */
+	void collapseAddedColumnGap(int gap)
+	{
+		if (addedColumnOffset > gap)
+			addedColumnOffset--;
+	}
 }

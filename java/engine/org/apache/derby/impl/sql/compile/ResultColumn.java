@@ -467,6 +467,26 @@ public class ResultColumn extends ValueNode
 	}
 
 	/**
+	 * Adjust this virtualColumnId to account for the removal of a column
+	 *
+	 * This routine is called when bind processing finds and removes
+	 * duplicate columns in the result list which were pulled up due to their
+	 * presence in the ORDER BY clause, but were later found to be duplicate.
+	 * 
+	 * If this column is a virtual column, and if this column's virtual
+	 * column id is greater than the column id which is being removed, then
+	 * we must logically shift this column to the left by decrementing its
+	 * virtual column id.
+	 *
+	 * @param removedColumnId   id of the column being removed.
+	 */
+	public void collapseVirtualColumnIdGap(int removedColumnId)
+	{
+		if (columnDescriptor == null && virtualColumnId > removedColumnId)
+			virtualColumnId--;
+	}
+
+	/**
 	 * Generate a unique (across the entire statement) column name for unnamed
 	 * ResultColumns
 	 *

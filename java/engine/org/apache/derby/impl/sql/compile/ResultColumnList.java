@@ -89,8 +89,8 @@ public class ResultColumnList extends QueryTreeNodeVector
      * statement uses the "*" token to select all the columns from a table,
      * then during ORDER BY parsing we redundantly generate the columns
      * mentioned in the ORDER BY clause into the ResultColumnlist, but then
-     * later in getOrderByColumn we determine that these are duplicates and
-     * we take them back out again.
+     * later in getOrderByColumnToBind we determine that these are
+     * duplicates and we take them back out again.
      */
 
 	/*
@@ -385,18 +385,47 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * For order by, get a ResultColumn that matches the specified 
+	 * For order by column bind, get a ResultColumn that matches the specified 
 	 * columnName.
+	 *
+	 * This method is called during bind processing, in the special
+	 * "bind the order by" call that is made by CursorNode.bindStatement().
+	 * The OrderByList has a special set of bind processing routines
+	 * that analyzes the columns in the ORDER BY list and verifies that
+	 * each column is one of:
+	 * - a direct reference to a column explicitly mentioned in
+	 *   the SELECT list
+	 * - a direct reference to a column implicitly mentioned as "SELECT *"
+	 * - a direct reference to a column "pulled up" into the result
+	 *   column list
+	 * - or a valid and fully-bound expression ("c+2", "YEAR(hire_date)", etc.)
+	 *
+	 * At this point in the processing, it is possible that we'll find
+	 * the column present in the RCL twice: once because it was pulled
+	 * up during statement compilation, and once because it was added
+	 * when "SELECT *" was expanded into the table's actual column list.
+	 * If we find such a duplicated column, we can, and do, remove the
+	 * pulled-up copy of the column and point the OrderByColumn
+	 * to the actual ResultColumn from the *-expansion.
+	 *
+	 * Note that the association of the OrderByColumn with the
+	 * corresponding ResultColumn in the RCL occurs in
+	 * OrderByColumn.resolveAddedColumn.
 	 *
 	 * @param columnName	The ResultColumn to get from the list
 	 * @param tableName	The table name on the OrderByColumn, if any
 	 * @param tableNumber	The tableNumber corresponding to the FromTable with the
 	 *						exposed name of tableName, if tableName != null.
+	 * @param obc           The OrderByColumn we're binding.
 	 *
 	 * @return	the column that matches that name.
 	 * @exception StandardException thrown on ambiguity
 	 */
-	public ResultColumn getOrderByColumn(String columnName, TableName tableName, int tableNumber)
+	public ResultColumn getOrderByColumnToBind(
+            String columnName,
+            TableName tableName,
+            int tableNumber,
+            OrderByColumn obc)
 		throws StandardException
 	{
 		int				size = size();
@@ -455,6 +484,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 				{// remove the column due to pullup of orderby item
 					removeElement(resultColumn);
 					decOrderBySelect();
+					obc.clearAddedColumnOffset();
+					collapseVirtualColumnIdGap(
+							resultColumn.getColumnPosition());
 					break;
 				}
 			}
@@ -462,18 +494,58 @@ public class ResultColumnList extends QueryTreeNodeVector
 		return retVal;
 	}
 
+	/**
+	 * Adjust virtualColumnId values due to result column removal
+	 *
+	 * This method is called when a duplicate column has been detected and
+	 * removed from the list. We iterate through each of the other columns
+	 * in the list and notify them of the column removal so they can adjust
+	 * their virtual column id if necessary.
+	 *
+	 * @param gap   id of the column which was just removed.
+	 */
+	private void collapseVirtualColumnIdGap(int gap)
+	{
+		for (int index = 0; index < size(); index++)
+			((ResultColumn) elementAt(index)).collapseVirtualColumnIdGap(gap);
+	}
+
 
 	/**
 	 * For order by, get a ResultColumn that matches the specified 
 	 * columnName.
 	 *
+	 * This method is called during pull-up processing, at the very
+	 * start of bind processing, as part of
+	 * OrderByList.pullUpOrderByColumns. Its job is to figure out
+	 * whether the provided column (from the ORDER BY list) already
+	 * exists in the ResultColumnList or not. If the column does
+	 * not exist in the RCL, we return NULL, which signifies that
+	 * a new ResultColumn should be generated and added ("pulled up")
+	 * to the RCL by our caller.
+	 *
+	 * Note that at this point in the processing, we should never
+	 * find this column present in the RCL multiple times; if the
+	 * column is already present in the RCL, then we don't need to,
+	 * and won't, pull a new ResultColumn up into the RCL.
+	 *
+	 * If the caller specified "SELECT *", then the RCL at this
+	 * point contains a special AllResultColumn object. This object
+	 * will later be expanded and replaced by the actual set of
+	 * columns in the table, but at this point we don't know what
+	 * those columns are, so we may pull up an OrderByColumn
+	 * which duplicates a column in the *-expansion; such
+	 * duplicates will be removed at the end of bind processing
+	 * by OrderByList.bindOrderByColumns.
+	 *
 	 * @param columnName	The ResultColumn to get from the list
 	 * @param tableName	The table name on the OrderByColumn, if any
 	 *
-	 * @return	the column that matches that name.
+	 * @return	the column that matches that name, or NULL if pull-up needed
 	 * @exception StandardException thrown on ambiguity
 	 */
-	public ResultColumn getOrderByColumn(String columnName, TableName tableName)
+	public ResultColumn findResultColumnForOrderBy(
+                            String columnName, TableName tableName)
 		throws StandardException
 	{
 		int				size = size();
@@ -513,10 +585,10 @@ public class ResultColumnList extends QueryTreeNodeVector
 					throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_FOR_ORDER_BY, columnName);
 				}
 				else if (index >= size - orderBySelect)
-				{// remove the column due to pullup of orderby item
-					removeElement(resultColumn);
-					decOrderBySelect();
-					break;
+				{
+					SanityManager.THROWASSERT(
+							"Unexpectedly found ORDER BY column '" +
+							columnName + "' pulled up at position " +index);
 				}
 			}
 		}
@@ -3973,7 +4045,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		orderBySelect++;
 	}
 
-	public void decOrderBySelect()
+	private void decOrderBySelect()
 	{
 		orderBySelect--;
 	}

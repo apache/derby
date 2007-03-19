@@ -150,7 +150,7 @@ public class OrderByList extends OrderedColumnList
 		for (int index = 0; index < size; index++)
 		{
 			OrderByColumn obc = (OrderByColumn) elementAt(index);
-			obc.bindOrderByColumn(target);
+			obc.bindOrderByColumn(target, this);
 
 			/*
 			** Always sort if we are ordering on an expression, and not
@@ -161,6 +161,30 @@ public class OrderByList extends OrderedColumnList
 			{
 				alwaysSort = true;
 			}
+		}
+	}
+	
+	/**
+	 * Adjust addedColumnOffset values due to removal of a duplicate column
+	 *
+	 * This routine is called by bind processing when it identifies and
+	 * removes a column from the result column list which was pulled up due
+	 * to its presence in the ORDER BY clause, but which was later found to
+	 * be a duplicate. The OrderByColumn instance for the removed column
+	 * has been adjusted to point to the true column in the result column
+	 * list and its addedColumnOffset has been reset to -1. This routine
+	 * finds any other OrderByColumn instances which had an offset greater
+	 * than that of the column that has been deleted, and decrements their
+	 * addedColumOffset to account for the deleted column's removal.
+	 *
+	 * @param gap   column which has been removed from the result column list
+	 */
+	void closeGap(int gap)
+	{
+		for (int index = 0; index < size(); index++)
+		{
+			OrderByColumn obc = (OrderByColumn) elementAt(index);
+			obc.collapseAddedColumnGap(gap);
 		}
 	}
 

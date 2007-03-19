@@ -517,3 +517,20 @@ select a, b from derby147_a t order by derby147_a.b;
 -- select * from derby147_b order by b, a+2;
 -- Verify that correlation names match the table names properly:
 select t.a, sum(t.a) from derby147_a t group by t.a order by t.a;
+
+-- Tests which verify the handling of expressions in the ORDER BY list
+-- related to DERBY-1861. The issue in DERBY-1861 has to do with how the
+-- compiler handles combinations of expressions and simple columns in the
+-- ORDER BY clause, so we try a number of such combinations
+
+create table derby1861 (a int, b int, c int, d int);
+insert into derby1861 values (1, 2, 3, 4);
+select * from derby1861 order by a, b, c+2;
+select a, c from derby1861 order by a, b, c-4;
+select t.* from derby1861 t order by t.a, t.b, t.c+2;
+select a, b, a, c, d from derby1861 order by b, c-1, a;
+select * from derby1861 order by a, c+2, a;
+select * from derby1861 order by c-1, c+1, a, b, c * 6;
+select t.*, t.c+2 from derby1861 t order by a, b, c+2;
+select * from derby1861 order by 3, 1;
+select * from derby1861 order by 2, a-2;
