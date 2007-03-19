@@ -220,6 +220,10 @@ class UpgradeRun {
                 break;
             }
         }
+        else
+        {
+            suite.addTest(new BasicSetup("noConnectionAfterHardUpgrade"));
+        }
                 
         return TestConfiguration.connectionDSDecorator(suite);
     }

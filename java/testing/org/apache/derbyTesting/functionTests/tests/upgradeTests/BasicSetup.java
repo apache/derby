@@ -126,4 +126,24 @@ public class BasicSetup extends UpgradeChange {
         ps.close();
         commit();
     }
+    
+    /**
+     * Ensure that after hard upgrade (with the old version)
+     * we can no longer connect to the database.
+     */
+    public void noConnectionAfterHardUpgrade()
+    {              
+        switch (getPhase())
+        {
+        case PH_POST_HARD_UPGRADE:
+            try {
+                    getConnection();
+                } catch (SQLException e) {
+                    // Other SQL states might be valid,
+                    // once the beta flag is dropped.
+                    assertSQLState("XSLAP", e);
+                }
+            break;
+        }
+    }
 }
