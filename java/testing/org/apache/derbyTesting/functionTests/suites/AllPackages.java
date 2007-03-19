@@ -71,6 +71,14 @@ public class AllPackages extends BaseTestCase {
         // harness above the functionTests and unitTests
         // directories(packages)
         suite.addTest(org.apache.derbyTesting.unitTests.junit._Suite.suite());
+        
+        // Add the upgrade tests, though will only run tests if the
+        // System property derbyTesting.oldReleasePath is set
+        // to point at old releases. See upgradeTests._Suite
+        // for more information.
+        suite.addTest(
+           org.apache.derbyTesting.functionTests.tests.upgradeTests._Suite.suite());
+
         return suite;
     }
     
