@@ -401,6 +401,7 @@ public final class TransactionResourceImpl
 
 		if (sqlException != null) {
 			sqlException.setNextException(nextSQLException);
+            sqlException.initCause(nextSQLException);
 		}
 
 		return nextSQLException;
