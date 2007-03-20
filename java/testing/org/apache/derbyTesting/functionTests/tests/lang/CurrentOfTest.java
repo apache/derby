@@ -140,8 +140,17 @@ public class CurrentOfTest extends BaseJDBCTestCase {
     */
 	public void testDelete() throws SQLException {
 		PreparedStatement select, delete;
-		Statement delete2;
+		Statement delete1,delete2;
 		ResultSet cursor;
+		String tableRows = "select i, c from t for read only";
+		
+		delete1 = createStatement();
+		Object[][] expectedRows = new Object[][]{{new String("1956"),new String("hello world")},                                       
+												 {new String("456"),new String("hi yourself")},                                       
+												 {new String("180"),new String("rubber ducky")},                                      
+												 {new String("3"),new String("you are the one")}}; 
+		JDBC.assertFullResultSet(delete1.executeQuery(tableRows), expectedRows, true);
+		
 		select = prepareStatement("select i, c from t for update");
 		cursor = select.executeQuery(); // cursor is now open
 
@@ -159,17 +168,23 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 				+ cursor.getCursorName());
 		// TEST: delete before the cursor is on a row
 		assertStatementError("24000", delete);
-
-		// TEST: find the cursor during execution and it is on a row
 		cursor.next();
+		assertEquals(1956, cursor.getInt(1));
+		
+		// TEST: find the cursor during execution and it is on a row
 		assertUpdateCount(delete, 1);
 		// skip a row and delete another row so that two rows will
 		// have been removed from the table when we are done.
-		cursor.next(); // skip this row
+		// skip this row
 		cursor.next();
+		assertEquals(456, cursor.getInt(1));
+		cursor.next();
+		assertEquals(180, cursor.getInt(1));
 		assertUpdateCount(delete, 1);
+		
 		// TEST: delete past the last row
 		cursor.next();// skip this row
+		assertEquals(3, cursor.getInt(1));
 		assertFalse(cursor.next());
 		if (usingEmbedded())
 			assertStatementError("24000", delete);
@@ -191,6 +206,9 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 			assertStatementError("42X30", delete2,"delete from t where current of myCursor" );
 		else
 			assertStatementError("XJ202", delete2,"delete from t where current of myCursor" );
+		expectedRows = new Object[][]{{new String("456"),new String("hi yourself")},                                       
+				   					  {new String("3"),new String("you are the one")}}; 
+		JDBC.assertFullResultSet(delete1.executeQuery(tableRows), expectedRows, true);
 		delete.close();
 		delete2.close();
 		select.close();
@@ -203,9 +221,9 @@ public class CurrentOfTest extends BaseJDBCTestCase {
                 + cursor.getCursorName());
         assertTrue(cursor.next());
         assertUpdateCount(delete, 1);
+        
         delete.close();
-        
-        
+        delete1.close();        
         cursor.close();
         select.close();
         
@@ -223,8 +241,9 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 	public void testUpdate() throws SQLException {
 		PreparedStatement select;
 		PreparedStatement update;
-		Statement update2;
+		Statement select1,update2;
 		ResultSet cursor;
+		String tableRows = "select i, c from t for read only";
 
 		// these are basic tests without a where clause on the select.
 		// all rows are in and stay in the cursor's set when updated.
@@ -242,6 +261,14 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		cursor.close();
 		select.close();
 
+		//Making sure we have the correct rows in the table to begin with
+		select1 = createStatement();
+		Object[][] expectedRows = new Object[][]{{new String("1956"),new String("hello world")},                                       
+				 {new String("456"),new String("hi yourself")},                                       
+				 {new String("180"),new String("rubber ducky")},                                      
+				 {new String("3"),new String("you are the one")}}; 
+		JDBC.assertFullResultSet(select1.executeQuery(tableRows), expectedRows, true);	
+		
 		select = prepareStatement("select I, C from t for update");
 		cursor = select.executeQuery(); // cursor is now open
 
@@ -263,6 +290,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 
 		// TEST: find the cursor during execution and it is on a row
 		cursor.next();
+		assertEquals(1956,cursor.getInt(1));
 		assertUpdateCount(update, 1);
 
 		// TEST: update an already updated row; expect it to succeed.
@@ -271,11 +299,14 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		// skip a row and update another row so that two rows will
 		// have been removed from the table when we are done.
 		cursor.next(); // skip this row
+		assertEquals(456,cursor.getInt(1));
 		cursor.next();
+		assertEquals(180,cursor.getInt(1));
 		assertUpdateCount(update, 1);
 
 		// TEST: update past the last row
 		cursor.next(); // skip this row
+		assertEquals(3,cursor.getInt(1));
 		assertFalse(cursor.next());
 		assertStatementError("24000", update);
 
@@ -289,6 +320,13 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		update2 = createStatement();
 		assertStatementError("42X30", update2,"update t set i=1 where current of nosuchcursor");
 		update2.close();
+		
+		//Verifyin we have the correct updated rows in the table at the end
+		expectedRows = new Object[][]{{new String("1976"),new String("Gumby was here")},                                       
+				 {new String("456"),new String("hi yourself")},                                       
+				 {new String("190"),new String("Gumby was here")},                                      
+				 {new String("3"),new String("you are the one")}}; 
+		JDBC.assertFullResultSet(select1.executeQuery(tableRows), expectedRows, true);
 		// TEST: attempt to do positioned update before cursor execute'd
 		// TBD
 		
