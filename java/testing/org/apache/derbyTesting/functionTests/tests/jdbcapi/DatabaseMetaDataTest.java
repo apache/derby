@@ -21,6 +21,8 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -32,13 +34,16 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -66,7 +71,6 @@ import org.apache.derby.shared.common.reference.JDBC40Translation;
  * 
  *  getBestRowIdentifier
  *  getColumnPrivileges
- *  getColumns (filtering)
  *  getCrossReference
  *  getExportedKeys
  *  getImportedKeys
@@ -191,9 +195,31 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         super.tearDown();
     }
     
+    /**
+     * Default suite for running this test.
+     */
     public static Test suite() {
         return TestConfiguration.defaultSuite(DatabaseMetaDataTest.class);
-     }
+    }
+    
+    /**
+     * Return the identifiers used to create schemas,
+     * tables etc. in the order the database stores them.
+     * @return
+     */
+    private String[] getSortedIdentifiers()
+    {
+        String[] dbIDS = new String[IDS.length];
+        // Remove any quotes from user schemas and upper case
+        // those without quotes.
+        for (int i = 0; i < IDS.length; i++)
+        {          
+            dbIDS[i] = getStoredIdentifier(IDS[i]);
+        }
+        Arrays.sort(dbIDS); 
+        
+        return dbIDS;
+    }
     
     private final DatabaseMetaData getDMD() throws SQLException
     {
@@ -681,7 +707,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void testGetSchemasNoModify() throws SQLException {
+    public void testGetSchemasReadOnly() throws SQLException {
         
         DatabaseMetaData dmd = getDMD();
          
@@ -804,7 +830,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException
      * @throws IOException 
      */
-    public void testGetTablesNoModify() throws SQLException, IOException {
+    public void testGetTablesReadOnly() throws SQLException, IOException {
         
         DatabaseMetaData dmd = getDMD();
         
@@ -892,16 +918,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         String[] userTableOnly = new String[] {"TABLE"};
         
         // Get the list of idenifiers from IDS as the database
-        // would store them in the order required.
-        
-        String[] dbIDS = new String[IDS.length];
-        // Remove any quotes from user schemas and upper case
-        // those without quotes.
-        for (int i = 0; i < IDS.length; i++)
-        {          
-            dbIDS[i] = getStoredIdentifier(IDS[i]);
-        }
-        Arrays.sort(dbIDS);     
+        // would store them in the order required.      
+        String[] dbIDS = getSortedIdentifiers();    
                
         // Check the contents, ordered by TABLE_CAT, TABLE_SCHEMA, TABLE_NAME
         rs = getDMDTables(dmd, null, null, null, userTableOnly);
@@ -994,7 +1012,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                     dbIDS.length, rowPosition);
          }        
     }
-    
+      
   
     /**
      * Execute and check the ODBC variant of getTables which
@@ -1120,12 +1138,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * for a SELECT * from the table. All columns in
      * all tables are checked.
      */
-    public void testGetColumnsNoModify() throws SQLException
+    public void testGetColumnsReadOnly() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         ResultSet rs = dmd.getColumns(null, null, null, null);
         checkColumnsShape(rs);
-        crossCheckGetColumnsAndResultSetMetaData(rs);
+        crossCheckGetColumnsAndResultSetMetaData(rs, false);
         
     }
     
@@ -1134,7 +1152,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void testGetColumns() throws SQLException {
+    public void testGetColumnsModify() throws SQLException {
            
         // skip XML datatype as our cross check with
         // ResultSetMetaData will fail
@@ -1142,9 +1160,241 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // First cross check all the columns in the database
         // with the ResultSetMetaData.
-        testGetColumnsNoModify();
+        testGetColumnsReadOnly();
         
-        // TODO: pattern matching on getColumns
+        Random rand = new Random();
+        String[] dbIDS = getSortedIdentifiers();
+            
+        
+        DatabaseMetaData dmd = this.getDMD();
+        
+        
+        for (int i = 1; i < 20; i++) {
+            int seenColumnCount = 0;
+            // These are the pattern matching parameters
+            String schemaPattern = getPattern(rand, dbIDS);
+            String tableNamePattern = getPattern(rand, dbIDS);
+            String columnNamePattern = getPattern(rand, dbIDS);
+        
+            ResultSet rs = dmd.getColumns(null,
+                schemaPattern, tableNamePattern, columnNamePattern);
+            
+            
+            checkColumnsShape(rs);
+            
+            while (rs.next())
+            {
+                String schema = rs.getString("TABLE_SCHEM");
+                String table = rs.getString("TABLE_NAME");
+                String column = rs.getString("COLUMN_NAME");
+                
+                assertMatchesPattern(schemaPattern, schema);
+                assertMatchesPattern(tableNamePattern, table);
+                assertMatchesPattern(columnNamePattern, column);
+                
+                
+                seenColumnCount++;
+            }
+            rs.close();
+            
+            // Re-run to check the correct data is returned
+            // when filtering is enabled
+            rs = dmd.getColumns(null,
+                    schemaPattern, tableNamePattern, columnNamePattern);
+            crossCheckGetColumnsAndResultSetMetaData(rs, true);
+            
+            // Now re-execute fetching all schemas, columns etc.
+            // and see we can the same result when we "filter"
+            // in the application
+            int appColumnCount = 0;
+            rs = dmd.getColumns(null,null, null, null);
+            
+            while (rs.next())
+            {
+                String schema = rs.getString("TABLE_SCHEM");
+                String table = rs.getString("TABLE_NAME");
+                String column = rs.getString("COLUMN_NAME");
+                
+                if (!doesMatch(schemaPattern, 0, schema, 0))
+                    continue;               
+                if (!doesMatch(tableNamePattern, 0, table, 0))
+                    continue;
+                if (!doesMatch(columnNamePattern, 0, column, 0))
+                    continue;
+                
+                appColumnCount++;
+            }
+            rs.close();
+            
+            assertEquals("Mismatched column count on getColumns() filtering",
+                    seenColumnCount, appColumnCount);    
+        }       
+    }
+    
+    
+    private void assertMatchesPattern(String pattern, String result)
+    {       
+        if (!doesMatch(pattern, 0, result, 0))
+        {
+            fail("Bad pattern matching:" + pattern + 
+                            " result:" + result);
+        }
+
+    }
+     
+    /**
+     * See if a string matches the pattern as defined by
+     * DatabaseMetaData. By passing in non-zero values
+     * can check sub-sets of the pattern against the
+     * sub strings of the result.
+     * <BR>
+     * _ matches a single character
+     * <BR>
+     * % matches zero or more characters
+     * <BR>
+     * Other characters match themselves.
+     * @param pattern Pattern
+     * @param pp Position in pattern to start the actual pattern from
+     * @param result result string
+     * @param rp position in result to starting checking
+     * @return
+     */
+    private boolean doesMatch(String pattern, int pp,
+            String result, int rp)
+    {
+        // Find a match
+        for (;;)
+        {
+            if (pp == pattern.length() && rp == result.length())
+                return true;
+            
+            // more characters to match in the result but
+            // no more pattern.
+            if (pp == pattern.length())
+                return false;
+            
+            char pc = pattern.charAt(pp);
+            if (pc == '_')
+            {
+                // need to match a single character but
+                // exhausted result, so no match.
+                if (rp == result.length())
+                    return false;
+                
+                pp++;
+                rp++;
+            }
+            else if (pc == '%')
+            {
+                // % at end, complete match regardless of
+                // position of result since % matches zero or more.
+                if (pp == pattern.length() - 1)
+                {
+                    return true;
+                }
+                
+                // Brut force, we have a pattern like %X
+                // and we are say in the third character of
+                // abCdefgX
+                // then start a 'CdefgX' and look for a match,
+                // then 'defgX' etc.
+                for (int sp = rp; sp < result.length(); sp++)
+                {
+                    if (doesMatch(pattern, pp+1, result, sp))
+                    {
+                        // Have a match for the pattern after the %
+                        // which means we have a match for the pattern
+                        // with the % since we can match 0 or mor characters
+                        // with %.
+                        return true;
+                    }
+                }
+                
+                // Could not match the pattern after the %
+                return false;
+          }
+            else
+            {
+                // need to match a single character but
+                // exhausted result, so no match.
+                if (rp == result.length())
+                    return false;
+                
+                // Single character, must match exactly.
+                if (pc != result.charAt(rp))
+                {
+                    //Computer says no.
+                    return false;
+                }
+                pp++;
+                rp++;
+            }
+            
+        }
+        
+    }
+    
+    private String getPattern(Random rand, String[] dbIDS)
+    {
+        int y = rand.nextInt(100);
+        if (y < 10)
+            return "%"; // All
+        if (y < 30)
+            return dbIDS[rand.nextInt(dbIDS.length)]; // exact match
+        
+        String base;
+        if (y < 40)
+        {
+            // Base for some pattern that can never match
+            base = "XxZZzXXZZZxxXxZz";
+        }
+        else
+        {
+            base = dbIDS[rand.nextInt(dbIDS.length)];
+        }
+        
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < base.length();)
+        {
+            int x = rand.nextInt(10);
+            if (x < 5)
+                x = 0; // bias towards keeping the characters.
+            
+            boolean inWild;
+            if (sb.length() == 0)
+                inWild = false;
+            else
+            {
+                char last = sb.charAt(sb.length() - 1);
+                inWild = last == '_' || last == '%';
+            }
+
+            if (x == 0)
+            {
+                // character from base
+                sb.append(base.charAt(i++));
+            }
+            else if (x == 5)
+            {
+                i++;
+               // single character match
+                if (!inWild)
+                    sb.append('_');
+
+            }
+            else
+            {
+                i += (x - 5);
+                
+                // replace a number of characters with %
+                if (!inWild)
+                    sb.append('%');
+               
+            }
+        }
+        
+        // Some pattern involving 
+        return sb.toString();
     }
     
     /**
@@ -1157,7 +1407,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @param rs
      * @throws SQLException
      */
-    private void crossCheckGetColumnsAndResultSetMetaData(ResultSet rs)
+    private void crossCheckGetColumnsAndResultSetMetaData(ResultSet rs,
+            boolean partial)
     throws SQLException
     {
         Statement s = createStatement();
@@ -1169,14 +1420,17 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             ResultSet rst = s.executeQuery(
                 "SELECT * FROM " + JDBC.escape(schema, table));
             ResultSetMetaData rsmdt = rst.getMetaData();
+
                      
             for (int col = 1; col <= rsmdt.getColumnCount() ; col++)
             {
-                if (col != 1)
-                     assertTrue(rs.next());
+                if (!partial) {
+                    if (col != 1)
+                        assertTrue(rs.next());
                 
-                assertEquals("ORDINAL_POSITION",
+                    assertEquals("ORDINAL_POSITION",
                             col, rs.getInt("ORDINAL_POSITION"));
+                }
                 
                 assertEquals("TABLE_CAT",
                         "", rs.getString("TABLE_CAT"));
@@ -1186,6 +1440,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                         table, rs.getString("TABLE_NAME"));
                 
                 crossCheckGetColumnRowAndResultSetMetaData(rs, rsmdt);
+                if (partial)
+                    break;
                 
             }
             rst.close();
