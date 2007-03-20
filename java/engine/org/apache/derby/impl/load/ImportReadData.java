@@ -105,7 +105,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
 
 
   // variables realted to reading lob data from files.
-  private ImportLobFile lobFile; // lob file object 
+  private ImportLobFile[] lobFileHandles; // lob file handle object 
   private String lobFileName; // current file name
   private int lobOffset; // offset of the current large object
   private int lobLength; //length of the current large object
@@ -153,6 +153,9 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
     //read the first row to find how many columns make a row and then save that
     //column information for further use
     loadMetaData();
+
+    lobFileHandles = new ImportLobFile[numberOfColumns];
+
   }
 
   //just a getter returning number of columns for a row in the data file
@@ -281,9 +284,14 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
     }
 
     // close external lob file resources.
-    if (lobFile !=null) {
-        lobFile.close();
+    if (lobFileHandles != null) {
+        for (int i = 0 ; i < numberOfColumns ; i++) 
+        {
+            if(lobFileHandles[i] != null) 
+                lobFileHandles[i].close();
+        }
     }
+
   }
 
   //actually looks at the data file to find how many columns make up a row
@@ -934,22 +942,51 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
      * to external file is stored in the main import file.
      */
 
+    
     /**
      * Returns a clob columnn data stored at the specified location.
      * @param lobLocationStr location of the clob data.
+     * @param colIndex number of the column. starts at 1.      
      * @exception  SQLException  on any errors. 
      */
-    String getClobColumnFromExtFile(String lobLocationStr) 
+    String getClobColumnFromExtFileAsString(String lobLocationStr, int colIndex) 
         throws SQLException 
     {
 		try {
-            initExternalLobFile(lobLocationStr);
+            initExternalLobFile(lobLocationStr, colIndex);
             if (lobLength == -1 ){
                 // lob length -1 indicates columnn value is a NULL, 
                 // just return null. 
                 return null;
             } else {
-                return lobFile.getString(lobOffset,lobLength);
+                return lobFileHandles[colIndex-1].getString(lobOffset,lobLength);
+            }
+            
+		}catch(Exception ex) {
+			throw LoadError.unexpectedError(ex);
+		}
+	}
+
+
+    /**
+     * Returns a clob columnn data stored at the specified location as
+     * a java.sql.Clob object. 
+     * @param lobLocationStr location of the clob data.
+     * @param colIndex number of the column. starts at 1. 
+     * @exception  SQLException  on any errors. 
+     */
+    java.sql.Clob getClobColumnFromExtFile(String lobLocationStr, int colIndex) 
+        throws SQLException 
+    {
+		try {
+            initExternalLobFile(lobLocationStr, colIndex);
+            if (lobLength == -1 ){
+                // lob length -1 indicates columnn value is a NULL, 
+                // just return null. 
+                return null;
+            } else {
+                return new ImportClob(lobFileHandles[colIndex -1],
+                                      lobOffset,lobLength);
             }
             
 		}catch(Exception ex) {
@@ -961,19 +998,21 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
      * Returns a blob columnn data stored at the specified location as
      * a java.sql.Blob object. 
      * @param lobLocationStr location of the clob data.
+     * @param colIndex number of the column. starts at 1.                   
      * @exception  SQLException  on any errors. 
      */
-    java.sql.Blob getBlobColumnFromExtFile(String lobLocationStr)
+    java.sql.Blob getBlobColumnFromExtFile(String lobLocationStr, int colIndex)
         throws SQLException
     {
-        initExternalLobFile(lobLocationStr);
+        initExternalLobFile(lobLocationStr, colIndex);
         if (lobLength == -1) {
             // lob length -1 indicates columnn value is a NULL, 
             // just return null. 
             return null;
         }
         else {
-            return new ImportBlob(lobFile, lobOffset, lobLength);
+            return new ImportBlob(lobFileHandles[colIndex -1], 
+                                  lobOffset, lobLength);
         }
     }
 
@@ -983,9 +1022,10 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
      * the file on first  invocaton. 
      *
      * @param lobLocationStr location of the clob data.
+     * @param colIndex number of the column. starts at 1.
      * @exception  SQLException  on any errors. 
      */
-    private void initExternalLobFile(String lobLocationStr) 
+    private void initExternalLobFile(String lobLocationStr, int colIndex) 
         throws SQLException 
     {
 		// extract file name, offset, and the length from the 
@@ -1004,20 +1044,20 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
                                      offsetIndex+1, 
                                      lengthIndex));
         lobFileName = lobLocationStr.substring(0 , offsetIndex);
-
-        if (lobFile == null) {
+        if (lobFileHandles[colIndex-1] == null) {
             // open external file where the lobs are stored.
             try {
-                lobFile = new ImportLobFile(lobFileName, 
-                                            controlFileReader.getDataCodeset());
+                // each lob column in the table has it's own file handle. 
+                // separate file handles are must, lob stream objects
+                // can not be reused until the whole row is inserted.
+                lobFileHandles[colIndex-1] = new ImportLobFile(lobFileName, 
+                                         controlFileReader.getDataCodeset());
             }catch(Exception ex) {
                 throw LoadError.unexpectedError(ex);
             }
         }
     }
 }
-
-
 
 
 

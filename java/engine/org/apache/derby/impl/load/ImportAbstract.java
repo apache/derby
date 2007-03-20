@@ -145,12 +145,13 @@ abstract class ImportAbstract extends VTITemplate {
 
     if (columnIndex <= numberOfColumns) {
 		String val = nextRow[columnIndex-1];
-		if (isColumnInExtFile(columnIndex)) {
+        if (isColumnInExtFile(columnIndex)) {
             // a clob column data is stored in an external 
             // file, the reference to it is in the main file. 
             // read the data from the external file using the 
             // reference from the main file. 
-			val = importReadData.getClobColumnFromExtFile(val);
+			val = importReadData.getClobColumnFromExtFileAsString(val, 
+                                                                  columnIndex);
         }
 		wasNull = (val == null);
 		return val;
@@ -159,6 +160,33 @@ abstract class ImportAbstract extends VTITemplate {
        throw LoadError.invalidColumnNumber(numberOfColumns);
     }
   }
+
+
+    /**
+     * Returns <code> java.sql.Clob </code> type object that 
+     * contains the columnn data from the import file. 
+     * @param columnIndex number of the column. starts at 1.
+     * @exception SQLException if any occurs during create of the clob object.
+     */
+	public java.sql.Clob getClob(int columnIndex) throws SQLException {
+
+        java.sql.Clob clob = null;
+		if (lobsInExtFile) 
+        {
+            // lob data is in another file, read from the external file.
+            clob = importReadData.getClobColumnFromExtFile(
+                                         nextRow[columnIndex-1], columnIndex);
+        } else {
+            // data is in the main export file.
+            String data =  nextRow[columnIndex-1];
+            if (data != null) {
+                clob = new ImportClob(data);                
+            }
+        }
+        
+        wasNull = (clob == null);
+        return clob;
+	}
 
 	
     /**
@@ -174,7 +202,7 @@ abstract class ImportAbstract extends VTITemplate {
         {
             // lob data is in another file, read from the external file.
             blob = importReadData.getBlobColumnFromExtFile(
-                                         nextRow[columnIndex-1]);
+                                         nextRow[columnIndex-1], columnIndex);
         } else {
             // data is in the main export file, stored in hex format.
             String hexData = nextRow[columnIndex-1];
@@ -211,6 +239,8 @@ abstract class ImportAbstract extends VTITemplate {
         wasNull = (blob == null);
         return blob;
 	}
+
+
 
 
     /**

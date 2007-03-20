@@ -91,13 +91,7 @@ class ImportLobFile
         // of data is read from the file, for example to read one 
         // column data from the file. 
         lobLimitIn = new  LimitInputStream(lobInputStream);
-
-        // setup a reader on top of the stream, so that calls 
-        // to read the clob data from the file can read the 
-        // with approapriate  data code set. 
-        lobReader = dataCodeset == null ?
-    		new InputStreamReader(lobLimitIn) : 
-            new InputStreamReader(lobLimitIn, dataCodeset);    
+   
     }
 
 
@@ -128,6 +122,13 @@ class ImportLobFile
         lobInputStream.seek(offset);
         lobLimitIn.clearLimit();
         lobLimitIn.setLimit((int) length);
+        
+        // wrap a reader on top of the stream, so that calls 
+        // to read the clob data from the file can read the 
+        // with approapriate  data code set. 
+        lobReader = dataCodeset == null ?
+    		new InputStreamReader(lobLimitIn) : 
+            new InputStreamReader(lobLimitIn, dataCodeset);    
 
         // read data from the file, and return it as string. 
         StringBuffer sb = new StringBuffer();
@@ -140,6 +141,60 @@ class ImportLobFile
 		return sb.toString();
     }
 
+
+    /* 
+     * Returns a stream that points to the clob data from file at the 
+     * given <code> offset </code>.
+     * @param offset  byte offset of the column data in the file. 
+     * @param length  length of the the data in bytes.
+     * @exception  IOException  on any I/O error.     
+     */
+    public java.io.Reader getCharacterStream(long offset, long length) 
+        throws IOException 
+    {
+        lobInputStream.seek(offset);
+        lobLimitIn.clearLimit();
+        lobLimitIn.setLimit((int) length);
+
+        // wrap a reader on top of the stream, so that calls 
+        // to read the clob data from the file can read the 
+        // with approapriate  data code set. 
+        lobReader = dataCodeset == null ?
+    		new InputStreamReader(lobLimitIn) : 
+            new InputStreamReader(lobLimitIn, dataCodeset);    
+
+        return lobReader;
+    }
+
+    /*
+     * Returns the clob data length in characters at the give location. 
+     * @param offset  byte offset of the column data in the file. 
+     * @param length  length of the the data in bytes.
+     * @exception  IOException  on any I/O error.     
+     */
+    public long getClobDataLength(long offset, long length) throws IOException {
+        lobInputStream.seek(offset);
+        lobLimitIn.clearLimit();
+        lobLimitIn.setLimit((int) length);
+        
+        // wrap a reader on top of the stream, so that calls 
+        // to read the clob data from the file can read the 
+        // with approapriate  data code set. 
+        lobReader = dataCodeset == null ?
+            new InputStreamReader(lobLimitIn) : 
+            new InputStreamReader(lobLimitIn, dataCodeset);   
+
+        // find the length in characters 
+        char[] buf= new char[1024];
+        long lengthInChars = 0;
+        int noChars = lobReader.read(buf , 0 , 1024);
+        while (noChars != -1) {
+            lengthInChars += noChars;
+            noChars = lobReader.read(buf , 0 , 1024);
+        }
+        
+        return lengthInChars;
+    }
 
     /* 
      * close all the resources realate to the lob file.
