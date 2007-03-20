@@ -266,7 +266,7 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 				for (int i = storeRestrictionList.size() - 1; i >= 0; i--)
 				{
 					pred = (Predicate)storeRestrictionList.getOptPredicate(i);
-					if (pred.getSourceInList() != null)
+					if (pred.isInListProbePredicate())
 					{
 						SanityManager.THROWASSERT("Found IN-list probing " +
 							"predicate (" + pred.binaryRelOpColRefsToString() +

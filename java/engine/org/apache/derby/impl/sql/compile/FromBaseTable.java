@@ -1331,23 +1331,29 @@ public class FromBaseTable extends FromTable
 					/* A probe predicate is only useful if it can be used as
 					 * as a start/stop key for _first_ column in an index
 					 * (i.e. if the column position is 0).  That said, we only
-					 * allow a single start/stop key per column position in the
-					 * index (see orderUsefulPredicates() in PredicateList.java).
+					 * allow a single start/stop key per column position in
+					 * the index (see PredicateList.orderUsefulPredicates()).
 					 * Those two facts combined mean that we should never have
 					 * more than one probe predicate start/stop key for a given
 					 * conglomerate.
 					 */
 					if (SanityManager.DEBUG)
 					{
-						SanityManager.ASSERT(
-							(ssKeySourceInList == null) ||
-								(((Predicate)pred).getSourceInList() == null),
+						if ((ssKeySourceInList != null) &&
+							((Predicate)pred).isInListProbePredicate())
+						{
+							SanityManager.THROWASSERT(
 							"Found multiple probe predicate start/stop keys" +
 							" for conglomerate '" + cd.getConglomerateName() +
 							"' when at most one was expected.");
+						}
 					}
 
-					ssKeySourceInList = ((Predicate)pred).getSourceInList();
+					/* By passing "true" in the next line we indicate that we
+					 * should only retrieve the underlying InListOpNode *if*
+					 * the predicate is a "probe predicate".
+					 */
+					ssKeySourceInList = ((Predicate)pred).getSourceInList(true);
 					boolean knownConstant = pred.compareWithKnownConstant(this, true);
 
 					if (startKey)
@@ -2736,7 +2742,7 @@ public class FromBaseTable extends FromTable
 		for (int i = 0; i < restrictionList.size(); i++)
 		{
 			Predicate pred = (Predicate)restrictionList.elementAt(i);
-			if ((pred.getSourceInList() != null) && pred.isStartKey())
+			if (pred.isInListProbePredicate() && pred.isStartKey())
 			{
 				disableBulkFetch();
 				multiProbing = true;

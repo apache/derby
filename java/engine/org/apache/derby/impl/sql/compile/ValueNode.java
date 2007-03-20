@@ -1281,6 +1281,19 @@ public abstract class ValueNode extends QueryTreeNode
 		return false;
 	}
 
+	/**
+	 * Returns true if this value node is an operator created
+	 * for optimized performance of an IN list.
+	 *
+	 * Or more specifically, returns true if this value node is
+	 * an equals operator of the form "col = ?" that we generated
+	 * during preprocessing to allow index multi-probing.
+	 */
+	public boolean isInListProbeNode()
+	{
+		return false;
+	}
+
 	/** Return true if the predicate represents an optimizable equality node.
 	 * an expression is considered to be an optimizable equality node if all the
 	 * following conditions are met:

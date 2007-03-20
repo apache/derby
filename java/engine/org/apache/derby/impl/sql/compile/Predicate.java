@@ -1309,19 +1309,80 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 */
 	protected boolean isRelationalOpPredicate()
 	{
-		return ((getRelop() != null) && (getSourceInList() == null));
+		/* The isRelationalOperator() method on the ValueNode
+		 * interface tells us what we need to know, so all we have
+		 * to do is call that method on the left child of our AND node.
+		 * Note that BinaryRelationalOperatorNode.isRelationalOperator()
+		 * includes logic to determine whether or not it (the BRON) is
+		 * really a disguised IN-list operator--and if so, it will
+		 * return false (which is what we want).
+		 */
+		return andNode.getLeftOperand().isRelationalOperator();
 	}
 
 	/**
-	 * If this predicate is an IN-list "probe predicate" then return
-	 * the InListOperatorNode from which it was built.  Otherwise
-	 * return null.
+	 * Return whether or not this predicate is an IN-list probe
+	 * predicate.
+	 */
+	protected boolean isInListProbePredicate()
+	{
+		/* The isInListProbeNode() method on the ValueNode interface
+		 * tells us what we need to know, so all we have to do is call
+		 * that method on the left child of our AND node.
+		 */
+		return andNode.getLeftOperand().isInListProbeNode();
+	}
+
+	/**
+	 * If this predicate corresponds to an IN-list, return the underlying
+	 * InListOperatorNode from which it was built.  There are two forms
+	 * to check for:
+	 *
+	 *  1. This predicate is an IN-list "probe predicate", in which case
+	 *     the underlying InListOpNode is stored within the binary relational
+	 *     operator that is the left operand of this predicate's AND node.
+	 *
+	 *  2. This predicate corresponds to an IN-list that could _not_ be
+	 *     transformed into a "probe predicate" (i.e. the IN-list contains
+	 *     one or more non-parameter, non-constant values). In that case
+	 *     the underlying InListOpNode is simply the left operand of
+	 *     this predicate's AND node.
+	 *
+	 * If this predicate does not correspond to an IN-list in any way,
+	 * this method will return null.
 	 */
 	protected InListOperatorNode getSourceInList()
 	{
-		RelationalOperator relop = getRelop();
-		if (relop instanceof BinaryRelationalOperatorNode)
-			return ((BinaryRelationalOperatorNode)relop).getInListOp();
+		return getSourceInList(false);
+	}
+
+	/**
+	 * Does the work of getSourceInList() above, but can also be called
+	 * directly with an argument to indicate whether or not we should
+	 * limit ourselves to probe predicates.
+	 *
+	 * @param probePredOnly If true, only get the source IN list for this
+	 *   predicate *if* it is an IN-list probe predicate.  If false,
+	 *   return the underlying InListOperatorNode (if it exists) regardless
+	 *   of whether this is a probe predicate or an un-transformed IN-list
+	 *   pred.
+	 * 
+	 * @return Underlying InListOp for this predicate (depending on
+	 *   the value of probePredOnly), or null if this predicate does
+	 *   not correspond to an IN-list in any way.
+	 */
+	protected InListOperatorNode getSourceInList(boolean probePredOnly)
+	{
+		ValueNode vn = andNode.getLeftOperand();
+		if (isInListProbePredicate())
+			return ((BinaryRelationalOperatorNode)vn).getInListOp();
+
+		if (probePredOnly)
+			return null;
+
+		if (vn instanceof InListOperatorNode)
+			return (InListOperatorNode)vn;
+
 		return null;
 	}
 }

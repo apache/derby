@@ -195,29 +195,25 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		for (int index = 0; index < size; index++)
 		{
 			Predicate	pred = (Predicate) elementAt(index);
-
-			/*
-			** Skip over it if it's not a relational operator (this includes
-			** BinaryComparisonOperators and IsNullNodes.
-			*/
 			RelationalOperator relop = pred.getRelop();
+
+			/* InListOperatorNodes, while not relational operators, may still
+			 * be useful.  There are two cases: a) we transformed the IN-list
+			 * into a probe predicate of the form "col = ?", which can then be
+			 * optimized/generated as a start/stop key and used for "multi-
+			 * probing" at execution; or b) we did *not* transform the IN-list,
+			 * in which case we'll generate _dynamic_ start and stop keys in
+			 * order to improve scan performance (beetle 3858).  In either case
+			 * the IN-list may still prove "useful".
+			 */
 			InListOperatorNode inNode = pred.getSourceInList();
 			boolean isIn = (inNode != null);
 
-			if (relop == null)
-			{
-				/* if it's "in" operator, we generate dynamic start and stop key
-				 * to improve index scan performance, beetle 3858.
-				 */
-				if (pred.getAndNode().getLeftOperand() instanceof InListOperatorNode &&
-					! ((InListOperatorNode)pred.getAndNode().getLeftOperand()).getTransformed())
-				{
-					isIn = true;
-					inNode = (InListOperatorNode) pred.getAndNode().getLeftOperand();
-				}
-				else
-					continue;
-			}
+			/* If it's not a relational operator and it's not "in", then it's
+			 * not useful.
+			 */
+			if (!isIn && (relop == null))
+				continue;
 
 			/*
 			** If the relational operator is neither a useful start key
@@ -564,7 +560,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
 				if (SanityManager.DEBUG)
 				{
-					if (pred.getSourceInList() != null)
+					if (pred.isInListProbePredicate())
 					{
 						SanityManager.THROWASSERT("Found an IN-list probe " +
 							"predicate (" + pred.binaryRelOpColRefsToString() +
@@ -609,34 +605,29 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			Predicate pred = (Predicate) elementAt(index);
 			ColumnReference indexCol = null;
 			int			indexPosition;
-
-			/*
-			** Skip over it if it's not a relational operator (this includes
-			** BinaryComparisonOperators and IsNullNodes.
-			*/
 			RelationalOperator relop = pred.getRelop();
 
-			/* if it's "in" operator, we generate dynamic start and stop key
-			 * to improve index scan performance, beetle 3858.
+			/* InListOperatorNodes, while not relational operators, may still
+			 * be useful.  There are two cases: a) we transformed the IN-list
+			 * into a probe predicate of the form "col = ?", which can then be
+			 * optimized/generated as a start/stop key and used for "multi-
+			 * probing" at execution; or b) we did *not* transform the IN-list,
+			 * in which case we'll generate _dynamic_ start and stop keys in
+			 * order to improve scan performance (beetle 3858).  In either case
+			 * the IN-list may still prove "useful".
 			 */
 			InListOperatorNode inNode = pred.getSourceInList();
 			boolean isIn = (inNode != null);
-			boolean isInListProbePred = isIn;
 
-			if (relop == null)
+			/* If it's not an "in" operator and either a) it's not a relational
+			 * operator or b) it's not a qualifier, then it's not useful for
+			 * limiting the scan, so skip it.
+			 */
+			if (!isIn &&
+				((relop == null) || !relop.isQualifier(optTable, pushPreds)))
 			{
-				if (pred.getAndNode().getLeftOperand() instanceof InListOperatorNode &&
-					! ((InListOperatorNode)pred.getAndNode().getLeftOperand()).getTransformed())
-				{
-					isIn = true;
-					inNode = (InListOperatorNode) pred.getAndNode().getLeftOperand();
-				}
-				else
-					continue;
-			}
-
-			if ( !isIn && ! relop.isQualifier(optTable, pushPreds))
 				continue;
+			}
 
 			/* Look for an index column on one side of the relop */
 			for (indexPosition = 0;
@@ -652,7 +643,8 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 								(indexCol.getColumnNumber() != baseColumnPositions[indexPosition]) ||
 								inNode.selfReference(indexCol))
 							indexCol = null;
-						else if (isInListProbePred && (indexPosition > 0))
+						else if (pred.isInListProbePredicate()
+								&& (indexPosition > 0))
 						{
 							/* If the predicate is an IN-list probe predicate
 							 * then we only consider it to be useful if the
@@ -753,20 +745,10 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			RelationalOperator	relop             = thisPred.getRelop();
 			int                 thisOperator      = -1;
 
-			InListOperatorNode  inNode            = thisPred.getSourceInList();
-			boolean             isIn              = (inNode != null);
-			boolean             isInListProbePred     = isIn;
+			boolean isIn = (thisPred.getSourceInList() != null);
 
-			if (relop == null)
-			{
-				isIn = true;
-				inNode = (InListOperatorNode) 
-                    thisPred.getAndNode().getLeftOperand();
-			}
-			else
-            {
+			if (relop != null)
 				thisOperator = relop.getOperator();
-            }
 
 			/* Allow only one start and stop position per index column */
 			if (currentStartPosition != thisIndexPosition)
@@ -911,7 +893,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				 * predicate down to the base table for special handling.
 				 */
 				Predicate predToPush;
-				if (isIn && !isInListProbePred)
+				if (isIn && !thisPred.isInListProbePredicate())
                 {
 					AndNode andCopy = (AndNode) getNodeFactory().getNode(
 										C_NodeTypes.AND_NODE,
@@ -941,7 +923,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					 * via execution-time index probes (for more see
 					 * execute/MultiProbeTableScanResultSet.java).
 					 */
-					if (!isIn || isInListProbePred)
+					if (!isIn || thisPred.isInListProbePredicate())
 						removeOptPredicate(thisPred);
 				}
 				else if (SanityManager.DEBUG)
@@ -1506,11 +1488,11 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					 * Reference node).  Then we pass that copy into the new
 					 * relational operator node.
 					 */
-					InListOperatorNode ilon = opNode.getInListOp();
-					if (ilon != null)
+					inNode = opNode.getInListOp();
+					if (inNode != null)
 					{
-						ilon = ilon.shallowCopy();
-						ilon.setLeftOperand(newCRNode);
+						inNode = inNode.shallowCopy();
+						inNode.setLeftOperand(newCRNode);
 					}
 
 					BinaryRelationalOperatorNode newRelop = (BinaryRelationalOperatorNode)
@@ -1518,7 +1500,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 										opNode.getNodeType(),
 										newCRNode,
 										opNode.getRightOperand(),
-										ilon,
+										inNode,
 										getContextManager());
 					newRelop.bindComparisonOperator();
 					leftOperand = newRelop;
@@ -2854,15 +2836,12 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	protected void generateInListValues(ExpressionClassBuilder acb,
 		MethodBuilder mb) throws StandardException
 	{
-		int size = size();
-		InListOperatorNode ilon = null;
-		for (int index = size - 1; index >= 0; index--)
+		for (int index = size() - 1; index >= 0; index--)
 		{
 			Predicate pred = (Predicate)elementAt(index);
-			ilon = pred.getSourceInList();
 
 			// Don't do anything if it's not an IN-list probe predicate.
-			if (ilon == null)
+			if (!pred.isInListProbePredicate())
 				continue;
 
 			/* We're going to generate the relevant code for the probe
@@ -2882,8 +2861,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			{
 				for (int i = 0; i < index; i++)
 				{
-					pred = (Predicate)elementAt(i);
-					if (pred.getSourceInList() != null)
+					if (((Predicate)elementAt(i)).isInListProbePredicate())
 					{
 						SanityManager.THROWASSERT("Found multiple probe " +
 							"predicates for IN-list when only one was " +
@@ -2892,18 +2870,20 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				}
 			}
 
-			break;
-		}
-
-		if (ilon != null)
-		{
+			InListOperatorNode ilon = pred.getSourceInList();
 			mb.getField(ilon.generateListAsArray(acb, mb));
 			mb.push(ilon.isOrdered());
+			return;
 		}
-		else
+
+		/* If we get here then we didn't find any probe predicates.  But
+		 * if that's true then we shouldn't have made it to this method
+		 * to begin with.
+		 */
+		if (SanityManager.DEBUG)
 		{
-			mb.pushNull(ClassName.DataValueDescriptor + "[]");
-			mb.push(false);
+			SanityManager.THROWASSERT("Attempted to generate IN-list values" +
+				"for multi-probing but no probe predicates were found.");
 		}
 	}
 
@@ -3467,8 +3447,8 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		// second arg
 		if (isIn)
 		{
-			InListOperatorNode inNode = (InListOperatorNode) pred.getAndNode().getLeftOperand();
-			inNode.generateStartStopKey(isAscending[columnNumber], isStartKey, acb, mb);
+			pred.getSourceInList().generateStartStopKey(
+				isAscending[columnNumber], isStartKey, acb, mb);
 		}
 		else
 			pred.generateExpressionOperand(optTable, baseColumns[columnNumber], acb, mb);

@@ -1230,6 +1230,12 @@ public class BinaryRelationalOperatorNode
 			(operatorType == RelationalOperator.EQUALS_RELOP);
 	}
 
+	/** @see ValueNode#isInListProbeNode */
+	public boolean isInListProbeNode()
+	{
+		return (inListProbeSource != null);
+	}
+
 	/** @see ValueNode#optimizableEqualityNode */
 	public boolean optimizableEqualityNode(Optimizable optTable, 
 										   int columnNumber, 
