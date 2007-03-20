@@ -30,6 +30,7 @@ import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
@@ -179,7 +180,7 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
     {
         Connection conn = getConnection();
         Statement s = conn.createStatement();
-        JDBC.createAndPopulateAllDataTypesTable(s);
+        SQLUtilities.createAndPopulateAllDataTypesTable(s);
         PreparedStatement ps = conn.prepareStatement("SELECT * from AllDataTypesTable");
         ResultSetMetaData rsmd = ps.getMetaData();
         int colCount = rsmd.getColumnCount();

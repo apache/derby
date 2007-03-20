@@ -36,6 +36,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import org.apache.derbyTesting.functionTests.tests.lang.CastingTest;
@@ -143,14 +144,14 @@ public class NullIfTest extends BaseJDBCTestCase {
         for (int firstColumnType = 0; firstColumnType < CastingTest.SQLTypes.length; firstColumnType++) {
 
             StringBuffer nullIfString = new StringBuffer("SELECT NULLIF("
-                    + JDBC.allDataTypesColumnNames[firstColumnType]);
+                    + SQLUtilities.allDataTypesColumnNames[firstColumnType]);
             for (int secondColumnType = 0; secondColumnType < CastingTest.SQLTypes.length; secondColumnType++) {
 
                 int row = 0;
                 try {
                     StringBuffer completeNullIfString = new StringBuffer(
                             nullIfString.toString() + ","
-                                    + JDBC.allDataTypesColumnNames[secondColumnType]);
+                                    + SQLUtilities.allDataTypesColumnNames[secondColumnType]);
                     ResultSet rs = s.executeQuery(completeNullIfString
                             + ") from AllDataTypesTable");
                     while (rs.next()) {
@@ -201,7 +202,7 @@ public class NullIfTest extends BaseJDBCTestCase {
         for (int secondColumnType = 0; secondColumnType < CastingTest.SQLTypes.length; secondColumnType++) {
 
             String nullIfString = new String("SELECT NULLIF(?,"
-                    + JDBC.allDataTypesColumnNames[secondColumnType]
+                    + SQLUtilities.allDataTypesColumnNames[secondColumnType]
                     + ") from AllDataTypesTable");
             int row = 0;
             try {
@@ -303,7 +304,7 @@ public class NullIfTest extends BaseJDBCTestCase {
              * 
              */
             protected void decorateSQL(Statement s) throws SQLException {
-                JDBC.createAndPopulateAllDataTypesTable(s);
+                SQLUtilities.createAndPopulateAllDataTypesTable(s);
             }
 
          
