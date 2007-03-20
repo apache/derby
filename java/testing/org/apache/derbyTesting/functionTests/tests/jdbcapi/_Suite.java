@@ -88,6 +88,10 @@ public class _Suite extends BaseTestCase  {
             // even to load, even though the suite method
             // is correctly implemented.
             suite.addTest(DataSourcePropertiesTest.suite());
+
+            // Tests JDBC 3.0 ability to establish a result set of 
+            // auto-generated keys.
+            suite.addTest(AutoGenJDBC30Test.suite());
         }
 		
         return suite;
