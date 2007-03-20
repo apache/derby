@@ -129,6 +129,7 @@ public class Changes10_3 extends UpgradeChange {
     
     private void checkDataToCase606(int start_value, int end_value)
             throws SQLException {
+        getConnection().setAutoCommit(false);
         Statement s = createStatement();
         PreparedStatement insert_stmt = prepareStatement("insert into case606 values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         char[] data_dt = new char[24];
