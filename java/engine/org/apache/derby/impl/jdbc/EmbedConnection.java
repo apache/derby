@@ -1804,7 +1804,6 @@ public abstract class EmbedConnection implements EngineConnection
 				nse = Util.generateCsSQLException(mse);
 
 			se.setNextException(nse);
-            se.initCause(nse);
 			throw se;
 		}
 
