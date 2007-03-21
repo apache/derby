@@ -151,10 +151,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		doImportAndExport(c, "T1", "%", "&", "UTF-16");
 	}
 	
-    /* This test is disabled temporarily due to bug : DERBY-2456 .
-     * Remove the prefix "derby2456"  when the bug is fixed.
-     */
-	public void derby2456testInvalidEncoding() throws Exception {
+	public void testInvalidEncoding() throws Exception {
 		Connection c = getConnection();
 		resetTables();
 		try {

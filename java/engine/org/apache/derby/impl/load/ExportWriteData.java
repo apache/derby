@@ -103,28 +103,62 @@ final class ExportWriteData extends ExportWriteDataAbstract
 		  lobsFileName = url.getFile();
 	  }
     } catch (MalformedURLException ex) {}
-    FileOutputStream anOutputStream = new FileOutputStream(outputFileName);
-    BufferedOutputStream buffered = new BufferedOutputStream(anOutputStream);
+
     
-    aStream = dataCodeset == null ?
+    FileOutputStream anOutputStream = null;
+    BufferedOutputStream buffered = null;
+    FileOutputStream lobOutputStream = null;
+
+    try {
+        anOutputStream = new FileOutputStream(outputFileName);
+        buffered = new BufferedOutputStream(anOutputStream);
+    
+        aStream = dataCodeset == null ?
     		new OutputStreamWriter(buffered) :
     		new OutputStreamWriter(buffered, dataCodeset);    	        
 
-    // if lobs are exported to an external file, then 
-    // setup the required streams to write lob data.
-    if (lobsInExtFile) 
-    {
-        // setup streams to write large objects into the external file. 
-        FileOutputStream lobOutputStream = new FileOutputStream(lobsFileName);
-        lobOutBinaryStream = new BufferedOutputStream(lobOutputStream);
+        // if lobs are exported to an external file, then 
+        // setup the required streams to write lob data.
+        if (lobsInExtFile) 
+        {
+            // setup streams to write large objects into the external file. 
+            lobOutputStream = new FileOutputStream(lobsFileName);
+            lobOutBinaryStream = new BufferedOutputStream(lobOutputStream);
 
-        // helper stream to convert char data to binary, after conversion
-        // data is written to lobOutBinaryStream.
-        lobByteArrayStream = new ByteArrayOutputStream();
-        lobCharStream =  dataCodeset == null ?
-            new OutputStreamWriter(lobByteArrayStream) :
-            new OutputStreamWriter(lobByteArrayStream, dataCodeset);    	        
-	}
+            // helper stream to convert char data to binary, after conversion
+            // data is written to lobOutBinaryStream.
+            lobByteArrayStream = new ByteArrayOutputStream();
+            lobCharStream =  dataCodeset == null ?
+                new OutputStreamWriter(lobByteArrayStream) :
+                new OutputStreamWriter(lobByteArrayStream, dataCodeset);    	        
+        }
+    } catch (Exception e) {
+        // might have failed to setup export file stream. for example 
+        // user has specified invalid codeset or incorrect file path. 
+        // close the opened file streams.
+
+        if (aStream == null) {
+            if (buffered != null) {
+                buffered.close();
+            } else {
+                if(anOutputStream != null)
+                    anOutputStream .close();
+            }
+        } else {
+            // close the main export file stream.
+            aStream.close();
+            // close the external lob file stream.
+            if (lobOutBinaryStream != null) {
+                lobOutBinaryStream.close() ;
+            } else {
+                if (lobOutputStream != null) 
+                    lobOutputStream.close();
+            }
+        }
+
+        // throw back the original exception.
+        throw e;
+    }
   }
 
   /**if control file says true for column definition, write it as first line of the
