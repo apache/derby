@@ -542,8 +542,8 @@ public class JDBC {
     /**
      * Takes a Prepared Statement and an array of expected parameter types
      * from java.sql.Types 
-     * and asserts that the column types in the ParamterMetaData
-     * match the number, order, and names of those
+     * and asserts that the parameter types in the ParamterMetaData
+     * match the number and order of those
      * in the array.
      * @param ps PreparedStatement for which we're checking parameter names.
      * @param expectedTypes Array of expected parameter types.
@@ -552,14 +552,14 @@ public class JDBC {
 	        int[] expectedTypes) throws SQLException
 	    {
 		ParameterMetaData pmd = ps.getParameterMetaData();
-	        int actualCols = pmd.getParameterCount();
+	        int actualParams = pmd.getParameterCount();
 
-	        Assert.assertEquals("Unexpected column count:",
+	        Assert.assertEquals("Unexpected parameter count:",
 	                expectedTypes.length, pmd.getParameterCount());
 
-	        for (int i = 0; i < actualCols; i++)
+	        for (int i = 0; i < actualParams; i++)
 	        {
-	            Assert.assertEquals("Column types do not match for column " + (i+1),
+	            Assert.assertEquals("Types do not match for parameter " + (i+1),
 	                    expectedTypes[i], pmd.getParameterType(i+1));
 	        }
 	    }
