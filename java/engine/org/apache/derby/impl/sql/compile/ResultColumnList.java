@@ -1582,11 +1582,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 				/* Make sure that every column has a name */
 				allExpansion.nameAllResultColumns();
 
-				/* Make sure that every RC and expression is marked as being in
-				 * the SELECT list.
-				 */
-				allExpansion.setClause(ValueNode.IN_SELECT_LIST);
-
 				/* Replace the AllResultColumn with the expanded list. 
 				 * We will update the VirtualColumnIds once below.
 				 */
@@ -2699,17 +2694,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 		}
 
 		return parentRC;
-	}
-
-	public void setClause(int clause)
-	{
-		int size = size();
-
-		for (int index = 0; index < size; index++)
-		{
-			ResultColumn	rc =  (ResultColumn) elementAt(index);
-			rc.setClause(clause);
-		}
 	}
 
 	/**

@@ -249,18 +249,6 @@ public class BinaryOperatorNode extends ValueNode
 	}
 
 	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		super.setClause(clause);
-		leftOperand.setClause(clause);
-		rightOperand.setClause(clause);
-	}
-
-	/**
 	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
 	 * how tree printing is supposed to work.
 	 *

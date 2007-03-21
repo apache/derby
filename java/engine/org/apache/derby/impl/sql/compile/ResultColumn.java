@@ -414,26 +414,6 @@ public class ResultColumn extends ValueNode
 		return resultSetNumber;
 	}
 
-	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		super.setClause(clause);
-		/* expression will be null for AllResultColumn */
-		if (expression != null)
-		{
-			expression.setClause(clause);
-		}
-		else if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(this instanceof AllResultColumn,
-				"this expected to be instanceof AllResultColumn when expression is null");
-		}
-	}
-
 	/** 
 	 * Adjust the virtualColumnId for this ResultColumn	by the specified amount
 	 * 

@@ -66,15 +66,9 @@ import java.util.Vector;
 
 public abstract class ValueNode extends QueryTreeNode
 {
-	public static final int IN_UNKNOWN_CLAUSE = 0;
-	public static final int IN_SELECT_LIST = 1;
-	public static final int IN_WHERE_CLAUSE = 2;
-	public static final int IN_HAVING_CLAUSE = 3;
-
 	protected DataTypeDescriptor	dataTypeServices;
 	private TypeId typeId;	   
 	private TypeCompiler typeCompiler;
-	protected int				clause = IN_UNKNOWN_CLAUSE;
 
 	// Whether or not additional predicates have been created from this one.
 	boolean	transformed;
@@ -165,7 +159,6 @@ public abstract class ValueNode extends QueryTreeNode
 			return "dataTypeServices: " +
 				( ( dataTypeServices != null) ?
 						dataTypeServices.toString() : "null" ) + "\n" +
-				"clause: " + clause + "\n" +
 				super.toString();
 		}
 		else
@@ -260,26 +253,6 @@ public abstract class ValueNode extends QueryTreeNode
 			"getSourceResultColumn() not expected to be called for this node - " +
 			getClass().toString());
 		return null;
-	}
-
-	/**
-	 * Get the clause that this node appears in.
-	 *
-	 * @return int	The clause that this node appears in.
-	 */
-	public int getClause()
-	{
-		return clause;
-	}
-
-	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		this.clause = clause;
 	}
 
 	/**

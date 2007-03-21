@@ -696,7 +696,7 @@ public class SubqueryNode extends ValueNode
 		if (flattenable)
 		{
 			SelectNode	select = (SelectNode) resultSet;
-			if ((select.getAggregateVector(IN_SELECT_LIST).size() == 0) &&
+			if ((!select.hasAggregatesInSelectList()) &&
 			    (select.havingClause == null))
 			{
 				ValueNode origLeftOperand = leftOperand;

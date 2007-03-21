@@ -154,22 +154,6 @@ public class TernaryOperatorNode extends ValueNode
 	}
 
 	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		super.setClause(clause);
-		receiver.setClause(clause);
-		leftOperand.setClause(clause);
-		if (rightOperand != null)
-		{
-			rightOperand.setClause(clause);
-		}
-	}
-
-	/**
 	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
 	 * how tree printing is supposed to work.
 	 *

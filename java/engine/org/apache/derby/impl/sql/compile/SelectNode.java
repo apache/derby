@@ -319,36 +319,6 @@ public class SelectNode extends ResultSetNode
 	}
 
 	/**
-	 * Return the specified aggregate vector for this SelectNode.
-	 *
-	 * @param clause	Which clause to get the aggregate list for
-	 *
-	 * @return aggregateVector	The specified aggregate vector for this SelectNode.
-	 */
-	public Vector getAggregateVector(int clause)
-	{
-		switch (clause)
-		{
-			case ValueNode.IN_SELECT_LIST:
-				return selectAggregates;
-
-			case ValueNode.IN_WHERE_CLAUSE:
-				return whereAggregates;
-
-			case ValueNode.IN_HAVING_CLAUSE:
-				return null;
-
-			default:
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.ASSERT(false,
-						"Unexpected value for clause");
-				}
-				return null;
-		}
-	}
-
-	/**
 	 * Return the whereSubquerys for this SelectNode.
 	 *
 	 * @return SubqueryList	The whereSubquerys for this SelectNode.
@@ -460,7 +430,6 @@ public class SelectNode extends ResultSetNode
 			fromListParam.insertElementAt(fromList.elementAt(index), index);
 		}
 
-		resultColumns.setClause(ValueNode.IN_SELECT_LIST);
 		resultColumns.bindExpressions(fromListParam, 
 									  selectSubquerys,
 									  selectAggregates);
@@ -2190,5 +2159,13 @@ public class SelectNode extends ResultSetNode
 		}
 		
 		return returnNode;
+	}
+
+	/**
+	 * @return true if there are aggregates in the select list.
+	 */
+	public boolean hasAggregatesInSelectList() 
+	{
+		return !selectAggregates.isEmpty();
 	}
 }

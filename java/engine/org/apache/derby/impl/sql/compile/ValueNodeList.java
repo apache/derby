@@ -75,22 +75,6 @@ public class ValueNodeList extends QueryTreeNodeVector
 		}
 	}
 
-	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		int size = size();
-
-		for (int index = 0; index < size; index++)
-		{
-			ValueNode		valueNode;
-				valueNode = (ValueNode) elementAt(index);
-			valueNode.setClause(clause);
-		}
-	}
 
 	/**
 	 * Add a ValueNode to the list.

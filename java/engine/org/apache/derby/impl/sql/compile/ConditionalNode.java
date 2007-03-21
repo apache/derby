@@ -113,18 +113,6 @@ public class ConditionalNode extends ValueNode
 		}
 	}
 
-	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		super.setClause(clause);
-		testCondition.setClause(clause);
-		thenElseList.setClause(clause);
-	}
-
 	private boolean isCastNode(ValueNode node) {
 		if (node.getNodeType() == C_NodeTypes.CAST_NODE)
 			return true;

@@ -64,17 +64,6 @@ public class JavaToSQLValueNode extends ValueNode
 	}
 
 	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		super.setClause(clause);
-		javaNode.setClause(clause);
-	}
-
-	/**
 	 * Preprocess an expression tree.  We do a number of transformations
 	 * here (including subqueries, IN lists, LIKE and BETWEEN) plus
 	 * subquery flattening.

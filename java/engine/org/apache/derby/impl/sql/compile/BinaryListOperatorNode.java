@@ -126,18 +126,6 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	}
 
 	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		super.setClause(clause);
-		leftOperand.setClause(clause);
-		rightOperandList.setClause(clause);
-	}
-
-	/**
 	 * Bind this expression.  This means binding the sub-expressions,
 	 * as well as figuring out what the return type is for this expression.
 	 *

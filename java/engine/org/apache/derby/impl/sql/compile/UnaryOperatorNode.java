@@ -281,23 +281,6 @@ public class UnaryOperatorNode extends ValueNode
 		}
 	}
 
-	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		super.setClause(clause);
-
-		/*
-		** Operator may be null for COUNT(*)
-		*/
-		if (operand != null)
-		{
-			operand.setClause(clause);
-		}
-	}
 
 	/**
 	 * Bind this expression.  This means binding the sub-expressions,
