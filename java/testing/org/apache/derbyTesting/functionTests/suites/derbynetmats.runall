@@ -26,7 +26,6 @@ lang/holdCursorJavaReflection.java
 lang/procedure.java
 lang/simpleScroll.sql
 lang/supersimple.sql
-lang/unaryArithmeticDynamicParameter.java
 lang/wisconsin.java
 lang/syscat.sql
 lang/ShutdownDatabase.java
