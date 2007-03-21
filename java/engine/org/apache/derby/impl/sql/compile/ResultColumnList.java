@@ -586,7 +586,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 				}
 				else if (index >= size - orderBySelect)
 				{
-					SanityManager.THROWASSERT(
+					if (SanityManager.DEBUG)
+						SanityManager.THROWASSERT(
 							"Unexpectedly found ORDER BY column '" +
 							columnName + "' pulled up at position " +index);
 				}
