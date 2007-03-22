@@ -3,4 +3,3 @@ jdbcapi/xaSimplePositive.sql
 jdbcapi/xaStateTran.sql
 jdbcapi/XATest.java
 jdbcapi/checkDataSource.java
-lang/grantRevoke.java

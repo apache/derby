@@ -36,7 +36,6 @@ lang/forbitdata.java
 lang/forupdate.sql
 lang/grantRevokeDDL.sql
 lang/grantRevokeDDL2.sql
-lang/grantRevoke.java
 lang/holdCursorIJ.sql
 lang/holdCursorJavaReflection.java
 lang/inbetween.sql

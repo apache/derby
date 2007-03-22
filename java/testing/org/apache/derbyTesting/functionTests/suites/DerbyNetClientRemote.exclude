@@ -32,8 +32,6 @@
 # jdbcapi/checkDataSource.java - test leaves things in a bad state, causing the subsequent
 #       tests to fail when run on same database. See DERBY-1760.
 # jdbcapi/checkDataSource30.java - ditto to checkDataSource.
-# lang/grantRevoke.java - this test expects certain properties in the remote server's 
-#       derby.properties file.
 # stress/stress.multi - attempts to connect to localhost.
 # 
 store/bootLock.java
@@ -58,5 +56,4 @@ lang/wisconsin.java
 junitTests/derbyNet/CompatibilityTest.java
 jdbcapi/checkDataSource.java
 jdbcapi/checkDataSource30.java
-lang/grantRevoke.java
 stress/stress.multi
