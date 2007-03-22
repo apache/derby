@@ -27,6 +27,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -103,15 +104,26 @@ public class DboPowersTest extends BaseJDBCTestCase
     {
         TestSuite suite = new TestSuite("DboPowersTest");
 
+        /* Database shutdown powers */
+
         suite.addTest(dboShutdownSuite("suite: shutdown powers, embedded"));
         suite.addTest(
             TestConfiguration.clientServerDecorator(
                 dboShutdownSuite("suite: shutdown powers, client")));
 
-        suite.addTest(dboEncryptionSuite("suite: encryption powers, embedded"));
-        suite.addTest(
-            TestConfiguration.clientServerDecorator(
-                dboEncryptionSuite("suite: encryption powers, client")));
+        /* Database (re)encryption powers
+         *
+         * The encryption power tests are not run for JSR169, since Derby
+         * does not support database encryption for that platform, cf.
+         * the specification for JSR169 support in DERBY-97.
+         */
+        if (!JDBC.vmSupportsJSR169()) {
+            suite.addTest(
+                dboEncryptionSuite("suite: encryption powers, embedded"));
+            suite.addTest(
+                TestConfiguration.clientServerDecorator(
+                    dboEncryptionSuite("suite: encryption powers, client")));
+        }
 
         return suite;
     }
