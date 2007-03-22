@@ -85,6 +85,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(InListMultiProbeTest.suite());
         suite.addTest(CurrentOfTest.suite());
         suite.addTest(UnaryArithmeticParameterTest.suite());
+        suite.addTest(HoldCursorTest.suite());
         suite.addTest(ShutdownDatabaseTest.suite());
 
         // Add the XML tests, which exist as a separate suite

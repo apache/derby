@@ -1,4 +1,3 @@
-lang/holdCursorJava.java
 jdbcapi/checkDataSource30.java
 jdbcapi/parameterMetaDataJdbc30.java
 lang/procedureJdbc30.java

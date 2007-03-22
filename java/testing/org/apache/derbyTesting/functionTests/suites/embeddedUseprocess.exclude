@@ -7,7 +7,6 @@
 #     and access denied (java.lang.RuntimePermission loadLibrary.db2jcct2). (????!)
 # jdbcapi/getCurConnJdbc20.sql ditto.
 # jdbcapi/checkDataSource30.java problem using reflection (class not found)
-# lang/holdCursorJava.java ditto.
 # lang/procedureJdbc30.java ditto.
 # jdbcapi/SURQueryMixTest.junit - fails with severe errors.
 # jdbcapi/SURTest.junit - fails with severe errors.
@@ -18,7 +17,6 @@ jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
 jdbcapi/getCurConnJdbc20.sql
 jdbcapi/checkDataSource30.java
-lang/holdCursorJava.java
 lang/procedureJdbc30.java
 jdbcapi/SURQueryMixTest.junit
 jdbcapi/SURTest.junit

@@ -16,7 +16,6 @@ lang/big.sql
 lang/bug5054.java
 lang/forupdate.sql
 lang/holdCursorIJ.sql
-lang/holdCursorJavaReflection.java
 lang/procedure.java
 lang/simpleScroll.sql
 lang/supersimple.sql

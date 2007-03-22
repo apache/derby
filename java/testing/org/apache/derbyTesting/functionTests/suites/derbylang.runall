@@ -37,7 +37,6 @@ lang/forupdate.sql
 lang/grantRevokeDDL.sql
 lang/grantRevokeDDL2.sql
 lang/holdCursorIJ.sql
-lang/holdCursorJavaReflection.java
 lang/inbetween.sql
 lang/infostreams.sql
 lang/isolationLevels.sql
