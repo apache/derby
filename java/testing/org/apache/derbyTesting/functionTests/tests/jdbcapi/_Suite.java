@@ -73,6 +73,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(DatabaseMetaDataTest.suite());
 		suite.addTest(ClosedObjectTest.suite());
                 suite.addTest(SetTransactionIsolationTest.suite());
+		suite.addTest(AuthenticationTest.suite());
         
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.
@@ -93,6 +94,12 @@ public class _Suite extends BaseTestCase  {
             // Tests JDBC 3.0 ability to establish a result set of 
             // auto-generated keys.
             suite.addTest(AutoGenJDBC30Test.suite());
+
+            // Test uses DriverManager
+            suite.addTest(DriverMgrAuthenticationTest.suite());
+            // Tests uses JDBC 3.0 datasources
+            suite.addTest(PoolDSAuthenticationTest.suite());
+            suite.addTest(XADSAuthenticationTest.suite());
         }
 		
         return suite;

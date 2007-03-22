@@ -31,7 +31,6 @@ import junit.framework.TestSuite;
 
 import org.apache.derby.jdbc.ClientXADataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -49,7 +48,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     }
 
     public static Test suite() {
-        // This test uses driverManager and so is not suitable for JSR169
+        // This test uses XADataSource and so is not suitable for JSR169
         if (JDBC.vmSupportsJSR169())
             return new TestSuite("");
         else {
@@ -61,50 +60,32 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         }
     }
     
+    // baseSuite takes advantage of setting system properties as defined
+    // in AuthenticationTest
     public static Test baseSuite(String name) {
         TestSuite suite = new TestSuite("XADSAuthenticationTest");
 
-        // set a user at system level
-        java.lang.System.setProperty("derby.user.system", "admin");
-        java.lang.System.setProperty("derby.user.mickey", "mouse");
-        
-        // Use DatabasePropertyTestSetup decorator to set the user properties
-        // required by this test (and shutdown the database for the
-        // property to take effect).
-        Properties props = new Properties();
-        props.setProperty("derby.infolog.append", "true");
-        props.setProperty("derby.debug.true", "AuthenticationTrace");
-
         Test test = new XADSAuthenticationTest(
             "testConnectShutdownAuthentication");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
         
-        // DatabasePropertyTestSsetup uses SYSCS_SET_DATABASE_PROPERTY
-        // so that is database level setting.
         test = new XADSAuthenticationTest("testUserFunctions");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
 
         test = new XADSAuthenticationTest("testNotFullAccessUsers");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
         
         test = new XADSAuthenticationTest(
             "testChangePasswordAndDatabasePropertiesOnly");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
 
         // only part of this fixture runs with network server / client
         test = new XADSAuthenticationTest("testGreekCharacters");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
         
+        test = new XADSAuthenticationTest("testSystemShutdown");
+        setBaseProps(suite, test);
+
         // The test needs to run in a new single use database as we're setting
         // a number of properties
         return TestConfiguration.singleUseDatabaseDecorator(suite);
@@ -310,10 +291,11 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         if (usingEmbedded())
         {
             xads = J2EEDataSource.getXADataSource();
-            JDBCDataSource.setBeanProperty(xads, "shutdownDatabase", "shutdown");
+            JDBCDataSource.setBeanProperty(
+                xads, "shutdownDatabase", "shutdown");
+            JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
             JDBCDataSource.setBeanProperty(xads, "user", user);
             JDBCDataSource.setBeanProperty(xads, "password", password);
-            JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
             try {
                 xads.getXAConnection();
                 fail("expected system shutdown resulting in XJ015 error");
@@ -326,7 +308,10 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         {
             ClientXADataSource xads = 
                 (ClientXADataSource)J2EEDataSource.getXADataSource();
+            // current client/server code interprets shutdown with an
+            // empty databaseName string as a system shutdown
             xads.setDatabaseName(dbName);
+            // Client does not support *ds*.setShutdown(), use set Conn Attrs 
             xads.setConnectionAttributes(
                 "shutdown=true;user=" + user + ";password=" + password);
             try {
@@ -339,12 +324,6 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         }
     }
 
-    // Note, we need a separate method for fail & OK because something
-    // the framework will add the wrong details. If we use
-    // getDataSource(dbName), we don't get a successful XJ015, ever,
-    // if we use getDataSource(), it appears the user/password on connect
-    // is ignored, at least, we get XJ015 anyway.
-    // 
     protected void assertSystemShutdownFail(
         String expectedError, String dbName, String user, String password)
     throws SQLException {
@@ -353,6 +332,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
             xads = J2EEDataSource.getXADataSource();
             JDBCDataSource.setBeanProperty(
                 xads, "shutdownDatabase", "shutdown");
+            JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
             JDBCDataSource.setBeanProperty(xads, "user", user);
             JDBCDataSource.setBeanProperty(xads, "password", password);
             try {
@@ -366,8 +346,12 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         {
             ClientXADataSource xads = 
                 (ClientXADataSource)J2EEDataSource.getXADataSource();
+            // current client/server code interprets shutdown with an
+            // empty databaseName string as a system shutdown
+            xads.setDatabaseName(dbName);
+            // Client does not support *ds*.setShutdown(), use set Conn Attrs 
             xads.setConnectionAttributes(
-                    "shutdown=true;user=" + user + ";password=" + password);
+                "shutdown=true;user=" + user + ";password=" + password);
             try {
                 xads.getXAConnection(user, password);
                 fail("expected shutdown to fail");

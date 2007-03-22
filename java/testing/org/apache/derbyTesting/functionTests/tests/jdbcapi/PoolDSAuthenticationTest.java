@@ -32,7 +32,6 @@ import junit.framework.TestSuite;
 
 import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -49,7 +48,8 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     }
 
     public static Test suite() {
-        // This test uses driverManager and so is not suitable for JSR169
+        // This test uses ConnectionPoolDataSource and so is not suitable for 
+        // JSR169
         if (JDBC.vmSupportsJSR169())
             return new TestSuite("ConnectionPoolDataSource not available" +
                 " with JSR169; empty test");
@@ -62,55 +62,37 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         }
     }
     
+    // baseSuite takes advantage of setting system properties as defined
+    // in AuthenticationTest
     public static Test baseSuite(String name) {
         TestSuite suite = new TestSuite("PoolDSAuthenticationTest");
 
-        // set a user at system level
-        java.lang.System.setProperty("derby.user.system", "admin");
-        java.lang.System.setProperty("derby.user.mickey", "mouse");
-        
-        // Use DatabasePropertyTestSetup decorator to set the user 
-        // properties required by this test (and shutdown the database for
-        // the property to take effect).
-        Properties props = new Properties();
-        props.setProperty("derby.infolog.append", "true");
-        props.setProperty("derby.debug.true", "AuthenticationTrace");
-
         Test test = new PoolDSAuthenticationTest(
             "testConnectShutdownAuthentication");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
         
-        // DatabasePropertyTestSsetup uses SYSCS_SET_DATABASE_PROPERTY
-        // so that is database level setting.
         test = new PoolDSAuthenticationTest("testUserFunctions");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
 
         test = new PoolDSAuthenticationTest("testNotFullAccessUsers");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
         
         test = new PoolDSAuthenticationTest(
             "testChangePasswordAndDatabasePropertiesOnly");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
 
         // only part of this fixture runs with network server / client
         test = new PoolDSAuthenticationTest("testGreekCharacters");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
         
+        test = new PoolDSAuthenticationTest("testSystemShutdown");
+        setBaseProps(suite, test);
+
         // The test needs to run in a new single use database as we're
         // setting a number of properties
         return TestConfiguration.singleUseDatabaseDecorator(suite);
     }
-    
+
     protected void assertConnectionOK(
         String dbName, String user, String password)
     throws SQLException
@@ -315,10 +297,10 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         if (usingEmbedded())
         {
             pds = J2EEDataSource.getConnectionPoolDataSource();
+            JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
             JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
             JDBCDataSource.setBeanProperty(pds, "user", user);
             JDBCDataSource.setBeanProperty(pds, "password", password);
-            JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
             try {
                 pds.getPooledConnection();
                 fail("expected system shutdown resulting in XJ015 error");
@@ -332,7 +314,10 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
             ClientConnectionPoolDataSource pds = 
                 (ClientConnectionPoolDataSource)
                 J2EEDataSource.getConnectionPoolDataSource();
+            // current client/server code interprets shutdown with an
+            // empty databaseName string as a system shutdown
             pds.setDatabaseName(dbName);
+            // Client does not support *ds*.setShutdown(), use set Conn Attrs 
             pds.setConnectionAttributes(
                     "shutdown=true;user=" + user + ";password=" + password);
             try {
@@ -345,19 +330,14 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         }
     }
 
-    // Note, we need a separate method for fail & OK because something
-    // the framework will add the wrong details. If we use
-    // getDataSource(dbName), we don't get a successful XJ015, ever,
-    // if we use getDataSource(), it appears the user/password on connect
-    // is ignored, at least, we get XJ015 anyway.
-    // 
     protected void assertSystemShutdownFail(
             String expectedError, String dbName, String user, String password)
     throws SQLException {
         if (usingEmbedded())
         {
             pds = J2EEDataSource.getConnectionPoolDataSource();
-            JDBCDataSource.setBeanProperty(pds, "shutdownDatabase","shutdown");
+            JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
+            JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
             JDBCDataSource.setBeanProperty(pds, "user", user);
             JDBCDataSource.setBeanProperty(pds, "password", password);
             try {
@@ -372,6 +352,10 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
             ClientConnectionPoolDataSource pds = 
                 (ClientConnectionPoolDataSource)
                 J2EEDataSource.getConnectionPoolDataSource();
+            // current client/server code interprets shutdown with an
+            // empty databaseName string as a system shutdown
+            pds.setDatabaseName(dbName);
+            // Client does not support *ds*.setShutdown(), use set Conn Attrs 
             pds.setConnectionAttributes(
                     "shutdown=true;user=" + user + ";password=" + password);
             try {

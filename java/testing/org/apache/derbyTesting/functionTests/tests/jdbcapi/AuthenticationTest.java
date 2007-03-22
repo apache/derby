@@ -36,12 +36,11 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.jdbc.ClientDataSource;
-import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class AuthenticationTest extends BaseJDBCTestCase {
@@ -53,6 +52,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     protected String zeus = "\u0396\u0395\u03A5\u03A3";
     protected String apollo = "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
 
+    protected static Properties sysprops = new Properties();
+    protected static Properties props = new Properties();
     
     /** Creates a new instance of the Test */
     public AuthenticationTest(String name) {
@@ -70,59 +71,82 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite("AuthenticationTest");
         suite.addTest(baseSuite("AuthenticationTest:embedded"));
         if (!JDBC.vmSupportsJSR169())
+        {
             suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("AuthenticationTest:client")));
+        }
         return suite;
     }
     
     public static Test baseSuite(String name) {
         TestSuite suite = new TestSuite("AuthenticationTest");
-
-        // set users at system level
-        java.lang.System.setProperty("derby.user.system", "admin");
-        java.lang.System.setProperty("derby.user.mickey", "mouse");
         
-        // Use DatabasePropertyTestSetup decorator to set the user properties
-        // required by this test (and shutdown the database for the
-        // property to take effect).
-        Properties props = new Properties();
-        props.setProperty("derby.infolog.append", "true");
-        props.setProperty("derby.debug.true", "AuthenticationTrace");
-
-        Test test = new AuthenticationTest("testConnectShutdownAuthentication");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        Test test = new AuthenticationTest(
+            "testConnectShutdownAuthentication");
+        setBaseProps(suite, test);
         
-        // DatabasePropertyTestSsetup uses SYSCS_SET_DATABASE_PROPERTY
-        // so that is database level setting.
         test = new AuthenticationTest("testUserFunctions");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
 
         test = new AuthenticationTest("testNotFullAccessUsers");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
         
         test = new AuthenticationTest(
             "testChangePasswordAndDatabasePropertiesOnly");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
 
         // only part of this fixture runs with network server / client
         test = new AuthenticationTest("testGreekCharacters");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
+
+        test = new AuthenticationTest("testSystemShutdown");
+        setBaseProps(suite, test);
         
         // This test needs to run in a new single use database as we're setting
         // a number of properties
         return TestConfiguration.singleUseDatabaseDecorator(suite);
     }
+    
+    protected static void setBaseProps(TestSuite suite, Test test) 
+    {
+        // Use DatabasePropertyTestSetup.builtinAuthentication decorator
+        // to set the user properties required by this test (and shutdown 
+        // the database for the property to take effect).
+        // DatabasePropertyTestSetup uses SYSCS_SET_DATABASE_PROPERTY
+        // so that is database level setting.
+        // Additionally use DatabasePropertyTestSetup to add some
+        // possibly useful settings
+        // Finally SystemPropertyTestSetup sets up system level users
+        props.setProperty("derby.infolog.append", "true");
+        props.setProperty("derby.debug.true", "AuthenticationTrace");
+        sysprops.put("derby.user.system", "admin");
+        sysprops.put("derby.user.mickey", "mouse");
+        test = DatabasePropertyTestSetup.builtinAuthentication(test,
+            USERS, PASSWORD_SUFFIX);
+        test = new DatabasePropertyTestSetup (test, props, true);
+        suite.addTest(new SystemPropertyTestSetup (test, sysprops));
+    }
+    
+    public void tearDown() throws Exception {
+        try {
+            AccessController.doPrivileged
+            (new java.security.PrivilegedAction(){
+                public Object run(){
+                    System.getProperties().remove(
+                        "derby.connection.requireAuthentication");
+                    String apollo = 
+                        "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
+                    return 
+                        System.getProperties().remove("derby.user." +apollo);
+                }
+            });
+        } catch (Exception e) {
+            fail("failed to unset properties");
+        }
+        super.tearDown();
+    }
 
+    
     // roughly based on old functionTests test users.sql, except that
     // test used 2 databases. Possibly that was on the off-chance that
     // a second database would not work correctly - but that will not
@@ -219,18 +243,24 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertShutdownFail("08004", dbName, "badUser", "badPwd");
         assertShutdownFail("08004", dbName, "dan", "badPwd");
         assertShutdownFail("08004", dbName, "badUser", ("dan" + PASSWORD_SUFFIX));
-        
-        // try system shutdown with wrong user
-        assertSystemShutdownFail("08004", "", "badUser", ("dan" + PASSWORD_SUFFIX));
-        // with 'allowed' user but bad pwd
-        assertSystemShutdownFail("08004", "", "dan", ("jeff" + PASSWORD_SUFFIX));
-        // dbo, but bad pwd
-        assertSystemShutdownFail("08004", "", "APP", ("POO"));
-        // allowed user but not dbo
-        assertSystemShutdownFail("2850H", "", "dan", ("dan" + PASSWORD_SUFFIX));
+
+        // try some system shutdowns. Note, that all these work, because
+        // we have not set require authentication at system level.
+        // try system shutdown with wrong user - should work
+        assertSystemShutdownOK("", "badUser", ("dan" + PASSWORD_SUFFIX));
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
+        // with 'allowed' user but bad pwd - will succeed
+        assertSystemShutdownOK("", "dan", ("jeff" + PASSWORD_SUFFIX));
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
+        // dbo, but bad pwd - will succeed
+        assertSystemShutdownOK("", "APP", ("POO"));
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
+        // allowed user but not dbo - will also succeed
+        assertSystemShutdownOK("", "dan", ("dan" + PASSWORD_SUFFIX));
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
         // expect Derby system shutdown, which gives XJ015 error.
         assertSystemShutdownOK("", "APP", ("APP" + PASSWORD_SUFFIX));
-        
+
         // so far so good. set back security properties
         conn1 = openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX));
         setDatabaseProperty(
@@ -530,6 +560,67 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         conn1.close();
     }
     
+    // tests system shutdown with setting required authentication at
+    // system level
+    public void testSystemShutdown() throws SQLException
+    {
+        String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
+        
+        // just for the setting the stage, recheck connections while fullAccess
+        // (default) is set at database level. 
+        
+        // first try connection with valid user/password
+        assertConnectionOK(dbName, "system", ("admin"));
+        assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+
+        // try ensuring system level is set for authentication
+        AccessController.doPrivileged
+        (new java.security.PrivilegedAction(){
+                public Object run(){
+                    return java.lang.System.setProperty(
+                        "derby.connection.requireAuthentication", "true");
+                }
+        });
+        // bring down the database
+        assertShutdownOK(dbName, "APP", "APP" + PASSWORD_SUFFIX);
+        // recheck
+        assertConnectionOK(dbName, "system", "admin");
+        assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+        // bring down server to ensure settings take effect 
+        assertSystemShutdownOK("", "badUser", ("dan" + PASSWORD_SUFFIX));
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
+
+        // try system shutdown with wrong user
+        assertSystemShutdownFail("08004", "", "badUser", ("dan" + PASSWORD_SUFFIX));
+        // with 'allowed' user but bad pwd
+        assertSystemShutdownFail("08004", "", "dan", ("jeff" + PASSWORD_SUFFIX));
+        // APP, but bad pwd
+        assertSystemShutdownFail("08004", "", "APP", ("POO"));
+        // note: we don't have a database, so no point checking for dbo.
+        // expect Derby system shutdown, which gives XJ015 error.
+        assertSystemShutdownOK("", "system", "admin");
+        
+        // reset.
+        Connection conn1 = openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX));
+        setDatabaseProperty(
+            "derby.database.defaultConnectionMode","fullAccess", conn1);
+        setDatabaseProperty(
+            "derby.connection.requireAuthentication","false", conn1);
+        AccessController.doPrivileged
+        (new java.security.PrivilegedAction(){
+                public Object run(){
+                    return java.lang.System.setProperty(
+                        "derby.connection.requireAuthentication", "false");
+                }
+        });
+        conn1.commit();
+        conn1.close();
+        openDefaultConnection("system", "admin");
+        assertShutdownOK(dbName, "APP", "APP" + PASSWORD_SUFFIX);
+        assertSystemShutdownOK("", "system", "admin");
+        openDefaultConnection("system", "admin"); // just so teardown works.
+    }
+    
     protected void assertFailSetDatabaseProperty(
         String propertyName, String value, Connection conn) 
     throws SQLException {
@@ -792,7 +883,14 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     throws SQLException {
         if (usingEmbedded())
         {
-            DataSource ds = JDBCDataSource.getDataSource(dbName);
+            // we cannot use JDBCDataSource.getDataSource() (which uses the
+            // default database name), unless we specifically clear the 
+            // databaseName. Otherwise, only the database will be shutdown.
+            // The alternative is to use jDBCDataSource.getDatasource(dbName),
+            // where dbName is an empty string - this will in the current code
+            // be interpreted as a system shutdown.
+            DataSource ds = JDBCDataSource.getDataSource();
+            JDBCDataSource.clearStringBeanProperty(ds, "databaseName");
             JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
             try {
                 ds.getConnection(user, password);
@@ -804,6 +902,13 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         }
         else if (usingDerbyNetClient())
         {
+            // ds.setShutdown is not currently suppported by client, so we need
+            // to use ds.setConnectionAttributes.
+            // With client, we cannot user clearStringBeanProperty on the  
+            // databaseName, that will result in error 08001 - 
+            // Required DataSource property databaseName not set.
+            // So, we pass an empty string as databaseName, which the current
+            // code interprets as a system shutdown.
             ClientDataSource ds = 
                 (ClientDataSource)JDBCDataSource.getDataSource(dbName);
             ds.setConnectionAttributes("shutdown=true");
@@ -817,12 +922,6 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         }
     }
 
-    // Note, we need a separate method for fail & OK because something
-    // the framework will add the wrong details. If we use
-    // getDataSource(dbName), we don't get a successful XJ015, ever,
-    // if we use getDataSource(), it appears the user/password on connect
-    // is ignored, at least, we get XJ015 anyway.
-    // 
     protected void assertSystemShutdownFail(
         String expectedError, String dbName, String user, String password)
     throws SQLException {
@@ -843,13 +942,19 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         else if (usingDerbyNetClient())
         {
             ClientDataSource ds = 
-                (ClientDataSource)JDBCDataSource.getDataSource();
-            JDBCDataSource.clearStringBeanProperty(ds, "databaseName");
+                (ClientDataSource)JDBCDataSource.getDataSource(dbName);
+            // note: with network server, you cannot set the databaseName
+            // to null, that results in error 08001 - Required DataSource
+            // property databaseName not set.
+            // so, we rely on passing of an empty string for databaseName,
+            // which in the current code is interpreted as system shutdown.
+            // also, we need to use setConnectionAttributes.
             ds.setConnectionAttributes(
                 "shutdown=true;user=" + user + ";password=" + password);
             try {
                 ds.getConnection();
                 fail("expected shutdown to fail");
+                ds.getConnection(user, password);
             } catch (SQLException e) {
                 assertSQLState(expectedError, e);
             }

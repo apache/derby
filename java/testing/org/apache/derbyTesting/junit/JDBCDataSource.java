@@ -221,14 +221,20 @@ public class JDBCDataSource {
      */
     public static void shutdownDatabase(javax.sql.DataSource ds)
     {
-        setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        // commenting out until such time as setShutdownDatabase is
+        // supported by client
+        //setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        setBeanProperty(ds, "connectionAttributes", "shutdown=true");
         try {
             ds.getConnection();
             Assert.fail("Database failed to shut down");
         } catch (SQLException e) {
              BaseJDBCTestCase.assertSQLState("Database shutdown", "08006", e);
         } finally {
-            clearStringBeanProperty(ds, "shutdownDatabase");
+            // here too, commenting out until setShutdownDatabase is 
+            // supported by client
+            //clearStringBeanProperty(ds, "shutdownDatabase");
+            clearStringBeanProperty(ds, "connectionAttributes");
         }
     }
 }

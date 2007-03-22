@@ -176,6 +176,21 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             "testNetworkServerSecurityMechanism"));
         return TestConfiguration.clientServerDecorator((suite));
     }
+    
+    public void tearDown() throws Exception {
+        try {
+            AccessController.doPrivileged
+            (new java.security.PrivilegedAction(){
+                public Object run(){
+                    return System.getProperties().remove(
+                            "derby.drda.securityMechanism");
+                }
+            });
+        } catch (Exception e) {
+            fail("warning: could not remove secmec settings");
+        }
+        super.tearDown();
+    }
 
     // Indicates userid/encrypted password security mechanism.
     static final short SECMEC_EUSRIDPWD = 0x09;
@@ -383,7 +398,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             server2.start(null);
             // TODO: sleep ridiculously long, otherwise getting 08001 errors
             //       even when the server is up.
-            Thread.sleep(80000);
+            Thread.sleep(120000);
             
             if (derby_drda_securityMechanism.equals("") ||
                 derby_drda_securityMechanism.equals("INVALID_VALUE"))
@@ -878,7 +893,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * get connection from datasource
      * @param user username
      * @param password password
-     * @param msg message to print for testcase
+     * @param expectedValue expected sql state
      */
     public void getDataSourceConnection(
         String user, String password, String expectedValue)

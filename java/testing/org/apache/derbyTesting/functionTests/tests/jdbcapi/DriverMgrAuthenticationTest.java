@@ -24,12 +24,10 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -58,50 +56,32 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
             return suite;
         }
     }
-    
+
+    // baseSuite takes advantage of setting system properties as defined
+    // in AuthenticationTest
     public static Test baseSuite(String name) {
         TestSuite suite = new TestSuite("DriverMgrAuthenticationTest");
-
-        // set a user at system level
-        java.lang.System.setProperty("derby.user.system", "admin");
-        java.lang.System.setProperty("derby.user.mickey", "mouse");
         
-        // Use DatabasePropertyTestSetup decorator to set the user properties
-        // required by this test (and shutdown the database for the
-        // property to take effect).
-        Properties props = new Properties();
-        props.setProperty("derby.infolog.append", "true");
-        props.setProperty("derby.debug.true", "AuthenticationTrace");
-
         Test test = new DriverMgrAuthenticationTest(
             "testConnectShutdownAuthentication");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
         
-        // DatabasePropertyTestSsetup uses SYSCS_SET_DATABASE_PROPERTY
-        // so that is database level setting.
         test = new DriverMgrAuthenticationTest("testUserFunctions");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
 
         test = new DriverMgrAuthenticationTest("testNotFullAccessUsers");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
         
         test = new DriverMgrAuthenticationTest(
             "testChangePasswordAndDatabasePropertiesOnly");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
 
         // only part of this fixture runs with network server / client
         test = new DriverMgrAuthenticationTest("testGreekCharacters");
-        test = DatabasePropertyTestSetup.builtinAuthentication(test,
-            USERS, PASSWORD_SUFFIX);
-        suite.addTest(new DatabasePropertyTestSetup (test, props, true));
+        setBaseProps(suite, test);
+
+        test = new DriverMgrAuthenticationTest("testSystemShutdown");
+        setBaseProps(suite, test);
         
         // The test needs to run in a new single use database as we're
         // setting a number of properties
@@ -233,7 +213,7 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
     {
         String url = TestConfiguration.getCurrent().getJDBCUrl(dbName);
         if (usingDerbyNetClient() && dbName=="")
-            // The junit test harness has kicked off the test will hang when 
+            // The junit test harness that kicked off the test will hang when 
             // we attempt to shutdown the system - most likely because we're
             // shutting down the system while the network server thread is
             // still alive, so it gets confused...
@@ -252,9 +232,9 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        String url = TestConfiguration.getCurrent().getJDBCUrl();
+        String url = TestConfiguration.getCurrent().getJDBCUrl(dbName);
         if (usingDerbyNetClient() && dbName=="")
-            // The junit test harness has kicked off the test will hang when 
+            // The junit test harness that kicked off the test will hang when 
             // we attempt to shutdown the system - most likely because we're
             // shutting down the system while the network server thread is
             // still alive, so it gets confused...
@@ -262,7 +242,8 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
         String url2 = 
             url + ";user=" + user + ";password=" + password + ";shutdown=true";
         try {
-            DriverManager.getConnection(url2, user, password);
+            //DriverManager.getConnection(url2, user, password);
+            DriverManager.getConnection(url2);
             fail("expected failed shutdown");
         } catch (SQLException e) {
             assertSQLState(expectedSqlState, e);
