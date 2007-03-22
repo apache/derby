@@ -33,7 +33,6 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 	/**
 	 * This tests unary minus and unary plus as dynamic parameters in PreparedStatements.
-	 * @throws SQLException
 	 */
 
 public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
