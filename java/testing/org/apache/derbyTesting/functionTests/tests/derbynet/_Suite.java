@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.JDBC;
 
 import junit.framework.Test; 
 import junit.framework.TestSuite;
@@ -53,7 +54,13 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(BadConnectionTest.suite());
         suite.addTest(NetHarnessJavaTest.suite());
         suite.addTest(SecureServerTest.suite());
-        suite.addTest(NSSecurityMechanismTest.suite());
+        
+        // this test refers to ConnectionPooledDataSource class
+        // thus causing class not found exceptions with JSR169
+        if (JDBC.vmSupportsJDBC3())
+        {
+            suite.addTest(NSSecurityMechanismTest.suite());
+        }
         
         // These tests references a client class directly
         // thus causing class not found exceptions if the
