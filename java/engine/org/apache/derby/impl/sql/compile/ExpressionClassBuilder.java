@@ -178,28 +178,6 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	abstract	void 	setNumSubqueries()
 		 throws StandardException;
 
-	/**
-	 * Build boiler plate for the Execute method
-	 *
-	 *
-	 *	@return	a method builder containing boiler plate for the Execute method
-	 *
-	 * 	@exception StandardException thrown on failure
-	 */
-	abstract	MethodBuilder	beginExecuteMethod()
-		throws StandardException;
-
-
-	/**
-	 * Finish up the Execute method.
-	 *
-	 *
-	 * 	@exception StandardException thrown on failure
-	 */
-	abstract		void 			finishExecuteMethod(boolean		genMarkAsTopNode )
-		throws StandardException;
-
-
 	///////////////////////////////////////////////////////////////////////
 	//
 	// ACCESSORS
@@ -225,10 +203,12 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	}
 
 	/**
-	 * The execute method returns a result set that will evaluate the
-	 * statement this activation class is the compiled form of.
-	 * REVISIT: do we need to give the caller the ability to touch it
-	 * directly, or could we wrap the alterations to it in this class?
+     * Get the execute method in order to add code to it.
+     * Added code will be executed for each execution
+     * of the activation. StatementNode completes the
+     * execute method so that code added by other nodes
+     * will be executed before the ResultSet is created
+     * using fillResultSet. 
 	 */
 	MethodBuilder getExecuteMethod() {
 		return executeMethod;

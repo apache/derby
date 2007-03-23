@@ -300,53 +300,75 @@ public abstract class StatementNode extends QueryTreeNode
 		ActivationClassBuilder generatingClass = new ActivationClassBuilder(
 										superClass, 
 										getCompilerContext());
-		MethodBuilder executeMethod = generatingClass.getExecuteMethod();
 
+        /*
+         * Generate the code to execute this statement.
+         * Two methods are generated here: execute() and
+         * fillResultSet().
+         * <BR>
+         * execute is called for every execution of the
+         * Activation. Nodes may add code to this using
+         * ActivationClassBuilder.getExecuteMethod().
+         * This code will be executed every execution.
+         * <BR>
+         * fillResultSet is called by execute if the BaseActivation's
+         * resultSet field is null and the returned ResultSet is
+         * set into the the resultSet field.
+         * <P>
+         * The generated code is equivalent to:
+         * <code>
+         * public ResultSet execute() {
+         * 
+         *    // these two added by ActivationClassBuilder
+         *    throwIfClosed("execute");
+         *    startExecution();
+         *    
+         *    [per-execution code added by nodes]
+         *    
+         *    if (resultSet == null)
+         *        resultSet = fillResultSet();
+         *    
+         *    return resultSet;
+         * }
+         * </code>
+         */
 
-		/*
-		** the resultSet variable is cached.
-		**
-		** 	resultSet = (resultSet == null) ? ... : resultSet
-		*/
+        MethodBuilder executeMethod = generatingClass.getExecuteMethod();
+
+        MethodBuilder mbWorker = generatingClass.getClassBuilder().newMethodBuilder(
+                Modifier.PRIVATE,
+                ClassName.ResultSet,
+                "fillResultSet");
+        mbWorker.addThrownException(ClassName.StandardException);
+        
+        // Generate the complete ResultSet tree for this statement.
+        // This step may add statements into the execute method
+        // for per-execution actions.
+        generate(generatingClass, mbWorker);
+        mbWorker.methodReturn();
+        mbWorker.complete();
 
 		executeMethod.pushThis();
-		executeMethod.getField(ClassName.BaseActivation, "resultSet", ClassName.ResultSet);
+		executeMethod.getField(ClassName.BaseActivation, "resultSet",
+                ClassName.ResultSet);
+        
 		executeMethod.conditionalIfNull();
-
-			/* We should generate the result set here.  However, the generated
-			 * code size may be too big to fit in a conditional statement for
-			 * Java compiler to handle (it has a jump/branch step limit).  For
-			 * example, a extremely huge insert is issued with many many rows
-			 * (beetle 4293).  We fork a worker method here to get the
-			 * generated result set, pass our parameter to it and call it.
-			 */
-			MethodBuilder mbWorker = generatingClass.getClassBuilder().newMethodBuilder(
-														Modifier.PROTECTED,
-														ClassName.ResultSet,
-														"fillResultSet");
-			mbWorker.addThrownException(ClassName.StandardException);
-
-			// we expect to get back an expression that will give a resultSet
-			// the nodes use the generatingClass: they add expression functions
-			// to it, and then use those functions in their expressions.
-			generate(generatingClass, mbWorker);
-
-			mbWorker.methodReturn();
-			mbWorker.complete();
+        
+            // Generate the result set tree and store the
+            // resulting top-level result set into the resultSet
+            // field, as well as returning it from the execute method.
+			
 			executeMethod.pushThis();
 			executeMethod.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null,
 									 "fillResultSet", ClassName.ResultSet, 0);
-
+            executeMethod.pushThis();
+            executeMethod.swap();
+            executeMethod.putField(ClassName.BaseActivation, "resultSet", ClassName.ResultSet);
+            
 		executeMethod.startElseCode(); // this is here as the compiler only supports ? :
 			executeMethod.pushThis();
 			executeMethod.getField(ClassName.BaseActivation, "resultSet", ClassName.ResultSet);
 		executeMethod.completeConditional();
-
-		executeMethod.pushThis();
-		executeMethod.swap();
-		executeMethod.putField(ClassName.BaseActivation, "resultSet", ClassName.ResultSet);
-
-		executeMethod.endStatement();
 
    		// wrap up the activation class definition
 		// generate on the tree gave us back the newExpr

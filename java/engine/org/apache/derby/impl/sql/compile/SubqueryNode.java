@@ -2075,7 +2075,7 @@ public class SubqueryNode extends ValueNode
 			MethodBuilder mbsq,
 			String 			type)
 	{
-		MethodBuilder mb = acb.executeMethod;
+		MethodBuilder mb = acb.getExecuteMethod();
 
 		// declare field
 		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, type);

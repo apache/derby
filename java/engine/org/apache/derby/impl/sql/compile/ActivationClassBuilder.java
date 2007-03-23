@@ -201,7 +201,7 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	 *
 	 * @exception StandardException thrown on failure
 	 */
-	public	MethodBuilder	beginExecuteMethod()
+	private	MethodBuilder	beginExecuteMethod()
 		throws StandardException
 	{
 		// create a reset method that does nothing.
@@ -265,9 +265,6 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	   Upon entry the only word on the stack is the result set expression
 	 */
 	void finishExecuteMethod(boolean genMarkAsTopNode) {
-
-		executeMethod.pushThis();
-		executeMethod.getField(ClassName.BaseActivation, "resultSet", ClassName.ResultSet);
 
 		/* We only call markAsTopResultSet() for selects.
 		 * Non-select DML marks the top NoPutResultSet in the constructor.
