@@ -78,9 +78,16 @@ public class NetHarnessJavaTest extends HarnessJavaTest {
         suite.addTest(TestConfiguration.clientServerDecorator(
         		         decorate(new NetHarnessJavaTest("executeUpdate"))));
 
-        suite.addTest(TestConfiguration.clientServerDecorator(
-        		         SecurityManagerSetup.noSecurityManager(
-        		             decorate(new NetHarnessJavaTest("testProtocol")))));
+        //DERBY-2348: SECMEC 9 is available on IBM 1.4.2 and 1.5 VMs, leading
+        //            to differences in output, disabling for now. While tests
+        //            for security mechanism exist in NSSecurityMechanismTest,
+        //            that test does not currently check the correct order of
+        //            responses of secmec and secchkcd for various error cases,
+        //            which is tested in testProtocol.
+        //            
+        //suite.addTest(TestConfiguration.clientServerDecorator(
+        //		         SecurityManagerSetup.noSecurityManager(
+        //		             decorate(new NetHarnessJavaTest("testProtocol")))));
 
         // Server does not run on J2ME
         if (JDBC.vmSupportsJDBC3()) {
