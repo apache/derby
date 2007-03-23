@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derbyTesting.functionTests.util;
+package org.apache.derbyTesting.junit;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -75,12 +75,15 @@ public class XATestUtil {
      * @param conn
      * @throws SQLException
      */
-    public static void showXATransactionView(Connection conn) throws SQLException
+    public static void checkXATransactionView(Connection conn,String[][] expectedRows) throws SQLException
     {
         Statement s = conn.createStatement();
         ResultSet rs = s.executeQuery(
                 "select * from XATESTUTIL.global_xactTable where gxid is not null order by gxid");
-        JDBCDisplayUtil.DisplayResults(System.out, rs, conn);
+        if (expectedRows == null)
+            JDBC.assertEmpty(rs);
+        else
+            JDBC.assertFullResultSet(rs, expectedRows);
         rs.close();
     }
     

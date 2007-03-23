@@ -1,4 +1,3 @@
-# DerbyNetClientUseprocess.exclude
 # identifies tests that fail when run in a suite with useprocess=false with DerbyNetClient 
 #
 # jdbcapi/HoldabilityTest.junit - test causes subsequent tests to fail because of missing

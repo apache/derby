@@ -68,6 +68,20 @@ public class J2EEDataSource {
     {
         return getXADataSource(TestConfiguration.getCurrent(), (HashMap) null);
     }
+    
+    
+    /**
+     * Set a bean property for a data source. This code can be used
+     * on any data source type.
+     * @param ds DataSource to have property set
+     * @param property name of property.
+     * @param value Value, type is derived from value's class.
+     */
+    public static void setBeanProperty(Object ds, String property, Object value) {
+       // reuse code from JDBCDataSource
+        JDBCDataSource.setBeanProperty(ds, property, value);
+    }
+    
     /**
      * Create a new DataSource object setup from the passed in TestConfiguration.
      * The getXAConnection() method is configured
