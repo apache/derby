@@ -409,7 +409,7 @@ class DRDAXAProtocol {
 
 		try {
 			xaResource.end(xid,xaflags);
-            xid = null;
+            this.xid = null;
 			if (SanityManager.DEBUG)
 			{
 				connThread.trace("ended XA transaction. xid =  " + xid +
