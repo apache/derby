@@ -54,6 +54,6 @@ public class testProtocol {
 	 */
 	public static void executeFile(String filename)
 	{
-		TestProto t = new TestProto(filename);
+		TestProto t = new TestProto(filename, TestConfiguration.getCurrent().getPort());
 	}
 }

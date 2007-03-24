@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.drda;
 
+import org.apache.derby.drda.NetworkServerControl;
 
 /**
 	This tests protocol errors and protocol not used by JCC
@@ -53,6 +54,6 @@ public class TestFile{
 	 */
 	public static void executeFile(String filename)
 	{
-		TestProto t = new TestProto(filename);
+		TestProto t = new TestProto(filename, NetworkServerControl.DEFAULT_PORTNUMBER);
 	}
 }

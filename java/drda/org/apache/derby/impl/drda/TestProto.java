@@ -129,11 +129,13 @@ public class TestProto {
 	private boolean failed = false;
 	private StreamTokenizer tkn;
 	private String current_filename;
+    private int port;
 
-	// constructor
-	public TestProto(String filename) 
-	{
+	// constructors
+    public TestProto(String filename, int port) 
+    {
 		current_filename = filename;
+        this.port = port;
 		getConnection();
 
 		try 
@@ -153,8 +155,8 @@ public class TestProto {
 		{
 			closeConnection();
 		}
+    }
 
-	}
 	/**
 	 * Process include file
 	 *
@@ -179,10 +181,9 @@ public class TestProto {
 	{
 		String prev_filename = current_filename;
 		current_filename = filename;
-        	String hostName=getHostName();
+       	String hostName=getHostName();
 		BufferedReader fr;
-                try
-		{
+        try {
 			fr = new BufferedReader(new InputStreamReader(new FileInputStream(filename),"UTF-8"));
 		} catch (FileNotFoundException fnfe) {
 			// if useprocess=false & we're running in a suite, 
@@ -215,7 +216,7 @@ public class TestProto {
 	{
         String hostName=getHostName();
 		try {
-            monitorSocket = new Socket(hostName,1527);
+            monitorSocket = new Socket(hostName, port);
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host: " + hostName);
             System.exit(1);
