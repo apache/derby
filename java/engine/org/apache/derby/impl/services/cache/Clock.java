@@ -48,11 +48,11 @@ import java.util.Properties;
 
 
 /**
-	A cache manager that uses a Hashtable and a ArrayList. The ArrayList holds
-	CachedItem objects, each with a holder object. The Hashtable is keyed
+	A cache manager that uses a HashMap and an ArrayList. The ArrayList holds
+	CachedItem objects, each with a holder object. The HashMap is keyed
 	by the identity of the holder object (Cacheable.getIdentity()) and
 	the data portion is a pointer to the CachedItem. CachedItems that have
-	holder objects with no identity do not have entries in the hashtable.
+	holder objects with no identity do not have entries in the hash map.
 	<P>
 	CachedItems can in various state.
 	<UL>
@@ -469,7 +469,7 @@ final class Clock implements CacheManager, Serviceable {
 		unkeep does not handle the case of remove.
 
 
-		<P>MT - must be MT-safe.  Getting and deleteing item from the hashtable
+		<P>MT - must be MT-safe. Getting and deleting item from the hash map
 		is in the same synchronized block.  If the cacheable object is waiting
 		to be removed, that is synchronized thru the cachedItem itself
 		(RESOLVE: need to move this sync block to cachedItem instead)
