@@ -22,7 +22,8 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derby.impl.drda.TestProto;
-
+import org.apache.derbyTesting.junit.TestConfiguration;
+import java.io.File;
 
 /**
 	This tests protocol errors and protocol not used by JCC or derbyclient
@@ -30,18 +31,21 @@ import org.apache.derby.impl.drda.TestProto;
 
 public class testProtocol { 
 
-	private static final String DEFAULT_FILENAME = "extin/protocol.tests";
-	
+	private static final String DEFAULT_FILENAME = "extin" + File.separator + "protocol.tests";
+	private static final String OLD_HARNESS_FILENAME = "protocol.tests";
+
 	// constructor
 	public testProtocol() {}
 	
-
 	/**
 	 * main routine
 	 */
     public static void main(String[] args) {
 		
-		executeFile(DEFAULT_FILENAME);
+    	if (TestConfiguration.runningInDerbyHarness())
+    		executeFile(OLD_HARNESS_FILENAME);
+    	else
+		    executeFile(DEFAULT_FILENAME);
 	}
 	/**
 	 * Execute a command file against a network server

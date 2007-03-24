@@ -189,7 +189,7 @@ public class TestProto {
 			// the location is different, try it
 			String userdir =  System.getProperty("user.dir");
 			String sep =  System.getProperty("file.separator");
-			fr = new BufferedReader (new InputStreamReader(new FileInputStream(userdir + sep + "extin" + sep + filename),"UTF-8"));
+			fr = new BufferedReader (new InputStreamReader(new FileInputStream(userdir + sep + filename),"UTF-8"));
 		}
 		tkn = new StreamTokenizer(fr);
 		int val;
