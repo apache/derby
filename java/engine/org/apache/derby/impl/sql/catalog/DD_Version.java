@@ -393,7 +393,15 @@ public	class DD_Version implements	Formatable
 			// Grant PUBLIC access to some system routines
 			bootingDictionary.grantPublicAccessToSystemRoutines(tc, aid);
         }
-        
+
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_2)
+        {
+            // On ugrade from versions before 10.3, create system procedures
+            // added in 10.3.
+            bootingDictionary.create_10_3_system_procedures(
+                tc, 
+                bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
+        }
 	}
 
 	/**

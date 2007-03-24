@@ -29,6 +29,9 @@ import java.sql.Statement;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.JDBC;
+
 
 /**
  * Upgrade test cases for changes made in 10.3.
@@ -44,8 +47,7 @@ public class Changes10_3 extends UpgradeChange {
         TestSuite suite = new TestSuite("Upgrade changes for 10.3");
         
         suite.addTestSuite(Changes10_3.class);
-        
-        return suite;
+        return new SupportFilesSetup((Test) suite);
     }
 
     public Changes10_3(String name) {
@@ -177,4 +179,73 @@ public class Changes10_3 extends UpgradeChange {
         commit();
 
     }
+
+
+
+    /**
+     * Simple test to ensure new import/export procedures added in 10.3 
+     * are working on hard upgrade to 10.3 from previous derby versions.
+     */
+    public void testImportExportLobsProcedures()
+        throws SQLException
+    {
+    
+        switch(getPhase()) {
+        case PH_CREATE: {
+            Statement s = createStatement();
+            s.execute("create table iet1(id int , content clob , pic blob)");
+            s.executeUpdate("insert into iet1 values " + 
+                            "(1, 'SQL Tips', cast(X'4231a2' as blob))");
+            s.close();
+            commit();
+            break;
+        }
+        case PH_SOFT_UPGRADE: {
+            // new import export procedure should not be found 
+            // on soft-upgrade.
+            Statement s = createStatement();
+            assertStatementError("42Y03", s, 
+                "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE" +  
+                "(null , 'IET1' , 'iet1.del' , null, " + 
+                "null, null, 'iet1_lobs.dat')");
+            s.close();
+            break;
+        }
+        case PH_POST_SOFT_UPGRADE: 
+            break;
+        case PH_HARD_UPGRADE: {
+            //  main file used to perform import/export.
+            String fileName =  
+                (SupportFilesSetup.getReadWrite("iet1.del")).getPath();
+            // external file name used to store lobs.
+            String lobsFileName =
+                (SupportFilesSetup.getReadWrite("iet1_lobs.dat")).getPath();
+
+            Statement s = createStatement();
+            s.execute(
+                "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE" +  
+                "(null , 'IET1' , '"  +  fileName  + 
+                "' , null, null, null, '" + lobsFileName + "')");
+            s.execute("call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(" + 
+                      "null, 'IET1' , '" + fileName + 
+                      "', null, null, null, 0)");
+            s.execute("call SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE(" +
+                      "'select * from IET1', '" +  fileName + 
+                      "' , null, null, null, '" + lobsFileName + "')");
+            s.execute("call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(" + 
+                      "null, 'IET1','ID, CONTENT, PIC', '1,2,3'," + 
+                      "'" + fileName +"', null, null, null, 1)") ;
+            
+            // verify table has correct data after performing import/export.
+            ResultSet rs = s.executeQuery("select * from iet1");
+            JDBC.assertFullResultSet(rs, new String[][]
+                {{"1", "SQL Tips", "4231a2"},
+                 {"1", "SQL Tips", "4231a2"}});
+            s.close();
+            break;
+        }
+        
+        }
+    }
+
 }
