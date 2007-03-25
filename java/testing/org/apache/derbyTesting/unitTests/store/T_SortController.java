@@ -695,7 +695,7 @@ public class T_SortController extends T_Generic
 		// Close the sort controller.  This makes the rows
 		// available to be retrieved.
         // It also means we are getting final sort statistics.
-        sort.close();
+        sort.completedInserts();
 
         // Test the SortInfo part of sort.
         SortInfo   sort_info = sort.getSortInfo();
