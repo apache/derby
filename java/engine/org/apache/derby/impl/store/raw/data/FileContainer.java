@@ -795,7 +795,7 @@ abstract class FileContainer
 	{
 		ArrayInputStream inStream = new ArrayInputStream(a);
 
-		inStream.setLimit(0, CONTAINER_INFO_SIZE);
+		inStream.setLimit(CONTAINER_INFO_SIZE);
 		int fid = inStream.readInt();
 		if (fid != formatIdInteger)
         {
@@ -1046,7 +1046,7 @@ abstract class FileContainer
 
 		try
 		{			
-			inStream.setLimit(0, CONTAINER_INFO_SIZE);
+			inStream.setLimit(CONTAINER_INFO_SIZE);
 
 			int fid = inStream.readInt();
 			if (fid != formatIdInteger)

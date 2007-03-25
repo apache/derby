@@ -986,7 +986,7 @@ public class FileLogger implements Logger {
 				{
 					int optionalDataLength = rawInput.readInt();
 					int savePosition = rawInput.getPosition();
-					rawInput.setLimit(savePosition, optionalDataLength);
+					rawInput.setLimit(optionalDataLength);
 	
 					compensation = lop.generateUndo(t, rawInput);
 
@@ -1471,7 +1471,7 @@ public class FileLogger implements Logger {
                     }
 
 					int dataLength = logIn.readInt();
-					logIn.setLimit(logIn.getPosition(), dataLength);
+					logIn.setLimit(dataLength);
 										
 					// even though the log has already been written, we need to
 					// tie the page to the log stream so that if redo failed

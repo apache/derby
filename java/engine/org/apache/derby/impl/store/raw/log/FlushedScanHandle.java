@@ -136,7 +136,7 @@ public class FlushedScanHandle implements ScanHandle
 		{
 			int dataLength = rawInput.readInt();
 			readOptionalData = true;
-			rawInput.setLimit(rawInput.getPosition(), dataLength);
+			rawInput.setLimit(dataLength);
 			return rawInput;
 		}
 

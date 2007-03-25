@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 import org.apache.derby.iapi.services.io.ErrorObjectInput;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.io.UTFDataFormatException;
 
@@ -46,21 +47,26 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 	private int		end;		// exclusive
 	private int		position;
 
+	/**
+	 * Create an ArrayInputStream with a zero length byte array.
+	 * The position is set to 0 and the limit is the entire byte array.
+	 *
+	 */
 	public ArrayInputStream() {
-		this(null);
+		this(ReuseFactory.getZeroLenByteArray());
 	}
 
 	private ErrorObjectInput oi;
 
+	/**
+	 * Create an ArrayInputStream with the passed in data.
+	 * The position is set to 0 and the limit is the entire byte array.
+	 * @param data
+	 */
 	public ArrayInputStream(byte[] data) {
 		super();
 		setData(data);
 		oi = new org.apache.derby.iapi.services.io.FormatIdInputStream(this);
-	}
-
-	public ArrayInputStream(byte[] data, int offset, int length) throws IOException {
-		this(data);
-		setLimit(offset, length);
 	}
 
 	/*
@@ -69,15 +75,12 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 
 	/**
 		Set the array of bytes to be read.
+		Position is set to zero.
 	*/
 	public void setData(byte[] data) {
 		pageData = data;
-		clearLimit();
-	}
-
-	public void setData(byte[] data, int offset, int length) throws IOException {
-		pageData = data;
-		setLimit(offset, length);
+		start = position = 0;
+		end = data.length;
 	}
 
 	/**
@@ -203,16 +206,10 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 		@see Limit#clearLimit
 	*/
 	public final int clearLimit() {
-
-		if (pageData != null) {
-			start = 0;
-			int remainingBytes = end - position;
-			end = pageData.length;
-			return remainingBytes;
-		} else {
-			start = end = position = 0;
-			return 0;
-		}
+        start = 0;
+        int remainingBytes = end - position;
+        end = pageData.length;
+        return remainingBytes;
 	}
 
 	/*
