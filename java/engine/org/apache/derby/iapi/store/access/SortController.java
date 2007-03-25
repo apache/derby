@@ -21,11 +21,8 @@
 
 package org.apache.derby.iapi.store.access;
 
-import org.apache.derby.iapi.types.CloneableObject;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 
 /**
@@ -47,23 +44,19 @@ import org.apache.derby.iapi.error.StandardException;
 public interface SortController
 {
 	/**
-	Close this sort controller.
-	<p>
-	Currently, since only one sort controller is allowed per sort,
-	closing the sort controller means the last row has been
-	inserted.
+	Inform SortController that all the rows have
+    been inserted into it. 
 	**/
-	void close();
+	void completedInserts();
 
 	/**
     Insert a row into the sort.
 
-    @param row The row to insert into the conglomerate.  The stored
+    @param row The row to insert into the SortController.  The stored
 	representations of the row's columns are copied into a new row
-	somewhere in the conglomerate.
+	somewhere in the sort.
 
 	@exception StandardException Standard exception policy.
-	@see CloneableObject
     **/
     void insert(DataValueDescriptor[] row)
 		throws StandardException;

@@ -58,7 +58,7 @@ import java.util.Vector;
 
 **/
 
-public final class MergeSort implements Sort
+final class MergeSort implements Sort
 {
 
 	/*
@@ -346,7 +346,7 @@ public final class MergeSort implements Sort
 		// which will give us any in-progress merge
 		// runs, if there are any.
 		if (inserter != null)
-			inserter.close();
+			inserter.completedInserts();
 		inserter = null;
 
 		// Make sure the scan is closed, if there is one.

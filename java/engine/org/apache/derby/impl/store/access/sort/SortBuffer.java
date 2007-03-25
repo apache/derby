@@ -112,7 +112,7 @@ class SortBuffer
 	Arrange that the next node allocated in the tree have
 	it's aux field set to the argument.
 	**/
-	public void setNextAux(int aux)
+	void setNextAux(int aux)
 	{
 		nextAux = aux;
 	}
@@ -121,7 +121,7 @@ class SortBuffer
 	Retrieve the aux value from the last node deallocated
 	from the tree.
 	**/
-	public int getLastAux()
+	int getLastAux()
 	{
 		return lastAux;
 	}
@@ -130,7 +130,7 @@ class SortBuffer
 	Construct doesn't do anything, callers must call init
 	and check its return code.
 	**/
-	public SortBuffer(MergeSort sort)
+	SortBuffer(MergeSort sort)
 	{
 		this.sort = sort;
 	}
@@ -139,7 +139,7 @@ class SortBuffer
 	Initialize.  Returns false if the allocator
 	couldn't be initialized.
 	**/
-	public boolean init()
+	boolean init()
 	{
 		allocator = new NodeAllocator();
 
@@ -159,14 +159,14 @@ class SortBuffer
 		return true;
 	}
 
-	public void reset()
+	void reset()
 	{
 		allocator.reset();
 		head = allocator.newNode();
 		height = 0;
 	}
 
-	public void close()
+	void close()
 	{
 		if (allocator != null)
 			allocator.close();
@@ -178,7 +178,7 @@ class SortBuffer
 	/**
 	Grow by a certain percent if we can
 	*/
-	public void grow(int percent)
+	void grow(int percent)
 	{
 		if (percent > 0)
 			allocator.grow(percent);
@@ -190,7 +190,7 @@ class SortBuffer
 	It's the capacity of the node allocator minus one
 	because the sorter uses one node for the head.
 	**/
-	public int capacity()
+	int capacity()
 	{
 		if (allocator == null)
 			return 0;
@@ -204,7 +204,7 @@ class SortBuffer
 	<P>
 	See Knuth Vol. 3, Sec. 6.2.3, pp. 455-457 for the algorithm.
 	**/
-	public int insert(DataValueDescriptor[] k)
+	int insert(DataValueDescriptor[] k)
 		throws StandardException
 	{
 		int c;
@@ -415,7 +415,7 @@ class SortBuffer
 	Return the lowest key and delete it from 
 	the tree, preserving the balance of the tree.
 	**/
-	public DataValueDescriptor[] removeFirst()
+	DataValueDescriptor[] removeFirst()
 	{
 		if (head.rightLink == null)
 			return null;

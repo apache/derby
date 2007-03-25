@@ -1531,7 +1531,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		boolean updateStatistics = false;
 		if(!truncateTable)
 		{
-			sorters[index].close();
+			sorters[index].completedInserts();
 			sorters[index] = null;
 
 			if (td.statisticsExist(cd))
@@ -1987,11 +1987,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	}
 
 	/**
-	 * @see ResultSet#cleanUp
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void	cleanUp() throws StandardException
+	private void	cleanUp() throws StandardException
 	{
 		if (compressHeapCC != null)
 		{
@@ -2011,7 +2010,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			{
 				if (sorters[index] != null)
 				{
-					sorters[index].close();
+					sorters[index].completedInserts();
 				}
 				sorters[index] = null;
 			}

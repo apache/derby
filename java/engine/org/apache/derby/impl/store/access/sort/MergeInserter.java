@@ -35,28 +35,28 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 **/
 
-public final class MergeInserter implements SortController
+final class MergeInserter implements SortController
 {
 	/**
 	The sort this inserter is for.
 	**/
-	protected MergeSort sort = null;
+	private MergeSort sort;
 
 	/**
 	The transaction this inserter is in.
 	**/
-	protected TransactionManager tran;
+	private TransactionManager tran;
 
 	/**
 	A vector of the conglomerate ids of the merge runs.
 	**/
-	Vector mergeRuns = null;
+	private Vector mergeRuns;
 
 	/**
 	An in-memory ordered set that is used to sort rows
 	before they're sent to merge runs.
 	**/
-	SortBuffer sortBuffer = null;
+	private SortBuffer sortBuffer;
 
 	/**
 	Information about memory usage to dynamically tune the
@@ -195,15 +195,13 @@ public final class MergeInserter implements SortController
 	}
 
 	/**
-	Close this sort controller.	Closing the sort controller
-	means the caller is done inserting rows.  This method
-	must not throw any exceptions since it's called during
-	error processing.
+     * Called when the caller has completed
+     * inserting rows into the sorter.
 
-	@see SortController#close
+	@see SortController#completedInserts
 	**/
 
-	public void close()
+	public void completedInserts()
 	{
 		// Tell the sort that we're closed, and hand off
 		// the sort buffer and the vector of merge runs.

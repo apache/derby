@@ -382,7 +382,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 		/*
 		** End the sort and open up the result set
 		*/
-		sorter.close();
+		sorter.completedInserts();
 
 		scanController = 
             tc.openSortScan(sortId, activation.getResultSetHoldability());

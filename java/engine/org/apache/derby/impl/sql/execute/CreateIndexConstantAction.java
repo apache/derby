@@ -765,7 +765,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 		}
 		finally
 		{
-			sorter.close();
+			sorter.completedInserts();
 		}
 
 		return new CardinalityCounter(tc.openSortRowSource(sortId));

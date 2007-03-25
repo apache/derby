@@ -1805,7 +1805,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			// We can finally drain the sorter and rebuild the index
 			// RESOLVE - all indexes are btrees right now
 			// Populate the index.
-			sorters[index].close();
+			sorters[index].completedInserts();
 			sorters[index] = null;
 			rowSources[index] = new CardinalityCounter(tc.openSortRowSource(sortIds[index]));
 			newIndexCongloms[index] = tc.createAndLoadConglomerate(
@@ -1923,7 +1923,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			{
 				if (sorters[index] != null)
 				{
-					sorters[index].close();
+					sorters[index].completedInserts();
 				}
 				sorters[index] = null;
 			}
@@ -2213,7 +2213,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		for (int index = 0; index < numIndexes; index++)
 		{
 			sorters[index] = tc.openSort(sortIds[index]);
-			sorters[index].close();
+			sorters[index].completedInserts();
 			rowSources[index] = tc.openSortRowSource(sortIds[index]);
 		}
 

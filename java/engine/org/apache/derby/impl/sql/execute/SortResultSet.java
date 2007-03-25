@@ -318,7 +318,7 @@ class SortResultSet extends NoPutResultSetImpl
 		}
 		source.close();
 		sortProperties = sorter.getSortInfo().getAllSortInfo(sortProperties);
-		sorter.close();
+		sorter.completedInserts();
 
 		return tc.openSortScan(sortId, activation.getResultSetHoldability());
 	}

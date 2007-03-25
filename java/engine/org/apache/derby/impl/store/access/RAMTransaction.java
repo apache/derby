@@ -301,7 +301,7 @@ public class RAMTransaction
                 for (int i = sortControllers.size() - 1; i >= 0; i--)
                 {
                     SortController sc = (SortController) sortControllers.get(i);
-                    sc.close();
+                    sc.completedInserts();
                 }
                 sortControllers.clear();
             }

@@ -270,7 +270,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			*/
 			source.close();
 			sortProperties = sorter.getSortInfo().getAllSortInfo(sortProperties);
-			sorter.close();
+			sorter.completedInserts();
 
 			scanController = 
                 tc.openSortScan(sortId, activation.getResultSetHoldability());
@@ -329,7 +329,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		}
 		source.close();
 		sortProperties = sorter.getSortInfo().getAllSortInfo(sortProperties);
-		sorter.close();
+		sorter.completedInserts();
 
 		return tc.openSortScan(sortId, activation.getResultSetHoldability());
 	}
