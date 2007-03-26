@@ -1,3 +1,8 @@
+//
+// This template policy file gives examples of how to configure the
+// permissions needed to run a Derby network server with the Java
+// Security manager.
+//
 grant codeBase "${derby.install.url}derby.jar"
 {
 //
@@ -7,6 +12,13 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.util.PropertyPermission "derby.*", "read";
   permission java.io.FilePermission "${derby.system.home}","read";
   permission java.io.FilePermission "${derby.system.home}${/}-", "read,write,delete";
+
+//
+// This permission lets a DBA reload the policy file while the server
+// is still running. The policy file is reloaded by invoking the
+// SYSCS_UTIL.SYSCS_RELOAD_SECURITY_POLICY() system procedure.
+//
+  permission java.security.SecurityPermission "getPolicy";
 
 //
 // This permission lets you backup and restore databases
