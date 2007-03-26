@@ -33,7 +33,11 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.util.PropertyPermission "derbyTesting.unittest.*", "write";
 
   permission java.lang.RuntimePermission "createClassLoader";
-  permission java.security.SecurityPermission "getPolicy";
+
+  //
+  // This permission deliberately omitted.
+  //
+  // permission java.security.SecurityPermission "getPolicy";
   
   permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
   permission java.io.FilePermission "${derby.system.home}${/}derby.log", "read, write, delete";

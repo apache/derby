@@ -137,6 +137,11 @@ package org.apache.derby.shared.common.reference;
 	  <LI> XSCH0 Heap
 	  </UL>
 
+	<LI>Security
+	  <UL>
+	  <LI> XK...
+	  </UL>
+
     <LI>Reserved for IBM Use: XQC00 - XQCZZ
 	</UL>
 */
@@ -1621,7 +1626,7 @@ public interface SQLState {
     String NO_UPGRADE = "XJ050.U";
         
     /*
-     ** Messages whose SQL states are proscribed by DRDA
+     ** Messages whose SQL states are prescribed by DRDA
      */
     String DRDA_NO_AUTOCOMMIT_UNDER_XA                              = "2D521.S.1";
     String DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK              = "2D521.S.2"; 
@@ -1702,5 +1707,11 @@ public interface SQLState {
 	String PERIOD_AS_CHAR_DELIMITER_NOT_ALLOWED                    ="XIE0K.S";
 	String TABLE_NOT_FOUND                                         ="XIE0M.S";
 	String IMPORTFILE_HAS_INVALID_HEXSTRING                        ="XIE0N.S";
+
+
+    /*
+    ** Security XK...
+    */
+    String POLICY_NOT_RELOADED                                     ="XK000.S";
 }
 

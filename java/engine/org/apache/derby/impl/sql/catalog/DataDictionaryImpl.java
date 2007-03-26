@@ -10627,6 +10627,23 @@ public final class	DataDictionaryImpl
                 (TypeDescriptor) null,
                 tc);
         }
+
+
+        // void SYSCS_UTIL.SYSCS_RELOAD_SECURITY_POLICY()
+        {
+            createSystemProcedureOrFunction(
+                "SYSCS_RELOAD_SECURITY_POLICY",
+                sysUtilUUID,
+                null,
+                null,
+                0,
+                0,
+                RoutineAliasInfo.NO_SQL,
+                (TypeDescriptor) null,
+                tc);
+        }
+
+
     }
 
 

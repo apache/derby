@@ -61,6 +61,10 @@ import junit.framework.Test;
  * 
  */
 public class SupportFilesSetup extends TestSetup {
+
+    public  static  final   String  EXTIN = "extin";
+    public  static  final   String  EXTINOUT = "extinout";
+    public  static  final   String  EXTOUT = "extout";
     
     private String[] readOnly;
     private String[] readWrite;
@@ -112,19 +116,19 @@ public class SupportFilesSetup extends TestSetup {
     
     protected void setUp() throws PrivilegedActionException, IOException
     {
-        privCopyFiles("extin", readOnly, readOnlyTargetFileNames);
-        privCopyFiles("extinout", readWrite, readWriteTargetFileNames);
-        privCopyFiles("extout", (String[]) null, (String[]) null);
+        privCopyFiles(EXTIN, readOnly, readOnlyTargetFileNames);
+        privCopyFiles(EXTINOUT, readWrite, readWriteTargetFileNames);
+        privCopyFiles(EXTOUT, (String[]) null, (String[]) null);
     }
     
     protected void tearDown()
     {
-        DropDatabaseSetup.removeDirectory("extin");
-        DropDatabaseSetup.removeDirectory("extinout");
-        DropDatabaseSetup.removeDirectory("extout");
+        DropDatabaseSetup.removeDirectory(EXTIN);
+        DropDatabaseSetup.removeDirectory(EXTINOUT);
+        DropDatabaseSetup.removeDirectory(EXTOUT);
     }
     
-    private void privCopyFiles(final String dirName, final String[] resources, final String[] targetNames)
+    public  static   void privCopyFiles(final String dirName, final String[] resources, final String[] targetNames)
     throws PrivilegedActionException
     {
         AccessController.doPrivileged
@@ -138,7 +142,7 @@ public class SupportFilesSetup extends TestSetup {
 
     }
     
-    private void copyFiles(String dirName, String[] resources, String[] targetNames)
+    private static  void copyFiles(String dirName, String[] resources, String[] targetNames)
         throws PrivilegedActionException, IOException
     {
         File dir = new File(dirName);
@@ -221,7 +225,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static File getReadOnly(String name)
     {
-        return getFile("extin", name);
+        return getFile(EXTIN, name);
     }
     /**
      * Obtain a File for the local copy of a read-write resource.
@@ -229,7 +233,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static File getReadWrite(String name)
     {
-        return getFile("extinout", name);
+        return getFile(EXTINOUT, name);
     }
     /**
      * Obtain a File for the local copy of a write-only resource.
@@ -237,7 +241,7 @@ public class SupportFilesSetup extends TestSetup {
      */
     public static File getWriteOnly(String name)
     {
-        return getFile("extout", name);
+        return getFile(EXTOUT, name);
     }
     
     private static File getFile(String dirName, String name)

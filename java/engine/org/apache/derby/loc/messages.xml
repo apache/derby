@@ -4456,7 +4456,19 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
         </family>
 
+        <family>
+            <title>Class XK: Security Exceptions</title>
 
+            <msg>
+                <name>XK000.S</name>
+                <text>The security policy could not be reloaded: {0}</text>
+                <arg>reason</arg>
+            </msg>
+
+        </family>
+
+
+ 
         <family>
             <title>Class XN: Network Client Exceptions</title>
 

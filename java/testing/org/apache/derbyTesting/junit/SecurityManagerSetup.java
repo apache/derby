@@ -59,7 +59,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	}
 	
 	private final String decoratorPolicyResource;
-	private SecurityManagerSetup(Test test, String policyResource)
+	public SecurityManagerSetup(Test test, String policyResource)
 	{
 		super(test);
 		this.decoratorPolicyResource = policyResource;
@@ -117,6 +117,10 @@ public final class SecurityManagerSetup extends TestSetup {
     {
         if ("<NONE>".equals(decoratorPolicyResource))
             BaseTestCase.setSystemProperty("java.security.policy", "");
+        else if ( !externalSecurityManagerInstalled )
+        {
+            uninstallSecurityManager();
+        }
     }
 	
     /**
@@ -140,7 +144,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	
 	private static void installSecurityManager(String policyFile)
 			throws PrivilegedActionException {
-		
+
 		if (externalSecurityManagerInstalled)
 			return;
 		
@@ -156,13 +160,7 @@ public final class SecurityManagerSetup extends TestSetup {
 					return;
 			
 			// Uninstall the current manager.
-			AccessController.doPrivileged(new java.security.PrivilegedAction() {
-
-				public Object run() {
-					System.setSecurityManager(null);
-					return null;
-				}
-			});
+			uninstallSecurityManager();
 		}
 		
 		// Set the system properties from the desired set.
@@ -178,7 +176,8 @@ public final class SecurityManagerSetup extends TestSetup {
 		// and install
 		AccessController.doPrivileged(new java.security.PrivilegedAction() {
 
-			public Object run() {
+
+                public Object run() {
 				System.setSecurityManager(new SecurityManager());
 				return null;
 			}
@@ -353,4 +352,24 @@ public final class SecurityManagerSetup extends TestSetup {
 			}
 		});
 	}
+
+    /**
+     * Remove the security manager.
+     */
+    private static void uninstallSecurityManager()
+        throws PrivilegedActionException {
+
+            AccessController.doPrivileged
+            (
+             new java.security.PrivilegedAction()
+             {
+                 public Object run() {
+                     System.setSecurityManager(null);
+                     return null;
+                 }
+             }
+             );
+
+    }
+
 }

@@ -220,6 +220,11 @@ public abstract class Util  {
 	}
 
 
+	public static SQLException policyNotReloaded( Throwable t ) {
+		return newEmbedSQLException(SQLState.POLICY_NOT_RELOADED, new Object[] { t.getMessage() },
+        		StandardException.getSeverityFromIdentifier(SQLState.POLICY_NOT_RELOADED), t);
+	}
+
 	public static SQLException notImplemented() {
 
 		return notImplemented( MessageService.getTextMessage(MessageId.CONN_NO_DETAILS) );

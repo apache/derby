@@ -69,6 +69,8 @@ public class TestConfiguration {
     public final static int    DEFAULT_PORT = 1527;
     private final static String DEFAULT_FRAMEWORK = "embedded";
     public final static String DEFAULT_HOSTNAME = "localhost";
+
+    public  final   static  String  TEST_DBO = "TEST_DBO";
             
     /**
      * Keys to use to look up values in properties files.
@@ -138,10 +140,17 @@ public class TestConfiguration {
         runningInDerbyHarness = assumeHarness;
         
         if (!assumeHarness) {
-            File dsh = new File("system");
+            final   File dsh = new File("system");
 
-            BaseTestCase.setSystemProperty("derby.system.home",
-                    dsh.getAbsolutePath());
+            AccessController.doPrivileged
+            (new java.security.PrivilegedAction(){
+                public Object run(){
+                    BaseTestCase.setSystemProperty("derby.system.home",
+                                                   dsh.getAbsolutePath());
+                    return null;
+                }
+            }
+             );            
         }
      }
     
@@ -419,7 +428,7 @@ public class TestConfiguration {
      * This decorator must be the outer one in this mode.
      * <code>
      * test = DatabasePropertyTestSetup.builtinAuthentication(test,
-                new String[] {"TEST_DBO","U1","U2",},
+                new String[] {TEST_DBO,"U1","U2",},
                 "nh32ew");
        test = TestConfiguration.sqlAuthorizationDecorator(test);
      * </code>
@@ -446,7 +455,7 @@ public class TestConfiguration {
         
         return changeUserDecorator(
             new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true),
-            "TEST_DBO", "dummy"); // DRDA doesn't like empty pw
+            TEST_DBO, "dummy"); // DRDA doesn't like empty pw
     }
 
 
@@ -482,7 +491,7 @@ public class TestConfiguration {
             DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true);
 
         return changeUserDecorator(setSQLAuthMode,
-                                   "TEST_DBO",
+                                   TEST_DBO,
                                    "dummy"); // DRDA doesn't like empty pw
     }
     
@@ -507,7 +516,7 @@ public class TestConfiguration {
             String[] users, String passwordToken)
     {
         String[] usersWithDBO = new String[users.length + 1];
-        usersWithDBO[0] = "TEST_DBO";
+        usersWithDBO[0] = TEST_DBO;
         System.arraycopy(users, 0, usersWithDBO, 1, users.length);
         return sqlAuthorizationDecorator(
             DatabasePropertyTestSetup.builtinAuthentication(test, 

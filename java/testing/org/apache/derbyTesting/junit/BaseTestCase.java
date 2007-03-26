@@ -74,8 +74,16 @@ public abstract class BaseTestCase
      * setUp, tearDown methods and decorators.
      */
     public void runBare() throws Throwable {
-    	if (getTestConfiguration().defaultSecurityManagerSetup())
+
+        // install a default security manager if one has not already been
+        // installed
+        if ( System.getSecurityManager() == null )
+        {
+            if (getTestConfiguration().defaultSecurityManagerSetup())
+            {
     		assertSecurityManager();
+            }
+        }
     	 
     	super.runBare();   
     }

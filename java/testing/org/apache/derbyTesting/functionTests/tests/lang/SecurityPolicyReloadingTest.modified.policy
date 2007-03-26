@@ -1,4 +1,4 @@
-grant codeBase "${derby.install.url}derby.jar"
+grant codeBase "${derbyTesting.codejar}derby.jar"
 {
 //
 // These permissions are needed for everyday, embedded Derby usage.
@@ -26,11 +26,26 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
 };
 
-grant codeBase "${derby.install.url}derbynet.jar"
+grant codeBase "${derbyTesting.codejar}derbynet.jar"
 {
 //
 // This permission lets the Network Server manage connections from clients.
 //
-  permission java.net.SocketPermission "${derby.drda.host}:*", "accept"; 
+  permission java.net.SocketPermission "${derbyTesting.serverhost}:*", "accept, connect, resolve"; 
+  permission java.net.SocketPermission "localhost:*", "accept, connect, resolve"; 
 };
 
+grant codeBase "${derbyTesting.testjar}derbyTesting.jar"
+{
+  // Don't allow all properties to be read
+  permission java.util.PropertyPermission "derby.*", "read,write";
+
+  // Access all files
+  permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
+
+  // When running with useprocess=false need to install and uninstall
+  // the security manager and allow setIO to change the system err and out
+  // streams. Currently the nist suite runs with useprocess=false.
+  permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.lang.RuntimePermission "setIO"; 
+};

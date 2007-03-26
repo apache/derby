@@ -21,6 +21,10 @@
 
 package org.apache.derby.catalog;
 
+import java.security.AccessControlException;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
+import java.security.Policy;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -73,6 +77,20 @@ public class SystemProcedures  {
      */
     public  static String SQLERRMC_MESSAGE_DELIMITER = new String(new char[] {(char)20,(char)20,(char)20});
 
+    public  static  class   ReloadPolicyAction   implements PrivilegedExceptionAction
+    {
+        public     ReloadPolicyAction() {}
+       
+        public  Object  run()
+        throws Exception
+        {
+            Policy          policy = Policy.getPolicy();
+            
+            policy.refresh();
+        
+            return null;
+        }
+    }
 	/**
 	  Method used by Derby Network Server to get localized message (original call
 	  from jcc.
@@ -1416,6 +1434,27 @@ public class SystemProcedures  {
 		ps.close();
 	}
 	
+    /**
+     * Reload the policy file.
+     * <p>
+     * System procedure called thusly:
+     *
+     * SYSCS_UTIL.SYSCS_RELOAD_SECURITY_POLICY()
+     **/
+    public static void SYSCS_RELOAD_SECURITY_POLICY()
+        throws SQLException
+    {
+        ReloadPolicyAction             reloadPolicyAction = new ReloadPolicyAction();
+
+        try {
+            AccessController.doPrivileged( reloadPolicyAction );
+        }
+        catch (Exception e)
+        {
+            throw Util.policyNotReloaded( e );
+        }
+    }
+
 	/**
 	 * Method to return the constant PI.
 	 * SYSFUN.PI().
