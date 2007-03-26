@@ -94,7 +94,11 @@ public class EmbedStatement extends ConnectionChild
     private int fetchSize = 1;
     private int fetchDirection = JDBC20Translation.FETCH_FORWARD;
     int MaxFieldSize;
-    private int timeoutSeconds;
+	/**
+	 * Query timeout in milliseconds. By default, no statements time
+	 * out. Timeout is set explicitly with setQueryTimeout().
+	 */
+    long timeoutMillis;
 
 	//the state of this statement, set to false when close() is called
 	private boolean active = true;
@@ -128,10 +132,6 @@ public class EmbedStatement extends ConnectionChild
 		lcc = getEmbedConnection().getLanguageConnection();
 		applicationConnection = getEmbedConnection().getApplicationConnection();
         applicationStatement = this;
-
-        // By default, no statements time out.
-        // Timeout is set explicitly with setQueryTimeout().
-        timeoutSeconds = 0;
 	}
 
 	//
@@ -406,7 +406,7 @@ public class EmbedStatement extends ConnectionChild
      */
 	public final int getQueryTimeout() throws SQLException {
         checkStatus();
-        return timeoutSeconds;
+        return (int) (timeoutMillis / 1000);
 	}
 
     /**
@@ -423,7 +423,7 @@ public class EmbedStatement extends ConnectionChild
             throw newSQLException(SQLState.INVALID_QUERYTIMEOUT_VALUE,
                                   new Integer(seconds));
         }
-        timeoutSeconds = seconds;
+        timeoutMillis = (long) seconds * 1000;
 	}
 
     /**
@@ -1177,7 +1177,6 @@ public class EmbedStatement extends ConnectionChild
 				//and clear existing result sets in case this has been cached
 				a.reset();
 				a.setMaxRows(maxRows);
-                long timeoutMillis = (long)timeoutSeconds * 1000L;
                 ResultSet resultsToWrap = ps.execute(a,
                                                      false,
                                                      timeoutMillis);

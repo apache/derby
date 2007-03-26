@@ -183,7 +183,7 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     private Statement applicationStmt;
     
-    private long timeoutMillis;
+    private final long timeoutMillis;
 
 	private final boolean isAtomic;
 
@@ -232,7 +232,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 
         this.timeoutMillis = stmt == null
             ? 0L
-            : (long)stmt.getQueryTimeout() * 1000L;
+            : stmt.timeoutMillis;
 
 		this.isAtomic = isAtomic;
                 
@@ -259,7 +259,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		resultDescription = theResults.getResultDescription();
 		final ExecutionFactory factory = conn.getLanguageConnection().
 			getLanguageConnectionFactory().getExecutionFactory();
-		final int columnCount = getMetaData().getColumnCount();
+		final int columnCount = resultDescription.getColumnCount();
 		this.currentRow = factory.getValueRow(columnCount);
 		currentRow.setRowArray(null);
 
