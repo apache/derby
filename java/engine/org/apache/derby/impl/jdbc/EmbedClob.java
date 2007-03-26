@@ -370,30 +370,39 @@ final class EmbedClob extends ConnectionChild implements Clob
 
   /**
    * Determines the character position at which the specified substring
-   * <code>searchstr</code> appears in the <code>CLOB</code>.  The search
+   * <code>searchStr</code> appears in the <code>CLOB</code> value.  The search
    * begins at position <code>start</code>. The method uses the following
-   * algorithm for the search
-   * If the clob is materialized in string use String.indexOf
-   * else
-   * Read a block of 256 chars from start position
-   * compare the chars with the searchString
-   * If a match is found
-   * increment the matchCount
-   * if the matchCount is equal to lenght of searchString return 
-   * Remember the position where the stream has a char equal to the first char
-   * of the searchString. This position we will use to start next try for match
-   * if the current match fails.
-   * if a mismatch is found 
-   * start fresh match from the position remembered if there is no postion 
-   * found for next match start with current position + 1
+   * algorithm for the search:
+   * <p>
+   * If the <code>CLOB</code> value is materialized as a string, use
+   * <code>String.indexOf</code>.
+   * <p>
+   * If the <code>CLOB</code> value is represented as a stream, read a block of
+   * chars from the start position and compare the chars with
+   * <code>searchStr</code>. Then:
+   * <ul> <li>If a matching char is found, increment <code>matchCount</code>.
+   *      <li>If <code>matchCount</code> is equal to the length of
+   *          <code>searchStr</code>, return with the current start position.
+   *      <li>If no match is found, and there is more data, restart search
+   *          (see below).
+   *      <li>If all data is processed without a match, return <code>-1</code>.
+   * </ul>
+   * <p>
+   * The position where the stream has a char equal to the first char of
+   * <code>searchStr</code> will be remembered and used as the starting 
+   * position for the next search-iteration if the current match fails.
+   * If a non-matching char is found, start a fresh search from the position
+   * remembered. If there is no such position, next search will start at the
+   * current position <code>+1</code>.
    * 
    * @param searchStr the substring for which to search
    * @param start the position at which to begin searching; the first position
-   *              is 1
-   * @return the position at which the substring appears, else -1; the first
-   *         position is 1
+   *    is <code>1</code>
+   * @return The position at which the substring appears, <code>-1</code> if
+   *    it does not appear in the <code>CLOB</code> value. The first position
+   *    is <code>1</code>.
    * @exception SQLException if there is an error accessing the
-   * <code>CLOB</code> value
+   *    <code>CLOB</code> value
    */
     public long position(String searchStr, long start)
         throws SQLException
