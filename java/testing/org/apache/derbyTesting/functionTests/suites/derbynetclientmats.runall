@@ -1,4 +1,2 @@
 junitTests/derbyNet/CompatibilityTest.java
-jdbcapi/xaSimplePositive.sql
-jdbcapi/xaStateTran.sql
 jdbcapi/checkDataSource.java

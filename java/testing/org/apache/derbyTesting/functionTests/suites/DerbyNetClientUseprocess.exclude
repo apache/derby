@@ -9,9 +9,6 @@
 # jdbcapi/*sers* these tests log on to wombat with different permissions and users
 #    test could possibly be rewritten to use another database
 # junitTests/derbyNet/CompatibilityTest.java - exits the suite
-# jdbcapi/xaSimplePositive.sql - needs more props, getting nullPointer accessing derby.log
-# jdbcapi/xaStateTran.sql - needs more props, getting nullPointer accessing derby.log
-# jdbcapi/XATest.java - fails, needs to set up wombat differently, reflectionInvocation error
 # derbynet/DerbyNetAutoStart.java - exits the suite...
 # derbynet/NSinSameJVM.java - fails with different thread names. probably ok...
 # derbynet/dblook_test_net.java - expects different dir structure
@@ -40,9 +37,6 @@ jdbcapi/users2.sql
 jdbcapi/secureUsers.sql
 jdbcapi/secureUsers1.sql
 junitTests/derbyNet/CompatibilityTest.java
-jdbcapi/xaSimplePositive.sql
-jdbcapi/xaStateTran.sql
-jdbcapi/XATest.java
 derbynet/DerbyNetAutoStart.java
 derbynet/NSinSameJVM.java
 derbynet/dblook_test_net.java
