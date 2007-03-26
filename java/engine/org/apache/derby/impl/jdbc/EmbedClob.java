@@ -371,57 +371,22 @@ final class EmbedClob extends ConnectionChild implements Clob
   /**
    * Determines the character position at which the specified substring
    * <code>searchstr</code> appears in the <code>CLOB</code>.  The search
-	* begins at position <code>start</code>. The method uses the following
-	* algorithm for the search
-	*
-	*
-	* 1)Is the length of the current pattern string to be matched greater than 256 ?
-	*
-	*	1.1)If "YES"
-	*		Extract the first 256 bytes as the current pattern to be matched
-	*
-	*		If "NO"
-	*		Make the pattern string itself as the current pattern to be matched
-	*
-	*	1.2)Initialize a variable that will indicate the character in the pattern
-	*		String being matched to zero. (say currPatternPos)
-	*
-	* 2)Read the 256 bytes of the Clob from the database
-	*
-	*	2.1)Initialize a variable that will indicate the current index in this array
-	*		to zero. (say currClobPos)
-	*	2.2)Exit if there are no more characters to be read in the Clob
-	*
-	* 3)Initialize a bestMatchPosition that will keep storing the next occurence of the 
-	*	first character in the pattern.This will be useful when we want to go back and 
-	*	start searching in the Clob array when a mismatch occurs.
-	*
-	* 4)Do the characters in currPatternPos and currClobPos match ?
-	*	4.1)If "YES" 
-	*
-	*		Increment currPatternPos and currClobPos. 
-	*
-	*		If currPatternPos is not 0 and the character in the 
-	*		currentClobPos is the same as the first character in the
-	*		pattern set bestMatchPosition = currentClobPos
-	*
-	*	4.2)If "No" 
-	*
-	*		set currClobPos = bestMatchPosition
-	*		set currPatternPos = 0
-	*
-	*	4.3)If currPatternPos > 256 
-	*		4.3.1)If "YES" 
-	*			  Return the current position in the Clob if all characters 
-	*			  have been matched otherwise perform step 1 to fetch the
-	*			  next 256 characters and increment matchCount
-	*		4.3.2)If "NO" repeat Step 4
-	*
-	*	4.4)If currClobPos > 256
-	*		4.4.1)If "YES"
-	*			  Repeat step 2 to fetch next 256 characters
-	*		4.4.2)If "NO"
-	*			  Repeat step 4
+   * begins at position <code>start</code>. The method uses the following
+   * algorithm for the search
+   * If the clob is materialized in string use String.indexOf
+   * else
+   * Read a block of 256 chars from start position
+   * compare the chars with the searchString
+   * If a match is found
+   * increment the matchCount
+   * if the matchCount is equal to lenght of searchString return 
+   * Remember the position where the stream has a char equal to the first char
+   * of the searchString. This position we will use to start next try for match
+   * if the current match fails.
+   * if a mismatch is found 
+   * start fresh match from the position remembered if there is no postion 
+   * found for next match start with current position + 1
+   * 
    * @param searchStr the substring for which to search
    * @param start the position at which to begin searching; the first position
    *              is 1
@@ -460,200 +425,71 @@ final class EmbedClob extends ConnectionChild implements Clob
             }
             else // we have a stream
             {
-				Object synchronization = getConnectionSynchronization();
+                Object synchronization = getConnectionSynchronization();
                 synchronized (synchronization)
                 {
                     pushStack = !getEmbedConnection().isClosed();
                     if (pushStack)
                         setupContextStack();
+                    int matchCount = 0;
+                    long pos = start - 1;
+                    long newStart = -1;
+                    Reader reader = getCharacterStreamAtPos (start, this);
+                    char [] tmpClob = new char [256];
+                    boolean reset;
+                    for (;;) {
+                        reset = false;
+                        int readCount = reader.read (tmpClob);
+                        if (readCount == -1)
+                            return -1;
+                        if (readCount == 0)
+                            continue;            
+                        for (int clobOffset = 0; 
+                                    clobOffset < readCount; clobOffset++) {
+                            if (tmpClob [clobOffset] 
+                                            == searchStr.charAt (matchCount)) {
+                                //find the new starting position in 
+                                // case this match is unsuccessful
+                                if (matchCount != 0 && newStart == -1 
+                                        && tmpClob [clobOffset] 
+                                        == searchStr.charAt (0)) {
+                                    newStart = pos + clobOffset + 1;
+                                }
+                                matchCount ++;
+                                if (matchCount == searchStr.length()) {
+                                    //return after converting the position 
+                                    //to 1 based index
+                                    return pos + clobOffset 
+                                            - searchStr.length() + 1 + 1;
+                                }
+                            }
+                            else {
+                                if (matchCount > 0) {
+                                    matchCount = 0;
+                                    if (newStart == -1) {
+                                        continue;
+                                    }
+                                    if (newStart < pos) {
+                                        pos = newStart;
+                                        reader.close();
+                                        reader = getCharacterStreamAtPos 
+                                                    (newStart + 1, this);
+                                        newStart = -1;
+                                        reset = true;
+                                        break;
+                                    }                        
+                                    clobOffset = (int) (newStart - pos) - 1;
+                                    newStart = -1;
+                                    continue;
+                                }
+                            }
+                        }
+                        if (!reset) {
+                            pos += readCount;
+                        }
+                    }
 
-					char[] tmpClob = new char[256];
-					int patternLength = searchStr.length();
-
-restartPattern:
-					for (;;) {
-
-					//System.out.println("RESET " + start);
-						UTF8Reader clobReader = getCharacterStreamAtPos(start, synchronization);
-						if (clobReader == null)
-							return -1;
-
-
-
-						// start of any match of the complete pattern.
-
-						int patternIndex = 0;
-						char[] tmpPattern = null;
-						boolean needPattern = true;
-
-						// how many characters of the patter segment we have matched
-						int matchCount = 0;
-
-						long currentPosition = start;
-						int clobOffset = -1;
-						int read = -1;
-
-						// absolute position of a possible match
-						long matchPosition = -1;
-
-
-						// absolute position of the next possible match
-						long nextBestMatchPosition = -1;
-						//System.out.println("restartPattern: " + start);
-
-
-search:
-						for (;;)
-						{
-							//System.out.println("search: " + needPattern + " -- " + clobOffset);
-							if (needPattern) {
-
-								String tmpPatternS;
-								//Keep extracting substrings of length 256 from the pattern string
-								//and use these substrings for comparison with the data from the Clob
-								//if the subString remaining has a length > 256 then extract 256 bytes
-								//and return it
-								//otherwise return the remaining string 
-								if ((patternLength - patternIndex) > 256)
-									tmpPatternS = searchStr.substring(patternIndex , patternIndex + 256);
-								else
-									tmpPatternS = searchStr.substring(patternIndex , patternLength);
-
-								tmpPattern = tmpPatternS.toCharArray();
-								needPattern = false;
-								matchCount = 0;
-
-							}
-
-							if (clobOffset == -1) {
-								
-								read = clobReader.read(tmpClob, 0, tmpClob.length);
-							//System.out.println("MORE DATA " + read);
-								if (read == -1)
-									return -1;
-
-								if (read == 0)
-									continue search;
-
-								clobOffset = 0;
-							}
-
-
-							// find matches within our two temp arrays.
-compareArrays:
-							for (; clobOffset < read; clobOffset++) {
-
-								//System.out.println("compareArrays " + clobOffset);
-
-								char clobC = tmpClob[clobOffset];
-
-
-								if (clobC == tmpPattern[matchCount])
-								{
-									if (matchPosition == -1) {
-										matchPosition = currentPosition + clobOffset;
-									}
-
-									matchCount++;
-
-									// have we matched the entire pattern segment
-									if (matchCount == tmpPattern.length)
-									{
-										// move onto the next segment.
-										patternIndex += tmpPattern.length;
-										if (patternIndex == patternLength) {
-											// complete match !!
-											clobReader.close();
-											//System.out.println("COMPLETE@" + matchPosition);
-											return matchPosition;
-										}
-
-										needPattern = true;
-										//We need to increment clobOffset
-										//to start comparison from the 
-										//next character since the current
-										//character has already been compared
-										clobOffset++;
-										continue search;
-
-									}
-
-									if (clobC == tmpPattern[0]) {
-
-										// save the next best start position.
-
-										// must be the first character of the actual pattern
-										if (patternIndex == 0) {
-
-											// must not be just a repeat of the match of the first character
-											if (matchCount != 1) {
-
-												// must not have a previous next best.
-
-												if (nextBestMatchPosition == -1) {
-													nextBestMatchPosition = currentPosition + clobOffset;
-												}
-
-											}
-
-										}
-									}
-
-									continue compareArrays;
-								}
-								else
-								{
-									// not a match
-									//
-									// 
-									if (matchPosition != -1) {
-										// failed after we matched some amount of the pattern
-										matchPosition = -1;
-
-										// See if we found a next best match
-										if (nextBestMatchPosition == -1)
-										{
-											// NO - just continue on, re-starting at this character
-
-											if (patternIndex != 0) {
-												needPattern = true;
-												continue search;
-											}
-										}
-										else if (nextBestMatchPosition >= currentPosition)
-										{
-											// restart in the current array
-											clobOffset = (int) (nextBestMatchPosition - currentPosition);
-											nextBestMatchPosition = -1;
-									
-											if (patternIndex != 0) {
-												needPattern = true;
-												continue search;
-											}
-										}
-										else
-										{
-											clobReader.close();
-											start = nextBestMatchPosition;
-											continue restartPattern;
-										}
-
-										clobOffset--; // since the continue will increment it
-										matchCount = 0;
-										continue compareArrays;
-									}
-									
-									// no current match, just continue
-								}
-							}
-
-							currentPosition += read;
-
-							// indicates we need to read more data
-							clobOffset = -1;
-						}
-					}
-				}
+                }
             }
         }
         catch (Throwable t)
