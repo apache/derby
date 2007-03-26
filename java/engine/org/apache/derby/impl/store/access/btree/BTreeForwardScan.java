@@ -27,22 +27,14 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
-import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-
-import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
-import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 
 /**
@@ -78,64 +70,6 @@ public class BTreeForwardScan extends BTreeScan
 	{
         positionAtStartForForwardScan(pos);
 	}
-
-	///////////////////////////////////////////////
-	// 
-	// RESOLVE (jamie): i had to add these simple
-	// super.init() super.close() calls to get mssdk302
-	// to work.  I could not determine what the problem
-	// is.  For the time being, please don't remove
-	// them even though they don't appear to serve a
-	// useful purpose.
-	// 
-	///////////////////////////////////////////////
-	
-	/**
-	Initialize the scan for use.
-	<p>
-	Any changes to this method may have to be reflected in close as well.
-    <p>
-    The btree init opens the container (super.init), and stores away the
-    state of the qualifiers.  The actual searching for the first position
-    is delayed until the first next() call.
-
-	@exception  StandardException  Standard exception policy.
-	**/
-	public void init(
-    TransactionManager              xact_manager,
-    Transaction                     rawtran,
-    boolean                         hold,
-    int                             open_mode,
-    int                             lock_level,
-    BTreeLockingPolicy              btree_locking_policy,
-    FormatableBitSet                         scanColumnList,
-    DataValueDescriptor[]	        startKeyValue,
-    int                             startSearchOperator,
-    Qualifier                       qualifier[][],
-    DataValueDescriptor[]	        stopKeyValue,
-    int                             stopSearchOperator,
-    BTree                           conglomerate,
-    LogicalUndo                     undo,
-    StaticCompiledOpenConglomInfo   static_info,
-    DynamicCompiledOpenConglomInfo  dynamic_info)
-        throws StandardException
-	{
-		super.init(
-            xact_manager, rawtran, hold, open_mode, lock_level,
-            btree_locking_policy, scanColumnList, startKeyValue,
-            startSearchOperator, qualifier, stopKeyValue,
-			stopSearchOperator, conglomerate, undo, static_info, dynamic_info);
-	}
-
-    /**
-    Close the scan.
-    **/
-    public void close()
-        throws StandardException
-	{
-		super.close();
-	}
-
 
     /**
      * Fetch the next N rows from the table.
