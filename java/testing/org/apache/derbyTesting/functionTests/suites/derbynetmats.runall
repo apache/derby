@@ -27,7 +27,6 @@ lang/procedure.java
 lang/simpleScroll.sql
 lang/supersimple.sql
 lang/wisconsin.java
-lang/syscat.sql
 lang/ShutdownDatabase.java
 store/holdCursorExternalSortJDBC30.sql
 store/holdCursorJDBC30.sql
