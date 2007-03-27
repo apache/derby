@@ -115,6 +115,12 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     {
         TestSuite       suite = new TestSuite("SecurityPolicyReloadingTest");
 
+        // The reloaded policy requires restricted property-reading permissions,
+        // which is easy to do if you can subdivide the protection domains by
+        // jar file but is not easy to do with all of the testing and server
+        // classes jumbled together in the same class tree.
+        if ( !TestConfiguration.loadingFromJars() ) { return suite; }
+
         suite.addTest( decorateTest() );
 
         return suite;
