@@ -56,7 +56,6 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 	/**
 	 * Most tests run in embedded only, since they are only checking DDL
 	 * statements. Metadata methods test also runs in client/server mode.
-	 * @return
 	 */
 	public static Test suite() {
 		TestSuite suite = new TestSuite();
@@ -1302,7 +1301,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
      * @param hasPrivilege whether or not the user has the privilege
      * @param user the user to check
      * @param schema the schema to check
-     * @param table the table to check
+     * @param procedure the name of the procedure to check
      * @throws SQLException throws all exceptions
      */
     public void assertProcedurePrivilege(boolean hasPrivilege, String user, String schema, String procedure) throws SQLException {

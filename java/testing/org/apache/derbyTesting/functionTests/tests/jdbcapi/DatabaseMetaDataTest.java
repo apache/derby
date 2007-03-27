@@ -205,7 +205,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Return the identifiers used to create schemas,
      * tables etc. in the order the database stores them.
-     * @return
      */
     private String[] getSortedIdentifiers()
     {
@@ -1257,7 +1256,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @param pp Position in pattern to start the actual pattern from
      * @param result result string
      * @param rp position in result to starting checking
-     * @return
+     * @return true if a match is found
      */
     private boolean doesMatch(String pattern, int pp,
             String result, int rp)
