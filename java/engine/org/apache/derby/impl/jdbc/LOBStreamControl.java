@@ -53,7 +53,6 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
  */
 
 class LOBStreamControl {
-    //private RandomAccessFile tmpFile;
     private StorageRandomAccessFile tmpFile;
     private StorageFile lobFile;
     private byte [] dataBytes = new byte [0];
@@ -75,13 +74,13 @@ class LOBStreamControl {
                             Property.DATABASE_MODULE, dbName);
                     DataFactory df =  (DataFactory) Monitor.findServiceModule(
                             monitor, DataFactory.MODULE);
+                    //create a temporary file
                     lobFile =
                         df.getStorageFactory().createTemporaryFile("lob", null);
                     tmpFile = lobFile.getRandomAccessFile ("rw");
                     return null;
                 }
             });
-            //create a temporary file
         }
         catch (PrivilegedActionException pae) {
             Exception e = pae.getException();
@@ -156,7 +155,7 @@ class LOBStreamControl {
         }
     }
 
-    private void isValidOffset(int off, int length) throws SQLException, IOException {
+    private void isValidOffset(int off, int length) throws SQLException {
         if (off < 0 || off > length)
             throw Util.generateCsSQLException(
                     SQLState.BLOB_INVALID_OFFSET, new Integer(off));
@@ -180,8 +179,7 @@ class LOBStreamControl {
                 init(dataBytes, pos);
             }
         }
-        if (tmpFile.getFilePointer() != pos)
-            tmpFile.seek(pos);
+        tmpFile.seek(pos);
         tmpFile.write(b);
         return tmpFile.getFilePointer();
     }
@@ -208,42 +206,14 @@ class LOBStreamControl {
                     throw new ArrayIndexOutOfBoundsException (e.getMessage());
         }
         if (isBytes) {
-            long finalLen = (dataBytes != null) ? dataBytes.length + b.length
-                    : b.length;
-            if (finalLen < MAX_BUF_SIZE)
+            if (pos + b.length < MAX_BUF_SIZE)
                 return updateData(b, off, len, pos);
             else {
                 init(dataBytes, pos);
             }
         }
-        if (tmpFile.getFilePointer() != pos)
-            tmpFile.seek(pos);
+        tmpFile.seek(pos);
         tmpFile.write(b, off, len);
-        return tmpFile.getFilePointer();
-    }
-
-    /**
-     * Writes byte array starting from pos.
-     * @param b bytes array
-     * @param pos starting postion
-     * @return new position
-     * @throws IOException, SQLException
-     */
-    synchronized long write(byte[] b, long pos)
-    throws IOException, SQLException {
-        isValidPostion(pos);
-        if (isBytes) {
-            long len = (dataBytes != null) ? dataBytes.length + b.length
-                    : b.length;
-            if (len < MAX_BUF_SIZE)
-                return updateData(b, 0, b.length, pos);
-            else {
-                init(dataBytes, pos);
-            }
-        }
-        if (tmpFile.getFilePointer() != pos)
-            tmpFile.seek(pos);
-        tmpFile.write(b);
         return tmpFile.getFilePointer();
     }
 
@@ -279,18 +249,6 @@ class LOBStreamControl {
     }
 
     /**
-     * Copies bytes into byte array starting from pos.
-     * @param b bytes array to copy data
-     * @param pos starting postion
-     * @return new postion
-     * @throws IOException, SQLException
-     */
-    synchronized int read(byte[] b, long pos)
-    throws IOException, SQLException {
-        return read (b, 0, b.length, pos);
-    }
-
-    /**
      * Reads bytes starting from 'position' into bytes array.
      * starting from 'offset'
      * @param buff array into the bytes will be copied
@@ -307,8 +265,7 @@ class LOBStreamControl {
         if (isBytes) {
             return readBytes(buff, off, len, pos);
         }
-        if (tmpFile.getFilePointer() != pos)
-            tmpFile.seek(pos);
+        tmpFile.seek(pos);
         return tmpFile.read (buff, off, len);
     }
 
@@ -355,7 +312,7 @@ class LOBStreamControl {
         } else {
             if (size < Integer.MAX_VALUE && size < MAX_BUF_SIZE) {
                 dataBytes = new byte [(int) size];
-                read(dataBytes, 0);
+                read(dataBytes, 0, dataBytes.length, 0);
                 isBytes = true;
                 tmpFile.close();
                 tmpFile = null;

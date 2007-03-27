@@ -3654,6 +3654,11 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>The statement has been cancelled or timed out.</text>
             </msg>
 
+            <msg>
+                <name>XCL53</name>
+                <text>Stream is closed</text>
+            </msg>
+
         </family>
 
 

@@ -115,28 +115,6 @@ public class LOBOutputStream extends OutputStream {
     }
 
     /**
-     * Writes <code>b.length</code> bytes from the specified byte array
-     * to this output stream. The general contract for <code>write(b)</code>
-     * is that it should have exactly the same effect as the call
-     * <code>write(b, 0, b.length)</code>.
-     *
-     * @param b   the data.
-     * @exception IOException  if an I/O error occurs.
-     * @see java.io.OutputStream#write(byte[], int, int)
-     */
-    public void write(byte[] b) throws IOException {
-        if (closed)
-            throw new IOException (
-                    MessageService.getTextMessage(
-                        SQLState.LANG_STREAM_CLOSED));
-        try {
-            pos = control.write(b, pos);
-        } catch (SQLException e) {
-            throw new IOException(e.getMessage());
-        }
-    }
-
-    /**
      * Closes this output stream and releases any system resources
      * associated with this stream. The general contract of <code>close</code>
      * is that it closes the output stream. A closed stream cannot perform

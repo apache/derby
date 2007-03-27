@@ -123,59 +123,6 @@ public class LOBInputStream extends InputStream {
     }
 
     /**
-     * Reads some number of bytes from the input stream and stores them into
-     * the buffer array <code>b</code>. The number of bytes actually read is
-     * returned as an integer.  This method blocks until input data is
-     * available, end of file is detected, or an exception is thrown.
-     *
-     * <p> If <code>b</code> is <code>null</code>, a
-     * <code>NullPointerException</code> is thrown.  If the length of
-     * <code>b</code> is zero, then no bytes are read and <code>0</code> is
-     * returned; otherwise, there is an attempt to read at least one byte. If
-     * no byte is available because the stream is at end of file, the value
-     * <code>-1</code> is returned; otherwise, at least one byte is read and
-     * stored into <code>b</code>.
-     *
-     * <p> The first byte read is stored into element <code>b[0]</code>, the
-     * next one into <code>b[1]</code>, and so on. The number of bytes read is,
-     * at most, equal to the length of <code>b</code>. Let <i>k</i> be the
-     * number of bytes actually read; these bytes will be stored in elements
-     * <code>b[0]</code> through <code>b[</code><i>k</i><code>-1]</code>,
-     * leaving elements <code>b[</code><i>k</i><code>]</code> through
-     * <code>b[b.length-1]</code> unaffected.
-     *
-     * <p> If the first byte cannot be read for any reason other than end of
-     * file, then an <code>IOException</code> is thrown. In particular, an
-     * <code>IOException</code> is thrown if the input stream has been closed.
-     *
-     * <p> The <code>read(b)</code> method for class <code>InputStream</code>
-     * has the same effect as: <pre><code> read(b, 0, b.length) </code></pre>
-     *
-     * @param b   the buffer into which the data is read.
-     * @return the total number of bytes read into the buffer, or
-     *             <code>-1</code> is there is no more data because the end of
-     *             the stream has been reached.
-     * @exception IOException  if an I/O error occurs.
-     * @exception NullPointerException  if <code>b</code> is <code>null</code>.
-     * @see java.io.InputStream#read(byte[], int, int)
-     */
-    public int read(byte[] b) throws IOException {
-        if (closed)
-            throw new IOException (
-                   MessageService.getTextMessage(SQLState.LANG_STREAM_CLOSED));
-        try {
-            int ret = control.read(b, pos);
-            if (ret > 0) {
-                pos += ret;
-                return ret;
-            }
-            return -1;
-        } catch (SQLException e) {
-            return handleSQLException (e);
-        }
-    }
-
-    /**
      * Closes this input stream and releases any system resources associated
      * with the stream.
      *

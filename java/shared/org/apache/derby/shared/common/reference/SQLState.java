@@ -942,7 +942,6 @@ public interface SQLState {
 	// MORE GENERIC LANGUAGE STUFF
 	String LANG_COLUMN_DEFAULT										   = "42Z09.U";
 	String LANG_STREAM												   = "42Z11.U";
-    String LANG_STREAM_CLOSED                                          = "42Z12";
 
 	// String LANG_UPDATABLE_VTI_BAD_GETMETADATA						   = "42Z14";
 
@@ -1333,6 +1332,9 @@ public interface SQLState {
 	String LANG_CANT_UPGRADE_DATABASE                                 = "XCL50.S";
 
     String LANG_STATEMENT_CANCELLED_OR_TIMED_OUT                       = "XCL52.S";
+
+    //lob stream error
+    String LANG_STREAM_CLOSED                                     = "XCL53";
 
     /*
 	** Language errors that match DB2

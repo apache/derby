@@ -113,7 +113,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
         super(con);
          try {
              control = new LOBStreamControl (con.getDBName());
-             control.write (blobBytes, 0);
+             control.write (blobBytes, 0, blobBytes.length, 0);
              materialized = true;
          }
          catch (IOException e) {
@@ -145,13 +145,14 @@ final class EmbedBlob extends ConnectionChild implements Blob
                 SanityManager.ASSERT(dvdBytes != null,"blob has a null value underneath");
             control = new LOBStreamControl (getEmbedConnection().getDBName());
             try {
-                control.write (dvdBytes, pos);
+                control.write (dvdBytes, 0, dvdBytes.length, pos);
             }
             catch (SQLException e) {
                 throw StandardException.newException (e.getSQLState());
             }
             catch (IOException e) {
-                throw StandardException.newException (null, e);
+                throw StandardException.newException (
+                                        SQLState.SET_STREAM_FAILURE, e);
             }
         }
         else
@@ -350,7 +351,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
             // if the blob is materialized
             if (materialized) {
                  result = new byte [length];
-                 int sz = control.read (result, startPos - 1);
+                 int sz = control.read (result, 0, result.length, startPos - 1);
                  if (sz < length) {
                      byte [] tmparray = new byte [sz];
                      System.arraycopy (result, 0, tmparray, 0, sz);
@@ -809,9 +810,6 @@ final class EmbedBlob extends ConnectionChild implements Blob
                     return control.getOutputStream (pos - 1);
                 }
                 else {
-                    if (pos > length())
-                        throw Util.generateCsSQLException (
-                                                SQLState.BLOB_POSITION_TOO_LARGE);
                     control = new LOBStreamControl (
                                             getEmbedConnection().getDBName());
                     control.copyData (myStream, pos - 1);
@@ -841,7 +839,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
 	{
             if (len > length())
                 throw Util.generateCsSQLException(
-                    SQLState.BLOB_NONPOSITIVE_LENGTH, new Long(pos));
+                    SQLState.BLOB_LENGTH_TOO_LONG, new Long(pos));
             try {
                 if (materialized) {
                     control.truncate (len);
