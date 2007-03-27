@@ -77,7 +77,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             
             // from old xa.runall
             //"checkDataSource", TODO: investigate failure/convert
-            // "dataSourcePermissions", TODO: passes embedded, fails client - investigate failure/convert
             //"XATest" TODO: investigate failure/convert
     };
 
@@ -107,7 +106,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
         
         // Tests that pass on embedded but fail on client
         "parameterMetaDataJdbc30",
-        "dataSourcePermissions",         
     };
     
     

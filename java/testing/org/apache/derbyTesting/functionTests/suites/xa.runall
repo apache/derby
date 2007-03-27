@@ -1,5 +1,4 @@
 jdbcapi/checkDataSource.java
-jdbcapi/dataSourcePermissions.java
 jdbcapi/xaAnotherTest.sql
 jdbcapi/xaSimpleNegative.sql
 store/xaOffline1.sql

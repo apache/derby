@@ -2,10 +2,6 @@ jdbcapi/bestrowidentifier.sql
 jdbcapi/checkDriver.java
 jdbcapi/nullSQLText.java
 jdbcapi/resultsetStream.java
-jdbcapi/users.sql
-jdbcapi/users2.sql
-jdbcapi/secureUsers.sql
-jdbcapi/secureUsers1.sql
 jdbcapi/LOBTest.java
 jdbcapi/parameterMapping.java
 jdbcapi/testRelative.java

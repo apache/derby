@@ -5,23 +5,16 @@
 # excluding test   - because...
 # store/bootLock.java - this test uses local connections to make sure 
 #     a database cannot be loaded by 2 different instances.
-# jdbcapi/secureUsers,secureUsers1, users and users2.sql 
-#     because they expect the server to have been started with special derby.properties
-#     this test can be made to work by changing the properties from system properties
-#     i.e. set in a derby.properties file - to be database properties - i.e. set using
-#     SYSCS_SET_ procedure.
 # derbynet/dblook_test_net because it tries to search derby.log, which is on
 #     the server machine
 # derbynet/getCurrentProperties for it exercises NetworkServerControl statements
 #     that are only supported on localhost
 # derbynet/NSinSameJVM - tries to start the server
-# derbynet/DataSourcePermissions_net - tries to use NetworkServerControl statements
 # derbynet/maxthreads - tries to use NetworkServerControl statements
 # derbynet/runtimeinfo - tries to use NetworkServerControl statements
 # derbynet/sysinfo - tries to use NetworkServerControl statements
 # derbynet/sysinfo_withproperties - tries to use NetworkServerControl statements and for the test, server needs to be
 # started with specific property set - DERBY928 for reference 
-# derbynet/testSecMec - this test requires property to be set when server is started with derby.drda.securityMechanism
 # thus not suitable for remote server testing in its current form. - DERBY-928
 # derbynet/testProperties - tries to use NetworkServerControl statements
 # derbynet/timeslice - tries to use NetworkServerControl statements
@@ -35,20 +28,14 @@
 # stress/stress.multi - attempts to connect to localhost.
 # 
 store/bootLock.java
-jdbcapi/secureUsers.sql
-jdbcapi/secureUsers1.sql
-jdbcapi/users.sql
-jdbcapi/users2.sql
 derbynet/dblook_test_net.java
 derbynet/getCurrentProperties.java
 derbynet/NSinSameJVM.java
-derbynet/DataSourcePermissions_net.java
 derbynet/maxthreads.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
 derbynet/testProperties.java
-derbynet/testSecMec.java
 derbynet/timeslice.java
 derbynet/DerbyNetAutoStart.java
 tools/ieptests.sql

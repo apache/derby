@@ -7,8 +7,6 @@
 #     java.lang.ExceptionInInitializerError 
 #     and access denied (java.lang.RuntimePermission loadLibrary.db2jcct2). (????!)
 # jdbcapi/checkDriver.java - subtest createdbwithspaces fails, probably expecting different dir
-# jdbcapi/*sers* - these tests log on to wombat with different permissions and users
-#    test could possibly be rewritten to use another database
 # derbynet/NSinSameJVM.java - diff between thread and main. kind of ok, but fails.
 # derbynet/DerbyNetAutoStart.java - exits suite...
 # derbynet/getCurrentProperties.java - fails with different sessions
@@ -29,10 +27,6 @@ jdbcapi/maxfieldsize.java
 jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
 jdbcapi/checkDriver.java
-jdbcapi/users.sql
-jdbcapi/users2.sql
-jdbcapi/secureUsers.sql
-jdbcapi/secureUsers1.sql
 derbynet/testij.java
 derbynet/NSinSameJVM.java
 derbynet/DerbyNetAutoStart.java
