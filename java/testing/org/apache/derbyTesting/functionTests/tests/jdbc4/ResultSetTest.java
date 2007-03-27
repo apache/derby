@@ -52,6 +52,11 @@ public class ResultSetTest
             0x65, 0x66, 0x67, 0x68, 0x69
         };
 
+    private static final String str1 =
+        "I am the main Input string and I will be Updated";
+
+    private static final String str2 = "I am the string used to update";
+
     /** 
      * Key used to identify inserted rows.
      * Use method <code>requestKey</code> to obtain it. 
@@ -915,7 +920,7 @@ public class ResultSetTest
      *
      * @throws SQLException if some error occurs while calling the method
      */
-    public void embeddedUpdateClob()
+    public void testUpdateClob()
     throws Exception {
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
@@ -1004,13 +1009,47 @@ public class ResultSetTest
         rs1.close();
     }
 
+    /**
+     * Test the Clob method that accepts a Input Stream and its length
+     * as input parameter.
+     *
+     * @throws Exception
+     */
+    public void testUpdateClobwithLengthofIS()
+            throws Exception {
+        Reader r1 = new java.io.StringReader(str1);
+        // InputStream for insertion.
+        Reader r2 = new java.io.StringReader(str2);
+
+        // Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep("dClob");
+        ps_sb.setInt(1, key);
+        ps_sb.setCharacterStream(2, r1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update operation
+        ResultSet rs1 = fetchUpd("dClob", key);
+        rs1.next();
+        rs1.updateClob(1, r2, str2.length());
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch("dClob", key);
+        rs1.next();
+        assertEquals(new StringReader(str2),
+                     rs1.getCharacterStream(1));
+        rs1.close();
+    }
+
      /**
      * This methods tests the ResultSet interface method
      * updateBlob
      *
      * @throws SQLException if some error occurs while calling the method
      */
-    public void embeddedUpdateBlob()
+    public void testUpdateBlob()
     throws Exception {
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
@@ -1099,12 +1138,77 @@ public class ResultSetTest
     }
 
     /**
+     * tests the updateBlob that accepts a input stream and the length of the IS.
+     *
+     * @throws an Exception
+     */
+    public void testUpdateBlobWithLengthofIS()
+            throws Exception {
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+        // InputStream for insertion.
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        // Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep("dBlob");
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2, is1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update operation
+        ResultSet rs1 = fetchUpd("dBlob", key);
+        rs1.next();
+        rs1.updateBlob(1, is2, BYTES2.length);
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch("dBlob", key);
+        rs1.next();
+        assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
+        rs1.close();
+    }
+
+    /**
+     * Tests the updateBlob that accepts a input stream and the length of the IS
+     * and the parameter name String.
+     *
+     * @throws an Exception
+     */
+    public void testUpdateBlobStringParameterNameWithLengthofIS()
+            throws Exception {
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+        // InputStream for insertion.
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        // Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep("dBlob");
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2, is1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update operation
+        ResultSet rs1 = fetchUpd("dBlob", key);
+        rs1.next();
+        rs1.updateBlob("dBlob", is2, BYTES2.length);
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch("dBlob", key);
+        rs1.next();
+        assertEquals(new ByteArrayInputStream(BYTES2), rs1.getBinaryStream(1));
+        rs1.close();
+    }
+
+    /**
      * This methods tests the ResultSet interface method
      * updateClob
      *
      * @throws SQLException if some error occurs while calling the method
      */
-    public void embeddedUpdateClobStringParameterName()
+    public void testUpdateClobStringParameterName()
     throws Exception {
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
@@ -1193,13 +1297,47 @@ public class ResultSetTest
         rs1.close();
     }
 
+    /**
+     * Tests the updateClob that accepts a input stream and the length of the IS
+     * and the parameter name String.
+     *
+     * @throws an Exception
+     */
+    public void testUpdateClobStringParameterNameWithLengthofIS()
+            throws Exception {
+        Reader r1 = new java.io.StringReader(str1);
+        // InputStream for insertion.
+        Reader r2 = new java.io.StringReader(str2);
+
+        // Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep("dClob");
+        ps_sb.setInt(1, key);
+        ps_sb.setCharacterStream(2, r1);
+        ps_sb.executeUpdate();
+        ps_sb.close();
+
+        // Update operation
+        ResultSet rs1 = fetchUpd("dClob", key);
+        rs1.next();
+        rs1.updateClob("dClob", r2, str2.length());
+        rs1.updateRow();
+        rs1.close();
+
+        // Query to see whether the data that has been updated.
+        rs1 = fetch("dClob", key);
+        rs1.next();
+        assertEquals(new StringReader(str2),
+                     rs1.getCharacterStream(1));
+        rs1.close();
+    }
+
      /**
      * This methods tests the ResultSet interface method
      * updateBlob
      *
      * @throws SQLException if some error occurs while calling the method
      */
-    public void embeddedUpdateBlobStringParameterName()
+    public void testUpdateBlobStringParameterName()
     throws Exception {
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
@@ -1291,42 +1429,10 @@ public class ResultSetTest
      **                        T E S T  S E T U P                           *
      ************************************************************************/
 
-    /**
-     * Create suite containing client-only tests.
-     */
-    private static TestSuite clientSuite(String name) {
-        TestSuite clientSuite = new TestSuite(name);
-        return clientSuite;
-    }
-
-    /**
-     * Create suite containing embedded-only tests.
-     */
-    private static TestSuite embeddedSuite(String name) {
-        TestSuite embeddedSuite = new TestSuite(name);
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embeddedUpdateBlob"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embeddedUpdateClob"));
-        embeddedSuite.addTest(new ResultSetTest(
-                    "embeddedUpdateClobStringParameterName"));
-        return embeddedSuite;
-    }
-
     public static Test suite() {
         TestSuite rsSuite = new TestSuite("ResultSetTest suite");
-
-        TestSuite embedded = new TestSuite("ResultSetTest:embedded");
-        embedded.addTestSuite(ResultSetTest.class);
-        embedded.addTest(embeddedSuite("ResultSetTest:embedded-only"));
-        rsSuite.addTest(decorateTestSuite(embedded));
-
-        TestSuite client = new TestSuite("ResultSetTest:client");
-        client.addTestSuite(ResultSetTest.class);
-        client.addTest(clientSuite("ResultSetTest:client-only"));
-        rsSuite.addTest(TestConfiguration.clientServerDecorator(
-            decorateTestSuite(client)));
-
+        rsSuite.addTest(decorateTestSuite(TestConfiguration.defaultSuite
+            (ResultSetTest.class,false)));
         return rsSuite;
     }
 

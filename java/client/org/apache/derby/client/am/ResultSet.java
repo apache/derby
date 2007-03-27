@@ -3805,20 +3805,124 @@ public abstract class ResultSet implements java.sql.ResultSet,
         throw jdbc3MethodNotSupported();
     }
 
+    /**
+     * Updates the designated column with a <code>java.sql.Blob</code> value.
+     * The updater methods are used to update column values in the
+     * current row or the insert row.  The updater methods do not
+     * update the underlying database; instead the <code>updateRow</code> or
+     * <code>insertRow</code> methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x the new column value
+     * @throws SQLException if the columnIndex is not valid;
+     * if a database access error occurs;
+     * the result set concurrency is <code>CONCUR_READ_ONLY</code>
+     * or this method is called on a closed result set
+     */
     public void updateBlob(int columnIndex, java.sql.Blob x) throws SQLException {
-        throw jdbc3MethodNotSupported();
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateBlob",
+                        columnIndex, x);
+            }
+            try {
+                checkUpdatePreconditions(columnIndex, "updateBlob");
+                updateColumn(columnIndex,
+                             agent_.crossConverters_.setObject(
+                                    resultSetMetaData_.types_[columnIndex -1],
+                                    x));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
     }
 
+    /**
+     * Updates the designated column with a <code>java.sql.Blob</code> value.
+     * The updater methods are used to update column values in the
+     * current row or the insert row.  The updater methods do not
+     * update the underlying database; instead the <code>updateRow</code> or
+     * <code>insertRow</code> methods are called to update the database.
+     *
+     * @param columnName the label for the column specified with the SQL AS
+     * clause. If the SQL AS clause was not specified, then the label is the
+     * name of the column
+     * @param x the new column value
+     * @throws SQLException if the columnLabel is not valid;
+     * if a database access error occurs;
+     * the result set concurrency is <code>CONCUR_READ_ONLY</code>
+     * or this method is called on a closed result set
+     */
     public void updateBlob(String columnName, java.sql.Blob x) throws SQLException {
-        throw jdbc3MethodNotSupported();
+        try {
+            updateBlob(findColumnX(columnName), x);
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+  
+    /**
+     * Updates the designated column using the given input stream, which
+     * will have the specified number of bytes.
+     * The updater methods are used to update column values in the
+     * current row or the insert row.  The updater methods do not
+     * update the underlying database; instead the <code>updateRow</code> or
+     * <code>insertRow</code> methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x An object that contains the data to set the parameter
+     * value to.
+     * @param length the number of bytes in the parameter data.
+     * @exception SQLException if the columnIndex is not valid;
+     * if a database access error occurs;
+     * the result set concurrency is <code>CONCUR_READ_ONLY</code>
+     * or this method is called on a closed result set
+     */
+    public void updateBlob(int columnIndex, InputStream x, long length)
+                            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateBlob",
+                        columnIndex, x, (int)length);
+            }
+            try {
+                checkUpdatePreconditions(columnIndex, "updateBlob");
+                updateColumn(columnIndex,
+                             agent_.crossConverters_.setObject(
+                                    resultSetMetaData_.types_[columnIndex -1],
+                                    new Blob(agent_, x, (int)length)));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
     }
 
-    public void updateClob(int columnIndex, java.sql.Clob x) throws SQLException {
-        throw jdbc3MethodNotSupported();
-    }
-
-    public void updateClob(String columnName, java.sql.Clob x) throws SQLException {
-        throw jdbc3MethodNotSupported();
+    /**
+     * Updates the designated column using the given input stream, which
+     * will have the specified number of bytes.
+     * The updater methods are used to update column values in the
+     * current row or the insert row.  The updater methods do not
+     * update the underlying database; instead the <code>updateRow</code> or
+     * <code>insertRow</code> methods are called to update the database.
+     *
+     * @param columnName the label for the column specified with the
+     * SQL AS clause.  If the SQL AS clause was not specified, then the
+     * label is the name of the column
+     * @param x An object that contains the data to set the parameter
+     * value to.
+     * @param length the number of bytes in the parameter data.
+     * @exception SQLException if the columnLabel is not valid;
+     * if a database access error occurs;
+     * the result set concurrency is <code>CONCUR_READ_ONLY</code>
+     * or this method is called on a closed result set
+     */
+    public void updateBlob(String columnName, InputStream x, long length)
+                           throws SQLException {
+        try {
+            updateBlob(findColumnX(columnName), x, length);
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
     }
 
     public void updateArray(int columnIndex, java.sql.Array x) throws SQLException {
@@ -5917,6 +6021,145 @@ public abstract class ResultSet implements java.sql.ResultSet,
             throws SQLException {
         try {
             updateClob(findColumnX(columnLabel), reader);
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+      
+    /**
+     * Updates the designated column using the given <code>Reader</code>
+     * object, which is the given number of characters long.
+     * When a very large UNICODE value is input to a <code>LONGVARCHAR</code>
+     * parameter, it may be more practical to send it via a
+     * <code>java.io.Reader</code> object. The JDBC driver will
+     * do any necessary conversion from UNICODE to the database char format.
+     *
+     * <p>
+     * The updater methods are used to update column values in the
+     * current row or the insert row.  The updater methods do not
+     * update the underlying database; instead the <code>updateRow</code> or
+     * <code>insertRow</code> methods are called to update the database.
+     *
+     * @param columnIndex the first column is 1, the second is 2, ...
+     * @param x An object that contains the data to set the parameter value to.
+     * @param length the number of characters in the parameter data.
+     * @exception SQLException if the columnIndex is not valid;
+     * if a database access error occurs;
+     * the result set concurrency is <code>CONCUR_READ_ONLY</code>
+     * or this method is called on a closed result set
+     * @throws SQLFeatureNotSupportedException if the JDBC driver does not
+     * support this method
+     */
+    public void updateClob(int columnIndex, Reader x, long length)
+                throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateClob",
+                        columnIndex, x, (int)length);
+            }
+            try {
+                checkUpdatePreconditions(columnIndex, "updateClob");
+                updateColumn(columnIndex,
+                             agent_.crossConverters_.setObject(
+                                 resultSetMetaData_.types_[columnIndex -1],
+                                 new Clob(agent_, x, (int)length)));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
+    }
+
+    /**
+     * Updates the designated column using the given <code>Reader</code>
+     * object, which is the given number of characters long.
+     * When a very large UNICODE value is input to a <code>LONGVARCHAR</code>
+     * parameter, it may be more practical to send it via a
+     * <code>java.io.Reader</code> object.  The JDBC driver will
+     * do any necessary conversion from UNICODE to the database char format.
+     *
+     * <p>
+     * The updater methods are used to update column values in the
+     * current row or the insert row.  The updater methods do not
+     * update the underlying database; instead the <code>updateRow</code> or
+     * <code>insertRow</code> methods are called to update the database.
+     *
+     * @param columnName the label for the column specified with the
+     * SQL AS clause.  If the SQL AS clause was not specified,
+     * then the label is the name of the column
+     * @param x An object that contains the data to set the parameter value to.
+     * @param length the number of characters in the parameter data.
+     * @exception SQLException if the columnLabel is not valid;
+     * if a database access error occurs;
+     * the result set concurrency is <code>CONCUR_READ_ONLY</code>
+     * or this method is called on a closed result set
+     * @throws SQLFeatureNotSupportedException if the JDBC driver does not
+     * support this method
+     */
+
+    public void updateClob(String columnName, Reader x, long length)
+                           throws SQLException {
+        try {
+            updateClob(findColumnX(columnName), x);
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+   
+    /**
+     * Updates the designated column with a <code>java.sql.Clob</code> value.
+     * The updater methods are used to update column values in the
+     * current row or the insert row.  The updater methods do not
+     * update the underlying database; instead the <code>updateRow</code> or
+     * <code>insertRow</code> methods are called to update the database.
+     *
+     * @param columnIndex the label for the column specified with the SQL AS
+     *                    clause. If the SQL AS clause was not specified, then
+     *                    the label is the name of the column
+     * @param x the new column value
+     * @throws SQLException if the columnLabel is not valid;
+     * if a database access error occurs;
+     * the result set concurrency is <code>CONCUR_READ_ONLY</code>
+     * or this method is called on a closed result set
+     */
+    public void updateClob(int columnIndex, java.sql.Clob x)
+            throws SQLException {
+        synchronized (connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "updateClob",
+                        columnIndex, x);
+            }
+            try {
+                checkUpdatePreconditions(columnIndex, "updateClob");
+                updateColumn(columnIndex,
+                             agent_.crossConverters_.setObject(
+                                 resultSetMetaData_.types_[columnIndex -1],
+                                 x));
+            } catch (SqlException se) {
+                throw se.getSQLException();
+            }
+        }
+    }
+
+    /**
+     * Updates the designated column with a <code>java.sql.Clob</code> value.
+     * The updater methods are used to update column values in the
+     * current row or the insert row.  The updater methods do not
+     * update the underlying database; instead the <code>updateRow</code> or
+     * <code>insertRow</code> methods are called to update the database.
+     *
+     * @param columnLabel the label for the column specified with the SQL AS
+     *                    clause. If the SQL AS clause was not specified, then
+     *                    the label is the name of the column
+     * @param x the new column value
+     * @throws SQLException if the columnLabel is not valid;
+     * if a database access error occurs;
+     * the result set concurrency is <code>CONCUR_READ_ONLY</code>
+     * or this method is called on a closed result set
+     */
+    public void updateClob(String columnLabel, java.sql.Clob x)
+            throws SQLException {
+        try {
+            updateClob(findColumnX(columnLabel), x);
         } catch (SqlException se) {
             throw se.getSQLException();
         }

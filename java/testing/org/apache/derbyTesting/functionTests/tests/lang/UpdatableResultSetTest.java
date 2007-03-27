@@ -205,23 +205,23 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         //                                            e        m
         //                                            a
         //                                            m
-        /* 0 SMALLINT      */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "22018", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "0A000", "XCL12", "XCL12", "XCL12", "0A000", "PASS",  "PASS", "0A000", "0A000"},
-        /* 1 INTEGER       */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "22018", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "0A000", "XCL12", "XCL12", "XCL12", "0A000", "PASS",  "PASS", "0A000", "0A000"},
-        /* 2 BIGINT        */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "22018", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "0A000", "XCL12", "XCL12", "XCL12", "0A000", "PASS",  "PASS", "0A000", "0A000"},
-        /* 3 DECIMAL       */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "22018", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "0A000", "XCL12", "XCL12", "XCL12", "0A000", "PASS",  "PASS", "0A000", "0A000"},
-        /* 4 REAL          */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "0A000", "XCL12", "XCL12", "XCL12", "0A000", "PASS",  "PASS", "0A000", "0A000"},
-        /* 5 DOUBLE        */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "0A000", "XCL12", "XCL12", "XCL12", "0A000", "PASS",  "PASS", "0A000", "0A000"},
-        /* 6 CHAR          */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "0A000", "PASS",  "PASS",  "PASS",  "0A000", "PASS",  "PASS", "0A000", "0A000"},
-        /* 7 VARCHAR       */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "0A000", "PASS",  "PASS",  "PASS",  "0A000", "PASS",  "PASS", "0A000", "0A000"},
-        /* 8 LONGVARCHAR   */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "0A000", "PASS",  "PASS",  "PASS",  "0A000", "PASS",  "PASS", "0A000", "0A000"},
-        /* 9 CHAR FOR BIT  */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "0A000", "XCL12", "XCL12", "XCL12", "0A000", "XCL12", "PASS", "0A000", "0A000"},
-        /* 10 VARCH. BIT   */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "0A000", "XCL12", "XCL12", "XCL12", "0A000", "XCL12", "PASS", "0A000", "0A000"},
-        /* 11 LONGVAR. BIT */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "0A000", "XCL12", "XCL12", "XCL12", "0A000", "XCL12", "PASS", "0A000", "0A000"},
-        /* 12 CLOB         */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "XCL12", "0A000", "XCL12", "XCL12", "XCL12", "0A000", "XCL12", "PASS", "0A000", "0A000"},
-        /* 13 DATE         */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "0A000", "PASS",  "XCL12", "PASS",  "0A000", "XCL12", "PASS", "0A000", "0A000"},
-        /* 14 TIME         */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "0A000", "XCL12", "PASS",  "PASS",  "0A000", "XCL12", "PASS", "0A000", "0A000"},
-        /* 15 TIMESTAMP    */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "0A000", "PASS",  "XCL12", "PASS",  "0A000", "XCL12", "PASS", "0A000", "0A000"},
-        /* 16 BLOB         */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "0A000", "XCL12", "XCL12", "XCL12", "0A000", "XCL12", "PASS", "0A000", "0A000"},
+        /* 0 SMALLINT      */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "22018", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS", "0A000", "0A000"},
+        /* 1 INTEGER       */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "22018", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS", "0A000", "0A000"},
+        /* 2 BIGINT        */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "22018", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS", "0A000", "0A000"},
+        /* 3 DECIMAL       */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "22018", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS", "0A000", "0A000"},
+        /* 4 REAL          */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS", "0A000", "0A000"},
+        /* 5 DOUBLE        */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS", "0A000", "0A000"},
+        /* 6 CHAR          */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "PASS",  "XCL12", "PASS",  "PASS", "0A000", "0A000"},
+        /* 7 VARCHAR       */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "PASS",  "XCL12", "PASS",  "PASS", "0A000", "0A000"},
+        /* 8 LONGVARCHAR   */ {"PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "PASS",  "XCL12", "PASS",  "PASS", "0A000", "0A000"},
+        /* 9 CHAR FOR BIT  */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS", "0A000", "0A000"},
+        /* 10 VARCH. BIT   */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS", "0A000", "0A000"},
+        /* 11 LONGVAR. BIT */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS", "0A000", "0A000"},
+        /* 12 CLOB         */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "PASS",  "XCL12", "XCL12", "XCL12", "PASS", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS", "0A000", "0A000"},
+        /* 13 DATE         */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "XCL12", "PASS",  "XCL12", "XCL12", "PASS", "0A000", "0A000"},
+        /* 14 TIME         */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "XCL12", "XCL12", "PASS", "0A000", "0A000"},
+        /* 15 TIMESTAMP    */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "XCL12", "PASS",  "XCL12", "XCL12", "PASS", "0A000", "0A000"},
+        /* 16 BLOB         */ {"XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "XCL12", "PASS",  "PASS",  "XCL12", "XCL12", "XCL12", "XCL12", "PASS", "XCL12", "PASS", "0A000", "0A000"},
     };
     
     // This table contains the expected result of the combination of datatype
@@ -2449,18 +2449,9 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                 } catch (SQLException e) {
                     // updateArray and updateRef are not implemented on both 
                     // drivers
-                    // updateClob is not implemented in the client
-                    // updateBlob is not implemented in the client
-                    if (
-                            (updateXXXName == 20) || (updateXXXName == 21) || 
-                            (usingDerbyNetClient() && updateXXXName == 13) || 
-                            (usingDerbyNetClient() && updateXXXName == 17))   
-                    {
+                    if((updateXXXName == 20) || (updateXXXName == 21)) {
                         assertSQLState("FAIL - unexpected exception on " + 
                                 allUpdateXXXNames[updateXXXName-1], "0A000", e);
-                    } else {
-                        assertSQLState("FAIL - unexpected exception on " + 
-                                allUpdateXXXNames[updateXXXName-1], "XJ083", e);
                     }
                 }
                 rs.close();

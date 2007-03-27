@@ -115,11 +115,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
                         " yet.");
             }
         } catch (SQLException se) {
-            if (usingEmbedded()) {
-                assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
-            } else {
-                assertSQLState(NOT_IMPLEMENTED, se);
-            }
+            assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
             rs.updateBlob("c", null);
@@ -131,11 +127,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
                         " yet.");
             }
         } catch (SQLException se) {
-            if (usingEmbedded()) {
-                assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
-            } else {
-                assertSQLState(NOT_IMPLEMENTED, se);
-            }
+            assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
             rs.updateClob(8, null);
@@ -147,11 +139,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
                         " yet.");
             }
         } catch (SQLException se) {
-            if (usingEmbedded()) {
-                assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
-            } else {
-                assertSQLState(NOT_IMPLEMENTED, se);
-            }
+            assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
             rs.updateClob("c", null);
@@ -163,11 +151,7 @@ public class ResultSetJDBC30Test extends BaseJDBCTestCase {
                         " yet.");
             }
         } catch (SQLException se) {
-            if (usingEmbedded()) {
-                assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
-            } else {
-                assertSQLState(NOT_IMPLEMENTED, se);
-            }
+            assertSQLState(UPDATABLE_RESULTSET_API_DISALLOWED, se);
         }
         try {
             rs.updateArray(8, null);

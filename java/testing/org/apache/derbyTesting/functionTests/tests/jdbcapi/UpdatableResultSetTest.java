@@ -25,6 +25,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
 import java.sql.*;
+import java.io.*;
 
 /**
  * Tests updatable result sets.
@@ -35,6 +36,24 @@ import java.sql.*;
  */
 public class UpdatableResultSetTest extends BaseJDBCTestCase {
     
+    private static final byte[] BYTES1 = {
+            0x65, 0x66, 0x67, 0x68, 0x69,
+            0x69, 0x68, 0x67, 0x66, 0x65
+        };
+
+    private static final byte[] BYTES2 = {
+            0x69, 0x68, 0x67, 0x66, 0x65,
+            0x65, 0x66, 0x67, 0x68, 0x69
+        };
+
+    /**
+     * Key used to identify inserted rows.
+     * Use method <code>requestKey</code> to obtain it.
+     **/
+    private static int insertKey = 0;
+
+    private int key = -1;
+
     /** Creates a new instance of UpdatableResultSetTest */
     public UpdatableResultSetTest(String name) {
         super(name);
@@ -51,6 +70,13 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
         conn.setAutoCommit(false);
         Statement stmt = conn.createStatement();
         
+        stmt.execute("create table UpdateTestTableResultSet (" +
+                            "sno int not null unique," +
+                            "dBlob BLOB," +
+                            "dClob CLOB," +
+                            "dLongVarchar LONG VARCHAR," +
+                            "dLongBit LONG VARCHAR FOR BIT DATA)");
+
         // Quoted table
         stmt.executeUpdate("create table \"my \"\"quoted\"\" table\" (x int)");
         stmt.executeUpdate("insert into \"my \"\"quoted\"\" table\" (x) " +
@@ -368,5 +394,330 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
         }
         rs.close();
         stmt.close();                
+    }
+
+    /**
+     * This methods tests the ResultSet interface method
+     * updateBlob
+     *
+     * @throws Exception
+     */
+    public void testUpdateBlob()
+    throws Exception {
+        //Byte array in which the returned bytes from
+        //the Database after the update are stored. This
+        //array is then checked to determine if it
+        //has the same elements of the Byte array used for
+        //the update operation
+
+        byte[] bytes_ret = new byte[10];
+
+        //1 Input Stream for insertion
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+
+        //2 Input Stream for insertion
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        //Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep("dBlob");
+
+        //first insert
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2,is1,BYTES1.length);
+        ps_sb.executeUpdate();
+
+        //second insert
+        int key2 = requestKey();
+        ps_sb.setInt(1, key2);
+        ps_sb.setBinaryStream(2,is2,BYTES2.length);
+        ps_sb.executeUpdate();
+
+        ps_sb.close();
+
+        //Update operation
+        //use a different ResultSet variable so that the
+        //other tests can go on unimpacted
+        //we do not have set methods on Clob and Blob implemented
+        //So query the first Clob from the database
+        //update the second result set with this
+        //Clob value
+
+        ResultSet rs1 = fetch("dBlob", key);
+        rs1.next();
+        Blob blob = rs1.getBlob(1);
+        rs1.close();
+
+        rs1 = fetchUpd("dBlob", key2);
+        rs1.next();
+        rs1.updateBlob(1,blob);
+        rs1.updateRow();
+        rs1.close();
+
+        //Query to see whether the data that has been updated
+        //using the updateBlob method is the same
+        //data that we expected
+
+        rs1 = fetch("dBlob", key2);
+        rs1.next();
+        assertEquals(blob, rs1.getBlob(1));
+        rs1.close();
+    }
+
+    /**
+     * This methods tests the ResultSet interface method
+     * updateBlob
+     *
+     * @throws Exception
+     */
+    public void testUpdateBlobStringParameterName()
+    throws Exception {
+        //Byte array in which the returned bytes from
+        //the Database after the update are stored. This
+        //array is then checked to determine if it
+        //has the same elements of the Byte array used for
+        //the update operation
+
+        byte[] bytes_ret = new byte[10];
+
+        //1 Input Stream for insertion
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+
+        //2 Input Stream for insertion
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        //Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep("dBlob");
+
+        //first insert
+        ps_sb.setInt(1, key);
+        ps_sb.setBinaryStream(2,is1,BYTES1.length);
+        ps_sb.executeUpdate();
+
+        //second insert
+        int key2 = requestKey();
+        ps_sb.setInt(1, key2);
+        ps_sb.setBinaryStream(2,is2,BYTES2.length);
+        ps_sb.executeUpdate();
+
+        ps_sb.close();
+
+        //Update operation
+        //use a different ResultSet variable so that the
+        //other tests can go on unimpacted
+        //we do not have set methods on Clob and Blob implemented
+        //So query the first Clob from the database
+        //update the second result set with this
+        //Clob value
+
+        ResultSet rs1 = fetch("dBlob", key);
+        rs1.next();
+        Blob blob = rs1.getBlob(1);
+        rs1.close();
+
+        rs1 = fetchUpd("dBlob", key2);
+        rs1.next();
+        rs1.updateBlob("dBlob",blob);
+        rs1.updateRow();
+        rs1.close();
+
+        //Query to see whether the data that has been updated
+        //using the updateBlob method is the same
+        //data that we expected
+
+        rs1 = fetch("dBlob", key2);
+        rs1.next();
+        assertEquals(blob, rs1.getBlob(1));
+        rs1.close();
+    }
+
+    /**
+     * This methods tests the ResultSet interface method
+     * updateClob
+     *
+     * @throws Exception
+     */
+    public void testUpdateClob()
+    throws Exception {
+        //Byte array in which the returned bytes from
+        //the Database after the update are stored. This
+        //array is then checked to determine if it
+        //has the same elements of the Byte array used for
+        //the update operation
+
+        byte[] bytes_ret = new byte[10];
+
+        //1 Input Stream for insertion
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+
+        //2 Input Stream for insertion
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        //Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep("dClob");
+
+        //first insert
+        ps_sb.setInt(1,key);
+        ps_sb.setAsciiStream(2,is1,BYTES1.length);
+        ps_sb.executeUpdate();
+
+        //second insert
+        int key2 = requestKey();
+        ps_sb.setInt(1,key2);
+        ps_sb.setAsciiStream(2,is2,BYTES2.length);
+        ps_sb.executeUpdate();
+
+        ps_sb.close();
+
+        //Update operation
+        //use a different ResultSet variable so that the
+        //other tests can go on unimpacted
+        //we do not have set methods on Clob and Blob implemented
+        //So query the first Clob from the database
+        //update the second result set with this
+        //Clob value
+
+        ResultSet rs1 = fetchUpd("dClob", key);
+        rs1.next();
+        Clob clob = rs1.getClob(1);
+        rs1.close();
+
+        rs1 = fetchUpd("dClob", key2);
+        rs1.next();
+        rs1.updateClob(1,clob);
+        rs1.updateRow();
+        rs1.close();
+
+        //Query to see whether the data that has been updated
+        //using the updateClob method is the same
+        //data that we expected
+
+        rs1 = fetch("dClob", key2);
+        rs1.next();
+        assertEquals(clob, rs1.getClob(1));
+        rs1.close();
+    }
+
+    /**
+     * This methods tests the ResultSet interface method
+     * updateClob
+     *
+     * @throws Exception
+     */
+    public void testUpdateClobStringParameterName()
+    throws Exception {
+        //Byte array in which the returned bytes from
+        //the Database after the update are stored. This
+        //array is then checked to determine if it
+        //has the same elements of the Byte array used for
+        //the update operation
+
+        byte[] bytes_ret = new byte[10];
+
+        //1 Input Stream for insertion
+        InputStream is1 = new java.io.ByteArrayInputStream(BYTES1);
+
+        //2 Input Stream for insertion
+        InputStream is2 = new java.io.ByteArrayInputStream(BYTES2);
+
+        //Prepared Statement used to insert the data
+        PreparedStatement ps_sb = prep("dClob");
+
+        //first insert
+        ps_sb.setInt(1, key);
+        ps_sb.setAsciiStream(2,is1,BYTES1.length);
+        ps_sb.executeUpdate();
+
+        //second insert
+        int key2 = requestKey();
+        ps_sb.setInt(1, key2);
+        ps_sb.setAsciiStream(2,is2,BYTES2.length);
+        ps_sb.executeUpdate();
+
+        ps_sb.close();
+
+        //Update operation
+        //use a different ResultSet variable so that the
+        //other tests can go on unimpacted
+        //we do not have set methods on Clob and Blob implemented
+        //So query the first Clob from the database
+        //update the second result set with this
+        //Clob value
+
+        ResultSet rs1 = fetch("dClob", key);
+        rs1.next();
+        Clob clob = rs1.getClob(1);
+        rs1.close();
+
+        rs1 = fetchUpd("dClob", key2);
+        rs1.next();
+        rs1.updateClob("dClob",clob);
+        rs1.updateRow();
+        rs1.close();
+
+        //Query to see whether the data that has been updated
+        //using the updateClob method is the same
+        //data that we expected
+
+        rs1 = fetch("dClob", key2);
+        rs1.next();
+        assertEquals(clob, rs1.getClob(1));
+        rs1.close();
+    }
+
+    /**
+     * Get a key that is used to identify an inserted row.
+     * Introduced to avoid having to delete table contents after each test,
+     * and because the order of the tests is not guaranteed.
+     *
+     * @return an integer in range [1, Integer.MAX_VALUE -1]
+     */
+    private static final int requestKey() {
+        return ++insertKey;
+    }
+
+    /**
+     * Prepare commonly used statement to insert a row.
+     *
+     * @param colName name of the column to insert into
+     * @throws SQLException
+     */
+    private PreparedStatement prep(String colName)
+            throws SQLException {
+        return prepareStatement("insert into UpdateTestTableResultSet " +
+                "(sno, " + colName + ") values (?,?)");
+    }
+
+    /**
+     * Fetch the specified row for update.
+     *
+     * @param colName name of the column to fetch
+     * @param key identifier for row to fetch
+     * @return a <code>ResultSet</code> with zero or one row, depending on
+     *      the key used
+     * @throws SQLException
+     */
+    private ResultSet fetchUpd(String colName, int key)
+            throws SQLException {
+        Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                             ResultSet.CONCUR_UPDATABLE);
+        return stmt.executeQuery("select " + colName +
+                " from UpdateTestTableResultSet where sno = " + key +
+                " for update");
+    }
+
+    /**
+     * Fetch the specified row.
+     *
+     * @param colName name of the column to fetch
+     * @param key identifier for row to fetch
+     * @return a <code>ResultSet</code> with zero or one row, depending on
+     *      the key used
+     * @throws SQLException
+     */
+    private ResultSet fetch(String colName, int key)
+            throws SQLException {
+        Statement stmt = createStatement();
+        return stmt.executeQuery("select " + colName +
+                " from UpdateTestTableResultSet where sno = " + key);
     }
 }
