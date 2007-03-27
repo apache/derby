@@ -1135,17 +1135,17 @@ public class SystemProcedures  {
 
     /**
      * Export data from a table to given files. Large objects 
-     * are exported to a separate file and the reference to it is written 
+     * are exported to an external file and the reference to it is written 
      * in the main export file. 
      * <p>
      * Will be called by system procedure:
-     * SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
+     * SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
      * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
      * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
      * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672))
      * @exception  StandardException  Standard exception policy.
      **/
-    public static void SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE(
+    public static void SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE(
     String  schemaName,
     String  tableName,
     String  fileName,
@@ -1197,18 +1197,18 @@ public class SystemProcedures  {
 
     /**
      * Export data from a  select statement to given file. Large objects 
-     * are exported to a separate file and the reference to it is written 
+     * are exported to an external file and the reference to it is written 
      * in the main export file. 
      * <p>
      * Will be called as 
-     * SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE(IN SELECTSTATEMENT  VARCHAR(32672),
+     * SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE(IN SELECTSTATEMENT  VARCHAR(32672),
      * IN FILENAME VARCHAR(32672) , 
      * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
      * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672))
      *
      * @exception  StandardException  Standard exception policy.
      **/
-    public static void SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE(
+    public static void SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE(
     String  selectStatement,
     String  fileName,
     String  columnDelimiter,
@@ -1273,13 +1273,13 @@ public class SystemProcedures  {
      * lob location info in the main import file. 
      * <p>
      * Will be called by system procedure as
-     * SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
+     * SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
      * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
      * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
      * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT)
      * @exception  StandardException  Standard exception policy.
      **/
-    public static void SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(
+    public static void SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(
     String  schemaName,
     String  tableName,
     String  fileName,
@@ -1359,7 +1359,7 @@ public class SystemProcedures  {
      * the lob location info in the main import file. 
      * <p>
      * Will be called as 
-     * SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(IN SCHEMANAME VARCHAR(128), 
+     * SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(IN SCHEMANAME VARCHAR(128), 
      *               IN TABLENAME VARCHAR(128),
      *               IN INSERTCOLUMNLIST VARCHAR(32762), 
      *               IN COLUMNINDEXES VARCHAR(32762),
@@ -1369,7 +1369,7 @@ public class SystemProcedures  {
      *
      * @exception  StandardException  Standard exception policy.
      **/
-    public static void SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(
+    public static void SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(
     String  schemaName,
     String  tableName,
     String  insertColumnList,

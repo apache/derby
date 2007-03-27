@@ -125,7 +125,7 @@ public class Export extends ExportAbstract{
 
 	
     /**
-     * SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE system procedure from ij 
+     * SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE system procedure from ij 
      * or from a Java application invokes  this method to perform 
      * export of a table data to a file. Large object data is exported 
      * to a different file and the reference to it is stored in the
@@ -186,7 +186,7 @@ public class Export extends ExportAbstract{
 
 
     /**
-     * SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE system Procedure from ij 
+     * SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE system Procedure from ij 
      * or from a Java application invokes this method to perform 
      * export of the data retrieved by select  statement to a file.
      * Large object data is exported to a different file  and the reference 

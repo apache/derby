@@ -144,9 +144,9 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
 
     /**
      * Perform export using 
-     * SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE procedure.
+     * SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE procedure.
      */
-    protected void doExportTableLobsInExtFile(String schemaName, 
+    protected void doExportTableLobsToExtFile(String schemaName, 
                                               String tableName, 
                                               String fileName, 
                                               String colDel , 
@@ -156,7 +156,7 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
         throws SQLException 
     {
         String expsql = 
-            "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE" +  
+            "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE" +  
             "(? , ? , ? , ?, ?, ?, ?)";
         PreparedStatement ps = prepareStatement(expsql);
         ps.setString(1, schemaName);
@@ -174,9 +174,9 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
 
     /**
      * Perform export using 
-     * SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE procedure.
+     * SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE procedure.
      */
-    protected void doExportQueryLobsInExtFile(String query,
+    protected void doExportQueryLobsToExtFile(String query,
                                               String fileName,
                                               String colDel , 
                                               String charDel, 
@@ -185,7 +185,7 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
         throws SQLException 
     {
         String expsql = 
-            "call SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE" + 
+            "call SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE" + 
             "(? , ? , ? , ?, ?, ?)";
         PreparedStatement ps = prepareStatement(expsql);
         ps.setString(1, query);
@@ -200,9 +200,9 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
 
     /**
      * Perform import using 
-     * SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE procedure.
+     * SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE procedure.
      */
-    protected void doImportTableLobsInExtFile(String schemaName,
+    protected void doImportTableLobsFromExtFile(String schemaName,
                                               String tableName, 
                                               String fileName, 
                                               String colDel, 
@@ -212,7 +212,7 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
         throws SQLException 
     {
         String impsql = 
-            "call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE" +
+            "call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE" +
             "(?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = prepareStatement(impsql);
         ps.setString(1 , schemaName);
@@ -229,21 +229,21 @@ public abstract class ImportExportBaseTest extends BaseJDBCTestCase {
 
     /**
      *  Perform import using 
-     *  SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE procedure.
+     *  SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE procedure.
      */
-    protected void doImportDataLobsInExtFile(String schemaName,
-                                              String tableName, 
-                                              String insertCols,
-                                              String colIndexes, 
-                                              String fileName,
-                                              String colDel, 
-                                              String charDel , 
-                                              String codeset, 
-                                              int replace) 
+    protected void doImportDataLobsFromExtFile(String schemaName,
+                                               String tableName, 
+                                               String insertCols,
+                                               String colIndexes, 
+                                               String fileName,
+                                               String colDel, 
+                                               String charDel , 
+                                               String codeset, 
+                                               int replace) 
         throws SQLException 
     {
         String impsql = 
-            "call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE" + 
+            "call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE" + 
             "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = prepareStatement(impsql);
         ps.setString(1, schemaName);

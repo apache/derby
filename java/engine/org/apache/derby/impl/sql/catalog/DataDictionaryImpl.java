@@ -10453,7 +10453,7 @@ public final class	DataDictionaryImpl
         throws StandardException
     {
 
-        /* SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
+        /* SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
          * IN TABLENAME    VARCHAR(128), IN FILENAME VARCHAR(32672) , 
          * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
          * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672) )
@@ -10485,7 +10485,7 @@ public final class	DataDictionaryImpl
             };
 
             createSystemProcedureOrFunction(
-               "SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE",
+               "SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE",
                 sysUtilUUID,
                 arg_names,
                 arg_types,
@@ -10497,11 +10497,11 @@ public final class	DataDictionaryImpl
         }
 
         
-        /* SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE(
+        /* SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE(
          * IN SELECTSTATEMENT  VARCHAR(32672), 
          * IN FILENAME VARCHAR(32672) , 
          * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
-         * IN CODESET VARCHAR(128))
+         * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672))
          */
         {
             // procedure argument names
@@ -10526,7 +10526,7 @@ public final class	DataDictionaryImpl
             };
 
             createSystemProcedureOrFunction(
-                "SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE",
+                "SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE",
                 sysUtilUUID,
                 arg_names,
                 arg_types,
@@ -10538,7 +10538,7 @@ public final class	DataDictionaryImpl
         }
 
         		
-        /*  SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(IN SCHEMANAME VARCHAR(128), 
+        /*  SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(IN SCHEMANAME VARCHAR(128), 
          *  IN TABLENAME VARCHAR(128),  IN FILENAME VARCHAR(32762), 
          *  IN COLUMNDELIMITER CHAR(1), IN CHARACTERDELIMITER  CHAR(1),  
          *  IN CODESET VARCHAR(128) , IN  REPLACE SMALLINT)
@@ -10568,7 +10568,7 @@ public final class	DataDictionaryImpl
             };
 
             createSystemProcedureOrFunction(
-               "SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE",
+               "SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE",
                sysUtilUUID,
                arg_names,
                arg_types,
@@ -10579,7 +10579,7 @@ public final class	DataDictionaryImpl
                tc);
         }
 
-        /*  SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(IN SCHEMANAME VARCHAR(128), 
+        /*  SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(IN SCHEMANAME VARCHAR(128), 
          *  IN TABLENAME VARCHAR(128), IN INSERTCOLUMNLIST VARCHAR(32762), 
          *  IN COLUMNINDEXES VARCHAR(32762), IN IN FILENAME VARCHAR(32762), 
          *  IN COLUMNDELIMITER CHAR(1), IN CHARACTERDELIMITER  CHAR(1),  
@@ -10617,7 +10617,7 @@ public final class	DataDictionaryImpl
 
 
             createSystemProcedureOrFunction(
-                "SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE",
+                "SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE",
                 sysUtilUUID,
                 arg_names,
                 arg_types,

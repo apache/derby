@@ -254,42 +254,43 @@ public class ImportExportLobTest extends ImportExportBaseTest
 
     /**
      * Test import/export of a table, using 
-     * SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE and 
-     * SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE  procedures.
+     * SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE and 
+     * SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE  procedures.
      */
     public void testImportTableExportTableLobsInExtFile()  
         throws SQLException, IOException
     {
-        doExportTableLobsInExtFile("APP", "BOOKS", fileName, 
+        doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                    null, null , null, lobsFileName);
-	    doImportTableLobsInExtFile("APP", "BOOKS_IMP", fileName, 
-                                   null, null, null, 0);
+	    doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
+                                     null, null, null, 0);
         verifyData(" * ");
     }
 
     
     /*
      * Test import/export of all the columns using 
-     * SYSCS_EXPORT_QUERY and SYSCS_IMPORT_DATA procedures.  
+     * SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE and 
+     * SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE procedures.  
      */
     public void testImportDataExportQueryLobsInExtFile() 
         throws SQLException, IOException
     {
-        doExportQueryLobsInExtFile("select * from BOOKS", fileName,
+        doExportQueryLobsToExtFile("select * from BOOKS", fileName,
                                    null, null , null, lobsFileName);
-	    doImportDataLobsInExtFile(null, "BOOKS_IMP", null, null, fileName, 
+	    doImportDataLobsFromExtFile(null, "BOOKS_IMP", null, null, fileName, 
                                    null, null, null, 0);
         verifyData(" * ");
 
         // perform import with column names specified in random order.
-        doImportDataLobsInExtFile(null, "BOOKS_IMP", "PIC, CONTENT, NAME, ID", 
+        doImportDataLobsFromExtFile(null, "BOOKS_IMP", "PIC, CONTENT, NAME, ID", 
                                   "4, 3, 2, 1", fileName, null, null, null, 1);
         verifyData("PIC, CONTENT, NAME, ID");
 
         // test with  non-default delimiters. 
-        doExportQueryLobsInExtFile("select * from BOOKS_IMP", fileName,
+        doExportQueryLobsToExtFile("select * from BOOKS_IMP", fileName,
                                    ";", "%" , null, lobsFileName);
-	    doImportDataLobsInExtFile(null, "BOOKS_IMP", null, null, fileName, 
+	    doImportDataLobsFromExtFile(null, "BOOKS_IMP", null, null, fileName, 
                                   ";", "%", null, 1);
 
     }
@@ -297,27 +298,28 @@ public class ImportExportLobTest extends ImportExportBaseTest
 
     /*
      * Test import of only some columns of the table 
-     * using  SYSCS_EXPOR_QUERY and IMPORT_DATA procedures.  
+     * using  SYSCS_EXPOR_QUERY_LOBS_TO_EXTFILE and 
+     * SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE procedures.  
      */
     public void testImportDataExportQueryWithFewColsLobsInExtFile() 
         throws SQLException, IOException
     {
-        doExportQueryLobsInExtFile("select id, name, content, pic from BOOKS",
+        doExportQueryLobsToExtFile("select id, name, content, pic from BOOKS",
                                    fileName,  null, null, null, lobsFileName);
-        doImportDataLobsInExtFile(null, "BOOKS_IMP", "ID,PIC", "1 , 4",
-                                  fileName, null, null, null, 0);
+        doImportDataLobsFromExtFile(null, "BOOKS_IMP", "ID,PIC", "1 , 4",
+                                    fileName, null, null, null, 0);
         verifyData("ID,PIC");
-        doImportDataLobsInExtFile(null, "BOOKS_IMP", "ID, PIC, NAME", "1, 4, 2",
+        doImportDataLobsFromExtFile(null, "BOOKS_IMP", "ID, PIC, NAME", "1, 4, 2",
                                   fileName, null, null, null, 1);
         verifyData("ID, PIC, NAME");
-        doImportDataLobsInExtFile(null, "BOOKS_IMP", "ID, CONTENT, NAME", 
+        doImportDataLobsFromExtFile(null, "BOOKS_IMP", "ID, CONTENT, NAME", 
                                   "1, 3, 2", fileName, null, null, null, 1);
         verifyData("ID, CONTENT, NAME");
 
         // test with  non-default delimiters. 
-        doExportQueryLobsInExtFile("select id, name, content, pic from BOOKS",  
+        doExportQueryLobsToExtFile("select id, name, content, pic from BOOKS",  
                                    fileName,  "$", "!" , null, lobsFileName);
-        doImportDataLobsInExtFile(null, "BOOKS_IMP", "ID,PIC", "1 , 4",
+        doImportDataLobsFromExtFile(null, "BOOKS_IMP", "ID,PIC", "1 , 4",
                                   fileName, "$", "!", null, 0);
     }
 
@@ -330,20 +332,20 @@ public class ImportExportLobTest extends ImportExportBaseTest
          throws SQLException, IOException   
     {
         try {
-            doExportTableLobsInExtFile("APP", "BOOKS", fileName, 
+            doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                        null, "9" , null, lobsFileName);
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
 
         try {
-            doExportQueryLobsInExtFile("select * from BOOKS", fileName,
+            doExportQueryLobsToExtFile("select * from BOOKS", fileName,
                                        "|", "f", null, lobsFileName);
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
 
-        doExportQueryLobsInExtFile("select * from BOOKS where id < 10", 
+        doExportQueryLobsToExtFile("select * from BOOKS where id < 10", 
                                    fileName, null, null, null, lobsFileName);
 
 
@@ -356,14 +358,14 @@ public class ImportExportLobTest extends ImportExportBaseTest
          */
 
         try {
-            doImportTableLobsInExtFile("APP", "BOOKS_IMP", fileName, "2", 
-                                       null, null, 0);
+            doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, "2", 
+                                         null, null, 0);
         } catch (SQLException e) {
              assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0J", e);
         }
 
         try {
-            doImportDataLobsInExtFile(null, "BOOKS_IMP", null, 
+            doImportDataLobsFromExtFile(null, "BOOKS_IMP", null, 
                                       null,  fileName, null, "c", null, 1);
         } catch (SQLException e) {
             assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0J", e);
@@ -435,13 +437,24 @@ public class ImportExportLobTest extends ImportExportBaseTest
         s.executeUpdate("insert into books values " + 
                         "(11, '212C3B24', '2422412221', " + 
                         "  cast (X'212421222C23B90A2124' as blob))");
+        // insert some clob data with default char delimiter inside 
+        // the data. It should get exported in double-delimiter format
+        // when exporting to the main export file. 
+        s.executeUpdate("insert into books values" +
+                        "(12, 'Transaction Processing' , " +
+                        "'This books covers \"Transaction\" \"processing\" concepts'"+
+                        ",cast (X'144594322143423214ab35f2e54e' as blob))");
+        s.executeUpdate("insert into books values" + 
+                        "(13, 'effective java' ," +  
+                        "'describes how to write \" quality java \" code', " +
+                        "cast (X'124594322143423214ab35f2e34c' as blob))");
 
         // insert some more randomly genrated data.
         Connection conn = s.getConnection();
         String sql = "insert into books values(? , ? , ? , ?)";
         PreparedStatement ps = conn.prepareStatement(sql);
         int blobSize = 0;
-        int id = 12;
+        int id = 14;
         for (int i = 0 ; i < 17 ; i++) {
             ps.setInt(1 , id++);
             ps.setString(2 , "book" +i);

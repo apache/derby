@@ -205,7 +205,7 @@ public class Changes10_3 extends UpgradeChange {
             // on soft-upgrade.
             Statement s = createStatement();
             assertStatementError("42Y03", s, 
-                "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE" +  
+                "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE" +  
                 "(null , 'IET1' , 'iet1.del' , null, " + 
                 "null, null, 'iet1_lobs.dat')");
             s.close();
@@ -223,16 +223,16 @@ public class Changes10_3 extends UpgradeChange {
 
             Statement s = createStatement();
             s.execute(
-                "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_IN_EXTFILE" +  
+                "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE" +  
                 "(null , 'IET1' , '"  +  fileName  + 
                 "' , null, null, null, '" + lobsFileName + "')");
-            s.execute("call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_IN_EXTFILE(" + 
+            s.execute("call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(" + 
                       "null, 'IET1' , '" + fileName + 
                       "', null, null, null, 0)");
-            s.execute("call SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_IN_EXTFILE(" +
+            s.execute("call SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE(" +
                       "'select * from IET1', '" +  fileName + 
                       "' , null, null, null, '" + lobsFileName + "')");
-            s.execute("call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_IN_EXTFILE(" + 
+            s.execute("call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(" + 
                       "null, 'IET1','ID, CONTENT, PIC', '1,2,3'," + 
                       "'" + fileName +"', null, null, null, 1)") ;
             
