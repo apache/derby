@@ -48,14 +48,10 @@ public class HoldCursorTest extends BaseJDBCTestCase {
 	
 	
 	  public static Test suite() {
-		  if ( !JDBC.vmSupportsJDBC3())
-	            return new TestSuite("empty HoldCursorTest - supported only from JDBC3.0 and above");
-	        else{
         TestSuite suite = new TestSuite("HoldCursorTest");
         suite.addTest(baseSuite("HoldCursorTest:embedded"));
         suite.addTest(baseSuite("HoldCursorTest:client"));
         return suite;
-	        }
     }
     private static Test baseSuite(String name) {
 
@@ -345,7 +341,7 @@ public class HoldCursorTest extends BaseJDBCTestCase {
 	     * @param resultSetType
 	     * @param resultSetConcurrency
 	     * @param resultSetHoldability
-	     * @return
+	     * @return Statement with desired holdability set
 	     * @throws SQLException
 	     */
 	    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException
