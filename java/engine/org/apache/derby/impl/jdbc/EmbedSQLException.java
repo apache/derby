@@ -74,7 +74,10 @@ public class EmbedSQLException extends SQLException {
 		arguments = args;
 		if (nextException !=null)
 			this.setNextException(nextException);
-		javaException = t;
+		if (t != null) {
+			javaException = t;
+			setStackTrace(t.getStackTrace());
+		}
 	}
     
 	public Throwable getJavaException() {
@@ -87,46 +90,6 @@ public class EmbedSQLException extends SQLException {
 
 	public Object[] getArguments() {
 		return arguments;
-	}
-
-	/**
-		Print the stack trace of the wrapped java exception or this
-		exception if there is none.
-
-		@see Throwable#printStackTrace
-	*/
-	public void printStackTrace() {
-		Throwable je = getJavaException();
-		if (je != null)
-			je.printStackTrace();
-		else
-			super.printStackTrace();
-	}
-	/**
-		Print the stack trace of the wrapped java exception or this
-		exception if there is none.
-
-		@see Throwable#printStackTrace
-	*/
-	public void printStackTrace(PrintStream s) {
-		Throwable je = getJavaException();
-		if (je != null)
-			je.printStackTrace(s);
-		else
-			super.printStackTrace(s);
-	}
-	/**
-		Print the stack trace of the wrapped java exception or this
-		exception if there is none.
-
-		@see Throwable#printStackTrace
-	*/
-	public void printStackTrace(PrintWriter s) {
-		Throwable je = getJavaException();
-		if (je != null)
-			je.printStackTrace(s);
-		else
-			super.printStackTrace(s);
 	}
 
 	/*

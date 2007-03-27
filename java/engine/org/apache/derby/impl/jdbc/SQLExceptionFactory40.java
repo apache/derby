@@ -134,17 +134,6 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
         // Generate an EmbedSQLException
         SQLException e =
             super.getSQLException(message, messageId, next, severity, t, args);
-
-        // We want to preserve the stack trace of the original
-        // exception. EmbedSQLException overrides printStackTrace() to achieve
-        // this, but that won't help us when the EmbedSQLException is not the
-        // first exception in the chain. Ideally, we would use initCause(), but
-        // a comment in EmbedSQLException indicates that the cause of the
-        // exception is not supposed to be serialized.
-        if (t != null) {
-            e.setStackTrace(t.getStackTrace());
-        }
-
         return e;
 	}
 	
