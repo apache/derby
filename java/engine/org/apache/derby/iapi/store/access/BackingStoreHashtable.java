@@ -56,6 +56,7 @@ or row[key_column_numbers[0, 1, ...]] if key_column_numbers.length > 1,
 and that duplicate detection is done by the standard java duplicate detection provided by 
 java.util.Hashtable.
 <p>
+<pre>
 import java.util.Hashtable;
 
 hash_table = new Hashtable();
@@ -68,7 +69,7 @@ while((row = rowSource.getNextRowFromRowSource()) != null)
     if (needsToClone)
         row = clone_row_from_row(row);
 
-	Object key = KeyHasher.buildHashKey(row, key_column_numbers);
+    Object key = KeyHasher.buildHashKey(row, key_column_numbers);
 
     if ((duplicate_value = 
         hash_table.put(key, row)) != null)
@@ -96,6 +97,7 @@ while((row = rowSource.getNextRowFromRowSource()) != null)
         row_vec.addElement(row);
     }
 }
+</pre>
 
 **/
 
