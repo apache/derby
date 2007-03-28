@@ -24,6 +24,10 @@ import java.sql.Connection;
 public class RuntimeStatisticsParser {
 
     private int isolationLevel = Connection.TRANSACTION_NONE;
+    private boolean distinctScan = false;
+    private boolean eliminatedDuplicates = false;
+    private boolean tableScan = false;
+    private String statistics = "";
 
     /**
      * Create a RuntimeStatistics object to parse the text and extract
@@ -34,6 +38,7 @@ public class RuntimeStatisticsParser {
      * 
      */
     public RuntimeStatisticsParser(String rts) {
+    	statistics = rts;
         if (rts.indexOf(" at serializable isolation level ") != -1)
             isolationLevel = Connection.TRANSACTION_SERIALIZABLE;
         else if (rts.indexOf("at read uncommitted isolation level") != -1)
@@ -43,6 +48,17 @@ public class RuntimeStatisticsParser {
         else if (rts.indexOf("at repeatable read isolation level") != -1)
             isolationLevel = Connection.TRANSACTION_REPEATABLE_READ;
 
+        if (rts.indexOf("Distinct Scan ResultSet") > 0) {
+        	distinctScan = true;
+        }
+        
+        if (rts.indexOf("Table Scan ResultSet") > 0) {
+        	tableScan = true;
+        }
+        
+        if (rts.indexOf("Eliminate duplicates = true") > 0) {
+        	eliminatedDuplicates = true;
+        }
     }
 
     /**
@@ -52,4 +68,27 @@ public class RuntimeStatisticsParser {
         return isolationLevel;
     }
     
+    /**
+     * Return whether or not a Distinct Scan result set was used in the
+     * query.
+     */
+    public boolean usedDistinctScan() {
+    	return distinctScan;
+    }
+    
+    /**
+     * Return whether or not a Table Scan result set was used in the
+     * query.
+     */
+    public boolean usedTableScan() {
+    	return tableScan;
+    }
+    
+    /**
+     * Return whether or not the query involved a sort that eliminated
+     * duplicates
+     */
+    public boolean eliminatedDuplicates() {
+    	return eliminatedDuplicates;
+    }
 }
