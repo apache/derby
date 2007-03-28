@@ -626,9 +626,11 @@ public interface TransactionController
      * startNestedUserTransaction() call, and let the child transaction be the
      * transaction returned by the startNestedUserTransaction() call.
      * <p>
-     * Only 1 non-readOnly nested user transaction can exist.  If a subsequent
-     * non-readOnly transaction creation is attempted prior to destroying an
-     * existing write nested user transaction an exception will be thrown.  
+     * A parent transaction can nest a single readonly transaction
+     * and a single separate read/write transaction. 
+     * If a subsequent nested transaction creation is attempted
+     * against the parent prior to destroying an existing
+     * nested user transaction of the same type, an exception will be thrown.  
      * <p>
      * The nesting is limited to one level deep.  An exception will be thrown
      * if a subsequent getNestedUserTransaction() is called on the child
