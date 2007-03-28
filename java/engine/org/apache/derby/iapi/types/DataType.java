@@ -976,23 +976,37 @@ public abstract class DataType
 
 		/* Do a binary search if the list is ordered until the 
 		 * range of values to search is 3 or less.
-		 * NOTE: We've ensured that the IN list and the left all have
-		 * the same precedence at compile time.  If we don't enforce 
-		 * the same precendence then
-		 * we could get the wrong result when doing a binary search.
+		 *
+		 * NOTE: We may have sorted the IN-lst values at compile time using
+		 * a specific (dominant) type, but we did *not* actually cast the
+		 * values to that type.  So it's possible that different IN-list
+		 * values have different precedences (verses each other and also
+		 * verses the type of the left operand) when we get here.  Thus
+		 * when we do any comparisons here we have to make sure we always
+		 * compare using the dominant type of the two values being compared.
+		 * Otherwise we can end up with wrong results when doing the binary
+		 * search (ex. as caused by incorrect truncation).  DERBY-2256.
 		 */
+		int leftPrecedence = left.typePrecedence();
+		DataValueDescriptor comparator = null;
 		if (orderedList)
 		{
 			while (finish - start > 2)
 			{
 				int mid = ((finish - start) / 2) + start;
+				comparator =
+					(leftPrecedence < inList[mid].typePrecedence())
+						? inList[mid]
+						: left;
+
 				// Search left
-				retval = equals(left, inList[mid]);
+				retval = comparator.equals(left, inList[mid]);
 				if (retval.equals(true))
 				{
 					return retval;
 				}
-				BooleanDataValue goLeft = greaterThan(inList[mid], left);
+				BooleanDataValue goLeft =
+					comparator.greaterThan(inList[mid], left);
 				if (goLeft.equals(true))
 				{
 					// search left
@@ -1009,10 +1023,19 @@ public abstract class DataType
 		/* Walk the in list comparing the values.  Return as soon as we
 		 * find a match.  If the list is ordered, return as soon as the left
 		 * value is greater than an element in the in list.
+		 *
+		 * Note: for the same reasons outlined above we must be sure to always
+		 * do the comparisons using the dominant type of the two values being
+		 * compared.
 		 */
 		for (int index = start; index < finish; index++)
 		{
-			retval = equals(left, inList[index]);
+			comparator =
+				(leftPrecedence < inList[index].typePrecedence())
+					? inList[index]
+					: left;
+
+			retval = comparator.equals(left, inList[index]);
 			if (retval.equals(true))
 			{
 				break;
@@ -1021,7 +1044,8 @@ public abstract class DataType
 			// Can we stop searching?
 			if (orderedList)
 			{
-				BooleanDataValue stop = greaterThan(inList[index], left);
+				BooleanDataValue stop =
+					comparator.greaterThan(inList[index], left);
 				if (stop.equals(true))
 				{
 					break;

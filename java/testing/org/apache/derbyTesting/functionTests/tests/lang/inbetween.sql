@@ -565,6 +565,19 @@ execute q1 using 'values 8';
 execute q1 using 'values 9';
 remove q1;
 
+-- DERBY-2256: IN lists where left operand is not the dominant type.
+
+-- Should see *no* rows for either of these queries.
+select * from test where i in (4.23);
+select * from test where i in (2.8, 4.23);
+
+-- Should not see any rows for this one, either.
+select * from test where i in (cast (2.8 as decimal(4, 2)), 4.23);
+
+-- Should get one row for each of these queries.
+select * from test where i in (4, 4.23);
+select * from test where i in (4.23, 4);
+
 -- reset autocommit
 autocommit on;
 

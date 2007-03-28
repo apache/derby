@@ -36,7 +36,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
-
+import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.sql.compile.Optimizable;
@@ -222,19 +222,45 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			if (allConstants)
 			{
 				/* When sorting or choosing min/max in the list, if types
-				 * are not an exact match, we use the left operand's type
-				 * as the "judge", assuming that they are compatible, as
-				 * also the case with DB2.
+				 * are not an exact match then we have to use the *dominant*
+				 * type across all values, where "all values" includes the
+				 * left operand.  Otherwise we can end up with incorrect
+				 * results.
+				 *
+				 * Note that it is *not* enough to just use the left operand's
+				 * type as the judge because we have no guarantee that the
+				 * left operand has the dominant type.  If, for example, the
+				 * left operand has type INTEGER and all (or any) values in
+				 * the IN list have type DECIMAL, use of the left op's type
+				 * would lead to comparisons with truncated values and could
+				 * therefore lead to an incorrect sort order. DERBY-2256.
 				 */
-				TypeId judgeTypeId = leftOperand.getTypeServices().getTypeId();
-				DataValueDescriptor judgeODV = null;  //no judge, no argument
+				DataTypeDescriptor targetType = leftOperand.getTypeServices();
+				TypeId judgeTypeId = targetType.getTypeId();
+
 				if (!rightOperandList.allSamePrecendence(
 					judgeTypeId.typePrecedence()))
 				{
-					judgeODV = (DataValueDescriptor) judgeTypeId.getNull();
+					/* Iterate through the entire list of values to find out
+					 * what the dominant type is.
+					 */
+					ClassFactory cf = getClassFactory();
+					int sz = rightOperandList.size();
+					for (int i = 0; i < sz; i++)
+					{
+						ValueNode vn = (ValueNode)rightOperandList.elementAt(i);
+						targetType =
+							targetType.getDominantType(
+								vn.getTypeServices(), cf);
+					}
 				}
  
-				// Sort the list in ascending order
+				/* Now wort the list in ascending order using the dominant
+				 * type found above.
+				 */
+				DataValueDescriptor judgeODV =
+					(DataValueDescriptor)targetType.getTypeId().getNull();
+
 				rightOperandList.sortInAscendingOrder(judgeODV);
 				isOrdered = true;
 
@@ -244,16 +270,15 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 						rightOperandList.size() - 1);
 
 				/* Handle the degenerate case where the min and the max
-				 * are the same value.
+				 * are the same value.  Note (again) that we need to do
+				 * this comparison using the dominant type found above.
 				 */
 				DataValueDescriptor minODV =
 					((ConstantNode) minValue).getValue();
 				DataValueDescriptor maxODV =
 					 ((ConstantNode) maxValue).getValue();
 
-				if (((judgeODV == null) && (minODV.compare(maxODV) == 0)) ||
-					((judgeODV != null)
-						&& judgeODV.equals(minODV, maxODV).equals(true)))
+				if (judgeODV.equals(minODV, maxODV).equals(true))
 				{
 					BinaryComparisonOperatorNode equal = 
 						(BinaryComparisonOperatorNode)getNodeFactory().getNode(
