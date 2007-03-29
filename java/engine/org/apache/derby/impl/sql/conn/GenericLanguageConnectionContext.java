@@ -149,19 +149,20 @@ public class GenericLanguageConnectionContext
 	private final TransactionController tran;
 
 	/**
-	 * If non-null indicates that a nested user transaction is in progress.
+	 * If non-null indicates that a read-only nested 
+     * user transaction is in progress.
 	 */
-	private TransactionController childTransaction;
+	private TransactionController readOnlyNestedTransaction;
 	
 	/**
 	 * queryNestingDepth is a counter used to keep track of how many calls 
-	 * have been made to begin nested transactions. Only the first call 
+	 * have been made to begin read-only nested transactions. Only the first call 
 	 * actually starts a Nested User Transaction with the store. Subsequent
 	 * calls simply increment this counter. commitNestedTransaction only
 	 * decrements the counter and when it drops to 0 actually commits the 
 	 * nested user transaction.
 	 */
-	protected int queryNestingDepth;
+	private int queryNestingDepth;
 
 	protected DataValueFactory dataFactory;
 	protected LanguageFactory langFactory;
@@ -1128,6 +1129,16 @@ public class GenericLanguageConnectionContext
 		{
 			finishDDTransaction();
 		}
+        
+        // Check that any nested transaction has been destoyed
+        // before a commit.
+        if (SanityManager.DEBUG)
+        {
+            if (readOnlyNestedTransaction != null)
+            {
+                SanityManager.THROWASSERT("Nested transaction active!");
+            }
+        }
 
 		// now commit the Store transaction
 		TransactionController tc = getTransactionExecute();
@@ -1325,6 +1336,16 @@ public class GenericLanguageConnectionContext
 			tempTablesAndRollback();
 
 		finishDDTransaction();
+        
+        // If a nested transaction is active then
+        // ensure it is destroyed before working
+        // with the user transaction.
+        if (readOnlyNestedTransaction != null)
+        {
+            readOnlyNestedTransaction.destroy();
+            readOnlyNestedTransaction = null;
+            queryNestingDepth = 0;
+        }
 
 		// now rollback the Store transaction
 		TransactionController tc = getTransactionExecute();
@@ -1334,6 +1355,7 @@ public class GenericLanguageConnectionContext
 				((XATransactionController)tc).xa_rollback();
 			else
 				tc.abort(); 
+            
 			// reset the savepoints to the new
 			// location, since any outer nesting
 			// levels expet there to be a savepoint
@@ -1449,10 +1471,14 @@ public class GenericLanguageConnectionContext
 	 */
 	public void beginNestedTransaction(boolean readOnly) throws StandardException
 	{
-		if (childTransaction == null)
-			childTransaction = tran.startNestedUserTransaction(readOnly);
+        // DERBY-2490 incremental rework, currently this is only called
+        // with read-only true. Future changes will have this
+        // method support read-write nested transactions as well
+        // instead of callers using the startNestedUserTransaction
+        // directly on tran.
+		if (readOnlyNestedTransaction == null)
+			readOnlyNestedTransaction = tran.startNestedUserTransaction(readOnly);
 		queryNestingDepth++;
-		return;
 	}
 
 	public void commitNestedTransaction()
@@ -1460,10 +1486,9 @@ public class GenericLanguageConnectionContext
 	{
 		if (--queryNestingDepth == 0)
 		{
-			childTransaction.commit();
-			childTransaction.destroy();
-			childTransaction = null;
-			return;
+			readOnlyNestedTransaction.commit();
+			readOnlyNestedTransaction.destroy();
+			readOnlyNestedTransaction = null;
 		}
 	}
 
@@ -1474,7 +1499,7 @@ public class GenericLanguageConnectionContext
 	 */
 	public TransactionController getTransactionCompile()
 	{
-		return (childTransaction != null) ? childTransaction : tran;
+		return (readOnlyNestedTransaction != null) ? readOnlyNestedTransaction : tran;
 	}
 
 	public TransactionController getTransactionExecute()
