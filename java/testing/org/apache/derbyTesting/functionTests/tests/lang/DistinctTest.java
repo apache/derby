@@ -27,12 +27,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
 import junit.framework.Assert;
 import junit.framework.Test;
@@ -49,9 +51,12 @@ public class DistinctTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
-		TestSuite suite = new TestSuite(DistinctTest.class);
+		Test s = new TestSuite(DistinctTest.class);
+		Properties p = new Properties();
+		p.put("derby.optimizer.noTimeout", "true");
+		Test t = new SystemPropertyTestSetup(s, p);
 		
-		return new CleanDatabaseTestSetup(suite) {
+		return new CleanDatabaseTestSetup(t) {
 			protected void decorateSQL(Statement s) throws SQLException {
 				s.execute("create table t (i int, s smallint, r real, f float, d date, t time, ts timestamp, c char(10), v varchar(20))");
  
@@ -488,13 +493,15 @@ public class DistinctTest extends BaseJDBCTestCase {
 		s.execute("insert into netbuttonlibraryrole1 values('lusername1', 1,'user1', 'role1', default)");
 		s.execute("insert into netbuttonlibraryrole1 values('lusername2', 2,'user2', 'role2', default)");
 		
-		
 		PreparedStatement p = prepareStatement("SELECT DISTINCT nb.name AS name, nb.summary AS summary FROM netbutton1 nb, netbuttonlibraryrole1 nlr, library_netbutton ln" +
+		" WHERE nb.lname = ln.lname AND (nlr.lusername = ? OR nlr.lusername =?)");
+
+		p = prepareStatement("SELECT DISTINCT nb.name AS name, nb.summary AS summary FROM netbutton1 nb, netbuttonlibraryrole1 nlr, library_netbutton ln" +
 				" WHERE nlr.netbuttonlibrary_id = ln.netbuttonlibrary_id AND nb.lname = ln.lname AND (nlr.lusername = ? OR nlr.lusername = ?) AND nb.lname = ? ORDER BY summary");
 		
 		p.setString(1, "lusername1");
 		p.setString(2, "lusername2");
-		p.setString(3, "lname1");
+		//p.setString(3, "lname1");
 		assertTrue(p.execute());
 
 	
@@ -536,6 +543,7 @@ public class DistinctTest extends BaseJDBCTestCase {
 		s.execute("drop table td");
 		s.close();
 	}
+	
 	/**
 	 * Tests for DERBY-504 (select distinct from a subquery)
 	 * 
