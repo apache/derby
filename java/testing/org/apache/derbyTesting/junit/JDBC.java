@@ -833,6 +833,87 @@ public class JDBC {
     }
 
     /**
+     * Assert that the ResultSet contains the same rows as the specified
+     * two-dimensional array. The order of the results is ignored. Convert the
+     * results to trimmed strings before comparing. The ResultSet object will
+     * be closed.
+     *
+     * @param rs the ResultSet to check
+     * @param expectedRows the expected rows
+     */
+    public static void assertUnorderedResultSet(
+            ResultSet rs, String[][] expectedRows) throws SQLException {
+        assertUnorderedResultSet(rs, expectedRows, true);
+    }
+
+    /**
+     * Assert that the ResultSet contains the same rows as the specified
+     * two-dimensional array. The order of the results is ignored. Objects are
+     * read out of the ResultSet with the <code>getObject()</code> method and
+     * compared with <code>equals()</code>. If the
+     * <code>asTrimmedStrings</code> is <code>true</code>, the objects are read
+     * with <code>getString()</code> and trimmed before they are compared. The
+     * ResultSet object will be closed when this method returns.
+     *
+     * @param rs the ResultSet to check
+     * @param expectedRows the expected rows
+     * @param asTrimmedStrings whether the object should be compared as trimmed
+     * strings
+     */
+    public static void assertUnorderedResultSet(
+            ResultSet rs, Object[][] expectedRows, boolean asTrimmedStrings)
+                throws SQLException {
+
+        if (expectedRows.length == 0) {
+            assertEmpty(rs);
+        }
+
+        ResultSetMetaData rsmd = rs.getMetaData();
+        Assert.assertEquals("Unexpected column count",
+                            expectedRows[0].length, rsmd.getColumnCount());
+
+        ArrayList expected = new ArrayList(expectedRows.length);
+        for (int i = 0; i < expectedRows.length; i++) {
+            Assert.assertEquals("Different column count in expectedRows",
+                                expectedRows[0].length, expectedRows[i].length);
+            if (asTrimmedStrings) {
+                ArrayList row = new ArrayList(expectedRows[i].length);
+                for (int j = 0; j < expectedRows[i].length; j++) {
+                    String val = (String) expectedRows[i][j];
+                    row.add(val == null ? null : val.trim());
+                }
+                expected.add(row);
+            } else {
+                expected.add(Arrays.asList(expectedRows[i]));
+            }
+        }
+
+        ArrayList actual = new ArrayList(expectedRows.length);
+        while (rs.next()) {
+            ArrayList row = new ArrayList(expectedRows[0].length);
+            for (int i = 1; i <= expectedRows[0].length; i++) {
+                if (asTrimmedStrings) {
+                    String s = rs.getString(i);
+                    row.add(s == null ? null : s.trim());
+                } else {
+                    row.add(rs.getObject(i));
+                }
+            }
+            actual.add(row);
+        }
+        rs.close();
+
+        Assert.assertEquals("Unexpected row count",
+                            expectedRows.length, actual.size());
+
+        Assert.assertTrue("Missing rows in ResultSet",
+                          actual.containsAll(expected));
+
+        actual.removeAll(expected);
+        Assert.assertTrue("Extra rows in ResultSet", actual.isEmpty());
+    }
+
+    /**
      * Convert byte array to String.
      * Each byte is converted to a hexadecimal string representation.
      *

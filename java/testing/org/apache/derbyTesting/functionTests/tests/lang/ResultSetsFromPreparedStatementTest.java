@@ -41,6 +41,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 // TODO:
 // - Add parameters to all PreparedStatements that support it
@@ -709,11 +710,11 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         for (int i = 0; i < expected.length; ++i) {
             tst.setString(1,new Integer(i) +"_");
             ResultSet rs = tst.executeQuery();
-            assertResultSet("?="+i+"_", expected[i], rs);
+            JDBC.assertUnorderedResultSet(rs, expected[i], false);
 
             // Re-execute tst with the same parameters
             rs = tst.executeQuery();
-            assertResultSet("R?="+i+"_", expected[i], rs);
+            JDBC.assertUnorderedResultSet(rs, expected[i], false);
 
             if (i < mgrs.length) {
                 del.setObject(1, mgrs[i]);

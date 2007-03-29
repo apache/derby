@@ -538,7 +538,9 @@ public class DistinctTest extends BaseJDBCTestCase {
                                      {"1", "1"},
         		                     {"2", "2"}, 
         		                     {"2", "1"} };
-		JDBC.assertFullResultSet(s.executeQuery("select * from td, (select distinct x from td) as sub(x)"), expected);	
+		JDBC.assertUnorderedResultSet(s.executeQuery(
+			"select * from td, (select distinct x from td) as sub(x)"),
+			expected);
 		
 		s.execute("drop table td");
 		s.close();
