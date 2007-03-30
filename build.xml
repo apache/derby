@@ -1686,7 +1686,9 @@
            fork="yes" forkmode="once"
            jvm="${derby.junit.jvm}"
            showoutput="yes"
-           dir="junit_${derby.junit.timestamp}/testout">
+           dir="junit_${derby.junit.timestamp}/testout"
+  	 	   errorproperty="tests.failed"
+  	       failureproperty="tests.failed">
       <formatter type="xml"/>
       <test name="${derby.junit.testname}" 
             todir="junit_${derby.junit.timestamp}"/>
@@ -1783,6 +1785,8 @@
           out="junit_${derby.junit.timestamp}/overview-frame2.html"/>
     <move file="junit_${derby.junit.timestamp}/overview-frame2.html"
           tofile="junit_${derby.junit.timestamp}/overview-frame.html"/>
+  	
+  	<fail if="tests.failed">Tests Failed!</fail>
   </target>
 
   <target name="l10ncheck"> 
@@ -1796,7 +1800,7 @@
 	-->
 	<target name="junit-all-codeline-jars" depends="setsanityname">
 		<property name="derby.jar.base" value="${basedir}/jars/${sanity.name}"/>
-	    <antcall target="junit-all">
+	    <antcall target="junitreport">
 	      <param name="derby.junit.classpath"
 	        value="${derby.jar.base}/derbyTesting.jar:${derby.jar.base}/derbynet.jar:${derby.jar.base}/derbytools.jar:${derby.jar.base}/derbyclient.jar"/>
 	    </antcall>
