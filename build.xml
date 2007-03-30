@@ -1677,7 +1677,12 @@
   </target>
 
   <target name="junit-oneclass" depends="junit-init">
-    <junit printsummary="on"
+    <condition property="derby.junit.classpath" value="">
+      <not>
+        <isset property="derby.junit.classpath"/>
+      </not>
+    </condition>
+  	 <junit printsummary="on"
            fork="yes" forkmode="once"
            jvm="${derby.junit.jvm}"
            showoutput="yes"
@@ -1685,6 +1690,9 @@
       <formatter type="xml"/>
       <test name="${derby.junit.testname}" 
             todir="junit_${derby.junit.timestamp}"/>
+      <classpath>
+     	    <pathelement path="${derby.junit.classpath}"/>
+      </classpath>
     </junit>
   </target>
  
@@ -1779,6 +1787,19 @@
 
   <target name="l10ncheck"> 
     <ant dir="${derbysrc.dir}/../tools/l10n"/>
-  </target>   
+  </target>  
+	
+	<!-- Run the junit-all target with the classpath set to include
+	     the main derby jar files. Requires that the caller have
+	     junit.jar in CLASSPATH due to some bug in ant that is
+	     fixed in version 1.7.
+	-->
+	<target name="junit-all-codeline-jars" depends="setsanityname">
+		<property name="derby.jar.base" value="${basedir}/jars/${sanity.name}"/>
+	    <antcall target="junit-all">
+	      <param name="derby.junit.classpath"
+	        value="${derby.jar.base}/derbyTesting.jar:${derby.jar.base}/derbynet.jar:${derby.jar.base}/derbytools.jar:${derby.jar.base}/derbyclient.jar"/>
+	    </antcall>
+	</target>
 
 </project>
