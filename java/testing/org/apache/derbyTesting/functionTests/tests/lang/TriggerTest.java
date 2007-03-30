@@ -83,12 +83,24 @@ public class TriggerTest extends BaseJDBCTestCase {
         conn.setAutoCommit(false);
     }
     
+    protected void setUp() throws Exception
+    {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE PROCEDURE TRIGGER_LOG_INFO(" +
+                "O VARCHAR(255)) " +
+                "NO SQL PARAMETER STYLE JAVA LANGUAGE JAVA " +
+                "EXTERNAL NAME " +
+                "'" + getClass().getName() + ".logTriggerInfo'");
+        s.close();
+
+    }
+    
     protected void tearDown() throws Exception
     {
         TRIGGER_INFO.set(null);
-        
         JDBC.dropSchema(getConnection().getMetaData(),
                 getTestConfiguration().getUserName());
+
         super.tearDown();
     }
     
@@ -107,11 +119,80 @@ public class TriggerTest extends BaseJDBCTestCase {
     {
         Statement s = createStatement();
         s.executeUpdate("CREATE TABLE T(ID INT)");
-        s.executeUpdate("CREATE PROCEDURE TRIGGER_LOG_INFO(" +
-                "O VARCHAR(255)) " +
-                "NO SQL PARAMETER STYLE JAVA LANGUAGE JAVA " +
-                "EXTERNAL NAME " +
-                "'" + getClass().getName() + ".logTriggerInfo'");
+        
+        int triggerCount = createRandomTriggers()[0];
+        
+        List info = new ArrayList();
+        TRIGGER_INFO.set(info);
+        
+        // Check ordering with a single row.
+        s.execute("INSERT INTO T VALUES 1");
+        commit();
+        int fireCount = assertFiringOrder("INSERT", 1);
+        info.clear();
+        
+        s.execute("UPDATE T SET ID = 2");
+        commit();
+        fireCount += assertFiringOrder("UPDATE", 1);
+        info.clear();
+        
+        s.execute("DELETE FROM T");
+        commit();
+        fireCount += assertFiringOrder("DELETE", 1);
+        info.clear();
+           
+        assertEquals("All triggers fired?", triggerCount, fireCount);
+
+        // and now with multiple rows
+        s.execute("INSERT INTO T VALUES 1,2,3");
+        commit();
+        fireCount = assertFiringOrder("INSERT", 3);
+        info.clear();
+        
+        s.execute("UPDATE T SET ID = 2");
+        commit();
+        fireCount += assertFiringOrder("UPDATE", 3);
+        info.clear();
+        
+        s.execute("DELETE FROM T");
+        commit();
+        fireCount += assertFiringOrder("DELETE", 3);
+        info.clear();
+        
+        // cannot assume row triggers were created so can only
+        // say that at least all the triggers were fired.
+        assertTrue("Sufficient triggers fired?", fireCount >= triggerCount);
+        
+        
+        // and then with no rows
+        assertTableRowCount("T", 0);
+        s.execute("INSERT INTO T SELECT ID FROM T");
+        commit();
+        fireCount = assertFiringOrder("INSERT", 0);
+        info.clear();
+        
+        s.execute("UPDATE T SET ID = 2");
+        commit();
+        fireCount += assertFiringOrder("UPDATE", 0);
+        info.clear();
+        
+        s.execute("DELETE FROM T");
+        commit();
+        fireCount += assertFiringOrder("DELETE", 0);
+        info.clear();
+        
+        // can't assert anthing about fireCount, could be all row triggers.
+            
+        s.close();
+
+    }
+    
+    private int[] createRandomTriggers() throws SQLException
+    {
+        Statement s = createStatement();
+        
+        int beforeCount = 0;
+        int afterCount = 0;
         
         Random r = new Random();
         // Randomly generate a number of triggers.
@@ -127,10 +208,13 @@ public class TriggerTest extends BaseJDBCTestCase {
             sb.append(" ");
             
             String before;
-            if (r.nextInt(2) == 0)
+            if (r.nextInt(2) == 0) {
                 before = "NO CASCADE BEFORE";
-            else
+                beforeCount++;
+            } else {
                 before = "AFTER";
+                afterCount++;
+            }
             sb.append(before);
             sb.append(" ");
             
@@ -167,69 +251,57 @@ public class TriggerTest extends BaseJDBCTestCase {
             s.execute(sb.toString());
         }
         commit();
-        
-        TRIGGER_INFO.set(new ArrayList());
-        
-        // Check ordering with a single row.
-        s.execute("INSERT INTO T VALUES 1");
-        commit();
-        int fireCount = assertFiringOrder("INSERT", 1);
-        ((List) TRIGGER_INFO.get()).clear();
-        
-        s.execute("UPDATE T SET ID = 2");
-        commit();
-        fireCount += assertFiringOrder("UPDATE", 1);
-        ((List) TRIGGER_INFO.get()).clear();
-        
-        s.execute("DELETE FROM T");
-        commit();
-        fireCount += assertFiringOrder("DELETE", 1);
-        ((List) TRIGGER_INFO.get()).clear();
-           
-        assertEquals("All triggers fired?", triggerCount, fireCount);
-
-        // and now with multiple rows
-        s.execute("INSERT INTO T VALUES 1,2,3");
-        commit();
-        fireCount = assertFiringOrder("INSERT", 3);
-        ((List) TRIGGER_INFO.get()).clear();
-        
-        s.execute("UPDATE T SET ID = 2");
-        commit();
-        fireCount += assertFiringOrder("UPDATE", 3);
-        ((List) TRIGGER_INFO.get()).clear();
-        
-        s.execute("DELETE FROM T");
-        commit();
-        fireCount += assertFiringOrder("DELETE", 3);
-        ((List) TRIGGER_INFO.get()).clear();
-        
-        // cannot assume row triggers were created so can only
-        // say that at least all the triggers were fired.
-        assertTrue("Sufficient triggers fired?", fireCount >= triggerCount);
-        
-        
-        // and then with no rows
-        assertTableRowCount("T", 0);
-        s.execute("INSERT INTO T SELECT ID FROM T");
-        commit();
-        fireCount = assertFiringOrder("INSERT", 0);
-        ((List) TRIGGER_INFO.get()).clear();
-        
-        s.execute("UPDATE T SET ID = 2");
-        commit();
-        fireCount += assertFiringOrder("UPDATE", 0);
-        ((List) TRIGGER_INFO.get()).clear();
-        
-        s.execute("DELETE FROM T");
-        commit();
-        fireCount += assertFiringOrder("DELETE", 0);
-        ((List) TRIGGER_INFO.get()).clear();
-        
-        // can't assert anthing about fireCount, could be all row triggers.
-            
         s.close();
+        return new int[] {triggerCount, beforeCount, afterCount};
+    }
+    
+    
+    /**
+     * Test that a order of firing is before triggers,
+     * constraint checking and after triggers.
+     * @throws SQLException 
+     *
+     */
+    public void testFiringConstraintOrder() throws SQLException
+    {
+        Statement s = createStatement();
+        s.execute("CREATE TABLE T (I INT PRIMARY KEY," +
+                "U INT NOT NULL UNIQUE, C INT CHECK (C < 20))");
+        s.execute("INSERT INTO T VALUES(1,5,10)");
+        s.execute("INSERT INTO T VALUES(11,19,3)");
+        commit();
+        
+        int beforeCount = createRandomTriggers()[1];
+        
+        List info = new ArrayList();
+        TRIGGER_INFO.set(info);
+        
+        // constraint violation on primary key
+        assertStatementError("23505", s, "INSERT INTO T VALUES (1,6,10)");
+        assertFiringOrder("INSERT", 1, true);        
+        info.clear();
+        assertStatementError("23505", s, "UPDATE T SET I=1 WHERE I = 11");
+        assertFiringOrder("UPDATE", 1, true);        
+        info.clear();
+        
+        // constraint violation on unique key
+        assertStatementError("23505", s, "INSERT INTO T VALUES (2,5,10)");
+        assertFiringOrder("INSERT", 1, true);        
+        info.clear();
+        assertStatementError("23505", s, "UPDATE T SET U=5 WHERE I = 11");
+        assertFiringOrder("UPDATE", 1, true);        
+        info.clear();
+        
+        // check constraint
+        assertStatementError("23513", s, "INSERT INTO T VALUES (2,6,22)");
+        assertFiringOrder("INSERT", 1, true);        
+        info.clear();
+        assertStatementError("23513", s, "UPDATE T SET C=C+40 WHERE I = 11");
+        assertFiringOrder("UPDATE", 1, true);        
+        info.clear();
 
+        s.close();
+        commit();
     }
     
     /**
@@ -240,6 +312,11 @@ public class TriggerTest extends BaseJDBCTestCase {
      * @return the number of triggers checked
      */
     private int assertFiringOrder(String iud, int modifiedRowCount)
+    {
+        return assertFiringOrder(iud, modifiedRowCount, false);
+    }
+    private int assertFiringOrder(String iud, int modifiedRowCount,
+            boolean noAfter)
     {
         List fires = (List) TRIGGER_INFO.get();
         
@@ -263,6 +340,8 @@ public class TriggerTest extends BaseJDBCTestCase {
             if (modifiedRowCount == 0)
                assertEquals("Row trigger firing on no rows",
                        "STATEMENT", row);
+            if (noAfter)
+                assertFalse("No AFTER triggers", "AFTER".equals(before));
             
             // First trigger.
             if (lastOrder == -1)
@@ -302,6 +381,7 @@ public class TriggerTest extends BaseJDBCTestCase {
     
     /**
      * Record the trigger information in the thread local.
+     * Called as a SQL procedure.
      * @param info trigger information
       */
     public static void logTriggerInfo(String info)

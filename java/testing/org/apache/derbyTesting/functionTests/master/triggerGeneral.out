@@ -213,41 +213,6 @@ drop schema test restrict;
 0 rows inserted/updated/deleted
 ij> create table t (x int, y int, c char(1));
 0 rows inserted/updated/deleted
-ij> --
--- Test trigger firing order
---
-create trigger t1 after insert on t for each row
-	values app.triggerFiresMin('3rd');
-0 rows inserted/updated/deleted
-ij> create trigger t2 after insert on t for each statement
-	values app.triggerFiresMin('1st');
-0 rows inserted/updated/deleted
-ij> create trigger t3 no cascade before insert on t for each row
-	values app.triggerFiresMin('4th');
-0 rows inserted/updated/deleted
-ij> create trigger t4 after insert on t for each row
-	values app.triggerFiresMin('2nd');
-0 rows inserted/updated/deleted
-ij> create trigger t5 no cascade before insert on t for each statement
-	values app.triggerFiresMin('5th');
-0 rows inserted/updated/deleted
-ij> insert into t values (1,1,'1');
-TRIGGER: <4th>
-TRIGGER: <5th>
-TRIGGER: <3rd>
-TRIGGER: <1st>
-TRIGGER: <2nd>
-1 row inserted/updated/deleted
-ij> drop trigger t1;
-0 rows inserted/updated/deleted
-ij> drop trigger t2;
-0 rows inserted/updated/deleted
-ij> drop trigger t3;
-0 rows inserted/updated/deleted
-ij> drop trigger t4;
-0 rows inserted/updated/deleted
-ij> drop trigger t5;
-0 rows inserted/updated/deleted
 ij> -- try multiple values, make sure result sets don't get screwed up
 -- this time we'll print out result sets
 create trigger t1 after insert on t for each row
@@ -385,7 +350,7 @@ AFTER RESULT SET
 	{4,4,4}
 3 rows inserted/updated/deleted
 ij> delete from t;
-4 rows inserted/updated/deleted
+3 rows inserted/updated/deleted
 ij> drop trigger t1;
 0 rows inserted/updated/deleted
 ij> drop trigger t2;

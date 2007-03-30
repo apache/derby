@@ -166,26 +166,6 @@ drop schema test restrict;
 
 create table t (x int, y int, c char(1));
 
---
--- Test trigger firing order
---
-create trigger t1 after insert on t for each row
-	values app.triggerFiresMin('3rd');
-create trigger t2 after insert on t for each statement
-	values app.triggerFiresMin('1st');
-create trigger t3 no cascade before insert on t for each row
-	values app.triggerFiresMin('4th');
-create trigger t4 after insert on t for each row
-	values app.triggerFiresMin('2nd');
-create trigger t5 no cascade before insert on t for each statement
-	values app.triggerFiresMin('5th');
-insert into t values (1,1,'1');
-drop trigger t1;
-drop trigger t2;
-drop trigger t3;
-drop trigger t4;
-drop trigger t5;
-
 -- try multiple values, make sure result sets don't get screwed up
 -- this time we'll print out result sets
 create trigger t1 after insert on t for each row
