@@ -155,9 +155,13 @@ public final class SecurityManagerSetup extends TestSetup {
 		if (sm != null) {
 			// SecurityManager installed, see if it has the same settings.
 
-			if (set.getProperty("java.security.policy").equals(
-					BaseTestCase.getSystemProperty("java.security.policy")))
-					return;
+			String  newPolicyProperty = set.getProperty("java.security.policy" );
+			if ( newPolicyProperty == null ) { newPolicyProperty = ""; } 
+                                                   
+			String  oldPolicyProperty = BaseTestCase.getSystemProperty("java.security.policy");
+			if ( oldPolicyProperty == null ) { oldPolicyProperty = ""; }
+
+			if ( newPolicyProperty.equals( oldPolicyProperty ) ) { return; }
 			
 			// Uninstall the current manager.
 			uninstallSecurityManager();
