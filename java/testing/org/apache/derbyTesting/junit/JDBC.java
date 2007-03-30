@@ -593,6 +593,7 @@ public class JDBC {
      * column equal to the passed in String value. The value can
      * be null to indicate SQL NULL. The comparision is make
      * using assertFullResultSet in trimmed string mode.
+     *  As a side effect, this method closes the ResultSet.
      */
     public static void assertSingleValueResultSet(ResultSet rs,
             String value) throws SQLException
@@ -608,6 +609,7 @@ public class JDBC {
      * <code>
      * assertFullResultSet(rs, expectedRows, true)
      * </code>
+     *  As a side effect, this method closes the ResultSet.
      */
     public static void assertFullResultSet(ResultSet rs,
             String [][] expectedRows)
@@ -621,7 +623,7 @@ public class JDBC {
      * that the rows and columns in the result set match the number,
      * order, and values of those in the array.  Each row in
      * the array is compared with the corresponding row in the
-     * result set.
+     * result set. As a side effect, this method closes the ResultSet.
      *
      * Will throw an assertion failure if any of the following
      * is true:
@@ -674,6 +676,8 @@ public class JDBC {
                     expectedRows[rows], allAsTrimmedStrings);
             }
         }
+
+        rs.close();
 
         // And finally, assert the row count.
         Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);
