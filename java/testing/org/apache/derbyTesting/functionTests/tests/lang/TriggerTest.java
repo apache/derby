@@ -269,6 +269,8 @@ public class TriggerTest extends BaseJDBCTestCase {
                 "U INT NOT NULL UNIQUE, C INT CHECK (C < 20))");
         s.execute("INSERT INTO T VALUES(1,5,10)");
         s.execute("INSERT INTO T VALUES(11,19,3)");
+        s.execute("CREATE TABLE TCHILD (I INT, FOREIGN KEY (I) REFERENCES T)");
+        s.execute("INSERT INTO TCHILD VALUES 1");
         commit();
         
         int beforeCount = createRandomTriggers()[1];
@@ -283,6 +285,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         assertStatementError("23505", s, "UPDATE T SET I=1 WHERE I = 11");
         assertFiringOrder("UPDATE", 1, true);        
         info.clear();
+        rollback();
         
         // constraint violation on unique key
         assertStatementError("23505", s, "INSERT INTO T VALUES (2,5,10)");
@@ -291,6 +294,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         assertStatementError("23505", s, "UPDATE T SET U=5 WHERE I = 11");
         assertFiringOrder("UPDATE", 1, true);        
         info.clear();
+        rollback();
         
         // check constraint
         assertStatementError("23513", s, "INSERT INTO T VALUES (2,6,22)");
@@ -299,7 +303,12 @@ public class TriggerTest extends BaseJDBCTestCase {
         assertStatementError("23513", s, "UPDATE T SET C=C+40 WHERE I = 11");
         assertFiringOrder("UPDATE", 1, true);        
         info.clear();
-
+        rollback();
+        
+        // Foreign key constraint
+        assertStatementError("23503", s, "DELETE FROM T WHERE I = 1");
+        assertFiringOrder("DELETE", 1, true);        
+        
         s.close();
         commit();
     }
