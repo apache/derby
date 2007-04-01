@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.types.CollatorSQLChar
+   Derby - Class org.apache.derby.iapi.types.CollatorSQLVarchar
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -22,17 +22,16 @@
 package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.text.RuleBasedCollator;
 
 /**
- * CollatorSQLChar class differs from SQLChar based on how the 2 classes use 
- * different collations to collate their data. SQLChar uses Derby's default 
- * collation which is UCS_BASIC. Whereas, this class uses the RuleBasedCollator  
- * object that was passed to it in it's constructor and that RuleBasedCollator   
- * object decides the collation.
+ * CollatorSQLVarchar class differs from SQLVarchar based on how the 2 classes  
+ * use different collations to collate their data. SQLVarchar uses Derby's 
+ * default collation which is UCS_BASIC. Whereas, this class uses the 
+ * RuleBasedCollator object that was passed to it in it's constructor and that 
+ * RuleBasedCollator object decides the collation.
  * 
  * In Derby 10.3, this class will be passed a RuleBasedCollator which is based 
  * on the database's territory. In future releases of Derby, this class can be 
@@ -40,9 +39,10 @@ import java.text.RuleBasedCollator;
  * just passing an appropriate RuleBasedCollator object for that kind of 
  * collation.
  */
-public class CollatorSQLChar extends SQLChar implements CollationElementsInterface
+public class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterface
 {
 	WorkHorseForCollatorDatatypes holderForCollationSensitiveInfo;
+
 	/*
 	 * constructors
 	 */
@@ -50,11 +50,11 @@ public class CollatorSQLChar extends SQLChar implements CollationElementsInterfa
 	/**
 		no-arg constructor, required by Formattable.
 	*/
-	public CollatorSQLChar()
+	public CollatorSQLVarchar()
 	{
 	}
 
-	public CollatorSQLChar(String val, RuleBasedCollator collatorForCharacterDatatypes)
+	public CollatorSQLVarchar(String val, RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		super(val);
 		holderForCollationSensitiveInfo = 
@@ -62,7 +62,7 @@ public class CollatorSQLChar extends SQLChar implements CollationElementsInterfa
 	}
 
 	/**
-	 * Set the RuleBasedCollator for this instance of CollatorSQLChar. It will
+	 * Set the RuleBasedCollator for this instance of CollatorSQLVarchar. It will
 	 * be used to do the collation.
 	 */
 	private void setCollator(RuleBasedCollator collatorForCharacterDatatypes)
@@ -94,7 +94,7 @@ public class CollatorSQLChar extends SQLChar implements CollationElementsInterfa
 	{
 		try
 		{
-			return new CollatorSQLChar(getString(), 
+			return new CollatorSQLVarchar(getString(), 
 					holderForCollationSensitiveInfo.getCollatorForCollation());
 		}
 		catch (StandardException se)
@@ -110,7 +110,7 @@ public class CollatorSQLChar extends SQLChar implements CollationElementsInterfa
 	 */
 	public DataValueDescriptor getNewNull()
 	{
-		CollatorSQLChar result = new CollatorSQLChar();
+		CollatorSQLVarchar result = new CollatorSQLVarchar();
 		result.setCollator(
 				holderForCollationSensitiveInfo.getCollatorForCollation());
 		return result;

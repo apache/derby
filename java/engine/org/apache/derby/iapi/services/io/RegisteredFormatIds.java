@@ -527,8 +527,5 @@ String[] TwoByte = {
         /* 463 */   "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
         /* 464 */   "org.apache.derby.iapi.types.SqlXmlUtil",        
 		/* 465 */   "org.apache.derby.impl.store.raw.data.CompressSpacePageOperation",
-		
-	    /// --- For CollatorSQLChar
-		/* 466 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
 };
 }

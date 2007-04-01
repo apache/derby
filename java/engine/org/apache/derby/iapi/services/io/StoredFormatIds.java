@@ -1474,9 +1474,6 @@ public interface StoredFormatIds {
 
         public static final int SQL_INTEGER_ID = 
                 (MIN_ID_2 + 80);
-        
-        static public final int SQL_CHAR_WITH_NON_DEFAULT_COLLATION_ID =
-                (MIN_ID_2 + 466);
 
         public static final int SQL_REAL_ID = 
                 (MIN_ID_2 + 81);
@@ -1866,7 +1863,7 @@ public interface StoredFormatIds {
          * Make sure this is updated when a new module is added
          */
         public static final int MAX_ID_2 =
-                (MIN_ID_2 + 466);
+                (MIN_ID_2 + 465);
 
         // DO NOT USE 4 BYTE IDS ANYMORE
         static public final int MAX_ID_4 =
