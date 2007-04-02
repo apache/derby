@@ -98,7 +98,27 @@ abstract class TableOperatorNode extends FromTable
 		if (leftResultSet instanceof FromTable)
 		{
 			if (leftOptimizer != null)
+			{
+				/* We know leftOptimizer's list of Optimizables consists of
+				 * exactly one Optimizable, and we know that the Optimizable
+				 * is actually leftResultSet (see optimizeSource() of this
+				 * class). That said, the following call to modifyAccessPaths()
+				 * will effectively replace leftResultSet as it exists in
+				 * leftOptimizer's list with a "modified" node that *may* be
+				 * different from the original leftResultSet--for example, it
+				 * could be a new DISTINCT node whose child is the original
+				 * leftResultSet.  So after we've modified the node's access
+				 * path(s) we have to explicitly set this.leftResulSet to
+				 * point to the modified node. Otherwise leftResultSet would
+				 * continue to point to the node as it existed *before* it was
+				 * modified, and that could lead to incorrect behavior for
+				 * certain queries.  DERBY-1852.
+				 */
 				leftOptimizer.modifyAccessPaths();
+				leftResultSet = (ResultSetNode)
+					((OptimizerImpl)leftOptimizer)
+						.optimizableList.getOptimizable(0);
+			}
 			else
 			{
 				leftResultSet = 
@@ -115,7 +135,17 @@ abstract class TableOperatorNode extends FromTable
 		if (rightResultSet instanceof FromTable)
 		{
 			if (rightOptimizer != null)
+			{
+				/* For the same reasons outlined above we need to make sure
+				 * we set rightResultSet to point to the *modified* right result
+				 * set node, which sits at position "0" in rightOptimizer's
+				 * list.
+				 */
 				rightOptimizer.modifyAccessPaths();
+				rightResultSet = (ResultSetNode)
+					((OptimizerImpl)rightOptimizer)
+						.optimizableList.getOptimizable(0);
+			}
 			else
 			{
 				rightResultSet = 
@@ -693,7 +723,27 @@ abstract class TableOperatorNode extends FromTable
 		if (!leftModifyAccessPathsDone)
 		{
 			if (leftOptimizer != null)
+			{
+				/* We know leftOptimizer's list of Optimizables consists of
+				 * exactly one Optimizable, and we know that the Optimizable
+				 * is actually leftResultSet (see optimizeSource() of this
+				 * class). That said, the following call to modifyAccessPaths()
+				 * will effectively replace leftResultSet as it exists in
+				 * leftOptimizer's list with a "modified" node that *may* be
+				 * different from the original leftResultSet--for example, it
+				 * could be a new DISTINCT node whose child is the original
+				 * leftResultSet.  So after we've modified the node's access
+				 * path(s) we have to explicitly set this.leftResulSet to
+				 * point to the modified node. Otherwise leftResultSet would
+				 * continue to point to the node as it existed *before* it was
+				 * modified, and that could lead to incorrect behavior for
+				 * certain queries.  DERBY-1852.
+				 */
 				leftOptimizer.modifyAccessPaths();
+				leftResultSet = (ResultSetNode)
+					((OptimizerImpl)leftOptimizer)
+						.optimizableList.getOptimizable(0);
+			}
 			else
 			{
 				// If this is a SetOperatorNode then we may have pushed
@@ -714,7 +764,17 @@ abstract class TableOperatorNode extends FromTable
 		if (!rightModifyAccessPathsDone)
 		{
 			if (rightOptimizer != null)
+			{
+				/* For the same reasons outlined above we need to make sure
+				 * we set rightResultSet to point to the *modified* right result
+				 * set node, which sits at position "0" in rightOptimizer's
+				 * list.
+				 */
 				rightOptimizer.modifyAccessPaths();
+				rightResultSet = (ResultSetNode)
+					((OptimizerImpl)rightOptimizer)
+						.optimizableList.getOptimizable(0);
+			}
 			else
 			{
 				if (this instanceof SetOperatorNode) {

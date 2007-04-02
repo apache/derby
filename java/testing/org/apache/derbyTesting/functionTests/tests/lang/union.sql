@@ -395,3 +395,79 @@ select vx, vy from v1
 drop view v1;
 drop table o;
 drop table a;
+
+-- DERBY-1852: Incorrect results when a UNION U1 (with no "ALL") appears
+-- in the FROM list of a SELECT query, AND there are duplicate rows
+-- across the left and/or right result sets of U1, AND U1 is the left or
+-- right child of another set operator.
+
+create table t1 (i int, j int);
+create table t2 (i int, j int);
+insert into t1 values (1, 2), (2, 4), (3, 6), (4, 8), (5, 10);
+insert into t2 values (1, 2), (2, -4), (3, 6), (4, -8), (5, 10);
+insert into t2 values (3, 6), (4, 8), (3, -6), (4, -8);
+
+-- U1 is left child of another UNION; top-level query.
+select * from t1 union select * from t2 union select * from t1;
+
+-- U1 is left child of another UNION; subquery in FROM list.
+select * from
+  (select * from t1 union select * from t2 union select * from t1) x;
+
+-- Same kind of thing, but in the form of a view (which is a
+-- more likely use-ccase).
+create view uv as
+  select * from t1 union select * from t2 union select * from t1;
+select * from uv;
+drop view uv;
+
+-- U1 is left child of a UNION ALL; top-level query.
+select * from t1 union select * from t2 union all select * from t1;
+
+-- U1 is left child of a UNION ALL; subquery in FROM list.
+select * from
+  (select * from t1 union select * from t2 union all select * from t1) x;
+
+-- U1 is left child of an EXCEPT; top-level query.
+select * from t1 union select * from t2 except select * from t1;
+
+-- U1 is left child of an EXCEPT; subquery in FROM list.
+select * from
+  (select * from t1 union select * from t2 except select * from t1) x;
+
+-- U1 is left child of an EXCEPT ALL; top-level query.
+select * from t1 union select * from t2 except all select * from t1;
+
+-- U1 is left child of an EXCEPT ALL; subquery in FROM list.
+select * from
+  (select * from t1 union select * from t2 except all select * from t1) x;
+
+-- U1 is left child of an INTERSECT; top-level query.
+-- Note: intersect has higher precedence than union so we have to use
+-- quotes to force the UNION to be a child of the intersect.
+(select * from t1 union select * from t2) intersect select * from t2;
+
+-- U1 is left child of an INTERSECT; subquery in FROM list.
+create view iv as
+  (select * from t1 union select * from t2) intersect select * from t2;
+select * from iv;
+drop view iv;
+
+-- U1 is left child of an INTERSECT ALL; top-level query.
+(select * from t1 union select * from t2) intersect all select * from t2;
+
+-- U1 is left child of an INTERSECT ALL; subquery in FROM list.
+create view iv as
+  (select * from t1 union select * from t2) intersect all select * from t2;
+select * from iv;
+drop view iv;
+
+-- Just as a sanity check, make sure things work if U1 is a child of
+-- an explicit JoinNode (since JoinNode is an instanceof TableOperatorNode
+-- and TableOperatorNode is where the bug for DERBY-1852 was fixed).
+select * from
+  (select * from t1 union select * from t2) x2 left join t2 on x2.i = t2.i;
+
+-- cleanup.
+drop table t1;
+drop table t2;

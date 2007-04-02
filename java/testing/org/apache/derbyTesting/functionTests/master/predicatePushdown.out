@@ -517,12 +517,12 @@ Rows returned = 9
 Left result set:
 	Sort ResultSet:
 	Number of opens = 1
-	Rows input = 20
+	Rows input = 12
 	Rows returned = 7
 	Eliminate duplicates = true
 	In sorted order = false
 	Sort information: 
-		Number of rows input=20
+		Number of rows input=12
 		Number of rows output=7
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
@@ -531,34 +531,106 @@ Left result set:
 	Source result set:
 		Union ResultSet:
 		Number of opens = 1
-		Rows seen from the left = 15
+		Rows seen from the left = 7
 		Rows seen from the right = 5
-		Rows returned = 20
+		Rows returned = 12
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Union ResultSet:
+			Sort ResultSet:
 			Number of opens = 1
-			Rows seen from the left = 10
-			Rows seen from the right = 5
-			Rows returned = 15
+			Rows input = 12
+			Rows returned = 7
+			Eliminate duplicates = true
+			In sorted order = false
+			Sort information: 
+				Number of rows input=12
+				Number of rows output=7
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			Left result set:
+			Source result set:
 				Union ResultSet:
 				Number of opens = 1
-				Rows seen from the left = 5
+				Rows seen from the left = 7
 				Rows seen from the right = 5
-				Rows returned = 10
+				Rows returned = 12
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
+					Sort ResultSet:
+					Number of opens = 1
+					Rows input = 10
+					Rows returned = 7
+					Eliminate duplicates = true
+					In sorted order = false
+					Sort information: 
+						Number of rows input=10
+						Number of rows output=7
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+					Source result set:
+						Union ResultSet:
+						Number of opens = 1
+						Rows seen from the left = 5
+						Rows seen from the right = 5
+						Rows returned = 10
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+						Left result set:
+							Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 5
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of pages visited=1
+								Number of rows qualified=5
+								Number of rows visited=5
+								Scan type=heap
+								start position: 
+null								stop position: 
+null								qualifiers:
+None
+						Right result set:
+							Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 5
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of pages visited=1
+								Number of rows qualified=5
+								Number of rows visited=5
+								Scan type=heap
+								start position: 
+null								stop position: 
+null								qualifiers:
+None
+				Right result set:
 					Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 1
 					Rows seen = 5
@@ -579,50 +651,6 @@ Left result set:
 						start position: 
 null						stop position: 
 null						qualifiers:
-None
-				Right result set:
-					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 1
-					Rows seen = 5
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of pages visited=1
-						Number of rows qualified=5
-						Number of rows visited=5
-						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
-			Right result set:
-				Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 5
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of pages visited=1
-					Number of rows qualified=5
-					Number of rows visited=5
-					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
 None
 		Right result set:
 			Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
@@ -647,7 +675,7 @@ null				stop position:
 null				qualifiers:
 None
 Right result set:
-	Hash Table ResultSet (16):
+	Hash Table ResultSet (19):
 	Number of opens = 7
 	Hash table size = 19
 	Hash key is column number 0
@@ -667,12 +695,12 @@ Negate comparison result: false
 	Source result set:
 		Sort ResultSet:
 		Number of opens = 1
-		Rows input = 43
+		Rows input = 33
 		Rows returned = 21
 		Eliminate duplicates = true
 		In sorted order = false
 		Sort information: 
-			Number of rows input=43
+			Number of rows input=33
 			Number of rows output=21
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
@@ -681,66 +709,80 @@ Negate comparison result: false
 		Source result set:
 			Union ResultSet:
 			Number of opens = 1
-			Rows seen from the left = 31
+			Rows seen from the left = 21
 			Rows seen from the right = 12
-			Rows returned = 43
+			Rows returned = 33
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Left result set:
-				Union ResultSet:
+				Sort ResultSet:
 				Number of opens = 1
-				Rows seen from the left = 19
-				Rows seen from the right = 12
-				Rows returned = 31
+				Rows input = 31
+				Rows returned = 21
+				Eliminate duplicates = true
+				In sorted order = false
+				Sort information: 
+					Number of rows input=31
+					Number of rows output=21
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				Left result set:
-					Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+				Source result set:
+					Union ResultSet:
 					Number of opens = 1
-					Rows seen = 19
-					Rows filtered = 0
-					Fetch Size = 1
+					Rows seen from the left = 19
+					Rows seen from the right = 12
+					Rows returned = 31
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of pages visited=1
-						Number of rows qualified=19
-						Number of rows visited=19
-						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
+					Left result set:
+						Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+						Number of opens = 1
+						Rows seen = 19
+						Rows filtered = 0
+						Fetch Size = 1
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							next time in milliseconds/row = 0
+						scan information: 
+							Bit set of columns fetched=All
+							Number of columns fetched=2
+							Number of pages visited=1
+							Number of rows qualified=19
+							Number of rows visited=19
+							Scan type=heap
+							start position: 
+null							stop position: 
+null							qualifiers:
 None
-				Right result set:
-					Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 1
-					Rows seen = 12
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of pages visited=1
-						Number of rows qualified=12
-						Number of rows visited=12
-						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
+					Right result set:
+						Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
+						Number of opens = 1
+						Rows seen = 12
+						Rows filtered = 0
+						Fetch Size = 1
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							next time in milliseconds/row = 0
+						scan information: 
+							Bit set of columns fetched=All
+							Number of columns fetched=2
+							Number of pages visited=1
+							Number of rows qualified=12
+							Number of rows visited=12
+							Scan type=heap
+							start position: 
+null							stop position: 
+null							qualifiers:
 None
 			Right result set:
 				Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
@@ -4803,12 +4845,12 @@ Rows returned = 9
 Left result set:
 	Sort ResultSet:
 	Number of opens = 1
-	Rows input = 20
+	Rows input = 12
 	Rows returned = 7
 	Eliminate duplicates = true
 	In sorted order = false
 	Sort information: 
-		Number of rows input=20
+		Number of rows input=12
 		Number of rows output=7
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
@@ -4817,34 +4859,106 @@ Left result set:
 	Source result set:
 		Union ResultSet:
 		Number of opens = 1
-		Rows seen from the left = 15
+		Rows seen from the left = 7
 		Rows seen from the right = 5
-		Rows returned = 20
+		Rows returned = 12
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Union ResultSet:
+			Sort ResultSet:
 			Number of opens = 1
-			Rows seen from the left = 10
-			Rows seen from the right = 5
-			Rows returned = 15
+			Rows input = 12
+			Rows returned = 7
+			Eliminate duplicates = true
+			In sorted order = false
+			Sort information: 
+				Number of rows input=12
+				Number of rows output=7
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			Left result set:
+			Source result set:
 				Union ResultSet:
 				Number of opens = 1
-				Rows seen from the left = 5
+				Rows seen from the left = 7
 				Rows seen from the right = 5
-				Rows returned = 10
+				Rows returned = 12
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
+					Sort ResultSet:
+					Number of opens = 1
+					Rows input = 10
+					Rows returned = 7
+					Eliminate duplicates = true
+					In sorted order = false
+					Sort information: 
+						Number of rows input=10
+						Number of rows output=7
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+					Source result set:
+						Union ResultSet:
+						Number of opens = 1
+						Rows seen from the left = 5
+						Rows seen from the right = 5
+						Rows returned = 10
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+						Left result set:
+							Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 5
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of pages visited=1
+								Number of rows qualified=5
+								Number of rows visited=5
+								Scan type=heap
+								start position: 
+null								stop position: 
+null								qualifiers:
+None
+						Right result set:
+							Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 5
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of pages visited=1
+								Number of rows qualified=5
+								Number of rows visited=5
+								Scan type=heap
+								start position: 
+null								stop position: 
+null								qualifiers:
+None
+				Right result set:
 					Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 1
 					Rows seen = 5
@@ -4865,50 +4979,6 @@ Left result set:
 						start position: 
 null						stop position: 
 null						qualifiers:
-None
-				Right result set:
-					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 1
-					Rows seen = 5
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of pages visited=1
-						Number of rows qualified=5
-						Number of rows visited=5
-						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
-			Right result set:
-				Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 5
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of pages visited=1
-					Number of rows qualified=5
-					Number of rows visited=5
-					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
 None
 		Right result set:
 			Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
@@ -4957,86 +5027,100 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Union ResultSet:
+			Sort ResultSet:
 			Number of opens = 7
-			Rows seen from the left = 6
-			Rows seen from the right = 3
+			Rows input = 9
 			Rows returned = 9
+			Eliminate duplicates = true
+			In sorted order = false
+			Sort information: 
+				Number of rows input=0
+				Number of rows output=0
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			Left result set:
-				Index Row to Base Row ResultSet for T3:
+			Source result set:
+				Union ResultSet:
 				Number of opens = 7
-				Rows seen = 6
-				Columns accessed from heap = {1}
+				Rows seen from the left = 6
+				Rows seen from the right = 3
+				Rows returned = 9
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-					Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
+				Left result set:
+					Index Row to Base Row ResultSet for T3:
 					Number of opens = 7
 					Rows seen = 6
-					Rows filtered = 0
-					Fetch Size = 1
+					Columns accessed from heap = {1}
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+						Index Scan ResultSet for T3 using index T3_IX1 at read committed isolation level using share row locking chosen by the optimizer
+						Number of opens = 7
+						Rows seen = 6
+						Rows filtered = 0
+						Fetch Size = 1
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							next time in milliseconds/row = 0
+						scan information: 
+							Bit set of columns fetched=All
+							Number of columns fetched=2
+							Number of deleted rows visited=0
+							Number of pages visited=3
+							Number of rows qualified=0
+							Number of rows visited=1
+							Scan type=btree
+							Tree height=3
+							start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+							stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+							qualifiers:
 None
-			Right result set:
-				Index Row to Base Row ResultSet for T4:
-				Number of opens = 7
-				Rows seen = 3
-				Columns accessed from heap = {1}
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
+				Right result set:
+					Index Row to Base Row ResultSet for T4:
 					Number of opens = 7
 					Rows seen = 3
-					Rows filtered = 0
-					Fetch Size = 1
+					Columns accessed from heap = {1}
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of deleted rows visited=0
-						Number of pages visited=3
-						Number of rows qualified=0
-						Number of rows visited=1
-						Scan type=btree
-						Tree height=3
-						start position: 
+						Index Scan ResultSet for T4 using index T4_IX1 at read committed isolation level using share row locking chosen by the optimizer
+						Number of opens = 7
+						Rows seen = 3
+						Rows filtered = 0
+						Fetch Size = 1
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							next time in milliseconds/row = 0
+						scan information: 
+							Bit set of columns fetched=All
+							Number of columns fetched=2
+							Number of deleted rows visited=0
+							Number of pages visited=3
+							Number of rows qualified=0
+							Number of rows visited=1
+							Scan type=btree
+							Tree height=3
+							start position: 
 	>= on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						stop position: 
+							stop position: 
 	> on first 1 column(s).
 	Ordered null semantics on the following columns: 
-						qualifiers:
+							qualifiers:
 None
 		Right result set:
 			Index Row to Base Row ResultSet for T4:
@@ -5120,7 +5204,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (9):
+Project-Restrict ResultSet (11):
 Number of opens = 1
 Rows seen = 7
 Rows filtered = 0
@@ -5135,12 +5219,12 @@ projection = true
 Source result set:
 	Sort ResultSet:
 	Number of opens = 1
-	Rows input = 20
+	Rows input = 12
 	Rows returned = 7
 	Eliminate duplicates = true
 	In sorted order = false
 	Sort information: 
-		Number of rows input=20
+		Number of rows input=12
 		Number of rows output=7
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
@@ -5149,34 +5233,114 @@ Source result set:
 	Source result set:
 		Union ResultSet:
 		Number of opens = 1
-		Rows seen from the left = 15
+		Rows seen from the left = 7
 		Rows seen from the right = 5
-		Rows returned = 20
+		Rows returned = 12
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Union ResultSet:
+			Sort ResultSet:
 			Number of opens = 1
-			Rows seen from the left = 10
-			Rows seen from the right = 5
-			Rows returned = 15
+			Rows input = 12
+			Rows returned = 7
+			Eliminate duplicates = true
+			In sorted order = false
+			Sort information: 
+				Number of rows input=12
+				Number of rows output=7
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			Left result set:
+			Source result set:
 				Union ResultSet:
 				Number of opens = 1
-				Rows seen from the left = 5
+				Rows seen from the left = 7
 				Rows seen from the right = 5
-				Rows returned = 10
+				Rows returned = 12
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
+					Sort ResultSet:
+					Number of opens = 1
+					Rows input = 10
+					Rows returned = 7
+					Eliminate duplicates = true
+					In sorted order = false
+					Sort information: 
+						Number of rows input=10
+						Number of rows output=7
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+					Source result set:
+						Union ResultSet:
+						Number of opens = 1
+						Rows seen from the left = 5
+						Rows seen from the right = 5
+						Rows returned = 10
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+						Left result set:
+							Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 5
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of pages visited=1
+								Number of rows qualified=5
+								Number of rows visited=5
+								Scan type=heap
+								start position: 
+null								stop position: 
+null								qualifiers:
+Column[0][0] Id: 0
+Operator: <=
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
+						Right result set:
+							Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+							Number of opens = 1
+							Rows seen = 5
+							Rows filtered = 0
+							Fetch Size = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+								next time in milliseconds/row = 0
+							scan information: 
+								Bit set of columns fetched=All
+								Number of columns fetched=2
+								Number of pages visited=1
+								Number of rows qualified=5
+								Number of rows visited=5
+								Scan type=heap
+								start position: 
+null								stop position: 
+null								qualifiers:
+Column[0][0] Id: 0
+Operator: <=
+Ordered nulls: false
+Unknown return value: true
+Negate comparison result: true
+				Right result set:
 					Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 					Number of opens = 1
 					Rows seen = 5
@@ -5197,58 +5361,6 @@ Source result set:
 						start position: 
 null						stop position: 
 null						qualifiers:
-Column[0][0] Id: 0
-Operator: <=
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-				Right result set:
-					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 1
-					Rows seen = 5
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of pages visited=1
-						Number of rows qualified=5
-						Number of rows visited=5
-						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-Column[0][0] Id: 0
-Operator: <=
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-			Right result set:
-				Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 5
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of pages visited=1
-					Number of rows qualified=5
-					Number of rows visited=5
-					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
 Column[0][0] Id: 0
 Operator: <=
 Ordered nulls: false
@@ -5318,7 +5430,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (12):
+Project-Restrict ResultSet (14):
 Number of opens = 1
 Rows seen = 1
 Rows filtered = 0
@@ -5340,7 +5452,7 @@ Source result set:
 		close time (milliseconds) = 0
 	Index Key Optimization = false
 	Source result set:
-		Project-Restrict ResultSet (11):
+		Project-Restrict ResultSet (13):
 		Number of opens = 1
 		Rows seen = 108
 		Rows filtered = 0
@@ -5353,7 +5465,7 @@ Source result set:
 			restriction time (milliseconds) = 0
 			projection time (milliseconds) = 0
 		Source result set:
-			Project-Restrict ResultSet (10):
+			Project-Restrict ResultSet (12):
 			Number of opens = 1
 			Rows seen = 108
 			Rows filtered = 0
@@ -5368,12 +5480,12 @@ Source result set:
 			Source result set:
 				Sort ResultSet:
 				Number of opens = 1
-				Rows input = 103401
+				Rows input = 48918
 				Rows returned = 108
 				Eliminate duplicates = true
 				In sorted order = false
 				Sort information: 
-					Number of rows input=103401
+					Number of rows input=48918
 					Number of rows output=108
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
@@ -5382,59 +5494,109 @@ Source result set:
 				Source result set:
 					Union ResultSet:
 					Number of opens = 1
-					Rows seen from the left = 54589
+					Rows seen from the left = 106
 					Rows seen from the right = 48812
-					Rows returned = 103401
+					Rows returned = 48918
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 					Left result set:
-						Union ResultSet:
+						Sort ResultSet:
 						Number of opens = 1
-						Rows seen from the left = 10
-						Rows seen from the right = 54579
-						Rows returned = 54589
+						Rows input = 54586
+						Rows returned = 106
+						Eliminate duplicates = true
+						In sorted order = false
+						Sort information: 
+							Number of rows input=54586
+							Number of rows output=106
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
-						Left result set:
+						Source result set:
 							Union ResultSet:
 							Number of opens = 1
-							Rows seen from the left = 5
-							Rows seen from the right = 5
-							Rows returned = 10
+							Rows seen from the left = 7
+							Rows seen from the right = 54579
+							Rows returned = 54586
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
 							Left result set:
-								Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+								Sort ResultSet:
 								Number of opens = 1
-								Rows seen = 5
-								Rows filtered = 0
-								Fetch Size = 1
+								Rows input = 10
+								Rows returned = 7
+								Eliminate duplicates = true
+								In sorted order = false
+								Sort information: 
+									Number of rows input=10
+									Number of rows output=7
 									constructor time (milliseconds) = 0
 									open time (milliseconds) = 0
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
-									next time in milliseconds/row = 0
-								scan information: 
-									Bit set of columns fetched=All
-									Number of columns fetched=2
-									Number of pages visited=1
-									Number of rows qualified=5
-									Number of rows visited=5
-									Scan type=heap
-									start position: 
-null									stop position: 
-null									qualifiers:
+								Source result set:
+									Union ResultSet:
+									Number of opens = 1
+									Rows seen from the left = 5
+									Rows seen from the right = 5
+									Rows returned = 10
+										constructor time (milliseconds) = 0
+										open time (milliseconds) = 0
+										next time (milliseconds) = 0
+										close time (milliseconds) = 0
+									Left result set:
+										Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
+										Number of opens = 1
+										Rows seen = 5
+										Rows filtered = 0
+										Fetch Size = 1
+											constructor time (milliseconds) = 0
+											open time (milliseconds) = 0
+											next time (milliseconds) = 0
+											close time (milliseconds) = 0
+											next time in milliseconds/row = 0
+										scan information: 
+											Bit set of columns fetched=All
+											Number of columns fetched=2
+											Number of pages visited=1
+											Number of rows qualified=5
+											Number of rows visited=5
+											Scan type=heap
+											start position: 
+null											stop position: 
+null											qualifiers:
+None
+									Right result set:
+										Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+										Number of opens = 1
+										Rows seen = 5
+										Rows filtered = 0
+										Fetch Size = 1
+											constructor time (milliseconds) = 0
+											open time (milliseconds) = 0
+											next time (milliseconds) = 0
+											close time (milliseconds) = 0
+											next time in milliseconds/row = 0
+										scan information: 
+											Bit set of columns fetched=All
+											Number of columns fetched=2
+											Number of pages visited=1
+											Number of rows qualified=5
+											Number of rows visited=5
+											Scan type=heap
+											start position: 
+null											stop position: 
+null											qualifiers:
 None
 							Right result set:
-								Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+								Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
 								Number of opens = 1
-								Rows seen = 5
+								Rows seen = 54579
 								Rows filtered = 0
 								Fetch Size = 1
 									constructor time (milliseconds) = 0
@@ -5445,35 +5607,13 @@ None
 								scan information: 
 									Bit set of columns fetched=All
 									Number of columns fetched=2
-									Number of pages visited=1
-									Number of rows qualified=5
-									Number of rows visited=5
+									Number of pages visited=434
+									Number of rows qualified=54579
+									Number of rows visited=54579
 									Scan type=heap
 									start position: 
 null									stop position: 
 null									qualifiers:
-None
-						Right result set:
-							Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
-							Number of opens = 1
-							Rows seen = 54579
-							Rows filtered = 0
-							Fetch Size = 1
-								constructor time (milliseconds) = 0
-								open time (milliseconds) = 0
-								next time (milliseconds) = 0
-								close time (milliseconds) = 0
-								next time in milliseconds/row = 0
-							scan information: 
-								Bit set of columns fetched=All
-								Number of columns fetched=2
-								Number of pages visited=434
-								Number of rows qualified=54579
-								Number of rows visited=54579
-								Scan type=heap
-								start position: 
-null								stop position: 
-null								qualifiers:
 None
 					Right result set:
 						Table Scan ResultSet for T4 at read committed isolation level using share row locking chosen by the optimizer
@@ -5790,53 +5930,57 @@ Left result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Union ResultSet:
+			Sort ResultSet:
 			Number of opens = 1
-			Rows seen from the left = 5
-			Rows seen from the right = 4
+			Rows input = 9
 			Rows returned = 9
+			Eliminate duplicates = true
+			In sorted order = false
+			Sort information: 
+				Number of rows input=9
+				Number of rows output=9
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			Left result set:
-				Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 5
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of pages visited=1
-					Number of rows qualified=5
-					Number of rows visited=5
-					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
-			Right result set:
+			Source result set:
 				Union ResultSet:
 				Number of opens = 1
-				Rows seen from the left = 3
-				Rows seen from the right = 1
-				Rows returned = 4
+				Rows seen from the left = 5
+				Rows seen from the right = 4
+				Rows returned = 9
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
+					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 5
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=5
+						Number of rows visited=5
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+				Right result set:
 					Union ResultSet:
 					Number of opens = 1
-					Rows seen from the left = 2
+					Rows seen from the left = 3
 					Rows seen from the right = 1
-					Rows returned = 3
+					Rows returned = 4
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -5844,21 +5988,39 @@ None
 					Left result set:
 						Union ResultSet:
 						Number of opens = 1
-						Rows seen from the left = 1
+						Rows seen from the left = 2
 						Rows seen from the right = 1
-						Rows returned = 2
+						Rows returned = 3
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 						Left result set:
-							Row ResultSet:
+							Union ResultSet:
 							Number of opens = 1
-							Rows returned = 1
+							Rows seen from the left = 1
+							Rows seen from the right = 1
+							Rows returned = 2
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
+							Left result set:
+								Row ResultSet:
+								Number of opens = 1
+								Rows returned = 1
+									constructor time (milliseconds) = 0
+									open time (milliseconds) = 0
+									next time (milliseconds) = 0
+									close time (milliseconds) = 0
+							Right result set:
+								Row ResultSet:
+								Number of opens = 1
+								Rows returned = 1
+									constructor time (milliseconds) = 0
+									open time (milliseconds) = 0
+									next time (milliseconds) = 0
+									close time (milliseconds) = 0
 						Right result set:
 							Row ResultSet:
 							Number of opens = 1
@@ -5875,14 +6037,6 @@ None
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
-				Right result set:
-					Row ResultSet:
-					Number of opens = 1
-					Rows returned = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
 		Right result set:
 			Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 			Number of opens = 1
@@ -6305,53 +6459,57 @@ Left result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 		Left result set:
-			Union ResultSet:
+			Sort ResultSet:
 			Number of opens = 1
-			Rows seen from the left = 5
-			Rows seen from the right = 4
+			Rows input = 9
 			Rows returned = 9
+			Eliminate duplicates = true
+			In sorted order = false
+			Sort information: 
+				Number of rows input=9
+				Number of rows output=9
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			Left result set:
-				Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
-				Number of opens = 1
-				Rows seen = 5
-				Rows filtered = 0
-				Fetch Size = 1
-					constructor time (milliseconds) = 0
-					open time (milliseconds) = 0
-					next time (milliseconds) = 0
-					close time (milliseconds) = 0
-					next time in milliseconds/row = 0
-				scan information: 
-					Bit set of columns fetched=All
-					Number of columns fetched=2
-					Number of pages visited=1
-					Number of rows qualified=5
-					Number of rows visited=5
-					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
-			Right result set:
+			Source result set:
 				Union ResultSet:
 				Number of opens = 1
-				Rows seen from the left = 3
-				Rows seen from the right = 1
-				Rows returned = 4
+				Rows seen from the left = 5
+				Rows seen from the right = 4
+				Rows returned = 9
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				Left result set:
+					Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
+					Number of opens = 1
+					Rows seen = 5
+					Rows filtered = 0
+					Fetch Size = 1
+						constructor time (milliseconds) = 0
+						open time (milliseconds) = 0
+						next time (milliseconds) = 0
+						close time (milliseconds) = 0
+						next time in milliseconds/row = 0
+					scan information: 
+						Bit set of columns fetched=All
+						Number of columns fetched=2
+						Number of pages visited=1
+						Number of rows qualified=5
+						Number of rows visited=5
+						Scan type=heap
+						start position: 
+null						stop position: 
+null						qualifiers:
+None
+				Right result set:
 					Union ResultSet:
 					Number of opens = 1
-					Rows seen from the left = 2
+					Rows seen from the left = 3
 					Rows seen from the right = 1
-					Rows returned = 3
+					Rows returned = 4
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -6359,21 +6517,39 @@ None
 					Left result set:
 						Union ResultSet:
 						Number of opens = 1
-						Rows seen from the left = 1
+						Rows seen from the left = 2
 						Rows seen from the right = 1
-						Rows returned = 2
+						Rows returned = 3
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 						Left result set:
-							Row ResultSet:
+							Union ResultSet:
 							Number of opens = 1
-							Rows returned = 1
+							Rows seen from the left = 1
+							Rows seen from the right = 1
+							Rows returned = 2
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
+							Left result set:
+								Row ResultSet:
+								Number of opens = 1
+								Rows returned = 1
+									constructor time (milliseconds) = 0
+									open time (milliseconds) = 0
+									next time (milliseconds) = 0
+									close time (milliseconds) = 0
+							Right result set:
+								Row ResultSet:
+								Number of opens = 1
+								Rows returned = 1
+									constructor time (milliseconds) = 0
+									open time (milliseconds) = 0
+									next time (milliseconds) = 0
+									close time (milliseconds) = 0
 						Right result set:
 							Row ResultSet:
 							Number of opens = 1
@@ -6390,14 +6566,6 @@ None
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
-				Right result set:
-					Row ResultSet:
-					Number of opens = 1
-					Rows returned = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
 		Right result set:
 			Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 			Number of opens = 1
@@ -6421,7 +6589,7 @@ null				stop position:
 null				qualifiers:
 None
 Right result set:
-	Project-Restrict ResultSet (25):
+	Project-Restrict ResultSet (27):
 	Number of opens = 11
 	Rows seen = 1127
 	Rows filtered = 1108
@@ -6436,12 +6604,12 @@ Right result set:
 	Source result set:
 		Sort ResultSet:
 		Number of opens = 11
-		Rows input = 600407
+		Rows input = 1127
 		Rows returned = 1127
 		Eliminate duplicates = true
 		In sorted order = false
 		Sort information: 
-			Number of rows input=54582
+			Number of rows input=102
 			Number of rows output=102
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
@@ -6450,73 +6618,95 @@ Right result set:
 		Source result set:
 			Union ResultSet:
 			Number of opens = 11
-			Rows seen from the left = 600402
+			Rows seen from the left = 1122
 			Rows seen from the right = 5
-			Rows returned = 600407
+			Rows returned = 1127
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Left result set:
-				Union ResultSet:
+				Sort ResultSet:
 				Number of opens = 11
-				Rows seen from the left = 600369
-				Rows seen from the right = 33
-				Rows returned = 600402
+				Rows input = 600402
+				Rows returned = 1122
+				Eliminate duplicates = true
+				In sorted order = false
+				Sort information: 
+					Number of rows input=54582
+					Number of rows output=102
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				Left result set:
-					Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
-					Number of opens = 11
-					Rows seen = 600369
-					Rows filtered = 0
-					Fetch Size = 1
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-						next time in milliseconds/row = 0
-					scan information: 
-						Bit set of columns fetched=All
-						Number of columns fetched=2
-						Number of pages visited=434
-						Number of rows qualified=54579
-						Number of rows visited=54579
-						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
-				Right result set:
+				Source result set:
 					Union ResultSet:
 					Number of opens = 11
-					Rows seen from the left = 22
-					Rows seen from the right = 11
-					Rows returned = 33
+					Rows seen from the left = 600369
+					Rows seen from the right = 33
+					Rows returned = 600402
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 					Left result set:
+						Table Scan ResultSet for T3 at read committed isolation level using share row locking chosen by the optimizer
+						Number of opens = 11
+						Rows seen = 600369
+						Rows filtered = 0
+						Fetch Size = 1
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+							next time in milliseconds/row = 0
+						scan information: 
+							Bit set of columns fetched=All
+							Number of columns fetched=2
+							Number of pages visited=434
+							Number of rows qualified=54579
+							Number of rows visited=54579
+							Scan type=heap
+							start position: 
+null							stop position: 
+null							qualifiers:
+None
+					Right result set:
 						Union ResultSet:
 						Number of opens = 11
-						Rows seen from the left = 11
+						Rows seen from the left = 22
 						Rows seen from the right = 11
-						Rows returned = 22
+						Rows returned = 33
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 						Left result set:
-							Row ResultSet:
+							Union ResultSet:
 							Number of opens = 11
-							Rows returned = 11
+							Rows seen from the left = 11
+							Rows seen from the right = 11
+							Rows returned = 22
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
+							Left result set:
+								Row ResultSet:
+								Number of opens = 11
+								Rows returned = 11
+									constructor time (milliseconds) = 0
+									open time (milliseconds) = 0
+									next time (milliseconds) = 0
+									close time (milliseconds) = 0
+							Right result set:
+								Row ResultSet:
+								Number of opens = 11
+								Rows returned = 11
+									constructor time (milliseconds) = 0
+									open time (milliseconds) = 0
+									next time (milliseconds) = 0
+									close time (milliseconds) = 0
 						Right result set:
 							Row ResultSet:
 							Number of opens = 11
@@ -6525,14 +6715,6 @@ None
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-					Right result set:
-						Row ResultSet:
-						Number of opens = 11
-						Rows returned = 11
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
 			Right result set:
 				Index Row to Base Row ResultSet for T4:
 				Number of opens = 11
@@ -6615,7 +6797,7 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (17):
+Project-Restrict ResultSet (18):
 Number of opens = 1
 Rows seen = 5
 Rows filtered = 0
@@ -6641,12 +6823,12 @@ Source result set:
 	Left result set:
 		Sort ResultSet:
 		Number of opens = 1
-		Rows input = 11
+		Rows input = 9
 		Rows returned = 9
 		Eliminate duplicates = true
 		In sorted order = false
 		Sort information: 
-			Number of rows input=11
+			Number of rows input=9
 			Number of rows output=9
 			constructor time (milliseconds) = 0
 			open time (milliseconds) = 0
@@ -6655,55 +6837,33 @@ Source result set:
 		Source result set:
 			Union ResultSet:
 			Number of opens = 1
-			Rows seen from the left = 6
+			Rows seen from the left = 4
 			Rows seen from the right = 5
-			Rows returned = 11
+			Rows returned = 9
 				constructor time (milliseconds) = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 			Left result set:
-				Union ResultSet:
+				Sort ResultSet:
 				Number of opens = 1
-				Rows seen from the left = 2
-				Rows seen from the right = 4
-				Rows returned = 6
+				Rows input = 6
+				Rows returned = 4
+				Eliminate duplicates = true
+				In sorted order = false
+				Sort information: 
+					Number of rows input=6
+					Number of rows output=4
 					constructor time (milliseconds) = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				Left result set:
+				Source result set:
 					Union ResultSet:
 					Number of opens = 1
-					Rows seen from the left = 1
-					Rows seen from the right = 1
-					Rows returned = 2
-						constructor time (milliseconds) = 0
-						open time (milliseconds) = 0
-						next time (milliseconds) = 0
-						close time (milliseconds) = 0
-					Left result set:
-						Row ResultSet:
-						Number of opens = 1
-						Rows returned = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-					Right result set:
-						Row ResultSet:
-						Number of opens = 1
-						Rows returned = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
-				Right result set:
-					Union ResultSet:
-					Number of opens = 1
-					Rows seen from the left = 3
-					Rows seen from the right = 1
-					Rows returned = 4
+					Rows seen from the left = 2
+					Rows seen from the right = 4
+					Rows returned = 6
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
@@ -6711,9 +6871,35 @@ Source result set:
 					Left result set:
 						Union ResultSet:
 						Number of opens = 1
-						Rows seen from the left = 2
+						Rows seen from the left = 1
 						Rows seen from the right = 1
-						Rows returned = 3
+						Rows returned = 2
+							constructor time (milliseconds) = 0
+							open time (milliseconds) = 0
+							next time (milliseconds) = 0
+							close time (milliseconds) = 0
+						Left result set:
+							Row ResultSet:
+							Number of opens = 1
+							Rows returned = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+						Right result set:
+							Row ResultSet:
+							Number of opens = 1
+							Rows returned = 1
+								constructor time (milliseconds) = 0
+								open time (milliseconds) = 0
+								next time (milliseconds) = 0
+								close time (milliseconds) = 0
+					Right result set:
+						Union ResultSet:
+						Number of opens = 1
+						Rows seen from the left = 3
+						Rows seen from the right = 1
+						Rows returned = 4
 							constructor time (milliseconds) = 0
 							open time (milliseconds) = 0
 							next time (milliseconds) = 0
@@ -6721,21 +6907,39 @@ Source result set:
 						Left result set:
 							Union ResultSet:
 							Number of opens = 1
-							Rows seen from the left = 1
+							Rows seen from the left = 2
 							Rows seen from the right = 1
-							Rows returned = 2
+							Rows returned = 3
 								constructor time (milliseconds) = 0
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
 							Left result set:
-								Row ResultSet:
+								Union ResultSet:
 								Number of opens = 1
-								Rows returned = 1
+								Rows seen from the left = 1
+								Rows seen from the right = 1
+								Rows returned = 2
 									constructor time (milliseconds) = 0
 									open time (milliseconds) = 0
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
+								Left result set:
+									Row ResultSet:
+									Number of opens = 1
+									Rows returned = 1
+										constructor time (milliseconds) = 0
+										open time (milliseconds) = 0
+										next time (milliseconds) = 0
+										close time (milliseconds) = 0
+								Right result set:
+									Row ResultSet:
+									Number of opens = 1
+									Rows returned = 1
+										constructor time (milliseconds) = 0
+										open time (milliseconds) = 0
+										next time (milliseconds) = 0
+										close time (milliseconds) = 0
 							Right result set:
 								Row ResultSet:
 								Number of opens = 1
@@ -6752,14 +6956,6 @@ Source result set:
 								open time (milliseconds) = 0
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
-					Right result set:
-						Row ResultSet:
-						Number of opens = 1
-						Rows returned = 1
-							constructor time (milliseconds) = 0
-							open time (milliseconds) = 0
-							next time (milliseconds) = 0
-							close time (milliseconds) = 0
 			Right result set:
 				Table Scan ResultSet for T1 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 1
