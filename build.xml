@@ -1800,7 +1800,7 @@
 	-->
 	<target name="junit-all-codeline-jars" depends="setsanityname">
 		<property name="derby.jar.base" value="${basedir}/jars/${sanity.name}"/>
-	    <antcall target="junitreport">
+	    <antcall target="junit-all">
 	      <param name="derby.junit.classpath"
 	        value="${derby.jar.base}/derbyTesting.jar:${derby.jar.base}/derbynet.jar:${derby.jar.base}/derbytools.jar:${derby.jar.base}/derbyclient.jar"/>
 	    </antcall>
