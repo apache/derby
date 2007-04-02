@@ -29,7 +29,6 @@ lang/emptyStatistics.sql
 lang/errorCode.sql
 lang/errorStream.java
 lang/fk_nonSPS.sql
-lang/forbitdata.java
 lang/forupdate.sql
 lang/grantRevokeDDL.sql
 lang/grantRevokeDDL2.sql
