@@ -26,11 +26,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import junit.extensions.TestSetup;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -914,4 +914,285 @@ public class ProcedureTest extends BaseJDBCTestCase {
         }
         c.close();
     }
+
+    
+        /**
+         * Test various combinations of getMoreResults
+         * 
+         * @throws SQLException
+         */
+        public void testGetMoreResults() throws SQLException {
+            Connection conn = getConnection();
+
+                Statement s = conn.createStatement();
+                
+
+                s.executeUpdate("create table MRS.FIVERS(i integer)");
+                PreparedStatement ps = conn.prepareStatement("insert into MRS.FIVERS values (?)");
+                for (int i = 1; i <= 20; i++) {
+                        ps.setInt(1, i);
+                        ps.executeUpdate();
+                }
+                ps.close();
+
+                // create a procedure that returns 5 result sets.
+                        
+                s.executeUpdate("create procedure MRS.FIVEJP() parameter style JAVA READS SQL DATA dynamic result sets 5 language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.fivejp'");
+
+
+                CallableStatement cs = conn.prepareCall("CALL MRS.FIVEJP()");
+                ResultSet[] allRS = new ResultSet[5];
+
+                defaultGetMoreResults(cs, allRS);
+                java.util.Arrays.fill(allRS, null);
+                closeCurrentGetMoreResults(cs, allRS);
+                java.util.Arrays.fill(allRS, null);
+                keepCurrentGetMoreResults(cs, allRS);                              
+                java.util.Arrays.fill(allRS, null);
+                mixedGetMoreResults(cs, allRS);
+                java.util.Arrays.fill(allRS, null);
+                checkExecuteClosesResults(cs, allRS);
+                java.util.Arrays.fill(allRS, null);
+                checkCSCloseClosesResults(cs,allRS);
+                java.util.Arrays.fill(allRS, null);
+        }
+
+        
+        /**
+         * Check that CallableStatement.execute() closes results
+         * @param cs
+         * @param allRS
+         * @throws SQLException
+         */
+        private void checkExecuteClosesResults(CallableStatement cs, ResultSet[] allRS) throws SQLException {
+            //Fetching result sets with getMoreResults(Statement.KEEP_CURRENT_RESULT) and checking that cs.execute() closes them");          
+            cs.execute();
+            int pass = 0;
+            do {
+
+                    allRS[pass++] = cs.getResultSet();                
+                    // expect everything to stay open.                        
+
+            } while (cs.getMoreResults(Statement.KEEP_CURRENT_RESULT));
+            //fetched all results
+            // All should still be open.
+            for (int i = 0; i < 5; i++)
+                JDBC.assertDrainResults(allRS[i]);                
+            
+            cs.execute();
+            // all should be closed.
+            for (int i = 0; i < 5; i++)
+                JDBC.assertClosed(allRS[i]);
+        }
+
+        /**
+         * Check that CallableStatement.close() closes results
+         * @param cs
+         * @param allRS
+         * @throws SQLException
+         */
+        private void checkCSCloseClosesResults(CallableStatement cs, ResultSet[] allRS) throws SQLException {
+            cs.execute();
+            int pass = 0;
+            do {
+
+                    allRS[pass++] = cs.getResultSet();                
+                    // expect everything to stay open.                        
+
+            } while (cs.getMoreResults(Statement.KEEP_CURRENT_RESULT));
+            //fetched all results
+            // All should still be open.
+            for (int i = 0; i < 5; i++)
+                JDBC.assertDrainResults(allRS[i]);                
+            
+            cs.close();
+            // all should be closed.
+            for (int i = 0; i < 5; i++)
+                JDBC.assertClosed(allRS[i]);
+        }
+
+        private void mixedGetMoreResults(CallableStatement cs, ResultSet[] allRS) throws SQLException {
+            //Fetching result sets with getMoreResults(<mixture>)"
+            cs.execute();
+
+            //first two with KEEP_CURRENT_RESULT"
+            allRS[0] = cs.getResultSet();
+            boolean moreRS = cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
+            if (!moreRS)
+                    fail("FAIL - no second result set");
+            allRS[1] = cs.getResultSet();                
+            // two open
+            allRS[0].next();
+            assertEquals(2,allRS[0].getInt(1));
+            allRS[1].next();
+            assertEquals(3,allRS[1].getInt(1));
+            
+            //third with CLOSE_CURRENT_RESULT"
+            moreRS = cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
+            if (!moreRS)
+                    fail("FAIL - no third result set");
+            // first and third open
+            allRS[2] = cs.getResultSet();
+            assertEquals(2,allRS[0].getInt(1));
+            JDBC.assertClosed(allRS[1]);
+            allRS[2].next();
+            assertEquals(4,allRS[2].getInt(1));
+
+            
+            //fourth with KEEP_CURRENT_RESULT"
+            moreRS = cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
+            if (!moreRS)
+                    fail("FAIL - no fourth result set");
+            allRS[3] = cs.getResultSet();
+            allRS[3].next();
+            // first, third and fourth open, second closed
+            assertEquals(2,allRS[0].getInt(1));
+            JDBC.assertClosed(allRS[1]);
+            assertEquals(4,allRS[2].getInt(1));
+            assertEquals(5,allRS[3].getInt(1));
+            
+            //fifth with CLOSE_ALL_RESULTS"
+            moreRS = cs.getMoreResults(Statement.CLOSE_ALL_RESULTS);
+            if (!moreRS)
+                   fail("FAIL - no fifth result set");
+            allRS[4] = cs.getResultSet();
+            allRS[4].next();
+            // only fifth open
+            JDBC.assertClosed(allRS[0]);
+            JDBC.assertClosed(allRS[1]);
+            JDBC.assertClosed(allRS[2]);
+            JDBC.assertClosed(allRS[3]);
+            assertEquals(6,allRS[4].getInt(1));
+            
+            //no more results with with KEEP_CURRENT_RESULT"
+            moreRS = cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
+            if (moreRS)
+                    fail("FAIL - too many result sets");
+            // only fifth open
+            JDBC.assertClosed(allRS[0]);
+            JDBC.assertClosed(allRS[1]);
+            JDBC.assertClosed(allRS[2]);
+            JDBC.assertClosed(allRS[3]);
+            assertEquals(6,allRS[4].getInt(1));
+            
+            allRS[4].close();
+        }
+
+        /**
+         * Check getMoreResults(Statement.KEEP_CURRENT_RESULT)  
+         * 
+         * @param cs
+         * @param allRS
+         * @throws SQLException
+         */
+        private void keepCurrentGetMoreResults(CallableStatement cs, ResultSet[] allRS) throws SQLException {
+            cs.execute();
+            allRS[0] = cs.getResultSet();
+            allRS[0].next();
+            assertEquals(2,allRS[0].getInt(1));
+            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
+            
+            allRS[1] = cs.getResultSet();
+            allRS[1].next();
+            assertEquals(3,allRS[1].getInt(1));
+            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
+          
+            allRS[2] = cs.getResultSet();
+            allRS[2].next();
+            assertEquals(4,allRS[2].getInt(1));
+            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
+         
+            
+            allRS[3] = cs.getResultSet();
+            allRS[3].next();
+            assertEquals(5,allRS[3].getInt(1));
+            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
+            
+
+            
+            allRS[4] = cs.getResultSet();
+            allRS[4].next();
+            assertEquals(6,allRS[4].getInt(1));
+            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
+            
+            
+            // resultSets should still be open
+            for (int i = 0; i < 5; i++)
+                JDBC.assertDrainResults(allRS[i]);
+        }
+
+        private void closeCurrentGetMoreResults(CallableStatement cs, ResultSet[] allRS) throws SQLException {
+            cs.execute();
+            allRS[0] = cs.getResultSet();
+            allRS[0].next();
+            assertEquals(2,allRS[0].getInt(1));
+            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
+            
+            allRS[1] = cs.getResultSet();
+            allRS[1].next();
+            assertEquals(3,allRS[1].getInt(1));
+            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
+          
+            allRS[2] = cs.getResultSet();
+            allRS[2].next();
+            assertEquals(4,allRS[2].getInt(1));
+            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
+            
+            allRS[3] = cs.getResultSet();
+            allRS[3].next();
+            assertEquals(5,allRS[3].getInt(1));
+            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
+
+            
+            allRS[4] = cs.getResultSet();
+            allRS[4].next();
+            assertEquals(6,allRS[4].getInt(1));
+            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
+            
+            // verify resultSets are closed
+            for (int i = 0; i < 5; i++)
+                JDBC.assertClosed(allRS[i]);
+        }
+
+        /**
+         * Test default getMoreResults() closes result set.
+         * @param cs
+         * @param allRS
+         * @throws SQLException
+         */
+        private void defaultGetMoreResults(CallableStatement cs, ResultSet[] allRS) throws SQLException {
+            // execute the procedure that returns 5 result sets and then use the various
+            // options of getMoreResults().
+
+            cs.execute();
+            allRS[0] = cs.getResultSet();
+            allRS[0].next();
+            assertEquals(2,allRS[0].getInt(1));
+            cs.getMoreResults();
+            
+            allRS[1] = cs.getResultSet();
+            allRS[1].next();
+            assertEquals(3,allRS[1].getInt(1));
+            cs.getMoreResults();
+            
+            allRS[2] = cs.getResultSet();
+            allRS[2].next();
+            assertEquals(4,allRS[2].getInt(1));
+            cs.getMoreResults();
+            
+            allRS[3] = cs.getResultSet();
+            allRS[3].next();
+            assertEquals(5,allRS[3].getInt(1));
+            cs.getMoreResults();
+            
+            allRS[4] = cs.getResultSet();
+            allRS[4].next();
+            assertEquals(6,allRS[4].getInt(1));
+            cs.getMoreResults();
+            
+            // verify resultSets are closed
+            for (int i = 0; i < 5; i++)
+                JDBC.assertClosed(allRS[i]);
+        }
+
 }
