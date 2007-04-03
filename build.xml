@@ -1675,23 +1675,43 @@
       <fileset dir="${basedir}" includes="junit*/**"/>
     </delete>
   </target>
-
-  <target name="junit-oneclass" depends="junit-init">
+	  <!--
+	  Autoloading tests need to be run in a separate JVM thus
+	  as a separate test. This target runs the test a number of 
+	  times, each with a different setting for jdbc.drivers.
+	  When run with jar files on java SE 6/JDBC 4 the run without
+	  setting jdbc.drivers will test that autoloading from
+	  the manifest file works. The settings with jdbc.drivers
+	  test the auto-loading in non JDBC 4 environments and
+	  that setting jdbc.drivers in JDBC 4 does not cause issues.
+	   -->
+	
+  <target name="junit-core" depends="junit-init">
     <condition property="derby.junit.classpath" value="">
       <not>
         <isset property="derby.junit.classpath"/>
       </not>
     </condition>
   	 <junit printsummary="on"
-           fork="yes" forkmode="once"
+           fork="yes" forkmode="perTest"
            jvm="${derby.junit.jvm}"
            showoutput="yes"
-           dir="junit_${derby.junit.timestamp}/testout"
+           dir="junit_${derby.junit.timestamp}"
   	 	   errorproperty="tests.failed"
   	       failureproperty="tests.failed">
       <formatter type="xml"/>
-      <test name="${derby.junit.testname}" 
-            todir="junit_${derby.junit.timestamp}"/>
+  	 	
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest"/>
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversEmbeddedTest"/>
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversClientTest"/>
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversAllTest"/>
+<test name="org.apache.derbyTesting.functionTests.tests.derbynet._Suite"/>
+<test name="org.apache.derbyTesting.functionTests.tests.tools._Suite"/>
+<test name="org.apache.derbyTesting.functionTests.tests.lang._Suite"/>
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite"/>
+<test name="org.apache.derbyTesting.functionTests.tests.store._Suite"/>
+<test name="org.apache.derbyTesting.functionTests.suites.EncryptionSuite"/>
+
       <classpath>
      	    <pathelement path="${derby.junit.classpath}"/>
       </classpath>
@@ -1699,69 +1719,29 @@
   </target>
  
   <!-- only execute jdbc4 suite if we have a pointer to a 1.6 VM -->
-  <target name="junit-jdbc4" if="jdk16">
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.jvm"
-             value="${jdk16}/bin/java"/>
-      <param name="derby.junit.testname"
-             value="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"/>
-    </antcall>
+  <target name="junit-jdbc4" if="jdk16" depends="junit-init">
+    <condition property="derby.junit.classpath" value="">
+      <not>
+        <isset property="derby.junit.classpath"/>
+      </not>
+    </condition>
+  	 <junit printsummary="on"
+           fork="yes" forkmode="perTest"
+           jvm="${jdk16}/bin/java"
+           showoutput="yes"
+           dir="junit_${derby.junit.timestamp}"
+  	 	   errorproperty="tests.failed"
+  	       failureproperty="tests.failed">
+      <formatter type="xml"/>
+  	 	
+      <test name="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"/>
+        <classpath>
+       	    <pathelement path="${derby.junit.classpath}"/>
+        </classpath>
+      </junit>	
   </target>
 
-  <target name="junit-all" depends="junit-init,junit-jdbc4,junit-autoloadtest">
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-             value="org.apache.derbyTesting.functionTests.tests.derbynet._Suite"/>
-    </antcall>
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-             value="org.apache.derbyTesting.functionTests.tests.tools._Suite"/>
-    </antcall>
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-             value="org.apache.derbyTesting.functionTests.tests.lang._Suite"/>
-    </antcall>
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-             value="org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite"/>
-    </antcall>
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-             value="org.apache.derbyTesting.functionTests.tests.store._Suite"/>
-    </antcall>
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-             value="org.apache.derbyTesting.functionTests.suites.EncryptionSuite"/>
-    </antcall>
-  </target>
-	
-  <!--
-  Autoloading tests need to be run in a separate JVM thus
-  as a separate test. This target runs the test a number of 
-  times, each with a different setting for jdbc.drivers.
-  When run with jar files on java SE 6/JDBC 4 the run without
-  setting jdbc.drivers will test that autoloading from
-  the manifest file works. The settings with jdbc.drivers
-  test the auto-loading in non JDBC 4 environments and
-  that setting jdbc.drivers in JDBC 4 does not cause issues.
-   -->
-  <target name="junit-autoloadtest" depends="junit-init">
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-        value="org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest"/>
-    </antcall>
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-        value="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversEmbeddedTest"/>
-    </antcall>
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-        value="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversClientTest"/>
-    </antcall>
-    <antcall target="junit-oneclass">
-      <param name="derby.junit.testname"
-        value="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversAllTest"/>
-    </antcall>
+  <target name="junit-all" depends="junit-core,junit-jdbc4">
   </target>
  
   <target name="junitreport" depends="junit-sysinfo,junit-all">
