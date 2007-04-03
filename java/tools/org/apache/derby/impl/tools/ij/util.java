@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -219,11 +221,19 @@ public final class util implements java.security.PrivilegedAction {
 	  */
 	static public InputStream getResourceAsStream(String resourceName) 
 	{
-		Class c= util.class;
-		resourceName = qualifyResourceName(resourceName,true);
-		if (resourceName == null) 
+		final Class c = util.class;
+		final String resource = qualifyResourceName(resourceName,true);
+		if (resource == null) 
 			return null;
-		InputStream is = c.getResourceAsStream(resourceName);
+		InputStream is = (InputStream) AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() { 
+                      InputStream locis = 
+                          c.getResourceAsStream(resource);
+                                  return locis;
+            }
+        }
+     );
+
 		if (is != null) 
 			is = new BufferedInputStream(is, utilMain.BUFFEREDFILESIZE);
 		return is;

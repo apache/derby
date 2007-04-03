@@ -37,6 +37,8 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -132,15 +134,25 @@ public class Main {
                     }
                 }
 
-		String outFile = util.getSystemProperty("ij.outfile");
+		final String outFile = util.getSystemProperty("ij.outfile");
 		if (outFile != null && outFile.length()>0) {
 			LocalizedOutput oldOut = out;
-			try {
-				out = langUtil.getNewOutput(new FileOutputStream(outFile));
-			}
-			catch (IOException ioe) {
-				oldOut.println(langUtil.getTextMessage("IJ_IjErroUnabTo",outFile));
-			}
+			FileOutputStream fos = (FileOutputStream) AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					FileOutputStream out = null;
+					try {
+						out = new FileOutputStream(outFile);
+					} catch (FileNotFoundException e) {
+						out = null;
+					}
+					return out;
+				}
+			});
+			out = langUtil.getNewOutput(fos);
+
+			if (out == null)
+			   oldOut.println(langUtil.getTextMessage("IJ_IjErroUnabTo",outFile));
+	
 		}
 
 		// the old property name is deprecated...
@@ -238,4 +250,5 @@ public class Main {
 		// adjust the application in accordance with derby.ui.locale and derby.ui.codeset
 	LocalizedResource.getInstance();	
   }
+  
 }

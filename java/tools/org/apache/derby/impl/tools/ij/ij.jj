@@ -47,6 +47,8 @@ import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.tools.URLCheck;
 
 import java.lang.reflect.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -98,7 +100,8 @@ import java.util.Locale;
  */
 class ij {
 	static final String PROTOCOL_PROPERTY = "ij.protocol";
-    static final String USER_PROPERTY = "ij.user";
+    static final String URLCHECK_PROPERTY = "ij.URLCheck";
+	static final String USER_PROPERTY = "ij.user";
     static final String PASSWORD_PROPERTY = "ij.password";
 	static final String FRAMEWORK_PROPERTY = "framework";
 
@@ -106,6 +109,7 @@ class ij {
 
 	Connection theConnection = null;
 	ConnectionEnv currentConnEnv = null;
+	String urlCheck = null;
 
 	xaAbstractHelper xahelper = null;
 	boolean exit = false;
@@ -138,7 +142,12 @@ class ij {
 
 		// load all protocols specified via properties
 		//
-		Properties p = System.getProperties();
+        Properties p = (Properties) AccessController.doPrivileged(new PrivilegedAction() {
+          	public Object run() {
+              	return System.getProperties();
+            }
+        });
+        urlCheck = p.getProperty(URLCHECK_PROPERTY);
 		protocol = p.getProperty(PROTOCOL_PROPERTY);
 		String framework_property = p.getProperty(FRAMEWORK_PROPERTY);
 		
@@ -1473,7 +1482,7 @@ throws SQLException
                         }
 			// By default perform extra checking on the URL attributes.
 			// This checking does not change the processing.
-                        if (System.getProperty("ij.URLCheck") == null || Boolean.getBoolean("ij.URLCheck")) {
+			if (urlCheck == null || Boolean.valueOf(urlCheck).booleanValue()) {
                           URLCheck aCheck = new URLCheck(sVal);
                         }
 		if (!sVal.startsWith("jdbc:") && (p == null) && (protocol != null)) {

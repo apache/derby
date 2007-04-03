@@ -28,6 +28,8 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -64,8 +66,12 @@ class ConnectionEnv {
 		// only load up ij.connection.* properties if there is
 		// only one ConnectionEnv in the system.
 		if (only) {
-		    Properties p = System.getProperties();
-		    protocol = p.getProperty(ij.PROTOCOL_PROPERTY);
+            Properties p = (Properties) AccessController.doPrivileged(new PrivilegedAction() {
+            	public Object run() {
+                	return System.getProperties();
+            	}
+            });
+            protocol = p.getProperty(ij.PROTOCOL_PROPERTY);
 
 	        String prefix = CONNECTION_PROPERTY + ".";
 		    for (Enumeration e = p.propertyNames(); e.hasMoreElements(); )

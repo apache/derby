@@ -42,6 +42,8 @@ import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.StringReader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.DriverManager;
 import java.sql.Driver;
 import java.sql.Connection;
@@ -248,13 +250,25 @@ public class utilMain implements java.security.PrivilegedAction {
 
       		//check if the property is set to not show select count and set the static variable
       		//accordingly. 
-    		boolean showNoCountForSelect = Boolean.getBoolean("ij.showNoCountForSelect");
+    		//boolean showNoCountForSelect = Boolean.getBoolean("ij.showNoCountForSelect");
+    		String prop = (String) AccessController.doPrivileged(new PrivilegedAction() {
+    					public Object run() {
+    						return System.getProperty("ij.showNoCountForSelect");
+    					}
+    		});
+    		boolean showNoCountForSelect = Boolean.valueOf(prop).booleanValue();
       		JDBCDisplayUtil.showSelectCount = !showNoCountForSelect;
 
       		//check if the property is set to not show initial connections and accordingly set the
       		//static variable.
-    		boolean showNoConnectionsAtStart = Boolean.getBoolean("ij.showNoConnectionsAtStart");
-      		if (!(showNoConnectionsAtStart)) {
+    		prop = (String) AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					return System.getProperty("ij.showNoConnectionsAtStart");
+				}
+         	});
+    		boolean showNoConnectionsAtStart = Boolean.valueOf(prop).booleanValue();
+
+    		if (!(showNoConnectionsAtStart)) {
          		try {
            			ijResult result = ijParser.showConnectionsMethod(true);
  					displayResult(out,result,connEnv[currCE].getConnection());
