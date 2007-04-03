@@ -427,6 +427,22 @@ public class JDBC {
         assertDrainResults(rs, 0);
     }
 	
+    /**
+     * 
+     * @param rs
+     */
+    public static void assertClosed(ResultSet rs)
+    {
+        try { 
+            rs.next();
+            Assert.fail("ResultSet not closed");
+        }catch (SQLException sqle){
+            Assert.assertEquals("XCL16", sqle.getSQLState());
+        }
+        
+        
+    }
+    
 	/**
 	 * Drain a single ResultSet by reading all of its
 	 * rows and columns. Each column is accessed using

@@ -15,7 +15,6 @@ lang/big.sql
 lang/bug5054.java
 lang/forupdate.sql
 lang/holdCursorIJ.sql
-lang/procedure.java
 lang/simpleScroll.sql
 lang/supersimple.sql
 store/holdCursorExternalSortJDBC30.sql

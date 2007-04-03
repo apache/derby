@@ -53,7 +53,6 @@ lang/partdml.sql
 lang/predicatePushdown.sql
 lang/predicatesIntoViews.sql
 lang/primarykey.sql
-lang/procedure.java
 lang/procedureInTrigger.sql
 lang/refActions.sql
 lang/refActions2.sql

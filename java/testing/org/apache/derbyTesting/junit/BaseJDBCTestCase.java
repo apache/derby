@@ -719,6 +719,26 @@ public abstract class BaseJDBCTestCase
         }
     }
 
+
+    /**
+     * Executes the Callable statement that is expected to fail and verifies
+     * that it throws the expected SQL exception.
+     * @param conn The Connection handle
+     * @param sql The SQL to execute
+     * @param expectedSE The expected SQL exception
+     * @throws SQLException
+     */
+    public static void assertCallError(String expectedSE, Connection conn, String callSQL)
+    throws SQLException
+    {
+        try {
+            CallableStatement cs = conn.prepareCall(callSQL);
+            cs.execute();
+            fail("FAIL - SQL expected to throw exception");
+        } catch (SQLException se) {
+            assertSQLState(expectedSE, se.getSQLState(), se);
+        }
+    }
     /**
      * Perform a fetch on the ResultSet with an expected failure
      * 
