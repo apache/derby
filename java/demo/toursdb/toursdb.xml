@@ -26,7 +26,7 @@
   <target name="toursdb" depends="compile,buildschema,loadtables,jarup"/>
 
   <target name="compile">
-    <echo message="Begin building toursdb"/>
+    <echo level=""info" message="Begin building toursdb"/>
     <javac srcdir="..">
       <include name="toursdb/insertMaps.java"/>
     </javac>
@@ -85,7 +85,7 @@
   <target name="jarup"> 
     <zip destfile="toursdb.jar"
          basedir="toursdb"/>
-    <echo message="Finished building toursdb"/>
+    <echo level="info" message="Finished building toursdb"/>
   </target>
 
 </project>

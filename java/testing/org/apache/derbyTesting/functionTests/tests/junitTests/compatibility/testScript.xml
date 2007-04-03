@@ -517,7 +517,7 @@
   -->
   <target name="_startServer">
 <!-- Trace -->
-<echo> svrVM:${svrVM}, outDir:${outDir}, srvClasspath:${srvClasspath}, srvSecurity:${srvSecurity}. </echo>
+<echo level="info"> svrVM:${svrVM}, outDir:${outDir}, srvClasspath:${srvClasspath}, srvSecurity:${srvSecurity}. </echo>
 <!-- -->
     <exec
 	  executable="${svrVM}"
@@ -641,7 +641,7 @@
   <!-- Write the summary file -->
   <target name="_writeSummary">
 
-    <echo file="${summaryFile}" append="true"> 
+    <echo level="info" file="${summaryFile}" append="true"> 
 ${summaryMessage}
 
 </echo>

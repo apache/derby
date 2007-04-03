@@ -168,10 +168,10 @@
   </target>
 
   <target name="noSplit" unless="splitmsgs.available">
-    <echo message=""/>
-    <echo message="***** SplitMessages not available *****"/>
-    <echo message=" ***** Run &quot;all&quot; target first *****"/>
-    <echo message=""/>
+    <echo level="error" message=""/>
+    <echo level="error" message="***** SplitMessages not available *****"/>
+    <echo level="error" message=" ***** Run &quot;all&quot; target first *****"/>
+    <echo level="error" message=""/>
     <fail message="  Exiting ant build..."/>
   </target>
 </project>

@@ -57,7 +57,7 @@
   </target>
 
   <target name="buildschema">
-    <echo message="Begin building toursdb"/>
+    <echo level="info" message="Begin building toursdb"/>
     <java classname="org.apache.derby.tools.ij"
           output="toursdb.out"
           failonerror="true"
@@ -110,7 +110,7 @@
     <zip destfile="${derby.demo.src.dir}/toursdb/toursdb.jar"
          basedir="${derby.demo.src.dir}/toursdb"
          includes="toursdb/**"/>
-    <echo message="Finished building toursdb"/>
+    <echo level="info" message="Finished building toursdb"/>
   </target>
 
   <target name="copyfiles">

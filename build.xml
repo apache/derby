@@ -86,14 +86,14 @@
   </target>
 
   <target name="showenv" depends="init" unless="showenv.done">
-    <echo message=""/>
-    <echo message="Ant environment:"/>
-    <echo message="  Base Directory: ${basedir}"/>
-    <echo message="  Build output: ${out.dir}"/>
-    <echo message="  Compiler: ${build.compiler}"/>
-    <echo message="  Sane = ${sane}"/>
-    <echo message="  Proceed = ${proceed}"/>
-    <echo message=""/>
+    <echo level="info" message=""/>
+    <echo level="info" message="Ant environment:"/>
+    <echo level="info" message="  Base Directory: ${basedir}"/>
+    <echo level="info" message="  Build output: ${out.dir}"/>
+    <echo level="info" message="  Compiler: ${build.compiler}"/>
+    <echo level="info" message="  Sane = ${sane}"/>
+    <echo level="info" message="  Proceed = ${proceed}"/>
+    <echo level="info" message=""/>
     <property name="showenv.done" value="true"/>
   </target>
 
@@ -396,7 +396,7 @@
   <target name="state" if="needstate"
           depends="showenv,getstate"
           description="Build SanityState.java">
-    <echo message="  Generating SanityState.java..."/>
+    <echo level="info" message="  Generating SanityState.java..."/>
     <property name="sane" value="true"/>
     <filter token="SANE" value="${sane}"/>
     <copy file="${sanity.dir}/SanityState.tmpl"
@@ -441,7 +441,7 @@
   </target>
 
   <target name="genParser" depends="chkparser" unless="parser.done">
-    <echo message="  ${msg}"/>
+    <echo level="info" message="  ${msg}"/>
     <delete>
       <fileset dir="${directory}" includes="${rmfiles}"/>
     </delete>
@@ -931,7 +931,7 @@
 <!-- Eclipse Plugin                                                     -->
 <!-- =================================================================== -->
   <target name="plugin" depends= "buildjars">
-       <echo message="Begining Derby Eclipse plugin build"/>
+       <echo level="info" message="Begining Derby Eclipse plugin build"/>
        <property name="plugin.tmp.dir" value ="plugintmp"/>
        <mkdir dir="${derby.jar.dir}/${plugin.tmp.dir}"/>
 
@@ -943,7 +943,7 @@
        </java>
 
        <property file="${derby.jar.dir}/${plugin.tmp.dir}/plugintmp.properties"/>
-       <echo message="Derby Eclipse plugin build: ${plugin.derby.version.build.number}"/>
+       <echo level="info" message="Derby Eclipse plugin build: ${plugin.derby.version.build.number}"/>
 
        <property name="plugin.dir" value ="plugins"/>
        <property name="plugin.core.dir" value ="${plugin.derby.core}_${plugin.derby.version}"/>
@@ -993,13 +993,13 @@
         <isset property="changenumber"/>
       </not>
     </condition>
-    <echo message="Revision number set to ${changenumber}."/>
+    <echo level="info" message="Revision number set to ${changenumber}."/>
   </target>
 
 
   <target name="jdbc4_classlist_edit" if="jdk16">
     <!-- uncomment jdbc4 classes if jdk 1.6 is available -->
-    <echo message="uncommenting jdbc4 classes"/>
+    <echo level="info" message="uncommenting jdbc4 classes"/>
     <replaceregexp file="${jar.classlist}"
      match="^#jdbc4_optional_(.*)"
      replace="\1"
@@ -1010,7 +1010,7 @@
 
   <target name="derbyjar" depends="initjars">
 
-    <echo message="Beginning derby.jar ${sanity.name} build"/>
+    <echo level="info" message="Beginning derby.jar ${sanity.name} build"/>
 
     <concat destfile="${derby.jar.dir}/lists/otherDerbyClasses.properties">
       <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
@@ -1033,7 +1033,7 @@
     <!-- filter out EmbeddedActivator if osgi.jar is not available -->
     <antcall target="filteractivator"/>
 
-    <echo message=" creating derby.jar class list "/>
+    <echo level="info" message=" creating derby.jar class list "/>
     <java classname="org.apache.derbyBuild.classlister" fork="yes">
       <jvmarg value="-DcloudscapeOnly=true"/>
       <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/derby.list"/>
@@ -1049,7 +1049,7 @@
     <!-- on the command line, the build number will be inserted into the   -->
     <!-- build at this point.                                              -->
  
-    <echo message=" creating new DBMS.properties file"/>
+    <echo level="info" message=" creating new DBMS.properties file"/>
     <antcall target="infowriter">
       <param name="info.iname" value="Apache Derby Embedded Engine"/>
       <param name="info.ename" value="Apache Derby"/>
@@ -1057,7 +1057,7 @@
       <param name="info.productfile" value="derby.jar"/>
       <param name="info.file" value="${out.dir}//org/apache/derby/info/DBMS.properties"/>
     </antcall>
-    <echo file="${derby.jar.dir}/lists/derby.list"
+    <echo level="info" file="${derby.jar.dir}/lists/derby.list"
           append="true"
           message="org/apache/derby/info/DBMS.properties"/>
 
@@ -1191,9 +1191,9 @@
 
   <target name="derbytoolsjar" depends="setsanityname">
 
-    <echo message="Beginning derbytools.jar ${sanity.name} build"/>
+    <echo level="info" message="Beginning derbytools.jar ${sanity.name} build"/>
 
-    <echo message=" creating tools.list "/>
+    <echo level="info" message=" creating tools.list "/>
     <java classname="org.apache.derbyBuild.classlister" fork="yes">
       <jvmarg value="-Ddb2jtools=true"/>
       <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/derbytools.list"/>
@@ -1204,7 +1204,7 @@
     </java>
     <replace file="${derby.jar.dir}/lists/derbytools.list" token="$$$$" value="$$"/>
 
-    <echo message=" creating new tools.properties file "/>
+    <echo level="info" message=" creating new tools.properties file "/>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
       <param name="info.iname" value="Apache Derby Tools"/>
@@ -1240,9 +1240,9 @@
 
   <target name="derbynetjar" depends="setsanityname">
 
-    <echo message="Beginning derbynet.jar ${sanity.name} build"/>
+    <echo level="info" message="Beginning derbynet.jar ${sanity.name} build"/>
 
-    <echo message=" creating net.list"/> 
+    <echo level="info" message=" creating net.list"/> 
     <java classname="org.apache.derbyBuild.classlister" fork="yes">
       <jvmarg value="-Ddb2jdrda=true"/>
       <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/derbynet.list"/>
@@ -1252,7 +1252,7 @@
       </classpath>
     </java>
 
-    <echo message=" creating new net.properties file "/>
+    <echo level="info" message=" creating new net.properties file "/>
     <antcall target="infowriter">
       <param name="info.buildnumber" value="${changenumber}"/>
       <param name="info.iname" value="Apache Derby Network Server"/>
@@ -1308,7 +1308,7 @@
 
  <target name="derbyclientjar" depends="setsanityname,initjars">
 
-    <echo message="Beginning derbyclient.jar ${sanity.name} build"/>
+    <echo level="info" message="Beginning derbyclient.jar ${sanity.name} build"/>
 
     <copy file="${basedir}/tools/jar/dnc.properties"
           tofile="${derby.jar.dir}/lists/dnc.properties"/>
@@ -1325,7 +1325,7 @@
       </classpath>
     </java>
 
-    <echo message=" creating new dnc.properties file "/>
+    <echo level="info" message=" creating new dnc.properties file "/>
 
     <mkdir dir="${out.dir}/org/apache/derby/info/"/>
     <antcall target="infowriter">
@@ -1370,7 +1370,7 @@
    
   <target name="derbyrunjar" depends="setsanityname,initjars">
 
-    <echo message="Beginning derbyrun.jar build"/>
+    <echo level="info" message="Beginning derbyrun.jar build"/>
 
     <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
     <copy todir="${derby.jar.dir}/lists/META-INF">
@@ -1398,7 +1398,7 @@
 
  <target name="derbywar" depends="initjars">
 
-    <echo message="Beginning derby.war  build"/>
+    <echo level="info" message="Beginning derby.war  build"/>
     <delete file="${derby.jar.dir}/derby.war"/>
     <zip zipfile="${derby.jar.dir}/derby.war" compress="true" basedir="tools/j2ee/derby"/>
   </target>
@@ -1468,7 +1468,7 @@
 
   <target name="localejar">
  
-    <echo message="Building derbyLocale_${locale.iname}.jar"/>
+    <echo level="info" message="Building derbyLocale_${locale.iname}.jar"/>
 
     <!-- generate new locale property file -->
     <antcall target="localeinfowriter">
@@ -1566,7 +1566,7 @@
   <target name="declare-autoloadable-driver">
  
     <mkdir dir="${derby.jar.dir}/lists/META-INF/services"/>
-    <echo file="${derby.jar.dir}/lists/META-INF/services/java.sql.Driver">${driver.name}
+    <echo level="info" file="${derby.jar.dir}/lists/META-INF/services/java.sql.Driver">${driver.name}
 </echo>
 
   </target>
@@ -1639,14 +1639,14 @@
   </target>
 
   <target name="snapshotError" if="is.sane">
-    <echo message="Please run the snapshot using an insane build,"/>
-    <echo message="but don't forget to generate a sane build into jars/sane also."/>
-    <echo message="Either run &quot;ant -Dsane=false snapshot&quot;, or run"/>
-    <echo message="the insane target before running the snapshot target."/>
-    <echo message="For more information, see:"/>
-    <echo message="http://wiki.apache.org/db-derby/DerbySnapshotOrRelease"/>
+    <echo level="error" message="Please run the snapshot using an insane build,"/>
+    <echo level="error" message="but don't forget to generate a sane build into jars/sane also."/>
+    <echo level="error" message="Either run &quot;ant -Dsane=false snapshot&quot;, or run"/>
+    <echo level="error" message="the insane target before running the snapshot target."/>
+    <echo level="error" message="For more information, see:"/>
+    <echo level="error" message="http://wiki.apache.org/db-derby/DerbySnapshotOrRelease"/>
 
-    <echo message=""/>
+    <echo level="error" message=""/>
     <fail message="Exiting snapshot build..."/>
   </target>
 
