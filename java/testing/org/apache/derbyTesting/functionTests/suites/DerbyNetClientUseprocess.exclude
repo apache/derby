@@ -11,7 +11,6 @@
 # derbynet/NSinSameJVM.java - fails with different thread names. probably ok...
 # derbynet/dblook_test_net.java - expects different dir structure
 # stress/stress.multi - exits suite
-# derbynet/testij.java - sets up wombat connections in italian, causes later failures
 # derbynet/getCurrentProperties.java - fails, different sessions
 # derbynet/runtimeinfo.java - different sessions
 # derbynet/sysinfo.java - needs other properties
@@ -34,7 +33,6 @@ junitTests/derbyNet/CompatibilityTest.java
 derbynet/DerbyNetAutoStart.java
 derbynet/NSinSameJVM.java
 derbynet/dblook_test_net.java
-derbynet/testij.java
 derbynet/getCurrentProperties.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java

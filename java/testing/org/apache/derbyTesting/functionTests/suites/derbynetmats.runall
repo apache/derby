@@ -11,7 +11,6 @@ derbynet/sysinfo_withproperties.java
 derbynet/testProtocol.java
 derbynet/testProperties.java
 derbynet/testconnection.java
-derbynet/testij.java
 derbynet/timeslice.java
 jdbcapi/metadata.java
 jdbcapi/metadataMultiConn.java

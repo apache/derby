@@ -12,7 +12,6 @@
 # derbynet/getCurrentProperties.java - fails with different sessions
 # derbynet/dblook_test_net.java - fails, test misses properties
 # derbynet/runtimeinfo.java - fails with already existing threads (maybe intermittent)
-# derbynet/testij.java - sets up wombat in italian, causing subsequent tests to fail.
 # derbynet/sysinfo.java - fails because not access to java.class.path
 # derbynet/sysinfo_withproperties.java - fails because not access to java.class.path
 # jdbcapi/odbc_metadata.java - fails...
@@ -27,7 +26,6 @@ jdbcapi/maxfieldsize.java
 jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
 jdbcapi/checkDriver.java
-derbynet/testij.java
 derbynet/NSinSameJVM.java
 derbynet/DerbyNetAutoStart.java
 derbynet/getCurrentProperties.java
