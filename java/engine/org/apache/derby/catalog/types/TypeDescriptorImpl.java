@@ -52,6 +52,10 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	private int						scale;
 	private boolean					isNullable;
 	private int						maximumWidth;
+	/** @see TypeDescriptor.getCollationType */
+	private int						collationType;
+	/** @see TypeDescriptor.getCollationDerivation() */
+	private String					collationDerivation = TypeDescriptor.COLLATION_DERIVATION_INCORRECT;
 
 	/**
 	 * Public niladic constructor. Needed for Formatable interface to work.
@@ -327,6 +331,30 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		isNullable = nullable;
 	}
 
+	/** @see TypeDescriptor.getCollationType */
+	public int	getCollationType()
+	{
+		return collationType;
+	}
+
+	/** @see TypeDescriptor.setCollationType */
+	public void	setCollationType(int collationTypeValue)
+	{
+		collationType = collationTypeValue;
+	}
+
+	/** @see TypeDescriptor.getCollationDerivation */
+	public String	getCollationDerivation()
+	{
+		return collationDerivation;
+	}
+
+	/** @see TypeDescriptor.setCollationDerivation */
+	public void	setCollationDerivation(String collationDerivationValue)
+	{
+		collationDerivation = collationDerivationValue;
+	}
+
 	/**
 	 * Converts this data type descriptor (including length/precision)
 	 * to a string. E.g.
@@ -374,6 +402,8 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		if(!this.getTypeName().equals(typeDescriptor.getTypeName()) ||
 		   this.precision != typeDescriptor.getPrecision() ||
 		   this.scale != typeDescriptor.getScale() ||
+		   this.collationDerivation.equals(typeDescriptor.getCollationDerivation()) ||
+		   this.collationType == typeDescriptor.getCollationType() || 
 		   this.isNullable != typeDescriptor.isNullable() ||
 		   this.maximumWidth != typeDescriptor.getMaximumWidth())
 		   return false;
@@ -396,7 +426,28 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	{
 		typeId = (BaseTypeIdImpl) in.readObject();
 		precision = in.readInt();
-		scale = in.readInt();
+		
+		switch (typeId.getJDBCTypeId()) {
+		case Types.CHAR:
+		case Types.VARCHAR:
+		case Types.LONGVARCHAR:
+		case Types.CLOB:
+			scale = 0;
+			collationType = in.readInt();
+			//I am assuming that the readExternal gets called only on 
+			//persistent columns. Since all persistent character string type
+			//columns always have the collation derivation of implicit, I will 
+			//simply use that value for collation derivation here for character 
+			//string type columns.
+			collationDerivation = TypeDescriptor.COLLATION_DERIVATION_IMPLICIT;
+			break;
+		default:
+			scale = in.readInt();
+			collationType = 0;
+			collationDerivation = TypeDescriptor.COLLATION_DERIVATION_INCORRECT;
+			break;
+		}
+		
 		isNullable = in.readBoolean();
 		maximumWidth = in.readInt();
 	}
@@ -413,7 +464,19 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	{
 		out.writeObject( typeId );
 		out.writeInt( precision );
-		out.writeInt( scale );
+
+		switch (typeId.getJDBCTypeId()) {
+		case Types.CHAR:
+		case Types.VARCHAR:
+		case Types.LONGVARCHAR:
+		case Types.CLOB:
+			out.writeInt( collationType );
+			break;
+		default:
+			out.writeInt( scale );
+			break;
+		}		
+		
 		out.writeBoolean( isNullable );
 		out.writeInt( maximumWidth );
 	}

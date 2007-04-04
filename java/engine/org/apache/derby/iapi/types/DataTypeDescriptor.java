@@ -777,6 +777,30 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		return typeDescriptor.getScale();
 	}
 
+	/** @see TypeDescriptor.getCollationType */
+	public int	getCollationType()
+	{
+		return typeDescriptor.getCollationType();
+	}
+
+	/** @see TypeDescriptor.setCollationType */
+	public void	setCollationType(int collationTypeValue)
+	{
+		typeDescriptor.setCollationType(collationTypeValue);
+	}
+
+	/** @see TypeDescriptor.getCollationDerivation */
+	public String	getCollationDerivation()
+	{
+		return typeDescriptor.getCollationDerivation();
+	}
+
+	/** @see TypeDescriptor.setCollationDerivation */
+	public void	setCollationDerivation(String collationDerivationValue)
+	{
+		typeDescriptor.setCollationDerivation(collationDerivationValue);
+	}
+
 	/**
 	 * Returns TRUE if the datatype can contain NULL, FALSE if not.
 	 * JDBC supports a return value meaning "nullability unknown" -
