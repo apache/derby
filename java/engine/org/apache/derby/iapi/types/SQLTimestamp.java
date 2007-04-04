@@ -1170,7 +1170,7 @@ public final class SQLTimestamp extends DataType
         throws StandardException
     {
         if( resultHolder == null)
-            resultHolder = new SQLInteger();
+            resultHolder = new SQLLongint();
  
        if( isNull() || time1.isNull())
         {
@@ -1206,8 +1206,6 @@ public final class SQLTimestamp extends DataType
         switch( intervalType)
         {
         case FRAC_SECOND_INTERVAL:
-            if( secondsDiff > Integer.MAX_VALUE/ONE_BILLION || secondsDiff < Integer.MIN_VALUE/ONE_BILLION)
-                throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "INTEGER");
             ldiff = secondsDiff*ONE_BILLION + nanosDiff;
             break;
             
@@ -1308,9 +1306,7 @@ public final class SQLTimestamp extends DataType
                                                   ReuseFactory.getInteger( intervalType),
                                                   "TIMESTAMPDIFF");
         }
-		if (ldiff > Integer.MAX_VALUE || ldiff < Integer.MIN_VALUE)
-			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, "INTEGER");
-        resultHolder.setValue( (int) ldiff);
+        resultHolder.setValue(ldiff);
         return resultHolder;
     } // end of timestampDiff
 

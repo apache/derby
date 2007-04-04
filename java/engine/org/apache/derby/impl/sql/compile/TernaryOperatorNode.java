@@ -823,7 +823,7 @@ public class TernaryOperatorNode extends ValueNode
 	{
         bindDateTimeArg( rightOperand, 2);
         bindDateTimeArg( receiver, 3);
-        setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.INTEGER));
+        setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.BIGINT));
         return this;
     } // End of timestampDiffBind
 
