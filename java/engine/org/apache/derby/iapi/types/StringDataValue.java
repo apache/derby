@@ -31,6 +31,33 @@ public interface StringDataValue extends ConcatableDataValue
 	public static final int LEADING		= 2;
 
 	/**
+	  For a character string type, the collation derivation should always be 
+	  "explicit"(not possible in Derby 10.3), "implicit" or "none". We will 
+	  start by setting it to "none" in TypeDescriptorImpl. At runtime, only 
+	  character string types which are results of aggregate methods dealing 
+	  with operands with different collation types should have a collation 
+	  derivation of "none". All the other character string types should have 
+	  their collation derivation set to "implicit". 
+	 */
+	public	static	int COLLATION_DERIVATION_NONE = 0;
+	/** @see StringDataValue#COLLATION_DERIVATION_NONE */
+	public	static	int COLLATION_DERIVATION_IMPLICIT = 1;
+	/** @see StringDataValue#COLLATION_DERIVATION_NONE */
+	public	static	int COLLATION_DERIVATION_EXPLICIT = 2;
+	/**
+	 * In Derby 10.3, it is possible to have database with one of the following
+	 * two configurations
+	 * 1)all the character columns will have a collation type of UCS_BASIC. 
+	 * This is same as what we do in Derby 10.2 release. 
+	 * 2)all the character string columns belonging to system tables will have 
+	 * collation type of UCS_BASIC but all the character string columns 
+	 * belonging to user tables will have collation type of TERRITORY_BASED.
+	 */
+	public	static	int COLLATION_TYPE_UCS_BASIC = 0;
+	/** @see StringDataValue#COLLATION_TYPE_UCS_BASIC */
+	public	static	int COLLATION_TYPE_TERRITORY_BASED = 1;
+
+	/**
 	 * The SQL concatenation '||' operator.
 	 *
 	 * @param leftOperand	String on the left hand side of '||'

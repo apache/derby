@@ -26,6 +26,8 @@ import org.apache.derby.iapi.services.io.Formatable;
 
 import org.apache.derby.catalog.TypeDescriptor;
 
+import org.apache.derby.iapi.types.StringDataValue;
+
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -52,10 +54,10 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	private int						scale;
 	private boolean					isNullable;
 	private int						maximumWidth;
-	/** @see TypeDescriptor.getCollationType */
+	/** @see TypeDescriptor#getCollationType() */
 	private int						collationType;
-	/** @see TypeDescriptor.getCollationDerivation() */
-	private String					collationDerivation = TypeDescriptor.COLLATION_DERIVATION_INCORRECT;
+	/** @see TypeDescriptor#getCollationDerivation() */
+	private int					collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
 
 	/**
 	 * Public niladic constructor. Needed for Formatable interface to work.
@@ -331,26 +333,26 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		isNullable = nullable;
 	}
 
-	/** @see TypeDescriptor.getCollationType */
+	/** @see TypeDescriptor#getCollationType() */
 	public int	getCollationType()
 	{
 		return collationType;
 	}
 
-	/** @see TypeDescriptor.setCollationType */
+	/** @see TypeDescriptor#setCollationType(int) */
 	public void	setCollationType(int collationTypeValue)
 	{
 		collationType = collationTypeValue;
 	}
 
-	/** @see TypeDescriptor.getCollationDerivation */
-	public String	getCollationDerivation()
+	/** @see TypeDescriptor#getCollationDerivation() */
+	public int	getCollationDerivation()
 	{
 		return collationDerivation;
 	}
 
-	/** @see TypeDescriptor.setCollationDerivation */
-	public void	setCollationDerivation(String collationDerivationValue)
+	/** @see TypeDescriptor#setCollationDerivation(int) */
+	public void	setCollationDerivation(int collationDerivationValue)
 	{
 		collationDerivation = collationDerivationValue;
 	}
@@ -402,7 +404,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		if(!this.getTypeName().equals(typeDescriptor.getTypeName()) ||
 		   this.precision != typeDescriptor.getPrecision() ||
 		   this.scale != typeDescriptor.getScale() ||
-		   this.collationDerivation.equals(typeDescriptor.getCollationDerivation()) ||
+		   this.collationDerivation == typeDescriptor.getCollationDerivation() ||
 		   this.collationType == typeDescriptor.getCollationType() || 
 		   this.isNullable != typeDescriptor.isNullable() ||
 		   this.maximumWidth != typeDescriptor.getMaximumWidth())
@@ -427,6 +429,16 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		typeId = (BaseTypeIdImpl) in.readObject();
 		precision = in.readInt();
 		
+		//Scale does not apply to character data types. Starting 10.3 release,
+		//the scale field in TypeDescriptor in SYSCOLUMNS will be used to save
+		//the collation type of the character data types. Because of this, in
+		//this method, we check if we are dealing with character types. If yes,
+		//then read the on-disk scale field of TypeDescriptor into collation
+		//type. In other words, the on-disk scale field has 2 different 
+		//meanings depending on what kind of data type we are dealing with.
+		//For character data types, it really represents the collation type of
+		//the character data type. For all the other data types, it represents
+		//the scale of that data type.
 		switch (typeId.getJDBCTypeId()) {
 		case Types.CHAR:
 		case Types.VARCHAR:
@@ -439,12 +451,12 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 			//columns always have the collation derivation of implicit, I will 
 			//simply use that value for collation derivation here for character 
 			//string type columns.
-			collationDerivation = TypeDescriptor.COLLATION_DERIVATION_IMPLICIT;
+			collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
 			break;
 		default:
 			scale = in.readInt();
 			collationType = 0;
-			collationDerivation = TypeDescriptor.COLLATION_DERIVATION_INCORRECT;
+			collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
 			break;
 		}
 		
@@ -465,6 +477,18 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		out.writeObject( typeId );
 		out.writeInt( precision );
 
+		//Scale does not apply to character data types. Starting 10.3 release,
+		//the scale field in TypeDescriptor in SYSCOLUMNS will be used to save
+		//the collation type of the character data types. Because of this, in
+		//this method, we check if we are dealing with character types. If yes,
+		//then write the collation type into the on-disk scale field of 
+		//TypeDescriptor. But if we are dealing with non-character data types,
+		//then write the scale of that data type into the on-disk scale field
+		//of TypeDescriptor. In other words, the on-disk scale field has 2 
+		//different meanings depending on what kind of data type we are dealing 
+		//with. For character data types, it really represents the collation 
+		//type of the character data type. For all the other data types, it 
+		//represents the scale of that data type.
 		switch (typeId.getJDBCTypeId()) {
 		case Types.CHAR:
 		case Types.VARCHAR:

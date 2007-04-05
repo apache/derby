@@ -777,26 +777,26 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		return typeDescriptor.getScale();
 	}
 
-	/** @see TypeDescriptor.getCollationType */
+	/** @see TypeDescriptor#getCollationType() */
 	public int	getCollationType()
 	{
 		return typeDescriptor.getCollationType();
 	}
 
-	/** @see TypeDescriptor.setCollationType */
+	/** @see TypeDescriptor#setCollationType(int) */
 	public void	setCollationType(int collationTypeValue)
 	{
 		typeDescriptor.setCollationType(collationTypeValue);
 	}
 
-	/** @see TypeDescriptor.getCollationDerivation */
-	public String	getCollationDerivation()
+	/** @see TypeDescriptor#getCollationDerivation() */
+	public int	getCollationDerivation()
 	{
 		return typeDescriptor.getCollationDerivation();
 	}
 
-	/** @see TypeDescriptor.setCollationDerivation */
-	public void	setCollationDerivation(String collationDerivationValue)
+	/** @see TypeDescriptor#setCollationDerivation(int) */
+	public void	setCollationDerivation(int collationDerivationValue)
 	{
 		typeDescriptor.setCollationDerivation(collationDerivationValue);
 	}

@@ -46,31 +46,6 @@ public interface TypeDescriptor
 
 	public	static	int MAXIMUM_WIDTH_UNKNOWN = -1;
 
-	/**
-	  For a character string type, the collation derivation should always be 
-	  "explicit"(not possible in Derby 10.3), "implicit" or "none". We will 
-	  start by setting it to "error" here. But at runtime, no TypeDescriptor 
-	  which belongs to a character string type should ever have a collation 
-	  derivation of "error". The initialization to "error" is for catching an 
-	  edge(bug) case where the collation derivation may not have gotten set 
-	  correctly for a character string type.
-	  For all the other types (which are not character string types, the 
-	  collation derivation will be set to "error".
-	 */
-	public	static	String COLLATION_DERIVATION_INCORRECT = "error";
-	public	static	String COLLATION_DERIVATION_IMPLICIT = "implicit";
-	public	static	String COLLATION_DERIVATION_NONE = "none";
-	/**
-	 * In Derby 10.3, all the character columns could have a collation type of
-	 * UCS_BASIC. This is same as what we do in Derby 10.3 release. The other
-	 * option in Derby 10.3 is that all the character string types belonging to
-	 * system tables will collate using UCS_BASIC but all the character string
-	 * types belonging to user tables will collate using TERRITORY_BASED
-	 * collation.
-	 */
-	public	static	int COLLATION_VALUE_UCS_BASIC = 0;
-	public	static	int COLLATION_VALUE_TERRITORY_BASED = 1;
-
 
 	///////////////////////////////////////////////////////////////////////
 	//
@@ -180,8 +155,8 @@ public interface TypeDescriptor
 	public int getCollationType();
 
 	/**
-	 * Set the collation type of this DTD
-	 * @param collationDerivationValue This will be UCS_BASIC/TERRITORY_BASED
+	 * Set the collation type of this TypeDescriptor
+	 * @param collationTypeValue This will be 0(UCS_BASIC)/1(TERRITORY_BASED)
 	 */
 	public void setCollationType(int collationTypeValue);
 
@@ -213,22 +188,19 @@ public interface TypeDescriptor
 	 * with character strings with different collations (Section 9.3 Data types 
 	 * of results of aggregations Syntax Rule 3aii).
 	 *  
-	 * Collation derivation will be initialized to "error" but by the 
-	 * time the runtime code kicks in, it should get set to "implicit"
-	 * or "none". Otherwise, we have run into a bug.
+	 * Collation derivation will be initialized to 0("none").
 	 *  
-	 * @return Should be "implicit" or "none". A value of "error" indicates 
-	 * that the collation derivation of character type has not been set
-	 * correctly.
+	 * @return Should be 0("none") or 1("implicit"). 
 	 */
-	public String getCollationDerivation();
+	public int getCollationDerivation();
 
 	/**
 	 * Set the collation derivation of this DTD
-	 * @param collationDerivationValue This will be implicit/none/explicit
-	 * In Derby 10.3, we do not expect to get value explicit.
+	 * @param collationDerivationValue This will be 
+	 * (0)none/(1)implicit/(2)explicit
+	 * In Derby 10.3, we do not expect to get value 2(explicit).
 	 */
-	public void setCollationDerivation(String collationDerivationValue);
+	public void setCollationDerivation(int collationDerivationValue);
 
 }
 
