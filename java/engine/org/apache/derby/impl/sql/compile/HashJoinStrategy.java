@@ -338,18 +338,19 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 							)
 						throws StandardException
 	{
-		/* If we're doing a Hash join then we shouldn't have any IN-list
-		 * probe predicates in the store restriction list.  The reason
-		 * is that those predicates are one-sided and thus if they
-		 * make it this far they will be pushed down to the base table
-		 * as restrictions on the rows read from disk.  That would be
-		 * wrong because a probe predicate is of the form "col = <val>"
-		 * where <val> is the first value in the IN-list.  But that's
-		 * not correct--we need to return all rows having any value that
-		 * appears in the IN-list (not just those rows matching the
-		 * first value).  Checks elsewhere in the code should ensure
-		 * that no probe predicates have made it this far, but if we're
-		 * running in SANE mode it doesn't hurt to verify.
+		/* We do not currently support IN-list "multi-probing" for hash scans
+		 * (though we could do so in the future).  So if we're doing a hash
+		 * join then we shouldn't have any IN-list probe predicates in the
+		 * store restriction list at this point.  The reason is that, in the
+		 * absence of proper multi-probing logic, such predicates would act
+		 * as restrictions on the rows read from disk.  That would be wrong
+		 * because a probe predicate is of the form "col = <val>" where <val>
+		 * is the first value in the IN-list.  Enforcement of that restriction
+		 * would lead to incorrect results--we need to return all rows having
+		 * any value that appears in the IN-list, not just those rows matching
+		 * the first value.  Checks elsewhere in the code should ensure that
+		 * no probe predicates have made it this far, but if we're running in
+		 * SANE mode it doesn't hurt to verify.
 		 */
 		if (SanityManager.DEBUG)
 		{

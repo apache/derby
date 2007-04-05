@@ -596,6 +596,35 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		baseColumnPositions = cd.getIndexDescriptor().baseColumnPositions();
 		isAscending = cd.getIndexDescriptor().isAscending();
 
+		/* If we have a "useful" IN list probe predicate we will generate a
+		 * start/stop key for optTable of the form "col = <val>", where <val>
+		 * is the first value in the IN-list.  Then during normal index multi-
+		 * probing (esp. as implemented by exec/MultiProbeTableScanResultSet)
+		 * we will use that start/stop key as a "placeholder" into which we'll
+		 * plug the values from the IN-list one at a time.
+		 *
+		 * That said, if we're planning to do a hash join with optTable then
+		 * we won't generate a MultiProbeTableScanResult; instead we'll
+		 * generate a HashScanResultSet, which does not (yet) account for
+		 * IN-list multi-probing.  That means the start/stop key "col = <val>"
+		 * would be treated as a regular restriction, which could lead to
+		 * incorrect results.  So if we're dealing with a hash join, we do
+		 * not consider IN-list probe predicates to be "useful". DERBY-2500.
+		 *
+		 * Note that it should be possible to enhance HashScanResultSet to
+		 * correctly perform index multi-probing at some point, and there
+		 * would indeed be benefits to doing so (namely, we would scan fewer
+		 * rows from disk and build a smaller hash table). But until that
+		 * happens we have to make sure we do not consider probe predicates
+		 * to be "useful" for hash joins.
+		 *
+		 * Only need to do this check if "pushPreds" is true, i.e. if we're
+		 * modifying access paths and thus we know for sure that we are going
+		 * to generate a hash join.
+		 */
+		boolean skipProbePreds = pushPreds &&
+			optTable.getTrulyTheBestAccessPath().getJoinStrategy().isHashJoin();
+
 		/*
 		** Create an array of useful predicates.  Also, count how many
 		** useful predicates there are.
@@ -628,6 +657,14 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			{
 				continue;
 			}
+
+			/* Skip it if we're doing a hash join and it's a probe predicate.
+			 * Then, since the probe predicate is deemed not useful, it will
+			 * be implicitly "reverted" to its underlying IN-list as part of
+			 * code generation.
+			 */
+			if (skipProbePreds && pred.isInListProbePredicate())
+				continue;
 
 			/* Look for an index column on one side of the relop */
 			for (indexPosition = 0;

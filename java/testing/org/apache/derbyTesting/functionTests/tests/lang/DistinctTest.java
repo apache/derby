@@ -469,10 +469,12 @@ public class DistinctTest extends BaseJDBCTestCase {
 		s.close();
 	}
 	
-	/*
-	 * Following test case fails in the prepareStatement call,
-	 * with an ASSERT related to the DERBY-47 in list changes.
-	 *
+	/* Distinct query using ANDs and ORs, the latter of which will be
+	 * transformed into an IN list.  Assumption is that the optimizer
+	 * will choose to use an index for this query, though we don't
+	 * actually verify that (we're just checking that the query
+	 * compiles and executes without error).
+	 */
 	public void testResultSetInOrderWhenUsingIndex() throws SQLException{
 		Statement s = createStatement();
 		
@@ -494,28 +496,42 @@ public class DistinctTest extends BaseJDBCTestCase {
 		s.execute("insert into netbuttonlibraryrole1 values('lusername2', 2,'user2', 'role2', default)");
 		
 		PreparedStatement p = prepareStatement("SELECT DISTINCT nb.name AS name, nb.summary AS summary FROM netbutton1 nb, netbuttonlibraryrole1 nlr, library_netbutton ln" +
-		" WHERE nb.lname = ln.lname AND (nlr.lusername = ? OR nlr.lusername =?)");
-
-		p = prepareStatement("SELECT DISTINCT nb.name AS name, nb.summary AS summary FROM netbutton1 nb, netbuttonlibraryrole1 nlr, library_netbutton ln" +
 				" WHERE nlr.netbuttonlibrary_id = ln.netbuttonlibrary_id AND nb.lname = ln.lname AND (nlr.lusername = ? OR nlr.lusername = ?) AND nb.lname = ? ORDER BY summary");
 		
 		p.setString(1, "lusername1");
 		p.setString(2, "lusername2");
-		//p.setString(3, "lname1");
+		p.setString(3, "lname1");
 		assertTrue(p.execute());
 
-	
 		String [][] expected = { {"name1", "sum2" } };
-    	ResultSet rs = p.getResultSet();
+		ResultSet rs = p.getResultSet();
 		JDBC.assertFullResultSet(rs, expected);
 		rs.close();
 		p.close();
 		
+		/* Similar to previous query but without the final equality predicate;
+		 * this query should return two rows.  Before the fix for DERBY-2500
+		 * we only returned one row, which was wrong.
+		 */
+		p = prepareStatement("SELECT DISTINCT nb.name AS name, nb.summary "
+			+ "AS summary FROM netbutton1 nb, netbuttonlibraryrole1 nlr, "
+			+ "library_netbutton ln WHERE nlr.netbuttonlibrary_id = "
+			+ "ln.netbuttonlibrary_id AND nb.lname = ln.lname AND "
+		 	+ "(nlr.lusername = ? OR nlr.lusername =?) ORDER BY summary");
+
+		p.setString(1, "lusername1");
+		p.setString(2, "lusername2");
+		assertTrue(p.execute());
+
+		expected = new String [][] { {"name1", "sum2" }, {"name2", "sum2"} };
+		rs = p.getResultSet();
+		JDBC.assertFullResultSet(rs, expected);
+		rs.close();
+
 		s.execute("drop table library_netbutton");
 		s.execute("drop table netbutton1");
 		s.close();
 	}
-	*/
 	
 	public void testDistinctStoreSort() throws SQLException {
 		Statement s = createStatement();
