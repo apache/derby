@@ -39,7 +39,40 @@ import java.util.Properties;
 import junit.framework.Assert;
 
 /**
+ * <p>
  * XML utility methods for the JUnit tests.
+ * </p>
+ *
+ * <p>
+ * Note that The XML tests require a more advanced version of Xalan
+ * than the default version bundled with JDK 1.4. The XML tests silently
+ * exit if the required environment is not found.
+ * </p>
+ *
+ * <p>
+ * To run the XML tests under JDK 1.4, you must do the following:
+ * </p>
+ *
+ * <ul>
+ * <li>Download the latest version of Xalan (2.7.0 as of this writing).</li>
+ * <li>Copy all of the downloaded jars into the jre/lib/endorsed directory
+ * of your JDK 1.4 installation. Those jar files are:
+ * serializer.jar, xalan.jar, xercesImpl.jar, xml-apis.jar, and xsltc.jar.</li>
+ * </ul>
+ *
+ * <p>
+ *That's it! Now the XML tests should run for you under JDK 1.4.
+ * </p>
+ *
+ * <p>
+ * To run the XML tests under a higher version of the JDK, you must do the
+ * following:
+ * </p>
+ *
+ * <ul>
+ * <li>Download the latest version of Xalan as described above.</li>
+ * <li>Wire the downloaded jar files into your CLASSPATH.</li>
+ * </ul>
  */
 public class XML {
     

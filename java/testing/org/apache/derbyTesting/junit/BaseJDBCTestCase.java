@@ -723,9 +723,9 @@ public abstract class BaseJDBCTestCase
     /**
      * Executes the Callable statement that is expected to fail and verifies
      * that it throws the expected SQL exception.
-     * @param conn The Connection handle
-     * @param sql The SQL to execute
      * @param expectedSE The expected SQL exception
+     * @param conn The Connection handle
+     * @param callSQL The SQL to execute
      * @throws SQLException
      */
     public static void assertCallError(String expectedSE, Connection conn, String callSQL)
