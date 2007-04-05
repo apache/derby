@@ -54,6 +54,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(BadConnectionTest.suite());
         suite.addTest(NetHarnessJavaTest.suite());
         suite.addTest(SecureServerTest.suite());
+        suite.addTest(NetIjTest.suite());
         
         // this test refers to ConnectionPooledDataSource class
         // thus causing class not found exceptions with JSR169

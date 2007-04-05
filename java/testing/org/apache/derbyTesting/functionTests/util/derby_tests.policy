@@ -100,12 +100,18 @@ grant codeBase "${derbyTesting.clientjar}derbyclient.jar" {
 // focus is on getting the engine & network server secure.
 //
 grant codeBase "${derbyTesting.codejar}derbytools.jar" {
-  // Access all properties using System.getProperties
+  // Access all properties using System.getProperties -
+  // ij enumerates the properties in order to open connections
+  // for any property set in ij.connection.* and set protocols
+  // for any property in ij.protocol.*
   permission java.util.PropertyPermission "*", "read, write";
   
   // Read all files under ${user.dir}
   permission java.io.FilePermission "${user.dir}${/}-", "read";
   
+  // IjTestCases read, write, and delete ij's output in the extinout dir
+  permission java.io.FilePermission "${user.dir}${/}extinout${/}-", "read, write, delete";
+ 
   // ij needs permission to read the sql files in this jar
   permission java.io.FilePermission "${derbyTesting.testjarpath}", "read";
   

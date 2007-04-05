@@ -24,22 +24,24 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.IjTestCase;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Network client .sql tests to run via ij.
  */
-public class NetIjTests extends IjTestCase {
+public class NetIjTest extends IjTestCase {
 	
-	private NetIjTests(String name) {
+	private NetIjTest(String name) {
 		super(name);
 	}
 	
 	public static Test suite() {
         
         TestSuite suite = new TestSuite("NetIjTests");
-        suite.addTest(TestConfiguration.clientServerDecorator(
-        		new NetIjTests("testclientij")));
+        suite.addTest(new SupportFilesSetup(
+        		TestConfiguration.clientServerDecorator(
+        		new NetIjTest("testclientij"))));
         
         return suite;
     }

@@ -27,9 +27,15 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
+
 
 /**
  * Run a .sql script via ij's main method and compare with a canon.
+ * 
+ * Tests that extend this class should always wrap their suite with
+ * a SupportFilesSetup so that the extinout directory where ij will
+ * write the test output is created. 
  */
 public class IjTestCase extends ScriptTestCase {
 
@@ -44,7 +50,7 @@ public class IjTestCase extends ScriptTestCase {
 	public IjTestCase(String name) {
 		super(name);
 		scriptName = getName() + ".sql";
-		outfileName = "system" + File.separator + getName() + ".out";
+		outfileName = SupportFilesSetup.EXTINOUT + File.separator + getName() + ".out";
 		outfile = new File(outfileName);
 	}
 	
