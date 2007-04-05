@@ -673,6 +673,49 @@ public class JDBC {
         Object [][] expectedRows, boolean allAsTrimmedStrings)
         throws SQLException
     {
+        assertFullResultSet( rs, expectedRows, allAsTrimmedStrings, true );
+    }
+
+    /**
+     * Takes a result set and a two-dimensional array and asserts
+     * that the rows and columns in the result set match the number,
+     * order, and values of those in the array.  Each row in
+     * the array is compared with the corresponding row in the
+     * result set.
+     *
+     * Will throw an assertion failure if any of the following
+     * is true:
+     *
+     *  1. Expected vs actual number of columns doesn't match
+     *  2. Expected vs actual number of rows doesn't match
+     *  3. Any column in any row of the result set does not "equal"
+     *     the corresponding column in the expected 2-d array.  If
+     *     "allAsTrimmedStrings" is true then the result set value
+     *     will be retrieved as a String and compared, via the ".equals()"
+     *     method, to the corresponding object in the array (with the
+     *     assumption being that the objects in the array are all 
+     *     Strings).  Otherwise the result set value will be retrieved
+     *     and compared as an Object, which is useful when asserting
+     *     the JDBC types of the columns in addition to their values.
+     *
+     * NOTE: It follows from #3 that the order of the rows in the
+     * in received result set must match the order of the rows in
+     * the received 2-d array.  Otherwise the result will be an
+     * assertion failure.
+     *
+     * @param rs The actual result set.
+     * @param expectedRows 2-Dimensional array of objects representing
+     *  the expected result set.
+     * @param allAsTrimmedStrings Whether or not to fetch (and compare)
+     *  all values from the actual result set as trimmed Strings; if
+     *  false the values will be fetched and compared as Objects.  For
+     *  more on how this parameter is used, see assertRowInResultSet().
+     * @param closeResultSet If true, the ResultSet is closed on the way out.
+     */
+    public static void assertFullResultSet(ResultSet rs,
+        Object [][] expectedRows, boolean allAsTrimmedStrings, boolean closeResultSet)
+        throws SQLException
+    {
         int rows;
         ResultSetMetaData rsmd = rs.getMetaData();
 
@@ -693,7 +736,7 @@ public class JDBC {
             }
         }
 
-        rs.close();
+        if ( closeResultSet ) { rs.close(); }
 
         // And finally, assert the row count.
         Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);

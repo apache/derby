@@ -2453,7 +2453,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             {"3"}
         };
 
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertFullResultSet(rs, expRS, true, false);
         
         // The use of MAX in the previous query throws a warning because
         // the table T1 has null values.  Just for sanity check for that
@@ -2470,6 +2470,8 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             assertTrue("Expected warning but found none.", (sqlWarn != null));
             assertSQLState("01003", sqlWarn);
         }
+
+        rs.close();
         
         // Then use XPath position syntax to retrieve the 
         // attributes and concatenate them.  We need one call to 
