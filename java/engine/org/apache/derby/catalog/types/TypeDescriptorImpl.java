@@ -57,7 +57,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	/** @see TypeDescriptor#getCollationType() */
 	private int						collationType;
 	/** @see TypeDescriptor#getCollationDerivation() */
-	private int					collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
+	private int					collationDerivation = StringDataValue.COLLATION_DERIVATION_NONE;
 
 	/**
 	 * Public niladic constructor. Needed for Formatable interface to work.
