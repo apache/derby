@@ -559,7 +559,17 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	public int getCollationTypeOfSystemSchemas(){
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
+	public int getCollationTypeOfUserSchemas(){
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
 	public FileInfoDescriptor getFileInfoDescriptor(UUID id)
 			throws StandardException {
 		// TODO Auto-generated method stub
