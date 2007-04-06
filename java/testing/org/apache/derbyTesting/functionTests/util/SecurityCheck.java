@@ -29,6 +29,8 @@ import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import junit.framework.Assert;
+
 
 /**
  * Code to aid in checking the Security of Derby.
@@ -163,6 +165,14 @@ public class SecurityCheck {
 		SecurityCheck.inspectClass(o.getClass(), declared);
 	}
 	
+    // temporary add a method - this will eventually replace inspect
+    // method above
+    public static void assertSourceSecurity(Object o, String declared)
+    {
+        Assert.assertNotNull(o);
+        Assert.assertTrue(SecurityCheck.inspectClass(o.getClass(), declared));
+    }
+    
 	/**
 	 * Inspect a Derby class for security risks. This includes following potential
 	 * references exposed through the class.
