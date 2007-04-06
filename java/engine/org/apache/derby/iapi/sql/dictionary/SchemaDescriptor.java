@@ -158,6 +158,13 @@ public final class SchemaDescriptor extends TupleDescriptor
 
     private final boolean isSystem;
     private final boolean isSYSIBM;
+    
+    /**
+     * For system schemas, the only possible value for collation type is
+     * UCS_BASIC. For user schemas, the collation type can be UCS_BASIC or 
+     * TERRITORY_BASED.
+     */
+    private int collationType;
 
 	/**
 	 * Constructor for a SchemaDescriptor.
@@ -183,6 +190,10 @@ public final class SchemaDescriptor extends TupleDescriptor
 		this.oid = oid;
         this.isSystem = isSystem;
 		isSYSIBM = isSystem && IBM_SYSTEM_SCHEMA_NAME.equals(name);
+		if (isSystem)
+			collationType = dataDictionary.getCollationTypeOfSystemSchemas();
+		else
+			collationType = dataDictionary.getCollationTypeOfUserSchemas();
 	}
 
 	/**

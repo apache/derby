@@ -416,6 +416,26 @@ public final class	DataDictionaryImpl
 												"SYSCS_GET_RUNTIMESTATISTICS", 
 												};
 	
+	/**
+	 * Collation Type for SYSTEM schemas. In Derby 10.3, this will always 
+	 * be UCS_BASIC 
+	 */
+	private int collationTypeOfSystemSchemas;
+
+	/**
+	 * Collation Type for user schemas. In Derby 10.3, this is either 
+	 * UCS_BASIC or TERRITORY_BASED. The exact value is decided by what has 
+	 * user asked for through JDBC url optional attribute COLLATION. If that
+	 * atrribute is set to UCS_BASIC, the collation type for user schemas
+	 * will be UCS_BASIC. If that attribute is set to TERRITORY_BASED, the 
+	 * collation type for user schemas will be TERRITORY_BASED. If the user
+	 * has not provide COLLATION attribute value in the JDBC url at database
+	 * create time, then collation type of user schemas will default to 
+	 * UCS_BASIC. Pre-10.3 databases after upgrade to Derby 10.3 will also
+	 * use UCS_BASIC for collation type of user schemas.
+	 */
+	private int collationTypeOfUserSchemas;
+
 	/*
 	** Constructor
 	*/
@@ -464,8 +484,16 @@ public final class	DataDictionaryImpl
 		uuidFactory = Monitor.getMonitor().getUUIDFactory();
 
 		engineType = Monitor.getEngineType( startParams );
-        
-        getBuiltinSchemas();
+
+		//Set the collation type of system schemas before we start loading 
+		//built-in schemas's SchemaDescriptor(s). This is because 
+		//SchemaDescriptor will look to DataDictionary to get the correct 
+		//collation type for themselves. We can't load SD for SESSION schema
+		//just yet because we do not know the collation type for user schemas
+		//yet. We will know the right collation for user schema little later
+		//in this boot method.
+		collationTypeOfSystemSchemas = StringDataValue.COLLATION_TYPE_UCS_BASIC;
+        getBuiltinSystemSchemas();
 
 		// REMIND: actually, we're supposed to get the DataValueFactory
 		// out of the connection context...this is a bit of a shortcut.
@@ -639,7 +667,49 @@ public final class	DataDictionaryImpl
 			exFactory.newExecutionContext(cm);
 
 			DataDescriptorGenerator ddg = getDataDescriptorGenerator();
-	
+
+			//We should set the user schema collation type here now because
+			//later on, we are going to create user schema APP. By the time any
+			//user schema gets created, we should have the correct collation
+			//type set for such schemas to use. For this reason, don't remove
+			//the following if else statement and don't move it later in this 
+			//method.
+			String userDefinedCollation;		
+			if (create) {
+				// Get the collation attribute from the JDBC url. It can only have one of
+				// 2 possible values - UCS_BASIC or TERRITORY_BASED
+				// This attribute can only be specified at database create time.
+				userDefinedCollation = startParams.getProperty(Attribute.COLLATION);		
+				if (userDefinedCollation == null)
+					userDefinedCollation = Property.UCS_BASIC_COLLATION;
+				else {//Invalid value handling
+					if (!userDefinedCollation.equalsIgnoreCase(Property.UCS_BASIC_COLLATION)
+							&& !userDefinedCollation.equalsIgnoreCase(Property.TERRITORY_BASED_COLLATION))
+						throw StandardException.newException(SQLState.INVALID_COLLATION, userDefinedCollation);
+					}
+				bootingTC.setProperty(Property.COLLATION,userDefinedCollation,true);
+			} else {
+				userDefinedCollation = startParams.getProperty(Property.COLLATION);
+				if (userDefinedCollation == null)
+					userDefinedCollation = Property.UCS_BASIC_COLLATION;
+			}
+
+			//Initialize the collation type of user schemas after looking at 
+			//collation property/attribute.
+			if (userDefinedCollation.equalsIgnoreCase(Property.UCS_BASIC_COLLATION))
+				collationTypeOfUserSchemas = StringDataValue.COLLATION_TYPE_UCS_BASIC;
+			else
+				collationTypeOfUserSchemas = StringDataValue.COLLATION_TYPE_TERRITORY_BASED;
+
+			//Now is also a good time to create schema descriptor for global
+			//temporary tables. Since this is a user schema, it should use the
+			//collation type associated with user schemas. Since we just 
+			//finished setting up the collation type of user schema, it is 
+			//safe to create user SchemaDescriptor(s) now.
+			declaredGlobalTemporaryTablesSchemaDesc = 
+	            newDeclaredGlobalTemporaryTablesSchemaDesc(
+	                    SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME);
+			
 			if (create) {
 				String userName = IdUtil.getUserNameFromURLProps(startParams);
 				authorizationDatabaseOwner = IdUtil.getUserAuthorizationId(userName);
@@ -673,18 +743,6 @@ public final class	DataDictionaryImpl
 					bootingTC.setProperty(Property.SQL_AUTHORIZATION_PROPERTY,"true",true);
 					usesSqlAuthorization=true;
 				}
-				// Get the collation attribute from the JDBC url. It can only have one of
-				// 2 possible values - UCS_BASIC or TERRITORY_BASED
-				// This attribute can only be specified at database create time.
-				String userDefinedCollation = startParams.getProperty(Attribute.COLLATION);		
-				if (userDefinedCollation == null)
-					userDefinedCollation = Property.UCS_BASIC_COLLATION;
-				else {//Invalid value handling
-					if (!userDefinedCollation.equalsIgnoreCase(Property.UCS_BASIC_COLLATION)
-							&& !userDefinedCollation.equalsIgnoreCase(Property.TERRITORY_BASED_COLLATION))
-						throw StandardException.newException(SQLState.INVALID_COLLATION, userDefinedCollation);
-					}
-				bootingTC.setProperty(Property.COLLATION,userDefinedCollation,true);
 			} else {
 				// Get the ids for non-core tables
 				loadDictionaryTables(bootingTC, ddg, startParams);
@@ -1193,6 +1251,18 @@ public final class	DataDictionaryImpl
 	{
 		return usesSqlAuthorization;
 	}
+	
+	/** @see DataDictionary#getCollationTypeOfSystemSchemas() */
+	public int getCollationTypeOfSystemSchemas() 
+	{
+		return collationTypeOfSystemSchemas;		
+	}
+	
+	/** @see DataDictionary#getCollationTypeOfUserSchemas() */
+	public int getCollationTypeOfUserSchemas()
+	{
+		return collationTypeOfUserSchemas;
+	}
 
 	/**
 	 * Get a DataValueFactory, through which we can create
@@ -1217,9 +1287,9 @@ public final class	DataDictionaryImpl
 
 
     /**
-     * Set up the builtin schema descriptors.
+     * Set up the builtin schema descriptors for system schemas.
      */
-    private void getBuiltinSchemas()
+    private void getBuiltinSystemSchemas()
     {
         if (systemSchemaDesc != null)
             return;
@@ -1233,10 +1303,6 @@ public final class	DataDictionaryImpl
 		systemUtilSchemaDesc  = 
             newSystemSchemaDesc(SchemaDescriptor.STD_SYSTEM_UTIL_SCHEMA_NAME,
                 SchemaDescriptor.SYSCS_UTIL_SCHEMA_UUID);
-
-		declaredGlobalTemporaryTablesSchemaDesc = 
-            newDeclaredGlobalTemporaryTablesSchemaDesc(
-                    SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME);
     }
 
 	/**
@@ -6256,7 +6322,7 @@ public final class	DataDictionaryImpl
 
 	/**
 		Create all the required dictionary tables. Any classes that extend this class
-		and need to create new tables shoudl override this method, and then
+		and need to create new tables should override this method, and then
 		call this method as the first action in the new method, e.g.
 		<PRE>
 		protected Configuration createDictionaryTables(Configuration cfg, TransactionController tc,

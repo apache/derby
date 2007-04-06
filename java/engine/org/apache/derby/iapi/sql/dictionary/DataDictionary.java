@@ -265,7 +265,31 @@ public interface DataDictionary
 	 * @return	Whether sqlAuthorization is being used
 	 */
 	public boolean usesSqlAuthorization();
+	
+	/**
+	 * Return the collation type for SYSTEM schemas. In Derby 10.3, this will 
+	 * always be UCS_BASIC 
+	 * 
+	 * @return the collation type for SYSTEM schemas
+	 */
+	public int getCollationTypeOfSystemSchemas();
 
+	/**
+	 * Return the collation type for user schemas. In Derby 10.3, this is either 
+	 * UCS_BASIC or TERRITORY_BASED. The exact value is decided by what has 
+	 * user asked for through JDBC url optional attribute COLLATION. If that
+	 * atrribute is set to UCS_BASIC, the collation type for user schemas
+	 * will be UCS_BASIC. If that attribute is set to TERRITORY_BASED, the 
+	 * collation type for user schemas will be TERRITORY_BASED. If the user
+	 * has not provided COLLATION attribute value in the JDBC url at database
+	 * create time, then collation type of user schemas will default to 
+	 * UCS_BASIC. Pre-10.3 databases after upgrade to Derby 10.3 will also
+	 * use UCS_BASIC for collation type of user schemas. 
+	 * 
+	 * @return the collation type for user schemas
+	 */
+	public int getCollationTypeOfUserSchemas();
+	
 	/**
 	 * Get the descriptor for the named schema.
 	   Schema descriptors include authorization ids and schema ids.
