@@ -75,5 +75,4 @@ lang/triggerGeneral.sql
 lang/triggerRecursion.sql
 lang/triggerRefClause.sql
 lang/ungroupedAggregatesNegative.sql
-lang/updateCursor.java
 lang/wisconsin.java
