@@ -35,6 +35,7 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.impl.sql.execute.ColumnInfo;
 import org.apache.derby.impl.sql.execute.ConstraintConstantAction;
@@ -230,6 +231,28 @@ public class AlterTableNode extends DDLStatementNode
 		/* Statement is dependent on the TableDescriptor */
 		getCompilerContext().createDependency(baseTable);
 
+		//If we are dealing with add column character type, then set that 
+		//column's collation type to be the collation type of the schema.
+		//The collation derivation of such a column would be "implicit".
+		if (changeType == ADD_TYPE) {//the action is of type add.
+			if (tableElementList != null) {//check if is is add column
+				for (int i=0; i<tableElementList.size();i++) {
+					if (tableElementList.elementAt(i) instanceof ColumnDefinitionNode) {
+						ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElementList.elementAt(i);
+						//check if we are dealing with add character column
+						if (cdn.getDataTypeServices().getTypeId().isStringTypeId()) {
+							//we found what we are looking for. Set the 
+							//collation type of this column to be the same as
+							//schema descriptor's collation. Set the collation
+							//derivation as implicit
+							cdn.getDataTypeServices().setCollationType(schemaDescriptor.getCollationType());
+							cdn.getDataTypeServices().setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			        	}						
+					}
+				}
+				
+			}
+		}
 		if (tableElementList != null)
 		{
 			tableElementList.validate(this, dd, baseTable);

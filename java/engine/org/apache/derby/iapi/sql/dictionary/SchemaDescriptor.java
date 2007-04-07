@@ -238,6 +238,17 @@ public final class SchemaDescriptor extends TupleDescriptor
 		this.oid = oid;
 	}
 
+	/**
+	 * Returns the collation type associated with this schema 
+	 *
+	 * @return collation type
+	 *
+	 */
+	public int	getCollationType()
+	{
+		return collationType;
+	}
+
 	//
 	// Provider interface
 	//

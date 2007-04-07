@@ -44,6 +44,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.sql.execute.ColumnInfo;
 import org.apache.derby.impl.sql.execute.CreateConstraintConstantAction;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 import java.util.Properties;
 
 /**
@@ -424,6 +425,18 @@ public class CreateTableNode extends DDLStatementNode
 		CreateConstraintConstantAction[] conActions = null;
 
 		SchemaDescriptor sd = getSchemaDescriptor();
+		
+		//Set the collation type and collation derivation of all the character
+		//type columns. Their collation type will be same as the collation of
+		//the schema they belong to. Theie collation derivation will be 
+		//"implicit".
+        for (int i = 0; i < colInfos.length; i++) {
+        	DataTypeDescriptor dts = colInfos[i].dataType;
+        	if (dts.getTypeId().isStringTypeId()) {
+        		dts.setCollationType(sd.getCollationType());
+sqlc        		dts.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+        	}
+        }
 
 		if (numConstraints > 0)
 		{
