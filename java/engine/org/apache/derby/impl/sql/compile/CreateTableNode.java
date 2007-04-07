@@ -434,7 +434,7 @@ public class CreateTableNode extends DDLStatementNode
         	DataTypeDescriptor dts = colInfos[i].dataType;
         	if (dts.getTypeId().isStringTypeId()) {
         		dts.setCollationType(sd.getCollationType());
-sqlc        		dts.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+        		dts.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
         	}
         }
 
