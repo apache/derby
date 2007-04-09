@@ -100,6 +100,10 @@ public class _Suite extends BaseTestCase  {
             // Tests uses JDBC 3.0 datasources
             suite.addTest(PoolDSAuthenticationTest.suite());
             suite.addTest(XADSAuthenticationTest.suite());
+            
+            // Test uses DriverManager, Pooled and XADataSources, and
+            // an inner class implements ConnectionEventListener.
+            suite.addTest(DataSourceTest.suite());
         }
 		
         return suite;

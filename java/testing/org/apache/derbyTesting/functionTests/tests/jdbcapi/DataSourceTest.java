@@ -114,7 +114,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        // TODO: remove tearDown?
         if (JDBC.vmSupportsJSR169())
         {
             // test uses unsupported classes like DriverManager, XADataSource,
@@ -269,7 +268,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         }
         pc.addConnectionEventListener(new AssertEventCatcher(1));
 
-        // TODO: log bug / check if one exists
+        // DERBY-2531
         // with Network Server / DerbyNetClient, the assertConnectionOK check
         // returns a different connection object...
         assertConnectionOK(
@@ -458,8 +457,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // when switching between global transactions and local
         // and setting connection state.
         // some of this may be tested elsewhere too.
-        // TODO: there is a difference in ReadOnly state between
-        // DerbyNetClient and embedded...Is this a bug?
 
         XADataSource dsx = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
@@ -486,6 +483,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         setHoldability(cs1, false); // close cursors
         // modified X1
         boolean ReadOnly = false;
+        // see DERBY-911, ReadOnly state different for Embedded/DerbyNetClient
         if (usingEmbedded())
             ReadOnly = true;
         assertConnectionState(
@@ -745,9 +743,9 @@ public class DataSourceTest extends BaseJDBCTestCase {
     // left in for reference to the original non-junit test
     public void testReuseAcrossGlobalLocal() throws SQLException, XAException {
 
-        // TODO: analyze & log a bug if needed:
+        // DERBY-2533 -
         // network server cannot run this test - it hits a protocol error
-        // on tearDown.
+        // on tearDown. Embedded requires a database shutdown
         if (usingDerbyNetClient())
             return;
         
@@ -908,7 +906,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // test methods against a closed XAConnection and its resource
         try {
             xac2.getXAResource();
-            // TODO: is this a bug?: 
+            // DERBY-2532
             // Network Server does not think this is worth an exception.
             if (usingEmbedded())
                 fail("expected SQLException on " +
@@ -1805,7 +1803,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
     /* ------------------ JDBC30 (and up) Fixtures ------------------ */
     
     public void testXAHoldability() throws SQLException, XAException {
-        // TODO: figure this out
+        // DERBY-2533 - 
         // This test, when run with Network server / DerbyNetClient
         // leaves the database is a bad state which results in a
         // network protocol error
@@ -1920,8 +1918,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // STATEMENT(this one was created with holdability true, 
         // outside the global transaction. Check its holdability inside 
         // global transaction:
-        // TODO: network server / DerbyNetClient has a different value than
-        //       embedded. Log a bug or is there one?:
+        // DERBY-2531: network server / DerbyNetClient has a different value 
+        // than embedded.
         if (usingEmbedded())
             assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, 
                 sh.getResultSetHoldability());
@@ -2532,7 +2530,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
     throws SQLException {
 
         try {
-            // TODO: is this a bug?
+            // DERBY-2531
             // network server gives mismatched connections. See also
             // comment in testAllDataSources()
             if (usingEmbedded())
