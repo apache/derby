@@ -4,7 +4,6 @@
 # excluding jdbcapi/testRelative.java because this is a new test contributed by Shreyas Kaushik and needs to be debugged with JCC  in order to get it running with network server
 # excluding jdbcapi/SetQueryTimeoutTest.java because neither the JCC driver nor the ClientDriver support setQueryTimeout() yet.
 # excluding jdbcapi/rsgetXXXcolumnNames.java as it fails incorrectly, according to JDBC spec. Forwarding test case to JCC team.
-# excluding jdbcapi/checkDataSource30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
 # excluding jdbcapi/dataSourceReference.java - client side only tests, tests all data sources
 #           regardless of framework
@@ -18,7 +17,6 @@ jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/SetQueryTimeoutTest.java
 jdbcapi/blobSetBinaryStream.java
-jdbcapi/checkDataSource30.java
 jdbcapi/statementJdbc30.java
 jdbcapi/dataSourceReference.java
 #no XA for JCC
@@ -26,9 +24,6 @@ jdbcapi/savepointJdbc30_XA.java
 # excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test
 jdbcapi/derbyStress.java
 largedata/LobLimits.java
-# Excluding checkDataSource and checkDataSource30 because JCC has no XA
-jdbcapi/checkDataSource30.java
-jdbcapi/checkDataSource.java
 jdbcapi/SURTest_ij.sql
 # Excluding ResultSetClose test since an exception in a statement results in all
 # the result sets associated with the connection closing

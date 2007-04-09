@@ -22,9 +22,6 @@
 # tools/ieptests - names files in extin dir, but they are on the server
 # lang/wisconsin - optimization is quite different when running remote server.
 # junitTests/derbyNet/CompatibilityTest.java - tries to start and shutdown the server.
-# jdbcapi/checkDataSource.java - test leaves things in a bad state, causing the subsequent
-#       tests to fail when run on same database. See DERBY-1760.
-# jdbcapi/checkDataSource30.java - ditto to checkDataSource.
 # stress/stress.multi - attempts to connect to localhost.
 # 
 store/bootLock.java
@@ -41,6 +38,4 @@ derbynet/DerbyNetAutoStart.java
 tools/ieptests.sql
 lang/wisconsin.java
 junitTests/derbyNet/CompatibilityTest.java
-jdbcapi/checkDataSource.java
-jdbcapi/checkDataSource30.java
 stress/stress.multi

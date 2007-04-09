@@ -1,4 +1,3 @@
-jdbcapi/checkDataSource.java
 jdbcapi/xaAnotherTest.sql
 jdbcapi/xaSimpleNegative.sql
 store/xaOffline1.sql

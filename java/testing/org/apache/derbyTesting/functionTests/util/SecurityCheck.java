@@ -157,16 +157,6 @@ public class SecurityCheck {
 	 * @param o Obejct to be inspected
 	 * @param declared the declared type of the object. 
 	 */
-	public static void inspect(Object o, String declared)
-	{
-		if (o == null)
-			return;
-				
-		SecurityCheck.inspectClass(o.getClass(), declared);
-	}
-	
-    // temporary add a method - this will eventually replace inspect
-    // method above
     public static void assertSourceSecurity(Object o, String declared)
     {
         Assert.assertNotNull(o);
