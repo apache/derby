@@ -65,7 +65,7 @@ public class CollatorSQLLongvarchar extends SQLLongvarchar implements CollationE
 	 * Set the RuleBasedCollator for this instance of CollatorSQLLongvarchar. 
 	 * It will be used to do the collation.
 	 */
-	private void setCollator(RuleBasedCollator collatorForCharacterDatatypes)
+	protected void setCollator(RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		holderForCollationSensitiveInfo = 
 			new WorkHorseForCollatorDatatypes(collatorForCharacterDatatypes, this);
@@ -114,6 +114,31 @@ public class CollatorSQLLongvarchar extends SQLLongvarchar implements CollationE
 		result.setCollator(
 				holderForCollationSensitiveInfo.getCollatorForCollation());
 		return result;
+	}
+
+	/**
+	 * We do not anticipate this method on collation sensitive DVD to be
+	 * ever called in Derby 10.3 In future, when Derby will start supporting
+	 * SQL standard COLLATE clause, this method might get called on the
+	 * collation sensitive DVDs.
+	 *  
+	 * @see StringDataValue#getValue(RuleBasedCollator) 
+	 */
+	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
+	{
+		if (collatorForComparison != null)
+		{
+			//non-null collatorForComparison means use this collator sensitive
+			//implementation of SQLLongvarchar
+		    setCollator(collatorForComparison);
+		    return this;			
+		} else {
+			//null collatorForComparison means use UCS_BASIC for collation.
+			//For that, we need to use the base class SQLLongvarchar
+			SQLLongvarchar s = new SQLLongvarchar();
+			s.copyState(this);
+			return s;
+		}
 	}
 
 	/**

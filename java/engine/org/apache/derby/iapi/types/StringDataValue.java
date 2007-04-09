@@ -23,6 +23,8 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import java.text.RuleBasedCollator;
+
 public interface StringDataValue extends ConcatableDataValue
 {
 	// TRIM() types
@@ -175,4 +177,13 @@ public interface StringDataValue extends ConcatableDataValue
 	 */
 	public char[] getCharArray() throws StandardException;
 
+	/**
+	 * Gets either SQLChar/SQLVarchar/SQLLongvarchar/SQLClob(base classes) or 
+	 * CollatorSQLChar/CollatorSQLVarchar/CollatorSQLLongvarch/CollatorSQLClob
+	 * (subclasses). Whether this method returns the base class or the subclass 
+	 * depends on the value of the RuleBasedCollator. If RuleBasedCollator is 
+	 * null, then the object returned would be baseclass otherwise it would be 
+	 * subcalss.
+	 */
+	public StringDataValue getValue(RuleBasedCollator collatorForComparison);
 }

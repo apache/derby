@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.types;
 
+import java.text.RuleBasedCollator;
+
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
@@ -90,6 +92,22 @@ public class SQLVarchar
 	public DataValueDescriptor getNewNull()
 	{
 		return new SQLVarchar();
+	}
+
+	/** @see StringDataValue#getValue(RuleBasedCollator) */
+	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
+	{
+		if (collatorForComparison == null)
+		{//null collatorForComparison means use UCS_BASIC for collation
+		    return this;			
+		} else {
+			//non-null collatorForComparison means use collator sensitive
+			//implementation of SQLVarchar
+		     CollatorSQLVarchar s = new CollatorSQLVarchar();
+		     s.copyState(this);
+		     s.setCollator(collatorForComparison);
+		     return s;
+		}
 	}
 
 

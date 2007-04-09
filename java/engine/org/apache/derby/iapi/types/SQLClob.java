@@ -36,6 +36,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.RuleBasedCollator;
 import java.util.Calendar;
 
 
@@ -92,6 +93,22 @@ public class SQLClob
 	public DataValueDescriptor getNewNull()
 	{
 		return new SQLClob();
+	}
+
+	/** @see StringDataValue#getValue(RuleBasedCollator) */
+	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
+	{
+		if (collatorForComparison == null)
+		{//null collatorForComparison means use UCS_BASIC for collation
+		    return this;			
+		} else {
+			//non-null collatorForComparison means use collator sensitive
+			//implementation of SQLClob
+		     CollatorSQLClob s = new CollatorSQLClob();
+		     s.copyState(this);
+		     s.setCollator(collatorForComparison);
+		     return s;
+		}
 	}
 
 	/*

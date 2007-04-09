@@ -954,6 +954,22 @@ readingLoop:
 		return new SQLChar();
 	}
 
+	/** @see StringDataValue#getValue(RuleBasedCollator) */
+	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
+	{
+		if (collatorForComparison == null)
+		{//null collatorForComparison means use UCS_BASIC for collation
+		    return this;			
+		} else {
+			//non-null collatorForComparison means use collator sensitive
+			//implementation of SQLChar
+		     CollatorSQLChar s = new CollatorSQLChar();
+		     s.copyState(this);
+		     s.setCollator(collatorForComparison);
+		     return s;
+		}
+	}
+
 	/** 
 	 * @see DataValueDescriptor#setValueFromResultSet 
 	 *
