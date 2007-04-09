@@ -1639,8 +1639,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
     
     /**
      * Check that trace file exists in <framework> directory
-     * 
-     * @param filename Name of trace file
      */
     private static void assertTraceFilesExist() 
     {
