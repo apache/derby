@@ -26,6 +26,10 @@ import java.sql.ResultSet;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;    
+import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.error.StandardException;
+
 
 /**
  * This class provides ways to export data from
@@ -88,8 +92,12 @@ public class Export extends ExportAbstract{
      */
 	private void setLobsExtFileName(String lobsFileName) throws SQLException
 	{
-		if (lobsFileName == null)
-			throw LoadError.dataFileNull();
+		if (lobsFileName == null) {
+            throw PublicAPI.wrapStandardException(
+                      StandardException.newException(
+                      SQLState.LOB_DATA_FILE_NULL));
+        }
+
 		this.lobsFileName = lobsFileName;
 		lobsInExtFile = true;
 	}

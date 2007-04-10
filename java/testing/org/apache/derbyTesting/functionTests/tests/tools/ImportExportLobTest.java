@@ -107,6 +107,9 @@ public class ImportExportLobTest extends ImportExportBaseTest
         // delete the rows from the import table.
         s.executeUpdate("DELETE FROM BOOKS_IMP");
         s.close();
+        // delete the export files. 
+        SupportFilesSetup.deleteFile(fileName);
+        SupportFilesSetup.deleteFile(lobsFileName);
     }
 
     
@@ -267,6 +270,30 @@ public class ImportExportLobTest extends ImportExportBaseTest
         verifyData(" * ");
     }
 
+    /**
+     * Test import/export of a table, using 
+     * SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE and 
+     * SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE  procedures, 
+     * with an unqualified lob data file name as parameter
+     * for the export procedure.
+     */
+    public void testImportTableExportTableLobsInUnqalifiedExtFile()  
+        throws SQLException, IOException
+    {
+        // test export procedure with unqulified lob data  file name
+        // lob data file should get crated at the same location, where
+        // the main export file is created. And also perform import/export
+        // using "UTF-16" code set.
+        
+        doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
+                                    "\t", "|", "UTF-16", 
+                                   "unql_books_lobs.dat");
+	    doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
+                                     "\t", "|", "UTF-16", 0);
+        verifyData(" * ");
+    }
+
+
     
     /*
      * Test import/export of all the columns using 
@@ -277,9 +304,9 @@ public class ImportExportLobTest extends ImportExportBaseTest
         throws SQLException, IOException
     {
         doExportQueryLobsToExtFile("select * from BOOKS", fileName,
-                                   null, null , null, lobsFileName);
+                                  null, null, "8859_1", lobsFileName);
 	    doImportDataLobsFromExtFile(null, "BOOKS_IMP", null, null, fileName, 
-                                   null, null, null, 0);
+                                   null, null , "8859_1", 0);
         verifyData(" * ");
 
         // perform import with column names specified in random order.
@@ -371,6 +398,44 @@ public class ImportExportLobTest extends ImportExportBaseTest
             assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0J", e);
         }
     }
+
+
+
+    /**
+     * Test import/export of a table, using 
+     * SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE and 
+     * SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE  procedures, with an unqualified
+     * lobs file name as an argument value.
+     */
+    public void testImportTableExportWithInvalidLobFileName()  
+        throws SQLException, IOException
+    {
+        // test export of lob data with lob file name parameter 
+        // value as null,  it should fail.
+        try {
+            doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
+                                       null, null , null, 
+                                       null);
+        }catch (SQLException e) {
+            assertSQLState("XIE0Q", e);
+        }
+
+        // export of lob data into an external file.
+        doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
+                                   null, null , null, 
+                                   lobsFileName);
+        // delete the lob data file, and then perfom the import.
+        // import should fail with lob data file not found error. 
+        SupportFilesSetup.deleteFile(lobsFileName);
+        try {
+            // missing lob file, refered by the main import file.
+            doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
+                                         null, null, null, 0);
+        }catch (SQLException e) {
+            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0P", e);
+        }
+    }
+
 
 
     /* 

@@ -20,10 +20,19 @@
  */
 
 package org.apache.derby.impl.load;
-import java.io.*;
+import java.io.File;
+import java.io.RandomAccessFile;
+import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.FileNotFoundException;
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
+import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.error.StandardException;
 
 
 /**
@@ -36,28 +45,26 @@ class ImportLobFile
     private ImportFileInputStream lobInputStream = null;
     private LimitInputStream  lobLimitIn;
     private Reader lobReader = null;
-    private String lobFileName;
     private String dataCodeset; 
     
 
     /*
      * Create a ImportLobFile object.
-     * @param fileName  the file which gas LOB Data.
-     * @param  dataCodeset the code set to use char data in the file.
+     * @param lobFile  the file which has the LOB Data.
+     * @param dataCodeset the code set to use char data in the file.
      */
-    ImportLobFile(String fileName, String dataCodeset) throws Exception {
-        this.lobFileName = fileName;
+    ImportLobFile(File lobFile, String dataCodeset) throws Exception {
         this.dataCodeset = dataCodeset;
-        openLobFile(lobFileName);
+        openLobFile(lobFile);
     }
 
 
     /* 
      * Open the lob file and setup the stream required to read the data.
-     * @param lobFileName name of the file that contains lob data.
+     * @param lobFile the file that contains lob data.
      * @exception  Exception  if an error occurs.     
      */
-    private void openLobFile(final String lobFileName) 
+    private void openLobFile(final File lobFile) 
         throws Exception 
     {
         RandomAccessFile lobRaf;
@@ -67,7 +74,7 @@ class ImportLobFile
                 lobRaf = (RandomAccessFile)AccessController.doPrivileged
                 (new java.security.PrivilegedExceptionAction(){
                         public Object run() throws IOException{
-                            return new RandomAccessFile(lobFileName, "r");
+                            return new RandomAccessFile(lobFile, "r");
                         }   
                     }
                  );    	
@@ -75,7 +82,10 @@ class ImportLobFile
                 throw pae.getException();
             }
         } catch (FileNotFoundException ex) {
-            throw LoadError.dataFileNotFound(lobFileName);
+            throw PublicAPI.wrapStandardException(
+                      StandardException.newException(
+                      SQLState.LOB_DATA_FILE_NOT_FOUND, 
+                      lobFile.getPath()));
         } 
         
         // set up stream to read from input file, starting from 

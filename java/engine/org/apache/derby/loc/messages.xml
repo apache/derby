@@ -3870,6 +3870,18 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>hexString</arg>
             </msg>
 
+            <msg>
+                <name>XIE0P.S</name>
+                <text>Lob data file {0} referenced in the import file not found.</text>
+                <arg>fileName</arg>
+            </msg>
+
+            <msg>
+                <name>XIE0Q.S</name>
+                <text>Lob data file name cannot be null. </text>
+            </msg>
+
+
         </family>
 
 

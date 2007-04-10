@@ -266,4 +266,19 @@ public class SupportFilesSetup extends TestSetup {
             throw (MalformedURLException) e.getException();
         } 
     }
+
+
+    public static boolean deleteFile(final String fileName) 
+    {
+        Boolean ret = (Boolean) AccessController.doPrivileged
+            (new java.security.PrivilegedAction() {
+                        
+                    public Object run() {
+                        return Boolean.valueOf((new File(fileName)).delete());
+                    }
+                }
+             );
+            
+        return ret.booleanValue();
+    }
 }

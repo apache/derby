@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.io.IOException;
+import java.io.File;
 
 //this class takes the passed row and writes it into the data file using the
 //properties from the control file
@@ -122,7 +123,18 @@ final class ExportWriteData extends ExportWriteDataAbstract
         if (lobsInExtFile) 
         {
             // setup streams to write large objects into the external file. 
-            lobOutputStream = new FileOutputStream(lobsFileName);
+            File lobsFile =  new File(lobsFileName);
+            if (lobsFile.getParentFile() == null) {
+                // lob file name is unqualified. Make lobs file 
+                // parent directory is same as the the main export file. 
+                // lob file should get created at the same location 
+                // as the main export file.
+                lobsFile = new File((new File (outputFileName)).getParentFile(),
+                                    lobsFileName);
+
+            }
+
+            lobOutputStream = new FileOutputStream(lobsFile);
             lobOutBinaryStream = new BufferedOutputStream(lobOutputStream);
 
             // helper stream to convert char data to binary, after conversion

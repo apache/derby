@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -1050,8 +1051,17 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
                 // each lob column in the table has it's own file handle. 
                 // separate file handles are must, lob stream objects
                 // can not be reused until the whole row is inserted.
-                lobFileHandles[colIndex-1] = new ImportLobFile(lobFileName, 
-                                         controlFileReader.getDataCodeset());
+                File lobsFile = new File (lobFileName);
+                if (lobsFile.getParentFile() == null) {
+                    // lob file name is unqualified. lob file 
+                    // is expected to be in the same location as
+                    // the import file.
+                    lobsFile = new File((
+                                new File(inputFileName)).getParentFile(),
+                                        lobFileName);
+                }
+                lobFileHandles[colIndex-1] = new ImportLobFile(lobsFile, 
+                                             controlFileReader.getDataCodeset());
             }catch(Exception ex) {
                 throw LoadError.unexpectedError(ex);
             }

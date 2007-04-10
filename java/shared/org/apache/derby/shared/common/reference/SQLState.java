@@ -1709,6 +1709,9 @@ public interface SQLState {
 	String PERIOD_AS_CHAR_DELIMITER_NOT_ALLOWED                    ="XIE0K.S";
 	String TABLE_NOT_FOUND                                         ="XIE0M.S";
 	String IMPORTFILE_HAS_INVALID_HEXSTRING                        ="XIE0N.S";
+	String LOB_DATA_FILE_NOT_FOUND                                 ="XIE0P.S";
+	String LOB_DATA_FILE_NULL                                      ="XIE0Q.S";
+
 
 
     /*
