@@ -1,5 +1,4 @@
 jdbcapi/bestrowidentifier.sql
-jdbcapi/checkDriver.java
 jdbcapi/nullSQLText.java
 jdbcapi/resultsetStream.java
 jdbcapi/parameterMapping.java

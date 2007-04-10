@@ -5,7 +5,6 @@
 # jdbcapi/bestrowidentifier.sql - test fails when db2jcc is in classpath, complaining about
 #     java.lang.ExceptionInInitializerError 
 #     and access denied (java.lang.RuntimePermission loadLibrary.db2jcct2). (????!)
-# jdbcapi/checkDriver.java subtest createdbwithspaces fails, probably expecting different dir
 # junitTests/derbyNet/CompatibilityTest.java - exits the suite
 # derbynet/DerbyNetAutoStart.java - exits the suite...
 # derbynet/NSinSameJVM.java - fails with different thread names. probably ok...
@@ -28,7 +27,6 @@
 #
 jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
-jdbcapi/checkDriver.java
 junitTests/derbyNet/CompatibilityTest.java
 derbynet/DerbyNetAutoStart.java
 derbynet/NSinSameJVM.java

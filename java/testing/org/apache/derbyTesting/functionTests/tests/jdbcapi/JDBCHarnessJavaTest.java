@@ -52,7 +52,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             // "dataSourceReference", TODO: investigate failure/convert
             
             // from old jdbcapi.runall
-            // "checkDriver",  TODO: investigate failure/convert
             "derbyStress",
             // "nullSQLText",  TODO: investigate failure/convert
             // "prepStmtMetaData",  TODO: convert - different canon for client
