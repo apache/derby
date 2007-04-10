@@ -41,11 +41,11 @@ public interface StringDataValue extends ConcatableDataValue
 	  derivation of "none". All the other character string types should have 
 	  their collation derivation set to "implicit". 
 	 */
-	public	static	int COLLATION_DERIVATION_NONE = 0;
+	public	static final int COLLATION_DERIVATION_NONE = 0;
 	/** @see StringDataValue#COLLATION_DERIVATION_NONE */
-	public	static	int COLLATION_DERIVATION_IMPLICIT = 1;
+	public	static final int COLLATION_DERIVATION_IMPLICIT = 1;
 	/** @see StringDataValue#COLLATION_DERIVATION_NONE */
-	public	static	int COLLATION_DERIVATION_EXPLICIT = 2;
+	public	static final int COLLATION_DERIVATION_EXPLICIT = 2;
 	/**
 	 * In Derby 10.3, it is possible to have database with one of the following
 	 * two configurations
@@ -55,9 +55,9 @@ public interface StringDataValue extends ConcatableDataValue
 	 * collation type of UCS_BASIC but all the character string columns 
 	 * belonging to user tables will have collation type of TERRITORY_BASED.
 	 */
-	public	static	int COLLATION_TYPE_UCS_BASIC = 0;
+	public	static final int COLLATION_TYPE_UCS_BASIC = 0;
 	/** @see StringDataValue#COLLATION_TYPE_UCS_BASIC */
-	public	static	int COLLATION_TYPE_TERRITORY_BASED = 1;
+	public	static final int COLLATION_TYPE_TERRITORY_BASED = 1;
 
 	/**
 	 * The SQL concatenation '||' operator.
