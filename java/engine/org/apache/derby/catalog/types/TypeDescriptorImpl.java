@@ -404,13 +404,29 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		if(!this.getTypeName().equals(typeDescriptor.getTypeName()) ||
 		   this.precision != typeDescriptor.getPrecision() ||
 		   this.scale != typeDescriptor.getScale() ||
-		   this.collationDerivation == typeDescriptor.getCollationDerivation() ||
-		   this.collationType == typeDescriptor.getCollationType() || 
 		   this.isNullable != typeDescriptor.isNullable() ||
 		   this.maximumWidth != typeDescriptor.getMaximumWidth())
 		   return false;
 	    else
-			return true;
+	    {
+			switch (typeId.getJDBCTypeId()) {
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.CLOB:
+				//if we are dealing with character types, then we should 
+				//also compare the collation information on them.
+				if(this.collationDerivation != typeDescriptor.getCollationDerivation() ||
+						this.collationType != typeDescriptor.getCollationType())
+					return false;
+				else
+					return true;
+			default:
+				//no collation checking required if we are dealing with 
+				//non-char datatypes.
+				return true;
+			}
+	    }
 	}						   
 
 	// Formatable methods
