@@ -29,6 +29,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import java.util.Locale;
 
 /**
  * This interface is how we get constant data values of different types.
@@ -671,4 +672,19 @@ public interface DataValueFactory
          * that value.
          */
         XMLDataValue            getNullXML(XMLDataValue dataValue);
+
+        /**
+         * Set the locale on DVF. This method gets called by the boot method of
+         * BasicDatabase after BasicDatabase has finished booting DVF. This 
+         * Locale will be either the Locale obtained from the territory 
+         * attribute supplied by the user on the JDBC url at database create 
+         * time or if user didn't provide the territory attribute at database
+         * create time, then it will be set to the default JVM locale. The 
+         * Locale object will be used to construct the Collator object if user 
+         * has requested territory based collation.
+         *
+         * @param localeOfTheDatabase Use this object to construct the 
+         *   Collator object
+         */
+        void setLocale(Locale localeOfTheDatabase);
 }

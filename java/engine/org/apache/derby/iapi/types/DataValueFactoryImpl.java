@@ -46,8 +46,9 @@ import org.apache.derby.iapi.services.monitor.ModuleControl;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Properties;
 
+import java.util.Properties;
+import java.util.Locale;
 
 import org.apache.derby.iapi.db.DatabaseContext;
 import org.apache.derby.iapi.services.context.ContextService;
@@ -62,6 +63,9 @@ import org.apache.derby.iapi.services.context.ContextService;
 abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 {
         LocaleFinder localeFinder;
+        //BasicDatabase first boots DVF in it's boot method and then sets 
+        //this databaseLocale in DVF.
+    	private Locale databaseLocale;
 
         DataValueFactoryImpl()
         {
@@ -1077,6 +1081,11 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
             dataValue.setToNull();
             return dataValue;
         }
+    }
+
+    /** @see DataValueFactory#setLocale(Locale) */
+    public void setLocale(Locale localeOfTheDatabase){
+    	databaseLocale = localeOfTheDatabase;
     }
 
         // RESOLVE: This is here to find the LocaleFinder (i.e. the Database)

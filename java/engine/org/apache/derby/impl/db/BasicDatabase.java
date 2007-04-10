@@ -172,10 +172,20 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		// validation is separated from AccessFactory, therefore from store
 		bootValidation(create, startParams);
 		
-		// boot the type factpry before store to ensure any dynamically
+		// boot the type factory before store to ensure any dynamically
 		// registered types (DECIMAL) are there before logical undo recovery might need them.
 		Monitor.bootServiceModule(create, this,
-					org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
+				org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
+/*		DataValueFactory dvf = (DataValueFactory) Monitor.bootServiceModule(create, this,
+				org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
+		//After booting the DVF, set the Locale information into it. This 
+		//Locale will be either the Locale obtained from the territory 
+		//attribute supplied by the user on the JDBC url at database create 
+		//time or if user didn't provide the territory attribute at database
+		//create time, then it will be set to the default JVM locale. If user 
+		//has requested territory based collation then a Collator object will
+		//be constructed from this Locale object. 
+		dvf.setLocale(databaseLocale);*/
 
 		bootStore(create, startParams);
 
