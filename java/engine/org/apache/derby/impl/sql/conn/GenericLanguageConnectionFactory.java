@@ -304,6 +304,10 @@ public class GenericLanguageConnectionFactory
 	public void boot(boolean create, Properties startParams) 
 		throws StandardException {
 
+		//The following call to Monitor to get DVF is going to get the already
+		//booted DVF (DVF got booted by BasicDatabase's boot method. 
+		//BasicDatabase also set the correct Locale in the DVF. There after,
+		//DVF with correct Locale is available to rest of the Derby code.
 		dvf = (DataValueFactory) Monitor.bootServiceModule(create, this, org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
 		javaFactory = (JavaFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.JavaFactory);
 		uuidFactory = Monitor.getMonitor().getUUIDFactory();
