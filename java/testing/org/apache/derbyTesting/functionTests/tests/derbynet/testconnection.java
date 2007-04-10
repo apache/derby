@@ -45,7 +45,7 @@ public class testconnection
 		"ping", "-h", "localhost", "-p", "1527"};
 	private static String[] TestConnectionCmd3 = new String[] {"org.apache.derby.drda.NetworkServerControl",
 				    "ping", "-h", "notthere", "-p", "1527"};
-	private static String[] TestConnectionCmd3a = new String[] {"org.apache.derby.drda.NetworkServerControl",																		"ping", "-h", "ihave-inmyname.com", "-p", "1527"};
+	private static String[] TestConnectionCmd3a = new String[] {"org.apache.derby.drda.NetworkServerControl",																		"ping", "-h", "fictitious.apache.org", "-p", "1527"};
 	private static String[] TestConnectionCmd4 = new String[] {"org.apache.derby.drda.NetworkServerControl",
 		"ping", "-h", "localhost"};
 	private static String[] TestConnectionCmd5 = new String[] {"org.apache.derby.drda.NetworkServerControl",
