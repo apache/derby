@@ -50,7 +50,7 @@ public class IjTestCase extends ScriptTestCase {
 	public IjTestCase(String name) {
 		super(name);
 		scriptName = getName() + ".sql";
-		outfileName = SupportFilesSetup.EXTINOUT + File.separator + getName() + ".out";
+		outfileName = SupportFilesSetup.EXTINOUT + "/" + getName() + ".out";
 		outfile = new File(outfileName);
 	}
 	
@@ -59,7 +59,7 @@ public class IjTestCase extends ScriptTestCase {
 		setSystemProperty("ij.outfile", outfileName);
 		setSystemProperty("ij.defaultResourcePackage",
 				"/org/apache/derbyTesting/functionTests/tests/"
-				+ getArea() + File.separator);
+				+ getArea() + "/");
 	}
 	
 	public void tearDown() throws Exception {

@@ -250,23 +250,12 @@ public class utilMain implements java.security.PrivilegedAction {
 
       		//check if the property is set to not show select count and set the static variable
       		//accordingly. 
-    		//boolean showNoCountForSelect = Boolean.getBoolean("ij.showNoCountForSelect");
-    		String prop = (String) AccessController.doPrivileged(new PrivilegedAction() {
-    					public Object run() {
-    						return System.getProperty("ij.showNoCountForSelect");
-    					}
-    		});
-    		boolean showNoCountForSelect = Boolean.valueOf(prop).booleanValue();
+    		boolean showNoCountForSelect = Boolean.valueOf(util.getSystemProperty("ij.showNoCountForSelect")).booleanValue();
       		JDBCDisplayUtil.showSelectCount = !showNoCountForSelect;
 
       		//check if the property is set to not show initial connections and accordingly set the
       		//static variable.
-    		prop = (String) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					return System.getProperty("ij.showNoConnectionsAtStart");
-				}
-         	});
-    		boolean showNoConnectionsAtStart = Boolean.valueOf(prop).booleanValue();
+    		boolean showNoConnectionsAtStart = Boolean.valueOf(util.getSystemProperty("ij.showNoConnectionsAtStart")).booleanValue();
 
     		if (!(showNoConnectionsAtStart)) {
          		try {
