@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -92,7 +93,26 @@ public class CastingTest extends BaseJDBCTestCase {
             "BLOB(1k)",
     };
 
-
+    public static int[] jdbcTypes = {
+        java.sql.Types.SMALLINT,
+        java.sql.Types.INTEGER,
+        java.sql.Types.BIGINT,
+        java.sql.Types.DECIMAL,
+        java.sql.Types.REAL,
+        java.sql.Types.DOUBLE,
+        java.sql.Types.CHAR,
+        java.sql.Types.VARCHAR,
+        java.sql.Types.LONGVARCHAR,
+        java.sql.Types.BINARY,
+        java.sql.Types.VARBINARY,
+        java.sql.Types.LONGVARBINARY,
+        java.sql.Types.CLOB,
+        java.sql.Types.DATE,
+        java.sql.Types.TIME,
+        java.sql.Types.TIMESTAMP,
+        java.sql.Types.BLOB
+    };
+    
     public static int NULL_DATA_OFFSET = 0;  // offset of NULL value
     public static int VALID_DATA_OFFSET = 1;  // offset of NULL value
 
@@ -370,6 +390,8 @@ public static String[][]SQLData =
                         ResultSet rs = s.executeQuery(query);
                         rs.next();
                         String val = rs.getString(1);
+                        ResultSetMetaData rsmd = rs.getMetaData();
+                        assertEquals(rsmd.getColumnType(1), jdbcTypes[targetType]);
                         rs.close();
                         if (dataOffset == 0)
                             assertNull(val);

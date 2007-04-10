@@ -2,7 +2,6 @@ jdbcapi/bestrowidentifier.sql
 jdbcapi/checkDriver.java
 jdbcapi/nullSQLText.java
 jdbcapi/resultsetStream.java
-jdbcapi/LOBTest.java
 jdbcapi/parameterMapping.java
 jdbcapi/testRelative.java
 jdbcapi/SURTest_ij.sql

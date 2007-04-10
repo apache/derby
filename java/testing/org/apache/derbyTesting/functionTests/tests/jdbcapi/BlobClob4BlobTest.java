@@ -34,9 +34,11 @@ import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.Utilities;
 
 import junit.framework.*;
 import java.sql.*;
+
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -3134,6 +3136,59 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         assertEquals("FAIL - wrong not null row count null:" + nullCount,
                 9, rowCount);
         assertEquals("FAIL - wrong null blob count", 1, nullCount);
+    }
+
+    /**
+     * From LobTest.java, test various inserts on a BLOB column
+     * 
+     * @throws SQLException
+     */
+    public void testBlobInsert() throws SQLException {
+        String[] typeNames = { "int", "char(10)", "varchar(80)", "long varchar",
+                "char(10) for bit data", "long varchar for bit data", "blob(80)" };
+
+        Connection conn = getConnection();
+        Statement s = conn.createStatement();
+
+        // create table for testing
+
+        s.execute("create table blobCheck (bl blob(80)) ");
+
+        int columns = typeNames.length;
+        // test insertion of literals.
+        for (int i = 0; i < columns; i++) {
+
+            if (typeNames[i].indexOf("blob") == -1)
+                continue;
+
+            // Check char literals.
+            // (fail)
+            String insert = "insert into blobCheck (bl"
+                    + " ) values ('string' )";
+            assertStatementError("42821",s,insert);
+            // (succeed)
+            insert = "insert into blobCheck (bl" + " ) values (cast ("
+                    + Utilities.stringToHexLiteral("string") + " as blob(80)) )";
+            s.execute(insert);
+            // Check bit literals.
+            // (fail)
+            insert = "insert into blobCheck (bl" + " ) values (X'48' )";
+           assertStatementError("42821",s,insert);
+            // old CS compatible value: ( b'01001' )
+            // (succeed)
+            insert = "insert into blobCheck (bl"
+                    + " ) values (cast (X'C8' as blob(80)) )";
+            s.execute(insert);
+            // Check hex literals.
+            // (fail)
+            insert = "insert into blobCheck (bl" + " ) values ( X'a78a' )";
+            assertStatementError("42821",s,insert);
+            // (succeed)
+            insert = "insert into blobCheck (bl"
+                    + " ) values (cast (X'a78a' as blob(80)) )";
+            s.execute(insert);
+        }
+        s.execute("drop table blobCheck");
     }
 
     private void checkException(String SQLState, SQLException se)
