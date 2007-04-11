@@ -10,7 +10,6 @@ lang/authorize.sql
 lang/autoincrement.sql
 lang/checkConstraint.sql
 lang/closed.java
-lang/coalesceTests.java
 lang/columnDefaults.sql
 lang/compressTable.sql
 lang/connect.sql

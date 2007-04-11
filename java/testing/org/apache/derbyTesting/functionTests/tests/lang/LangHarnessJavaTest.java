@@ -59,7 +59,6 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
         "bug5054",
         //"casting", TODO: investigate/convert, uses TestUtil.isNetFramework()
         //"closed", TODO: investigate/convert
-        // "coalesceTests", TODO: investigate/convert
         "concateTests",
         // "currentof", being converted
         // "cursor", TODO: investigate/convert
