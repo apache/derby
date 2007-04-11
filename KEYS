@@ -427,3 +427,72 @@ SQQYEQIACQUCROLl4wIbDAAKCRDfoOnJiNg3In9mAJwOJiJ+8s4BSFd+u9JzW2wg
 1D3dCgCgyDPdCE3+3sl/C/VvoZ0PdhnuYAE=
 =+RoX
 -----END PGP PUBLIC KEY BLOCK-----
+pub   1024D/5355D01C 2007-03-25
+uid                  Dag H. Wanvik (Derby committer) <dag@apache.org>
+sig          35C100F0 2007-03-26  Bernt M. Johnsen <bernt@apache.org>
+sig 3        5355D01C 2007-03-26  Dag H. Wanvik (Derby committer) <dag@apache.org>
+sig          990ED4AA 2007-03-27  Knut Anders Hatlen <kahatlen@apache.org>
+sig 3        5355D01C 2007-03-25  Dag H. Wanvik (Derby committer) <dag@apache.org>
+sig 3        990ED4AA 2007-04-11  Knut Anders Hatlen <kahatlen@apache.org>
+uid                  Dag H. Wanvik <dag@wanvik.com>
+sig          35C100F0 2007-03-26  Bernt M. Johnsen <bernt@apache.org>
+sig 3        5355D01C 2007-03-25  Dag H. Wanvik (Derby committer) <dag@apache.org>
+sig          35C100F0 2007-03-26  Bernt M. Johnsen <bernt@apache.org>
+sig          990ED4AA 2007-03-27  Knut Anders Hatlen <kahatlen@apache.org>
+sig          990ED4AA 2007-03-27  Knut Anders Hatlen <kahatlen@apache.org>
+sig 3        990ED4AA 2007-04-11  Knut Anders Hatlen <kahatlen@apache.org>
+uid                  Dag H. Wanvik <dag.wanvik@sun.com>
+sig 3        5355D01C 2007-03-26  Dag H. Wanvik (Derby committer) <dag@apache.org>
+sub   2048g/6F3578EF 2007-03-25
+sig          5355D01C 2007-03-25  Dag H. Wanvik (Derby committer) <dag@apache.org>
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.4.6 (SunOS)
+
+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
+sQ==
+=GBQb
+-----END PGP PUBLIC KEY BLOCK-----
