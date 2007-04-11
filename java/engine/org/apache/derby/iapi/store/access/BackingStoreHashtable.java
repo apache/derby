@@ -32,8 +32,10 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties; 
 import java.util.Vector;
 import java.util.NoSuchElementException;
@@ -109,7 +111,7 @@ public class BackingStoreHashtable
      **************************************************************************
      */
     private TransactionController tc;
-    private Hashtable   hash_table;
+    private HashMap     hash_table;
     private int[]       key_column_numbers;
     private boolean     remove_duplicates;
 	private boolean		skipNullKeyColumns;
@@ -145,7 +147,7 @@ public class BackingStoreHashtable
      * constructor.  
      * <p>
      * If the number of rows is <= "max_inmemory_rowcnt", then the rows are
-     * inserted into a java.util.Hashtable.  In this case no 
+     * inserted into a java.util.HashMap. In this case no
      * TransactionController is necessary, a "null" tc is valid.
      * <p>
      * If the number of rows is > "max_inmemory_rowcnt", then the rows will
@@ -158,12 +160,12 @@ public class BackingStoreHashtable
      * @param row_source        RowSource to read rows from.
      *
      * @param key_column_numbers The column numbers of the columns in the
-     *                          scan result row to be the key to the Hashtable.
+     *                          scan result row to be the key to the HashMap.
      *                          "0" is the first column in the scan result
      *                          row (which may be different than the first
      *                          row in the table of the scan).
      *
-     * @param remove_duplicates Should the Hashtable automatically remove
+     * @param remove_duplicates Should the HashMap automatically remove
      *                          duplicates, or should it create the Vector of
      *                          duplicates?
      *
@@ -175,11 +177,9 @@ public class BackingStoreHashtable
      *                          inmemory Hash table before overflowing to disk.
      *                          Pass in -1 if there is no maximum.
      *
-     * @param initialCapacity   If not "-1" used to initialize the java 
-     *                          Hashtable.
+     * @param initialCapacity   If not "-1" used to initialize the java HashMap
      *
-     * @param loadFactor        If not "-1" used to initialize the java 
-     *                          Hashtable.
+     * @param loadFactor        If not "-1" used to initialize the java HashMap
 	 *
 	 * @param skipNullKeyColumns	Skip rows with a null key column, if true.
      *
@@ -222,8 +222,8 @@ public class BackingStoreHashtable
         {
             hash_table = 
                 ((loadFactor == -1) ? 
-                     new Hashtable(initialCapacity) : 
-                     new Hashtable(initialCapacity, loadFactor));
+                     new HashMap(initialCapacity) :
+                     new HashMap(initialCapacity, loadFactor));
         }
         else
         {
@@ -237,26 +237,26 @@ public class BackingStoreHashtable
              * some very high row count estimates--even up to the point of
              * Double.POSITIVE_INFINITY (see DERBY-1259 for an explanation
              * of how that can happen).  In that case any attempts to
-             * create a Hashtable of size estimated_rowcnt can cause
-             * OutOfMemory errors when we try to create the Hashtable.
+             * create a hash table of size estimated_rowcnt can cause
+             * OutOfMemory errors when we try to create the hash table.
              * So as a "red flag" for that kind of situation, we check to
              * see if the estimated row count is greater than the max
              * in-memory size for this table.  Unit-wise this comparison
              * is relatively meaningless: rows vs bytes.  But if our
              * estimated row count is greater than the max number of
              * in-memory bytes that we're allowed to consume, then
-             * it's very likely that creating a Hashtable with a capacity
+             * it's very likely that creating a hash table with a capacity
              * of estimated_rowcnt will lead to memory problems.  So in
              * that particular case we leave hash_table null here and
              * initialize it further below, using the estimated in-memory
              * size of the first row to figure out what a reasonable size
-             * for the Hashtable might be.
+             * for the hash table might be.
              */
             hash_table = 
                 (((estimated_rowcnt <= 0) || (row_source == null)) ?
-                     new Hashtable() :
+                     new HashMap() :
                      (estimated_rowcnt < max_inmemory_size) ?
-                         new Hashtable((int) estimated_rowcnt) :
+                         new HashMap((int) estimated_rowcnt) :
                          null);
         }
 
@@ -267,7 +267,7 @@ public class BackingStoreHashtable
             while ((row = getNextRowFromRowSource()) != null)
             {
                 // If we haven't initialized the hash_table yet then that's
-                // because a Hashtable with capacity estimated_rowcnt would
+                // because a hash table with capacity estimated_rowcnt would
                 // probably cause memory problems.  So look at the first row
                 // that we found and use that to create the hash table with
                 // an initial capacity such that, if it was completely full,
@@ -278,12 +278,13 @@ public class BackingStoreHashtable
                 {
                     // Check to see how much memory we think the first row
                     // is going to take, and then use that to set the initial
-                    // capacity of the Hashtable.
+                    // capacity of the hash table.
                     double rowUsage = getEstimatedMemUsage(row);
-                    hash_table = new Hashtable((int)(max_inmemory_size / rowUsage));
+                    hash_table =
+                        new HashMap((int)(max_inmemory_size / rowUsage));
                 }
                
-                add_row_to_hash_table(hash_table, row, needsToClone);
+                add_row_to_hash_table(row, needsToClone);
             }
         }
 
@@ -295,7 +296,7 @@ public class BackingStoreHashtable
         // BackingStoreHashtable (ex. "size()") will have a working hash_table
         // on which to operate.
         if (hash_table == null)
-            hash_table = new Hashtable();
+            hash_table = new HashMap();
     }
 
     /**************************************************************************
@@ -401,18 +402,14 @@ public class BackingStoreHashtable
      * <p>
      *
      * @param row               Row to add to the hash table.
-     * @param hash_table        The java HashTable to load into.
      * @param needsToClone      If the row needs to be cloned
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    private void add_row_to_hash_table(
-    Hashtable   hash_table,
-    Object[]    row,
-    boolean needsToClone )
+    private void add_row_to_hash_table(Object[] row, boolean needsToClone)
 		throws StandardException
     {
-        if( spillToDisk( hash_table, row))
+        if (spillToDisk(row))
             return;
         
         if (needsToClone)
@@ -474,17 +471,13 @@ public class BackingStoreHashtable
     /**
      * Determine whether a new row should be spilled to disk and, if so, do it.
      *
-     * @param hash_table The in-memory hash table
      * @param row
      *
      * @return true if the row was spilled to disk, false if not
      *
      * @exception  StandardException  Standard exception policy.
      */
-    private boolean spillToDisk( Hashtable   hash_table,
-                                 Object[]    row)
-		throws StandardException
-    {
+    private boolean spillToDisk(Object[] row) throws StandardException {
         // Once we have started spilling all new rows will go to disk, even if we have freed up some
         // memory by moving duplicates to disk. This simplifies handling of duplicates and accounting.
         if( diskHashtable == null)
@@ -599,7 +592,7 @@ public class BackingStoreHashtable
         throws StandardException
     {
         if( diskHashtable == null)
-            return(hash_table.elements());
+            return Collections.enumeration(hash_table.values());
         return new BackingStoreHashtableEnumeration();
     }
 
@@ -613,14 +606,14 @@ public class BackingStoreHashtable
      * otherwise it is a KeyHasher containing
 	 * the objects stored in row[key_column_numbers[0, 1, ...]].
      * For every qualifying unique row value an entry is placed into the 
-     * Hashtable.
+     * hash table.
      * <p>
      * For row values with duplicates, the value of the data is a Vector of
      * rows.
      * <p>
      * The caller will have to call "instanceof" on the data value
      * object if duplicates are expected, to determine if the data value
-     * of the Hashtable entry is a row or is a Vector of rows.
+     * of the hash table entry is a row or is a Vector of rows.
      * <p>
      * The BackingStoreHashtable "owns" the objects returned from the get()
      * routine.  They remain valid until the next access to the 
@@ -758,7 +751,7 @@ public class BackingStoreHashtable
         }
         else
         {
-            add_row_to_hash_table(hash_table, row, needsToClone);
+            add_row_to_hash_table(row, needsToClone);
             return(true);
         }
     }
@@ -781,12 +774,12 @@ public class BackingStoreHashtable
 
     private class BackingStoreHashtableEnumeration implements Enumeration
     {
-        private Enumeration memoryEnumeration;
+        private Iterator memoryIterator;
         private Enumeration diskEnumeration;
 
         BackingStoreHashtableEnumeration()
         {
-            memoryEnumeration = hash_table.elements();
+            memoryIterator = hash_table.values().iterator();
             if( diskHashtable != null)
             {
                 try
@@ -802,11 +795,11 @@ public class BackingStoreHashtable
         
         public boolean hasMoreElements()
         {
-            if( memoryEnumeration != null)
-            {
-                if( memoryEnumeration.hasMoreElements())
+            if (memoryIterator != null) {
+                if (memoryIterator.hasNext()) {
                     return true;
-                memoryEnumeration = null;
+                }
+                memoryIterator = null;
             }
             if( diskEnumeration == null)
                 return false;
@@ -815,11 +808,11 @@ public class BackingStoreHashtable
 
         public Object nextElement() throws NoSuchElementException
         {
-            if( memoryEnumeration != null)
-            {
-                if( memoryEnumeration.hasMoreElements())
-                    return memoryEnumeration.nextElement();
-                memoryEnumeration = null;
+            if (memoryIterator != null) {
+                if (memoryIterator.hasNext()) {
+                    return memoryIterator.next();
+                }
+                memoryIterator = null;
             }
             return diskEnumeration.nextElement();
         }
