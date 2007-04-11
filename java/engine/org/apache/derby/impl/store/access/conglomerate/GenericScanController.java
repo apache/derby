@@ -1172,6 +1172,7 @@ public abstract class GenericScanController
      * just as in a normal scan.  This call is logically equivalent to the 
      * caller performing the following:
      *
+     * <pre>
      * import java.util.Hashtable;
      *
      * hash_table = new Hashtable();
@@ -1206,6 +1207,8 @@ public abstract class GenericScanController
      *         row_vec.addElement(row);
      *     }
      * }
+     * </pre>
+     *
      * <p>
      * The columns of the row will be the standard columns returned as
      * part of a scan, as described by the validColumns - see openScan for
