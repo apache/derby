@@ -303,7 +303,26 @@ drop table admins;
 drop table users;
 -- end derby-1854/derby-1641 test case. 
 
+--
+-- begin test case for derby-2193:
+--
+-- Field comprised of all blank space should become a null
+--
 
+create table derby_2193_tab
+(
+    a  varchar( 50 ),
+    b  varchar( 50 )
+);
+
+CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE 
+( null, 'DERBY_2193_TAB', 'extin/derby-2193.txt', null, null, null, 0 );
+select * from derby_2193_tab;
+select b, length(b) from derby_2193_tab;
+
+--
+-- end test case for derby-2193:
+--
 
 
 

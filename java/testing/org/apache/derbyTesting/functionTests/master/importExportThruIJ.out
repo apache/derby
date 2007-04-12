@@ -774,5 +774,34 @@ ij> drop table admins;
 ij> drop table users;
 0 rows inserted/updated/deleted
 ij> -- end derby-1854/derby-1641 test case. 
+--
+-- begin test case for derby-2193:
+--
+-- Field comprised of all blank space should become a null
+--
+create table derby_2193_tab
+(
+    a  varchar( 50 ),
+    b  varchar( 50 )
+);
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE 
+( null, 'DERBY_2193_TAB', 'extin/derby-2193.txt', null, null, null, 0 );
+0 rows inserted/updated/deleted
+ij> select * from derby_2193_tab;
+A                                                 |B                                                 
+-----------------------------------------------------------------------------------------------------
+who put the bop                                   |in the bopshebop                                  
+diddywopdiddy                                     |NULL                                              
+boopdeedoo                                        |boopdeedoo                                        
+ij> select b, length(b) from derby_2193_tab;
+B                                                 |2          
+--------------------------------------------------------------
+in the bopshebop                                  |16         
+NULL                                              |NULL       
+boopdeedoo                                        |10         
+ij> --
+-- end test case for derby-2193:
+--
 ;
 ij> 

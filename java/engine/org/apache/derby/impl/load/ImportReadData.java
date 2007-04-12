@@ -830,7 +830,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
       }
     }
 
-    if (totalCharsSoFar != -1) {
+    if (totalCharsSoFar > -1) {
 
       /* This is a hack to fix a problem: When there is missing data in columns
       and hasDelimiterAtEnd==true, then the last delimiter was read as the last column data.
@@ -840,7 +840,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
       actually same as the delimiter.
       */
       if (!hasDelimiterAtEnd) {//normal path:
-        returnStringArray[upperLimit] = new String(currentToken,
+          returnStringArray[upperLimit] = new String(currentToken,
                           positionOfNonWhiteSpaceCharInFront, totalCharsSoFar);
       }
       else if (totalCharsSoFar==fieldSeparatorLength && isFieldSep(currentToken) ){
