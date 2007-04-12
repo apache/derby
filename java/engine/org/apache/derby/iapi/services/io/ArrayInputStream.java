@@ -160,24 +160,16 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 
 		@exception IOException limit is out of range 
 	*/
-	public int setLimit(int offset, int length) throws IOException {
-
-		if ((offset < 0) || (length < 0)) {
-			start = end = position = 0;
-			throw new EOFException();
-		}
+	public void setLimit(int offset, int length) throws IOException {
 
 		start = offset;
 		end = offset + length;
+		position = start;
 
-		if (end > pageData.length) {
+		if ((offset < 0) || (length < 0) || (end > pageData.length)) {
 			start = end = position = 0;
 			throw new EOFException();
 		}
-
-		position = start;
-
-		return length;
 	}
 
 	/*
@@ -189,12 +181,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
         start = position;
         end   = position + length;
 
-        if (end <= pageData.length)
-        {
-            return;
-        }
-        else
-        {
+        if (end > pageData.length) {
 			start = end = position = 0;
 			throw new EOFException();
         }
