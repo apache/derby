@@ -23,44 +23,16 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.Storable;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.error.StandardException;
 
-
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
 
-import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.Qualifier;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.io.FormatableArrayHolder;
-import org.apache.derby.iapi.services.io.FormatableIntHolder;
 
 import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Vector;
 
 /**
  * Eliminates duplicates while scanning the underlying conglomerate.
