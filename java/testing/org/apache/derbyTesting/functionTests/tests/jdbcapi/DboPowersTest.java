@@ -41,7 +41,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *    {no authentication, authentication and authentication/sqlAuthorization} x
  *    {data base owner, other user }
  *
- * One could consider removing the client/server suite to speed up
+ * One could consider removing the client/server suites to speed up
  * this test as it does not add much value given the nature of the changes.
  *
  */
@@ -77,7 +77,11 @@ public class DboPowersTest extends BaseJDBCTestCase
     }
 
     /**
-     * Create a new instance of DboPowersTest (for encryption tests)
+     * Create a new instance of DboPowersTest (for encryption and hard
+     * upgrade tests). The database owner credentials is needed to
+     * always be able to perform the restricted operations (when they
+     * are not under test, but used as part of a test fixture for
+     * another operation).
      *
      * @param name Fixture name
      * @param authLevel authentication level with which test is run
@@ -125,6 +129,14 @@ public class DboPowersTest extends BaseJDBCTestCase
                     dboEncryptionSuite("suite: encryption powers, client")));
         }
 
+        /* Database hard upgrade powers */
+
+        suite.addTest(
+            dboHardUpgradeSuite("suite: hard upgrade powers, embedded"));
+        suite.addTest(
+            TestConfiguration.clientServerDecorator(
+                dboHardUpgradeSuite("suite: hard upgrade powers, client")));
+
         return suite;
     }
 
@@ -155,7 +167,7 @@ public class DboPowersTest extends BaseJDBCTestCase
      * @return A suite containing the test case for shutdown
      * incarnated for the three security levels no authentication,
      * authentication, and authentication plus sqlAuthorization, The
-     * latter two has an instance for dbo, and one for ordinary user,
+     * latter two has an instance for dbo, and one for an ordinary user,
      * so there are in all five incarnations of tests.
      */
     private static Test dboShutdownSuite(String framework)
@@ -169,7 +181,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             new TestSuite("suite: security level=" +
                           secLevelNames[NOAUTHENTICATION]);
         noauthSuite.addTest(new DboPowersTest("testShutDown",
-                                                    NOAUTHENTICATION));;
+                                              NOAUTHENTICATION));
         tests[NOAUTHENTICATION] = noauthSuite;
 
         /* First decorate with users, then with authentication. Do this
@@ -204,7 +216,7 @@ public class DboPowersTest extends BaseJDBCTestCase
 
     /**
      * Wraps the shutdown fixture in decorators to run with data
-     * base owner and other valid user.
+     * base owner and one other valid user.
      *
      * @param autLev security context to use
      */
@@ -311,7 +323,7 @@ public class DboPowersTest extends BaseJDBCTestCase
      * @return A suite containing the test case for encryption
      * incarnated for the three security levels no authentication,
      * authentication, and authentication plus sqlAuthorization, The
-     * latter two has an instance for dbo, and one for ordinary user,
+     * latter two has an instance for dbo, and one for an ordinary user,
      * so there are in all five incarnations of tests.
      */
     private static Test dboEncryptionSuite(String framework)
@@ -362,7 +374,7 @@ public class DboPowersTest extends BaseJDBCTestCase
 
     /**
      * Wraps the encryption fixtures in decorators to run with data
-     * base owner and other valid user.
+     * base owner and one other valid user.
      *
      * @param autLev security context to use
      */
@@ -566,26 +578,177 @@ public class DboPowersTest extends BaseJDBCTestCase
      */
     private void vetEncryptionAttempt (String user, SQLException e)
     {
+        vetAttempt(user, e, "2850I", "(re)encryption");
+    }
+
+    /**
+     *
+     * Construct suite of tests for hard upgrade database action
+     *
+     * NOTE: there is no real upgrade going on here since the
+     * database is created with the same version, but the checking
+     * is performed nonetheless, which is what we are testing
+     * here.  This saves us from having to create a database with
+     * an old version of Derby to test this power.
+     *
+     * @param framework Derby framework name
+     * @return A suite containing the test case for hard upgrade
+     * incarnated for the three security levels no authentication,
+     * authentication, and authentication plus sqlAuthorization, The
+     * latter two has an instance for dbo, and one for an ordinary user,
+     * so there are in all five incarnations of tests.
+     */
+    private static Test dboHardUpgradeSuite(String framework)
+    {
+        Test tests[] = new Test[SQLAUTHORIZATION+1]; // one per authLevel
+
+        /* Tests without any authorization active (level ==
+         * NOAUTHENTICATION).
+         */
+        TestSuite noauthSuite =
+            new TestSuite("suite: security level=" +
+                          secLevelNames[NOAUTHENTICATION]);
+        noauthSuite.addTest(new DboPowersTest("testHardUpgrade",
+                                              NOAUTHENTICATION,
+                                              "foo", "bar"));
+        tests[NOAUTHENTICATION] = noauthSuite;
+
+        /* First decorate with users, then with authentication. Do this
+         * twice, once for authentication only, and once for
+         * authentication + sqlAuthorization (see extra decorator
+         * added below).
+         */
+        for (int autLev = AUTHENTICATION;
+             autLev <= SQLAUTHORIZATION ; autLev++) {
+
+            tests[autLev] = wrapHardUpgradeUserTests(autLev);
+        }
+
+        TestSuite suite = new TestSuite("dboPowers:"+framework);
+
+        /* run tests with no authentication enabled */
+        suite.addTest(tests[NOAUTHENTICATION]);
+
+        /* run test for all users with only authentication enabled */
+        suite.addTest(tests[AUTHENTICATION]);
+
+        /* run test for all users with authentication and
+         * sqlAuthorization enabled
+         */
+        suite.addTest(
+            TestConfiguration.
+            sqlAuthorizationDecorator(tests[SQLAUTHORIZATION]));
+
+        return suite;
+    }
+
+    /**
+     * Wraps the shutdown fixture in decorators to run with data
+     * base owner and one other valid user.
+     *
+     * @param autLev security context to use
+     */
+
+    private static Test wrapHardUpgradeUserTests(int autLev)
+    {
+        // add decorator for different users authenticated
+        TestSuite usersSuite =
+            new TestSuite("usersSuite: security level=" +
+                          secLevelNames[autLev]);
+
+        // First decorate with users, then with
+        for (int userNo = 0; userNo < users.length; userNo++) {
+            usersSuite.addTest
+                (TestConfiguration.changeUserDecorator
+                 (new DboPowersTest("testHardUpgrade",
+                                    autLev,
+                                    users[autLev-1][0], // dbo
+                                    users[autLev-1][0].concat(pwSuffix)),
+                  users[autLev-1][userNo],
+                  users[autLev-1][userNo].concat(pwSuffix)));
+        }
+
+        return DatabasePropertyTestSetup.
+            builtinAuthentication(usersSuite, users[autLev-1], pwSuffix);
+    }
+
+    /**
+     * Test database upgrade power enforcement
+     *
+     * @throws SQLException
+     */
+    public void testHardUpgrade() throws SQLException
+    {
+        println("testHardUpgrade: auth=" + this._authLevel +
+                " user="+getTestConfiguration().getUserName());
+
+        // make sure db is created
+        getConnection().close();
+        // shut it down in preparation for upgrade boot
+        bringDbDown();
+
+        String user = getTestConfiguration().getUserName();
+        String password = getTestConfiguration().getUserPassword();
+
+        DataSource ds = JDBCDataSource.getDataSource();
+        JDBCDataSource.setBeanProperty(
+            ds, "connectionAttributes", "upgrade=true");
+        JDBCDataSource.setBeanProperty(ds, "user", user);
+        JDBCDataSource.setBeanProperty(ds, "password", password);
+        try {
+            ds.getConnection();
+            vetHardUpgradeAttempt(user, null);
+        } catch (SQLException e) {
+            vetHardUpgradeAttempt(user, e);
+        }
+
+        bringDbDown();
+    }
+
+
+    /**
+     * Decide if the result of trying to hard upgrade the database is
+     * compliant with the semantics introduced by DERBY-2264.
+     *
+     * @param user The db user under which we tried to upgrade
+     * @param e    Exception caught during attempt, if any
+     */
+    private void vetHardUpgradeAttempt (String user, SQLException e)
+    {
+        vetAttempt(user, e, "2850J", "hard upgrade");
+    }
+
+    /**
+     * Decide if the result of trying operation yields expected result.
+     *
+     * @param user The db user under which we tried to upgrade
+     * @param e    Exception caught during attempted operation, if any
+     * @param state The expected SQL state if this operation fails due to
+     *             insufficient power
+     * @param operation string describing the operation attempted
+     */
+    private void vetAttempt (String user, SQLException e,
+                             String state, String operation)
+    {
         switch (_authLevel) {
         case NOAUTHENTICATION:
-            assertEquals("encryption, no authentication", null, e);
+            assertEquals(operation + ", no authentication", null, e);
             break;
         case AUTHENTICATION:
             if ("APP".equals(user)) {
-                assertEquals("encryption, authentication, db owner", null, e);
+                assertEquals(operation + ", authentication, db owner", null, e);
             } else {
-                assertSQLState("database encryption restriction, " +
-                               "authentication, not db owner", "2850I", e);
+                assertSQLState(operation + ", authentication, not db owner",
+                               state, e);
             }
             break;
         case SQLAUTHORIZATION:
             if ("TEST_DBO".equals(user)) {
-                assertEquals("encryption, SQL authorization, db owner",
+                assertEquals(operation + ", SQL authorization, db owner",
                              null, e);
             } else {
-                assertSQLState("encryption restriction, " +
-                               "SQL authorization, not db owner",
-                               "2850I", e);
+                assertSQLState(operation +", SQL authorization, not db owner",
+                               state, e);
             }
             break;
         default:

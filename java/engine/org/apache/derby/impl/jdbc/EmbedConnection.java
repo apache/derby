@@ -217,16 +217,19 @@ public abstract class EmbedConnection implements EngineConnection
 			boolean	createBoot = createBoot(info);	
 
 			// DERBY-2264: keeps track of whether we do a plain boot before an
-			// (re)encryption boot to (possibly) authenticate first. We can not
-			// authenticate before we have booted, so in order to enforce data
-			// base owner powers over encryption, we need a plain boot, then
-			// authenticate, then, if all is well, boot with (re)encryption.
-			// Encryption at create time is not checked.
+			// (re)encryption or hard upgrade boot to (possibly) authenticate
+			// first. We can not authenticate before we have booted, so in
+			// order to enforce data base owner powers over encryption or
+			// upgrade, we need a plain boot, then authenticate, then, if all
+			// is well, boot with (re)encryption or upgrade.  Encryption at
+			// create time is not checked.
 			boolean isTwoPhaseEncryptionBoot = (!createBoot &&
 												isEncryptionBoot(info));
+			boolean isTwoPhaseUpgradeBoot = (!createBoot &&
+											 isHardUpgradeBoot(info));
 
 			// Save original properties if we modified them for
-			// isTwoPhaseEncryptionBoot.
+			// two phase encryption or upgrade boot.
 			Properties savedInfo = null;
 
 			if (database != null)
@@ -234,12 +237,13 @@ public abstract class EmbedConnection implements EngineConnection
 				// database already booted by someone else
 				tr.setDatabase(database);
 				isTwoPhaseEncryptionBoot = false;
+				isTwoPhaseUpgradeBoot = false;
 			}
 			else if (!shutdown)
 			{
-				if (isTwoPhaseEncryptionBoot) {
+				if (isTwoPhaseEncryptionBoot || isTwoPhaseUpgradeBoot) {
 					savedInfo = info;
-					info = removeEncryptionProps((Properties)info.clone());
+					info = removePhaseTwoProps((Properties)info.clone());
 				}
 
 				// Return false iff the monitor cannot handle a service of the
@@ -298,18 +302,20 @@ public abstract class EmbedConnection implements EngineConnection
 			// the rest.
 			tr.startTransaction();
 
-			if (isTwoPhaseEncryptionBoot) {
-				// DERBY-2264: shutdown and boot again with encryption
-				// attributes active. This is restricted to the database owner.
+			if (isTwoPhaseEncryptionBoot || isTwoPhaseUpgradeBoot) {
+				// DERBY-2264: shutdown and boot again with encryption or
+				// upgrade attributes active. This is restricted to the
+				// database owner.
 				if (!usingNoneAuth) {
 					// a failure here leaves database booted, but no
 					// (re)encryption has taken place and the connection is
 					// rejected.
-					checkIsDBOwner(OP_ENCRYPT);
+					checkIsDBOwner(isTwoPhaseEncryptionBoot? OP_ENCRYPT :
+								   OP_HARD_UPGRADE);
 				}
 
 				// shutdown and reboot using saved properties which
-				// include the (re)encyption attributes
+				// include the (re)encyption or upgrade attribute(s)
 				info = savedInfo;
 				handleException(tr.shutdownDatabaseException());
 				restoreContextStack();
@@ -322,7 +328,7 @@ public abstract class EmbedConnection implements EngineConnection
 					if (SanityManager.DEBUG) {
 						SanityManager.THROWASSERT(
 							"bootDatabase failed after initial plain boot " +
-							"for (re)encryption");
+							"for (re)encryption or upgrade");
 					}
 					tr.clearContextInError();
 					setInactive();
@@ -442,18 +448,31 @@ public abstract class EmbedConnection implements EngineConnection
 				(p.getProperty(Attribute.NEW_CRYPTO_EXTERNAL_KEY) != null));
 	}
 
+	/**
+	 * Examine boot properties and determine if a boot with the given
+	 * attributes would entail a hard upgrade.
+	 *
+	 * @param p the attribute set
+	 * @return true if a boot will hard upgrade the database
+	 */
+	private boolean isHardUpgradeBoot(Properties p)
+	{
+		return Boolean.valueOf(
+			p.getProperty(Attribute.UPGRADE_ATTR)).booleanValue();
+	}
 
 	/**
-	 * Remove any encryption properties from the given properties
+	 * Remove any encryption or upgarde properties from the given properties
 	 *
 	 * @param p the attribute set
 	 * @return clone sans encryption properties
 	 */
-	private Properties removeEncryptionProps(Properties p)
+	private Properties removePhaseTwoProps(Properties p)
 	{
 		p.remove(Attribute.DATA_ENCRYPTION);
 		p.remove(Attribute.NEW_BOOT_PASSWORD);
 		p.remove(Attribute.NEW_CRYPTO_EXTERNAL_KEY);
+		p.remove(Attribute.UPGRADE_ATTR);
 		return p;
 	}
 
@@ -567,6 +586,7 @@ public abstract class EmbedConnection implements EngineConnection
 	/* Enumerate operations controlled by database owner powers */
 	private static final int OP_ENCRYPT = 0;
 	private static final int OP_SHUTDOWN = 1;
+	private static final int OP_HARD_UPGRADE = 2;
 	/**
 	 * Check if actual authenticationId is equal to the database owner's.
 	 *
@@ -587,6 +607,9 @@ public abstract class EmbedConnection implements EngineConnection
 									  actualId, tr.getDBName());
 			case OP_SHUTDOWN:
 				throw newSQLException(SQLState.AUTH_SHUTDOWN_NOT_DB_OWNER,
+									  actualId, tr.getDBName());
+			case OP_HARD_UPGRADE:
+				throw newSQLException(SQLState.AUTH_HARD_UPGRADE_NOT_DB_OWNER,
 									  actualId, tr.getDBName());
 			default:
 				if (SanityManager.DEBUG) {

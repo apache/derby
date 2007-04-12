@@ -1388,6 +1388,7 @@ public interface SQLState {
 	String AUTH_NO_OBJECT_PERMISSION                                   = "2850G";
 	String AUTH_SHUTDOWN_NOT_DB_OWNER                                  = "2850H.C";
 	String AUTH_ENCRYPT_NOT_DB_OWNER                                   = "2850I.C";
+	String AUTH_HARD_UPGRADE_NOT_DB_OWNER                              = "2850J.C";
 
 	/*
 	** Dependency manager
