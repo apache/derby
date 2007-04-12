@@ -165,11 +165,18 @@ public abstract class BTree extends GenericConglomerate
     /**
     The array of format id's, one for each column in the template.
     **/
-    int[]    format_ids;
+    protected int[]    format_ids;
+
 
 	//columns sorting order information
 	// true - Ascending Order ; false -Descending Order
 	protected boolean[]	ascDescInfo;
+
+    /**
+    The array of collation id's for each column in the template.
+    **/
+    protected int[]   collation_ids;
+
 
 	/*
 	** Private Methods of BTree.
@@ -308,7 +315,8 @@ public abstract class BTree extends GenericConglomerate
 	public void addColumn(
     TransactionManager  xact_manager,
     int                 column_id,
-    Storable            template_column)
+    Storable            template_column,
+    int                 collation_id)
         throws StandardException
     {
         throw StandardException.newException(

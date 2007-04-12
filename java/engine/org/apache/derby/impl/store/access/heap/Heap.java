@@ -47,6 +47,7 @@ import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
+import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.Qualifier;
@@ -64,6 +65,7 @@ import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 
@@ -73,35 +75,49 @@ import org.apache.derby.impl.store.access.conglomerate.OpenConglomerate;
 import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSpace;
 
 /**
- * @format_id ACCESS_HEAP_V1_ID
- *
- * @purpose   The tag that describes the on disk representation of the Heap
- *            conglomerate object.  The Heap conglomerate object is stored in
- *            a field of a row in the Conglomerate directory.
- *
- * @upgrade   This format was made obsolete in the kimono release.
- *
- * @disk_layout
- *     containerid(long)
- *     segmentid(int)
- **/
-
-/**
  * @format_id ACCESS_HEAP_V2_ID
  *
  * @purpose   The tag that describes the on disk representation of the Heap
- *            conglomerate object.  The Heap conglomerate object is stored in
- *            a field of a row in the Conglomerate directory.
+ *            conglomerate object.  Access contains no "directory" of 
+ *            conglomerate information.  In order to bootstrap opening a file
+ *            it encodes the factory that can open the conglomerate in the 
+ *            conglomerate id itself.  There exists a single HeapFactory which
+ *            must be able to read all heap format id's.  
+ *
+ *            This format was used for all Derby database Heap's in version
+ *            10.2 and previous versions.
  *
  * @upgrade   The format id of this object is currently always read from disk
- *            as a separate column in the conglomerate directory.  To read
- *            A conglomerate object from disk and upgrade it to the current
- *            version do the following:
+ *            as the first field of the conglomerate itself.  A bootstrap
+ *            problem exists as we don't know the format id of the heap 
+ *            until we are in the "middle" of reading the Heap.  Thus the
+ *            base Heap implementation must be able to read and write 
+ *            all formats based on the reading the 
+ *            "format_of_this_conglomerate". 
  *
- *                format_id = get format id from a separate column
- *                Upgradable conglom_obj = instantiate empty obj(format_id)
- *                read in conglom_obj from disk
- *                conglom = conglom_obj.upgradeToCurrent();
+ *            soft upgrade to ACCESS_HEAP_V3_ID:
+ *                read:
+ *                    old format is readable by current Heap implementation,
+ *                    with automatic in memory creation of default collation
+ *                    id needed by new format.  No code other than
+ *                    readExternal and writeExternal need know about old format.
+ *                write:
+ *                    will never write out new format id in soft upgrade mode.
+ *                    Code in readExternal and writeExternal handles writing
+ *                    correct version.  Code in the factory handles making
+ *                    sure new conglomerates use the Heap_v10_2 class to 
+ *                    that will write out old format info.
+ *
+ *            hard upgrade to ACCESS_HEAP_V3_ID:
+ *                read:
+ *                    old format is readable by current Heap implementation,
+ *                    with automatic in memory creation of default collation
+ *                    id needed by new format.
+ *                write:
+ *                    Only "lazy" upgrade will happen.  New format will only
+ *                    get written for new conglomerate created after the 
+ *                    upgrade.  Old conglomerates continue to be handled the
+ *                    same as soft upgrade.
  *
  * @disk_layout
  *     format_of_this_conlgomerate(byte[])
@@ -112,20 +128,56 @@ import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSp
  **/
 
 /**
+ * @format_id ACCESS_HEAP_V3_ID
+ *
+ * @purpose   The tag that describes the on disk representation of the Heap
+ *            conglomerate object.  The Heap conglomerate object is stored in
+ *            a field of a row in the Conglomerate directory.
+ *
+ * @purpose   The tag that describes the on disk representation of the Heap
+ *            conglomerate object.  Access contains no "directory" of 
+ *            conglomerate information.  In order to bootstrap opening a file
+ *            it encodes the factory that can open the conglomerate in the 
+ *            conglomerate id itself.  There exists a single HeapFactory which
+ *            must be able to read all heap format id's.  
+ *
+ *            This format is used for all Derby database Heap's in versions
+ *            subsequent to 10.2.  The format is contains first the 
+ *            ACCESS_HEAP_V2_ID format, followed by a compressed representation
+ *            of the collation id's of each column in the heap.
+ *
+ * @upgrade   This is the current version, no upgrade necessary.
+ *
+ * @disk_layout
+ *     format_of_this_conlgomerate(byte[])
+ *     containerid(long)
+ *     segmentid(int)
+ *     number_of_columns(int)
+ *     array_of_format_ids(byte[][])
+ *     collation_ids(compressed array of ints)
+ **/
+
+/**
 
   A heap object corresponds to an instance of a heap conglomerate.  It caches
   information which makes it fast to open heap controllers from it.
 
 **/
 
-public final class Heap 
+public class Heap 
     extends    GenericConglomerate
     implements Conglomerate, StaticCompiledOpenConglomInfo
 {
 
+
 	/*
 	** Fields of Heap.
 	*/
+
+    /**
+     * Format id of the conglomerate.
+     **/
+	protected int conglom_format_id;
 
 	private ContainerKey id;
 
@@ -133,6 +185,11 @@ public final class Heap
      * The format id's of each of the columns in the heap table.
      **/
     int[]    format_ids;
+
+    /**
+    The array of collation id's for each column in the template.
+    **/
+    protected int[]   collation_ids;
 
     private static final int BASE_MEMORY_USAGE = ClassSize.estimateBaseFromCatalog( Heap.class);
     private static final int CONTAINER_KEY_MEMORY_USAGE = ClassSize.estimateBaseFromCatalog( ContainerKey.class);
@@ -177,7 +234,10 @@ public final class Heap
     int                     segmentId,
     long                    input_containerid,
     DataValueDescriptor[]   template,
+    ColumnOrdering[]        columnOrder,
+    int[]                   collationIds,
     Properties              properties,
+    int                     conglom_format_id,
 	int                     tmpFlag)
 		throws StandardException
 	{
@@ -237,6 +297,14 @@ public final class Heap
         // conglomerate state.
         this.format_ids = ConglomerateUtil.createFormatIds(template);
 
+        // copy the format id of the conglomerate.
+        this.conglom_format_id = conglom_format_id;
+
+        // get collation ids from input collation ids, store it in the 
+        // conglom state.
+        collation_ids = 
+            ConglomerateUtil.createCollationIds(
+                format_ids.length, collationIds);
 
         // need to open the container and insert the row.  Since we are
         // creating it no need to bother with locking since no one can get
@@ -316,13 +384,15 @@ public final class Heap
      * 
      * @param column_id        The column number to add this column at.
      * @param template_column  An instance of the column to be added to table.
+     * @param collation_id     Collation id of the column added.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
 	public void addColumn(
 	TransactionManager  xact_manager,
     int                 column_id,
-    Storable            template_column)
+    Storable            template_column,
+    int                 collation_id)
         throws StandardException
     {
         // need to open the container and update the row containing the 
@@ -366,6 +436,15 @@ public final class Heap
             format_ids[old_format_ids.length] = 
                 template_column.getTypeFormatId();
 
+            // create a new collation array, and copy old values to it.
+            int[] old_collation_ids = collation_ids;
+            collation_ids           = new int[old_collation_ids.length + 1];
+            System.arraycopy(
+                old_collation_ids, 0, collation_ids, 0, 
+                old_collation_ids.length);
+
+            // add the new column's collation id.
+            collation_ids[old_collation_ids.length] =  collation_id;
            
             // row in slot 0 of heap page 1 which is just a single column with
             // the heap entry.
@@ -1016,7 +1095,7 @@ public final class Heap
      **/
 	public int getTypeFormatId()
     {
-		return StoredFormatIds.ACCESS_HEAP_V2_ID;
+		return StoredFormatIds.ACCESS_HEAP_V3_ID;
 	}
 
     /**
@@ -1044,7 +1123,17 @@ public final class Heap
      * Store the stored representation of the column value in the stream.
      *
      **/
-	public void writeExternal(ObjectOutput out) throws IOException
+
+    /**
+     * Store the 10.2 format stored representation of column value in stream.
+     * <p>
+     * This routine stores the 10.2 version the Heap, ie. the ACCESS_HEAP_V2_ID
+     * format.  It is used by any database which has been created in 
+     * 10.2 or a previous release and has not been hard upgraded to a 
+     * version subsequent to 10.2.
+     * <p>
+     **/
+	protected void writeExternal_v10_2(ObjectOutput out) throws IOException
     {
 
         // write the format id of this conglomerate
@@ -1061,14 +1150,40 @@ public final class Heap
 	}
 
     /**
+     * Store the stored representation of column value in stream.
+     * <p>
+     * This routine uses the current database version to either store the
+     * the 10.2 format (ACCESS_HEAP_V2_ID) or the current format 
+     * (ACCESS_HEAP_V3_ID).  
+     * <p>
+     **/
+	public void writeExternal(ObjectOutput out) throws IOException
+    {
+        writeExternal_v10_2(out);
+
+        if (conglom_format_id == StoredFormatIds.ACCESS_HEAP_V3_ID)
+        {
+            // Now append sparse array of collation ids
+            ConglomerateUtil.writeCollationIdArray(collation_ids, out);
+        }
+	}
+
+    /**
      * Restore the in-memory representation from the stream.
+     * <p>
+     *
+     * @exception ClassNotFoundException Thrown if the stored representation 
+     *                                   is serialized and a class named in 
+     *                                   the stream could not be found.
      *
      * @see java.io.Externalizable#readExternal
      **/
-	public void readExternal(ObjectInput in) throws IOException 
-    {
+	private final void localReadExternal(ObjectInput in)
+		throws IOException, ClassNotFoundException
+	{
+
         // read the format id of this conglomerate.
-        FormatIdUtil.readFormatIdInteger(in);
+        conglom_format_id = FormatIdUtil.readFormatIdInteger(in);
 
 		int segmentid = in.readInt();
         long containerid = in.readLong();
@@ -1080,23 +1195,45 @@ public final class Heap
 
         // read the array of format ids.
         format_ids = ConglomerateUtil.readFormatIdArray(num_columns, in);
+
+        // In memory maintain a collation id per column in the template.
+        collation_ids = new int[format_ids.length];
+
+        // initialize all the entries to COLLATION_TYPE_UCS_BASIC, 
+        // and then reset as necessary.  For version ACCESS_HEAP_V2_ID,
+        // this is the default and no resetting is necessary.
+        for (int i = 0; i < format_ids.length; i++)
+            collation_ids[i] = StringDataValue.COLLATION_TYPE_UCS_BASIC;
+
+		if (conglom_format_id == StoredFormatIds.ACCESS_HEAP_V3_ID)
+        {
+            // current format id, read collation info from disk
+
+            ConglomerateUtil.readCollationIdArray(collation_ids, in);
+        }
+        else if (conglom_format_id != StoredFormatIds.ACCESS_HEAP_V2_ID)
+        {
+            // Currently only V2 and V3 should be possible in a Derby DB.
+            // Actual work for V2 is handled by default code above, so no
+            // special work is necessary.
+
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT(
+                    "Unexpected format id: " + conglom_format_id);
+            }
+        }
     }
 
-	public void readExternalFromArray(ArrayInputStream in) throws IOException 
-    {
-        // read the format id of this conglomerate.
-        FormatIdUtil.readFormatIdInteger(in);
-
-		int segmentid = in.readInt();
-        long containerid = in.readLong();
-
-		id = new ContainerKey(segmentid, containerid);
-
-        // read the number of columns in the heap.
-        int num_columns = in.readInt();
-
-        // read the array of format ids.
-        format_ids = ConglomerateUtil.readFormatIdArray(num_columns, in);
+	public void readExternal(ObjectInput in)
+		throws IOException, ClassNotFoundException
+	{
+        localReadExternal(in);
     }
 
+	public void readExternalFromArray(ArrayInputStream in)
+		throws IOException, ClassNotFoundException
+	{
+        localReadExternal(in);
+    }
 }

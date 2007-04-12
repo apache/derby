@@ -27,6 +27,7 @@ import org.apache.derbyTesting.unitTests.harness.T_Fail;
 import org.apache.derby.iapi.store.access.*;
 
 import org.apache.derby.iapi.types.SQLLongint;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
@@ -208,6 +209,7 @@ public class T_AccessFactory extends T_Generic
                     "heap", // create a heap conglomerate
                     null,   // ERROR - Heap requires a template!!!
 					null, 	// column sort order not required for heap
+					null, 	// default collation
                     null,   // default properties
                     TransactionController.IS_DEFAULT); // not temporary
 
@@ -225,6 +227,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -352,6 +355,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -518,6 +522,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(), // 1 SQLInteger() column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -914,6 +919,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(), // 1 SQLInteger() column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -991,6 +997,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",         // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(),   // 1 SQLInteger() column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,           // default properties
                 TransactionController.IS_DEFAULT);         // not temporary
 
@@ -1047,6 +1054,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 prop,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 		// Open the conglomerate.
@@ -1170,6 +1178,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 		// Open the conglomerate.
@@ -1346,7 +1355,8 @@ public class T_AccessFactory extends T_Generic
 
 
         // now alter the conglomerate, add another int column
-        tc.addColumnToConglomerate(conglomid, 1, c1);
+        tc.addColumnToConglomerate(
+            conglomid, 1, c1, StringDataValue.COLLATION_TYPE_UCS_BASIC);
 
         // Open the table after the close done by commit.
 		cc = tc.openConglomerate(
@@ -1549,6 +1559,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 		// Open the conglomerate.
@@ -1721,6 +1732,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 		// Open the conglomerate.
@@ -1818,6 +1830,7 @@ public class T_AccessFactory extends T_Generic
                     "heap",               // create a heap conglomerate
                     new T_AccessRow(numcols).getRowArray(),   // 1 SQLInteger() column template.
 					null, 	// column sort order not required for heap
+                    null, 	// default collation
                     null,                 // default properties
                     TransactionController.IS_DEFAULT);               // not temporary
 
@@ -1936,6 +1949,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 		// Open the conglomerate.
@@ -2017,6 +2031,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 		// Open the conglomerate.
@@ -2509,6 +2524,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",         // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(),   // 1 SQLInteger() column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,           // default properties
                 temporary ? TransactionController.IS_TEMPORARY : TransactionController.IS_DEFAULT);
 
@@ -2595,8 +2611,16 @@ public class T_AccessFactory extends T_Generic
 		baseRow[0] = col0;
 
 		// Create a btree secondary index conglomerate.
-		long iid = tc.createConglomerate("BTREE", template.getRowArray(), null, indexProps,
-			temporary ? TransactionController.IS_TEMPORARY : TransactionController.IS_DEFAULT);
+		long iid = 
+            tc.createConglomerate(
+                "BTREE", 
+                template.getRowArray(), 
+                null, 
+                null, 	// default collation
+                indexProps,
+			    temporary ? 
+                    TransactionController.IS_TEMPORARY : 
+                    TransactionController.IS_DEFAULT);
 
 		// Open the index so we can stuff in index rows.
 		ConglomerateController cc = 
@@ -2704,6 +2728,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 r1.getRowArray(),
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -2938,6 +2963,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(), // 1 SQLInteger() column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -2947,6 +2973,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",         // create a heap conglomerate
                 new T_AccessRow(1).getRowArray(),   // 1 SQLInteger() column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,           // default properties
                 TransactionController.IS_TEMPORARY);
 
@@ -3038,6 +3065,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 big_row.getRowArray(),
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -3093,6 +3121,7 @@ public class T_AccessFactory extends T_Generic
                 big_row.getRowArray(),
 				null, 	// column sort order not required for heap
                 null,         // default properties
+                null, 	// default collation
                 TransactionController.IS_DEFAULT);       // not temporary
 
         tc.commit();
@@ -3264,6 +3293,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 template_row.getRowArray(), // 1 column template.
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -3972,6 +4002,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 big_row.getRowArray(),
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -4085,6 +4116,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 big_row.getRowArray(),
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -4207,6 +4239,7 @@ public class T_AccessFactory extends T_Generic
                 "heap",       // create a heap conglomerate
                 big_row.getRowArray(),
 				null, 	// column sort order not required for heap
+                null, 	// default collation
                 null,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 

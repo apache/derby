@@ -908,4 +908,27 @@ public interface RawStoreFactory extends Corruptable {
 		Get the Transaction Factory to use with this store.
 	*/
 	public TransactionFactory getXactFactory();
+
+    /**
+     *  Check to see if a database has been upgraded to the required
+     *  level in order to use a store feature.
+     *
+     * @param requiredMajorVersion  required database Engine major version
+     * @param requiredMinorVersion  required database Engine minor version
+     * @param feature               Non-null to throw an exception, null to 
+     *                              return the state of the version match.
+     *
+     * @return <code> true </code> if the database has been upgraded to 
+     *         the required level, <code> false </code> otherwise.
+     *
+     * @exception  StandardException 
+     *             if the database is not at the require version 
+     *             when <code>feature</code> feature is 
+     *             not <code> null </code>. 
+     */
+	public boolean checkVersion(
+    int     requiredMajorVersion, 
+    int     requiredMinorVersion, 
+    String  feature) 
+        throws StandardException;
 }

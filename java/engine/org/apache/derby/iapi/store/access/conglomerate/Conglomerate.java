@@ -77,13 +77,15 @@ public interface Conglomerate extends Storable, DataValueDescriptor
      *                         operation takes place.
      * @param column_id        The column number to add this column at.
      * @param template_column  An instance of the column to be added to table.
+     * @param collation_id     Collation id of the added column.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
 	public void addColumn(
     TransactionManager  xact_manager,
     int                 column_id,
-    Storable            template_column)
+    Storable            template_column,
+    int                 collation_id)
         throws StandardException;
 
     /**

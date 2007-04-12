@@ -75,6 +75,7 @@ public interface ConglomerateFactory extends MethodFactory
                                 raw store to assign an id.
     @param template             Template of row in the conglomerate.
 	@param columnOrder          columns sort order for Index creation
+    @param collationIds         collation ids of columns in the conglomerate.
     @param properties           Properties associated with the conglomerate.
 
  	@exception StandardException if the conglomerate could not be
@@ -87,6 +88,7 @@ public interface ConglomerateFactory extends MethodFactory
     long                    input_containerid,
     DataValueDescriptor[]   template,
 	ColumnOrdering[]		columnOrder,
+    int[]                   collationIds,
     Properties              properties,
 	int						temporaryFlag)
             throws StandardException;

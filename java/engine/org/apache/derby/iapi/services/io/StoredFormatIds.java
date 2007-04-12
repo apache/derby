@@ -1599,6 +1599,7 @@ public interface StoredFormatIds {
     public static final int ACCESS_TREE_V1_ID =
             (MIN_ID_2 + 386);
 
+
     public static final int ACCESS_B2I_V3_ID =
             (MIN_ID_2 + 388);
 
@@ -1626,7 +1627,14 @@ public interface StoredFormatIds {
     public static final int ACCESS_T_RECTANGLE_ID =
             (MIN_ID_4 + 34);
 
-    public static final int ACCESS_T_INTCOL_V1_ID =               MIN_ID_4 + 4;
+    public static final int ACCESS_T_INTCOL_V1_ID =      
+            (MIN_ID_4 + 4);
+
+    public static final int ACCESS_B2I_V4_ID =
+            (MIN_ID_2 + 466);
+
+    public static final int ACCESS_HEAP_V3_ID =
+            (MIN_ID_2 + 467);
 
     /******************************************************************
     **
@@ -1865,9 +1873,9 @@ public interface StoredFormatIds {
      * Make sure this is updated when a new module is added
      */
     public static final int MAX_ID_2 =
-            (MIN_ID_2 + 465);
+            (MIN_ID_2 + 467);
 
     // DO NOT USE 4 BYTE IDS ANYMORE
     static public final int MAX_ID_4 =
-        MIN_ID_4 + 34;
+            (MIN_ID_4 + 34);
 }

@@ -68,6 +68,7 @@ class NoOpTransaction implements TransactionController {
 
     public long createConglomerate(String implementation,
             DataValueDescriptor[] template, ColumnOrdering[] columnOrder,
+            int[] collation_ids,
             Properties properties, int temporaryFlag) throws StandardException {
         // TODO Auto-generated method stub
         return 0;
@@ -75,6 +76,7 @@ class NoOpTransaction implements TransactionController {
 
     public long createAndLoadConglomerate(String implementation,
             DataValueDescriptor[] template, ColumnOrdering[] columnOrder,
+            int[] collation_ids,
             Properties properties, int temporaryFlag,
             RowLocationRetRowSource rowSource, long[] rowCount)
             throws StandardException {
@@ -84,7 +86,9 @@ class NoOpTransaction implements TransactionController {
 
     public long recreateAndLoadConglomerate(String implementation,
             boolean recreate_ifempty, DataValueDescriptor[] template,
-            ColumnOrdering[] columnOrder, Properties properties,
+            ColumnOrdering[] columnOrder, 
+            int[] collation_ids,
+            Properties properties,
             int temporaryFlag, long orig_conglomId,
             RowLocationRetRowSource rowSource, long[] rowCount)
             throws StandardException {
@@ -93,7 +97,7 @@ class NoOpTransaction implements TransactionController {
     }
 
     public void addColumnToConglomerate(long conglomId, int column_id,
-            Storable template_column) throws StandardException {
+            Storable template_column, int collation_id) throws StandardException {
         // TODO Auto-generated method stub
 
     }

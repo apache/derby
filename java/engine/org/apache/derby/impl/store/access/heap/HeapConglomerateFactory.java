@@ -40,6 +40,7 @@ import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
+import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -63,8 +64,6 @@ import org.apache.derby.iapi.store.access.conglomerate.MethodFactory;
 public class HeapConglomerateFactory implements ConglomerateFactory, ModuleControl, ModuleSupportable
 {
 
-	// RESOLVE (mikem) (STO062) 
-    // The heap implementation id should be "heap table".
 	private static final String IMPLEMENTATIONID = "heap";
 	private static final String FORMATUUIDSTRING = "D2976090-D9F5-11d0-B54D-00A024BF8878";
 	private UUID formatUUID;
@@ -164,16 +163,40 @@ public class HeapConglomerateFactory implements ConglomerateFactory, ModuleContr
     int                     segment,
     long                    input_containerid,
     DataValueDescriptor[]   template,
-	ColumnOrdering[]        columnOrder,  //only meant for BTree type congloms
+	ColumnOrdering[]        columnOrder,
+    int[]                   collationIds,
     Properties              properties,
 	int                     temporaryFlag)
 		throws StandardException
 	{
-		//parent.register(heap);
-		Heap heap = new Heap();
+		Heap heap = null;
+
+
+        if (xact_mgr.checkVersion(
+                RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10,
+                RawStoreFactory.DERBY_STORE_MINOR_VERSION_3,
+                null))
+        {
+            // on disk databases with version higher than 10.2 should use
+            // current disk format B2I.  This includes new databases or
+            // hard upgraded databases.
+            heap = new Heap();
+        }
+        else
+        {
+            // Old databases that are running in new versions of the software,
+            // but are running in soft upgrade mode at release level 10.2
+            // and before should use the old B2I version.  This version will
+            // continue to write metadata that can be read by 10.2 and previous
+            // versions.
+            heap = new Heap_v10_2();
+        }
+
 		heap.create(
             xact_mgr.getRawStoreXact(), segment, input_containerid, 
-            template, properties, temporaryFlag);
+            template, columnOrder, collationIds, properties, 
+            heap.getTypeFormatId(), 
+            temporaryFlag);
 
 		return heap;
 	}

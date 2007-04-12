@@ -170,7 +170,15 @@ public class TestDiskHashtable
                                  DataValueDescriptor[][] rows)
         throws StandardException
     {
-        DiskHashtable dht = new DiskHashtable(tc, template, keyCols, removeDups, false);
+        DiskHashtable dht = 
+            new DiskHashtable(
+                    tc, 
+                    template, 
+                    (int[]) null, // default collation
+                    keyCols, 
+                    removeDups, 
+                    false);
+
         boolean[] isDuplicate = new boolean[ rows.length];
         boolean[] found = new boolean[ rows.length];
         HashMap simpleHash = new HashMap( rows.length);

@@ -6785,9 +6785,13 @@ public final class	DataDictionaryImpl
 			int columnID = newColumnIDs[ix];
 			int storablePosition = columnID - 1;			// from 1 to 0 based
 
-			tc.addColumnToConglomerate( conglomID,
-										storablePosition,
-										templateRow.getColumn( columnID) );
+            // system catalog columns always have UCS_BASIC collation.
+
+			tc.addColumnToConglomerate( 
+                conglomID,
+                storablePosition,
+                templateRow.getColumn( columnID),
+                StringDataValue.COLLATION_TYPE_UCS_BASIC);
 		}
 
 	}
@@ -7219,6 +7223,7 @@ public final class	DataDictionaryImpl
 			"BTREE", // we're requesting an index conglomerate
 			indexableRow.getRowArray(),
 			null, //default sort order
+            null, //default collation id's for collumns in all system congloms
 			indexProperties, // default properties
 			TransactionController.IS_DEFAULT); // not temporary
 
@@ -7418,6 +7423,7 @@ public final class	DataDictionaryImpl
 			"heap", // we're requesting a heap conglomerate
 			rowTemplate.getRowArray(), // row template
 			null, // default sort order
+            null, // default collation ids
 			properties, // default properties
 			TransactionController.IS_DEFAULT); // not temporary
 

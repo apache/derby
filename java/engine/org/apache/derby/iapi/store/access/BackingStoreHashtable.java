@@ -498,11 +498,14 @@ public class BackingStoreHashtable
                 // Do not know how to put it on disk
                 return false;
             }
-            diskHashtable = new DiskHashtable( tc,
-                                               (DataValueDescriptor[]) row,
-                                               key_column_numbers,
-                                               remove_duplicates,
-                                               keepAfterCommit);
+            diskHashtable = 
+                new DiskHashtable(
+                       tc,
+                       (DataValueDescriptor[]) row,
+                       (int[]) null, //TODO-COLLATION, set non default collation if necessary.
+                       key_column_numbers,
+                       remove_duplicates,
+                       keepAfterCommit);
         }
         Object key = KeyHasher.buildHashKey(row, key_column_numbers);
         Object duplicateValue = hash_table.get( key);

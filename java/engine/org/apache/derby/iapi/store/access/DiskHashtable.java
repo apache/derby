@@ -25,13 +25,16 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Vector;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.SQLInteger;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.StringDataValue;
+
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 /**
  * This class is used by BackingStoreHashtable when the BackingStoreHashtable 
@@ -76,6 +79,7 @@ public class DiskHashtable
     public DiskHashtable( 
     TransactionController   tc,
     DataValueDescriptor[]   template,
+    int[]                   collation_ids,
     int[]                   key_column_numbers,
     boolean                 remove_duplicates,
     boolean                 keepAfterCommit)
@@ -118,6 +122,7 @@ public class DiskHashtable
                 "heap",
                 template,
                 (ColumnOrdering[]) null,
+                collation_ids,
                 (Properties) null,
                 tempFlags);
 
@@ -151,11 +156,18 @@ public class DiskHashtable
                 "2"); // Include the row location column
         btreeProps.put("maintainParentLinks", 
                 "false");
+
+        // default collation is used for hash code and row location
+        int[] index_collation_ids = 
+            {StringDataValue.COLLATION_TYPE_UCS_BASIC,
+             StringDataValue.COLLATION_TYPE_UCS_BASIC};
+
         btreeConglomerateId = 
             tc.createConglomerate( 
                 "BTREE",
                 btreeRow,
                 (ColumnOrdering[]) null,
+                index_collation_ids,
                 btreeProps,
                 tempFlags);
 

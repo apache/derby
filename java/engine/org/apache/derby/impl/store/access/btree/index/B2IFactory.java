@@ -40,6 +40,7 @@ import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
+import org.apache.derby.iapi.store.raw.RawStoreFactory;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -165,14 +166,36 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
     long                    input_containerid,
     DataValueDescriptor[]   template,
 	ColumnOrdering[]        columnOrder,
+    int[]                   collationIds,
     Properties              properties,
 	int                     temporaryFlag)
             throws StandardException
 	{
-		B2I btree = new B2I();
+        B2I btree = null;
+
+        if (xact_mgr.checkVersion(
+                RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10,
+                RawStoreFactory.DERBY_STORE_MINOR_VERSION_3,
+                null))
+        {
+            // on disk databases with version higher than 10.2 should use
+            // current disk format B2I.  This includes new databases or
+            // hard upgraded databases.
+            btree = new B2I();
+        }
+        else
+        {
+            // Old databases that are running in new versions of the software,
+            // but are running in soft upgrade mode at release level 10.2
+            // and before should use the old B2I version.  This version will
+            // continue to write metadata that can be read by 10.2 and previous
+            // versions.
+            btree = new B2I_v10_2();
+        }
+
 		btree.create(
             xact_mgr, segment, input_containerid, template, columnOrder, 
-            properties, temporaryFlag);
+            collationIds, properties, temporaryFlag);
 
 		return(btree);
 	}

@@ -249,10 +249,16 @@ class MaterializedResultSet extends NoPutResultSetImpl
 
 				tc = activation.getTransactionController();
 
-				materializedCID = tc.createConglomerate("heap",	materializedRowBuffer.getRowArray(),
-														null, null,
-														TransactionController.IS_TEMPORARY |
-														TransactionController.IS_KEPT);
+				materializedCID = 
+                    tc.createConglomerate(
+                        "heap",	
+                        materializedRowBuffer.getRowArray(),
+                        null, 
+                        (int[]) null, // TODO-COLLATION, implement collation in materialized result sets if necessary
+                        null, 
+                        (TransactionController.IS_TEMPORARY |
+                         TransactionController.IS_KEPT));
+
 				materializedCreated = true;
 				materializedCC = 
                     tc.openConglomerate(

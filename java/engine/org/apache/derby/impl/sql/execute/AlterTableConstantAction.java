@@ -77,6 +77,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.impl.sql.catalog.DDColumnDependableFinder;
 
 /**
@@ -124,6 +125,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	private SortController[]		sorters;
 	private int						columnPosition;
 	private ColumnOrdering[][]		ordering;
+	private int[][]		            collation;
 
 	private	TableDescriptor 		td;
 
@@ -572,8 +574,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			storableDV = columnInfo[ix].dataType.getNull();
 
 		// Add the column to the conglomerate.(Column ids in store are 0-based)
-		tc.addColumnToConglomerate(td.getHeapConglomerateId(), colNumber, 
-								   storableDV);
+		tc.addColumnToConglomerate(
+            td.getHeapConglomerateId(), 
+            colNumber, 
+            storableDV, 
+            columnInfo[ix].dataType.getCollationType());
 
 		UUID defaultUUID = columnInfo[ix].newDefaultUUID;
 
@@ -685,7 +690,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *  - if that column was the only column in the index, the
 	 *    entire index is dropped. 
 	 *
-         * @param   activation          the current activation
+     * @param   activation  the current activation
 	 * @param   ix 			the index of the column specfication in the ALTER 
 	 *						statement-- currently we allow only one.
 	 * @exception StandardException 	thrown on failure.
@@ -1113,7 +1118,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	/* NOTE: compressTable can also be called for 
 	 * ALTER TABLE <t> DROP COLUMN <c>;
 	 */
-	private void compressTable(Activation activation)
+	private void compressTable(
+    Activation activation)
 		throws StandardException
 	{
 		ExecRow					emptyHeapRow;
@@ -1131,7 +1137,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			if (lockGranularity != '\0')
 			{
 				SanityManager.THROWASSERT(
-					"lockGranularity expected to be '\0', not " + lockGranularity);
+					"lockGranularity expected to be '\0', not " + 
+                    lockGranularity);
 			}
 			SanityManager.ASSERT(! compressTable || columnInfo == null,
 				"columnInfo expected to be null");
@@ -1146,12 +1153,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                                 TransactionController.MODE_TABLE,
                                 TransactionController.ISOLATION_SERIALIZABLE);
 
-		// invalidate any prepared statements that
-		// depended on this table (including this one)
-		// bug 3653 has threads that start up and block on our lock, but do
-		// not see they have to recompile their plan.    We now invalidate earlier
-		// however they still might recompile using the old conglomerate id before we
-		// commit our DD changes.
+		// invalidate any prepared statements that depended on this table 
+        // (including this one), this fixes problem with threads that start up 
+        // and block on our lock, but do not see they have to recompile their 
+        // plan.  We now invalidate earlier however they still might recompile
+        // using the old conglomerate id before we commit our DD changes.
 		//
 		dm.invalidateFor(td, DependencyManager.COMPRESS_TABLE, lcc);
 
@@ -1175,7 +1181,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		indexRows = new ExecIndexRow[numIndexes];
 		if (! compressTable)
 		{
-			ExecRow newRow = activation.getExecutionFactory().getValueRow(emptyHeapRow.nColumns() - 1);
+			ExecRow newRow = 
+                activation.getExecutionFactory().getValueRow(
+                    emptyHeapRow.nColumns() - 1);
+
 			for (int i = 0; i < newRow.nColumns(); i++)
 			{
 				newRow.setColumn(i + 1, i < columnPosition - 1 ?
@@ -1202,14 +1211,22 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 
 
-		newHeapConglom = tc.createAndLoadConglomerate(
-									"heap",
-									emptyHeapRow.getRowArray(),
-									null, //column sort order - not required for heap
-									properties,
-									TransactionController.IS_DEFAULT,
-									this,
-									(long[]) null);
+		newHeapConglom = 
+            tc.createAndLoadConglomerate(
+                "heap",
+                emptyHeapRow.getRowArray(),
+                null, //column sort order - not required for heap
+                (int[]) null, // TODO-COLLATION - implement correct setting of
+                              // collation ids.  This is made more tricky as
+                              // this routine could be called by either compress
+                              // table where the heap ids are same as old heap
+                              // or drop table where the collation ids need
+                              // to be shuffled about.  Setting default 
+                              // collation for now.
+                properties,
+                TransactionController.IS_DEFAULT,
+                this,
+                (long[]) null);
 
 		closeBulkFetchScan();
 
@@ -1366,19 +1383,22 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		compressHeapCC = null;
 
 		//create new conglomerate
-		newHeapConglom = tc.createConglomerate(
-									"heap",
-									emptyHeapRow.getRowArray(),
-									null, //column sort order - not required for heap
-									properties,
-									TransactionController.IS_DEFAULT);
+		newHeapConglom = 
+            tc.createConglomerate(
+                "heap",
+                emptyHeapRow.getRowArray(),
+                null, //column sort order - not required for heap
+                td.getColumnCollationIds(),
+                properties,
+                TransactionController.IS_DEFAULT);
 		
 		/* Set up index info to perform truncate on them*/
 		getAffectedIndexes(activation);
 		if(numIndexes > 0)
 		{
 			indexRows = new ExecIndexRow[numIndexes];
-			ordering = new ColumnOrdering[numIndexes][];
+			ordering  = new ColumnOrdering[numIndexes][];
+
 			for (int index = 0; index < numIndexes; index++)
 			{
 				// create a single index row template for each index
@@ -1392,16 +1412,23 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				 * No need to try to enforce uniqueness here as
 				 * index should be valid.
 				 */
-				int[] baseColumnPositions = compressIRGs[index].baseColumnPositions();
+				int[] baseColumnPositions = 
+                    compressIRGs[index].baseColumnPositions();
+
 				boolean[] isAscending = compressIRGs[index].isAscending();
+
 				int numColumnOrderings;
 				numColumnOrderings = baseColumnPositions.length + 1;
-				ordering[index] = new ColumnOrdering[numColumnOrderings];
+				ordering[index]    = new ColumnOrdering[numColumnOrderings];
+                collation[index]   = new int[baseColumnPositions.length + 1];
+
 				for (int ii =0; ii < numColumnOrderings - 1; ii++) 
 				{
-					ordering[index][ii] = new IndexColumnOrder(ii, isAscending[ii]);
+					ordering[index][ii] = 
+                        new IndexColumnOrder(ii, isAscending[ii]);
 				}
-				ordering[index][numColumnOrderings - 1] = new IndexColumnOrder(numColumnOrderings - 1);
+				ordering[index][numColumnOrderings - 1] = 
+                    new IndexColumnOrder(numColumnOrderings - 1);
 			}
 		}
 
@@ -1546,6 +1573,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								   "BTREE",
 								   indexRows[index].getRowArray(),
 								   ordering[index],
+                                   (int[]) null, // TODO-COLLATION, implement 
+                                                 // collation support for alter
+                                                 // table.  Currently only
+                                                 // supports default collation
+                                                 // columns.
 								   properties,
 								   TransactionController.IS_DEFAULT,
 								   cCount,
@@ -1577,14 +1609,19 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 							true, tc);	// no error on duplicate.
 				}
 			}
-		}else
+		}
+        else
 		{
-			newIndexCongloms[index] = tc.createConglomerate(
-								   "BTREE",
-									indexRows[index].getRowArray(),
-									ordering[index],
-									properties,
-								   TransactionController.IS_DEFAULT);
+            newIndexCongloms[index] = 
+                tc.createConglomerate(
+                    "BTREE",
+                    indexRows[index].getRowArray(),
+                    ordering[index],
+                    (int[]) null, // TODO-COLLATION, implement alter table 
+                                  // collation passing, 
+                                  // currently only supports default collation.
+                    properties,
+                    TransactionController.IS_DEFAULT);
 
 
 			//on truncate drop the statistics because we know for sure 

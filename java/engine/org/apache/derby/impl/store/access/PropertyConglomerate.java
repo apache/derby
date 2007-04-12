@@ -143,6 +143,7 @@ class PropertyConglomerate
                     AccessFactoryGlobals.HEAP,
                     template, 
                     null, 
+                    (int[]) null, // use default collation for property conglom.
                     conglomProperties, 
                     TransactionController.IS_DEFAULT);
 

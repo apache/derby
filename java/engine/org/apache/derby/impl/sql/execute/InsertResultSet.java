@@ -1250,27 +1250,31 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		long[] loadedRowCount = new long[1];
 		if (bulkInsertReplace)
 		{
-			newHeapConglom = tc.createAndLoadConglomerate(
-										"heap",
-										fullTemplate.getRowArray(),
-										null, //column sort order - not required for heap
-										properties,
-										TransactionController.IS_DEFAULT,
-										sourceResultSet,
-										loadedRowCount);
+			newHeapConglom = 
+                tc.createAndLoadConglomerate(
+                    "heap",
+                    fullTemplate.getRowArray(),
+                    null, //column sort order - not required for heap
+                    td.getColumnCollationIds(),
+                    properties,
+                    TransactionController.IS_DEFAULT,
+                    sourceResultSet,
+                    loadedRowCount);
 		}
 		else
 		{
-			newHeapConglom = tc.recreateAndLoadConglomerate(
-										"heap",
-										false,
-										fullTemplate.getRowArray(),
-										null, //column sort order - not required for heap
-										properties,
-										TransactionController.IS_DEFAULT,
-										oldHeapConglom,
-										sourceResultSet,
-										loadedRowCount);
+			newHeapConglom = 
+                tc.recreateAndLoadConglomerate(
+                    "heap",
+                    false,
+                    fullTemplate.getRowArray(),
+                    null, //column sort order - not required for heap
+                    td.getColumnCollationIds(),
+                    properties,
+                    TransactionController.IS_DEFAULT,
+                    oldHeapConglom,
+                    sourceResultSet,
+                    loadedRowCount);
 		}
 
 		/* Nothing else to do if we get back the same conglomerate number.
@@ -1808,14 +1812,16 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			sorters[index].completedInserts();
 			sorters[index] = null;
 			rowSources[index] = new CardinalityCounter(tc.openSortRowSource(sortIds[index]));
-			newIndexCongloms[index] = tc.createAndLoadConglomerate(
-										"BTREE",
-										indexRows[index].getRowArray(),
-										ordering[index],
-										properties,
-										TransactionController.IS_DEFAULT,
-										rowSources[index],
-										(long[]) null);
+			newIndexCongloms[index] = 
+                tc.createAndLoadConglomerate(
+                    "BTREE",
+                    indexRows[index].getRowArray(),
+                    ordering[index],
+                    (int[]) null, // TODO-COLLATION, set non default collation if necessary
+                    properties,
+                    TransactionController.IS_DEFAULT,
+                    rowSources[index],
+                    (long[]) null);
 
 			CardinalityCounter cCount = (CardinalityCounter)rowSources[index];
 			long numRows;
@@ -2265,14 +2271,16 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			// We can finally drain the sorter and rebuild the index
 			// RESOLVE - all indexes are btrees right now
 			// Populate the index.
-			newIndexCongloms[index] = tc.createAndLoadConglomerate(
-										"BTREE",
-										indexRows[index].getRowArray(),
-										null, //default column sort order 
-										properties,
-										TransactionController.IS_DEFAULT,
-										rowSources[index],
-										(long[]) null);
+			newIndexCongloms[index] = 
+                tc.createAndLoadConglomerate(
+                    "BTREE",
+                    indexRows[index].getRowArray(),
+                    null, //default column sort order 
+                    (int[]) null, // TODO-COLLATION - set collation based on collation of original index.
+                    properties,
+                    TransactionController.IS_DEFAULT,
+                    rowSources[index],
+                    (long[]) null);
 
 			/* Update the DataDictionary
 			 *

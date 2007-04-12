@@ -271,6 +271,7 @@ public class T_b2i extends T_MultiIterations
                 "heap",   // create a heap conglomerate
                 base_row, // base table template row
                 null, //column sort order - not required for heap
+                null, //default collation
                 null,     // default properties
                 TransactionController.IS_DEFAULT);// not temporary
 
@@ -313,6 +314,7 @@ public class T_b2i extends T_MultiIterations
                 "BTREE",    	    // create a btree secondary
                 index_row.getRow(), // index row template
 				null, //column sort order - default
+                null, //default collation
                 properties,         // properties
                 TransactionController.IS_DEFAULT); // not temporary
 
@@ -1323,6 +1325,7 @@ public class T_b2i extends T_MultiIterations
                 "heap",                            // create a heap conglomerate
                 base_row,                          // base table template row
 				null, //column sort order - not required for heap
+                null, //default collation
                 null,                              // default properties
                 TransactionController.IS_DEFAULT); // not temporary
 
@@ -1353,6 +1356,7 @@ public class T_b2i extends T_MultiIterations
                 "BTREE",    				// create a btree secondary
                 index_row.getRow(),         // row template
 				null, //column sort order - default
+                null, //default collation
                 properties,                 // properties
                 TransactionController.IS_DEFAULT);   // not temporary
 
@@ -2341,12 +2345,15 @@ public class T_b2i extends T_MultiIterations
         DataValueDescriptor[]   base_row        = TemplateRow.newU8Row(2);
         T_SecondaryIndexRow     index_row1      = new T_SecondaryIndexRow();
 
-        long base_conglomid = tc.createConglomerate(
-                                        "heap",   // create a heap conglomerate
-                                        base_row, // base table template row
-										null, //column sort order - not required for heap
-                                        null,     // default properties
-                                        TransactionController.IS_DEFAULT);
+        long base_conglomid = 
+            tc.createConglomerate(
+                "heap",   // create a heap conglomerate
+                base_row, // base table template row
+                null, //column sort order - not required for heap
+                null, //default collation
+                null,     // default properties
+                TransactionController.IS_DEFAULT);
+
         // Open the base table
         ConglomerateController base_cc = 
             tc.openConglomerate(
@@ -2378,7 +2385,7 @@ public class T_b2i extends T_MultiIterations
         {
             testbtree.create(
                 tm, -1, ContainerHandle.DEFAULT_ASSIGN_ID, index_row1.getRow(),
-                null, null, TransactionController.IS_TEMPORARY); 
+                null, null, null, TransactionController.IS_TEMPORARY); 
 
             throw T_Fail.testFailMsg("bad create succeeded.");
         }
@@ -2407,6 +2414,7 @@ public class T_b2i extends T_MultiIterations
                     "BTREE",    				// create a btree secondary
                     index_row1.getRow(), // row template
 					null, //column sort order - default
+                    null, //default collation
                     properties,                 // properties
                     TransactionController.IS_DEFAULT); // not temporary
 
@@ -2871,6 +2879,7 @@ public class T_b2i extends T_MultiIterations
                 "heap",   // create a heap conglomerate
                 base_row, // base table template row
                 null, //column sort order - not required for heap
+                null, //default collation
                 null,     // default properties
                 TransactionController.IS_DEFAULT);
 
@@ -2910,6 +2919,7 @@ public class T_b2i extends T_MultiIterations
                 "BTREE",       // create a heap conglomerate
                 index_row1.getRow(), // 1 column template.
 				null, //column sort order - default
+                null, //default collation
                 properties,         // default properties
                 TransactionController.IS_DEFAULT);       // not temporary
 
@@ -3705,6 +3715,7 @@ public class T_b2i extends T_MultiIterations
                 "heap",                            // create a heap conglomerate
                 base_row,                          // base table template row
 				null, //column sort order - not required for heap
+                null, //default collation
                 null,                              // default properties
                 TransactionController.IS_DEFAULT); // not temporary
 
@@ -3743,6 +3754,7 @@ public class T_b2i extends T_MultiIterations
                 "BTREE",    				// create a btree secondary
                 index_row.getRow(),         // row template
 				order, //column sort order - default
+                null, //default collation
                 properties,                 // properties
                 TransactionController.IS_DEFAULT);   // not temporary
 
@@ -4168,6 +4180,7 @@ public class T_b2i extends T_MultiIterations
                 "heap",                            // create a heap conglomerate
                 base_row,                          // base table template row
 				null, //column sort order - not required for heap
+                null, //default collation
                 null,                              // default properties
                 TransactionController.IS_DEFAULT); // not temporary
 
@@ -4206,6 +4219,7 @@ public class T_b2i extends T_MultiIterations
                 "BTREE",    				// create a btree secondary
                 index_row.getRow(),         // row template
 				order, //column sort order - default
+                null, //default collation
                 properties,                 // properties
                 TransactionController.IS_DEFAULT);   // not temporary
 
@@ -4752,6 +4766,7 @@ public class T_b2i extends T_MultiIterations
                 "heap",                            // create a heap conglomerate
                 base_row,                          // base table template row
 				null, //column sort order - not required for heap
+                null, //default collation
                 null,                              // default properties
                 TransactionController.IS_DEFAULT); // not temporary
 
@@ -4790,6 +4805,7 @@ public class T_b2i extends T_MultiIterations
                 "BTREE",    				// create a btree secondary
                 index_row.getRow(),         // row template
 				order, //column sort order - default
+                null, //default collation
                 properties,                 // properties
                 TransactionController.IS_DEFAULT);   // not temporary
 

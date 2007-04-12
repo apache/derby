@@ -565,11 +565,15 @@ class CreateIndexConstantAction extends IndexConstantAction
 													 indexTemplateRow,
 													 true);
 			}
+
 			ColumnOrdering[]	order = new ColumnOrdering[numColumnOrderings];
 			for (int i=0; i < numColumnOrderings; i++) 
 			{
-				order[i] = new IndexColumnOrder(i, unique || i < numColumnOrderings - 1 
-													? isAscending[i] : true);
+				order[i] = 
+                    new IndexColumnOrder(
+                        i, 
+                        unique || i < numColumnOrderings - 1 ? 
+                            isAscending[i] : true);
 			}
 
 			// create the sorter
@@ -590,10 +594,12 @@ class CreateIndexConstantAction extends IndexConstantAction
 			rowSource = loadSorter(baseRows, indexRows, tc,
 								   scan, sortId, rl);
 
-			conglomId = tc.createAndLoadConglomerate(
+			conglomId = 
+                tc.createAndLoadConglomerate(
 					indexType,
 					indexTemplateRow.getRowArray(),	// index row template
 					order, //colums sort order
+                    null,  // TODO-COLLATION, implement non-default collation
 					indexProperties,
 					TransactionController.IS_DEFAULT, // not temporary
 					rowSource,

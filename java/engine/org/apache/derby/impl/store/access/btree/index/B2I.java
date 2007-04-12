@@ -33,76 +33,120 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
+
+import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
+
+import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.Qualifier;
-import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.store.access.ColumnOrdering;
 
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.impl.store.access.btree.BTree;
 import org.apache.derby.impl.store.access.btree.BTreeLockingPolicy;
 import org.apache.derby.impl.store.access.btree.LeafControlRow;
 import org.apache.derby.impl.store.access.btree.OpenBTree;
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.cache.ClassSize;
+
+import org.apache.derby.iapi.services.io.CompressedNumber;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+
 
 // For JavaDoc references (i.e. @see)
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 
+
 /*
- * @format_id ACCESS_B2I_V1_ID
+ * @format_id ACCESS_B2I_V3_ID
  *
  * @purpose   The tag that describes the on disk representation of the B2I
- *            conglomerate object.  The B2I conglomerate object is stored in
- *            a field of a row in the Conglomerate directory.  
+ *            conglomerate object.  Access contains no "directory" of 
+ *            conglomerate information.  In order to bootstrap opening a file
+ *            it encodes the factory that can open the conglomerate in the 
+ *            conglomerate id itself.  There exists a single B2IFactory which
+ *            must be able to read all btree format id's.  
  *
- * @upgrade   This format was made obsolete in the kimono release.
+ *            This format was used for all Derby database B2I's in version
+ *            10.2 and previous versions.
+ *
+ * @upgrade   The format id of this object is currently always read from disk
+ *            as the first field of the conglomerate itself.  A bootstrap
+ *            problem exists as we don't know the format id of the B2I 
+ *            until we are in the "middle" of reading the B2I.  Thus the
+ *            base B2I implementation must be able to read and write 
+ *            all formats based on the reading the 
+ *            "format_of_this_conglomerate". 
+ *
+ *            soft upgrade to ACCESS_B2I_V4_ID:
+ *                read:
+ *                    old format is readable by current B2I implementation,
+ *                    with automatic in memory creation of default collation
+ *                    id needed by new format.  No code other than
+ *                    readExternal and writeExternal need know about old format.
+ *                write:
+ *                    will never write out new format id in soft upgrade mode.
+ *                    Code in readExternal and writeExternal handles writing
+ *                    correct version.  Code in the factory handles making
+ *                    sure new conglomerates use the B2I_v10_2 class to 
+ *                    that will write out old format info.
+ *
+ *            hard upgrade to ACCESS_B2I_V4_ID:
+ *                read:
+ *                    old format is readable by current B2I implementation,
+ *                    with automatic in memory creation of default collation
+ *                    id needed by new format.
+ *                write:
+ *                    Only "lazy" upgrade will happen.  New format will only
+ *                    get written for new conglomerate created after the 
+ *                    upgrade.  Old conglomerates continue to be handled the
+ *                    same as soft upgrade.
  *
  * @disk_layout 
+ *     format_of_this_conlgomerate(byte[])
  *     containerid(long)
  *     segmentid(int)
  *     number_of_key_fields(int)
  *     number_of_unique_columns(int)
  *     allow_duplicates(boolean)
  *     maintain_parent_links(boolean)
- *     format_of_this_conlgomerate(byte[])
  *     array_of_format_ids(byte[][])
  *     baseConglomerateId(long)
  *     rowLocationColumn(int)
+ *     ascend_column_info(FormatableBitSet)
+ *
  */
 
 /*
- * @format_id ACCESS_B2I_V2_ID
+ * @format_id ACCESS_B2I_V4_ID
  *
  * @purpose   The tag that describes the on disk representation of the B2I
- *            conglomerate object.  The B2I conglomerate object is stored in
- *            a field of a row in the Conglomerate directory.  
+ *            conglomerate object.  Access contains no "directory" of 
+ *            conglomerate information.  In order to bootstrap opening a file
+ *            it encodes the factory that can open the conglomerate in the 
+ *            conglomerate id itself.  There exists a single B2IFactory which
+ *            must be able to read all btree format id's.  
  *
- * @upgrade   The format id of this object is currently always read from disk
- *            as a separate column in the conglomerate directory.  To read
- *            A conglomerate object from disk and upgrade it to the current
- *            version do the following:
+ *            This format is the current version id of B2I and has been used 
+ *            in versions of Derby after the 10.2 release.
  *
- *                format_id = get format id from a separate column
- *                Upgradable conglom_obj = instantiate empty obj(format_id)
- *                read in conglom_obj from disk
- *                conglom = conglom_obj.upgradeToCurrent();
+ * @upgrade   This is the current version, no upgrade necessary.
  *
  * @disk_layout 
  *     format_of_this_conlgomerate(byte[])
@@ -115,6 +159,9 @@ import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
  *     array_of_format_ids(byte[][])
  *     baseConglomerateId(long)
  *     rowLocationColumn(int)
+ *     ascend_column_info(FormatableBitSet)
+ *     collation_ids(compressed array of ints)
+ *
  */
 
 /**
@@ -140,7 +187,7 @@ public class B2I extends BTree
     private static final String PROPERTY_BASECONGLOMID = "baseConglomerateId";
     private static final String PROPERTY_ROWLOCCOLUMN  = "rowLocationColumn";
 
-    static final int FORMAT_NUMBER = StoredFormatIds.ACCESS_B2I_V3_ID;
+    static final int FORMAT_NUMBER = StoredFormatIds.ACCESS_B2I_V4_ID;
 
 	/*
 	** Fields of B2I.
@@ -164,7 +211,8 @@ public class B2I extends BTree
 	**/
 	int rowLocationColumn;
 
-    private static final int BASE_MEMORY_USAGE = ClassSize.estimateBaseFromCatalog( B2I.class);
+    private static final int BASE_MEMORY_USAGE = 
+        ClassSize.estimateBaseFromCatalog( B2I.class);
 
     public int estimateMemoryUsage()
     {
@@ -392,6 +440,7 @@ public class B2I extends BTree
     long                    input_conglomid, 
     DataValueDescriptor[]	template, 
 	ColumnOrdering[]	    columnOrder,
+    int[]                   collationIds,
     Properties              properties,
 	int                     temporaryFlag)
 		throws StandardException
@@ -460,13 +509,14 @@ public class B2I extends BTree
         }
 
 
-		/* covert the sorting order information into a boolean array map.
+		/* convert the sorting order information into a boolean array map.
 		 * If the sorting order for the columns is not provided, we
 		 * assign the default as Ascending Order.
-		 * array length is equla to template length , because column order
-		 * length changes wther it is unique is non unique. store assumes
-		 * template length arrays. So , we make  template length array and make
-		 * the last column as ascending instead of having lot of execeptions code.
+		 * array length is equal to template length, because column order
+		 * length changes whether it is unique or is non unique. store assumes
+		 * template length arrays. So, we make template length array and make
+		 * the last column as ascending instead of having lot of execeptions 
+         * code.
 		 */
 		
 		ascDescInfo = new boolean[template.length];
@@ -478,8 +528,15 @@ public class B2I extends BTree
 				ascDescInfo[i] = true;  // default values - ascending order
 		}
 
+        // get collation ids from input collation ids, store it in the 
+        // conglom state.
+        collation_ids = 
+            ConglomerateUtil.createCollationIds(template.length, collationIds);
+
 		// Do the generic part of creating the b-tree.
-		super.create(rawtran, segmentId, input_conglomid, template, properties, getTypeFormatId(), temporaryFlag);
+		super.create(
+            rawtran, segmentId, input_conglomid, template, 
+            properties, getTypeFormatId(), temporaryFlag);
 
         // open the base conglomerate - to get the lock
         ConglomerateController base_cc = 
@@ -498,7 +555,8 @@ public class B2I extends BTree
                 TransactionController.MODE_TABLE,
                 rawtran.newLockingPolicy(
                     LockingPolicy.MODE_CONTAINER,
-                    TransactionController.ISOLATION_SERIALIZABLE, true), base_cc, open_btree);
+                    TransactionController.ISOLATION_SERIALIZABLE, true), 
+                base_cc, open_btree);
 
 
         // The following call will "open" the new btree.  Create is
@@ -562,7 +620,8 @@ public class B2I extends BTree
      * @param lock_level      One of (MODE_TABLE, MODE_RECORD, or MODE_NONE).
      *
      * @param isolation_level The isolation level to lock the conglomerate at.
-     *                        One of (ISOLATION_READ_COMMITTED or ISOLATION_SERIALIZABLE).
+     *                        One of (ISOLATION_READ_COMMITTED or 
+     *                        ISOLATION_SERIALIZABLE).
      *
 	 * @param scanColumnList  A description of which columns to return from 
      *                        every fetch in the scan.  template, 
@@ -940,103 +999,118 @@ public class B2I extends BTree
 		return StoredFormatIds.ACCESS_B2I_V3_ID;
 	}
 
-	/**
-	Store the stored representation of the column value in the stream.
-	It might be easier to simply store the properties - which would certainly
-	make upgrading easier.*/
-	public void writeExternal_v36(ObjectOutput out) throws IOException {
-		super.writeExternal(out);
-		out.writeLong(baseConglomerateId);
-		out.writeInt(rowLocationColumn);
-	}
 
-	/**
-	Restore the in-memory representation from the stream.
-
-	@exception ClassNotFoundException Thrown if the stored representation is
-	serialized and a class named in the stream could not be found.
-
-	@see java.io.Externalizable#readExternal
-	*/
-	public void readExternal_v36(ObjectInput in)
-		throws IOException, ClassNotFoundException
-	{
-		super.readExternal(in);
-		
-		// XXX (nat) need to improve error handling
-		baseConglomerateId = in.readLong();
-		rowLocationColumn = in.readInt();
-		//set the default (Ascending) sort order
-		ascDescInfo = new boolean[nKeyFields];
-		for (int i=0 ; i < ascDescInfo.length; i++)
-			ascDescInfo[i] = true;
-	}
-
-
-	/**
-	Store the stored representation of the column value in the stream.
-	It might be easier to simply store the properties - which would certainly
-	make upgrading easier.
-
-    */
-	public void writeExternal(ObjectOutput out) throws IOException {
+    /**
+     * Store the stored representation of the column value in the
+     * stream.
+     * <p>
+     * For more detailed description of the ACCESS_B2I_V3_ID format see 
+     * documentation at top of file.
+     *
+     * @see java.io.Externalizable#writeExternal
+     **/
+	public void writeExternal_v10_2(ObjectOutput out) 
+        throws IOException 
+    {
 		super.writeExternal(out);
 		out.writeLong(baseConglomerateId);
 		out.writeInt(rowLocationColumn);
 
-		// if the conglomerate type is not not the version2
-		// sorting information is stored from version V3(release 3.7)
-		if (conglom_format_id != StoredFormatIds.ACCESS_B2I_V2_ID)
-		{
-			//write the coulmsn sort information as bits
-			FormatableBitSet ascDescBits = new FormatableBitSet(ascDescInfo.length);
-			for (int i = 0; i < ascDescInfo.length; i++)
-			{	
-				if (ascDescInfo[i])
-					ascDescBits.set(i);
-			}
-			ascDescBits.writeExternal(out);
-		}
+        //write the columns ascend/descend information as bits
+        FormatableBitSet ascDescBits = 
+            new FormatableBitSet(ascDescInfo.length);
 
+        for (int i = 0; i < ascDescInfo.length; i++)
+        {	
+            if (ascDescInfo[i])
+                ascDescBits.set(i);
+        }
+        ascDescBits.writeExternal(out);
 	}
 
-	/**
-	Restore the in-memory representation from the stream.
+    /**
+     * Store the stored representation of the column value in the
+     * stream.
+     * <p>
+     * For more detailed description of the ACCESS_B2I_V3_ID and 
+     * ACCESS_B2I_V4_ID formats see documentation at top of file.
+     *
+     * @see java.io.Externalizable#writeExternal
+     **/
+	public void writeExternal(ObjectOutput out) 
+        throws IOException 
+    {
+        // First part of ACCESS_B2I_V4_ID format is the ACCESS_B2I_V3_ID format.
+        writeExternal_v10_2(out);
 
-	@exception ClassNotFoundException Thrown if the stored representation is
-	serialized and a class named in the stream could not be found.
+		if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V4_ID)
+        {
+            // Now append sparse array of collation ids
+            ConglomerateUtil.writeCollationIdArray(collation_ids, out);
+        }
+	}
 
-	@see java.io.Externalizable#readExternal
-	*/
+    /**
+     * Restore the in-memory representation from the stream.
+     * <p>
+     *
+     * @exception ClassNotFoundException Thrown if the stored representation 
+     *                                   is serialized and a class named in 
+     *                                   the stream could not be found.
+     *
+     * @see java.io.Externalizable#readExternal
+     **/
 	private final void localReadExternal(ObjectInput in)
 		throws IOException, ClassNotFoundException
 	{
 		super.readExternal(in);
 		
-		// XXX (nat) need to improve error handling
 		baseConglomerateId = in.readLong();
-		rowLocationColumn = in.readInt();
+		rowLocationColumn  = in.readInt();
 
-		// if the conglomerate type is  not the version2
-		// sorting info is avaialable  from version v3(release 3.7)
-		if (conglom_format_id != StoredFormatIds.ACCESS_B2I_V2_ID)
-		{
-			// read the column sort order info
-			FormatableBitSet ascDescBits = new FormatableBitSet();
-			ascDescBits.readExternal(in);
-			ascDescInfo = new boolean[ascDescBits.getLength()];
-			for(int i =0 ; i < ascDescBits.getLength(); i++)
-				ascDescInfo[i] = ascDescBits.isSet(i);
-		}
-		else
-		{
-			//set the default (Ascending) sort order
-			ascDescInfo = new boolean[nKeyFields];
-			for (int i=0 ; i < ascDescInfo.length; i++)
-				ascDescInfo[i] = true;
+        // read the column sort order info
+        FormatableBitSet ascDescBits = new FormatableBitSet();
+        ascDescBits.readExternal(in);
+        ascDescInfo = new boolean[ascDescBits.getLength()];
+        for(int i =0 ; i < ascDescBits.getLength(); i++)
+            ascDescInfo[i] = ascDescBits.isSet(i);
 
-		}
+        // In memory maintain a collation id per column in the template.
+        collation_ids = new int[format_ids.length];
 
+        // initialize all the entries to COLLATION_TYPE_UCS_BASIC, 
+        // and then reset as necessary.  For version ACCESS_B2I_V3_ID,
+        // this is the default and no resetting is necessary.
+        for (int i = 0; i < format_ids.length; i++)
+            collation_ids[i] = StringDataValue.COLLATION_TYPE_UCS_BASIC;
+
+		if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V4_ID)
+        {
+            // current format id, read collation info from disk
+
+            if (SanityManager.DEBUG)
+            {
+                // length must include row location column and at least
+                // one other field.
+                SanityManager.ASSERT(
+                    collation_ids.length >= 2, 
+                    "length = " + collation_ids.length);
+            }
+
+            ConglomerateUtil.readCollationIdArray(collation_ids, in);
+        }
+        else if (conglom_format_id != StoredFormatIds.ACCESS_B2I_V3_ID)
+        {
+            // Currently only V3 and V4 should be possible in a Derby DB.
+            // Actual work for V3 is handled by default code above, so no
+            // special work is necessary.
+
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT(
+                    "Unexpected format id: " + conglom_format_id);
+            }
+        }
 	}
 
 	public void readExternal(ObjectInput in)

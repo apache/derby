@@ -502,6 +502,32 @@ public class TableDescriptor extends TupleDescriptor
 		return result;
 	}
 
+    /**
+     * Return an array of collation ids.
+     * <p>
+     * Return an array of collation ids, one for each column in the
+     * columnDescriptorList.  This is useful for passing collation id info
+     * down to store, for instance in createConglomerate().
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public int[] getColumnCollationIds()
+		throws StandardException
+    {
+        int[] collation_ids = new int[getNumberOfColumns()]; 
+
+		for (int index = 0; index < collation_ids.length; index++)
+		{
+			ColumnDescriptor cd = 
+                (ColumnDescriptor) columnDescriptorList.elementAt(index);
+
+            collation_ids[index] = cd.getType().getCollationType();
+
+		}
+		return(collation_ids);
+
+    }
+
 	/**
 	 * Gets the conglomerate descriptor list
 	 *

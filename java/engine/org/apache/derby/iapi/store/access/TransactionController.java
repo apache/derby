@@ -301,6 +301,8 @@ public interface TransactionController
 		long conglomId = tc.createConglomerate(
 			"heap", // we're requesting a heap conglomerate
 			template, // a populated template is required for heap and btree.
+            null, // no column order
+            null, // default collation order for all columns
 			null, // default properties
 			0); // not temporary
 	</blockquote></pre>
@@ -379,6 +381,13 @@ public interface TransactionController
 	value is 'null', which means all columns needs to be sorted in 
 	Ascending order.
 
+    @param collationIds Specifies the collation id of each of the columns
+    in the new conglomerate.  Collation id along with format id may be used
+    to create DataValueDescriptor's which may subsequently be used for
+    comparisons.  For instance the correct collation specific order and
+    searching is maintained by correctly specifying the collation id of 
+    the columns in the index when the index is created.
+
 
 	@param properties Implementation-specific properties of the
 	conglomerate.  
@@ -417,6 +426,7 @@ public interface TransactionController
     String                  implementation,
     DataValueDescriptor[]   template,
     ColumnOrdering[]        columnOrder,
+    int[]                   collationIds,
     Properties              properties,
     int                     temporaryFlag)
 		throws StandardException;
@@ -439,6 +449,33 @@ public interface TransactionController
 	THE WAY THAT THE IMPLEMENTATION IS CHOSEN STILL NEEDS SOME WORK.
     For now, use "BTREE" or "heap" for a local access manager.
 
+    @param template A row which describes the prototypical
+	row that the conglomerate will be holding.
+	Typically this row gives the conglomerate
+	information about the number and type of
+	columns it will be holding.  The implementation
+	may require a specific subclass of row type.
+    Note that the createConglomerate call reads the template and makes a copy
+    of any necessary information from the template, no reference to the
+    template is kept (and thus this template can be re-used in subsequent
+    calls - such as openScan()).  This field is required when creating either
+    a heap or btree conglomerate.
+
+	@param columnOrder Specifies the colummns sort order.
+	Useful only when the conglomerate is of type BTREE, default
+	value is 'null', which means all columns needs to be sorted in 
+	Ascending order.
+
+    @param collationIds Specifies the collation id of each of the columns
+    in the new conglomerate.  Collation id along with format id may be used
+    to create DataValueDescriptor's which may subsequently be used for
+    comparisons.  For instance the correct collation specific order and
+    searching is maintained by correctly specifying the collation id of 
+    the columns in the index when the index is created.
+
+	@param properties Implementation-specific properties of the
+	conglomerate.  
+
 	@param rowSource the interface to recieve rows to load into the
 	conglomerate. 
 
@@ -456,10 +493,11 @@ public interface TransactionController
     String                  implementation,
     DataValueDescriptor[]   template,
 	ColumnOrdering[]		columnOrder,
+    int[]                   collationIds,
     Properties              properties,
     int                     temporaryFlag,
     RowLocationRetRowSource rowSource,
-	long[] rowCount)
+	long[]                  rowCount)
     throws StandardException;
 
 	/**
@@ -506,6 +544,13 @@ public interface TransactionController
 	value is 'null', which means all columns needs to be sorted in 
 	Ascending order.
 
+    @param collationIds Specifies the collation id of each of the columns
+    in the new conglomerate.  Collation id along with format id may be used
+    to create DataValueDescriptor's which may subsequently be used for
+    comparisons.  For instance the correct collation specific order and
+    searching is maintained by correctly specifying the collation id of 
+    the columns in the index when the index is created.
+
 	@param properties Implementation-specific properties of the conglomerate.  
 
     @param  temporaryFlag  If true, the conglomerate is temporary.
@@ -536,6 +581,7 @@ public interface TransactionController
     boolean                 recreate_ifempty,
     DataValueDescriptor[]   template,
 	ColumnOrdering[]		columnOrder,
+    int[]                   collationIds,
     Properties              properties,
     int			            temporaryFlag,
     long                    orig_conglomId,
@@ -566,6 +612,7 @@ public interface TransactionController
 	@param conglomId        The identifier of the conglomerate to alter.
 	@param column_id        The column number to add this column at.
 	@param template_column  An instance of the column to be added to table.
+	@param collation_id     Collation id of the added column.
 
 	@exception StandardException Only some types of conglomerates can support
         adding a column, for instance "heap" conglomerates support adding a 
@@ -575,7 +622,8 @@ public interface TransactionController
     public void addColumnToConglomerate(
     long        conglomId, 
     int         column_id, 
-    Storable    template_column)
+    Storable    template_column,
+    int         collation_id)
 		throws StandardException;
 
 

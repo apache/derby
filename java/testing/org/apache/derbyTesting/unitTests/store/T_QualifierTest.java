@@ -1163,7 +1163,7 @@ public class T_QualifierTest
         {
             base_conglomid = 
                 tc.createConglomerate(
-                    "heap", base_row, null,  null, 
+                    "heap", base_row, null,  null, null, 
                     TransactionController.IS_DEFAULT);
 
             index_row = new T_SecondaryIndexRow();
@@ -1183,6 +1183,7 @@ public class T_QualifierTest
             index_conglomid = 
                 tc.createConglomerate(
                     init_conglomerate_type, index_row.getRow(), 
+                    null,
                     null,
 					init_properties,
 					init_temporary ? TransactionController.IS_TEMPORARY : TransactionController.IS_DEFAULT);
@@ -1209,9 +1210,15 @@ public class T_QualifierTest
         else
         {
             base_conglomid = 
-                tc.createConglomerate(init_conglomerate_type, base_row, null, 
-                                      init_properties,
-									  init_temporary ? TransactionController.IS_TEMPORARY : TransactionController.IS_DEFAULT);
+                tc.createConglomerate(
+                    init_conglomerate_type, 
+                    base_row, 
+                    null,                   // default order 
+                    null,                   // default collation
+                    init_properties,
+                    init_temporary ? 
+                        TransactionController.IS_TEMPORARY : 
+                        TransactionController.IS_DEFAULT);
 
             base_cc =	
                 tc.openConglomerate(

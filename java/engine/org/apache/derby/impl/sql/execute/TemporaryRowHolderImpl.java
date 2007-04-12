@@ -256,15 +256,54 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		{
 			TransactionController tc = activation.getTransactionController();
 
+            // TODO-COLLATE, I think collation needs to get set always correctly
+            // but did see what to get collate id when there was no result
+            // description.  The problem comes if row holder is used to stream
+            // row to temp disk, then row is read from disk using an interface
+            // where store creates the DataValueDescriptor template itself, 
+            // and subsquently the returned column is used for some sort of
+            // comparison.  Also could be a problem is reader of tempoary 
+            // table uses qualifiers, that would result in comparisons internal
+            // to store.  I believe the below impl is incomplete - either
+            // it should always be default, or real collate_ids should be 
+            // passed in.
+
+            // null collate_ids in createConglomerate call indicates to use all
+            // default collate ids.
+            int collation_ids[] = null;
+
+            /*
+            TODO-COLLATE - if we could count on resultDescription I think the
+            following would work.
+
+            if (resultDescription != null)
+            {
+                // init collation id info from resultDescription for create call
+                collation_ids = new int[resultDescription.getColumnCount()];
+
+                for (int i = 0; i < collation_ids.length; i++)
+                {
+                    collation_ids[i] = 
+                        resultDescription.getColumnDescriptor(
+                            i + 1).getType().getCollationType();
+                }
+            }
+            */
+
+
 			/*
 			** Create the conglomerate with the template row.
 			*/
-			CID = tc.createConglomerate("heap",
-										inputRow.getRowArray(),
-										null, //column sort order - not required for heap
-										properties,
-										TransactionController.IS_TEMPORARY | 
-										TransactionController.IS_KEPT);
+			CID = 
+                tc.createConglomerate(
+                    "heap",
+                    inputRow.getRowArray(),
+                    null, //column sort order - not required for heap
+                    collation_ids,
+                    properties,
+                    TransactionController.IS_TEMPORARY | 
+                    TransactionController.IS_KEPT);
+
 			conglomCreated = true;
 
 			cc = tc.openConglomerate(CID, 
@@ -334,9 +373,15 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 				uniqueIndexRow[1] = baseRowLocation;
 				Properties props = makeIndexProperties(uniqueIndexRow, CID);
 				uniqueIndexConglomId =
-					tc.createConglomerate("BTREE",uniqueIndexRow , null,  props, 
-										  TransactionController.IS_TEMPORARY | 
-										  TransactionController.IS_KEPT);
+					tc.createConglomerate(
+                        "BTREE",
+                        uniqueIndexRow, 
+                        null,  
+                        null, // no collation needed for index on row locations.
+                        props, 
+                        (TransactionController.IS_TEMPORARY | 
+                         TransactionController.IS_KEPT));
+
 				uniqueIndex_cc = tc.openConglomerate(
 								uniqueIndexConglomId, 
 								false,
@@ -394,15 +439,23 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			positionIndexRow[1] = rl;				
 			Properties props = makeIndexProperties(positionIndexRow, CID);
 			positionIndexConglomId =
-				tc.createConglomerate("BTREE", positionIndexRow, null,  props, 
-									  TransactionController.IS_TEMPORARY |
-									  TransactionController.IS_KEPT);
-			positionIndex_cc = tc.openConglomerate(
-													positionIndexConglomId, 
-													false,
-													TransactionController.OPENMODE_FORUPDATE,
-													TransactionController.MODE_TABLE,
-													TransactionController.ISOLATION_SERIALIZABLE);
+                tc.createConglomerate(
+                    "BTREE",
+                    positionIndexRow, 
+                    null,  
+                    null, // no collation needed for index on row locations.
+                    props, 
+                    (TransactionController.IS_TEMPORARY | 
+                     TransactionController.IS_KEPT));
+
+			positionIndex_cc = 
+                tc.openConglomerate(
+                    positionIndexConglomId, 
+                    false,
+                    TransactionController.OPENMODE_FORUPDATE,
+                    TransactionController.MODE_TABLE,
+                    TransactionController.ISOLATION_SERIALIZABLE);
+
 			positionIndexCreated = true;
 		}
 		

@@ -143,7 +143,7 @@ String[] TwoByte = {
         /* 88 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 89 */        "org.apache.derby.iapi.types.SQLLongint",
         /* 90 */        "org.apache.derby.impl.store.access.heap.HeapClassInfo",
-        /* 91 */        "org.apache.derby.impl.store.access.heap.Heap",
+        /* 91 */        "org.apache.derby.impl.store.access.heap.Heap_v10_2",
         /* 92 */        null,
         /* 93 */        "org.apache.derby.impl.store.access.StorableFormatId",
         /* 94 */        null,
@@ -440,7 +440,7 @@ String[] TwoByte = {
         /* 385 */   null,
         /* 386 */   null,
         /* 387 */       "org.apache.derby.catalog.types.IndexDescriptorImpl",
-        /* 388 */       "org.apache.derby.impl.store.access.btree.index.B2I",
+        /* 388 */       "org.apache.derby.impl.store.access.btree.index.B2I_v10_2",
         /* 389 */   null,
         /* 390 */   null,
         /* 391 */   null,
@@ -527,5 +527,7 @@ String[] TwoByte = {
         /* 463 */   "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
         /* 464 */   "org.apache.derby.iapi.types.SqlXmlUtil",        
 		/* 465 */   "org.apache.derby.impl.store.raw.data.CompressSpacePageOperation",
+        /* 466 */   "org.apache.derby.impl.store.access.btree.index.B2I",
+        /* 467 */   "org.apache.derby.impl.store.access.heap.Heap"
 };
 }

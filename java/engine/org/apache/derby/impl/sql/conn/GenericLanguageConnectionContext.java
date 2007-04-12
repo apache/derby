@@ -51,7 +51,7 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import	org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
@@ -1177,23 +1177,33 @@ public class GenericLanguageConnectionContext
 	}
 
 	/**
-	 * If dropAndRedeclare is true, that means we have come here for temp tables with on commit delete rows
-	 * and no held curosr open on them. We will drop the existing conglomerate and redeclare a new conglomerate
-	 * similar to old conglomerate. This is a more efficient way of deleting all rows from the table.
+	 * If dropAndRedeclare is true, that means we have come here for temp 
+     * tables with on commit delete rows and no held curosr open on them. We 
+     * will drop the existing conglomerate and redeclare a new conglomerate
+	 * similar to old conglomerate. This is a more efficient way of deleting 
+     * all rows from the table.
 	 *
-	 * If dropAndRedeclare is false, that means we have come here for the rollback cleanup work. We are trying
-	 * to restore old definition of the temp table (because the drop on it is being rolled back).
+	 * If dropAndRedeclare is false, that means we have come here for the 
+     * rollback cleanup work. We are trying to restore old definition of the 
+     * temp table (because the drop on it is being rolled back).
 	 */
-	private TableDescriptor cleanupTempTableOnCommitOrRollback(TableDescriptor td, boolean dropAndRedeclare)
+	private TableDescriptor cleanupTempTableOnCommitOrRollback(
+    TableDescriptor td, 
+    boolean         dropAndRedeclare)
 		 throws StandardException
 	{
-		//create new conglomerate with same properties as the old conglomerate and same row template as the old conglomerate
-		long conglomId = tran.createConglomerate(
-			"heap", // we're requesting a heap conglomerate
-			td.getEmptyExecRow(getContextManager()).getRowArray(), // row template
-			null, //column sort order - not required for heap
-			null, // properties
-			(TransactionController.IS_TEMPORARY | TransactionController.IS_KEPT));
+		//create new conglomerate with same properties as the old conglomerate 
+        //and same row template as the old conglomerate
+		long conglomId = 
+            tran.createConglomerate(
+                "heap", // we're requesting a heap conglomerate
+                td.getEmptyExecRow(
+                    getContextManager()).getRowArray(), // row template
+                null, //column sort order - not required for heap
+                td.getColumnCollationIds(),  // same ids as old conglomerate
+                null, // properties
+                (TransactionController.IS_TEMPORARY | 
+                 TransactionController.IS_KEPT));
 
 		long cid = td.getHeapConglomerateId();
 

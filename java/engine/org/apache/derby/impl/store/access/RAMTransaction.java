@@ -601,6 +601,7 @@ public class RAMTransaction
 	@param conglomId        The identifier of the conglomerate to drop.
 	@param column_id        The column number to add this column at.
 	@param template_column  An instance of the column to be added to table.
+	@param collation_id     collation id of the added column.
 
 	@exception StandardException Only some types of conglomerates can support
         adding a column, for instance "heap" conglomerates support adding a
@@ -610,7 +611,8 @@ public class RAMTransaction
     public void addColumnToConglomerate(
     long        conglomId,
     int         column_id,
-    Storable    template_column)
+    Storable    template_column,
+    int         collation_id)
 		throws StandardException
     {
         boolean is_temporary = (conglomId < 0);
@@ -632,7 +634,7 @@ public class RAMTransaction
                 (StaticCompiledOpenConglomInfo) null,
                 (DynamicCompiledOpenConglomInfo) null);
 
-		conglom.addColumn(this, column_id, template_column);
+		conglom.addColumn(this, column_id, template_column, collation_id);
 
         // remove the old entry in the Conglomerate directory, and add the
         // new one.
@@ -802,6 +804,7 @@ public class RAMTransaction
     String                  implementation,
     DataValueDescriptor[]   template,
     ColumnOrdering[]        columnOrder,
+    int[]                   collationIds,
     Properties              properties,
     int                     temporaryFlag)
 		throws StandardException
@@ -839,7 +842,7 @@ public class RAMTransaction
         Conglomerate conglom =
             cfactory.createConglomerate(
                 this, segment, conglomid, template, 
-                columnOrder, properties, temporaryFlag);
+                columnOrder, collationIds, properties, temporaryFlag);
 
 		long conglomId;
 		if ((temporaryFlag & TransactionController.IS_TEMPORARY)
@@ -870,6 +873,7 @@ public class RAMTransaction
     String                  implementation,
     DataValueDescriptor[]   template,
 	ColumnOrdering[]		columnOrder,
+    int[]                   collationIds,
     Properties              properties,
     int                     temporaryFlag,
     RowLocationRetRowSource rowSource,
@@ -882,6 +886,7 @@ public class RAMTransaction
                 true,
                 template,
 				columnOrder,
+                collationIds,
                 properties,
                 temporaryFlag,
                 0 /* unused if recreate_ifempty is true */,
@@ -900,6 +905,7 @@ public class RAMTransaction
     boolean                 recreate_ifempty,
     DataValueDescriptor[]   template,
 	ColumnOrdering[]		columnOrder,
+    int[]                   collationIds,
     Properties              properties,
     int			            temporaryFlag,
     long                    orig_conglomId,
@@ -912,7 +918,8 @@ public class RAMTransaction
 		// necessary although still correct.
 		long conglomId = 
 			createConglomerate(
-                implementation, template, columnOrder, properties, temporaryFlag);
+                implementation, template, columnOrder, collationIds, 
+                properties, temporaryFlag);
 
         long rows_loaded = 
             loadConglomerate(
@@ -2148,6 +2155,34 @@ public class RAMTransaction
         rawtran.addPostCommitWork(work);
 
         return;
+    }
+
+    /**
+     *  Check to see if a database has been upgraded to the required
+     *  level in order to use a store feature.
+     *
+     * @param requiredMajorVersion  required database Engine major version
+     * @param requiredMinorVersion  required database Engine minor version
+     * @param feature               Non-null to throw an exception, null to 
+     *                              return the state of the version match.
+     *
+     * @return <code> true </code> if the database has been upgraded to 
+     *         the required level, <code> false </code> otherwise.
+     *
+     * @exception  StandardException 
+     *             if the database is not at the require version 
+     *             when <code>feature</code> feature is 
+     *             not <code> null </code>. 
+     */
+	public boolean checkVersion(
+    int     requiredMajorVersion, 
+    int     requiredMinorVersion, 
+    String  feature) 
+        throws StandardException
+    {
+        return(
+            accessmanager.getRawStore().checkVersion(
+                requiredMajorVersion, requiredMinorVersion, feature));
     }
 
     /**

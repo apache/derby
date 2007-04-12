@@ -163,23 +163,35 @@ class CreateTableConstantAction extends DDLConstantAction
 		/* Mark the activation as being for create table */
 		activation.setForCreateTable();
 
-		/*
-		** Create a row template to tell the store what type of rows this table
-		** holds.
-		*/
-		template = RowUtil.getEmptyValueRow(columnInfo.length, lcc);
+        // setup for create conglomerate call:
+        //   o create row template to tell the store what type of rows this
+        //     table holds.
+        //   o create array of collation id's to tell collation id of each
+        //     column in table.
+		template            = RowUtil.getEmptyValueRow(columnInfo.length, lcc);
+        int[] collation_ids = new int[columnInfo.length];
 
-		/* Get a template value for each column */
 		for (int ix = 0; ix < columnInfo.length; ix++)
 		{
-			/* If there is a default value, use it, otherwise use null */
-			if (columnInfo[ix].defaultValue != null)
-				template.setColumn(ix + 1, columnInfo[ix].defaultValue);
+            ColumnInfo  col_info = columnInfo[ix];
+
+            // Get a template value for each column
+
+			if (col_info.defaultValue != null)
+            {
+                /* If there is a default value, use it, otherwise use null */
+				template.setColumn(ix + 1, col_info.defaultValue);
+            }
 			else
-				template.setColumn(ix + 1,
-									columnInfo[ix].dataType.getNull()
-								);
+            {
+				template.setColumn(ix + 1, col_info.dataType.getNull());
+            }
+
+            // get collation info for each column.
+
+            collation_ids[ix] = col_info.dataType.getCollationType();
 		}
+
 
 		/* create the conglomerate to hold the table's rows
 		 * RESOLVE - If we ever have a conglomerate creator
@@ -190,9 +202,12 @@ class CreateTableConstantAction extends DDLConstantAction
 				"heap", // we're requesting a heap conglomerate
 				template.getRowArray(), // row template
 				null, //column sort order - not required for heap
+                collation_ids,
 				properties, // properties
 				tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE ?
-				(TransactionController.IS_TEMPORARY | TransactionController.IS_KEPT) : TransactionController.IS_DEFAULT);
+                    (TransactionController.IS_TEMPORARY | 
+                     TransactionController.IS_KEPT) : 
+                        TransactionController.IS_DEFAULT);
 
 		/*
 		** Inform the data dictionary that we are about to write to it.

@@ -55,7 +55,7 @@ public interface ResultDescription
 	public ResultColumnDescriptor[] getColumnInfo();
 
 	/**
-	 * Returns a ResultColumnDescriptor for the column, given the oridinal
+	 * Returns a ResultColumnDescriptor for the column, given the ordiinal
 	 * position of the column.
 	 * NOTE - position is 1-based.
 	 *
