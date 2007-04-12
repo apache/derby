@@ -29,6 +29,8 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import java.text.RuleBasedCollator;
+
 import java.util.Locale;
 
 /**
@@ -687,4 +689,30 @@ public interface DataValueFactory
          *   Collator object
          */
         void setLocale(Locale localeOfTheDatabase);
+        
+        /**
+         * Return the RuleBasedCollator depending on the collation type. 
+         * If the collation type is UCS_BASIC, then this method will return 
+         * null. If the collation type is TERRITORY_BASED then the return
+         * value will be the Collator derived from the database's locale.
+         * 
+         * This method will be used when Store code is trying to create a DVD
+         * template row using the format ids and the collation types. First a
+         * DVD will be constructed just using format id. Then if the DVD is of
+         * type StringDataValue, then it will call this method to get the
+         * Collator object. If the Collator object returned from this method is
+         * null then we will continue to use the default DVDs for the character
+         * types, ie the DVDs which just use the JVM's default collation. (This
+         * is why, we want this method to return null if we are dealing with
+         * UCS_BASIC.) If the Collator object returned is not null, then we
+         * will construct collation sensitive DVD for the character types. So,
+         * the return value of this method determines if we are going to create
+         * a character DVD with default collation or with custom collation. 
+         * 
+         * @param collationType This will be UCS_BASIC or TERRITORY_BASED
+         *  
+         * @return Collator null if the collation type is UCS_BASIC.
+         *  Collator based on territory if the collation type is TERRITORY_BASED
+         */
+        RuleBasedCollator getCharacterCollator(int collationType);
 }

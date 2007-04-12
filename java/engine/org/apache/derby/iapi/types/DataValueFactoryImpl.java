@@ -47,6 +47,9 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import java.text.Collator;
+import java.text.RuleBasedCollator;
+
 import java.util.Properties;
 import java.util.Locale;
 
@@ -66,6 +69,8 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         //BasicDatabase first boots DVF in it's boot method and then sets 
         //this databaseLocale in DVF.
     	private Locale databaseLocale;
+    	//Following Collator object will be initialized using databaseLocale.  
+    	private RuleBasedCollator collatorForCharacterTypes;
 
         DataValueFactoryImpl()
         {
@@ -1086,6 +1091,17 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     /** @see DataValueFactory#setLocale(Locale) */
     public void setLocale(Locale localeOfTheDatabase){
     	databaseLocale = localeOfTheDatabase;
+    	collatorForCharacterTypes = 
+    		(RuleBasedCollator) Collator.getInstance(databaseLocale);
+    }
+
+    /** @see DataValueFactory#getCharacterCollator(int) */
+    public RuleBasedCollator getCharacterCollator(int collationType){
+    	if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+    		return (RuleBasedCollator)null;
+    	else
+    		return collatorForCharacterTypes;
+    	
     }
 
         // RESOLVE: This is here to find the LocaleFinder (i.e. the Database)
