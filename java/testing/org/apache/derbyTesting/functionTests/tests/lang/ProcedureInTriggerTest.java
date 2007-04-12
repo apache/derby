@@ -228,12 +228,15 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         //--- trigger creation will pass but firing should fail
         s.execute("create trigger bad_before_trig no cascade BEFORE insert on t2 for each STATEMENT call proc_wrongly_defined_as_no_sql(50, 'fifty')");
         //--- try to insert 2 rows
-        //--- Bug DERBY-1629 -- in JDK 1.6 you only get 38001, not 38000
         try {
             s.execute("insert into t2 values (1,2), (2,4)");
         } catch (SQLException se) {
-            assertSQLState("38000", se);
-            se = se.getNextException();
+            //--- Bug DERBY-1629 -- in JDK 1.6 you only get 38001, not 38000
+            if (!JDBC.vmSupportsJDBC4())
+            {
+                assertSQLState("38000", se);
+                se = se.getNextException();
+            }
             assertSQLState("38001", se);           
         }
         //--- check trigger is not fired.
