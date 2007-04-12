@@ -274,7 +274,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * @return	The row at the absolute position, or NULL if no such position.
 	 *
 	 * @exception StandardException		Thrown on failure
-	 * @see Row
+	 * @see org.apache.derby.iapi.sql.Row
 	 */
 	public ExecRow	getAbsoluteRow(int row) throws StandardException
 	{
@@ -380,7 +380,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * @return	The row at the relative position, or NULL if no such position.
 	 *
 	 * @exception StandardException		Thrown on failure
-	 * @see Row
+	 * @see org.apache.derby.iapi.sql.Row
 	 */
 	public ExecRow	getRelativeRow(int row) throws StandardException
 	{
@@ -430,7 +430,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 *
 	 * @return	NULL.
 	 *
-	 * @see Row
+	 * @see org.apache.derby.iapi.sql.Row
 	 */
 	public ExecRow	setBeforeFirstRow() 
 	{
@@ -448,7 +448,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * @return	The first row, or NULL if no rows.
 	 *
 	 * @exception StandardException		Thrown on failure
-	 * @see Row
+	 * @see org.apache.derby.iapi.sql.Row
 	 */
 	public ExecRow	getFirstRow() 
 		throws StandardException
@@ -541,7 +541,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * @return	The previous row, or NULL if no more previous rows.
 	 *
 	 * @exception StandardException		Thrown on failure
-	 * @see Row
+	 * @see org.apache.derby.iapi.sql.Row
 	 */
 	public ExecRow	getPreviousRow() 
 		throws StandardException
@@ -603,7 +603,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * @return	The last row, or NULL if no rows.
 	 *
 	 * @exception StandardException		Thrown on failure
-	 * @see Row
+	 * @see org.apache.derby.iapi.sql.Row
 	 */
 	public ExecRow	getLastRow()
 		throws StandardException
@@ -660,7 +660,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 * @return	NULL.
 	 *
 	 * @exception StandardException		Thrown on failure
-	 * @see Row
+	 * @see org.apache.derby.iapi.sql.Row
 	 */
 	public ExecRow	setAfterLastRow() 
 		throws StandardException
