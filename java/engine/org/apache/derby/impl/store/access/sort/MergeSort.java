@@ -67,33 +67,33 @@ final class MergeSort implements Sort
 
 	/**
 	**/
-	static final int STATE_CLOSED = 0;
+	private static final int STATE_CLOSED = 0;
 
 	/**
 	**/
-	static final int STATE_INITIALIZED = 1;
+	private static final int STATE_INITIALIZED = 1;
 
 	/**
 	**/
-	static final int STATE_INSERTING = 2;
+	private static final int STATE_INSERTING = 2;
 
 	/**
 	**/
-	static final int STATE_DONE_INSERTING = 3;
+	private static final int STATE_DONE_INSERTING = 3;
 
 	/**
 	**/
-	static final int STATE_SCANNING = 4;
+	private static final int STATE_SCANNING = 4;
 
 	/**
 	**/
-	static final int STATE_DONE_SCANNING = 5;
+	private static final int STATE_DONE_SCANNING = 5;
 
 	/**
 	Maintains the current state of the sort as defined in
 	the preceding values.  Sorts start off and end up closed.
 	**/
-	protected int state = STATE_CLOSED;
+	private int state = STATE_CLOSED;
 
 	/**
 	The template as passed in on create.  Valid when the state
@@ -115,17 +115,17 @@ final class MergeSort implements Sort
     column to compare.  To find the column id to compare as the i'th column
     look in columnOrderingMap[i].
 	**/
-	protected int columnOrderingMap[];
+	private int columnOrderingMap[];
 
 	/**
     A lookup table to speed up lookup of Ascending state of a column, 
 	**/
-	protected boolean columnOrderingAscendingMap[];
+	private boolean columnOrderingAscendingMap[];
 
 	/**
 	The sort observer.  May be null.  Used as a callback.
 	**/
-	protected SortObserver sortObserver;
+	SortObserver sortObserver;
 
 	/**
 	Whether the rows are expected to be in order on insert,
@@ -137,37 +137,37 @@ final class MergeSort implements Sort
 	The inserter that's being used to insert rows into the sort.
 	This field is only valid when the state is INSERTING.
 	**/
-	protected MergeInserter inserter = null;
+	private MergeInserter inserter = null;
 
 	/**
 	The scan that's being used to return rows from the sort.
 	This field is only valid when the state is SCANNING.
 	**/
-	protected Scan scan = null;
+	private Scan scan = null;
 
 	/**
 	A vector of merge runs, produced by the MergeInserter.
 	Might be null if no merge runs were produced.
 	It is a vector of container ids.
 	**/
-	protected Vector mergeRuns = null;
+	private Vector mergeRuns = null;
 
 	/**
 	An ordered set of the leftover rows that didn't go
 	in the last merge run (might be all the rows if there
 	are no merge runs).
 	**/
-	protected SortBuffer sortBuffer = null;
+	private SortBuffer sortBuffer = null;
 
 	/**
 	The maximum number of entries a sort buffer can hold.
 	**/
-	protected int sortBufferMax;
+	int sortBufferMax;
 
 	/**
 	The minimum number of entries a sort buffer can hold.
 	**/
-	protected int sortBufferMin;
+	int sortBufferMin;
 
 	/**
 	Properties for mergeSort

@@ -362,7 +362,7 @@ public class HeapController
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                    new Long(heap.id.getContainerId()));
+                    new Long(heap.getId().getContainerId()));
         }
 
         this.init(open_conglom);

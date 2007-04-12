@@ -127,7 +127,7 @@ public final class Heap
 	** Fields of Heap.
 	*/
 
-	protected ContainerKey id;
+	private ContainerKey id;
 
     /**
      * The format id's of each of the columns in the heap table.

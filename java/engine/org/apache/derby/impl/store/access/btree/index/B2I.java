@@ -137,10 +137,10 @@ import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
  */
 public class B2I extends BTree
 {
-    public    static final String PROPERTY_BASECONGLOMID = "baseConglomerateId";
-    public    static final String PROPERTY_ROWLOCCOLUMN  = "rowLocationColumn";
+    private static final String PROPERTY_BASECONGLOMID = "baseConglomerateId";
+    private static final String PROPERTY_ROWLOCCOLUMN  = "rowLocationColumn";
 
-	public static final int FORMAT_NUMBER = StoredFormatIds.ACCESS_B2I_V3_ID;
+    static final int FORMAT_NUMBER = StoredFormatIds.ACCESS_B2I_V3_ID;
 
 	/*
 	** Fields of B2I.
@@ -152,7 +152,7 @@ public class B2I extends BTree
 	to refer to that conglomerate.  Used to obtain table/row locks on the
     base table rows which the index rows point at.
 	**/
-	protected long baseConglomerateId;
+	long baseConglomerateId;
 
 	/**
 	The column id (zero-based integer index) of the column which holds the row 
@@ -162,7 +162,7 @@ public class B2I extends BTree
     point at.
 	Currently, RowLocationColumn must be the last key column.
 	**/
-	protected int rowLocationColumn;
+	int rowLocationColumn;
 
     private static final int BASE_MEMORY_USAGE = ClassSize.estimateBaseFromCatalog( B2I.class);
 

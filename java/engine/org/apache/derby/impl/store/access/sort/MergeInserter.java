@@ -62,18 +62,18 @@ final class MergeInserter implements SortController
 	Information about memory usage to dynamically tune the
 	in-memory sort buffer size.
 	*/
-	long beginFreeMemory;
-	long beginTotalMemory;
-	long estimatedMemoryUsed;
-	boolean avoidMergeRun;		// try to avoid merge run if possible
-    int runSize;
-    int totalRunSize;
+	private long beginFreeMemory;
+	private long beginTotalMemory;
+	private long estimatedMemoryUsed;
+	private boolean avoidMergeRun;		// try to avoid merge run if possible
+    private int runSize;
+    private int totalRunSize;
 
-    protected String  stat_sortType;
-    protected int     stat_numRowsInput;
-    protected int     stat_numRowsOutput;
-    protected int     stat_numMergeRuns;
-    protected Vector  stat_mergeRunsSize;
+    String  stat_sortType;
+    int     stat_numRowsInput;
+    int     stat_numRowsOutput;
+    int     stat_numMergeRuns;
+    Vector  stat_mergeRunsSize;
 
 
 	/*

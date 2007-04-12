@@ -34,12 +34,12 @@ final class RAMTransactionContext extends ContextImpl
 	/**
 	The transaction this context is managing.
 	**/
-	protected RAMTransaction transaction;
+	private RAMTransaction transaction;
 
 	/**
 	   true if any exception causes this transaction to be destroyed
 	**/
-	private boolean abortAll;
+	private final boolean abortAll;
 
 	/*
 	** Context methods (most are implemented by super-class).

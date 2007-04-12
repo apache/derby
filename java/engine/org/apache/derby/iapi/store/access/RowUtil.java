@@ -120,7 +120,7 @@ public class RowUtil
 	public static final FetchDescriptor EMPTY_ROW_FETCH_DESCRIPTOR  = 
         new FetchDescriptor(0);
 
-	public static final FetchDescriptor[] ROWUTIL_FETCH_DESCRIPTOR_CONSTANTS  =
+	private static final FetchDescriptor[] ROWUTIL_FETCH_DESCRIPTOR_CONSTANTS  =
         {EMPTY_ROW_FETCH_DESCRIPTOR,
          new FetchDescriptor(1, 1),
          new FetchDescriptor(2, 2),
