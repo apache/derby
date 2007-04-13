@@ -213,9 +213,6 @@ public final class ConglomerateUtil
      * StringDataValue.COLLATION_TYPE_UCS_BASIC values.
      *
      * @return An array of collation id's describing the input array of objects.
-     *
-     * @param template a row.
-     *
      **/
     public static int[] createCollationIds(
     int     sizeof_ids,
