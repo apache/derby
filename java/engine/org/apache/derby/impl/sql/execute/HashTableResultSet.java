@@ -23,20 +23,13 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.Storable;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
-
 
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -44,7 +37,6 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowSource;
@@ -59,8 +51,8 @@ import org.apache.derby.iapi.store.access.KeyHasher;
 
 import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 
+import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 /**
  * Builds a hash table on the underlying result set tree.
@@ -96,7 +88,7 @@ class HashTableResultSet extends NoPutResultSetImpl
 	private boolean		firstNext = true;
 	private int			numFetchedOnNext;
 	private int			entryVectorSize;
-	private Vector		entryVector;
+	private List		entryVector;
 
 	private boolean hashTableBuilt;
 	private boolean firstIntoHashtable = true;
@@ -346,12 +338,12 @@ class HashTableResultSet extends NoPutResultSetImpl
 						hashEntry = ht.get(mh);
 					}
 
-					if (hashEntry instanceof Vector)
+					if (hashEntry instanceof List)
 					{
-						entryVector = (Vector) hashEntry;
+						entryVector = (List) hashEntry;
 						entryVectorSize = entryVector.size();
 						columns = 
-                            (DataValueDescriptor[]) entryVector.firstElement();
+                            (DataValueDescriptor[]) entryVector.get(0);
 					}
 					else
 					{
@@ -362,11 +354,9 @@ class HashTableResultSet extends NoPutResultSetImpl
 				}
 				else if (numFetchedOnNext < entryVectorSize)
 				{
-					/* We walking a Vector and there's 
-					 * more rows left in the vector.
-					 */
+					// We are walking a list and there are more rows left.
 					columns = (DataValueDescriptor[]) 
-                        entryVector.elementAt(numFetchedOnNext);
+                        entryVector.get(numFetchedOnNext);
 				}
 
 				if (columns != null)

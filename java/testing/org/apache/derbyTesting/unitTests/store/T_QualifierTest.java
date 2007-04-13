@@ -27,6 +27,7 @@ import org.apache.derby.impl.store.access.conglomerate.*;
 
 import java.util.Properties;
 import java.util.HashSet;
+import java.util.List;
 
 import java.io.PrintWriter;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
@@ -48,7 +49,6 @@ import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import java.util.Enumeration;
-import java.util.Vector;
 
 public class T_QualifierTest 
 {
@@ -1042,15 +1042,13 @@ public class T_QualifierTest
                 }
                 numrows++;
             }
-            else if (obj instanceof Vector)
+            else if (obj instanceof List)
             {
-
-
-                Vector row_vect = (Vector) obj;
+                List row_vect = (List) obj;
 
                 for (int i = 0; i < row_vect.size(); i++)
                 {
-                    row = (DataValueDescriptor[] ) row_vect.elementAt(i);
+                    row = (DataValueDescriptor[]) row_vect.get(i);
 
                     key = ((SQLLongint)(row[2])).getLong();
 

@@ -32,12 +32,13 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties; 
-import java.util.Vector;
 import java.util.NoSuchElementException;
 
 /**
@@ -127,9 +128,10 @@ public class BackingStoreHashtable
     private boolean keepAfterCommit;
 
     /**
-     * The estimated number of bytes used by Vector(0)
+     * The estimated number of bytes used by ArrayList(0)
      */  
-    private final static int vectorSize = ClassSize.estimateBaseFromCatalog(java.util.Vector.class);
+    private final static int ARRAY_LIST_SIZE =
+        ClassSize.estimateBaseFromCatalog(ArrayList.class);
     
     private DiskHashtable diskHashtable;
 
@@ -166,7 +168,7 @@ public class BackingStoreHashtable
      *                          row in the table of the scan).
      *
      * @param remove_duplicates Should the HashMap automatically remove
-     *                          duplicates, or should it create the Vector of
+     *                          duplicates, or should it create the list of
      *                          duplicates?
      *
      * @param estimated_rowcnt  The estimated number of rows in the hash table.
@@ -425,28 +427,28 @@ public class BackingStoreHashtable
         {
             if (!remove_duplicates)
             {
-                Vector row_vec;
+                List row_vec;
 
                 // inserted a duplicate
-                if ((duplicate_value instanceof Vector))
+                if (duplicate_value instanceof List)
                 {
                     doSpaceAccounting( row, false);
-                    row_vec = (Vector) duplicate_value;
+                    row_vec = (List) duplicate_value;
                 }
                 else
                 {
-                    // allocate vector to hold duplicates
-                    row_vec = new Vector(2);
+                    // allocate list to hold duplicates
+                    row_vec = new ArrayList(2);
 
                     // insert original row into vector
-                    row_vec.addElement(duplicate_value);
+                    row_vec.add(duplicate_value);
                     doSpaceAccounting( row, true);
                 }
 
-                // insert new row into vector
-                row_vec.addElement(row);
+                // insert new row into list
+                row_vec.add(row);
 
-                // store vector of rows back into hash table,
+                // store list of rows back into hash table,
                 // overwriting the duplicate key that was 
                 // inserted.
                 hash_table.put(key, row_vec);
@@ -464,7 +466,7 @@ public class BackingStoreHashtable
         {
             max_inmemory_size -= getEstimatedMemUsage(row);
             if( firstDuplicate)
-                max_inmemory_size -= vectorSize;
+                max_inmemory_size -= ARRAY_LIST_SIZE;
         }
     } // end of doSpaceAccounting
 
@@ -515,12 +517,12 @@ public class BackingStoreHashtable
                 return true; // a degenerate case of spilling
             // If we are keeping duplicates then move all the duplicates from memory to disk
             // This simplifies finding duplicates: they are either all in memory or all on disk.
-            if( duplicateValue instanceof Vector)
+            if (duplicateValue instanceof List)
             {
-                Vector duplicateVec = (Vector) duplicateValue;
+                List duplicateVec = (List) duplicateValue;
                 for( int i = duplicateVec.size() - 1; i >= 0; i--)
                 {
-                    Object[] dupRow = (Object[]) duplicateVec.elementAt(i);
+                    Object[] dupRow = (Object[]) duplicateVec.get(i);
                     diskHashtable.put( key, dupRow);
                 }
             }
@@ -611,12 +613,12 @@ public class BackingStoreHashtable
      * For every qualifying unique row value an entry is placed into the 
      * hash table.
      * <p>
-     * For row values with duplicates, the value of the data is a Vector of
+     * For row values with duplicates, the value of the data is a list of
      * rows.
      * <p>
      * The caller will have to call "instanceof" on the data value
      * object if duplicates are expected, to determine if the data value
-     * of the hash table entry is a row or is a Vector of rows.
+     * of the hash table entry is a row or is a list of rows.
      * <p>
      * The BackingStoreHashtable "owns" the objects returned from the get()
      * routine.  They remain valid until the next access to the 

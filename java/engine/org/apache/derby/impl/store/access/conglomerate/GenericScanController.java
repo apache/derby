@@ -40,8 +40,6 @@ import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 
-import org.apache.derby.iapi.store.access.Qualifier;
-
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.RowLocation;
@@ -1158,10 +1156,10 @@ public abstract class GenericScanController
      * Hashtable has a key value of the object stored in 
      * row[key_column_number], and the value of the data is row.  For row 
      * values with duplicates, the key value is also row[key_column_number], 
-     * but the value of the data is a Vector of
+     * but the value of the data is a <code>List</code> of
      * rows.  The caller will have to call "instanceof" on the data value
      * object if duplicates are expected, to determine if the data value
-     * of the Hashtable entry is a row or is a Vector of rows.
+     * of the Hashtable entry is a row or is a <code>List</code> of rows.
      * <p>
      * Note, that for this routine to work efficiently the caller must 
      * ensure that the object in row[key_column_number] implements 

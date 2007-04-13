@@ -23,16 +23,9 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.Storable;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -46,9 +39,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
 
-import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.ScanController;
@@ -56,8 +47,6 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.types.Orderable;
 import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
@@ -66,18 +55,17 @@ import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 import org.apache.derby.iapi.services.io.FormatableIntHolder;
 import org.apache.derby.iapi.store.access.KeyHasher;
 
-import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 /**
  * Takes a conglomerate and a table filter builds a hash table on the 
  * specified column of the conglomerate on the 1st open.  Look up into the
  * hash table is done on the hash key column.  The hash table consists of
- * either DataValueDescriptor[]s or Vectors of DataValueDescriptor[].  The store builds 
- * the hash table.  When a collision occurs, the store builds a Vector with
- * the colliding DataValueDescriptor[]s.
- *
+ * either <code>DataValueDescriptor[]</code>s or <code>List</code>s of
+ * <code>DataValueDescriptor[]</code>. The store builds the hash table. When a
+ * collision occurs, the store builds a <code>List</code> with the colliding
+ * <code>DataValueDescriptor[]</code>s.
  */
 public class HashScanResultSet extends NoPutResultSetImpl
 	implements CursorResultSet
@@ -92,7 +80,7 @@ public class HashScanResultSet extends NoPutResultSetImpl
 	protected boolean	firstNext = true;
 	private int			numFetchedOnNext;
 	private int			entryVectorSize;
-	private Vector		entryVector;
+	private List		entryVector;
 
     // set in constructor and not altered during
     // life of object.
@@ -508,12 +496,12 @@ public class HashScanResultSet extends NoPutResultSetImpl
 						hashEntry = (mh == null) ? null : hashtable.get(mh);
 					}
 
-					if (hashEntry instanceof Vector)
+					if (hashEntry instanceof List)
 					{
-						entryVector = (Vector) hashEntry;
+						entryVector = (List) hashEntry;
 						entryVectorSize = entryVector.size();
 						columns = 
-                            (DataValueDescriptor[]) entryVector.firstElement();
+                            (DataValueDescriptor[]) entryVector.get(0);
 					}
 					else
 					{
@@ -524,11 +512,9 @@ public class HashScanResultSet extends NoPutResultSetImpl
 				}
 				else if (numFetchedOnNext < entryVectorSize)
 				{
-					/* We walking a Vector and there's 
-					 * more rows left in the vector.
-					 */
+					// We are walking a list and there are more rows left.
 					columns = (DataValueDescriptor[]) 
-                        entryVector.elementAt(numFetchedOnNext);
+                        entryVector.get(numFetchedOnNext);
 				}
 
 				if (columns != null)
