@@ -104,7 +104,7 @@ final class Clock implements CacheManager, Serviceable {
 	/*
 	** Fields
 	*/
-	public final CacheStat			stat;
+	private final CacheStat stat;
 	private final HashMap cache_;
 	private DaemonService		cleaner;	// the background worker thread who is going to
 									// do pre-flush for this cache. 
@@ -238,7 +238,7 @@ final class Clock implements CacheManager, Serviceable {
 					  }
 					}
 				}
-			}
+			} // synchronized(this)
 	
 			// no entry was found, need to add one
 			if (item == null) {
@@ -285,8 +285,8 @@ final class Clock implements CacheManager, Serviceable {
 							}
 						}
 					}
-				}
-			}
+				} // synchronized(this)
+			} // if (item == null)
 			
 			if (add) {
 	
@@ -351,7 +351,7 @@ final class Clock implements CacheManager, Serviceable {
 				stat.findCachedHit++;
 			
 			item.keepAfterSearch();
-		}
+		} // synchronized(this)
 
 		Cacheable entry = item.use();
 		if (entry == null) {
@@ -395,7 +395,7 @@ final class Clock implements CacheManager, Serviceable {
                     if( null != item)
                         item.setUsed( true);
                 }
-            }
+            } // synchronized(this)
         }
     } // end of setUsed
 
@@ -443,7 +443,7 @@ final class Clock implements CacheManager, Serviceable {
 							 cache_.size());
 				}
 			}
-		}
+		} // synchronized(this)
 
 		Cacheable entry = addEntry(item, key, true, createParameter);
 	
@@ -505,9 +505,9 @@ final class Clock implements CacheManager, Serviceable {
 
 			if (cleaner == null) {
 				// try to shrink the cache on a release
-				toShrink = shrinkSize( getCurrentSize());
+				toShrink = shrinkSize(getCurrentSizeNoSync());
 			}
-		}
+		} // synchronized(this)
 
 		if (removeItem) {
 
@@ -518,7 +518,7 @@ final class Clock implements CacheManager, Serviceable {
 			performWork(true /* shrink only */);
 	}
 
-	protected void release(CachedItem item) {
+	private void release(CachedItem item) {
 
 		boolean removeItem;
 
@@ -538,7 +538,7 @@ final class Clock implements CacheManager, Serviceable {
 				// while we are destroying it.
 				item.keepForClean();
 			}
-		}
+		} // synchronized(this)
 
 		if (removeItem) {
 
@@ -588,7 +588,7 @@ final class Clock implements CacheManager, Serviceable {
 				cache_.remove(entry.getIdentity());
 				item.keepForClean();
 			}
-		}
+		} // synchronized(this)
 
 		try {
 			// if removeNow is false then this thread may sleep
@@ -606,7 +606,7 @@ final class Clock implements CacheManager, Serviceable {
 				item.getEntry().clearIdentity();
                 if( useByteCount)
                     currentByteCount += getItemSize( item) - origItemSize;
-			}
+			} // synchronized(this)
 		}
 
 	}
@@ -640,7 +640,7 @@ final class Clock implements CacheManager, Serviceable {
 		synchronized (this) {
 
 			int size = holders.size();
-			long toShrink = shrinkSize( getCurrentSize());
+			long toShrink = shrinkSize(getCurrentSizeNoSync());
 			boolean shrunk = false;
 
 			for (int position = 0; position < size; position++) {
@@ -675,7 +675,7 @@ final class Clock implements CacheManager, Serviceable {
 			if (shrunk)
 				trimToSize();
 
-		} // out of sync block
+		} // synchronized(this)
 	} // end of ageOut
 
 	/**
@@ -726,7 +726,7 @@ final class Clock implements CacheManager, Serviceable {
 		synchronized (this) {
 
 			int size = holders.size();
-			long toShrink = shrinkSize( getCurrentSize());
+			long toShrink = shrinkSize(getCurrentSizeNoSync());
 			boolean shrunk = false;
 
 			for (int position = 0; position < size; position++) {
@@ -761,11 +761,11 @@ final class Clock implements CacheManager, Serviceable {
 					toShrink -= itemSize;
 					shrunk = true;
 				}
-			}
+			} // for (int position = 0;...
 
 			if (shrunk)
 				trimToSize();
-		}
+		} // synchronized(this)
 
 		return noMisses;
 	}
@@ -823,7 +823,7 @@ final class Clock implements CacheManager, Serviceable {
 					item.unkeep();
 					notifyWaiters = item.isKept();
 				}
-			}
+			} // synchronized(this)
 
 			// whatever the outcome, we have to notify waiters ...
 			if (notifyWaiters)
@@ -834,7 +834,7 @@ final class Clock implements CacheManager, Serviceable {
 	}
 
    
-	protected CachedItem findFreeItem() throws StandardException {
+	private CachedItem findFreeItem() throws StandardException {
 
 		// Need to avoid thrashing the cache when we start out
 		// so if the cache is smaller than its maximum size
@@ -898,7 +898,7 @@ final class Clock implements CacheManager, Serviceable {
 						return item;
 					}
 				}
-			}
+			} // synchronized(this)
 		}
 
 
@@ -911,7 +911,7 @@ final class Clock implements CacheManager, Serviceable {
 		eviction candidate is synchronized.  The cleaning of the cachable is
 		handled by the cacheable itself.
 	*/
-	protected CachedItem rotateClock(float percentOfClock) throws StandardException
+	private CachedItem rotateClock(float percentOfClock) throws StandardException
 	{
 		// statistics -- only used in debug
 		int evictions = 0;
@@ -1011,7 +1011,8 @@ restartClock:
 							}
 
 							item.keepForCreate();
-							if( useByteCount && getCurrentSize() > maximumSize)
+							if (useByteCount &&
+									getCurrentSizeNoSync() > maximumSize)
                             {
                                 availableItem = item;
                                 // now look for bytes.
@@ -1073,7 +1074,8 @@ restartClock:
                             if( useByteCount)
                             {
                                 toShrink -= itemSize;
-                                if( getCurrentSize() > maximumSize && 0 < toShrink)
+                                if (getCurrentSizeNoSync() > maximumSize &&
+										0 < toShrink)
                                 {
                                     if( null == availableItem)
                                     {
@@ -1111,7 +1113,7 @@ restartClock:
 						return availableItem;
 					}
 
-				} // out of synchronized block
+				} // synchronized(this)
 
 				// clean the entry outside of a sync block				    
 				try 
@@ -1230,7 +1232,7 @@ restartClock:
 			return inUse;
 	}
 /*
-	public int getNumberKept() {
+	private int getNumberKept() {
 
 		synchronized (this) {
 
@@ -1283,7 +1285,7 @@ restartClock:
 
         @return the amount by which this shrinks the cache.
 	*/
-	protected long removeIdentity(CachedItem item) {
+	private long removeIdentity(CachedItem item) {
 
         long shrink = 1;
         
@@ -1315,7 +1317,7 @@ restartClock:
 		out, the synchronization of cleaning of the individual cachable is
 		provided by the cacheable itself.
 	 */
-	protected void cleanCache(Matchable partialKey) throws StandardException {
+	private void cleanCache(Matchable partialKey) throws StandardException {
 	
 		int position;
 
@@ -1367,7 +1369,7 @@ innerscan:
 					item.keepForClean();
 					break innerscan;
 				}
-			} // end of synchronized block
+			} // synchronized(this)
 
 			if (position < 0)
 			{
@@ -1386,7 +1388,7 @@ innerscan:
 	}
 
 
-	protected long shrinkSize(long currentSize) {
+	private long shrinkSize(long currentSize) {
 
 		long maxSize = getMaximumSize();
 
@@ -1426,7 +1428,7 @@ innerscan:
 		need to be).  Cleaning of the cacheable is handle by the cacheable itself.
 
 	*/
-	protected int performWork(boolean shrinkOnly)
+	private int performWork(boolean shrinkOnly)
 	{
 		long target;
 		long toShrink;
@@ -1439,7 +1441,7 @@ innerscan:
 				return Serviceable.DONE;
 			}
 			else {
-				long currentSize = getCurrentSize();
+				long currentSize = getCurrentSizeNoSync();
 				target = currentSize / 20;  // attempt to get 5% of the cache clean
 				toShrink = wokenToClean ? 0 : shrinkSize(currentSize);
 			}
@@ -1456,7 +1458,7 @@ innerscan:
 			}
 
             maxLooks = useByteCount ? (holders.size()/10) : (int) (target * 2);
-		}
+		} // synchronized(this)
 
 		// try to clean the next N (target) cached item, 
 		long clean = 0;
@@ -1482,7 +1484,7 @@ innerscan:
 					
 			// see if the cache needs to shrink
 			boolean shrunk = false;
-            long currentSize = getCurrentSize();
+			long currentSize = getCurrentSizeNoSync();
 
 			for (; shrinkOnly ? (currentSize > maximumSize && toShrink > 0) : (clean < target); item = null)
 			{				
@@ -1525,7 +1527,7 @@ innerscan:
 						holders.remove(currentPosition);
                         if( useByteCount)
                             currentByteCount -= getItemSize( item);
-                        currentSize = getCurrentSize();
+                        currentSize = getCurrentSizeNoSync();
                         toShrink += currentSize;
                         itemCount--;
 
@@ -1559,7 +1561,7 @@ innerscan:
 						holders.remove(currentPosition);
                         if( useByteCount)
                             currentByteCount -= getItemSize( item);
-                        currentSize = getCurrentSize();
+                        currentSize = getCurrentSizeNoSync();
                         toShrink += currentSize;
                         itemCount--;
                         shrunk = true;
@@ -1586,7 +1588,7 @@ innerscan:
 				needService = false;
 				return Serviceable.DONE;
 			}
-		} // end of sync block
+		} // synchronized(this)
 
 		try
 		{
@@ -1635,7 +1637,7 @@ innerscan:
 	**/
 	public synchronized long[] getCacheStats()
     {
-		stat.currentSize = getCurrentSize();
+		stat.currentSize = getCurrentSizeNoSync();
 		return stat.getStats();
     }
 
@@ -1671,7 +1673,7 @@ innerscan:
         {
             maximumSize = newSize;
             stat.maxSize = maximumSize;
-            shrink = ( shrinkSize( getCurrentSize()) > 0);
+            shrink = (shrinkSize(getCurrentSizeNoSync()) > 0);
         }
         if( shrink)
         {
@@ -1701,10 +1703,15 @@ innerscan:
                 
     } // end of resize;
     
-    private synchronized long getCurrentSize()
-    {
-        if( ! useByteCount)
+
+    private synchronized long getCurrentSize() {
+        return getCurrentSizeNoSync();
+    }
+
+    private long getCurrentSizeNoSync() {
+        if (!useByteCount) {
             return holders.size();
+        }
         return currentByteCount + holders.size()*ITEM_OVERHEAD;
     }
 
@@ -1760,7 +1767,7 @@ innerscan:
                 if( position >= holders.size())
                     return;
 
-            } // end of synchronization
+            } // synchronized(this)
             operator.operate( entry);
             // Do not release the item until we have re-acquired the synchronization lock.
             // Otherwise the item may be removed and its next link invalidated.
