@@ -45,6 +45,7 @@ abstract class ImportAbstract extends VTITemplate {
   int numberOfColumns;
   int[] columnWidths;
 
+  int lineNumber = 0;
   String[] nextRow;
 
   ResultSetMetaData importResultSetMetaData;
@@ -114,8 +115,12 @@ abstract class ImportAbstract extends VTITemplate {
     return (importReadData.getCurrentRowNumber());
   }
   
+    /** gets the current line number */
+    public    int getCurrentLineNumber() { return lineNumber; }
+    
   public boolean next() throws SQLException {
     try {
+      lineNumber++;
       return (importReadData.readNextRow(nextRow));
     } catch (Exception ex) {
 		throw LoadError.unexpectedError(ex);

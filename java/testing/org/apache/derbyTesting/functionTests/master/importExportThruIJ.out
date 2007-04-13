@@ -38,7 +38,7 @@ ij> create index T1_IndexLname on T1 (Lname, Account);
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extin/EndOfFile.txt' , 
                                     null, null, null, 0) ;
-ERROR 38000: The exception 'java.sql.SQLException: Read endOfFile at unexpected place on line 2.' was thrown while evaluating an expression.
+ERROR XIE0R: Import error on line 2 of file extin/EndOfFile.txt: Read endOfFile at unexpected place on line 2. 
 ERROR XIE0E: Read endOfFile at unexpected place on line 2.
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extin/Tutor1.asc' , 
                                     null, null, null, 0) ;
@@ -382,7 +382,7 @@ ij> create table Alt1 (	Account	int,
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT1' , 'extin/Alt1.asc' , 
                                       null, null, null, 0) ;
-ERROR 38000: The exception 'java.sql.SQLException: Invalid character string format for type INTEGER.' was thrown while evaluating an expression.
+ERROR XIE0R: Import error on line 1 of file extin/Alt1.asc: Invalid character string format for type INTEGER. 
 ERROR 22018: Invalid character string format for type INTEGER.
 ij> select * from Alt1 where State = 'CA';
 ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT   |BALANCE   
@@ -406,7 +406,7 @@ ij> create table Alt3 (	Account	int,
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT3' , 'extin/Alt3.asc' , 
                                       null, null, null, 0) ;
-ERROR 38000: The exception 'java.sql.SQLException: Invalid character string format for type INTEGER.' was thrown while evaluating an expression.
+ERROR XIE0R: Import error on line 1 of file extin/Alt3.asc: Invalid character string format for type INTEGER. 
 ERROR 22018: Invalid character string format for type INTEGER.
 ij> select * from Alt3 where State = 'CA' or State = 'TX';
 ACCOUNT    |FNAME                         |LNAME                         |COMPANY                            |ADDRESS                                 |CITY                |STATE|ZIP       |PAYMENT   |BALANCE   
@@ -800,6 +800,22 @@ B                                                 |2
 in the bopshebop                                  |16         
 NULL                                              |NULL       
 boopdeedoo                                        |10         
+ij> --
+-- Errors should contain identifying line numbers
+--
+create table derby_2193_lineNumber
+(
+    a  int,
+    b  int
+);
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE 
+( null, 'DERBY_2193_LINENUMBER', 'extin/derby-2193-linenumber.txt', null, null, null, 0 );
+ERROR XIE0R: Import error on line 2 of file extin/derby-2193-linenumber.txt: Invalid character string format for type INTEGER. 
+ERROR 22018: Invalid character string format for type INTEGER.
+ij> select * from derby_2193_lineNumber;
+A          |B          
+-----------------------
 ij> --
 -- end test case for derby-2193:
 --

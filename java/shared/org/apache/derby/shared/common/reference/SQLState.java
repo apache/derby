@@ -1712,6 +1712,7 @@ public interface SQLState {
 	String IMPORTFILE_HAS_INVALID_HEXSTRING                        ="XIE0N.S";
 	String LOB_DATA_FILE_NOT_FOUND                                 ="XIE0P.S";
 	String LOB_DATA_FILE_NULL                                      ="XIE0Q.S";
+	String UNEXPECTED_IMPORT_ERROR                       ="XIE0R.S";
 
 
 

@@ -321,6 +321,19 @@ select * from derby_2193_tab;
 select b, length(b) from derby_2193_tab;
 
 --
+-- Errors should contain identifying line numbers
+--
+create table derby_2193_lineNumber
+(
+    a  int,
+    b  int
+);
+
+CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE 
+( null, 'DERBY_2193_LINENUMBER', 'extin/derby-2193-linenumber.txt', null, null, null, 0 );
+select * from derby_2193_lineNumber;
+
+--
 -- end test case for derby-2193:
 --
 

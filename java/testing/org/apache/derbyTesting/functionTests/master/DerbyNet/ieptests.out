@@ -661,7 +661,7 @@ ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from parent where a < 3' , 'ext
 Statement executed.
 ij> --replace should fail because of dependent table
 CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE(NULL, 'PARENT', 'extinout/parent.del',null, null, null,1);
-ERROR 38000: The exception 'java.sql.SQLException: INSERT on table 'PARENT' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.' was thrown while evaluating an expression. SQLSTATE: 23503: INSERT on table 'PARENT' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.
+ERROR XIE0R: Import error on line 3 of file extinout/parent.del: INSERT on table 'PARENT' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.  SQLSTATE: 23503: INSERT on table 'PARENT' caused a violation of foreign key constraint 'xxxxGENERATED-IDxxxx' for key (3).  The statement has been rolled back.
 ij> select * from parent;
 A          
 -----

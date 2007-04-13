@@ -3888,6 +3888,14 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>Lob data file name cannot be null. </text>
             </msg>
 
+            <msg>
+                <name>XIE0R.S</name>
+                <text>Import error on line {0} of file {1}: {2} </text>
+                <arg>lineNumber</arg>
+                <arg>fileName</arg>
+                <arg>details</arg>
+            </msg>
+
 
         </family>
 

@@ -31,6 +31,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.DatabaseMetaData;
 import java.util.*;
 
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.error.PublicAPI;
+
 /**
  * This class implements import of data from a URL into a table.
  * Import functions provided here in this class shouble be called through
@@ -40,7 +44,10 @@ import java.util.*;
 
 public class Import extends ImportAbstract{
 
-	private String inputFileName;
+    private static  int                _importCounter;
+    private static  Hashtable   _importers = new Hashtable();
+
+    private String inputFileName;
 
 	/**
 	 * Constructior to Invoke Import from a select statement 
@@ -50,7 +57,8 @@ public class Import extends ImportAbstract{
 	public Import(String inputFileName, String columnDelimiter,
                   String characterDelimiter,  String codeset, 
                   int noOfColumnsExpected,  String columnTypes, 
-                  boolean lobsInExtFile) throws SQLException 
+                  boolean lobsInExtFile,
+                  int importCounter ) throws SQLException 
 	{
 
 		try{
@@ -62,6 +70,8 @@ public class Import extends ImportAbstract{
 												   columnDelimiter, codeset);
             this.lobsInExtFile = lobsInExtFile;
 
+            _importers.put( new Integer( importCounter ), this );
+            
 			doImport();
 
 		}catch(Exception e)
@@ -159,111 +169,130 @@ public class Import extends ImportAbstract{
 	 * INTEGER)  from new org.apache.derby.impl.load.Import('extin/Tutor1.asc') as importvti;
 	 *
 	 */
-	private static void performImport(Connection connection, 
-                                      String schemaName, 
-                                      String insertColumnList, 
-                                      String columnIndexes,
-                                      String tableName, 
-                                      String inputFileName,  
-                                      String  columnDelimiter, 
-                                      String characterDelimiter, 
-                                      String codeset, 
-                                      short replace, 
-                                      boolean lobsInExtFile)
+    private static void performImport
+        (Connection connection, 
+         String schemaName, 
+         String insertColumnList, 
+         String columnIndexes,
+         String tableName, 
+         String inputFileName,  
+         String  columnDelimiter, 
+         String characterDelimiter, 
+         String codeset, 
+         short replace, 
+         boolean lobsInExtFile)
         throws SQLException 
-	{
-
-		if (connection == null)
-			throw LoadError.connectionNull();
-		
-	
-		
-		if (tableName == null)
-			throw LoadError.entityNameMissing();
-		
-
-		ColumnInfo columnInfo = new ColumnInfo(connection , schemaName ,
-											   tableName, insertColumnList, 
-											   columnIndexes, COLUMNNAMEPREFIX);
-
-		/* special handling of single quote delimiters
-		 * Single quote should be writeen with an extra quote otherwise sql will
-		 * throw syntac error.
-		 * i.e  to recognize a quote  it has to be appended with extra  quote ('')
-		 */
-		if(characterDelimiter!=null && characterDelimiter.equals("'"))
-			characterDelimiter = "''";
-		if(columnDelimiter !=null && columnDelimiter.equals("'"))
-			columnDelimiter = "''";
-		
-
-		StringBuffer sb = new StringBuffer("new ");
-		sb.append("org.apache.derby.impl.load.Import");
-		sb.append("(") ; 
-		sb.append(	(inputFileName !=null ? "'" + inputFileName + "'" : null));
-		sb.append(",") ;
-		sb.append(	(columnDelimiter !=null ? "'" + columnDelimiter + "'" : null));
-		sb.append(",") ;
-		sb.append(	(characterDelimiter !=null ? "'" + characterDelimiter + "'" : null));
-		sb.append(",") ;
-		sb.append(	(codeset !=null ? "'" + codeset + "'" : null));
-		sb.append(", ");
-        sb.append( columnInfo.getExpectedNumberOfColumnsInFile());
-        sb.append(", ");
-        sb.append( "'" + columnInfo.getExpectedVtiColumnTypesAsString() + "'");
-        sb.append(", ");
-        sb.append(lobsInExtFile);
-		sb.append(" )") ;
-
-		String importvti = sb.toString();
-
-		// delimit the table and schema names with quotes.
-		// because they might have been  created as quoted
-		// identifiers(for example when reserved words are used, names are quoted)
-		
-		// Import procedures are to be called with case-senisitive names. 
-		// Incase of delimited table names, they need to be passed as defined
-		// and when they are not delimited, they need to be passed in upper
-		// case, because all undelimited names are stored in the upper case 
-		// in the database. 
-
-		String entityName = (schemaName == null ? "\""+ tableName + "\"" : 
-							 "\"" + schemaName + "\"" + "." + "\"" + tableName + "\""); 
-
-		String insertModeValue;
-		if(replace > 0)
-			insertModeValue = "replace";
-		else
-			insertModeValue = "bulkInsert";
-
-		String cNamesWithCasts = columnInfo.getColumnNamesWithCasts();
-		String insertColumnNames = columnInfo.getInsertColumnNames();
-		if(insertColumnNames !=null)
-			insertColumnNames = "(" + insertColumnNames + ") " ;
-		else
-			insertColumnNames = "";
-		String insertSql = "INSERT INTO " + entityName +  insertColumnNames + 
-			" --DERBY-PROPERTIES insertMode=" + insertModeValue + "\n" +
-			" SELECT " + cNamesWithCasts + " from " + 
-			importvti + " AS importvti" ;
-
-		//prepare the import statement to hit any errors before locking the table
-		PreparedStatement ips = connection.prepareStatement(insertSql);
-		
-		//lock the table before perfoming import, because there may 
-		//huge number of lockes aquired that might have affect on performance 
-		//and some possible dead lock scenarios.
-		Statement statement = connection.createStatement();
-		String lockSql = "LOCK TABLE " + entityName + " IN EXCLUSIVE MODE";
-		statement.executeUpdate(lockSql);
-
-		//execute the import operaton.
-		ips.executeUpdate();
-		statement.close();
-		ips.close();
-
-	}
-
+    {
+        Integer     importCounter = new Integer( bumpImportCounter() );
+        
+        try {
+            if (connection == null)
+                throw LoadError.connectionNull();
+            
+            
+            
+            if (tableName == null)
+                throw LoadError.entityNameMissing();
+            
+            
+            ColumnInfo columnInfo = new ColumnInfo(connection , schemaName ,
+                                                   tableName, insertColumnList, 
+                                                   columnIndexes, COLUMNNAMEPREFIX);
+            
+            /* special handling of single quote delimiters
+             * Single quote should be writeen with an extra quote otherwise sql will
+             * throw syntac error.
+             * i.e  to recognize a quote  it has to be appended with extra  quote ('')
+             */
+            if(characterDelimiter!=null && characterDelimiter.equals("'"))
+                characterDelimiter = "''";
+            if(columnDelimiter !=null && columnDelimiter.equals("'"))
+                columnDelimiter = "''";
+            
+            
+            StringBuffer sb = new StringBuffer("new ");
+            sb.append("org.apache.derby.impl.load.Import");
+            sb.append("(") ; 
+            sb.append(	(inputFileName !=null ? "'" + inputFileName + "'" : null));
+            sb.append(",") ;
+            sb.append(	(columnDelimiter !=null ? "'" + columnDelimiter + "'" : null));
+            sb.append(",") ;
+            sb.append(	(characterDelimiter !=null ? "'" + characterDelimiter + "'" : null));
+            sb.append(",") ;
+            sb.append(	(codeset !=null ? "'" + codeset + "'" : null));
+            sb.append(", ");
+            sb.append( columnInfo.getExpectedNumberOfColumnsInFile());
+            sb.append(", ");
+            sb.append( "'" + columnInfo.getExpectedVtiColumnTypesAsString() + "'");
+            sb.append(", ");
+            sb.append(lobsInExtFile);
+            sb.append(", ");
+            sb.append( importCounter.intValue() );
+            sb.append(" )") ;
+            
+            String importvti = sb.toString();
+            
+            // delimit the table and schema names with quotes.
+            // because they might have been  created as quoted
+            // identifiers(for example when reserved words are used, names are quoted)
+            
+            // Import procedures are to be called with case-senisitive names. 
+            // Incase of delimited table names, they need to be passed as defined
+            // and when they are not delimited, they need to be passed in upper
+            // case, because all undelimited names are stored in the upper case 
+            // in the database. 
+            
+            String entityName = (schemaName == null ? "\""+ tableName + "\"" : 
+                                 "\"" + schemaName + "\"" + "." + "\"" + tableName + "\""); 
+            
+            String insertModeValue;
+            if(replace > 0)
+                insertModeValue = "replace";
+            else
+                insertModeValue = "bulkInsert";
+            
+            String cNamesWithCasts = columnInfo.getColumnNamesWithCasts();
+            String insertColumnNames = columnInfo.getInsertColumnNames();
+            if(insertColumnNames !=null)
+                insertColumnNames = "(" + insertColumnNames + ") " ;
+            else
+                insertColumnNames = "";
+            String insertSql = "INSERT INTO " + entityName +  insertColumnNames + 
+                " --DERBY-PROPERTIES insertMode=" + insertModeValue + "\n" +
+                " SELECT " + cNamesWithCasts + " from " + 
+                importvti + " AS importvti" ;
+            
+            //prepare the import statement to hit any errors before locking the table
+            PreparedStatement ips = connection.prepareStatement(insertSql);
+            
+            //lock the table before perfoming import, because there may 
+            //huge number of lockes aquired that might have affect on performance 
+            //and some possible dead lock scenarios.
+            Statement statement = connection.createStatement();
+            String lockSql = "LOCK TABLE " + entityName + " IN EXCLUSIVE MODE";
+            statement.executeUpdate(lockSql);
+            
+            //execute the import operaton.
+            try {
+                ips.executeUpdate();
+            }
+            catch (Throwable t)
+            {
+                throw formatImportError( (Import) _importers.get( importCounter ), inputFileName, t );
+            }
+            statement.close();
+            ips.close();
+        }
+        finally
+        {
+            //
+            // The importer was put into a hashtable so that we could look up
+            // line numbers for error messages. The Import constructor put
+            // the importer in the hashtable. Now garbage collect that entry.
+            //
+            _importers.remove( importCounter );
+        }
+    }
 
 	/** virtual method from the abstract class
 	 * @exception	Exception on error
@@ -271,23 +300,31 @@ public class Import extends ImportAbstract{
 	ImportReadData getImportReadData() throws Exception {
 		return new ImportReadData(inputFileName, controlFileReader);
 	}
+
+    /*
+     * Bump the import counter.
+     *
+     */
+    private static  synchronized    int bumpImportCounter()
+    {
+        return ++_importCounter;
+    }
+    
+    /*
+     * Format a import error with line number
+     *
+     */
+    private static  SQLException    formatImportError( Import importer, String inputFile, Throwable t )
+    {
+        int     lineNumber = -1;
+
+        if ( importer != null ) { lineNumber = importer.getCurrentLineNumber(); }
+        
+        StandardException se = StandardException.newException
+            ( SQLState.UNEXPECTED_IMPORT_ERROR, new Integer( lineNumber ), inputFile, t.getMessage() );
+        se.setNestedException( t );
+
+        return PublicAPI.wrapStandardException(se);
+    }
+    
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
