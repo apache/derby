@@ -520,9 +520,40 @@ public class Blob extends Lob implements java.sql.Blob {
         }
     }
 
+    /**
+     * Returns an <code>InputStream</code> object that contains a partial <code>
+     * Blob</code> value, starting  with the byte specified by pos,
+     * which is length bytes in length.
+     *
+     * @param pos the offset to the first byte of the partial value to
+     * be retrieved. The first byte in the <code>Blob</code> is at position 1.
+     * @param length the length in bytes of the partial value to be retrieved
+     * @return <code>InputStream</code> through which the partial
+     * <code>Blob</code> value can be read.
+     * @throws SQLException if pos is less than 1 or if pos is greater than
+     * the number of bytes in the <code>Blob</code> or if pos + length is
+     * greater than the number of bytes in the <code>Blob</code>
+     *
+     * @throws SQLException.
+     */
     public InputStream getBinaryStream(long pos, long length)
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented("getBinaryStream(long,long)");
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
+        synchronized (agent_.connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getBinaryStream",
+                    (int) pos, length);
+            }
+            checkPosAndLength(pos, length);
+            InputStream retVal = new java.io.ByteArrayInputStream
+                    (binaryString_, (int)(dataOffset_ + pos - 1), (int)length);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getBinaryStream", retVal);
+            }
+            return retVal;
+        }
     }
 
     //------------------ Material layer event callback methods -------------------

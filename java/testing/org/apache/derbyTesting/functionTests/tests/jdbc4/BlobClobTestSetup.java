@@ -46,6 +46,12 @@ public class BlobClobTestSetup
     public static final int ID_NULLVALUES = 1;
     /** Constant for accessing the row with sample values. */
     public static final int ID_SAMPLEVALUES = 2;
+    /**
+     * ID is used to store the latest unique value for the ID column
+     * Start from 3 since 1 is used for null values and 2 is used for
+     * sample values.
+     */
+    public static int ID = 3;
 
     /** Blob data. */
     private static final byte[] blobData = new byte[] {
@@ -155,6 +161,14 @@ public class BlobClobTestSetup
         rs.close();
         stmt.close();
         return clob;
+    }
+
+    /**
+     * Returns new unique ID values that can be used in these tests.
+     * @return an integer that represents an unique ID value.
+     */
+    public static int getID() {
+        return ID++;
     }
 
 } // End class BlobClobTestSetup

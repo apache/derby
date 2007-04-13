@@ -374,10 +374,143 @@ public class BlobTest
         fail("Don't know how to handle type " + type);
         return null;            // unreachable statement
     }
+
+    /**
+     * Tests the implementation of the method
+     * getBinaryStream(long pos, long length)
+     * in the NetworkClient.
+     *
+     * @throws Exception
+     */
+    public void clientTestGetBinaryStreamLong()
+    throws Exception {
+        byte[] BYTES1 = {
+            0x65, 0x66, 0x67, 0x68, 0x69,
+            0x69, 0x68, 0x67, 0x66, 0x65
+        };
+
+        InputStream is = new java.io.ByteArrayInputStream(BYTES1);
+
+        PreparedStatement ps = prepareStatement(
+            "insert into BLOBCLOB(ID, BLOBDATA) values(?,?)");
+        int id = BlobClobTestSetup.getID();
+        ps.setInt(1,id);
+        ps.setBinaryStream(2,is);
+        ps.execute();
+        ps.close();
+
+        Statement st = createStatement();
+
+        ResultSet rs = st.executeQuery("select BLOBDATA from " +
+            "BLOBCLOB where ID="+id);
+        rs.next();
+        Blob blob = rs.getBlob(1);
+
+        InputStream is_1 = blob.getBinaryStream(2L,5L);
+        InputStream is_2 = new java.io.ByteArrayInputStream(BYTES1,1,5);
+
+        rs.close();
+        st.close();
+
+        assertEquals(is_2,is_1);
+    }
     
+    /**
+     * Tests the exceptions thrown by the getBinaryStream
+     * (long pos, long length) for the following conditions
+     * a) pos <= 0
+     * b) pos > (length of LOB)
+     * c) length < 0
+     * d) pos + length > (length of LOB).
+     *
+     * @throws SQLException.
+     */
+    public void clientTestGetBinaryStreamLongExceptionConditions()
+    throws SQLException {
+        byte[] BYTES1 = {
+            0x65, 0x66, 0x67, 0x68, 0x69,
+            0x69, 0x68, 0x67, 0x66, 0x65
+        };
+
+        InputStream is = new java.io.ByteArrayInputStream(BYTES1);
+
+        PreparedStatement ps = prepareStatement(
+            "insert into BLOBCLOB(ID, BLOBDATA) values(?,?)");
+        int id = BlobClobTestSetup.getID();
+        ps.setInt(1,id);
+        ps.setBinaryStream(2,is);
+        ps.execute();
+        ps.close();
+
+        Statement st = createStatement();
+
+        ResultSet rs = st.executeQuery("select BLOBDATA from " +
+            "BLOBCLOB where ID="+id);
+        rs.next();
+        Blob blob = rs.getBlob(1);
+        // check the case where pos <= 0
+        try {
+            // set pos as negative
+            blob.getBinaryStream(-2L,5L);
+            //Should not come here. The exception has to be thrown.
+            fail("FAIL: Expected SQLException for pos being negative " +
+                    "not thrown");
+        }
+        catch(SQLException sqle) {
+            // The SQLState for the exception thrown when pos <= 0 is XJ070
+            assertSQLState("XJ070", sqle);
+        }
+
+        // check for the case pos > length of Blob
+        try {
+            // set the pos to any value greater than the Blob length
+            blob.getBinaryStream(blob.length()+1, 5L);
+            //Should not come here. The exception has to be thrown.
+            fail("FAIL: Expected SQLException for position being greater than " +
+                    "length of LOB not thrown");
+        }
+        catch(SQLException sqle) {
+            // The SQLState for the exception thrown when pos > length of Blob
+            // is XJ076
+            assertSQLState("XJ076", sqle);
+        }
+
+        //check for the case when length < 0
+        try {
+            // set length as negative
+            blob.getBinaryStream(2L, -5L);
+            // Should not come here. The exception has to be thrown.
+            fail("Fail: expected exception for the length being negative " +
+                    "not thrown");
+        }
+        catch(SQLException sqle) {
+            // The SQLState for the exception thrown when length < 0 of Blob
+            // is XJ071
+            assertSQLState("XJ071", sqle);
+        }
+
+        //check for the case when pos + length > length of Blob
+        try {
+            // set pos + length > length of Blob
+            blob.getBinaryStream((blob.length() - 4), 10L);
+            // Should not come here. The exception has to be thrown.
+            fail("Fail: expected exception for the sum of position and length" +
+                    " being greater than the LOB size not thrown");
+        }
+        catch(SQLException sqle) {
+            // The SQLState for the exception thrown when length < 0 of Blob
+            // is XJ087
+            assertSQLState("XJ087", sqle);
+        }
+    }
+
     
-    public void testGetBinaryStringLongNotImplemented()
-        throws SQLException {
+    /**
+     * Tests the getBinaryStream(long pos, long length) on the Embedded side.
+     * @throws SQLException
+     */
+    public void embeddedTestGetBinaryStringLongNotImplemented()
+    throws SQLException {
         try {
             blob.getBinaryStream(5l, 10l);
             fail("Blob.getBinaryStream(long,long) should not be implemented");
@@ -390,13 +523,23 @@ public class BlobTest
      * Create test suite for this test.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("BlobTest suite");
-        suite.addTest(new BlobClobTestSetup(
-            new TestSuite(BlobTest.class, "BlobTest:embedded")));
-        suite.addTest(TestConfiguration.clientServerDecorator(
-            new BlobClobTestSetup(new TestSuite(BlobTest.class,
-                                                "BlobTest:client"))));
-        return suite;
+        TestSuite btSuite = new TestSuite("BlobTest suite");
+
+        TestSuite embedded = new TestSuite("BlobTest:embedded");
+        embedded.addTestSuite(BlobTest.class);
+        embedded.addTest(new BlobTest(
+                    "embeddedTestGetBinaryStringLongNotImplemented"));
+        btSuite.addTest(new BlobClobTestSetup(embedded));
+
+        TestSuite client = new TestSuite("BlobTest:client");
+        client.addTestSuite(BlobTest.class);
+        client.addTest(new BlobTest("clientTestGetBinaryStreamLong"));
+        client.addTest(new BlobTest("clientTestGetBinaryStreamLong" +
+                "ExceptionConditions"));
+        btSuite.addTest(TestConfiguration.clientServerDecorator(
+            new BlobClobTestSetup(client)));
+
+        return btSuite;
     }
 
 } // End class BlobTest

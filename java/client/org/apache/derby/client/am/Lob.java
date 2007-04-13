@@ -212,4 +212,38 @@ public abstract class Lob implements UnitOfWorkListener {
         return willBeLayerBStreamed_;
     }
 
+    /**
+     * Checks the <code>pos</code> and <code>length</code>.
+     *
+     * @param pos a long that contains the position that needs to be checked
+     * @param length a long that contains the length that needs to be checked
+     * @throws SQLException if
+     *         a) pos <= 0
+     *         b) pos > (length of LOB)
+     *         c) length < 0
+     *         d) pos + length > (length of LOB)
+     */
+    protected void checkPosAndLength(long pos, long length)
+    throws SQLException {
+        if (pos <= 0) {
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId(SQLState.BLOB_BAD_POSITION),
+                new Long(pos)).getSQLException();
+        }
+        if (pos > this.length()) {
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE),
+                new Long(pos)).getSQLException();
+        }
+        if (length < 0) {
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
+                new Integer((int)length)).getSQLException();
+        }
+        if ((pos + length) > this.length()) {
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId(SQLState.POS_AND_LENGTH_GREATER_THAN_LOB),
+                new Long(pos), new Long(length)).getSQLException();
+        }
+    }
 }

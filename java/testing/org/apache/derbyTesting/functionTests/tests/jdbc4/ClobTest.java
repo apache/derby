@@ -375,8 +375,14 @@ public class ClobTest
         return null;            // unreachable statement
     }
     
-    public void testGetCharacterStreamLongNotImplemented()
-        throws SQLException {
+    /**
+     * Tests the getCharacterStream(long pos, long length) on the
+     * Embedded side.
+     *
+     * @throws SQLException
+     */
+    public void embeddedTestGetCharacterStreamLongNotImplemented()
+    throws SQLException {
         try {
             clob.getCharacterStream(5l, 10l);
             fail("Clob.getCharacterStream(long,long)" +
@@ -387,16 +393,149 @@ public class ClobTest
     }
 
     /**
+     * Tests the implementation of getCharacterStream(long pos, long length)
+     * in the NetworkClient.
+     * @throws Exception
+     */
+    public void clientTestGetCharacterStreamLong()
+    throws Exception {
+        String str1 = "This is a test String. This is a test String";
+
+        Reader r1 = new java.io.StringReader(str1);
+
+        PreparedStatement ps = prepareStatement(
+            "insert into BLOBCLOB(ID, CLOBDATA) values(?,?)");
+        int id = BlobClobTestSetup.getID();
+        ps.setInt(1,id);
+        ps.setCharacterStream(2,r1);
+        ps.execute();
+        ps.close();
+
+        Statement st = createStatement();
+
+        ResultSet rs = st.executeQuery("select CLOBDATA from " +
+            "BLOBCLOB where ID="+id);
+        rs.next();
+        Clob clob = rs.getClob(1);
+
+        Reader r_1 = clob.getCharacterStream(2L,5L);
+        String str2 = str1.substring(1,6);
+        Reader r_2 = new java.io.StringReader(str2);
+
+        rs.close();
+        st.close();
+
+        assertEquals(r_2,r_1);
+    }
+
+    /**
+     * Tests the exceptions thrown by the getCharacterStream
+     * (long pos, long length) for the following conditions
+     * a) pos <= 0
+     * b) pos > (length of LOB)
+     * c) length < 0
+     * d) pos + length > (length of LOB).
+     *
+     * @throws SQLException.
+     */
+    public void clientTestGetCharacterStreamLongExceptionConditions()
+    throws SQLException {
+        String str1 = "This is a test String. This is a test String";
+
+        Reader r1 = new java.io.StringReader(str1);
+
+        PreparedStatement ps = prepareStatement(
+            "insert into BLOBCLOB(ID, CLOBDATA) values(?,?)");
+        int id = BlobClobTestSetup.getID();
+        ps.setInt(1,id);
+        ps.setCharacterStream(2,r1);
+        ps.execute();
+        ps.close();
+
+        Statement st = createStatement();
+
+        ResultSet rs = st.executeQuery("select CLOBDATA from " +
+            "BLOBCLOB where ID="+id);
+        rs.next();
+        Clob clob = rs.getClob(1);
+        // check the case where pos <= 0
+        try {
+            // set pos as negative
+            clob.getCharacterStream(-2L,5L);
+            //Should not come here. The exception has to be thrown.
+            fail("FAIL: Expected SQLException for pos being negative " +
+                    "not thrown");
+        }
+        catch(SQLException sqle) {
+            // The SQLState for the exception thrown when pos <= 0 is XJ070
+            assertSQLState("XJ070", sqle);
+        }
+
+        // check for the case pos > length of clob
+        try {
+            // set the pos to any value greater than the Clob length
+            clob.getCharacterStream(clob.length()+1, 5L);
+            //Should not come here. The exception has to be thrown.
+            fail("FAIL: Expected SQLException for position being greater than " +
+                    "length of LOB not thrown");
+        }
+        catch(SQLException sqle) {
+            // The SQLState for the exception thrown when pos > length of Clob
+            // is XJ076
+            assertSQLState("XJ076", sqle);
+        }
+
+        //check for the case when length < 0
+        try {
+            // set length as negative
+            clob.getCharacterStream(2L, -5L);
+            // Should not come here. The exception has to be thrown.
+            fail("Fail: expected exception for the length being negative " +
+                    "not thrown");
+        }
+        catch(SQLException sqle) {
+            // The SQLState for the exception thrown when length < 0 of Clob
+            // is XJ071
+            assertSQLState("XJ071", sqle);
+        }
+
+        //check for the case when pos + length > length of Clob
+        try {
+            // set pos + length > length of Clob
+            clob.getCharacterStream((clob.length() - 4), 10L);
+            // Should not come here. The exception has to be thrown.
+            fail("Fail: expected exception for the sum of position and length" +
+                    " being greater than the LOB size not thrown");
+        }
+        catch(SQLException sqle) {
+            // The SQLState for the exception thrown when length < 0 of Clob
+            // is XJ087
+            assertSQLState("XJ087", sqle);
+        }
+    }
+
+
+    /**
      * Create test suite for this test.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("ClobTest suite");
-        suite.addTest(new BlobClobTestSetup(
-            new TestSuite(ClobTest.class, "ClobTest:embedded")));
-        suite.addTest(TestConfiguration.clientServerDecorator(
-            new BlobClobTestSetup(new TestSuite(ClobTest.class,
-                                                "ClobTest:client"))));
-        return suite;
+        TestSuite ctSuite = new TestSuite("ClobTest suite");
+
+        TestSuite embedded = new TestSuite("ClobTest:embedded");
+        embedded.addTestSuite(ClobTest.class);
+        embedded.addTest(new ClobTest(
+                    "embeddedTestGetCharacterStreamLongNotImplemented"));
+        ctSuite.addTest(new BlobClobTestSetup(embedded));
+
+        TestSuite client = new TestSuite("ClobTest:client");
+        client.addTestSuite(ClobTest.class);
+        client.addTest(new ClobTest("clientTestGetCharacterStreamLong"));
+        client.addTest(new ClobTest("clientTestGetCharacterStreamLong" +
+                 "ExceptionConditions"));
+        ctSuite.addTest(TestConfiguration.clientServerDecorator(
+            new BlobClobTestSetup(client)));
+
+        return ctSuite;
     }
 
 } // End class ClobTest

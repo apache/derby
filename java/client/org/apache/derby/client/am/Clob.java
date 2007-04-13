@@ -772,10 +772,50 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
+    /**
+     * Returns a <code>Reader</code> object that contains a partial
+     * <code>Clob</code> value, starting with the character specified by pos,
+     * which is length characters in length.
+     *
+     * @param pos the offset to the first character of the partial value to
+     * be retrieved.  The first character in the Clob is at position 1.
+     * @param length the length in characters of the partial value to be
+     * retrieved.
+     * @return <code>Reader</code> through which the partial <code>Clob</code>
+     * value can be read.
+     * @throws SQLException if pos is less than 1 or if pos is greater than the
+     * number of
+     * characters in the <code>Clob</code> or if pos + length is greater than
+     * the number of
+     * characters in the <code>Clob</code>
+     *
+     * @throws SQLException.
+     */
     public Reader getCharacterStream(long pos, long length)
         throws SQLException {
-        throw SQLExceptionFactory.notImplemented(
-                "getCharacterStream(long,long");
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+
+        synchronized (agent_.connection_) {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getCharacterStream",
+                    (int) pos, length);
+            }
+            checkPosAndLength(pos, length);
+            String retVal_str = null;
+            try {
+                retVal_str = getSubStringX(pos, (int)length);
+            }
+            catch(SqlException sqle) {
+                throw sqle.getSQLException();
+            }
+            Reader retVal = new java.io.StringReader(retVal_str);
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, "getCharacterStream", retVal);
+            }
+            return retVal;
+        }
     }
     
     //----------------------------helper methods----------------------------------

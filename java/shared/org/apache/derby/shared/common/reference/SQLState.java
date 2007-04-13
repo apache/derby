@@ -1457,6 +1457,7 @@ public interface SQLState {
     String COLUMN_NOT_FROM_BASE_TABLE = "XJ084.U";
     String STREAM_EOF = "XJ085.S";
     String CURSOR_NOT_POSITIONED_ON_INSERT_ROW = "XJ086.S";
+    String POS_AND_LENGTH_GREATER_THAN_LOB = "XJ087.S";
     
     
     String WASNULL_INVALID = "XJ088.S";
