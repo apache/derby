@@ -185,6 +185,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
                 return null;
             }
         });
+        super.tearDown();
     }
 
     /* comment out. leaving in, just in case it's ever relevant.

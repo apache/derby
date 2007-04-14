@@ -32,11 +32,11 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -66,7 +66,8 @@ public class DriverTest extends BaseJDBCTestCase {
     static final String[] ADDITIONAL_DBS = {
         DB_NAME_WITH_SPACES,
         "testcreatedb1", 
-        "testcreatedb2"
+        "testcreatedb2",
+        "'wombat'"
     };
     
     public DriverTest(String name) {
@@ -97,18 +98,7 @@ public class DriverTest extends BaseJDBCTestCase {
         setBaseProps(suite, new DriverTest("testClientURL"));
         setBaseProps(suite, new DriverTest("testDbNameWithSpaces"));
         
-        // This test needs to run in a new single use database as we're setting
-        // a number of properties
-        TestSetup setup = TestConfiguration.singleUseDatabaseDecorator(suite);
-        
-        // also, we need a couple of extra databases
-        for (int i = 0; i < ADDITIONAL_DBS.length; i++)
-        {
-            setup = TestConfiguration.additionalDatabaseDecorator(setup,
-                    ADDITIONAL_DBS[i]);
-        }
-        
-        return setup;
+        return suite;
     }
     
     private static void setBaseProps(TestSuite suite, Test test) 
@@ -127,6 +117,78 @@ public class DriverTest extends BaseJDBCTestCase {
         dbprops.setProperty("derby.database.users." + dbName, "testuser,APP");
         test = new DatabasePropertyTestSetup (test, dbprops, true);
         suite.addTest(test);
+    }
+
+    public void tearDown() throws Exception {
+        // attempt to get rid of any left-over trace files
+        AccessController.doPrivileged(new java.security.PrivilegedAction() {
+            public Object run() {
+                for (int i=0 ; i < 2 ; i++)
+                {   
+                    String traceFileName = "trace" + (i+1) + ".out";
+                    File traceFile = new File(traceFileName);
+                    if (traceFile.exists())
+                    {
+                        // if it exists, attempt to get rid of it
+                        traceFile.delete();
+                    }
+                } 
+                removeDatabases();
+                return null;
+            }
+            
+            // attempt to get rid of any databases. 
+            void removeDatabases()
+            {
+                for ( int i=0 ; i<ADDITIONAL_DBS.length ; i++)
+                {
+                    String dbName = ADDITIONAL_DBS[i];
+                    //TestConfiguration config = TestConfiguration.getCurrent();
+                    dbName = dbName.replace('/', File.separatorChar);
+                    String dsh = BaseTestCase.getSystemProperty("derby.system.home");
+                    if (dsh == null) {
+                        fail("not implemented");
+                    } else {
+                        dbName = dsh + File.separator + dbName;
+                    }
+                    removeDirectory(dbName);
+                }
+            }
+
+            void removeDirectory(String path)
+            {
+                final File dir = new File(path);
+                removeDir(dir);
+            }
+
+            private void removeDir(File dir) {
+
+                // Check if anything to do!
+                // Database may not have been created.
+                if (!dir.exists())
+                    return;
+
+                String[] list = dir.list();
+
+                // Some JVMs return null for File.list() when the
+                // directory is empty.
+                if (list != null) {
+                    for (int i = 0; i < list.length; i++) {
+                        File entry = new File(dir, list[i]);
+
+                        if (entry.isDirectory()) {
+                            removeDir(entry);
+                        } else {
+                            entry.delete();
+                            //assertTrue(entry.getPath(), entry.delete());
+                        }
+                    }
+                }
+                dir.delete();
+                //assertTrue(dir.getPath(), dir.delete());
+            }
+        });
+        super.tearDown();
     }
     
     /**
@@ -178,11 +240,8 @@ public class DriverTest extends BaseJDBCTestCase {
         int  frameworkOffset;
         int EMBEDDED_OFFSET = 0;
         int DERBYNETCLIENT_OFFSET = 1;
-        int DERBYNET_OFFSET = 2;   // JCC
         if (usingDerbyNetClient())
             frameworkOffset = DERBYNETCLIENT_OFFSET;
-        else if (usingDerbyNet())
-            frameworkOffset = DERBYNET_OFFSET; // JCC
         else // assume (usingEmbedded())
             frameworkOffset = EMBEDDED_OFFSET;
         
@@ -193,14 +252,11 @@ public class DriverTest extends BaseJDBCTestCase {
         int port = TestConfiguration.getCurrent().getPort();
         String CLIENT_URL = 
             "jdbc:derby://"+hostName+":"+port+"/"+dbName+";create=true";
-        String JCC_URL = 
-            "jdbc:derby:net://"+hostName+":"+port+"/"+dbName+";create=true";
         
         String[] urls = new String[]
         {
             EMBEDDED_URL,
             CLIENT_URL,
-            JCC_URL,
             INVALID_URL,
         };
 
@@ -210,11 +266,10 @@ public class DriverTest extends BaseJDBCTestCase {
         // to check for valid results for each framework
         boolean[][] acceptsURLTable = new boolean[][]
         {
-        // Framework/url      EMBEDDED     DERBYNETCLIENT       DERBYNET (JCC)
-        /* EMBEDDED_URL*/  {   true      ,  false           ,   false    },
-        /* CLIENT_URL  */  {   false     ,  true            ,   false    },     
-        /* JCC_URL     */  {   false     ,  false           ,   true     },
-        /* INVALID_URL */  {   false     ,  false           ,   false    } 
+        // Framework/url      EMBEDDED     DERBYNETCLIENT 
+        /* EMBEDDED_URL*/  {   true      ,  false        },
+        /* CLIENT_URL  */  {   false     ,  true         },     
+        /* INVALID_URL */  {   false     ,  false        } 
         };
 
         for (int u = 0; u < urls.length;u++)
@@ -229,8 +284,7 @@ public class DriverTest extends BaseJDBCTestCase {
     /**
      * Tests that embedded attributes can be specified in either url or info 
      * argument to connect
-     * DERBY-530. Only valid for embedded driver and client. JCC has a 
-     * different url format for embedded attributes
+     * DERBY-530. Only valid for embedded driver and client. 
      */
     public static void testEmbeddedAttributes() throws SQLException
     {
@@ -296,6 +350,15 @@ public class DriverTest extends BaseJDBCTestCase {
         {
             assertSQLState("08006", se);
         }
+        
+        // shutdown using url
+        try {
+            assertConnect(
+                false, protocol + "testcreatedb2;shutdown=true", null);
+        } catch (SQLException se)
+        {
+            assertSQLState("08006", se);
+        }
     }
         
     /**
@@ -322,6 +385,8 @@ public class DriverTest extends BaseJDBCTestCase {
         info.setProperty("traceFile",traceFile);
         assertConnect(false, url, info);
         assertTraceFilesExist();
+        shutdownDB(url + ";shutdown=true", null);
+
     }
 
     /**
@@ -361,34 +426,38 @@ public class DriverTest extends BaseJDBCTestCase {
         
         Properties info = null;     //test with null Properties object
 
-        String CLIENT_URL_WITH_COLON1 = protocol + dbName + ":create=true";
-        //String CLIENT_URL_WITH_COLON2 = protocol + DERBY_SYSTEM_HOME + 
+        String CLIENT_CREATE_URL_WITH_COLON1 = 
+            protocol + dbName + ":create=true";
+        //String CLIENT_CREATE_URL_WITH_COLON2 = protocol + DERBY_SYSTEM_HOME + 
         //   File.separator + dbName + ":create=true";
-        // String CLIENT_URL_WITH_DOUBLE_QUOTES1 = 
+        // String CLIENT_CREATE_URL_WITH_DOUBLE_QUOTES1 = 
         //     protocol + "\"" + dbName + "\";create=true";  
-        // String CLIENT_URL_WITH_DOUBLE_QUOTES2 = protocol + "\"" + 
+        // String CLIENT_CREATE_URL_WITH_DOUBLE_QUOTES2 = protocol + "\"" + 
         //     DERBY_SYSTEM_HOME + File.separator + dbName + "\";create=true"; 
-        // String CLIENT_URL_WITH_SINGLE_QUOTES1 = protocol + "'" + 
+        // String CLIENT_CREATE_URL_WITH_SINGLE_QUOTES1 = protocol + "'" + 
         //     DERBY_SYSTEM_HOME + File.separator + dbName + "';create=true"; 
-        String CLIENT_URL_WITH_SINGLE_QUOTES2 = 
+        String CLIENT_CREATE_URL_WITH_SINGLE_QUOTES2 = 
             protocol + "'" + dbName + "';create=true";
         
+        String CLIENT_SHUT_URL_WITH_SINGLE_QUOTES2 = 
+            protocol + "'" + dbName + "';shutdown=true";
+        
         //Client URLS
-        String[] clientUrls = new String[]
+        String[] clientCreateUrls = new String[]
         {
-            CLIENT_URL_WITH_COLON1,
+            CLIENT_CREATE_URL_WITH_COLON1,
             //CLIENT_URL_WITH_COLON2,
             //CLIENT_URL_WITH_DOUBLE_QUOTES1,
             //CLIENT_URL_WITH_DOUBLE_QUOTES2,
             //CLIENT_URL_WITH_SINGLE_QUOTES1,
-            CLIENT_URL_WITH_SINGLE_QUOTES2
+            CLIENT_CREATE_URL_WITH_SINGLE_QUOTES2
         };
         
-        for (int i = 0; i < clientUrls.length;i++)
+        for (int i = 0; i < clientCreateUrls.length;i++)
         {
-            String url = clientUrls[i];
+            String url = clientCreateUrls[i];
             try{
-                if (url.equals(CLIENT_URL_WITH_COLON1))
+                if (url.equals(CLIENT_CREATE_URL_WITH_COLON1))
                 {
                     Driver driver = DriverManager.getDriver(url);
                     assertNull(driver.connect(url,info));
@@ -400,6 +469,11 @@ public class DriverTest extends BaseJDBCTestCase {
                 fail ("did not expect an exception");
             }
         }
+        // shutdown the databases, which should get rid of all open connections
+        // currently, there's only the one; otherwise, this could be done in
+        // a loop.
+        shutdownDB(
+            CLIENT_SHUT_URL_WITH_SINGLE_QUOTES2 + ";shutdown=true", null);
     }   
     
     /**
@@ -434,26 +508,11 @@ public class DriverTest extends BaseJDBCTestCase {
             TestConfiguration.getCurrent().getHostName() + ":" + 
             TestConfiguration.getCurrent().getPort() + "/";
         
-        String EMBEDDED_URL_WITH_SPACES = 
-            protocol + DB_NAME_WITH_SPACES + ";create=true";
-        String CLIENT_URL_WITH_SPACES = 
-            protocol + DB_NAME_WITH_SPACES + ";create=true";
-        String JCC_URL_WITH_SPACES = 
-            protocol + DB_NAME_WITH_SPACES + ";create=true";
+        url = protocol + DB_NAME_WITH_SPACES + ";create=true";
+        String shuturl = protocol + DB_NAME_WITH_SPACES + ";shutdown=true";
         
-        if(usingEmbedded())
-            url = EMBEDDED_URL_WITH_SPACES;
-        else if(usingDerbyNetClient()) 
-            url = CLIENT_URL_WITH_SPACES;
-        else if(usingDerbyNet()) {
-            url = JCC_URL_WITH_SPACES;
-            // JCC requires user and password
-            info =  new Properties();
-            info.put("user", "tester");
-            info.put("password", "testpass");
-        }
-        
-        assertConnect(false, url, info);
+        assertConnect(false, url, null);
+        shutdownDB(shuturl, null);
     }
     
     /**
@@ -466,13 +525,13 @@ public class DriverTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException on error.
      */
-    private static Connection assertConnect(
+    private static void assertConnect(
         boolean expectUrlEqualsGetUrl, String url, Properties info) 
     throws SQLException
     {
         Driver driver = DriverManager.getDriver(url);
 
-        Connection conn = driver.connect(url,info);
+        Connection conn = driver.connect(url, info);
         assertNotNull(conn);
    
         if (expectUrlEqualsGetUrl)
@@ -484,8 +543,23 @@ public class DriverTest extends BaseJDBCTestCase {
         rs.next();
         assertEquals(
             rs.getString(1), conn.getMetaData().getUserName().toUpperCase());
+        rs.close();
         conn.close();
-        return conn;
+        return;
+    }
+    
+    /**
+     * use this method to shutdown databases in an effort to release
+     * any locks they may be holding
+     */
+    private static void shutdownDB(String url, Properties info) throws SQLException {
+        
+        Driver driver = DriverManager.getDriver(url);
+        try {
+            driver.connect(url, info);
+        } catch (SQLException se) {
+            assertSQLState("08006", se);
+        }
     }
 
     /**
