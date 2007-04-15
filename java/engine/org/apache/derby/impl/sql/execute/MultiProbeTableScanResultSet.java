@@ -67,16 +67,21 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
 {
     /* The values with which we will probe the table. */
     protected DataValueDescriptor [] probeValues;
+    /**
+     * The values with which we will probe the table, as they were passed to
+     * the constructor. We need to keep them unchanged in case the result set
+     * is reused when a statement is re-executed (see DERBY-827).
+     */
+    protected DataValueDescriptor [] origProbeValues;
 
     /* 0-based position of the *next* value to lookup w.r.t. the probe
      * values list.
      */
     protected int probeValIndex;
 
-    /* Whether or not we need to sort the values (sorting should only
-     * happen once).  If all values were specified as literals (as
-     * opposed to parameters) then we did the sort at compile time
-     * and so we do not need to do it here.
+    /* Whether or not we need to sort the values.  If all values were
+     * specified as literals (as opposed to parameters) then we did the
+     * sort at compile time and so we do not need to do it here.
      */
     private boolean needSort;
 
@@ -154,7 +159,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
                 " is not the case.");
         }
 
-        this.probeValues = probingVals;
+        this.origProbeValues = probingVals;
         this.needSort = !probeValsAreSorted;
     }
 
@@ -183,17 +188,16 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
              * ideal, but it works for now.
              */
             DataValueDescriptor [] pVals =
-                new DataValueDescriptor[probeValues.length];
+                new DataValueDescriptor[origProbeValues.length];
 
             for (int i = 0; i < pVals.length; i++)
-                pVals[i] = probeValues[i].getClone();
+                pVals[i] = origProbeValues[i].getClone();
 
             java.util.Arrays.sort(pVals);
             probeValues = pVals;
-
-            // Only sort once.
-            needSort = false;
         }
+        else
+            probeValues = origProbeValues;
 
         probeValIndex = 0;
         super.openCore();
