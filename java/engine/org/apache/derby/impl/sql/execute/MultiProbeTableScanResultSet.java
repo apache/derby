@@ -65,7 +65,7 @@ import org.apache.derby.iapi.sql.execute.ResultSetFactory;
 class MultiProbeTableScanResultSet extends TableScanResultSet
     implements CursorResultSet
 {
-    /* The values with which we will probe the table. */
+    /** The values with which we will probe the table. */
     protected DataValueDescriptor [] probeValues;
     /**
      * The values with which we will probe the table, as they were passed to
@@ -74,12 +74,14 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
      */
     protected DataValueDescriptor [] origProbeValues;
 
-    /* 0-based position of the *next* value to lookup w.r.t. the probe
+    /**
+     * 0-based position of the <b>next</b> value to lookup w.r.t. the probe
      * values list.
      */
     protected int probeValIndex;
 
-    /* Whether or not we need to sort the values.  If all values were
+    /**
+     * Whether or not we need to sort the values.  If all values were
      * specified as literals (as opposed to parameters) then we did the
      * sort at compile time and so we do not need to do it here.
      */
