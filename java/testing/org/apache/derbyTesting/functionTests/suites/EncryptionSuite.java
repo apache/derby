@@ -76,7 +76,7 @@ public final class EncryptionSuite extends BaseJDBCTestCase {
           suite.addTest(encryptedSuite("DESede/CFB/NoPadding"));
           suite.addTest(encryptedSuite("DES/CBC/NoPadding"));
           suite.addTest(encryptedSuite("Blowfish/CBC/NoPadding"));
-          suite.addTest(encryptedSuite("AES/CBC/NoPadding"));
+          suite.addTest(encryptedSuite("AES/OFB/NoPadding"));
         }
         
         return suite;
