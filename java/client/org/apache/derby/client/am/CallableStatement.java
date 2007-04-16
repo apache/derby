@@ -338,11 +338,7 @@ public class CallableStatement extends PreparedStatement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "getLong", parameterIndex);
                 }
-                super.checkForClosedStatement();
-                long result;
-                checkGetterPreconditions(parameterIndex);
-                setWasNull(parameterIndex);
-                result = wasNullX() ? 0 : singletonRowData_.getLong(parameterIndex);
+                long result = getLongX(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getLong", result);
                 }
@@ -353,6 +349,13 @@ public class CallableStatement extends PreparedStatement
         {
             throw se.getSQLException();
         }
+    }
+
+    long getLongX(int parameterIndex) throws SqlException {
+        super.checkForClosedStatement();
+        checkGetterPreconditions(parameterIndex);
+        setWasNull(parameterIndex);
+        return wasNullX() ? 0 : singletonRowData_.getLong(parameterIndex);
     }
 
     public float getFloat(int parameterIndex) throws SQLException {
@@ -649,10 +652,7 @@ public class CallableStatement extends PreparedStatement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "getBytes", parameterIndex);
                 }
-                super.checkForClosedStatement();
-                checkGetterPreconditions(parameterIndex);
-                setWasNull(parameterIndex);
-                byte[] result = wasNullX() ? null : singletonRowData_.getBytes(parameterIndex);
+                byte[] result = getBytesX(parameterIndex);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getBytes", result);
                 }
@@ -664,6 +664,14 @@ public class CallableStatement extends PreparedStatement
             throw se.getSQLException();
         }
     }
+
+    byte[] getBytesX(final int parameterIndex) throws SqlException 
+    {
+        super.checkForClosedStatement();
+        checkGetterPreconditions(parameterIndex);
+        setWasNull(parameterIndex);
+        return  wasNullX() ? null : singletonRowData_.getBytes(parameterIndex);
+     }
 
     public java.sql.Blob getBlob(int parameterIndex) throws SQLException {
         try

@@ -1656,7 +1656,7 @@ public abstract class Connection implements java.sql.Connection,
         }
     }
 
-    private CallableStatement prepareCallX(String sql,
+    CallableStatement prepareCallX(String sql,
                                            int resultSetType,
                                            int resultSetConcurrency,
                                            int resultSetHoldability) throws SqlException {
@@ -2010,6 +2010,33 @@ public abstract class Connection implements java.sql.Connection,
             agent_.logWriter_.traceConnectResetExit(this);
         }
     }
+    
+    /**
+     * Reference to object with prepared statements for calling the locator
+     * procedures. Makes it possible to reuse prepared statements within 
+     * the connection.
+     */
+    private CallableLocatorProcedures lobProcs;
+    
+    /**
+     * Get handle to the object that contains prepared statements for calling
+     * locator procedures for this connection.  The object will be created on 
+     * the first invocation.
+     *
+     * An example of how to call a stored procedure via this method:
+     * <pre> <code>
+     *    connection.locatorProcedureCall().blobReleaseLocator(locator);
+     * </code> </pre>
+     *
+     * @return object with prepared statements for calling locator procedures
+     */
+    CallableLocatorProcedures locatorProcedureCall() 
+    {
+        if (lobProcs == null) {
+            lobProcs = new CallableLocatorProcedures(this);
+        }
+        return lobProcs;
+    }    
 
 
     //-------------------------------helper methods-------------------------------

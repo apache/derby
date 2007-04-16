@@ -145,7 +145,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // When this is false we skip autocommit for this PreparedStatement.
     // This is needed when the PreparedStatement object is used internally by
     // the driver and a commit is not desired, e.g., Blob/Clob API calls
-    public boolean isAutoCommittableStatement_ = true;
+    boolean isAutoCommittableStatement_ = true;
 
     // The user has no control over the statement that owns a catalog query, and has no ability to close that statement.
     // We need a special member variable on our internal catalog query statements so that

@@ -601,15 +601,20 @@ public class PreparedStatement extends Statement
                                                       java.sql.Types.INTEGER,
                                                       paramType);
                 }
-                
-                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIGINT;
-                setInput(parameterIndex, new Long(x));
+                setLongX(parameterIndex, x);
             }
         }
         catch ( SqlException se )
         {
             throw se.getSQLException();
         }
+    }
+
+    void setLongX(final int parameterIndex, final long x) 
+    {
+        parameterMetaData_.clientParamtertype_[parameterIndex - 1] 
+                = java.sql.Types.BIGINT;
+        setInput(parameterIndex, new Long(x));
     }
 
     public void setFloat(int parameterIndex, float x) throws SQLException {
