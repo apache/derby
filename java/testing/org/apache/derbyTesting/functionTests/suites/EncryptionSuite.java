@@ -36,7 +36,7 @@ import junit.framework.TestSuite;
  * tests run without any problems when encryption
  * is enabled.
  * <BR>
- * It is not for testing of encrpytion functionality,
+ * It is not for testing of encryption functionality,
  * e.g. testing that bootPassword must be a certain
  * length etc. That should be in a specific JUnit test
  * that probably needs to control database creation
