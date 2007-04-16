@@ -106,6 +106,7 @@ public class SQLUtilities {
         ResultSet rs = s.executeQuery("values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()");
         rs.next();
         String rts = rs.getString(1);
+        rs.close();
         return new RuntimeStatisticsParser(rts);
     }
 
@@ -120,7 +121,10 @@ public class SQLUtilities {
         ResultSet rs = s.getResultSet();
         if (rs != null)
             JDBC.assertDrainResults(rs);
-        return SQLUtilities.getRuntimeStatisticsParser(s2);
+        RuntimeStatisticsParser parser = getRuntimeStatisticsParser(s2);
+        s.close();
+        s2.close();
+        return parser;
     }
     
 }
