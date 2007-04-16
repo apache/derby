@@ -167,7 +167,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 			doImportFromFile(c, "extin/EndOfFile.txt" , "T4" , null , null , null, 0);
 		} catch (SQLException e) {
 			// DERBY-1440: JDBC 4 client driver doesn't include nested exception SQLStates
-			assertSQLState(JDBC.vmSupportsJDBC4() ? "38000" : "XIE0E", e);
+			assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R" : "XIE0E", e);
 		}
 	}
 	

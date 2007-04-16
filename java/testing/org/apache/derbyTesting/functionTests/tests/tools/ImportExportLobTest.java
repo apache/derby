@@ -226,7 +226,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
             doImportTable("APP", "BOOKS_IMP", fileName, null, null, null, 0);
             fail("import did not fail on data with invalid hex string");
         } catch (SQLException e) {
-             assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0N", e);
+             assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
         }
 
         try {
@@ -238,7 +238,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0N", e);
+            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
         }
 
         try {
@@ -250,7 +250,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0N", e);
+            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
         }
     }
 
@@ -432,7 +432,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
             doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
                                          null, null, null, 0);
         }catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0P", e);
+            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0P", e);
         }
     }
 

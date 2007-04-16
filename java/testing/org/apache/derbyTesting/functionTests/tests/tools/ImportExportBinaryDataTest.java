@@ -258,7 +258,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
             doImportTable("APP", "BIN_TAB_IMP", fileName, null, null, null, 0);
             fail("import did not fail on data with invalid hex string");
         } catch (SQLException e) {
-             assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0N", e);
+             assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
         }
 
         try {
@@ -268,7 +268,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0N", e);
+            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
         }
         
         try {
@@ -278,7 +278,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0N", e);
+            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
         }
     }
 
