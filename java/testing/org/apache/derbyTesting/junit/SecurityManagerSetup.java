@@ -159,6 +159,7 @@ public final class SecurityManagerSetup extends TestSetup {
 			if ( newPolicyProperty == null ) { newPolicyProperty = ""; } 
                                                    
 			String  oldPolicyProperty = BaseTestCase.getSystemProperty("java.security.policy");
+
 			if ( oldPolicyProperty == null ) { oldPolicyProperty = ""; }
 
 			if ( newPolicyProperty.equals( oldPolicyProperty ) ) { return; }
@@ -197,6 +198,13 @@ public final class SecurityManagerSetup extends TestSetup {
 			return;
 		}
 		URL policyURL = BaseTestCase.getTestResource(policyResource);
+
+		// maybe the passed in resource was an URL to begin with
+		if ( policyURL == null )
+		{
+			try { policyURL = new URL( policyResource ); }
+			catch (Exception e) { System.out.println( "Unreadable url: " + policyResource ); }
+		}
 
 		if (policyURL != null)
 			set.setProperty("java.security.policy",

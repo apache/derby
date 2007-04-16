@@ -383,7 +383,20 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
      */
     private String makeServerPolicyName()
     {
-        return  SupportFilesSetup.EXTINOUT + File.separator + makeTargetPolicyStub();
+        try {
+            String  userDir = getSystemProperty( "user.dir" );
+            String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + makeTargetPolicyStub();
+            File      file = new File( fileName );
+            String  urlString = file.toURL().toExternalForm();
+
+            return urlString;
+        }
+        catch (Exception e)
+        {
+            System.out.println( "Unexpected exception caught by makeServerPolicyName(): " + e );
+
+            return null;
+        }
     }
 
     /**
