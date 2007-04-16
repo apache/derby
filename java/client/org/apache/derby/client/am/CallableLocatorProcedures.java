@@ -38,7 +38,7 @@ package org.apache.derby.client.am;
  * that does not fit in a VARCHAR (FOR BIT DATA), are split into
  * several calls each operating on a fragment of the LOB.
  *
- * @see Connection.locatorProcedureCall() for an example of how to use
+ * @see Connection#locatorProcedureCall for an example of how to use
  * this class.
  */
 class CallableLocatorProcedures 
@@ -462,7 +462,8 @@ class CallableLocatorProcedures
 
     /**
      * Truncates the <code>BLOB</code> value identified by
-     * <code>sourceLocator</code> to be <code>length</code> bytes.  <p>
+     * <code>sourceLocator</code> to be <code>length</code> bytes.  
+     * <p>
      * <b>Note:</b> If the value specified for <code>length</code> is greater
      * than the length+1 of the <code>BLOB</code> value then an
      * <code>SQLException</code> will be thrown.
@@ -613,7 +614,8 @@ class CallableLocatorProcedures
      * substring <code>searchLiteral</code> begins within the <code>CLOB</code>
      * value identified by <code>locator</code>.  The search for
      * <code>searchLiteral</code> begins at position <code>fromPosition</code>.
-     * <p> This is a helper function used by clobGetPositionFromString(int,
+     * <p> 
+     * This is a helper function used by clobGetPositionFromString(int,
      * String, long) for each call to the CLOBGETPOSITIONFROMSTRING procedure.
      *
      * @param locator locator that identifies the CLOB to be searched.
@@ -752,7 +754,7 @@ class CallableLocatorProcedures
     String clobGetSubString(int sourceLocator, long fromPosition, int forLength)
         throws SqlException
     {
-        if (forLength == 0) return new String("");
+        if (forLength == 0) return "";
 
         if (clobGetSubStringCall == null) {
             clobGetSubStringCall = connection.prepareCallX

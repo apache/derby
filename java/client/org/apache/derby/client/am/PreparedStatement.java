@@ -612,6 +612,7 @@ public class PreparedStatement extends Statement
 
     void setLongX(final int parameterIndex, final long x) 
     {
+        // Column numbers starts at 1, clientParamtertype_[0] refers to column 1
         parameterMetaData_.clientParamtertype_[parameterIndex - 1] 
                 = java.sql.Types.BIGINT;
         setInput(parameterIndex, new Long(x));
