@@ -11,7 +11,6 @@
 # 			see DERBY-326 and DERBY-550 issues
 jdbcapi/resultsetStream.java
 lang/errorStream.java
-lang/scrollCursors2.java
 jdbcapi/statementJdbc20.java
 jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java

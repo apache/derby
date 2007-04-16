@@ -28,6 +28,7 @@ public class RuntimeStatisticsParser {
     private boolean eliminatedDuplicates = false;
     private boolean tableScan = false;
     private String statistics = "";
+    private boolean scrollInsensitive = false;
 
     /**
      * Create a RuntimeStatistics object to parse the text and extract
@@ -59,6 +60,8 @@ public class RuntimeStatisticsParser {
         if (rts.indexOf("Eliminate duplicates = true") > 0) {
         	eliminatedDuplicates = true;
         }
+        if (rts.indexOf("Scroll Insensitive ResultSet:") > 0)
+            scrollInsensitive = true;
     }
 
     /**
@@ -91,4 +94,9 @@ public class RuntimeStatisticsParser {
     public boolean eliminatedDuplicates() {
     	return eliminatedDuplicates;
     }
+    
+    public boolean isScrollInsensitive(){
+        return scrollInsensitive;
+    }
+    
 }

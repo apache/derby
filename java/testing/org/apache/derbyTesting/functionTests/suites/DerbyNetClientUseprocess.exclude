@@ -23,7 +23,6 @@
 #  lang/wisconsin.java
 #  jdbcapi/derbyStress.java
 #  jdbcapi/maxfieldsize.java
-#  lang/scrollCursors1.sql
 #
 jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
@@ -44,4 +43,3 @@ lang/forupdate.sql
 lang/wisconsin.java
 jdbcapi/derbyStress.java
 jdbcapi/maxfieldsize.java
-lang/scrollCursors1.sql
