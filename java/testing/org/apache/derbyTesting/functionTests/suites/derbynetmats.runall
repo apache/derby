@@ -20,7 +20,6 @@ lang/bug5054.java
 lang/forupdate.sql
 lang/holdCursorIJ.sql
 lang/simpleScroll.sql
-lang/supersimple.sql
 lang/wisconsin.java
 lang/ShutdownDatabase.java
 store/holdCursorExternalSortJDBC30.sql

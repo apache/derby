@@ -79,7 +79,17 @@ insert into t values(2);
 execute 'select * from t where c1=?' using 'select * from t where c1>=1';
 drop table t;
 
--- show that long fields now don't take forever...
+-- Bug 4694 Test automatic rollback with close of connection
+-- in ij
+connect 'wombat';
+autocommit off;
+create table a (a int);
+select count(*) from a;
+
+disconnect;
+set connection connection0;
+select count(*) from a;
+
 
 create table t ( c char(50));
 insert into t values('hello');
@@ -106,4 +116,5 @@ show connections;
 set connection connection0;
 
 show connections;
+
 
