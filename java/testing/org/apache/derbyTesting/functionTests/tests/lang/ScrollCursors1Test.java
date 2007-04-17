@@ -1,5 +1,5 @@
 /**
- *  Derby - Class org.apache.derbyTesting.functionTests.tests.lang.ScrollCursors1
+ *  Derby - Class org.apache.derbyTesting.functionTests.tests.lang.ScrollCursors1est
  *  
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -38,9 +38,9 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.Connection;
 
-public class ScrollCursors1 extends BaseJDBCTestCase {
+public class ScrollCursors1Test extends BaseJDBCTestCase {
 
-    public ScrollCursors1(String name) {
+    public ScrollCursors1Test(String name) {
         super(name);
 
     }
@@ -552,6 +552,101 @@ public class ScrollCursors1 extends BaseJDBCTestCase {
          s.executeUpdate("drop table big");
         }
         
+        public void testSimpleScrollCursors() throws SQLException {
+            Connection conn = getConnection();
+            Statement s = conn.createStatement();
+            s.executeUpdate("create table t (a int)");
+            PreparedStatement ps = conn.prepareStatement("insert into t values (?)");
+            for (int i = 1; i <=5; i++)
+            {
+                ps.setInt(1, i);
+                ps.executeUpdate();
+            }
+            ps.close();
+            PreparedStatement ps_c1 = conn.prepareStatement("select * from t", ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = ps_c1.executeQuery();
+            rs.first();
+            assertEquals(1,rs.getInt(1));
+            rs.next();
+            assertEquals(2,rs.getInt(1));
+            rs.previous();
+            assertEquals(1,rs.getInt(1));
+            rs.last();
+            assertEquals(5,rs.getInt(1));
+            rs.absolute(2);
+            assertEquals(2, rs.getInt(1));
+            rs.relative(2);
+            assertEquals(4,rs.getInt(1));
+            rs.close();
+            // since JCC gets 64 results and then scrolls within them
+            // lets try each p ositioning command as the first command for the cursor.
+            rs = ps_c1.executeQuery();
+            rs.next();
+            assertEquals(1,rs.getInt(1));
+            rs.close();
+            rs = ps_c1.executeQuery();
+            rs.last();
+            assertEquals(5,rs.getInt(1));
+            rs.close();
+            rs = ps_c1.executeQuery();
+            rs.absolute(3);
+            assertEquals(3,rs.getInt(1));
+            rs.next();
+            assertEquals(4,rs.getInt(1));
+            rs.close();
+            ps_c1.close();
+            // lets try a table with more than 64 rows.
+            s.executeUpdate("create table tab1 (a int)");
+            PreparedStatement is = conn.prepareStatement("insert into tab1 values (?)");
+            for (int i = 1; i <= 70; i++) {
+                is.setInt(1, i);
+                is.executeUpdate();
+            }
+            ps_c1 = conn.prepareStatement("select * from tab1",ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY);
+            rs = ps_c1.executeQuery();
+            rs.first();
+            assertEquals(1,rs.getInt(1));
+            rs.last();
+            assertEquals(70,rs.getInt(1));
+            rs.absolute(65);
+            assertEquals(65,rs.getInt(1));
+            rs.absolute(-1);
+            assertEquals(70,rs.getInt(1));
+            rs.close();
+            ps_c1.close();
+            // try sensitive scroll cursors bug 4677
+            ps_c1 = conn.prepareStatement("select * from t1",ResultSet.TYPE_SCROLL_SENSITIVE,
+                        ResultSet.CONCUR_READ_ONLY);
+            rs = ps_c1.executeQuery();
+            rs.close();
+            ps_c1.close();
+            ps_c1 = conn.prepareStatement("select * from t1 for update",ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+            rs.close();
+            s.executeUpdate("drop table tab1");
+            // defect 5225, outer joins returning NULLS
+            s.executeUpdate("create table tab1(i1 bigint not null, c1 varchar(64) not null)");
+            s.executeUpdate("create table tab2 (i2 bigint not null, c2 varchar(64) not null)");
+            s.executeUpdate("insert into tab1 values (1, 'String 1')");
+            s.executeUpdate("insert into tab1 values (2, 'String 2')");
+            s.executeUpdate("insert into tab2 values (1, 'String 1')");
+            s.executeUpdate("insert into tab2 values (3, 'String 3')");
+            rs = s.executeQuery("select c1 from tab1 right outer join tab2 on (i1=i2)");
+            JDBC.assertFullResultSet(rs, new String[][] {{"String 1"},{null}});
+            rs = s.executeQuery("select c2 from tab1 right outer join tab2 on (i1=i2)");
+            JDBC.assertFullResultSet(rs, new String[][] {{"String 1"},{"String 3"}});
+            // left outer join
+            rs = s.executeQuery("select c1 from tab1 left outer join tab2 on (i1=i2)");
+            JDBC.assertFullResultSet(rs, new String[][] {{"String 1"},{"String 2"}});
+            rs = s.executeQuery("select c2 from tab1 left outer join tab2 on (i1=i2)");
+            JDBC.assertFullResultSet(rs, new String[][] {{"String 1"},{null}});
+            s.executeUpdate("drop table t");
+            s.executeUpdate("drop table tab1");
+            s.executeUpdate("drop table tab2");            
+        }
+        
         public void testScrollCursors3() throws SQLException {
             Connection conn = getConnection();
             Connection conn2 = openDefaultConnection();
@@ -609,7 +704,7 @@ public class ScrollCursors1 extends BaseJDBCTestCase {
         public static Test baseSuite(String name) {
 
         TestSuite suite = new TestSuite(name);
-        suite.addTestSuite(ScrollCursors1.class);
+        suite.addTestSuite(ScrollCursors1Test.class);
 
         return new CleanDatabaseTestSetup(suite) {
 
