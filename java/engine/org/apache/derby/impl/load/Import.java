@@ -45,6 +45,14 @@ import org.apache.derby.iapi.error.PublicAPI;
 public class Import extends ImportAbstract{
 
     private static  int                _importCounter;
+
+    //
+    // This hashtable stores Import instances, which keep the context needed
+    // to correlate Derby errors with line numbers in the file that is being
+    // imported. An importing thread will access this hashtable at the very
+    // beginning and the very end of its run. We cannot use Hashmap
+    // because different threads may simultaneously put and delete entries.
+    //
     private static  Hashtable   _importers = new Hashtable();
 
     private String inputFileName;
