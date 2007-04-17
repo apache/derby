@@ -1312,11 +1312,11 @@ CONGLOMERATENAME                                                                
 T1                                                                                                                              |3                   |0                   
 ij> delete from t1;
 26 rows inserted/updated/deleted
-ij> select conglomeratename, numallocatedpages, numfreepages from new org.apache.derby.diag.SpaceTable('T1') tab;
-CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   |NUMFREEPAGES        
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-T1                                                                                                                              |1                   |2                   
-ij> call syscs_util.syscs_inplace_compress_table('APP','T1',2,2,2);
+ij> -- don't check result from delete as the number of free pages is system
+-- performance dependent.  It depends on how quickly post commit can run and
+-- reclaim the space, the result will not be reproducible across all platforms.
+-- select conglomeratename, numallocatedpages, numfreepages from new org.apache.derby.diag.SpaceTable('T1') tab;
+call syscs_util.syscs_inplace_compress_table('APP','T1',2,2,2);
 0 rows inserted/updated/deleted
 ij> select conglomeratename, numallocatedpages, numfreepages from new org.apache.derby.diag.SpaceTable('T1') tab;
 CONGLOMERATENAME                                                                                                                |NUMALLOCATEDPAGES   |NUMFREEPAGES        
