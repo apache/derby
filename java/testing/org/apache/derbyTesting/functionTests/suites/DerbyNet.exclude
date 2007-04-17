@@ -5,7 +5,6 @@
 # excluding jdbcapi/SetQueryTimeoutTest.java because neither the JCC driver nor the ClientDriver support setQueryTimeout() yet.
 # excluding jdbcapi/rsgetXXXcolumnNames.java as it fails incorrectly, according to JDBC spec. Forwarding test case to JCC team.
 # excluding jdbcapi/statementJdbc30.java - Client behaves differently. Need to look into this
-# excluding jdbcapi/dataSourceReference.java - client side only tests, tests all data sources
 #           regardless of framework
 # excluding largedata/LobLimits.java to run with the network server because currently lobs are materialized and this test tests for 2G lobs.
 # 			see DERBY-326 and DERBY-550 issues
@@ -17,7 +16,6 @@ jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/SetQueryTimeoutTest.java
 jdbcapi/blobSetBinaryStream.java
 jdbcapi/statementJdbc30.java
-jdbcapi/dataSourceReference.java
 #no XA for JCC
 jdbcapi/savepointJdbc30_XA.java
 # excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test

@@ -184,8 +184,22 @@ public abstract class Connection implements java.sql.Connection,
         // "setConnectionAttributes" method.  
         databaseName_ = dataSource.getDatabaseName();
         String connAtrrs = dataSource.getConnectionAttributes();
+        if (dataSource.getCreateDatabase() != null) // can be "create" or null
+        {
+            if (connAtrrs == null)
+                connAtrrs = "create=true";
+            else
+                connAtrrs = connAtrrs + ";create=true";
+        }
+        if (dataSource.getShutdownDatabase() != null) // "shutdown" or null
+        {
+            if (connAtrrs == null)
+                connAtrrs = "shutdown=true";
+            else
+                connAtrrs = connAtrrs + ";shutdown=true";
+        }
         if(databaseName_ != null && connAtrrs != null)
-        	databaseName_ = databaseName_ + ";" + connAtrrs;
+            databaseName_ = databaseName_ + ";" + connAtrrs;
 
         retrieveMessageText_ = dataSource.getRetrieveMessageText();
 

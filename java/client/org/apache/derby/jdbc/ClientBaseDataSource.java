@@ -677,7 +677,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
                         new ClientMessageId(SQLState.INVALID_ATTRIBUTE_SYNTAX),
                         attributeString);
                 }
-
+                //if (shutdownDatabase != null )
+                
                 augmentedProperties.setProperty((v.substring(0, eqPos)).trim(), (v.substring(eqPos + 1)).trim());
             }
         } catch (NoSuchElementException e) {
@@ -852,6 +853,63 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
             return getUpgradedSecurityMechanism(password);
         
         return securityMechanism;
+    }
+
+    // ----------------------- set/getCreate/ShutdownDatabase ---------------------------
+    /**
+     * Set to true if the database should be created.
+     */
+    private boolean createDatabase;
+
+    /**
+     * Set to true if the database should be shutdown.
+     */
+    private boolean shutdownDatabase;
+    
+    /**
+     * Set this property to create a new database.  If this property is not
+     * set, the database (identified by databaseName) is assumed to be already
+     * existing.
+     * @param create if set to the string "create", this data source will try
+     *               to create a new database of databaseName, or boot the 
+     *               database if one by that name already exists.
+     * 
+     */
+    public final void setCreateDatabase(String create) {
+        if (create != null && create.equalsIgnoreCase("create"))
+            this.createDatabase = true;
+    }
+    
+    /** @return "create" if create is set, or null if not 
+     */
+    public final String getCreateDatabase() {
+        String createstr=null;
+        if (createDatabase)
+            createstr="create";
+        return createstr;
+    }
+    
+    /**
+     * Set this property if one wishes to shutdown the database identified by
+     * databaseName. 
+     * @param shutdown if set to the string "shutdown", this data source will 
+     *                 shutdown the database if it is running.
+     * 
+     */
+    public final void setShutdownDatabase(String shutdown) {
+        if (shutdown != null && shutdown.equalsIgnoreCase("shutdown"))
+            this.shutdownDatabase = true;
+    }
+
+    /** @return "shutdown" if shutdown is set, or null if not 
+     */
+    public final String getShutdownDatabase() {
+        String shutdownstr=null;
+        if (shutdownDatabase)
+        {
+            shutdownstr = "shutdown"; 
+        }           
+        return shutdownstr;
     }
 
     protected String connectionAttributes = null;
