@@ -103,8 +103,7 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(XADSAuthenticationTest.suite());
 
             // Test uses JDBC 3.0 datasources, and javax.naming.Reference etc.
-	    // Test hits nullPointerException with jdk16; commenting out until resolved
-            //suite.addTest(DataSourceReferenceTest.suite());
+            suite.addTest(DataSourceReferenceTest.suite());
 
             // Test uses DriverManager, Pooled and XADataSources, and
             // an inner class implements ConnectionEventListener.

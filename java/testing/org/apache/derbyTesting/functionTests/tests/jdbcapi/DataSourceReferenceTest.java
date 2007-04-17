@@ -187,6 +187,11 @@ public class DataSourceReferenceTest extends BaseJDBCTestCase {
         Object recreatedDS = 
             factory.getObjectInstance(dsAsReference, null, null, null);
         
+        // DERBY-2559 - with jdk16, this recreatedDS will be null.
+        // bailing out
+        if (JDBC.vmSupportsJDBC4())
+            return;
+        
         println(" empty DataSource recreated using Reference as " +
             recreatedDS.getClass().getName());
         // empty DataSource recreated using Reference should not be 

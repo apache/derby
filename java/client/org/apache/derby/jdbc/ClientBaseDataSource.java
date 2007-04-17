@@ -677,7 +677,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
                         new ClientMessageId(SQLState.INVALID_ATTRIBUTE_SYNTAX),
                         attributeString);
                 }
-                //if (shutdownDatabase != null )
                 
                 augmentedProperties.setProperty((v.substring(0, eqPos)).trim(), (v.substring(eqPos + 1)).trim());
             }
