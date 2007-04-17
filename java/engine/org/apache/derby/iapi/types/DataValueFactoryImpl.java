@@ -39,9 +39,16 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
+import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
+import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.RegisteredFormatIds;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+
+import org.apache.derby.iapi.services.loader.ClassInfo;
+import org.apache.derby.iapi.services.loader.InstanceGetter;
+
+import org.apache.derby.iapi.reference.SQLState;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -71,6 +78,12 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     	private Locale databaseLocale;
     	//Following Collator object will be initialized using databaseLocale.  
     	private RuleBasedCollator collatorForCharacterTypes;
+
+    	/** 
+    	 * For performance purposes, cache InstanceGetters for various formatid
+    	 * as we get them in getInstanceUsingFormatIdAndCollationType method.
+    	 */ 
+    	private InstanceGetter[] instanceGettersForFormatIds;
 
         DataValueFactoryImpl()
         {
@@ -1100,8 +1113,102 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     	if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
     		return (RuleBasedCollator)null;
     	else
-    		return collatorForCharacterTypes;
-    	
+    		return collatorForCharacterTypes;    	
+    }
+
+    /** 
+     * @see DataValueFactory#getInstanceUsingFormatIdAndCollationType(int, int)
+     */
+    public Object getInstanceUsingFormatIdAndCollationType(
+    		int formatId, int collationType) throws StandardException {
+		String className;
+		int fmtIdPositionInInstanceGetterArray;
+		InstanceGetter instanceGetter;
+
+		try {
+			fmtIdPositionInInstanceGetterArray = 
+				formatId - StoredFormatIds.MIN_TWO_BYTE_FORMAT_ID;
+			//If this is the first time this method is getting called, then
+			//instanceGettersForFormatIds will be null. If so, allocate it.
+			if (instanceGettersForFormatIds == null) {
+				instanceGettersForFormatIds = new InstanceGetter[RegisteredFormatIds.TwoByte.length];
+			}
+			//Check if we have already called this method for the passed format
+			//id. 
+			instanceGetter = 
+				instanceGettersForFormatIds[fmtIdPositionInInstanceGetterArray];
+			//If following if is true, then this method has already been called
+			//for the passed format id. We can just use the cached InstanceGetter
+			//from instanceGettersForFormatIds
+			if (instanceGetter != null) {
+				//Get the object from the InstanceGetter
+				Object returnObject = instanceGetter.getNewInstance();
+				//If we are dealing with default collation, then we have 
+				//got the right DVD already. Just return it.
+				if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+					return returnObject;
+				//If we are dealing with territory based collation and 
+				//the object is of type StringDataValue, then we need to 
+				//create a StringDataValue with territory based collation.
+				if (returnObject instanceof StringDataValue) 
+					((StringDataValue)returnObject).getValue(getCharacterCollator(collationType));
+				return returnObject;
+			}
+			//This is the first time this method has been called for the passed
+			//format id and hence it's InstanceGetter is not in 
+			//instanceGettersForFormatIds. Get the InstanceGetter's name for
+			//this format id from RegisteredFormatIds
+			className = RegisteredFormatIds.TwoByte[fmtIdPositionInInstanceGetterArray];
+		} catch (ArrayIndexOutOfBoundsException aioobe) {
+			className = null;
+			fmtIdPositionInInstanceGetterArray = 0;
+		} catch (Exception ite) {
+			throw StandardException.newException(SQLState.REGISTERED_CLASS_INSTANCE_ERROR,
+					ite, new Integer(formatId), "XX" /*ci.getClassName()*/);
+		}
+
+		if (className != null) {
+			Throwable t;
+			try {
+				Class clazz = Class.forName(className);
+				// See if the InstanceGetter class for this format id is a 
+				//FormatableInstanceGetter
+				if (FormatableInstanceGetter.class.isAssignableFrom(clazz)) {
+					FormatableInstanceGetter tfig = (FormatableInstanceGetter) clazz.newInstance();
+					tfig.setFormatId(formatId);
+					//Cache this InstanceGetter in instanceGettersForFormatIds
+					instanceGettersForFormatIds[fmtIdPositionInInstanceGetterArray] = tfig;
+					//Get the object from the InstanceGetter
+					Object returnObject = tfig.getNewInstance();
+					//If we are dealing with default collation, then we have 
+					//got the right DVD already. Just return it.
+					if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+						return returnObject;
+					//If we are dealing with territory based collation and 
+					//the object is of type StringDataValue, then we need to 
+					//create a StringDataValue with territory based collation.
+					if (returnObject instanceof StringDataValue) 
+						((StringDataValue)returnObject).getValue(getCharacterCollator(collationType));
+						return returnObject;
+				}
+				//InstanceGetter is not of the type FormatableInstanceGetter
+				instanceGettersForFormatIds[fmtIdPositionInInstanceGetterArray] = new ClassInfo(clazz);
+				return instanceGettersForFormatIds[fmtIdPositionInInstanceGetterArray].getNewInstance();
+			} catch (ClassNotFoundException cnfe) {
+				t = cnfe;
+			} catch (IllegalAccessException iae) {
+				t = iae;
+			} catch (InstantiationException ie) {
+				t = ie;
+			} catch (LinkageError le) {
+				t = le;
+			} catch (java.lang.reflect.InvocationTargetException ite) {
+				t = ite;
+			}
+			throw StandardException.newException(SQLState.REGISTERED_CLASS_LINAKGE_ERROR,
+				t, FormatIdUtil.formatIdToString(formatId), className);
+		}
+		throw StandardException.newException(SQLState.REGISTERED_CLASS_NONE, FormatIdUtil.formatIdToString(formatId));    	
     }
 
         // RESOLVE: This is here to find the LocaleFinder (i.e. the Database)

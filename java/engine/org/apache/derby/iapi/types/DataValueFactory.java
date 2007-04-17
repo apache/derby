@@ -715,4 +715,24 @@ public interface DataValueFactory
          *  Collator based on territory if the collation type is TERRITORY_BASED
          */
         RuleBasedCollator getCharacterCollator(int collationType);
+        
+        /**
+         * Return an object based on the format id and collation type. For
+         * format ids which do not correspond to character types, a format id
+         * is sufficient to get the right DVD. But for character types, Derby
+         * uses same format id for collation sensitive character types and for
+         * character types that use the default JVM collation. To get the
+         * correct DVD for character types, we need to know the collation type.
+         * Using collation type, we will determine if we need to construct
+         * collation sensitive DVD and associate the correct RuleBasedCollator
+         * with such DVDs.
+         *  
+         * @param formatId Format id for the DVD
+         * @param collationType this is meaningful only for character types.
+         * 
+         * @return Object which will be constructed using the passed
+         * parameters 
+         */
+        Object getInstanceUsingFormatIdAndCollationType(int formatId, int collationType)
+        throws StandardException;
 }
