@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -33,6 +34,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class ProcedureInTriggerTest extends BaseJDBCTestCase {
 
@@ -51,6 +53,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         Statement s = conn.createStatement();
         s.execute("create trigger after_stmt_trig_no_sql AFTER insert on t2 for each STATEMENT call proc_no_sql()");
         //insert 2 rows. check that trigger is fired - procedure should be called once
+        zeroArgCount = 0;
         s.execute("insert into t2 values (1,2), (2,4)");
         checkAndResetZeroArgCount(1);
         ResultSet rs = s.executeQuery("SELECT * FROM T2");
@@ -143,6 +146,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         s.execute("insert into t1 values (1, 'one')");
         s.execute("create trigger after_stmt_trig_reads_sql AFTER insert on t2 for each STATEMENT call proc_reads_sql(1)");
         //--- insert 2 rows. check that trigger is fired - procedure should be called once
+        selectRowsCount = 0;
         s.execute("insert into t2 values (1,2), (2,4)");
         checkAndResetSelectRowsCount(1);
         //--- check inserts are successful
@@ -237,7 +241,9 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
                 assertSQLState("38000", se);
                 se = se.getNextException();
             }
-            assertSQLState("38001", se);           
+            // Client does not get chained exceptions
+            if (usingEmbedded())
+                assertSQLState("38001", se);           
         }
         //--- check trigger is not fired.
         rs = s.executeQuery("select * from t1");
@@ -257,11 +263,18 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
        s.execute("insert into t1 values (4,'four')");
        //--- Check that insert successful and trigger fired. 
        rs = s.executeQuery("select * from t1");
+       String [][] expectedRows = {{"5","two            "},
+                                   {"3","one            "},
+                                   {"6","four           "}};
+       JDBC.assertFullResultSet(rs, expectedRows);
+              
        s.execute("drop trigger update_trig");
        s.execute("create trigger delete_trig AFTER insert on t1 for each STATEMENT call proc_modifies_sql_delete_op(3)");
        s.execute("insert into t1 values (8,'eight')");
        //-- Check that insert was successful and trigger was fired
        rs = s.executeQuery("select * from t1");
+       expectedRows = new String [][]
+                        {{"5","two            "},{"6","four           "},{"8","eight          "}};
        s.execute("drop trigger delete_trig");
        //--- Procedures with schema name
        s.execute("create trigger call_proc_in_default_schema AFTER insert on t2 for each STATEMENT call APP.proc_no_sql()");
@@ -293,6 +306,26 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
       JDBC.assertEmpty(rs);
       s.execute("drop trigger call_proc_in_new_schema");
       
+    }
+
+    private void showResultSet(ResultSet rs) throws SQLException {
+        int row = 0;
+           while (rs.next()) {
+               row++;
+               ResultSetMetaData rsmd = rs.getMetaData();
+               int nocols = rsmd.getColumnCount();
+               System.out.print("{");
+              
+               for (int i = 0; i < nocols; i++)
+               {
+                   System.out.print("\"" + rs.getString(i+1) + "\"");
+                   if (i == (nocols -1))
+                       System.out.println("}");
+                   else
+                       System.out.print(",");
+                       
+               }
+           }
     }
 
     /**
@@ -410,6 +443,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          expectedRows = new String[][] { {"5","two"},{"6","four"},{"8","eight"}};
          //--- check trigger is not created
          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='TEST_TRIG'");
+         JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
          s.execute("drop trigger create_trigger_trig");
          //--- create a trigger to test we cannot drop it from a procedure called by a trigger
          s.execute("create trigger test_trig AFTER delete on t1 for each STATEMENT insert into  t1 values(20, 'twenty')");
@@ -420,6 +454,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          JDBC.assertFullResultSet(rs,new String[][] {{"1","2"}, {"2","4"}});
          //--- check trigger is not dropped
          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='TEST_TRIG'");
+         JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
          s.execute("drop trigger drop_trigger_trig");
          //- use procedures which create/drop index on trigger table and some other table
          s.execute("create trigger create_index_trig AFTER delete on t2 for each STATEMENT call create_index_proc()");
@@ -430,6 +465,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          JDBC.assertFullResultSet(rs,new String[][] {{"1","2"}, {"2","4"}});
          // -- check index is not created
          rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=1");
+         JDBC.assertFullResultSet(rs, new String [][] {{"0"}});
          s.execute("drop trigger create_index_trig");
          //--- create an index to test we cannot drop it from a procedure called by a trigger
          s.execute("create index ix on t1(i,b)");
@@ -438,6 +474,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          // -- check delete failed
          rs = s.executeQuery("select * from t1");
          expectedRows = new String[][] { {"5","two"},{"6","four"},{"8","eight"}};
+         JDBC.assertFullResultSet(rs, expectedRows);
          // -- check index is not dropped
          rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=1");
          JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
@@ -482,8 +519,10 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
                 
         public static Test suite() { 
             TestSuite suite = new TestSuite();
-            if (!JDBC.vmSupportsJSR169())
+            if (!JDBC.vmSupportsJSR169()) {
                 suite.addTest(basesuite());
+                suite.addTest(TestConfiguration.clientServerDecorator(basesuite()));
+            }
             return suite;
         }
 
