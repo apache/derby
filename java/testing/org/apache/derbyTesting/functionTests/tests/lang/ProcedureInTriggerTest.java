@@ -275,6 +275,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
        rs = s.executeQuery("select * from t1");
        expectedRows = new String [][]
                         {{"5","two            "},{"6","four           "},{"8","eight          "}};
+       JDBC.assertFullResultSet(rs, expectedRows);
        s.execute("drop trigger delete_trig");
        //--- Procedures with schema name
        s.execute("create trigger call_proc_in_default_schema AFTER insert on t2 for each STATEMENT call APP.proc_no_sql()");
@@ -441,6 +442,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          //--- check delete failed
          rs = s.executeQuery("select * from t1");
          expectedRows = new String[][] { {"5","two"},{"6","four"},{"8","eight"}};
+         JDBC.assertFullResultSet(rs, expectedRows);
          //--- check trigger is not created
          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='TEST_TRIG'");
          JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
