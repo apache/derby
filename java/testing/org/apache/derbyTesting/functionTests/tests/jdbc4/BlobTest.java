@@ -472,7 +472,7 @@ public class BlobTest
         catch(SQLException sqle) {
             // The SQLState for the exception thrown when pos > length of Blob
             // is XJ076
-            assertSQLState("XJ076", sqle);
+            assertSQLState("XJ087", sqle);
         }
 
         //check for the case when length < 0

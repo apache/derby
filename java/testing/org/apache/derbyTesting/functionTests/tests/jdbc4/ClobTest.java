@@ -482,7 +482,7 @@ public class ClobTest
         catch(SQLException sqle) {
             // The SQLState for the exception thrown when pos > length of Clob
             // is XJ076
-            assertSQLState("XJ076", sqle);
+            assertSQLState("XJ087", sqle);
         }
 
         //check for the case when length < 0
