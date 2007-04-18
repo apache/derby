@@ -39,15 +39,10 @@ public class BlobOutputStream extends java.io.OutputStream {
         }
     }
 
-    public void write(int b) throws java.io.IOException {
-
-        byte[] newbuf = new byte[(int) offset_ + blob_.dataOffset_];
-        System.arraycopy(blob_.binaryString_, 0, newbuf, 0, (int) offset_ - 1 + blob_.dataOffset_);
-        blob_.binaryString_ = newbuf;
-        blob_.binaryString_[(int) offset_ + blob_.dataOffset_ - 1] = (byte) b;
-        blob_.binaryStream_ = new java.io.ByteArrayInputStream(blob_.binaryString_);
-        blob_.sqlLength_ = blob_.binaryString_.length - blob_.dataOffset_;
-        offset_++;
+    public void write(int b) throws java.io.IOException 
+    {
+        byte ba[] = {(byte )b};
+        writeX(ba, 0, 1);
     }
 
     public void write(byte b[], int off, int len) throws java.io.IOException {
@@ -59,14 +54,21 @@ public class BlobOutputStream extends java.io.OutputStream {
         } else if (len == 0) {
             return;
         }
+        writeX(b, off, len);
+    }
+
+    private void writeX(byte b[], int off, int len) 
+    {
         byte[] newbuf = new byte[(int) offset_ - 1 + len + blob_.dataOffset_];
-        System.arraycopy(blob_.binaryString_, 0, newbuf, 0, (int) offset_ - 1 + blob_.dataOffset_);
+        System.arraycopy(blob_.binaryString_, 0, 
+                         newbuf, 0, (int )offset_ - 1 + blob_.dataOffset_);
         blob_.binaryString_ = newbuf;
         for (int i = 0; i < len; i++, offset_++) {
-            blob_.binaryString_[(int) offset_ + blob_.dataOffset_ - 1] = b[off + i];
+            blob_.binaryString_[(int )offset_ + blob_.dataOffset_ - 1] 
+                = b[off + i];
         }
-        blob_.binaryStream_ = new java.io.ByteArrayInputStream(blob_.binaryString_);
-        blob_.sqlLength_ = blob_.binaryString_.length - blob_.dataOffset_;
+        blob_.binaryStream_ 
+            = new java.io.ByteArrayInputStream(blob_.binaryString_);
+        blob_.setSqlLength(blob_.binaryString_.length - blob_.dataOffset_);
     }
 }
-

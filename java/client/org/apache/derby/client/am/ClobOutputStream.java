@@ -35,7 +35,7 @@ public class ClobOutputStream extends java.io.OutputStream {
             in the case of a empty Clob hence check from
             offset_-1
          */
-        if ((offset_-1) > clob_.sqlLength_) {
+        if ((offset_-1) > clob_.sqlLength()) {
             throw new IndexOutOfBoundsException();
         }
     }
@@ -43,15 +43,7 @@ public class ClobOutputStream extends java.io.OutputStream {
     public void write(int b) throws java.io.IOException {
         byte[] newByte = new byte[1];
         newByte[0] = (byte)b;
-        clob_.string_ = clob_.string_.substring(0, (int) offset_ - 1);
-        // Since this is an OutputStream returned by Clob.setAsciiStream 
-        // use Ascii encoding when creating the String from bytes
-        clob_.string_ = clob_.string_.concat(new String(newByte, "US-ASCII"));
-        clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
-        clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
-        clob_.characterStream_ = new java.io.StringReader(clob_.string_);
-        clob_.sqlLength_ = clob_.string_.length();
-        offset_++;
+        writeBytes(newByte);
     }
 
 
@@ -67,16 +59,23 @@ public class ClobOutputStream extends java.io.OutputStream {
 
         byte[] newByte = new byte[len];
         System.arraycopy(b, off, newByte, 0, len);
+        writeBytes(newByte);
+    }
+
+
+    private void writeBytes(byte b[])  throws java.io.IOException
+    {
         // Since this is an OutputStream returned by Clob.setAsciiStream 
         // use Ascii encoding when creating the String from bytes
-        String str = new String(newByte, "US-ASCII");
+        String str = new String(b, "US-ASCII");
         clob_.string_ = clob_.string_.substring(0, (int) offset_ - 1);
         clob_.string_ = clob_.string_.concat(str);
         clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);
-        clob_.unicodeStream_ = new java.io.StringBufferInputStream(clob_.string_);
+        clob_.unicodeStream_ 
+            = new java.io.StringBufferInputStream(clob_.string_);
         clob_.characterStream_ = new java.io.StringReader(clob_.string_);
-        clob_.sqlLength_ = clob_.string_.length();
-        offset_ += len;
+        clob_.setSqlLength(clob_.string_.length());
+        offset_ += b.length;
     }
 }
 

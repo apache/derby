@@ -47,8 +47,8 @@ public abstract class Lob implements UnitOfWorkListener {
     //-----------------------------state------------------------------------------
     protected int dataType_ = 0;      // data type(s) the LOB instance currently contains
 
-    protected long sqlLength_;      // length of the LOB value, as defined by the server
-    protected boolean lengthObtained_;
+    private long sqlLength_;// length of the LOB value, as defined by the server
+    private boolean lengthObtained_;
     
     final private boolean willBeLayerBStreamed_;
 
@@ -71,16 +71,40 @@ public abstract class Lob implements UnitOfWorkListener {
 
     // ---------------------------jdbc 2------------------------------------------
 
-    // should only be called by a synchronized method.
+    /**
+     * Return the length of the Lob value represented by this Lob object.
+     * If length is not already known, Lob will first be materialized.
+     * NOTE: The caller needs to deal with synchronization.
+     *
+     * @throws SqlException on execution errors while materializing the stream, 
+     *         or if Layer B streaming is used and length not already obtained.
+     * @return length of Lob value
+     */
+    long sqlLength() throws SqlException 
+    {
+        if (lengthObtained_) return sqlLength_;
+        
+        if (willBeLayerBStreamed()) {
+            throw new SqlException(agent_.logWriter_,
+                                   LOB_OBJECT_LENGTH_UNKNOWN_YET);
+        }
 
-
-    // should only be called by a synchronized method.
-    public long sqlLength() throws SqlException {
-        checkForClosedConnection();
-
+        materializeStream();  // Will set sqlLength_
         return sqlLength_;
     }
 
+    /**
+     * Update the registered length of the Lob value.  To be called by
+     * methods that make changes to the length of the Lob.
+     * NOTE: The caller needs to deal with synchronization.
+     *
+     * @param the new length of the Lob value
+     */
+    void setSqlLength(long length)
+    {
+        sqlLength_ = length;
+        lengthObtained_ = true;
+    }
 
     //-----------------------event callback methods-------------------------------
 
@@ -119,6 +143,17 @@ public abstract class Lob implements UnitOfWorkListener {
     void completeLocalCommit() {
         ;
     }
+
+    
+    /**
+     * Method to be implemented by subclasses, so that
+     * #materializedStream(InputStream, String) can be called with subclass
+     * specific parameters and the result assigned to the right stream.
+     *
+     * @throws SqlException
+     */
+    protected abstract void materializeStream() throws SqlException;
+
 
     /**
      * Materialize the given stream into memory and update the internal

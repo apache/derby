@@ -44,9 +44,6 @@ public class Clob extends Lob implements java.sql.Clob {
     // Therefore, we always convert a String to UTF-8 before we flow it for input
     protected byte[] utf8String_;
 
-    // the length of the clob returned by the LENGTH function.
-    protected long lengthInBytes_ = 0;
-
     private PreparedStatement internalLengthStmt_ = null;
 
     protected String encoding_ = "UNICODE";
@@ -62,8 +59,7 @@ public class Clob extends Lob implements java.sql.Clob {
              false);
         
         string_ = string;
-        sqlLength_ = string_.length();
-        lengthObtained_ = true;
+        setSqlLength(string_.length());
         dataType_ |= STRING;
     }
 
@@ -91,8 +87,7 @@ public class Clob extends Lob implements java.sql.Clob {
                     dataOffset,
                     unconvertedBytes.length - dataOffset,
                     charsetName);
-            sqlLength_ = string_.length();
-            lengthObtained_ = true;
+            setSqlLength(string_.length());
             dataType_ |= STRING;
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_, 
@@ -112,8 +107,7 @@ public class Clob extends Lob implements java.sql.Clob {
         this(agent,
              false);
 
-        sqlLength_ = length;
-        lengthObtained_ = true;
+        setSqlLength(length);
 
         if (encoding.equals("US-ASCII")) {
             asciiStream_ = inputStream;
@@ -131,7 +125,7 @@ public class Clob extends Lob implements java.sql.Clob {
                     "UnicodeBigUnmarked", "InputStreamReader", e);
             }
             dataType_ |= CHARACTER_STREAM;
-            sqlLength_ = length / 2;
+            setSqlLength(length / 2);
         }
     }
 
@@ -154,8 +148,6 @@ public class Clob extends Lob implements java.sql.Clob {
         this(agent,
              isLayerBStreamingPossible( agent ));
         
-        lengthObtained_ = false;
-        
         if (encoding.equals("US-ASCII")) {
             asciiStream_ = inputStream;
             dataType_ |= ASCII_STREAM;
@@ -173,8 +165,7 @@ public class Clob extends Lob implements java.sql.Clob {
         this(agent,
              false);
         
-        sqlLength_ = length;
-        lengthObtained_ = true;
+        setSqlLength(length);
         characterStream_ = reader;
         dataType_ |= CHARACTER_STREAM;
     }
@@ -194,7 +185,6 @@ public class Clob extends Lob implements java.sql.Clob {
         this(agent,
              isLayerBStreamingPossible( agent ) );
         
-        lengthObtained_ = false;
         // Wrap reader in stream to share code.
         unicodeStream_ = EncodedInputStream.createUTF8Stream(reader);
         // Override type to share logic with the other stream types.
@@ -229,21 +219,12 @@ public class Clob extends Lob implements java.sql.Clob {
                     agent_.logWriter_.traceEntry(this, "length");
                 }
 
-                if (lengthObtained_) {
-                    return sqlLength_;
-                }
-
-                if( willBeLayerBStreamed() )
-                    throw new SqlException(agent_.logWriter_,
-                                           LOB_OBJECT_LENGTH_UNKNOWN_YET);
-                
-                materializeStream();
-                lengthInBytes_ = super.sqlLength();
+                long length = super.sqlLength();
 
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceExit(this, "length", sqlLength_);
+                    agent_.logWriter_.traceExit(this, "length", length);
                 }
-                return sqlLength_;
+                return length;
             }
         }
         catch ( SqlException se )
@@ -301,7 +282,7 @@ public class Clob extends Lob implements java.sql.Clob {
                         new Integer(length));
                 }
 
-                if (pos > this.length() + 1) {
+                if (pos > sqlLength() + 1) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), 
                         new Long(pos));                    
@@ -320,19 +301,13 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    private String getSubStringX(long pos, int length) throws SqlException {
-        try
-        {
-            checkForClosedConnection();
-            // actual length is the lesser of the length requested
-            // and the number of characters available from pos to the end
-            long actualLength = Math.min(this.length() - pos + 1, (long) length);
-            return string_.substring((int) pos - 1, (int) (pos - 1 + actualLength));
-        }
-        catch ( SQLException se )
-        {
-            throw new SqlException(se);
-        }
+    private String getSubStringX(long pos, int length) throws SqlException 
+    {
+        checkForClosedConnection();
+        // actual length is the lesser of the length requested
+        // and the number of characters available from pos to the end
+        long actualLength = Math.min(this.sqlLength() - pos + 1, (long) length);
+        return string_.substring((int) pos - 1, (int) (pos - 1 + actualLength));
     }
 
     public java.io.Reader getCharacterStream() throws SQLException {
@@ -514,11 +489,13 @@ public class Clob extends Lob implements java.sql.Clob {
         // if the searchstr is longer than the source, no match
         int index;
         try {
-            if (searchstr.length() > length()) {
+            if (searchstr.length() > sqlLength()) {
                 return -1;
             }
 
-            index = string_.indexOf(searchstr.getSubString(1L, (int) searchstr.length()), (int) start - 1);
+            index = string_.indexOf(searchstr.getSubString(1L, 
+                                                      (int) searchstr.length()),
+                                    (int) start - 1);
         } catch (java.sql.SQLException e) {
             throw new SqlException(e);
         }
@@ -586,7 +563,7 @@ public class Clob extends Lob implements java.sql.Clob {
                 new ClientMessageId(SQLState.BLOB_BAD_POSITION), 
                 new Long(pos));
         }
-        if ( pos - 1 > sqlLength_) {
+        if ( pos - 1 > sqlLength()) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE),
                 new Long(pos));
@@ -614,7 +591,7 @@ public class Clob extends Lob implements java.sql.Clob {
         asciiStream_ = new java.io.StringBufferInputStream(string_);
         unicodeStream_ = new java.io.StringBufferInputStream(string_);
         characterStream_ = new java.io.StringReader(string_);
-        sqlLength_ = string_.length();
+        setSqlLength(string_.length());
         return length;
     }
 
@@ -688,13 +665,13 @@ public class Clob extends Lob implements java.sql.Clob {
                         new Long(len));
                 }
                 
-                if ( len > this.length()) {
+                if ( len > sqlLength()) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.BLOB_LENGTH_TOO_LONG),
                         new Long(len));
                 }
                 
-                if (len == this.length()) {
+                if (len == sqlLength()) {
                     return;
                 }
                 String newstr = string_.substring(0, (int) len);
@@ -702,7 +679,7 @@ public class Clob extends Lob implements java.sql.Clob {
                 asciiStream_ = new java.io.StringBufferInputStream(string_);
                 unicodeStream_ = new java.io.StringBufferInputStream(string_);
                 characterStream_ = new java.io.StringReader(string_);
-                sqlLength_ = string_.length();
+                setSqlLength(string_.length());
             }
         }
         catch ( SqlException se )
@@ -759,8 +736,6 @@ public class Clob extends Lob implements java.sql.Clob {
                 throw new SqlException(null, new ClientMessageId(SQLState.IO_ERROR_UPON_LOB_FREE)).getSQLException();
             }
         }
-        
-        lengthInBytes_ = 0;
         
         if (internalLengthStmt_ != null) {
             try {
@@ -903,17 +878,7 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    // this method is primarily for mixed clob length calculations.
-    // it was introduced to prevent recursion in the actual char length calculation
-    public long getByteLength() throws SQLException {
-            if (lengthObtained_ == true) {
-                return lengthInBytes_;
-            }
 
-            length();
-            return lengthInBytes_;
-    }
-    
     /*
      * Checks is isValid is true. If it is not true throws 
      * a SQLException stating that a method has been called on
@@ -929,8 +894,10 @@ public class Clob extends Lob implements java.sql.Clob {
 
     /**
      * Materialize the stream used for input to the database.
+     *
+     * @throws SqlException
      */
-    private void materializeStream()
+    protected void materializeStream()
         throws SqlException {
         unicodeStream_ = super.materializeStream(isAsciiStream() ? 
                                                         asciiStream_ : 
