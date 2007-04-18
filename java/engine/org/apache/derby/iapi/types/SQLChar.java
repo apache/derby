@@ -2784,4 +2784,18 @@ readingLoop:
 		this.localeFinder = localeFinder;
 	}
 
+    /**
+     * Gets a trace representation for debugging.
+     *
+     * @return a trace representation of this SQL Type.
+     */
+    public String getTraceString() throws StandardException {
+        // Check if the value is SQL NULL.
+        if (isNull()) {
+            return "NULL";
+        }
+
+        return (toString());
+    }
+
 }

@@ -229,10 +229,10 @@ public class SQLClob
 
         // Check if we have a stream.
         if (getStream() != null) {
-            return ("CLOB(" + getStream().toString() + ")");
+            return (getTypeName() + "(" + getStream().toString() + ")");
         }
 
-        return ("CLOB(" + getLength() + ")");
+        return (getTypeName() + "(" + getLength() + ")");
     }
     
     /**

@@ -1124,4 +1124,23 @@ abstract class SQLBinary
 
                   ps.setBytes(position, getBytes());
      }
+
+    /**
+     * Gets a trace representation for debugging.
+     *
+     * @return a trace representation of this SQL DataType.
+     */
+    public final String getTraceString() throws StandardException {
+        // Check if the value is SQL NULL.
+        if (isNull()) {
+            return "NULL";
+        }
+
+        // Check if we have a stream.
+        if (getStream() != null) {
+            return (getTypeName() + "(" + getStream().toString() + ")");
+        }
+
+        return (getTypeName() + ":Length=" + getLength());
+    }
 }
