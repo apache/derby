@@ -1149,10 +1149,9 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 					return returnObject;
 				//If we are dealing with territory based collation and 
 				//the object is of type StringDataValue, then we need to 
-				//create a StringDataValue with territory based collation.
+				//return a StringDataValue with territory based collation.
 				if (returnObject instanceof StringDataValue) 
-					((StringDataValue)returnObject).getValue(getCharacterCollator(collationType));
-				return returnObject;
+					return ((StringDataValue)returnObject).getValue(getCharacterCollator(collationType));
 			}
 			//This is the first time this method has been called for the passed
 			//format id and hence it's InstanceGetter is not in 
@@ -1186,10 +1185,9 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 						return returnObject;
 					//If we are dealing with territory based collation and 
 					//the object is of type StringDataValue, then we need to 
-					//create a StringDataValue with territory based collation.
+					//return a StringDataValue with territory based collation.
 					if (returnObject instanceof StringDataValue) 
-						((StringDataValue)returnObject).getValue(getCharacterCollator(collationType));
-						return returnObject;
+						return ((StringDataValue)returnObject).getValue(getCharacterCollator(collationType));
 				}
 				//InstanceGetter is not of the type FormatableInstanceGetter
 				instanceGettersForFormatIds[fmtIdPositionInInstanceGetterArray] = new ClassInfo(clazz);
