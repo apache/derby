@@ -164,6 +164,8 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         assertNotSetAndGet(dbName, "shutdownDatabase", "false");
         assertNotSetAndGet(dbName, "createDatabase", "false");
         
+        assertReset(dbName);
+        
         // check that shutting down using Attributes works
         assertShutdownUsingConnAttrsOK(dbName);
         // re-vive db
@@ -230,6 +232,48 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         DataSource ds = JDBCDataSource.getDataSourceLogical(dbName);
         JDBCDataSource.setBeanProperty(ds, propertyString, setValue);
         assertNull(getBeanProperty(ds, propertyString));
+    }
+    
+    protected void assertReset(String dbName) 
+    throws SQLException {
+        DataSource ds = JDBCDataSource.getDataSourceLogical(dbName);
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "");
+        assertNull(getBeanProperty(ds, "createDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+        assertEquals("create", getBeanProperty(ds, "createDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "boo");
+        assertNull(getBeanProperty(ds, "createDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+        assertEquals("create", getBeanProperty(ds, "createDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
+        assertNull(getBeanProperty(ds, "createDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+        assertEquals("create", getBeanProperty(ds, "createDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "");
+        assertNull(getBeanProperty(ds, "createDatabase"));
+        try { 
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "");
+        assertNull(getBeanProperty(ds, "shutdownDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        assertEquals("shutdown", getBeanProperty(ds, "shutdownDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "boo");
+        assertNull(getBeanProperty(ds, "shutdownDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "false");
+        assertNull(getBeanProperty(ds, "shutdownDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        assertEquals("shutdown", getBeanProperty(ds, "shutdownDatabase"));
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "");
+        assertNull(getBeanProperty(ds, "shutdownDatabase"));
+        try { 
+            JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     public static Object getBeanProperty(Object ds, String propertyString)

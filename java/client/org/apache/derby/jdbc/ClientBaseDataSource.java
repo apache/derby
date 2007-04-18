@@ -877,6 +877,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final void setCreateDatabase(String create) {
         if (create != null && create.equalsIgnoreCase("create"))
             this.createDatabase = true;
+        else // reset
+            this.createDatabase = false;
     }
     
     /** @return "create" if create is set, or null if not 
@@ -898,6 +900,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final void setShutdownDatabase(String shutdown) {
         if (shutdown != null && shutdown.equalsIgnoreCase("shutdown"))
             this.shutdownDatabase = true;
+        else // reset
+            this.shutdownDatabase = false;
     }
 
     /** @return "shutdown" if shutdown is set, or null if not 
