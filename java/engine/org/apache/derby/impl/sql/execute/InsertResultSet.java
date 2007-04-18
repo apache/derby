@@ -538,7 +538,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		endTime = getCurrentTimeMillis();
 	}
 
-	/*
+	/**
 	 * Verify that the auto-generated columns list (by position) has valid
 	 * column positions for the table.
 	 */
@@ -556,7 +556,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		}
 	}
 
-	/*
+	/**
 	 * If user didn't provide columns list for auto-generated columns, then only include
 	 * columns with auto-generated values in the resultset. Those columns would be ones
 	 * with default value defined.
@@ -594,7 +594,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		return returnGeneratedColumnPositionsArray;
 	}
 
-	/*
+	/**
 	 * Remove duplicate columns from the array. Then use this array to generate a sub-set
 	 * of insert resultset to be returned for JDBC3.0 getGeneratedKeys() call.
 	 */
@@ -1146,7 +1146,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                 } 
  }
 
-	/*
+	/**
 	 * Take the input row and return a new compact ExecRow
 	 * using the column positions provided in columnIndexes.
 	 * Copies references, no cloning.
@@ -1336,7 +1336,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		return newHeapConglom;
 	}
 
-	/*
+	/**
 	** Bulk Referential Integrity Checker
 	*/
 	private void bulkValidateForeignKeys(TransactionController tc, ContextManager cm)
