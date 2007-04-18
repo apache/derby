@@ -54,20 +54,20 @@ public class OpenConglomerateScratchSpace
      * create new rows for export from this class.  This variable is for
      * use by get_row_for_export().
      **/
-    private FormatableBitSet     row_for_export_column_list;
-    private InstanceGetter[] row_for_export_class_template;
+    private FormatableBitSet        row_for_export_column_list;
+    private DataValueDescriptor[]   row_for_export_template;
 
     /**
      * A Scratch template used for searching and qualifying rows in the 
-     * conglomerate.  This is a full template, independent of the FormatableBitSet
-     * used for access.
+     * conglomerate.  This is a full template, independent of the 
+     * FormatableBitSet used for access.
      **/
     private DataValueDescriptor[] scratch_template;
 
     /**
      * A Scratch row used for qualifying rows in the 
-     * conglomerate.  This is a row which matches the FormatableBitSet of rows being
-     * returned.
+     * conglomerate.  This is a row which matches the FormatableBitSet of rows
+     * being returned.
      **/
     private DataValueDescriptor[] scratch_row;
 
@@ -113,16 +113,14 @@ public class OpenConglomerateScratchSpace
     {
         // Create a partial row class template template from the initial scan
         // parameters.
-        if (row_for_export_class_template == null)
+        if (row_for_export_template == null)
         {
-            row_for_export_class_template = 
-                RowUtil.newClassInfoTemplate(
-                    row_for_export_column_list, format_ids);
+            row_for_export_template = 
+                RowUtil.newTemplate(row_for_export_column_list, format_ids);
         }
 
         // Allocate a new row based on the class template.
-        return(
-            RowUtil.newRowFromClassInfoTemplate(row_for_export_class_template));
+        return(RowUtil.newRowFromTemplate(row_for_export_template));
     }
 
     /**
@@ -170,7 +168,8 @@ public class OpenConglomerateScratchSpace
         // Create a partial row class template from the initial scan parameters.
         if (scratch_template == null)
         {
-            scratch_template = TemplateRow.newRow((FormatableBitSet) null, format_ids);
+            scratch_template = 
+                TemplateRow.newRow((FormatableBitSet) null, format_ids);
         }
 
         return(scratch_template);
@@ -184,7 +183,7 @@ public class OpenConglomerateScratchSpace
     public void init(
     FormatableBitSet export_column_list)
     {
-        row_for_export_class_template = null;
+        row_for_export_template       = null;
         row_for_export_column_list    = null;
     }
 }

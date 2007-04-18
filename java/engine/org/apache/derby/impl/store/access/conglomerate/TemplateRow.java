@@ -162,23 +162,10 @@ public final class TemplateRow
         DataValueDescriptor[] columns = 
             new DataValueDescriptor[template.length];
 
-        try
+        for (int i = template.length; i-- > 0 ;)
         {
-            for (int i = template.length; i-- > 0 ;)
-            {
-                // get empty instance of object identified by the format id.
-                columns[i] = 
-                    (DataValueDescriptor) template[i].getClass().newInstance();
-            }
-        }
-        catch (Throwable t)
-        {
-            // RESOLVE - Dan is investigating ways to change the monitor
-            // so that it provides the functionality required here, when
-            // that happens I will just all the monitor and let any 
-            // StandardError that come back just go on up.
-            throw(StandardException.newException(
-                    SQLState.CONGLOMERATE_TEMPLATE_CREATE_ERROR));
+            // get empty instance of object identified by the format id.
+            columns[i] = template[i].getNewNull();
         }
 
 		return columns;
@@ -329,7 +316,7 @@ public final class TemplateRow
      **/
 	static public boolean checkPartialColumnTypes(
     int[]                   format_ids, 
-    FormatableBitSet                 validColumns,
+    FormatableBitSet        validColumns,
     int[]                   fieldStates,
     DataValueDescriptor[]   row)
 		throws StandardException

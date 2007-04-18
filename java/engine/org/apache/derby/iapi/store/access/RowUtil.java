@@ -29,7 +29,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.loader.InstanceGetter;
 
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
 
@@ -343,10 +342,10 @@ public class RowUtil
      */
 
     /**
-     * Generate a row of InstanceGetter objects to be used to generate  "empty" rows.
+     * Generate a template row of DataValueDescriptor's
      * <p>
-     * Generate an array of InstanceGetter objects which will be used to make
-     * repeated calls to newRowFromClassInfoTemplate(), to repeatedly and
+     * Generate an array of DataValueDescriptor objects which will be used to 
+     * make calls to newRowFromClassInfoTemplate(), to repeatedly and
      * efficiently generate new rows.  This is important for certain 
      * applications like the sorter and fetchSet which generate large numbers
      * of "new" empty rows.
@@ -354,17 +353,18 @@ public class RowUtil
      *
 	 * @return The new row.
      *
-     * @param format_ids an array of format id's, one per column in row.
+     * @param column_list A bit set indicating which columns to include in row.
+     * @param format_ids  an array of format id's, one per column in row.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public static InstanceGetter[] newClassInfoTemplate(
+    public static DataValueDescriptor[] newTemplate(
     FormatableBitSet column_list,
-    int[]    format_ids) 
+    int[]            format_ids) 
         throws StandardException
     {
-        int         num_cols = format_ids.length;
-        InstanceGetter[] ret_row  = new InstanceGetter[num_cols];
+        int                   num_cols = format_ids.length;
+        DataValueDescriptor[] ret_row  = new DataValueDescriptor[num_cols];
 
 		int column_listSize = 
             (column_list == null) ? 0 : column_list.getLength();
@@ -384,7 +384,8 @@ public class RowUtil
 
                 // get empty instance of object identified by the format id.
 
-                ret_row[i] = Monitor.classFromIdentifier(format_ids[i]);
+                ret_row[i] = (DataValueDescriptor) 
+                    Monitor.newInstanceFromIdentifier(format_ids[i]);
             }
         }
 
@@ -400,57 +401,38 @@ public class RowUtil
     }
 
     /**
-     * Generate an "empty" row from an array of classInfo objects.
+     * Generate an "empty" row from an array of DataValueDescriptor objects.
      * <p>
-     * Generate an array of new'd objects by using the getNewInstance()
-     * method on each of the InstanceGetter objects.  It is more
-     * efficient to allocate new objects based on this "cache'd"
-     * InstanceGetter object than to call the Monitor to generate a new class
-     * from a format id.
+     * Generate an array of new'd objects by using the getNewNull()
+     * method on each of the DataValueDescriptor objects.  
      * <p>
      *
 	 * @return The new row.
      *
-     * @param classinfo_template   An array of InstanceGetter objects each of 
-     *                             which can be used to create a new instance 
-     *                             of the appropriate type to build a new empty
-     *                             template row.
+     * @param  template            An array of DataValueDescriptor objects 
+     *                             each of which can be used to create a new 
+     *                             instance of the appropriate type to build a 
+     *                             new empty template row.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public static DataValueDescriptor[] newRowFromClassInfoTemplate(
-    InstanceGetter[]    classinfo_template) 
+    public static DataValueDescriptor[] newRowFromTemplate(
+    DataValueDescriptor[]    template) 
         throws StandardException
     {
 
         DataValueDescriptor[] columns = 
-            new DataValueDescriptor[classinfo_template.length];
+            new DataValueDescriptor[template.length];
 
-        try
+        
+        for (int column_index = template.length; column_index-- > 0;)
         {
-            for (int column_index = classinfo_template.length; 
-                 column_index-- > 0;)
+            if (template[column_index] != null)
             {
-                if (classinfo_template[column_index] != null)
-                {
-                    // get empty instance of DataValueDescriptor identified by 
-                    // the format id.
-                    columns[column_index] = (DataValueDescriptor) 
-                        classinfo_template[column_index].getNewInstance();
-                }
+                // get empty instance of DataValueDescriptor identified by 
+                // the format id.
+                columns[column_index] = template[column_index].getNewNull();
             }
-        }
-        catch (InstantiationException ie)
-        {
-            newRowFromClassInfoTemplateError();
-        }
-        catch (IllegalAccessException iae)
-        {
-            newRowFromClassInfoTemplateError();
-        }
-        catch (InvocationTargetException ite)
-        {
-            newRowFromClassInfoTemplateError();
         }
 
 		return columns;
