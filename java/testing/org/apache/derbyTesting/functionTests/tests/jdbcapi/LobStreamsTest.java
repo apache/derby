@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -442,9 +443,27 @@ public class LobStreamsTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
                 
-        return TestConfiguration.clientServerSuite(LobStreamsTest.class);
+        return TestConfiguration.defaultSuite (LobStreamsTest.class);
     }
 
+    //method to ensure that buffer is filled if there is any data in stream
+    private int readBytesFromStream (byte [] b, InputStream is) 
+                                                          throws IOException {
+        int read = 0;
+        while (read < b.length) {
+            int ret = is.read (b, read, b.length - read);
+            if (ret < 0) {
+                if (read == 0) {
+                    return ret;
+                }
+                else {
+                    break;
+                }
+            }
+            read += ret;
+        }
+        return read;
+    }
 
     private boolean compareLob2File(
             InputStream fStream,
@@ -456,8 +475,8 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         String fString, lString;
 
         do {
-            fLength = fStream.read(fByte, 0, 1024);
-            lLength = lStream.read(lByte, 0, 1024);
+            fLength = readBytesFromStream (fByte, fStream);
+            lLength = readBytesFromStream (lByte, lStream);
             if (!java.util.Arrays.equals(fByte, lByte))
                 return false;
         } while (fLength > 0 && lLength > 0);

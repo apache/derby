@@ -66,6 +66,32 @@ public final class UTF8Reader extends Reader
 			this.utfLen = readUnsignedShort();
 		}
 	}
+        
+    /**
+     * Constructs a UTF8Reader using a stream. This consturctor accepts 
+     * the stream size as paramater and doesn't attempts to read the lenght 
+     * from the stream.
+     * @param in InputStream
+     * @param maxFieldSize 
+     * @param streamSize size of the stream
+     * @param parent connectionChild this stream is associated with
+     * @param synchronization object to synchronize on
+     * @throws IOException
+     */
+        public UTF8Reader(
+                InputStream in,
+                long maxFieldSize,
+                long streamSize,
+                ConnectionChild      parent,                
+                Object synchronization)
+                throws IOException {
+            super(synchronization);
+            
+            this.in     = in;
+            this.maxFieldSize = maxFieldSize;
+            this.parent = parent;
+            this.utfLen = streamSize;
+        }
 
 	/*
 	** Reader implemention.

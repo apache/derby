@@ -108,6 +108,9 @@ public class _Suite extends BaseTestCase  {
             // Test uses DriverManager, Pooled and XADataSources, and
             // an inner class implements ConnectionEventListener.
             suite.addTest(DataSourceTest.suite());
+
+            //suite to test updateable reader for clob in embedded driver
+            suite.addTest (ClobUpdateableReaderTest.suite());
         }
 		
         return suite;

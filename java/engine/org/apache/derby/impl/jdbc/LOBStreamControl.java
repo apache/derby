@@ -61,9 +61,11 @@ class LOBStreamControl {
     //randomly selected value
     private final int MAX_BUF_SIZE = 4096;
     private String dbName;
+    private long updateCount;
 
     public LOBStreamControl (String dbName) {
         this.dbName = dbName;
+        updateCount = 0;
     }
 
     private void init(byte [] b, long len) throws IOException, SQLException {
@@ -170,6 +172,7 @@ class LOBStreamControl {
      */
     synchronized long write(int b, long pos) throws IOException, SQLException {
         isValidPostion(pos);
+        updateCount++;
         if (isBytes) {
             if (pos + 1 < MAX_BUF_SIZE) {
                 byte [] bytes = {(byte) b};
@@ -205,6 +208,7 @@ class LOBStreamControl {
                                   SQLState.BLOB_INVALID_OFFSET)))
                     throw new ArrayIndexOutOfBoundsException (e.getMessage());
         }
+        updateCount++;
         if (isBytes) {
             if (pos + b.length < MAX_BUF_SIZE)
                 return updateData(b, off, len, pos);
@@ -368,5 +372,80 @@ class LOBStreamControl {
                     throw (RuntimeException) e;
             }
         }
+    }
+    
+    /**
+     * Replaces bytes in the middle of the lob.The new byte array may not be 
+     * be of same length as the original bytes, so it may result in resizing 
+     * the total length.
+     * @param buf byte array which will be written inplace of old block
+     * @param stPos starting pisition of old block
+     * @param endPos end position of old block
+     * @return newposition new write position 
+     * @throws IOExcepton, SQLException
+     */
+    synchronized long replaceBytes (byte [] buf, long stPos, long endPos) 
+                                            throws IOException, SQLException {
+        long length = getLength();
+        long finalLength = length - endPos + stPos + buf.length;
+        if (isBytes) {
+            if (finalLength > MAX_BUF_SIZE) {
+                init (dataBytes, stPos);
+                write (buf, 0, buf.length, getLength());
+                if (endPos < length)
+                    write (dataBytes, (int) endPos, 
+                            (int) (length - endPos), getLength());
+            }
+            else {
+                byte [] tmpByte = new byte [(int) finalLength];
+                System.arraycopy (dataBytes, 0, tmpByte, 0, (int) stPos);
+                System.arraycopy (buf, 0, tmpByte, (int) stPos, (int) buf.length);
+                if (endPos < length)
+                    System.arraycopy (dataBytes, (int) endPos, tmpByte, 
+                            (int) (stPos + buf.length), (int) (length - endPos));
+                dataBytes = tmpByte;            
+            }
+        }
+        else {
+            //save over file handle and 
+            //create new file with 0 size
+            
+            byte tmp [] = new byte [0];
+            StorageRandomAccessFile oldFile = tmpFile;
+            init (tmp, 0);
+            byte [] tmpByte = new byte [1024];
+            long sz = stPos;
+            oldFile.seek(0);
+            while (sz != 0) {
+                int readLen = (int) Math.min (1024, sz);                
+                int actualLength = oldFile.read (tmpByte, 0, readLen);
+                if (actualLength == -1)
+                    break;
+                tmpFile.write (tmpByte, 0, actualLength);
+                sz -= actualLength;
+            }
+            tmpFile.write (buf);
+            oldFile.seek (endPos);
+            int rdLen;
+            if (endPos < length) {
+                do {
+                    rdLen = oldFile.read (tmpByte, 0, 1024);
+                    if (rdLen == -1)
+                        break;
+                    tmpFile.write (tmpByte, 0, rdLen);
+                }while (true);
+            }            
+        }
+        updateCount++;
+        return stPos + buf.length;
+    }
+
+    /**
+     * Returns the running secquence number to check if the lob is updated since
+     * last access.
+     * @return newcount
+     */
+    long getUpdateCount() {
+        return updateCount;
     }
 }

@@ -36,12 +36,13 @@ public class LOBInputStream extends InputStream {
     private boolean closed;
     private LOBStreamControl control;
     private long pos;
+    private long updateCount;
 
     LOBInputStream(LOBStreamControl control, long position) {
         closed = false;
         this.control = control;
         pos = position;
-
+        updateCount = control.getUpdateCount ();
     }
 
     /**
@@ -173,5 +174,29 @@ public class LOBInputStream extends InputStream {
                               SQLState.BLOB_INVALID_OFFSET)))
                 throw new ArrayIndexOutOfBoundsException (e.getMessage());
             throw new IOException(e.getMessage());
+    }
+    
+    /**
+     * Checks if underlying StreamControl has been updated.
+     * @return if stream is modified since created
+     */
+    boolean isObsolete () {
+        return updateCount != control.getUpdateCount();
+    }
+    
+    /**
+     * Reinitializes the stream and sets the current pointer to zero.
+     */
+    void reInitialize () {
+        updateCount = control.getUpdateCount();
+        pos = 0;
+    }
+    
+    /**
+     * Returns size of stream in bytes.
+     * @return size of stream.
+     */
+    long length () throws IOException {
+        return control.getLength();
     }
 }

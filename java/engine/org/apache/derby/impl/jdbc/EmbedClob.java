@@ -72,9 +72,9 @@ import java.sql.Clob;
 final class EmbedClob extends ConnectionChild implements Clob
 {
     // clob is either a string or stream
-    private boolean         isString;
+    private boolean         materialized;
     private InputStream     myStream;
-    private String          myString;
+    private ClobStreamControl control;
     
     //This boolean variable indicates whether the Clob object has
     //been invalidated by calling free() on it
@@ -88,18 +88,29 @@ final class EmbedClob extends ConnectionChild implements Clob
      *        Clob.
      *
      * @param con The Connection object associated with this EmbedClob object.
+     * @throws SQLException
      *
      */
     
-    EmbedClob(String clobString,EmbedConnection con) {
+    EmbedClob(String clobString,EmbedConnection con) throws SQLException {
         super(con);
-        myString = clobString;
-        isString = true;
+        materialized = true;
+        control = new ClobStreamControl (con.getDBName(), this);
+        try {
+            control.insertString (clobString, 0);
+        }
+       
+        catch (IOException e) {
+            throw Util.setStreamFailure (e);
+        }
     }
     
-    /*
-    This constructor should only be called by EmbedResultSet.getClob
-    */
+    /**
+     * This constructor should only be called by EmbedResultSet.getClob
+     * @param dvd 
+     * @param con 
+     * @throws StandardException
+     */
     protected EmbedClob(DataValueDescriptor dvd, EmbedConnection con)
         throws StandardException
     {
@@ -112,10 +123,19 @@ final class EmbedClob extends ConnectionChild implements Clob
         myStream = dvd.getStream();
         if (myStream == null)
         {
-            isString = true;
-           myString = dvd.getString();
-            if (SanityManager.DEBUG)
-                SanityManager.ASSERT(myString != null,"clob has a null value underneath");
+            control = new ClobStreamControl (con.getDBName(), this);
+            materialized = true;
+            try {
+                String str = dvd.getString();
+                control.insertString (dvd.getString(), 0);
+            }
+            catch (SQLException sqle) {
+                throw StandardException.newException (sqle.getSQLState(), sqle);
+            }
+            catch (IOException e) {
+                throw StandardException.newException (
+                                        SQLState.SET_STREAM_FAILURE, e);
+            }
         }
         else
         {
@@ -162,8 +182,13 @@ final class EmbedClob extends ConnectionChild implements Clob
         //the Clob object has been freed by calling free() on it
         checkValidity();
         // if we have a string, not a stream
-        if (isString)
-            return myString.length();
+        try {
+            if (materialized)
+                return control.getCharLength ();
+        }
+        catch (IOException e) {
+            throw Util.setStreamFailure (e);
+        }
 
 
 		Object synchronization = getConnectionSynchronization();
@@ -240,15 +265,21 @@ final class EmbedClob extends ConnectionChild implements Clob
                 SQLState.BLOB_NONPOSITIVE_LENGTH, new Integer(length));
 
         // if we have a string, not a stream
-        if (isString)
+        if (materialized)
         {
-            int sLength = myString.length();
-            if (sLength + 1 < pos)
-                throw Util.generateCsSQLException(
-                    SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
-            int endIndex = ((int) pos) + length - 1;
-            // cannot go over length of string
-            return myString.substring(((int) pos) - 1, (sLength > endIndex ? endIndex : sLength));
+            try {
+                long sLength = control.getCharLength ();
+                if (sLength + 1 < pos)
+                    throw Util.generateCsSQLException(
+                        SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
+                int endIndex = ((int) pos) + length - 1;
+                // cannot go over length of string
+                    return control.getSubstring (pos - 1,
+                            (sLength > endIndex ? endIndex : sLength));
+            }
+            catch (IOException e) {
+                throw Util.setStreamFailure (e);
+            }
         }
 
 		Object synchronization = getConnectionSynchronization();
@@ -305,20 +336,18 @@ final class EmbedClob extends ConnectionChild implements Clob
         //the Clob object has been freed by calling free() on it
         checkValidity();
 
-        // if we have a string, not a stream
-        if (isString)
-        {
-            return new StringReader(myString);
-        }
 
-
-		Object synchronization = getConnectionSynchronization();
+        Object synchronization = getConnectionSynchronization();
         synchronized (synchronization)
         {
             setupContextStack();
 
 			try {
-				return getCharacterStreamAtPos(1, synchronization);
+                            if (materialized) {
+                                return control.getReader (0);
+                            }
+                            
+                            return getCharacterStreamAtPos(1, synchronization);
 			}
 			catch (Throwable t)
 			{
@@ -348,24 +377,30 @@ final class EmbedClob extends ConnectionChild implements Clob
 		return new ReaderToAscii(getCharacterStream());
     }
 
-	private UTF8Reader getCharacterStreamAtPos(long position, Object synchronization)
-		throws IOException, StandardException
-	{
-        ((Resetable)myStream).resetStream();
-		UTF8Reader clobReader = new UTF8Reader(myStream, 0, this, synchronization);
-
-		// skip to the correct position (pos is one based)
-		long remainToSkip = position - 1;
-		while (remainToSkip > 0) {
-			long skipBy = clobReader.skip(remainToSkip);
-			if (skipBy == -1)
-				return null;
-
-			remainToSkip -= skipBy;
-		}
-
-		return clobReader;
-	}
+    private UTF8Reader getCharacterStreamAtPos(long position, Object synchronization)
+    throws IOException, StandardException {
+        UTF8Reader clobReader = null;
+        if (materialized)
+            clobReader = new UTF8Reader (control.getInputStream (0), 0, 
+                                            control.getByteLength(), 
+                                    this, control);
+        else {
+            ((Resetable)myStream).resetStream();
+            clobReader = new UTF8Reader(myStream, 0, this, synchronization);
+        }
+        
+        // skip to the correct position (pos is one based)
+        long remainToSkip = position - 1;
+        while (remainToSkip > 0) {
+            long skipBy = clobReader.skip(remainToSkip);
+            if (skipBy == -1)
+                return null;
+            
+            remainToSkip -= skipBy;
+        }
+        
+        return clobReader;
+    }
 
 
   /**
@@ -422,83 +457,75 @@ final class EmbedClob extends ConnectionChild implements Clob
             if (searchStr == "")
                 return start; // match DB2's SQL LOCATE function
 
-            // if we have a string, not a stream
-            if (isString)
+            Object synchronization = getConnectionSynchronization();
+            synchronized (synchronization)
             {
-				// avoid truncation errors in the cast of start to an int.
-				if (start > myString.length())
-					return -1;
-
-                int result = myString.indexOf(searchStr, (int) start-1);
-                return result < 0 ? -1 : result + 1;
-            }
-            else // we have a stream
-            {
-                Object synchronization = getConnectionSynchronization();
-                synchronized (synchronization)
-                {
-                    pushStack = !getEmbedConnection().isClosed();
-                    if (pushStack)
-                        setupContextStack();
-                    int matchCount = 0;
-                    long pos = start - 1;
-                    long newStart = -1;
-                    Reader reader = getCharacterStreamAtPos (start, this);
-                    char [] tmpClob = new char [256];
-                    boolean reset;
-                    for (;;) {
-                        reset = false;
-                        int readCount = reader.read (tmpClob);
-                        if (readCount == -1)
-                            return -1;
-                        if (readCount == 0)
-                            continue;            
-                        for (int clobOffset = 0; 
-                                    clobOffset < readCount; clobOffset++) {
-                            if (tmpClob [clobOffset] 
-                                            == searchStr.charAt (matchCount)) {
-                                //find the new starting position in 
-                                // case this match is unsuccessful
-                                if (matchCount != 0 && newStart == -1 
-                                        && tmpClob [clobOffset] 
-                                        == searchStr.charAt (0)) {
-                                    newStart = pos + clobOffset + 1;
-                                }
-                                matchCount ++;
-                                if (matchCount == searchStr.length()) {
-                                    //return after converting the position 
-                                    //to 1 based index
-                                    return pos + clobOffset 
-                                            - searchStr.length() + 1 + 1;
-                                }
+                pushStack = !getEmbedConnection().isClosed();
+                if (pushStack)
+                    setupContextStack();
+                int matchCount = 0;
+                long pos = start - 1;
+                long newStart = -1;
+                Reader reader = getCharacterStreamAtPos (start, this);
+                char [] tmpClob = new char [4096];
+                boolean reset;
+                for (;;) {
+                    reset = false;
+                    int readCount = reader.read (tmpClob);
+                    if (readCount == -1)
+                        return -1;
+                    if (readCount == 0)
+                        continue;            
+                    for (int clobOffset = 0; 
+                                clobOffset < readCount; clobOffset++) {
+                        if (tmpClob [clobOffset] 
+                                        == searchStr.charAt (matchCount)) {
+                            //find the new starting position in 
+                            // case this match is unsuccessful
+                            if (matchCount != 0 && newStart == -1 
+                                    && tmpClob [clobOffset] 
+                                    == searchStr.charAt (0)) {
+                                newStart = pos + clobOffset + 1;
                             }
-                            else {
-                                if (matchCount > 0) {
-                                    matchCount = 0;
-                                    if (newStart == -1) {
-                                        continue;
+                            matchCount ++;
+                            if (matchCount == searchStr.length()) {
+                                //return after converting the position 
+                                //to 1 based index
+                                return pos + clobOffset 
+                                        - searchStr.length() + 1 + 1;
+                            }
+                        }
+                        else {
+                            if (matchCount > 0) {
+                                if (newStart == -1) {
+                                    if (matchCount > 1) {
+                                        //compensate for increment in the "for"
+                                        clobOffset--;
                                     }
-                                    if (newStart < pos) {
-                                        pos = newStart;
-                                        reader.close();
-                                        reader = getCharacterStreamAtPos 
-                                                    (newStart + 1, this);
-                                        newStart = -1;
-                                        reset = true;
-                                        break;
-                                    }                        
-                                    clobOffset = (int) (newStart - pos) - 1;
-                                    newStart = -1;
+                                    matchCount = 0;                                    
                                     continue;
                                 }
+                                matchCount = 0;
+                                if (newStart < pos) {
+                                    pos = newStart;
+                                    reader.close();
+                                    reader = getCharacterStreamAtPos 
+                                                (newStart + 1, this);
+                                    newStart = -1;
+                                    reset = true;
+                                    break;
+                                }                        
+                                clobOffset = (int) (newStart - pos) - 1;
+                                newStart = -1;
+                                continue;
                             }
                         }
-                        if (!reset) {
-                            pos += readCount;
-                        }
                     }
-
+                    if (!reset) {
+                        pos += readCount;
+                    }
                 }
+
             }
         }
         catch (Throwable t)
@@ -546,7 +573,7 @@ final class EmbedClob extends ConnectionChild implements Clob
 
             synchronized (getConnectionSynchronization())
             {
-				char[] subPatternChar = new char[256];
+				char[] subPatternChar = new char[1024];
 
 				boolean seenOneCharacter = false;
 
@@ -629,7 +656,7 @@ restartScan:
     protected void finalize()
     {
         // System.out.println("finalizer called");
-        if (!isString)
+        if (!materialized)
             ((Resetable)myStream).closeStream();
     }
 
@@ -659,13 +686,11 @@ restartScan:
     * @return the number of characters written 
     * @exception SQLException Feature not implemented for now.
 	*/
-	public int setString(long pos, String parameterName)
-    throws SQLException
-	{
-		throw Util.notImplemented();
+	public int setString(long pos, String str) throws SQLException {
+            return setString (pos, str, 0, str.length());
 	}
 
-	/**
+   /**
     * JDBC 3.0
     *
     * Writes len characters of str, starting at character offset, to the CLOB value
@@ -678,11 +703,23 @@ restartScan:
     * @return the number of characters written
     * @exception SQLException Feature not implemented for now.
 	*/
-	public int setString(long pos, String str, int offset, int len)
-    throws SQLException
-	{
-		throw Util.notImplemented();
-	}
+        public int setString(long pos, String str, int offset, int len)
+        throws SQLException {
+            try {
+                if (!materialized) {
+                    control.copyData(myStream, length());
+                    materialized = true;
+                }
+                long charPos = control.getStreamPosition(0, pos - 1);
+                if (charPos == -1)
+                    throw Util.generateCsSQLException(
+                            SQLState.BLOB_POSITION_TOO_LARGE, "" + pos);
+                return (int) control.insertString(str.substring (offset,
+                        (offset + len)), charPos);
+            } catch (IOException e) {
+                throw Util.setStreamFailure(e);
+            }
+        }
 
 	/**
     * JDBC 3.0
@@ -694,11 +731,13 @@ restartScan:
     * @return the stream to which ASCII encoded characters can be written 
     * @exception SQLException Feature not implemented for now.
 	*/
-	public java.io.OutputStream setAsciiStream(long pos)
-    throws SQLException
-	{
-                throw Util.notImplemented();
-	}
+    public java.io.OutputStream setAsciiStream(long pos) throws SQLException {
+        try {
+            return new ClobAsciiStream (control.getWriter(pos - 1));
+        } catch (IOException e) {
+            throw Util.setStreamFailure(e);
+        }
+    }
 
 	/**
     * JDBC 3.0
@@ -710,11 +749,17 @@ restartScan:
     * @return the stream to which Unicode encoded characters can be written 
     * @exception SQLException Feature not implemented for now.
 	*/
-	public java.io.Writer setCharacterStream(long pos)
-    throws SQLException
-	{
-		throw Util.notImplemented();
-	}
+    public java.io.Writer setCharacterStream(long pos) throws SQLException {
+        try {
+            if (!materialized) {
+                control.copyData(myStream, length());
+                materialized = true;
+            }
+            return control.getWriter(pos - 1);
+        } catch (IOException e) {
+            throw Util.setStreamFailure(e);
+        }
+    }
 
   	/**
     * JDBC 3.0
@@ -725,8 +770,7 @@ restartScan:
     * value should be truncated
     * @exception SQLException Feature not implemented for now.
 	*/
-	public void truncate(long len)
-    throws SQLException
+	public void truncate(long len) throws SQLException
 	{
 		throw Util.notImplemented();
 	}
@@ -754,10 +798,17 @@ restartScan:
         //valid
         isValid = false;
         
-        if (!isString)
+        if (!materialized) {
             ((Resetable)myStream).closeStream();
-        else
-            myString = null;
+        }
+        else {
+            try {
+                control.free();
+            }    
+            catch (IOException e) {
+                throw Util.setStreamFailure(e);
+            }
+        }
     }
 
     public java.io.Reader getCharacterStream(long pos, long length)
@@ -791,5 +842,6 @@ restartScan:
         private void checkValidity() throws SQLException{
             if(!isValid)
                 throw newSQLException(SQLState.LOB_OBJECT_INVALID);
+            localConn.checkIfClosed();
         }
 }

@@ -1227,7 +1227,6 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         rs.close();
         stmt.close();
         commit();
-
         // no problem accessing this after commit since it is in memory
         assertEquals("FAIL - can not access short clob after commit",
                 26, shortClob.length());
@@ -1313,9 +1312,19 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         commit();
         getConnection().close();
 
-        // no problem accessing this after commit since it is in memory
-        assertEquals("FAIL - erorr accessing short lob after closing the " +
-                "connection", 26,  shortClob.length());
+        try {
+            long len = shortClob.length();
+            if (usingEmbedded()) {
+                fail("FAIL - should not be able to access large log " +
+                        "after commit");
+            }
+            assertEquals ("FAIL length mismatch", 26, len);
+        }
+        catch (SQLException e) {
+            checkException(NO_CURRENT_CONNECTION, e);
+            assertTrue("FAIL - Derby Client and JCC should not get an " +
+                    "exception", usingEmbedded());
+        }
 
         // these should all give blob/clob data unavailable exceptions
         try {
@@ -1350,11 +1359,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                         "after the connection is closed");
             }
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(NO_CURRENT_CONNECTION, e);
-            }
+            checkException(NO_CURRENT_CONNECTION, e);
         }
         try {
             clob.position(clob,2);
