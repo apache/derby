@@ -369,6 +369,7 @@ public abstract class EmbedConnection implements EngineConnection
 			throw NO_MEM;
 		}
 		catch (Throwable t) {
+			tr.cleanupOnError(t);
 			throw handleException(t);
 		} finally {
 			restoreContextStack();
