@@ -79,12 +79,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     	//Following Collator object will be initialized using databaseLocale.  
     	private RuleBasedCollator collatorForCharacterTypes;
 
-    	/** 
-    	 * For performance purposes, cache InstanceGetters for various formatid
-    	 * as we get them in getInstanceUsingFormatIdAndCollationType method.
-    	 */ 
-    	private InstanceGetter[] instanceGettersForFormatIds;
-
         DataValueFactoryImpl()
         {
         }
@@ -1117,96 +1111,83 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     }
 
     /** 
-     * @see DataValueFactory#getInstanceUsingFormatIdAndCollationType(int, int)
+     * @see DataValueFactory#getNull(int, int)
      */
-    public Object getInstanceUsingFormatIdAndCollationType(
-    		int formatId, int collationType) throws StandardException {
-		String className;
-		int fmtIdPositionInInstanceGetterArray;
-		InstanceGetter instanceGetter;
+    public DataValueDescriptor getNull(int formatId, int collationType) 
+    throws StandardException {
 
-		try {
-			fmtIdPositionInInstanceGetterArray = 
-				formatId - StoredFormatIds.MIN_TWO_BYTE_FORMAT_ID;
-			//If this is the first time this method is getting called, then
-			//instanceGettersForFormatIds will be null. If so, allocate it.
-			if (instanceGettersForFormatIds == null) {
-				instanceGettersForFormatIds = new InstanceGetter[RegisteredFormatIds.TwoByte.length];
-			}
-			//Check if we have already called this method for the passed format
-			//id. 
-			instanceGetter = 
-				instanceGettersForFormatIds[fmtIdPositionInInstanceGetterArray];
-			//If following if is true, then this method has already been called
-			//for the passed format id. We can just use the cached InstanceGetter
-			//from instanceGettersForFormatIds
-			if (instanceGetter != null) {
-				//Get the object from the InstanceGetter
-				Object returnObject = instanceGetter.getNewInstance();
-				//If we are dealing with default collation, then we have 
-				//got the right DVD already. Just return it.
-				if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
-					return returnObject;
-				//If we are dealing with territory based collation and 
-				//the object is of type StringDataValue, then we need to 
-				//return a StringDataValue with territory based collation.
-				if (returnObject instanceof StringDataValue) 
-					return ((StringDataValue)returnObject).getValue(getCharacterCollator(collationType));
-			}
-			//This is the first time this method has been called for the passed
-			//format id and hence it's InstanceGetter is not in 
-			//instanceGettersForFormatIds. Get the InstanceGetter's name for
-			//this format id from RegisteredFormatIds
-			className = RegisteredFormatIds.TwoByte[fmtIdPositionInInstanceGetterArray];
-		} catch (ArrayIndexOutOfBoundsException aioobe) {
-			className = null;
-			fmtIdPositionInInstanceGetterArray = 0;
-		} catch (Exception ite) {
-			throw StandardException.newException(SQLState.REGISTERED_CLASS_INSTANCE_ERROR,
-					ite, new Integer(formatId), "XX" /*ci.getClassName()*/);
+    	//For StoredFormatIds.SQL_DECIMAL_ID, different implementations are 
+    	//required for different VMs. getNullDecimal method is not static and 
+    	//hence can't be called in the static getNullDVDWithUCS_BASICcollation
+    	//method in this class. That is why StoredFormatIds.SQL_DECIMAL_ID is 
+    	//getting handled here.
+    	if (formatId == StoredFormatIds.SQL_DECIMAL_ID)
+    		return getNullDecimal(null);
+		else {
+			DataValueDescriptor returnDVD = 
+				DataValueFactoryImpl.getNullDVDWithUCS_BASICcollation(formatId);
+			//If we are dealing with default collation, then we have got the
+			//right DVD already. Just return it.
+			if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+				return returnDVD;			
+			//If we are dealing with territory based collation and returnDVD is 
+			//of type StringDataValue, then we need to return a StringDataValue   
+			//with territory based collation.
+			if (returnDVD instanceof StringDataValue) 
+				return ((StringDataValue)returnDVD).getValue(getCharacterCollator(collationType));
+			else
+				return returnDVD;			
 		}
-
-		if (className != null) {
-			Throwable t;
-			try {
-				Class clazz = Class.forName(className);
-				// See if the InstanceGetter class for this format id is a 
-				//FormatableInstanceGetter
-				if (FormatableInstanceGetter.class.isAssignableFrom(clazz)) {
-					FormatableInstanceGetter tfig = (FormatableInstanceGetter) clazz.newInstance();
-					tfig.setFormatId(formatId);
-					//Cache this InstanceGetter in instanceGettersForFormatIds
-					instanceGettersForFormatIds[fmtIdPositionInInstanceGetterArray] = tfig;
-					//Get the object from the InstanceGetter
-					Object returnObject = tfig.getNewInstance();
-					//If we are dealing with default collation, then we have 
-					//got the right DVD already. Just return it.
-					if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
-						return returnObject;
-					//If we are dealing with territory based collation and 
-					//the object is of type StringDataValue, then we need to 
-					//return a StringDataValue with territory based collation.
-					if (returnObject instanceof StringDataValue) 
-						return ((StringDataValue)returnObject).getValue(getCharacterCollator(collationType));
-				}
-				//InstanceGetter is not of the type FormatableInstanceGetter
-				instanceGettersForFormatIds[fmtIdPositionInInstanceGetterArray] = new ClassInfo(clazz);
-				return instanceGettersForFormatIds[fmtIdPositionInInstanceGetterArray].getNewInstance();
-			} catch (ClassNotFoundException cnfe) {
-				t = cnfe;
-			} catch (IllegalAccessException iae) {
-				t = iae;
-			} catch (InstantiationException ie) {
-				t = ie;
-			} catch (LinkageError le) {
-				t = le;
-			} catch (java.lang.reflect.InvocationTargetException ite) {
-				t = ite;
-			}
-			throw StandardException.newException(SQLState.REGISTERED_CLASS_LINAKGE_ERROR,
-				t, FormatIdUtil.formatIdToString(formatId), className);
-		}
-		throw StandardException.newException(SQLState.REGISTERED_CLASS_NONE, FormatIdUtil.formatIdToString(formatId));    	
+    }
+    
+    /**
+     * This method will return a DVD based on the formatId. It doesn't take
+     * into account the collation that should be associated with collation
+     * sensitive DVDs, which are all the character type DVDs. Such DVDs 
+     * returned from this method have default UCS_BASIC collation associated
+     * with them. If collation associated should be terriotry based, then that
+     * needs to be handled by the caller of this method. An example of such 
+     * code in the caller can be seen in DataValueFactory.getNull method.
+     * 
+     * Another thing to note is this method does not deal with format id
+     * associated with decimal. This is because different implementation are
+     * required for different VMs. This is again something that needs to be
+     * handled by the caller. An example of such code in the caller can be 
+     * seen in DataValueFactory.getNull method.
+     *  
+     * @param formatId Return a DVD based on the format id
+     * @return DataValueDescriptor with default collation of UCS_BASIC 
+     */
+    public static DataValueDescriptor getNullDVDWithUCS_BASICcollation(int formatId){
+        switch (formatId) {
+        /* Wrappers */
+        case StoredFormatIds.SQL_BIT_ID: return new SQLBit();
+        case StoredFormatIds.SQL_BOOLEAN_ID: return new SQLBoolean();
+        case StoredFormatIds.SQL_CHAR_ID: return new SQLChar();
+        case StoredFormatIds.SQL_DATE_ID: return new SQLDate();
+        case StoredFormatIds.SQL_DOUBLE_ID: return new SQLDouble();
+        case StoredFormatIds.SQL_INTEGER_ID: return new SQLInteger();
+        case StoredFormatIds.SQL_LONGINT_ID: return new SQLLongint();
+        case StoredFormatIds.SQL_NATIONAL_CHAR_ID: return new SQLNationalChar();
+        case StoredFormatIds.SQL_NATIONAL_LONGVARCHAR_ID: return new SQLNationalLongvarchar();
+        case StoredFormatIds.SQL_NATIONAL_VARCHAR_ID: return new SQLNationalVarchar();
+        case StoredFormatIds.SQL_REAL_ID: return new SQLReal();
+        case StoredFormatIds.SQL_REF_ID: return new SQLRef();
+        case StoredFormatIds.SQL_SMALLINT_ID: return new SQLSmallint();
+        case StoredFormatIds.SQL_TIME_ID: return new SQLTime();
+        case StoredFormatIds.SQL_TIMESTAMP_ID: return new SQLTimestamp();
+        case StoredFormatIds.SQL_TINYINT_ID: return new SQLTinyint();
+        case StoredFormatIds.SQL_VARCHAR_ID: return new SQLVarchar();
+        case StoredFormatIds.SQL_LONGVARCHAR_ID: return new SQLLongvarchar();
+        case StoredFormatIds.SQL_VARBIT_ID: return new SQLVarbit();
+        case StoredFormatIds.SQL_LONGVARBIT_ID: return new SQLLongVarbit();
+        case StoredFormatIds.SQL_USERTYPE_ID_V3: return new UserType();
+        case StoredFormatIds.SQL_BLOB_ID: return new SQLBlob();
+        case StoredFormatIds.SQL_CLOB_ID: return new SQLClob();
+        case StoredFormatIds.SQL_NCLOB_ID: return new SQLNClob();
+        case StoredFormatIds.XML_ID: return new XML();
+        default:return null;
+        }
     }
 
         // RESOLVE: This is here to find the LocaleFinder (i.e. the Database)

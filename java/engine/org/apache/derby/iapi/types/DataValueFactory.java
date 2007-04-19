@@ -730,9 +730,9 @@ public interface DataValueFactory
          * @param formatId Format id for the DVD
          * @param collationType this is meaningful only for character types.
          * 
-         * @return Object which will be constructed using the passed
-         * parameters 
+         * @return DataValueDescriptor which will be constructed using the 
+         * passed parameters 
          */
-        Object getInstanceUsingFormatIdAndCollationType(int formatId, int collationType)
+        DataValueDescriptor getNull(int formatId, int collationType) 
         throws StandardException;
 }
