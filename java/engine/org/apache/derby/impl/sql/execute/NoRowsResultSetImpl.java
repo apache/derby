@@ -346,17 +346,12 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	}
 
 	/**
-		Just report that it is always closed.
-		RESOLVE: if we don't report that we are closed,
-		then we will wind up with a dependency problem when
-		we send an invalidateFor on our own Statement.  It
-		will call lcc.verifyNoOpenResultSets(), which is really
-		supposed to be verify that there are no read only
-		result sets that are open.
+	 * Find out if the <code>ResultSet</code> is closed.
+	 *
+	 * @return <code>true</code> if closed, <code>false</code> otherwise
 	 */
 	public boolean isClosed() {
 		return isClosed;
-		//return true;
 	}
 
 	/**
