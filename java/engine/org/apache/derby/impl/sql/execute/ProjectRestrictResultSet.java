@@ -62,7 +62,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 
     // set in constructor and not altered during
     // life of object.
-    public NoPutResultSet source;
+    final NoPutResultSet source;
 	public GeneratedMethod constantRestriction;
     public GeneratedMethod restriction;
 	public boolean doesProjection;
@@ -352,6 +352,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 		{
 			isOpen = false;
 			shortCircuitOpen = false;
+			source.close();
 			return;
 		}
 

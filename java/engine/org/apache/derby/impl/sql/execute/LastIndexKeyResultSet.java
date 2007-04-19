@@ -317,6 +317,7 @@ class LastIndexKeyResultSet extends NoPutResultSetImpl
 		if (isOpen)
 	    {
 			isOpen = false;
+			returnedRow = false;
 		    clearCurrentRow();
 
 			super.close();
