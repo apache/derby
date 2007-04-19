@@ -17,8 +17,25 @@ ij> --
 -- Adding new testcases for DB2 syntax "GENERATED ALWAYS AS IDENTITY"
 -- We don't enhance "ALTER TABLE <T> MODIFY COLUMN" yet: DB2 uses "ALTER TABLE <T> ALTER COLUMN..."
 -- try generated  values with all types.
--- Cloudscape specific syntax for the autoincrement clause can be found in store/bug3498.sql
-create table ai_zero (i int, a_zero int generated always as identity);
+-- use query on lock table that only looks at locks held by user transactions,
+-- to avoid picking up locks by background threads.
+create view lock_table as
+select
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    state,
+    status
+from
+    syscs_diag.lock_table l right outer join syscs_diag.transaction_table t 
+        on l.xid = t.xid 
+where 
+    t.type='UserTransaction' and l.lockcount is not null;
+0 rows inserted/updated/deleted
+ij> create table ai_zero (i int, a_zero int generated always as identity);
 0 rows inserted/updated/deleted
 ij> create table ai_one (i int, a_one smallint generated always as identity);
 0 rows inserted/updated/deleted
@@ -743,19 +760,19 @@ X          |YYY
 1          |0          
 2          |1          
 ij> -- should see only locks on t1, no locks on system catalogs.
-select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
-TYPE |TABLENAME                                                                                                                       |MODE
--------------------------------------------------------------------------------------------------------------------------------------------
-ROW  |T1                                                                                                                              |X   
-ROW  |T1                                                                                                                              |X   
-TABLE|T1                                                                                                                              |IX  
+select * from lock_table order by tabname, type desc, mode, cnt;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |STATE|STATUS  
+----------------------------------------------------------------
+APP     |UserTran|TABLE   |2   |IX  |T1          |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |T1          |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |T1          |GRANT|ACTIVE  
 ij> delete from t1;
 2 rows inserted/updated/deleted
 ij> commit;
 ij> -- locks should be gone now.
-select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
-TYPE |TABLENAME                                                                                                                       |MODE
--------------------------------------------------------------------------------------------------------------------------------------------
+select * from lock_table order by tabname, type desc, mode, cnt;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |STATE|STATUS  
+----------------------------------------------------------------
 ij> set isolation serializable;
 0 rows inserted/updated/deleted
 ij> -- this will get a share  lock on syscolumns
@@ -764,20 +781,20 @@ select columnname, autoincrementvalue
 COLUMNNAME                                                                                                                      |AUTOINCREMENTVALUE  
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 YYY                                                                                                                             |2                   
-ij> select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
-TYPE |TABLENAME                                                                                                                       |MODE
--------------------------------------------------------------------------------------------------------------------------------------------
-TABLE|SYSCOLUMNS                                                                                                                      |S   
+ij> select * from lock_table order by tabname, type desc, mode, cnt;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |STATE|STATUS  
+----------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |S   |SYSCOLUMNS  |GRANT|ACTIVE  
 ij> insert into t1 (x) values (3);
 1 row inserted/updated/deleted
-ij> select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
-TYPE |TABLENAME                                                                                                                       |MODE
--------------------------------------------------------------------------------------------------------------------------------------------
-ROW  |SYSCOLUMNS                                                                                                                      |X   
-TABLE|SYSCOLUMNS                                                                                                                      |IX  
-TABLE|SYSCOLUMNS                                                                                                                      |S   
-ROW  |T1                                                                                                                              |X   
-TABLE|T1                                                                                                                              |IX  
+ij> select * from lock_table order by tabname, type desc, mode, cnt;
+USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |STATE|STATUS  
+----------------------------------------------------------------
+APP     |UserTran|TABLE   |1   |IX  |SYSCOLUMNS  |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |S   |SYSCOLUMNS  |GRANT|ACTIVE  
+APP     |UserTran|ROW     |2   |X   |SYSCOLUMNS  |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |1   |IX  |T1          |GRANT|ACTIVE  
+APP     |UserTran|ROW     |1   |X   |T1          |GRANT|ACTIVE  
 ij> commit;
 ij> -- try using default keyword with ai.
 drop table t1;

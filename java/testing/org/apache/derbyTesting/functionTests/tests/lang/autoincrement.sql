@@ -17,7 +17,24 @@
 -- Adding new testcases for DB2 syntax "GENERATED ALWAYS AS IDENTITY"
 -- We don't enhance "ALTER TABLE <T> MODIFY COLUMN" yet: DB2 uses "ALTER TABLE <T> ALTER COLUMN..."
 -- try generated  values with all types.
--- Cloudscape specific syntax for the autoincrement clause can be found in store/bug3498.sql
+
+-- use query on lock table that only looks at locks held by user transactions,
+-- to avoid picking up locks by background threads.
+create view lock_table as
+select
+    cast(username as char(8)) as username,
+    cast(t.type as char(8)) as trantype,
+    cast(l.type as char(8)) as type,
+    cast(lockcount as char(3)) as cnt,
+    mode,
+    cast(tablename as char(12)) as tabname,
+    state,
+    status
+from
+    syscs_diag.lock_table l right outer join syscs_diag.transaction_table t 
+        on l.xid = t.xid 
+where 
+    t.type='UserTransaction' and l.lockcount is not null;
 
 create table ai_zero (i int, a_zero int generated always as identity);
 create table ai_one (i int, a_one smallint generated always as identity);
@@ -417,24 +434,24 @@ insert into t1 (x) values (2);
 
 select * from t1;
 -- should see only locks on t1, no locks on system catalogs.
-select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
+select * from lock_table order by tabname, type desc, mode, cnt;
 
 delete from t1;
 commit;
 
 -- locks should be gone now.
-select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
+select * from lock_table order by tabname, type desc, mode, cnt;
 set isolation serializable;
 
 -- this will get a share  lock on syscolumns
 select columnname, autoincrementvalue
  from sys.syscolumns where columnname = 'YYY';
 
-select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
+select * from lock_table order by tabname, type desc, mode, cnt;
 
 insert into t1 (x) values (3);
 
-select  l.type, l.tablename, l.mode from syscs_diag.lock_table l order by tablename, type;
+select * from lock_table order by tabname, type desc, mode, cnt;
 commit;
 
 -- try using default keyword with ai.
