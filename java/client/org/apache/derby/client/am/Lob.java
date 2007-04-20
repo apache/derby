@@ -98,7 +98,7 @@ public abstract class Lob implements UnitOfWorkListener {
      * methods that make changes to the length of the Lob.
      * NOTE: The caller needs to deal with synchronization.
      *
-     * @param the new length of the Lob value
+     * @param length the new length of the Lob value
      */
     void setSqlLength(long length)
     {
