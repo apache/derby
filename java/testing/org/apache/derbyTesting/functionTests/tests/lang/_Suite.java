@@ -78,7 +78,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SysDiagVTIMappingTest.suite());
         suite.addTest(UpdatableResultSetTest.suite());
         suite.addTest(CurrentOfTest.suite());
-	    suite.addTest(CursorTest.suite());
+	suite.addTest(CursorTest.suite());
         suite.addTest(CastingTest.suite());
         suite.addTest(ScrollCursors2Test.suite());
         suite.addTest(NullIfTest.suite());
@@ -95,11 +95,12 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(UpdateCursorTest.suite());
         suite.addTest(CoalesceTest.suite());
         suite.addTest(ProcedureInTriggerTest.suite());
+	suite.addTest(ForUpdateTest.suite());
         suite.addTest(CollationTest.suite());
         suite.addTest(ScrollCursors1Test.suite());
         suite.addTest(SimpleTest.suite());
-        // [TEMPORARY] Commented out because the test class is missing.
-        //suite.addTest(ErrorCodeTest.suite());
+
+        suite.addTest(ErrorCodeTest.suite());
 
         // Add the XML tests, which exist as a separate suite
         // so that users can "run all XML tests" easily.
