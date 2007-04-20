@@ -46,7 +46,19 @@ prepare procedure as 'select * from bar';
 -- a foundation 2000 concept
 execute procedure sqlj.install_jar( 'file:c:/p4c/systest/out/DigIt.jar', 'SourceWUs', 1 );
 
+-- moved from errorcode.sql
 
+-- specify an invalid driver
+driver 'java.lang.Integer';
+
+-- now a valid driver
+driver 'org.apache.derby.jdbc.EmbeddedDriver';
+
+-- specify an invalid database
+connect 'asdfasdf';
+
+-- now a valid database, but no create
+connect 'jdbc:derby:wombat';
 -- and, the help output:
 help;
 

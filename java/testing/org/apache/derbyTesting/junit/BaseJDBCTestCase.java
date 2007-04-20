@@ -584,7 +584,24 @@ public abstract class BaseJDBCTestCase
     public static void assertSQLState(String expected, SQLException exception) {
         assertSQLState("Unexpected SQL state.", expected, exception);
     }
-
+    
+    public static void assertErrorCode(String message, int expected, SQLException exception) {
+       while (exception != null)
+       {
+           try {
+               assertEquals(message, expected,exception.getErrorCode());
+           } catch (AssertionFailedError e) {
+               // check and see if our error code is in a chained exception
+               exception = exception.getNextException();               
+           }
+       }
+    }
+    
+    public static void assertErrorCode(int expected, SQLException exception)
+    {
+       assertErrorCode("Unexpected Error Code",expected, exception);
+    }
+    
     /**
      * Assert that the query does not compile and throws
      * a SQLException with the expected state.
@@ -689,7 +706,34 @@ public abstract class BaseJDBCTestCase
             assertSQLState(sqlState, se);
         }
     }
-
+    /**
+     * Assert that the query fails (either in compilation,
+     * execution, or retrieval of results--doesn't matter)
+     * and throws a SQLException with the expected state
+     * and error code
+     *
+     * Assumption is that 'query' does *not* have parameters
+     * that need binding and thus can be executed using a
+     * simple Statement.execute() call.
+     * 
+     * @param sqlState expected sql state.
+     * @param errorCode expected error code.
+     * @param st Statement object on which to execute.
+     * @param query the query to compile and execute.
+     */
+    public static void assertStatementError(String sqlState, int errorCode, Statement st, String query) {
+        try {
+            boolean haveRS = st.execute(query);
+            fetchAndDiscardAllResults(st, haveRS);
+            fail("Expected error '" + sqlState +
+                "' but no error was thrown.");
+        } catch (SQLException se) {
+            assertSQLState(sqlState, se);
+            assertEquals(errorCode,se.getErrorCode());
+        }
+        
+    }
+    
     /**
      * Assert that execution of the received PreparedStatement
      * object fails (either in execution or when retrieving
@@ -812,6 +856,21 @@ public abstract class BaseJDBCTestCase
     {
         assertEquals("Update count does not match:",
             expectedRC, pSt.executeUpdate());
+    }
+
+    /**
+     * Get the last SQLException in chain.
+     * @param a <code>SQLException</code>
+     * @return the last exception in the chain.
+     */
+    public SQLException getLastSQLException(SQLException sqle) {
+        SQLException current = sqle;
+        SQLException next = sqle.getNextException();
+        while (next != null) {
+            current = next;
+            next = next.getNextException();
+        }
+        return current;
     }
 
     /**

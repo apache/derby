@@ -1134,20 +1134,6 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Return the last chained SQLException.
-     * If there are no exceptions chained, the original one is returned.
-     */
-    private SQLException getLastSQLException(SQLException sqle) {
-        SQLException last = sqle;
-        SQLException next = sqle;
-        while (next != null) {
-            last = next;
-            next = last.getNextException();
-        }
-        return last;
-    }
-
-    /**
      * This methods is not to be used, but sometimes you have to!
      *
      * @param preSQLState the expected outer SQL state

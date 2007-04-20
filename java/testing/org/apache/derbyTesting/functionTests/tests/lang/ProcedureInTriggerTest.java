@@ -309,26 +309,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
       
     }
 
-    private void showResultSet(ResultSet rs) throws SQLException {
-        int row = 0;
-           while (rs.next()) {
-               row++;
-               ResultSetMetaData rsmd = rs.getMetaData();
-               int nocols = rsmd.getColumnCount();
-               System.out.print("{");
-              
-               for (int i = 0; i < nocols; i++)
-               {
-                   System.out.print("\"" + rs.getString(i+1) + "\"");
-                   if (i == (nocols -1))
-                       System.out.println("}");
-                   else
-                       System.out.print(",");
-                       
-               }
-           }
-    }
-
+  
     /**
      * Some misc negative tests for procedures in triggers.
      * 

@@ -20,6 +20,9 @@
 package org.apache.derbyTesting.junit;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * General non-JDBC related utilities relocated from TestUtil
@@ -79,5 +82,40 @@ public class Utilities {
         }
 
 
+        /**
+         * Print out resultSet in two dimensional array format, for use by
+         * JDBC.assertFullResultSet(rs,expectedRows) expectedRows argument.
+         * Useful while converting tests to get output in correct format.
+         * 
+         * @param rs
+         * @throws SQLException
+         */
+        public static void showResultSet(ResultSet rs) throws SQLException {
+            System.out.print("{");
+            int row = 0;
+            boolean next = rs.next();
+            while (next) {
+                row++;
+                ResultSetMetaData rsmd = rs.getMetaData();
+                int nocols = rsmd.getColumnCount();
+                System.out.print("{");
+                
+                for (int i = 0; i < nocols; i++)
+                {
+                    System.out.print("\"" + rs.getString(i+1) + "\"");
+                    if (i == (nocols -1))
+                        System.out.print("}");
+                    else
+                        System.out.print(",");
+                           
+                }
+                next = rs.next();
+                   
+                if (next)
+                    System.out.println(",");
+                else
+                    System.out.println("};");
+            }
+        }       
 
 }

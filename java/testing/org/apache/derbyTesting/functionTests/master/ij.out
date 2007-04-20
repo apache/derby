@@ -19,10 +19,10 @@ ij> --
 -- no driver loaded yet, detected off of the url
 -- this one is a bad url:
 connect 'cloudscape:wombat';
-ERROR 08001: No suitable driver
+ERROR 08001: No suitable driver (errorCode = 0)
 ij> -- this one will work.
 connect 'jdbc:derby:wombat';
-ERROR XJ004: Database 'wombat' not found.
+ERROR XJ004: Database 'wombat' not found. (errorCode = 40000)
 ij> -- no connection yet, this will fail
 create table t (i int);
 IJ ERROR: Unable to establish connection
@@ -50,6 +50,18 @@ ij> -- should fail because text is passed on to derby, which
 -- a foundation 2000 concept
 execute procedure sqlj.install_jar( 'file:c:/p4c/systest/out/DigIt.jar', 'SourceWUs', 1 );
 IJ ERROR: Unable to establish connection
+ij> -- moved from errorcode.sql
+-- specify an invalid driver
+driver 'java.lang.Integer';
+IJ ERROR: Could not locate class java.lang.Integer
+ij> -- now a valid driver
+driver 'org.apache.derby.jdbc.EmbeddedDriver';
+ij> -- specify an invalid database
+connect 'asdfasdf';
+ERROR 08001: No suitable driver (errorCode = 0)
+ij> -- now a valid database, but no create
+connect 'jdbc:derby:wombat';
+ERROR XJ004: Database 'wombat' not found. (errorCode = 40000)
 ij> -- and, the help output:
 help;
  Supported commands include:
