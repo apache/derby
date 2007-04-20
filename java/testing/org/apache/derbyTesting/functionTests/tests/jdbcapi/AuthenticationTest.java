@@ -35,7 +35,6 @@ import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -170,7 +169,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertShutdownWOUPFail("2850H", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
         assertShutdownFail("2850H", dbName, "system", "admin");
         assertShutdownWOUPFail("2850H", dbName, "system", "admin");
-        assertShutdownOK(dbName, "APP", ("APP" + PASSWORD_SUFFIX));
+        assertShutdownUsingConnAttrsOK(dbName, "APP", ("APP" + PASSWORD_SUFFIX));
         
         // ensure that a password is encrypted
         Connection conn1 = openDefaultConnection(
@@ -532,7 +531,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             assertConnectionOK(dbName, apollo, zeus);
             assertShutdownFail("08004", dbName, zeus, zeus);
             assertShutdownFail("2850H", dbName, apollo, zeus);
-            assertShutdownOK(dbName, "APP", ("APP" + PASSWORD_SUFFIX));
+            assertShutdownUsingSetShutdownOK(
+                dbName, "APP", ("APP" + PASSWORD_SUFFIX));
 
             conn1 = openDefaultConnection(zeus, apollo);
             Statement stmt = conn1.createStatement();
@@ -582,7 +582,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
                 }
         });
         // bring down the database
-        assertShutdownOK(dbName, "APP", "APP" + PASSWORD_SUFFIX);
+        assertShutdownUsingSetShutdownOK(
+            dbName, "APP", "APP" + PASSWORD_SUFFIX);
         // recheck
         assertConnectionOK(dbName, "system", "admin");
         assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
@@ -616,7 +617,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         conn1.commit();
         conn1.close();
         openDefaultConnection("system", "admin");
-        assertShutdownOK(dbName, "APP", "APP" + PASSWORD_SUFFIX);
+        assertShutdownUsingSetShutdownOK(
+            dbName, "APP", "APP" + PASSWORD_SUFFIX);
         assertSystemShutdownOK("", "system", "admin");
         openDefaultConnection("system", "admin"); // just so teardown works.
     }
@@ -745,34 +747,31 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         }
     }
 
-    protected void assertShutdownOK(
-        String dbName, String user, String password)
-    throws SQLException {
-
-        if (usingEmbedded())
-        {
-            DataSource ds = JDBCDataSource.getDataSource(dbName);
-            JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
-            try {
-                ds.getConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
+    protected void assertShutdownUsingSetShutdownOK(
+            String dbName, String user, String password) throws SQLException {
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        try {
+            ds.getConnection(user, password);
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            // expect 08006 on successful shutdown
+            assertSQLState("08006", e);
         }
-        else if (usingDerbyNetClient())
-        {
-            ClientDataSource ds = 
-                (ClientDataSource)JDBCDataSource.getDataSource(dbName);
-            ds.setConnectionAttributes("shutdown=true");
-            try {
-                ds.getConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
+    }
+
+    protected void assertShutdownUsingConnAttrsOK(
+        String dbName, String user, String password) throws SQLException {
+
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        JDBCDataSource.setBeanProperty(
+            ds, "connectionAttributes", "shutdown=true");
+        try {
+            ds.getConnection(user, password);
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            // expect 08006 on successful shutdown
+            assertSQLState("08006", e);
         }
     }
 
@@ -783,33 +782,16 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         String dbName, String user, String password)
     throws SQLException {
 
-        if (usingEmbedded())
-        {
-            DataSource ds = JDBCDataSource.getDataSource(dbName);
-            JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(ds, "user", user);
-            JDBCDataSource.setBeanProperty(ds, "password", password);
-            try {
-                ds.getConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientDataSource ds = 
-                (ClientDataSource)JDBCDataSource.getDataSource(dbName);
-            ds.setConnectionAttributes(
-                    "shutdown=true;user=" + user + ";password="+password);
-            try {
-                ds.getConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(ds, "user", user);
+        JDBCDataSource.setBeanProperty(ds, "password", password);
+        try {
+            ds.getConnection();
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            // expect 08006 on successful shutdown
+            assertSQLState("08006", e);
         }
     }
     
@@ -817,30 +799,13 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-
-        // with DerbyNetClient there is no Datasource setShutdownDatabase method
-        if (usingEmbedded()) 
-        {
-            DataSource ds = JDBCDataSource.getDataSource(dbName);
-            JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
-            try {
-                ds.getConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientDataSource ds = 
-                (ClientDataSource)JDBCDataSource.getDataSource(dbName);
-            ds.setConnectionAttributes("shutdown=true");
-            try {
-                ds.getConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        try {
+            ds.getConnection(user, password);
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            assertSQLState(expectedSqlState, e);
         }
     }
     
@@ -848,39 +813,22 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        // with DerbyNetClient there is no Datasource setShutdownDatabase 
-        // method so can't use the same setBeanProperty as with embedded
-        if (usingEmbedded()) 
-        {
-            DataSource ds = JDBCDataSource.getDataSource(dbName);
-            JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(ds, "user", user);
-            JDBCDataSource.setBeanProperty(ds, "password", password);
-            try {
-                ds.getConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientDataSource ds = 
-                (ClientDataSource)JDBCDataSource.getDataSource(dbName);
-            ds.setConnectionAttributes(
-                "shutdown=true;user=" + user + ";password="+password);
-            try {
-                ds.getConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(ds, "user", user);
+        JDBCDataSource.setBeanProperty(ds, "password", password);
+        try {
+            ds.getConnection();
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            assertSQLState(expectedSqlState, e);
         }
     }
     
     protected void assertSystemShutdownOK(
         String dbName, String user, String password)
     throws SQLException {
+        DataSource ds;
         if (usingEmbedded())
         {
             // we cannot use JDBCDataSource.getDataSource() (which uses the
@@ -889,78 +837,59 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             // The alternative is to use jDBCDataSource.getDatasource(dbName),
             // where dbName is an empty string - this will in the current code
             // be interpreted as a system shutdown.
-            DataSource ds = JDBCDataSource.getDataSource();
+            
+            ds = JDBCDataSource.getDataSource();
             JDBCDataSource.clearStringBeanProperty(ds, "databaseName");
-            JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
-            try {
-                ds.getConnection(user, password);
-                fail("expected system shutdown resulting in XJ015 error");
-            } catch (SQLException e) {
-                // expect XJ015, system shutdown, on successful shutdown
-                assertSQLState("XJ015", e);
-            }
         }
-        else if (usingDerbyNetClient())
+        else 
         {
-            // ds.setShutdown is not currently suppported by client, so we need
-            // to use ds.setConnectionAttributes.
             // With client, we cannot user clearStringBeanProperty on the  
             // databaseName, that will result in error 08001 - 
             // Required DataSource property databaseName not set.
             // So, we pass an empty string as databaseName, which the current
             // code interprets as a system shutdown.
-            ClientDataSource ds = 
-                (ClientDataSource)JDBCDataSource.getDataSource(dbName);
-            ds.setConnectionAttributes("shutdown=true");
-            try {
-                ds.getConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect XJ015 on successful shutdown
-                assertSQLState("XJ015", e);
-            }
+            ds = JDBCDataSource.getDataSource(dbName);
+        }
+        
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        try {
+            ds.getConnection(user, password);
+            fail("expected system shutdown resulting in XJ015 error");
+        } catch (SQLException e) {
+            // expect XJ015, system shutdown, on successful shutdown
+            assertSQLState("XJ015", e);
         }
     }
 
     protected void assertSystemShutdownFail(
         String expectedError, String dbName, String user, String password)
     throws SQLException {
+        DataSource ds;
         if (usingEmbedded())
         {
-            DataSource ds = JDBCDataSource.getDataSource();
+            ds = JDBCDataSource.getDataSource();
             JDBCDataSource.clearStringBeanProperty(ds, "databaseName");
-            JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(ds, "user", user);
-            JDBCDataSource.setBeanProperty(ds, "password", password);
-            try {
-                ds.getConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedError, e);
-            }
         }
-        else if (usingDerbyNetClient())
+        else
         {
-            ClientDataSource ds = 
-                (ClientDataSource)JDBCDataSource.getDataSource(dbName);
-            // note: with network server, you cannot set the databaseName
+            // note: with network server/client, you can't set the databaseName
             // to null, that results in error 08001 - Required DataSource
             // property databaseName not set.
             // so, we rely on passing of an empty string for databaseName,
             // which in the current code is interpreted as system shutdown.
-            // also, we need to use setConnectionAttributes.
-            ds.setConnectionAttributes(
-                "shutdown=true;user=" + user + ";password=" + password);
-            try {
-                ds.getConnection();
-                fail("expected shutdown to fail");
-                ds.getConnection(user, password);
-            } catch (SQLException e) {
-                assertSQLState(expectedError, e);
-            }
+            ds = JDBCDataSource.getDataSource(dbName);
+        }
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(ds, "user", user);
+        JDBCDataSource.setBeanProperty(ds, "password", password);
+        try {
+            ds.getConnection();
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            assertSQLState(expectedError, e);
         }
     }
-    
+
     public void assertConnectionFail(String dbName) throws SQLException {
         
         // Get the default data source but clear the user and

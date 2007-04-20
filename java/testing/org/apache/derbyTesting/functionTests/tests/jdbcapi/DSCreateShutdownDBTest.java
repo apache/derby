@@ -39,6 +39,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
 
     static final String[] ADDITIONAL_DBS = {
+        "dscreateconatdb1",
         "dscreateshutdowndb1", 
         "dscreateshutdowndb2",
         "conflict1",
@@ -58,7 +59,7 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
 
     public static Test suite() 
     {
-        TestSuite suite = new TestSuite("DSCreateShutdownTest"); 
+        TestSuite suite = new TestSuite("DSCreateShutdownDBTest"); 
         Test test = TestConfiguration.defaultSuite(DSCreateShutdownDBTest.class);        
         //Test test = TestConfiguration.clientServerSuite(DSCreateShutdownDBTest.class);
         suite.addTest(test);
@@ -78,8 +79,8 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
     
     public void tearDown() throws Exception {
         // attempt to get rid of any databases. 
-        // only 4 dbs (in addition to defaultdb) should actually get
-        // created, but just in case...
+        // only 5 dbs (in addition to defaultdb) should actually get
+        // created, but just in case, try all...
         AccessController.doPrivileged(new java.security.PrivilegedAction() {
             public Object run() {
                 for (int i=0 ; i < ADDITIONAL_DBS.length ; i++)
@@ -166,21 +167,24 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         
         assertReset(dbName);
         
-        // check that shutting down using Attributes works
+        // check that create using ConnAttributes works
+        assertCreateUsingConnAttrsOK(composeDatabaseName(ADDITIONAL_DBS[0]));
+        
+        // check that shutting down using ConnAttributes works
         assertShutdownUsingConnAttrsOK(dbName);
         // re-vive db
         getConnection();
         
         // now, actually create, and shutdown a database
         // first ensure it's not there yet
-        dbName = composeDatabaseName(ADDITIONAL_DBS[0]);
+        dbName = composeDatabaseName(ADDITIONAL_DBS[1]);
         assertNoDB(dbName);
         // straightforward create and shutdown
         assertPositive(dbName);
         
         // what happens when you combine set*Database and 
         // matching connection attribute? (should work)
-        dbName = composeDatabaseName(ADDITIONAL_DBS[1]);
+        dbName = composeDatabaseName(ADDITIONAL_DBS[2]);
         assertNoDB(dbName);
         assertTwiceOK(dbName);
         
@@ -190,15 +194,15 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         // what happens when you combine create and shutdown connattr?
         // database does not get created.
         assertShutdownAndCreateConnAttr(DBNotFoundState, 
-            composeDatabaseName(ADDITIONAL_DBS[2]), 
+            composeDatabaseName(ADDITIONAL_DBS[3]), 
             "shutdown=true;create=true");
         assertShutdownAndCreateConnAttr(DBNotFoundState, 
-            composeDatabaseName(ADDITIONAL_DBS[3]), 
+            composeDatabaseName(ADDITIONAL_DBS[4]), 
             "create=true;shutdown=true");
 
         // and when you set both setShutdownDatabase and setCreateDatabase?
         // database does not get created
-        assertConflictedSettersOK(composeDatabaseName(ADDITIONAL_DBS[4]));
+        assertConflictedSettersOK(composeDatabaseName(ADDITIONAL_DBS[5]));
         
         // what happens when you combine set*Database and
         // opposing connection attributes? database does not get created. 
@@ -237,6 +241,7 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
     protected void assertReset(String dbName) 
     throws SQLException {
         DataSource ds = JDBCDataSource.getDataSourceLogical(dbName);
+
         JDBCDataSource.setBeanProperty(ds, "createDatabase", "");
         assertNull(getBeanProperty(ds, "createDatabase"));
         JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
@@ -281,7 +286,6 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         String getterName = getGetterName(propertyString);
 
         // Base the type of the setter method from the value's class.
-
         Object retObject=null;
         try {
             Method getter = ds.getClass().getMethod(getterName, null);
@@ -310,9 +314,20 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         assertDSConnectionFailed("08006", ds);
     }
     
+    // for completeness' sake, test create=true conn attr.
+    protected void assertCreateUsingConnAttrsOK(String dbName)
+    throws SQLException {
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        JDBCDataSource.setBeanProperty(
+                ds, "ConnectionAttributes", "create=true");
+        assertUpdateCount(
+            ds.getConnection().createStatement(), 0, "set schema APP");
+        JDBCDataSource.clearStringBeanProperty(ds, "ConnectionAttributes");
+        assertShutdownUsingSetOK(dbName, false);
+    }
+    
     protected void assertShutdownUsingConnAttrsOK(String dbName)
     throws SQLException {
-
         DataSource ds = JDBCDataSource.getDataSourceLogical(dbName);
         JDBCDataSource.setBeanProperty(
             ds, "ConnectionAttributes", "shutdown=true");
@@ -379,17 +394,16 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
 
     protected void assertConflictedSetterConnAttrOK() 
     throws SQLException {
-        assertConSetOK(DBNotFoundState, composeDatabaseName(ADDITIONAL_DBS[5]), 
+        assertConSetOK(DBNotFoundState, composeDatabaseName(ADDITIONAL_DBS[6]), 
             "shutdown=true", "CreateDatabase", "create");
         // with the new networkserver methods, this actually works...
-        assertConSetOK(DBNotFoundState, composeDatabaseName(ADDITIONAL_DBS[6]),
+        assertConSetOK(DBNotFoundState, composeDatabaseName(ADDITIONAL_DBS[7]),
             "create=true", "ShutdownDatabase", "shutdown");
-        assertSetConOK(DBNotFoundState, composeDatabaseName(ADDITIONAL_DBS[7]), 
+        assertSetConOK(DBNotFoundState, composeDatabaseName(ADDITIONAL_DBS[8]), 
             "shutdown=true", "CreateDatabase", "create");
         // with the new networkserver methods, this actually works...
-        assertSetConOK(DBNotFoundState, composeDatabaseName(ADDITIONAL_DBS[8]),
+        assertSetConOK(DBNotFoundState, composeDatabaseName(ADDITIONAL_DBS[9]),
             "create=true", "ShutdownDatabase", "shutdown");
-
     }
     
     // first sets setCreate/ShutdownDB, then sets ConnectionAttributes
@@ -397,7 +411,6 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         String connAttrValue, String setter, String setValue) 
     throws SQLException {
         DataSource ds = JDBCDataSource.getDataSource(dbName);
-        
         JDBCDataSource.setBeanProperty(ds, setter, setValue);
         JDBCDataSource.setBeanProperty(
             ds, "ConnectionAttributes", connAttrValue);
@@ -416,7 +429,6 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         String connAttrValue, String setter, String setValue) 
     throws SQLException {
         DataSource ds = JDBCDataSource.getDataSource(dbName);
-        
         JDBCDataSource.setBeanProperty(
             ds, "ConnectionAttributes", connAttrValue);
         JDBCDataSource.setBeanProperty(ds, setter, setValue);
@@ -429,5 +441,4 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
         JDBCDataSource.clearStringBeanProperty(ds, "ConnectionAttributes");
         JDBCDataSource.clearStringBeanProperty(ds, setter);
     }
-
 }

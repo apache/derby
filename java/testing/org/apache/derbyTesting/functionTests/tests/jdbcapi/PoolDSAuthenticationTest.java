@@ -23,15 +23,12 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.SQLException;
-import java.util.Properties;
 
 import javax.sql.ConnectionPoolDataSource;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -155,72 +152,49 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         }
     }
     
-    protected void assertShutdownOK(
+    protected void assertShutdownUsingSetShutdownOK(
         String dbName, String user, String password)
     throws SQLException {
-        if (usingEmbedded())
-        {
-            pds = J2EEDataSource.getConnectionPoolDataSource();
-            JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
-            JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
-            try {
-                pds.getPooledConnection(user, password);
-                fail ("expected a failed shutdown connection");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
+        pds = J2EEDataSource.getConnectionPoolDataSource();
+        JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
+        JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
+        try {
+            pds.getPooledConnection(user, password);
+            fail ("expected a failed shutdown connection");
+        } catch (SQLException e) {
+            // expect 08006 on successful shutdown
+            assertSQLState("08006", e);
         }
-        else if (usingDerbyNetClient())
-        {
-            ClientConnectionPoolDataSource pds = 
-                (ClientConnectionPoolDataSource)
-                J2EEDataSource.getConnectionPoolDataSource();
-            pds.setDatabaseName(dbName);
-            pds.setConnectionAttributes("shutdown=true");
-            try {
-                pds.getPooledConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
+    }
+    
+    protected void assertShutdownUsingConnAttrsOK(
+        String dbName, String user, String password) throws SQLException {
+        pds = J2EEDataSource.getConnectionPoolDataSource();
+        JDBCDataSource.setBeanProperty(
+            pds, "connectionAttributes", "shutdown=true");
+        try {
+            pds.getPooledConnection(user, password);
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            // expect 08006 on successful shutdown
+            assertSQLState("08006", e);
         }
     }
 
     protected void assertShutdownWOUPOK(
         String dbName, String user, String password)
     throws SQLException {
-        if (usingEmbedded())
-        {
-            pds = J2EEDataSource.getConnectionPoolDataSource();
-            JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
-            JDBCDataSource.setBeanProperty(pds, "user", user);
-            JDBCDataSource.setBeanProperty(pds, "password", password);
-            JDBCDataSource.setBeanProperty(pds, "shutdownDatabase","shutdown");
-            try {
-                pds.getPooledConnection();
-                fail ("expected a failed shutdown connection");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientConnectionPoolDataSource pds = 
-                (ClientConnectionPoolDataSource)
-                J2EEDataSource.getConnectionPoolDataSource();
-            pds.setDatabaseName(dbName);
-            pds.setConnectionAttributes(
-                "shutdown=true;user=" + user + ";password=" + password);
-            try {
-                pds.getPooledConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
+        pds = J2EEDataSource.getConnectionPoolDataSource();
+        JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
+        JDBCDataSource.setBeanProperty(pds, "user", user);
+        JDBCDataSource.setBeanProperty(pds, "password", password);
+        JDBCDataSource.setBeanProperty(pds, "shutdownDatabase","shutdown");
+        try {
+            pds.getPooledConnection();
+            fail ("expected a failed shutdown connection");
+        } catch (SQLException e) {
+            // expect 08006 on successful shutdown
+            assertSQLState("08006", e);
         }
     }
 
@@ -228,31 +202,14 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        if (usingEmbedded()) 
-        {
-            pds = J2EEDataSource.getConnectionPoolDataSource();
-            JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
-            try {
-                pds.getPooledConnection(user, password);
-                fail("expected failed shutdown");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientConnectionPoolDataSource pds = 
-                (ClientConnectionPoolDataSource)
-                J2EEDataSource.getConnectionPoolDataSource();
-            pds.setConnectionAttributes("shutdown=true");
-            pds.setDatabaseName(dbName);
-            try {
-                pds.getPooledConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
+        pds = J2EEDataSource.getConnectionPoolDataSource();
+        JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
+        try {
+            pds.getPooledConnection(user, password);
+            fail("expected failed shutdown");
+        } catch (SQLException e) {
+            assertSQLState(expectedSqlState, e);
         }
     }
     
@@ -260,139 +217,70 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        if (usingEmbedded()) 
-        {
-            pds = J2EEDataSource.getConnectionPoolDataSource();
-            JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(pds, "user", user);
-            JDBCDataSource.setBeanProperty(pds, "password", password);
-            JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
-            try {
-                pds.getPooledConnection();
-                fail("expected failed shutdown");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientConnectionPoolDataSource pds = 
-                (ClientConnectionPoolDataSource)
-                J2EEDataSource.getConnectionPoolDataSource();
-            pds.setDatabaseName(dbName);
-            pds.setConnectionAttributes(
-                    "shutdown=true;user=" + user + ";password=" + password);
-            try {
-                pds.getPooledConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
+        pds = J2EEDataSource.getConnectionPoolDataSource();
+        JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(pds, "user", user);
+        JDBCDataSource.setBeanProperty(pds, "password", password);
+        JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
+        try {
+            pds.getPooledConnection();
+            fail("expected failed shutdown");
+        } catch (SQLException e) {
+            assertSQLState(expectedSqlState, e);
         }
     }
 
+    // using an empty dbName is interpreted as system shutdown
     protected void assertSystemShutdownOK(
         String dbName, String user, String password)
     throws SQLException {
-        if (usingEmbedded())
-        {
-            pds = J2EEDataSource.getConnectionPoolDataSource();
-            JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
-            JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(pds, "user", user);
-            JDBCDataSource.setBeanProperty(pds, "password", password);
-            try {
-                pds.getPooledConnection();
-                fail("expected system shutdown resulting in XJ015 error");
-            } catch (SQLException e) {
-                // expect XJ015, system shutdown, on successful shutdown
-                assertSQLState("XJ015", e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientConnectionPoolDataSource pds = 
-                (ClientConnectionPoolDataSource)
-                J2EEDataSource.getConnectionPoolDataSource();
-            // current client/server code interprets shutdown with an
-            // empty databaseName string as a system shutdown
-            pds.setDatabaseName(dbName);
-            // Client does not support *ds*.setShutdown(), use set Conn Attrs 
-            pds.setConnectionAttributes(
-                    "shutdown=true;user=" + user + ";password=" + password);
-            try {
-                pds.getPooledConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect XJ015 on successful shutdown
-                assertSQLState("XJ015", e);
-            }
+        pds = J2EEDataSource.getConnectionPoolDataSource();
+        JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
+        JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
+        JDBCDataSource.setBeanProperty(pds, "user", user);
+        JDBCDataSource.setBeanProperty(pds, "password", password);
+        try {
+            pds.getPooledConnection();
+            fail("expected system shutdown resulting in XJ015 error");
+        } catch (SQLException e) {
+            // expect XJ015, system shutdown, on successful shutdown
+            assertSQLState("XJ015", e);
         }
     }
 
     protected void assertSystemShutdownFail(
             String expectedError, String dbName, String user, String password)
     throws SQLException {
-        if (usingEmbedded())
-        {
-            pds = J2EEDataSource.getConnectionPoolDataSource();
-            JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
-            JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(pds, "user", user);
-            JDBCDataSource.setBeanProperty(pds, "password", password);
-            try {
-                pds.getPooledConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedError, e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientConnectionPoolDataSource pds = 
-                (ClientConnectionPoolDataSource)
-                J2EEDataSource.getConnectionPoolDataSource();
-            // current client/server code interprets shutdown with an
-            // empty databaseName string as a system shutdown
-            pds.setDatabaseName(dbName);
-            // Client does not support *ds*.setShutdown(), use set Conn Attrs 
-            pds.setConnectionAttributes(
-                    "shutdown=true;user=" + user + ";password=" + password);
-            try {
-                pds.getPooledConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedError, e);
-            }
+        pds = J2EEDataSource.getConnectionPoolDataSource();
+        JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
+        JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
+        JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(pds, "user", user);
+        JDBCDataSource.setBeanProperty(pds, "password", password);
+        try {
+            pds.getPooledConnection();
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            assertSQLState(expectedError, e);
         }
     }
 
     public void assertConnectionFail(String dbName) throws SQLException {
-        // can't rely on junit framework automatic methods for they'll
-        // default the user / password which need to remain empty
+        pds = J2EEDataSource.getConnectionPoolDataSource();
+        // Reset to no user/password though client requires
+        // a valid name, so reset to the default
         if (usingDerbyNetClient())
-        {
-            ClientConnectionPoolDataSource pds = 
-                new ClientConnectionPoolDataSource();
-            pds.setDatabaseName(dbName);
-            try {
-                pds.getPooledConnection();
-                fail("expected connection to fail");
-            } catch (SQLException e) {
-                assertSQLState("08004", e);
-            }
-        }
-        else if (usingEmbedded()) 
-        {
-            EmbeddedConnectionPoolDataSource pds = 
-                new EmbeddedConnectionPoolDataSource();
-            pds.setDatabaseName(dbName);
-            try {
-                pds.getPooledConnection();
-                fail("expected connection to fail");
-            } catch (SQLException e) {
-                assertSQLState("08004", e);
-            }
+            JDBCDataSource.setBeanProperty(pds, "user", "APP");
+        else
+            JDBCDataSource.clearStringBeanProperty(pds, "user");
+        JDBCDataSource.clearStringBeanProperty(pds, "password");
+        JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
+        try {
+            pds.getPooledConnection();
+            fail("expected connection to fail");
+        } catch (SQLException e) {
+            assertSQLState("08004", e);
         }
     }
 }

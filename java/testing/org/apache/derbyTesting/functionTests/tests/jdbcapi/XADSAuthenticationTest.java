@@ -23,14 +23,12 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.SQLException;
-import java.util.Properties;
+
 import javax.sql.XADataSource;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.jdbc.ClientXADataSource;
-import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -151,72 +149,50 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         }
     }
     
-    protected void assertShutdownOK(
-        String dbName, String user, String password)
-    throws SQLException {
-        if (usingEmbedded())
-        {
-            xads = J2EEDataSource.getXADataSource();
-            JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
-            JDBCDataSource.setBeanProperty(
-                xads, "shutdownDatabase", "shutdown");
-            try {
-                xads.getXAConnection(user, password);
-                fail ("expected a failed shutdown connection");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
+    protected void assertShutdownUsingSetShutdownOK(
+            String dbName, String user, String password) throws SQLException {
+        xads = J2EEDataSource.getXADataSource();
+        JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
+        JDBCDataSource.setBeanProperty(
+            xads, "shutdownDatabase", "shutdown");
+        try {
+            xads.getXAConnection(user, password);
+            fail ("expected a failed shutdown connection");
+        } catch (SQLException e) {
+            // expect 08006 on successful shutdown
+            assertSQLState("08006", e);
         }
-        else if (usingDerbyNetClient())
-        {
-            ClientXADataSource xads = 
-                (ClientXADataSource)J2EEDataSource.getXADataSource();
-            xads.setDatabaseName(dbName);
-            xads.setConnectionAttributes("shutdown=true");
-            try {
-                xads.getXAConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
+    }
+
+    protected void assertShutdownUsingConnAttrsOK(
+        String dbName, String user, String password) throws SQLException {
+        xads = J2EEDataSource.getXADataSource();
+        JDBCDataSource.setBeanProperty(
+            xads, "connectionAttributes", "shutdown=true");
+        try {
+            xads.getXAConnection(user, password);
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            // expect 08006 on successful shutdown
+            assertSQLState("08006", e);
         }
     }
 
     protected void assertShutdownWOUPOK(
         String dbName, String user, String password)
     throws SQLException {
-        if (usingEmbedded())
-        {
-            xads = J2EEDataSource.getXADataSource();
-            JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
-            JDBCDataSource.setBeanProperty(
+        xads = J2EEDataSource.getXADataSource();
+        JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
+        JDBCDataSource.setBeanProperty(
                 xads, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(xads, "user", user);
-            JDBCDataSource.setBeanProperty(xads, "password", password);
-            try {
-                xads.getXAConnection();
-                fail ("expected a failed shutdown connection");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientXADataSource xads = 
-                (ClientXADataSource)J2EEDataSource.getXADataSource();
-            xads.setDatabaseName(dbName);
-            xads.setConnectionAttributes(
-                "shutdown=true;user=" + user + ";password=" + password);
-            try {
-                xads.getXAConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect 08006 on successful shutdown
-                assertSQLState("08006", e);
-            }
+        JDBCDataSource.setBeanProperty(xads, "user", user);
+        JDBCDataSource.setBeanProperty(xads, "password", password);
+        try {
+            xads.getXAConnection();
+            fail ("expected a failed shutdown connection");
+        } catch (SQLException e) {
+            // expect 08006 on successful shutdown
+            assertSQLState("08006", e);
         }
     }
 
@@ -224,30 +200,14 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        if (usingEmbedded()) 
-        {
-            xads = J2EEDataSource.getXADataSource();
-            JDBCDataSource.setBeanProperty(xads, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
-            try {
-                xads.getXAConnection(user, password);
-                fail("expected failed shutdown");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientXADataSource xads = 
-                (ClientXADataSource)J2EEDataSource.getXADataSource();
-            xads.setDatabaseName(dbName);
-            xads.setConnectionAttributes("shutdown=true");
-            try {
-                xads.getXAConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
+        xads = J2EEDataSource.getXADataSource();
+        JDBCDataSource.setBeanProperty(xads, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
+        try {
+            xads.getXAConnection(user, password);
+            fail("expected failed shutdown");
+        } catch (SQLException e) {
+            assertSQLState(expectedSqlState, e);
         }
     }
             
@@ -255,136 +215,69 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        if (usingEmbedded()) 
-        {
-            xads = J2EEDataSource.getXADataSource();
-            JDBCDataSource.setBeanProperty(xads, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
-            JDBCDataSource.setBeanProperty(xads, "user", user);
-            JDBCDataSource.setBeanProperty(xads, "password", password);
-            try {
-                xads.getXAConnection();
-                fail("expected failed shutdown");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientXADataSource xads = 
-                (ClientXADataSource)J2EEDataSource.getXADataSource();
-            xads.setDatabaseName(dbName);
-            xads.setConnectionAttributes(
-                "shutdown=true;user=" + user + ";password=" + password);
-            try {
-                xads.getXAConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedSqlState, e);
-            }
+        xads = J2EEDataSource.getXADataSource();
+        JDBCDataSource.setBeanProperty(xads, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
+        JDBCDataSource.setBeanProperty(xads, "user", user);
+        JDBCDataSource.setBeanProperty(xads, "password", password);
+        try {
+            xads.getXAConnection();
+            fail("expected failed shutdown");
+        } catch (SQLException e) {
+            assertSQLState(expectedSqlState, e);
         }
     }
 
     protected void assertSystemShutdownOK(
         String dbName, String user, String password)
     throws SQLException {
-        if (usingEmbedded())
-        {
-            xads = J2EEDataSource.getXADataSource();
-            JDBCDataSource.setBeanProperty(
+        xads = J2EEDataSource.getXADataSource();
+        JDBCDataSource.setBeanProperty(
                 xads, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
-            JDBCDataSource.setBeanProperty(xads, "user", user);
-            JDBCDataSource.setBeanProperty(xads, "password", password);
-            try {
-                xads.getXAConnection();
-                fail("expected system shutdown resulting in XJ015 error");
-            } catch (SQLException e) {
-                // expect XJ015, system shutdown, on successful shutdown
-                assertSQLState("XJ015", e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientXADataSource xads = 
-                (ClientXADataSource)J2EEDataSource.getXADataSource();
-            // current client/server code interprets shutdown with an
-            // empty databaseName string as a system shutdown
-            xads.setDatabaseName(dbName);
-            // Client does not support *ds*.setShutdown(), use set Conn Attrs 
-            xads.setConnectionAttributes(
-                "shutdown=true;user=" + user + ";password=" + password);
-            try {
-                xads.getXAConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                // expect XJ015 on successful shutdown
-                assertSQLState("XJ015", e);
-            }
+        JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
+        JDBCDataSource.setBeanProperty(xads, "user", user);
+        JDBCDataSource.setBeanProperty(xads, "password", password);
+        try {
+            xads.getXAConnection();
+            fail("expected system shutdown resulting in XJ015 error");
+        } catch (SQLException e) {
+            // expect XJ015, system shutdown, on successful shutdown
+            assertSQLState("XJ015", e);
         }
     }
 
     protected void assertSystemShutdownFail(
         String expectedError, String dbName, String user, String password)
     throws SQLException {
-        if (usingEmbedded())
-        {
-            xads = J2EEDataSource.getXADataSource();
-            JDBCDataSource.setBeanProperty(
+        xads = J2EEDataSource.getXADataSource();
+        JDBCDataSource.setBeanProperty(
                 xads, "shutdownDatabase", "shutdown");
-            JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
-            JDBCDataSource.setBeanProperty(xads, "user", user);
-            JDBCDataSource.setBeanProperty(xads, "password", password);
-            try {
-                xads.getXAConnection();
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedError, e);
-            }
-        }
-        else if (usingDerbyNetClient())
-        {
-            ClientXADataSource xads = 
-                (ClientXADataSource)J2EEDataSource.getXADataSource();
-            // current client/server code interprets shutdown with an
-            // empty databaseName string as a system shutdown
-            xads.setDatabaseName(dbName);
-            // Client does not support *ds*.setShutdown(), use set Conn Attrs 
-            xads.setConnectionAttributes(
-                "shutdown=true;user=" + user + ";password=" + password);
-            try {
-                xads.getXAConnection(user, password);
-                fail("expected shutdown to fail");
-            } catch (SQLException e) {
-                assertSQLState(expectedError, e);
-            }
+        JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
+        JDBCDataSource.setBeanProperty(xads, "user", user);
+        JDBCDataSource.setBeanProperty(xads, "password", password);
+        try {
+            xads.getXAConnection();
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            assertSQLState(expectedError, e);
         }
     }
 
     public void assertConnectionFail(String dbName) throws SQLException {
-        // can't rely on junit framework automatic methods for they'll
-        // default the user / password which need to remain empty
+        xads = J2EEDataSource.getXADataSource();
+        // Reset to no user/password though client requires
+        // a valid name, so reset to the default
         if (usingDerbyNetClient())
-        {
-            ClientXADataSource xads = new ClientXADataSource();
-            xads.setDatabaseName(dbName);
-            try {
-                xads.getXAConnection();
-                fail("expected connection to fail");
-            } catch (SQLException e) {
-                assertSQLState("08004", e);
-            }
-        }
-        else if (usingEmbedded()) 
-        {
-            EmbeddedXADataSource xads = new EmbeddedXADataSource();
-            xads.setDatabaseName(dbName);
-            try {
-                xads.getXAConnection();
-                fail("expected connection to fail");
-            } catch (SQLException e) {
-                assertSQLState("08004", e);
-            }
+            JDBCDataSource.setBeanProperty(xads, "user", "APP");
+        else
+            JDBCDataSource.clearStringBeanProperty(xads, "user");
+        JDBCDataSource.clearStringBeanProperty(xads, "password");
+        JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
+        try {
+            xads.getXAConnection();
+            fail("expected connection to fail");
+        } catch (SQLException e) {
+            assertSQLState("08004", e);
         }
     }
 }
