@@ -79,15 +79,6 @@ public class RefTypeCompiler extends BaseTypeCompiler
 		return convertible(otherType,false);
 	}
 
-
-	/** @see TypeCompiler#comparable */
-	public boolean comparable(TypeId otherType,
-                              boolean forEquals,
-                              ClassFactory cf)
-	{
-		return false;
-	}
-
 	/** @see TypeCompiler#storable */
 	public boolean storable(TypeId otherType, ClassFactory cf)
 	{

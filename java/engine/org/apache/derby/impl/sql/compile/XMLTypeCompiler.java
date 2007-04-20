@@ -40,24 +40,6 @@ import org.apache.derby.iapi.reference.ClassName;
 public class XMLTypeCompiler extends BaseTypeCompiler
 {
     /**
-     * Tell whether this type (XML) can be compared to the given type.
-     * Says SQL/XML[2003] spec:
-     *
-     * 4.2.2 XML comparison and assignment
-     * "XML values are not comparable."
-     *
-     * @param otherType The TypeId of the other type.
-     */
-    public boolean comparable(TypeId otherType,
-                            boolean forEquals,
-                            ClassFactory cs)
-    {
-        // An XML value cannot be compared to any type--
-        // not even to other XML values.
-        return false;
-    }
-
-    /**
      * Tell whether this type (XML) can be converted to the given type.
      *
      * An XML value can't be converted to any other type, per

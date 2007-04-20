@@ -42,37 +42,6 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 	/* TypeCompiler methods */
 
 	/**
-	 * User types are comparable to other user types only if
-	 * (for now) they are the same type and are being used to
-	 * implement some JDBC type.  This is sufficient for
-	 * date/time types; it may be generalized later for e.g.
-	 * comparison of any user type with one of its subtypes.
-	 *
-	 * @param otherType the type of the instance to compare with this type.
-	 * @param forEquals True if this is an = or <> comparison, false
-	 *					otherwise.
-	 * @param cf		A ClassFactory
-	 * @return true if otherType is comparable to this type, else false.
-	 */
-	public boolean comparable(TypeId otherType,
-                              boolean forEquals,
-                              ClassFactory cf)
-	{
-		if (forEquals)
-			return true;
-
-		try {
-			Class thisClass = cf.getClassInspector().getClass(
-									getTypeId().getCorrespondingJavaTypeName());
-
-			return java.lang.Comparable.class.isAssignableFrom(thisClass);
-
-		} catch (ClassNotFoundException cnfe) {
-			return false;
-		}
-	}
-
-	/**
 	 * User types are convertible to other user types only if
 	 * (for now) they are the same type and are being used to
 	 * implement some JDBC type.  This is sufficient for

@@ -49,22 +49,6 @@ import org.apache.derby.iapi.reference.JDBC20Translation;
 
 public class LOBTypeCompiler extends BaseTypeCompiler
 {
-       /**
-         * Tell whether this type (BLOB) can be compared to the given type. // 
-		 * BLOBS are not comparable.
-         *
-         * @param otherType     The TypeId of the other type.
-         */
-
-        public boolean comparable(TypeId otherType,
-                                  boolean forEquals,
-                                  ClassFactory cf)
-        {
-			return false;
-        }
-
-
-
         /**
          * Tell whether this type (LOB) can be converted to the given type.
          *

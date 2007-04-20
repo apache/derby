@@ -50,29 +50,6 @@ import org.apache.derby.iapi.reference.JDBC20Translation;
 public class BitTypeCompiler extends BaseTypeCompiler
 {
         /**
-         * Tell whether this type (bit) can be compared to the given type. // 
-         *
-		 * Bit Types can only be compared to Bit Types.
-		 * Long Bit Types can not be compared
-         * @param otherType     The TypeId of the other type.
-         */
-
-        public boolean comparable(TypeId otherType,
-                                  boolean forEquals,
-                                  ClassFactory cf)
-		{
-
-			if (getTypeId().isLongConcatableTypeId() ||
-				otherType.isLongConcatableTypeId())
-				return false;
-
-			TypeCompiler otherTC = getTypeCompiler(otherType);
-			return (otherType.isBitTypeId() || 
-					(otherType.userType() &&
-					 otherTC.comparable(getTypeId(), forEquals, cf)));
-        }
-	
-        /**
          * Tell whether this type (bit) can be converted to the given type.
          *
          * @see TypeCompiler#convertible

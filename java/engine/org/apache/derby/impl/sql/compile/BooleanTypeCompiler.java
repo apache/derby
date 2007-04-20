@@ -46,27 +46,6 @@ import java.sql.Types;
 public class BooleanTypeCompiler extends BaseTypeCompiler
 {
 	/**
-	 * Tell whether this type (boolean) can be compared to the given type.
-	 *
-	 * @param otherType	The TypeId of the other type.
-	 */
-
-	public boolean comparable(TypeId otherType,
-                              boolean forEquals,
-                              ClassFactory cf)
-	{
-		TypeId thisTypeId = getTypeId();
-		TypeCompiler otherTypeCompiler = getTypeCompiler(otherType);
-
-		/* Only allow comparison of Boolean with Boolean or string types */
-		return otherType.getSQLTypeName().equals(thisTypeId.getSQLTypeName()) ||
-				otherType.isStringTypeId() ||
-				otherType.isNumericTypeId() ||
-				(otherType.userType() &&
-					otherTypeCompiler.comparable(thisTypeId, forEquals, cf));
-	}
-
-	/**
 	 * Tell whether this type (boolean) can be converted to the given type.
 	 *
 	 * @see TypeCompiler#convertible

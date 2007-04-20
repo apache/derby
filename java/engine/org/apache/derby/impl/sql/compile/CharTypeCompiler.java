@@ -51,38 +51,6 @@ import org.apache.derby.iapi.reference.JDBC20Translation;
 
 public final class CharTypeCompiler extends BaseTypeCompiler
 {
-        /**
-         * Tell whether this type (char) can be compared to the given type.
-		 * Long types can not be compared.
-		 * VARCHAR AND CHAR can be compared to CHAR/VARCHAR/DATE/TIME/TIMESTAMP
-		 *
-         *
-         * @param otherType     The TypeId of the other type.
-         */
-
-        public boolean comparable(TypeId otherType,
-                                  boolean forEquals,
-                                  ClassFactory cf)
-		{
-				
-			// Long Types cannot be compared
-			if (getTypeId().isLongConcatableTypeId() ||
-				otherType.isLongConcatableTypeId())
-				return false;
-			
-			// CHAR and VARCHAR can compare to Strings or DATE/TIME/TIMESTAMP
-			if((otherType.isStringTypeId() ||
-				otherType.isDateTimeTimeStampTypeID() ||
-				otherType.isBooleanTypeId()))
-				return true;
-			
-			
-			TypeCompiler otherTC = getTypeCompiler(otherType);
-			return (otherType.userType() && otherTC.comparable(getTypeId(),
-															   forEquals, cf));
-		}
-	
-	
 	   /**
          * Tell whether this type (char) can be converted to the given type.
          *

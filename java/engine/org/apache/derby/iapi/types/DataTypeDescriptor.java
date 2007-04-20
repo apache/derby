@@ -42,6 +42,7 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 
 
+import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.io.ObjectOutput;
@@ -833,6 +834,158 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		return typeDescriptor.equals(aTypeDescriptor);
 	}
 
+	/**
+	 * Check if this type is comparable with the passed type.
+	 * 
+	 * @param compareWithDTD the type of the instance to compare with this type.
+	 * @param forEquals True if this is an = or <> comparison, false
+	 *					otherwise.
+	 * @param cf		A ClassFactory
+	 * @return true if compareWithDTD is comparable to this type, else false.
+	 */
+	public boolean	comparable(DataTypeDescriptor compareWithDTD,
+            boolean forEquals,
+            ClassFactory cf){
+
+		TypeId compareWithTypeID = compareWithDTD.getTypeId();
+		int compareWithJDBCTypeId = compareWithTypeID.getJDBCTypeId();
+
+		// Long types cannot be compared
+		if (compareWithTypeID.isLongConcatableTypeId() || typeId.isLongConcatableTypeId())
+			return false;
+
+		// Ref types cannot be compared
+		if (typeId.isRefTypeId() || compareWithTypeID.isRefTypeId())
+			return false;
+		
+		//If this DTD is not user defined type but the DTD to be compared with 
+		//is user defined type, then let the other DTD decide what should be the
+		//outcome of the comparable method.
+		if (!(typeId.isUserDefinedTypeId()) && 
+				(compareWithTypeID.isUserDefinedTypeId()))
+			return compareWithDTD.comparable(this, forEquals, cf);
+		
+        switch (typeId.getJDBCTypeId()) 
+		{
+                case Types.DECIMAL:
+                case Types.BIGINT:
+                case Types.DOUBLE:
+                case Types.INTEGER:
+                case Types.NUMERIC:
+                case Types.REAL:
+                case Types.SMALLINT:
+                case Types.TINYINT:
+                	// Numeric types are comparable to numeric types, boolean 
+                	//types and to comparable user types
+            		return (compareWithTypeID.isNumericTypeId() ||
+            		compareWithTypeID.isBooleanTypeId());
+
+                case Types.CHAR:
+                case Types.LONGVARCHAR:
+                case Types.VARCHAR:
+            		// CHAR and VARCHAR are comparable to strings, boolean, 
+                	// DATE/TIME/TIMESTAMP and to comparable user types
+            		if((compareWithTypeID.isDateTimeTimeStampTypeID() ||
+            				compareWithTypeID.isBooleanTypeId()))
+            				return true;
+            		//If both the types are string types, then we need to make
+            		//sure they have the same collation set on them
+            		if (compareWithTypeID.isStringTypeId() && typeId.isStringTypeId()) {
+            			if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
+            					getCollationType() == compareWithDTD.getCollationType())
+            				return true;
+            			else
+            				return false;
+            		} else
+            			return false;
+            		
+
+                case Types.BIT:
+                case JDBC30Translation.SQL_TYPES_BOOLEAN:
+            		/* Are comparable to Boolean, string, numeric and to 
+            		 * comparable user types */
+            		return (compareWithTypeID.getSQLTypeName().equals(typeId.getSQLTypeName()) ||
+            				compareWithTypeID.isStringTypeId() ||
+            				compareWithTypeID.isNumericTypeId()); 
+
+                case Types.DATE:
+                	/*
+                	 * Dates are comparable to dates, strings and to comparable
+                	 * user types.
+                	 */
+            		if (compareWithJDBCTypeId == Types.DATE || 
+            				compareWithTypeID.isStringTypeId())
+            			return true;
+            		else
+            			return false;
+
+                case Types.TIME:
+                	/*
+                	 * Times are comparable to times, strings and to comparable
+                	 * user types.
+                	 */
+            		if (compareWithJDBCTypeId == Types.TIME || 
+            				compareWithTypeID.isStringTypeId())
+            			return true;
+            		else
+            			return false;
+
+                case Types.TIMESTAMP:
+                	/*
+                	 * Timestamps are comparable to timestamps, strings and to 
+                	 * comparable user types.
+                	 */
+            		if (compareWithJDBCTypeId == Types.TIMESTAMP || 
+            				compareWithTypeID.isStringTypeId())
+            			return true;
+            		else
+            			return false;
+
+                case Types.BINARY:
+                case Types.LONGVARBINARY:
+                case Types.VARBINARY:
+                	//Are comparable to other bit types and comparable user types
+                	return (compareWithTypeID.isBitTypeId()); 
+
+                case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
+                case Types.OTHER:
+                	/*
+                	 * User types are comparable to other user types only if
+                	 * (for now) they are the same type and are being used to
+                	 * implement some JDBC type.  This is sufficient for
+                	 * date/time types; it may be generalized later for e.g.
+                	 * comparison of any user type with one of its subtypes.
+                	 */
+                	if (forEquals)
+                		return true;
+                	try {
+                	
+                		Class thisClass = cf.getClassInspector().getClass(
+    					typeId.getCorrespondingJavaTypeName());
+                		
+                		return java.lang.Comparable.class.isAssignableFrom(thisClass);
+                	} catch (ClassNotFoundException cnfe) {
+                		return false;
+                	}
+
+                case StoredFormatIds.XML_TYPE_ID:
+                    /*
+                     * Tell whether this type (XML) can be compared to the given type.
+                     * Says SQL/XML[2003] spec:
+                     *
+                     * 4.2.2 XML comparison and assignment
+                     * "XML values are not comparable."
+                     * 
+                     * An XML value cannot be compared to any type--
+                     * not even to other XML values.
+                     */ 
+                	return false;
+		}
+
+		return false;
+	}
+	
+		
 	/**
 	 * Converts this data type descriptor (including length/precision)
 	 * to a string. E.g.

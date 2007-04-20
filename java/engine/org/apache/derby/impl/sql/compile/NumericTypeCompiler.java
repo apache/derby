@@ -304,14 +304,6 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 					maximumWidth
 				);
 	}
-	/** @see TypeCompiler#comparable */
-	public boolean comparable(TypeId otherType,
-                              boolean forEquals,
-                              ClassFactory cf)
-	{
-		return numberComparable(otherType, forEquals, cf);
-	}
-
 
 	/** @see TypeCompiler#convertible */
 	public boolean convertible(TypeId otherType, boolean forDataTypeFunction)

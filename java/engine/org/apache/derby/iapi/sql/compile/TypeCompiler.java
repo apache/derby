@@ -96,24 +96,6 @@ public interface TypeCompiler
 							throws StandardException;
 
 	/**
-	 * Determine if this type can be compared to some other type
-	 *
-	 * @param otherType	The CompilationType of the other type to compare
-	 *					this type to
-	 * @param forEquals True if this is an = or <> comparison, false otherwise.
-	 * @param cf		A ClassFactory
-	 *
-	 * @return	true if the types can be compared, false if comparisons between
-	 *			the types are not allowed
-	 */
-
-	boolean				comparable(TypeId otherType,
-                                   boolean forEquals,
-                                   ClassFactory cf);
-
-
-
-	/**
 	 * Determine if this type can be CONVERTed to some other type
 	 *
 	 * @param otherType	The CompilationType of the other type to compare

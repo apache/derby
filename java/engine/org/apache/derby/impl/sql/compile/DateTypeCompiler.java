@@ -41,40 +41,6 @@ import java.sql.Types;
 public class DateTypeCompiler extends BaseTypeCompiler
 {
 	/* TypeCompiler methods */
-
-	/**
-	 * Dates are comparable to timestamps and to comparable
-	 * user types.
-	 *
-	 * @param otherType the type of the instance to compare with this type.
-	 * @param forEquals True if this is an = or <> comparison, false
-	 *					otherwise.
-	 * @param cf		A ClassFactory
-	 * @return true if otherType is comparable to this type, else false.
-	 */
-	public boolean comparable(TypeId otherType,
-                              boolean forEquals,
-                              ClassFactory cf)
-	{
-		int otherJDBCTypeId = otherType.getJDBCTypeId();
-		TypeCompiler otherTC = getTypeCompiler(otherType);
-
-		// Long types cannot be compared
-		if (otherType.isLongConcatableTypeId())
-			return false;
-
-		if (otherJDBCTypeId == Types.DATE || otherType.isStringTypeId())
-			return true;
-
-		/* User types know the rules for what can be compared to them */
-		if (otherType.userType())
-		{
-			return otherTC.comparable(getTypeId(), forEquals, cf);
-		}
-
-		return false;
-	}
-
 	/**
 	 * User types are convertible to other user types only if
 	 * (for now) they are the same type and are being used to

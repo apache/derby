@@ -183,29 +183,6 @@ abstract class BaseTypeCompiler implements TypeCompiler
 
 		return false;
 	}
-
-	/**
-	 * Tell whether this numeric type can be compared to the given type.
-	 *
-	 * @param otherType	The TypeId of the other type.
-	 */
-
-	public boolean numberComparable(TypeId otherType,
-									boolean forEquals,
-									ClassFactory cf)
-	{
-		TypeCompiler otherTC = getTypeCompiler(otherType);
-
-		/* Numbers can be compared to other numbers, 
-		 * boolean and objects
-		 */
-		return otherType.isNumericTypeId() ||
-				otherType.isBooleanTypeId() ||
-				(otherType.userType() && otherTC.comparable(otherType,
-															forEquals,
-															cf));
-	}
-
 	
 	/**
 	 * Tell whether this numeric type can be converted to the given type.

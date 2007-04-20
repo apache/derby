@@ -240,9 +240,10 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		*/
 		boolean forEquals = operator.equals("=") || operator.equals("<>");
 
-        boolean cmp = leftOperand.getTypeCompiler().comparable(rightType,
-                                                               forEquals,
-                                                               getClassFactory());
+        boolean cmp = leftOperand.getTypeServices().comparable(
+        		rightOperand.getTypeServices(),
+				forEquals,
+				getClassFactory());
 		// Bypass the comparable check if this is a rewrite from the 
 		// optimizer.  We will assume Mr. Optimizer knows what he is doing.
           if (!cmp && !forQueryRewrite) {
@@ -431,8 +432,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		 */
 		if (leftTypeId.userType())
 		{
-			if (leftOperand.getTypeCompiler().comparable(leftTypeId, false,
-														   getClassFactory()))
+			if (leftOperand.getTypeServices().comparable(leftOperand.getTypeServices(),
+					false, getClassFactory()))
 				return this;
 
 			leftOperand = leftOperand.genSQLJavaSQLTree();
@@ -442,8 +443,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 
 		if (rightTypeId.userType())
 		{
-			if (rightOperand.getTypeCompiler().comparable(rightTypeId, false,
-															getClassFactory()))
+			if (rightOperand.getTypeServices().comparable(rightOperand.getTypeServices(),
+					false, getClassFactory()))
 				return this;
 
 			rightOperand = rightOperand.genSQLJavaSQLTree();

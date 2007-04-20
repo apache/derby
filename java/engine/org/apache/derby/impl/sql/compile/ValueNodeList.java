@@ -291,10 +291,8 @@ public class ValueNodeList extends QueryTreeNodeVector
 		int			 size = size();
 		TypeId	leftType;
 		ValueNode		valueNode;
-		TypeCompiler leftTC;
 
 		leftType = leftOperand.getTypeId();
-		leftTC = leftOperand.getTypeCompiler();
 
 		for (int index = 0; index < size; index++)
 		{
@@ -304,7 +302,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 			** Can the types be compared to each other?  If not, throw an
 			** exception.
 			*/
-			if (! leftTC.comparable(valueNode.getTypeId(),
+			if (! leftOperand.getTypeServices().comparable(valueNode.getTypeServices(),
 									false,
 									getClassFactory()))
 			{

@@ -457,8 +457,8 @@ public class ConditionalNode extends ValueNode
 
 		// RESOLVE DJDOI - this looks wrong, why should the then expression
 		// be comparable to the then expression ??
-		if (! thenExpression.getTypeCompiler().
-			 comparable(elseExpression.getTypeId(), false, getClassFactory()) &&
+		if (! thenExpression.getTypeServices().
+			 comparable(elseExpression.getTypeServices(), false, getClassFactory()) &&
 			! cu.assignableTo(thenExpression.getTypeId().getCorrespondingJavaTypeName(),
 							  elseExpression.getTypeId().getCorrespondingJavaTypeName()) &&
 			! cu.assignableTo(elseExpression.getTypeId().getCorrespondingJavaTypeName(),
