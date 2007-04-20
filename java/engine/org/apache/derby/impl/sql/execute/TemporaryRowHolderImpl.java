@@ -596,7 +596,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		if (positionIndexCreated)
 		{
 			tc.dropConglomerate(positionIndexConglomId);
-			uniqueIndexCreated = false;
+			positionIndexCreated = false;
 		}
 
 		if (conglomCreated)
