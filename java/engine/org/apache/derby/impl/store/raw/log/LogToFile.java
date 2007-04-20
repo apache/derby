@@ -460,6 +460,11 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 */
 	private boolean isWriteSynced = false;
 
+    /**
+     * Status for whether the check on the sync error on some JVMs has been
+     * done or not. See the checkJvmSyncError method for details.
+     */
+    private boolean jvmSyncErrorChecked = false;
     
     // log file that is yet to be copied to backup, updates to this variable 
     // needs to visible  checkpoint thread. 
@@ -5008,23 +5013,21 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
  	 */
 	private StorageRandomAccessFile openLogFileInWriteMode(StorageFile logFile) throws IOException
 	{
-		StorageRandomAccessFile log;
-		try{
-			log = privRandomAccessFile(logFile, "rws");
-		}catch(FileNotFoundException ex)
-		{
-			// Normally this exception should never occur. For some reason
-			// currently on Mac JVM 1.4.2 FileNotFoundException exception is
-			// thrown if a file is opened in "rws" mode and if it already
-			// exists. Please refere to Derby-1 for more/ details on this issue.
-			// Temporary workaround to avoid this problem is to make the logging 
-			// system use file sync mechanism. 
+        /* Some JVMs have an error in the code for write syncing. If this error
+           is present we disable write syncing and fall back to doing writes
+           followed by an explicit sync operation. See the details about this
+           problem in the checkJvmSyncError() method. This code should be
+           removed when we no longer support the JVMs with this problem. */
+        if ( !jvmSyncErrorChecked ) {
+            if ( checkJvmSyncError(logFile) ) {
+                // To work around the problem of error for write syncing we
+                // disable write sync and open the file in "rw" mode
+                isWriteSynced = false;
+                return privRandomAccessFile(logFile, "rw");
+            }
+        }
 
-			// disable the write sync and open the file in "rw" mode. 
-			isWriteSynced = false;
-			log = privRandomAccessFile(logFile, "rw");
-		}
-		
+		StorageRandomAccessFile log = privRandomAccessFile(logFile, "rws");
 		return log ;
 	}
 
@@ -5035,6 +5038,68 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             return logDir.toString();
         return logDevice + logStorageFactory.getSeparator() + logDir.toString();
     } // end of getLogDirPath
+
+
+    /**
+     * In Java 1.4.2 and newer rws and rwd modes for RandomAccessFile
+     * are supported. Still, on some JVMs (e.g. early versions of 1.4.2
+     * and 1.5 on Mac OS and FreeBSD) the support for rws and rwd is
+     * not working. This method attempts to detect this by opening an
+     * existing file in "rws" mode. If this fails, Derby should fall
+     * back to use "rw" mode for the log files followed by explicit
+     * syncing of the log.
+     *
+     * Note: it is important to use "rws" for the test. If "rwd" is used, no
+     * exception is thrown when opening the file, but the syncing does not
+     * take place.
+     *
+     * For more details see DERBY-1 (and DERBY-2020).
+     *
+     * @param logFile information about the log file to be opened
+     *
+     * @return true if a JVM error is detected, false otherwise
+     *
+     * @exception StandardException Standard Derby exception
+     */
+    private boolean checkJvmSyncError(StorageFile logFile) throws IOException
+    {
+        boolean hasJvmSyncError = false;
+        StorageRandomAccessFile rwsTest;
+
+        // Normally this log file already exists but in case it does
+        // not we open the file using "rw" mode. This is needed in
+        // order to ensure that the file already exists when it is
+        // opened in "rws" mode. This should succeed on all JVMs
+        rwsTest = privRandomAccessFile(logFile, "rw");
+        rwsTest.close();
+
+        // Try to re-open the file in "rws" mode
+        try{
+            rwsTest = privRandomAccessFile(logFile, "rws");
+            rwsTest.close();
+        }
+        catch (FileNotFoundException ex) {
+            // Normally this exception should never occur. For some
+            // reason currently on some Mac and FreeBSD JVM 1.4.2 and
+            // 1.5 FileNotFoundException exception is thrown if a file
+            // is opened in "rws" mode and if it already
+            // exists. Please refer to DERBY-1 for more details on
+            // this issue.  Temporary workaround to avoid this problem
+            // is to make the logging system use file sync mechanism.
+            logErrMsg("LogToFile.checkJvmSyncError: Your JVM seems to have a " +
+                      "problem with implicit syncing of log files. Will use " +
+                      "explicit syncing instead.");
+
+            hasJvmSyncError = true;
+        }
+
+        // Set this variable to true to avoid that this method is called
+        // multiple times
+        jvmSyncErrorChecked = true;
+
+        return hasJvmSyncError;
+    }
+
 
     /*
         Following  methods require Priv Blocks to run under a security manager.
