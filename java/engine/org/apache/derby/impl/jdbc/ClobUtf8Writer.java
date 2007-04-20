@@ -32,14 +32,13 @@ import org.apache.derby.iapi.services.i18n.MessageService;
  */
 final class ClobUtf8Writer extends Writer {
     private ClobStreamControl control;    
-    private long pos; //postion in bytes
+    private long pos; // Position in bytes.
     private boolean closed;
     
     /**
      * Constructor.
      * @param control 
      * @param pos 
-     * @return 
      */
     ClobUtf8Writer(ClobStreamControl control, long pos) {
         this.control = control;

@@ -103,10 +103,13 @@ final class ClobStreamControl extends LOBStreamControl {
     }
     
     /**
-     * constructs and reurns a reader.
-     * @param pos 
-     * @return 
-     * @throws IOException, SQLException
+     * Construct and return a <code>Reader</code>.
+     * @param pos initial position of the returned <code>Reader</code> in
+     *      number of characters
+     * @return A <code>Reader</code> with the underlying <code>CLOB</code>
+     *      value as source.
+     * @throws IOException
+     * @throws SQLException
      */
     Reader getReader (long pos) throws IOException, SQLException {
         Reader isr = new ClobUpdateableReader (
@@ -120,11 +123,12 @@ final class ClobStreamControl extends LOBStreamControl {
     }    
     
     /**
-     * returns a substring.
+     * Returns a substring.
      * @param bIndex 
      * @param eIndex 
-     * @return 
-     * @throws IOException, SQLException
+     * @return A substring of the <code>CLOB</code> value.
+     * @throws IOException
+     * @throws SQLException
      */
     synchronized String getSubstring (long bIndex, long eIndex) 
                                             throws IOException, SQLException {
@@ -158,8 +162,8 @@ final class ClobStreamControl extends LOBStreamControl {
     }
     
     /**
-     * returns the size of clob in bytes.
-     * @return 
+     * Returns the size of the Clob in bytes.
+     * @return Number of bytes in the <code>CLOB</code> value.
      * @throws IOException
      */
     long getByteLength () throws IOException {
