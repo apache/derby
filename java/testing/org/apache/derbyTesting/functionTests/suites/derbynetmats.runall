@@ -17,7 +17,6 @@ jdbcapi/odbc_metadata.java
 lang/optimizerOverrides.sql
 lang/big.sql
 lang/bug5054.java
-lang/forupdate.sql
 lang/holdCursorIJ.sql
 lang/wisconsin.java
 lang/ShutdownDatabase.java

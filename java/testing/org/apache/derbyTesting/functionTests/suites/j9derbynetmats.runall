@@ -11,7 +11,6 @@ jdbcapi/metadataMultiConn.java
 jdbcapi/odbc_metadata.java
 lang/big.sql
 lang/bug5054.java
-lang/forupdate.sql
 lang/holdCursorIJ.sql
 store/holdCursorExternalSortJDBC30.sql
 store/holdCursorJDBC30.sql
