@@ -25,7 +25,6 @@ lang/desc_index.sql
 lang/dropTable.sql
 lang/dynamicLikeOptimization.sql
 lang/emptyStatistics.sql
-lang/errorCode.sql
 lang/errorStream.java
 lang/fk_nonSPS.sql
 lang/grantRevokeDDL.sql
