@@ -99,7 +99,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(CollationTest.suite());
         suite.addTest(ScrollCursors1Test.suite());
         suite.addTest(SimpleTest.suite());
-
+        suite.addTest(ReleaseCompileLocksTest.suite());
         suite.addTest(ErrorCodeTest.suite());
 
         // Add the XML tests, which exist as a separate suite
