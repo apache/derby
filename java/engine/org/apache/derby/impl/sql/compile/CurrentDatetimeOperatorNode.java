@@ -143,8 +143,6 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 											MethodBuilder mb)
 									throws StandardException
 	{
-		acb.pushDataValueFactory(mb);
-
 		/*
 		** First, we generate the current expression to be stuffed into
 		** the right shape of holder.
@@ -161,9 +159,7 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 				break;
 		}
 
-		String fieldType = getTypeCompiler().interfaceName();
-		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, fieldType);
-		getTypeCompiler().generateDataValue(mb, field);
+		acb.generateDataValue(mb, getTypeCompiler(), (LocalField)null);
 	}
 
 	/*
