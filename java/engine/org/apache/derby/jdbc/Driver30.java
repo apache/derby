@@ -30,9 +30,15 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredConnection30;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
+import org.apache.derby.iapi.jdbc.ResourceAdapter;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.derby.impl.jdbc.*;
+
+/** -- jdbc 2.0. extension -- */
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
 
 import java.util.Properties;
 
@@ -123,4 +129,30 @@ public class Driver30 extends Driver20 {
 
 		return new BrokeredConnection30(control);
 	}
+
+    /**
+     * Create and return an EmbedPooledConnection from the received instance
+     * of EmbeddedDataSource.
+     */
+    protected PooledConnection getNewPooledConnection(
+        EmbeddedDataSource eds, String user, String password,
+        boolean requestPassword) throws SQLException
+    {
+        return new EmbedPooledConnection(
+            eds, user, password, requestPassword);
+    }
+
+    /**
+     * Create and return an EmbedXAConnection from the received instance
+     * of EmbeddedDataSource.
+     */
+    protected XAConnection getNewXAConnection(
+        EmbeddedDataSource eds, ResourceAdapter ra,
+        String user, String password, boolean requestPassword)
+        throws SQLException
+    {
+        return new EmbedXAConnection(
+            eds, ra, user, password, requestPassword);
+    }
+
 }

@@ -32,6 +32,7 @@ public final class ServerSetup extends ChangeConfigurationSetup {
 
     private final String host;
     private final int port;
+    private JDBCClient client;
     
     public ServerSetup(Test test, String host, int port) {
         super(test);
@@ -41,7 +42,15 @@ public final class ServerSetup extends ChangeConfigurationSetup {
 
     TestConfiguration getNewConfiguration(TestConfiguration old) {
                
-        return new TestConfiguration(old, JDBCClient.DERBYNETCLIENT,
-                    host, port);
+        return new TestConfiguration(old,
+            (client == null) ? JDBCClient.DERBYNETCLIENT : client, host, port);
+    }
+
+    /**
+     * Specify a JDBCClient to use in place of the default DERBYNETCLIENT.
+     */
+    void setJDBCClient(JDBCClient newClient)
+    {
+        this.client = newClient;
     }
 }

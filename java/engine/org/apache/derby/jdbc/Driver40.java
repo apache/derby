@@ -39,6 +39,7 @@ import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData40;
 import org.apache.derby.impl.jdbc.SQLExceptionFactory40;
 import org.apache.derby.impl.jdbc.EmbedStatement40;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData40;
+import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.impl.jdbc.Util;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -47,6 +48,9 @@ import java.sql.PreparedStatement;
 import java.util.Properties;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
+/** -- jdbc 2.0. extension -- */
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
 
 public class Driver40 extends Driver30 {
     
@@ -160,4 +164,29 @@ public class Driver40 extends Driver30 {
                              (ResultColumnDescriptor[] columnInfo) {
             return new EmbedResultSetMetaData40(columnInfo);
         }
+
+    /**
+     * Create and return an EmbedPooledConnection from the received instance
+     * of EmbeddedDataSource.
+     */
+    protected PooledConnection getNewPooledConnection(
+        EmbeddedDataSource eds, String user, String password,
+        boolean requestPassword) throws SQLException
+    {
+        return new EmbedPooledConnection40(
+            eds, user, password, requestPassword);
+    }
+
+    /**
+     * Create and return an EmbedXAConnection from the received instance
+     * of EmbeddedDataSource.
+     */
+    protected XAConnection getNewXAConnection(
+        EmbeddedDataSource eds, ResourceAdapter ra,
+        String user, String password, boolean requestPassword)
+        throws SQLException
+    {
+        return new EmbedXAConnection40(
+            eds, ra, user, password, requestPassword);
+    }
 }

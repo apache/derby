@@ -44,6 +44,33 @@ public class JDBCDataSource {
     }
     
     /**
+     * Return a ConnectionPoolDataSource corresponding to the current
+     * configuration.  This method returns a generic Object (as opposed
+     * to a ConnectionPoolDataSource) because this class has to work
+     * with JSR169 JVMs, as well, and those JVMs do not include the
+     * javax.sql.ConnectionPoolDataSource class.
+     */
+    public static Object getConnectionPoolDataSource()
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+        return getDataSource(config, (HashMap) null,
+			config.getJDBCClient().getConnectionPoolDataSourceClassName());
+    }
+    
+    /*
+     * Return an XADataSource corresponding to the current configuration.
+     * This method returns a generic Object (as opposed to an XADataSource)
+     * because this class has to work with JSR169 JVMs, as well, and those
+     * JVMs do not include the javax.sql.XADataSource class.
+     */
+    public static Object getXADataSource()
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+        return getDataSource(config, (HashMap) null,
+            config.getJDBCClient().getXADataSourceClassName());
+    }
+    
+    /**
      * Return a DataSource corresponding to the current
      * configuration except that the databse name is different.
      */
@@ -86,13 +113,23 @@ public class JDBCDataSource {
     static javax.sql.DataSource getDataSource(TestConfiguration config,
             HashMap beanProperties)
     {
+        return (javax.sql.DataSource) getDataSource(config,
+            beanProperties, config.getJDBCClient().getDataSourceClassName());
+    }
+
+    /**
+     * Create a new DataSource object setup from the passed in
+     * TestConfiguration using the received properties and data
+     * source class name.
+     */
+    static Object getDataSource(TestConfiguration config,
+        HashMap beanProperties, String dsClassName)
+    {
         if (beanProperties == null)
              beanProperties = getDataSourceProperties(config);
         
-        String dataSourceClass = config.getJDBCClient().getDataSourceClassName();
-        
-        return (javax.sql.DataSource) getDataSourceObject(dataSourceClass,
-                beanProperties);
+        return (javax.sql.DataSource) getDataSourceObject(dsClassName,
+            beanProperties);
     }
     
     /**

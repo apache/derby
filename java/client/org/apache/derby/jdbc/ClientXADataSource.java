@@ -28,6 +28,7 @@ import javax.sql.XADataSource;
 
 import org.apache.derby.client.ClientXAConnection;
 import org.apache.derby.client.net.NetLogWriter;
+import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
 
 
@@ -68,11 +69,23 @@ public class ClientXADataSource extends ClientDataSource implements XADataSource
         try
         {
             NetLogWriter dncLogWriter = (NetLogWriter) super.computeDncLogWriterForNewConnection("_xads");
-            return new ClientXAConnection(this, dncLogWriter, user, password);
+            return getXAConnectionX(dncLogWriter, this, user, password);
         }
         catch ( SqlException se )
         {
             throw se.getSQLException();
         }
     }    
+
+    /**
+     * Method that establishes the initial physical connection
+     * using DS properties instead of CPDS properties.
+     */
+    private XAConnection getXAConnectionX(LogWriter dncLogWriter,
+        ClientBaseDataSource ds, String user, String password)
+        throws SQLException
+    {
+        return ClientDriver.getFactory().newClientXAConnection(ds,
+                dncLogWriter, user, password);
+    }   
 }

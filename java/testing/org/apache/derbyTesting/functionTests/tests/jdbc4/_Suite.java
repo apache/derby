@@ -70,6 +70,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(VerifySignatures.suite());
         suite.addTest (LobStreamTest.suite());
         suite.addTest (BlobSetMethodsTest.suite());
+        suite.addTest (JDBC4FromJDBC3DataSourceTest.suite());
 		
 		return suite;
 	}

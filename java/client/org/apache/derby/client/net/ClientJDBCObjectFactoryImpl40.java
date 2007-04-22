@@ -23,6 +23,8 @@ package org.apache.derby.client.net;
 
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.ClientPooledConnection40;
+import org.apache.derby.client.ClientXAConnection;
+import org.apache.derby.client.ClientXAConnection40;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.CallableStatement40;
 import org.apache.derby.client.am.ColumnMetaData;
@@ -42,9 +44,12 @@ import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Statement40;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Cursor;
+import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.jdbc.ClientDataSource;
-import java.sql.SQLException;
 import org.apache.derby.jdbc.ClientBaseDataSource;
+import org.apache.derby.jdbc.ClientXADataSource;
+
+import java.sql.SQLException;
 
 /**
  * Implements the ClientJDBCObjectFactory interface
@@ -74,6 +79,16 @@ public class ClientJDBCObjectFactoryImpl40 implements ClientJDBCObjectFactory{
             ClientBaseDataSource ds, LogWriter logWriter,String user,
             String password,int rmId) throws SQLException {
         return new ClientPooledConnection40(ds,logWriter,user,password,rmId);
+    }
+    /**
+     * Returns an instance of org.apache.derby.client.ClientXAConnection40 
+     */
+    public ClientXAConnection newClientXAConnection(
+        ClientBaseDataSource ds, LogWriter logWriter,String user,
+        String password) throws SQLException
+    {
+        return new ClientXAConnection40((ClientXADataSource)ds,
+            (NetLogWriter)logWriter,user,password);
     }
     /**
      * Returns an instance of org.apache.derby.client.am.CallableStatement.

@@ -191,15 +191,45 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements
 	}
         
     /**
-     * Intantiate and returns EmbedXAConnection.
+     * Intantiate and return an EmbedXAConnection from this instance
+     * of EmbeddedXADataSource.
+     *
      * @param user 
      * @param password 
      * @return XAConnection
      */
-        protected XAConnection createXAConnection (ResourceAdapter ra, 
-                String user, String password, 
-                boolean requestPassword) throws SQLException {
-            return new EmbedXAConnection(this, ra, user, 
-                    password, requestPassword);
-        }
+    protected XAConnection createXAConnection (ResourceAdapter ra, 
+        String user, String password, boolean requestPassword)
+        throws SQLException
+    {
+        /* This object (EmbeddedXADataSource) is a JDBC 2 and JDBC 3
+         * implementation of XADatSource.  However, it's possible that we
+         * are running with a newer driver (esp. JDBC 4) in which case we
+         * should return a PooledConnection that implements the newer JDBC
+         * interfaces--even if "this" object does not itself satisfy those
+         * interfaces.  As an example, if we have a JDK 6 application then
+         * even though this specific object doesn't implement JDBC 4 (it
+         * only implements JDBC 2 and 3), we should still return an
+         * XAConnection object that *does* implement JDBC 4 because that's
+         * what a JDK 6 app expects.
+         *
+         * By calling "findDriver()" here we will get the appropriate
+         * driver for the JDK in use (ex. if using JDK 6 then findDriver()
+         * will return the JDBC 4 driver).  If we then ask the driver to
+         * give us an XA connection, we will get a connection that
+         * corresponds to whatever driver/JDBC implementation is being
+         * used--which is what we want.  So for a JDK 6 application we
+         * will correctly return a JDBC 4 XAConnection. DERBY-2488.
+         *
+         * This type of scenario can occur if an application that was
+         * previously running with an older JVM (ex. JDK 1.4/1.5) starts
+         * running with a newer JVM (ex. JDK 6), in which case the app
+         * is probably still using the "old" data source (ex. is still
+         * instantiating EmbeddedXADataSource) instead of the newer one
+         * (EmbeddedXADataSource40).
+         */
+        return ((Driver30) findDriver()).getNewXAConnection(
+            this, ra, user, password, requestPassword);
+    }
+
 }

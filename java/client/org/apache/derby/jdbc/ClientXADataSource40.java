@@ -52,22 +52,6 @@ import org.apache.derby.shared.common.reference.SQLState;
  */
 public class ClientXADataSource40 extends ClientXADataSource {
     
-    /**
-     * creates a jdbc4.0 XAConnection
-     * @param user 
-     * @param password 
-     * @return XAConnection
-     */
-    public XAConnection getXAConnection(String user, String password) throws SQLException {
-        try {
-            NetLogWriter dncLogWriter = (NetLogWriter) 
-                        super.computeDncLogWriterForNewConnection("_xads");
-            return new ClientXAConnection40 (this, dncLogWriter, user, password);
-        } catch ( SqlException se ) {
-            throw se.getSQLException();
-        }
-    }
-    
 	/**
      * Returns false unless <code>interfaces</code> is implemented 
      * 

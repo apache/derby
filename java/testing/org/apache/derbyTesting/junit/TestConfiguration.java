@@ -227,7 +227,31 @@ public class TestConfiguration {
 
         return (suite);
     }
-    
+
+    /**
+     * Return a Test suite that contains all the test fixtures
+     * for the passed in class running in embedded and client-
+     * server *JDBC3* configurations.
+     * <BR>
+     * Each set of embedded and set of client server tests is
+     * decorated with a CleanDatabaseTestSetup.
+     * <BR>
+     */
+    public static Test forceJDBC3Suite(Class testClass)
+    {
+        final TestSuite suite = new TestSuite(suiteName(testClass));
+
+        suite.addTest(
+            new CleanDatabaseTestSetup(
+                forceJDBC3Embedded(embeddedSuite(testClass))));
+
+        suite.addTest(
+            new CleanDatabaseTestSetup(
+                forceJDBC3NetClient(clientServerSuite(testClass))));
+
+        return (suite);
+    }
+
     /**
      * Generate a suite name from a class name, taking
      * only the last element of the fully qualified class name.
@@ -567,6 +591,26 @@ public class TestConfiguration {
         if (JDBC.vmSupportsJDBC4()) {
             test = new JDBCClientSetup(test, JDBCClient.EMBEDDED_30);
         }
+        return test;
+    }
+    
+    /**
+     * Returns a decorator that forces the JDBC 3 network client in
+     * a Java SE 6/JDBC 4 environment. The only difference is that
+     * the DataSource class names will be the "old" JDBC 3 versions
+     * and not the JDBC 4 specific ones.
+     *
+     * Assumption is that the received Test is an instance of ServerSetup,
+     * which is the decorator for client server tests.  If that is not
+     * the case then this method is a no-op.
+     *
+     * @param test Test around which to wrap the JDBC 3 network client
+     *  configuration.
+     */
+    public static Test forceJDBC3NetClient(Test test)
+    {
+        if (JDBC.vmSupportsJDBC4() && (test instanceof ServerSetup))
+            ((ServerSetup)test).setJDBCClient(JDBCClient.DERBYNETCLIENT_30);
         return test;
     }
     

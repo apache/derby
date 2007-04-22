@@ -100,16 +100,4 @@ public class EmbeddedXADataSource40 extends EmbeddedXADataSource {
         }
     }
 	
-    /**
-     * Intantiate and returns EmbedXAConnection.
-     * @param user 
-     * @param password 
-     * @return XAConnection
-     */
-        protected XAConnection createXAConnection (ResourceAdapter ra, 
-                String user, String password,
-                boolean requestPassword)  throws SQLException {
-            return new EmbedXAConnection40 (this, ra, user, 
-                    password, requestPassword);
-        }
 }

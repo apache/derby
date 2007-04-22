@@ -94,6 +94,14 @@ public final class JDBCClient {
             "org.apache.derby.jdbc.ClientXADataSource",
             "jdbc:derby://");
     
+    static final JDBCClient DERBYNETCLIENT_30 = new JDBCClient(
+            "DerbyNetClient",
+            "org.apache.derby.jdbc.ClientDriver",
+            "org.apache.derby.jdbc.ClientDataSource",
+            "org.apache.derby.jdbc.ClientConnectionPoolDataSource",
+            "org.apache.derby.jdbc.ClientXADataSource",
+            "jdbc:derby://");
+
     /**
      * The DB2 Universal JDBC network client.
      * AKA: JCC or DerbyNet.

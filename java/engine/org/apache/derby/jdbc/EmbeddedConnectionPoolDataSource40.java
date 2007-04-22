@@ -91,14 +91,4 @@ public class EmbeddedConnectionPoolDataSource40
                     interfaces);
         }
     }
-
-    /**
-     * create and returns EmbedPooledConnection.
-     */
-    protected PooledConnection createPooledConnection (String user, 
-            String password, boolean requestPassword)  throws SQLException {
-        return new EmbedPooledConnection40(this, user, password,
-                                           requestPassword);
-    }    
-        
 }

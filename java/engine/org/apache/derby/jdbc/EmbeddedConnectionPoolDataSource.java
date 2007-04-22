@@ -94,12 +94,43 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
 	}
         
     /**
-     * create and returns EmbedPooledConnection.
+     * Create and return an EmbedPooledConnection from this instance
+     * of EmbeddedConnectionPoolDataSource.
      */
     protected PooledConnection createPooledConnection (String user,
-            String password, boolean requestPassword) throws SQLException {
-        return new EmbedPooledConnection(this, user, password, requestPassword);
+        String password, boolean requestPassword) throws SQLException
+    {
+        /* This object (EmbeddedConnectionPoolDataSource) is a JDBC 2
+         * and JDBC 3 implementation of ConnectionPoolDatSource.  However,
+         * it's possible that we are running with a newer driver (esp.
+         * JDBC 4) in which case we should return a PooledConnection that
+         * implements the newer JDBC interfaces--even if "this" object
+         * does not itself satisfy those interfaces.  As an example, if
+         * we have a JDK 6 application then even though this specific
+         * object doesn't implement JDBC 4 (it only implements JDBC 2
+         * and 3), we should still return a PooledConnection object that
+         * *does* implement JDBC 4 because that's what a JDK 6 app
+         * expects.
+         *
+         * By calling "findDriver()" here we will get the appropriate
+         * driver for the JDK in use (ex. if using JDK 6 then findDriver()
+         * will return the JDBC 4 driver).  If we then ask the driver to
+         * give us a pooled connection, we will get a connection that
+         * corresponds to whatever driver/JDBC implementation is being
+         * used--which is what we want.  So for a JDK 6 application we
+         * will correctly return a JDBC 4 PooledConnection. DERBY-2488.
+         *
+         * This type of scenario can occur if an application that was
+         * previously running with an older JVM (ex. JDK 1.4/1.5) starts
+         * running with a newer JVM (ex. JDK 6), in which case the app
+         * is probably still using the "old" data source (ex. is still
+         * instantiating EmbeddedConnectionPoolDataSource) instead of
+         * the newer one (EmbeddedConnectionPoolDataSource40).
+         */
+        return ((Driver30) findDriver()).getNewPooledConnection(
+            this, user, password, requestPassword);
     }
+
 }
 
 

@@ -25,6 +25,7 @@ import java.rmi.UnexpectedException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.derby.client.ClientPooledConnection;
+import org.apache.derby.client.ClientXAConnection;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.client.am.LogicalConnection;
@@ -37,7 +38,9 @@ import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Cursor;
+import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.jdbc.ClientBaseDataSource;
+import org.apache.derby.jdbc.ClientXADataSource;
 import org.apache.derby.client.am.ColumnMetaData;
 
 /**
@@ -63,6 +66,15 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
             LogWriter logWriter,String user,
             String password,int rmId) throws SQLException {
         return new ClientPooledConnection(ds,logWriter,user,password,rmId);
+    }
+    /**
+     * Returns an instance of org.apache.derby.client.ClientXAConnection 
+     */
+    public ClientXAConnection newClientXAConnection(ClientBaseDataSource ds,
+        LogWriter logWriter,String user, String password) throws SQLException
+    {
+        return new ClientXAConnection((ClientXADataSource)ds,
+            (NetLogWriter)logWriter,user,password);
     }
     /**
      * Returns an instance of org.apache.derby.client.am.CallableStatement.

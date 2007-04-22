@@ -22,6 +22,7 @@
 package org.apache.derby.client.am;
 
 import org.apache.derby.client.ClientPooledConnection;
+import org.apache.derby.client.ClientXAConnection;
 import org.apache.derby.jdbc.ClientDataSource;
 import java.sql.SQLException;
 import org.apache.derby.jdbc.ClientBaseDataSource;
@@ -52,6 +53,15 @@ public interface ClientJDBCObjectFactory {
      */
     ClientPooledConnection newClientPooledConnection(ClientBaseDataSource ds,
             LogWriter logWriter,String user,String password,int rmId)
+            throws SQLException;
+    
+    /**
+     * This method is used to return an instance of
+     * ClientXAConnection (or ClientXAConnection40) class which
+     * implements javax.sql.XAConnection
+     */
+    ClientXAConnection newClientXAConnection(ClientBaseDataSource ds,
+            LogWriter logWriter,String user,String password)
             throws SQLException;
     
     /**
