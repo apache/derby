@@ -63,7 +63,6 @@ lang/staleplans.sql
 lang/subquery.sql
 lang/subquery2.sql
 lang/subqueryFlattening.sql
-lang/timestampArith.java
 lang/triggerBeforeTrig.sql
 lang/triggerGeneral.sql
 lang/triggerRecursion.sql
