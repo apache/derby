@@ -1141,21 +1141,14 @@ public abstract class EmbedConnection implements EngineConnection
      */
     public void close() throws SQLException {
 		// JDK 1.4 javadoc indicates close on a closed connection is a no-op
-		if (isClosed())
-		   	return;
-
-
-		if (rootConnection == this)
-		{
-			/* Throw error to match DB2/JDBC if a tran is pending in non-autocommit mode */
-			if (!autoCommit && !transactionIsIdle()) {
-				throw newSQLException(SQLState.LANG_INVALID_TRANSACTION_STATE);
-			}
-
-			close(exceptionClose);
+		if (!isClosed() &&
+				(rootConnection == this) && 
+				(!autoCommit && !transactionIsIdle())) {
+			throw newSQLException(
+				SQLState.LANG_INVALID_TRANSACTION_STATE);
 		}
-		else
-			setInactive(); // nested connection
+		
+		close(exceptionClose);
 	}
 
 	// This inner close takes the exception and calls 
@@ -1174,22 +1167,30 @@ public abstract class EmbedConnection implements EngineConnection
 				 * If it isn't active, it's already been closed.
 				 */
 				if (active) {
-					setupContextStack();
-					try {
-						tr.rollback();
-
-						// Let go of lcc reference so it can be GC'ed after
-						// cleanupOnError, the tr will stay around until the
-						// rootConnection itself is GC'ed, which is dependent
-						// on how long the client program wants to hold on to
-						// the Connection object.
+					if (tr.isActive()) {
+						setupContextStack();
+						try {
+							tr.rollback();
+							
+							// Let go of lcc reference so it can be GC'ed after
+							// cleanupOnError, the tr will stay around until the
+							// rootConnection itself is GC'ed, which is dependent
+							// on how long the client program wants to hold on to
+							// the Connection object.
+							tr.clearLcc(); 
+							tr.cleanupOnError(e);
+							
+						} catch (Throwable t) {
+							throw handleException(t);
+						} finally {
+							restoreContextStack();
+						}
+					} else {
+						// DERBY-1947: If another connection has closed down
+						// the database, the transaction is not active, but
+						// the cleanup has not been done yet.
 						tr.clearLcc(); 
 						tr.cleanupOnError(e);
-
-					} catch (Throwable t) {
-						throw handleException(t);
-					} finally {
-						restoreContextStack();
 					}
 				}
 			}
@@ -1211,9 +1212,6 @@ public abstract class EmbedConnection implements EngineConnection
 			if (getTR().isActive()) {
 				return false;
 			}
-
-			setInactive();
-
 		}
 		return true;
 	}
@@ -1608,11 +1606,19 @@ public abstract class EmbedConnection implements EngineConnection
 	 */
 	protected void finalize() throws Throwable 
 	{
-		if (rootConnection == this)
-		{
+		try {
+			// Only close root connections, since for nested
+			// connections, it is not strictly necessary and close()
+			// synchronizes on the root connection which can cause
+			// deadlock with the call to runFinalization from
+			// GenericPreparedStatement#prepareToInvalidate (see
+			// DERBY-1947) on SUN VMs.
+			if (rootConnection == this) {
+				close(exceptionClose);
+			}
+		}
+		finally {
 			super.finalize();
-			if (!isClosed())
-	    		close(exceptionClose);
 		}
 	}
 
