@@ -22,21 +22,23 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.Activation;
 
 
 /**
- *	This is a wrapper class which invokes the Execution-time logic for
- *	Misc statements. The real Execution-time logic lives inside the
- *	executeConstantAction() method of the Execution constant.
- *
+ * This is a wrapper class which invokes the Execution-time logic for
+ * Misc statements. The real Execution-time logic lives inside the
+ * executeConstantAction() method. Note that when re-using the
+ * language result set tree across executions (DERBY-827) it is not
+ * possible to store the ConstantAction as a member variable, because
+ * a re-prepare of the statement will invalidate the stored
+ * ConstantAction. Re-preparing a statement does not create a new
+ * Activation unless the GeneratedClass has changed, so the existing
+ * result set tree may survive a re-prepare.
  */
 
 class MiscResultSet extends NoRowsResultSetImpl
 {
-	private final ConstantAction constantAction;
-
 	/**
      * Construct a MiscResultSet
 	 *
@@ -48,16 +50,25 @@ class MiscResultSet extends NoRowsResultSetImpl
 		 throws StandardException
     {
 		super(activation);
-		constantAction = activation.getConstantAction();
 	}
     
+	/**
+	 * Opens a MiscResultSet, executes the Activation's
+	 * ConstantAction, and then immediately closes the MiscResultSet.
+	 *
+	 * @exception StandardException Standard Derby error policy.
+	 */
 	public void open() throws StandardException
 	{
-		constantAction.executeConstantAction(activation);
+		activation.getConstantAction().executeConstantAction(activation);
 		super.close();
 	}
 
+	// Does not override close() (no action required)
+	// Does not override finish() (no action required)
+
 	/**
+	 * No action is required, but not implemented in any base class
 	 * @see org.apache.derby.iapi.sql.ResultSet#cleanUp
 	 */
 	public void	cleanUp() 
