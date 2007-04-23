@@ -83,7 +83,11 @@ public abstract class GlobalXact {
 			for (int i = 0; i < global_id.length; i++)
 		    {
 				mask = (global_id[i] & 0xFF);
-				globalhex += Integer.toHexString(mask);
+                if (mask < 16) {
+                    globalhex += "0" + Integer.toHexString(mask);
+                } else {
+                    globalhex += Integer.toHexString(mask);
+                }
 		    }
 	    }
 	
@@ -93,7 +97,11 @@ public abstract class GlobalXact {
 			for (int i = 0; i < branch_id.length; i++)
 		    {
 				mask = (branch_id[i] & 0xFF);
-				branchhex += Integer.toHexString(mask);
+                if (mask < 16) {
+                    branchhex += "0" + Integer.toHexString(mask);
+                } else {
+                    branchhex += Integer.toHexString(mask);
+                }
 		    }
 	    }
 
