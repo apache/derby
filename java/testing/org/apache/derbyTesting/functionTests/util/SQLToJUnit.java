@@ -1,6 +1,7 @@
 package org.apache.derbyTesting.functionTests.util;
 
 import java.io.*;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -264,8 +265,20 @@ public class SQLToJUnit
 
             System.out.println("\n  ==> Ignored " + numIgnored + " lines and left " +
                 numUnconverted + " lines unconverted.\n  ==> Output is in '" +
-                jTestName + ".junit'.\n\nDone.\n");
+                jTestName + ".junit'.\n\n");
+            
+            if (multipleUserConnections) {
+            	System.out.print("Found multiple users: ");
+            	for (Enumeration e = userConnections.elements(); e.hasMoreElements(); )
+            	{
+            		System.out.print("\"");
+            		System.out.print(e.nextElement());
+            		System.out.print("\"");
+            		System.out.print((e.hasMoreElements() ? ", " : ""));
+            	}
+            }
 
+            System.out.println("\n\nDone.\n");
             junit.flush();
     
         } catch (Exception e) {
@@ -939,8 +952,15 @@ public class SQLToJUnit
         {
             // Second row is just "underlining" of the column names,
             // so skip it.
-            if ((rowCount == 1) || (getLineType(row) == ROW_COUNT))
+            if (rowCount == 1)
                 continue;
+            
+            // ignore last line ROW_COUNTs
+            // continue to write out assert statement.
+            if (getLineType(row) == ROW_COUNT) {
+            	rowCount--;
+            	continue;
+            }
 
             // First row is column names.
             if (rowCount == 0)
