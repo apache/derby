@@ -860,7 +860,7 @@ public abstract class BaseJDBCTestCase
 
     /**
      * Get the last SQLException in chain.
-     * @param a <code>SQLException</code>
+     * @param sqle <code>SQLException</code>
      * @return the last exception in the chain.
      */
     public SQLException getLastSQLException(SQLException sqle) {
