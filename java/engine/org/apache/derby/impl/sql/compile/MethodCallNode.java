@@ -148,26 +148,6 @@ abstract class MethodCallNode extends JavaValueNode
     {
         return javaClassName;
     }
-    
-	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		super.setClause(clause);
-		if (methodParms != null)
-		{
-			for (int parm = 0; parm < methodParms.length; parm++)
-			{
-				if (methodParms[parm] != null)
-				{
-					methodParms[parm].setClause(clause);
-				}
-			}
-		}
-	}
 
 	/**
 	 * Add the parameter list.

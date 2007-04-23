@@ -178,16 +178,6 @@ abstract class JavaValueNode extends QueryTreeNode
 	}
 
 	/**
-	 * Set the clause that this node appears in.
-	 *
-	 * @param clause	The clause that this node appears in.
-	 */
-	public void setClause(int clause)
-	{
-		clause = clause;
-	}
-
-	/**
 	 * Mark this node as being for a CALL Statement.
 	 * (void methods are only okay for CALL Statements)
 	 */
