@@ -118,8 +118,21 @@ C1
 1          
 ij> drop table t;
 0 rows inserted/updated/deleted
-ij> -- show that long fields now don't take forever...
-create table t ( c char(50));
+ij> -- Bug 4694 Test automatic rollback with close of connection
+-- in ij
+connect 'wombat';
+ij(CONNECTION1)> autocommit off;
+ij(CONNECTION1)> create table a (a int);
+0 rows inserted/updated/deleted
+ij(CONNECTION1)> select count(*) from a;
+1          
+-----------
+0          
+ij(CONNECTION1)> disconnect;
+ij> set connection connection0;
+ij> select count(*) from a;
+ERROR 42X05: Table/View 'A' does not exist.
+ij> create table t ( c char(50));
 0 rows inserted/updated/deleted
 ij> insert into t values('hello');
 1 row inserted/updated/deleted
