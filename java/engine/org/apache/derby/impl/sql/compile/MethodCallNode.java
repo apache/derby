@@ -110,17 +110,6 @@ abstract class MethodCallNode extends JavaValueNode
 	protected String actualMethodReturnType;
 
 	/**
-	  *	Gets the signature of JSQLTypes needed to propagate a work unit from
-	  *	target to source.
-	  *
-	  *	@return	the JSQLType signature
-	  */
-	public	JSQLType[]	getSignature()
-	{
-		return	signature;
-	}
-
-	/**
 		The parameter types for the resolved method.
 	*/
 	String[] methodParameterTypes;
@@ -148,19 +137,6 @@ abstract class MethodCallNode extends JavaValueNode
     {
         return javaClassName;
     }
-
-	/**
-	 * Add the parameter list.
-	 * (This flavor is useful when transforming a non-static method call node
-	 * to a static method call node.)
-	 *
-	 * @param methodParms		JavaValueNode[]
-	 */
-
-	public void addParms(JavaValueNode[] methodParms)
-	{
-		this.methodParms = methodParms;
-	}
 
 	/**
 	 * Add the parameter list
@@ -510,7 +486,7 @@ abstract class MethodCallNode extends JavaValueNode
 				// casts are only required for primitive types.
 				// In any other case the expression type must be assignable
 				// to the parameter type.
-				if (classInspector.primitiveType(parameterType)) {
+				if (ClassInspector.primitiveType(parameterType)) {
 					mb.cast(parameterType);
 				} else {
 
