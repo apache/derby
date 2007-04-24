@@ -62,7 +62,6 @@ import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
-//import org.apache.oro.text.perl.Perl5Util;
 
 /**
  * Test the various embedded DataSource implementations of Derby.
@@ -87,19 +86,14 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     protected static Hashtable conns = new Hashtable();
     
-    /**
-     * This is a utility that knows how to do pattern matching.  Used
-     * in checking the format of a connection string
-     */
-//    protected static Perl5Util p5u = new Perl5Util();
-    
     /** The expected format of a connection string. In English:
      * "<classname>@<hashcode> (XID=<xid>), (SESSION = <sessionid>),
      *  (DATABASE=<dbname>), (DRDAID = <drdaid>)"
      */
-    private static final String CONNSTRING_FORMAT = "\\S+@[0-9]+ " +
-        "\\(XID = .*\\), \\(SESSIONID = [0-9]+\\), " +
-        "\\(DATABASE = [A-Za-z]+\\), \\(DRDAID = .+\\)";
+    private static final String CONNSTRING_FORMAT = 
+        "\\S+@[0-9]+.* \\(XID = .*\\), \\(SESSIONID = [0-9]+\\), " +
+        "\\(DATABASE = [A-Za-z]+\\), \\(DRDAID = .*\\) "; 
+    
     
     /**
      * Hang onto the SecurityCheck class while running the
@@ -2923,41 +2917,20 @@ public class DataSourceTest extends BaseJDBCTestCase {
     {
         String prefix = assertStringPrefix(pc);
         String connstr = pc.toString();
-        String format = "/" + prefix + 
-        " \\(ID = [0-9]+\\), Physical Connection = " +
-        "<none>|" + CONNSTRING_FORMAT + "/";
-        
-        // TODO: figure out: add jakarta-oro2.0.8 so this can build & run,
-        // or needed to put some other matching code in? 
-/*
-        if ( ! p5u.match(format, connstr) )
-        {
-            throw new Exception( "Connection.toString() (" + connstr + ") " +
-                    "does not match expected format (" + format + ")");
-        }
-*/        
+        String format = prefix + " \\(ID = [0-9]+\\), Physical Connection = " +
+            "<none>|" + CONNSTRING_FORMAT;
+        assertTrue(connstr.matches(format));
     }
 
     /**
      * Check the format of the connection string.  This is the default test
      * to run if this is not a BrokeredConnection class
      */
-    private static void assertStringFormat(Connection conn) throws Exception
+    private static void assertStringFormat(Connection conn) //throws Exception
     {
-        // TODO: figure out: add jakarta-oro2.0.8 so this can build & run,
-        // or needed to put some other matching code in? 
-        String prefix = assertStringPrefix(conn);
-
-        String str = conn.toString();        
-
-/*        
-        // See if the connection string matches the format pattern    
-        if ( ! p5u.match("/" + CONNSTRING_FORMAT + "/", str) )
-        {
-            throw new Exception( "Connection.toString() (" + str + ") " +
-                    "does not match expected format (" + CONNSTRING_FORMAT + ")");
-        }
-*/        
+        assertStringPrefix(conn);
+        String str = conn.toString(); 
+        assertTrue(str.matches(CONNSTRING_FORMAT));
     }
 
     /**
@@ -2967,7 +2940,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * @return the expected prefix string, this is used in further string
      *   format checking
      */
-    private static String assertStringPrefix(Object conn) throws Exception
+    private static String assertStringPrefix(Object conn) //throws Exception
     {
         String connstr = conn.toString();
         String prefix = conn.getClass().getName() + "@" + conn.hashCode();
