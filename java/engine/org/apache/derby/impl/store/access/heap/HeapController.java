@@ -350,6 +350,7 @@ public class HeapController
                 (ContainerHandle) null,
                 heap,
                 heap.format_ids,
+                heap.collation_ids,
                 xact_manager,
                 xact_manager.getRawStoreXact(),
                 false,

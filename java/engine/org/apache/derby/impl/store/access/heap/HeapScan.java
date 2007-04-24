@@ -260,7 +260,9 @@ class HeapScan
         // We could optimize this, if there are no qualifiers and read
         // into a zero column row, but callers should be using fetchNext()
         // instead.
-        fetchNext_one_slot_array[0] = open_conglom.getRuntimeMem().get_scratch_row();
+        fetchNext_one_slot_array[0] = 
+            open_conglom.getRuntimeMem().get_scratch_row(
+                    open_conglom.getRawTran());
 
         boolean ret_val = 
             fetchRows(

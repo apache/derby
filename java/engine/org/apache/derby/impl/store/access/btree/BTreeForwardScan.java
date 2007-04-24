@@ -234,7 +234,7 @@ public class BTreeForwardScan extends BTreeScan
                         if (row_array[ret_row_count] == null)
                         {
                             row_array[ret_row_count] = 
-                                runtime_mem.get_row_for_export();
+                                runtime_mem.get_row_for_export(getRawTran());
                         }
 
                         fetch_row = row_array[ret_row_count];
@@ -242,7 +242,8 @@ public class BTreeForwardScan extends BTreeScan
                     else
                     {
                         // get a brand new row.
-                        fetch_row = runtime_mem.get_row_for_export(); 
+                        fetch_row = 
+                            runtime_mem.get_row_for_export(getRawTran()); 
                     }
                 }
 

@@ -2037,7 +2037,8 @@ public abstract class ControlRow implements AuxObject, TypedFormat
     public DataValueDescriptor[] getRowTemplate(OpenBTree    open_btree)
 		throws StandardException
     {
-        return(open_btree.getConglomerate().createTemplate());
+        return(open_btree.getConglomerate().createTemplate(
+                    open_btree.getRawTran()));
     }
 
 

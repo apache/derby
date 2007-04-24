@@ -153,7 +153,9 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			if (startParams.getProperty(Property.CREATE_WITH_NO_LOG) == null)
 				startParams.put(Property.CREATE_WITH_NO_LOG, "true");
 
-			String localeID = startParams.getProperty(org.apache.derby.iapi.reference.Attribute.TERRITORY);
+			String localeID = 
+                startParams.getProperty(
+                    org.apache.derby.iapi.reference.Attribute.TERRITORY);
 
 			if (localeID == null) {
 				localeID = Locale.getDefault().toString();
@@ -173,9 +175,15 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		bootValidation(create, startParams);
 		
 		// boot the type factory before store to ensure any dynamically
-		// registered types (DECIMAL) are there before logical undo recovery might need them.
-		DataValueFactory dvf = (DataValueFactory) Monitor.bootServiceModule(create, this,
-				org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
+		// registered types (DECIMAL) are there before logical undo recovery 
+        // might need them.
+		DataValueFactory dvf = (DataValueFactory) 
+            Monitor.bootServiceModule(
+                create, 
+                this,
+				org.apache.derby.iapi.reference.ClassName.DataValueFactory, 
+                startParams);
+
 		//After booting the DVF, set the Locale information into it. This 
 		//Locale will be either the Locale obtained from the territory 
 		//attribute supplied by the user on the JDBC url at database create 
@@ -207,8 +215,13 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
             Monitor.bootServiceModule(create, this,
                     DataDictionary.MODULE, allParams);
 
-		lcf = (LanguageConnectionFactory) Monitor.bootServiceModule(create, this, LanguageConnectionFactory.MODULE, allParams);
-		lf = (LanguageFactory) Monitor.bootServiceModule(create, this, LanguageFactory.MODULE, allParams);
+		lcf = (LanguageConnectionFactory) 
+            Monitor.bootServiceModule(
+                create, this, LanguageConnectionFactory.MODULE, allParams);
+
+		lf = (LanguageFactory) 
+            Monitor.bootServiceModule(
+                create, this, LanguageFactory.MODULE, allParams);
 
 		bootResourceAdapter(create, allParams);
 
@@ -224,8 +237,9 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		//
 		authenticationService = bootAuthenticationService(create, allParams);
 		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(authenticationService != null,
-								 "Failed to set the Authentication service for the database");
+			SanityManager.ASSERT(
+                authenticationService != null,
+                "Failed to set the Authentication service for the database");
 		}
 
 		// Lastly, let store knows that database creation is done and turn

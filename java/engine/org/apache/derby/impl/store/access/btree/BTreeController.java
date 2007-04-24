@@ -377,7 +377,9 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         boolean         reclaim_deleted_rows_attempted  = false;
 
         if (scratch_template == null)
-            scratch_template = runtime_mem.get_template();
+        {
+            scratch_template = runtime_mem.get_template(getRawTran());
+        }
 
         if (SanityManager.DEBUG)
             this.isIndexableRowConsistent(rowToInsert);
@@ -1164,7 +1166,9 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 		}
 
         if (scratch_template == null)
-            scratch_template = runtime_mem.get_template();
+        {
+            scratch_template = runtime_mem.get_template(getRawTran());
+        }
 
         LeafControlRow current_leaf = null;
 

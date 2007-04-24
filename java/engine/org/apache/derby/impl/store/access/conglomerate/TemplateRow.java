@@ -28,9 +28,13 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.error.StandardException;
+
 import org.apache.derby.iapi.store.access.RowUtil;
 
+import org.apache.derby.iapi.store.raw.Transaction;
+
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.types.SQLLongint;
 
@@ -65,9 +69,11 @@ public final class TemplateRow
 	 * @exception  StandardException  Standard exception policy.
      **/
     private static DataValueDescriptor[] allocate_objects(
+    Transaction         rawtran,
     int                 num_cols_to_allocate,
     FormatableBitSet    column_list,
-    int[]               format_ids)
+    int[]               format_ids,
+    int[]               collation_ids)
 		throws StandardException
     {
         int         dest_pos = 0;
@@ -76,6 +82,8 @@ public final class TemplateRow
             new DataValueDescriptor[num_cols_to_allocate];
         int         num_cols = 
             (column_list == null ? format_ids.length : column_list.size());
+
+        DataValueFactory dvf = rawtran.getDataValueFactory();
 
         for (int i = 0; i < num_cols; i++)
         {
@@ -89,8 +97,7 @@ public final class TemplateRow
                 // yes - create the column 
 
                 // get empty instance of object identified by the format id.
-                ret_row[i] = (DataValueDescriptor) 
-                    Monitor.newInstanceFromIdentifier(format_ids[i]);
+                ret_row[i] = dvf.getNull(format_ids[i], collation_ids[i]);
 
                 if (SanityManager.DEBUG)
                 {
@@ -99,12 +106,12 @@ public final class TemplateRow
                     if (o == null)
                     {
                         SanityManager.THROWASSERT(
-                        "obj from Monitor.newInstanceFromIdentifier() null." +
+                        "obj from DataValueFactory.newNull(" +
+                        format_ids[i] + ", " + collation_ids[i] + ") null." +
                         ";src column position = "  + i              +
                         ";dest column position = " + i  + 
                         ";num_cols = "             + num_cols       +
                         ";format_ids.length = "    + format_ids.length);
-
                     }
 
                     if ( ! (o instanceof Storable))
@@ -186,11 +193,16 @@ public final class TemplateRow
 	 * @exception  StandardException  Standard exception policy.
      **/
     public static DataValueDescriptor[] newRow(
+    Transaction          rawtran,
     FormatableBitSet     column_list,
-    int[]        format_ids) 
+    int[]                format_ids,
+    int[]                collation_ids) 
         throws StandardException
     {
-        return(allocate_objects(format_ids.length, column_list, format_ids));
+        return(
+            allocate_objects(
+                rawtran, format_ids.length, column_list, 
+                format_ids, collation_ids));
     }
 
     /**
@@ -212,7 +224,9 @@ public final class TemplateRow
 	 * @exception  StandardException  Standard exception policy.
      **/
     public static DataValueDescriptor[] newBranchRow(
+    Transaction         rawtran,
     int[]               format_ids,
+    int[]               collation_ids,
     DataValueDescriptor page_ptr) 
         throws StandardException
     {
@@ -221,7 +235,9 @@ public final class TemplateRow
         // the page pointer in the branch row.
         DataValueDescriptor[] columns = 
             allocate_objects(
-                format_ids.length + 1, (FormatableBitSet) null, format_ids);
+                rawtran,
+                format_ids.length + 1, 
+                (FormatableBitSet) null, format_ids, collation_ids);
 
         // tack on the page pointer to the extra column allocated onto the 
         // end of the row built from a leafrow template.

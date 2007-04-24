@@ -26,6 +26,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.RowUtil;
 
+import org.apache.derby.iapi.store.raw.Transaction;
+
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -75,15 +77,18 @@ public class OpenConglomerateScratchSpace
      * A complete array of format id's for this conglomerate.
      **/
     private int[]    format_ids;
+    private int[]    collation_ids;
 
     /**************************************************************************
      * Constructors for This class:
      **************************************************************************
      */
     public OpenConglomerateScratchSpace(
-    int[]  format_ids)
+    int[]   format_ids,
+    int[]   collation_ids)
     {
-        this.format_ids = format_ids;
+        this.format_ids     = format_ids;
+        this.collation_ids  = collation_ids;
     }
 
     /**************************************************************************
@@ -108,7 +113,7 @@ public class OpenConglomerateScratchSpace
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public DataValueDescriptor[] get_row_for_export()
+    public DataValueDescriptor[] get_row_for_export(Transaction rawtran)
         throws StandardException
     {
         // Create a partial row class template template from the initial scan
@@ -116,7 +121,9 @@ public class OpenConglomerateScratchSpace
         if (row_for_export_template == null)
         {
             row_for_export_template = 
-                RowUtil.newTemplate(row_for_export_column_list, format_ids);
+                RowUtil.newTemplate(
+                    rawtran.getDataValueFactory(), 
+                    row_for_export_column_list, format_ids, collation_ids);
         }
 
         // Allocate a new row based on the class template.
@@ -137,14 +144,14 @@ public class OpenConglomerateScratchSpace
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public DataValueDescriptor[] get_scratch_row()
+    public DataValueDescriptor[] get_scratch_row(Transaction    rawtran)
         throws StandardException
     {
         // Create a partial row class template template from the initial scan
         // parameters.
         if (scratch_row == null)
         {
-            scratch_row = get_row_for_export();
+            scratch_row = get_row_for_export(rawtran);
         }
 
         // Allocate a new row based on the class template.
@@ -162,14 +169,16 @@ public class OpenConglomerateScratchSpace
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public DataValueDescriptor[] get_template()
+    public DataValueDescriptor[] get_template(Transaction rawtran)
         throws StandardException
     {
         // Create a partial row class template from the initial scan parameters.
         if (scratch_template == null)
         {
             scratch_template = 
-                TemplateRow.newRow((FormatableBitSet) null, format_ids);
+                TemplateRow.newRow(
+                    rawtran, 
+                    (FormatableBitSet) null, format_ids, collation_ids);
         }
 
         return(scratch_template);

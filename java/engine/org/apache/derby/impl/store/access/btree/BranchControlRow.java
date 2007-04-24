@@ -413,7 +413,10 @@ public class BranchControlRow extends ControlRow
             // Find the child page for the shrink key.
 
             BranchRow branch_template =
-                BranchRow.createEmptyTemplate(open_btree.getConglomerate());
+                BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
+                    open_btree.getConglomerate());
+
             SearchParameters sp = new SearchParameters(
                 shrink_key,
                 SearchParameters.POSITION_LEFT_OF_PARTIAL_KEY_MATCH,
@@ -666,7 +669,9 @@ public class BranchControlRow extends ControlRow
 
             // Read in the branch row which is at the split point.
             BranchRow split_branch_row =
-                BranchRow.createEmptyTemplate(open_btree.getConglomerate());
+                BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
+                    open_btree.getConglomerate());
 
             this.page.fetchFromSlot(
                 (RecordHandle) null, splitpoint, split_branch_row.getRow(), 
@@ -735,7 +740,9 @@ public class BranchControlRow extends ControlRow
             newbranchrow.setPageNumber(newbranch.page.getPageNumber());
 
             BranchRow branch_template =
-                BranchRow.createEmptyTemplate(open_btree.getConglomerate());
+                BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
+                    open_btree.getConglomerate());
 			SearchParameters sp = new SearchParameters(
                 newbranchrow.getRow(),
                 SearchParameters.POSITION_LEFT_OF_PARTIAL_KEY_MATCH,
@@ -883,7 +890,10 @@ public class BranchControlRow extends ControlRow
 
         // RESOLVE (mikem) - should this be passed in?
         BranchRow branch_template =
-            BranchRow.createEmptyTemplate(open_btree.getConglomerate());
+            BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
+                    open_btree.getConglomerate());
+
 		SearchParameters sp = new SearchParameters(
             splitrow, 
             SearchParameters.POSITION_LEFT_OF_PARTIAL_KEY_MATCH,
@@ -1513,6 +1523,7 @@ public class BranchControlRow extends ControlRow
 		throws StandardException
     {
         return(BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
                     open_btree.getConglomerate()).getRow());
     }
 

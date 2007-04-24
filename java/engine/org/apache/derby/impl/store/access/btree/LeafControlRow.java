@@ -596,7 +596,8 @@ public class LeafControlRow extends ControlRow
         // Save away current split point leaf row, and build a branch row
         // based on it.
         DataValueDescriptor[] split_leaf_row = 
-            open_btree.getConglomerate().createTemplate();
+            open_btree.getConglomerate().createTemplate(
+                    open_btree.getRawTran());
 
         this.page.fetchFromSlot(
             (RecordHandle) null, splitpoint, split_leaf_row, 
@@ -722,7 +723,10 @@ public class LeafControlRow extends ControlRow
 
 
         BranchRow branch_template = 
-            BranchRow.createEmptyTemplate(open_btree.getConglomerate());
+            BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
+                    open_btree.getConglomerate());
+
         SearchParameters sp = 
             new SearchParameters(
                 branchrow.getRow(),

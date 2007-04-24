@@ -57,13 +57,15 @@ import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 
-import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
+import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.xact.TransactionId;
+import org.apache.derby.impl.store.raw.xact.XactXAResourceManager;
+
+import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.impl.store.raw.xact.XactXAResourceManager;
 
 import java.util.Enumeration;
 import java.util.Properties;
@@ -90,6 +92,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	protected LockFactory           lockFactory;
 	protected LogFactory            logFactory;
 	protected DataFactory           dataFactory;
+	protected DataValueFactory      dataValueFactory;
 	protected RawStoreFactory       rawStoreFactory;
 
 	public TransactionTable ttab;
@@ -124,7 +127,24 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	{
 
 		uuidFactory = Monitor.getMonitor().getUUIDFactory();
+
+        /*
+        dataValueFactory =  (DataValueFactory)
+            Monitor.findServiceModule(
+                this,
+                org.apache.derby.iapi.reference.ClassName.DataValueFactory);
+        */
+            // if datafactory has not been booted yet, try now.  This can
+            // happen in the unit tests.  Usually it is booted before store
+            // booting is called.
+            dataValueFactory = (DataValueFactory) 
+                Monitor.bootServiceModule(
+                    create, 
+                    this,
+                    org.apache.derby.iapi.reference.ClassName.DataValueFactory, 
+                    properties);
 		
+
 		contextFactory = ContextService.getFactory();
 
 		lockFactory = 
@@ -269,7 +289,9 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		}
 
 		Xact xact = 
-            new Xact(this, logFactory, dataFactory, readOnly, compatibilitySpace);
+            new Xact(
+                this, logFactory, dataFactory, dataValueFactory, 
+                readOnly, compatibilitySpace);
 
         xact.setTransName(transName);
 		pushTransactionContext(cm, xact_context_id, xact,
@@ -376,7 +398,8 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		}
 
 		Xact xact = 
-            new Xact(this, logFactory, dataFactory, false, null);
+            new Xact(
+                this, logFactory, dataFactory, dataValueFactory, false, null);
 
 		// hold latches etc. past commit in NTT
 		xact.setPostComplete();
@@ -398,7 +421,9 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		}
 
 
-		Xact xact = new InternalXact(this, logFactory, dataFactory);
+		Xact xact = 
+            new InternalXact(this, logFactory, dataFactory, dataValueFactory);
+
 		pushTransactionContext(cm, INTERNAL_CONTEXT_ID, xact, 
 							   true /* abortAll*/,
 							   rsf,

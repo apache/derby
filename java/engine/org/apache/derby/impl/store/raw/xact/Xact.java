@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.locks.Limit;
+import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.Compensation;
@@ -53,6 +54,8 @@ import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.access.RowSource;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.error.ExceptionSeverity;
+
+import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.services.property.PersistentSet;
 
@@ -166,10 +169,11 @@ public class Xact extends RawTransaction implements Limit  {
 	protected	XactContext		xc;	// my context - set by XactContext
 
 	// these fields remain fixed for the lifetime of this object
-	protected final XactFactory		xactFactory;
-	protected final DataFactory		dataFactory;
-	protected final LogFactory		logFactory;
-	private final CompatibilitySpace compatibilitySpace;
+	protected final XactFactory		    xactFactory;
+	protected final DataFactory		    dataFactory;
+	protected final LogFactory		    logFactory;
+    protected final DataValueFactory    dataValueFactory;
+	private   final CompatibilitySpace  compatibilitySpace;
 
 	// these fields remain fixedfor the lifetime
 	private LockingPolicy defaultLocking;
@@ -255,19 +259,21 @@ public class Xact extends RawTransaction implements Limit  {
 	*/
 
 	protected Xact(
-    XactFactory xactFactory, 
-    LogFactory  logFactory, 
-    DataFactory dataFactory,
-    boolean     readOnly,
-    CompatibilitySpace compatibilitySpace)
+    XactFactory         xactFactory, 
+    LogFactory          logFactory, 
+    DataFactory         dataFactory,
+    DataValueFactory    dataValueFactory,
+    boolean             readOnly,
+    CompatibilitySpace  compatibilitySpace)
     {
 
 		super();
 
-		this.xactFactory = xactFactory;
-		this.logFactory  = logFactory;
-		this.dataFactory = dataFactory;
-		this.readOnly    = readOnly;
+		this.xactFactory        = xactFactory;
+		this.logFactory         = logFactory;
+		this.dataFactory        = dataFactory;
+		this.dataValueFactory   = dataValueFactory;
+		this.readOnly           = readOnly;
 
 		if (compatibilitySpace == null) {
 			this.compatibilitySpace =
@@ -2686,6 +2692,26 @@ public class Xact extends RawTransaction implements Limit  {
 		
 		return toString();
 	}
+
+    /**
+     * Get DataValueFactory.
+     * <p>
+     * Return a DataValueFactory that can be used to allocate objects.  Used
+     * to make calls to: 
+     *     DataValueFactory.getInstanceUsingFormatIdAndCollationType()
+     *
+	 * @return a booted data value factory.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public DataValueFactory getDataValueFactory()
+		throws StandardException
+    {
+        return((DataValueFactory) 
+            Monitor.findServiceModule(
+                xactFactory,
+                org.apache.derby.iapi.reference.ClassName.DataValueFactory));
+    }
 
 
 	/* package */

@@ -47,6 +47,7 @@ import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.raw.Loggable;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
 
 /**
  * A TransactionController that does nothing.
@@ -414,6 +415,10 @@ class NoOpTransaction implements TransactionController {
     public Properties getProperties() throws StandardException {
         // TODO Auto-generated method stub
         return null;
+    }
+    public DataValueFactory getDataValueFactory() throws StandardException {
+        // TODO Auto-generated method stub
+        return(null);
     }
 
 }

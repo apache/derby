@@ -21,14 +21,15 @@
 
 package org.apache.derby.iapi.store.raw;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.access.RowSource;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.types.DataValueFactory;
 
 import java.util.Properties;
 
@@ -611,5 +612,17 @@ public interface Transaction {
 	public String getActiveStateTxIdString();
 
 
-
+    /**
+     * Get DataValueFactory.
+     * <p>
+     * Return a DataValueFactory that can be used to allocate objects.  Used
+     * to make calls to: 
+     *     DataValueFactory.getInstanceUsingFormatIdAndCollationType()
+     *
+	 * @return a booted data value factory.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public DataValueFactory getDataValueFactory()
+		throws StandardException;
 }

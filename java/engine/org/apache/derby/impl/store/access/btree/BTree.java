@@ -253,10 +253,13 @@ public abstract class BTree extends GenericConglomerate
 	 * @exception  StandardException  Standard exception policy.
      **/
     final DataValueDescriptor[] createBranchTemplate(
+    Transaction         rawtran,
     DataValueDescriptor page_ptr)
         throws StandardException
     {
-        return(TemplateRow.newBranchRow(format_ids, page_ptr));
+        return(
+            TemplateRow.newBranchRow(
+                rawtran, format_ids, collation_ids, page_ptr));
     }
 
 
@@ -278,13 +281,16 @@ public abstract class BTree extends GenericConglomerate
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    final public DataValueDescriptor[] createTemplate()
+    final public DataValueDescriptor[] createTemplate(
+    Transaction rawtran)
         throws StandardException
     {
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(format_ids != null);
 
-        return(TemplateRow.newRow((FormatableBitSet) null, format_ids));
+        return(TemplateRow.newRow(
+                    rawtran, 
+                    (FormatableBitSet) null, format_ids, collation_ids));
     }
 
     /**
@@ -540,7 +546,7 @@ public abstract class BTree extends GenericConglomerate
     long        conglomId)
 		throws StandardException
     {
-        return(new OpenConglomerateScratchSpace(format_ids));
+        return(new OpenConglomerateScratchSpace(format_ids, collation_ids));
     }
 
 

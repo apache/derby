@@ -44,6 +44,7 @@ import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.RegisteredFormatIds;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.loader.ClassInfo;
 import org.apache.derby.iapi.services.loader.InstanceGetter;
@@ -1158,7 +1159,9 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
      * @param formatId Return a DVD based on the format id
      * @return DataValueDescriptor with default collation of UCS_BASIC 
      */
-    public static DataValueDescriptor getNullDVDWithUCS_BASICcollation(int formatId){
+    public static DataValueDescriptor getNullDVDWithUCS_BASICcollation(
+    int formatId) {
+
         switch (formatId) {
         /* Wrappers */
         case StoredFormatIds.SQL_BIT_ID: return new SQLBit();
@@ -1186,6 +1189,11 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         case StoredFormatIds.SQL_CLOB_ID: return new SQLClob();
         case StoredFormatIds.SQL_NCLOB_ID: return new SQLNClob();
         case StoredFormatIds.XML_ID: return new XML();
+        case StoredFormatIds.ACCESS_HEAP_ROW_LOCATION_V1_ID: 
+        // This is an specific implementation of RowLocation, known to be
+        // a DTD.  
+             return(
+                 new org.apache.derby.impl.store.access.heap.HeapRowLocation());
         default:return null;
         }
     }

@@ -744,7 +744,8 @@ public abstract class OpenConglomerate
 
             // get a template.
 
-            DataValueDescriptor[] row = runtime_mem.get_row_for_export();
+            DataValueDescriptor[] row = 
+                runtime_mem.get_row_for_export(getRawTran());
 
             // Print pages of the heap.
             Page page = container.getFirstPage();
@@ -803,6 +804,7 @@ public abstract class OpenConglomerate
     ContainerHandle                 open_container,
     Conglomerate                    conglomerate,
     int[]                           format_ids,
+    int[]                           collation_ids,
     TransactionManager              xact_manager,
     Transaction                     rawtran,
     boolean                         hold,
@@ -828,7 +830,7 @@ public abstract class OpenConglomerate
         this.runtime_mem    = 
             (dynamic_info != null ? 
              ((OpenConglomerateScratchSpace) dynamic_info) : 
-             new OpenConglomerateScratchSpace(format_ids));
+             new OpenConglomerateScratchSpace(format_ids, collation_ids));
 
         // Is this an open for update or read?  This will
 		// be passed down to the raw store fetch methods, which allows

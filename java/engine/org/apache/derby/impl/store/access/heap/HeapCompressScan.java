@@ -182,7 +182,8 @@ class HeapCompressScan
                     if (row_array[ret_row_count] == null)
                     {
                         row_array[ret_row_count] = 
-                          open_conglom.getRuntimeMem().get_row_for_export();
+                          open_conglom.getRuntimeMem().get_row_for_export(
+                              open_conglom.getRawTran());
                     }
 
                     fetch_row = row_array[ret_row_count];

@@ -438,7 +438,9 @@ public class OpenBTree
         this.runtime_mem    = 
             (dynamic_info != null ? 
              ((OpenConglomerateScratchSpace) dynamic_info) : 
-             new OpenConglomerateScratchSpace(conglomerate.format_ids));
+             new OpenConglomerateScratchSpace(
+                 conglomerate.format_ids, 
+                 conglomerate.collation_ids));
 
 	}
 
@@ -516,7 +518,7 @@ public class OpenBTree
         if (SanityManager.DEBUG)
         {
             DataValueDescriptor[] template = 
-                this.init_conglomerate.createTemplate();
+                this.init_conglomerate.createTemplate(getRawTran());
 
             // RESOLVE - could just compare format id's rather than allocate
             // objects.

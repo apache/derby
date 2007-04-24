@@ -262,7 +262,8 @@ class BTreePostCommit implements Serviceable
         throws StandardException
     {
         DataValueDescriptor[] shrink_key = 
-            open_btree.getConglomerate().createTemplate();
+            open_btree.getConglomerate().createTemplate(
+                    open_btree.getRawTran());
 
         control_row.page.fetchFromSlot(
             (RecordHandle) null,

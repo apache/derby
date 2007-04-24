@@ -28,8 +28,10 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.RowUtil;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
+import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.SQLLongint;
 
 /**
@@ -78,13 +80,15 @@ public class BranchRow
 	{
 	}
 
-	private BranchRow(BTree btree)
+	private BranchRow(
+    Transaction         rawtran,
+    BTree               btree)
         throws StandardException
 	{
         SQLLongint child_page  = 
             new SQLLongint(ContainerHandle.INVALID_PAGE_NUMBER);
 
-        branchrow   = btree.createBranchTemplate(child_page);
+        branchrow   = btree.createBranchTemplate(rawtran, child_page);
 
         if (SanityManager.DEBUG)
         {
@@ -126,12 +130,12 @@ public class BranchRow
      *
      * @exception StandardException Standard exception policy.
      */
-    public static BranchRow createEmptyTemplate(BTree   btree)
+    public static BranchRow createEmptyTemplate(
+    Transaction         rawtran,
+    BTree               btree)
         throws StandardException
     {
-        BranchRow  newbranch   = new BranchRow(btree);
-
-        return(new BranchRow(btree));
+        return(new BranchRow(rawtran, btree));
     }
 
     /**

@@ -308,7 +308,8 @@ public abstract class GenericScanController
         // so allocating it here is probably not that bad.
         init_fetchDesc = 
             new FetchDescriptor(
-              (open_conglom.getRuntimeMem().get_scratch_row()).length,
+              (open_conglom.getRuntimeMem().get_scratch_row(
+                    open_conglom.getRawTran())).length,
               init_scanColumnList,
               init_qualifier);
 
@@ -660,7 +661,8 @@ public abstract class GenericScanController
                         if (row_array[ret_row_count] == null)
                         {
                             row_array[ret_row_count] = 
-                              open_conglom.getRuntimeMem().get_row_for_export();
+                              open_conglom.getRuntimeMem().get_row_for_export(
+                                  open_conglom.getRawTran());
                         }
 
                         fetch_row = row_array[ret_row_count];
@@ -668,7 +670,8 @@ public abstract class GenericScanController
                     else
                     {
                         fetch_row = 
-                            open_conglom.getRuntimeMem().get_row_for_export();
+                            open_conglom.getRuntimeMem().get_row_for_export(
+                                open_conglom.getRawTran());
                     }
                 }
 
@@ -1421,7 +1424,8 @@ public abstract class GenericScanController
         }
 
         DataValueDescriptor row[] = 
-            open_conglom.getRuntimeMem().get_scratch_row();
+            open_conglom.getRuntimeMem().get_scratch_row(
+                open_conglom.getRawTran());
 
         // If fetchFromSlot returns null it either means the row is deleted,
         // or the qualifier evaluates to false.

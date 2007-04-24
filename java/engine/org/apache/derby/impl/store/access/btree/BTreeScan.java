@@ -1207,7 +1207,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
 		this.init_hold                  = hold;
 
-		this.init_template              = runtime_mem.get_template();
+		this.init_template              = 
+            runtime_mem.get_template(getRawTran());
 
         this.init_scanColumnList        = scanColumnList;
 
@@ -1729,7 +1730,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 		throws StandardException
 	{
         // Turn this call into a group fetch of a 1 element group.
-        fetchNext_one_slot_array[0] = runtime_mem.get_scratch_row();
+        fetchNext_one_slot_array[0] = runtime_mem.get_scratch_row(getRawTran());
         boolean ret_val = 
             fetchRows(
                 scan_position,
@@ -2313,7 +2314,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                     if (reposition(scan_position, false))
                     {
                         scan_position.current_positionKey = 
-                            runtime_mem.get_row_for_export();
+                            runtime_mem.get_row_for_export(getRawTran());
 
 
                         Page page = scan_position.current_leaf.getPage();
@@ -2438,7 +2439,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                     scan_position.current_rh.getPageNumber())
             {
                 scan_position.current_positionKey = 
-                    runtime_mem.get_row_for_export();
+                    runtime_mem.get_row_for_export(getRawTran());
 
                 RecordHandle rh =
                     page.fetchFromSlot(

@@ -21,18 +21,15 @@
 
 package org.apache.derby.iapi.store.access;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException; 
-import org.apache.derby.iapi.services.io.Storable;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.Storable;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
 
-import java.lang.reflect.InvocationTargetException;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -359,8 +356,10 @@ public class RowUtil
 	 * @exception  StandardException  Standard exception policy.
      **/
     public static DataValueDescriptor[] newTemplate(
-    FormatableBitSet column_list,
-    int[]            format_ids) 
+    DataValueFactory    dvf,
+    FormatableBitSet    column_list,
+    int[]               format_ids,
+    int[]               collation_ids) 
         throws StandardException
     {
         int                   num_cols = format_ids.length;
@@ -384,8 +383,7 @@ public class RowUtil
 
                 // get empty instance of object identified by the format id.
 
-                ret_row[i] = (DataValueDescriptor) 
-                    Monitor.newInstanceFromIdentifier(format_ids[i]);
+                ret_row[i] = dvf.getNull(format_ids[i], collation_ids[i]);
             }
         }
 

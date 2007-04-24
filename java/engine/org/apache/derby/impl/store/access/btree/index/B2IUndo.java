@@ -144,10 +144,10 @@ public class B2IUndo implements LogicalUndo, Formatable
                 SanityManager.ASSERT(btree instanceof B2I);
 
             // create a template for the logged index row from the conglomerate.
-            logged_index_row_template = btree.createTemplate();
+            logged_index_row_template = btree.createTemplate(rawtran);
 
             // create a template for the page index row from the conglomerate.
-            template                  = btree.createTemplate();
+            template                  = btree.createTemplate(rawtran);
         }
         finally
         {

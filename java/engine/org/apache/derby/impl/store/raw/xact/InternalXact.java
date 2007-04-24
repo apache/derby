@@ -33,6 +33,8 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.types.DataValueFactory;
+
 import java.io.ObjectInput;
 
 /**
@@ -48,11 +50,14 @@ public class InternalXact extends Xact
 	*/
 
 	protected InternalXact(
-    XactFactory     xactFactory, 
-    LogFactory      logFactory, 
-    DataFactory     dataFactory) 
+    XactFactory         xactFactory, 
+    LogFactory          logFactory, 
+    DataFactory         dataFactory,
+    DataValueFactory    dataValueFactory) 
     {
-		super(xactFactory, logFactory, dataFactory, false, null);
+		super(
+            xactFactory, logFactory, dataFactory, dataValueFactory, 
+            false, null);
 
 		// always want to hold latches & containers open past the commit/abort
 		setPostComplete();

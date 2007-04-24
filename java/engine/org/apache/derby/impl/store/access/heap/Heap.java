@@ -583,7 +583,7 @@ public class Heap
     long        conglomId)
 		throws StandardException
     {
-        return(new OpenConglomerateScratchSpace(format_ids));
+        return(new OpenConglomerateScratchSpace(format_ids, collation_ids));
     }
 
     /**
@@ -687,6 +687,7 @@ public class Heap
                 (ContainerHandle) null,
                 this,
                 this.format_ids,
+                this.collation_ids,
                 xact_manager,
                 rawtran,
                 hold,
@@ -748,6 +749,7 @@ public class Heap
                 (ContainerHandle) null,
                 this,
                 this.format_ids,
+                this.collation_ids,
                 xact_manager,
                 rawtran,
                 hold,
@@ -796,6 +798,7 @@ public class Heap
                     (ContainerHandle) null,
                     this,
                     this.format_ids,
+                    this.collation_ids,
                     xact_manager,
                     rawtran,
                     false,
@@ -828,6 +831,7 @@ public class Heap
                 (ContainerHandle) null,
                 this,
                 this.format_ids,
+                this.collation_ids,
                 nested_xact,
                 nested_xact.getRawStoreXact(),
                 true,
@@ -920,6 +924,7 @@ public class Heap
                     (ContainerHandle) null,
                     this,
                     this.format_ids,
+                    this.collation_ids,
                     xact_manager,
                     rawtran,
                     false,
@@ -974,6 +979,7 @@ public class Heap
                 (ContainerHandle) null,
                 this,
                 this.format_ids,
+                this.collation_ids,
                 xact_manager,
                 rawtran,
                 hold,
@@ -1032,6 +1038,7 @@ public class Heap
                 (ContainerHandle) null,
                 this,
                 this.format_ids,
+                this.collation_ids,
                 xact_manager,
                 rawtran,
                 false,
