@@ -34,8 +34,6 @@ import java.io.*;
  **/
 public class AssertFailure extends RuntimeException
 {
-	private Throwable nestedException;
-
 	/**
 	 * This constructor takes the pieces of information
 	 * expected for each error.
@@ -51,8 +49,7 @@ public class AssertFailure extends RuntimeException
 	 **/
 	public AssertFailure(String message, Throwable nestedError)
 	{
-		super(message);
-		nestedException = nestedError;
+		super(message, nestedError);
 	}
 
 	/**
@@ -61,21 +58,5 @@ public class AssertFailure extends RuntimeException
 	public AssertFailure(String message)
 	{
 		super(message);
-	}
-
-	public void printStackTrace() {
-		super.printStackTrace();
-		if (nestedException != null)
-			nestedException.printStackTrace();
-	}
-	public void printStackTrace(PrintStream s) {
-		super.printStackTrace(s);
-		if (nestedException != null)
-			nestedException.printStackTrace(s);
-	}
-	public void printStackTrace(PrintWriter s) {
-		super.printStackTrace(s);
-		if (nestedException != null)
-			nestedException.printStackTrace(s);
 	}
 }
