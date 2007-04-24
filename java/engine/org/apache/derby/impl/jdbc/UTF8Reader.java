@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.jdbc;
 
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.IOException;
@@ -58,7 +59,7 @@ public final class UTF8Reader extends Reader
 	{
 		super(synchronization);
 
-		this.in     = in;
+		this.in     = new BufferedInputStream (in);
 		this.maxFieldSize = maxFieldSize;
 		this.parent = parent;
 
@@ -87,7 +88,7 @@ public final class UTF8Reader extends Reader
                 throws IOException {
             super(synchronization);
             
-            this.in     = in;
+            this.in     = new BufferedInputStream (in);
             this.maxFieldSize = maxFieldSize;
             this.parent = parent;
             this.utfLen = streamSize;
