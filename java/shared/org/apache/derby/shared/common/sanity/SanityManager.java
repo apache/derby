@@ -144,16 +144,7 @@ public class SanityManager {
 		// XXX (nat) Hmm, should we check ASSERT here?  The caller is
 		// not expecting this function to return, whether assertions
 		// are compiled in or not.
-
-		if (DEBUG) {
-			AssertFailure af = new AssertFailure("ASSERT FAILED " + msgIfFail);
-			if (DEBUG_ON("AssertFailureTrace")) {
-				showTrace(af);
-			}
-			throw af;
-		}
-		else
-			throw new AssertFailure("ASSERT FAILED " + msgIfFail);
+		THROWASSERT(msgIfFail, null);
 	}
 
 	/**
@@ -168,19 +159,16 @@ public class SanityManager {
 	 * @see org.apache.derby.iapi.services.sanity.AssertFailure
 	 */
 	public static final void THROWASSERT(String msg, Throwable t) {
-
+		AssertFailure af = new AssertFailure("ASSERT FAILED " + msg, t);
 		if (DEBUG) {
-			AssertFailure af = new AssertFailure("ASSERT FAILED " + t.toString(), t);
 			if (DEBUG_ON("AssertFailureTrace")) {
 				showTrace(af);
 			}
-			showTrace(t);
-			throw af;
 		}
-		else {
+		if (t != null) {
 			showTrace(t);
-			throw new AssertFailure("ASSERT FAILED " + t.toString(), t);
 		}
+		throw af;
 	}
 
 	/**
@@ -192,19 +180,7 @@ public class SanityManager {
 	 * @see org.apache.derby.iapi.services.sanity.AssertFailure
 	 */
 	public static final void THROWASSERT(Throwable t) {
-
-		if (DEBUG) {
-			AssertFailure af = new AssertFailure("ASSERT FAILED " + t.toString(), t);
-			if (DEBUG_ON("AssertFailureTrace")) {
-				showTrace(af);
-			}
-			showTrace(t);
-			throw af;
-		}
-		else {
-			showTrace(t);
-			throw new AssertFailure("ASSERT FAILED " + t.toString(), t);
-		}
+		THROWASSERT(t.toString(), t);
 	}
 
 	/**
