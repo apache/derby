@@ -1597,6 +1597,14 @@
 
   </target>
 
+  <!-- 
+     cibuild - target suitable for continuous integration builds.
+     Clobbers/cleans everything it can, then builds the jars
+     and the javadoc. 
+  -->
+  <target name="cibuild"
+	depends="clobber,cleanjars,cleandocs,junit-clean,gump_all"/>
+
   <target name="gump_all" depends="all,buildjars,javadoc"/>
 
   <target name="snapshot" depends="clobber,snapshotError,init,initjars">
