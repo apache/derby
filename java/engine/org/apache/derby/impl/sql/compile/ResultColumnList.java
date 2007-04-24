@@ -1169,8 +1169,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 				userExprFun.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Row, "getColumn",
 					ClassName.DataValueDescriptor, 1); // the express
 
-				acb.generateNullWithExpress(userExprFun, rc.getTypeCompiler());
-
+				acb.generateNullWithExpress(userExprFun, rc.getTypeCompiler(),
+						rc.getTypeServices().getCollationType());
 			}
 			else
 			{

@@ -206,7 +206,8 @@ public class SpecialFunctionNode extends ValueNode
 		String fieldType = getTypeCompiler().interfaceName();
 		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, fieldType);
 
-		acb.generateDataValue(mb, getTypeCompiler(), field);
+		acb.generateDataValue(mb, getTypeCompiler(), 
+				getTypeServices().getCollationType(), field);
 	}
 
 	/*

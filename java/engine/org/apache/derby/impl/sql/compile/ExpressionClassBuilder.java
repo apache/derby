@@ -867,10 +867,10 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 		Nothing is required on the stack, a SQL null data value
 		is pushed.
 	*/
-	void generateNull(MethodBuilder mb, TypeCompiler tc) {
+	void generateNull(MethodBuilder mb, TypeCompiler tc, int collationType) {
 		pushDataValueFactory(mb);
 		mb.pushNull(tc.interfaceName());
-		tc.generateNull(mb);
+		tc.generateNull(mb, collationType, getBaseClassName());
 	}
 
 	/**
@@ -878,11 +878,12 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 		The express value is required on the stack and will be popped, a SQL null data value
 		is pushed.
 	*/
-	void generateNullWithExpress(MethodBuilder mb, TypeCompiler tc) {
+	void generateNullWithExpress(MethodBuilder mb, TypeCompiler tc, 
+			int collationType) {
 		pushDataValueFactory(mb);
 		mb.swap(); // need the dvf as the instance
 		mb.cast(tc.interfaceName());
-		tc.generateNull(mb);
+		tc.generateNull(mb, collationType, getBaseClassName());
 	}
 
 	/**
@@ -891,10 +892,11 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 		on the stack and will be popped, a SQL data value
 		is pushed.
 	*/
-	void generateDataValue(MethodBuilder mb, TypeCompiler tc, LocalField field) {
+	void generateDataValue(MethodBuilder mb, TypeCompiler tc, 
+			int collationType, LocalField field) {
 		pushDataValueFactory(mb);
 		mb.swap(); // need the dvf as the instance
-		tc.generateDataValue(mb, field);
+		tc.generateDataValue(mb, collationType, getBaseClassName(), field);
 	}
 
 	

@@ -246,7 +246,7 @@ public class UserTypeConstantNode extends ConstantNode {
 		/* Are we generating a SQL null value? */
 	    if (value == null)
 	    {
-			acb.generateNull(mb, tc);
+			acb.generateNull(mb, tc, getTypeServices().getCollationType());
 	    }
         // The code generated here is invoked when the generated class is constructed. However the prepared statement
         // is not set into the activation class when it is constructed, but later. So we cannot use the getSavedObject
@@ -289,7 +289,7 @@ public class UserTypeConstantNode extends ConstantNode {
 
 			LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, fieldType);
 
-			acb.generateDataValue(mb, tc, field);
+			acb.generateDataValue(mb, tc, getTypeServices().getCollationType(), field);
 		}
 	}
 

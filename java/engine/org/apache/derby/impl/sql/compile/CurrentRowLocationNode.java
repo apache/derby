@@ -142,7 +142,8 @@ public class CurrentRowLocationNode extends ValueNode
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getRowLocation", ClassName.RowLocation, 0);
 
 
-		acb.generateDataValue(mb, getTypeCompiler(), field);
+		acb.generateDataValue(mb, getTypeCompiler(), 
+				getTypeServices().getCollationType(), field);
 
 		/*
 		** Store the result of the method call in the field, so we can re-use

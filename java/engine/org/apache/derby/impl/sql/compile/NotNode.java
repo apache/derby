@@ -120,7 +120,8 @@ public final class NotNode extends UnaryLogicalOperatorNode
 
 		// arg 2
 		mb.push(false);
-		acb.generateDataValue(mb, getTypeCompiler(), field);
+		acb.generateDataValue(mb, getTypeCompiler(), 
+				getTypeServices().getCollationType(), field);
 		mb.upCast(ClassName.DataValueDescriptor);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "equals", interfaceName, 2);

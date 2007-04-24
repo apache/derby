@@ -27,26 +27,20 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
-import org.apache.derby.iapi.types.BitDataValue;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import java.sql.Types;
 
 /**
  * This is the base implementation of TypeCompiler
@@ -99,9 +93,9 @@ abstract class BaseTypeCompiler implements TypeCompiler
 										);
 	}
 
-	/** @see TypeCompiler#generateNull */
-
-	public void generateNull(MethodBuilder mb)
+	/** @see TypeCompiler#generateNull(MethodBuilder, int, String) */
+	public void generateNull(MethodBuilder mb, int collationType, 
+			String className)
 	{
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
 									nullMethodName(),
@@ -109,9 +103,9 @@ abstract class BaseTypeCompiler implements TypeCompiler
 									1);
 	}
 
-	/** @see TypeCompiler#generateDataValue */
-	public void generateDataValue(MethodBuilder mb,
-										LocalField field)
+	/** @see TypeCompiler#generateDataValue(MethodBuilder, int, String, LocalField) */
+	public void generateDataValue(MethodBuilder mb, int collationType,
+			String className, LocalField field)
 	{
 		String				interfaceName = interfaceName();
 
@@ -130,7 +124,6 @@ abstract class BaseTypeCompiler implements TypeCompiler
 			mb.getField(field);
 		}
 
-
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
 							dataValueMethodName(),
 							interfaceName,
@@ -143,6 +136,71 @@ abstract class BaseTypeCompiler implements TypeCompiler
 			 */
 			mb.putField(field);
 		}
+	}
+
+	/**
+	 * If the collation type is UCS_BASIC, then we have already generated the
+	 * code for the correct DVD and hence simply return from this method. 
+	 * 
+	 * But if the collation type is territory based and we are generating DVDs
+	 * for character types, then we need to generate CollatorSQLxxx type of 
+	 * DVD. This CollatorSQLxxx DVD will be provided by generating following 
+	 * code which works on top of the DVD that has been generated with 
+	 * UCS_BASIC collation.
+	 * DVDwithUCS_BASIC.getValue(DVF.getCharacterCollator(collationType));
+	 * 
+	 * This method will be called only by CharTypeCompiler and ClobTypeCompiler 
+	 * because those are the only type compilers who generate DVDs which are 
+	 * impacted by the collation. Rest of the TypeCompilers generate DVDs which
+	 * are collation in-sensitive.
+	 * 
+	 * @param mb The method to put the expression in
+	 * @param collationType For character DVDs, this will be used to determine
+	 *   what Collator should be associated with the DVD which in turn will 
+	 *   decide whether to generate CollatorSQLcharDVDs or SQLcharDVDs. For 
+	 *   other types of DVDs, this parameter will be ignored.
+	 * @param className name of the base class of the activation's hierarchy
+	 */
+	protected void generateCollationSensitiveDataValue(MethodBuilder mb, 
+			int collationType, String className){		
+		if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+			return; 
+		//In case of character DVDs, for territory based collation, we need to 
+		//generate DVDs with territory based RuleBasedCollator and hence we 
+		//need to generate CollatorSQLChar/CollatorSQLVarchar/
+		//CollatorSQLLongvarchar/CollatorSQLClob 
+		pushDataValueFactory(mb, className);
+		mb.push(collationType);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "getCharacterCollator",
+				"java.text.RuleBasedCollator", 1);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "getValue", interfaceName(), 1);
+	}
+	
+	private Object getDVF;
+	/**
+	 * This method will push a DVF on the stack. This DVF is required to get
+	 * the territory based collator using the collation type. In other words,
+	 * this DVF will be used to generate something like following
+	 * DVF.getCharacterCollator(collationType)
+	 * 
+	 * @param mb The method to put the expression in
+	 * @param className name of the base class of the activation's hierarchy
+	 */
+	private void pushDataValueFactory(MethodBuilder mb, String className)
+	{
+		// generates:
+		//	   getDataValueFactory()
+		//
+
+		if (getDVF == null) {
+			getDVF = mb.describeMethod(VMOpcode.INVOKEVIRTUAL,
+										className,
+										"getDataValueFactory",
+										ClassName.DataValueFactory);
+		}
+
+		mb.pushThis();
+		mb.callMethod(getDVF);
 	}
 
 	protected abstract String nullMethodName();

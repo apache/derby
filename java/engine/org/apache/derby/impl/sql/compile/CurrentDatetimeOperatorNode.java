@@ -159,7 +159,8 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 				break;
 		}
 
-		acb.generateDataValue(mb, getTypeCompiler(), (LocalField)null);
+		acb.generateDataValue(mb, getTypeCompiler(), 
+				getTypeServices().getCollationType(), (LocalField)null);
 	}
 
 	/*

@@ -288,7 +288,7 @@ public class CoalesceFunctionNode extends ValueNode
 		//Following is for the second arg. This arg will be used to pass the return value.
 		//COALESCE method expects this to be initialized to NULL SQLxxx type object.
 		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, receiverType);
-		acb.generateNull(mb, getTypeCompiler());
+		acb.generateNull(mb, getTypeCompiler(), getTypeServices().getCollationType());
 		mb.upCast(ClassName.DataValueDescriptor);
 		mb.putField(field);
 

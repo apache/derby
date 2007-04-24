@@ -909,7 +909,8 @@ public class CastNode extends ValueNode
 		** the object.
 		*/
 
-		acb.generateNull(acbConstructor, getTypeCompiler(destCTI));
+		acb.generateNull(acbConstructor, getTypeCompiler(destCTI), 
+				castTarget.getCollationType());
 		acbConstructor.setField(field);
 
 

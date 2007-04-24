@@ -27,7 +27,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -177,13 +176,16 @@ public interface TypeCompiler
 	/**
 	 * Generate the code necessary to produce a SQL null of the appropriate
 	 * type. The stack must contain a DataValueFactory and a null or a value
-	   of the correct type (interfaceName()).
+	 * of the correct type (interfaceName()).
 	 *
 	 * @param mb	The method to put the expression in
-	 *
+	 * @param collationType For character DVDs, this will be used to determine
+	 *   what Collator should be associated with the DVD which in turn will 
+	 *   decide whether to generate CollatorSQLcharDVDs or SQLcharDVDs.
+	 * @param className name of the base class of the activation's hierarchy
 	 */
 
-	void			generateNull(MethodBuilder mb);
+	void generateNull(MethodBuilder mb, int collationType, String className);
 
 
 	/**
@@ -195,13 +197,19 @@ public interface TypeCompiler
 	 *
 	 * If the type of the value is incorrect, the generated code will
 	 * not work.
-
-       The stack must contain
-			data value factory
-			value
-	 *
+	 * 
+	 * The stack must contain data value factory value.
+	 * 
+	 * @param mb	The method to put the expression in
+	 * @param collationType For character DVDs, this will be used to determine
+	 *   what Collator should be associated with the DVD which in turn will 
+	 *   decide whether to generate CollatorSQLcharDVDs or SQLcharDVDs. For 
+	 *   other types of DVDs, this parameter will be ignored.
+	 * @param className name of the base class of the activation's hierarchy
+	 * @param field LocalField
 	 */
-	void			generateDataValue(MethodBuilder eb, LocalField field);
+	void generateDataValue(MethodBuilder eb, int collationType, 
+			String className, LocalField field);
 
 	/**
 	 * Return the maximum width for this data type when cast to a char type.

@@ -142,7 +142,8 @@ public class JavaToSQLValueNode extends ValueNode
 
 			mb.conditionalIfNull();
 			mb.getField(nullValueField);
-			acb.generateNullWithExpress(mb, getTypeCompiler());
+			acb.generateNullWithExpress(mb, getTypeCompiler(), 
+					getTypeServices().getCollationType());
 
 
 			/*
@@ -165,7 +166,8 @@ public class JavaToSQLValueNode extends ValueNode
 		javaNode.generateExpression(acb, mb);
 
 		/* Generate the SQL value, which is always nullable */
-		acb.generateDataValue(mb, tc, field);
+		acb.generateDataValue(mb, tc, 
+				getTypeServices().getCollationType(), field);
 
 		/*
 		** If there was a receiver, the return value will be the result

@@ -22,27 +22,19 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import java.lang.reflect.Modifier;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
+
+import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.util.ReuseFactory;
-
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 
 import java.util.Vector;
 
@@ -228,14 +220,16 @@ abstract class ConstantNode extends ValueNode
 		/* Are we generating a SQL null value? */
 	    if (isNull())
 	    {
-			acb.generateNull(mb, getTypeCompiler());
+			acb.generateNull(mb, getTypeCompiler(), 
+					getTypeServices().getCollationType());
 		}
 		else
 		{
 			generateConstant(acb, mb);	// ask sub type to give a constant,
 										// usually a literal like 'hello'
 
-			acb.generateDataValue(mb, getTypeCompiler(), (LocalField) null);
+			acb.generateDataValue(mb, getTypeCompiler(), 
+					getTypeServices().getCollationType(), (LocalField) null);
 		}
 	}
 

@@ -494,7 +494,8 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 	throws StandardException
 	{
 		mb.conditionalIfNull();//get the field on the stack and if it is null
-			acb.generateNull(mb, getTypeCompiler());// yes, it is, hence create a NULL SQLxxx type object and put that on stack
+			acb.generateNull(mb, getTypeCompiler(),
+					getTypeServices().getCollationType());// yes, it is, hence create a NULL SQLxxx type object and put that on stack
 		mb.startElseCode(); //no, it is not null
 			mb.getField(resultField); //so put it back on the stack
 		mb.completeConditional(); //complete if else block

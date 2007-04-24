@@ -25,24 +25,16 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.util.StringUtil;
-
-import java.sql.Types;
-import org.apache.derby.iapi.reference.JDBC20Translation;
 
 /**
  * This class implements TypeCompiler for the SQL char datatypes.
@@ -199,6 +191,22 @@ public final class CharTypeCompiler extends BaseTypeCompiler
                                 return null;
                 }
         }
+
+    	/** @see TypeCompiler#generateDataValue(MethodBuilder, int, String, LocalField) */
+    	public void generateDataValue(MethodBuilder mb, int collationType,
+    			String className, LocalField field)
+    	{
+    		super.generateDataValue(mb, collationType, className, field);
+    		generateCollationSensitiveDataValue(mb, collationType, className);
+    	}
+
+    	/** @see TypeCompiler#generateNull(MethodBuilder, int, String) */
+    	public void generateNull(MethodBuilder mb, int collationType, 
+    			String className)
+    	{
+    		super.generateNull(mb, collationType, className);
+    		generateCollationSensitiveDataValue(mb, collationType, className);
+    	}
 
         protected String dataValueMethodName()
         {

@@ -301,7 +301,8 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 												MethodBuilder mb)
 						throws StandardException
 	{
-		acb.generateNull(mb, operand.getTypeCompiler());
+		acb.generateNull(mb, operand.getTypeCompiler(), 
+				operand.getTypeServices().getCollationType());
 	}
 
 	/** @see RelationalOperator#getStartOperator */
@@ -349,7 +350,8 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 		MethodBuilder qualMethod = acb.newUserExprFun();
 
 		/* Generate a method that returns that expression */
-		acb.generateNull(qualMethod, operand.getTypeCompiler());
+		acb.generateNull(qualMethod, operand.getTypeCompiler(),
+				operand.getTypeServices().getCollationType());
 		qualMethod.methodReturn();
 		qualMethod.complete();
 
