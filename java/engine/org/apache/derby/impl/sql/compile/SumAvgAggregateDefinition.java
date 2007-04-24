@@ -106,7 +106,7 @@ public class SumAvgAggregateDefinition
 		{
 			if (SanityManager.DEBUG)
 			{
-				SanityManager.THROWASSERT("Unexpected exception " + e);
+				SanityManager.THROWASSERT("Unexpected exception", e);
 			}
 		}
 

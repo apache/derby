@@ -100,7 +100,7 @@ public class CollatorSQLChar extends SQLChar implements CollationElementsInterfa
 		catch (StandardException se)
 		{
 			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Unexpected exception " + se);
+				SanityManager.THROWASSERT("Unexpected exception", se);
 			return null;
 		}
 	}

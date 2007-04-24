@@ -88,7 +88,7 @@ public abstract class GClass implements ClassBuilder {
 			fis.close();
 		} catch (IOException e) {
 			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Unable to write .class file");
+				SanityManager.THROWASSERT("Unable to write .class file", e);
 		}
 		}
 	}
@@ -130,7 +130,7 @@ public abstract class GClass implements ClassBuilder {
 				else
 					cf.loadApplicationClass(typeName);
 			} catch (ClassNotFoundException cnfe) {
-				SanityManager.THROWASSERT("Class "+typeName+" not found");
+				SanityManager.THROWASSERT("Class "+typeName+" not found", cnfe);
 			}
 
 	        // all the checks succeeded, it must be okay.

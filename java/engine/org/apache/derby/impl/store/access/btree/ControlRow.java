@@ -503,10 +503,10 @@ public abstract class ControlRow implements AuxObject, TypedFormat
             if (SanityManager.DEBUG)
             {
                 SanityManager.THROWASSERT(
-                    "setLeftSibling got an exception: " + se +
+                    "setLeftSibling got an exception: " +
                     "control_row = " + this +
                     "trying to update field number " + CR_LEFTSIB_COLID + 
-                    "to new value " + this.leftSiblingPageNumber);
+                    "to new value " + this.leftSiblingPageNumber, se);
             }
             throw(se);
         }
@@ -560,10 +560,10 @@ public abstract class ControlRow implements AuxObject, TypedFormat
             if (SanityManager.DEBUG)
             {
                 SanityManager.THROWASSERT(
-                    "setRightSibling got an exception: " + se +
+                    "setRightSibling got an exception: " +
                     "control_row = " + this +
                     "trying to update field number " + CR_RIGHTSIB_COLID + 
-                    "to new value " + this.rightSiblingPageNumber);
+                    "to new value " + this.rightSiblingPageNumber, se);
             }
             throw(se);
         }
@@ -672,10 +672,10 @@ public abstract class ControlRow implements AuxObject, TypedFormat
             if (SanityManager.DEBUG)
             {
                 SanityManager.THROWASSERT(
-                    "setParent got an exception: " + se +
+                    "setParent got an exception: " +
                     "control_row = " + this +
                     "trying to update field number " + CR_PARENT_COLID + 
-                    "to new value " + this.parentPageNumber);
+                    "to new value " + this.parentPageNumber, se);
             }
             throw(se);
         }

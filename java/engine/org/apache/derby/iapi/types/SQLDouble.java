@@ -290,9 +290,9 @@ public final class SQLDouble extends NumberDataType
 		{
 			if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT(
-					"error on clone, se = " + se +
+					"error on clone, " +
 					" value = " + value +
-					" isnull = " + isnull);
+					" isnull = " + isnull, se);
 			return null;
 		}
 	}

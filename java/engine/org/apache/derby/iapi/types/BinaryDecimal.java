@@ -167,7 +167,7 @@ abstract class BinaryDecimal extends NumberDataType
 			}
 			catch (StandardException se)
 			{
-				SanityManager.THROWASSERT(se.toString());
+				SanityManager.THROWASSERT(se);
 			}
 		}
 		
@@ -183,7 +183,7 @@ abstract class BinaryDecimal extends NumberDataType
 			}
 			catch (StandardException se)
 			{
-				SanityManager.THROWASSERT(se.toString());
+				SanityManager.THROWASSERT(se);
 			}
 		}	
 	}

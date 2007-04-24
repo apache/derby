@@ -254,7 +254,7 @@ public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
 
 		} catch (StandardException se) {
 			if (SanityManager.DEBUG) {
-				SanityManager.THROWASSERT("Unexpected exception " + se, se);
+				SanityManager.THROWASSERT("Unexpected exception", se);
 			}
 
 			/*
@@ -281,7 +281,7 @@ public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
 
 		} catch (StandardException se) {
 			if (SanityManager.DEBUG) {
-				SanityManager.THROWASSERT("Unexpected exception " + se, se);
+				SanityManager.THROWASSERT("Unexpected exception", se);
 			}
 
 			/*

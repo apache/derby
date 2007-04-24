@@ -551,7 +551,8 @@ public class TransactionTableEntry implements Formatable, TransactionInfo, Clone
 			if (SanityManager.DEBUG) 
             {
 				SanityManager.THROWASSERT(
-                    "TransactionTableEntry cloneable but throws CloneNotSupportedException " + e);
+                    "TransactionTableEntry cloneable but throws " +
+					"CloneNotSupportedException", e);
 			}
 			return null;
 		}				

@@ -143,7 +143,7 @@ public class InternalXact extends Xact
 			catch (StandardException se)
 			{
 				if (SanityManager.DEBUG)
-					SanityManager.THROWASSERT("unexpected exception: " + se);
+					SanityManager.THROWASSERT("unexpected exception", se);
 			}
 		}
 	}

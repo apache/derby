@@ -558,9 +558,7 @@ recompileOutOfDatePlan:
 		{
 			if (SanityManager.DEBUG)
 			{
-				se.printStackTrace(System.out);
-				SanityManager.THROWASSERT(
-					"Unexpected exception - " + se);
+				SanityManager.THROWASSERT("Unexpected exception", se);
 			}
 		}
 	}
@@ -1127,9 +1125,7 @@ recompileOutOfDatePlan:
 			{
 				if (SanityManager.DEBUG)
 				{
-					se.printStackTrace(System.out);
-					SanityManager.THROWASSERT(
-						"Unexpected exception - " + se);
+					SanityManager.THROWASSERT("Unexpected exception", se);
 				}
 			}
 		}

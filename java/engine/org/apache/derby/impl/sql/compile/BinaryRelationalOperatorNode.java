@@ -412,8 +412,7 @@ public class BinaryRelationalOperatorNode
             if (SanityManager.DEBUG)
             {
                 SanityManager.THROWASSERT("Failed when trying to " +
-                    "find base table number for column reference check:\n" +
-                    se.getMessage());
+                    "find base table number for column reference check:", se);
             }
 		}
 
@@ -1600,8 +1599,7 @@ public class BinaryRelationalOperatorNode
 			if (SanityManager.DEBUG)
 			{
 				SanityManager.THROWASSERT("Failed when trying to " +
-					"find base table numbers for reference check:\n" +
-					se.getMessage());
+					"find base table numbers for reference check:", se);
 			}
 		}
 

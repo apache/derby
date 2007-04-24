@@ -881,7 +881,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
         catch (StandardException se)
         {
 			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("error from make RecordHandle.");
+				SanityManager.THROWASSERT(se);
         }
 
     }

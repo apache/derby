@@ -80,7 +80,7 @@ public class SQLVarchar
 		catch (StandardException se)
 		{
 			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Unexpected exception " + se);
+				SanityManager.THROWASSERT("Unexpected exception", se);
 			return null;
 		}
 	}

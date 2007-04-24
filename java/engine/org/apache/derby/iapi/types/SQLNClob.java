@@ -90,9 +90,9 @@ public class SQLNClob
                 }
                 catch (StandardException se)
                 {
-                        if (SanityManager.DEBUG)
-                                SanityManager.THROWASSERT("Unexpected exception " + se);
-                        return null;
+                    if (SanityManager.DEBUG)
+                        SanityManager.THROWASSERT("Unexpected exception", se);
+                    return null;
                 }
         }
 

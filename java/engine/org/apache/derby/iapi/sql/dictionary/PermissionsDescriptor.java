@@ -56,7 +56,8 @@ public abstract class PermissionsDescriptor extends TupleDescriptor
 		catch( java.lang.CloneNotSupportedException cnse)
 		{
 			if( SanityManager.DEBUG)
-				SanityManager.THROWASSERT( "Could not clone a " + getClass().getName());
+				SanityManager.THROWASSERT("Could not clone a " +
+										  getClass().getName(), cnse);
 			return null;
 		}
 	}

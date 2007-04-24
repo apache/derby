@@ -256,7 +256,7 @@ class JCECipherProvider implements CipherProvider
 		{
 			// should never happen
 			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Illegal state exception");
+				SanityManager.THROWASSERT(ise);
 		}
 		catch (GeneralSecurityException gse)
 		{
@@ -338,7 +338,7 @@ class JCECipherProvider implements CipherProvider
 		{
 			// should never happen
 			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Illegal state exception");
+				SanityManager.THROWASSERT(ise);
 		}
 		catch (GeneralSecurityException gse)
 		{

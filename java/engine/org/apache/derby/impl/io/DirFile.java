@@ -175,7 +175,8 @@ class DirFile extends File implements StorageFile
 			// problem is
 			if (SanityManager.DEBUG)
 			{
-				SanityManager.THROWASSERT("Unable to create Exclusive Lock File " + getPath());
+				SanityManager.THROWASSERT(
+                    "Unable to create Exclusive Lock File " + getPath(), ioe);
 			}
 		}
 		

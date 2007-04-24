@@ -223,8 +223,7 @@ public class NewInvocationNode extends MethodCallNode
 				 */
 				if (SanityManager.DEBUG)
 				{
-					SanityManager.THROWASSERT(
-						"Unexpected exception - " + cnfe);
+					SanityManager.THROWASSERT("Unexpected exception", cnfe);
 				}
 				return null;
 			}
@@ -476,8 +475,7 @@ public class NewInvocationNode extends MethodCallNode
 			 */
 			if (SanityManager.DEBUG)
 			{
-				SanityManager.THROWASSERT(
-					"Unexpected ClassNotFoundException for javaClassName");
+				SanityManager.THROWASSERT("Unexpected exception", e);
 			}
 			return null;
 		}

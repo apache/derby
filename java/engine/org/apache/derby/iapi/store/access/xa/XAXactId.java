@@ -276,7 +276,7 @@ public class XAXactId extends GlobalXact implements Xid
 			// this class only knows how to compare with other Xids
 			if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT("comparing XAXactId with " + 
-										  other.getClass().getName()); 
+										  other.getClass().getName(), cce); 
 		
 			return false;
 	    }

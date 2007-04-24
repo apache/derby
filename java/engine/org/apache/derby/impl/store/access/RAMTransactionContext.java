@@ -91,7 +91,7 @@ final class RAMTransactionContext extends ContextImpl
                 // RESOLVE - what to do in error case.
                 if (SanityManager.DEBUG)
                     SanityManager.THROWASSERT(
-                        "got error while invalidating cache.");
+                        "got error while invalidating cache.", se);
             }
 
             transaction.closeControllers(true /* close held controllers */ );

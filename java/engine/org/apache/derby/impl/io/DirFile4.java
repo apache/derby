@@ -184,7 +184,7 @@ class DirFile4 extends DirFile
 			if (SanityManager.DEBUG)
 			{
 				SanityManager.THROWASSERT("Unable to Acquire Exclusive Lock on "
-										  + getPath());
+										  + getPath(), ioe);
 			}
 		}
     

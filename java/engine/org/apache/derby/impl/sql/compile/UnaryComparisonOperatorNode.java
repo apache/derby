@@ -241,8 +241,8 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
             	if (SanityManager.DEBUG)
             	{
             	    SanityManager.THROWASSERT("Failed when trying to " +
-            	        "find base table number for column reference check:\n" +
-            	        se.getMessage());
+            	        "find base table number for column reference check:",
+						se);
             	}
 			}
 			crTables.and(cRefTables);

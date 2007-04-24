@@ -940,7 +940,7 @@ readingLoop:
 		catch (StandardException se)
 		{
 			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Unexpected exception " + se);
+				SanityManager.THROWASSERT("Unexpected exception", se);
 			return null;
 		}
 	}
@@ -2490,7 +2490,7 @@ readingLoop:
 		catch (StandardException se)
 		{
 			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Unexpected exception " + se);
+				SanityManager.THROWASSERT("Unexpected exception", se);
 			return 0;
 		}
 
@@ -2543,7 +2543,7 @@ readingLoop:
 		{
 			if (SanityManager.DEBUG)
 			{
-				SanityManager.THROWASSERT("Unexpected exception " + se);
+				SanityManager.THROWASSERT("Unexpected exception", se);
 			}
 		}
 
