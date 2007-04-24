@@ -167,6 +167,10 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
     public static final String CAS     = " on delete cascade";
     public static final String SETN    = " on delete set null";
 
+    /** Secondary connection. Used if something needs to be executed in a
+     * separate transaction. */
+    private Connection c2;
+
     /**
      * Creates a String containing an insert statement for the
      * specified table containing the specified number of '?'
@@ -200,6 +204,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         Statement s = createStatement();
         s.execute(CT+name+signature);
         s.execute(insertFrom(name, src));
+        s.close();
     }
 
     /**
@@ -236,7 +241,9 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      */
     private static void assertResultSet(String message,
                                         Object[][] expected,
-                                        ResultSet returned) throws Exception {
+                                        ResultSet returned)
+            throws SQLException
+    {
         int i = 0;
         boolean moreRows = false;
         try {
@@ -271,7 +278,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      */
     private static void assertRow(String message,
                                   Object[] expected,
-                                  ResultSet returned) throws Exception {
+                                  ResultSet returned) throws SQLException {
         final ResultSetMetaData rmd = returned.getMetaData();
         assertEquals(message+" columns:", expected.length,
                      rmd.getColumnCount());
@@ -404,15 +411,35 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
     // ---------------------------------------------------------------
     // Framework methods
     protected void setUp() throws Exception {
+        Statement s1 = createStatement();
+        s1.executeUpdate("set schema " + SCHEMA);
+        s1.close();
         getConnection().setAutoCommit(false);
-        createStatement().execute("set schema "+SCHEMA);
-        commit();
+
+        c2 = openDefaultConnection();
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("set schema " + SCHEMA);
+        s2.close();
+        c2.setAutoCommit(false);
     }
 
     protected void tearDown() throws Exception {
-        // Any changes _committed_ by a fixture must be
-        // cleaned up by the fixture itself.
         rollback();
+        c2.rollback();
+        c2.close();
+        c2 = null;
+
+        // Some fixtures create tables named emp or dept, or views on
+        // them. Drop them, but ignore errors since they might not exist.
+        Statement s = createStatement();
+        try { s.executeUpdate("drop view vemp"); } catch (SQLException e) {}
+        try { s.executeUpdate("drop view vdept"); } catch (SQLException e) {}
+        try { s.executeUpdate("drop table emp"); } catch (SQLException e) {}
+        try { s.executeUpdate("drop table emp2"); } catch (SQLException e) {}
+        try { s.executeUpdate("drop table dept"); } catch (SQLException e) {}
+        s.close();
+        commit();
+
         super.tearDown();
     }
 
@@ -573,26 +600,26 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         ps.close();
     }
 
-    /**
-     * Test InsertVTIResultSet TODO
-     */
-    public void testInsertVTIResultSet() throws Exception {
-    }
-    /**
-     * Test DeleteVTIResultSet TODO
-     */
-    public void testDeleteVTIResultSet() throws Exception {
-    }
-    /**
-     * Test UpdateVTIResultSet TODO
-     */
-    public void testUpdateVTIResultSet() throws Exception {
-    }
-    /**
-     * Test MaterializedResultSet TODO
-     */
-    public void testMaterializedResultSet() throws Exception {
-    }
+//     /**
+//      * Test InsertVTIResultSet TODO
+//      */
+//     public void testInsertVTIResultSet() throws Exception {
+//     }
+//     /**
+//      * Test DeleteVTIResultSet TODO
+//      */
+//     public void testDeleteVTIResultSet() throws Exception {
+//     }
+//     /**
+//      * Test UpdateVTIResultSet TODO
+//      */
+//     public void testUpdateVTIResultSet() throws Exception {
+//     }
+//     /**
+//      * Test MaterializedResultSet TODO
+//      */
+//     public void testMaterializedResultSet() throws Exception {
+//     }
 
 
     // Fixtures for distinct/aggregate ResultSets
@@ -608,6 +635,43 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         // ScalarAggregateResultSet, ScrollInsensitiveResultSet
         PreparedStatement ps = prepareStatement
             ("select max(c0) from emp where mgrname = ?");
+
+        testScalarAggregateResultSet(ps, del);
+
+        Statement s = createStatement();
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+
+        // re-run test on the new table (statements will be re-prepared)
+        testScalarAggregateResultSet(ps, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-run test with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        // don't execute the delete statement since it would try to obtain
+        // exclusive locks and time out
+        testScalarAggregateResultSet(ps, null);
+
+        ps.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testScalarAggregateResultSet(PreparedStatement ps,
+                                              PreparedStatement del)
+            throws SQLException
+    {
         for (int i = 0; i < non_mgrs.length; ++i) {
             ps.setObject(1,non_mgrs[i]);
             ResultSet rs = ps.executeQuery();
@@ -620,6 +684,10 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             assertNull(rs.getObject(1));
             assertFalse(rs.next());
             rs.close();
+        }
+
+        if (del == null) {
+            return;
         }
 
         Object [][][] m = new Object[][][] {
@@ -635,8 +703,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             del.setString(1,mgrs[i]);
             del.execute();
         }
-        ps.close();
-        del.close();
     }
 
     /**
@@ -654,6 +720,43 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         PreparedStatement del = prepareStatement
             ("delete from emp where name = ?");
 
+        testLastIndexKeyResultSet(tst, del);
+
+        Statement s = createStatement();
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+
+        // re-execute on the new table
+        testLastIndexKeyResultSet(tst, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-execute with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        tst.setString(1, "0_");
+        JDBC.assertFullResultSet(tst.executeQuery(),
+                                 new String[][] {{"0_" + truong}},
+                                 false);
+
+        tst.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testLastIndexKeyResultSet(PreparedStatement tst,
+                                           PreparedStatement del)
+            throws SQLException
+    {
         Object[][][] expected = new Object[][][] {
             {{"0_"+truong}}, {{"1_"+sam2}}, {{"2_"+sam1}}, {{"3_"+roger}},
             {{"4_"+robin}}, {{"5_"+monica}}, {{"6_"+lily2}}, {{"7_"+lily1}},
@@ -678,9 +781,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             del.setString(1, victim.substring(victim.indexOf('_')+1));
             del.execute();
         }
-
-        tst.close();
-        del.close();
     }
 
     /**
@@ -695,6 +795,43 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         PreparedStatement tst = prepareStatement
             ("select ? || T.dm from "+
              "(select distinct mgrname dm from emp) as T");
+
+        testDistinctScanResultSet(tst, del);
+
+        Statement s = createStatement();
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+
+        // re-execute on the new table
+        testDistinctScanResultSet(tst, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-execute with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        tst.setString(1, "0_");
+        // don't check contents, only that the query doesn't hang
+        JDBC.assertDrainResults(tst.executeQuery(), 7);
+
+        tst.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testDistinctScanResultSet(PreparedStatement tst,
+                                           PreparedStatement del)
+            throws SQLException
+    {
         Object[][][] expected = new Object[][][] {
             {{ "0_"+roger }, { "0_"+john }, { "0_"+robin },
              { "0_"+guy },{ "0_"+hamid },{ "0_"+ashok },{ null }},
@@ -721,8 +858,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
                 del.execute();
             }
         }
-        tst.close();
-        del.close();
     }
 
     /**
@@ -739,6 +874,43 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         PreparedStatement tst = prepareStatement
             ("select count(distinct mgrname)+? from emp");
 
+        testDistinctScalarAggregateResultSet(tst, del);
+
+        Statement s = createStatement();
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+
+        // re-execute on the new table
+        testDistinctScalarAggregateResultSet(tst, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-execute with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        tst.setInt(1, 0);
+        JDBC.assertFullResultSet(tst.executeQuery(),
+                                 new Integer[][] {{i6}},
+                                 false);
+
+        tst.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testDistinctScalarAggregateResultSet(PreparedStatement tst,
+                                                      PreparedStatement del)
+            throws SQLException
+    {
         Object[][][] expected = new Object[][][] {
             {{i6}}, {{i6}}, {{i6}}, {{i6}}, {{i6}}, {{i6}}, {{i6}}
         };
@@ -754,8 +926,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
                 del.execute();
             }
         }
-        tst.close();
-        del.close();
     }
 
     /**
@@ -773,6 +943,43 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             ("select count(distinct mgrname) nummgrs, dno "+
              "from emp group by dno having dno <> ?");
 
+        testDistinctGroupedAggregateResultSet(tst, del);
+
+        Statement s = createStatement();
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+
+        // re-execute on the new table
+        testDistinctGroupedAggregateResultSet(tst, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-execute with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        tst.setObject(1, dept[0][1]);
+        JDBC.assertFullResultSet(tst.executeQuery(),
+                                 new Object[][] {{i1, k51}, {i2, k52}},
+                                 false);
+
+        tst.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testDistinctGroupedAggregateResultSet(PreparedStatement tst,
+                                                       PreparedStatement del)
+            throws SQLException
+    {
         final Integer i0 = new Integer(0);
         Object[][][][] expected = new Object[][][][] {
             {
@@ -829,8 +1036,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
                 del.execute();
             }
         }
-        tst.close();
-        del.close();
     }
 
     /**
@@ -847,6 +1052,41 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             ("select max(name) maxemp, mgrname from emp "+
              "group by mgrname having mgrname <> ?");
 
+        testGroupedAggregateResultSet(tst, del);
+
+        Statement s = createStatement();
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+
+        // re-execute on the new table
+        testGroupedAggregateResultSet(tst, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-execute with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        tst.setString(1, mgrs[0]);
+        JDBC.assertDrainResults(tst.executeQuery(), 5);
+
+        tst.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testGroupedAggregateResultSet(PreparedStatement tst,
+                                               PreparedStatement del)
+            throws SQLException
+    {
         Object[][][] expected = new Object[][][] {
             {
                 { monica, guy },
@@ -904,8 +1144,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
                 del.execute();
             }
         }
-        tst.close();
-        del.close();
     }
 
 
@@ -925,6 +1163,41 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
              "(select * from emp where mgrname = ?) as T "+
              "where dept.dno = T.dno");
 
+        testNestedLoopResultSet(tst, del);
+
+        Statement s = createStatement();
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+
+        // re-execute on the new table
+        testNestedLoopResultSet(tst, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-execute with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        tst.setString(1, mgrs[0]);
+        JDBC.assertDrainResults(tst.executeQuery(), 4);
+
+        tst.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testNestedLoopResultSet(PreparedStatement tst,
+                                         PreparedStatement del)
+            throws SQLException
+    {
         for (int i = 0; i < non_mgrs.length; ++i) {
             tst.setString(1,non_mgrs[i]);
             ResultSet rs = tst.executeQuery();
@@ -970,8 +1243,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             del.setString(1,mgrs[i]);
             del.execute();
         }
-        tst.close();
-        del.close();
     }
 
     /**
@@ -986,7 +1257,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         Statement s = createStatement();
         s.execute("create view vemp as select * from emp");
         s.execute("create view vdept as select * from dept");
-        s.close();
         // HashJoinResultSet, HashTableResultSet,
         // ProjectRestrictResultSet,ScrollInsensitiveResultSet,
         // TableScanResultSet
@@ -995,6 +1265,46 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
              "from vemp inner join vdept on vemp.dno = vdept.dno "+
              "where mgrname = ?");
 
+        testHashTableResultSet(tst, del);
+
+        s.executeUpdate("drop view vemp");
+        s.executeUpdate("drop view vdept");
+        s.executeUpdate("drop table dept");
+        createTestTable("dept", DS, "dept_data");
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+        s.executeUpdate("create view vemp as select * from emp");
+        s.executeUpdate("create view vdept as select * from dept");
+
+        // re-execute on the new tables
+        testHashTableResultSet(tst, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-execute with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        tst.setString(1, mgrs[0]);
+        JDBC.assertDrainResults(tst.executeQuery(), 4);
+
+        tst.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testHashTableResultSet(PreparedStatement tst,
+                                        PreparedStatement del)
+            throws SQLException
+    {
         for (int i = 0; i < non_mgrs.length; ++i) {
             tst.setObject(1,non_mgrs[i]);
             ResultSet rs = tst.executeQuery();
@@ -1040,8 +1350,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             del.setString(1,mgrs[i]);
             del.execute();
         }
-        tst.close();
-        del.close();
     }
 
     /**
@@ -1061,6 +1369,43 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
              "from emp left outer join dept on emp.dno = dept.dno "+
              "where mgrname = ?");
 
+        testNestedLoopLeftOuterJoinResultSet(tst, del);
+
+        Statement s = createStatement();
+        s.executeUpdate("drop table dept");
+        createTestTable("dept", DS, "dept_data");
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+
+        // re-execute on the new table
+        testNestedLoopLeftOuterJoinResultSet(tst, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-execute with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        tst.setString(1, mgrs[0]);
+        JDBC.assertDrainResults(tst.executeQuery(), 4);
+
+        tst.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testNestedLoopLeftOuterJoinResultSet(PreparedStatement tst,
+                                                      PreparedStatement del)
+            throws SQLException
+    {
         for (int i = 0; i < non_mgrs.length; ++i) {
             tst.setObject(1,non_mgrs[i]);
             ResultSet rs = tst.executeQuery();
@@ -1105,8 +1450,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             del.setString(1,mgrs[i]);
             del.execute();
         }
-        tst.close();
-        del.close();
     }
 
     /**
@@ -1126,6 +1469,43 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
              "from emp left outer join emp2 on emp.dno = emp2.dno "+
              "where emp.mgrname = ? order by emp.c0");
 
+        testHashLeftOuterJoinResultSet(tst, del);
+
+        Statement s = createStatement();
+        s.executeUpdate("drop table emp");
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+        s.executeUpdate("drop table emp2");
+        createTestTable("emp2", ES+","+DNO+")", "emp_data");
+
+        // re-execute on the new table
+        testHashLeftOuterJoinResultSet(tst, del);
+
+        // restore data
+        s.executeUpdate("delete from emp");
+        s.executeUpdate(insertFrom("emp", "emp_data"));
+        commit();
+
+        // make sure another transaction has exclusive locks
+        Statement s2 = c2.createStatement();
+        s2.executeUpdate("update emp set c0 = c0");
+
+        // re-execute with different isolation level (will get lock timeout
+        // with other isolation levels)
+        getConnection().
+            setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        tst.setString(1, mgrs[0]);
+        JDBC.assertDrainResults(tst.executeQuery(), 4);
+
+        tst.close();
+        del.close();
+        s.close();
+        s2.close();
+    }
+
+    private void testHashLeftOuterJoinResultSet(PreparedStatement tst,
+                                                PreparedStatement del)
+            throws SQLException
+    {
         for (int i = 0; i < non_mgrs.length; ++i) {
             tst.setObject(1,non_mgrs[i]);
             ResultSet rs = tst.executeQuery();
@@ -1153,8 +1533,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             del.setString(1,mgrs[i]);
             del.execute();
         }
-        tst.close();
-        del.close();
     }
 
     // Fixtures for update ResultSets
