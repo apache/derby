@@ -63,12 +63,22 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	// will help keep track of such a condition.
 	private boolean  referencesSessionSchema;
 
+	/* Whether or not this FromList is transparent.  A "transparent" FromList
+	 * is one in which all FromTables are bound based on an outer query's
+	 * FromList.  This means that the FromTables in the transparent list are
+	 * allowed to see and reference FromTables in the outer query's list.
+	 * Or put differently, a FromTable which sits in a transparent FromList
+	 * does not "see" the transparent FromList when binding; rather, it sees
+	 * (and can therefore reference) the FromList of an outer query.
+	 */
+	private boolean isTransparent;
 
 	/** Initializer for a FromList */
 
 	public void init(Object optimizeJoinOrder)
 	{
 		fixedJoinOrder = ! (((Boolean) optimizeJoinOrder).booleanValue());
+		isTransparent = false;
 	}
 
 	/**
@@ -333,7 +343,12 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		for (int index = 0; index < size; index++)
 		{
 			fromTable = (FromTable) elementAt(index);
-			fromTable.bindExpressions(this);
+
+			/* If this FromList is transparent then its FromTables should
+			 * be bound based on the outer query's FROM list.
+			 */
+			fromTable.bindExpressions(
+				isTransparent ? fromListParam : this);
 		}
 	}
 
@@ -393,10 +408,31 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	/**
 	 * Expand a "*" into the appropriate ResultColumnList. If the "*"
 	 * is unqualified it will expand into a list of all columns in all
-	 * of the base tables in the from list, otherwise it will expand
-	 * into a list of all of the columns in the base table that matches
-	 * the qualification.
+	 * of the base tables in the from list at the current nesting level;
+	 * otherwise it will expand into a list of all of the columns in the
+	 * base table that matches the qualification.
 	 *
+	 * NOTE: Callers are responsible for ordering the FromList by nesting
+	 * level, with tables at the deepest (current) nesting level first.  
+	 * We will expand the "*" into a list of all columns from all tables
+	 * having the same nesting level as the first FromTable in this list.
+	 * The check for nesting level exists because it's possible that this
+	 * FromList includes FromTables from an outer query, which can happen
+	 * if there is a "transparent" FromList above this one in the query
+	 * tree.  Ex:
+	 *
+	 *  select j from onerow where exists
+	 *    (select 1 from somerow
+	 *      union select * from diffrow where onerow.j < diffrow.k)
+	 *
+	 * If "this" is the FromList for the right child of the UNION then it will
+	 * contain both "diffrow" and "onerow", the latter of which was passed
+	 * down via a transparent FromList (to allow binding of the WHERE clause).
+	 * In that case the "*" should only expand the result columns of "diffrow";
+	 * it should not expand the result columns of "onerow" because that table
+	 * is from an outer query.  We can achieve this selective expansion by
+	 * looking at nesting levels.
+	 * 
 	 * @param allTableName		The qualification on the "*" as a String.
 	 *
 	 * @return ResultColumnList representing expansion
@@ -412,13 +448,44 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		FromTable	 fromTable;
  
 		/* Expand the "*" for the table that matches, if it is qualified 
-		 * (allTableName is not null) or for all tables in the list if the 
-		 * "*" is not qualified (allTableName is null).
+		 * (allTableName is not null) or for all tables in the list at the
+		 * current nesting level if the "*" is not qualified (allTableName
+		 * is null).  Current nesting level is determined by the nesting
+		 * level of the first FromTable in the list.
 		 */
+		int targetNestingLevel = ((FromTable)elementAt(0)).getLevel();
 		int size = size();
+
+		/* Make sure our assumption about nesting-based ordering
+		 * has been satisified.  I.e. that the list is ordered
+		 * with the most deeply nested FromTables first.
+		 */
+		if (SanityManager.DEBUG)
+		{
+			int prevNL = targetNestingLevel;
+			for (int i = 1; i < size; i++)
+			{
+				int currNL = ((FromTable)elementAt(i)).getLevel();
+				SanityManager.ASSERT((prevNL >= currNL),
+					"FROM list should have been ordered by nesting " +
+					"level (deepest level first), but it was not.");
+
+				prevNL = currNL;
+			}
+		}
+
 		for (int index = 0; index < size; index++)
 		{
 			fromTable = (FromTable) elementAt(index);
+			if (targetNestingLevel != fromTable.getLevel())
+			{
+				/* We only expand result columns for tables at the
+				 * target nesting level.  Since the FromTables are
+				 * sorted based on nesting level, we're done if we
+				 * get here.
+				 */
+				break;
+			}
 
 			/* We let the FromTable decide if there is a match on
 			 * the exposed name.  (A JoinNode will not have an
@@ -1524,6 +1591,17 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		}
 
 		return false;
+	}
+
+	/**
+	 * Indicate that this FromList is "transparent", which means that
+	 * its FromTables should be bound to tables from an outer query.
+	 * Generally this is not allowed, but there are exceptions.  See
+	 * SetOperatorNode.setResultToBooleanTrueNode() for more.
+	 */
+	void markAsTransparent()
+	{
+		isTransparent = true;
 	}
 
 	/**

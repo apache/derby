@@ -464,7 +464,7 @@ public class SubqueryNode extends ValueNode
 		if (subqueryType == EXISTS_SUBQUERY)
 		{
 			/* Transform the * into true (EXISTS). */
-			resultSet.setResultToBooleanTrueNode(true);
+			resultSet = resultSet.setResultToBooleanTrueNode(true);
 		}
 
 		/* We need to bind the tables before we can bind the target list
@@ -500,7 +500,7 @@ public class SubqueryNode extends ValueNode
 			 * AllResultColumn above, but we have to also handle
 			 * EXISTS (select r from s ...)
 			 */
-			resultSet.setResultToBooleanTrueNode(false);
+			resultSet = resultSet.setResultToBooleanTrueNode(false);
 		}
 
 		/* bind the left operand, if there is one */

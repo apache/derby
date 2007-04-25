@@ -2001,15 +2001,11 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             // Make the sets are disjunct (DERBY-2370)
             tst.setInt(1,i);
             rs = tst.executeQuery();
-            assertResultSet("?="+i+" ?="+(i+1),
-                            /*always empty when DERBY-2370 is fixed*/
-                            (i==0?empty:existed), rs);
+            assertResultSet("?="+i+" ?="+(i+1), empty, rs);
 
             // Re-execute tst with the same parameters
             rs = tst.executeQuery();
-            assertResultSet("R?="+i+" ?="+(i+1),
-                            /*always empty when DERBY-2370 is fixed*/
-                            (i==0?empty:existed), rs);
+            assertResultSet("R?="+i+" ?="+(i+1), empty, rs);
         }
         tst.close();
     }

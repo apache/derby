@@ -905,16 +905,116 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 * NOTE: No transformation is performed if the ResultColumn.expression is
 	 * already the correct boolean constant.
 	 * 
+	 * This method is used during binding of EXISTS predicates to map
+	 * a subquery's result column list into a single TRUE node.  For
+	 * SELECT and VALUES subqueries this transformation is pretty
+	 * straightforward.  But for set operators (ex. INTERSECT) we have
+	 * to do some extra work.  To see why, assume we have the following
+	 * query:
+	 *
+	 *  select * from ( values 'BAD' ) as T
+	 *    where exists ((values 1) intersect (values 2))
+	 *
+	 * If we treated the INTERSECT in this query the same way that we
+	 * treat SELECT/VALUES subqueries then the above query would get
+	 * transformed into:
+	 *
+	 *  select * from ( values 'BAD' ) as T
+	 *    where ((values TRUE) intersect (values TRUE))
+	 *
+	 * Since both children of the INTERSECT would then have the same value,
+	 * the result of set operation would be a single value (TRUE), which
+	 * means the WHERE clause would evaluate to TRUE and thus the query
+	 * would return one row with value 'BAD'.  That would be wrong.
+	 *
+	 * To avoid this problem, we internally wrap this SetOperatorNode
+	 * inside a "SELECT *" subquery and then we change the new SelectNode's
+	 * result column list (as opposed to *this* nodes' result column list)
+	 * to a singe boolean true node:
+	 *
+	 *  select * from ( values 'BAD' ) as T where
+	 *      SELECT TRUE FROM ((values 1) intersect (values 2))
+	 *
+	 * In this case the left and right children of the INTERSECT retain
+	 * their values, which ensures that the result of the intersect
+	 * operation will be correct.  Since (1 intersect 2) is an empty
+	 * result set, the internally generated SELECT node will return
+	 * zero rows, which in turn means the WHERE predicate will return
+	 * NULL (an empty result set from a SubqueryNode is treated as NULL
+	 * at execution time; see impl/sql/execute/AnyResultSet). Since
+	 * NULL is not the same as TRUE the query will correctly return
+	 * zero rows.  DERBY-2370.
+	 *
 	 * @param onlyConvertAlls	Boolean, whether or not to just convert *'s
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void setResultToBooleanTrueNode(boolean onlyConvertAlls)
-				throws StandardException
+	public ResultSetNode setResultToBooleanTrueNode(boolean onlyConvertAlls)
+		throws StandardException
 	{
-		super.setResultToBooleanTrueNode(onlyConvertAlls);
-		leftResultSet.setResultToBooleanTrueNode(onlyConvertAlls);
-		rightResultSet.setResultToBooleanTrueNode(onlyConvertAlls);
+		// First create a FromList to hold this node (and only this node).
+
+		FromList fromList =
+			(FromList) getNodeFactory().getNode(
+				C_NodeTypes.FROM_LIST,
+				getContextManager());
+
+		fromList.addFromTable(this);
+
+		/* It's possible that this SetOperatorNode (or more specifically,
+		 * one of its children) references tables from an outer query, ex:
+		 *
+		 *  select j from onerow where exists
+		 *    (select 1 from diffrow where 1 = 0 INTERSECT
+		 *      select * from diffrow where onerow.j < k)
+		 *
+		 * In this case the right child of the INTERSECT node references
+		 * the outer table "onerow".  In order to ensure that the new
+		 * subquery binds correctly we mark the new FromList as "transparent",
+		 * which means that the FromTables it contains (namely, this node
+		 * and its children) will still be able to see (and reference) the
+		 * outer table.
+		 */
+		fromList.markAsTransparent();
+
+		// Now create a ResultColumnList that simply holds the "*".
+
+		ResultColumnList rcl =
+			(ResultColumnList) getNodeFactory().getNode(
+				C_NodeTypes.RESULT_COLUMN_LIST,
+				getContextManager());
+
+		ResultColumn allResultColumn =
+			(ResultColumn) getNodeFactory().getNode(
+				C_NodeTypes.ALL_RESULT_COLUMN,
+				null,
+				getContextManager());
+
+		rcl.addResultColumn(allResultColumn);
+
+		/* Create a new SELECT node of the form:
+		 *  SELECT * FROM <thisSetOperatorNode>
+		 */
+		ResultSetNode result =
+			(ResultSetNode) getNodeFactory().getNode(
+				C_NodeTypes.SELECT_NODE,
+				rcl,      // ResultColumns
+				null,     // AGGREGATE list
+				fromList, // FROM list
+				null,     // WHERE clause
+				null,     // GROUP BY list
+				null,     // having clause
+				getContextManager());
+
+		/* And finally, transform the "*" in the new SELECT node
+		 * into a TRUE constant node.  This ultimately gives us:
+		 *
+		 *  SELECT TRUE FROM <thisSetOperatorNode>
+		 *
+		 * which has a single result column that is a boolean TRUE
+		 * constant.  So we're done.
+		 */
+		return result.setResultToBooleanTrueNode(onlyConvertAlls);
 	}
 
 	/**

@@ -110,6 +110,15 @@ select i from t1 a where i in (select a.i from t2 where a.i < i union
 select i from t1 where exists (select * from t2 union select * from t2);
 select i from t1 where exists (select 1 from t2 union select 2 from t2);
 select i from t1 where exists (select 1 from t2 where 1 = 0 union 
+							   select 2 from t2 where t1.i < i);
+select i from t1 where exists (select i from t2 where t1.i < i union 
+							    select i from t2 where 1 = 0 union 
+							   select i from t2 where t1.i < i union 
+							    select i from t2 where 1 = 0);
+
+-- These next two should fail because left/right children do not have
+-- the same number of result columns.
+select i from t1 where exists (select 1 from t2 where 1 = 0 union 
 							   select * from t2 where t1.i < i);
 select i from t1 where exists (select i from t2 where t1.i < i union 
 							    select * from t2 where 1 = 0 union 
@@ -286,6 +295,15 @@ select i from t1 a where i in (select a.i from t2 where a.i < i union all
 -- exists subquery
 select i from t1 where exists (select * from t2 union all select * from t2);
 select i from t1 where exists (select 1 from t2 union all select 2 from t2);
+select i from t1 where exists (select 1 from t2 where 1 = 0 union all
+							   select 2 from t2 where t1.i < i);
+select i from t1 where exists (select i from t2 where t1.i < i union all
+							    select i from t2 where 1 = 0 union all
+							   select i from t2 where t1.i < i union all
+							    select i from t2 where 1 = 0);
+
+-- These next two should fail because left/right children do not have
+-- the same number of result columns.
 select i from t1 where exists (select 1 from t2 where 1 = 0 union all
 							   select * from t2 where t1.i < i);
 select i from t1 where exists (select i from t2 where t1.i < i union all

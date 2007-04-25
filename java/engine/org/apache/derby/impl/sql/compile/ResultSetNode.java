@@ -532,11 +532,13 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * already the correct boolean constant.
 	 * 
 	 * @param onlyConvertAlls	Boolean, whether or not to just convert *'s
+	 * @return ResultSetNode whose resultColumn was transformed; defaults
+	 *  to "this" here, but can be overridden by subclasses.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void setResultToBooleanTrueNode(boolean onlyConvertAlls)
-				throws StandardException
+	public ResultSetNode setResultToBooleanTrueNode(boolean onlyConvertAlls)
+		throws StandardException
 	{
 		BooleanConstantNode	booleanNode;
 		ResultColumn		resultColumn;
@@ -554,7 +556,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		}
 		else if (onlyConvertAlls)
 		{
-			return;
+			return this;
 		}
 		else
 		{
@@ -563,7 +565,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 			/* Nothing to do if query is already select TRUE ... */
 			if (resultColumn.getExpression().isBooleanTrue())
 			{
-				return;
+				return this;
 			}
 		}
 		
@@ -577,6 +579,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		/* VirtualColumnIds are 1-based, RCLs are 0-based */
 		resultColumn.setVirtualColumnId(1);
 		resultColumns.setElementAt(resultColumn, 0);
+		return this;
 	}
 
 	/**
