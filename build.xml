@@ -1786,12 +1786,17 @@
 	     junit.jar in CLASSPATH due to some bug in ant that is
 	     fixed in version 1.7.
 	-->
-	<target name="junit-all-codeline-jars" depends="setsanityname">
-		<property name="derby.jar.base" value="${basedir}/jars/${sanity.name}"/>
-	    <antcall target="junit-all">
-	      <param name="derby.junit.classpath"
-	        value="${derby.jar.base}/derbyTesting.jar:${derby.jar.base}/derbynet.jar:${derby.jar.base}/derbytools.jar:${derby.jar.base}/derbyclient.jar"/>
-	    </antcall>
+	<target name="junit-all-codeline-jars"
+	    depends="junit-all-codeline-jars-set-properties,junit-all">
+		<fail if="tests.failed">Tests Failed!</fail>
 	</target>
+	
+	<target name="junit-all-codeline-jars-set-properties" depends="setsanityname">
+		<property name="derby.jar.base" value="${basedir}/jars/${sanity.name}"/>
+	    <property name="derby.junit.classpath"
+	        value="${derby.jar.base}/derbyTesting.jar:${derby.jar.base}/derbynet.jar:${derby.jar.base}/derbytools.jar:${derby.jar.base}/derbyclient.jar"/>
+	</target>
+	
+	
 
 </project>
