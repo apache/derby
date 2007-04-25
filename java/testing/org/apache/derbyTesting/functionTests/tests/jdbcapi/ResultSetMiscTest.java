@@ -436,11 +436,8 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertTrue(met.isSearchable(16));
         assertFalse(met.isCurrency(16));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(16));
-        assertFalse(met.isSigned(16));
-        // DERBY-2425 Client returns negative value for getColumnDisplaySize()
-        // enable for client once fixed.
-        if (usingEmbedded())
-            assertEquals(2147483647, met.getColumnDisplaySize(16));
+        assertFalse(met.isSigned(16));       
+        assertEquals(2147483647, met.getColumnDisplaySize(16));
         assertEquals("BL", met.getColumnLabel(16));
         assertEquals("BL", met.getColumnName(16));
         // beetle 5323

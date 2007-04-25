@@ -313,7 +313,13 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case Types.VARBINARY:
             case Types.LONGVARBINARY:
             case Types.BLOB:
-                return (int) (2 * sqlLength_[column - 1]); // eg. "FF" represents just one byte
+		// Derby-2425. For long length values, size overflows the int 
+		// range. In such cases, the size is limited to the max. int value
+		// This behavior is consistent with the same in Embedded mode.
+		int size = (int) (2 * sqlLength_[column - 1]);  // eg. "FF" represents just one byte
+		if ( size < 0 )
+		    size = Integer.MAX_VALUE;
+                return size;
             default:
                 throw new SqlException(logWriter_, 
                 		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
