@@ -24,6 +24,8 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 import org.apache.derby.drda.NetworkServerControl;
 
 import org.apache.derbyTesting.functionTests.harness.jvm;
+import org.apache.derbyTesting.junit.TestConfiguration;
+
 import org.apache.derby.tools.ij;
 
 import java.util.Properties;
@@ -31,6 +33,8 @@ import java.util.Properties;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+
+import java.net.InetAddress;
 
 import java.sql.DriverManager;
 import java.sql.Connection;
@@ -76,8 +80,15 @@ public class DerbyNetNewServer extends Thread
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-            testServer(new NetworkServerControl(), bos, "non-null PrintWriter");
-            testServer(new NetworkServerControl(), null, "null PrintWriter");
+            NetworkServerControl server = new NetworkServerControl(
+                InetAddress.getByName("localhost"),
+                TestConfiguration.getCurrent().getPort());
+            testServer(server, bos, "non-null PrintWriter");
+
+            server = new NetworkServerControl(
+                InetAddress.getByName("localhost"),
+                TestConfiguration.getCurrent().getPort());
+            testServer(server, null, "null PrintWriter");
         }
         catch( Exception e)
         {
