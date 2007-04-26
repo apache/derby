@@ -1709,16 +1709,26 @@
   	       failureproperty="tests.failed">
       <formatter type="xml"/>
   	 	
-<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest"/>
-<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversEmbeddedTest"/>
-<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversClientTest"/>
-<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversAllTest"/>
-<test name="org.apache.derbyTesting.functionTests.tests.derbynet._Suite"/>
-<test name="org.apache.derbyTesting.functionTests.tests.tools._Suite"/>
-<test name="org.apache.derbyTesting.functionTests.tests.lang._Suite"/>
-<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite"/>
-<test name="org.apache.derbyTesting.functionTests.tests.store._Suite"/>
-<test name="org.apache.derbyTesting.functionTests.suites.EncryptionSuite"/>
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest"
+  	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversEmbeddedTest"
+	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversClientTest"
+	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversAllTest"
+	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.derbynet._Suite"
+	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.tools._Suite"
+  	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.lang._Suite"
+	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite"
+	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.store._Suite"
+	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.suites.EncryptionSuite"
+	todir="junit_${derby.junit.timestamp}"/>
 
       <classpath>
      	    <pathelement path="${derby.junit.classpath}"/>
@@ -1742,7 +1752,8 @@
   	       failureproperty="tests.failed">
       <formatter type="xml"/>
   	 	
-      <test name="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"/>
+      <test name="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"
+      	todir="junit_${derby.junit.timestamp}"/>
         <classpath>
        	    <pathelement path="${derby.junit.classpath}"/>
         </classpath>
