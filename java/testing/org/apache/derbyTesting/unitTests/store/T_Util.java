@@ -35,6 +35,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.locks.*;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.AssertFailure;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -1161,6 +1162,13 @@ public class T_Util
 			// expect thread interrupted exception
 			if (!se.getMessageId().equals("08000")) {
 				throw se;
+			}
+		} catch (AssertFailure af) {
+			// When running in sane mode, an AssertFailure will be thrown if we
+			// try to double latch a page.
+			if (!(SanityManager.DEBUG &&
+				  af.getMessage().endsWith("Attempted to latch page twice"))) {
+				throw af;
 			}
 		}
 

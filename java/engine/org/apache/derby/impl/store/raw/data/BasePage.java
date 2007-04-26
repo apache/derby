@@ -1563,6 +1563,11 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 				// just deadlock out if a transaction tries to double latch the
 				// page while not in abort
+
+				if (SanityManager.DEBUG) {
+					SanityManager.THROWASSERT("Attempted to latch page twice");
+				}
+
 			}
 
 			while (owner != null) {
