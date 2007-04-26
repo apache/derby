@@ -8245,7 +8245,7 @@ public final class	DataDictionaryImpl
 				//have to add 1 to the month value returned because the method give 0-January, 1-February and so on and so forth
 				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.MONTH)+1));
 				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.DAY_OF_MONTH)));
-				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.HOUR)));
+				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.HOUR_OF_DAY)));
 				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.MINUTE)));
 				generatedSystemSQLName.append(twoDigits(calendarForLastSystemSQLName.get(Calendar.SECOND)));
 				//because we don't have enough space to store the entire millisec value, just store the higher 2 digits.
