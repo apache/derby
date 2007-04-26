@@ -27,8 +27,6 @@ lang/dynamicLikeOptimization.sql
 lang/emptyStatistics.sql
 lang/errorStream.java
 lang/fk_nonSPS.sql
-lang/grantRevokeDDL.sql
-lang/grantRevokeDDL2.sql
 lang/holdCursorIJ.sql
 lang/inbetween.sql
 lang/infostreams.sql
