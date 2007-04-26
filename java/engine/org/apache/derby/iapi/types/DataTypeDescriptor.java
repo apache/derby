@@ -850,7 +850,13 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		TypeId compareWithTypeID = compareWithDTD.getTypeId();
 		int compareWithJDBCTypeId = compareWithTypeID.getJDBCTypeId();
 
-		// Long types cannot be compared
+		// Long types cannot be compared. 
+		// XML types also fall in this window
+		// Says SQL/XML[2003] spec:
+		// 4.2.2 XML comparison and assignment
+		// "XML values are not comparable."
+		// An XML value cannot be compared to any type--
+		// not even to other XML values.
 		if (compareWithTypeID.isLongConcatableTypeId() || typeId.isLongConcatableTypeId())
 			return false;
 
@@ -864,122 +870,86 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		if (!(typeId.isUserDefinedTypeId()) && 
 				(compareWithTypeID.isUserDefinedTypeId()))
 			return compareWithDTD.comparable(this, forEquals, cf);
-		
-        switch (typeId.getJDBCTypeId()) 
-		{
-                case Types.DECIMAL:
-                case Types.BIGINT:
-                case Types.DOUBLE:
-                case Types.INTEGER:
-                case Types.NUMERIC:
-                case Types.REAL:
-                case Types.SMALLINT:
-                case Types.TINYINT:
-                	// Numeric types are comparable to numeric types, boolean 
-                	//types and to comparable user types
-            		return (compareWithTypeID.isNumericTypeId() ||
+
+    	//Numeric types are comparable to numeric types, boolean types and to 
+		//comparable user types
+		if (typeId.isNumericTypeId())
+    		return (compareWithTypeID.isNumericTypeId() || 
             		compareWithTypeID.isBooleanTypeId());
 
-                case Types.CHAR:
-                case Types.LONGVARCHAR:
-                case Types.VARCHAR:
-            		// CHAR and VARCHAR are comparable to strings, boolean, 
-                	// DATE/TIME/TIMESTAMP and to comparable user types
-            		if((compareWithTypeID.isDateTimeTimeStampTypeID() ||
-            				compareWithTypeID.isBooleanTypeId()))
-            				return true;
-            		//If both the types are string types, then we need to make
-            		//sure they have the same collation set on them
-            		if (compareWithTypeID.isStringTypeId() && typeId.isStringTypeId()) {
-            			if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
-            					getCollationType() == compareWithDTD.getCollationType())
-            				return true;
-            			else
-            				return false;
-            		} else
-            			return false;
-            		
+		//CHAR, VARCHAR and LONGVARCHAR are comparable to strings, boolean, 
+		//DATE/TIME/TIMESTAMP and to comparable user types
+		if (typeId.isStringTypeId()) {
+    		if((compareWithTypeID.isDateTimeTimeStampTypeID() ||
+    				compareWithTypeID.isBooleanTypeId()))
+    				return true;
+    		//If both the types are string types, then we need to make sure
+    		//they have the same collation set on them
+    		if (compareWithTypeID.isStringTypeId() && typeId.isStringTypeId()) {
+    			if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
+    					getCollationType() == compareWithDTD.getCollationType())
+    				return true;//collation matches
+    			else
+    				return false;//collation does not match
+    		} else
+    			return false;//can't be compared			
+		}
 
-                case Types.BIT:
-                case JDBC30Translation.SQL_TYPES_BOOLEAN:
-            		/* Are comparable to Boolean, string, numeric and to 
-            		 * comparable user types */
-            		return (compareWithTypeID.getSQLTypeName().equals(typeId.getSQLTypeName()) ||
-            				compareWithTypeID.isStringTypeId() ||
-            				compareWithTypeID.isNumericTypeId()); 
+    	//Are comparable to other bit types and comparable user types
+		if (typeId.isBitTypeId()) 
+        	return (compareWithTypeID.isBitTypeId()); 
+		
+		//Booleans are comparable to Boolean, string, numeric and to 
+		//comparable user types 
+		if (typeId.isBooleanTypeId())
+    		return (compareWithTypeID.getSQLTypeName().equals(typeId.getSQLTypeName()) ||
+    				compareWithTypeID.isStringTypeId() ||
+    				compareWithTypeID.isNumericTypeId()); 
 
-                case Types.DATE:
-                	/*
-                	 * Dates are comparable to dates, strings and to comparable
-                	 * user types.
-                	 */
-            		if (compareWithJDBCTypeId == Types.DATE || 
-            				compareWithTypeID.isStringTypeId())
-            			return true;
-            		else
-            			return false;
+		//Dates are comparable to dates, strings and to comparable
+		//user types.
+		if (typeId.getJDBCTypeId() == Types.DATE)
+    		if (compareWithJDBCTypeId == Types.DATE || 
+    				compareWithTypeID.isStringTypeId())
+    			return true;
+    		else
+    			return false;
 
-                case Types.TIME:
-                	/*
-                	 * Times are comparable to times, strings and to comparable
-                	 * user types.
-                	 */
-            		if (compareWithJDBCTypeId == Types.TIME || 
-            				compareWithTypeID.isStringTypeId())
-            			return true;
-            		else
-            			return false;
+    	//Times are comparable to times, strings and to comparable
+		//user types.
+		if (typeId.getJDBCTypeId() == Types.TIME)
+    		if (compareWithJDBCTypeId == Types.TIME || 
+    				compareWithTypeID.isStringTypeId())
+    			return true;
+    		else
+    			return false;
 
-                case Types.TIMESTAMP:
-                	/*
-                	 * Timestamps are comparable to timestamps, strings and to 
-                	 * comparable user types.
-                	 */
-            		if (compareWithJDBCTypeId == Types.TIMESTAMP || 
-            				compareWithTypeID.isStringTypeId())
-            			return true;
-            		else
-            			return false;
+    	//Timestamps are comparable to timestamps, strings and to
+		//comparable user types.
+		if (typeId.getJDBCTypeId() == Types.TIMESTAMP)
+    		if (compareWithJDBCTypeId == Types.TIMESTAMP || 
+    				compareWithTypeID.isStringTypeId())
+    			return true;
+    		else
+    			return false;
 
-                case Types.BINARY:
-                case Types.LONGVARBINARY:
-                case Types.VARBINARY:
-                	//Are comparable to other bit types and comparable user types
-                	return (compareWithTypeID.isBitTypeId()); 
-
-                case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
-                case Types.OTHER:
-                	/*
-                	 * User types are comparable to other user types only if
-                	 * (for now) they are the same type and are being used to
-                	 * implement some JDBC type.  This is sufficient for
-                	 * date/time types; it may be generalized later for e.g.
-                	 * comparison of any user type with one of its subtypes.
-                	 */
-                	if (forEquals)
-                		return true;
-                	try {
-                	
-                		Class thisClass = cf.getClassInspector().getClass(
-    					typeId.getCorrespondingJavaTypeName());
-                		
-                		return java.lang.Comparable.class.isAssignableFrom(thisClass);
-                	} catch (ClassNotFoundException cnfe) {
-                		return false;
-                	}
-
-                case StoredFormatIds.XML_TYPE_ID:
-                    /*
-                     * Tell whether this type (XML) can be compared to the given type.
-                     * Says SQL/XML[2003] spec:
-                     *
-                     * 4.2.2 XML comparison and assignment
-                     * "XML values are not comparable."
-                     * 
-                     * An XML value cannot be compared to any type--
-                     * not even to other XML values.
-                     */ 
-                	return false;
+		//User types are comparable to other user types only if
+		//(for now) they are the same type and are being used to
+		//implement some JDBC type.  This is sufficient for
+		//date/time types; it may be generalized later for e.g.
+		//comparison of any user type with one of its subtypes.
+		if (typeId.isUserDefinedTypeId() || typeId.getJDBCTypeId() == Types.OTHER) {
+        	if (forEquals)
+        		return true;
+        	try {
+        	
+        		Class thisClass = cf.getClassInspector().getClass(
+				typeId.getCorrespondingJavaTypeName());
+        		
+        		return java.lang.Comparable.class.isAssignableFrom(thisClass);
+        	} catch (ClassNotFoundException cnfe) {
+        		return false;
+        	}			
 		}
 
 		return false;
