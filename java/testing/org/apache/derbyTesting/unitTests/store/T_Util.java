@@ -35,7 +35,6 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.locks.*;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.shared.common.sanity.AssertFailure;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -1163,12 +1162,15 @@ public class T_Util
 			if (!se.getMessageId().equals("08000")) {
 				throw se;
 			}
-		} catch (AssertFailure af) {
+		} catch (RuntimeException e) {
 			// When running in sane mode, an AssertFailure will be thrown if we
-			// try to double latch a page.
+			// try to double latch a page. The AssertFailure class is not
+			// available in insane jars, so we cannot reference the class
+			// directly.
 			if (!(SanityManager.DEBUG &&
-				  af.getMessage().endsWith("Attempted to latch page twice"))) {
-				throw af;
+				  e.getClass().getName().endsWith(".sanity.AssertFailure") &&
+				  e.getMessage().endsWith("Attempted to latch page twice"))) {
+				throw e;
 			}
 		}
 
