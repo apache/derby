@@ -19,7 +19,6 @@
 # derbynet/DerbyNetAutoStart - tries to start networkserver
 # derbynet/sysinfo_withproperties - tries to use NetworkServerControl statements and test requires server to 
 # be started with a specific property. see DERBY-928 for reference
-# tools/ieptests - names files in extin dir, but they are on the server
 # lang/wisconsin - optimization is quite different when running remote server.
 # junitTests/derbyNet/CompatibilityTest.java - tries to start and shutdown the server
 # 
@@ -34,6 +33,5 @@ derbynet/sysinfo_withproperties.java
 derbynet/testProperties.java
 derbynet/timeslice.java
 derbynet/DerbyNetAutoStart.java
-tools/ieptests.sql
 lang/wisconsin.java
 junitTests/derbyNet/CompatibilityTest.java

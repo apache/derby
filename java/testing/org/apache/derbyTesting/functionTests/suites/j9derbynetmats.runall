@@ -14,4 +14,3 @@ lang/bug5054.java
 lang/holdCursorIJ.sql
 store/holdCursorExternalSortJDBC30.sql
 store/holdCursorJDBC30.sql
-tools/ieptests.sql

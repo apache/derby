@@ -49,6 +49,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(ImportExportTest.suite());
         suite.addTest(ImportExportBinaryDataTest.suite());
         suite.addTest(ImportExportLobTest.suite());
+        suite.addTest(ImportExportProcedureTest.suite());
 
         // SysinfoAPITest currently fails when run against jars, so is
         // disabled. Only the first jar file on the classpath properly

@@ -28,35 +28,38 @@ import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.apache.derbyTesting.functionTests.util.JDBCTestDisplayUtil;
 import org.apache.derby.impl.tools.ij.util;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
 	This tests to see if the security manager is running.
 */
 
-public class checkSecMgr
+public class CheckSecurityManager extends BaseJDBCTestCase
 {
 
-	public static void main (String args[])
+	public static Test suite()
 	{
-		try
-		{
-			Connection conn = null;
-			util.getPropertyArg(args);
-			conn = util.startJBMS();
-			// bug 6021
-			// testIllegalDBCreate();
-			testIllegalPropertySet(conn);
-			cleanUp(conn);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		// only run testIllegalPropertySet,
+		// testIllegalDBCreate disabled, see comments
+	    return TestConfiguration.defaultSuite(CheckSecurityManager.class);
+	}
+	
+	public CheckSecurityManager(String name)
+	{
+		super(name);
 	}
 
+	/*
+	 * 
+	 
 	public static void testIllegalDBCreate() throws Exception
 	{
 			System.out.println("Security Manager Test Starts");
@@ -98,27 +101,24 @@ public class checkSecMgr
 				JDBCTestDisplayUtil.ShowCommonSQLException(System.out, se);			
 			}
 	}
+	*/
 
 	
 	/** Try to set a property in a stored procedure for which there is not
 	 *  adequate permissions in the policy file
 	 */
-	public static void testIllegalPropertySet(Connection conn)
+	public void testIllegalPropertySet() throws SQLException
 	{
-		System.out.println("testIllegalPropertySet");
-		try {
+			Connection conn = getConnection();
 			String createproc = "CREATE PROCEDURE setIllegalPropertyProc() DYNAMIC RESULT SETS 0 LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.derbynet.checkSecMgr.setIllegalPropertyProc' PARAMETER STYLE JAVA";
 			PreparedStatement pstmt = conn.prepareStatement(createproc);
 			pstmt.executeUpdate();
 			CallableStatement cstmt = conn.prepareCall("{call setIllegalPropertyProc()}");
-			System.out.println("execute the procedure setting illegal property");
-			cstmt.executeUpdate();
-			System.out.println("FAILED: Should have gotten security Exception");
-		} catch (SQLException se)
-		{
-			System.out.println("Expected Security Exception");
-			JDBCTestDisplayUtil.ShowCommonSQLException(System.out, se);
-		}
+			try {
+				cstmt.executeUpdate();
+			} catch (SQLException e) {
+				assertSQLState("38000", e);
+			}
 	}
 
 	public static void setIllegalPropertyProc()
@@ -126,13 +126,13 @@ public class checkSecMgr
 		System.setProperty("notAllowed", "somevalue");
 	}
 
-	public static void cleanUp(Connection conn) throws SQLException
+	public void tearDown() throws SQLException
 	{
-		Statement stmt = conn.createStatement();
+		Statement stmt = createStatement();
 		try {
 			stmt.executeUpdate("drop procedure setIllegalPropertyProc");
 		} catch (SQLException se) {
-			JDBCTestDisplayUtil.ShowCommonSQLException(System.out, se);
+			// ignore
 		}
 	}
 

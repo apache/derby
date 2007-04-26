@@ -1214,13 +1214,16 @@ public class SQLToJUnit
             		}
         		}  else {
       			    targetBuf.append(nextline);
-      			    if (gotCommand)
+      			    if (gotCommand){
             			// multi-line command or comment, keep going till
-            			// we get a semicolon
+            			// we get a semicolon. Add a space to avoid glomming
+      			    	// multiple trimmed strings together.
+      			    	targetBuf.append(" ");
       			    	continue;
-      			    else
+      			    } else{
       			    	// single line warning or error, finished
       			    	break;
+      			    }
         		}
         	}
         }

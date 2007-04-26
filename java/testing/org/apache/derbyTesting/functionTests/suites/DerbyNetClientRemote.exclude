@@ -19,7 +19,6 @@
 # derbynet/testProperties - tries to use NetworkServerControl statements
 # derbynet/timeslice - tries to use NetworkServerControl statements
 # derbynet/DerbyNetAutoStart - tries to start networkserver
-# tools/ieptests - names files in extin dir, but they are on the server
 # lang/wisconsin - optimization is quite different when running remote server.
 # junitTests/derbyNet/CompatibilityTest.java - tries to start and shutdown the server.
 # stress/stress.multi - attempts to connect to localhost.
@@ -35,7 +34,6 @@ derbynet/sysinfo_withproperties.java
 derbynet/testProperties.java
 derbynet/timeslice.java
 derbynet/DerbyNetAutoStart.java
-tools/ieptests.sql
 lang/wisconsin.java
 junitTests/derbyNet/CompatibilityTest.java
 stress/stress.multi
