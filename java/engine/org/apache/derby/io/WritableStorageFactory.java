@@ -57,13 +57,13 @@ public interface WritableStorageFactory extends StorageFactory
 
     /**
      * This method tests whether the StorageRandomAccessFile "rws" and "rwd" modes
-     * are implemented. If the "rws" method is supported then the database
-     * engine will conclude that the write methods of "rws" mode
+     * are implemented. If the "rws" and "rwd" modes are supported then the database
+     * engine will conclude that the write methods of "rws"/"rwd" mode
      * StorageRandomAccessFiles are slow but the sync method is fast and optimize
      * accordingly.
      *
      * @return <b>true</b> if an StIRandomAccess file opened with "rws" or "rwd" modes immediately writes data to the
      *         underlying storage, <b>false</b> if not.
      */
-    public boolean supportsRws();
+    public boolean supportsWriteSync();
 }

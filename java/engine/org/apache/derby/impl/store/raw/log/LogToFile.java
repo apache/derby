@@ -439,7 +439,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 * Note : The reason to support file and write sync of logs is 
 	 * there was no support to do write sync until jdk1.4 and then
 	 * there was write sync jvm bug in jdk1.4.1, only in jdk1.4.2 write 
-	 * sync(rws mode)  mechanism can be used corretly.
+	 * sync(rws and rwd modes) mechanism can be used correctly.
 	 * Default in JVMS >= jdk1.4.2 is write sync(see the boot method for jvm checks).
 	 *
 	 * Write sync mechanism support is added  for performance reasons. 
@@ -2906,11 +2906,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		//get log factorty properties if any set in derby.properties
 		getLogFactoryProperties(null);
 
-		/* check if the storage factory supports write sync(rws).  If so, use it unless
-		 * derby.storage.fileSyncTransactionLog property is set true by user.
+		/* check if the storage factory supports write sync (rws and rwd). If
+		 * so, use it unless derby.storage.fileSyncTransactionLog property is
+		 * set true by user.
 		 */
 
-		if (logStorageFactory.supportsRws())
+		if (logStorageFactory.supportsWriteSync())
         {
 			//write sync can be used in the jvm that database is running on.
 			//disable write sync if derby.storage.fileSyncTransactionLog is true
