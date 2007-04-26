@@ -44,8 +44,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.tools.JDBCDisplayUtil;
-import org.apache.derbyTesting.functionTests.tests.jdbcapi.resultsetStream.TestOfGetAsciiStream;
-import org.apache.derbyTesting.functionTests.tests.tools.ImportExportTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
