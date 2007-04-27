@@ -235,6 +235,17 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 									   false,
                                        keepAfterCommit);
 
+		// When re-using language result sets (DERBY-827) we need to
+		// reset some member variables to the value they would have
+		// had in a newly constructed object.
+		lastPosition = 0;
+		needsRepositioning = false;
+		numFromHashTable = 0;
+		numToHashTable = 0;
+		positionInSource = 0;
+		seenFirst = false;
+		seenLast = false;
+
 		openTime += getElapsedMillis(beginTime);
 		setBeforeFirstRow();
 	}
