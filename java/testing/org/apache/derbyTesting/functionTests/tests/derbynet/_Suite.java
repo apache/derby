@@ -47,7 +47,6 @@ public class _Suite extends BaseTestCase  {
         TestSuite suite = new TestSuite("derbynet");
              
         suite.addTest(PrepareStatementTest.suite());
-        suite.addTest(CheckSecurityManager.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
         suite.addTest(SuicideOfStreamingTest.suite());
         suite.addTest(DRDAProtocolTest.suite());
@@ -56,6 +55,12 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(NetHarnessJavaTest.suite());
         suite.addTest(SecureServerTest.suite());
         suite.addTest(NetIjTest.suite());
+        
+        // Disabled due to "java.sql.SQLSyntaxErrorException: The class
+        // 'org.apache.derbyTesting.functionTests.tests.derbynet.checkSecMgr'
+        //  does not exist or is inaccessible. This can happen if the class is not public."
+        //  in the nightly tests with JDK 1.6 and jar files.
+        //suite.addTest(CheckSecurityManager.suite());
         
         // this test refers to ConnectionPooledDataSource class
         // thus causing class not found exceptions with JSR169
