@@ -221,26 +221,32 @@ public class JDBC {
         // foreign key constraints leading to a dependency loop.
         // Drop any constraints that remain and then drop the tables.
         // If there are no tables then this should be a quick no-op.
-        rs = dmd.getExportedKeys((String) null, schema, (String) null);
-        while (rs.next())
-        {
-            short keyPosition = rs.getShort("KEY_SEQ");
-            if (keyPosition != 1)
-                continue;
-            String fkName = rs.getString("FK_NAME");
-            // No name, probably can't happen but couldn't drop it anyway.
-            if (fkName == null)
-                continue;
-            String fkSchema = rs.getString("FKTABLE_SCHEM");
-            String fkTable = rs.getString("FKTABLE_NAME");
-            
-            String ddl = "ALTER TABLE " +
-                JDBC.escape(fkSchema, fkTable) +
-                " DROP FOREIGN KEY " +
-                JDBC.escape(fkName);
-            s.executeUpdate(ddl);
+        ResultSet table_rs = dmd.getTables((String) null, schema, (String) null,
+                new String[] {"TABLE"});
+
+        while (table_rs.next()) {
+            String tablename = table_rs.getString("TABLE_NAME");
+            rs = dmd.getExportedKeys((String) null, schema, tablename);
+            while (rs.next()) {
+                short keyPosition = rs.getShort("KEY_SEQ");
+                if (keyPosition != 1)
+                    continue;
+                String fkName = rs.getString("FK_NAME");
+                // No name, probably can't happen but couldn't drop it anyway.
+                if (fkName == null)
+                    continue;
+                String fkSchema = rs.getString("FKTABLE_SCHEM");
+                String fkTable = rs.getString("FKTABLE_NAME");
+
+                String ddl = "ALTER TABLE " +
+                    JDBC.escape(fkSchema, fkTable) +
+                    " DROP FOREIGN KEY " +
+                    JDBC.escape(fkName);
+                s.executeUpdate(ddl);
+            }
+            rs.close();
         }
-        rs.close();
+        table_rs.close();
         conn.commit();
                 
         // Tables (again)
