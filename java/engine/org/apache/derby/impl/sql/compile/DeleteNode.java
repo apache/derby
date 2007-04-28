@@ -525,8 +525,11 @@ public class DeleteNode extends DMLModStatementNode
 							throws StandardException
 	{
 
-		//If the DML is on the temporary table, generate the code to mark temporary table as modified in the current UOW
-		generateCodeForTemporaryTable(acb, mb);
+		// If the DML is on the temporary table, generate the code to
+		// mark temporary table as modified in the current UOW. After
+		// DERBY-827 this must be done in execute() since
+		// fillResultSet() will only be called once.
+		generateCodeForTemporaryTable(acb, acb.getExecuteMethod());
 
 		/* generate the parameters */
 		if(!isDependentTable)
