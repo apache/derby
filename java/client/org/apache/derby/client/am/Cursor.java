@@ -365,7 +365,7 @@ public abstract class Cursor {
     }
 
     // Build a Java int from a 4-byte signed binary representation.
-    private final int get_INTEGER(int column) {
+    protected final int get_INTEGER(int column) {
         return org.apache.derby.client.am.SignedBinary.getInt(dataBuffer_,
                 columnDataPosition_[column - 1]);
     }

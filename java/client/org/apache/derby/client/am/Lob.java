@@ -40,12 +40,14 @@ public abstract class Lob implements UnitOfWorkListener {
     public static final int CHARACTER_STREAM = 16;
     public static final int BINARY_STREAM = 32;
     public static final int BINARY_STRING = 64;
+    public static final int LOCATOR = 128;
 
     //---------------------navigational members-----------------------------------
     protected Agent agent_;
 
     //-----------------------------state------------------------------------------
     protected int dataType_ = 0;      // data type(s) the LOB instance currently contains
+    protected int locator_ = -1;   // locator id for this LOB, -1 if not locator
 
     private long sqlLength_;// length of the LOB value, as defined by the server
     private boolean lengthObtained_;
@@ -72,17 +74,24 @@ public abstract class Lob implements UnitOfWorkListener {
     // ---------------------------jdbc 2------------------------------------------
 
     /**
-     * Return the length of the Lob value represented by this Lob object.
-     * If length is not already known, Lob will first be materialized.
-     * NOTE: The caller needs to deal with synchronization.
+     * Return the length of the Lob value represented by this Lob
+     * object.  If length is not already known, and Lob is locator
+     * based, length will be retrieved from the server.  If not,
+     * locator based, Lob will first be materialized.  NOTE: The
+     * caller needs to deal with synchronization.
      *
      * @throws SqlException on execution errors while materializing the stream, 
-     *         or if Layer B streaming is used and length not already obtained.
+     *         or if Layer B streaming is used and length not yet obtained.
      * @return length of Lob value
      */
     long sqlLength() throws SqlException 
     {
         if (lengthObtained_) return sqlLength_;
+        
+        if (isLocator()) {
+            sqlLength_ = getLocatorLength();
+            lengthObtained_ = true;
+        }
         
         if (willBeLayerBStreamed()) {
             throw new SqlException(agent_.logWriter_,
@@ -105,6 +114,21 @@ public abstract class Lob implements UnitOfWorkListener {
         sqlLength_ = length;
         lengthObtained_ = true;
     }
+
+    /**
+     * Get the length of locator based Lob from the server.  This is a
+     * dummy implementation that is supposed to be overridden by
+     * subclasses.  A stored procedure call will be made to get the
+     * length from the server.
+     * 
+     * @throws org.apache.derby.client.am.SqlException 
+     * @return length of Lob
+     */
+    long getLocatorLength() throws SqlException
+    {
+        return -1;
+    }
+
 
     //-----------------------event callback methods-------------------------------
 
@@ -246,6 +270,23 @@ public abstract class Lob implements UnitOfWorkListener {
     public boolean willBeLayerBStreamed() {
         return willBeLayerBStreamed_;
     }
+
+    /**
+     * Check whether this Lob is based on a locator
+     * @return true if Lob is based on locator, false otherwise
+     */
+    public boolean isLocator() {
+        return ((dataType_ & LOCATOR) == LOCATOR);
+    }
+
+    /**
+     * Get locator for this Lob
+     * @return locator for this Lob, -1 is Lob is not based on locator
+     */
+    public int getLocator() {
+        return locator_;
+    }
+
 
     /**
      * Checks the <code>pos</code> and <code>length</code>.

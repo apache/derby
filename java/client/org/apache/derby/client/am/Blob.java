@@ -23,6 +23,7 @@ package org.apache.derby.client.am;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -99,6 +100,19 @@ public class Blob extends Lob implements java.sql.Blob {
         binaryStream_ = binaryStream;
         dataType_ |= BINARY_STREAM;
     }
+    
+    /**
+     * Create a <code>Blob</code> object for a Blob value stored 
+     * on the server and indentified by <code>locator</code>.
+     * @param agent context for this Blob object (incl. connection)
+     * @param locator reference id to Blob value on server
+     */
+    public Blob(Agent agent, int locator)  
+    {
+        super(agent, false);
+        locator_ = locator;
+        dataType_ |= LOCATOR;
+    }
 
     // ---------------------------jdbc 2------------------------------------------
 
@@ -126,6 +140,20 @@ public class Blob extends Lob implements java.sql.Blob {
         {
             throw se.getSQLException();
         }
+    }
+    
+    /**
+     * Get the length in bytes of the <code>Blob</code> value represented by 
+     * this locator based <Blob> object.  
+     * 
+     * A stored procedure call will be made to get it from the server.
+     * @throws org.apache.derby.client.am.SqlException 
+     * @return length of Blob in bytes
+     */
+    long getLocatorLength() throws SqlException
+    {
+        return agent_.connection_.locatorProcedureCall()
+            .blobGetLength(locator_);
     }
 
   /**
@@ -196,8 +224,15 @@ public class Blob extends Lob implements java.sql.Blob {
         // actual length is the lesser of the number of bytes requested
         // and the number of bytes available from pos to the end
         actualLength = Math.min(sqlLength() - pos + 1, (long) length);
-        byte[] retVal = new byte[(int) actualLength];
-        System.arraycopy(binaryString_, (int) pos + dataOffset_ - 1, retVal, 0, (int) actualLength);
+        byte[] retVal; 
+        if (isLocator()) {
+            retVal = agent_.connection_.locatorProcedureCall()
+                .blobGetBytes(locator_, pos, (int )actualLength);
+        } else {
+            retVal = new byte[(int) actualLength];
+            System.arraycopy(binaryString_, (int) pos + dataOffset_ - 1, 
+                             retVal, 0, (int) actualLength);
+        }
         return retVal;
     }
 
@@ -231,9 +266,12 @@ public class Blob extends Lob implements java.sql.Blob {
         if (isBinaryStream())    // this Lob is used for input
         {
             return binaryStream_;
+        } else if (isLocator()) {
+            return new BlobLocatorInputStream(agent_.connection_, this);
+        } else {  // binary string
+            return new java.io.ByteArrayInputStream(binaryString_, dataOffset_,
+                                           binaryString_.length - dataOffset_);
         }
-
-        return new java.io.ByteArrayInputStream(binaryString_, dataOffset_, binaryString_.length - dataOffset_);
     }
 
     public long position(byte[] pattern, long start) throws SQLException {
@@ -271,7 +309,12 @@ public class Blob extends Lob implements java.sql.Blob {
     private long positionX(byte[] pattern, long start) throws SqlException {
         checkForClosedConnection();
 
-        return binaryStringPosition(pattern, start);
+        if (isLocator()) {
+            return agent_.connection_.locatorProcedureCall()
+                .blobGetPositionFromBytes(locator_, pattern, start);
+        } else {
+            return binaryStringPosition(pattern, start);
+        }
     }
 
     public long position(java.sql.Blob pattern, long start) throws SQLException {
@@ -310,9 +353,26 @@ public class Blob extends Lob implements java.sql.Blob {
         checkForClosedConnection();
 
         try {
-            return binaryStringPosition(pattern.getBytes(1L, 
-                                                         (int)pattern.length()),
-                                        start);
+            if (isLocator()) {
+                if ((pattern instanceof Blob) 
+                    && ((Blob )pattern).isLocator()) {
+                    // Send locator for pattern to server
+                    return agent_.connection_.locatorProcedureCall()
+                        .blobGetPositionFromLocator(locator_, 
+                                                 ((Blob )pattern).getLocator(),
+                                                 start);
+                } else {
+                    // Convert pattern to byte array before sending to server
+                    return agent_.connection_.locatorProcedureCall()
+                        .blobGetPositionFromBytes(locator_, 
+                                  pattern.getBytes(1L, (int )pattern.length()),
+                                  start);
+                }
+            } else { 
+                return binaryStringPosition(
+                                  pattern.getBytes(1L, (int )pattern.length()),
+                                  start);
+            }
         } catch (java.sql.SQLException e) {
             throw new SqlException(e);
         }
@@ -391,9 +451,10 @@ public class Blob extends Lob implements java.sql.Blob {
                     new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
         }
         
-        if (pos - 1 > binaryString_.length - dataOffset_) {
+        if (pos - 1 > sqlLength()) {
             throw new SqlException(agent_.logWriter_,
-                    new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE), new Long(pos));
+                         new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE),
+                         new Long(pos));
         }
         
         if ((offset < 0) || offset > bytes.length )
@@ -410,16 +471,35 @@ public class Blob extends Lob implements java.sql.Blob {
         if (len == 0) {
             return 0;
         }
+        
         length = Math.min((bytes.length - offset), len);
-        if ((binaryString_.length - dataOffset_ - (int) pos + 1) < length) {
-            byte newbuf[] = new byte[(int) pos + length + dataOffset_ - 1];
-            System.arraycopy(binaryString_, 0, newbuf, 0, binaryString_.length);
-            binaryString_ = newbuf;
-        }
+        if (isLocator()) {  
+            byte[] ba = bytes;
+            if ((offset > 0) || (length < bytes.length)) { 
+                // Copy the part we will use into a new array
+                ba = new byte[length];
+                System.arraycopy(bytes, offset, ba, 0, length);
+            }
+            agent_.connection_.locatorProcedureCall()
+                .blobSetBytes(locator_, pos, length, ba);
+            if (pos+length-1 > sqlLength()) { // Wrote beyond the old end
+                // Update length
+                setSqlLength(pos + length - 1);
+            } 
+        } else {
+            if ((binaryString_.length - dataOffset_ - (int)pos + 1) < length) {
+                byte newbuf[] = new byte[(int) pos + length + dataOffset_ - 1];
+                System.arraycopy(binaryString_, 0, 
+                                 newbuf, 0, binaryString_.length);
+                binaryString_ = newbuf;
+            }
 
-        System.arraycopy(bytes, offset, binaryString_, (int) pos + dataOffset_ - 1, length);
-        binaryStream_ = new java.io.ByteArrayInputStream(binaryString_);
-        setSqlLength(binaryString_.length - dataOffset_);
+            System.arraycopy(bytes, offset, 
+                             binaryString_, (int) pos + dataOffset_ - 1, 
+                             length);
+            binaryStream_ = new java.io.ByteArrayInputStream(binaryString_);
+            setSqlLength(binaryString_.length - dataOffset_);
+        }
         return length;
     }
 
@@ -427,16 +507,35 @@ public class Blob extends Lob implements java.sql.Blob {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setBinaryStream", (int) pos);
-            }
-            BlobOutputStream outStream = new BlobOutputStream(this, pos);
+        try {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "setBinaryStream", (int) pos);
+                }
+                if (pos < 1) {
+                    throw new SqlException(agent_.logWriter_,
+                            new ClientMessageId(SQLState.BLOB_BAD_POSITION),
+                            new Long(pos));
+                }
+                
+                OutputStream outStream;
+                if (isLocator()) {
+                    outStream = new BlobLocatorOutputStream(agent_.connection_,
+                                                            this,
+                                                            pos);
+                } else {
+                    outStream = new BlobOutputStream(this, pos);
+                }
 
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "setBinaryStream", outStream);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, 
+                                                "setBinaryStream", 
+                                                outStream);
+                }
+                return outStream;
             }
-            return outStream;
+        } catch ( SqlException se ) {
+            throw se.getSQLException();
         }
     }
 
@@ -458,12 +557,20 @@ public class Blob extends Lob implements java.sql.Blob {
                 if (len == this.sqlLength()) {
                     return;
                 }
-                long newLength = (int) len + dataOffset_;
-                byte newbuf[] = new byte[(int) len + dataOffset_];
-                System.arraycopy(binaryString_, 0, newbuf, 0, (int) newLength);
-                binaryString_ = newbuf;
-                binaryStream_ = new java.io.ByteArrayInputStream(binaryString_);
-                setSqlLength(binaryString_.length - dataOffset_);
+                if (isLocator()) {
+                    agent_.connection_.locatorProcedureCall()
+                        .blobTruncate(locator_, len);
+                    setSqlLength(len);
+                } else {
+                    long newLength = (int) len + dataOffset_;
+                    byte newbuf[] = new byte[(int) len + dataOffset_];
+                    System.arraycopy(binaryString_, 0, 
+                                     newbuf, 0, (int) newLength);
+                    binaryString_ = newbuf;
+                    binaryStream_ 
+                        = new java.io.ByteArrayInputStream(binaryString_);
+                    setSqlLength(binaryString_.length - dataOffset_);
+                }
             }
         }
         catch ( SqlException se )
@@ -492,17 +599,27 @@ public class Blob extends Lob implements java.sql.Blob {
         //now that free has been called the Blob object is no longer
         //valid
         isValid = false;
-        
-        if(isBinaryStream()) {
-            try {
-                binaryStream_.close();
+        try {            
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "free");
+                }
+                if (isBinaryStream()) {
+                    try {
+                        binaryStream_.close();
+                    } catch(IOException ioe) {
+                        throw new SqlException(null, new ClientMessageId(
+                                             SQLState.IO_ERROR_UPON_LOB_FREE));
+                    }
+                } else if (isLocator()) {
+                    agent_.connection_.locatorProcedureCall()
+                        .blobReleaseLocator(locator_);
+                } else {
+                    binaryString_ = null;
+                }
             }
-            catch(IOException ioe) {
-                throw new SqlException(null, new ClientMessageId(SQLState.IO_ERROR_UPON_LOB_FREE)).getSQLException();
-            }
-        }
-        else {
-            binaryString_ = null;
+        } catch (SqlException se) {
+            throw se.getSQLException();
         }
     }
 

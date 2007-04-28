@@ -635,11 +635,13 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     // Calculates the column index for Lob objects constructed from EXTDTA data.
     // Describe information isn't sufficient because we have to check
     // for trivial values (nulls or zero-length) and exclude them.
+    // Need also to check whether locator was returned since in that case
+    // there will be no EXTDTA data for the LOB column.
     void calculateLobColumnPositionsForRow() {
         int currentPosition = 0;
 
         for (int i = 0; i < columns_; i++) {
-            if (isNonTrivialDataLob(i))
+            if ((isNonTrivialDataLob(i)) && (locator(i + 1) == -1))
             // key = column position, data = index to corresponding data in extdtaData_
             // ASSERT: the server always returns the EXTDTA objects in ascending order
             {
@@ -1045,8 +1047,32 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
         return data;
     }
+    
+    /**
+     * Get locator for LOB of the designated column
+     * @param column column number, starts at 1
+     * @return locator value, -1 if LOB value was sent instead of locator
+     */
+    private int locator(int column)
+    {
+        int locator = get_INTEGER(column);
+        // If Lob value was sent instead of locator, highest bit will be set
+        if ((locator & 0x8000) == 0x8000) { 
+            return -1;
+        } else {
+            return locator;
+        }
+    }
 
-    public Blob getBlobColumn_(int column, Agent agent) throws SqlException {
+    public Blob getBlobColumn_(int column, Agent agent) throws SqlException 
+    {
+        // Check for locator
+        int locator = locator(column);
+        if (locator > 0) { // Create locator-based LOB object
+            return new Blob(agent, locator);
+        }
+        
+        // The Blob value has been sent instead of locator 
         int index = column - 1;
         int dataOffset;
         byte[] data;
