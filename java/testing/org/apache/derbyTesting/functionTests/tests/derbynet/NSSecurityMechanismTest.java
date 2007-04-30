@@ -43,6 +43,7 @@ import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.Test;
@@ -349,13 +350,29 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             {
                 assertUSRSSBPWD_with_BUILTIN(testDERBY528ExpectedValues);
             }
+            else
+            {
+                // shutdown the database - this will prevent slow startup 
+                // when bouncing the server with next security mechanism.
+                // for ENCRYPTED_USER_AND_PASSWORD_SECURITY:
+                short secmeccode=SECMEC_EUSRIDPWD;
+                if (derby_drda_securityMechanism.equals("USER_ONLY_SECURITY"))
+                    secmeccode=SECMEC_USRIDONL;
+                else if (derby_drda_securityMechanism.equals(
+                    "CLEAR_TEXT_PASSWORD_SECURITY"))
+                    secmeccode=SECMEC_USRIDPWD;
+                assertConnectionUsingDriverManager(getJDBCUrl(
+                    "user=APP;password=APP;shutdown=true;securityMechanism=" +
+                    secmeccode)," BUILTIN (T5):",
+                    "08006");
+            }
         }
     }
     
     // returns a boolean true if the security mechanism is not supported
     // so the loop in which this is called can be continued without
     // causing unnecessary/impossible tests to be run
-    public boolean setSecurityMechanism(String derby_security_mechanism) 
+    private boolean setSecurityMechanism(String derby_security_mechanism) 
     throws Exception {
         try {
         // getting a networkservercontrol to shutdown the currently running 
@@ -367,7 +384,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
 
         // shut down the server
         server.shutdown();
-        Thread.sleep(500);
         } catch (Exception e) {
             if (!(e.getMessage().substring(0,17).equals("DRDA_InvalidValue")))
             {
@@ -396,9 +412,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             //server2.start(new PrintWriter(System.out, true));
             // and comment out:
             server2.start(null);
-            // TODO: sleep ridiculously long, otherwise getting 08001 errors
-            //       even when the server is up.
-            Thread.sleep(120000);
+            NetworkServerTestSetup.waitForServerStart(server2);
             
             if (derby_drda_securityMechanism.equals("") ||
                 derby_drda_securityMechanism.equals("INVALID_VALUE"))
@@ -430,7 +444,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         return false;
     }
 
-    public void assertConnectionsUsingDriverManager(String[] expectedValues)
+    private void assertConnectionsUsingDriverManager(String[] expectedValues)
     {
         assertConnectionUsingDriverManager(
             getJDBCUrl(null),"T1:", expectedValues[1]);
@@ -466,7 +480,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     /**
      * Get connection from datasource and also set security mechanism
      */
-    public void assertConnectionUsingDataSource(String[] expectedValues)
+    private void assertConnectionUsingDataSource(String[] expectedValues)
     {
         // Note: bug in jcc, throws error with null password
         if (usingDerbyNetClient())
@@ -502,7 +516,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         }
     }
 
-    public void assertSecurityMechanismOK(String user, String password,
+    private void assertSecurityMechanismOK(String user, String password,
         Short secmec, String msg, String expectedValue)
     {
         Connection conn;
@@ -559,7 +573,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         }
     }
 
-    public void assertConnectionUsingDriverManager(
+    private void assertConnectionUsingDriverManager(
         String dbUrl, String msg, String expectedValue)
     {
         try
@@ -788,7 +802,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      |     |      |8       |N         | -       -       Err1         |
      ================================================================= 
      */
-    public void assertAllCombinationsOfUserPasswordSecMecInputOK(
+    private void assertAllCombinationsOfUserPasswordSecMecInputOK(
         String[] expectedValues) {
         // Try following combinations:
         // user { null, user attribute given}
@@ -895,7 +909,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @param password password
      * @param expectedValue expected sql state
      */
-    public void getDataSourceConnection(
+    private void getDataSourceConnection(
         String user, String password, String expectedValue)
     {
         Connection conn;
@@ -937,7 +951,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @param sqle SQLException whose complete chain of exceptions is
      * traversed and sqlstate and message is printed out
      */
-    public static void dumpSQLException(SQLException sqle)
+    private static void dumpSQLException(SQLException sqle)
     {
         while ( sqle != null)
         {
@@ -958,7 +972,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @param secmec security mechanism for datasource
      * @throws Exception
      */
-    public void assertSecMecWithConnPoolingOK(
+    private void assertSecMecWithConnPoolingOK(
         String user, String password, Short secmec) throws Exception
     {
         Connection conn;
@@ -982,6 +996,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         conn.close();
         conn = pc.getConnection();
         assertConnectionOK(conn);
+        pc.close();
         conn.close();
     }
 
@@ -990,7 +1005,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @param   conn    database connection
      * @throws Exception if there is any error
      */
-    public void assertConnectionOK(Connection conn)
+    private void assertConnectionOK(Connection conn)
     throws Exception
     {
         Statement stmt = conn.createStatement();
@@ -1059,7 +1074,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * derby.drda.securityMechanism to restrict client connections based on
      * the security mechanism.
      */
-    public void assertDerby1080Fixed(String expectedValue)
+    private void assertDerby1080Fixed(String expectedValue)
     {
         try
         {
@@ -1100,7 +1115,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * 
      * @throws Exception if there an unexpected error
      */
-    public void assertUSRSSBPWD_with_BUILTIN(String[] expectedValues)
+    private void assertUSRSSBPWD_with_BUILTIN(String[] expectedValues)
     {
         // Turn on Derby BUILTIN authentication and attempt connecting with
         // USRSSBPWD security mechanism.
@@ -1191,7 +1206,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         }
     }
     
-    public Connection getDataSourceConnectionWithSecMec(
+    private Connection getDataSourceConnectionWithSecMec(
         String user, String password, Short secMec)
     {
         Connection conn = null;
@@ -1221,7 +1236,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         return conn;
     }
 
-    public String getJDBCUrl(String attrs) {
+    private String getJDBCUrl(String attrs) {
         String dbName = 
             TestConfiguration.getCurrent().getDefaultDatabaseName();
         // s is protocol, subprotocol, + dbName
@@ -1235,12 +1250,12 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         return s;
     }
 
-    public javax.sql.DataSource getDS(String user, String password)
+    private javax.sql.DataSource getDS(String user, String password)
     {
         return getDS(user,password,null);
     }
 
-    public javax.sql.DataSource getDS(
+    private javax.sql.DataSource getDS(
         String user, String password, HashMap attrs)
     {
         if (attrs == null)
@@ -1290,7 +1305,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         return attrs;
     }
 
-    public javax.sql.ConnectionPoolDataSource getCPDS(
+    private javax.sql.ConnectionPoolDataSource getCPDS(
         String user, String password)
     {
         HashMap attrs = new HashMap();
@@ -1310,7 +1325,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         return cpds;
     }
 
-    public static String getSetterName(String attribute)
+    private static String getSetterName(String attribute)
     {
         return "set" + Character.toUpperCase(attribute.charAt(0)) +
             attribute.substring(1);
@@ -1323,5 +1338,4 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         if (expectedValue.equals("08001.C.8"))
             assertEquals("Password can not be null.", sqle.getMessage());
     }
-    
 }
