@@ -69,10 +69,11 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt.executeUpdate("ALTER TABLE testBlob ADD COLUMN crc32 BIGINT");
 
         stmt.close();
-
+        commit();
     }
 
     protected void tearDown() throws Exception {
+        rollback();
         Statement stmt = createStatement();
         stmt.executeUpdate("DROP TABLE testClob");
         stmt.executeUpdate("DROP TABLE testBlob");
@@ -1377,13 +1378,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * after updating the clob when using result sets of type
      * TYPE_SCROLL_INSENSITIVE.
      *
-     * The method updateString(int, String) is used to set the value on the
-     * clob because the method updateBlob(int, Blob) has not yet been
-     * implemented for DerbyNetClient.
-     *
      * @throws SQLException
      */
-    public void xTestGetClobBeforeAndAfterUpdate() throws SQLException {
+    public void testGetClobBeforeAndAfterUpdate() throws SQLException {
         String clobData = "initial clob ";
         PreparedStatement ps = prepareStatement("insert into " +
                 "testClob (b, a) values (?, ?)");
@@ -1434,7 +1431,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         assertEquals("FAIL - wrong clob value", expectedValue, value);
         // update contents
         value = updatedClobData + rs.getInt(1);
-        rs.updateString(2, value);
+        c.setString(1, value);
+        rs.updateClob(2, c);
         rs.updateRow();
         // check update values
         rs.next(); // leave the row
@@ -1454,7 +1452,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      *
      * @throws SQLException
      */
-    public void xTestGetClobBeforeAndAfterUpdateStream() throws SQLException {
+    public void testGetClobBeforeAndAfterUpdateStream() throws SQLException {
         String clobData = "initial clob ";
         PreparedStatement ps = prepareStatement("insert into " +
                 "testClob (b, a) values (?, ?)");
@@ -2406,13 +2404,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * after updating the blob when using result sets of type
      * TYPE_SCROLL_INSENSITIVE.
      *
-     * The method updateBytes(int, byte[]) is used to set the value on the
-     * clob because the method updateClob(int, Clob) has not yet been
-     * implemented for DerbyNetClient.
-     *
      * @throws Exception
      */
-    public void xTestGetBlobBeforeAndAfterUpdate() throws Exception {
+    public void testGetBlobBeforeAndAfterUpdate() throws Exception {
         String blobData = "initial blob ";
         PreparedStatement ps =
                 prepareStatement(
@@ -2464,7 +2458,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
 
         // update contents
         value = (updatedBlobData + rs.getInt(1)).getBytes();
-        rs.updateBytes(2, value);
+        b.setBytes(1, value);
+        rs.updateBlob(2, b);
         rs.updateRow();
         // check update values
         rs.next(); // leave the row
@@ -2485,7 +2480,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      *
      * @throws Exception
      */
-    public void xTestGetBlobBeforeAndAfterUpdateStream() throws Exception {
+    public void testGetBlobBeforeAndAfterUpdateStream() throws Exception {
 
         String blobData = "initial blob ";
         PreparedStatement ps =
@@ -2772,26 +2767,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         suite.addTest(
                 TestConfiguration.clientServerSuite(BlobClob4BlobTest.class));
 
-        suite.addTest(derbynetExclude("BlobClob4BlobTest:embedded"));
-        suite.addTest(TestConfiguration.clientServerDecorator(
-                derbynetExclude("BlobClob4BlobTest:client")));
-
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4));
     }
 
-    private static Test derbynetExclude(String name) {
-        TestSuite suite = new TestSuite(name);
-        suite.addTest(new BlobClob4BlobTest(
-                "xTestGetClobBeforeAndAfterUpdate"));
-        suite.addTest(new BlobClob4BlobTest(
-                "xTestGetClobBeforeAndAfterUpdateStream"));
-        suite.addTest(new BlobClob4BlobTest(
-                "xTestGetBlobBeforeAndAfterUpdate"));
-        suite.addTest(new BlobClob4BlobTest(
-                "xTestGetBlobBeforeAndAfterUpdateStream"));
-        return suite;
-    }
 
     private void insertDefaultData() throws Exception {
         PreparedStatement ps = prepareStatement(
@@ -3066,7 +3045,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             InputStream inStream = blob.getBinaryStream();
             inStream.skip(pos - 1);
             int numBytes = inStream.read(value);
-            // chech the the two values match
+            // check that the two values match
             if (numBytes >= 0) {
                 byte[] readBytes = new byte[numBytes];
                 System.arraycopy(value, 0, readBytes, 0, numBytes);
