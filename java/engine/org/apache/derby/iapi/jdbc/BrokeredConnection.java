@@ -616,35 +616,39 @@ public abstract class BrokeredConnection implements EngineConnection
         
     }
 	/**
-	* Dummy implementation for method in EngineConnection.
-        *
+	* Add the locator and the corresponding LOB object into the
+	* HashMap
+	*
 	* @param LOBReference The object which contains the LOB object that
 	*                     that is added to the HashMap.
 	* @return an integer that represents the locator that has been
 	*         allocated to this LOB.
 	*/
-	public int addLOBMapping(Object LOBReference) {
-		//This call is forwarded to the implementation in the EmbedConnection
-		//class and hence the actual implementation here is not necessary.
-		return -1;
+	public int addLOBMapping(Object LOBReference) throws SQLException {
+            //Forward the methods implementation to the implementation in the
+            //underlying EmbedConnection object. 
+            return getRealConnection().addLOBMapping(LOBReference);
 	}
 
 	/**
-	* Dummy implementation for method in EngineConnection.
+	* Clear the HashMap of all entries.
+	* Called when a commit or rollback of the transaction
+	* happens.
 	*/
-	public void clearLOBMapping() {
-		//This call is forwarded to the implementation in the EmbedConnection
-		//class and hence the actual implementation here is not necessary.
+	public void clearLOBMapping() throws SQLException {
+            //Forward the methods implementation to the implementation in the
+            //underlying EmbedConnection object. 
+            getRealConnection().clearLOBMapping();
 	}
 
 	/**
-	* Dummy implementation for method in EngineConnection.
+	* Get the LOB reference corresponding to the locator.
 	* @param key the integer that represents the LOB locator value.
 	* @return the LOB Object corresponding to this locator.
 	*/
-	public Object getLOBMapping(int key) {
-		//This call is forwarded to the implementation in the EmbedConnection
-		//class and hence the actual implementation here is not necessary.
-		return null;
+	public Object getLOBMapping(int key) throws SQLException {
+            //Forward the methods implementation to the implementation in the
+            //underlying EmbedConnection object. 
+            return getRealConnection().getLOBMapping(key);
 	}
 }

@@ -101,7 +101,7 @@ public interface EngineConnection extends Connection {
     * @return an integer that represents the locator that has been
     *         allocated to this LOB.
     */
-    public int addLOBMapping(Object LOBReference);
+    public int addLOBMapping(Object LOBReference) throws SQLException;
 
     /**
     * Clear the HashTable of all entries.
@@ -115,5 +115,5 @@ public interface EngineConnection extends Connection {
     * @param key the integer that represents the LOB locator value.
     * @return the LOB Object corresponding to this locator.
     */
-    public Object getLOBMapping(int key);
+    public Object getLOBMapping(int key) throws SQLException;
 }
