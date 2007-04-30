@@ -57,7 +57,9 @@ public class BlobLocatorInputStream extends java.io.InputStream
      */
     public BlobLocatorInputStream(Connection connection, Blob blob) 
     {        
-        SanityManager.ASSERT(blob.isLocator());
+        if (SanityManager.DEBUG) {
+        	SanityManager.ASSERT(blob.isLocator());
+        }
          this.connection = connection;
         this.blob = blob;
     }

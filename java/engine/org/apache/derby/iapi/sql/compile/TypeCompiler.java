@@ -200,7 +200,7 @@ public interface TypeCompiler
 	 * 
 	 * The stack must contain data value factory value.
 	 * 
-	 * @param mb	The method to put the expression in
+	 * @param eb	The method to put the expression in
 	 * @param collationType For character DVDs, this will be used to determine
 	 *   what Collator should be associated with the DVD which in turn will 
 	 *   decide whether to generate CollatorSQLcharDVDs or SQLcharDVDs. For 
