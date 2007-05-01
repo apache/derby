@@ -35,7 +35,7 @@ public interface StringDataValue extends ConcatableDataValue
 	/**
 	  For a character string type, the collation derivation should always be 
 	  "explicit"(not possible in Derby 10.3), "implicit" or "none". We will 
-	  start by setting it to "none" in TypeDescriptorImpl. At runtime, only 
+	  start by setting it to "implicit" in TypeDescriptorImpl. At runtime, only 
 	  character string types which are results of aggregate methods dealing 
 	  with operands with different collation types should have a collation 
 	  derivation of "none". All the other character string types should have 
@@ -54,6 +54,12 @@ public interface StringDataValue extends ConcatableDataValue
 	 * 2)all the character string columns belonging to system tables will have 
 	 * collation type of UCS_BASIC but all the character string columns 
 	 * belonging to user tables will have collation type of TERRITORY_BASED.
+	 * 
+	 * Data types will start with collation type defaulting to UCS_BASIC in
+	 * TypeDescriptorImpl. This collation type ofcourse makes sense fpr 
+	 * character string types only. It will be ignored for the rest of the
+	 * types. If a character's collation type should be TERRIOTRY_BASED, then
+	 * DTD.setCollationType can be called to change the default of UCS_BASIC.
 	 */
 	public	static final int COLLATION_TYPE_UCS_BASIC = 0;
 	/** @see StringDataValue#COLLATION_TYPE_UCS_BASIC */
