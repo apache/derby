@@ -104,7 +104,6 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ReleaseCompileLocksTest.suite());
         suite.addTest(ErrorCodeTest.suite());
         suite.addTest(TimestampArithTest.suite());
-        suite.addTest(GrantRevokeDDLTest.suite());
 
 
         // Add the XML tests, which exist as a separate suite
@@ -127,6 +126,17 @@ public class _Suite extends BaseTestCase  {
 		}
         suite.addTest(ResultSetsFromPreparedStatementTest.suite());
 
-		return suite;
+        // tests that do not run with JSR169
+        if (JDBC.vmSupportsJDBC3())  
+        {
+            // test uses triggers interwoven with other tasks
+            // triggers may cause a generated class which calls 
+            // java.sql.DriverManager, which will fail with JSR169.
+            // also, test calls procedures which use DriverManager
+            // to get the default connection.
+            suite.addTest(GrantRevokeDDLTest.suite());
+        }
+
+        return suite;
 	}
 }
