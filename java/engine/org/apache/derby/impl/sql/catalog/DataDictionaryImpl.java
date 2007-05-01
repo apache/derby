@@ -10115,7 +10115,6 @@ public final class	DataDictionaryImpl
      * database, or code doing hard upgrade from previous version.
      *
      * @param tc            an instance of the TransactionController class.
-     * @param schema_uuid   uuid of the SYSUTIL schema.
      *
      * @throws StandardException  Standard exception policy.
      **/
