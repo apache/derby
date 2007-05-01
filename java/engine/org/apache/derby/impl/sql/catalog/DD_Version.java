@@ -398,9 +398,7 @@ public	class DD_Version implements	Formatable
         {
             // On ugrade from versions before 10.3, create system procedures
             // added in 10.3.
-            bootingDictionary.create_10_3_system_procedures(
-                tc, 
-                bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
+            bootingDictionary.create_10_3_system_procedures(tc);
         }
 	}
 

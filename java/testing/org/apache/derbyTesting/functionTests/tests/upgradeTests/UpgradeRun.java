@@ -184,8 +184,13 @@ class UpgradeRun {
                     suite.addTest(Changes10_1.suite());
                 if (oldMinor < 2)
                    suite.addTest(Changes10_2.suite());
-                if (oldMinor < 3)
-                   suite.addTest(Changes10_3.suite());
+                if (oldMinor < 3) {
+                   //Pass the phase as a parameter to the
+                   //suite method that will enable the test to add existing
+                   //junit tests after checking for the phase of the current
+                   //run. 
+                   suite.addTest(Changes10_3.suite(phase));
+                 }
             }
             
             // Add DatabaseMetaData tests. Since metadata

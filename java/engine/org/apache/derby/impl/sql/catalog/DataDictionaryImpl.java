@@ -9330,10 +9330,7 @@ public final class	DataDictionaryImpl
         // add 10.2 specific system procedures
         create_10_2_system_procedures(tc, sysUtilUUID);
         // add 10.3 specific system procedures
-        create_10_3_system_procedures(tc, sysUtilUUID);
-        //create 10.3 functions used by LOB methods.
-        UUID sysIBMUUID = getSysIBMSchemaDescriptor().getUUID();
-        create_10_3_LOB_Specific_functions(tc, sysIBMUUID);
+        create_10_3_system_procedures(tc);
     }
 
     /**
@@ -10122,10 +10119,11 @@ public final class	DataDictionaryImpl
      *
      * @throws StandardException  Standard exception policy.
      **/
-    private void create_10_3_LOB_Specific_functions(
-        TransactionController   tc,
-        UUID                    schema_uuid)
+    private void create_10_3_system_procedures_SYSIBM(
+        TransactionController   tc)
         throws StandardException {
+        //create 10.3 functions used by LOB methods.
+        UUID schema_uuid = getSysIBMSchemaDescriptor().getUUID();
         {
             UUID routine_uuid = null;
             String[] arg_names = null;
@@ -10509,22 +10507,34 @@ public final class	DataDictionaryImpl
     }
 
     /**
-     * Create system procedures added in version 10.3.
+     * Create the System procedures that are added in 10.3.
+     *
+     * @param tc an instance of the TransactionController.
+     * @throws StandardException Standard exception policy. 
+     */
+    void create_10_3_system_procedures(TransactionController tc) 
+    throws StandardException {
+        // Create the procedures in the SYSCS_UTIL schema.
+        create_10_3_system_procedures_SYSCS_UTIL(tc);
+        //create the procedures in the SYSIBM schema
+        create_10_3_system_procedures_SYSIBM(tc);
+    }
+    /**
+     * Create system procedures that are part of the
+     * SYSCS_UTIL schema added in version 10.3.
      * <p>
      * Create 10.3 system procedures, called by either code creating new
      * database, or code doing hard upgrade from previous version.
      * <p>
      *
-     * @param sysUtilUUID   uuid of the SYSUTIL schema.
-     *
+     * @param tc an instance of the Transaction Controller.
      * @exception  StandardException  Standard exception policy.
      **/
-    void create_10_3_system_procedures(
-    TransactionController   tc,
-    UUID                    sysUtilUUID)
+    void create_10_3_system_procedures_SYSCS_UTIL(
+    TransactionController   tc)
         throws StandardException
     {
-
+        UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
         /* SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
          * IN TABLENAME    VARCHAR(128), IN FILENAME VARCHAR(32672) , 
          * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  

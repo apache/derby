@@ -32,6 +32,9 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.JDBC;
 
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.BlobStoredProcedureTest;
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.ClobStoredProcedureTest;
+
 
 /**
  * Upgrade test cases for changes made in 10.3.
@@ -44,11 +47,28 @@ import org.apache.derbyTesting.junit.JDBC;
 public class Changes10_3 extends UpgradeChange {
 
     private static  final   String  UNKNOWN_PROCEDURE = "42Y03";
-    
-    public static Test suite() {
+   
+    /**
+     * Return the suite of tests to test the changes made in 10.3.
+     * @param phase an integer that indicates the current phase in
+     *              the upgrade test.
+     * @return the test suite created.
+     */   
+    public static Test suite(int phase) {
         TestSuite suite = new TestSuite("Upgrade changes for 10.3");
         
         suite.addTestSuite(Changes10_3.class);
+        
+        //Add the tests for the Stored procedures related to the locator
+        //implementation of the LOB related JDBC methods. This needs to be done
+        //only during the hard(full) upgrade phase.
+        if(phase == PH_HARD_UPGRADE) {
+            //Tests for the Blob related locator StoredProcedures
+            suite.addTestSuite(BlobStoredProcedureTest.class);
+            //Tests for the Clob related locator StoredProcedures
+            suite.addTestSuite(ClobStoredProcedureTest.class);
+        }
+        
         return new SupportFilesSetup((Test) suite);
     }
 
