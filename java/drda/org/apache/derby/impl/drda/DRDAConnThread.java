@@ -4439,6 +4439,42 @@ class DRDAConnThread extends Thread {
 				 }
 				 break;
 			 }
+                        case DRDAConstants.DRDA_TYPE_NLOBLOC:
+                        {
+                            //read the locator value
+                            int paramVal = reader.readInt(getByteOrder());
+                            
+                            if (SanityManager.DEBUG)
+                                trace("locator value is: "+paramVal);
+                            
+                            //Map the locator value to the Blob object in the
+                            //Hash map.
+                            java.sql.Blob blobFromLocator = (java.sql.Blob)
+                            database.getConnection().getLOBMapping(paramVal);
+                            
+                            //set the PreparedStatement parameter to the mapped
+                            //Blob object.
+                            ps.setBlob(i+1, blobFromLocator);
+                            break;
+                        }
+                        case DRDAConstants.DRDA_TYPE_NCLOBLOC:
+                        {
+                            //read the locator value.
+                            int paramVal = reader.readInt(getByteOrder());
+                            
+                            if (SanityManager.DEBUG)
+                                trace("locator value is: "+paramVal);
+                            
+                            //Map the locator value to the Clob object in the
+                            //Hash Map.
+                            java.sql.Clob clobFromLocator = (java.sql.Clob)
+                            database.getConnection().getLOBMapping(paramVal);
+                            
+                            //set the PreparedStatement parameter to the mapped
+                            //Clob object.
+                            ps.setClob(i+1, clobFromLocator);
+                            break;
+                        }
 			default:
 				{
 				String paramVal = reader.readLDStringData(stmt.ccsidMBCEncoding);

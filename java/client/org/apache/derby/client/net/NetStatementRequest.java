@@ -849,6 +849,20 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         }
 
                         break;
+                    case DRDAConstants.DRDA_TYPE_NLOBLOC:
+                        //The FD:OCA data or the FDODTA contains the locator
+                        //value corresponding to the LOB. write the integer
+                        //value representing the locator here.
+                        writeIntFdocaData(((Blob)inputs[i]).
+                                getLocator());
+                        break;
+                    case DRDAConstants.DRDA_TYPE_NCLOBLOC:
+                        //The FD:OCA data or the FDODTA contains the locator
+                        //value corresponding to the LOB. write the integer
+                        //value representing the locator here.
+                        writeIntFdocaData(((Clob)inputs[i]).
+                                getLocator());
+                        break;
                     default:
                         throw new SqlException(netAgent_.logWriter_, 
                             new ClientMessageId(SQLState.NET_UNRECOGNIZED_JDBC_TYPE),
@@ -1325,6 +1339,14 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         lidAndLengths[i][1] =
                                 buildPlaceholderLength(parameterMetaData.sqlLength_[i]);
+                    } else if (b instanceof Blob && ((Blob)b).isLocator()){
+                        //we are sending locators.
+                        //Here the LID local identifier in the FDODSC
+                        //FD:OCA descriptor should be initialized as
+                        //to contain a BLOB locator.
+                        lidAndLengths[i][0] = 
+                                    DRDAConstants.DRDA_TYPE_NLOBLOC;
+                        lidAndLengths[i][1] = 4;
                     } else {
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         try {
@@ -1356,6 +1378,15 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         
                         if (c == null) {
                             lobLength = parameterMetaData.sqlLength_[i];
+                        } else if (c instanceof Clob && ((Clob)c).isLocator()) {
+                            //The inputRow contains an Integer meaning that
+                            //we are sending locators.
+                            //Here the LID local identifier in the FDODSC
+                            //FD:OCA descriptor should be initialized as
+                            //to contain a CLOB locator.
+                            lidAndLengths[i][0] = 
+                                    DRDAConstants.DRDA_TYPE_NCLOBLOC;
+                            lidAndLengths[i][1] = 4;
                         } else if (isExternalClob) {
                             try {
                                 lobLength = c.length();
