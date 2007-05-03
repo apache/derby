@@ -45,6 +45,15 @@ class prepStmt
 {
 	private static Connection conn = null;
 
+
+    private static String[] testObjects =  // string array for cleaning up
+        {"table t1", "table tab1", "table t2", "table bigtab", "table tstab",
+         "table doubletab", "table numtab", "table Numeric_Tab", "table jira614", 
+	 "table jira614_a", "table jira428", "table jira125", 
+         "table jira125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125125",
+         "table jira1533_a", "table jira1533_b"};
+
+
 	public static void main (String args[])
 	{
 		try
@@ -307,6 +316,8 @@ class prepStmt
 			jira125Test(conn);
 			jira1454Test(conn);
 			jira428Test(conn);
+                        jira1533Test_a(conn);
+                        jira1533Test_b(conn);
 			conn.close();
 			System.out.println("prepStmt Test Ends");
         }
@@ -990,6 +1001,107 @@ class prepStmt
         while (rs.next());
         System.out.println("Iteration 1 successful: " + (nCols + 1) +
 			" parameter markers successfully prepared and executed.");
+    }
+    // Jira 1533 involves two different bugs regarding the handling of large
+    // amounts of parameter data: first, the Network Server was incorrectly
+    // handling the desegmentation of continued DSS segements, and second,
+    // the Network Server was using the wrong heuristic to determine whether
+    // long string data was being flowed in-line or externalized.
+    //
+    // Tests "a" and "b" provoke two different forms of this problem, one
+    // with just a single continued segement, and one with several continuations
+    private static void jira1533Test_a(Connection conn)
+        throws Exception
+    {
+        Statement stmt = conn.createStatement();
+        PreparedStatement ps ;
+        try { stmt.execute("drop table jira1533_a"); } catch (Throwable t) { }
+        stmt.execute("create table jira1533_a (aa BIGINT NOT NULL, "+
+                "bbbbbb BIGINT DEFAULT 0 NOT NULL,"+
+                " cccc  VARCHAR(40), ddddddddddd BIGINT, eeeeee VARCHAR(128),"+
+                " ffffffffffffffffff VARCHAR(128),"+
+                "ggggggggg  BLOB(2G), hhhhhhhhh VARCHAR(128), "+
+                "iiiiiiii VARCHAR(128), jjjjjjjjjjjjjj BIGINT,"+
+                "kkkkkkkk CHAR(1) DEFAULT 'f', "+
+                "llllllll CHAR(1) DEFAULT 'f', "+
+                "mmmmmmmmmmmmm  CHAR(1) DEFAULT 'f')");
+        stmt.close();
+        ps = conn.prepareStatement(
+                "INSERT INTO jira1533_a (aa,bbbbbb,cccc,ddddddddddd,eeeeee,"+
+                " ffffffffffffffffff,"+
+                "ggggggggg,hhhhhhhhh,iiiiiiii,jjjjjjjjjjjjjj,kkkkkkkk,"+
+                "llllllll,mmmmmmmmmmmmm)"+
+                " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        String blobStr = makeString(32584);
+        ps.setLong(1,5);
+        ps.setLong(2,1);
+        ps.setString(3,"AAAAAAAAAAA");
+        ps.setLong(4,30000);
+        ps.setString(5,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        ps.setString(6,"AAAAAAAAAAA");
+        ps.setBytes(7,blobStr.getBytes());
+        ps.setString(8,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        ps.setString(9,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        ps.setLong(10,1);
+        ps.setString(11,"1");
+        ps.setString(12,"1");
+        ps.setString(13,"1");
+        ps.execute();
+        ps.close();
+        System.out.println("JIRA Test 1533(a) successful (no exception)");
+    }
+    private static void jira1533Test_b(Connection conn)
+        throws Exception
+    {
+        Statement stmt = conn.createStatement();
+        PreparedStatement ps ;
+        try { stmt.execute("drop table jira1533_b"); } catch (Throwable t) { }
+        stmt.execute("create table jira1533_b (aa BIGINT NOT NULL, "+
+                "bbbbbb BIGINT DEFAULT 0 NOT NULL,"+
+                " cccc  VARCHAR(40), ddddddddddd BIGINT, eeeeee VARCHAR(128),"+
+                " ffffffffffffffffff VARCHAR(128),"+
+                "g1 BLOB(2G),g2 BLOB(2G),g3 BLOB(2G),g4 BLOB(2G),"+
+                "ggggggggg  BLOB(2G), hhhhhhhhh VARCHAR(128), "+
+                "iiiiiiii VARCHAR(128), jjjjjjjjjjjjjj BIGINT,"+
+                "kkkkkkkk CHAR(1) DEFAULT 'f', "+
+                "llllllll CHAR(1) DEFAULT 'f', "+
+                "mmmmmmmmmmmmm  CHAR(1) DEFAULT 'f')");
+        stmt.close();
+        ps = conn.prepareStatement(
+                "INSERT INTO jira1533_b (aa,bbbbbb,cccc,ddddddddddd,eeeeee,"+
+                " ffffffffffffffffff,"+
+                "g1,g2,g3,g4,"+
+                "ggggggggg,hhhhhhhhh,iiiiiiii,jjjjjjjjjjjjjj,kkkkkkkk,"+
+                "llllllll,mmmmmmmmmmmmm)"+
+                " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        String blobStr = makeString(32584);
+        ps.setLong(1,5);
+        ps.setLong(2,1);
+        ps.setString(3,"AAAAAAAAAAA");
+        ps.setLong(4,30000);
+        ps.setString(5,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        ps.setString(6,"AAAAAAAAAAA");
+        ps.setBytes(7,blobStr.getBytes());
+        ps.setBytes(8,blobStr.getBytes());
+        ps.setBytes(9,blobStr.getBytes());
+        ps.setBytes(10,blobStr.getBytes());
+        ps.setBytes(11,blobStr.getBytes());
+        ps.setString(12,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        ps.setString(13,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        ps.setLong(14,1);
+        ps.setString(15,"1");
+        ps.setString(16,"1");
+        ps.setString(17,"1");
+        ps.execute();
+        ps.close();
+        System.out.println("JIRA Test 1533(b) successful (no exception)");
+    }
+    private static String makeString(int length)
+    {
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < length; i++)
+            buf.append("X");
+        return buf.toString();
     }
     // Jira 428 involves large batch sizes for Statement.addBatch and
     // Statement.executeBatch. Currently, there is a hard DRDA limit of
