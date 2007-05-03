@@ -1,5 +1,4 @@
 jdbcapi/bestrowidentifier.sql
 jdbcapi/nullSQLText.java
-jdbcapi/parameterMapping.java
 jdbcapi/testRelative.java
 jdbcapi/SURTest_ij.sql
