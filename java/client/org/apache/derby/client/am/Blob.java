@@ -644,19 +644,38 @@ public class Blob extends Lob implements java.sql.Blob {
         //call checkValidity to exit by throwing a SQLException if
         //the Blob object has been freed by calling free() on it
         checkValidity();
-        synchronized (agent_.connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getBinaryStream",
-                    (int) pos, length);
+        try {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "getBinaryStream",
+                                                 (int) pos, length);
+                }
+                checkPosAndLength(pos, length);
+                
+                InputStream retVal;
+                if (isLocator()) {
+                    retVal = new BlobLocatorInputStream(agent_.connection_, 
+                                                        this, 
+                                                        pos, 
+                                                        length);
+                } else {  // binary string
+                    retVal = new java.io.ByteArrayInputStream
+                        (binaryString_, 
+                         (int)(dataOffset_ + pos - 1), 
+                         (int)length);
+                }
+                
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, 
+                                                "getBinaryStream", 
+                                                retVal);
+                }
+                return retVal;
             }
-            checkPosAndLength(pos, length);
-            InputStream retVal = new java.io.ByteArrayInputStream
-                    (binaryString_, (int)(dataOffset_ + pos - 1), (int)length);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getBinaryStream", retVal);
-            }
-            return retVal;
+        } catch ( SqlException se ) {
+            throw se.getSQLException();
         }
+
     }
 
     //------------------ Material layer event callback methods -------------------

@@ -25,6 +25,7 @@ import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.Blob;
 import org.apache.derby.client.am.Clob;
 import org.apache.derby.client.am.DisconnectException;
+import org.apache.derby.client.am.Lob;
 import org.apache.derby.client.am.SignedBinary;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
@@ -641,7 +642,8 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         int currentPosition = 0;
 
         for (int i = 0; i < columns_; i++) {
-            if ((isNonTrivialDataLob(i)) && (locator(i + 1) == -1))
+            if ((isNonTrivialDataLob(i)) 
+                && (locator(i + 1) == Lob.INVALID_LOCATOR))
             // key = column position, data = index to corresponding data in extdtaData_
             // ASSERT: the server always returns the EXTDTA objects in ascending order
             {
@@ -1051,14 +1053,15 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     /**
      * Get locator for LOB of the designated column
      * @param column column number, starts at 1
-     * @return locator value, -1 if LOB value was sent instead of locator
+     * @return locator value, <code>Lob.INVALID_LOCATOR</code> if LOB
+     *         value was sent instead of locator
      */
     private int locator(int column)
     {
         int locator = get_INTEGER(column);
         // If Lob value was sent instead of locator, highest bit will be set
         if ((locator & 0x8000) == 0x8000) { 
-            return -1;
+            return Lob.INVALID_LOCATOR;
         } else {
             return locator;
         }

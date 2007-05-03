@@ -42,12 +42,13 @@ public abstract class Lob implements UnitOfWorkListener {
     public static final int BINARY_STRING = 64;
     public static final int LOCATOR = 128;
 
+    public static final int INVALID_LOCATOR = -1;
     //---------------------navigational members-----------------------------------
     protected Agent agent_;
 
     //-----------------------------state------------------------------------------
     protected int dataType_ = 0;      // data type(s) the LOB instance currently contains
-    protected int locator_ = -1;   // locator id for this LOB, -1 if not locator
+    protected int locator_ = INVALID_LOCATOR; // locator id for this LOB
 
     private long sqlLength_;// length of the LOB value, as defined by the server
     private boolean lengthObtained_;
@@ -91,14 +92,13 @@ public abstract class Lob implements UnitOfWorkListener {
         if (isLocator()) {
             sqlLength_ = getLocatorLength();
             lengthObtained_ = true;
-        }
-        
-        if (willBeLayerBStreamed()) {
+        } else if (willBeLayerBStreamed()) {
             throw new SqlException(agent_.logWriter_,
                                    LOB_OBJECT_LENGTH_UNKNOWN_YET);
+        } else {
+            materializeStream();  // Will set sqlLength_
         }
 
-        materializeStream();  // Will set sqlLength_
         return sqlLength_;
     }
 
@@ -281,7 +281,8 @@ public abstract class Lob implements UnitOfWorkListener {
 
     /**
      * Get locator for this Lob
-     * @return locator for this Lob, -1 is Lob is not based on locator
+     * @return locator for this Lob, INVALID_LOCATOR if Lob is not
+     *         based on locator
      */
     public int getLocator() {
         return locator_;

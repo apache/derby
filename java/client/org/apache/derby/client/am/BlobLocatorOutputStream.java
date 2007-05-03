@@ -26,9 +26,9 @@ import java.io.IOException;
  * An <code>OutputStream</code> that will use an locator to write
  * bytes to the Blob value on the server.
  * <p>
- * Closing a <code>ByteArrayInputStream</code> has no effect. The methods in
- * this class can be called after the stream has been closed without
- * generating an <code>IOException</code>.
+ * Closing a <code>BlobLocatorOutputStream</code> has no effect. The
+ * methods in this class can be called after the stream has been
+ * closed without generating an <code>IOException</code>.
  * <p>
  * This <code>OutputStream</code> implementation is pretty basic.  No
  * buffering of data is done.  Hence, for efficieny #write(byte[])
@@ -53,7 +53,7 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
     {
         if (pos-1 > blob.sqlLength()) {
             throw new IndexOutOfBoundsException();
-       }
+        }
         
         this.connection = connection;
         this.blob = blob;
@@ -86,21 +86,21 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
      * @see java.io.OutputStream#write(byte[], int, int)
      */
     public void write(byte[] b, int off, int len) throws IOException 
-   {
-         if (len == 0) return;
-         if ((off < 0) || (off > b.length) || (len < 0) || 
-                 (off+len > b.length) || (off+len < 0)) {
-             throw new IndexOutOfBoundsException();
-         } 
-         
-         byte[] ba = b;
-         if ((off > 0) || (len < b.length)) { // Copy the part we will use
-             ba = new byte[len];
-             System.arraycopy(b, off, ba, 0, len);
+    {
+        if (len == 0) return;
+        if ((off < 0) || (off > b.length) || (len < 0) || 
+            (off+len > b.length) || (off+len < 0)) {
+            throw new IndexOutOfBoundsException();
+        } 
+        
+        byte[] ba = b;
+        if ((off > 0) || (len < b.length)) { // Copy the part we will use
+            ba = new byte[len];
+            System.arraycopy(b, off, ba, 0, len);
         }
-         writeBytes(ba);
+        writeBytes(ba);
     }
- 
+
     /**
      * Write the <code>byte[]</code> to the <code>Blob</code> value on
      * the server; starting from the current position of this stream.
@@ -108,7 +108,7 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
      * @param b The byte array containing the bytes to be written
      * @throws java.io.IOException Wrapped SqlException if writing
      *         to server fails.
-    */
+     */
     private void writeBytes(byte[] b) throws IOException
     {
         try {         
@@ -119,7 +119,7 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
                 // Wrote past the old end of the Blob value, update length
                 blob.setSqlLength(currentPos - 1);
             }
-       } catch (SqlException ex) {
+        } catch (SqlException ex) {
             IOException ioEx= new IOException();
             ioEx.initCause(ex);
             throw ioEx;
@@ -130,7 +130,7 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
      * Connection used to read Blob from server.
      */
     private Connection connection;
-   
+
     /**
      * The Blob to be accessed.
      */
@@ -141,5 +141,5 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
      * Blobs are indexed from 1
      */
     private long currentPos;
- 
+
 }
