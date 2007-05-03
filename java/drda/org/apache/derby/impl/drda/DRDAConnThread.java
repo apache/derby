@@ -6299,9 +6299,8 @@ class DRDAConnThread extends Thread {
 												 (pmeta.isNullable(i) == JDBC30Translation.PARAMETER_NULLABLE));
 			int colType = (hasRs ? rsmeta.getColumnType(i) : pmeta.getParameterType(i));
 			int[] outlen = {-1};
-			int drdaType =
-				(hasRs ?FdocaConstants.mapJdbcTypeToDrdaType(colType,nullable,outlen): 
-				 stmt.getParamDRDAType(i));
+			int drdaType = FdocaConstants.mapJdbcTypeToDrdaType(colType,nullable,outlen);
+				
 
 			boolean isDecimal = ((drdaType | 1) == DRDAConstants.DRDA_TYPE_NDECIMAL);
 			int precision = 0, scale = 0;
@@ -6317,9 +6316,12 @@ class DRDAConnThread extends Thread {
 			else if (isDecimal)
 			{
 				if (stmt.isOutputParam(i))
-					((CallableStatement) stmt.ps).registerOutParameter(i,Types.DECIMAL);
-				precision = pmeta.getPrecision(i);
-				scale = pmeta.getScale(i);
+				{
+					precision = pmeta.getPrecision(i);
+					scale = pmeta.getScale(i);
+					((CallableStatement) stmt.ps).registerOutParameter(i,Types.DECIMAL,scale);
+				  
+				}
 
 			}
 
@@ -6715,12 +6717,17 @@ class DRDAConnThread extends Thread {
 				}
 				else
 				{
+                                    
 					drdaType =   stmt.getParamDRDAType(i) & 0xff;
 					precision = stmt.getParamPrecision(i);
 					scale = stmt.getParamScale(i);
-					ndrdaType = drdaType | 1;
 					
 					if (stmt.isOutputParam(i)) {
+						int[] outlen = new int[1];
+						drdaType = FdocaConstants.mapJdbcTypeToDrdaType(stmt.getOutputParamType(i),true,outlen);
+						precision = stmt.getOutputParamPrecision(i);
+						scale = stmt.getOutputParamScale(i);
+                                                
 						if (SanityManager.DEBUG)
 							trace("***getting Object "+i);
 						val = ((CallableStatement) stmt.ps).getObject(i);

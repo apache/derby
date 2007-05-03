@@ -88,6 +88,9 @@ class DRDAStatement
 	protected String procName;			// callable statement's method name
 	private   int[] outputTypes;		// jdbc type for output parameter or NOT_OUTPUT_PARAM
 	                                    // if not an output parameter.
+	private int[] outputPrecision;
+	private int[] outputScale;
+        
 	protected static int NOT_OUTPUT_PARAM = -100000;
 	protected boolean outputExpected;	// expect output from a callable statement
 	private Statement stmt;				// SQL statement
@@ -1080,6 +1083,8 @@ class DRDAStatement
 		rslsetflg = null;
 		procName = null;
 		outputTypes = null;
+		outputPrecision = null;
+		outputScale = null;
 		// Clear parameters and release excess storage
 		drdaParamState_.clear(true);
 	}
@@ -1444,6 +1449,8 @@ class DRDAStatement
 			
 			int parameterMode = pmeta.getParameterMode(i + 1);
 			int parameterType = pmeta.getParameterType(i + 1);
+                        int parameterPrecision = pmeta.getPrecision(i + 1);
+                        int parameterScale = pmeta.getScale(i + 1);
 
 			switch (parameterMode) {
 				case JDBC30Translation.PARAMETER_MODE_IN:
@@ -1466,12 +1473,19 @@ class DRDAStatement
 				if (outputTypes == null) //not initialized yet, since previously none output
 				{
 					outputTypes = new int[numElems];
-					for (int j = 0; j < numElems; j++)
+					outputPrecision = new int [numElems];
+					outputScale = new int [numElems];
+					for (int j = 0; j < numElems; j++) {
 						outputTypes[j] = NOT_OUTPUT_PARAM;  //default init value
+						outputPrecision[j] = NOT_OUTPUT_PARAM;
+						outputScale[j] = NOT_OUTPUT_PARAM;
+					}
 				}
 				// save the output type so we can register when we parse
 				// the SQLDTA
 				outputTypes[i] = parameterType;
+				outputPrecision[i] = parameterPrecision;
+				outputScale[i] = parameterScale;                
 			}
 			
 		}
@@ -1599,6 +1613,30 @@ class DRDAStatement
 		return NOT_OUTPUT_PARAM;
 	}
 
+        /** 
+         * get scale for output parameter. 
+         *
+         * @param paramNum - parameter number starting with 1
+         * @return scale or NOT_OUTPUT_PARAM if this is not an output parameter
+         */
+        int getOutputParamScale(int paramNum){
+            if (outputScale != null)
+                return (outputScale[paramNum -1]);
+            return NOT_OUTPUT_PARAM;
+        }
+
+        /** 
+         * get precision  for output parameter. 
+         *
+         * @param paramNum - parameter number starting with 1
+         * @return precision or NOT_OUTPUT_PARAM if this is not an output parameter
+         */
+        int getOutputParamPrecision(int paramNum){
+            if (outputPrecision != null)
+                return (outputPrecision[paramNum -1]);
+            return NOT_OUTPUT_PARAM;
+        }
+        
 	private boolean isDynamicPkgid(String pkgid)
 	{
 		char size = pkgid.charAt(3);

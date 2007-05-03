@@ -484,7 +484,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
                         } catch (SQLException sqle) {
                             boolean expectedConversionError = ("22018".equals(sqle.getSQLState())|| 
-                                                               "22007".equals(sqle.getSQLState()));
+                                                               "22007".equals(sqle.getSQLState()) ||
+                                                               "22005".equals(sqle.getSQLState()));
                             assertTrue("FAIL: Unexpected exception" + sqle.getSQLState() + ":" + sqle.getMessage(),
                                     expectedConversionError);
                         }
@@ -771,7 +772,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         assertEquals("17:14:24",s);
                         break;
                     case java.sql.Types.TIMESTAMP:
-                        assertEquals("2004-02-14 17:14:24.097625551",s);
+                    	// DERBY-2602 Client TIMESTAMP is truncated
+                        if (usingEmbedded())
+                            assertEquals("2004-02-14 17:14:24.097625551",s);
+                        else
+                            assertEquals("2004-02-14 17:14:24.097625",s);
                         break;
                     case java.sql.Types.CLOB:
                         assertEquals("67",s);
@@ -3495,10 +3500,17 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             assertNotNull(val);
             break;
         case java.sql.Types.TIMESTAMP:
+        	//DERBY-2602 Client TIMESTAMP is truncated
             if (param == 2)
-                assertEquals("2004-03-12 21:14:24.938222433", val.toString());
+                if (usingEmbedded())
+                    assertEquals("2004-03-12 21:14:24.938222433", val.toString());
+                else
+                    assertEquals("2004-03-12 21:14:24.938222", val.toString());
             else if (param == 3)
-                assertEquals("2004-04-12 04:25:26.462983731", val.toString());
+                if (usingEmbedded())
+                    assertEquals("2004-04-12 04:25:26.462983731", val.toString());
+                else
+                    assertEquals("2004-04-12 04:25:26.462983", val.toString());
             break;
         }
     }
@@ -3590,12 +3602,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        // Can't run for client for now, getting strange protocol error on tearDown
-        // DERBY-2381
-        //return TestConfiguration.defaultSuite(ParameterMappingTest.class);
+        
         // Don't run for JSR169 until DERBY-2403 is resolved.
         if (JDBC.vmSupportsJDBC2())
-            return TestConfiguration.embeddedSuite(ParameterMappingTest.class);
+            return TestConfiguration.defaultSuite(ParameterMappingTest.class);
         else
             return  new TestSuite("ParameterMapping");
     }
