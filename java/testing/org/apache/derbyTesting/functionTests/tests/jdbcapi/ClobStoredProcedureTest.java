@@ -83,15 +83,7 @@ public class ClobStoredProcedureTest extends BaseJDBCTestCase {
         cs.setInt(2, 1);
         cs.setLong(3, testStrLength);
         cs.setString(4, testStr);
-        try {
-            cs.execute();
-        }
-        catch(SQLException sqle) {
-            //expected Unsupported SQLException
-            //The CLOBSETSTRING is not supported but contains
-            //temporary code that shall be removed when
-            //the method is enabled.
-        }
+        cs.execute();
         cs.close();
     }
     /**
@@ -226,12 +218,6 @@ public class ClobStoredProcedureTest extends BaseJDBCTestCase {
      * @throws SQLException.
      */
     public void testClobSetStringSP() throws SQLException {
-
-        //----------TO BE ENABLED LATER------------------------------
-        //This code needs to be enabled once the set methods on the
-        //Clob interface are implemented. Until that time keep checking
-        //for a not implemented exception being thrown.
-        /*
         String newString = "123456789012345";
         //initialize the locator to a default value.
         int locator = -1;
@@ -270,41 +256,6 @@ public class ClobStoredProcedureTest extends BaseJDBCTestCase {
         //procedure to see of they are the same.
         if (newString.compareTo(retVal) != 0)
             fail("SYSIBM.CLOBSETSTRING does not insert the right value");
-        cs.close();
-        */
-        //--------------TO BE ENABLED LATER--------------------------
-
-
-        String newString = "123456789012345";
-        //initialize the locator to a default value.
-        int locator = -1;
-        //call the stored procedure to return the created locator.
-        CallableStatement cs  = prepareCall
-            ("? = CALL SYSIBM.CLOBCREATELOCATOR()");
-        cs.registerOutParameter(1, java.sql.Types.INTEGER);
-        cs.executeUpdate();
-        locator = cs.getInt(1);
-        cs.close();
-
-        //use this new locator to test the SETSUBSTRING function
-        //by inserting a new sub string and testing whether it has
-        //been inserted properly.
-
-        //Insert the new substring.
-        cs  = prepareCall("CALL SYSIBM.CLOBSETSTRING(?,?,?,?)");
-        cs.setInt(1, locator);
-        cs.setInt(2, 1);
-        cs.setLong(3, newString.length());
-        cs.setString(4, newString);
-        try {
-            cs.execute();
-        }
-        catch(SQLException sqle) {
-            //expected Unsupported SQLException
-            //The CLOBSETSTRING is not supported but contains
-            //temporary code that shall be removed when
-            //the method is enabled.
-        }
         cs.close();
     }
 
@@ -378,15 +329,7 @@ public class ClobStoredProcedureTest extends BaseJDBCTestCase {
         cs.setInt(2, 1);
         cs.setLong(3, newStr.length());
         cs.setString(4, newStr);
-        try {
-            cs.execute();
-        }
-        catch(SQLException sqle) {
-            //expected Unsupported SQLException
-            //The CLOBSETSTRING is not supported but contains
-            //temporary code that shall be removed when
-            //the method is enabled.
-        }
+        cs.execute();
 
         cs.close();
         cs  = prepareCall

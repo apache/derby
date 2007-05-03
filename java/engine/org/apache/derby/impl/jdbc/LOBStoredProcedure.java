@@ -161,14 +161,6 @@ public class LOBStoredProcedure {
      */
     public static void CLOBSETSTRING(int LOCATOR, long pos, int length,
         String str) throws SQLException {
-        //Temporary code that will insert a clob with data into
-        //the hashmap and will allow the testing of the locator
-        //stored procedures.
-        //This code will be removed once the set methods are implemented.
-        java.util.HashMap hm = getEmbedConnection().getlobHMObj();
-        EmbedClob clob = new EmbedClob(str, getEmbedConnection());
-        hm.remove(new Integer(LOCATOR));
-        hm.put(new Integer(LOCATOR), clob);
         getClobObjectCorrespondingtoLOCATOR(LOCATOR).setString(pos, str, 0, length);
     }
 
