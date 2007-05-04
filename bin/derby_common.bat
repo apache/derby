@@ -50,9 +50,10 @@ rem and for NT handling to skip to.
 rem check the value of DERBY_HOME
 if exist "%DERBY_HOME%\lib\derby.jar" goto setLocalClassPath
 
-:noAntHome
-echo DERBY_HOME is set incorrectly or derby.jar could not be located. Please set DERBY_HOME.
-goto end
+:noDerbyHome
+echo DERBY_HOME is set incorrectly or derby.jar could not be located. 
+echo Please set the DERBY_HOME environment variable to the path where you installed Derby.
+goto endcommon
 
 :setLocalClassPath
 set LOCALCLASSPATH=%DERBY_HOME%/lib/derby.jar;%DERBY_HOME%/lib/derbynet.jar;%DERBY_HOME%/lib/derbyclient.jar;%DERBY_HOME%/lib/derbytools.jar

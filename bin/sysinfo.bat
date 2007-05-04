@@ -19,6 +19,8 @@
 
 CALL "%~dp0derby_common.bat" %*
 
+if "%_JAVACMD%"=="" goto end
+
 if "%_USE_CLASSPATH%"=="no" goto runNoClasspath
 if not "%CLASSPATH%"=="" goto runWithClasspath
 
