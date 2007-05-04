@@ -169,6 +169,20 @@ public class Clob extends Lob implements java.sql.Clob {
         characterStream_ = reader;
         dataType_ |= CHARACTER_STREAM;
     }
+    
+    /**
+     * Create a <code>Clob</code> object for a Clob value stored 
+     * on the server and indentified by <code>locator</code>.
+     * @param agent context for this <code>Clob</code> 
+     *              object (incl. connection).
+     * @param locator reference id to <code>Clob</code> value on server.
+     */
+    public Clob(Agent agent, int locator)  
+    {
+        super(agent, false);
+        locator_ = locator;
+        dataType_ |= LOCATOR;
+    }
 
     /**
      * Create a <code>Clob</code> of unknown length.
@@ -307,7 +321,18 @@ public class Clob extends Lob implements java.sql.Clob {
         // actual length is the lesser of the length requested
         // and the number of characters available from pos to the end
         long actualLength = Math.min(this.sqlLength() - pos + 1, (long) length);
-        return string_.substring((int) pos - 1, (int) (pos - 1 + actualLength));
+        //Check to see if the Clob object is locator enabled.
+        if (isLocator()) {
+            //The Clob object is locator enabled. Hence call the stored
+            //procedure CLOBGETLENGTH to determine the length of the Clob.
+            return agent_.connection_.locatorProcedureCall()
+                .clobGetSubString(locator_, pos, (int)actualLength);
+        }
+        else {
+            //The Clob object is not locator enabled.
+            return string_.substring
+                    ((int) pos - 1, (int) (pos - 1 + actualLength));
+        }
     }
 
     public java.io.Reader getCharacterStream() throws SQLException {
@@ -339,7 +364,13 @@ public class Clob extends Lob implements java.sql.Clob {
     private java.io.Reader getCharacterStreamX() throws SqlException {
         checkForClosedConnection();
 
-        if (isCharacterStream())  // this Lob is used for input
+        //check is this Lob is locator enabled
+        if (isLocator()) {
+            //The Lob is locator enabled. Return an instance of the Locator
+            //enabled Writer implementation
+            return new ClobLocatorReader(agent_.connection_, this);
+        }
+        else if (isCharacterStream())  // this Lob is used for input
         {
             return characterStream_;
         }
@@ -380,8 +411,15 @@ public class Clob extends Lob implements java.sql.Clob {
         {
             return asciiStream_;
         }
-
-        return new AsciiStream(string_, new java.io.StringReader(string_));
+        else if(isLocator()) { // Check to see if this Lob is locator enabled
+            //The Lob is locator enabled. Return an instance
+            //of the Locator enabled Clob specific InputStream
+            //implementation.
+            return new ClobLocatorInputStream(agent_.connection_,this);
+        }
+        else {
+            return new AsciiStream(string_, new java.io.StringReader(string_));
+        }
     }
 
     public long position(String searchstr, long start) throws SQLException {
@@ -425,18 +463,28 @@ public class Clob extends Lob implements java.sql.Clob {
     private long positionX(String searchstr, long start) throws SqlException {
         checkForClosedConnection();
 
-
+        long index = -1;
         if (start <= 0) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.INVALID_API_PARAMETER),
                 new Long(start), "start", "Clob.position()");
         }
-
-        int index = string_.indexOf(searchstr, (int) start - 1);
-        if (index != -1) {
-            index++; // api index starts at 1
+        
+        //Check is locator support is available for this LOB.
+        if (isLocator()) {
+            //Locator support is available. Hence call 
+            //CLOBGETPOSITIONFROMSTRING to determine the position 
+            //of the given substring inside the LOB.
+            index = agent_.connection_.locatorProcedureCall()
+                .clobGetPositionFromString(locator_, searchstr, start);
+        } else {
+            //Locator support is not available.
+            index = string_.indexOf(searchstr, (int) start - 1);
+            if (index != -1) {
+                index++; // api index starts at 1
+            }
         }
-        return (long) index;
+        return index;
     }
 
     public long position(java.sql.Clob searchstr, long start) throws SQLException {
@@ -586,12 +634,26 @@ public class Clob extends Lob implements java.sql.Clob {
 
         int length = 0;
         length = Math.min((str.length() - offset), len);
-        String newString = string_.substring(0, (int) pos - 1);
-        string_ = newString.concat(str.substring(offset, offset + length));
-        asciiStream_ = new java.io.StringBufferInputStream(string_);
-        unicodeStream_ = new java.io.StringBufferInputStream(string_);
-        characterStream_ = new java.io.StringReader(string_);
-        setSqlLength(string_.length());
+        //check if the Clob object is locator enabled
+        if (isLocator()) {
+            //The Clob is locator enabled. Call the CLOBSETSTRING
+            //stored procedure to set the given string in the Clob.
+            agent_.connection_.locatorProcedureCall().clobSetString
+                (locator_, pos, length, str.substring(offset, offset + length));
+            if (pos+length-1 > sqlLength()) { // Wrote beyond the old end
+                // Update length
+                setSqlLength(pos + length - 1);
+            }
+        }
+        else {
+            //The Clob is not locator enabled.
+            String newString = string_.substring(0, (int) pos - 1);
+            string_ = newString.concat(str.substring(offset, offset + length));
+            asciiStream_ = new java.io.StringBufferInputStream(string_);
+            unicodeStream_ = new java.io.StringBufferInputStream(string_);
+            characterStream_ = new java.io.StringReader(string_);
+            setSqlLength(string_.length());
+        }
         return length;
     }
 
@@ -607,8 +669,19 @@ public class Clob extends Lob implements java.sql.Clob {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setAsciiStream", (int) pos);
                 }
-                ClobOutputStream outStream = new ClobOutputStream(this, pos);
-
+                java.io.OutputStream outStream = null;
+                
+                if(isLocator()) { // Check to see if the Lob is locator enabled
+                    //The Lob is locator enabled. Return an instance of the
+                    //Locator enabled Clob specific OutputStream implementation.
+                    outStream = new ClobLocatorOutputStream
+                            (agent_.connection_, this, pos);
+                }
+                else {
+                    //The Lob is not locator enabled.
+                    outStream = new 
+                            ClobOutputStream(this, pos);
+                }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "setAsciiStream", outStream);
                 }
@@ -633,7 +706,16 @@ public class Clob extends Lob implements java.sql.Clob {
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setCharacterStream", (int) pos);
                 }
-                ClobWriter writer = new ClobWriter(this, pos);
+                java.io.Writer writer = null;
+                //Check to see if this Clob is locator enabled.
+                if (isLocator()) {
+                    //return an instance of the locator enabled implementation
+                    //of the writer interface
+                    writer = new ClobLocatorWriter(agent_.connection_, this, pos);
+                }
+                else {//The Lob is not locator enabled.
+                    writer = new ClobWriter(this, pos);
+                }
 
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "setCharacterStream", writer);
@@ -674,12 +756,23 @@ public class Clob extends Lob implements java.sql.Clob {
                 if (len == sqlLength()) {
                     return;
                 }
-                String newstr = string_.substring(0, (int) len);
-                string_ = newstr;
-                asciiStream_ = new java.io.StringBufferInputStream(string_);
-                unicodeStream_ = new java.io.StringBufferInputStream(string_);
-                characterStream_ = new java.io.StringReader(string_);
-                setSqlLength(string_.length());
+                
+                //check whether the Lob is locator enabled.
+                if (isLocator()) {
+                    //The Lob is locator enabled then call the stored
+                    //procedure CLOBTRUNCATE to truncate this Lob.
+                    agent_.connection_.locatorProcedureCall().
+                            clobTruncate(locator_, len);
+                }
+                else {
+                    //The Lob is not locator enabled.
+                    String newstr = string_.substring(0, (int) len);
+                    string_ = newstr;
+                    asciiStream_ = new java.io.StringBufferInputStream(string_);
+                    unicodeStream_ = new java.io.StringBufferInputStream(string_);
+                    characterStream_ = new java.io.StringReader(string_);
+                    setSqlLength(string_.length());
+                }
             }
         }
         catch ( SqlException se )
@@ -778,16 +871,27 @@ public class Clob extends Lob implements java.sql.Clob {
                     (int) pos, length);
             }
             checkPosAndLength(pos, length);
-            String retVal_str = null;
-            try {
-                retVal_str = getSubStringX(pos, (int)length);
+            Reader retVal = null;
+            //check if the Lob is locator enabled.
+            if(isLocator()) {
+                //The Lob is locator enabled. Return the locator enabled
+                //Implementation of a Clob Reader.
+                retVal = new ClobLocatorReader(agent_.connection_, this, 
+                        pos, length);
             }
-            catch(SqlException sqle) {
-                throw sqle.getSQLException();
-            }
-            Reader retVal = new java.io.StringReader(retVal_str);
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getCharacterStream", retVal);
+            else {
+                //The Lob is not locator enabled.
+                String retVal_str = null;
+                try {
+                    retVal_str = getSubStringX(pos, (int)length);
+                }
+                catch(SqlException sqle) {
+                    throw sqle.getSQLException();
+                }
+                retVal = new java.io.StringReader(retVal_str);
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceExit(this, "getCharacterStream", retVal);
+                }
             }
             return retVal;
         }
@@ -906,4 +1010,21 @@ public class Clob extends Lob implements java.sql.Clob {
         dataType_ = UNICODE_STREAM;
     }
     
+    /*---------------------------------------------------------------------
+      Methods used in the locator implementation.
+     ----------------------------------------------------------------------*/
+    
+    /**
+     * Get the length in bytes of the <code>Clob</code> value represented by
+     * this locator based <code>Clob</code> object.
+     *
+     * A stored procedure call will be made to get it from the server.
+     * @throws org.apache.derby.client.am.SqlException
+     * @return length of <code>Clob</code> in bytes
+     */
+    long getLocatorLength() throws SqlException
+    {
+        return agent_.connection_.locatorProcedureCall()
+            .clobGetLength(locator_);
+    }
 }

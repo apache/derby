@@ -1103,6 +1103,13 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
 
     public Clob getClobColumn_(int column, Agent agent) throws SqlException {
+        // Check for locator
+        int locator = locator(column);
+        if (locator > 0) { // Create locator-based LOB object
+            return new Clob(agent, locator);
+        }
+        
+        // The Clob value has been sent instead of locator 
         int index = column - 1;
         int dataOffset;
         byte[] data;
