@@ -912,7 +912,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						lastFlush   = endPosition;
 						
 						//if write sync is true , prellocate the log file
-						//and reopen the file in rws mode.
+						//and reopen the file in rwd mode.
 						if(isWriteSynced)
 						{
 							//extend the file by wring zeros to it
@@ -3112,7 +3112,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					lastFlush = firstLog.getFilePointer();
 
                     //if write sync is true , prellocate the log file
-                    //and reopen the file in rws mode.
+                    //and reopen the file in rwd mode.
                     if(isWriteSynced)
                     {
                         //extend the file by wring zeros to it
@@ -5028,7 +5028,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             }
         }
 
-		StorageRandomAccessFile log = privRandomAccessFile(logFile, "rws");
+		StorageRandomAccessFile log = privRandomAccessFile(logFile, "rwd");
 		return log ;
 	}
 
