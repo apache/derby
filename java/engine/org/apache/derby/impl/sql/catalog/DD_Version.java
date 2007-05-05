@@ -361,6 +361,20 @@ public	class DD_Version implements	Formatable
 		
 		*/
 
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_1)
+        {
+            // add catalogs 1st, subsequent procedure adding may depend on
+            // catalogs.
+
+			// Add new system catalogs created for grant and revoke
+			bootingDictionary.upgradeMakeCatalog(
+                tc, DataDictionary.SYSTABLEPERMS_CATALOG_NUM);
+			bootingDictionary.upgradeMakeCatalog(
+                tc, DataDictionary.SYSCOLPERMS_CATALOG_NUM);
+			bootingDictionary.upgradeMakeCatalog(
+                tc, DataDictionary.SYSROUTINEPERMS_CATALOG_NUM);
+        }
+
         if (fromMajorVersionNumber == DataDictionary.DD_VERSION_CS_10_0)
         {
             // This upgrade depends on the SYSUTIL schema, which only exists
@@ -380,12 +394,10 @@ public	class DD_Version implements	Formatable
                 bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
 
 			if (SanityManager.DEBUG)
-				SanityManager.ASSERT((aid != null), "Failed to get new Database Owner authorization");
-
-			// Add new system catalogs created for grant and revoke
-			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSTABLEPERMS_CATALOG_NUM);
-			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSCOLPERMS_CATALOG_NUM);
-			bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSROUTINEPERMS_CATALOG_NUM);
+            {
+				SanityManager.ASSERT((aid != null), 
+                    "Failed to get new Database Owner authorization");
+            }
 
 			// Change system schemas to be owned by aid
 			bootingDictionary.updateSystemSchemaAuthorization(aid, tc);
