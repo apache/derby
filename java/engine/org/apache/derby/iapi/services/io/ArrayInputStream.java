@@ -691,14 +691,14 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
             }
             else
             {
-                // top 7 bits of 4 byte value is stored in int_value, we also 
+                // top 7 bits of 8 byte value is stored in int_value, we also
                 // know that the 0x80 bit was set, so need to mask off the 
                 // sign extension from the 1st byte to int conversion.  Need to
                 // mask the bytes from the next 7 bytes data[pos + 1,2,...] to 
                 // account for possible sign extension.
                 //
 
-                // value stored in 8 bytes.  only use low 6 bits from 1st byte.
+                // value stored in 8 bytes.  only use low 7 bits from 1st byte.
                 long_value = 
                     (((long) (int_value   & 0x7f)) << 56) |
                     (((long) (data[pos++] & 0xff)) << 48) |
