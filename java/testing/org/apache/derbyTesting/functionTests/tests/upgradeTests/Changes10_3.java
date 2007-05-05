@@ -85,7 +85,7 @@ public class Changes10_3 extends UpgradeChange {
      */
     public void testCompilationSchema() throws SQLException
     {        
-       switch (getPhase())
+        switch (getPhase())
         {
             case PH_CREATE:
             case PH_POST_SOFT_UPGRADE:
@@ -120,34 +120,54 @@ public class Changes10_3 extends UpgradeChange {
         throws SQLException
     {
         switch(getPhase()) {
-        case PH_CREATE: {
-            // This case is derived from OnlineCompressTest.test6.
-            Statement s = createStatement();
-            s.execute("create table case606(keycol int, indcol1 int,"+
-                "indcol2 int, data1 char(24), data2 char(24), data3 char(24)," +
-                "data4 char(24), data5 char(24), data6 char(24),"+
-                "data7 char(24), data8 char(24), data9 char(24)," + 
-                "data10 char(24), inddec1 decimal(8), indcol3 int,"+
-                "indcol4 int, data11 varchar(50))");
-            s.close();
-            break;
-        }
-        case PH_SOFT_UPGRADE:
-            // Ensure that the old Log Record format is written
-            // by Newer release without throwing any exceptions.
-            checkDataToCase606(0, 2000);
-            break;
-        case PH_POST_SOFT_UPGRADE:
-            // We are now back to Old release
-            checkDataToCase606(0, 1000);
-            break;
+            case PH_CREATE: {
 
-        case PH_HARD_UPGRADE:
-            // Create the Derby606 bug scenario and test that
-            // the error does not occur in Hard Upgrade
-            checkDataToCase606(0, 94000);
+                // This case is derived from OnlineCompressTest.test6.
+                Statement s = createStatement();
+                s.execute("create table case606(keycol int, indcol1 int,"+
+                    "indcol2 int, data1 char(24), data2 char(24), " +
+                    "data3 char(24)," +
+                    "data4 char(24), data5 char(24), data6 char(24),"+
+                    "data7 char(24), data8 char(24), data9 char(24)," + 
+                    "data10 char(24), inddec1 decimal(8), indcol3 int,"+
+                    "indcol4 int, data11 varchar(50))");
+                s.close();
 
-            break;
+                break;
+            }
+
+            case PH_SOFT_UPGRADE:
+                // in place compress was added in 10.1 release, don't check
+                // upgrade of it from 10.0 release.
+                if (!oldAtLeast(10, 1))
+                    return;
+
+                // Ensure that the old Log Record format is written
+                // by Newer release without throwing any exceptions.
+                checkDataToCase606(0, 2000);
+                break;
+
+            case PH_POST_SOFT_UPGRADE:
+                // in place compress was added in 10.1 release, don't check
+                // upgrade of it from 10.0 release.
+                if (!oldAtLeast(10, 1))
+                    return;
+
+                // We are now back to Old release
+                checkDataToCase606(0, 1000);
+                break;
+
+            case PH_HARD_UPGRADE:
+                // in place compress was added in 10.1 release, don't check
+                // upgrade of it from 10.0 release.
+                if (!oldAtLeast(10, 1))
+                    return;
+
+                // Create the Derby606 bug scenario and test that
+                // the error does not occur in Hard Upgrade
+                checkDataToCase606(0, 94000);
+
+                break;
         }
     }
     
