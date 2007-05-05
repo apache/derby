@@ -43,11 +43,19 @@ import org.apache.derby.drda.NetworkServerControl;
  */
 final public class NetworkServerTestSetup extends TestSetup {
 
-    /** Wait maximum 1 minute for server to start */
-    private static final long WAIT_TIME = 60000;
+    /** Setting maximum wait time to 300 seconds.   For some systems it looks
+     *  like restarting a server to listen on the same port is blocked waiting
+     *  for a system specific interval.  This number looks to be something
+     *  like 240 seconds on XP.  Waiting shorter than this time causes
+     *  intermittent failures on a laptop running XP with a software firewall
+     *  and a VPN.  Increasing the wait time should not adversely affect those
+     *  systems with fast port turnaround as the actual code loops for 
+     *  SLEEP_TIME intervals, so should never see WAIT_TIME.
+     */
+    private static final long WAIT_TIME = 300000;
     
-    /** Sleep for 50 ms before pinging the network server (again) */
-    private static final int SLEEP_TIME = 50;
+    /** Sleep for 500 ms before pinging the network server (again) */
+    private static final int SLEEP_TIME = 500;
 
     private static  long    waitTime = WAIT_TIME;
     
