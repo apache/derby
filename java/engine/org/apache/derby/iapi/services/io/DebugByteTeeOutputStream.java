@@ -22,6 +22,7 @@ package org.apache.derby.iapi.services.io;
 
 import java.io.*;
 import org.apache.derby.iapi.services.io.AccessibleByteArrayOutputStream;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 
 class DebugByteTeeOutputStream extends FilterOutputStream {
@@ -45,7 +46,8 @@ class DebugByteTeeOutputStream extends FilterOutputStream {
 
 	void checkObject(Formatable f) {
 
-		ByteArrayInputStream in = new ByteArrayInputStream(tee.getInternalByteArray(), 0, tee.size());
+		ByteArrayInputStream in = 
+            new ByteArrayInputStream(tee.getInternalByteArray(), 0, tee.size());
 
 		FormatIdInputStream fin = new FormatIdInputStream(in);
 
@@ -70,22 +72,39 @@ class DebugByteTeeOutputStream extends FilterOutputStream {
 			if ((f1.hashCode() == System.identityHashCode(f1)) &&
 				(f.hashCode() == System.identityHashCode(f)))
 				return;
+
 		} catch (Throwable t) {
-			System.out.println("FormatableError:read error    : " + t.toString());
-			System.out.println("FormatableError:class written : " + f.getClass());
-            if( null == f1)
-                System.out.println("FormatableError:read back as null");
-            else
-                System.out.println("FormatableError:class read    : " + f1.getClass());
-			System.out.println("FormatableError:write id      : " + FormatIdUtil.formatIdToString(f.getTypeFormatId()));
-            if( null != f1)
-                System.out.println("FormatableError:read id       : " + FormatIdUtil.formatIdToString(f1.getTypeFormatId()));
+
+            // for debugging purposes print this both to derby.log and to
+            // System.out.
+            String err_msg = 
+                "FormatableError:read error    : " + t.toString() + 
+                "\nFormatableError:class written : " + f.getClass();
+
+            err_msg += (f1 == null) ? 
+                "FormatableError:read back as null" :
+                ("FormatableError:class read    : " + f1.getClass());
+
+            err_msg +=
+                "FormatableError:write id      : " + 
+                    FormatIdUtil.formatIdToString(f.getTypeFormatId());
+
+            if (f1 != null) {
+                err_msg += "FormatableError:read id       : " + 
+                    FormatIdUtil.formatIdToString(f1.getTypeFormatId());
+            }
+
+            System.out.println(err_msg);
 			t.printStackTrace(System.out);
+
+            if (SanityManager.DEBUG) {
+                SanityManager.DEBUG_PRINT("DebugByteTeeOutputStream", err_msg);
+                SanityManager.showTrace(t);
+            }
 		}
 
 		//System.out.println("FormatableError:Class written " + f.getClass() + " format id " + f.getTypeFormatId());
 		//if (f1 != null)
 			//System.out.println("FormatableError:Class read    " + f1.getClass() + " format id " + f1.getTypeFormatId());
 	}
-
 }

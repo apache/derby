@@ -1144,7 +1144,7 @@ public class Heap
     {
 
         // write the format id of this conglomerate
-        FormatIdUtil.writeFormatIdInteger(out, this.getTypeFormatId());
+        FormatIdUtil.writeFormatIdInteger(out, conglom_format_id);
 
 		out.writeInt((int) id.getSegmentId());
         out.writeLong(id.getContainerId());
