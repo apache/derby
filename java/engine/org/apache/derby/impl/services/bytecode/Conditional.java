@@ -212,10 +212,12 @@ class Conditional {
 			
 			for (int i = 0; i < stackNumber; i++)
 			{
-				if (!stack[i].vmName().equals(elseStack[i].vmName()))
+				if (stack[i].vmType() != elseStack[i].vmType()) {
+				    if(  !stack[i].vmName().equals(elseStack[i].vmName()))
 					SanityManager.THROWASSERT("ByteCode Conditional then/else stack mismatch: then: "
 							+ stack[i].vmName() + 
 							" else: " + elseStack[i].vmName());
+				}
 			}
 		}
 		
