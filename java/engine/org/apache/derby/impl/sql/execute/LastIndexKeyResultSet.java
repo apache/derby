@@ -55,7 +55,7 @@ import java.util.Properties;
  * max().
  *
  */
-class LastIndexKeyResultSet extends NoPutResultSetImpl
+class LastIndexKeyResultSet extends ScanResultSet
 {
 	protected	ExecRow		candidate;
 
@@ -73,9 +73,6 @@ class LastIndexKeyResultSet extends NoPutResultSetImpl
 	public String indexName;
 	protected boolean runTimeStatisticsOn;
 	protected FormatableBitSet accessedCols;
-
-	public int isolationLevel;
-	public int lockMode;
 
 	// Run time statistics
 	public String stopPositionString;
@@ -131,6 +128,7 @@ class LastIndexKeyResultSet extends NoPutResultSetImpl
 	{
 		super(activation,
 				resultSetNumber,
+				lockMode, tableLocked, isolationLevel,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
 
@@ -146,73 +144,11 @@ class LastIndexKeyResultSet extends NoPutResultSetImpl
 		this.tableName = tableName;
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = indexName;
-		this.lockMode = lockMode;
 		if (colRefItem != -1)
 		{
 			this.accessedCols = (FormatableBitSet)(activation.getPreparedStatement().
 						getSavedObject(colRefItem));
 		}
-		/* Isolation level - translate from language to store */
-		// If not specified, get current isolation level
-		if (isolationLevel == ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL)
-		{
-			isolationLevel = lcc.getCurrentIsolationLevel();
-		}
-
-        if (isolationLevel == ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL)
-        {
-            this.isolationLevel = TransactionController.ISOLATION_SERIALIZABLE;
-        }
-        else
-        {
-            /* NOTE: always do row locking on READ COMMITTED/UNCOMMITTED 
-             *       and repeatable read scans unless the table is marked as 
-             *       table locked (in sys.systables).
-             *
-             *		 We always get instantaneous locks as we will complete
-             *		 the scan before returning any rows and we will fully
-             *		 requalify the row if we need to go to the heap on a next().
-             */
-
-            if (! tableLocked)
-            {
-                this.lockMode = TransactionController.MODE_RECORD;
-            }
-
-            if (isolationLevel == 
-                    ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL)
-            {
-                this.isolationLevel = 
-                    TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK;
-            }
-            else if (isolationLevel == 
-                        ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL)
-            {
-                this.isolationLevel = 
-                    TransactionController.ISOLATION_READ_UNCOMMITTED;
-            }
-            else if (isolationLevel == 
-                        ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL)
-            {
-                this.isolationLevel = 
-                    TransactionController.ISOLATION_REPEATABLE_READ;
-            }
-        }
-
-        if (SanityManager.DEBUG)
-        {
-            SanityManager.ASSERT(
-                ((isolationLevel == 
-                      ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL)   ||
-                 (isolationLevel == 
-                      ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL) ||
-                 (isolationLevel == 
-                      ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL)  ||
-                 (isolationLevel == 
-                      ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL)),
-
-                "Invalid isolation level - " + isolationLevel);
-        }
 
 		runTimeStatisticsOn = getLanguageConnectionContext().getRunTimeStatisticsMode();
 
@@ -242,6 +178,14 @@ class LastIndexKeyResultSet extends NoPutResultSetImpl
 	/////////////////////////////////////////////////////
 
 	/**
+	 * Can we get instantaneous locks when getting share row
+	 * locks at READ COMMITTED.
+	 */
+	boolean canGetInstantaneousLocks() {
+		return true;
+	}
+
+	/**
 	* open a scan on the table. scan parameters are evaluated
 	* at each open, so there is probably some way of altering
 	* their values...
@@ -260,6 +204,8 @@ class LastIndexKeyResultSet extends NoPutResultSetImpl
 
 		isOpen = true;
 		TransactionController tc = activation.getTransactionController();
+
+		initIsolationLevel();
 
 		/*
 		** Grab the last row.  Note that if there are deletes

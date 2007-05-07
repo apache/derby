@@ -67,7 +67,7 @@ import java.util.Properties;
  * collision occurs, the store builds a <code>List</code> with the colliding
  * <code>DataValueDescriptor[]</code>s.
  */
-public class HashScanResultSet extends NoPutResultSetImpl
+public class HashScanResultSet extends ScanResultSet
 	implements CursorResultSet
 {
 	private boolean		hashtableBuilt;
@@ -102,8 +102,6 @@ public class HashScanResultSet extends NoPutResultSetImpl
 	public boolean forUpdate;
 	private boolean runTimeStatisticsOn;
 	private FormatableBitSet accessedCols;
-	public int isolationLevel;
-	public int lockMode;
 	public int[] keyColumns;
 	private boolean sameStartStopPosition;
 	private boolean skipNullKeyColumns;
@@ -155,6 +153,7 @@ public class HashScanResultSet extends NoPutResultSetImpl
     {
 		super(activation,
 				resultSetNumber,
+				lockMode, tableLocked, isolationLevel,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
         this.scoci = scoci;
@@ -208,69 +207,6 @@ public class HashScanResultSet extends NoPutResultSetImpl
 			this.accessedCols = (FormatableBitSet)(activation.getPreparedStatement().
 										  getSavedObject(colRefItem));
 		}
-		this.lockMode = lockMode;
-
-		/* Isolation level - translate from language to store */
-		// If not specified, get current isolation level
-		if (isolationLevel == ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL)
-		{
-			isolationLevel = lcc.getCurrentIsolationLevel();
-		}
-
-        if (isolationLevel == ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL)
-        {
-            this.isolationLevel = TransactionController.ISOLATION_SERIALIZABLE;
-        }
-        else
-        {
-            /* NOTE: always do row locking on READ COMMITTED/UNCOMMITTED 
-             *       and repeatable read scans unless the table is marked as 
-             *       table locked (in sys.systables).
-             *
-             *		 We always get instantaneous locks as we will complete
-             *		 the scan before returning any rows and we will fully
-             *		 requalify the row if we need to go to the heap on a next().
-             */
-
-            if (! tableLocked)
-            {
-                this.lockMode = TransactionController.MODE_RECORD;
-            }
-
-            if (isolationLevel == 
-                    ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL)
-            {
-                this.isolationLevel = 
-                    TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK;
-            }
-            else if (isolationLevel == 
-                        ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL)
-            {
-                this.isolationLevel = 
-                    TransactionController.ISOLATION_READ_UNCOMMITTED;
-            }
-            else if (isolationLevel == 
-                        ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL)
-            {
-                this.isolationLevel = 
-                    TransactionController.ISOLATION_REPEATABLE_READ;
-            }
-        }
-
-        if (SanityManager.DEBUG)
-        {
-            SanityManager.ASSERT(
-                ((isolationLevel == 
-                      ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL)   ||
-                 (isolationLevel == 
-                      ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL) ||
-                 (isolationLevel == 
-                      ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL)  ||
-                 (isolationLevel == 
-                      ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL)),
-
-                "Invalid isolation level - " + isolationLevel);
-        }
 
 		runTimeStatisticsOn = 
             getLanguageConnectionContext().getRunTimeStatisticsMode();
@@ -285,6 +221,14 @@ public class HashScanResultSet extends NoPutResultSetImpl
 	//
 	// ResultSet interface (leftover from NoPutResultSet)
 	//
+
+	/**
+	 * Can we get instantaneous locks when getting share row
+	 * locks at READ COMMITTED.
+	 */
+	boolean canGetInstantaneousLocks() {
+		return true;
+	}
 
 	/**
      * open a scan on the table. scan parameters are evaluated
@@ -303,6 +247,8 @@ public class HashScanResultSet extends NoPutResultSetImpl
 
         // Get the current transaction controller
         tc = activation.getTransactionController();
+
+		initIsolationLevel();
 
 		if (startKeyGetter != null)
 		{
@@ -652,14 +598,6 @@ public class HashScanResultSet extends NoPutResultSetImpl
 		{
 			return totTime;
 		}
-	}
-
-	/**
-	 * @see NoPutResultSet#getScanIsolationLevel
-	 */
-	public int getScanIsolationLevel()
-	{
-		return isolationLevel;
 	}
 
 	/**

@@ -358,7 +358,7 @@ outer:		for (;;)
 	 */
 	protected boolean canGetInstantaneousLocks()
 	{
-		return true;
+		return !forUpdate;
 	}
 
 	/**

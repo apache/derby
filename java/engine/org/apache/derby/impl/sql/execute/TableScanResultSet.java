@@ -71,7 +71,7 @@ import java.util.Hashtable;
  * improve performance.
  *
  */
-class TableScanResultSet extends NoPutResultSetImpl
+class TableScanResultSet extends ScanResultSet
 	implements CursorResultSet, Cloneable
 {
     protected ScanController scanController;
@@ -104,9 +104,6 @@ class TableScanResultSet extends NoPutResultSetImpl
 	private boolean sameStartStopPosition;
 	private boolean nextDone;
 	private RowLocation rlTemplate;
-
-	public int isolationLevel;
-	public int lockMode;
 
 	// Run time statistics
 	private Properties scanProperties;
@@ -182,6 +179,7 @@ class TableScanResultSet extends NoPutResultSetImpl
     {
 		super(activation,
 				resultSetNumber,
+				lockMode, tableLocked, isolationLevel,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
 
@@ -236,91 +234,6 @@ class TableScanResultSet extends NoPutResultSetImpl
 		if (indexCols != null)
 			activation.setForUpdateIndexScan(this);
 
-		this.lockMode = lockMode;
-
-		/* Isolation level - translate from language to store */
-		// If not specified, get current isolation level
-		if (isolationLevel == ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL)
-		{
-			isolationLevel = lcc.getCurrentIsolationLevel();
-		}
-
-        if (isolationLevel == ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL)
-        {
-            this.isolationLevel = TransactionController.ISOLATION_SERIALIZABLE;
-        }
-        else
-        {
-			/* NOTE: always do row locking on READ COMMITTED/UNCOMITTED scans,
-			 * unless the table is marked as table locked (in sys.systables)
-			 * This is to improve concurrency.  Also see FromBaseTable's
-			 * updateTargetLockMode (KEEP THESE TWO PLACES CONSISTENT!
-			 * bug 4318).
-			 */
-
-            /* NOTE: always do row locking on READ COMMITTED/UNCOMMITTED 
-             *       and repeatable read scans unless the table is marked as 
-             *       table locked (in sys.systables).
-             *
-             *		 We always get instantaneous locks as we will complete
-             *		 the scan before returning any rows and we will fully
-             *		 requalify the row if we need to go to the heap on a next().
-             */
-
-            if (! tableLocked)
-            {
-                this.lockMode = TransactionController.MODE_RECORD;
-            }
-
-            if (isolationLevel == 
-                    ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL)
-            {
-                /* 
-                 * Now we see if we can get instantaneous locks
-                 * if we are getting share locks.
-                 * (For example, we can get instantaneous locks
-                 * when doing a bulk fetch.)
-                 */
-                if ((! forUpdate) && canGetInstantaneousLocks())
-                {
-                    this.isolationLevel = 
-                        TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK;
-                }
-                else
-                {
-                    this.isolationLevel = 
-                        TransactionController.ISOLATION_READ_COMMITTED;
-                }
-            }
-            else if (isolationLevel == 
-                        ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL)
-            {
-                this.isolationLevel = 
-                    TransactionController.ISOLATION_READ_UNCOMMITTED;
-            }
-            else if (isolationLevel == 
-                        ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL)
-            {
-                this.isolationLevel = 
-                    TransactionController.ISOLATION_REPEATABLE_READ;
-            }
-        }
-
-        if (SanityManager.DEBUG)
-        {
-            SanityManager.ASSERT(
-                ((isolationLevel == 
-                      ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL)   ||
-                 (isolationLevel == 
-                      ExecutionContext.READ_UNCOMMITTED_ISOLATION_LEVEL) ||
-                 (isolationLevel == 
-                      ExecutionContext.REPEATABLE_READ_ISOLATION_LEVEL)  ||
-                 (isolationLevel == 
-                      ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL)),
-
-                "Invalid isolation level - " + isolationLevel);
-        }
-
 		runTimeStatisticsOn = (activation != null &&
 							   activation.getLanguageConnectionContext().getRunTimeStatisticsMode());
 
@@ -352,6 +265,8 @@ class TableScanResultSet extends NoPutResultSetImpl
 
         // Get the current transaction controller
         TransactionController tc = activation.getTransactionController();
+
+		initIsolationLevel();
 
 		if (dcoci == null)
 			dcoci = tc.getDynamicCompiledConglomInfo(conglomId);
@@ -1442,14 +1357,6 @@ class TableScanResultSet extends NoPutResultSetImpl
 		}
 
 		return scanProperties;
-	}
-
-	/**
-	 * @see NoPutResultSet#getScanIsolationLevel
-	 */
-	public int getScanIsolationLevel()
-	{
-		return isolationLevel;
 	}
 
 	/**
