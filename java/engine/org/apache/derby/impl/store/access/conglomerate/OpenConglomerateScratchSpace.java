@@ -64,20 +64,24 @@ public class OpenConglomerateScratchSpace
      * conglomerate.  This is a full template, independent of the 
      * FormatableBitSet used for access.
      **/
-    private DataValueDescriptor[] scratch_template;
+    private DataValueDescriptor[]   scratch_template;
 
     /**
      * A Scratch row used for qualifying rows in the 
      * conglomerate.  This is a row which matches the FormatableBitSet of rows
      * being returned.
      **/
-    private DataValueDescriptor[] scratch_row;
+    private DataValueDescriptor[]   scratch_row;
 
     /**
-     * A complete array of format id's for this conglomerate.
+     * A complete array of format id's and collation_ids for this conglomerate.
      **/
-    private int[]    format_ids;
-    private int[]    collation_ids;
+    private int[]                   format_ids;
+    private int[]                   collation_ids;
+
+
+    /* scratch space used by ConglomerateController.delete and replace */
+    private RowPosition             scratch_row_position;
 
     /**************************************************************************
      * Constructors for This class:
@@ -182,6 +186,29 @@ public class OpenConglomerateScratchSpace
         }
 
         return(scratch_template);
+    }
+
+    /**
+     * Return a scratch RowPosition.
+     * <p>
+     * Used by GenericConglomerateController.delete() and 
+     * GenericConglomerateController.replace().  It may be reused so callers
+     * must insure that object no longer needed before next possible call
+     * to get it again.
+     * <p>
+     *
+	 * @return a scratch RowPosition.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public RowPosition get_scratch_row_position()
+    {
+        if (scratch_row_position == null)
+        {
+            scratch_row_position = new RowPosition();
+        }
+
+        return(scratch_row_position);
     }
 
     /**

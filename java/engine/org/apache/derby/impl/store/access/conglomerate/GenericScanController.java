@@ -899,7 +899,7 @@ public abstract class GenericScanController
      */
 	public void init(
     OpenConglomerate                open_conglom,
-	FormatableBitSet				            scanColumnList,
+	FormatableBitSet				scanColumnList,
     DataValueDescriptor[]	        startKeyValue,
     int                             startSearchOperator,
     Qualifier                       qualifier[][],
@@ -909,8 +909,7 @@ public abstract class GenericScanController
     {
         super.init(open_conglom);
 
-        // RESOLVE (mikem) - move this into runtime_mem
-        scan_position = allocateScanPosition();
+        scan_position = open_conglom.getRuntimeMem().get_scratch_row_position();
 
         // remember inputs
         init_scanColumnList         = scanColumnList;
@@ -924,7 +923,7 @@ public abstract class GenericScanController
             scan_position);
         
         reusableRecordIdSequenceNumber = 
-                    open_conglom.getContainer().getReusableRecordIdSequenceNumber();
+            open_conglom.getContainer().getReusableRecordIdSequenceNumber();
     }
 
 

@@ -166,7 +166,8 @@ public abstract class GenericConglomerateController
             }
         }
 
-        RowPosition pos = new RowPosition();
+        RowPosition pos = 
+            open_conglom.getRuntimeMem().get_scratch_row_position();
 
         getRowPositionFromRowLocation(loc, pos);
 
@@ -254,7 +255,8 @@ public abstract class GenericConglomerateController
 
         // Get the record handle out of its wrapper.
 
-        RowPosition pos = new RowPosition();
+        RowPosition pos = 
+            open_conglom.getRuntimeMem().get_scratch_row_position();
 
         getRowPositionFromRowLocation(loc, pos);
 
@@ -351,7 +353,8 @@ public abstract class GenericConglomerateController
 
         // Get the record handle out of its wrapper.
 
-        RowPosition pos = new RowPosition();
+        RowPosition pos = 
+            open_conglom.getRuntimeMem().get_scratch_row_position();
 
         getRowPositionFromRowLocation(loc, pos);
 
@@ -445,7 +448,8 @@ public abstract class GenericConglomerateController
             }
         }
 
-        RowPosition pos = new RowPosition();
+        RowPosition pos = 
+            open_conglom.getRuntimeMem().get_scratch_row_position();
 
         getRowPositionFromRowLocation(loc, pos);
 
