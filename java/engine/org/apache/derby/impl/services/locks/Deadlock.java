@@ -48,7 +48,14 @@ class Deadlock  {
 	/**
 	 * Look for a deadlock.
 	 * <BR>
-	 * MT - must be synchronized on the <code>LockSet</code> object.
+	 * MT - if the <code>LockTable</code> is a <code>LockSet</code> object, the
+	 * callers must be synchronized on the <code>LockSet</code> object in order
+	 * to satisfy the syncronization requirements of
+	 * <code>LockSet.addWaiters()</code>. If it is a
+	 * <code>ConcurrentLockSet</code> object, the callers must not hold any of
+	 * the <code>ReentrantLock</code>s guarding the entries in the lock table,
+	 * and the callers must make sure that only a single thread calls
+	 * <code>look()</code> at a time.
 	 */
 	static Object[] look(AbstractPool factory, LockTable set,
 						 LockControl control, ActiveLock startingLock,
