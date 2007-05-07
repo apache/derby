@@ -1,0 +1,112 @@
+<!--
+  TEMPLATE FOR CREATING A RELEASE NOTE FOR A SIGNIFICANT JIRA ENTRY
+
+  This is a standard form for filling in a release note for a
+  significant issue logged in JIRA. This could be an issue
+  which introduces a new feature. Or it could be an issue
+  which changes Derby in a way which breaks existing
+  applications. By using this standard form, you help the
+  release manager generate documentation for the next
+  release.
+
+  When you are done filling in this form, attach it to the appropriate
+  JIRA as "releaseNote.html". You can improve your release note as
+  many times as you like. The release machinery will simply use the
+  last version of releaseNote.html attached to the JIRA.
+
+  This template has the following standard sections. Brackets mark
+  optional sections.
+
+  Summary of Change
+  Symptoms Seen by Applications Affected by Change
+  [ Incompatibilities with Previous Release ]
+  Rationale for Change
+  [ Application Changes Required ]
+
+  Go through this template and replace all instances of "????" with
+  appropriate text. Remove the optional sections if you don't need them.
+
+-->
+
+<html>
+<body>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+<h4>Summary of Change</h4>
+<p>
+????
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+<p>
+????
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+<h4>Incompatibilities with Previous Release</h4>
+<p>
+????
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+<h4>Rationale for Change</h4>
+<p>
+????
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+<h4>Application Changes Required</h4>
+<p>
+????
+</p>
+
+
+</body>
+</html>
