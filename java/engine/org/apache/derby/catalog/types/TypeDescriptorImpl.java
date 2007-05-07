@@ -133,6 +133,25 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		this.maximumWidth = maximumWidth;
 	}
 
+	public TypeDescriptorImpl(
+			TypeDescriptorImpl source, 
+			int precision,
+			int scale,
+			boolean isNullable,
+			int maximumWidth,
+			int collationType,
+			int collationDerivation)
+		{
+			this.typeId = source.typeId;
+			this.precision = precision;
+			this.scale = scale;
+			this.isNullable = isNullable;
+			this.maximumWidth = maximumWidth;
+			this.collationType = collationType;
+			this.collationDerivation = collationDerivation;
+		}
+	
+	
 	/**
 	 * Constructor for internal uses only
 	 *

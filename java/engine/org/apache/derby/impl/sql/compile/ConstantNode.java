@@ -170,10 +170,15 @@ abstract class ConstantNode extends ValueNode
 	 * @param aggregateVector	The aggregate vector being built as we find AggregateNodes
 	 *
 	 * @return	The new top of the expression tree.
+	 *
+	 * @exception StandardException		Thrown on error. Although this class
+	 * doesn't throw this exception, it's subclasses do and hence this method
+	 * signature here needs to have throws StandardException 
 	 */
 	public ValueNode bindExpression(
 			FromList fromList, SubqueryList subqueryList,
 			Vector	aggregateVector)
+	throws StandardException
 	{
 		/*
 		** This has to be here for binding to work, but it doesn't

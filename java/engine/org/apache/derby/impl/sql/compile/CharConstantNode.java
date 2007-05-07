@@ -24,6 +24,8 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
+import org.apache.derby.iapi.sql.conn.ConnectionUtil;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -35,6 +37,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.sql.Types;
+import java.util.Vector;
 
 public final class CharConstantNode extends ConstantNode
 {
@@ -147,6 +150,24 @@ public final class CharConstantNode extends ConstantNode
 	Object getConstantValueAsObject() throws StandardException 
 	{
 		return value.getString();
+	}
+	
+	public ValueNode bindExpression(
+			FromList fromList, SubqueryList subqueryList,
+			Vector	aggregateVector)
+	throws StandardException
+	{
+		try {
+			//The DTD for this character constant should get its collation type
+			//from the schema it is getting compiled in.
+			LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+		    getTypeServices().setCollationType(lcc.getDefaultSchema().getCollationType());
+		}
+		catch( java.sql.SQLException sqle)
+		{
+			throw StandardException.plainWrapException( sqle);
+		}
+		return this;
 	}
 
 	/**

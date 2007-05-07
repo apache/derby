@@ -140,6 +140,13 @@ public class CollatorSQLChar extends SQLChar implements CollationElementsInterfa
 			return s;
 		}
 	}
+	
+	/** @see SQLChar.stringCompare(SQLChar, SQLChar) */
+	 protected int stringCompare(SQLChar char1, SQLChar char2)
+	 throws StandardException
+	 {
+		 return holderForCollationSensitiveInfo.stringCompare(char2);
+	 }
 
 	/**
 	 * This method implements the like function for char (with no escape value).
@@ -158,5 +165,21 @@ public class CollatorSQLChar extends SQLChar implements CollationElementsInterfa
 								throws StandardException
 	{
 		return(holderForCollationSensitiveInfo.like(pattern));
+	}
+	
+	/**
+	 * This method implements the like function for char with an escape value.
+	 * 
+	 * @param pattern		The pattern to use
+	 * 								 
+	 * @return	A SQL boolean value telling whether the first operand is
+	 * like the second operand
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public BooleanDataValue like(DataValueDescriptor pattern,
+			DataValueDescriptor escape) throws StandardException
+	{
+		return(holderForCollationSensitiveInfo.like(pattern, escape));
 	}
 }

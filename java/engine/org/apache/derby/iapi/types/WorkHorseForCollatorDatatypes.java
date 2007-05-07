@@ -24,12 +24,14 @@ package org.apache.derby.iapi.types;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.BooleanDataValue;
 
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.text.CollationElementIterator;
+import java.text.CollationKey;
 import java.text.RuleBasedCollator;
 
 /**
@@ -69,6 +71,9 @@ public class WorkHorseForCollatorDatatypes
 	 */
 	private int		countOfCollationElements;
 
+	// For null strings, cKey = null.
+	private CollationKey cKey; 
+
 	public WorkHorseForCollatorDatatypes(
 			RuleBasedCollator collatorForCharacterDatatypes,
 			SQLChar stringData)
@@ -76,7 +81,29 @@ public class WorkHorseForCollatorDatatypes
 		this.collatorForCharacterDatatypes = collatorForCharacterDatatypes;
 		this.stringData = stringData;
 	}
+	
+	/** @see SQLChar.stringCompare(SQLChar, SQLChar) */
+	protected int stringCompare(SQLChar str2)
+	throws StandardException
+	{
+		CollationKey ckey1 = stringData.getCollationKey();
+		CollationKey ckey2 = str2.getCollationKey();
+		
+		/*
+		** By convention, nulls sort High, and null == null
+		*/
+		if (ckey1 == null || ckey2 == null)
+		{
+			if (ckey1 != null)	// str2 == null
+				return -1;
+			if (ckey2 != null)	// this == null
+				return 1;
+			return 0;			// both == null
+		}
 
+		return ckey1.compareTo(ckey2);
+	}
+	
 	/**
 	 * This method implements the like function for char (with no escape value).
 	 * The difference in this method and the same method in SQLChar is that 
@@ -110,6 +137,60 @@ public class WorkHorseForCollatorDatatypes
 		return SQLBoolean.truthValue(stringData,
 									 pattern,
 									 likeResult);
+	}
+	
+	/**
+	 * This method implements the like function for char with an escape value.
+	 * 
+	 * @param pattern		The pattern to use
+	 * 
+	 * @return	A SQL boolean value telling whether the first operand is
+	 * 			like the second operand
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public BooleanDataValue like(DataValueDescriptor pattern, 
+			DataValueDescriptor escape)	throws StandardException
+	{
+		Boolean likeResult;
+
+		if (SanityManager.DEBUG)
+			SanityManager.ASSERT(
+							 pattern instanceof CollationElementsInterface &&
+							 escape instanceof CollationElementsInterface,
+			"All three operands must be instances of CollationElementsInterface");
+		
+		// ANSI states a null escape yields 'unknown' results 
+		//
+		// This method is only called when we have an escape clause, so this 
+		// test is valid
+
+		if (escape.isNull())
+		{
+			throw StandardException.newException(SQLState.LANG_ESCAPE_IS_NULL);
+		}
+
+		CollationElementsInterface patternToCheck = (CollationElementsInterface) pattern;
+		CollationElementsInterface escapeCharacter = (CollationElementsInterface) escape;
+
+		if (escapeCharacter.getCollationElementsForString() != null && 
+				(escapeCharacter.getCountOfCollationElements() != 1))
+		{
+			throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
+					new String(escapeCharacter.toString()));
+		}
+		likeResult = Like.like(
+				getCollationElementsForString(),
+				getCountOfCollationElements(),
+				patternToCheck.getCollationElementsForString(),
+				patternToCheck.getCountOfCollationElements(),
+				escapeCharacter.getCollationElementsForString(),
+				escapeCharacter.getCountOfCollationElements(),
+				collatorForCharacterDatatypes);
+
+		return SQLBoolean.truthValue(stringData,
+								 pattern,
+								 likeResult);
 	}
 
 	/**

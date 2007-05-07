@@ -71,7 +71,7 @@ public void testDefaultCollation() throws SQLException {
    * Test order by with polish collation
    * @throws SQLException
    */
-public void xtestPolishCollation() throws SQLException {
+public void testPolishCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("poldb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=pl;collation=TERRITORY_BASED");
@@ -85,7 +85,7 @@ public void xtestPolishCollation() throws SQLException {
    * 
    * @throws SQLException
    */
-public void xtestNorwayCollation() throws SQLException {
+public void testNorwayCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("nordb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=no;collation=TERRITORY_BASED");
@@ -99,7 +99,7 @@ public void xtestNorwayCollation() throws SQLException {
    * 
   * @throws SQLException
   */
-public void xtestEnglishCollation() throws SQLException {
+public void testEnglishCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("endb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=en;collation=TERRITORY_BASED");

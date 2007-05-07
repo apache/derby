@@ -328,12 +328,20 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	}
 	public DataTypeDescriptor(DataTypeDescriptor source, boolean isNullable)
 	{
+		//There might be other places, but one place this method gets called
+		//from is ResultColumn.init. When the ResultColumn(RC) is for a 
+		//ColumnDescriptor(CD), the RC's TypeDescriptorImpl(TDI) should get 
+		//all the attributes of CD's TDI. So, if the CD is for a user table's
+		//character type column, then this call by RC.init should have CD's 
+		//collation attributes copied into RC along with other attributes. 
 		this.typeId = source.typeId;
 		typeDescriptor = new TypeDescriptorImpl(source.typeDescriptor,
 												source.getPrecision(),
 												source.getScale(),
 												isNullable,
-												source.getMaximumWidth());
+												source.getMaximumWidth(),
+												source.getCollationType(),
+												source.getCollationDerivation());
 	}
 
 	/**
