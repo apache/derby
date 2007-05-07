@@ -38,10 +38,25 @@
 	  <param-value> 1527 </param-value>
 	  <description> Port number to use. The default is 1527. </description>
 	</init-param>
+        <!--
+        The "host" parameter allows configuration of the host name that will
+        be used for the listening socket for network connections. By default,
+        the Network Server will listen to requests only on the loopback
+        address, which means that it will only accept connections from the
+        local host. Changing this value could expose the server to
+        external connections, which raises security concerns, so before using
+        the "host" parameter, you should run under the Java security
+        manager and enable user authentication.
+        -->
+	<init-param>
+	  <param-name>  host </param-name>
+	  <param-value> localhost </param-value>
+	  <description> Host Name to use. The default is "localhost". Please secure any server which listens on a public address. </description>
+	</init-param>
 	<init-param>
 	  <param-name>  tracingDirectory </param-name>
 	  <param-value></param-value>
-	  <description> Port number to use. The default is 1527. </description>
+	  <description> Directory where trace files should be placed. </description>
 	</init-param>
 </servlet>
 

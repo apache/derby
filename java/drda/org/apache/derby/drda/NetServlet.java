@@ -76,6 +76,7 @@ public class NetServlet extends HttpServlet {
 		Configuration parameters:
 		<UL>
 		<LI><PRE>portNumber</PRE> - Port number
+		<LI><PRE>host</PRE> - Host name
 		<LI><PRE>traceDirectory</PRE> - location of trace directory
 		<LI><PRE>startNetworkServerOnInit</PRE> - start the server on initialization
 		</UL>
@@ -92,6 +93,9 @@ public class NetServlet extends HttpServlet {
 			if (p > 0)
 				portNumber = p;
 		}
+		String hostName = config.getInitParameter("host");
+		if (hostName != null)
+			host = hostName;
 
 		this.tracingDirectory = config.getInitParameter("tracingDirectory");
 		
