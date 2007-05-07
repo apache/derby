@@ -90,98 +90,101 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
  implements RowLocationRetRowSource
 {
 
-	protected	SchemaDescriptor			sd;
-	protected	String						tableName;
-	protected	UUID						schemaId;
-	protected	int							tableType;
-	protected	long						tableConglomerateId;
-	protected	ColumnInfo[]				columnInfo;
-	protected	ConstraintConstantAction[]	constraintActions;
-	protected	char						lockGranularity;
-	private	boolean					compressTable;
-	private	boolean					sequential;
-	private int						behavior;
-
-	// Alter table compress and Drop column
-	private boolean					doneScan;
-	private boolean[]				needToDropSort;
-	private boolean[]				validRow;
-	private	int						bulkFetchSize = 16;
-	private	int						currentCompressRow;
-	private int						numIndexes;
-	private int						rowCount;
-	private long					estimatedRowCount;
-	private long[]					indexConglomerateNumbers;
-	private	long[]					sortIds;
-	private FormatableBitSet					indexedCols;
-	private ConglomerateController	compressHeapCC;
-	private ExecIndexRow[]			indexRows;
-	private ExecRow[]				baseRow;
-	private ExecRow					currentRow;
-	private	GroupFetchScanController compressHeapGSC;
-	private IndexRowGenerator[]		compressIRGs;
-	private	DataValueDescriptor[][]			baseRowArray;
-	private RowLocation[]			compressRL;
-	private SortController[]		sorters;
-	private int						columnPosition;
-	private ColumnOrdering[][]		ordering;
-	private int[][]		            collation;
-
-	private	TableDescriptor 		td;
+    // copied from constructor args and stored locally.
+    private	    SchemaDescriptor			sd;
+    private	    String						tableName;
+    private	    UUID						schemaId;
+    private	    int							tableType;
+    private	    ColumnInfo[]				columnInfo;
+    private	    ConstraintConstantAction[]	constraintActions;
+    private	    char						lockGranularity;
+    private	    long						tableConglomerateId;
+    private	    boolean					    compressTable;
+    private     int						    behavior;
+    private	    boolean					    sequential;
+    private     boolean                     truncateTable;
 
 
-	//truncate table
-	private boolean                 truncateTable;
 
-	// CONSTRUCTORS
-		private LanguageConnectionContext lcc;
-		private DataDictionary dd;
-		private DependencyManager dm;
-		private TransactionController tc;
-		private Activation activation;
+    // Alter table compress and Drop column
+    private     boolean					    doneScan;
+    private     boolean[]				    needToDropSort;
+    private     boolean[]				    validRow;
+    private	    int						    bulkFetchSize = 16;
+    private	    int						    currentCompressRow;
+    private     int						    numIndexes;
+    private     int						    rowCount;
+    private     long					    estimatedRowCount;
+    private     long[]					    indexConglomerateNumbers;
+    private	    long[]					    sortIds;
+    private     FormatableBitSet			indexedCols;
+    private     ConglomerateController	    compressHeapCC;
+    private     ExecIndexRow[]			    indexRows;
+    private     ExecRow[]				    baseRow;
+    private     ExecRow					    currentRow;
+    private	    GroupFetchScanController    compressHeapGSC;
+    private     IndexRowGenerator[]		    compressIRGs;
+    private	    DataValueDescriptor[][]		baseRowArray;
+    private     RowLocation[]			    compressRL;
+    private     SortController[]		    sorters;
+    private     int						    droppedColumnPosition;
+    private     ColumnOrdering[][]		    ordering;
+    private     int[][]		                collation;
+
+    private	TableDescriptor 		        td;
+
+
+
+    // CONSTRUCTORS
+    private LanguageConnectionContext lcc;
+    private DataDictionary dd;
+    private DependencyManager dm;
+    private TransactionController tc;
+    private Activation activation;
 
 	/**
 	 *	Make the AlterAction for an ALTER TABLE statement.
 	 *
-	 *  @param sd			descriptor for the schema that table lives in.
-	 *  @param tableName	Name of table.
-	 *	@param tableId		UUID of table
+	 *  @param sd			        descriptor for the table's schema.
+	 *  @param tableName	        Name of table.
+	 *	@param tableId		        UUID of table
 	 *	@param tableConglomerateId	heap conglomerate number of table
-	 *  @param tableType	Type of table (e.g., BASE).
-	 *  @param columnInfo	Information on all the columns in the table.
+	 *  @param tableType	        Type of table (e.g., BASE).
+	 *  @param columnInfo	        Information on all the columns in the table.
 	 *  @param constraintActions	ConstraintConstantAction[] for constraints
-	 * @param lockGranularity	The lock granularity.
-	 *	@param compressTable	Whether or not this is a compress table
-	 *	@param behavior		drop behavior for dropping column
-	 *	@param sequential	If compress table/drop column, whether or not sequential
-	 *  @param truncateTable	Whether or not this is a truncate table
+	 *  @param lockGranularity	    The lock granularity.
+	 *	@param compressTable	    Whether or not this is a compress table
+	 *	@param behavior		        drop behavior for dropping column
+	 *	@param sequential	        If compress table/drop column, 
+     *	                            whether or not sequential
+	 *  @param truncateTable	    Whether or not this is a truncate table
 	 */
 	AlterTableConstantAction(
-								SchemaDescriptor	sd,
-								String			tableName,
-								UUID			tableId,
-								long			tableConglomerateId,
-								int				tableType,
-								ColumnInfo[]	columnInfo,
-								ConstraintConstantAction[] constraintActions,
-								char			lockGranularity,
-								boolean			compressTable,
-								int				behavior,
-								boolean			sequential,
-								boolean         truncateTable)
+    SchemaDescriptor            sd,
+    String			            tableName,
+    UUID			            tableId,
+    long			            tableConglomerateId,
+    int				            tableType,
+    ColumnInfo[]	            columnInfo,
+    ConstraintConstantAction[]  constraintActions,
+    char			            lockGranularity,
+    boolean			            compressTable,
+    int				            behavior,
+    boolean			            sequential,
+    boolean                     truncateTable)
 	{
 		super(tableId);
-		this.sd = sd;
-		this.tableName = tableName;
-		this.tableConglomerateId = tableConglomerateId;
-		this.tableType = tableType;
-		this.columnInfo = columnInfo;
-		this.constraintActions = constraintActions;
-		this.lockGranularity = lockGranularity;
-		this.compressTable = compressTable;
-		this.behavior = behavior;
-		this.sequential = sequential;
-		this.truncateTable = truncateTable;
+		this.sd                     = sd;
+		this.tableName              = tableName;
+		this.tableConglomerateId    = tableConglomerateId;
+		this.tableType              = tableType;
+		this.columnInfo             = columnInfo;
+		this.constraintActions      = constraintActions;
+		this.lockGranularity        = lockGranularity;
+		this.compressTable          = compressTable;
+		this.behavior               = behavior;
+		this.sequential             = sequential;
+		this.truncateTable          = truncateTable;
 
 		if (SanityManager.DEBUG)
 		{
@@ -213,13 +216,18 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void	executeConstantAction( Activation activation )
-						throws StandardException
+	public void	executeConstantAction(
+    Activation activation)
+        throws StandardException
 	{
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
-		DataDictionary dd = lcc.getDataDictionary();
-		DependencyManager dm = dd.getDependencyManager();
-		TransactionController tc = lcc.getTransactionExecute();
+		LanguageConnectionContext   lcc = 
+            activation.getLanguageConnectionContext();
+		DataDictionary              dd = lcc.getDataDictionary();
+		DependencyManager           dm = dd.getDependencyManager();
+		TransactionController       tc = lcc.getTransactionExecute();
+
+		int							numRows = 0;
+        boolean						tableScanned = false;
 
 		/*
 		** Inform the data dictionary that we are about to write to it.
@@ -235,9 +243,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// now do the real work
 
 		// get an exclusive lock of the heap, to avoid deadlock on rows of
-		// SYSCOLUMNS etc datadictionary tables (track 879) and phantom table
+		// SYSCOLUMNS etc datadictionary tables and phantom table
 		// descriptor, in which case table shape could be changed by a
-		// concurrent thread doing add/drop column (track 3804 and 3825)
+		// concurrent thread doing add/drop column.
 
 		// older version (or at target) has to get td first, potential deadlock
 		if (tableConglomerateId == 0)
@@ -260,50 +268,24 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				SQLState.LANG_TABLE_NOT_FOUND_DURING_EXECUTION, tableName);
 		}
 
-		if(truncateTable)
+		if (truncateTable)
 			dm.invalidateFor(td, DependencyManager.TRUNCATE_TABLE, lcc);
 		else
 			dm.invalidateFor(td, DependencyManager.ALTER_TABLE, lcc);
-		execGuts( activation );
-	}
-
-
-	/**
-	  *	Wrapper for this DDL action. Factored out so that our child, 
-	  * RepAlterTableConstantAction
-	  *	could enjoy the benefits of the startWriting() method above.
-	  *
-	  *
-	  * @exception StandardException		Thrown on failure
-	  */
-	public void	execGuts( Activation activation)
-						throws StandardException
-	{
-		ColumnDescriptor			columnDescriptor;
-		int							numRows = 0;
-		boolean						tableNeedsScanning = false;
-		boolean						tableScanned = false;
-
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
-		DataDictionary dd = lcc.getDataDictionary();
-		DependencyManager dm = dd.getDependencyManager();
-		TransactionController tc = lcc.getTransactionExecute();
 
 		// Save the TableDescriptor off in the Activation
 		activation.setDDLTableDescriptor(td);
 
 		/*
-		** If the schema descriptor is null, then
-		** we must have just read ourselves in.  
-		** So we will get the corresponding schema
-		** descriptor from the data dictionary.
+		** If the schema descriptor is null, then we must have just read 
+        ** ourselves in.  So we will get the corresponding schema descriptor 
+        ** from the data dictionary.
 		*/
 		if (sd == null)
 		{
 			sd = getAndCheckSchemaDescriptor(dd, schemaId, "ALTER TABLE");
 		}
 		
-
 		/* Prepare all dependents to invalidate.  (This is there chance
 		 * to say that they can't be invalidated.  For example, an open
 		 * cursor referencing a table/view that the user is attempting to
@@ -317,6 +299,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// Are we working on columns?
 		if (columnInfo != null)
 		{
+            boolean tableNeedsScanning = false;
+
 			/* NOTE: We only allow a single column to be added within
 			 * each ALTER TABLE command at the language level.  However,
 			 * this may change some day, so we will try to plan for it.
@@ -347,11 +331,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			if (tableNeedsScanning)
 			{
 				numRows = getSemiRowCount(tc);
-				// Don't allow user to add non-nullable column to non-empty table
+				// Don't allow add of non-nullable column to non-empty table
 				if (numRows > 0)
 				{
-					throw StandardException.newException(SQLState.LANG_ADDING_NON_NULL_COLUMN_TO_NON_EMPTY_TABLE, 
-									td.getQualifiedName());
+					throw StandardException.newException(
+                        SQLState.LANG_ADDING_NON_NULL_COLUMN_TO_NON_EMPTY_TABLE,
+                        td.getQualifiedName());
 				}
 				tableScanned = true;
 			}
@@ -367,7 +352,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				
 				if (columnInfo[ix].action == ColumnInfo.CREATE)
 				{
-					addNewColumnToTable(activation, ix);
+					addNewColumnToTable(activation, lcc, dd, tc, ix);
 				}
 				else if (columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART ||
@@ -386,32 +371,36 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				else if (columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_CONSTRAINT)
 				{
-					modifyColumnConstraint(activation, columnInfo[ix].name, true);
+					modifyColumnConstraint(
+                        activation, columnInfo[ix].name, true);
 				}
 				else if (columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_CONSTRAINT_NOT_NULL)
 				{
-					if (! tableScanned)
+					if (!tableScanned)
 					{
 						tableScanned = true;
 						numRows = getSemiRowCount(tc);
 					}
+
 					// check that the data in the column is not null
-					String colNames[] = new String[1];
-					colNames[0] = columnInfo[ix].name;
+					String colNames[]  = new String[1];
+					colNames[0]        = columnInfo[ix].name;
 					boolean nullCols[] = new boolean[1];
 
 					/* note validateNotNullConstraint returns true if the
 					 * column is nullable
 					 */
-					if (validateNotNullConstraint(colNames, nullCols, 
-							numRows, lcc, SQLState.LANG_NULL_DATA_IN_NON_NULL_COLUMN))
+					if (validateNotNullConstraint(
+                            colNames, nullCols, numRows, lcc, 
+                            SQLState.LANG_NULL_DATA_IN_NON_NULL_COLUMN))
 					{
 						/* nullable column - modify it to be not null
 						 * This is O.K. at this point since we would have
 						 * thrown an exception if any data was null
 						 */
-						modifyColumnConstraint(activation, columnInfo[ix].name, false);
+						modifyColumnConstraint(
+                            activation, columnInfo[ix].name, false);
 					}
 				}
 				else if (columnInfo[ix].action == ColumnInfo.DROP)
@@ -429,7 +418,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		/* Create/Drop any constraints */
 		if (constraintActions != null)
 		{
-			for (int conIndex = 0; conIndex < constraintActions.length; conIndex++)
+			for (int conIndex = 0; 
+                 conIndex < constraintActions.length; 
+                 conIndex++)
 			{
 				ConstraintConstantAction cca = constraintActions[conIndex];
 
@@ -438,28 +429,36 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					int constraintType = cca.getConstraintType();
 
 					/* Some constraint types require special checking:
-					 *		Check		- table must be empty, for now
-					 *		Primary Key - table cannot already have a primary key
+					 *   Check		 - table must be empty, for now
+					 *   Primary Key - table cannot already have a primary key
 					 */
 					switch (constraintType)
 					{
 						case DataDictionary.PRIMARYKEY_CONSTRAINT:
-							// Check to see if a constraint of the same type already exists
-							ConstraintDescriptorList cdl = dd.getConstraintDescriptors(td);
+
+							// Check to see if a constraint of the same type 
+                            // already exists
+							ConstraintDescriptorList cdl = 
+                                dd.getConstraintDescriptors(td);
+
 							if (cdl.getPrimaryKey() != null)
 							{
-								throw StandardException.newException(SQLState.LANG_ADD_PRIMARY_KEY_FAILED1, 
-											td.getQualifiedName());
+								throw StandardException.newException(
+                                    SQLState.LANG_ADD_PRIMARY_KEY_FAILED1, 
+                                    td.getQualifiedName());
 							}
-							if (! tableScanned)
+
+							if (!tableScanned)
 							{
 								tableScanned = true;
 								numRows = getSemiRowCount(tc);
 							}
 
 							break;
+
 						case DataDictionary.CHECK_CONSTRAINT:
-							if (! tableScanned)
+
+							if (!tableScanned)
 							{
 								tableScanned = true;
 								numRows = getSemiRowCount(tc);
@@ -473,10 +472,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								** to lump together several checks.	
 								*/
 								ConstraintConstantAction.validateConstraint(
-											cca.getConstraintName(),
-											((CreateConstraintConstantAction)cca).getConstraintText(),
-											td,
-											lcc, true);
+                                    cca.getConstraintName(),
+                                    ((CreateConstraintConstantAction)cca).getConstraintText(),
+                                    td,
+                                    lcc, true);
 							}
 							break;
 					}
@@ -487,12 +486,15 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					{
 						if (!(cca instanceof DropConstraintConstantAction))
 						{
-							SanityManager.THROWASSERT("constraintActions[" + conIndex + 
-							"] expected to be instanceof DropConstraintConstantAction not " +
-							cca.getClass().getName());
+							SanityManager.THROWASSERT(
+                                "constraintActions[" + conIndex + 
+                                "] expected to be instanceof " + 
+                                "DropConstraintConstantAction not " +
+                                cca.getClass().getName());
 						}
 					}
 				}
+
 				constraintActions[conIndex].executeConstantAction(activation);
 			}
 		}
@@ -506,7 +508,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					lockGranularity != 'R')
 				{
 					SanityManager.THROWASSERT(
-						"lockGranularity expected to be 'T'or 'R', not " + lockGranularity);
+						"lockGranularity expected to be 'T'or 'R', not " + 
+                        lockGranularity);
 				}
 			}
 
@@ -527,8 +530,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			truncateTable(activation);
 		}
-
-		
 	}
 
 	/**
@@ -538,20 +539,19 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *						statement-- currently we allow only one.
 	 * @exception StandardException 	thrown on failure.
 	 */
-	private void addNewColumnToTable(Activation activation, 
-									 int ix) 
+	private void addNewColumnToTable(
+    Activation                  activation, 
+    LanguageConnectionContext   lcc,
+    DataDictionary              dd,
+    TransactionController       tc,
+    int                         ix) 
 	        throws StandardException
 	{
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
-		DataDictionary dd = lcc.getDataDictionary();
-		DependencyManager dm = dd.getDependencyManager();
-		TransactionController tc = lcc.getTransactionExecute();
-
-		ColumnDescriptor columnDescriptor = 
+		ColumnDescriptor columnDescriptor   = 
 			td.getColumnDescriptor(columnInfo[ix].name);
 		DataValueDescriptor storableDV;
-		int colNumber = td.getMaxColumnID() + ix;
-		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
+		int                     colNumber   = td.getMaxColumnID() + ix;
+		DataDescriptorGenerator ddg         = dd.getDataDescriptorGenerator();
 
 		/* We need to verify that the table does not have an existing
 		 * column with the same name before we try to add the new
@@ -561,11 +561,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			throw 
 				StandardException.newException(
-											   SQLState.LANG_OBJECT_ALREADY_EXISTS_IN_OBJECT,
-											   columnDescriptor.getDescriptorType(),
-											   columnInfo[ix].name,
-											   td.getDescriptorType(),
-											   td.getQualifiedName());
+                   SQLState.LANG_OBJECT_ALREADY_EXISTS_IN_OBJECT,
+                   columnDescriptor.getDescriptorType(),
+                   columnInfo[ix].name,
+                   td.getDescriptorType(),
+                   td.getQualifiedName());
 		}
 
 		if (columnInfo[ix].defaultValue != null)
@@ -593,17 +593,18 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		// Add the column to syscolumns. 
 		// Column ids in system tables are 1-based
-		columnDescriptor = new ColumnDescriptor(
-												   columnInfo[ix].name,
-												   colNumber + 1,
-												   columnInfo[ix].dataType,
-												   columnInfo[ix].defaultValue,
-												   columnInfo[ix].defaultInfo,
-												   td,
-												   defaultUUID,
-												   columnInfo[ix].autoincStart,
-												   columnInfo[ix].autoincInc
-												   );
+		columnDescriptor = 
+            new ColumnDescriptor(
+                   columnInfo[ix].name,
+                   colNumber + 1,
+                   columnInfo[ix].dataType,
+                   columnInfo[ix].defaultValue,
+                   columnInfo[ix].defaultInfo,
+                   td,
+                   defaultUUID,
+                   columnInfo[ix].autoincStart,
+                   columnInfo[ix].autoincInc
+                   );
 
 		dd.addDescriptor(columnDescriptor, td,
 						 DataDictionary.SYSCOLUMNS_CATALOG_NUM, false, tc);
@@ -713,9 +714,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			throw 
 				StandardException.newException(
-									    SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, 
-										columnInfo[ix].name,
-										td.getQualifiedName());
+                    SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, 
+                    columnInfo[ix].name,
+                    td.getQualifiedName());
 		}
 
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
@@ -725,18 +726,19 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// can NOT drop a column if it is the only one in the table
 		if (size == 1)
 		{
-			throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
-							dm.getActionString(DependencyManager.DROP_COLUMN),
-							"THE *LAST* COLUMN " + columnInfo[ix].name,
-							"TABLE",
-							td.getQualifiedName() );
+			throw StandardException.newException(
+                    SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
+                    dm.getActionString(DependencyManager.DROP_COLUMN),
+                    "THE *LAST* COLUMN " + columnInfo[ix].name,
+                    "TABLE",
+                    td.getQualifiedName() );
 		}
 
-		columnPosition = columnDescriptor.getPosition();
+		droppedColumnPosition = columnDescriptor.getPosition();
 		boolean cascade = (behavior == StatementType.DROP_CASCADE);
 
 		FormatableBitSet toDrop = new FormatableBitSet(size + 1);
-		toDrop.set(columnPosition);
+		toDrop.set(droppedColumnPosition);
 		td.setReferencedColumnMap(toDrop);
 
 		dm.invalidateFor(td, 
@@ -747,8 +749,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// If column has a default we drop the default and any dependencies
 		if (columnDescriptor.getDefaultInfo() != null)
 		{
-			DefaultDescriptor defaultDesc = columnDescriptor.getDefaultDescriptor(dd);
-			dm.clearDependencies(lcc, defaultDesc);
+			dm.clearDependencies(
+                lcc, columnDescriptor.getDefaultDescriptor(dd));
 		}
 
 		// need to deal with triggers if has referencedColumns
@@ -764,24 +766,28 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			boolean changed = false;
 			for (j = 0; j < refColLen; j++)
 			{
-				if (referencedCols[j] > columnPosition)
+				if (referencedCols[j] > droppedColumnPosition)
+                {
 					changed = true;
-				else if (referencedCols[j] == columnPosition)
+                }
+				else if (referencedCols[j] == droppedColumnPosition)
 				{
 					if (cascade)
 					{
                         trd.drop(lcc);
 						activation.addWarning(
-							StandardException.newWarning(SQLState.LANG_TRIGGER_DROPPED,
-								trd.getName(), td.getName()));
+							StandardException.newWarning(
+                                SQLState.LANG_TRIGGER_DROPPED, 
+                                trd.getName(), td.getName()));
 					}
 					else
 					{	// we'd better give an error if don't drop it,
 						// otherwsie there would be unexpected behaviors
-						throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
-										dm.getActionString(DependencyManager.DROP_COLUMN),
-										columnInfo[ix].name, "TRIGGER",
-										trd.getName() );
+						throw StandardException.newException(
+                            SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
+                            dm.getActionString(DependencyManager.DROP_COLUMN),
+                            columnInfo[ix].name, "TRIGGER",
+                            trd.getName() );
 					}
 					break;
 				}
@@ -793,7 +799,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				dd.dropTriggerDescriptor(trd, tc);
 				for (j = 0; j < refColLen; j++)
 				{
-					if (referencedCols[j] > columnPosition)
+					if (referencedCols[j] > droppedColumnPosition)
 						referencedCols[j]--;
 				}
 				dd.addDescriptor(trd, sd,
@@ -809,7 +815,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// round.  This will ensure that self-referential constraints will
 		// work OK.
 		int tbr_size = 0;
-		ConstraintDescriptor[] toBeRemoved = new ConstraintDescriptor[csdl_size];
+		ConstraintDescriptor[] toBeRemoved = 
+            new ConstraintDescriptor[csdl_size];
 
 		// let's go downwards, don't want to get messed up while removing
 		for (int i = csdl_size - 1; i >= 0; i--)
@@ -820,9 +827,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			boolean changed = false;
 			for (j = 0; j < numRefCols; j++)
 			{
-				if (referencedColumns[j] > columnPosition)
+				if (referencedColumns[j] > droppedColumnPosition)
 					changed = true;
-				if (referencedColumns[j] == columnPosition)
+				if (referencedColumns[j] == droppedColumnPosition)
 					break;
 			}
 			if (j == numRefCols)			// column not referenced
@@ -832,7 +839,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					dd.dropConstraintDescriptor(td, cd, tc);
 					for (j = 0; j < numRefCols; j++)
 					{
-						if (referencedColumns[j] > columnPosition)
+						if (referencedColumns[j] > droppedColumnPosition)
 							referencedColumns[j]--;
 					}
 					((CheckConstraintDescriptor) cd).setReferencedColumnsDescriptor(new ReferencedColumnsDescriptorImpl(referencedColumns));
@@ -846,15 +853,16 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				// Reject the DROP COLUMN, because there exists a constraint
 				// which references this column.
 				//
-				throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
-										dm.getActionString(DependencyManager.DROP_COLUMN),
-										columnInfo[ix].name, "CONSTRAINT",
-										cd.getConstraintName() );
+				throw StandardException.newException(
+                        SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
+                        dm.getActionString(DependencyManager.DROP_COLUMN),
+                        columnInfo[ix].name, "CONSTRAINT",
+                        cd.getConstraintName() );
 			}
 
 			if (cd instanceof ReferencedKeyConstraintDescriptor)
 			{
-				// restrict will raise an error in invalidate if really referenced
+				// restrict will raise an error in invalidate if referenced
 				toBeRemoved[tbr_size++] = cd;
 				continue;
 			}
@@ -864,32 +872,42 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									lcc);
 			DropConstraintConstantAction.dropConstraintAndIndex(dm, td, dd,
 							 cd, tc, lcc, true);
-			activation.addWarning(StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
+
+			activation.addWarning(
+                StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
 				cd.getConstraintName(), td.getName()));
 		}
 
 		for (int i = tbr_size - 1; i >= 0; i--)
 		{
 			ConstraintDescriptor cd = toBeRemoved[i];
-			DropConstraintConstantAction.dropConstraintAndIndex(dm, td, dd, cd,
-						tc, lcc, false);
-			activation.addWarning(StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
-					cd.getConstraintName(), td.getName()));
+			DropConstraintConstantAction.dropConstraintAndIndex(
+                dm, td, dd, cd, tc, lcc, false);
+
+			activation.addWarning(
+                StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
+                cd.getConstraintName(), td.getName()));
 
 			if (cascade)
 			{
 				ConstraintDescriptorList fkcdl = dd.getForeignKeys(cd.getUUID());
 				for (int j = 0; j < fkcdl.size(); j++)
 				{
-					ConstraintDescriptor fkcd = (ConstraintDescriptor) fkcdl.elementAt(j);
+					ConstraintDescriptor fkcd = 
+                        (ConstraintDescriptor) fkcdl.elementAt(j);
+
 					dm.invalidateFor(fkcd,
 									DependencyManager.DROP_CONSTRAINT,
 									lcc);
 
 					DropConstraintConstantAction.dropConstraintAndIndex(
 						dm, fkcd.getTableDescriptor(), dd, fkcd, tc, lcc, true);
-					activation.addWarning(StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
-						fkcd.getConstraintName(), fkcd.getTableDescriptor().getName()));
+
+					activation.addWarning(
+                        StandardException.newWarning(
+                            SQLState.LANG_CONSTRAINT_DROPPED,
+						    fkcd.getConstraintName(), 
+                            fkcd.getTableDescriptor().getName()));
 				}
 			}
 
@@ -897,23 +915,24 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			dm.clearDependencies(lcc, cd);
 		}
 
-                /*
-                 * The work we've done above, specifically the possible
-                 * dropping of primary key, foreign key, and unique constraints
-                 * and their underlying indexes, may have affected the table
-                 * descriptor. By re-reading the table descriptor here, we
-                 * ensure that the compressTable code is working with an
-                 * accurate table descriptor. Without this line, we may get
-                 * conglomerate-not-found errors and the like due to our
-                 * stale table descriptor.
-                 */
+        /*
+         * The work we've done above, specifically the possible
+         * dropping of primary key, foreign key, and unique constraints
+         * and their underlying indexes, may have affected the table
+         * descriptor. By re-reading the table descriptor here, we
+         * ensure that the compressTable code is working with an
+         * accurate table descriptor. Without this line, we may get
+         * conglomerate-not-found errors and the like due to our
+         * stale table descriptor.
+         */
 		td = dd.getTableDescriptor(tableId);
 
 		compressTable(activation);
 
 		// drop the column from syscolumns 
 		dd.dropColumnDescriptor(td.getUUID(), columnInfo[ix].name, tc);
-		ColumnDescriptor[] cdlArray = new ColumnDescriptor[size - columnDescriptor.getPosition()];
+		ColumnDescriptor[] cdlArray = 
+            new ColumnDescriptor[size - columnDescriptor.getPosition()];
 
 		for (int i = columnDescriptor.getPosition(), j = 0; i < size; i++, j++)
 		{
@@ -926,22 +945,28 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 							  DataDictionary.SYSCOLUMNS_CATALOG_NUM, false, tc);
 
 		List deps = dd.getProvidersDescriptorList(td.getObjectID().toString());
-		for (Iterator depsIterator = deps.listIterator(); depsIterator.hasNext();)
+		for (Iterator depsIterator = deps.listIterator(); 
+             depsIterator.hasNext();)
 		{
-			DependencyDescriptor depDesc = (DependencyDescriptor) depsIterator.next();
+			DependencyDescriptor depDesc = 
+                (DependencyDescriptor) depsIterator.next();
+
 			DependableFinder finder = depDesc.getProviderFinder();
 			if (finder instanceof DDColumnDependableFinder)
 			{
-				DDColumnDependableFinder colFinder = (DDColumnDependableFinder) finder;
-				FormatableBitSet oldColumnBitMap = new FormatableBitSet(colFinder.getColumnBitMap());
-				FormatableBitSet newColumnBitMap = new FormatableBitSet(oldColumnBitMap);
+				DDColumnDependableFinder colFinder = 
+                    (DDColumnDependableFinder) finder;
+				FormatableBitSet oldColumnBitMap = 
+                    new FormatableBitSet(colFinder.getColumnBitMap());
+				FormatableBitSet newColumnBitMap = 
+                    new FormatableBitSet(oldColumnBitMap);
 				newColumnBitMap.clear();
 				int bitLen = oldColumnBitMap.getLength();
 				for (int i = 0; i < bitLen; i++)
 				{
-					if (i < columnPosition && oldColumnBitMap.isSet(i))
+					if (i < droppedColumnPosition && oldColumnBitMap.isSet(i))
 						newColumnBitMap.set(i);
-					if (i > columnPosition && oldColumnBitMap.isSet(i))
+					if (i > droppedColumnPosition && oldColumnBitMap.isSet(i))
 						newColumnBitMap.set(i - 1);
 				}
 				if (newColumnBitMap.equals(oldColumnBitMap))
@@ -1114,22 +1139,28 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// else we are simply changing the default value
 	}
 
-
-	/* NOTE: compressTable can also be called for 
-	 * ALTER TABLE <t> DROP COLUMN <c>;
-	 */
+    /**
+     * routine to process compress table or ALTER TABLE <t> DROP COLUMN <c>;
+     * <p>
+     * Uses class level variable "compressTable" to determine if processing
+     * compress table or drop column:
+     *     if (!compressTable)
+     *         must be drop column.
+     * <p>
+     * Handles rebuilding of base conglomerate and all necessary indexes.
+     **/
 	private void compressTable(
     Activation activation)
 		throws StandardException
 	{
-		ExecRow					emptyHeapRow;
 		long					newHeapConglom;
 		Properties				properties = new Properties();
 		RowLocation				rl;
-		this.lcc = activation.getLanguageConnectionContext();
-		this.dd = lcc.getDataDictionary();
-		this.dm = dd.getDependencyManager();
-		this.tc = lcc.getTransactionExecute();
+
+		this.lcc        = activation.getLanguageConnectionContext();
+		this.dd         = lcc.getDataDictionary();
+		this.dm         = dd.getDependencyManager();
+		this.tc         = lcc.getTransactionExecute();
 		this.activation = activation;
 
 		if (SanityManager.DEBUG)
@@ -1145,13 +1176,17 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			SanityManager.ASSERT(constraintActions == null,
 				"constraintActions expected to be null");
 		}
-		emptyHeapRow = td.getEmptyExecRow(lcc.getContextManager());
-		compressHeapCC = tc.openConglomerate(
-								td.getHeapConglomerateId(),
-                                false,
-                                TransactionController.OPENMODE_FORUPDATE,
-                                TransactionController.MODE_TABLE,
-                                TransactionController.ISOLATION_SERIALIZABLE);
+
+		ExecRow emptyHeapRow  = td.getEmptyExecRow(lcc.getContextManager());
+        int[]   collation_ids = td.getColumnCollationIds();
+
+		compressHeapCC = 
+            tc.openConglomerate(
+                td.getHeapConglomerateId(),
+                false,
+                TransactionController.OPENMODE_FORUPDATE,
+                TransactionController.MODE_TABLE,
+                TransactionController.ISOLATION_SERIALIZABLE);
 
 		// invalidate any prepared statements that depended on this table 
         // (including this one), this fixes problem with threads that start up 
@@ -1160,7 +1195,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // using the old conglomerate id before we commit our DD changes.
 		//
 		dm.invalidateFor(td, DependencyManager.COMPRESS_TABLE, lcc);
-
 
 		rl = compressHeapCC.newRowLocationTemplate();
 
@@ -1176,22 +1210,35 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		/* Set up index info */
 		getAffectedIndexes(activation);
+
 		// Get an array of RowLocation template
 		compressRL = new RowLocation[bulkFetchSize];
-		indexRows = new ExecIndexRow[numIndexes];
-		if (! compressTable)
+		indexRows  = new ExecIndexRow[numIndexes];
+		if (!compressTable)
 		{
+            // must be a drop column, thus the number of columns in the
+            // new template row and the collation template is one less.
 			ExecRow newRow = 
                 activation.getExecutionFactory().getValueRow(
                     emptyHeapRow.nColumns() - 1);
 
+            int[]   new_collation_ids = new int[collation_ids.length - 1];
+
 			for (int i = 0; i < newRow.nColumns(); i++)
 			{
-				newRow.setColumn(i + 1, i < columnPosition - 1 ?
-										 emptyHeapRow.getColumn(i + 1) :
-										 emptyHeapRow.getColumn(i + 1 + 1));
+				newRow.setColumn(
+                    i + 1, 
+                    i < droppedColumnPosition - 1 ?
+                        emptyHeapRow.getColumn(i + 1) :
+                        emptyHeapRow.getColumn(i + 1 + 1));
+
+                new_collation_ids[i] = 
+                    collation_ids[
+                        (i < droppedColumnPosition - 1) ? i : (i + 1)];
 			}
+
 			emptyHeapRow = newRow;
+			collation_ids = new_collation_ids;
 		}
 		setUpAllSorts(emptyHeapRow, rl);
 
@@ -1216,13 +1263,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 "heap",
                 emptyHeapRow.getRowArray(),
                 null, //column sort order - not required for heap
-                (int[]) null, // TODO-COLLATION - implement correct setting of
-                              // collation ids.  This is made more tricky as
-                              // this routine could be called by either compress
-                              // table where the heap ids are same as old heap
-                              // or drop table where the collation ids need
-                              // to be shuffled about.  Setting default 
-                              // collation for now.
+                collation_ids,
                 properties,
                 TransactionController.IS_DEFAULT,
                 this,
@@ -1271,17 +1312,17 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		 * back the same conglomerate number
 		 */
 		// Get the ConglomerateDescriptor for the heap
-		long oldHeapConglom = td.getHeapConglomerateId();
-		ConglomerateDescriptor cd = td.getConglomerateDescriptor(oldHeapConglom);
+		long oldHeapConglom       = td.getHeapConglomerateId();
+		ConglomerateDescriptor cd = 
+            td.getConglomerateDescriptor(oldHeapConglom);
 
 		// Update sys.sysconglomerates with new conglomerate #
 		dd.updateConglomerateDescriptor(cd, newHeapConglom, tc);
+
 		// Drop the old conglomerate
 		tc.dropConglomerate(oldHeapConglom);
 		cleanUp();
 	}
-
-
 	
 	/* 
 	 * TRUNCATE TABLE  TABLENAME; (quickly removes all the rows from table and
@@ -1508,23 +1549,27 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 	}
 
-	private void updateIndex(long newHeapConglom, DataDictionary dd,
-							 int index, long[] newIndexCongloms)
+	private void updateIndex(
+    long            newHeapConglom, 
+    DataDictionary  dd,
+    int             index, 
+    long[]          newIndexCongloms)
 		throws StandardException
 	{
-		ConglomerateController indexCC;
 		Properties properties = new Properties();
-		ConglomerateDescriptor cd;
+
 		// Get the ConglomerateDescriptor for the index
-		cd = td.getConglomerateDescriptor(indexConglomerateNumbers[index]);
+		ConglomerateDescriptor cd = 
+            td.getConglomerateDescriptor(indexConglomerateNumbers[index]);
 
 		// Build the properties list for the new conglomerate
-		indexCC = tc.openConglomerate(
-							indexConglomerateNumbers[index],
-                            false,
-                            TransactionController.OPENMODE_FORUPDATE,
-                            TransactionController.MODE_TABLE,
-                            TransactionController.ISOLATION_SERIALIZABLE);
+		ConglomerateController indexCC = 
+            tc.openConglomerate(
+                indexConglomerateNumbers[index],
+                false,
+                TransactionController.OPENMODE_FORUPDATE,
+                TransactionController.MODE_TABLE,
+                TransactionController.ISOLATION_SERIALIZABLE);
 
 		// Get the properties on the old index
 		indexCC.getInternalTablePropertySet(properties);
@@ -1536,62 +1581,67 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		properties.put("baseConglomerateId", Long.toString(newHeapConglom));
 		if (cd.getIndexDescriptor().isUnique())
 		{
-			properties.put("nUniqueColumns", 
-						   Integer.toString(indexRowLength - 1));
+			properties.put(
+                "nUniqueColumns", Integer.toString(indexRowLength - 1));
 		}
 		else
 		{
-			properties.put("nUniqueColumns", 
-						   Integer.toString(indexRowLength));
+			properties.put(
+                "nUniqueColumns", Integer.toString(indexRowLength));
 		}
-		properties.put("rowLocationColumn", 
-						Integer.toString(indexRowLength - 1));
-		properties.put("nKeyFields", Integer.toString(indexRowLength));
+		properties.put(
+            "rowLocationColumn", Integer.toString(indexRowLength - 1));
+		properties.put(
+            "nKeyFields", Integer.toString(indexRowLength));
 
 		indexCC.close();
 
 		// We can finally drain the sorter and rebuild the index
-		// RESOLVE - all indexes are btrees right now
 		// Populate the index.
 		
-		RowLocationRetRowSource cCount = null;
-		boolean updateStatistics = false;
-		if(!truncateTable)
+		RowLocationRetRowSource cCount           = null;
+		boolean                 statisticsExist  = false;
+
+		if (!truncateTable)
 		{
 			sorters[index].completedInserts();
 			sorters[index] = null;
 
 			if (td.statisticsExist(cd))
 			{
-				cCount = new CardinalityCounter(tc.openSortRowSource(sortIds[index]));
-				updateStatistics = true;
+				cCount = 
+                    new CardinalityCounter(
+                            tc.openSortRowSource(sortIds[index]));
+
+				statisticsExist = true;
 			}
 			else
-				cCount = new CardinalityCounter(tc.openSortRowSource(sortIds[index]));
+            {
+				cCount = 
+                    new CardinalityCounter(
+                            tc.openSortRowSource(sortIds[index]));
+            }
 
-			newIndexCongloms[index] = tc.createAndLoadConglomerate(
-								   "BTREE",
-								   indexRows[index].getRowArray(),
-								   ordering[index],
-                                   (int[]) null, // TODO-COLLATION, implement 
-                                                 // collation support for alter
-                                                 // table.  Currently only
-                                                 // supports default collation
-                                                 // columns.
-								   properties,
-								   TransactionController.IS_DEFAULT,
-								   cCount,
-								   (long[]) null);
+            newIndexCongloms[index] = 
+                tc.createAndLoadConglomerate(
+                    "BTREE",
+                    indexRows[index].getRowArray(),
+                    ordering[index],
+                    collation[index],
+                    properties,
+                    TransactionController.IS_DEFAULT,
+                    cCount,
+                    (long[]) null);
 
 			//For an index, if the statistics already exist, then drop them.
 			//The statistics might not exist for an index if the index was
 			//created when the table was empty.
-			//At ALTER TABLE COMPRESS time, for both kinds of indexes 
-			//(ie one with preexisting statistics and with no statistics), 
-			//create statistics for them if the table is not empty. 
-			//DERBY-737 "SYSCS_UTIL.SYSCS_COMPRESS_TABLE should create
-			//statistics if they do not exist"
-			if (updateStatistics)
+            //
+            //For all alter table actions, including ALTER TABLE COMPRESS,
+			//for both kinds of indexes (ie. one with preexisting statistics 
+            //and with no statistics), create statistics for them if the table 
+            //is not empty. 
+			if (statisticsExist)
 				dd.dropStatisticsDescriptors(td.getUUID(), cd.getUUID(), tc);
 			
 			long numRows;
@@ -1601,12 +1651,21 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				for (int i = 0; i < c.length; i++)
 				{
 					StatisticsDescriptor statDesc =
-						new StatisticsDescriptor(dd, dd.getUUIDFactory().createUUID(),
-								cd.getUUID(), td.getUUID(), "I", new StatisticsImpl(numRows, c[i]),
-								i + 1);
-					dd.addDescriptor(statDesc, null, // no parent descriptor
+						new StatisticsDescriptor(
+                            dd, 
+                            dd.getUUIDFactory().createUUID(), 
+                            cd.getUUID(), 
+                            td.getUUID(), 
+                            "I", 
+                            new StatisticsImpl(numRows, c[i]), 
+                            i + 1);
+
+					dd.addDescriptor(
+                            statDesc, 
+                            null,   // no parent descriptor
 							DataDictionary.SYSSTATISTICS_CATALOG_NUM,
-							true, tc);	// no error on duplicate.
+							true,   // no error on duplicate.
+                            tc);	
 				}
 			}
 		}
@@ -1617,9 +1676,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                     "BTREE",
                     indexRows[index].getRowArray(),
                     ordering[index],
-                    (int[]) null, // TODO-COLLATION, implement alter table 
-                                  // collation passing, 
-                                  // currently only supports default collation.
+                    collation[index],
                     properties,
                     TransactionController.IS_DEFAULT);
 
@@ -1631,16 +1688,15 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 
 		/* Update the DataDictionary
-		 * RESOLVE - this will change in 1.4 because we will get
-		 * back the same conglomerate number
 		 *
 		 * Update sys.sysconglomerates with new conglomerate #, we need to
 		 * update all (if any) duplicate index entries sharing this same
 		 * conglomerate.
 		 */
 		dd.updateConglomerateDescriptor(
-				td.getConglomerateDescriptors(indexConglomerateNumbers[index]),
-				newIndexCongloms[index], tc);
+            td.getConglomerateDescriptors(indexConglomerateNumbers[index]),
+            newIndexCongloms[index], 
+            tc);
 
 		// Drop the old conglomerate
 		tc.dropConglomerate(indexConglomerateNumbers[index]);
@@ -1673,7 +1729,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				int[] baseColumnPositions = compressIRGs[i].baseColumnPositions();
 				int j;
 				for (j = 0; j < baseColumnPositions.length; j++)
-					if (baseColumnPositions[j] == columnPosition) break;
+					if (baseColumnPositions[j] == droppedColumnPosition) break;
 				if (j == baseColumnPositions.length)	// not related
 					continue;
 					
@@ -1721,9 +1777,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				int size = baseColumnPositions.length;
 				for (int k = 0; k < size; k++)
 				{
-					if (baseColumnPositions[k] > columnPosition)
+					if (baseColumnPositions[k] > droppedColumnPosition)
 						baseColumnPositions[k]--;
-					else if (baseColumnPositions[k] == columnPosition)
+					else if (baseColumnPositions[k] == droppedColumnPosition)
 					{
 						baseColumnPositions[k] = 0;		// mark it
 						reMakeArrays = true;
@@ -1789,10 +1845,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 							   RowLocation rl)
 		throws StandardException
     {
-		ordering = new ColumnOrdering[numIndexes][];
+		ordering        = new ColumnOrdering[numIndexes][];
+        collation       = new int[numIndexes][]; 
+		needToDropSort  = new boolean[numIndexes];
+		sortIds         = new long[numIndexes];
 
-		needToDropSort = new boolean[numIndexes];
-		sortIds = new long[numIndexes];
+        int[] base_table_collation_ids = td.getColumnCollationIds();
 
 		/* For each index, build a single index row and a sorter. */
 		for (int index = 0; index < numIndexes; index++)
@@ -1800,52 +1858,64 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			// create a single index row template for each index
 			indexRows[index] = compressIRGs[index].getIndexRowTemplate();
 
+
 			// Get an index row based on the base row
-			// (This call is only necessary here because we need to pass a template to the sorter.)
-			compressIRGs[index].getIndexRow(sourceRow, 
-											  rl, 
-											  indexRows[index],
-											  (FormatableBitSet) null);
+			// (This call is only necessary here because we need to pass a 
+            // template to the sorter.)
+			compressIRGs[index].getIndexRow(
+                sourceRow, rl, indexRows[index], (FormatableBitSet) null);
+
+            // Setup collation id array to be passed in on call to create index.
+            collation[index] = 
+                compressIRGs[index].getColumnCollationIds(
+                    td.getColumnDescriptorList());
 
 			/* For non-unique indexes, we order by all columns + the RID.
 			 * For unique indexes, we just order by the columns.
 			 * No need to try to enforce uniqueness here as
 			 * index should be valid.
 			 */
-			int[] baseColumnPositions = compressIRGs[index].baseColumnPositions();
-			boolean[] isAscending = compressIRGs[index].isAscending();
-			int numColumnOrderings;
-			SortObserver sortObserver = null;
+			int[]       baseColumnPositions = 
+                compressIRGs[index].baseColumnPositions();
+			boolean[]   isAscending         = 
+                compressIRGs[index].isAscending();
+			int         numColumnOrderings  = 
+                baseColumnPositions.length + 1;
+
 			/* We can only reuse the wrappers when doing an
 			 * external sort if there is only 1 index.  Otherwise,
 			 * we could get in a situation where 1 sort reuses a
 			 * wrapper that is still in use in another sort.
 			 */
 			boolean reuseWrappers = (numIndexes == 1);
-			numColumnOrderings = baseColumnPositions.length + 1;
-			sortObserver = new BasicSortObserver(false, false, 
-												 indexRows[index],
-												 reuseWrappers);
+
+			SortObserver    sortObserver = 
+                new BasicSortObserver(
+                        false, false, indexRows[index], reuseWrappers);
+
 			ordering[index] = new ColumnOrdering[numColumnOrderings];
 			for (int ii =0; ii < numColumnOrderings - 1; ii++) 
 			{
 				ordering[index][ii] = new IndexColumnOrder(ii, isAscending[ii]);
 			}
-			ordering[index][numColumnOrderings - 1] = new IndexColumnOrder(numColumnOrderings - 1);
+			ordering[index][numColumnOrderings - 1] = 
+                new IndexColumnOrder(numColumnOrderings - 1);
 
 			// create the sorters
-			sortIds[index] = tc.createSort(
-							   (Properties)null, 
-								indexRows[index].getRowArrayClone(),
-								ordering[index],
-								sortObserver,
-								false,			// not in order
-								estimatedRowCount,		// est rows	
-								-1				// est row size, -1 means no idea	
-								);
+			sortIds[index] = 
+                tc.createSort(
+                   (Properties)null, 
+                    indexRows[index].getRowArrayClone(),
+                    ordering[index],
+                    sortObserver,
+                    false,			        // not in order
+                    estimatedRowCount,		// est rows	
+                    -1				        // est row size, -1 means no idea	
+                    );
 		}
 	
         sorters = new SortController[numIndexes];
+
 		// Open the sorts
 		for (int index = 0; index < numIndexes; index++)
 		{
@@ -1897,16 +1967,25 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		if (validRow[currentCompressRow])
 		{
 			if (compressTable)
+            {
 				currentRow = baseRow[currentCompressRow];
+            }
 			else
 			{
 				if (currentRow == null)
-					currentRow = activation.getExecutionFactory().getValueRow(baseRowArray[currentCompressRow].length - 1);
+                {
+					currentRow = 
+                        activation.getExecutionFactory().getValueRow(
+                            baseRowArray[currentCompressRow].length - 1);
+                }
+
 				for (int i = 0; i < currentRow.nColumns(); i++)
 				{
-					currentRow.setColumn(i + 1, i < columnPosition - 1 ?
-										baseRow[currentCompressRow].getColumn(i+1) :
-										baseRow[currentCompressRow].getColumn(i+1+1));
+					currentRow.setColumn(
+                        i + 1, 
+                        i < droppedColumnPosition - 1 ?
+                            baseRow[currentCompressRow].getColumn(i+1) :
+                            baseRow[currentCompressRow].getColumn(i+1+1));
 				}
 			}
 			currentCompressRow++;

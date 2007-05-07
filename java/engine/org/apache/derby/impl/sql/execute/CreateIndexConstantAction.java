@@ -599,7 +599,8 @@ class CreateIndexConstantAction extends IndexConstantAction
 					indexType,
 					indexTemplateRow.getRowArray(),	// index row template
 					order, //colums sort order
-                    null,  // TODO-COLLATION, implement non-default collation
+                    indexRowGenerator.getColumnCollationIds(
+                        td.getColumnDescriptorList()),
 					indexProperties,
 					TransactionController.IS_DEFAULT, // not temporary
 					rowSource,

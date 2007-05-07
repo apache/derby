@@ -503,11 +503,14 @@ public class TableDescriptor extends TupleDescriptor
 	}
 
     /**
-     * Return an array of collation ids.
+     * Return an array of collation ids for this table.
      * <p>
      * Return an array of collation ids, one for each column in the
      * columnDescriptorList.  This is useful for passing collation id info
      * down to store, for instance in createConglomerate().
+     *
+     * This is only expected to get called during ddl, so object allocation
+     * is ok. 
      *
 	 * @exception  StandardException  Standard exception policy.
      **/

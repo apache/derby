@@ -133,6 +133,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                                     rowSources;
 	private	ScanController			bulkHeapSC;
 	private ColumnOrdering[][]		ordering;
+	private int[][]		            collation;
 	private SortController[]		sorters;
 	private	TemporaryRowHolderImpl	rowHolder;
 	private RowLocation				rl;
@@ -1635,15 +1636,18 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		int					numIndexes = constants.irgs.length;
 		int					numColumns = td.getNumberOfColumns();
 
-		ordering = new ColumnOrdering[numIndexes][];
-		needToDropSort = new boolean[numIndexes];
-		sortIds = new long[numIndexes];
-		rowSources = new RowLocationRetRowSource[numIndexes];
+		ordering        = new ColumnOrdering[numIndexes][];
+        collation       = new int[numIndexes][];
+		needToDropSort  = new boolean[numIndexes];
+		sortIds         = new long[numIndexes];
+		rowSources      = new RowLocationRetRowSource[numIndexes];
 		// indexedCols is 1-based
-		indexedCols = new FormatableBitSet(numColumns + 1);
+		indexedCols     = new FormatableBitSet(numColumns + 1);
 
 
-		/* For each index, build a single index row and a sorter. */
+		/* For each index, build a single index row, collation templage, 
+         * and a sorter. 
+         */
 		for (int index = 0; index < numIndexes; index++)
 		{
 			// Update the bit map of indexed columns
@@ -1658,7 +1662,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			indexRows[index] = constants.irgs[index].getIndexRowTemplate();
 
 			// Get an index row based on the base row
-			// (This call is only necessary here because we need to pass a template to the sorter.)
+			// (This call is only necessary here because we need to 
+            // pass a template to the sorter.)
 			constants.irgs[index].getIndexRow(sourceRow, 
 											  rl, 
 											  indexRows[index],
@@ -1669,13 +1674,18 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			 * We create a unique index observer for unique indexes
 			 * so that we can catch duplicate key
 			 */
-			ConglomerateDescriptor cd;
+
 			// Get the ConglomerateDescriptor for the index
-			cd = td.getConglomerateDescriptor(constants.indexCIDS[index]);
-			int[] baseColumnPositions = constants.irgs[index].baseColumnPositions();
-			boolean[] isAscending = constants.irgs[index].isAscending();
+			ConglomerateDescriptor cd = 
+                td.getConglomerateDescriptor(constants.indexCIDS[index]);
+
+			int[] baseColumnPositions = 
+                constants.irgs[index].baseColumnPositions();
+			boolean[] isAscending     = constants.irgs[index].isAscending();
+           
 			int numColumnOrderings;
 			SortObserver sortObserver = null;
+
 			/* We can only reuse the wrappers when doing an
 			 * external sort if there is only 1 index.  Otherwise,
 			 * we could get in a situation where 1 sort reuses a
@@ -1688,24 +1698,28 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				String[] columnNames = getColumnNames(baseColumnPositions);
 
 				String indexOrConstraintName = cd.getConglomerateName();
-				if (cd.isConstraint()) // so, the index is backing up a constraint
+				if (cd.isConstraint()) 
 				{
-					ConstraintDescriptor conDesc = dd.getConstraintDescriptor(td,
-                                                                      cd.getUUID());
+                    // so, the index is backing up a constraint
+
+					ConstraintDescriptor conDesc = 
+                        dd.getConstraintDescriptor(td, cd.getUUID());
+
 					indexOrConstraintName = conDesc.getConstraintName();
 				}
-				sortObserver = new UniqueIndexSortObserver(
-														false, // don't clone rows
-														cd.isConstraint(), 
-														indexOrConstraintName,
-														indexRows[index],
-														reuseWrappers,
-														td.getName());
+				sortObserver = 
+                    new UniqueIndexSortObserver(
+                            false, // don't clone rows
+                            cd.isConstraint(), 
+                            indexOrConstraintName,
+                            indexRows[index],
+                            reuseWrappers,
+                            td.getName());
 			}
 			else
 			{
 				numColumnOrderings = baseColumnPositions.length + 1;
-				sortObserver = new BasicSortObserver(false, false, 
+				sortObserver       = new BasicSortObserver(false, false, 
 													 indexRows[index],
 													 reuseWrappers);
 			}
@@ -1715,18 +1729,29 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				ordering[index][ii] = new IndexColumnOrder(ii, isAscending[ii]);
 			}
 			if (numColumnOrderings > isAscending.length)
-				ordering[index][isAscending.length] = new IndexColumnOrder(isAscending.length);
+            {
+				ordering[index][isAscending.length] = 
+                    new IndexColumnOrder(isAscending.length);
+            }
+
+            // set collation templates for later index creation 
+            // call (createAndLoadConglomerate())
+            collation[index] = 
+                constants.irgs[index].getColumnCollationIds(
+                    td.getColumnDescriptorList());
 
 			// create the sorters
-			sortIds[index] = tc.createSort(
-								(Properties)null, 
-								indexRows[index].getRowArrayClone(),
-								ordering[index],
-								sortObserver,
-								false,			// not in order
-								(int) sourceResultSet.getEstimatedRowCount(),		// est rows	
-								-1				// est row size, -1 means no idea	
-								);
+			sortIds[index] = 
+                tc.createSort(
+                    (Properties)null, 
+                    indexRows[index].getRowArrayClone(),
+                    ordering[index],
+                    sortObserver,
+                    false,			                             // not in order
+                    (int) sourceResultSet.getEstimatedRowCount(), // est rows	
+                    -1				// est row size, -1 means no idea	
+                    );
+
 			needToDropSort[index] = true;
 		}
 
@@ -1735,7 +1760,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		// Open the sorts
 		for (int index = 0; index < numIndexes; index++)
 		{
-			sorters[index] = tc.openSort(sortIds[index]);
+			sorters[index]        = tc.openSort(sortIds[index]);
 			needToDropSort[index] = true;
 		}
 	}
@@ -1821,13 +1846,15 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			// Populate the index.
 			sorters[index].completedInserts();
 			sorters[index] = null;
-			rowSources[index] = new CardinalityCounter(tc.openSortRowSource(sortIds[index]));
+			rowSources[index] = 
+                new CardinalityCounter(tc.openSortRowSource(sortIds[index]));
+
 			newIndexCongloms[index] = 
                 tc.createAndLoadConglomerate(
                     "BTREE",
                     indexRows[index].getRowArray(),
                     ordering[index],
-                    (int[]) null, // TODO-COLLATION, set non default collation if necessary
+                    collation[index],
                     properties,
                     TransactionController.IS_DEFAULT,
                     rowSources[index],
@@ -2126,7 +2153,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		}
 
 		// We can finally create the partial base row
-		baseRows = activation.getExecutionFactory().getValueRow(numReferencedColumns);
+		baseRows = 
+            activation.getExecutionFactory().getValueRow(numReferencedColumns);
 
 		// Fill in each base row with nulls of the correct data type
 		int colNumber = 0;
@@ -2154,7 +2182,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			indexRows[index] = constants.irgs[index].getIndexRowTemplate();
 
 			// Get an index row based on the base row
-			// (This call is only necessary here because we need to pass a template to the sorter.)
+			// (This call is only necessary here because we need to pass a 
+            // template to the sorter.)
 			constants.irgs[index].getIndexRow(baseRows, 
 											  rl, 
 											  indexRows[index],
@@ -2178,24 +2207,26 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				String[] columnNames = getColumnNames(baseColumnPositions);
 
 				String indexOrConstraintName = cd.getConglomerateName();
-				if (cd.isConstraint()) // so, the index is backing up a constraint
+				if (cd.isConstraint()) 
 				{
-					ConstraintDescriptor conDesc = dd.getConstraintDescriptor(td,
-                                                                      cd.getUUID());
+                    // so, the index is backing up a constraint
+					ConstraintDescriptor conDesc = 
+                        dd.getConstraintDescriptor(td, cd.getUUID());
 					indexOrConstraintName = conDesc.getConstraintName();
 				}
-				sortObserver = new UniqueIndexSortObserver(
-														false, // don't clone rows
-														cd.isConstraint(), 
-														indexOrConstraintName,
-														indexRows[index],
-														true,
-														td.getName());
+				sortObserver = 
+                    new UniqueIndexSortObserver(
+                            false, // don't clone rows
+                            cd.isConstraint(), 
+                            indexOrConstraintName,
+                            indexRows[index],
+                            true,
+                            td.getName());
 			}
 			else
 			{
 				numColumnOrderings = baseColumnPositions.length + 1;
-				sortObserver = new BasicSortObserver(false, false, 
+				sortObserver       = new BasicSortObserver(false, false, 
 													 indexRows[index],
 													 true);
 			}
@@ -2205,18 +2236,23 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				ordering[index][ii] = new IndexColumnOrder(ii, isAscending[ii]);
 			}
 			if (numColumnOrderings > isAscending.length)
-				ordering[index][isAscending.length] = new IndexColumnOrder(isAscending.length);
+            {
+				ordering[index][isAscending.length] = 
+                    new IndexColumnOrder(isAscending.length);
+            }
 
 			// create the sorters
-			sortIds[index] = tc.createSort(
-								(Properties)null, 
-								indexRows[index].getRowArrayClone(),
-								ordering[index],
-								sortObserver,
-								false,			// not in order
-								rowCount,		// est rows	
-								-1				// est row size, -1 means no idea	
-								);
+			sortIds[index] = 
+                tc.createSort(
+                    (Properties)null, 
+                    indexRows[index].getRowArrayClone(),
+                    ordering[index],
+                    sortObserver,
+                    false,			// not in order
+                    rowCount,		// est rows	
+                    -1				// est row size, -1 means no idea	
+                    );
+
 			needToDropSort[index] = true;
 		}
 
@@ -2279,14 +2315,13 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			indexCC.close();
 
 			// We can finally drain the sorter and rebuild the index
-			// RESOLVE - all indexes are btrees right now
 			// Populate the index.
 			newIndexCongloms[index] = 
                 tc.createAndLoadConglomerate(
                     "BTREE",
                     indexRows[index].getRowArray(),
                     null, //default column sort order 
-                    (int[]) null, // TODO-COLLATION - set collation based on collation of original index.
+                    collation[index],
                     properties,
                     TransactionController.IS_DEFAULT,
                     rowSources[index],
@@ -2299,8 +2334,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			 * for those indexes need to be updated with the new number.
 			 */
 			dd.updateConglomerateDescriptor(
-						td.getConglomerateDescriptors(constants.indexCIDS[index]),
-						newIndexCongloms[index], tc);
+                td.getConglomerateDescriptors(constants.indexCIDS[index]),
+                newIndexCongloms[index], tc);
 
 			// Drop the old conglomerate
 			tc.dropConglomerate(constants.indexCIDS[index]);
@@ -2318,33 +2353,34 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	{
 		if (tableScan == null)
 		{
-			tableScan = new BulkTableScanResultSet(
-							conglomId,
-							tc.getStaticCompiledConglomInfo(conglomId),
-							activation,
-							new MyRowAllocator(fullTemplate),	// result row allocator
-							0,						// result set number
-							(GeneratedMethod)null, 	// start key getter
-							0, 						// start search operator
-							(GeneratedMethod)null,	// stop key getter
-							0, 						// start search operator
-							false,
-							(Qualifier[][])null,	// qualifiers
-							"tableName",
-							(String)null,
-							(String)null,			// index name
-							false,					// is constraint
-							false,					// for update
-							-1,						// saved object for referenced bitImpl
-							-1,
-							tc.MODE_TABLE,
-							true,					// table locked
-							tc.ISOLATION_READ_COMMITTED,
-							LanguageProperties.BULK_FETCH_DEFAULT_INT,	// rows per read
-							false,					// not a 1 row per scan
-							0d,						// estimated rows
-							0d 					// estimated cost
-							);
+			tableScan = 
+                new BulkTableScanResultSet(
+                    conglomId,
+                    tc.getStaticCompiledConglomInfo(conglomId),
+                    activation,
+                    new MyRowAllocator(fullTemplate),	// result row allocator
+                    0,						// result set number
+                    (GeneratedMethod)null, 	// start key getter
+                    0, 						// start search operator
+                    (GeneratedMethod)null,	// stop key getter
+                    0, 						// start search operator
+                    false,
+                    (Qualifier[][])null,	// qualifiers
+                    "tableName",
+                    (String)null,
+                    (String)null,			// index name
+                    false,					// is constraint
+                    false,					// for update
+                    -1,						// saved object for referenced bitImpl
+                    -1,
+                    tc.MODE_TABLE,
+                    true,					// table locked
+                    tc.ISOLATION_READ_COMMITTED,
+                    LanguageProperties.BULK_FETCH_DEFAULT_INT,	// rows per read
+                    false,					// not a 1 row per scan
+                    0d,						// estimated rows
+                    0d 					// estimated cost
+                    );
 			tableScan.openCore();
 		}
 		else

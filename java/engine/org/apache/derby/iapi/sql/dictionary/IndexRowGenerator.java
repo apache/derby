@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
@@ -29,8 +30,9 @@ import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 
-import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
@@ -241,6 +243,41 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 		}
 		return false;
 	}
+
+    /**
+     * Return an array of collation ids for this table.
+     * <p>
+     * Return an array of collation ids, one for each column in the
+     * columnDescriptorList.  This is useful for passing collation id info
+     * down to store, for instance in createConglomerate() to create
+     * the index.
+     *
+     * This is only expected to get called during ddl, so object allocation
+     * is ok. 
+     *
+	 * @param columnList ColumnDescriptors describing the base table.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public int[] getColumnCollationIds(ColumnDescriptorList columnList)
+		throws StandardException
+    {
+        int[] base_cols     = id.baseColumnPositions();
+        int[] collation_ids = new int[base_cols.length + 1];
+
+		for (int i = 0; i < base_cols.length; i++)
+		{
+            collation_ids[i] =
+				columnList.elementAt(
+                    base_cols[i] - 1).getType().getCollationType();
+		}
+
+        // row location column at end is always basic collation type.
+        collation_ids[collation_ids.length - 1] = 
+            StringDataValue.COLLATION_TYPE_UCS_BASIC; 
+
+		return(collation_ids);
+    }
 
 		 
 	/**
