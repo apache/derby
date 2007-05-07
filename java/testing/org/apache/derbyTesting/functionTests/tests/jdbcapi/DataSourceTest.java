@@ -1027,7 +1027,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         Connection conn4 = xac4.getConnection();
         assertTrue(conn4.getAutoCommit());
 
-        Statement s4 = conn4.createStatement();
+        Statement s4 = conn4.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.CLOSE_CURSORS_AT_COMMIT);
         ResultSet rs4 = s4.executeQuery("select i from autocommitxastart");
         rs4.next();
         assertEquals(1, rs4.getInt(1));
@@ -1050,12 +1050,12 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // appear to be closed, and we actually get a value.
         try {
             rs4.next();
-            rs4.getInt(1);
-            if (usingEmbedded())
-                fail ("expected an exception indicating resultset is closed.");
+            rs4.getInt(1);            
+            fail ("expected an exception indicating resultset is closed.");
         } catch (SQLException sqle) {
-            // expect 08003 - No current connection (or similar).
-            assertSQLState("08003",sqle);
+            // Embedded gets 08003. No current connection DERBY-2620        	
+        	if (usingDerbyNetClient())
+        		assertSQLState("XCL16",sqle);
         }
 
         conn4.setAutoCommit(false);
