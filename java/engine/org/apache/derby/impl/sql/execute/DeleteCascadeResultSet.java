@@ -142,9 +142,10 @@ public class DeleteCascadeResultSet extends DeleteResultSet
 			runFkChecker(false); //check for all constraint violations
 			rowChangerFinish();
 			fireAfterTriggers();
-			cleanUp();
 		}finally
 		{
+			cleanUp();
+
 			//clear the parent result sets hash table
 			activation.clearParentResultSets();
 		}

@@ -641,6 +641,9 @@ class DeleteResultSet extends DMLWriteResultSet
 			deferredBaseCC.close();
 		deferredBaseCC = null;
 
+		if (rc != null) {
+			rc.close();
+		}
 		super.close();
 	}
 
