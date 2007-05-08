@@ -22,6 +22,8 @@
 package org.apache.derbyTesting.functionTests.tests.store;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.JDBC;
+
 import junit.framework.Test; 
 import junit.framework.TestSuite;
 
@@ -50,6 +52,15 @@ public class _Suite extends BaseTestCase  {
         TestSuite suite = new TestSuite("store");
         
         suite.addTest(BootAllTest.suite());
+
+        // Encryption only supported for Derby in J2SE/J2EE environments.
+        // J2ME (JSR169) does not support encryption.
+        if (JDBC.vmSupportsJDBC3()) {
+            // Add tests of basic functionality on encrypted databases.
+            suite.addTest(EncryptionKeyAESTest.suite());
+            suite.addTest(EncryptionKeyBlowfishTest.suite());
+            suite.addTest(EncryptionKeyDESTest.suite());
+        }
         
         return suite;
     }
