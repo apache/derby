@@ -33,6 +33,7 @@ import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 
+import java.util.List;
 import java.util.Stack;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -490,6 +491,17 @@ public class utilMain implements java.security.PrivilegedAction {
 					throw se;
 				}
 				result.closeStatement();
+            } else if (result.isMultipleResultSetResult()) {
+              List resultSets = result.getMultipleResultSets();
+              try {
+                JDBCDisplayUtil.DisplayMultipleResults(out,resultSets,
+                                     connEnv[currCE].getConnection(),
+                                     result.getColumnDisplayList(),
+                                     result.getColumnWidthList());
+              } catch (SQLException se) {
+                result.closeStatement();
+                throw se;
+              }
 			} else if (result.isException()) {
 				JDBCDisplayUtil.ShowException(out,result.getException());
 			}

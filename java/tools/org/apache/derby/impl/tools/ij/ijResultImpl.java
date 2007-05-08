@@ -28,6 +28,7 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Vector;
+import java.util.List;
 
 /**
  * This is an empty impl for reuse of code.
@@ -42,12 +43,14 @@ abstract class ijResultImpl implements ijResult {
 	public boolean isVector() { return false; }
 	public boolean isMulti() { return false; }
 	public boolean isException() { return false; }
+	public boolean isMultipleResultSetResult(){ return false; }
 	public boolean hasWarnings() throws SQLException { return getSQLWarnings()!=null; }
 
 	public Connection getConnection() { return null; }
 	public Statement getStatement() { return null; }
 	public int getUpdateCount() throws SQLException { return -1; }
 	public ResultSet getResultSet() throws SQLException { return null; }
+	public List getMultipleResultSets() { return null; }
 	public ResultSet getNextRowOfResultSet() { return null; }
 	public Vector getVector() { return null; }
 	public SQLException getException() { return null; }
@@ -68,6 +71,9 @@ abstract class ijResultImpl implements ijResult {
 		if (isVector()) return LocalizedResource.getMessage("IJ_Vec0",getVector().toString());
 		if (isMulti()) return LocalizedResource.getMessage("IJ_Mul0",getVector().toString());
 		if (isException()) return LocalizedResource.getMessage("IJ_Exc0",getException().toString());
+		if (isMultipleResultSetResult())
+			return LocalizedResource.getMessage("IJ_MRS0",
+									    getMultipleResultSets().toString());
 		try {
 			if (isResultSet()) return LocalizedResource.getMessage("IJ_Rse0",getStatement().toString());
 		} catch(SQLException se) {

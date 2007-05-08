@@ -142,6 +142,11 @@ TABLE_SCHEM         |TABLE_NAME                    |REMARKS
 ------------------------------------------------------------------------
 USER1               |T3                            |                    
 1 row selected
+ij> SHOW INDEXES IN APP;
+TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
+----------------------------------------------------------------------------
+T1                  |TEST                |true  |3   |A   |NULL    |NULL    
+1 row selected
 ij> SHOW INDEXES FROM APP.t1;
 TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
 ----------------------------------------------------------------------------

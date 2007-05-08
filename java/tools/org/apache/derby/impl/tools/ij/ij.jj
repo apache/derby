@@ -64,6 +64,8 @@ import java.io.IOException;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Locale;
+import java.util.List;
+import java.util.ArrayList;
 
 
 /**
@@ -642,51 +644,129 @@ class ij {
 	   Return a resultset of indexes for the given table or schema
 
 	   @param schema  schema to find indexes for
-	   @param table   table to find indexes for
-	 */
-	public ijResult showIndexes(String schema, String table) throws SQLException {
-		ResultSet rs = null;
-		try {
-			haveConnection();
-			verifyTableExists(schema, table);
+	   @param table the exact name of the table to find indexes for
+	*/
+    private ResultSet getIndexInfoForTable(String schema, String table) 
+      throws SQLException {
 
-			DatabaseMetaData dbmd = theConnection.getMetaData();
-			rs = dbmd.getIndexInfo(null, schema, table, false, true);
+        ResultSet rs = null;
+        try {
+            haveConnection();
+            verifyTableExists(schema, table);
 
-			int[] displayColumns = new int[] {
-				rs.findColumn("TABLE_SCHEM"),
-				rs.findColumn("TABLE_NAME"),
-				rs.findColumn("COLUMN_NAME"),
-				rs.findColumn("NON_UNIQUE"),
-				rs.findColumn("TYPE"),
-				rs.findColumn("ASC_OR_DESC"),
-				rs.findColumn("CARDINALITY"),
-				rs.findColumn("PAGES"),
-			};
-			int[] columnWidths = new int[] {
-				20,
-				20,
-				20,
-				6,
-				4,
-				4,
-				8,
-				8,
-			};
+            DatabaseMetaData dbmd = theConnection.getMetaData();
+            rs = dbmd.getIndexInfo(null, schema, table, false, true);
 
-			if(schema!=null) {
-				displayColumns = intArraySubset(displayColumns, 1, 
-												displayColumns.length);
-				columnWidths   = intArraySubset(columnWidths, 1, 
-												columnWidths.length);
-			}
-			return new ijResultSetResult(rs, displayColumns, columnWidths);
-		} catch (SQLException e) {
-			if(rs!=null)
-				rs.close();
-			throw e;
-		}
-	}
+        } catch (SQLException e) {
+            if(rs!=null)
+                rs.close();
+            throw e;
+        }
+        return rs;
+    }
+
+    /**
+     * Used by showIndexes to get columns in correct order
+     */
+    private int[] getDisplayColumnsForIndex(String schema, ResultSet rs)
+        throws SQLException{
+        int[] displayColumns = new int[] {
+            rs.findColumn("TABLE_SCHEM"),
+            rs.findColumn("TABLE_NAME"),
+            rs.findColumn("COLUMN_NAME"),
+            rs.findColumn("NON_UNIQUE"),
+            rs.findColumn("TYPE"),
+            rs.findColumn("ASC_OR_DESC"),
+            rs.findColumn("CARDINALITY"),
+            rs.findColumn("PAGES"),
+        };
+        if(schema!=null) {
+            displayColumns = intArraySubset(displayColumns, 1, 
+                                            displayColumns.length);
+        }
+        return displayColumns;
+    }
+
+    /**
+     * Used by showIndexes to get correct column widths
+     */
+    private int[] getColumnWidthsForIndex(String schema){
+        int[] columnWidths = new int[] {
+            20,
+            20,
+            20,
+            6,
+            4,
+            4,
+            8,
+            8,
+        };
+        if(schema!=null) {
+            columnWidths = intArraySubset(columnWidths, 1, 
+                                            columnWidths.length);
+        }
+        return columnWidths;
+    }
+
+    /**
+     * Used to show all indices
+     * @param schema the schema indices are shown from. 
+     * @param table the table name to show indices for. If null, all
+     * indices of the schema are returned.
+     */
+    public ijResult showIndexes(String schema, String table) throws SQLException {
+          
+        ijResult result = null;
+
+        int[] displayColumns = null;
+        int[] columnWidths = null;
+
+        try {
+            if (table != null) {
+                ResultSet rs = getIndexInfoForTable(schema, table);
+                displayColumns = getDisplayColumnsForIndex(schema, rs);
+                columnWidths = getColumnWidthsForIndex(schema);
+                result = new ijResultSetResult(rs, displayColumns,
+                                               columnWidths); 
+            }
+            else {
+                /* DatabaseMetaData#getIndexInfo requires exact table names.
+                 * If table is null, we must first get all table names in
+                 * the appropriate schema, and then get all indices for each
+                 * of these. 
+                 */
+                haveConnection();
+                verifyTableExists(schema, table);
+
+                DatabaseMetaData dbmd = theConnection.getMetaData();
+                ResultSet tablers = dbmd.getTables(null,schema,null,null); 
+              
+                List resultSets = new ArrayList();
+                boolean firstIteration = true;
+                ResultSet current_rs = null;
+                while (tablers.next()){
+                    String tableName = tablers.getString("TABLE_NAME");
+                    current_rs = getIndexInfoForTable(schema, tableName);
+                    resultSets.add(current_rs);
+
+                    if (firstIteration) {
+                        displayColumns = getDisplayColumnsForIndex(schema,
+                                                                   current_rs);
+                        columnWidths = getColumnWidthsForIndex(schema);
+                        firstIteration = false;
+                    }              
+                }
+                result = new ijMultipleResultSetResult(resultSets,
+                                                       displayColumns,
+                                                       columnWidths);
+            }
+            return result;
+        } catch (SQLException e) {
+            if(result!=null)
+                result.closeStatement();
+            throw e;
+        }
+    }
 
 	/**
 	   Return a resultset of procedures from database metadata

@@ -28,6 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Vector;
+import java.util.List;
 
 /**
  * This is a wrapper for results coming out of the
@@ -44,12 +45,14 @@ interface ijResult {
 	boolean isVector();
 	boolean isMulti();
 	boolean isException();
+	boolean isMultipleResultSetResult();
 	boolean hasWarnings() throws SQLException ;
 
 	Connection getConnection();
 	Statement getStatement();
 	int getUpdateCount() throws SQLException;
 	ResultSet getResultSet() throws SQLException;
+	List getMultipleResultSets();
 	ResultSet getNextRowOfResultSet();
 	Vector getVector();
 	SQLException getException();

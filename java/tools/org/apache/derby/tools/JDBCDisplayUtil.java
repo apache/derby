@@ -39,6 +39,8 @@ import java.sql.Types;
 
 import java.util.Properties;
 import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
@@ -287,15 +289,34 @@ public class JDBCDisplayUtil {
 	}
 
 
-	/**
-		@param out the place to write to
-		@param rs the ResultSet to display
-		@param conn the Connection against which the ResultSet was retrieved
-	    @param displayColumns Column numbers to display, or null if all
-	    @param displayColumnWidths Column widths, in characters, if displayColumns is specified.
+    /**
+       @param out the place to write to
+       @param resultSets List of ResultSet to display
+       @param conn the Connection against which the ResultSet was retrieved
+       @param displayColumns Column numbers to display, or null if all
+       @param displayColumnWidths Column widths, in characters, if displayColumns is specified.
 
-		@exception SQLException on JDBC access failure
-	 */
+       @exception SQLException on JDBC access failure
+    */
+    static public void DisplayMultipleResults(PrintWriter out, List resultSets,
+                                              Connection conn,
+                                              int[] displayColumns,
+                                              int[] displayColumnWidths)
+        throws SQLException
+    {
+        indent_DisplayResults( out, resultSets, conn, 0, displayColumns, 
+                               displayColumnWidths);
+    }
+
+    /**
+       @param out the place to write to
+       @param rs the ResultSet to display
+       @param conn the Connection against which the ResultSet was retrieved
+       @param displayColumns Column numbers to display, or null if all
+       @param displayColumnWidths Column widths, in characters, if displayColumns is specified.
+
+       @exception SQLException on JDBC access failure
+    */
 	static public void DisplayResults(PrintWriter out, ResultSet rs, Connection conn,
 									  int[] displayColumns, int[] displayColumnWidths)
 		throws SQLException
@@ -304,66 +325,90 @@ public class JDBCDisplayUtil {
 							   displayColumnWidths);
 	}
 
-	static private void indent_DisplayResults
-	(PrintWriter out, ResultSet rs, Connection conn, int indentLevel, 
-	 int[] displayColumns, int[] displayColumnWidths)
-		throws SQLException {
-		ResultSetMetaData rsmd = rs.getMetaData();
-		checkNotNull(rsmd, "ResultSetMetaData");
-		Vector nestedResults;
-    int numberOfRowsSelected = 0;
+    static private void indent_DisplayResults
+        (PrintWriter out, ResultSet rs, Connection conn, int indentLevel, 
+         int[] displayColumns, int[] displayColumnWidths)
+        throws SQLException {
+        List resultSets = new ArrayList();
+        resultSets.add(rs);
+        indent_DisplayResults( out, resultSets, conn, 0, displayColumns, 
+                               displayColumnWidths);
+    }
 
-		// autocommit must be off or the nested cursors
-		// are closed when the outer statement completes.
-		if (!conn.getAutoCommit())
-			nestedResults = new Vector();
-		else
-			nestedResults = null;
+    static private void indent_DisplayResults
+        (PrintWriter out, List resultSets, Connection conn, int indentLevel, 
+         int[] displayColumns, int[] displayColumnWidths)
+        throws SQLException {
 
-		if(displayColumnWidths == null)
-			displayColumnWidths = getColumnDisplayWidths(rsmd, displayColumns,true);
-		
-		int len = indent_DisplayBanner(out,rsmd, indentLevel, displayColumns,
-									   displayColumnWidths);
+        ResultSetMetaData rsmd = null;
 
-		// When displaying rows, keep going past errors
-		// unless/until the maximum # of errors is reached.
-		boolean doNext = true;
-		int retry = 0;
-		while (doNext) {
-			try {
-				doNext = rs.next();
-				if (doNext) {
+        //get metadata from the first ResultSet
+        if (resultSets != null && resultSets.size() > 0)
+			rsmd = ((ResultSet)resultSets.get(0)).getMetaData();
+    
+        checkNotNull(rsmd, "ResultSetMetaData");
+        Vector nestedResults;
+        int numberOfRowsSelected = 0;
 
-		    		DisplayRow(out, rs, rsmd, len, nestedResults, conn, 
-							   indentLevel, displayColumns, 
-							   displayColumnWidths);
-					ShowWarnings(out, rs);
-					numberOfRowsSelected++;
-				}
-			} catch (SQLException e) {
-				// REVISIT: might want to check the exception
-				// and for some, not bother with the retry.
-				if (++retry > MAX_RETRIES)
-					throw e;
-				else
-					ShowSQLException(out, e);
-			}
-		}
-		if (showSelectCount == true) {
-		   if (numberOfRowsSelected == 1) {
-			   out.println();
-			   indentedPrintLine( out, indentLevel, LocalizedResource.getMessage("UT_1RowSelec"));
-		   } else if (numberOfRowsSelected >= 0) {
-			   out.println();
-		       indentedPrintLine( out, indentLevel, 
-			LocalizedResource.getMessage("UT_0RowsSelec", LocalizedResource.getNumber(numberOfRowsSelected)));
-		   }
-		}
+        // autocommit must be off or the nested cursors
+        // are closed when the outer statement completes.
+        if (!conn.getAutoCommit())
+            nestedResults = new Vector();
+        else
+            nestedResults = null;
 
-		DisplayNestedResults(out, nestedResults, conn, indentLevel );
-		nestedResults = null;
-	}
+        if(displayColumnWidths == null)
+            displayColumnWidths = getColumnDisplayWidths(rsmd,
+														 displayColumns,true);
+
+        int len = indent_DisplayBanner(out,rsmd, indentLevel, displayColumns,
+                                       displayColumnWidths);
+
+        // When displaying rows, keep going past errors
+        // unless/until the maximum # of errors is reached.
+        int retry = 0;
+
+        ResultSet rs = null;
+        boolean doNext = true;
+        for (int i = 0; i< resultSets.size(); i++) {
+            rs = (ResultSet)resultSets.get(i);
+            doNext = true;
+            while (doNext){
+                try {
+                    doNext = rs.next();
+                    if (doNext) {
+                
+                        DisplayRow(out, rs, rsmd, len, nestedResults, conn, 
+                                   indentLevel, displayColumns, 
+                                   displayColumnWidths);
+                        ShowWarnings(out, rs);
+                        numberOfRowsSelected++;
+                    }
+                } catch (SQLException e) {
+                    // REVISIT: might want to check the exception
+                    // and for some, not bother with the retry.
+                    if (++retry > MAX_RETRIES)
+                        throw e;
+                    else
+                        ShowSQLException(out, e);
+                }
+            }
+        }
+        if (showSelectCount == true) {
+            if (numberOfRowsSelected == 1) {
+                out.println();
+                indentedPrintLine( out, indentLevel, LocalizedResource.getMessage("UT_1RowSelec"));
+            } else if (numberOfRowsSelected >= 0) {
+                out.println();
+                indentedPrintLine( out, indentLevel, 
+                                   LocalizedResource.getMessage("UT_0RowsSelec", LocalizedResource.getNumber(numberOfRowsSelected)));
+            }
+        }
+
+        DisplayNestedResults(out, nestedResults, conn, indentLevel );
+        nestedResults = null;
+    }
+
 
 	/**
 		@param out the place to write to
