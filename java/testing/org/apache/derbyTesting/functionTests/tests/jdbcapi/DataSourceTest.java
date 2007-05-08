@@ -1035,22 +1035,15 @@ public class DataSourceTest extends BaseJDBCTestCase {
         assertEquals(2, rs4.getInt(1));
 
         // XAResource().start should commit the transaction
-        try {
-            xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
-            xac4.getXAResource().end(xid4a, XAResource.TMSUCCESS);
-        } catch (XAException xae) {
-            fail("unexpected XAException on xac4.getXAResource.start or end");
-        } catch (Exception e) {
-            fail("unexpected Exception on xac4.getXAResource.start or end");
-        }
-        
+        xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
+        xac4.getXAResource().end(xid4a, XAResource.TMSUCCESS);
+
         // DERBY-1025.
         // With Embedded, this will give error: 08003 - No current connection
         // But with NetworkServer / DerbyNetClient, the transaction does not
         // appear to be closed, and we actually get a value.
         try {
             rs4.next();
-            rs4.getInt(1);            
             fail ("expected an exception indicating resultset is closed.");
         } catch (SQLException sqle) {
             // Embedded gets 08003. No current connection DERBY-2620        	
@@ -1087,12 +1080,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
             assertEquals(-9, xae.errorCode);
         }
         
-        try {
-            rs4.next();
-            assertEquals(3, rs4.getInt(1));
-        } catch (Exception e) {
-            fail (" unexpected exception");
-        }
+        rs4.next();
+        assertEquals(3, rs4.getInt(1));
         rs4.close();
 
         conn4.rollback();
@@ -1945,7 +1934,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // XAConnection
         try {
             rsx.next();
-            rsx.getInt(1);
             fail("rsx's connection not active id ");
         } catch (SQLException sqle) {
             assertSQLState("08003", sqle);
@@ -1955,7 +1943,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // the xa start.
         try {
             rsh.next();
-            rsh.getInt(1);
             fail("rsh's connection not active id ");
         } catch (SQLException sqle) {
             if (usingEmbedded())
@@ -2029,14 +2016,12 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // try again once the xa transaction has been committed.            
         try {
             rsx.next(); 
-            rsx.getInt(1);
             fail("rsx's connection not active id (B)");
         } catch (SQLException sqle) {
             assertSQLState("XCL16", sqle);
         }
         try {
             rsh.next(); 
-            rsh.getInt(1);
             fail ("rsh's should be closed (B)");
         } catch (SQLException sqle) {
             assertSQLState("XCL16", sqle);
