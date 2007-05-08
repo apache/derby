@@ -73,7 +73,7 @@ abstract class ijResultImpl implements ijResult {
 		if (isException()) return LocalizedResource.getMessage("IJ_Exc0",getException().toString());
 		if (isMultipleResultSetResult())
 			return LocalizedResource.getMessage("IJ_MRS0",
-									    getMultipleResultSets().toString());
+										getMultipleResultSets().toString());
 		try {
 			if (isResultSet()) return LocalizedResource.getMessage("IJ_Rse0",getStatement().toString());
 		} catch(SQLException se) {

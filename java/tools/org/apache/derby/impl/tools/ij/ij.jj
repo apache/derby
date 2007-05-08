@@ -709,12 +709,14 @@ class ij {
     }
 
     /**
-     * Used to show all indices
+     * Used to show all indices.
+     *
      * @param schema the schema indices are shown from. 
-     * @param table the table name to show indices for. If null, all
-     * indices of the schema are returned.
+     * @param table the table name to show indices for. If <code>null</code>,
+     *      all indices of the schema are returned.
      */
-    public ijResult showIndexes(String schema, String table) throws SQLException {
+    public ijResult showIndexes(String schema, String table)
+            throws SQLException {
           
         ijResult result = null;
 

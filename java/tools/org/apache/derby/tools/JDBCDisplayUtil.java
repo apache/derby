@@ -291,10 +291,12 @@ public class JDBCDisplayUtil {
 
     /**
        @param out the place to write to
-       @param resultSets List of ResultSet to display
-       @param conn the Connection against which the ResultSet was retrieved
-       @param displayColumns Column numbers to display, or null if all
-       @param displayColumnWidths Column widths, in characters, if displayColumns is specified.
+       @param resultSets list of <code>ResultSet</code>s to display
+       @param conn the connection against which the <code>ResultSet</code>s
+            were retrieved
+       @param displayColumns column numbers to display, <code>null</code> if all
+       @param displayColumnWidths column widths, in characters, if
+            <code>displayColumns</code> is specified
 
        @exception SQLException on JDBC access failure
     */
@@ -304,16 +306,18 @@ public class JDBCDisplayUtil {
                                               int[] displayColumnWidths)
         throws SQLException
     {
-        indent_DisplayResults( out, resultSets, conn, 0, displayColumns, 
+        indent_DisplayResults( out, resultSets, conn, 0, displayColumns,
                                displayColumnWidths);
     }
 
     /**
        @param out the place to write to
-       @param rs the ResultSet to display
-       @param conn the Connection against which the ResultSet was retrieved
-       @param displayColumns Column numbers to display, or null if all
-       @param displayColumnWidths Column widths, in characters, if displayColumns is specified.
+       @param rs the <code>ResultSet</code> to display
+       @param conn the connection against which the <code>ResultSet</code>
+            was retrieved
+       @param displayColumns column numbers to display, <code>null</code> if all
+       @param displayColumnWidths column widths, in characters, if
+            <code>displayColumns</code> is specified
 
        @exception SQLException on JDBC access failure
     */
@@ -326,7 +330,7 @@ public class JDBCDisplayUtil {
 	}
 
     static private void indent_DisplayResults
-        (PrintWriter out, ResultSet rs, Connection conn, int indentLevel, 
+        (PrintWriter out, ResultSet rs, Connection conn, int indentLevel,
          int[] displayColumns, int[] displayColumnWidths)
         throws SQLException {
         List resultSets = new ArrayList();
@@ -336,7 +340,7 @@ public class JDBCDisplayUtil {
     }
 
     static private void indent_DisplayResults
-        (PrintWriter out, List resultSets, Connection conn, int indentLevel, 
+        (PrintWriter out, List resultSets, Connection conn, int indentLevel,
          int[] displayColumns, int[] displayColumnWidths)
         throws SQLException {
 
@@ -344,8 +348,8 @@ public class JDBCDisplayUtil {
 
         //get metadata from the first ResultSet
         if (resultSets != null && resultSets.size() > 0)
-			rsmd = ((ResultSet)resultSets.get(0)).getMetaData();
-    
+            rsmd = ((ResultSet)resultSets.get(0)).getMetaData();
+
         checkNotNull(rsmd, "ResultSetMetaData");
         Vector nestedResults;
         int numberOfRowsSelected = 0;
@@ -359,7 +363,7 @@ public class JDBCDisplayUtil {
 
         if(displayColumnWidths == null)
             displayColumnWidths = getColumnDisplayWidths(rsmd,
-														 displayColumns,true);
+                                                         displayColumns,true);
 
         int len = indent_DisplayBanner(out,rsmd, indentLevel, displayColumns,
                                        displayColumnWidths);
@@ -377,9 +381,9 @@ public class JDBCDisplayUtil {
                 try {
                     doNext = rs.next();
                     if (doNext) {
-                
-                        DisplayRow(out, rs, rsmd, len, nestedResults, conn, 
-                                   indentLevel, displayColumns, 
+
+                        DisplayRow(out, rs, rsmd, len, nestedResults, conn,
+                                   indentLevel, displayColumns,
                                    displayColumnWidths);
                         ShowWarnings(out, rs);
                         numberOfRowsSelected++;
@@ -397,11 +401,13 @@ public class JDBCDisplayUtil {
         if (showSelectCount == true) {
             if (numberOfRowsSelected == 1) {
                 out.println();
-                indentedPrintLine( out, indentLevel, LocalizedResource.getMessage("UT_1RowSelec"));
+                indentedPrintLine(out, indentLevel,
+                                  LocalizedResource.getMessage("UT_1RowSelec"));
             } else if (numberOfRowsSelected >= 0) {
                 out.println();
-                indentedPrintLine( out, indentLevel, 
-                                   LocalizedResource.getMessage("UT_0RowsSelec", LocalizedResource.getNumber(numberOfRowsSelected)));
+                indentedPrintLine(out, indentLevel,
+                        LocalizedResource.getMessage("UT_0RowsSelec",
+                            LocalizedResource.getNumber(numberOfRowsSelected)));
             }
         }
 
