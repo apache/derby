@@ -72,7 +72,9 @@ public class ClobLocatorInputStream extends java.io.InputStream {
      *        the <code>Clob</code> value on the server.
      */
     public ClobLocatorInputStream(Connection connection, Clob clob) {
-        SanityManager.ASSERT(clob.isLocator());
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(clob.isLocator());
+        }
         
         this.connection = connection;
         this.clob = clob;

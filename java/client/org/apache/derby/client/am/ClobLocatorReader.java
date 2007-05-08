@@ -75,7 +75,9 @@ public class ClobLocatorReader extends java.io.Reader {
      *        the <code>Clob</code> value on the server.
      */
     public ClobLocatorReader(Connection connection, Clob clob) {
-        SanityManager.ASSERT(clob.isLocator());
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(clob.isLocator());
+        }
         
         this.connection = connection;
         this.clob = clob;
