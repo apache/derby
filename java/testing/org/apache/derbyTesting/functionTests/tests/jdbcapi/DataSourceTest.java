@@ -1038,15 +1038,11 @@ public class DataSourceTest extends BaseJDBCTestCase {
         xac4.getXAResource().start(xid4a, XAResource.TMNOFLAGS);
         xac4.getXAResource().end(xid4a, XAResource.TMSUCCESS);
 
-        // DERBY-1025.
-        // With Embedded, this will give error: 08003 - No current connection
-        // But with NetworkServer / DerbyNetClient, the transaction does not
-        // appear to be closed, and we actually get a value.
         try {
             rs4.next();
             fail ("expected an exception indicating resultset is closed.");
         } catch (SQLException sqle) {
-            // Embedded gets 08003. No current connection DERBY-2620        	
+            // Embedded gets 08003. No current connection (DERBY-2620)        	
         	if (usingDerbyNetClient())
         		assertSQLState("XCL16",sqle);
         }
