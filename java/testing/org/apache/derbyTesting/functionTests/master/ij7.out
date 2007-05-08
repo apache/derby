@@ -152,4 +152,64 @@ TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES
 ----------------------------------------------------------------------------
 T1                  |TEST                |true  |3   |A   |NULL    |NULL    
 1 row selected
+ij> -- DERBY-2019: ensure that tables with mixed-case names can be described:
+SET SCHEMA APP;
+0 rows inserted/updated/deleted
+ij> create table "CamelCaseTable" (c1 int, c2 varchar(20));
+0 rows inserted/updated/deleted
+ij> -- should fail, as unquoted stirng is treated as case-insensitive upper case:
+describe CamelCaseTable;
+IJ ERROR: No table exists with the name CAMELCASETABLE
+ij> describe APP.CamelCaseTable;
+IJ ERROR: No table exists with the name CAMELCASETABLE
+ij> -- should find the table, as quoted string case is preserved.
+describe 'CamelCaseTable';
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+C1                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+C2                  |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+2 rows selected
+ij> -- should fail, as case is wrong:
+describe 'CAMELCaseTable';
+IJ ERROR: No table exists with the name CAMELCaseTable
+ij> -- should work, note that schema name must be upper case:
+describe 'APP.CamelCaseTable';
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+C1                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+C2                  |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+2 rows selected
+ij> set SCHEMA USER1;
+0 rows inserted/updated/deleted
+ij> -- should work, even after changing default schema, so long as schema is right
+describe 'APP.CamelCaseTable';
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+C1                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+C2                  |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+2 rows selected
+ij> -- should fail, since table is in the other schema
+describe 'CamelCaseTable';
+IJ ERROR: No table exists with the name CamelCaseTable
+ij> -- Can use * as a wildcard for table name:
+describe '*';
+TABLE_SCHEM         |TABLE_NAME          |COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------------------------------------------------
+USER1               |T2                  |I                   |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+USER1               |V1                  |I                   |INTEGER  |0   |10  |10    |NULL      |NULL      |NO      
+USER1               |V1                  |D                   |DECIMAL  |2   |10  |5     |NULL      |NULL      |YES     
+USER1               |V1                  |TEST                |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+4 rows selected
+ij> describe 'APP.*';
+TABLE_SCHEM         |TABLE_NAME          |COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------------------------------------------------
+APP                 |CamelCaseTable      |C1                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+APP                 |CamelCaseTable      |C2                  |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+APP                 |T1                  |I                   |INTEGER  |0   |10  |10    |AUTOINCRE&|NULL      |NO      
+APP                 |T1                  |D                   |DECIMAL  |2   |10  |5     |NULL      |NULL      |YES     
+APP                 |T1                  |TEST                |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+5 rows selected
+ij> -- Observe behavior with empty string:
+describe '';
+IJ ERROR: No table exists with the name (missing)
 ij> 

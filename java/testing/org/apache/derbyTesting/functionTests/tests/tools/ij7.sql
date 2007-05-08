@@ -54,3 +54,26 @@ SHOW SYNONYMS IN USER1;
 SHOW INDEXES IN APP;
 SHOW INDEXES FROM APP.t1;
 
+-- DERBY-2019: ensure that tables with mixed-case names can be described:
+SET SCHEMA APP;
+create table "CamelCaseTable" (c1 int, c2 varchar(20));
+-- should fail, as unquoted stirng is treated as case-insensitive upper case:
+describe CamelCaseTable;
+describe APP.CamelCaseTable;
+-- should find the table, as quoted string case is preserved.
+describe 'CamelCaseTable';
+-- should fail, as case is wrong:
+describe 'CAMELCaseTable';
+-- should work, note that schema name must be upper case:
+describe 'APP.CamelCaseTable';
+set SCHEMA USER1;
+-- should work, even after changing default schema, so long as schema is right
+describe 'APP.CamelCaseTable';
+-- should fail, since table is in the other schema
+describe 'CamelCaseTable';
+-- Can use * as a wildcard for table name:
+describe '*';
+describe 'APP.*';
+-- Observe behavior with empty string:
+describe '';
+

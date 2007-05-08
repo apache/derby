@@ -868,7 +868,7 @@ class ij {
 			// If schema is specified (if util.getSelectedSchema in
 			// DescTableStatement() returns correct value), then we
 			// don't need to output schema and table names.
-			if(schema!=null) {
+			if(schema!=null && table != null) {
 				displayColumns = intArraySubset(displayColumns, 2, 
 												displayColumns.length);
 				columnWidths   = intArraySubset(columnWidths, 2, 
@@ -1607,13 +1607,18 @@ throws SQLException
 	)
 	{
 		if(s!=null) {
-			String image = stringValue(s.image.toUpperCase());
+			i2 = stringValue(s.image);
 
-			int dotPosition = image.indexOf('.');
+			if (i2.length() == 0)
+				throw ijException.noSuchTable("(missing)");
+
+			int dotPosition = i2.indexOf('.');
 			if(dotPosition!=-1) {
-				i = image.substring(0,dotPosition);
-				i2 = image.substring(dotPosition+1);
+				i = i2.substring(0,dotPosition);
+				i2 = i2.substring(dotPosition+1);
 			}
+			if ("*".equals(i2))
+				i2 = null;
 		}
 
 		if(i==null)
