@@ -47,6 +47,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derby.shared.common.reference.JDBC40Translation;
@@ -199,7 +200,20 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Default suite for running this test.
      */
     public static Test suite() {
-        return TestConfiguration.defaultSuite(DatabaseMetaDataTest.class);
+        TestSuite suite = new TestSuite("DatabaseMetaDataTest");
+        suite.addTest(
+            TestConfiguration.defaultSuite(DatabaseMetaDataTest.class));
+        // Test for DERBY-2584 needs a fresh database to ensure that the
+        // meta-data queries haven't already been compiled. No need to run the
+        // test in client/server mode since it only tests the compilation of
+        // meta-data queries.
+        suite.addTest(
+            TestConfiguration.singleUseDatabaseDecorator(
+                // until DERBY-177 is fixed, set lock timeout to prevent the
+                // test from waiting one minute
+                DatabasePropertyTestSetup.setLockTimeouts(
+                    new DatabaseMetaDataTest("initialCompilationTest"), 2, 4)));
+        return suite;
     }
     
     /**
@@ -223,6 +237,30 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     private final DatabaseMetaData getDMD() throws SQLException
     {
         return getConnection().getMetaData();
+    }
+
+    /**
+     * Tests that a meta-data query is compiled and stored correctly even when
+     * there's a lock on the system tables (DERBY-2584). This test must run on
+     * a fresh database (that is, <code>getIndexInfo</code> must not have been
+     * prepared and stored in <code>SYS.SYSSTATEMENTS</code>).
+     */
+    public void initialCompilationTest() throws SQLException {
+        Connection c = getConnection();
+        c.setAutoCommit(false);
+        c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+        Statement s = createStatement();
+        // First get shared row locks on the SYSSTATEMENTS table.
+        JDBC.assertDrainResults(
+            s.executeQuery("SELECT * FROM SYS.SYSSTATEMENTS"));
+        s.close();
+        // Execute getIndexInfo() for the first time. Because of the shared
+        // locks on SYSSTATEMENTS, the query is compiled in the main
+        // transaction.
+        getDMD().getIndexInfo(null, null, "T", false, false).close();
+        // Re-use the previously compiled query from disk. Fails with
+        // ArrayIndexOutOfBoundsException before DERBY-2584.
+        getDMD().getIndexInfo(null, null, "T", false, false).close();
     }
 
     /**

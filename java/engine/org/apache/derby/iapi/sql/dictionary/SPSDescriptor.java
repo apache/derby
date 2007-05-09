@@ -700,6 +700,12 @@ public class SPSDescriptor extends TupleDescriptor
 					nestedTC = null;
 				}
 
+				// DERBY-2584: If the first attempt to compile the query fails,
+				// we need to reset initiallyCompilable to make sure the
+				// prepared plan is fully stored to disk. Save the initial
+				// value here.
+				final boolean compilable = initiallyCompilable;
+
 				try
 				{
 					prepareAndRelease(lcc, null, nestedTC);
@@ -717,6 +723,7 @@ public class SPSDescriptor extends TupleDescriptor
 						}
 						// if we couldn't do this with a nested xaction, retry with
 						// parent-- we need to wait this time!
+						initiallyCompilable = compilable;
 						prepareAndRelease(lcc, null, null);
 						updateSYSSTATEMENTS(lcc, RECOMPILE, null);
 					}
