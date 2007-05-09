@@ -63,7 +63,7 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         if (JDBC.vmSupportsJSR169()) {
-            return new TestSuite("empty: client not supported on JSR169");
+            return new TestSuite("empty: client not supported on JSR169; procs use DriverMgr");
         }
         else {
             return TestConfiguration.defaultSuite(

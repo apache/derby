@@ -63,10 +63,13 @@ public class Changes10_3 extends UpgradeChange {
         //implementation of the LOB related JDBC methods. This needs to be done
         //only during the hard(full) upgrade phase.
         if(phase == PH_HARD_UPGRADE) {
-            //Tests for the Blob related locator StoredProcedures
-            suite.addTestSuite(BlobStoredProcedureTest.class);
-            //Tests for the Clob related locator StoredProcedures
-            suite.addTestSuite(ClobStoredProcedureTest.class);
+            if (JDBC.vmSupportsJDBC3())
+            {
+                //Tests for the Blob related locator StoredProcedures
+                suite.addTestSuite(BlobStoredProcedureTest.class);
+                //Tests for the Clob related locator StoredProcedures
+                suite.addTestSuite(ClobStoredProcedureTest.class);
+            }
         }
         
         return new SupportFilesSetup((Test) suite);
