@@ -77,7 +77,7 @@ public class BlobLocatorInputStream extends java.io.InputStream
      *        <code>Blob</code> value from the server
      * @param blob <code>Blob</code> object that contains locator for
      *        the <code>Blob</code> value on the server.
-     * @param offset the offset in the <code>Blob</code> of the first
+     * @param position the position in the <code>Blob</code> of the first
      *        byte to read.  
      * @param length the maximum number of bytes to read from
      *        the <code>Blob</code>.
