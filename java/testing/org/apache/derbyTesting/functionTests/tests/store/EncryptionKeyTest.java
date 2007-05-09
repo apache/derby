@@ -236,7 +236,8 @@ public abstract class EncryptionKeyTest
         validateDBContents(con);
         CallableStatement cs = con.prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
-        cs.setString(1, SupportFilesSetup.EXTOUT);
+        cs.setString(1,
+                new File(SupportFilesSetup.EXTINOUT, "backups").getPath());
         // Perform backup.
         cs.execute();
         cs.close();
