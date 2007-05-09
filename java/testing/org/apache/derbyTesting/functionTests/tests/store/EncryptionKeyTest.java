@@ -577,15 +577,8 @@ public abstract class EncryptionKeyTest
         str.append(";");
         JDBCDataSource.setBeanProperty(
                 ds, "connectionAttributes", str.toString());
-        try {
             return ds.getConnection();
-        } catch (SQLException se)
-        {
-            SQLException sen = se.getNextException();
-            sen.printStackTrace();
-            throw se;
-            
-        }
+        
     }
 
     /**
