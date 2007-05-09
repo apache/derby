@@ -141,11 +141,11 @@ public class CollatorSQLClob extends SQLClob implements CollationElementsInterfa
 		}
 	}
 	
-	/** @see SQLChar.stringCompare(SQLChar, SQLChar) */
+	/** @see SQLChar#stringCompare(SQLChar, SQLChar) */
 	 protected int stringCompare(SQLChar char1, SQLChar char2)
 	 throws StandardException
 	 {
-		 return holderForCollationSensitiveInfo.stringCompare(char2);
+		 return holderForCollationSensitiveInfo.stringCompare(char1, char2);
 	 }
 
 	/**

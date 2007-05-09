@@ -83,10 +83,10 @@ public class WorkHorseForCollatorDatatypes
 	}
 	
 	/** @see SQLChar.stringCompare(SQLChar, SQLChar) */
-	protected int stringCompare(SQLChar str2)
+	protected int stringCompare(SQLChar str1, SQLChar str2)
 	throws StandardException
 	{
-		CollationKey ckey1 = stringData.getCollationKey();
+		CollationKey ckey1 = str1.getCollationKey();
 		CollationKey ckey2 = str2.getCollationKey();
 		
 		/*

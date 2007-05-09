@@ -63,8 +63,17 @@ public void testDefaultCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("defaultdb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true");
-      checkLangBasedQuery(ds, new String[][] {{"4","Acorn"},{"0","Smith"},{"1","Zebra"},
-              {"6","aacorn"}, {"2","\u0104corn"},{"5","\u015Amith"},{"3","\u017Bebra"}});      
+      setUpTable(ds);
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
+      		new String[][] {{"4","Acorn"},{"0","Smith"},{"1","Zebra"},
+      		{"6","aacorn"}, {"2","\u0104corn"},{"5","\u015Amith"},{"3","\u017Bebra"}});      
+      //In default JVM territory, 'aacorn' is != 'Acorn'
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
+      		null);
+      //In default JVM territory, 'aacorn' is not < 'Acorn'
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn' ",
+      		null);
+      dropTable(ds);
       }
       
   /**
@@ -75,8 +84,19 @@ public void testPolishCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("poldb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=pl;collation=TERRITORY_BASED");
-      checkLangBasedQuery(ds, new String[][] {{"6","aacorn"}, {"4","Acorn"}, {"2","\u0104corn"},
-              {"0","Smith"},{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}});
+      setUpTable(ds);
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
+      		new String[][] {{"6","aacorn"}, {"4","Acorn"}, {"2","\u0104corn"},
+      		{"0","Smith"},{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}});
+      //In Polish, 'aacorn' is != 'Acorn'
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
+      		null);
+      //In Polish, 'aacorn' is < 'Acorn'
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn'",
+      		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"},
+      		{"3","\u017Bebra"}, {"4","Acorn"}, {"5","\u015Amith"}, 
+			{"6","aacorn"}});
+      dropTable(ds);
       }    
   
 
@@ -89,8 +109,17 @@ public void testNorwayCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("nordb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=no;collation=TERRITORY_BASED");
-      checkLangBasedQuery(ds, new String[][] {{"4","Acorn"}, {"2","\u0104corn"},{"0","Smith"},
-              {"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}, {"6","aacorn"}});
+      setUpTable(ds);
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
+      		new String[][] {{"4","Acorn"}, {"2","\u0104corn"},{"0","Smith"},
+      		{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}, {"6","aacorn"}});
+      //In Norway, 'aacorn' is != 'Acorn'
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
+      		null);
+      //In Norway, 'aacorn' is not < 'Acorn'
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn' ",
+      		null);
+      dropTable(ds);
       }
   
 
@@ -103,37 +132,67 @@ public void testEnglishCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("endb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=en;collation=TERRITORY_BASED");
-      checkLangBasedQuery(ds, new String[][] {{"6","aacorn"},{"4","Acorn"},{"2","\u0104corn"},{"0","Smith"},
-               {"5","\u015Amith"},{"1","Zebra"},{"3","\u017Bebra"}});      
+      setUpTable(ds);
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
+      		new String[][] {{"6","aacorn"},{"4","Acorn"},{"2","\u0104corn"},{"0","Smith"},
+      		{"5","\u015Amith"},{"1","Zebra"},{"3","\u017Bebra"}});      
+      //In English, 'aacorn' != 'Acorn'
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
+      		null);
+      //In English, 'aacorn' is < 'Acorn'
+      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn'",
+      		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"},
+      		{"3","\u017Bebra"}, {"4","Acorn"}, {"5","\u015Amith"}, 
+			{"6","aacorn"}});
+      dropTable(ds);
       }
-  
+
+private void setUpTable(DataSource ds) throws SQLException {
+	Connection conn = ds.getConnection();
+	Statement s = conn.createStatement();
+    s.execute("CREATE TABLE CUSTOMER(ID INT, NAME VARCHAR(40))");
+
+    conn.setAutoCommit(false);
+    PreparedStatement ps = conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?)");
+    for (int i = 0; i < NAMES.length; i++)
+    {
+            ps.setInt(1, i);
+            ps.setString(2, NAMES[i]);
+            ps.executeUpdate();
+    }
+
+    conn.commit();
+    ps.close();
+    s.close();
+}
+
+private void dropTable(DataSource ds) throws SQLException {
+	Connection conn = ds.getConnection();
+	Statement s = conn.createStatement();
+	
+    s.execute("DROP TABLE CUSTOMER");     
+    s.close();
+}
 /**
  * sort customers by 
  * @param ds
- * @param expectedResult
+ * @param expectedResult Null for this means that the passed query is 
+ * expected to return an empty resultset. If not empty, then the resultset
+ * from the query should match this paramter
  * @throws SQLException
  */
-private void checkLangBasedQuery(DataSource ds, String[][] expectedResult) throws SQLException {
+private void checkLangBasedQuery(DataSource ds, String query, String[][] expectedResult) throws SQLException {
     Connection conn = ds.getConnection();
-      Statement s = conn.createStatement();
-      
-      s.execute("CREATE TABLE CUSTOMER(ID INT, NAME VARCHAR(40))");
+    conn.setAutoCommit(false);
 
-      conn.setAutoCommit(false);
-      PreparedStatement ps = conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?)");
-
-      for (int i = 0; i < NAMES.length; i++)
-      {
-              ps.setInt(1, i);
-              ps.setString(2, NAMES[i]);
-              ps.executeUpdate();
-      }
-      
-      ResultSet rs = s.executeQuery("SELECT ID, NAME FROM CUSTOMER ORDER BY NAME");
-      JDBC.assertFullResultSet(rs,expectedResult);
-      s.execute("DROP TABLE CUSTOMER");     
-      conn.commit();
-      ps.close();
+    Statement s = conn.createStatement();
+    ResultSet rs = s.executeQuery(query);
+    if (expectedResult == null) //expecting empty resultset from the query
+    	JDBC.assertEmpty(rs);
+    else
+    	JDBC.assertFullResultSet(rs,expectedResult);
+    s.close();
+    conn.commit();
 }
     
   public static Test suite() {
