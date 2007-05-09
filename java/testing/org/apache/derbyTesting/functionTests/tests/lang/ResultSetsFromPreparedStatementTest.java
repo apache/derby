@@ -407,6 +407,24 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         dumpee.close();
     }
 
+    /**
+     * Check whether a table is locked exclusively.
+     *
+     * @param table name of the table
+     * @return whether the table is locked exclusively
+     */
+    private boolean hasTableXLock(String table) throws SQLException {
+        PreparedStatement ps = prepareStatement(
+            "select count(*) from syscs_diag.lock_table where tablename=? " +
+            "and type='TABLE' and mode='X'");
+        ps.setString(1, table);
+        ResultSet rs = ps.executeQuery();
+        assertTrue(rs.next());
+        int count = rs.getInt(1);
+        rs.close();
+        ps.close();
+        return count != 0;
+    }
 
     // ---------------------------------------------------------------
     // Framework methods
@@ -1572,6 +1590,30 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         }
         tst.close();
         sel.close();
+    }
+
+    /**
+     * Test that an UpdateResultSet is able to detect changes in isolation
+     * level between executions.
+     */
+    public void testUpdateResultSetWithIsolation() throws SQLException {
+        createTestTable("dept", DS, "dept_data");
+        commit();
+        PreparedStatement ps = prepareStatement("update dept set c0 = c0");
+        getConnection().setTransactionIsolation(
+            Connection.TRANSACTION_SERIALIZABLE);
+        assertEquals(3, ps.executeUpdate());
+        // when serializable, UpdateResultSet uses table-level locking
+        assertTrue(hasTableXLock("DEPT"));
+        commit();
+        // all locks released on commit
+        assertFalse(hasTableXLock("DEPT"));
+        getConnection().setTransactionIsolation(
+            Connection.TRANSACTION_READ_COMMITTED);
+        assertEquals(3, ps.executeUpdate());
+        // when read committed, UpdateResultSet uses row-level locking
+        assertFalse(hasTableXLock("DEPT"));
+        ps.close();
     }
 
     /**
