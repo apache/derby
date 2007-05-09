@@ -276,7 +276,7 @@ public abstract class EncryptionKeyTest
         shutdown(dbName);
         // Create a new database from backup.
         String dbNameRestored = dbName + "Restored";
-        con = getPrivilegedConnection(dbNameRestored, CORRECT_KEY,
+        con = getConnection(dbNameRestored, CORRECT_KEY,
                 "createFrom=" + backupDbLocation);
         validateDBContents(con);
         con.close();
@@ -284,7 +284,7 @@ public abstract class EncryptionKeyTest
         // Try to create a new database from backup with the wrong key.
         dbNameRestored = dbName + "RestoreAttemptedWrongKey";
         try {
-            con = getPrivilegedConnection(dbNameRestored, WRONG_KEY,
+            con = getConnection(dbNameRestored, WRONG_KEY,
                     "createFrom=" + backupDbLocation);
             fail("Created database from encrypted backup with wrong key.");
         } catch (SQLException sqle) {
@@ -295,7 +295,7 @@ public abstract class EncryptionKeyTest
         // Try to create a new database from backup with an invalid key.
         dbNameRestored = dbName + "RestoreAttemptedInvalidKey";
         try {
-            con = getPrivilegedConnection(dbNameRestored, INVALID_CHAR_KEY,
+            con = getConnection(dbNameRestored, INVALID_CHAR_KEY,
                     "createFrom=" + backupDbLocation);
             fail("Created database from encrypted backup with an invalid key.");
         } catch (SQLException sqle) {
@@ -306,7 +306,7 @@ public abstract class EncryptionKeyTest
         // Try to create a new database from backup with an odd length key.
         dbNameRestored = dbName + "RestoreAttemptedOddLengthKey";
         try {
-            con = getPrivilegedConnection(dbNameRestored, ODD_LENGTH_KEY,
+            con = getConnection(dbNameRestored, ODD_LENGTH_KEY,
                     "createFrom=" + backupDbLocation);
             fail("Created db from encrypted backup with an odd length key.");
         } catch (SQLException sqle) {
@@ -332,7 +332,7 @@ public abstract class EncryptionKeyTest
         assertTrue(con.isClosed());
         // Create a new database from backup again.
         dbNameRestored = dbName + "RestoredOnceMore";
-        con = getPrivilegedConnection(dbNameRestored, CORRECT_KEY,
+        con = getConnection(dbNameRestored, CORRECT_KEY,
                 "createFrom=" + backupDbLocation);
         validateDBContents(con);
         con.close();
@@ -376,7 +376,7 @@ public abstract class EncryptionKeyTest
         // the existing database we are trying to restore to/into. This is
         // expected behavior currently, but should maybe change?
         try {
-            con = getPrivilegedConnection(dbNameRestored, INVALID_CHAR_KEY,
+            con = getConnection(dbNameRestored, INVALID_CHAR_KEY,
                     ";restoreFrom=" + obtainDbName(dbName, null));
             fail("Restored database with an invalid key.");
         } catch (SQLException sqle) {
@@ -486,7 +486,7 @@ public abstract class EncryptionKeyTest
         shutdown(sourceDb);
         confirmNonBootedDB(sourceDb);
         // Use the restoreFrom attribute.
-        con = getPrivilegedConnection(targetDb, CORRECT_KEY,
+        con = getConnection(targetDb, CORRECT_KEY,
                 ";restoreFrom=" + obtainDbName(sourceDb, "backups"));
         validateDBContents(con);
         con.close();
@@ -521,39 +521,6 @@ public abstract class EncryptionKeyTest
     private Connection getConnection(String dbName, int keyMode)
             throws SQLException {
         return getConnection(dbName, keyMode, null);
-    }
-
-    /**
-     * Try to establish a connection to the named database with the
-     * specified type of key and recovery mode.
-     * <p>
-     * The connection is made in a privileged block of code to allow Derby to
-     * read the database backup used for recovery.
-     *
-     * @param dbName name of the database
-     * @param keyMode what kind of key to use (correct, wrong, invalid, odd)
-     * @param recoveryAttribute attribute to recover a database from a backup,
-     *      for instance <code>createFrom</code> or <code>restoreFrom</code>.
-     *      Both the attribute and its value is expected.
-     * @return A connection to the database.
-     * @throws SQLException if connection fails
-     */
-    private Connection getPrivilegedConnection(final String dbName,
-                                               final int keyMode,
-                                               final String recoveryAttribute)
-            throws SQLException {
-        try {
-            return (Connection)AccessController.doPrivileged(
-                new PrivilegedExceptionAction() {
-                    public Object run()
-                            throws SQLException {
-                        return getConnection(dbName, keyMode,
-                            recoveryAttribute);
-                    }
-                });
-        } catch (PrivilegedActionException pae) {
-            throw (SQLException)pae.getException();
-        }
     }
 
     /**
@@ -610,7 +577,15 @@ public abstract class EncryptionKeyTest
         str.append(";");
         JDBCDataSource.setBeanProperty(
                 ds, "connectionAttributes", str.toString());
-        return ds.getConnection();
+        try {
+            return ds.getConnection();
+        } catch (SQLException se)
+        {
+            SQLException sen = se.getNextException();
+            sen.printStackTrace();
+            throw se;
+            
+        }
     }
 
     /**
