@@ -574,11 +574,11 @@ final class StorageFactoryService implements PersistentService
 		{
 			//First make sure backup service directory exists in the specified path
 			File backupRoot = new File(restoreFrom);
-			if(backupRoot.exists())
+			if(privExists(backupRoot))
 			{
 				//First make sure backup have service.properties
 				File bserviceProp = new File(restoreFrom, PersistentService.PROPERTIES_NAME);
-				if(bserviceProp.exists())
+				if(privExists(bserviceProp))
 				{
 					//create service root if required
 					if(createRoot)
@@ -909,4 +909,31 @@ final class StorageFactoryService implements PersistentService
             return null;
         } // end of run
     } // end of class DirectoryList
+    
+    /**
+     * Wrap File.exists() in a priv block to avoid Security exceptions
+     * @param fileToCheck
+	 * @return true if file exists, false if it does not
+	 * @throws SecurityException
+	 */
+    private boolean privExists(final File fileToCheck) throws SecurityException{
+        try {
+            
+            Boolean exist  = (Boolean) AccessController.doPrivileged(
+                    new PrivilegedExceptionAction()
+                    {
+                        public Object run()
+                        throws SecurityException
+                        {
+                            return new Boolean(fileToCheck.exists());
+                        }
+                    }); 
+            return exist.booleanValue();
+        }
+        catch( PrivilegedActionException pae)
+        {
+            throw (SecurityException) pae.getException();
+        }
+    }
+
 }
