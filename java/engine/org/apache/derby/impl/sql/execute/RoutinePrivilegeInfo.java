@@ -89,7 +89,19 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 				//Derby currently supports only restrict form of revoke execute
 				//privilege and that is why, we are sending invalidation action 
 				//as REVOKE_PRIVILEGE_RESTRICT rather than REVOKE_PRIVILEGE
-        		dd.getDependencyManager().invalidateFor(routinePermsDesc, DependencyManager.REVOKE_PRIVILEGE_RESTRICT, lcc);
+				dd.getDependencyManager().invalidateFor
+					(routinePermsDesc,
+					 DependencyManager.REVOKE_PRIVILEGE_RESTRICT, lcc);
+
+				// When revoking a privilege from a Routine we need to
+				// invalidate all GPSs refering to it. But GPSs aren't
+				// Dependents of RoutinePermsDescr, but of the
+				// AliasDescriptor itself, so we must send
+				// INTERNAL_RECOMPILE_REQUEST to the AliasDescriptor's
+				// Dependents.
+				dd.getDependencyManager().invalidateFor
+					(aliasDescriptor,
+					 DependencyManager.INTERNAL_RECOMPILE_REQUEST, lcc);
 			}
 			
 			addWarningIfPrivilegeNotRevoked(activation, grant, privileges_revoked, grantee);

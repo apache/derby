@@ -273,6 +273,14 @@ public final class ViewDescriptor extends TupleDescriptor
 			//don't do anything here. Later in makeInvalid method, we make  
 			//the ViewDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
+
+				// When REVOKE_PRIVILEGE gets sent to a
+				// TablePermsDescriptor we must also send
+				// INTERNAL_RECOMPILE_REQUEST to its Dependents which
+				// may be GPSs needing re-compilation. But Dependents
+				// could also be ViewDescriptors, which then also need
+				// to handle this event.
+			case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 		    	break;
 
 			//Notice that REVOKE_PRIVILEGE_RESTRICT is not caught earlier.
@@ -329,6 +337,14 @@ public final class ViewDescriptor extends TupleDescriptor
 			case DependencyManager.UPDATE_STATISTICS:
 			case DependencyManager.DROP_STATISTICS:
 			case DependencyManager.TRUNCATE_TABLE:
+
+				// When REVOKE_PRIVILEGE gets sent to a
+				// TablePermsDescriptor we must also send
+				// INTERNAL_RECOMPILE_REQUEST to its Dependents which
+				// may be GPSs needing re-compilation. But Dependents
+				// could also be ViewDescriptors, which then also need
+				// to handle this event.
+		    case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 				break;
 
 			//When REVOKE_PRIVILEGE gets sent (this happens for privilege 
