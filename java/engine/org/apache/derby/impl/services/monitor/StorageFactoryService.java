@@ -911,11 +911,18 @@ final class StorageFactoryService implements PersistentService
     } // end of class DirectoryList
     
     /**
-     * Wrap File.exists() in a priv block to avoid Security exceptions
-     * @param fileToCheck
-	 * @return true if file exists, false if it does not
-	 * @throws SecurityException
-	 */
+     * Wrap {@link File#exists} in a priv block to avoid security exceptions.
+     * <p>
+     * This method allows Derby to check if a file exists even when the higher
+     * layer code (application code) does not have the required privileges to
+     * do so. Note that the Derby code base must be granted the appropriate
+     * permissions (typically {@link java.io.FilePermission}). 
+     *
+     * @param fileToCheck the pathname to check the existence of
+     * @return <code>true</code> if file exists, <code>false</code> if not.
+     * @throws SecurityException if the required privileges to check if the file
+     *      exists are missing
+     */
     private boolean privExists(final File fileToCheck) throws SecurityException{
         try {
             
