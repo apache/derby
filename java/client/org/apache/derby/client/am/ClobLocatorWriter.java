@@ -35,12 +35,12 @@ public class ClobLocatorWriter extends java.io.Writer {
     /**
      * Connection used to read Clob from server.
      */
-    private Connection connection;
+    private final Connection connection;
     
     /**
      * The Clob to be accessed.
      */
-    private Clob clob;
+    private final Clob clob;
     
     /**
      * Current position in the underlying Clob.
@@ -86,8 +86,6 @@ public class ClobLocatorWriter extends java.io.Writer {
             return;
         }
         isClosed = true;
-        connection = null;
-        clob = null;
     }
     
     /**
@@ -147,7 +145,7 @@ public class ClobLocatorWriter extends java.io.Writer {
         checkClosed();
         if (len == 0) return;
         if ((off < 0) || (off > c.length) || (len < 0) ||
-                (off+len > c.length) || (off+len < 0)) {
+                (len > c.length - off)) {
             throw new IndexOutOfBoundsException();
         }
         writeCharacters(c, off, len);

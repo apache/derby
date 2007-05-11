@@ -49,12 +49,12 @@ public class ClobLocatorInputStream extends java.io.InputStream {
     /**
      * Connection used to read Clob from server.
      */
-    private Connection connection;
+    private final Connection connection;
     
     /**
      * The Clob to be accessed.
      */
-    private Clob clob;
+    private final Clob clob;
     
     /**
      * Current position in the underlying Clob.
@@ -100,7 +100,7 @@ public class ClobLocatorInputStream extends java.io.InputStream {
      */
     public int read(byte[] b, int off, int len) throws IOException {
         if (len == 0) return 0;
-        if ((off < 0) || (len < 0) || (off+len > b.length)) {
+        if ((off < 0) || (len < 0) || (len > b.length - off)) {
             throw new IndexOutOfBoundsException();
         }
         
@@ -129,7 +129,7 @@ public class ClobLocatorInputStream extends java.io.InputStream {
             String resultStr = connection.locatorProcedureCall().
                     clobGetSubString(clob.getLocator(),
                     currentPos, actualLength);
-            byte[] result = resultStr.getBytes();
+            byte[] result = getBytesFromString(resultStr);
             currentPos += result.length;
             return result;
         } catch (SqlException ex) {
@@ -137,5 +137,48 @@ public class ClobLocatorInputStream extends java.io.InputStream {
             ioEx.initCause(ex);
             throw ioEx;
         }
+    }
+
+    /**
+     * Returns a <code>Byte</code> array from the
+     * <code>String</code> passed as Input.
+     *
+     * @param str the input <code>String</code>.
+     * @return The <code>Byte</code> corresponding
+     *         to the <code>String</code> that was
+     *         input.
+     */
+    private byte[] getBytesFromString(String str) {
+        //The Byte array that will hold the final
+        //converted Byte array that will be returned
+        //to the user
+        byte[] result = new byte[str.length()];
+
+        //Iterate through the String to
+        //Convert each character in the
+        //String
+        for (int i = 1; i <= str.length(); i++) {
+            //charAt function accpets a index that
+            //starts from 0 and ranges to length()-1
+            char oneChar = str.charAt(i-1);
+
+            if (oneChar <= 0xff) {
+                //Check if the value is lesser
+                //than maximum value that can
+                //be stored in a byte. If it is
+                //lesser store it directly in the
+                //byte array
+                result[i-1] = (byte)oneChar;
+            }
+            else {
+                //The value is greater than the
+                //maximum value that can be
+                //stored. Use the value 0x003f
+                //which corresponds to '?'
+                //signifying an unknown character
+                result[i-1] = 0x3f;
+            }
+        }
+        return result;
     }
 }

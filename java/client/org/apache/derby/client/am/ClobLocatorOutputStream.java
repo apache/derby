@@ -40,12 +40,12 @@ public class ClobLocatorOutputStream extends java.io.OutputStream {
     /**
      * Connection used to read Clob from server.
      */
-    private Connection connection;
+    private final Connection connection;
     
     /**
      * The Clob to be accessed.
      */
-    private Clob clob;
+    private final Clob clob;
     
     /**
      * Current position in the underlying Clob.
@@ -101,7 +101,7 @@ public class ClobLocatorOutputStream extends java.io.OutputStream {
     public void write(byte[] b, int off, int len) throws IOException {
         if (len == 0) return;
         if ((off < 0) || (off > b.length) || (len < 0) ||
-                (off+len > b.length) || (off+len < 0)) {
+                (len > b.length - off)) {
             throw new IndexOutOfBoundsException();
         }
         
@@ -132,7 +132,7 @@ public class ClobLocatorOutputStream extends java.io.OutputStream {
      */
     private void writeBytes(byte[] b) throws IOException {
         try {
-            String clobStr = new String(b);
+            String clobStr = new String(b, "ISO-8859-1");
             connection.locatorProcedureCall().clobSetString
                     (clob.locator_, currentPos, b.length, clobStr);
             currentPos += b.length;

@@ -40,12 +40,12 @@ public class ClobLocatorReader extends java.io.Reader {
     /**
      * Connection used to read Clob from server.
      */
-    private Connection connection;
+    private final Connection connection;
     
     /**
      * The Clob to be accessed.
      */
-    private Clob clob;
+    private final Clob clob;
     
     /**
      * Current position in the underlying Clob.
@@ -124,7 +124,7 @@ public class ClobLocatorReader extends java.io.Reader {
     public int read(char[] c, int off, int len) throws IOException {
         checkClosed();
         if (len == 0) return 0;
-        if ((off < 0) || (len < 0) || (off+len > c.length)) {
+        if ((off < 0) || (len < 0) || (len > c.length - off)) {
             throw new IndexOutOfBoundsException();
         }
         
@@ -145,8 +145,6 @@ public class ClobLocatorReader extends java.io.Reader {
             return;
         }
         isClosed = true;
-        connection = null;
-        clob = null;
     }
     
     /**
