@@ -389,6 +389,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	*/
 	public void open() throws StandardException
 	{
+		setup();
 		// Remember if this is the 1st execution
 		firstExecute = (rowChanger == null);
 
@@ -885,7 +886,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		}
 
 		/* decode lock mode for the execution isolation level */
-		int lockMode = UpdateResultSet.decodeLockMode(lcc, constants.lockMode);
+		int lockMode = decodeLockMode(constants.lockMode);
 
 		rowChanger.open(lockMode);
 

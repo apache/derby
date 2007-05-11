@@ -86,6 +86,7 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 	*/
 	public void open() throws StandardException
 	{
+		setup();
 		// Remember if this is the 1st execution
 		firstExecute = (numOpens == 0);
 

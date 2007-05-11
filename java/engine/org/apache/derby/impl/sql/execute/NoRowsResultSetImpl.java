@@ -70,7 +70,8 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	NoPutResultSet[]	subqueryTrackingArray;
 
 	private final boolean statisticsTimingOn;
-	private boolean isClosed;
+	/** True if the result set has been opened, and not yet closed. */
+	private boolean isOpen;
 
 	/* fields used for formating run time statistics output */
 	protected String indent;
@@ -112,6 +113,16 @@ abstract class NoRowsResultSetImpl implements ResultSet
 		{
 			subqueryTrackingArray = sc.getSubqueryTrackingArray();
 		}
+	}
+
+	/**
+	 * Set up the result set for use. Should always be called from
+	 * <code>open()</code>.
+	 *
+	 * @exception StandardException thrown on error
+	 */
+	void setup() throws StandardException {
+		isOpen = true;
 	}
 
     /**
@@ -342,7 +353,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 */
 	public void	close() throws StandardException
 	{ 
-		isClosed = true;
+		isOpen = false;
 	}
 
 	/**
@@ -351,7 +362,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @return <code>true</code> if closed, <code>false</code> otherwise
 	 */
 	public boolean isClosed() {
-		return isClosed;
+		return !isOpen;
 	}
 
 	/**

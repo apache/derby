@@ -60,6 +60,7 @@ class MiscResultSet extends NoRowsResultSetImpl
 	 */
 	public void open() throws StandardException
 	{
+		setup();
 		activation.getConstantAction().executeConstantAction(activation);
 		super.close();
 	}

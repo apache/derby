@@ -199,6 +199,7 @@ class DeleteResultSet extends DMLWriteResultSet
 	//this routine open the source and find the dependent rows 
 	void  setup() throws StandardException
 	{
+		super.setup();
 
 		// Remember if this is the 1st execution
 		firstExecute = (rc == null);
@@ -251,7 +252,7 @@ class DeleteResultSet extends DMLWriteResultSet
 			lcc.getStatementContext().setTopResultSet(this, subqueryTrackingArray);
 		}
 		/* decode the lock mode for the execution isolation level */
-		lockMode = UpdateResultSet.decodeLockMode(lcc, constants.lockMode);
+		lockMode = decodeLockMode(constants.lockMode);
 
 		/* Open the RowChanger before the source ResultSet so that
 		 * the store will see the RowChanger's lock as a covering lock

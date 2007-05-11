@@ -64,6 +64,7 @@ class CallStatementResultSet extends NoRowsResultSetImpl
 	*/
 	public void open() throws StandardException
 	{
+		setup();
 		methodCall.invoke(activation);
 		close();
     }

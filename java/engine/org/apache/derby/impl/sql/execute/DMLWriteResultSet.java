@@ -26,6 +26,7 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -36,6 +37,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * For INSERT/UPDATE/DELETE impls.  Used to tag them.
@@ -204,7 +206,48 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 
 		return deferredSparseRow;
 	}
-	
+
+    /**
+     * Decode the update lock mode.
+     * <p>
+     * The value for update lock mode is in the second most significant byte for
+     * ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL isolation level. Otherwise
+     * (REPEATABLE READ, READ COMMITTED, and READ UNCOMMITTED) the lock mode is
+     * located in the least significant byte.
+     * <p>
+     * This is done to override the optimizer choice to provide maximum 
+     * concurrency of record level locking except in SERIALIZABLE where table
+     * level locking is required in heap scans for correctness.
+     *
+     * @param lockMode the compiled encoded lock mode for this query
+     * @return the lock mode (record or table) to use to open the result set
+     * @see org.apache.derby.impl.sql.compile.FromBaseTable#updateTargetLockMode
+     */
+    int decodeLockMode(int lockMode) {
+
+        if (SanityManager.DEBUG) {
+            // we want to decode lock mode when the result set is opened, not
+            // in the constructor
+            SanityManager.ASSERT(!isClosed());
+        }
+
+        if ((lockMode >>> 16) == 0) {
+            return lockMode;
+        }
+
+        // Note that isolation level encoding from getCurrentIsolationLevel()
+        // returns ExecutionContext.*ISOLATION_LEVEL constants, not
+        // TransactionController.ISOLATION* constants.
+
+        int isolationLevel = lcc.getCurrentIsolationLevel();
+
+        if (isolationLevel == ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL) {
+            return lockMode >>> 16;
+        }
+
+        return lockMode & 0xff;
+    }
+
 	/**
 	 * get the index name given the conglomerate id of the index.
 	 * 

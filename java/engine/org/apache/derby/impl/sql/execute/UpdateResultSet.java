@@ -38,7 +38,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.store.access.ConglomerateController;
@@ -236,8 +235,6 @@ class UpdateResultSet extends DMLWriteResultSet
 		/* Get the new base row */
 		newBaseRow = RowUtil.getEmptyValueRow(numberOfBaseColumns, lcc);
 
-		/* decode lock mode */
-		lockMode = decodeLockMode(lcc, constants.lockMode);
 		deferred = constants.deferred;
 		
 		//update can be marked for deferred mode because the scan is being done
@@ -289,6 +286,11 @@ class UpdateResultSet extends DMLWriteResultSet
 	*/
 	void setup() throws StandardException
 	{
+		super.setup();
+
+		/* decode lock mode */
+		lockMode = decodeLockMode(constants.lockMode);
+
 		boolean firstOpen = (rowChanger == null);
 
 		rowCount = 0;
@@ -1097,54 +1099,6 @@ class UpdateResultSet extends DMLWriteResultSet
 		endTime = getCurrentTimeMillis();
 	}
 
-    /**
-     * Decode the update lock mode.
-     * <p>
-     * The value for update lock mode is in the 2nd 2 bytes for 
-     * ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL isolation level.  Otherwise
-     * (REPEATABLE READ, READ COMMITTED, and READ UNCOMMITTED) the lock mode is
-     * located in the first 2 bytes.
-     * <p>
-     * This is done to override the optimizer choice to provide maximum 
-     * concurrency of record level locking except in SERIALIZABLE where table
-     * level locking is required in heap scans for correctness.
-     * <p>
-     * See Compilation!QueryTree!FromBaseTable for encoding of the lockmode.
-     * <p>
-     *
-	 * @return The lock mode (record or table) to use to open the result set.
-     *
-     * @param lcc       The context to look for current isolation level.
-     * @param lockMode  The compiled encoded lock mode for this query.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-	protected static int decodeLockMode(
-    LanguageConnectionContext   lcc, 
-    int                         lockMode)
-	{
-		if ((lockMode >>> 16) != 0)
-		{
-            // Note that isolation level encoding from 
-            // getCurrentIsolationLevel() returns 
-            // ExecutionContext.*ISOLATION_LEVEL constants, not 
-            // TransactionController.ISOLATION* constants.
-
-			int isolationLevel = lcc.getCurrentIsolationLevel();
-
-            if (isolationLevel != ExecutionContext.SERIALIZABLE_ISOLATION_LEVEL)
-            {
-				lockMode = lockMode & 0xff;
-            }
-            else
-            {
-				lockMode = lockMode >>> 16;
-            }
-		}
-		return lockMode;
-	}
-
-	
 	void rowChangerFinish() throws StandardException
 	{
 		rowChanger.finish();
