@@ -87,8 +87,10 @@ public class BlobLocatorInputStream extends java.io.InputStream
     public BlobLocatorInputStream(Connection connection, Blob blob,
                                   long position, long length) 
         throws SqlException
-    {        
-        SanityManager.ASSERT(blob.isLocator());
+    {    
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(blob.isLocator());
+        }
         this.connection = connection;
         this.blob = blob;
         this.currentPos = position;
