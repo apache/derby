@@ -267,14 +267,18 @@ public abstract class EmbedResultSet extends ConnectionChild
 		// updated column information if the columns can be updated.
 		if (concurrencyOfThisResultSet == JDBC20Translation.CONCUR_UPDATABLE)
 		{
-			//initialize arrays related to updateRow implementation
-			columnGotUpdated = new boolean[columnCount];
-			updateRow = factory.getValueRow(columnCount);
-			for (int i = 1; i <= columnCount; i++) {
-				updateRow.setColumn(i, resultDescription.getColumnDescriptor(i).
-									getType().getNull());
+			try{
+				//initialize arrays related to updateRow implementation
+				columnGotUpdated = new boolean[columnCount];
+				updateRow = factory.getValueRow(columnCount);
+				for (int i = 1; i <= columnCount; i++) {
+					updateRow.setColumn(i, resultDescription.getColumnDescriptor(i).
+										getType().getNull());
+				}
+				initializeUpdateRowModifiers();
+			} catch (StandardException t) {
+				throw noStateChangeException(t);
 			}
-			initializeUpdateRowModifiers();
 		} else {
 			updateRow = null;
 		}

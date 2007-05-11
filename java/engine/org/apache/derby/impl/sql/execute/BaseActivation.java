@@ -249,7 +249,8 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		PreparedStatement.
 
 	*/
-	public final void setupActivation(ExecPreparedStatement ps, boolean scrollable) {
+	public final void setupActivation(ExecPreparedStatement ps, boolean scrollable) 
+	throws StandardException {
 		preStmt = ps;
 				
 		if (ps != null) {

@@ -64,15 +64,46 @@ public void testDefaultCollation() throws SQLException {
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true");
       setUpTable(ds);
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
+      
+      Connection conn = ds.getConnection();
+      conn.setAutoCommit(false);
+      Statement s = conn.createStatement();
+
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"4","Acorn"},{"0","Smith"},{"1","Zebra"},
-      		{"6","aacorn"}, {"2","\u0104corn"},{"5","\u015Amith"},{"3","\u017Bebra"}});      
+      		{"6","aacorn"}, {"2","\u0104corn"},{"5","\u015Amith"},{"3","\u017Bebra"} });   
+
+      //COMPARISONS INVOLVING CONSTANTS
       //In default JVM territory, 'aacorn' is != 'Acorn'
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
       		null);
       //In default JVM territory, 'aacorn' is not < 'Acorn'
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn' ",
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn' ",
       		null);
+
+      //COMPARISONS INVOLVING CONSTANT and PERSISTENT COLUMN
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME <= 'Smith' ",
+      		new String[][] {{"0","Smith"}, {"4","Acorn"} });   
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME between 'Acorn' and 'Zebra' ",
+      		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"4","Acorn"} });
+      //After index creation, the query above will return same data but in 
+      //different order
+      /*s.executeUpdate("CREATE INDEX CUSTOMER_INDEX1 ON CUSTOMER(NAME)");
+      s.executeUpdate("INSERT INTO CUSTOMER VALUES (NULL, NULL)");
+      checkLangBasedQuery(s, 
+      		"SELECT ID, NAME FROM CUSTOMER WHERE NAME between 'Acorn' and " +
+			" 'Zebra' ORDER BY NAME",
+      		new String[][] {{"4","Acorn"}, {"0","Smith"}, {"1","Zebra"} });
+*/
+      //For non-collated databases, COMPARISONS OF USER PERSISTENT CHARACTER 
+      //COLUMN AND CHARACTER CONSTANT WILL not FAIL IN SYSTEM SCHEMA.
+      s.executeUpdate("set schema SYS");
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ",
+      		new String[][] {{"0","Smith"}, {"4","Acorn"} });   
+
+      s.close();
+      conn.commit();
+
       dropTable(ds);
       }
       
@@ -85,17 +116,50 @@ public void testPolishCollation() throws SQLException {
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=pl;collation=TERRITORY_BASED");
       setUpTable(ds);
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
+      
+      Connection conn = ds.getConnection();
+      conn.setAutoCommit(false);
+      Statement s = conn.createStatement();
+
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"6","aacorn"}, {"4","Acorn"}, {"2","\u0104corn"},
-      		{"0","Smith"},{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}});
+      		{"0","Smith"},{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"} });
+      
+      //COMPARISONS INVOLVING CONSTANTS
       //In Polish, 'aacorn' is != 'Acorn'
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
       		null);
       //In Polish, 'aacorn' is < 'Acorn'
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn'",
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn'",
       		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"},
       		{"3","\u017Bebra"}, {"4","Acorn"}, {"5","\u015Amith"}, 
-			{"6","aacorn"}});
+			{"6","aacorn"} });
+
+      //COMPARISONS INVOLVING CONSTANT and PERSISTENT COLUMN
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME <= 'Smith' ",
+      		new String[][] {{"0","Smith"}, {"2","\u0104corn"}, {"4","Acorn"}, 
+      		{"6","aacorn"} });
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME between 'Acorn' and 'Zebra' ",
+      		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"}, 
+      		{"4","Acorn"}, {"5","\u015Amith"} });
+      //After index creation, the query above will return same data but in 
+      //different order
+      /*s.executeUpdate("CREATE INDEX CUSTOMER_INDEX1 ON CUSTOMER(NAME)");
+      s.executeUpdate("INSERT INTO CUSTOMER VALUES (NULL, NULL)");
+      checkLangBasedQuery(s, 
+      		"SELECT ID, NAME FROM CUSTOMER -- derby-properties index=customer_index1 \r WHERE NAME between 'Acorn' and " +
+			" 'Zebra'", //ORDER BY NAME",
+      		new String[][] {{"4","Acorn"}, {"2","\u0104corn"}, {"0","Smith"}, 
+		      		{"5","\u015Amith"}, {"1","Zebra"} });
+      */
+      //For collated databases, COMPARISONS OF USER PERSISTENT CHARACTER 
+      //COLUMN AND CHARACTER CONSTANT WILL FAIL IN SYSTEM SCHEMA.
+      s.executeUpdate("set schema SYS");
+      assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
+
+      s.close();
+      conn.commit();
+
       dropTable(ds);
       }    
   
@@ -110,15 +174,47 @@ public void testNorwayCollation() throws SQLException {
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=no;collation=TERRITORY_BASED");
       setUpTable(ds);
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
+      
+      Connection conn = ds.getConnection();
+      conn.setAutoCommit(false);
+      Statement s = conn.createStatement();
+
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"4","Acorn"}, {"2","\u0104corn"},{"0","Smith"},
-      		{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}, {"6","aacorn"}});
+      		{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}, {"6","aacorn"} });
+      
+      //COMPARISONS INVOLVING CONSTANTS
       //In Norway, 'aacorn' is != 'Acorn'
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
       		null);
       //In Norway, 'aacorn' is not < 'Acorn'
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn' ",
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn' ",
       		null);
+
+      //COMPARISONS INVOLVING CONSTANT and PERSISTENT COLUMN
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME <= 'Smith' ",
+      		new String[][] {{"0","Smith"}, {"2","\u0104corn"}, {"4","Acorn"} });
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME between 'Acorn' and 'Zebra' ",
+      		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"}, 
+      		{"4","Acorn"}, {"5","\u015Amith"} });
+      //After index creation, the query above will return same data but in 
+      //different order
+      /*s.executeUpdate("CREATE INDEX CUSTOMER_INDEX1 ON CUSTOMER(NAME)");
+      s.executeUpdate("INSERT INTO CUSTOMER VALUES (NULL, NULL)");
+      checkLangBasedQuery(s, 
+      		"SELECT ID, NAME FROM CUSTOMER  -- derby-properties index=customer_index1 \r WHERE NAME between 'Acorn' and " +
+			" 'Zebra'", //ORDER BY NAME",
+      		new String[][] {{"4","Acorn"}, {"2","\u0104corn"}, {"0","Smith"}, 
+		      		{"5","\u015Amith"}, {"1","Zebra"} });
+      */
+      //For collated databases, COMPARISONS OF USER PERSISTENT CHARACTER 
+      //COLUMN AND CHARACTER CONSTANT WILL FAIL IN SYSTEM SCHEMA.
+      s.executeUpdate("set schema SYS");
+      assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
+
+      s.close();
+      conn.commit();
+
       dropTable(ds);
       }
   
@@ -133,17 +229,50 @@ public void testEnglishCollation() throws SQLException {
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=en;collation=TERRITORY_BASED");
       setUpTable(ds);
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
+      
+      Connection conn = ds.getConnection();
+      conn.setAutoCommit(false);
+      Statement s = conn.createStatement();
+
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"6","aacorn"},{"4","Acorn"},{"2","\u0104corn"},{"0","Smith"},
-      		{"5","\u015Amith"},{"1","Zebra"},{"3","\u017Bebra"}});      
+      		{"5","\u015Amith"},{"1","Zebra"},{"3","\u017Bebra"} });      
+
+      //COMPARISONS INVOLVING CONSTANTS
       //In English, 'aacorn' != 'Acorn'
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
       		null);
       //In English, 'aacorn' is < 'Acorn'
-      checkLangBasedQuery(ds, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn'",
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn'",
       		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"},
       		{"3","\u017Bebra"}, {"4","Acorn"}, {"5","\u015Amith"}, 
-			{"6","aacorn"}});
+			{"6","aacorn"} });
+
+      //COMPARISONS INVOLVING CONSTANT and PERSISTENT COLUMN
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME <= 'Smith' ",
+      		new String[][] {{"0","Smith"}, {"2","\u0104corn"}, {"4","Acorn"},
+      		{"6","aacorn"} });
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME between 'Acorn' and 'Zebra' ",
+      		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"}, 
+      		{"4","Acorn"}, {"5","\u015Amith"} });
+      //After index creation, the query above will return same data but in 
+      //different order
+      /*s.executeUpdate("CREATE INDEX CUSTOMER_INDEX1 ON CUSTOMER(NAME)");
+      s.executeUpdate("INSERT INTO CUSTOMER VALUES (NULL, NULL)");
+      checkLangBasedQuery(s, 
+      		"SELECT ID, NAME FROM CUSTOMER -- derby-properties index=customer_index1 \r WHERE NAME between 'Acorn' and " + 
+			" 'Zebra'", //ORDER BY NAME",
+      		new String[][] {{"4","Acorn"}, {"2","\u0104corn"}, {"0","Smith"}, 
+      		{"5","\u015Amith"}, {"1","Zebra"} });
+      */
+      //For collated databases, COMPARISONS OF USER PERSISTENT CHARACTER 
+      //COLUMN AND CHARACTER CONSTANT WILL FAIL IN SYSTEM SCHEMA.
+      s.executeUpdate("set schema SYS");
+      assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
+      
+      s.close();
+      conn.commit();
+      
       dropTable(ds);
       }
 
@@ -181,18 +310,12 @@ private void dropTable(DataSource ds) throws SQLException {
  * from the query should match this paramter
  * @throws SQLException
  */
-private void checkLangBasedQuery(DataSource ds, String query, String[][] expectedResult) throws SQLException {
-    Connection conn = ds.getConnection();
-    conn.setAutoCommit(false);
-
-    Statement s = conn.createStatement();
+private void checkLangBasedQuery(Statement s, String query, String[][] expectedResult) throws SQLException {
     ResultSet rs = s.executeQuery(query);
     if (expectedResult == null) //expecting empty resultset from the query
     	JDBC.assertEmpty(rs);
     else
     	JDBC.assertFullResultSet(rs,expectedResult);
-    s.close();
-    conn.commit();
 }
     
   public static Test suite() {

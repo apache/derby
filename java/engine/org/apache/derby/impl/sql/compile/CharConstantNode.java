@@ -162,6 +162,20 @@ public final class CharConstantNode extends ConstantNode
 			//from the schema it is getting compiled in.
 			LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 		    getTypeServices().setCollationType(lcc.getDefaultSchema().getCollationType());
+		    
+		    //Once we have the collation type, we should check if the value
+		    //associated with this node should change from 
+		    //SQLChar/SQLVarchar/SQLLongvarchar/SQLClob
+		    //to
+		    //CollatorSQLChar/CollatoSQLVarchar/CollatoSQLLongvarchar/CollatoSQLClob.
+		    //By default, the value associated with char constants are SQLxxx
+		    //kind because that is what is needed for UCS_BASIC collation. But
+		    //if at this bind time, we find that the char constant's collation
+		    //type is territory based, then we should change value from SQLxxx
+		    //to CollatorSQLxxx. That is what is getting done below.
+		    value = ((StringDataValue)value).getValue(
+		    		lcc.getDataValueFactory().getCharacterCollator(
+		    				getTypeServices().getCollationType()));
 		}
 		catch( java.sql.SQLException sqle)
 		{

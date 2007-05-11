@@ -82,7 +82,7 @@ public class WorkHorseForCollatorDatatypes
 		this.stringData = stringData;
 	}
 	
-	/** @see SQLChar.stringCompare(SQLChar, SQLChar) */
+	/** @see SQLChar#stringCompare(SQLChar, SQLChar) */
 	protected int stringCompare(SQLChar str1, SQLChar str2)
 	throws StandardException
 	{

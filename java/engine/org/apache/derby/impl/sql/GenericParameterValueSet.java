@@ -105,7 +105,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 	 * Initialize the set by allocating a holder DataValueDescriptor object
 	 * for each parameter.
 	 */
-	public void initialize(DataTypeDescriptor[] types)
+	public void initialize(DataTypeDescriptor[] types) throws StandardException
 	{
 		for (int i = 0; i < parms.length; i++)
 		{

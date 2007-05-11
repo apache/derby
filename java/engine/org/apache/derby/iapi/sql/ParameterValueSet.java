@@ -40,7 +40,7 @@ public interface ParameterValueSet
 	 * corresponding to the passed in type for each parameter.
 	 * @param types expected to match the number of parameters.
 	 */
-	void initialize(DataTypeDescriptor[] types);
+	void initialize(DataTypeDescriptor[] types) throws StandardException;
 
 
 	/**

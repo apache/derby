@@ -88,6 +88,7 @@ public final class UntypedNullConstantNode extends ConstantNode
 	 *
 	 */
 	public DataValueDescriptor convertDefaultNode(DataTypeDescriptor typeDescriptor)
+	throws StandardException
 	{
 		/*
 		** The default value is null, so set nullability to TRUE

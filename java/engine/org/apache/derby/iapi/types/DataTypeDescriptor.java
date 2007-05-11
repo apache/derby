@@ -40,7 +40,9 @@ import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
+import java.text.RuleBasedCollator;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
@@ -735,8 +737,28 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	/**
 		Get a Null for this type.
 	*/
-	public DataValueDescriptor getNull() {
-		return typeId.getNull();
+	public DataValueDescriptor getNull() throws StandardException {
+		DataValueDescriptor returnDVD = typeId.getNull();
+		//If we are dealing with default collation, then we have got the
+		//right DVD already. Just return it.
+		if (typeDescriptor.getCollationType() == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+			return returnDVD;			
+		//If we are dealing with territory based collation and returnDVD is 
+		//of type StringDataValue, then we need to return a StringDataValue   
+		//with territory based collation.
+		if (returnDVD instanceof StringDataValue) {
+			try {
+				RuleBasedCollator rbs = ConnectionUtil.getCurrentLCC().getDataValueFactory().
+				getCharacterCollator(typeDescriptor.getCollationType());
+				return ((StringDataValue)returnDVD).getValue(rbs);
+			}
+			catch( java.sql.SQLException sqle)
+			{
+				throw StandardException.plainWrapException( sqle);
+			}
+		}
+		else
+			return returnDVD;			
 	}
 
 	/**
