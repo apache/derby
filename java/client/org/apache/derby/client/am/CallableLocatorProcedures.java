@@ -21,6 +21,9 @@
 
 package org.apache.derby.client.am;
 
+import org.apache.derby.shared.common.error.ExceptionUtil;
+import org.apache.derby.shared.common.reference.SQLState;
+
 /**
  * Contains the necessary methods to call the stored procedure that
  * operate on LOBs identified by locators.  An instance of this class
@@ -43,6 +46,11 @@ package org.apache.derby.client.am;
  */
 class CallableLocatorProcedures 
 {
+    //caches the information from a Stored Procedure
+    //call as to whether locator support is available in
+    //the server or not.
+    boolean isLocatorSupportAvailable = true;
+    
     // One member variable for each stored procedure that can be called.
     // Used to be able to only prepare each procedure call once per connection.
     private CallableStatement blobCreateLocatorCall;
@@ -72,6 +80,8 @@ class CallableLocatorProcedures
      */
     private static final int VARCHAR_MAXWIDTH = 32672;
 
+    //Constant representing an invalid locator value
+    private static final int INVALID_LOCATOR = -1;
 
     /**
      * Create an instance to be used for calling locator-based stored
@@ -94,6 +104,14 @@ class CallableLocatorProcedures
      */
     int blobCreateLocator() throws SqlException
     {
+        //The information on whether the locator support
+        //is available is cached in the boolean
+        //isLocatorSupportAvailable. If this is false
+        //we can return -1
+        if (!isLocatorSupportAvailable) {
+            return INVALID_LOCATOR;
+        }
+        
         if (blobCreateLocatorCall == null) {
             blobCreateLocatorCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBCREATELOCATOR()",
@@ -105,8 +123,37 @@ class CallableLocatorProcedures
             // Make sure this statement does not commit user transaction
             blobCreateLocatorCall.isAutoCommittableStatement_ = false;
         }
-
-        blobCreateLocatorCall.executeX();
+        
+        try {
+            blobCreateLocatorCall.executeX();
+        }
+        catch(SqlException sqle) {
+            //An exception has occurred while calling the stored procedure
+            //used to create the locator value. 
+            
+            //We verify to see if this SqlException has a SQLState of
+            //42Y03(SQLState.LANG_NO_SUCH_METHOD_ALIAS)
+            //(corresponding to the stored procedure not being found)
+            
+            //This means that locator support is not available. 
+            
+            //This information is cached so that each time to determine
+            //if locator support is available we do not have to make a
+            //round trip to the server.
+            if (sqle.getSQLState().compareTo
+                    (ExceptionUtil.getSQLStateFromIdentifier
+                    (SQLState.LANG_NO_SUCH_METHOD_ALIAS)) == 0) {
+                isLocatorSupportAvailable = false;
+                return INVALID_LOCATOR;
+            }
+            else {
+                //The SqlException has not occurred because of the
+                //stored procedure not being found. Hence we simply throw
+                //it back.
+                throw sqle;
+            }
+        }
+        
         return blobCreateLocatorCall.getIntX(1);
     }
 
@@ -500,6 +547,14 @@ class CallableLocatorProcedures
      */
     int clobCreateLocator() throws SqlException
     {
+        //The information on whether the locator support
+        //is available is cached in the boolean
+        //isLocatorSupportAvailable. If this is false
+        //we can return -1
+        if (!isLocatorSupportAvailable) {
+            return INVALID_LOCATOR;
+        }
+        
         if (clobCreateLocatorCall == null) {
             clobCreateLocatorCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBCREATELOCATOR()",
@@ -512,7 +567,36 @@ class CallableLocatorProcedures
             clobCreateLocatorCall.isAutoCommittableStatement_ = false;
         }
 
-        clobCreateLocatorCall.executeX();
+        try {
+            clobCreateLocatorCall.executeX();
+        }
+        catch(SqlException sqle) {
+            //An exception has occurred while calling the stored procedure
+            //used to create the locator value. 
+            
+            //We verify to see if this SqlException has a SQLState of
+            //42Y03(SQLState.LANG_NO_SUCH_METHOD_ALIAS)
+            //(corresponding to the stored procedure not being found)
+            
+            //This means that locator support is not available. 
+            
+            //This information is cached so that each time to determine
+            //if locator support is available we do not have to make a
+            //round trip to the server.
+            if (sqle.getSQLState().compareTo
+                    (ExceptionUtil.getSQLStateFromIdentifier
+                    (SQLState.LANG_NO_SUCH_METHOD_ALIAS)) == 0) {
+                isLocatorSupportAvailable = false;
+                return INVALID_LOCATOR;
+            }
+            else {
+                //The SqlException has not occurred because of the
+                //stored procedure not being found. Hence we simply throw
+                //it back.
+                throw sqle;
+            }
+        }
+        
         return clobCreateLocatorCall.getIntX(1);
     }
 

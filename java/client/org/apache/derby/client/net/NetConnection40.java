@@ -132,43 +132,6 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
         throw SQLExceptionFactory.notImplemented ("createArrayOf(String,Object[])");
     }
 
-    /**
-     * Constructs an object that implements the Clob interface. The object
-     * returned initially contains no data.
-     * @return An object that implements the Clob interface
-     * @throws SQLException if an object that implements the
-     * Clob interface can not be constructed.
-     *
-     */
-    
-    public Clob createClob() throws SQLException {
-        try {
-            checkForClosedConnection();
-        } catch (SqlException se) {
-            throw se.getSQLException();
-        }
-        org.apache.derby.client.am.Clob clob = new org.apache.derby.client.am.Clob(this.agent_,"");
-        return clob;
-    }
-
-    /**
-     * Constructs an object that implements the Clob interface. The object
-     * returned initially contains no data.
-     * @return An object that implements the Clob interface
-     * @throws SQLException if an object that implements the
-     * Clob interface can not be constructed.
-     *
-     */
-    
-    public Blob createBlob() throws SQLException {
-        try {
-            checkForClosedConnection();
-        } catch (SqlException se) {
-            throw se.getSQLException();
-        }
-        org.apache.derby.client.am.Blob blob = new org.apache.derby.client.am.Blob(new byte[0],this.agent_, 0);
-        return blob;
-    }
     
     public NClob createNClob() throws SQLException {
         throw SQLExceptionFactory.notImplemented ("createNClob ()");

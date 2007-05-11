@@ -54,6 +54,9 @@ public abstract class Connection implements java.sql.Connection,
     // If they depend on both commit and rollback, they need to get on CommitAndRollbackListeners_.
     final java.util.WeakHashMap CommitAndRollbackListeners_ = new java.util.WeakHashMap();
     private SqlWarning warnings_ = null;
+    
+    //Constant representing an invalid locator value
+    private static final int INVALID_LOCATOR = -1;
 
     // ------------------------properties set for life of connection--------------
 
@@ -2136,5 +2139,97 @@ public abstract class Connection implements java.sql.Connection,
             return JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
         return holdability;
     }
+    
+    
+    /**
+     * Constructs an object that implements the <code>Clob</code> interface. 
+     * The object returned initially contains no data.
+     *
+     * @return An object that implements the <clob>Clob</clob> interface
+     * @throws java.sql.SQLException if an object that implements the
+     * <code>Clob</code> interface can not be constructed.
+     */
+    
+    public Clob createClob() throws SQLException {
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "createClob");
+        }
+        
+        try {
+            checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+        org.apache.derby.client.am.Clob clob = new 
+                org.apache.derby.client.am.Clob(this.agent_,"");
+        
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceExit(this, "createClob", clob);
+        }
+        
+        return clob;
+    }
+
+    /**
+     * Constructs an object that implements the <code>Blob</code> interface. 
+     * The object returned initially contains no data.
+     *
+     * @return An object that implements the <code>Blob</code> interface
+     * @throws SQLException if an object that implements the
+     * </code>Blob</code> interface can not be constructed.
+     *
+     */
+    
+    public Blob createBlob() throws SQLException {
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "createBlob");
+        }
+        
+        try {
+            checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+        
+        //Stores a locator value obtained by calling the
+        //stored procedure BLOBCREATELOCATOR.
+        int locator = INVALID_LOCATOR;
+        
+        //Stores the Blob instance that is returned.
+        org.apache.derby.client.am.Blob blob = null;
+
+        //Call the BLOBCREATELOCATOR stored procedure
+        //that will return a locator value.
+        try {
+            locator = locatorProcedureCall().blobCreateLocator();
+        }
+        catch(SqlException sqle) {
+            throw sqle.getSQLException();
+        }
+        
+        //If the locator value is -1 it means that we do not
+        //have locator support on the server.
+        
+        //The code here has been disabled because the Lob implementations
+        //have still not been completely converted to use locators. Once
+        //the Lob implementations are completed then this code can be enabled.
+        if (locator != INVALID_LOCATOR && false) {
+            //A valid locator value has been obtained.
+            blob = new org.apache.derby.client.am.Blob(this.agent_, locator);
+        } 
+        else {
+            //A valid locator value could not be obtained.
+            blob = new org.apache.derby.client.am.Blob
+                    (new byte[0],this.agent_, 0);
+        }
+        
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceExit(this, "createBlob", blob);
+        }
+        
+        return blob;
+    }
+    
+    
 
 }
