@@ -63,11 +63,11 @@ public class D_BaseContainerHandle extends DiagnosticableGeneric
             ")";
         */
 
-        long container_id = ch.identity.getContainerId();
+        long container_id = ch.getId().getContainerId();
 
         long conglom_id   = 
             D_DiagnosticUtil.diag_containerid_to_conglomid(
-                    ch.xact.getDataFactory(),
+                    ch.getTransaction().getDataFactory(),
                     container_id);
 
         if (conglom_id !=  Long.MIN_VALUE)

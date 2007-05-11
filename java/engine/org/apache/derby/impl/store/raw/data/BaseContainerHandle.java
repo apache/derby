@@ -74,21 +74,21 @@ public class BaseContainerHandle extends Observable
 		Container identifier
 		<BR> MT - Immutable
 	*/
-	protected /*final*/ ContainerKey		identity;
+	private /*final*/ ContainerKey		identity;
 
 	/**
 		Is this ContainerHandle active.
 
 		<BR> MT - Mutable : scoped
 	*/
-	protected boolean				active;	
+	private boolean				        active;	
 
 	/**
 		The actual container we are accessing. Only valid when active is true.
 
 		<BR> MT - Mutable : scoped
 	*/
-	protected BaseContainer		container;
+	protected BaseContainer		        container;
 
 	/**
 		the locking policy we opened the container with. 
@@ -97,27 +97,31 @@ public class BaseContainerHandle extends Observable
 		<BR> MT - Mutable : scoped
 	*/
 
-	private	LockingPolicy		locking;
+	private	LockingPolicy		        locking;
 
 	/**
 		our transaction. Only valid when active is true.
 
 		<BR> MT - Mutable : scoped
 	*/
-	protected	RawTransaction		xact;
+	private	RawTransaction		        xact;
 
 	/**
 		are we going to update?
 
 		<BR> MT - Immutable after container handle becomes active
 	*/
-	private	boolean		forUpdate;
-
-	protected int mode;	// mode the container was opened in
+	private	boolean		                forUpdate;
 
 
-	protected PageActions		actionsSet;
-	protected AllocationActions allocActionsSet;
+    /**
+     * mode the conainter was opened in.
+     **/
+	private int                         mode;
+
+
+	private PageActions		            actionsSet;
+	private AllocationActions           allocActionsSet;
 
 
 	/*
@@ -388,39 +392,42 @@ public class BaseContainerHandle extends Observable
 		@see ContainerHandle#close
 	*/
 
-	public void close() 
+	public synchronized void close() 
     {
+        // Close may be called by multiple threads concurrently, for
+        // instance it can be called automatically after an abort and
+        // explicitly by a client.  Depending on timing of machine
+        // these calls may happen concurrently.  Thus close needs to
+        // be synchronized.  
+        //
+        // Another example is that we may hand out an indirect reference
+        // to clients outside of JDBC through an OverFlowInputStream.  
+        // Derby code cannot control when clients may close those 
+        // streams with respect to implicit closes by abort.
 
         if (xact == null) 
         {
-            // Probably be closed explicitly by a client, after closing 
-            // automatically after an abort.
-            
-            if (SanityManager.DEBUG)
-                SanityManager.ASSERT(!active);
-
             return;
         }
 
-		// notify our observers (Pages) that we are closing ...
-		informObservers();
+        // notify our observers (Pages) that we are closing ...
+        informObservers();
 
-		active = false;
+        active = false;
 
-		getLockingPolicy().unlockContainer(xact, this);
+        getLockingPolicy().unlockContainer(xact, this);
 
-		// let go of the container
-		if (container != null) 
+        // let go of the container
+        if (container != null) 
         {
-			container.letGo(this);
-			container = null;
-		}
+            container.letGo(this);
+            container = null;
+        }
 
-		// and remove ourseleves from this transaction
+        // and remove ourseleves from this transaction
         xact.deleteObserver(this);
 
-		xact = null;
-		
+        xact = null;
 	}
 
 	/* cost estimation */
