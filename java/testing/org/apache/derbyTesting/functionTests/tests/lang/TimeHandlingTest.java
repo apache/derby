@@ -75,11 +75,6 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
     {
         TestSuite suite = new TestSuite(TimeHandlingTest.class);
         
-        // Once DERBY-889 is fixed the methods should be renamed
-        // and these lines removed so they are added under the default mechanism.
-        suite.addTest(new TimeHandlingTest("derby889testInertTime"));
-        suite.addTest(new TimeHandlingTest("derby889testCurrentTime"));
-        
         suite.addTest(TestConfiguration.clientServerSuite(TimeHandlingTest.class));
         
         return new CleanDatabaseTestSetup(suite) {
@@ -149,13 +144,11 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      * The returned values are fetched using checkTimeValue thus inheriting
      * all the checks within that method.
      * <BR>
-     * Once DERBY-889 is fixed this test should be renamed so that it
-     * loses the prefix derby889 (and the specific adding of this test
-     * in the suite() method removed.
+     * 
      * @throws SQLException
      * @throws UnsupportedEncodingException 
      */
-    public void derby889testInertTime() throws SQLException, UnsupportedEncodingException
+    public void testInertTime() throws SQLException, UnsupportedEncodingException
     {
         getConnection().setAutoCommit(false);
         // Insert a set of time values, 
@@ -252,13 +245,11 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      * is correctly between the start time of the statement
      * execution and the first fetch or completion.
      * <BR>
-     * Once DERBY-889 is fixed this test should be renamed so that it
-     * loses the prefix derby889 (and the specific adding of this test
-     * in the suite() method removed.
+     * 
      * @throws SQLException
      * @throws InterruptedException 
      */
-    public void derby889testCurrentTime() throws SQLException, InterruptedException
+    public void testCurrentTime() throws SQLException, InterruptedException
     {      
         currentFunctionTests(Types.TIME, CURRENT_TIME_FUNCTIONS);      
     }

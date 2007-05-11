@@ -477,18 +477,21 @@ public class DateTime {
                 10 * (((int) time.charAt(6)) - zeroBase) +
                 (((int) time.charAt(7)) - zeroBase);
 
+        // The SQL standard specifies that the date portion of the returned
+        // timestamp should be set to the current date. See DERBY-889 for
+        // more details.
+        java.util.Date today = new java.util.Date();
         if (recyclableTimestamp == null) {
-            return new java.sql.Timestamp(0, 0, 1, hour, minute, second, 0);
-        } else {
-            recyclableTimestamp.setYear(0);
-            recyclableTimestamp.setMonth(0);
-            recyclableTimestamp.setDate(1);
-            recyclableTimestamp.setHours(hour);
-            recyclableTimestamp.setMinutes(minute);
-            recyclableTimestamp.setSeconds(second);
-            recyclableTimestamp.setNanos(0);
-            return recyclableTimestamp;
+            recyclableTimestamp = new java.sql.Timestamp(today.getTime());
         }
+        else {
+            recyclableTimestamp.setTime(today.getTime());
+        }
+        recyclableTimestamp.setHours(hour);
+        recyclableTimestamp.setMinutes(minute);
+        recyclableTimestamp.setSeconds(second);
+        recyclableTimestamp.setNanos(0);
+        return recyclableTimestamp;
     }
     
     
