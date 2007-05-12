@@ -236,6 +236,26 @@ public abstract class ArrayUtil
 		return retVal;
 	}
 
+    public static String toString(int[] value)
+    {
+        String ret_val;
+
+        if (value == null || value.length == 0)
+        {
+            ret_val = "null";
+        }
+        else
+        {
+            ret_val = "";
+            for (int i = 0; i < value.length; i++)
+            {
+                ret_val += "[" + value[i] + "],";
+            }
+        }
+        return(ret_val);
+    }
+
+
 	///////////////////////////////////////////////////////////////////
 	//
 	// Methods for Arrays of LONGs

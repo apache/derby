@@ -23,8 +23,8 @@ package org.apache.derby.impl.store.access.conglomerate;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -258,7 +258,9 @@ public final class TemplateRow
 	 * @exception  StandardException  Standard exception policy.
      **/
 	static public boolean checkColumnTypes(
+    DataValueFactory        dvf,
     int[]                   format_ids, 
+    int[]                   collation_ids,
     DataValueDescriptor[]   row)
 		throws StandardException
 	{
@@ -295,7 +297,7 @@ public final class TemplateRow
                     }
 
                     column_template = 
-                        Monitor.newInstanceFromIdentifier(format_ids[colid]);
+                        dvf.getNull(format_ids[colid], collation_ids[colid]);
 
 
                     // is this the right check?
@@ -305,11 +307,14 @@ public final class TemplateRow
                             "check", "row = " +  RowUtil.toString(row));
 
                         SanityManager.THROWASSERT(
-                            "column["+colid+"] (" + column.getClass() +
-                            ") expected to be instanceof column_tempate() (" +
+                            "input column["+colid+"] (" + column.getClass() +
+                            ") did not match expected template class (" +
                             column_template.getClass() + ")" +
-                            "column = " + column +
-                            "row[colid] = " + row[colid]);
+                            "\ncolumn value = " + column +
+                            "\nformat_ids = " + 
+                                ArrayUtil.toString(format_ids) +
+                            "\ncollation  = " + 
+                                ArrayUtil.toString(collation_ids));
                     }
                 }
             }

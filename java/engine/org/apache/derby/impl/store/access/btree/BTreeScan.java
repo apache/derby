@@ -83,7 +83,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      */
     protected Transaction           init_rawtran             = null;
     protected boolean               init_forUpdate;
-    protected FormatableBitSet               init_scanColumnList;
+    protected FormatableBitSet      init_scanColumnList;
     protected DataValueDescriptor[] init_template;
     protected DataValueDescriptor[] init_startKeyValue;
     protected int                   init_startSearchOperator = 0;
@@ -1176,7 +1176,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     int                             open_mode,
     int                             lock_level,
     BTreeLockingPolicy              btree_locking_policy,
-    FormatableBitSet                         scanColumnList,
+    FormatableBitSet                scanColumnList,
     DataValueDescriptor[]		    startKeyValue,
     int                             startSearchOperator,
     Qualifier                       qualifier[][],
@@ -1236,14 +1236,12 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         
         if (SanityManager.DEBUG)
         {
-            // RESOLVE - (mikem) we should we require a template, need to 
-            // clean up some of the old tests which did not provide one?
-            if (init_template != null)
-            {
-                SanityManager.ASSERT(
-                    TemplateRow.checkColumnTypes(
-                        this.getConglomerate().format_ids, init_template));
-            }
+            SanityManager.ASSERT(
+                TemplateRow.checkColumnTypes(
+                    getRawTran().getDataValueFactory(),
+                    this.getConglomerate().format_ids, 
+                    this.getConglomerate().collation_ids,
+                    init_template));
         }
 
         // System.out.println("initializing scan:" + this);

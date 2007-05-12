@@ -57,6 +57,8 @@ import java.io.ObjectInput;
 
 import java.util.Properties;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
+
 /**
 
   A b-tree object corresponds to an instance of a b-tree conglomerate.  It 
@@ -546,6 +548,8 @@ public abstract class BTree extends GenericConglomerate
     long        conglomId)
 		throws StandardException
     {
+        SanityManager.DEBUG_PRINT("BTree.getDynamicCompiledConglomInfo", "collation_ids = " + ArrayUtil.toString(collation_ids));
+        SanityManager.showTrace(new Throwable());
         return(new OpenConglomerateScratchSpace(format_ids, collation_ids));
     }
 
