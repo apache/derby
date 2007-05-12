@@ -120,16 +120,8 @@ public abstract class T_Generic implements UnitTest, ModuleControl
 		
 		catch (Throwable t)
 		{
-			
-			while (t != null) {
-				FAIL(t.toString());
-				t.printStackTrace(out.getPrintWriter());
-				if (t instanceof StandardException) {
-					t = ((StandardException) t).getNestedException();
-					continue;
-				}
-				break;
-			}
+			FAIL(t.toString());
+			t.printStackTrace(out.getPrintWriter());
 			return false;
 		}
 

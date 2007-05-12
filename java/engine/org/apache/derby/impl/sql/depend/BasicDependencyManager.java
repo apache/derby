@@ -383,7 +383,7 @@ public class BasicDependencyManager implements DependencyManager {
 				} catch (StandardException sqle) {
 
 					if (noInvalidate != null)
-						sqle.setNestedException(noInvalidate);
+						sqle.initCause(noInvalidate);
 
 					noInvalidate = sqle;
 				}

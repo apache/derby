@@ -613,7 +613,7 @@ public class GenericLanguageConnectionContext
 				dm.invalidateFor(td, DependencyManager.DROP_TABLE, this);
 				tran.dropConglomerate(td.getHeapConglomerateId());
 			} catch (StandardException e) {
-				e.setNestedException(topLevelStandardException);
+				e.initCause(topLevelStandardException);
 				topLevelStandardException = e;
 			}
 		}
@@ -622,7 +622,7 @@ public class GenericLanguageConnectionContext
 		try {
 			internalCommit(true);
 		} catch (StandardException e) {
-			e.setNestedException(topLevelStandardException);
+			e.initCause(topLevelStandardException);
 			topLevelStandardException = e;
 		}
 		if (topLevelStandardException != null) throw topLevelStandardException;

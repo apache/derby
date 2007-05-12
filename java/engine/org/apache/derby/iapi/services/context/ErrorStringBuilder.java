@@ -21,7 +21,6 @@
 
 package org.apache.derby.iapi.services.context;
 
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 
 import java.io.StringWriter;
@@ -91,20 +90,11 @@ public class ErrorStringBuilder
 
 			t.printStackTrace(printWriter);
 
-
-			if (t instanceof StandardException) {
-				t = ((StandardException)t).getNestedException();
-			}
-			else if (t instanceof ExceptionInInitializerError) {
-				t = ((ExceptionInInitializerError) t).getException();
-			}
-			else if (t instanceof java.lang.reflect.InvocationTargetException) {
-				t = ((java.lang.reflect.InvocationTargetException) t).getTargetException();
-			}
-			else if (t instanceof java.sql.SQLException) {
-				t = ((java.sql.SQLException)t).getNextException();
+			if (t instanceof java.sql.SQLException) {
+				Throwable next = ((java.sql.SQLException)t).getNextException();
+				t = (next == null) ? t.getCause() : next;
 			} else {
-				t = null;
+				t = t.getCause();
 			}
 
 			if (level > 0)	

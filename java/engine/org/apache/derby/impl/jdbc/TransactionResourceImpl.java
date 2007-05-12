@@ -379,7 +379,7 @@ public final class TransactionResourceImpl
 
 			nextSQLException = Util.generateCsSQLException(se);
 
-			wrapInSQLException(nextSQLException, se.getNestedException());
+			wrapInSQLException(nextSQLException, se.getCause());
 
 		} else {
 

@@ -57,7 +57,6 @@ public class StandardException extends Exception
 	/*
 	 * Exception State
 	 */
-	private Throwable nestedException;
 	private transient Object[] arguments;
 	private int severity;
 	private String textMessage;
@@ -85,8 +84,10 @@ public class StandardException extends Exception
 
 		this.severity = getSeverityFromIdentifier(messageID);
 		this.sqlState = getSQLStateFromIdentifier(messageID);
-		this.nestedException = t;
 		this.arguments = args;
+		if (t != null) {
+			initCause(t);
+		}
 
 		if (SanityManager.DEBUG)
 		{
@@ -126,23 +127,6 @@ public class StandardException extends Exception
 	public final Object[] getArguments()
 	{
 		return arguments;
-	}
-
-	/**
-	 * Sets the nested exception for this exception.
-	 */
-	public final void setNestedException(Throwable nestedException)
-	{
-		this.nestedException = nestedException;
-	}
-
-	/**
-	 * Returns the nested exception for this exception,
-	 * if there is one.
-	 */
-	public final Throwable getNestedException()
-	{
-		return nestedException;
 	}
 
 	/**
@@ -446,7 +430,7 @@ public class StandardException extends Exception
     {
         StandardException se = new StandardException( MessageID, localizedMessage);
         if( t != null)
-            se.nestedException = t;
+            se.initCause(t);
         return se;
     }
 
@@ -472,7 +456,7 @@ public class StandardException extends Exception
 				StandardException se = new StandardException(state, sqlex.getMessage());
 				if (sqlex.getNextException() != null)		
 				{	
-					se.setNestedException(sqlex.getNextException());
+					se.initCause(sqlex.getNextException());
 				}
 				return se;
 			}
@@ -583,7 +567,7 @@ public class StandardException extends Exception
 				StandardException se = new StandardException(sqlState, "(" + sqle.getErrorCode()  + ") " + sqle.getMessage());
 				sqle = sqle.getNextException();
 				if (sqle != null)
-					se.setNestedException(plainWrapException(sqle));
+					se.initCause(plainWrapException(sqle));
 				return se;
 			}
 		}

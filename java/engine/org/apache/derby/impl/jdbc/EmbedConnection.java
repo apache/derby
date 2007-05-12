@@ -1812,7 +1812,7 @@ public abstract class EmbedConnection implements EngineConnection
 		} catch (StandardException mse) {
 			SQLException se = newSQLException(SQLState.BOOT_DATABASE_FAILED, dbname);
 
-			Throwable ne = mse.getNestedException();
+			Throwable ne = mse.getCause();
 			SQLException nse;
 
 			/*

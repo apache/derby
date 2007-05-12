@@ -330,7 +330,7 @@ public class Import extends ImportAbstract{
         
         StandardException se = StandardException.newException
             ( SQLState.UNEXPECTED_IMPORT_ERROR, new Integer( lineNumber ), inputFile, t.getMessage() );
-        se.setNestedException( t );
+        se.initCause(t);
 
         return PublicAPI.wrapStandardException(se);
     }

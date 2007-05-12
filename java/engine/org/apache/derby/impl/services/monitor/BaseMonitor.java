@@ -1840,14 +1840,15 @@ nextModule:
             
 		} catch (Throwable t) {
 
+			StandardException se;
 			// ensure that the severity will shutdown the service
 			if ((t instanceof StandardException) && (((StandardException) t).getSeverity() == ExceptionSeverity.DATABASE_SEVERITY))
-				;
+				se = (StandardException) t;
 			else
-				t = Monitor.exceptionStartingModule(t);
+				se = Monitor.exceptionStartingModule(t);
 
 			if (cm != previousCM) {
-				cm.cleanupOnError(t);
+				cm.cleanupOnError(se);
 			}
 
 			if (ts != null) {
@@ -1865,16 +1866,13 @@ nextModule:
 			}
 
 
-			Throwable nested = ((StandardException) t).getNestedException();
+			Throwable nested = se.getCause();
 
 			// never hide ThreadDeath
 			if (nested instanceof ThreadDeath)
-				throw (ThreadDeath) t;
+				throw (ThreadDeath) nested;
 
-			if (nested instanceof StandardException)
-				throw (StandardException) t;
-
-			throw (StandardException) t;
+			throw se;
 
 		} finally {
 			if ((previousCM == cm) && (sb != null))
