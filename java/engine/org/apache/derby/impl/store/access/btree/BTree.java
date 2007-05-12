@@ -548,8 +548,6 @@ public abstract class BTree extends GenericConglomerate
     long        conglomId)
 		throws StandardException
     {
-        SanityManager.DEBUG_PRINT("BTree.getDynamicCompiledConglomInfo", "collation_ids = " + ArrayUtil.toString(collation_ids));
-        SanityManager.showTrace(new Throwable());
         return(new OpenConglomerateScratchSpace(format_ids, collation_ids));
     }
 
