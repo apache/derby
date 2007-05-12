@@ -1132,7 +1132,8 @@ public class T_Util
 	} 
 
 	/**
-	 * Check that it's not possible to get a page which is latched.
+	 * Check that it's not possible to get a page which is already latched by
+	 * the same transaction.
 	 *
 	 * @param c a container handle
 	 * @param pageNumber the page number to check
@@ -1152,14 +1153,18 @@ public class T_Util
 				}
 			};
 		Thread interrupter = new Thread(r);
-		interrupter.start();
+		if (!SanityManager.DEBUG) {
+			// don't run the interrupter thread in sane builds, since getPage()
+			// will throw an assert error instead of hanging (DERBY-2635)
+			interrupter.start();
+		}
 
 		try {
 			Page p = c.getPage(pageNumber);
 			throw T_Fail.testFailMsg("got latched page");
 		} catch (StandardException se) {
-			// expect thread interrupted exception
-			if (!se.getMessageId().equals("08000")) {
+			// expect thread interrupted exception in insane builds
+			if (SanityManager.DEBUG || !se.getMessageId().equals("08000")) {
 				throw se;
 			}
 		} catch (RuntimeException e) {
@@ -1175,7 +1180,9 @@ public class T_Util
 		}
 
 		try {
-			interrupter.join();
+			if (interrupter.isAlive()) {
+				interrupter.join();
+			}
 		} catch (InterruptedException ie) { }
 	}
 
