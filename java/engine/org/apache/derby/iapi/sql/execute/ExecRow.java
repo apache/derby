@@ -64,6 +64,13 @@ public interface ExecRow extends Row {
 	 */
 	ExecRow	getNewNullRow();
 
+    /**
+     * Reset all the <code>DataValueDescriptor</code>s in the row array to
+     * (SQL) null values. This method may reuse (and therefore modify) the
+     * objects currently contained in the row array.
+     */
+    void resetRowArray();
+
 	/**
 	 * Get a clone of a DataValueDescriptor from an ExecRow.
 	 *

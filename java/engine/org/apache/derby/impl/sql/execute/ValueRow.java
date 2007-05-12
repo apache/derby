@@ -213,6 +213,17 @@ public class ValueRow implements ExecRow, Formatable
 		return new ValueRow(ncols);
 	}
 
+    /**
+     * Reset all columns in the row array to null values.
+     */
+    public void resetRowArray() {
+        for (int i = 0; i < column.length; i++) {
+            if (column[i] != null) {
+                column[i] = column[i].recycle();
+            }
+        }
+    }
+
 	// position is 1-based
 	public final DataValueDescriptor cloneColumn(int columnPosition)
 	{

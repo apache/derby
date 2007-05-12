@@ -57,8 +57,6 @@ import java.util.Properties;
  */
 class LastIndexKeyResultSet extends ScanResultSet
 {
-	protected	ExecRow		candidate;
-
 	// set in constructor and not altered during
 	// life of object.
 	protected long conglomId;
@@ -128,6 +126,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 	{
 		super(activation,
 				resultSetNumber,
+				resultRowAllocator,
 				lockMode, tableLocked, isolationLevel,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
@@ -152,8 +151,6 @@ class LastIndexKeyResultSet extends ScanResultSet
 
 		runTimeStatisticsOn = getLanguageConnectionContext().getRunTimeStatisticsMode();
 
-		/* Only call row allocators once */
-		candidate = (ExecRow) resultRowAllocator.invoke(activation);
 		constructorTime += getElapsedMillis(beginTime);
 
 		/*

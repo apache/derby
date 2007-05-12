@@ -245,6 +245,16 @@ public abstract class DataType
         return getString();  
     }
 
+    /**
+     * Recycle this DataType object.
+     *
+     * @return this object with value set to null
+     */
+    public DataValueDescriptor recycle() {
+        restoreToNull();
+        return this;
+    }
+
 	/*
 	 * Column interface
 	 */

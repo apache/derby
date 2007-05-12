@@ -80,7 +80,6 @@ class TableScanResultSet extends ScanResultSet
 	protected boolean		firstScan = true;
 	protected ExecIndexRow	startPosition;
 	protected ExecIndexRow	stopPosition;
-	protected	ExecRow		candidate;
 
     // set in constructor and not altered during
     // life of object.
@@ -179,6 +178,7 @@ class TableScanResultSet extends ScanResultSet
     {
 		super(activation,
 				resultSetNumber,
+				resultRowAllocator,
 				lockMode, tableLocked, isolationLevel,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
@@ -237,8 +237,6 @@ class TableScanResultSet extends ScanResultSet
 		runTimeStatisticsOn = (activation != null &&
 							   activation.getLanguageConnectionContext().getRunTimeStatisticsMode());
 
-		/* Only call row allocators once */
-		candidate = (ExecRow) resultRowAllocator.invoke(activation);
 		constructorTime += getElapsedMillis(beginTime);
 		
 		/* Always qualify the first time a row is being read */

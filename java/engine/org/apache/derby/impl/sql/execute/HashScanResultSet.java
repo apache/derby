@@ -73,7 +73,6 @@ public class HashScanResultSet extends ScanResultSet
 	private boolean		hashtableBuilt;
 	private ExecIndexRow	startPosition;
 	private ExecIndexRow	stopPosition;
-	protected	ExecRow		candidate; // candidate row is sparse
 	protected	ExecRow		compactRow;
 
 	// Variable for managing next() logic on hash entry
@@ -153,6 +152,7 @@ public class HashScanResultSet extends ScanResultSet
     {
 		super(activation,
 				resultSetNumber,
+				resultRowAllocator,
 				lockMode, tableLocked, isolationLevel,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
@@ -211,8 +211,6 @@ public class HashScanResultSet extends ScanResultSet
 		runTimeStatisticsOn = 
             getLanguageConnectionContext().getRunTimeStatisticsMode();
 
-		/* Only call row allocators once */
-		candidate = (ExecRow) resultRowAllocator.invoke(activation);
 		compactRow =
 				getCompactRow(candidate, accessedCols, (FormatableBitSet) null, false);
 		constructorTime += getElapsedMillis(beginTime);

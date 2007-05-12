@@ -176,6 +176,20 @@ public final class SQLBoolean
 		return TypeId.BOOLEAN_NAME;
 	}
 
+    /**
+     * Recycle this SQLBoolean object if possible. If the object is immutable,
+     * create and return a new object.
+     *
+     * @return a new SQLBoolean if this object is immutable; otherwise, this
+     * object with value set to null
+     */
+    public DataValueDescriptor recycle() {
+        if (immutable) {
+            return new SQLBoolean();
+        }
+        return super.recycle();
+    }
+
 	/*
 	 * Storable interface, implies Externalizable, TypedFormat
 	 */

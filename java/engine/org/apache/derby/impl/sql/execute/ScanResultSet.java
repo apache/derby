@@ -20,7 +20,9 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -46,11 +48,15 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
     /** The scan isolation level. */
     int isolationLevel;
 
+    /** The candidate row. */
+    final ExecRow candidate;
+
     /**
      * Construct a <code>ScanResultSet</code>.
      *
      * @param activation the activation
      * @param resultSetNumber number of the result set (unique within statement)
+     * @param resultRowAllocator method which generates rows
      * @param lockMode lock mode (record or table)
      * @param tableLocked true if marked as table locked in SYS.SYSTABLES
      * @param isolationLevel language isolation level for the result set
@@ -58,9 +64,10 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
      * @param optimizerEstimatedCost estimated cost
      */
     ScanResultSet(Activation activation, int resultSetNumber,
+                  GeneratedMethod resultRowAllocator,
                   int lockMode, boolean tableLocked, int isolationLevel,
                   double optimizerEstimatedRowCount,
-                  double optimizerEstimatedCost) {
+                  double optimizerEstimatedCost) throws StandardException {
         super(activation, resultSetNumber,
               optimizerEstimatedRowCount,
               optimizerEstimatedCost);
@@ -78,6 +85,9 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
         this.lockMode = getLockMode(isolationLevel);
         this.isolationLevel =
             translateLanguageIsolationLevel(isolationLevel);
+
+        /* Only call row allocators once */
+        candidate = (ExecRow) resultRowAllocator.invoke(activation);
     }
 
     /**
@@ -184,6 +194,8 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
     public void close() throws StandardException {
         // need to update isolation level on next open if it was unspecified
         isolationLevelNeedsUpdate = unspecifiedIsolationLevel;
+        // Prepare row array for reuse (DERBY-827).
+        candidate.resetRowArray();
         super.close();
     }
 }

@@ -114,6 +114,18 @@ public class HeapRowLocation extends DataType implements RowLocation
 		return new HeapRowLocation(this);
 	}
 
+    /**
+     * Recycle this HeapRowLocation object.
+     *
+     * @return this object reset to its initial state
+     */
+    public DataValueDescriptor recycle() {
+        pageno = 0L;
+        recid = 0;
+        rh = null;
+        return this;
+    }
+
 	public int getLength() {
 		return 10;
 	}

@@ -58,7 +58,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
  * rows that needs to be deleted on dependent tables. Using the row location 
  * we got from the index , base row is fetched.
 */
-class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
+class DependentResultSet extends ScanResultSet implements CursorResultSet
 {
 
 
@@ -90,7 +90,6 @@ class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
 	protected boolean		firstScan = true;
 	protected ExecIndexRow	startPosition;
 	protected ExecIndexRow	stopPosition;
-	protected	ExecRow		candidate;
 
     // set in constructor and not altered during
     // life of object.
@@ -111,9 +110,6 @@ class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
 	public int rowsPerRead;
 	public boolean forUpdate;
 	private boolean sameStartStopPosition;
-	public int isolationLevel;
-	public int lockMode;
-
 
 	// Run time statistics
 	private Properties scanProperties;
@@ -145,7 +141,7 @@ class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
 		int colRefItem,
 		int lockMode,
 		boolean tableLocked,
-		int isolationLevel,
+		int isolationLevel,		// ignored
 		int rowsPerRead,
 		boolean oneRowScan,
 		double optimizerEstimatedRowCount,
@@ -156,10 +152,14 @@ class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
 		int rltItem
 		)	throws StandardException
 	{
-		super(activation,
-				resultSetNumber,
-				optimizerEstimatedRowCount,
-				optimizerEstimatedCost);
+		super(activation, resultSetNumber, resultRowAllocator,
+			  lockMode, tableLocked,
+			  //Because the scan for the tables in this result set are done
+			  //internally for delete cascades, isolation should be set to
+			  //REPEATABLE READ irrespective what the user level isolation
+			  //level is.
+			  TransactionController.ISOLATION_REPEATABLE_READ,
+			  optimizerEstimatedRowCount, optimizerEstimatedCost);
 
 		this.conglomId = conglomId;
 
@@ -206,30 +206,8 @@ class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
 						getSavedObject(colRefItem));
 		}
 		
-		
-		//unless the table locking is specified in sys.systables,
-		//irrespective of what optimizer says choose record level 
-		//locking  for dependent result sets.
-		if (! tableLocked)
-		{
-			this.lockMode = TransactionController.MODE_RECORD;
-		}else
-		{
-			this.lockMode = lockMode;
-		}
-
-
-		//Because the scan for the tables in this result set are done
-		//internally for delete cascades, isolation should be set to
-		//REPEATABLE READ irrespective what the user level isolation level is.
-		this.isolationLevel = TransactionController.ISOLATION_REPEATABLE_READ;
-
 		runTimeStatisticsOn = (activation != null &&
 							   activation.getLanguageConnectionContext().getRunTimeStatisticsMode());
-
-		/* Only call row allocators once */
-		candidate = (ExecRow) resultRowAllocator.invoke(activation);
-		
 
 		tc = activation.getTransactionController();
 		//values required to scan the forein key index.
@@ -552,7 +530,7 @@ class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
 
 	public void openCore() throws StandardException
 	{
-
+		initIsolationLevel();
 		sVector = activation.getParentResultSet(parentResultSetId);
 		int size = sVector.size();
 		sourceRowHolders = new TemporaryRowHolder[size];
@@ -601,7 +579,7 @@ class DependentResultSet extends NoPutResultSetImpl implements CursorResultSet
 	 * Can we get instantaneous locks when getting share row
 	 * locks at READ COMMITTED.
 	 */
-	private boolean canGetInstantaneousLocks()
+	boolean canGetInstantaneousLocks()
 	{
 		return false;
 	}

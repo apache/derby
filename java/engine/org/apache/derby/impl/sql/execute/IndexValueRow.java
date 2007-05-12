@@ -115,6 +115,13 @@ class IndexValueRow implements ExecIndexRow {
 		return new IndexValueRow(valueRow.getNewNullRow());
 	}
 
+    /**
+     * Reset all columns in the row array to null values.
+     */
+    public void resetRowArray() {
+        valueRow.resetRowArray();
+    }
+
 	// position is 1-based
 	public DataValueDescriptor cloneColumn(int columnPosition)
 	{

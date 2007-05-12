@@ -289,6 +289,15 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 */
 	public DataValueDescriptor getClone();
 
+    /**
+     * Recycle this DataValueDescriptor if possible. Create and return a new
+     * object if it cannot be recycled.
+     *
+     * @return this object with the value set to null, or a new
+     * DataValueDescriptor of the same type as this
+     */
+    DataValueDescriptor recycle();
+
 	/**
 	 * Get a new null value of the same type as this data value.
 	 *
