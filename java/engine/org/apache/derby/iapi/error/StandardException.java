@@ -466,7 +466,7 @@ public class StandardException extends Exception
 		if (t instanceof EmbedSQLException) {
 			EmbedSQLException csqle = (EmbedSQLException) t;
 			if (csqle.isSimpleWrapper()) {
-				Throwable wrapped = csqle.getJavaException();
+				Throwable wrapped = csqle.getCause();
 				if (wrapped instanceof StandardException)
 					return (StandardException) wrapped;
 			}

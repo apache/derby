@@ -43,30 +43,12 @@ public class EmbedSQLException extends SQLException {
 	private String messageId;
 
 	/**
-		Java exception that caused this exception, can be null.
-	*/
-    //Because it's transient, it doesn't get sent over to the client
-    //side and hence the classes which needs to be included in the
-    //client.jar file decreases 5 folds.
-	private transient Throwable javaException;
-
-	/**
 	 * Because SQLException does not have settable fields,
 	 * the caller of the constructor must do message lookup,
 	 * and pass the appropriate values here for message, messageId,
 	 * and next exception.
 	 */
 	EmbedSQLException(String message, String messageId,
-		SQLException nextException, int severity, Object[] args) {
-
-		super(message, StandardException.getSQLStateFromIdentifier(messageId), severity);
-		this.messageId = messageId;
-		arguments = args;
-		if (nextException !=null)
-			this.setNextException(nextException);
-	}
-
-	public EmbedSQLException(String message, String messageId,
 		SQLException nextException, int severity, Throwable t, Object[] args) {
 
 		super(message, StandardException.getSQLStateFromIdentifier(messageId), severity);
@@ -74,14 +56,17 @@ public class EmbedSQLException extends SQLException {
 		arguments = args;
 		if (nextException !=null)
 			this.setNextException(nextException);
-		if (t != null) {
-			javaException = t;
-			setStackTrace(t.getStackTrace());
+
+		// if no cause has been specified, let nextException be the cause (this
+		// improves error reporting since the cause is included in the output
+		// from printStackTrace())
+		if (t == null) {
+			t = nextException;
 		}
-	}
-    
-	public Throwable getJavaException() {
-		return javaException;
+
+		if (t != null) {
+			initCause(t);
+		}
 	}
 
 	public String getMessageId() {

@@ -1152,7 +1152,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         Throwable cause = getLastSQLException(sqle).getCause();
         assertTrue("Exception not an EmbedSQLException",
                    cause instanceof EmbedSQLException);
-        cause = ((EmbedSQLException)cause).getJavaException();
+        cause = cause.getCause();
         assertTrue("Exception not a DerbyIOException",
                    cause instanceof DerbyIOException);
         DerbyIOException dioe = (DerbyIOException)cause;
