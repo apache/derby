@@ -192,18 +192,6 @@ Guide.
 
         </family>
 
-
-        <family>
-            <title>Class 04: Database authentication</title>
-
-            <msg>
-                <name>04501.C</name>
-                <text>Database connection refused.</text>
-            </msg>
-
-        </family>
-
-
         <family>
             <title>Class 07: Dynamic SQL Error</title>
 
@@ -347,6 +335,32 @@ Guide.
             <msg>
                 <name>08004.C.2</name>
                 <text>The connection was refused because the database {0} was not found.</text>
+                <arg>databaseName</arg>
+            </msg>
+
+            <msg>
+                <name>08004.C.3</name>
+                <text>Database connection refused.</text>
+            </msg>
+
+            <msg>
+                <name>08004.C.4</name>
+                <text>User '{0}' cannot shut down database '{1}'. Only the database owner can perform this operation.</text>
+                <arg>authorizationID</arg>
+                <arg>databaseName</arg>
+            </msg>
+
+            <msg>
+                <name>08004.C.5</name>
+                <text>User '{0}' cannot (re)encrypt database '{1}'. Only the database owner can perform this operation.</text>
+                <arg>authorizationID</arg>
+                <arg>databaseName</arg>
+            </msg>
+
+            <msg>
+                <name>08004.C.6</name>
+                <text>User '{0}' cannot hard upgrade database '{1}'. Only the database owner can perform this operation.</text>
+                <arg>authorizationID</arg>
                 <arg>databaseName</arg>
             </msg>
 
@@ -719,150 +733,9 @@ Guide.
             <title>Class 28: Invalid Authorization Specification</title>
 
             <msg>
-                <name>28501</name>
-                <text>Invalid database authorization property '{0}={1}'.</text>
-                <arg>value</arg>
-                <arg>value</arg>
-            </msg>
-
-            <msg>
                 <name>28502.C</name>
                 <text>The user name '{0}' is not valid. </text>
                 <arg>authorizationID</arg>
-            </msg>
-
-            <msg>
-                <name>28503</name>
-                <text>User(s) '{0}' must not be in both read-only and full-access authorization lists.</text>
-                <arg>authorizationID</arg>
-            </msg>
-
-            <msg>
-                <name>28504</name>
-                <text>Repeated user(s) '{1}' in access list '{0}';</text>
-                <arg>authorizationID</arg>
-                <arg>listName</arg>
-            </msg>
-
-            <msg>
-                <name>28505</name>
-                <text>Internal Error: invalid {0} id in statement permission list.</text>
-                <arg>authorizationID</arg>
-            </msg>
-
-            <msg>
-                <name>28506</name>
-                <text>User '{0}' does not have {1} permission on table '{2}'.'{3}'.</text>
-                <arg>authorizationID</arg>
-                <arg>permissionType</arg>
-                <arg>schemaNamet</arg>
-                <arg>tableName</arg>
-            </msg>
-
-            <msg>
-                <name>28507</name>
-                <text>User '{0}' does not have {1} permission on table '{2}'.'{3}' for grant.</text>
-                <arg>authorizationID</arg>
-                <arg>permissionType</arg>
-                <arg>schemaNamet</arg>
-                <arg>tableName</arg>
-            </msg>
-
-            <msg>
-                <name>28508</name>
-                <text>User '{0}' does not have {1} permission on column '{2}' of table '{3}'.'{4}'.</text>
-                <arg>authorizationID</arg>
-                <arg>permissionType</arg>
-                <arg>columnName</arg>
-                <arg>schemaName</arg>
-                <arg>tableName</arg>
-            </msg>
-
-            <msg>
-                <name>28509</name>
-                <text>User '{0}' does not have {1} permission on column '{2}' of table '{3}'.'{4}' for grant.</text>
-                <arg>authorizationID</arg>
-                <arg>permissionType</arg>
-                <arg>columnName</arg>
-                <arg>schemaName</arg>
-                <arg>tableName</arg>
-            </msg>
-
-            <msg>
-                <name>2850A</name>
-                <text>User '{0}' does not have execute permission on {1} '{2}'.'{3}'.</text>
-                <arg>authorizationID</arg>
-                <arg>objectName</arg>
-                <arg>schemaName</arg>
-                <arg>tableName</arg>
-            </msg>
-
-            <msg>
-                <name>2850B</name>
-                <text>User '{0}' does not have execute permission on {1} '{2}'.'{3}' for grant.</text>
-                <arg>authorizationID</arg>
-                <arg>objectName</arg>
-                <arg>schemaName</arg>
-                <arg>tableName</arg>
-            </msg>
-
-            <msg>
-                <name>2850C</name>
-                <text>User '{0}' is not the owner of {1} '{2}'.'{3}'.</text>
-                <arg>authorizationID</arg>
-                <arg>objectName</arg>
-                <arg>schemaName</arg>
-                <arg>tableName</arg>
-            </msg>
-
-            <msg>
-                <name>2850D</name>
-                <text>User '{0}' can not perform the operation in schema '{1}'.</text>
-                <arg>authorizationID</arg>
-                <arg>schemaName</arg>
-            </msg>
-
-            <msg>
-                <name>2850E</name>
-                <text>User '{0}' can not create schema '{1}'. Only database owner could issue this statement.</text>
-                <arg>authorizationID</arg>
-                <arg>schemaName</arg>
-            </msg>
-
-            <msg>
-                <name>2850F</name>
-                <text>Specified grant or revoke operation is not allowed on object '{0}'.</text>
-                <arg>objectName</arg>
-            </msg>
-
-            <msg>
-                <name>2850G</name>
-                <text>User '{0}' does not have {1} permission on object '{2}'.'{3}'.</text>
-                <arg>authorizationID</arg>
-                <arg>permissionName</arg>
-                <arg>schemaName</arg>
-                <arg>objectName</arg>
-            </msg>
-
-            <msg>
-                <name>2850H.C</name>
-                <text>User '{0}' cannot shut down database '{1}'. Only the database owner can perform this operation.</text>
-                <arg>authorizationID</arg>
-                <arg>databaseName</arg>
-            </msg>
-
-            <msg>
-                <name>2850I.C</name>
-                <text>User '{0}' cannot (re)encrypt database '{1}'. Only the database owner can perform this operation.</text>
-                <arg>authorizationID</arg>
-                <arg>databaseName</arg>
-            </msg>
-
-            <msg>
-                <name>2850J.C</name>
-                <text>User '{0}' cannot hard upgrade database '{1}'. Only the database owner can perform this operation.</text>
-                <arg>authorizationID</arg>
-                <arg>databaseName</arg>
             </msg>
 
         </family>
@@ -1037,6 +910,126 @@ Guide.
             <msg>
                 <name>42000</name>
                 <text>Syntax error or access rule violation; see additional errors for details.</text>
+            </msg>
+
+            <msg>
+                <name>42500</name>
+                <text>User '{0}' does not have {1} permission on table '{2}'.'{3}'.</text>
+                <arg>authorizationID</arg>
+                <arg>permissionType</arg>
+                <arg>schemaNamet</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>42501</name>
+                <text>User '{0}' does not have {1} permission on table '{2}'.'{3}' for grant.</text>
+                <arg>authorizationID</arg>
+                <arg>permissionType</arg>
+                <arg>schemaNamet</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>42502</name>
+                <text>User '{0}' does not have {1} permission on column '{2}' of table '{3}'.'{4}'.</text>
+                <arg>authorizationID</arg>
+                <arg>permissionType</arg>
+                <arg>columnName</arg>
+                <arg>schemaName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>42503</name>
+                <text>User '{0}' does not have {1} permission on column '{2}' of table '{3}'.'{4}' for grant.</text>
+                <arg>authorizationID</arg>
+                <arg>permissionType</arg>
+                <arg>columnName</arg>
+                <arg>schemaName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>42504</name>
+                <text>User '{0}' does not have execute permission on {1} '{2}'.'{3}'.</text>
+                <arg>authorizationID</arg>
+                <arg>objectName</arg>
+                <arg>schemaName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>42505</name>
+                <text>User '{0}' does not have execute permission on {1} '{2}'.'{3}' for grant.</text>
+                <arg>authorizationID</arg>
+                <arg>objectName</arg>
+                <arg>schemaName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>42506</name>
+                <text>User '{0}' is not the owner of {1} '{2}'.'{3}'.</text>
+                <arg>authorizationID</arg>
+                <arg>objectName</arg>
+                <arg>schemaName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>42507</name>
+                <text>User '{0}' can not perform the operation in schema '{1}'.</text>
+                <arg>authorizationID</arg>
+                <arg>schemaName</arg>
+            </msg>
+
+            <msg>
+                <name>42508</name>
+                <text>User '{0}' can not create schema '{1}'. Only database owner could issue this statement.</text>
+                <arg>authorizationID</arg>
+                <arg>schemaName</arg>
+            </msg>
+
+            <msg>
+                <name>42509</name>
+                <text>Specified grant or revoke operation is not allowed on object '{0}'.</text>
+                <arg>objectName</arg>
+            </msg>
+
+            <msg>
+                <name>4250A</name>
+                <text>User '{0}' does not have {1} permission on object '{2}'.'{3}'.</text>
+                <arg>authorizationID</arg>
+                <arg>permissionName</arg>
+                <arg>schemaName</arg>
+                <arg>objectName</arg>
+            </msg>
+
+            <msg>
+                <name>4250B</name>
+                <text>Invalid database authorization property '{0}={1}'.</text>
+                <arg>value</arg>
+                <arg>value</arg>
+            </msg>
+
+            <msg>
+                <name>4250C</name>
+                <text>User(s) '{0}' must not be in both read-only and full-access authorization lists.</text>
+                <arg>authorizationID</arg>
+            </msg>
+
+            <msg>
+                <name>4250D</name>
+                <text>Repeated user(s) '{1}' in access list '{0}';</text>
+                <arg>authorizationID</arg>
+                <arg>listName</arg>
+            </msg>
+
+            <msg>
+                <name>4250E</name>
+                <text>Internal Error: invalid {0} id in statement permission list.</text>
+                <arg>authorizationID</arg>
             </msg>
 
             <msg>

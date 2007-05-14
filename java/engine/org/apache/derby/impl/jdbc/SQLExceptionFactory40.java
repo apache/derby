@@ -80,7 +80,7 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
         } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {
             ex = new SQLIntegrityConstraintViolationException(message, sqlState,
                     severity, t);
-        } else if (sqlState.startsWith(SQLState.AUTHORIZATION_PREFIX)) {
+        } else if (sqlState.startsWith(SQLState.AUTHORIZATION_SPEC_PREFIX)) {
             ex = new SQLInvalidAuthorizationSpecException(message, sqlState,
                     severity, t);
         }        

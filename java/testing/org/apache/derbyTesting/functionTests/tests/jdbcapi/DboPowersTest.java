@@ -296,7 +296,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             } else {
                 assertSQLState("database shutdown restriction, " +
                                "authentication,  not db owner",
-                               "2850H", e);
+                               "08004", e);
             }
             break;
         case SQLAUTHORIZATION:
@@ -306,7 +306,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             } else {
                 assertSQLState("database shutdown restriction, " +
                                "SQL authorization, not db owner",
-                               "2850H", e);
+                               "08004", e);
             }
             break;
         default:
@@ -578,7 +578,7 @@ public class DboPowersTest extends BaseJDBCTestCase
      */
     private void vetEncryptionAttempt (String user, SQLException e)
     {
-        vetAttempt(user, e, "2850I", "(re)encryption");
+        vetAttempt(user, e, "08004", "(re)encryption");
     }
 
     /**
@@ -715,7 +715,7 @@ public class DboPowersTest extends BaseJDBCTestCase
      */
     private void vetHardUpgradeAttempt (String user, SQLException e)
     {
-        vetAttempt(user, e, "2850J", "hard upgrade");
+        vetAttempt(user, e, "08004", "hard upgrade");
     }
 
     /**

@@ -136,19 +136,19 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // Following revokes should fail. Only owner can revoke 
         // permissions
         
-        assertStatementError("2850C", st_barConnection,
+        assertStatementError("42506", st_barConnection,
             "revoke select on satheesh.tsat from public");
         
-        assertStatementError("2850C", st_barConnection,
+        assertStatementError("42506", st_barConnection,
             " revoke insert on satheesh.tsat from foo");
         
-        assertStatementError("2850C", st_barConnection,
+        assertStatementError("42506", st_barConnection,
             " revoke update(i) on satheesh.tsat from foo");
         
-        assertStatementError("2850C", st_barConnection,
+        assertStatementError("42506", st_barConnection,
             " revoke update on satheesh.tsat from foo");
         
-        assertStatementError("2850C", st_barConnection,
+        assertStatementError("42506", st_barConnection,
             " revoke delete on satheesh.tsat from foo");
         
         // set connection satConnection
@@ -314,10 +314,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_satConnection.executeUpdate(
             " grant select on v1 to bar");
         
-        assertStatementError("2850F", st_satConnection,
+        assertStatementError("42509", st_satConnection,
             " grant insert on v1 to foo");
         
-        assertStatementError("2850F", st_satConnection,
+        assertStatementError("42509", st_satConnection,
             " grant update on v1 to public");
         
         // Tests for synonym. Not supported currently.
@@ -398,24 +398,24 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // All these DDLs should fail.
         
-        assertStatementError("2850D", st_swiperConnection,
+        assertStatementError("42507", st_swiperConnection,
             "create table NotMyTable (i int, j int)");
         
-        assertStatementError("2850D", st_swiperConnection,
+        assertStatementError("42507", st_swiperConnection,
             " drop table tsat");
         
-        assertStatementError("2850D", st_swiperConnection,
+        assertStatementError("42507", st_swiperConnection,
             " drop index tsat_ind");
         
-        assertStatementError("2850D", st_swiperConnection,
+        assertStatementError("42507", st_swiperConnection,
             " create view myview as select * from satheesh.tsat");
         
-        assertStatementError("2850D", st_swiperConnection,
+        assertStatementError("42507", st_swiperConnection,
             " CREATE FUNCTION FuncNotMySchema(P1 INT) RETURNS INT "
             + "NO SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME "
             + "'java.lang.Math.abs' LANGUAGE JAVA PARAMETER STYLE JAVA");
         
-        assertStatementError("2850D", st_swiperConnection,
+        assertStatementError("42507", st_swiperConnection,
             " alter table tsat add column k int");
         
         st_swiperConnection.executeUpdate(
@@ -426,16 +426,16 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Some simple DML tests. Should all fail.
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             "select * from satheesh.tsat");
         
-        assertStatementError("28506", st_swiperConnection,
+        assertStatementError("42500", st_swiperConnection,
             " insert into satheesh.tsat values (1, 2)");
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             " update satheesh.tsat set i=j");
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             " create table my_tsat (i int not null, c char(10), "
             + "constraint fk foreign key(i) references satheesh.tsat)");
         
@@ -457,7 +457,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Now some of these should pass
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             "select * from satheesh.tsat");
         
         rs = st_swiperConnection.executeQuery(
@@ -468,7 +468,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         JDBC.assertEmpty(rs);
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             " select i from satheesh.tsat where j=2");
         
         rs = st_swiperConnection.executeQuery(
@@ -480,7 +480,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         JDBC.assertEmpty(rs);
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             " select i from satheesh.tsat where 2 > (select "
             + "count(j) from satheesh.tsat)");
         
@@ -499,7 +499,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         assertUpdateCount(st_swiperConnection, 0,
             " update satheesh.tsat set j=2 where i=2");
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             " update satheesh.tsat set j=2 where j=1");
         
         rs = st_swiperConnection.executeQuery(
@@ -519,7 +519,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         JDBC.assertEmpty(rs);
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             " select b from satheesh.table1 t1, satheesh.tsat t2 "
             + "where t1.a = t2.j");
         
@@ -532,14 +532,14 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
                 
         JDBC.assertEmpty(rs);
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             " select * from satheesh.table1, (select j from "
             + "satheesh.tsat) table2");
         
         // GrantRevoke TODO: This one should pass, but currently 
         // fails. Bind update expression in two steps.
         
-        assertStatementError("28508", st_swiperConnection,
+        assertStatementError("42502", st_swiperConnection,
             "update satheesh.tsat set j=i");
         
         st_swiperConnection.executeUpdate(
@@ -553,11 +553,11 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Should fail
         
-        assertStatementError("28506", st_swiperConnection,
+        assertStatementError("42500", st_swiperConnection,
             "create trigger trig_sat1 after update on "
             + "satheesh.tsat for each statement values 1");
         
-        assertStatementError("28506", st_swiperConnection,
+        assertStatementError("42500", st_swiperConnection,
             " create trigger trig_sat2 no cascade before delete "
             + "on satheesh.tsat for each statement values 1");
         
@@ -595,11 +595,11 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // set connection swiperConnection
         
-        assertStatementError("28506", st_swiperConnection,
+        assertStatementError("42500", st_swiperConnection,
             " create trigger trig_sat1 after update on "
             + "satheesh.tsat for each statement values 1");
         
-        assertStatementError("28506", st_swiperConnection,
+        assertStatementError("42500", st_swiperConnection,
             " create trigger trig_sat2 no cascade before delete "
             + "on satheesh.tsat for each statement values 1");
         
@@ -679,10 +679,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_swiperConnection.executeUpdate(
             " set schema satheesh");
         
-        assertStatementError("2850A", st_swiperConnection,
+        assertStatementError("42504", st_swiperConnection,
             " values f_abs(-5)");
         
-        assertStatementError("2850A", st_swiperConnection,
+        assertStatementError("42504", st_swiperConnection,
             " select f_abs(-4) from sys.systables where "
             + "tablename like 'SYSTAB%'");
         
@@ -735,10 +735,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // set connection swiperConnection
         
-        assertStatementError("2850A", st_swiperConnection,
+        assertStatementError("42504", st_swiperConnection,
             " values f_abs(-5)");
         
-        assertStatementError("2850A", st_swiperConnection,
+        assertStatementError("42504", st_swiperConnection,
             " select f_abs(-4) from sys.systables where "
             + "tablename like 'SYSTAB%'");
         
@@ -792,19 +792,19 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Negative tests. Should all fail
         
-        assertStatementError("2850E", st_swiperConnection,
+        assertStatementError("42508", st_swiperConnection,
             "create schema myFriend");
         
-        assertStatementError("2850E", st_swiperConnection,
+        assertStatementError("42508", st_swiperConnection,
             " create schema mySchema authorization me");
         
-        assertStatementError("2850E", st_swiperConnection,
+        assertStatementError("42508", st_swiperConnection,
             " create schema myschema authorization swiper");
         
         Connection CONNECTION0 = openUserConnection("sam");
         Statement st_CONNECTION0 = CONNECTION0.createStatement();
       
-        assertStatementError("2850E", st_CONNECTION0,
+        assertStatementError("42508", st_CONNECTION0,
             " create schema sam authorization swiper");
         
         // Should pass
@@ -871,10 +871,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // schemas.. Should fail
         
         
-        assertStatementError("2850E", st_swiperConnection,
+        assertStatementError("42508", st_swiperConnection,
             " create table mywork.t1(i int)");
         
-        assertStatementError("2850E", st_swiperConnection,
+        assertStatementError("42508", st_swiperConnection,
             " create view mywork.v1 as select * from swiper.swiperTab");
         
         // Implicit schema creation should only work if creating 
@@ -883,7 +883,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         Connection monicaConnection = openUserConnection("monica");
         Statement st_monicaConnection = monicaConnection.createStatement();
         
-        assertStatementError("2850E", st_monicaConnection,
+        assertStatementError("42508", st_monicaConnection,
             " create table mywork.t1 ( i int)");
         
         st_monicaConnection.executeUpdate(
@@ -980,28 +980,28 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Try granting or revoking from system tables. Should fail
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             "grant select on sys.systables to sam");
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             " grant delete on sys.syscolumns to sam");
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             " grant update(alias) on sys.sysaliases to swiper");
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             " revoke all privileges on sys.systableperms from public");
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             " revoke trigger on sys.sysroutineperms from sam");
         
         // Try granting or revoking from system routines that is 
         // expected fail
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             "grant execute on procedure sysibm.sqlprocedures to sam");
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             " revoke execute on procedure sysibm.sqlcamessage "
             + "from public restrict");
         
@@ -1062,15 +1062,15 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt = samConnection.prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', "
             + "'SAMTABLE' , 'extinout/table.dat', null, null, null)");
-        assertStatementError("2850A", cSt);
+        assertStatementError("42504", cSt);
         
         cSt = samConnection.prepareCall(
             " call "
             + "SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storag"
             + "e.pageSize', '4096')");
-        assertStatementError("2850A", cSt);
+        assertStatementError("42504", cSt);
         
-        assertStatementError("2850A", st_samConnection,
+        assertStatementError("42504", st_samConnection,
             " values "
             + "SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storag"
             + "e.pageSize')");
@@ -1202,7 +1202,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
  
         // following select will fail because no permissions
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "select * from mamta1.t11");
         
         st_mamta3.executeUpdate(
@@ -1213,7 +1213,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // following select will fail because no permissions
         
-        assertStatementError("28508", st_mamta4,
+        assertStatementError("42502", st_mamta4,
             "select * from mamta1.t11");
         
         st_mamta4.executeUpdate(
@@ -1298,7 +1298,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no select permissions on 
         // all the columns
         
-        assertStatementError("28508", st_mamta2,
+        assertStatementError("42502", st_mamta2,
             "select * from mamta1.t11");
         
         // set connection mamta3
@@ -1306,7 +1306,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no update permission on 
         // column c113
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "update mamta1.t11 set c113=3");
         
         rs = st_mamta3.executeQuery(
@@ -1327,7 +1327,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no select permission on 
         // column c112
         
-        assertStatementError("28508", st_mamta4,
+        assertStatementError("42502", st_mamta4,
             "select c112 from mamta1.t11");
         
         // set connection mamta1
@@ -1488,21 +1488,21 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // since mamta3 is not dba, following will fail because no 
         // access to mamta2.v22
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "create view v31 as select * from mamta2.v22");
         
         // mamta3 has access to mamta1.t11 since there is PUBLIC 
         // select access on that table but there is no access to 
         // mamta2.v22
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "create view v32 as select v22.c111 as a, t11.c111 "
             + "as b from mamta2.v22 v22, mamta1.t11 t11");
         
         // Try to create a view with no privilege to more than one 
         // object.
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "create view v33 as select v22.c111 as a, t11.c111 "
             + "as b from mamta2.v22 v22, mamta1.t11 t11, mamta2.v21");
         
@@ -1513,26 +1513,26 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
-        assertStatementError("2850G", st_mamta2,
+        assertStatementError("4250A", st_mamta2,
             "grant select on v22 to mamta3");
         
         // set connection mamta3
         
         // should fail
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "create view v31 as select * from mamta2.v22");
         
         // following will fail because mamta3 has no access to v22
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "create view v32 as select v22.c111 as a, t11.c111 "
             + "as b from mamta2.v22 v22, mamta1.t11 t11");
         
         // following will still fail because mamta3 doesn't have 
         // access to mamta1.t12.c121
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "create view v33 as select v22.c111 as a, t12.c121 "
             + "as b from mamta2.v22 v22, mamta1.t12 t12");
         
@@ -1541,14 +1541,14 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // privilege on v23 to mamta3
         
         
-        assertStatementError("2850G", st_mamta2,
+        assertStatementError("4250A", st_mamta2,
             " grant select on v23 to mamta3");
         
         // set connection mamta3
         
         // should fail
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "create view v34 as select * from mamta2.v23");
         
         // should fail
@@ -1630,7 +1630,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no execute permissions on 
         // mamta1.f_abs1
         
-        assertStatementError("2850A", st_mamta2,
+        assertStatementError("42504", st_mamta2,
             "create view v25(c251) as (values mamta1.f_abs1(-1))");
         
         // set connection mamta1
@@ -1736,12 +1736,12 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail because no access on column 
         // mamta1.t14.c142
         
-        assertStatementError("28508", st_mamta2,
+        assertStatementError("42502", st_mamta2,
             "create view v26 as (select * from mamta1.t14 where c142=1)");
         
         // following will fail for the same reason
         
-        assertStatementError("28508", st_mamta2,
+        assertStatementError("42502", st_mamta2,
             "create view v26 as (select c141 from mamta1.t14 "
             + "where c142=1)");
         
@@ -2025,14 +2025,14 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // mamta3 has not been granted select privileges on 
         // mamta2.v21ViewTest
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "select * from mamta2.v21ViewTest");
         
         // set connection mamta2
         
         // give select privileges on the view to mamta3, should fail
         
-        assertStatementError("2850G", st_mamta2,
+        assertStatementError("4250A", st_mamta2,
             "grant select on v21ViewTest to mamta3");
         
         // set connection mamta3
@@ -2040,7 +2040,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // select from mamta2.v21ViewTest will fail for mamta3 
         // because mamta3 has no select privilege on mamta2.v21ViewTest
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "select * from mamta2.v21ViewTest");
         
         // set connection satConnection
@@ -2068,7 +2068,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // mamta3 because dba took away the select privilege on 
         // mamta2.v21ViewTest
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "select * from mamta2.v21ViewTest");
         
         // set connection mamta2
@@ -2457,7 +2457,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
-        assertStatementError("2850G", st_mamta2,
+        assertStatementError("4250A", st_mamta2,
             "grant select on v21ViewTest to mamta3");
         
         rs = st_mamta2.executeQuery(
@@ -2491,7 +2491,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following should fail because not all the privileges 
         // are in place
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "create trigger tr31t31TriggerTest after insert on "
             + "t31TriggerTest for each statement insert into "
             + "t32TriggerTest values (select c111 from "
@@ -2995,12 +2995,12 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // grant permission to mamta3, should fail
         
-        assertStatementError("2850G", st_mamta2,
+        assertStatementError("4250A", st_mamta2,
             "grant select on v21ViewTest to mamta3");
         
         // set connection mamta3
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             " create view v31ViewTest as select * from mamta2.v21ViewTest");
         
         assertStatementError("42X05", st_mamta3,
@@ -3975,7 +3975,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following should fail because mamta2 doesn't have 
         // trigger permission on mamta1.t11TriggerTest
         
-        assertStatementError("28506", st_mamta2,
+        assertStatementError("42500", st_mamta2,
             "create trigger tr11t11TriggerTest after insert on "
             + "mamta1.t11TriggerTest for each statement insert into "
             + "mamta1.t12RoutineTest values (1)");
@@ -3998,7 +3998,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following will fail becuae mamta2 has TRIGGER privilege 
         // but not INSERT privilege on mamta1.t11TriggerTest
         
-        assertStatementError("28506", st_mamta2,
+        assertStatementError("42500", st_mamta2,
             "insert into mamta1.t11TriggerTest values(3)");
         
         // set connection mamta1
@@ -4165,7 +4165,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // will fail because mamta2 doesn't have INSERT privilege 
         // on mamta3.t31TriggerTest
         
-        assertStatementError("28506", st_mamta2,
+        assertStatementError("42500", st_mamta2,
             "insert into mamta3.t31TriggerTest values(1)");
         
         // set connection mamta3
@@ -4387,7 +4387,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
-        assertStatementError("2850G", st_mamta3,
+        assertStatementError("4250A", st_mamta3,
             " grant select on v21ViewTest to mamta2");
         
         // set connection mamta2
@@ -4398,7 +4398,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // the routine    (which is underneath the view) and hence 
         // select from view will fail
         
-        assertStatementError("28508", st_mamta2,
+        assertStatementError("42502", st_mamta2,
             "select * from mamta3.v21ViewTest");
         
         // set connection mamta1
@@ -4410,7 +4410,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
-        assertStatementError("28508", st_mamta2,
+        assertStatementError("42502", st_mamta2,
             "select * from mamta3.v21ViewTest");
         
         // set connection mamta1
@@ -4445,7 +4445,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " create view v21ViewTest as select * from "
             + "mamta1.t11TriggerTest");
         
-        assertStatementError("2850G", st_mamta2,
+        assertStatementError("4250A", st_mamta2,
             " grant select on v21ViewTest to mamta4");
         
         // set connection mamta3
@@ -4470,7 +4470,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         assertStatementError("42X94", st_mamta4,
             " drop trigger tr41t41");
         
-        assertStatementError("28508", st_mamta4,
+        assertStatementError("42502", st_mamta4,
             " create trigger tr41t41 after insert on "
             + "t41TriggerTest for each statement insert into "
             + "mamta3.t31TriggerTest (select * from mamta2.v21ViewTest)");
@@ -4539,17 +4539,17 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // will fail because no permissions on mamta4.t41TriggerTest
         
-        assertStatementError("28506", st_mamta3,
+        assertStatementError("42500", st_mamta3,
             "insert into mamta4.t41TriggerTest values(1)");
         
         // will fail because no permissions on mamta2.v21ViewTest
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "select * from mamta2.v21ViewTest");
         
         // will fail because no permissions on mamta1.t11TriggerTest
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "select * from mamta1.t11TriggerTest");
         
         // set connection mamta4
@@ -4816,7 +4816,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // following attempt to create insert trigger again will 
         // fail because trigger privilege has been revoked.
         
-        assertStatementError("28506", st_mamta2,
+        assertStatementError("42500", st_mamta2,
             "create trigger tr11t11 after insert on "
             + "mamta1.t11TriggerRevokeTest for each "
             + "statement insert into t21TriggerRevokeTest values(99)");
@@ -5632,16 +5632,16 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // Try granting or revoking to mamta1. Should all fail
         
-        assertStatementError("2850F", st_mamta1,
+        assertStatementError("42509", st_mamta1,
             "grant select on mamta1Table to mamta1");
         
-        assertStatementError("2850F", st_mamta1,
+        assertStatementError("42509", st_mamta1,
             " revoke select on mamta1Table from mamta1");
         
-        assertStatementError("2850F", st_mamta1,
+        assertStatementError("42509", st_mamta1,
             " grant execute on function f_abs to mamta1");
         
-        assertStatementError("2850F", st_mamta1,
+        assertStatementError("42509", st_mamta1,
             " revoke execute on function f_abs from mamta1 restrict");
         
         // set connection satConnection
@@ -5652,16 +5652,16 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " set schema mamta1");
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             " grant select on mamta1Table to mamta1");
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             " revoke select on mamta1Table from mamta1");
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             " grant execute on function f_abs to mamta1");
         
-        assertStatementError("2850F", st,
+        assertStatementError("42509", st,
             " revoke execute on function f_abs from mamta1 restrict");
         
         // But Grant/Revoke to another user should pass
@@ -5701,10 +5701,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             "lock table user1.t100 in exclusive mode");
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             " lock table user1.t100 in share mode");
         
         // set connection user1
@@ -5733,10 +5733,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             "lock table user1.t100 in exclusive mode");
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             " lock table user1.t100 in share mode");
         
         user2.commit();
@@ -5763,12 +5763,12 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // attempt to grant this view to others, should fail since 
         // user2 does not have grant privilege on object user1.t1
         
-        assertStatementError("2850C", st_user2,
+        assertStatementError("42506", st_user2,
             "grant select on user1.t1 to user3");
         
         // expect error
         
-        assertStatementError("2850G", st_user2,
+        assertStatementError("4250A", st_user2,
             "grant select on v1 to user3");
         
         // set connection user2
@@ -6065,7 +6065,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // should fail because mamta3 doesn't have any permission 
         // on this column in table mamta2.t1Derby1847
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "select c3 from mamta2.t1Derby1847");
         
         // set connection mamta2
@@ -6097,7 +6097,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // should fail because mamta3 lost it's select permission 
         // on new column in table mamta2.t1Derby1847
         
-        assertStatementError("28508", st_mamta3,
+        assertStatementError("42502", st_mamta3,
             "select c3 from mamta2.t1Derby1847");
         
         // set connection mamta2
@@ -6195,7 +6195,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         try {
             ResultSet crs2 = ps_crs2.executeQuery();
         } catch (SQLException e) {
-        	assertSQLState("28508", e);
+            assertSQLState("42502", e);
         }
         
         user2.setAutoCommit(true);
@@ -6243,7 +6243,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         try {
             ResultSet crs2 = ps_crs2.executeQuery();
         } catch (SQLException e) {
-        	assertSQLState("28508", e);
+            assertSQLState("42502", e);
         }
         
         // set connection user1
@@ -6553,7 +6553,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "select * from user1.t1 where i = 1");
         
         // set connection user1
@@ -6589,7 +6589,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "select * from user1.t1 where i = 1");
         
         // set connection user1
@@ -6625,7 +6625,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "select * from user1.t1 where i = 1");
         
         // set connection user1
@@ -6833,7 +6833,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // should fail
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "select * from user1.t1 where i = 1");
         
         // set connection user1
@@ -6963,50 +6963,50 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // test SELECT privilege, expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "select * from user1.t1");
         
         // test INSERT privilege, expect error
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             "insert into user1.t1(c1) values 4");
         
         // test UPDATE privilege, expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "update user1.t1 set c1=10");
         
         // test DELETE privilege, expect error
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             "delete from user1.t1");
         
         // test REFERENCES privilege, expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "create table t2 (c1 int primary key not null, c2 "
             + "int references user1.t1)");
         
         // test TRIGGER privilege, expect error
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             "create trigger trigger1 after update on user1.t1 "
             + "for each statement values integer('123')");
         
         // try to DROP user1.idx1 index, expect error
         
-        assertStatementError("2850D", st_user2,
+        assertStatementError("42507", st_user2,
             "drop index user1.idx1");
         
         // try to DROP user1.t1 table, expect error
         
-        assertStatementError("2850D", st_user2,
+        assertStatementError("42507", st_user2,
             "drop table user1.t1");
         
         // non privileged user try to grant privileges on 
         // user1.t1, expect error
         
-        assertStatementError("2850C", st_user2,
+        assertStatementError("42506", st_user2,
             "grant "
             + "select,insert,delete,update,references,trigger on "
             + "user1.t1 to user2");
@@ -7014,7 +7014,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // try to grant privileges for public on user1.t1, expect 
         // error
         
-        assertStatementError("2850C", st_user2,
+        assertStatementError("42506", st_user2,
             "grant "
             + "select,insert,delete,update,references,trigger on "
             + "user1.t1 to public");
@@ -7022,18 +7022,18 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // try to grant all privileges for user2 on user1.t1, 
         // expect error
         
-        assertStatementError("2850C", st_user2,
+        assertStatementError("42506", st_user2,
             "grant ALL PRIVILEGES on user1.t1 to user2");
         
         // try to grant all privileges on user1.t1 to public, 
         // expect error
         
-        assertStatementError("2850C", st_user2,
+        assertStatementError("42506", st_user2,
             "grant ALL PRIVILEGES on user1.t1 to public");
         
         // try to revoke user1 from table user1.t1, expect error
         
-        assertStatementError("2850F", st_user2,
+        assertStatementError("42509", st_user2,
             "revoke "
             + "select,insert,delete,update,references,trigger on "
             + "user1.t1 from user1");
@@ -7041,13 +7041,13 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // try to revoke all privileges from user1 on table 
         // user1.t1, expect error
         
-        assertStatementError("2850F", st_user2,
+        assertStatementError("42509", st_user2,
             "revoke ALL PRIVILEGES on user1.t1 from user1");
         
         // try to revoke execute on a non-existing function on 
         // user1.t1, expect error
         
-        assertStatementError("2850F", st_user2,
+        assertStatementError("42509", st_user2,
             "revoke execute on function user1.f1 from user1 restrict");
         
         st_user2.executeUpdate(
@@ -7055,22 +7055,22 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // try revoking yourself from user2.t2, expect error
         
-        assertStatementError("2850F", st_user2,
+        assertStatementError("42509", st_user2,
             "revoke select on t2 from user2");
         
         // try granting yourself again on user2.t2, expect error. Why?
         
-        assertStatementError("2850F", st_user2,
+        assertStatementError("42509", st_user2,
             "grant select on t2 to user2");
         
         // try granting yourself multiple times, expect error.  Why?
         
-        assertStatementError("2850F", st_user2,
+        assertStatementError("42509", st_user2,
             "grant insert on t2 to user2,user2,user2");
         
         // try to execute user1.F_ABS1, expect error
         
-        assertStatementError("2850A", st_user2,
+        assertStatementError("42504", st_user2,
             "values user1.F_ABS1(-9)");
         
         // set connection user1
@@ -7172,7 +7172,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // try to insert from t1, expect error
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             "insert into user1.t1 values (5, 'e')");
         
         // ok
@@ -7223,7 +7223,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // error
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             "insert into user1.t1 values (2, 'abc', 'ABC')");
         
         // ok
@@ -7252,7 +7252,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // user3 does not have permission to execute, expect error
         
-        assertStatementError("2850A", st_user3,
+        assertStatementError("42504", st_user3,
             "values user1.F_ABS1(-8)");
         
         // ok
@@ -7415,12 +7415,12 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("28508", st_user3,
+        assertStatementError("42502", st_user3,
             "select * from user1.t1");
         
         // expect error
         
-        assertStatementError("28508", st_user3,
+        assertStatementError("42502", st_user3,
             "update user1.t1 set c2 = 'user3'");
         
         // set connection test_dbo
@@ -7504,12 +7504,12 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "select * from user1.t4");
         
         // expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "select c1 from user1.t4");
         
         // ok
@@ -7523,7 +7523,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "update user1.t4 set c1=10, c3=100");
         
         // ok
@@ -7548,12 +7548,12 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "select c2 from user1.t4");
         
         // expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "update user1.t4 set c2='ABC'");
         
         // set connection user2
@@ -7566,7 +7566,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("2850E", st_user2,
+        assertStatementError("42508", st_user2,
             "create table myschema.t5 (i int)");
         
         // ok
@@ -7576,10 +7576,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("2850E", st_user2,
+        assertStatementError("42508", st_user2,
             "CREATE SCHEMA w3 AUTHORIZATION user2");
         
-        assertStatementError("2850E", st_user2,
+        assertStatementError("42508", st_user2,
             " create table w3.t1 (i int)");
         
         // expect error, already exists
@@ -7589,7 +7589,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("2850E", st_user2,
+        assertStatementError("42508", st_user2,
             "CREATE SCHEMA myschema");
         
         // expect error
@@ -7616,7 +7616,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("2850D", st_user5,
+        assertStatementError("42507", st_user5,
             "DROP SCHEMA w3 RESTRICT");
         
         // set connection user1
@@ -7634,7 +7634,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "select tablename from user1.sv1");
 
         st.executeUpdate(
@@ -7709,7 +7709,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "create view svc (i) as select * from user1.sva "
             + "union select * from user1.svb");
         
@@ -7798,14 +7798,14 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error, don't have with grant option
         
-        assertStatementError("2850G", st_user2,
+        assertStatementError("4250A", st_user2,
             "grant select on user2.v02ap to user3");
         
         // set connection user3
         
         // expect error
         
-        assertStatementError("28508", st_user3,
+        assertStatementError("42502", st_user3,
             "create view v03ap as select * from user2.v02ap");
         
         assertStatementError("42Y07", st_user3,
@@ -7878,7 +7878,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "create table rt2 (c1 int primary key not null, c2 "
             + "int not null, c3 int not null, constraint rt2fk "
             + "foreign key(c1) references user1.rt1)");
@@ -7933,7 +7933,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             "create table rt3 (c1 int primary key not null, c2 "
             + "int not null, c3 int not null, constraint rt3fk "
             + "foreign key(c1) references user1.rt1)");
@@ -8078,7 +8078,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
-        assertStatementError("2850A", st_user2,
+        assertStatementError("42504", st_user2,
             "values user1.F_ABS1(10) + user1.F_ABS2(-10)");
         
         // set connection user1
@@ -8107,13 +8107,13 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
-        assertStatementError("2850F", st_user2,
+        assertStatementError("42509", st_user2,
             "revoke execute on function ABS from user2 restrict");
         
         assertStatementError("42X01", st_user2,
             " revoke execute on function AVG from user2 restrict");
         
-        assertStatementError("2850F", st_user2,
+        assertStatementError("42509", st_user2,
             " revoke execute on function LENGTH from user2 restrict");
         
         // set connection user1
@@ -8130,7 +8130,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("2850A", st_user2,
+        assertStatementError("42504", st_user2,
             "values user1.F_ABS1(10) + user1.F_ABS2(-10)");
         
         // set connection user1
@@ -8170,232 +8170,232 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // not allowed. expect errors, sanity check
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             "grant ALL PRIVILEGES on sys.sysaliases to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.syschecks to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.syscolperms to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.syscolumns to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysconglomerates to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysconstraints to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysdepends to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysfiles to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysforeignkeys to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.syskeys to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysroutineperms to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysschemas to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysstatistics to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysstatements to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.systableperms to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.systables to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.systriggers to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on sys.sysviews to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant ALL PRIVILEGES on syscs_diag.lock_table to user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysaliases to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.syschecks to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.syscolperms to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.syscolumns to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysconglomerates to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysconstraints to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysdepends to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysfiles to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysforeignkeys to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.syskeys to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysroutineperms to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysschemas to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysstatistics to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysstatements to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.systableperms to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.systables to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.systriggers to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on sys.sysviews to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " grant select on syscs_diag.lock_table to user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysaliases from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.syschecks from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.syscolperms from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.syscolumns from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysconglomerates from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysconstraints from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysdepends from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysfiles from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysforeignkeys from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.syskeys from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysroutineperms from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysschemas from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysstatistics from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysstatements from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.systableperms from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.systables from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.systriggers from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on sys.sysviews from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke ALL PRIVILEGES on syscs_diag.lock_table from user2");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysaliases from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.syschecks from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.syscolperms from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.syscolumns from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysconglomerates from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysconstraints from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysdepends from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysfiles from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysforeignkeys from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.syskeys from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysroutineperms from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysschemas from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysstatistics from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysstatements from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.systableperms from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.systables from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.systriggers from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on sys.sysviews from user2, public");
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             " revoke select on syscs_diag.lock_table from user2, public");
         
         // set connection user3
@@ -8412,53 +8412,53 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         CallableStatement cSt3 = user3.prepareCall(
             "CALL SQLJ.INSTALL_JAR ('bogus.jar','user2.bogus',0)");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL SQLJ.REPLACE_JAR ('bogus1.jar', 'user2.bogus')");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL SQLJ.REMOVE_JAR  ('user2.bogus', 0)");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         // test backup routines, only db owner have privileges by 
         // default expect errors
         
         cSt3 = user3.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('backup1')");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL "
             + "SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCH"
             + "IVE_MODE('backup3', 1)");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL "
             + "SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCH"
             + "IVE_MODE_NOWAIT('backup4', 1)");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         // test admin routines, only db owner have privileges by 
         // default
         
         cSt3 = user3.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_FREEZE_DATABASE()");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE()");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1)");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         // set connection user1
         //ij(USER3)> -- test statistical routines, available for 
@@ -8556,23 +8556,23 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt3 = user3.prepareCall(
             " CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE ('USER3', "
             + "'TABLEEXP1', 'myfile.del', null, null, null)");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ('USER3', "
             + "'TABLEIMP1', 'myfile.del', null, null, null, 0)");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from "
             + "user3.TABLEEXP1','myfile.del', null, null, null)");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         cSt3 = user3.prepareCall(
             " CALL SYSCS_UTIL.SYSCS_IMPORT_DATA ('USER3', "
             + "'TABLEIMP1', null, '1,3,4', 'myfile.del', null, "
             + "null, null,0)");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
         // test property handling routines, only db owner have 
         // privileges by default expect errors
@@ -8580,9 +8580,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt3 = user3.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY "
             + "('derby.locks.deadlockTimeout', '10')");
-        assertStatementError("2850A", cSt3);
+        assertStatementError("42504", cSt3);
         
-        assertStatementError("2850A", st_user3,
+        assertStatementError("42504", st_user3,
             " VALUES "
             + "SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.locks."
             + "deadlockTimeout')");
@@ -8604,7 +8604,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // test check table routines, only db owner have privilege 
         // by default
         
-        assertStatementError("2850A", st_user3,
+        assertStatementError("42504", st_user3,
             "VALUES SYSCS_UTIL.SYSCS_CHECK_TABLE('USER3', 'TABLEEXP1')");
         
         // set connection user1
@@ -8650,7 +8650,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
-        assertStatementError("2850D", st_user2,
+        assertStatementError("42507", st_user2,
             "drop synonym user1.s1");
         
         assertStatementError("42X65", st_user2,
@@ -8709,19 +8709,19 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // set connection user2
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             " select * from user1.t1000");
         
         user2.setAutoCommit(false);
         
         // should fail
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             "lock table user1.t1000 in share mode");
         
         // should fail
         
-        assertStatementError("28506", st_user2,
+        assertStatementError("42500", st_user2,
             "lock table user1.t1000 in exclusive mode");
         
         user2.commit();
@@ -8736,7 +8736,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         user1.rollback();
         
         
-        assertStatementError("28508", st_user2,
+        assertStatementError("42502", st_user2,
             " select * from user1.t1000");
         
         // set connection user1
@@ -8993,7 +8993,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // DERBY-1858 expect error
         
-        assertStatementError("2850D", st_user2,
+        assertStatementError("42507", st_user2,
             "drop schema user4 restrict");
         
         // set connection dbo
@@ -9026,7 +9026,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("28508", pSt2);
+        assertStatementError("42502", pSt2);
         
         // set connection user1
         
@@ -9063,7 +9063,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("28508", pSt2);
+        assertStatementError("42502", pSt2);
         
         
         // set connection user2
@@ -9084,7 +9084,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect error
         
-        assertStatementError("2850F", st_user1,
+        assertStatementError("42509", st_user1,
             "revoke select on user2.tshared0 from user2");
         
         // set connection user2
@@ -9310,30 +9310,30 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         // expect errors
         
-        assertStatementError("2850G", st_user4,
+        assertStatementError("4250A", st_user4,
             "grant select on vshared1 to user5");
         
-        assertStatementError("2850G", st_user4,
+        assertStatementError("4250A", st_user4,
             " grant select on vshared2 to user5");
         
-        assertStatementError("2850G", st_user4,
+        assertStatementError("4250A", st_user4,
             " grant select on vshared3 to user5");
         
-        assertStatementError("2850G", st_user4,
+        assertStatementError("4250A", st_user4,
             " grant select on vshared4 to user5");
         
         // set connection user5
         
-        assertStatementError("28508", st_user5,
+        assertStatementError("42502", st_user5,
             " select * from user4.vshared1");
         
-        assertStatementError("28508", st_user5,
+        assertStatementError("42502", st_user5,
             " select * from user4.vshared2");
         
-        assertStatementError("28508", st_user5,
+        assertStatementError("42502", st_user5,
             " select * from user4.vshared3");
         
-        assertStatementError("28508", st_user5,
+        assertStatementError("42502", st_user5,
             " select * from user4.vshared4");
         
         // set connection user1

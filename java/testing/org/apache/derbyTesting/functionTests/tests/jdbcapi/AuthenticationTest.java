@@ -165,10 +165,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
         assertConnectionWOUPOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
         // try shutdown (but only dbo can do it)
-        assertShutdownFail("2850H", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
-        assertShutdownWOUPFail("2850H", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
-        assertShutdownFail("2850H", dbName, "system", "admin");
-        assertShutdownWOUPFail("2850H", dbName, "system", "admin");
+        assertShutdownFail("08004", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+        assertShutdownWOUPFail("08004", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+        assertShutdownFail("08004", dbName, "system", "admin");
+        assertShutdownWOUPFail("08004", dbName, "system", "admin");
         assertShutdownUsingConnAttrsOK(dbName, "APP", ("APP" + PASSWORD_SUFFIX));
         
         // ensure that a password is encrypted
@@ -197,14 +197,14 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertConnectionFail("08004", dbName, "nomen", "nescio");
         assertConnectionWOUPFail("08004", dbName, "nomen", "nescio");
         // attempt to shutdown db as one of the allowed users, will fail...
-        assertShutdownFail("2850H", dbName, "francois", ("francois" + PASSWORD_SUFFIX));
+        assertShutdownFail("08004", dbName, "francois", ("francois" + PASSWORD_SUFFIX));
         // ...for only dbowner can shutdown db.
         assertShutdownWOUPOK(dbName, "APP", ("APP" + PASSWORD_SUFFIX));
         // check simple connect ok as another allowed user, also revive db
         assertConnectionOK(dbName, "jeff", ("jeff" + PASSWORD_SUFFIX));
         // but dan wasn't on the list
-        assertConnectionFail("04501", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
-        assertShutdownFail("04501", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+        assertConnectionFail("08004", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+        assertShutdownFail("08004", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
 
         // now change fullAccessUsers & test again
         conn1 = 
@@ -214,9 +214,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         conn1.commit();
         conn1.close();
         assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX)); 
-        assertShutdownFail("2850H", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+        assertShutdownFail("08004", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
         // but dbo was not on list...
-        assertShutdownFail("04501", dbName, "APP", ("APP" + PASSWORD_SUFFIX));
+        assertShutdownFail("08004", dbName, "APP", ("APP" + PASSWORD_SUFFIX));
         // now add dbo back in...
         conn1 = openDefaultConnection("francois", ("francois" + PASSWORD_SUFFIX));
         setDatabaseProperty(
@@ -233,12 +233,12 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // just checking that it's still not working if we try again
         assertConnectionFail("08004", dbName, "badUser", "badPwd");
         // system is not on the list...
-        assertConnectionFail("04501", dbName, "system", "admin");
+        assertConnectionFail("08004", dbName, "system", "admin");
         // dan's on the list, but this isn't the pwd
         assertConnectionFail("08004", dbName, "dan", "badPwd");
         assertConnectionFail("08004", dbName, "jamie", ("dan" + PASSWORD_SUFFIX));
         // check some shutdowns
-        assertShutdownFail("04501", dbName, "system", "admin");
+        assertShutdownFail("08004", dbName, "system", "admin");
         assertShutdownFail("08004", dbName, "badUser", "badPwd");
         assertShutdownFail("08004", dbName, "dan", "badPwd");
         assertShutdownFail("08004", dbName, "badUser", ("dan" + PASSWORD_SUFFIX));
@@ -527,10 +527,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             assertConnectionOK(dbName, zeus, apollo);
             assertConnectionFail("08004", dbName, apollo, apollo);
             // shutdown only allowd by DBO
-            assertShutdownFail("2850H", dbName, zeus, apollo);
+            assertShutdownFail("08004", dbName, zeus, apollo);
             assertConnectionOK(dbName, apollo, zeus);
             assertShutdownFail("08004", dbName, zeus, zeus);
-            assertShutdownFail("2850H", dbName, apollo, zeus);
+            assertShutdownFail("08004", dbName, apollo, zeus);
             assertShutdownUsingSetShutdownOK(
                 dbName, "APP", ("APP" + PASSWORD_SUFFIX));
 
@@ -631,7 +631,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         setDBP.setString(1, propertyName);
         setDBP.setString(2, value);
         // user jamie cannot be both readOnly and fullAccess
-        assertStatementError("28503", setDBP);
+        assertStatementError("4250C", setDBP);
     }
     
     protected void setDatabaseProperty(

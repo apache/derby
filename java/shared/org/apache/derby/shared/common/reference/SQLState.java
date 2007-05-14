@@ -585,6 +585,7 @@ public interface SQLState {
 	** A group for standard SQLExceptions.
 	**
 	** 2200J-00R - For SQL/XML errors (based on SQL/XML[2006]).
+	** 4250x - access rule violations
 	** 428?? - adding some DB2 compatible errors
 	** 42X00-42Zxx for compilation errors 
 	** 46000  for SQLJ errors (for now, leave this range empty)
@@ -727,6 +728,24 @@ public interface SQLState {
 
 	String LANG_NULL_TO_PRIMITIVE_PARAMETER                            = "39004";
 	String LANG_SYNTAX_OR_ACCESS_VIOLATION                             = "42000";
+
+	// Fix for Derby-1828 - access rule violations should use SQL state 42
+	String AUTH_NO_TABLE_PERMISSION                                    = "42500";
+	String AUTH_NO_TABLE_PERMISSION_FOR_GRANT                          = "42501";
+	String AUTH_NO_COLUMN_PERMISSION                                   = "42502";
+	String AUTH_NO_COLUMN_PERMISSION_FOR_GRANT                         = "42503";
+	String AUTH_NO_EXECUTE_PERMISSION                                  = "42504";
+	String AUTH_NO_EXECUTE_PERMISSION_FOR_GRANT                        = "42505";
+	String AUTH_NOT_OWNER                                              = "42506";
+	String AUTH_NO_ACCESS_NOT_OWNER                                    = "42507";
+	String AUTH_NOT_DATABASE_OWNER                                     = "42508";
+	String AUTH_GRANT_REVOKE_NOT_ALLOWED                               = "42509";
+	String AUTH_NO_OBJECT_PERMISSION                                   = "4250A";
+	String AUTH_INVALID_AUTHORIZATION_PROPERTY                         = "4250B";
+	String AUTH_USER_IN_READ_AND_WRITE_LISTS                           = "4250C";
+	String AUTH_DUPLICATE_USERS                                        = "4250D";
+	String AUTH_INTERNAL_BAD_UUID                                      = "4250E";
+
 	String LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT                    = "42601";
 	String LANG_DB2_INVALID_HEXADECIMAL_CONSTANT                    = "42606";
 	String LANG_DB2_STRING_CONSTANT_TOO_LONG                    = "54002";
@@ -1363,32 +1382,13 @@ public interface SQLState {
 	/*
 	** Authorization and Authentication
 	*/
-	String AUTHORIZATION_PREFIX="28";
+	String AUTHORIZATION_SPEC_PREFIX="28";
 	
-	String AUTH_DATABASE_CONNECTION_REFUSED                            = "04501.C";
 	String AUTH_SET_CONNECTION_READ_ONLY_IN_ACTIVE_XACT                = "25501";
 	String AUTH_WRITE_WITH_READ_ONLY_CONNECTION                        = "25502";
 	String AUTH_DDL_WITH_READ_ONLY_CONNECTION                          = "25503";
 	String AUTH_CANNOT_SET_READ_WRITE                                  = "25505";
-	String AUTH_INVALID_AUTHORIZATION_PROPERTY                         = "28501";
 	String AUTH_INVALID_USER_NAME                                      = "28502.C";
-	String AUTH_USER_IN_READ_AND_WRITE_LISTS                           = "28503";
-	String AUTH_DUPLICATE_USERS                                        = "28504";
-	String AUTH_INTERNAL_BAD_UUID                                      = "28505";
-	String AUTH_NO_TABLE_PERMISSION                                    = "28506";
-	String AUTH_NO_TABLE_PERMISSION_FOR_GRANT                          = "28507";
-	String AUTH_NO_COLUMN_PERMISSION                                   = "28508";
-	String AUTH_NO_COLUMN_PERMISSION_FOR_GRANT                         = "28509";
-	String AUTH_NO_EXECUTE_PERMISSION                                  = "2850A";
-	String AUTH_NO_EXECUTE_PERMISSION_FOR_GRANT                        = "2850B";
-	String AUTH_NOT_OWNER                                              = "2850C";
-	String AUTH_NO_ACCESS_NOT_OWNER                                    = "2850D";
-	String AUTH_NOT_DATABASE_OWNER                                     = "2850E";
-	String AUTH_GRANT_REVOKE_NOT_ALLOWED                               = "2850F";
-	String AUTH_NO_OBJECT_PERMISSION                                   = "2850G";
-	String AUTH_SHUTDOWN_NOT_DB_OWNER                                  = "2850H.C";
-	String AUTH_ENCRYPT_NOT_DB_OWNER                                   = "2850I.C";
-	String AUTH_HARD_UPGRADE_NOT_DB_OWNER                              = "2850J.C";
 
 	/*
 	** Dependency manager
@@ -1558,7 +1558,13 @@ public interface SQLState {
     String LOGIN_FAILED = "08004";
     String NET_CONNECT_AUTH_FAILED                          = "08004.C.1";
     String NET_DATABASE_NOT_FOUND                           = "08004.C.2";
-        
+    String AUTH_DATABASE_CONNECTION_REFUSED                 = "08004.C.3"; 
+    //DERBY-1828: AUTH_DATABASE_CONNECTION_REFUSED used to be "04501.C"; 
+    String AUTH_SHUTDOWN_NOT_DB_OWNER                       = "08004.C.4";
+    String AUTH_ENCRYPT_NOT_DB_OWNER                        = "08004.C.5";
+    String AUTH_HARD_UPGRADE_NOT_DB_OWNER                   = "08004.C.6";
+    //DERBY-1828: AUTH_x_NOT_DB_OWNER used to be "2850H/I/J.C";
+
     // There can be multiple causes for 08003, which according
     // to SQL2003 spec means "connection does not exist"
     // We use a suffix to distinguish them.  Because of the suffix

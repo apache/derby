@@ -242,7 +242,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     private void nonDbaTest()
         throws Exception
     {
-        String          reservedToDBO = "2850A";
+        String          reservedToDBO = "42504";
         Connection  conn = openUserConnection( NON_DBO_USER );
 
         assertTrue( "Initially, should be able to read property.", canReadProperty() );

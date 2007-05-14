@@ -750,22 +750,22 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         try {
         	revoke(users[2], "select", "s1", "t1", "public");
         } catch (SQLException e) {
-        	assertSQLState("2850C", e);
+            assertSQLState("42506", e);
         }
         try {
         	revoke(users[2], "select", "s1", "t1", users[0]);
         } catch (SQLException e) {
-        	assertSQLState("2850F", e);
+            assertSQLState("42509", e);
         }
         try {
         	revoke(users[2], "insert", "s1", "t1", users[1]);
         } catch (SQLException e) {
-        	assertSQLState("2850C", e);
+            assertSQLState("42506", e);
         }
         try {
         	revoke(users[2], "update(c1)", "s1", "t1", users[2]);
         } catch (SQLException e) {
-        	assertSQLState("2850C", e);
+            assertSQLState("42506", e);
         }
     }
     
@@ -1014,7 +1014,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	    }
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
-    			assertSQLState("28508", e);
+    			assertSQLState("42502", e);
     		} else {
     			e.printStackTrace();
     			fail("Unexpected lack of select privilege.");
@@ -1046,7 +1046,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	    }
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
-    			assertSQLState("28506", e);
+    			assertSQLState("42500", e);
     		} else {
     			fail("Unexpected lack of delete privilege.");
     			e.printStackTrace();
@@ -1096,7 +1096,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	    }
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
-    			assertSQLState("28508", e);
+    			assertSQLState("42502", e);
     		} else {
     			fail("Unexpected lack of insert privilege on " + schema + "." + table + " by " + user);
     		}
@@ -1158,7 +1158,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         	    }
     		} catch (SQLException e) {
         		if (!hasPrivilege) {
-        			assertSQLState("28508", e);
+        			assertSQLState("42502", e);
         		} else {
         			e.printStackTrace();
         			fail("Unexpected lack of privilege to update on " + schema + "." + table + " by " + user);
@@ -1205,7 +1205,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         	    }
         	} catch (SQLException e) {
         		if (!hasPrivilege) {
-        			assertSQLState("28508", e);
+        			assertSQLState("42502", e);
         		} else {
         			e.printStackTrace();
         			fail("Unexpected lack of references privilege");
@@ -1243,7 +1243,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	    }
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
-    			assertSQLState("28506", e);
+    			assertSQLState("42500", e);
     		} else {
     			e.printStackTrace();
     			fail("Unexpected lack of trigger privilege on " + schema + "." + table + " by " + user);
@@ -1283,7 +1283,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 				if (forProcedure) 
 					assertSQLState("42Y03", e);
 				else 
-   				    assertSQLState("2850A", e);
+					assertSQLState("42504", e);
 			} else {
 				e.printStackTrace();
 				fail("Unexpected lack of function execute privilege");
@@ -1316,7 +1316,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 			rs = ps.getResultSet();
 		} catch (SQLException e) {
 			if (!hasPrivilege)
-				assertSQLState("2850A", e);
+				assertSQLState("42504", e);
 			else {
 				e.printStackTrace();
 				fail("Unexpected lack of procedure execute privilege.");

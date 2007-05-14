@@ -55,7 +55,7 @@ call sqlj.install_jar(AUTH_TEST.resourcefile('org.apache.derbyTesting.functionTe
 ij> --
 -- Configure the database with an invalid default connection mode (should fail);
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.defaultConnectionMode','AsDf');
-ERROR 28501: Invalid database authorization property 'derby.database.defaultConnectionMode=AsDf'.
+ERROR 4250B: Invalid database authorization property 'derby.database.defaultConnectionMode=AsDf'.
 ij> VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.defaultConnectionMode');
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ ij> --
 -- Add a bad list of read only users (should fail).
 --
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.readOnlyAccessUsers','fred,0IsABadFirstLetter');
-ERROR 28501: Invalid database authorization property 'derby.database.readOnlyAccessUsers=fred,0IsABadFirstLetter'.
+ERROR 4250B: Invalid database authorization property 'derby.database.readOnlyAccessUsers=fred,0IsABadFirstLetter'.
 ERROR XCXC0: Invalid id list.
 ij> VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.readOnlyAccessUsers');
 1                                                                                                                               
@@ -74,7 +74,7 @@ ij> --
 -- Add a bad list of full access users (should fail).
 --
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.fullAccessUsers','fred,0IsABadFirstLetter');
-ERROR 28501: Invalid database authorization property 'derby.database.fullAccessUsers=fred,0IsABadFirstLetter'.
+ERROR 4250B: Invalid database authorization property 'derby.database.fullAccessUsers=fred,0IsABadFirstLetter'.
 ERROR XCXC0: Invalid id list.
 ij> VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.fullAccessUsers');
 1                                                                                                                               
@@ -100,7 +100,7 @@ ij> --
 -- Connect as an unknown user (Should fail)
 --
 connect 'authorize' user 'fred';
-ERROR 04501: Database connection refused.
+ERROR 08004: Database connection refused.
 ij> --
 -- Connect as a user with an invalid name (Should fail)
 --
@@ -111,7 +111,7 @@ ij> --
 -- only valid if it is delimited (Should fail)
 --
 connect 'authorize' user '"!amber"' as c2;
-ERROR 04501: Database connection refused.
+ERROR 08004: Database connection refused.
 ij> --
 -- Delete the defaultAccessMode property. Verify unknown users
 -- have full access.
@@ -181,7 +181,7 @@ fullUser1,"***both","aaa-differByCase"
 ij> -- The following should fail as user '***both' can only be in 1 list
 -- and it is already defined in the fullAccess users list.
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.readOnlyAccessUsers','readUser1,"***both","AAA-differByCase"');
-ERROR 28503: User(s) '"***both"' must not be in both read-only and full-access authorization lists.
+ERROR 4250C: User(s) '"***both"' must not be in both read-only and full-access authorization lists.
 ij> -- This should succeed
 call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.database.readOnlyAccessUsers','readUser1,"AAA-differByCase"');
 0 rows inserted/updated/deleted
@@ -192,7 +192,7 @@ readUser1,"AAA-differByCase"
 ij> --
 -- Connect as an unknown user - due to case error (should fail);
 connect 'authorize' user '"fulluser1"';
-ERROR 04501: Database connection refused.
+ERROR 08004: Database connection refused.
 ij> --
 -- Connect as a read only user and verify access
 -- Verify the user can't elevate to full access.
@@ -465,15 +465,15 @@ ij(C2)> --
 call AUTH_TEST.addUserUtility('"dAda"','READ_ACCESS_PERMISSION');
 0 rows inserted/updated/deleted
 ij(C2)> call AUTH_TEST.addUserUtility('"dAda"','READ_ACCESS_PERMISSION');
-ERROR 28504: Repeated user(s) '"dAda"' in access list 'derby.database.readOnlyAccessUsers';
+ERROR 4250D: Repeated user(s) '"dAda"' in access list 'derby.database.readOnlyAccessUsers';
 ij(C2)> call AUTH_TEST.addUserUtility('"bUnny"','READ_ACCESS_PERMISSION');
 0 rows inserted/updated/deleted
 ij(C2)> call AUTH_TEST.addUserUtility('"bUnny"','READ_ACCESS_PERMISSION');
-ERROR 28504: Repeated user(s) '"bUnny"' in access list 'derby.database.readOnlyAccessUsers';
+ERROR 4250D: Repeated user(s) '"bUnny"' in access list 'derby.database.readOnlyAccessUsers';
 ij(C2)> call AUTH_TEST.addUserUtility('"jAmes"','READ_ACCESS_PERMISSION');
 0 rows inserted/updated/deleted
 ij(C2)> call AUTH_TEST.addUserUtility('"jAmes"','READ_ACCESS_PERMISSION');
-ERROR 28504: Repeated user(s) '"jAmes"' in access list 'derby.database.readOnlyAccessUsers';
+ERROR 4250D: Repeated user(s) '"jAmes"' in access list 'derby.database.readOnlyAccessUsers';
 ij(C2)> VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.readOnlyAccessUsers');
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
@@ -576,7 +576,7 @@ ij(C2)> --
 call AUTH_TEST.addUserUtility('dada','READ_ACCESS_PERMISSION');
 0 rows inserted/updated/deleted
 ij(C2)> call AUTH_TEST.addUserUtility('DADA','READ_ACCESS_PERMISSION');
-ERROR 28504: Repeated user(s) '"DADA"' in access list 'derby.database.readOnlyAccessUsers';
+ERROR 4250D: Repeated user(s) '"DADA"' in access list 'derby.database.readOnlyAccessUsers';
 ij(C2)> -- duplicate
 call AUTH_TEST.addUserUtility('bunny','FULL_ACCESS_PERMISSION');
 0 rows inserted/updated/deleted
