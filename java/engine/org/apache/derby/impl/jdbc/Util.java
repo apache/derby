@@ -209,6 +209,22 @@ public abstract class Util  {
         		StandardException.getSeverityFromIdentifier(SQLState.NO_CURRENT_CONNECTION));
 	}
 
+    /**
+     * Generate an <code>SQLException</code> which points to another
+     * <code>SQLException</code> nested within it with
+     * <code>setNextException()</code>.
+     *
+     * @param messageId message id
+     * @param args the arguments to the message creation
+     * @param next the next SQLException
+     * @return an SQLException wrapping another SQLException
+     */
+    static SQLException seeNextException(String messageId, Object[] args,
+                                         SQLException next) {
+        return newEmbedSQLException(messageId, args, next,
+            StandardException.getSeverityFromIdentifier(messageId), null);
+    }
+
 	public static SQLException javaException(Throwable t) {
 		String name, msg;
 

@@ -1760,10 +1760,9 @@ public abstract class EmbedConnection implements EngineConnection
 				addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.DATABASE_EXISTS, dbname));
 			}
 		} catch (StandardException mse) {
-
-			SQLException se = newSQLException(SQLState.CREATE_DATABASE_FAILED, dbname);
-			se.setNextException(handleException(mse));
-			throw se;
+            throw Util.seeNextException(SQLState.CREATE_DATABASE_FAILED,
+                                        new Object[] { dbname },
+                                        handleException(mse));
 		}
 
 		// clear these values as some modules hang onto
@@ -1810,7 +1809,6 @@ public abstract class EmbedConnection implements EngineConnection
 			tr.setDatabase(database);
 
 		} catch (StandardException mse) {
-			SQLException se = newSQLException(SQLState.BOOT_DATABASE_FAILED, dbname);
 
 			Throwable ne = mse.getCause();
 			SQLException nse;
@@ -1833,8 +1831,8 @@ public abstract class EmbedConnection implements EngineConnection
 			else
 				nse = Util.generateCsSQLException(mse);
 
-			se.setNextException(nse);
-			throw se;
+            throw Util.seeNextException(SQLState.BOOT_DATABASE_FAILED,
+                                        new Object[] { dbname }, nse);
 		}
 
 		// If database exists, getDatabase() will return the database object.
