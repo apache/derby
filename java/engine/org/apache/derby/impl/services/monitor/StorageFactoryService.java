@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.monitor;
 
+import org.apache.derby.iapi.util.PrivilegedFileOps;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -574,11 +575,11 @@ final class StorageFactoryService implements PersistentService
 		{
 			//First make sure backup service directory exists in the specified path
 			File backupRoot = new File(restoreFrom);
-			if(privExists(backupRoot))
+			if(PrivilegedFileOps.exists(backupRoot))
 			{
 				//First make sure backup have service.properties
 				File bserviceProp = new File(restoreFrom, PersistentService.PROPERTIES_NAME);
-				if(privExists(bserviceProp))
+				if(PrivilegedFileOps.exists(bserviceProp))
 				{
 					//create service root if required
 					if(createRoot)
@@ -909,38 +910,4 @@ final class StorageFactoryService implements PersistentService
             return null;
         } // end of run
     } // end of class DirectoryList
-    
-    /**
-     * Wrap {@link File#exists} in a priv block to avoid security exceptions.
-     * <p>
-     * This method allows Derby to check if a file exists even when the higher
-     * layer code (application code) does not have the required privileges to
-     * do so. Note that the Derby code base must be granted the appropriate
-     * permissions (typically {@link java.io.FilePermission}). 
-     *
-     * @param fileToCheck the pathname to check the existence of
-     * @return <code>true</code> if file exists, <code>false</code> if not.
-     * @throws SecurityException if the required privileges to check if the file
-     *      exists are missing
-     */
-    private boolean privExists(final File fileToCheck) throws SecurityException{
-        try {
-            
-            Boolean exist  = (Boolean) AccessController.doPrivileged(
-                    new PrivilegedExceptionAction()
-                    {
-                        public Object run()
-                        throws SecurityException
-                        {
-                            return new Boolean(fileToCheck.exists());
-                        }
-                    }); 
-            return exist.booleanValue();
-        }
-        catch( PrivilegedActionException pae)
-        {
-            throw (SecurityException) pae.getException();
-        }
     }
-
-}

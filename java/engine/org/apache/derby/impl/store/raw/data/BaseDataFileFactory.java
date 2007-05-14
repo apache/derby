@@ -86,6 +86,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.util.CheapDateFormatter;
+import org.apache.derby.iapi.util.PrivilegedFileOps;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
@@ -2513,7 +2514,7 @@ public class BaseDataFileFactory
          * This will fail with a security exception unless the database engine 
          * and all its callers have permission to read the backup directory.
          */
-        String[] bfilelist = backupRoot.list();
+        String[] bfilelist = PrivilegedFileOps.list(backupRoot);
         if(bfilelist !=null)
         {
             boolean segmentexist = false;
@@ -2523,7 +2524,8 @@ public class BaseDataFileFactory
                 if(bfilelist[i].startsWith("seg"))
                 {
                     bsegdir = new File(backupRoot , bfilelist[i]);
-                    if(bsegdir.exists() && bsegdir.isDirectory())
+                    if(PrivilegedFileOps.exists(bsegdir) &&
+                       PrivilegedFileOps.isDirectory(bsegdir))
                     {
                         segmentexist = true;
                         break;
