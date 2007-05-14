@@ -1,4 +1,4 @@
-/**
+/*
  *  Derby - Class org.apache.derbyTesting.functionTests.tests.lang.ProcedureInTriggerTest
  *  
  * Licensed to the Apache Software Foundation (ASF) under one
