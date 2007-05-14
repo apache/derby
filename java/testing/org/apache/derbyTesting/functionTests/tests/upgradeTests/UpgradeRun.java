@@ -21,6 +21,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -221,7 +222,7 @@ class UpgradeRun {
             // of DatabaseMetaData should be available.
             case UpgradeChange.PH_SOFT_UPGRADE:
             case UpgradeChange.PH_HARD_UPGRADE:
-                suite.addTestSuite(DatabaseMetaDataTest.class);
+                RunDataBaseMetaDataTest(suite, oldMinor);
                 break;
             }
         }
@@ -321,5 +322,27 @@ class UpgradeRun {
             return TestConfiguration.forceJDBC3Embedded(test);
         }
         return test;
+    }
+    
+    // We want to run DatabaseMetaDataTest, but it includes some
+    // features not supported in older versions, so we cannot just
+    // add the DatabaseMetaDataTest.class as is.
+    // Note also, that this does not execute fixture initialCompilationTest.
+    private static void RunDataBaseMetaDataTest (TestSuite suite, int oldMinor)
+    {
+        Method[] methods = DatabaseMetaDataTest.class.getMethods();
+        for (int i = 0; i < methods.length; i++) {
+            Method m = methods[i];
+            if (m.getParameterTypes().length > 0 ||
+                    !m.getReturnType().equals(Void.TYPE)) {
+                continue;
+            }
+            String name = m.getName();
+            if (name.startsWith("test"))
+            {
+                if (!(name.equals("testGetTablesModify") && oldMinor < 1))
+                    suite.addTest(new DatabaseMetaDataTest(name));
+            }
+        }
     }
 }
