@@ -24,9 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -36,7 +33,6 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.util.ReuseFactory;
 
-import java.sql.Types;
 import java.util.Vector;
 
 public final class CharConstantNode extends ConstantNode
@@ -157,30 +153,23 @@ public final class CharConstantNode extends ConstantNode
 			Vector	aggregateVector)
 	throws StandardException
 	{
-		try {
-			//The DTD for this character constant should get its collation type
-			//from the schema it is getting compiled in.
-			LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-		    getTypeServices().setCollationType(lcc.getDefaultSchema().getCollationType());
-		    
-		    //Once we have the collation type, we should check if the value
-		    //associated with this node should change from 
-		    //SQLChar/SQLVarchar/SQLLongvarchar/SQLClob
-		    //to
-		    //CollatorSQLChar/CollatoSQLVarchar/CollatoSQLLongvarchar/CollatoSQLClob.
-		    //By default, the value associated with char constants are SQLxxx
-		    //kind because that is what is needed for UCS_BASIC collation. But
-		    //if at this bind time, we find that the char constant's collation
-		    //type is territory based, then we should change value from SQLxxx
-		    //to CollatorSQLxxx. That is what is getting done below.
-		    value = ((StringDataValue)value).getValue(
-		    		lcc.getDataValueFactory().getCharacterCollator(
-		    				getTypeServices().getCollationType()));
-		}
-		catch( java.sql.SQLException sqle)
-		{
-			throw StandardException.plainWrapException( sqle);
-		}
+		//The DTD for this character constant should get its collation type
+		//from the schema it is getting compiled in.
+		getTypeServices().setCollationType(
+				getLanguageConnectionContext().getDefaultSchema().getCollationType());
+	    //Once we have the collation type, we should check if the value
+	    //associated with this node should change from 
+	    //SQLChar/SQLVarchar/SQLLongvarchar/SQLClob
+	    //to
+	    //CollatorSQLChar/CollatoSQLVarchar/CollatoSQLLongvarchar/CollatoSQLClob.
+	    //By default, the value associated with char constants are SQLxxx
+	    //kind because that is what is needed for UCS_BASIC collation. But
+	    //if at this bind time, we find that the char constant's collation
+	    //type is territory based, then we should change value from SQLxxx
+	    //to CollatorSQLxxx. That is what is getting done below.
+	    value = ((StringDataValue)value).getValue(
+	    		getLanguageConnectionContext().getDataValueFactory().getCharacterCollator(
+	    				getTypeServices().getCollationType()));
 		return this;
 	}
 
