@@ -37,6 +37,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.sql.execute.GenericConstantActionFactory;
 import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
 
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.JDBC30Translation;
@@ -1960,10 +1961,16 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public ResultSet getColumnPrivileges(String catalog, String schema,
 		String table, String columnNamePattern) throws SQLException {
+
+        if (table == null) {
+            throw Util.generateCsSQLException(
+                           SQLState.TABLE_NAME_CANNOT_BE_NULL);
+        }
+
 		PreparedStatement s = getPreparedQuery("getColumnPrivileges");
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
-		s.setString(3, swapNull(table));
+		s.setString(3, table); //DERBY-1484; must match table name as stored
 		s.setString(4, swapNull(columnNamePattern));
 		return s.executeQuery();
 	}
@@ -2040,7 +2047,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @param catalogPattern a catalog name; "" retrieves those without a
      * catalog; null means drop catalog name from the selection criteria
      * @param schemaPattern a schema name; "" retrieves those without a schema
-     * @param tablePattern a table name
+     * @param table a table name
      * @param scope the scope of interest; use same values as SCOPE
      * @param nullable include columns that are nullable?
      * @return ResultSet - each row is a column description
@@ -2050,12 +2057,12 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	(
 		String catalogPattern,
 		String schemaPattern,
-		String tablePattern,
+		String table,
 		int scope,
 		boolean nullable
 	) throws SQLException
 	{
-		return doGetBestRowId(catalogPattern, schemaPattern, tablePattern,
+		return doGetBestRowId(catalogPattern, schemaPattern, table,
 			scope, nullable, "");
 	}
 
@@ -2066,10 +2073,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * set will conform to ODBC specifications.
 	 */
 	public ResultSet getBestRowIdentifierForODBC(String catalogPattern,
-		String schemaPattern, String tablePattern, int scope,
+		String schemaPattern, String table, int scope,
 		boolean nullable) throws SQLException {
 
-		return doGetBestRowId(catalogPattern, schemaPattern, tablePattern,
+		return doGetBestRowId(catalogPattern, schemaPattern, table,
 			scope, nullable, "odbc_");
 	}
 
@@ -2083,9 +2090,14 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 *	JDBC or ODBC specifications.
 	 */
 	private ResultSet doGetBestRowId(String catalogPattern,
-		String schemaPattern, String tablePattern, int scope,
+		String schemaPattern, String table, int scope,
 		boolean nullable, String queryPrefix) throws SQLException {
 
+        if (table == null) {
+            throw Util.generateCsSQLException(
+                           SQLState.TABLE_NAME_CANNOT_BE_NULL);
+        }
+        
 		int nullableInIntForm = 0;
 		if (nullable)
 			nullableInIntForm = 1;
@@ -2097,10 +2109,6 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		if (schemaPattern == null)
 		{
 			schemaPattern = "%";
-		}
-		if (tablePattern == null)
-		{
-			tablePattern = "%";
 		}
 
 			PreparedStatement ps;
@@ -2116,7 +2124,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			ps = getPreparedQuery("getBestRowIdentifierPrimaryKey");
 			ps.setString(1,catalogPattern);
 			ps.setString(2,schemaPattern);
-			ps.setString(3,tablePattern);
+			ps.setString(3,table);
 	
 			ResultSet rs = ps.executeQuery();
 			done = rs.next();
@@ -2145,7 +2153,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			ps = getPreparedQuery("getBestRowIdentifierUniqueConstraint");
 			ps.setString(1,catalogPattern);
 			ps.setString(2,schemaPattern);
-			ps.setString(3,tablePattern);
+			ps.setString(3,table);
 	
 			rs = ps.executeQuery();
 			done = rs.next();
@@ -2175,7 +2183,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			ps = getPreparedQuery("getBestRowIdentifierUniqueIndex");
 			ps.setString(1,catalogPattern);
 			ps.setString(2,schemaPattern);
-			ps.setString(3,tablePattern);
+			ps.setString(3,table);
 	
 			rs = ps.executeQuery();
 			done = rs.next();
@@ -2203,7 +2211,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			ps = getPreparedQuery(queryPrefix + "getBestRowIdentifierAllColumns");
 			ps.setString(1,catalogPattern);
 			ps.setString(2,schemaPattern);
-			ps.setString(3,tablePattern);
+			ps.setString(3,table);
 			ps.setInt(4,scope);
 			ps.setInt(5,nullableInIntForm);
 			return ps.executeQuery();
@@ -2266,10 +2274,15 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	private ResultSet doGetVersionCols(String catalog, String schema,
 		String table, String queryName) throws SQLException {
 
+        if (table == null) {
+            throw Util.generateCsSQLException(
+                           SQLState.TABLE_NAME_CANNOT_BE_NULL);
+        }
+        
 		PreparedStatement s = getPreparedQuery(queryName);
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
-		s.setString(3, swapNull(table));
+		s.setString(3, table); //DERBY-1484: Must match table name as stored
 		return s.executeQuery();
 	}
 
@@ -2328,9 +2341,15 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public ResultSet getPrimaryKeys(String catalog, String schema,
 			String table) throws SQLException {
 		PreparedStatement s = getPreparedQuery("getPrimaryKeys");
+
+        if (table == null) {
+            throw Util.generateCsSQLException(
+                           SQLState.TABLE_NAME_CANNOT_BE_NULL);
+        }
+
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
-		s.setString(3, swapNull(table));
+		s.setString(3, table); //DERBY-1484: Must match table name as stored
 		return s.executeQuery();
 	}	
 
@@ -2404,10 +2423,15 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public ResultSet getImportedKeys(String catalog, String schema,
 				String table) throws SQLException {
+        if (table == null) {
+            throw Util.generateCsSQLException(
+                           SQLState.TABLE_NAME_CANNOT_BE_NULL);
+        }
+
 		PreparedStatement s = getPreparedQuery("getImportedKeys");
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
-		s.setString(3, swapNull(table));
+		s.setString(3, table); //DERBY-1484: Must match table name as stored
 		return s.executeQuery();
 	}
 
@@ -2482,10 +2506,16 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public ResultSet getExportedKeys(String catalog, String schema,
 				String table) throws SQLException {
+
+        if (table == null) {
+            throw Util.generateCsSQLException(
+                           SQLState.TABLE_NAME_CANNOT_BE_NULL);
+        }
+
 		PreparedStatement s = getPreparedQuery("getCrossReference");
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
-		s.setString(3, swapNull(table));
+		s.setString(3, table); //DERBY-1484: Must match table name as stored
 		s.setString(4, swapNull(null));
 		s.setString(5, swapNull(null));
 		s.setString(6, swapNull(null));
@@ -2725,12 +2755,17 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		boolean unique, boolean approximate, String queryName)
 		throws SQLException {
 
+        if (table == null) {
+            throw Util.generateCsSQLException(
+                           SQLState.TABLE_NAME_CANNOT_BE_NULL);
+        }
+
 		int approximateInInt = 0;
 		if (approximate) approximateInInt = 1;
 		PreparedStatement s = getPreparedQuery(queryName);
 		s.setString(1, swapNull(catalog));
 		s.setString(2, swapNull(schema));
-		s.setString(3, swapNull(table));
+		s.setString(3, table); //DERBY-1484: Must match table name as stored
 		s.setBoolean(4, unique);
 		s.setInt(5, approximateInInt);
 		return s.executeQuery();

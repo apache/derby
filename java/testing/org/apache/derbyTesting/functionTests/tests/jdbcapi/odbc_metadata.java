@@ -413,13 +413,13 @@ public class odbc_metadata extends metadata_test {
 
 		System.out.println("SQLForeignKeys: getImportedKeys");
 		s.execute(
-			"call sysibm.sqlforeignkeys (null, null, null, null, null, null, " +
+			"call sysibm.sqlforeignkeys (null, null, null, null, null, 'Louie', " +
 					"'IMPORTEDKEY=1;DATATYPE=''ODBC''')");
 		checkODBCNamesAndTypes(s.getResultSet(), GET_IMPORTED_KEYS);
 
 		System.out.println("SQLForeignKeys: getExportedKeys");
 		s.execute(
-			"call sysibm.sqlforeignkeys (null, null, null, null, null, null, " +
+			"call sysibm.sqlforeignkeys (null, null, 'Louie', null, null, null, " +
 				"'EXPORTEDKEY=1;DATATYPE=''ODBC''')");
 		checkODBCNamesAndTypes(s.getResultSet(), GET_EXPORTED_KEYS);
 
