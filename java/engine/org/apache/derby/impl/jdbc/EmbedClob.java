@@ -48,10 +48,10 @@ import java.sql.Clob;
     If its data is small (less than 1 page) it is a byte array taken from
     the SQLChar class. If it is large (more than 1 page) it is a long column
     in the database. The long column is accessed as a stream, and is implemented
-    in store as an OverflowInputStream.  The Resetable interface allows sending
+    in store as an OverflowInputStream. The Resetable interface allows sending
     messages to that stream to initialize itself (reopen its container and
     lock the corresponding row) and to reset itself to the beginning.
-
+    <p>
     NOTE: In the case that the data is large, it is represented as a stream.
     This stream can be returned to the user in the getAsciiStream() method.
     This means that we have limited control over the state of the stream,
@@ -106,7 +106,8 @@ final class EmbedClob extends ConnectionChild implements Clob
     }
     
     /**
-     * This constructor should only be called by EmbedResultSet.getClob
+     * This constructor should only be called by {@link EmbedResultSet#getClob}.
+     *
      * @param dvd 
      * @param con 
      * @throws StandardException

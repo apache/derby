@@ -37,10 +37,13 @@ import org.apache.derby.iapi.util.ByteArray;
 final class ClobStreamControl extends LOBStreamControl {
     
     private ConnectionChild conChild;
+
     /**
-     * Constructs ClobStreamControl
-     * @param dbName 
-     * @param conChild
+     * Constructs a <code>ClobStreamControl</code> object used to perform
+     * operations on a CLOB value.
+     *
+     * @param dbName name of the database the CLOB value belongs to
+     * @param conChild connection object used to obtain synchronization object
      */
     ClobStreamControl (String dbName, ConnectionChild conChild) {
         super (dbName);
@@ -48,11 +51,12 @@ final class ClobStreamControl extends LOBStreamControl {
     }        
     
     /**
-     * Finds the positon in bytes for a utf8 char postion starting 
-     * from startPos (bytes).
-     * @param startPos in bytes
-     * @param charPos in chars
-     * @return stream position for the given char position
+     * Finds the corresponding byte position for the given UTF-8 character
+     * position, starting from the byte position <code>startPos</code>.
+     *
+     * @param startPos start position in number of bytes
+     * @param charPos character position
+     * @return Stream position in bytes for the given character position.
      * @throws IOException
      */
     synchronized long getStreamPosition (long startPos, long charPos) throws IOException {
@@ -93,10 +97,12 @@ final class ClobStreamControl extends LOBStreamControl {
     }
     
     /**
-     * constructs and returns a writer.
-     * @param pos 
-     * @return Writer
-     * @throws IOException, SQLException
+     * Constructs and returns a <code>Writer</code> for the CLOB value.
+     *
+     * @param pos the initial position in bytes for the <code>Writer</code>
+     * @return A <code>Writer</code> to write to the CLOB value.
+     * @throws IOException
+     * @throws SQLException if the specified position is invalid
      */
     synchronized Writer getWriter (long pos) throws IOException, SQLException {
         long charPos = getStreamPosition (0, pos);
@@ -107,13 +113,13 @@ final class ClobStreamControl extends LOBStreamControl {
     }
     
     /**
-     * Construct and return a <code>Reader</code>.
+     * Constructs and returns a <code>Reader</code>.
      * @param pos initial position of the returned <code>Reader</code> in
      *      number of characters
      * @return A <code>Reader</code> with the underlying <code>CLOB</code>
      *      value as source.
      * @throws IOException
-     * @throws SQLException
+     * @throws SQLException if the specified position is invalid
      */
     Reader getReader (long pos) throws IOException, SQLException {
         Reader isr = new ClobUpdateableReader (

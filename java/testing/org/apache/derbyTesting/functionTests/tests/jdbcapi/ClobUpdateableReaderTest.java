@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class ClobUpdateableReaderTest
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.ClobUpdateableReaderTest
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,7 +33,8 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Test class to test Updateable Reader for Clob in embedder driver.
+ * Test class to test <code>UpdateableReader</code> for <code>Clob</code> in
+ * embedded driver.
  */
 public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
     
@@ -124,6 +125,11 @@ public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
         }
     }   
     
+    /**
+     * Generates a (static) string containing various Unicode characters.
+     *
+     * @return a string with ASCII and non-ASCII characters
+     */
     private String getUnicodeString () {
         char[] fill = new char[4];
         fill[0] = 'd';          // 1 byte UTF8 character (ASCII)
@@ -139,7 +145,8 @@ public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
     
     /**
      * Setup the test.
-     * @throws a SQLException.
+     *
+     * @throws SQLException if database access fails
      */
     public void setUp() throws Exception {
         Connection con = getConnection ();
@@ -156,6 +163,9 @@ public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
                     ClobUpdateableReaderTest.class);
     }        
 
+    /**
+     * Cleans up the database.
+     */
     protected void tearDown() throws java.lang.Exception {
         Connection con = getConnection ();
         Statement stmt = con.createStatement ();

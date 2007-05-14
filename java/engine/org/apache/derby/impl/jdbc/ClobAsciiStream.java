@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 final class ClobAsciiStream extends OutputStream {
+
     private Writer writer;
     
     ClobAsciiStream (Writer writer){
@@ -34,11 +35,12 @@ final class ClobAsciiStream extends OutputStream {
     }
 
     /**
-     * Writes the specified byte to this output stream. The general 
-     * contract for <code>write</code> is that one byte is written 
-     * to the output stream. The byte to be written is the eight 
-     * low-order bits of the argument <code>b</code>. The 24 
-     * high-order bits of <code>b</code> are ignored.
+     * Writes the specified byte to this output stream.
+     * <p>
+     * The general contract for <code>write</code> is that one byte is written
+     * to the output stream. The byte to be written is the eight low-order bits
+     * of the argument <code>b</code>. The 24 high-order bits of <code>b</code>
+     * are ignored.
      * <p>
      * Subclasses of <code>OutputStream</code> must provide an 
      * implementation for this method. 
@@ -55,6 +57,7 @@ final class ClobAsciiStream extends OutputStream {
     /**
      * Writes <code>len</code> bytes from the specified byte array 
      * starting at offset <code>off</code> to this output stream. 
+     * <p>
      * The general contract for <code>write(b, off, len)</code> is that 
      * some of the bytes in the array <code>b</code> are written to the 
      * output stream in order; element <code>b[off]</code> is the first 

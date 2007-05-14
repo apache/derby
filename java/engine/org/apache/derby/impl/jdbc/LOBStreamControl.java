@@ -377,14 +377,18 @@ class LOBStreamControl {
     }
     
     /**
-     * Replaces bytes in the middle of the lob.The new byte array may not be 
-     * be of same length as the original bytes, so it may result in resizing 
-     * the total length.
+     * Replaces a block of bytes in the middle of the LOB with a another block
+     * of bytes, which may be of a different size.
+     * <p>
+     * The new byte array may not be be of same length as the original,
+     * thus it may result in resizing the total lob.
+     *
      * @param buf byte array which will be written inplace of old block
-     * @param stPos starting pisition of old block
-     * @param endPos end position of old block
-     * @return newposition new write position 
-     * @throws IOExcepton, SQLException
+     * @param stPos inclusive starting position of current block
+     * @param endPos exclusive end position of current block
+     * @return Current position after write.
+     * @throws IOExcepton if writing to temporary file fails
+     * @throws SQLException
      */
     synchronized long replaceBytes (byte [] buf, long stPos, long endPos) 
                                             throws IOException, SQLException {
@@ -445,7 +449,8 @@ class LOBStreamControl {
     /**
      * Returns the running secquence number to check if the lob is updated since
      * last access.
-     * @return newcount
+     *
+     * @return The current update sequence number.
      */
     long getUpdateCount() {
         return updateCount;

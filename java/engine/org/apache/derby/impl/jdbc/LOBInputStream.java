@@ -30,8 +30,9 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 
 /**
- * This input stream is built on top of LOBStreamControl. All the read methods
- * are routed to LOBStreamControl.
+ * This input stream is built on top of {@link LOBStreamControl}.
+ * <p>
+ * All the read methods are routed to {@link LOBStreamControl}.
  */
 
 public class LOBInputStream extends InputStream {

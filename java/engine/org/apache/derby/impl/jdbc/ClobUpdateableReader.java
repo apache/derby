@@ -26,22 +26,30 @@ import java.io.IOException;
 import java.io.Reader;
 
 /**
- * ClobUpdateableReader is used to create Reader over InputStream. This class is
- * aware that underlying stream can be modified and reinitializes itsef if it 
- * detects any change in stream hence invalidating the cache so the changes are 
- * reflected immidiatly.
+ * <code>ClobUpdateableReader</code> is used to create a <code>Reader</code>
+ * over a <code>LOBInputStream</code>.
+ * <p>
+ * This class is aware that the underlying stream can be modified and
+ * reinitializes itself if it detects any change in the stream. This
+ * invalidates the cache so the changes are reflected immediately.
+ *
+ * @see LOBInputStream
  */
-
 final class ClobUpdateableReader extends Reader {
     
+    /** Reader accessing the Clob data and doing the work. */
     private Reader streamReader;
+    /** Character position of this reader. */
     private long pos;
+    /** Underlying stream of byte data. */
     private LOBInputStream stream;
+    /** Connection object used to obtain synchronization-object. */
     private ConnectionChild conChild;
     
     /**
-     * Constructs a Reader over a LOBInputStream.
-     * @param stream 
+     * Constructs a <code>Reader</code> over a <code>LOBInputStream</code>.
+     * @param stream underlying stream of byte data
+     * @param conChild a connection object used to obtain synchronization-object
      * @throws IOException
      */
     ClobUpdateableReader (LOBInputStream stream, ConnectionChild conChild)
@@ -82,8 +90,8 @@ final class ClobUpdateableReader extends Reader {
     
     /**
      * Initializes the streamReader and skips to the given position.
-     * @param skip 
-     * @throws IOException
+     * @param skip number of characters to skip to reach initial position
+     * @throws IOException if a streaming error occurs
      */
     private void init(long skip) throws IOException {
         streamReader = new UTF8Reader (stream, 0, stream.length (), 

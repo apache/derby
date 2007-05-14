@@ -31,7 +31,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
 /**
- * Writer implementation for Clob.
+ * Writer implementation for <code>Clob</code>.
  */
 final class ClobUtf8Writer extends Writer {
     private ClobStreamControl control;    
@@ -40,8 +40,9 @@ final class ClobUtf8Writer extends Writer {
     
     /**
      * Constructor.
-     * @param control 
-     * @param pos 
+     *
+     * @param control worker object for the CLOB value
+     * @param pos initial <b>byte</b> position in the CLOB value
      */
     ClobUtf8Writer(ClobStreamControl control, long pos) {
         this.control = control;
@@ -50,31 +51,31 @@ final class ClobUtf8Writer extends Writer {
     }    
 
     /**
-     * Flushes the stream.  If the stream has saved any characters from the
-     * various write() methods in a buffer, write them immediately to their
-     * intended destination.  Then, if that destination is another character or
-     * byte stream, flush it.  Thus one flush() invocation will flush all the
-     * buffers in a chain of Writers and OutputStreams.
-     * 
-     * <p> If the intended destination of this stream is an abstraction provided
-     * by the underlying operating system, for example a file, then flushing the
-     * stream guarantees only that bytes previously written to the stream are
-     * passed to the operating system for writing; it does not guarantee that
-     * they are actually written to a physical device such as a disk drive.
-     * 
-     * @throws IOException
-     *          If an I/O error occurs
+     * Flushes the stream.
+     * <p>
+     * Flushing the stream after {@link #close} has been called will cause an
+     * exception to be thrown.
+     * <p>
+     * <i>Implementation note:</i> In the current implementation, this is a
+     * no-op. Flushing is left to the underlying stream(s). Note that when
+     * programming against/with this class, always follow good practice and call
+     * <code>flush</code>.
+     *
+     * @throws IOException if the stream has been closed
      */
     public void flush() throws IOException {
         if (closed)
             throw new IOException (
                 MessageService.getTextMessage (SQLState.LANG_STREAM_CLOSED));
-        //no op
+        // A no-op.
+        // Flushing is currently the responsibility of the underlying stream(s).
     }
 
     /**
-     * Closes the stream, flushing it first. Once the stream has been closed,
-     * further write() or flush() invocations will cause an IOException to be
+     * Closes the stream.
+     * <p>
+     * Once the stream has been closed, further <code>write</code> or 
+     * {@link #flush} invocations will cause an <code>IOException</code> to be
      * thrown. Closing a previously closed stream has no effect.
      */
     public void close() {
@@ -82,16 +83,13 @@ final class ClobUtf8Writer extends Writer {
     }
 
     /**
-     * Writes a portion of an array of characters.
+     * Writes a portion of an array of characters to the CLOB value.
      * 
-     * @param cbuf
-     *         Array of characters
-     * @param off
-     *         Offset from which to start writing characters
-     * @param len
-     *         Number of characters to write
-     * @throws IOException
-     *          If an I/O error occurs
+     * @param cbuf array of characters
+     * @param off offset into <code>cbuf</code> from which to start writing
+     *      characters
+     * @param len number of characters to write
+     * @throws IOException if an I/O error occurs
      */
     public void write(char[] cbuf, int off, int len) throws IOException {
         if (closed)
