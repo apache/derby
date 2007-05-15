@@ -217,7 +217,13 @@ public class EmbedStatement extends ConnectionChild
      */
 	public int executeUpdate(String sql, int[] columnIndexes) throws SQLException
 	{
- 		throw Util.notImplemented("executeUpdate(String, int[])");
+		execute(sql, false, true,
+			((columnIndexes == null) || (columnIndexes.length == 0))
+				? JDBC30Translation.NO_GENERATED_KEYS
+				: JDBC30Translation.RETURN_GENERATED_KEYS,
+			columnIndexes,
+			null);
+		return updateCount;
 	}
 
     /**
@@ -238,7 +244,13 @@ public class EmbedStatement extends ConnectionChild
      */
 	public int executeUpdate(String sql, String[] columnNames) throws SQLException
 	{
- 		throw Util.notImplemented("executeUpdate(String, String[])");
+		execute(sql, false, true,
+			((columnNames == null) || (columnNames.length == 0))
+				? JDBC30Translation.NO_GENERATED_KEYS
+				: JDBC30Translation.RETURN_GENERATED_KEYS,
+			null,
+			columnNames);
+		return updateCount;
 	}
 
 	final void checkIfInMiddleOfBatch() throws SQLException {
@@ -631,7 +643,12 @@ public class EmbedStatement extends ConnectionChild
      */
 	public boolean execute(String sql, int[] columnIndexes) throws SQLException
 	{
- 		throw Util.notImplemented("execute(String, int[])");
+		return execute(sql, false, true,
+			((columnIndexes == null) || (columnIndexes.length == 0))
+				? JDBC30Translation.NO_GENERATED_KEYS
+				: JDBC30Translation.RETURN_GENERATED_KEYS,
+			columnIndexes,
+			null);
 	}
 
     /**
@@ -655,7 +672,12 @@ public class EmbedStatement extends ConnectionChild
      */
 	public boolean execute(String sql, String[] columnNames) throws SQLException
 	{
- 		throw Util.notImplemented("execute(String, String[])");
+		return execute(sql, false, true,
+			((columnNames == null) || (columnNames.length == 0))
+				? JDBC30Translation.NO_GENERATED_KEYS
+				: JDBC30Translation.RETURN_GENERATED_KEYS,
+			null,
+			columnNames);
 	}
 
     /**

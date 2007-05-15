@@ -68,6 +68,11 @@ public class statementJdbc30 {
 			System.out.println("trying stmt.executeUpdate(String, int) :");
 			stmt.executeUpdate("insert into tab1 values(2, 3, 4.1)", JDBC30Translation.NO_GENERATED_KEYS);
 
+			/* Next two stmts will fail because there's no auto-generated
+			 * column.  These forms of "executeUpdate()" are tested more
+			 * in the JUnit test, jdbcapi/AutoGenJDBC30Test.java.
+			 */
+
 			System.out.println("trying stmt.executeUpdate(String, int[]) :");
 			int[] columnIndexes = new int[2];
 			columnIndexes[0] = 1;
@@ -75,7 +80,7 @@ public class statementJdbc30 {
 			try {
 				stmt.executeUpdate("insert into tab1 values(2, 3, 4.1)", columnIndexes);
 			} catch (SQLException ex) {
-                BaseJDBCTestCase.assertSQLState("0A000", ex);
+				BaseJDBCTestCase.assertSQLState("X0X0E", ex);
 			}
 
 			System.out.println("trying stmt.executeUpdate(String, String[]) :");
@@ -85,24 +90,29 @@ public class statementJdbc30 {
 			try {
 				stmt.executeUpdate("insert into tab1 values(2, 3, 4.1)", columnNames);
 			} catch (SQLException ex) {
-                BaseJDBCTestCase.assertSQLState("0A000", ex);
+				BaseJDBCTestCase.assertSQLState("X0X0F", ex);
 			}
 
 			System.out.println("trying stmt.execute(String, int) :");
 			stmt.execute("select * from tab1", JDBC30Translation.NO_GENERATED_KEYS);
 
+			/* Next two stmts will fail because there's no auto-generated
+			 * column.  These forms of "execute()" are tested more in the
+			 * JUnit test, jdbcapi/AutoGenJDBC30Test.java.
+			 */
+
 			System.out.println("trying stmt.execute(String, int[]) :");
 			try {
 				stmt.execute("insert into tab1 values(2, 3, 4.1)", columnIndexes);
 			} catch (SQLException ex) {
-                BaseJDBCTestCase.assertSQLState("0A000", ex);
+				BaseJDBCTestCase.assertSQLState("X0X0E", ex);
 			}
 
 			System.out.println("trying stmt.execute(String, String[]) :");
 			try {
 				stmt.execute("insert into tab1 values(2, 3, 4.1)", columnNames);
 			} catch (SQLException ex) {
-                BaseJDBCTestCase.assertSQLState("0A000", ex);
+				BaseJDBCTestCase.assertSQLState("X0X0F", ex);
 			}
 
 			System.out.println("trying stmt.getResultSetHoldability() :");

@@ -1248,8 +1248,8 @@ public interface SQLState {
 	String LANG_CANT_INVALIDATE_OPEN_RESULT_SET                        = "X0X95.S";
 	String LANG_CANT_CHANGE_ISOLATION_HOLD_CURSOR                      = "X0X03.S";
 	//following three for auto-generated keys feature in JDBC3.0
-	String LANG_COLUMN_POSITION_NOT_FOUND                              = "X0X0E.S";
-	String LANG_COLUMN_NAME_NOT_FOUND                                  = "X0X0F.S";
+	String LANG_INVALID_AUTOGEN_COLUMN_POSITION                        = "X0X0E.S";
+	String LANG_INVALID_AUTOGEN_COLUMN_NAME                            = "X0X0F.S";
 
 	String LANG_INDEX_NOT_FOUND_DURING_EXECUTION                       = "X0X99.S";
 

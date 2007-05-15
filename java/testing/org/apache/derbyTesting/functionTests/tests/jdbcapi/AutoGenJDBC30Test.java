@@ -955,8 +955,15 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      * Expected result: Exception 0A000 should occur.
      * @throws SQLException 
      */
-    public void testColumnIndexesError() throws SQLException
+    public void testColumnIndexesNotImpl() throws SQLException
     {
+        /* As of DERBY-2631 we support this with embedded.  So do nothing
+         * for this test fixture; we'll test the functionality as part
+         * of a separate fixture.
+         */
+        if (usingEmbedded())
+            return;
+
         Statement s = createStatement();
         int colPositions[] = new int[1];
         colPositions[0] = 1;
@@ -1000,8 +1007,15 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      * Expected result: Exception 0A000 should occur.
      * @throws SQLException 
      */
-    public void testColumnNamesError() throws SQLException
+    public void testColumnNamesNotImpl() throws SQLException
     {
+        /* As of DERBY-2631 we support this with embedded.  So do nothing
+         * for this test fixture; we'll test the functionality as part
+         * of a separate fixture.
+         */
+        if (usingEmbedded())
+            return;
+
         Statement s = createStatement();
         String colNames[] = new String[1];
         colNames[0] = "C11";
@@ -1036,7 +1050,348 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Test that use of columnIndexes to indicate which keys should be
+     * made available works as expected.
+     *
+     * @throws SQLException 
+     */
+    public void testColumnIndexes() throws SQLException
+    {
+        /* Not supported for Derby client.  We check the "not supported"
+         * error message as part of a different fixture.
+         */
+        if (usingDerbyNetClient())
+            return;
+
+        // Valid (typical) usage.
+
+        int [] colIndexes = new int [] { 2 };
+        testUserGivenColumns(colIndexes, null, 1);
+
+        // Non-existent column index.
+
+        colIndexes[0] = 100;
+        testUserGivenColumnsError(colIndexes, null);
+
+        // Valid column index but not an auto-gen column.
+
+        colIndexes[0] = 1;
+        testUserGivenColumnsError(colIndexes, null);
+
+        /* If user specifies the same column index multiple times,
+         * things should still work.  We effectively just take the
+         * one and ignore the rest.
+         */
+
+        colIndexes = new int [] { 2, 2, 2 };
+        testUserGivenColumns(colIndexes, null, 5);
+
+        // Multiple col indexes, one of which is invalid.
+
+        colIndexes[1] = 100;
+        testUserGivenColumnsError(colIndexes, null);
+
+        // Multiple col indexes, one of which is not an auto-gen column.
+
+        colIndexes[1] = 1;
+        testUserGivenColumnsError(colIndexes, null);
+
+        /* Multiple col indexes, one of which is invalid and another
+         * of which is not an auto-gen column.
+         */
+
+        colIndexes[2] = 100;
+        testUserGivenColumnsError(colIndexes, null);
+
+        // Same as previous but with "bad" indexes switched.
+
+        colIndexes[1] = 100;
+        colIndexes[2] = 1;
+        testUserGivenColumnsError(colIndexes, null);
+    }
+
+    /**
+     * Test that use of columnNames to indicate which keys should be
+     * made available works as expected.
+     *
+     * @throws SQLException 
+     */
+    public void testColumnNames() throws SQLException
+    {
+        /* Not supported for Derby client.  We check the "not supported"
+         * error message as part of a different fixture.
+         */
+        if (usingDerbyNetClient())
+            return;
+
+        // Valid (typical) usage.
+
+        String [] colNames = new String [] { "C12" };
+        testUserGivenColumns(null, colNames, 1);
+
+        // Non-existent column name.
+
+        colNames[0] = "NOTTHERE";
+        testUserGivenColumnsError(null, colNames);
+
+        // Valid column name but not an auto-gen column.
+
+        colNames[0] = "C11";
+        testUserGivenColumnsError(null, colNames);
+
+        // "null" column name.
+
+        colNames[0] = null;
+        testUserGivenColumnsError(null, colNames);
+
+        /* If user specifies the same column name multiple times,
+         * things should still work.  We effectively just take the
+         * one and ignore the rest.
+         */
+
+        colNames = new String [] { "C12", "C12", "C12" };
+        testUserGivenColumns(null, colNames, 5);
+
+        // Multiple col names, one of which is invalid.
+
+        colNames[1] = "NOTTHERE";
+        testUserGivenColumnsError(null, colNames);
+
+        // Multiple col names, one of which is not an auto-gen column.
+
+        colNames[1] = "C11";
+        testUserGivenColumnsError(null, colNames);
+
+        // Multiple col names, one of which is null.
+
+        colNames[1] = null;
+        testUserGivenColumnsError(null, colNames);
+
+        /* Multiple col names, one of which is invalid and another
+         * of which is not an auto-gen column.
+         */
+
+        colNames[1] = "C11";
+        colNames[2] = "NOTTHERE";
+        testUserGivenColumnsError(null, colNames);
+
+        // Same as previous but with "bad" names switched.
+
+        colNames[1] = "NOTTHERE";
+        colNames[2] = "C11";
+        testUserGivenColumnsError(null, colNames);
+    }
+
+    /**
+     * Verify that if a user specifies a *NULL* column index or column
+     * name array to indicate which keys should be made available, Derby will
+     * effectively disable autogenerated keys (i.e. same as if user passed
+     * NO_GENERATED_KEYS).
+     *
+     * Expected result: a NULL result set.
+     * @throws SQLException 
+     */
+    public void testUserGivenColumnsNull() throws SQLException
+    {
+        /* Not supported for Derby client.  We check the "not supported"
+         * error message as part of a different fixture.
+         */
+        if (usingDerbyNetClient())
+            return;
+
+        Statement s = createStatement();
+
+        String sql="insert into t11_AutoGen(c11) values (99)";
+
+        s.execute(sql, (int[]) null);
+        assertNull("Expected NULL ResultSet after s.execute()", 
+            s.getGeneratedKeys());
+
+        s.executeUpdate(sql, (int[]) null);
+        assertNull("Expected NULL ResultSet after s.executeUpdate()", 
+            s.getGeneratedKeys());
+
+        s.execute(sql, (String[]) null);
+        assertNull("Expected NULL ResultSet after s.execute()", 
+            s.getGeneratedKeys());
+
+        s.executeUpdate(sql, (String[]) null);
+        assertNull("Expected NULL ResultSet after s.executeUpdate()", 
+            s.getGeneratedKeys());
+
+        s.close();
+
+        PreparedStatement ps = prepareStatement(sql, (int[]) null);
+        ps.execute();
+        assertNull("Expected NULL ResultSet after ps.execute()", 
+            ps.getGeneratedKeys());
+
+        ps = prepareStatement(sql, (int[]) null);
+        ps.executeUpdate();
+        assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
+            ps.getGeneratedKeys());
+
+        ps = prepareStatement(sql, (String[]) null);
+        ps.execute();
+        assertNull("Expected NULL ResultSet after ps.execute()", 
+            ps.getGeneratedKeys());
+
+        ps = prepareStatement(sql, (String[]) null);
+        ps.executeUpdate();
+        assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
+            ps.getGeneratedKeys());
+
+        ps.close();
+    }
+
     // Local utility methods.
+
+    /**
+     * Verify that if user specifies *valid* column indexes or column
+     * names to indicate which keys should be made available, Derby will
+     * return the correct results.
+     *
+     * Expected result: one row with a non-NULL key.
+     *
+     * @param colIndexes Array of column indexes indicating which keys
+     *  should be made available.  Must be null if colNames is non-null.
+     * @param colNames Array of column names indicating which keys should
+     *  be made available.  Must be null if colIndexes is non-null.
+     * @param expectedVal First expected autogenerated key; will be
+     *  incremented for each successful INSERT statement.
+     *
+     * @throws SQLException
+     */
+    private void testUserGivenColumns(int [] colIndexes, String [] colNames,
+        int expectedVal) throws SQLException
+    {
+        assertTrue("Exactly one of colIndexes or colNames should be null",
+            ((colIndexes != null) ^ (colNames != null)));
+
+        boolean useIndexes = (colIndexes != null);
+        Statement s = createStatement();
+
+        String sql="insert into t11_AutoGen(c11) values (99)";
+
+        if (useIndexes)
+            s.execute(sql, colIndexes);
+        else
+            s.execute(sql, colNames);
+
+        int keyval = getKeyValue (s.getGeneratedKeys());
+        assertEquals("Key value after s.execute()", expectedVal++, keyval);
+
+        if (useIndexes)
+            s.executeUpdate(sql, colIndexes);
+        else
+            s.executeUpdate(sql, colNames);
+
+        keyval = getKeyValue (s.getGeneratedKeys());
+        assertEquals("Key value after s.executeUpdate()",
+            expectedVal++, keyval);
+
+        s.close();
+
+        PreparedStatement ps = null;
+        if (useIndexes)
+            ps = prepareStatement(sql, colIndexes);
+        else
+            ps = prepareStatement(sql, colNames);
+
+        ps.execute();
+        keyval = getKeyValue (ps.getGeneratedKeys());
+        assertEquals("Key value after ps.execute()", expectedVal++, keyval);
+
+        if (useIndexes)
+            ps = prepareStatement(sql, colIndexes);
+        else
+            ps = prepareStatement(sql, colNames);
+
+        ps.executeUpdate();
+        keyval = getKeyValue (ps.getGeneratedKeys());
+        assertEquals("Key value after ps.executeUpdate()",
+            expectedVal++, keyval);
+
+        ps.close();
+    }
+
+    /**
+     * Verify that if user specifies *INvalid* column indexes or column
+     * names to indicate which keys should be made available, Derby will
+     * throw an appropriate error.
+     *
+     * Expected result: Execution-time error: X0X0E or X0X0F.
+     *
+     * @param colIndexes Array of column indexes indicating which keys
+     *  should be made available.  Must be null if colNames is non-null.
+     * @param colNames Array of column names indicating which keys should
+     *  be made available.  Must be null if colIndexes is non-null.
+     *
+     * @throws SQLException 
+     */
+    private void testUserGivenColumnsError(int [] colIndexes,
+        String [] colNames) throws SQLException
+    {
+        assertTrue("Exactly one of colIndexes or colNames should be null.",
+            ((colIndexes != null) ^ (colNames != null)));
+
+        boolean useIndexes = (colIndexes != null);
+        String expectedSQLState = (useIndexes ? "X0X0E" : "X0X0F");
+
+        Statement s = createStatement();
+        String sql="insert into t11_AutoGen(c11) values (99)";
+
+        try {
+
+            if (useIndexes)
+                s.execute(sql, colIndexes);
+            else
+                s.execute(sql, colNames);
+
+            fail("Expected s.execute() to fail, but it did not.");
+
+        } catch (SQLException se) {
+            assertSQLState(expectedSQLState, se.getSQLState(), se);
+        }
+
+        try {
+
+            if (useIndexes)
+                s.executeUpdate(sql, colIndexes);
+            else
+                s.executeUpdate(sql, colNames);
+
+            fail("Expected s.executeUpdate() to fail, but it did not.");
+
+        } catch (SQLException se) {
+            assertSQLState(expectedSQLState, se.getSQLState(), se);
+        }
+
+        s.close();
+
+        PreparedStatement ps = null;
+        if (useIndexes)
+               ps = prepareStatement(sql, colIndexes);
+        else
+               ps = prepareStatement(sql, colNames);
+
+        try {
+            ps.execute();
+            fail("Expected ps.execute() to fail, but it did not.");
+        } catch (SQLException se) {
+            assertSQLState(expectedSQLState, se.getSQLState(), se);
+        }
+
+        try {
+            ps.executeUpdate();
+            fail("Expected ps.executeUpdate() to fail, but it did not.");
+        } catch (SQLException se) {
+            assertSQLState(expectedSQLState, se.getSQLState(), se);
+        }
+
+        ps.close();
+    }
 
     /**
      * Runs the same SQL INSERT statement four ways: 

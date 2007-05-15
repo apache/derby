@@ -817,14 +817,22 @@ public abstract class EmbedConnection implements EngineConnection
 	 *  SQL statement, that will have the capability of returning auto-generated keys
 	 *  designated by the given array of column indexes
 	 *
-	 * @exception SQLException  Feature not implemented for now.
+	 * @exception SQLException  Thrown on error.
 	 */
 	public final PreparedStatement prepareStatement(
 			String sql,
 			int[] columnIndexes)
     throws SQLException
 	{
- 		throw Util.notImplemented("prepareStatement(String, int[])");
+  		return prepareStatement(sql,
+			JDBC20Translation.TYPE_FORWARD_ONLY,
+			JDBC20Translation.CONCUR_READ_ONLY,
+			connectionHoldAbility,
+			columnIndexes == null
+				? JDBC30Translation.NO_GENERATED_KEYS
+				: JDBC30Translation.RETURN_GENERATED_KEYS,
+			columnIndexes,
+			null);
 	}
 
 	/**
@@ -844,14 +852,22 @@ public abstract class EmbedConnection implements EngineConnection
 	 *  SQL statement, that will have the capability of returning auto-generated keys
 	 *  designated by the given array of column names
 	 *
-	 * @exception SQLException  Feature not implemented for now.
+	 * @exception SQLException Thrown on error.
 	 */
 	public final PreparedStatement prepareStatement(
 			String sql,
 			String[] columnNames)
     throws SQLException
 	{
- 		throw Util.notImplemented("prepareStatement(String, String[])");
+  		return prepareStatement(sql,
+			JDBC20Translation.TYPE_FORWARD_ONLY,
+			JDBC20Translation.CONCUR_READ_ONLY,
+			connectionHoldAbility,
+			columnNames == null
+				? JDBC30Translation.NO_GENERATED_KEYS
+				: JDBC30Translation.RETURN_GENERATED_KEYS,
+			null,
+			columnNames);
 	}
 
 	/**

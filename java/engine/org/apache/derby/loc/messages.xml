@@ -2657,14 +2657,16 @@ Guide.
 
             <msg>
                 <name>X0X0E.S</name>
-                <text>The column position '{0}' listed in the auto-generated column selection array was not found in the insert table. </text>
+                <text>Table '{1}' does not have an auto-generated column at column position '{0}'.</text>
                 <arg>columnPosition</arg>
+                <arg>tableName</arg>
             </msg>
 
             <msg>
                 <name>X0X0F.S</name>
-                <text>Column name '{0}' listed in auto-generated column selection array not found in the insert table.</text>
+                <text>Table '{1}' does not have an auto-generated column named '{0}'.</text>
                 <arg>columnName</arg>
+                <arg>tableName</arg>
             </msg>
 
             <msg>

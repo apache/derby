@@ -161,6 +161,40 @@ public abstract class BaseJDBCTestCase
     }    
 
     /**
+     * Utility method to create a PreparedStatement using the connection
+     * returned by getConnection and an array of column indexes that
+     * indicates which auto-generated keys produced by this Statement
+     * object should be made available for retrieval.
+     *
+     * @return Statement object from:
+     *     prepareStatement(sql, columnIndexes)
+     *
+     * @throws SQLException
+     */
+    public PreparedStatement prepareStatement(String sql,
+        int [] columnIndexes) throws SQLException
+    {
+        return getConnection().prepareStatement(sql, columnIndexes);
+    }
+
+    /**
+     * Utility method to create a PreparedStatement using the connection
+     * returned by getConnection and an array of column names that
+     * indicates which auto-generated keys produced by this Statement
+     * object should be made available for retrieval.
+     *
+     * @return Statement object from:
+     *     prepareStatement(sql, columnNames)
+     *
+     * @throws SQLException
+     */
+    public PreparedStatement prepareStatement(String sql,
+        String [] columnNames) throws SQLException
+    {
+        return getConnection().prepareStatement(sql, columnNames);
+    }
+
+    /**
      * Utility method to create a CallableStatement using the connection
      * returned by getConnection.
      * @return Statement object from
