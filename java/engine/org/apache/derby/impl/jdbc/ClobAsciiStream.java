@@ -26,9 +26,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 
+/**
+ * Wrap a Writer as an OutputStream to support Clob.setAsciiStream().
+ * Any value written to the OutputStream is a valid ASCII value
+ * (0-255 from JDBC 4 spec appendix C2) thus this class simply
+ * passes the written values onto the Writer.
+ *
+ */
 final class ClobAsciiStream extends OutputStream {
 
-    private Writer writer;
+    private final Writer writer;
+    private final char[] buffer = new char[1024];
     
     ClobAsciiStream (Writer writer){
         this.writer = writer;
@@ -41,9 +49,6 @@ final class ClobAsciiStream extends OutputStream {
      * to the output stream. The byte to be written is the eight low-order bits
      * of the argument <code>b</code>. The 24 high-order bits of <code>b</code>
      * are ignored.
-     * <p>
-     * Subclasses of <code>OutputStream</code> must provide an 
-     * implementation for this method. 
      * 
      * @param b   the <code>byte</code>.
      * @exception IOException  if an I/O error occurs. In particular, 
@@ -51,7 +56,7 @@ final class ClobAsciiStream extends OutputStream {
      *             output stream has been closed.
      */
     public void write(int b) throws IOException {
-        writer.write (b);
+        writer.write(b & 0xff);
     }
 
     /**
@@ -84,10 +89,16 @@ final class ClobAsciiStream extends OutputStream {
      *             stream is closed.
      */
     public void write(byte[] b, int off, int len) throws IOException {
-        char [] c = new char [len];
-        for (int i = off; i < len; i++) {
-            c [i - off] = (char) b [i];
+        
+        while (len > 0)
+        {
+            int clen = Math.min(len, buffer.length);
+            for (int i = 0; i < clen; i++) {
+                buffer[i] = (char) b[off + i];
+            }
+            writer.write(buffer, 0, clen);
+            off += clen;
+            len -= clen;
         }
-        writer.write(c);
     }    
 }

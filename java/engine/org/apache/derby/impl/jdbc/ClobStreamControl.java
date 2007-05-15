@@ -53,6 +53,8 @@ final class ClobStreamControl extends LOBStreamControl {
     /**
      * Finds the corresponding byte position for the given UTF-8 character
      * position, starting from the byte position <code>startPos</code>.
+     * See comments in SQLChar.readExternal for more notes on
+     * processing the UTF8 format.
      *
      * @param startPos start position in number of bytes
      * @param charPos character position
@@ -69,26 +71,31 @@ final class ClobStreamControl extends LOBStreamControl {
             if (c < 0)
                 return -1;
             charLength ++;
-             if ((c >= 0x0001) && (c <= 0x007F)) {
+            if ((c & 0x80) == 0x00) {
                 //found char of one byte width
                 streamLength++;
             }
-            else if (c > 0x07FF) {
-                //found char of three byte width
-                if (in.skip (2) < 2) {
-                    //no second and third byte present
-                    throw new UTFDataFormatException();
-                }
-                streamLength += 3;
-                break;
-            }
-            else {
-                //found char of three byte width
+            else if ((c & 0x60) == 0x40) // we know the top bit is set here
+            {
+                //found char of two byte width
                 if (in.skip (1) != 1) {
                     //no second and third byte present
                     throw new UTFDataFormatException();
                 }
-                streamLength += 2;
+                streamLength += 2;                
+            }
+            else if ((c & 0x70) == 0x60) // we know the top bit is set here
+            {
+                //found char of three byte width
+                if (in.skip (2) != 2) {
+                    //no second and third byte present
+                    throw new UTFDataFormatException();
+                }
+                streamLength += 3;
+            }
+            else
+            {
+                throw new UTFDataFormatException();
             }
         }
         
