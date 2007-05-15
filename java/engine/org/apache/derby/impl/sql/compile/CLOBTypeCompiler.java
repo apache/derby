@@ -140,19 +140,23 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
                 }
         }
 
-    	/** @see TypeCompiler#generateDataValue(MethodBuilder, int, String, LocalField) */
-    	public void generateDataValue(MethodBuilder mb, int collationType,
+    	/** @see TypeCompiler#generateDataValue(ExpressionClassBuilder, MethodBuilder, int, String, LocalField) */
+    	public void generateDataValue(
+    			ExpressionClassBuilder eb,
+				MethodBuilder mb, int collationType,
     			String className, LocalField field)
     	{
-    		super.generateDataValue(mb, collationType, className, field);
-    		generateCollationSensitiveDataValue(mb, collationType, className);
+    		super.generateDataValue(eb, mb, collationType, className, field);
+    		generateCollationSensitiveDataValue(eb, mb, collationType, className);
     	}
 
-    	/** @see TypeCompiler#generateNull(MethodBuilder, int, String) */
-    	public void generateNull(MethodBuilder mb, int collationType, 
+    	/** @see TypeCompiler#generateNull(ExpressionClassBuilder, MethodBuilder, int, String)*/
+    	public void generateNull(
+    			ExpressionClassBuilder eb,
+				MethodBuilder mb, int collationType, 
     			String className)
     	{
-    		super.generateNull(mb, collationType, className);
-    		generateCollationSensitiveDataValue(mb, collationType, className);
+    		super.generateNull(eb, mb, collationType, className);
+    		generateCollationSensitiveDataValue(eb, mb, collationType, className);
     	}
 }

@@ -93,8 +93,9 @@ abstract class BaseTypeCompiler implements TypeCompiler
 										);
 	}
 
-	/** @see TypeCompiler#generateNull(MethodBuilder, int, String) */
-	public void generateNull(MethodBuilder mb, int collationType, 
+	/** @see TypeCompiler#generateNull(ExpressionClassBuilder, MethodBuilder, int, String)*/
+	public void generateNull(ExpressionClassBuilder e,
+			MethodBuilder mb, int collationType, 
 			String className)
 	{
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
@@ -103,8 +104,9 @@ abstract class BaseTypeCompiler implements TypeCompiler
 									1);
 	}
 
-	/** @see TypeCompiler#generateDataValue(MethodBuilder, int, String, LocalField) */
-	public void generateDataValue(MethodBuilder mb, int collationType,
+	/** @see TypeCompiler#generateDataValue(ExpressionClassBuilder, MethodBuilder, int, String, LocalField) */
+	public void generateDataValue(ExpressionClassBuilder eb,
+			MethodBuilder mb, int collationType,
 			String className, LocalField field)
 	{
 		String				interfaceName = interfaceName();
@@ -153,7 +155,8 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	 * because those are the only type compilers who generate DVDs which are 
 	 * impacted by the collation. Rest of the TypeCompilers generate DVDs which
 	 * are collation in-sensitive.
-	 * 
+	 *
+	 * @param eb The ExpressionClassBuilder for the class we're generating
 	 * @param mb The method to put the expression in
 	 * @param collationType For character DVDs, this will be used to determine
 	 *   what Collator should be associated with the DVD which in turn will 
@@ -161,7 +164,9 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	 *   other types of DVDs, this parameter will be ignored.
 	 * @param className name of the base class of the activation's hierarchy
 	 */
-	protected void generateCollationSensitiveDataValue(MethodBuilder mb, 
+	protected void generateCollationSensitiveDataValue(
+			ExpressionClassBuilder eb,
+			MethodBuilder mb, 
 			int collationType, String className){		
 		if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
 			return; 
@@ -169,38 +174,11 @@ abstract class BaseTypeCompiler implements TypeCompiler
 		//generate DVDs with territory based RuleBasedCollator and hence we 
 		//need to generate CollatorSQLChar/CollatorSQLVarchar/
 		//CollatorSQLLongvarchar/CollatorSQLClob 
-		pushDataValueFactory(mb, className);
+		eb.pushDataValueFactory(mb);
 		mb.push(collationType);
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "getCharacterCollator",
 				"java.text.RuleBasedCollator", 1);
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "getValue", interfaceName(), 1);
-	}
-	
-	private Object getDVF;
-	/**
-	 * This method will push a DVF on the stack. This DVF is required to get
-	 * the territory based collator using the collation type. In other words,
-	 * this DVF will be used to generate something like following
-	 * DVF.getCharacterCollator(collationType)
-	 * 
-	 * @param mb The method to put the expression in
-	 * @param className name of the base class of the activation's hierarchy
-	 */
-	private void pushDataValueFactory(MethodBuilder mb, String className)
-	{
-		// generates:
-		//	   getDataValueFactory()
-		//
-
-		if (getDVF == null) {
-			getDVF = mb.describeMethod(VMOpcode.INVOKEVIRTUAL,
-										className,
-										"getDataValueFactory",
-										ClassName.DataValueFactory);
-		}
-
-		mb.pushThis();
-		mb.callMethod(getDVF);
 	}
 
 	protected abstract String nullMethodName();
