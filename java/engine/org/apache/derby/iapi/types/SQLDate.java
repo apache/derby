@@ -142,25 +142,39 @@ public final class SQLDate extends DataType
 		{
 			return null;
 		}
-		else 
-			// date is converted to a timestamp filling the time in with 00:00:00
-            return newTimestamp(cal);
+        
+        return new Timestamp(getTimeInMillis(cal));
     }
 
-    private long getTimeInMillis( Calendar cal)
+    /**
+     * Convert the date into a milli-seconds since the epoch
+     * with the time set to 00:00 based upon the passed in Calendar.
+     */
+    private long getTimeInMillis(Calendar cal)
     {
         if( cal == null)
             cal = new GregorianCalendar();
         cal.clear();
-        cal.set( getYear( encodedDate), getMonth( encodedDate)-1, getDay( encodedDate));
-        return cal.getTime().getTime();
+        
+        SQLDate.setDateInCalendar(cal, encodedDate);
+        
+        return cal.getTimeInMillis();
     }
     
-    private Timestamp newTimestamp(java.util.Calendar cal)
+    /**
+     * Set the date portion of a date-time value into
+     * the passed in Calendar object from its encodedDate
+     * value. Only the YEAR, MONTH and DAY_OF_MONTH
+     * fields are modified. The remaining
+     * state of the Calendar is not modified.
+     */
+    static void setDateInCalendar(Calendar cal, int encodedDate)
     {
-        return new Timestamp(getTimeInMillis( cal));
-	}
-
+        // Note Calendar uses 0 for January, Derby uses 1.
+        cal.set(getYear(encodedDate),
+                getMonth(encodedDate)-1, getDay(encodedDate));     
+    }
+    
 	/**
 		getObject returns the date value
 
@@ -729,10 +743,10 @@ public final class SQLDate extends DataType
 	 */
 	public Date getDate( Calendar cal)
 	{
-		if (encodedDate != 0)
-            return new Date( getTimeInMillis( cal));
-
-		return null;
+        if (isNull())
+            return null;
+        
+        return new Date(getTimeInMillis(cal));
 	}
 
 	/**
@@ -747,7 +761,8 @@ public final class SQLDate extends DataType
 	}
 
 	/**
-	 * Get the month from the encodedDate.
+	 * Get the month from the encodedDate,
+     * January is one.
 	 *
 	 * @param encodedDate	the encoded date
 	 * @return	 			month value.

@@ -164,18 +164,18 @@ public final class SQLTime extends DataType
             else
             {
                 cal.clear();
-                // Set Calendar to current date and time.
-                cal.setTime(new Date(System.currentTimeMillis()));
+                // Set Calendar to current date and time
+                // to pick up the current date. Time portion
+                // will be overridden by this value's time.
+                cal.setTimeInMillis(System.currentTimeMillis());
             }
-
-			cal.set(Calendar.HOUR_OF_DAY, getHour(encodedTime));
-			cal.set(Calendar.MINUTE, getMinute(encodedTime));
-			cal.set(Calendar.SECOND, getSecond(encodedTime));
             
+            SQLTime.setTimeInCalendar(cal, encodedTime);
+          
             // Derby's resolution for the TIME type is only seconds.
 			cal.set(Calendar.MILLISECOND, 0);
             
-			return new Timestamp(cal.getTime().getTime());
+			return new Timestamp(cal.getTimeInMillis());
 		}
 	}
 
@@ -800,20 +800,54 @@ public final class SQLTime extends DataType
 	{
 		if (isNull())
 			return null;
-
+        
+        // Derby's SQL TIME type only has second resolution
+        // so pass in 0 for nano-seconds
+        return getTime(cal, encodedTime, 0);
+	}
+    
+    /**
+     * Set the time portion of a date-time value into
+     * the passed in Calendar object from its encodedTime
+     * value. Note that this is only the time down
+     * to a resolution of one second. Only the HOUR_OF_DAY,
+     * MINUTE and SECOND fields are modified. The remaining
+     * state of the Calendar is not modified.
+     */
+    static void setTimeInCalendar(Calendar cal, int encodedTime)
+    {
+        cal.set(Calendar.HOUR_OF_DAY, getHour(encodedTime));
+        cal.set(Calendar.MINUTE, getMinute(encodedTime));
+        cal.set(Calendar.SECOND, getSecond(encodedTime));        
+    }
+    
+    /**
+     * Get a java.sql.Time object from an encoded time
+     * and nano-second value. As required by JDBC the
+     * date component of the Time object will be set to
+     * Jan. 1, 1970
+     * @param cal Calendar to use for conversion
+     * @param encodedTime Derby encoded time value
+     * @param nanos number of nano-seconds.
+     * @return Valid Time object.
+     */
+    static Time getTime(Calendar cal, int encodedTime, int nanos)
+    {
         if( cal == null)
             cal = new GregorianCalendar();
         
         cal.clear();
-		cal.set(Calendar.YEAR, 1970);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DATE, 1);
-		cal.set(Calendar.HOUR_OF_DAY, getHour(encodedTime));
-		cal.set(Calendar.MINUTE, getMinute(encodedTime));
-		cal.set(Calendar.SECOND, getSecond(encodedTime));
-		cal.set(Calendar.MILLISECOND, 0);	//only 0 fractional seconds currently
-		return new Time(cal.getTime().getTime());
-	}
+        
+        cal.set(1970, Calendar.JANUARY, 1);
+
+        SQLTime.setTimeInCalendar(cal, encodedTime);
+
+        cal.set(Calendar.MILLISECOND, nanos/1000000);
+        
+        return new Time(cal.getTimeInMillis());
+    }
+    
+    
 	/**
 	 * Get the encoded hour value (may be different than hour value for
 	 *  	current timezone if value encoded in a different timezone)
