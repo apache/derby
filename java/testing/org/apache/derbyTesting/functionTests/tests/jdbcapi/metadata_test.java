@@ -550,14 +550,33 @@ public abstract class metadata_test {
 				new String [] {null, null, "LOUIE"},
 				null, null, null));
 
-			System.out.println("getImportedKeys():");
+			// DERBY-2610 - wildcards no longer accepted in getImportedKeys
+			//      Prior to 2610, this query showed imported keys in
+			//      all tables, but only REFTAB and REFTAB2 had any. 
+
+			System.out.println("getImportedKeys('reftab'):");
 			dumpRS(GET_IMPORTED_KEYS, getMetaDataRS(met, GET_IMPORTED_KEYS,
-				new String [] {null, null, "%"},
+				new String [] {null, null, "REFTAB"},
+				//PRE 2610: new String [] {null, null, "%"},
 				null, null, null));
 
-			System.out.println("getExportedKeys():");
+			System.out.println("getImportedKeys('reftab2'):");
+			dumpRS(GET_IMPORTED_KEYS, getMetaDataRS(met, GET_IMPORTED_KEYS,
+				new String [] {null, null, "REFTAB2"},
+				//PRE 2610: new String [] {null, null, "%"},
+				null, null, null));
+
+			// DERBY-2610 - wildcards no longer accepted in getExportedKeys
+			//      See getImportedKeys for change details. References in
+			//      REFTAB are to REFTAB and LOUIE
+			System.out.println("getExportedKeys(LOUIE):");
 			dumpRS(GET_EXPORTED_KEYS, getMetaDataRS(met, GET_EXPORTED_KEYS,
-				new String [] {null, null, "%"},
+				new String [] {null, null, "LOUIE"},
+				//PRE 2610: new String [] {null, null, "%"},
+				null, null, null));
+			System.out.println("getExportedKeys(REFTAB):");
+			dumpRS(GET_EXPORTED_KEYS, getMetaDataRS(met, GET_EXPORTED_KEYS,
+				new String [] {null, null, "REFTAB"},
 				null, null, null));
 
 			System.out.println("---------------------------------------");
@@ -571,9 +590,20 @@ public abstract class metadata_test {
 				new String [] {"", "APP", "REFTAB", "", null, "REFTAB"},
 				null, null, null));
 
-			System.out.println("\ngetCrossReference('',null,null,'','APP','reftab' ):");
+			// DERBY-2610 - wildcards no longer accepted in getImportedKeys
+			//      Prior to 2610, this query showed crossrefs between all
+			//      tables and reftab. Effectively, this was louie-reftab
+			//      and reftab-reftab.
+			System.out.println(
+						"\ngetCrossReference('',null,'louie','','APP','reftab' ):");
 			dumpRS(GET_CROSS_REFERENCE, getMetaDataRS(met, GET_CROSS_REFERENCE,
-				new String [] {"", null, "%", "", "APP", "REFTAB"},
+				new String [] {"", null, "LOUIE", "", "APP", "REFTAB"},
+				//PRE 2610: new String [] {"", null, "%", "", "APP", "REFTAB"},
+				null, null, null));
+			System.out.println(
+						"\ngetCrossReference('',null,'reftab','','APP','reftab' ):");
+			dumpRS(GET_CROSS_REFERENCE, getMetaDataRS(met, GET_CROSS_REFERENCE,
+				new String [] {"", null, "REFTAB", "", "APP", "REFTAB"},
 				null, null, null));
 
 			System.out.println("\ngetImportedKeys('',null,null,'','APP','reftab' ):");
