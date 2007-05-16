@@ -935,6 +935,7 @@ public class JDBC {
 
         if (expectedRows.length == 0) {
             assertEmpty(rs);
+            return;
         }
 
         ResultSetMetaData rsmd = rs.getMetaData();
