@@ -288,6 +288,29 @@ public class PrepareStatementTest extends BaseJDBCTestCase
             assertSQLState("07000", e);
         }
         pSt.close();
+
+        // Some test cases for DERBY-2558, involving validation of the
+        // parameterIndex argument to the 4-argument overload of setObject
+        //
+        pSt = prepareStatement("create table d2558 (i int)");
+        assertUpdateCount(pSt, 0);
+        pSt.close();
+        pSt = prepareStatement("insert into d2558 values (3), (4)");
+        assertUpdateCount(pSt, 2);
+        pSt.close();
+        pSt = prepareStatement("select * from d2558 where i = ?");
+        pSt.setObject(1,new Integer(3),java.sql.Types.INTEGER,0);
+        try {
+            // There's only 1 parameter marker, so this should fail:
+            pSt.setObject(2,new Integer(4), java.sql.Types.INTEGER,0);
+            rs = pSt.executeQuery();
+            rs.close();
+            fail("Exception expected above!");
+        } catch (SQLException e) {
+            assertSQLState("XCL13", e);
+        }
+        pSt.close();
+
     }
 
 

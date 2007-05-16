@@ -67,6 +67,15 @@ execute 'select * from t where i=?' using 'create table s (i int)';
 -- note that the using part was, however, executed...
 drop table s;
 
+-- DERBY-2558: Verify that we get a reasonable message when the 'dimension'
+-- of the 'using-set' does not match the 'dimension' of the prepared statement:
+create table t2558 (i int);
+insert into t2558 values (3), (4);
+-- First two statements below should fail. Third one should work.
+execute 'select * from t2558 where i = ?' using 'values (3,4)';
+execute 'select * from t2558 where i in (?,?,?)' using 'values (3,4)';
+execute 'select * from t2558 where i = ? or i = ?' using 'values (3,4)';
+
 -- bug 5926 - make sure the using clause result set got closed
 drop table t;
 create table t(c1 int);

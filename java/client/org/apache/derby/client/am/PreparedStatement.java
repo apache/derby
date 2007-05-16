@@ -1488,6 +1488,7 @@ public class PreparedStatement extends Statement
                             Object x,
                             int targetJdbcType,
                             int scale) throws SqlException {
+        checkForValidParameterIndex(parameterIndex);
         checkForValidScale(scale);
 
         // JDBC 4.0 requires us to throw SQLFeatureNotSupportedException for

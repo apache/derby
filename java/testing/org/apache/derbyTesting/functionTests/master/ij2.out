@@ -91,6 +91,25 @@ IJ ERROR: Using clause had no results
 ij> -- note that the using part was, however, executed...
 drop table s;
 0 rows inserted/updated/deleted
+ij> -- DERBY-2558: Verify that we get a reasonable message when the 'dimension'
+-- of the 'using-set' does not match the 'dimension' of the prepared statement:
+create table t2558 (i int);
+0 rows inserted/updated/deleted
+ij> insert into t2558 values (3), (4);
+2 rows inserted/updated/deleted
+ij> -- First two statements below should fail. Third one should work.
+execute 'select * from t2558 where i = ?' using 'values (3,4)';
+IJ WARNING: Autocommit may close using result set
+ERROR XCL13: The parameter position '2' is out of range.  The number of parameters for this prepared  statement is '1'.
+ij> execute 'select * from t2558 where i in (?,?,?)' using 'values (3,4)';
+IJ WARNING: Autocommit may close using result set
+ERROR 07000: At least one parameter to the current statement is uninitialized.
+ij> execute 'select * from t2558 where i = ? or i = ?' using 'values (3,4)';
+IJ WARNING: Autocommit may close using result set
+I          
+-----------
+3          
+4          
 ij> -- bug 5926 - make sure the using clause result set got closed
 drop table t;
 0 rows inserted/updated/deleted
