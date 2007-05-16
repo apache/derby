@@ -27,12 +27,14 @@ public class RuntimeStatisticsParser {
     private boolean distinctScan = false;
     private boolean eliminatedDuplicates = false;
     private boolean tableScan = false;
+    private final boolean indexScan;
+    private final boolean indexRowToBaseRow;
     private String statistics = "";
     private boolean scrollInsensitive = false;
 
     /**
      * Create a RuntimeStatistics object to parse the text and extract
-     * information. Currently only isolation level is the only thing extracted.
+     * information.
      * 
      * @param rts
      *            Runtime Statistics string
@@ -56,6 +58,10 @@ public class RuntimeStatisticsParser {
         if (rts.indexOf("Table Scan ResultSet") > 0) {
         	tableScan = true;
         }
+
+        indexScan = (rts.indexOf("Index Scan ResultSet") >= 0);
+        indexRowToBaseRow =
+            (rts.indexOf("Index Row to Base Row ResultSet") >= 0);
         
         if (rts.indexOf("Eliminate duplicates = true") > 0) {
         	eliminatedDuplicates = true;
@@ -85,6 +91,21 @@ public class RuntimeStatisticsParser {
      */
     public boolean usedTableScan() {
     	return tableScan;
+    }
+
+    /**
+     * Return whether or not an index scan result set was used in the query.
+     */
+    public boolean usedIndexScan() {
+        return indexScan;
+    }
+
+    /**
+     * Return whether or not an index row to base row result set was used in
+     * the query.
+     */
+    public boolean usedIndexRowToBaseRow() {
+        return indexRowToBaseRow;
     }
     
     /**

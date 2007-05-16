@@ -89,6 +89,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(UnaryArithmeticParameterTest.suite());
         suite.addTest(HoldCursorTest.suite());
         suite.addTest(ShutdownDatabaseTest.suite());
+        suite.addTest(StalePlansTest.suite());
         suite.addTest(SystemCatalogTest.suite());
         suite.addTest(ForBitDataTest.suite());
         suite.addTest(DistinctTest.suite());
