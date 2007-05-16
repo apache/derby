@@ -73,16 +73,23 @@ public class _Suite extends BaseTestCase {
         "derbyTesting.oldReleasePath";
     
     /**
+     * The saved location in svn at apache for older releases for testing
+     */
+    public static final String OLD_JAR_URL =
+        "https://svn.apache.org/repos/asf/db/derby/jars";
+    
+    /**
      * List of the versions to test against.
      * The tests look for the jar files in each releasae
      * in the folder:
-     * ${derbyTesting.jar.path}/M.m.f.p/lib
+     * ${derbyTesting.oldReleasePath}/M.m.f.p
      * 
-     * If derbyTesting.jar.path is not set then no tests will be run.
+     * If derbyTesting.oldReleasePath is not set then it is assumed the files can
+     * be accessed from the svn repository at apache. If this location is
+     * not available, then the test will fail.
      * 
-     * If ${derbyTesting.jar.path}/M.m.f.p/lib does not exist
-     * for a specific release then those sets of tests will
-     * be skipped.
+     * If the property is set, but ${derbyTesting.oldReleasePath}/M.m.f.p does not exist
+     * for a specific release then those sets of tests will be skipped.
      */
     private static final int[][] OLD_VERSIONS =
     {
@@ -94,7 +101,6 @@ public class _Suite extends BaseTestCase {
         {10, 2, 2, 0}, // 10.2.2.0 (Dec 12, 2006 / SVN 485682)
     };
 
-
     /**
      * Use suite method instead.
      */
@@ -103,11 +109,6 @@ public class _Suite extends BaseTestCase {
     }
     
     public static Test suite() {
-        
-        if (getSystemProperty(OLD_RELEASE_PATH_PROPERTY) == null)
-            return new TestSuite(
-                    "empty: no upgrade tests: " +
-                    OLD_RELEASE_PATH_PROPERTY + " not set");
         
         TestSuite suite = new TestSuite("Upgrade Suite");       
 

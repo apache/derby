@@ -242,17 +242,31 @@ class UpgradeRun {
      */
     private static String getOldJarLocation(int[] oldVersion) {
         String jarPath = System.getProperty(_Suite.OLD_RELEASE_PATH_PROPERTY);
-        
-        Assert.assertNotNull(_Suite.OLD_RELEASE_PATH_PROPERTY
-                + " not set", jarPath);
       
+        if (jarPath == null)
+            return null;
+        
         String version = getTextVersion(oldVersion);
-        String jarLocation = jarPath + File.separator + version
-            + File.separator + "lib";
-                
+        String jarLocation = jarPath + File.separator + version;
+        
         return jarLocation;
     }
-    
+
+    /**
+     * Get the location of jars of old release, using the url for svn at apache.
+     *  
+     * @return location of jars of old release
+     */
+    private static String getOldJarURLLocation(int[] oldVersion) {
+
+        String oldJarUrl = _Suite.OLD_JAR_URL;
+        
+        String version = getTextVersion(oldVersion);
+        String jarLocation = oldJarUrl + "/" + version;
+        
+        return jarLocation;       
+    }
+
     /**
      * Create a class loader using jars in the specified location. Add all jars 
      * specified in jarFiles and the testing jar.
@@ -266,19 +280,38 @@ class UpgradeRun {
         
         String jarLocation = getOldJarLocation(version);
         
-        File lib = new File(jarLocation);
-                
-        // If the jars do not exist then return null
-        // and the caller will set up to skip this.
-        if (!lib.exists())
-            return null;
+        if (jarLocation != null)
+        {
+            File lib = new File(jarLocation);
+
+            // If the jars do not exist then return null
+            // and the caller will set up to skip this.
+            if (!lib.exists())
+                return null;
+
+            for (int i=0; i < jarFiles.length; i++) {
+                try {
+                    url[i] = new File(lib, jarFiles[i]).toURL();
+                } catch (MalformedURLException e) {
+                    Assert.fail(e.toString());
+                }
+            }
+        }
+        else
         
-        
-        for (int i=0; i < jarFiles.length; i++) {
-            try {
-                url[i] = new File(lib, jarFiles[i]).toURL();
-            } catch (MalformedURLException e) {
-                Assert.fail(e.toString());
+        // if the property was not set, attempt to access the jars from 
+        // the saved svn location.
+        // Note, this means the test fails if there is no network connection
+        // (or the server at apache is down) unless the property is set
+        // to a valid location
+        {
+            String oldURLJarLocation = getOldJarURLLocation(version);
+            for (int i=0; i < jarFiles.length; i++) {
+                try {
+                    url[i] = new URL(oldURLJarLocation + "/" + jarFiles[i]);
+                } catch (MalformedURLException e) {
+                    Assert.fail(e.toString());
+                }
             }
         }
         
