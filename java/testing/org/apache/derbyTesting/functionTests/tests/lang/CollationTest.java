@@ -69,6 +69,11 @@ public void testDefaultCollation() throws SQLException {
       conn.setAutoCommit(false);
       Statement s = conn.createStatement();
 
+      //The collation should be UCS_BASIC for this database
+      checkLangBasedQuery(s, 
+      		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
+			new String[][] {{"UCS_BASIC"}});
+
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"4","Acorn"},{"0","Smith"},{"1","Zebra"},
       		{"6","aacorn"}, {"2","\u0104corn"},{"5","\u015Amith"},{"3","\u017Bebra"} });   
@@ -120,6 +125,11 @@ public void testPolishCollation() throws SQLException {
       Connection conn = ds.getConnection();
       conn.setAutoCommit(false);
       Statement s = conn.createStatement();
+
+      //The collation should be TERRITORY_BASED for this database
+      checkLangBasedQuery(s, 
+      		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
+			new String[][] {{"TERRITORY_BASED"}});
 
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"6","aacorn"}, {"4","Acorn"}, {"2","\u0104corn"},
@@ -179,6 +189,11 @@ public void testNorwayCollation() throws SQLException {
       conn.setAutoCommit(false);
       Statement s = conn.createStatement();
 
+      //The collation should be TERRITORY_BASED for this database
+      checkLangBasedQuery(s, 
+      		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
+			new String[][] {{"TERRITORY_BASED"}});
+
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"4","Acorn"}, {"2","\u0104corn"},{"0","Smith"},
       		{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}, {"6","aacorn"} });
@@ -233,6 +248,11 @@ public void testEnglishCollation() throws SQLException {
       Connection conn = ds.getConnection();
       conn.setAutoCommit(false);
       Statement s = conn.createStatement();
+
+      //The collation should be TERRITORY_BASED for this database
+      checkLangBasedQuery(s, 
+      		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
+			new String[][] {{"TERRITORY_BASED"}});
 
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"6","aacorn"},{"4","Acorn"},{"2","\u0104corn"},{"0","Smith"},
