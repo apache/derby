@@ -1590,6 +1590,15 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 	}
 
     /**
+     * @see org.apache.derby.iapi.store.access.ScanController#isHeldAfterCommit
+     */
+    public boolean isHeldAfterCommit() throws StandardException
+    {
+        return (scan_state == SCAN_HOLD_INIT ||
+                scan_state == SCAN_HOLD_INPROGRESS);
+    }
+
+    /**
     Fetch the row at the current position of the Scan.
 	@see ScanController#fetch
 

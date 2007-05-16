@@ -104,6 +104,7 @@ public class HashScanResultSet extends ScanResultSet
 	public int[] keyColumns;
 	private boolean sameStartStopPosition;
 	private boolean skipNullKeyColumns;
+	private boolean keepAfterCommit;
 
 	protected BackingStoreHashtable hashtable;
 	protected boolean eliminateDuplicates;		// set to true in DistinctScanResultSet
@@ -187,6 +188,7 @@ public class HashScanResultSet extends ScanResultSet
 		this.isConstraint = isConstraint;
 		this.forUpdate = forUpdate;
 		this.skipNullKeyColumns = skipNullKeyColumns;
+		this.keepAfterCommit = activation.getResultSetHoldability();
 
 		/* Retrieve the hash key columns */
 		FormatableArrayHolder fah = (FormatableArrayHolder)
@@ -296,7 +298,8 @@ public class HashScanResultSet extends ScanResultSet
                     initialCapacity,    // in memory Hashtable initial capacity
                     loadFactor,         // in memory Hashtable load factor
                     runTimeStatisticsOn,
-					skipNullKeyColumns); 
+					skipNullKeyColumns,
+					keepAfterCommit);
 
 
 			if (runTimeStatisticsOn)

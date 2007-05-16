@@ -1367,7 +1367,8 @@ public class RAMTransaction
     int                     initialCapacity,
     float                   loadFactor,
     boolean                 collect_runtimestats,
-    boolean		            skipNullKeyColumns)
+    boolean		            skipNullKeyColumns,
+    boolean                 keepAfterCommit)
         throws StandardException
     {
         return (
@@ -1391,7 +1392,8 @@ public class RAMTransaction
                 initialCapacity,
                 loadFactor,
                 collect_runtimestats,
-				skipNullKeyColumns));
+				skipNullKeyColumns,
+                keepAfterCommit));
     }
 
 

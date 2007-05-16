@@ -83,7 +83,8 @@ class BackingStoreHashTableFromScan extends BackingStoreHashtable
         int                     initialCapacity,
         float                   loadFactor,
         boolean                 collect_runtimestats,
-		boolean					skipNullKeyColumns)
+		boolean					skipNullKeyColumns,
+        boolean                 keepAfterCommit)
             throws StandardException
     {
 
@@ -97,7 +98,7 @@ class BackingStoreHashTableFromScan extends BackingStoreHashtable
             initialCapacity,
             loadFactor,
 			skipNullKeyColumns,
-            false /* Do not keep the hash table after a commit. */);
+            keepAfterCommit);
 
         open_scan =  (ScanManager)
             tc.openScan(

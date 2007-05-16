@@ -152,7 +152,8 @@ class NoOpTransaction implements TransactionController {
             int stopSearchOperator, long max_rowcnt, int[] key_column_numbers,
             boolean remove_duplicates, long estimated_rowcnt,
             long max_inmemory_rowcnt, int initialCapacity, float loadFactor,
-            boolean collect_runtimestats, boolean skipNullKeyColumns)
+            boolean collect_runtimestats, boolean skipNullKeyColumns,
+            boolean keepAfterCommit)
             throws StandardException {
         // TODO Auto-generated method stub
         return null;

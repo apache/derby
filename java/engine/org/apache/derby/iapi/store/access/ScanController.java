@@ -167,6 +167,18 @@ public interface ScanController extends GenericScanController
     boolean doesCurrentPositionQualify()
 		throws StandardException;
 
+
+    /**
+     * Return true is the scan has been closed after a commit, but was
+     * opened with holdability and can be reopened using
+     * positionAtRowLocation.
+     *
+     * @exception StandardException Standard exception policy.
+     *
+     * @see ScanController#positionAtRowLocation
+     */
+    boolean isHeldAfterCommit() throws StandardException;
+
     /**
     Fetch the (partial) row at the current position of the Scan.
 	The value in the destRow storable row is replaced

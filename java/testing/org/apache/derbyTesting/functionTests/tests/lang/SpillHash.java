@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.bug4356
+   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.SpillHash
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -33,6 +33,7 @@ import java.util.BitSet;
 
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 /**
  * Test BackingStoreHashtable spilling to disk.
@@ -41,8 +42,6 @@ import org.apache.derby.tools.JDBCDisplayUtil;
  */
 public class SpillHash
 {
-    private static PreparedStatement joinStmt;
-    private static PreparedStatement distinctStmt;
     private static final int LOTS_OF_ROWS = 10000;
     private static int errorCount = 0;
     
@@ -61,11 +60,6 @@ public class SpillHash
             PreparedStatement insA = conn.prepareStatement( "insert into ta(ca1,ca2) values(?,?)");
             PreparedStatement insB = conn.prepareStatement( "insert into tb(cb1,cb2) values(?,?)");
             insertDups( insA, insB, initDupVals);
-
-            joinStmt =
-              conn.prepareStatement( "select ta.ca1, ta.ca2, tb.cb2 from ta, tb where ca1 = cb1");
-            distinctStmt =
-              conn.prepareStatement( "select distinct ca1 from ta");
 
             runStatements( conn, 0, new String[][][] {initDupVals});
 
@@ -102,12 +96,10 @@ public class SpillHash
         if( errorCount == 0)
         {
             System.out.println( "PASSED.");
-            System.exit(0);
         }
         else
         {
             System.out.println( "FAILED: " + errorCount + ((errorCount == 1) ? " error" : " errors"));
-            System.exit(1);
         }
     } // end of main
     
@@ -171,20 +163,49 @@ public class SpillHash
         return "B" + col1Val;
     }
     
+    static final boolean NEGATIVE_TEST = false;
+    static final boolean POSITIVE_TEST = true;
+
     private static void runStatements( Connection conn, int maxColValue, String[][][] dupVals)
         throws SQLException
     {
-        runJoin( conn, maxColValue, dupVals);
-        runDistinct( conn, maxColValue, dupVals);
-        runCursor( conn, maxColValue, dupVals);
+        // run variants with holdability false and true (last arg)
+        runJoin( conn, maxColValue, dupVals, false, POSITIVE_TEST);
+        runJoin( conn, maxColValue, dupVals, false, NEGATIVE_TEST);
+        runJoin( conn, maxColValue, dupVals, true, POSITIVE_TEST);
+
+        runDistinct( conn, maxColValue, dupVals, false, POSITIVE_TEST);
+        runDistinct( conn, maxColValue, dupVals, false, NEGATIVE_TEST);
+        runDistinct( conn, maxColValue, dupVals, true, POSITIVE_TEST);
+
+        runCursor( conn, maxColValue, dupVals, false, POSITIVE_TEST);
+        runCursor( conn, maxColValue, dupVals, false, NEGATIVE_TEST);
+        runCursor( conn, maxColValue, dupVals, true, POSITIVE_TEST);
     }
 
-    private static void runJoin( Connection conn, int maxColValue, String[][][] dupVals)
+    private static void runJoin( Connection conn,
+                                 int maxColValue,
+                                 String[][][] dupVals,
+                                 boolean holdOverCommit,
+                                 boolean positiveTest)
         throws SQLException
     {
-        System.out.println( "Running join");
+        System.out.println( "Running join, holdability=" + holdOverCommit +
+                            " " + (positiveTest ? "positive" : "negative"));
         int expectedRowCount = maxColValue; // plus expected duplicates, to be counted below
-        ResultSet rs = joinStmt.executeQuery();
+
+        Statement stmt;
+        if( holdOverCommit) {
+            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                        ResultSet.CONCUR_READ_ONLY,
+                                        ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        } else {
+            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                        ResultSet.CONCUR_READ_ONLY,
+                                        ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        }
+        ResultSet rs = stmt.executeQuery(
+            "select ta.ca1, ta.ca2, tb.cb2 from ta, tb where ca1 = cb1");
         BitSet joinRowFound = new BitSet( maxColValue);
         int dupKeyCount = 0;
         for( int i = 0; i < dupVals.length; i++)
@@ -255,6 +276,35 @@ public class SpillHash
                 }
                 dupsFound[dupKeyIdx].set( idx);
             }
+
+            if (holdOverCommit) {
+                // Commit inside an open result set to test
+                // rs' holdability, next() will reopen it if all is well.
+                rs.getStatement().getConnection().commit();
+                holdOverCommit = false; // hack: do this only once
+            } else if (!positiveTest) {
+                // Negative test, check if we get the expected error.
+                rs.getStatement().getConnection().commit();
+
+                try {
+                    rs.next();
+                } catch (SQLException e) {
+                    if (!e.getSQLState().
+                            equals(SQLStateConstants.RESULT_SET_IS_CLOSED)) {
+                        System.out.println("Running join, holdability=false " +
+                                           "negative test: Failed " +
+                                           e.getSQLState());
+                        rs.close();
+                    }
+                    stmt.close();
+                    return;
+                }
+                System.out.println("Running join, holdability=false " +
+                                   "negative test: Failed: rs not closed");
+                rs.close();
+                stmt.close();
+                return;
+            }
         };
         if( count != expectedRowCount)
         {
@@ -262,6 +312,7 @@ public class SpillHash
             errorCount++;
         }
         rs.close();
+        stmt.close();
     } // end of runJoin
 
     private static int findDupVal( ResultSet rs, int col, char prefix, int keyIdx, String[][][] dupVals)
@@ -296,17 +347,36 @@ public class SpillHash
         return str.trim();
     }
     
-    private static void runDistinct( Connection conn, int maxColValue, String[][][] dupVals)
+    private static void runDistinct( Connection   conn,
+                                     int          maxColValue,
+                                     String[][][] dupVals,
+                                     boolean      holdOverCommit,
+                                     boolean      positiveTest)
         throws SQLException
     {
-        System.out.println( "Running distinct");
-        ResultSet rs = distinctStmt.executeQuery();
-        checkAllCa1( rs, false, false, maxColValue, dupVals, "DISTINCT");
+        System.out.println( "Running distinct, holdability=" + holdOverCommit +
+                            " " + (positiveTest ? "positive" : "negative"));
+        Statement stmt;
+        if( holdOverCommit) {
+            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                        ResultSet.CONCUR_READ_ONLY,
+                                        ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        } else {
+            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                        ResultSet.CONCUR_READ_ONLY,
+                                        ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        }
+        ResultSet rs = stmt.executeQuery("select distinct ca1 from ta");
+        checkAllCa1( rs, false, holdOverCommit, positiveTest,
+                     maxColValue, dupVals, "DISTINCT");
+        rs.close();
+        stmt.close();
     }
 
     private static void checkAllCa1( ResultSet rs,
                                      boolean expectDups,
                                      boolean holdOverCommit,
+                                     boolean positiveTest,
                                      int maxColValue,
                                      String[][][] dupVals,
                                      String label)
@@ -391,10 +461,36 @@ public class SpillHash
                     found.set( col1Val);
                     count++;
                 }
-                if( holdOverCommit)
-                {
+
+                if( holdOverCommit) {
+                    // Commit inside an open result set to test
+                    // rs' holdability, next() will reopen it if all is well.
                     rs.getStatement().getConnection().commit();
                     holdOverCommit = false;
+                } else if (!positiveTest) {
+                    // Negative test, check if we get the expected error.
+                    rs.getStatement().getConnection().commit();
+
+                    String runningWhat =
+                        (expectDups ?
+                         "Running scroll insensitive cursor, " +
+                         "holdability=false" :
+                         "Running distinct, holdability=false");
+
+                    try {
+                        rs.next();
+                    } catch (SQLException e) {
+                        if (!e.getSQLState().equals
+                                (SQLStateConstants.RESULT_SET_IS_CLOSED)) {
+                            System.out.println(runningWhat +
+                                               " negative test: Failed " +
+                                               e.getSQLState());
+                        }
+                        return;
+                    }
+                    System.out.println(runningWhat +
+                                       " negative test: Failed: rs not closed");
+                    return;
                 }
             }
             if( count != maxColValue)
@@ -418,12 +514,16 @@ public class SpillHash
         }
     } // End of checkAllCa1
 
-    private static void runCursor( Connection conn, int maxColValue, String[][][] dupVals)
+    private static void runCursor( Connection   conn,
+                                   int          maxColValue,
+                                   String[][][] dupVals,
+                                   boolean      holdOverCommit,
+                                   boolean      positiveTest)
         throws SQLException
     {
-        System.out.println( "Running scroll insensitive cursor");
-        DatabaseMetaData dmd = conn.getMetaData();
-        boolean holdOverCommit = dmd.supportsOpenCursorsAcrossCommit();
+        System.out.println( "Running scroll insensitive cursor, holdability=" +
+                            holdOverCommit +
+                            " " + (positiveTest ? "positive" : "negative"));
         Statement stmt;
         if( holdOverCommit)
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -431,8 +531,10 @@ public class SpillHash
                                         ResultSet.HOLD_CURSORS_OVER_COMMIT);
         else
             stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                        ResultSet.CONCUR_READ_ONLY);
+                                        ResultSet.CONCUR_READ_ONLY,
+                                        ResultSet.CLOSE_CURSORS_AT_COMMIT);
         ResultSet rs = stmt.executeQuery( "SELECT ca1 FROM ta");
-        checkAllCa1( rs, true, holdOverCommit, maxColValue, dupVals, "scroll insensitive cursor");
+        checkAllCa1( rs, true, holdOverCommit, positiveTest,
+                     maxColValue, dupVals, "scroll insensitive cursor");
     }
 }

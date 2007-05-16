@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Vector;
+import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.SQLInteger;
@@ -63,6 +64,7 @@ public class DiskHashtable
     private final DataValueDescriptor[]   scanKey = { new SQLInteger()};
     private int                           size;
     private boolean                       keepStatistics;
+    private final boolean                 keepAfterCommit;
 
     /**
      * Creates a new <code>DiskHashtable</code> instance.
@@ -88,6 +90,7 @@ public class DiskHashtable
         this.tc                         = tc;
         this.key_column_numbers         = key_column_numbers;
         this.remove_duplicates          = remove_duplicates;
+        this.keepAfterCommit            = keepAfterCommit;
         LanguageConnectionContext lcc   = (LanguageConnectionContext)
             ContextService.getContextOrNull(
                 LanguageConnectionContext.CONTEXT_ID);
@@ -387,13 +390,14 @@ public class DiskHashtable
     {
         private ScanController scan;
         private boolean hasMore;
+        private RowLocation rowloc;
 
         ElementEnum()
         {
             try
             {
                 scan = tc.openScan( rowConglomerateId,
-                                    false, // do not hold
+                                    keepAfterCommit,
                                     0, // read only
                                     TransactionController.MODE_TABLE,
                                     TransactionController.ISOLATION_NOLOCK,
@@ -408,6 +412,9 @@ public class DiskHashtable
                 {
                     scan.close();
                     scan = null;
+                } else if (keepAfterCommit) {
+                    rowloc = rowConglomerate.newRowLocationTemplate();
+                    scan.fetchLocation(rowloc);
                 }
             }
             catch( StandardException se)
@@ -436,13 +443,27 @@ public class DiskHashtable
                 throw new NoSuchElementException();
             try
             {
-                scan.fetch( row);
+                if (scan.isHeldAfterCommit()) {
+                    // automatically reopens scan:
+                    if (!scan.positionAtRowLocation(rowloc)) {
+                        // Will not happen unless compress of this table
+                        // has invalidated the row location. Possible?
+                        throw StandardException.
+                            newException(SQLState.NO_CURRENT_ROW);
+                    }
+                }
+
+                scan.fetch(row);
+
                 Object retValue =  BackingStoreHashtable.shallowCloneRow( row);
                 hasMore = scan.next();
+
                 if( ! hasMore)
                 {
                     scan.close();
                     scan = null;
+                } else if (keepAfterCommit) {
+                    scan.fetchLocation(rowloc);
                 }
 
                 return retValue;

@@ -386,4 +386,14 @@ public abstract class Scan implements ScanManager, ScanInfo
 
         return(prop);
     }
+
+    /**
+     * @see org.apache.derby.iapi.store.access.ScanController#isHeldAfterCommit
+     */
+    public boolean isHeldAfterCommit() throws StandardException
+    {
+        throw StandardException.newException(
+                SQLState.SORT_IMPROPER_SCAN_METHOD);
+    }
+
 }

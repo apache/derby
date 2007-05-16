@@ -65,8 +65,9 @@ scan_position - this variable holds the current scan position, it may be
                 extended
                 to provide more information if necessary.
 
-scan_state    - a scan has 3 possible states: 
-                SCAN_INIT, SCAN_INPROGRESS, SCAN_DONE
+scan_state    - a scan has 5 possible states:
+                SCAN_INIT, SCAN_INPROGRESS, SCAN_DONE, SCAN_HOLD_INIT, and
+                SCAN_HOLD_INPROGRESS
 
 positionAtInitScan()
               - This routine is called to move the scan to the SCAN_INIT state.
@@ -1453,6 +1454,17 @@ public abstract class GenericScanController
 	{
 		fetch(row, false);
 	}
+
+    /**
+     * @see org.apache.derby.iapi.store.access.ScanController#isHeldAfterCommit
+     */
+    public boolean isHeldAfterCommit() throws StandardException
+    {
+        return (scan_state == SCAN_HOLD_INIT ||
+                scan_state == SCAN_HOLD_INPROGRESS);
+    }
+
+
 	
 	/**
     Fetch the row at the current position of the Scan.

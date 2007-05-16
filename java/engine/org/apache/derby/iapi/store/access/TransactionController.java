@@ -901,6 +901,8 @@ public interface TransactionController
      *                              BackingStoreHashtable.getRuntimeStats().
 	 * @param skipNullKeyColumns	Whether or not to skip rows with 1 or more null key columns
      *
+     * @param keepAfterCommit       If true then the hash table is kept after a
+     *                              commit
      * @see BackingStoreHashtable
      * @see TransactionController#openScan
      *
@@ -925,7 +927,8 @@ public interface TransactionController
     int                     initialCapacity,
     float                   loadFactor,
     boolean                 collect_runtimestats,
-    boolean		            skipNullKeyColumns)
+    boolean		            skipNullKeyColumns,
+    boolean                 keepAfterCommit)
         throws StandardException;
 
 
