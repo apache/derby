@@ -252,34 +252,4 @@ public interface ExecutionFactory {
 		This returns the value row as an indexable row 
 	 */
 	public ExecIndexRow	getIndexableRow(ExecRow valueRow);
-
-	/**
-		This returns the value row as an indexable row, reusing the passed
-		in ExecIndexRow if non-null.
-	 */
-	//public ExecIndexRow	getIndexableRow(ExecRow valueRow, ExecIndexRow sourceExecIndexRow);
-
-
-   /**
-	 Packages up a clump of constants which the Plugin uses at execute()
-	 time for COPY PUBLICATION.
-    */
-    public	Object	getJdbcCopyConstants
-	(
-		int[][]				paramReferences,
-		TypeDescriptor[][]	columnTypes,
-		int[][]				publishedTableSchemaCounts
-    );
-
-   /**
-	 Packages up a clump of constants which the Plugin uses at execute()
-	 time for CREATE PUBLICATION.
-    */
-    public	Object	getJdbcCreateConstants
-	(
-		UUID[]				publishedJarFileIDs,
-		Object				publishedItems,
-		int[][]				tableSchemaCounts
-    );
-
 }

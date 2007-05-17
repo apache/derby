@@ -328,30 +328,6 @@ public class GenericExecutionFactory
 		return new IndexValueRow(valueRow);
 	}
 
-   /**
-	 Packages up a clump of constants which the Plugin uses at execute()
-	 time for COPY PUBLICATION.
-    */
-    public	Object	getJdbcCopyConstants
-	(
-		int[][]				paramReferences,
-		TypeDescriptor[][]	columnTypes,
-		int[][]				publishedTableSchemaCounts
-    )
-	{ return null; }
-
-   /**
-	 Packages up a clump of constants which the Plugin uses at execute()
-	 time for CREATE PUBLICATION.
-    */
-    public	Object	getJdbcCreateConstants
-	(
-		UUID[]				publishedJarFileIDs,
-		Object				publishedItems,
-		int[][]				tableSchemaCounts
-    )
-	{ return null; }
-
 	//
 	// class interface
 	//
@@ -361,6 +337,6 @@ public class GenericExecutionFactory
 	//
 	// fields
 	//
-	public	  ResultSetFactory rsFactory;
-    protected GenericConstantActionFactory	genericConstantActionFactory;
+	private ResultSetFactory rsFactory;
+    private GenericConstantActionFactory	genericConstantActionFactory;
 }
