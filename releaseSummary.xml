@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at      
+
+http://www.apache.org/licenses/LICENSE-2.0  
+
+Unless required by applicable law or agreed to in writing, software  
+distributed under the License is distributed on an "AS IS" BASIS,  
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
+See the License for the specific language governing permissions and  
+limitations under the License.
+-->
+
+<!-- 
+This is the template for the release summary which the Release Manager
+writes. The ReleaseNotesGenerator uses this summary in order to
+generate various sections of the release notes. Please replace all ???
+with real information.
+-->
+
+<summary>
+
+<!--
+    Release identifier.
+
+    E.g.: 10.3.0.3
+-->
+<releaseID>10.3.0.0</releaseID>
+
+<!--
+    Identifier of previous release. The release notes describe the
+    delta between releaseID and previousReleaseID.
+
+    E.g.: 10.2.1.7
+
+-->
+<previousReleaseID>10.2.2.0</previousReleaseID>
+
+<buildInfo>
+
+  <!-- Name of the branch. E.g.: 10.3 -->
+  <branch>10.3</branch>
+
+  <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
+  <machine>Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2.</machine>
+
+  <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
+  <antVersion>Apache Ant version 1.6.5 compiled on June 2 2005.</antVersion>
+
+  <!-- Output of "java -version" run from your jdk1.4 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03). -->
+  <jdk1.4>Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03).</jdk1.4>
+
+  <!-- Output of "java -version" run from your Java 6 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105). -->
+  <java6> Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105).</java6>
+
+  <!--
+         Say here whether you used osgi.jar to build org.apache.derby.osgi.EmbeddedActivator.
+         E.g.:  The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.
+  -->
+  <osgi>The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.</osgi>
+
+  <!--
+         Say which compilers you used.
+         E.g.:
+
+           The 1.4.2_12-b03 javac was used to compile all classes
+           except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
+  -->
+  <compilers>The 1.4.2_12-b03 javac was used to compile all classes
+           except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.</compilers>
+
+  <!--
+         Say here whether you built the J2ME support and, if so, which
+         tookit you used.
+         E.g.: J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
+  -->
+  <jsr169>J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).</jsr169>
+
+</buildInfo>
+
+<overview>
+
+<p>
+Derby is a pure Java relational database engine using standard SQL and
+JDBC as its APIs.
+</p>
+
+<p>
+Derby functionality includes:
+</p>
+
+<ul>
+<li>Embedded engine with JDBC drivers</li>
+<li>Network Server</li>
+<li>Network client JDBC drivers</li>
+<li>Command line tools: ij (SQL scripting), dblook (schema dump) and sysinfo (system info)</li>
+</ul>
+
+</overview>
+
+<newFeatures>
+
+<p>
+This is a bug-fix release. No new features were added.
+</p>
+
+</newFeatures>
+
+</summary>
+

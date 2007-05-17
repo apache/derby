@@ -45,6 +45,20 @@
 
   <property name="src.excludes" value="tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb/**,java/demo/toursdb/toursdb.out,java/demo/toursdb/toursdb.jar,tools/testing/derby/**,**/derby.log"/>
 
+<!-- These properties are used by the Release Notes Generator. -->
+
+  <property name="relnotes.src.summary" value="${basedir}/releaseSummary.xml" />
+  <property name="relnotes.src.buglist" value="${relnotes.src.reports}/fixedBugsList.xml" />
+  <property name="relnotes.src.notes" value="${relnotes.src.reports}/releaseNotesList.xml" />
+  <property name="relnotes.out.pamphlet" value="${basedir}/RELEASE-NOTES.html" />
+
+<!-- Define the task which generates the release notes -->
+  <taskdef
+    name="generateReleaseNotes"
+    classname="org.apache.derbyBuild.ReleaseNotesGenerator"
+    classpath="${out.dir}"
+  />
+
 <!-- Targets -->
 
   <target name="release" depends="clean,bin,lib,lib-debug,src"/>
@@ -72,6 +86,27 @@
              includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"/>
     <fixcrlf srcdir="${basedir}" destdir="${lf.dir}" eol="lf"
              includes="CHANGES,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"/>
+
+  </target>
+
+<!--
+   Generate the Release Notes
+
+   The ${relnotes.src.reports} property must point at a
+   directory containing the two JIRA reports:
+
+     fixedBugsList.xml  - This is a JIRA xml report of issues fixed in the release.
+
+     releaseNotesList.xml - This is a JIRA xml report of issues having detailed release notes.
+-->
+  <target name="genrelnotes">
+
+     <generateReleaseNotes
+       summaryFileName="${relnotes.src.summary}"
+       bugListFileName="${relnotes.src.buglist}"
+       releaseNotesListFileName="${relnotes.src.notes}"
+       pamphletFileName="${relnotes.out.pamphlet}"
+     />
 
   </target>
 
