@@ -177,8 +177,8 @@ class UpdateResultSet extends DMLWriteResultSet
 		this.checkGM = checkGM;
 
 		constants = (UpdateConstantAction) constantAction;
-		fkInfoArray = constants.getFKInfo( lcc.getExecutionContext() );
-		triggerInfo = constants.getTriggerInfo(lcc.getExecutionContext());
+		fkInfoArray = constants.getFKInfo();
+		triggerInfo = constants.getTriggerInfo();
 
 		heapConglom = constants.conglomId;
 

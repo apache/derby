@@ -321,8 +321,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		heapConglom = constants.conglomId; 
 
         tc = activation.getTransactionController();
-		fkInfoArray = constants.getFKInfo( lcc.getExecutionContext() );
-		triggerInfo = constants.getTriggerInfo(lcc.getExecutionContext());
+		fkInfoArray = constants.getFKInfo();
+		triggerInfo = constants.getTriggerInfo();
 		
 		/*
 		** If we have a before statement trigger, then

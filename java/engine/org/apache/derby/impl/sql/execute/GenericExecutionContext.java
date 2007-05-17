@@ -52,8 +52,6 @@ class GenericExecutionContext
 	extends ContextImpl 
 	implements ExecutionContext {
 
-	private ResultSet sourceRS;
-
 	//
 	// class implementation
 	//
@@ -108,47 +106,6 @@ class GenericExecutionContext
 		return execFactory;
 	}
 
-	/**
-	 * @see ExecutionContext#beginStatement
-	 * @exception StandardException Thrown on error
-	 */
-	public void beginStatement(ResultSet sourceRS) throws StandardException {
-		this.sourceRS = sourceRS;
-	}
-
-	/**
-	 * @see ExecutionContext#endStatement
-	 * @exception StandardException Thrown on error
-	 */
-	public void endStatement() throws StandardException {
-		sourceRS = null;
-	}
-
-	/**
-	 * @see ExecutionContext#siftForeignKeys
-	 * @exception StandardException Thrown on error
-	 */
-	public	Object[]	siftForeignKeys( Object[] fullList ) throws StandardException
-	{
-		// for the Core Language, this routine is a NOP. The interesting
-		// cases occur during REFRESH and the initial boot of a Target
-		// database. See RepExecutionContext for the interesting cases.
-
-		return	fullList;
-	}
-
-	/**
-	 * @see ExecutionContext#siftTriggers
-	 * @exception StandardException Thrown on error
-	 */
-	public Object siftTriggers(Object triggerInfo) throws StandardException
-	{
-		// for the Core Language, this routine is a NOP. The interesting
-		// cases occur during REFRESH and the initial boot of a Target
-		// database. See RepExecutionContext for the interesting cases.
-		return	triggerInfo;
-	}
-
 	//
 	// Context interface
 	//
@@ -171,14 +128,6 @@ class GenericExecutionContext
  				return;
             }
 
-
-			if (sourceRS != null)
-			{
-				sourceRS.close();
-				sourceRS = null;
-			}
-
-			endStatement();
 			return;
 		}
 	}

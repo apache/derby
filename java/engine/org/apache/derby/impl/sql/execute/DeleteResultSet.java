@@ -140,8 +140,8 @@ class DeleteResultSet extends DMLWriteResultSet
 
 		tc = activation.getTransactionController();
 		constants = (DeleteConstantAction) constantAction;
-		fkInfoArray = constants.getFKInfo( lcc.getExecutionContext() );
-		triggerInfo = constants.getTriggerInfo(lcc.getExecutionContext());
+		fkInfoArray = constants.getFKInfo();
+		triggerInfo = constants.getTriggerInfo();
 		noTriggersOrFks = ((fkInfoArray == null) && (triggerInfo == null));
 		baseRowReadList = constants.getBaseRowReadList();
 		if(source != null)

@@ -174,29 +174,16 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	/**
 	  *	Gets the foreign key information for this constant action.
 	  *	A full list of foreign keys was compiled into this constant
-	  *	action. However, we prune this list at run time so that we
-	  *	enforce only the foreign keys that we absolutely must.
-	  *
-	  *	What's going on here? Well, in certain contexts (REFRESH and
-	  *	when intially booting a Target), we don't have to enforce some
-	  *	foreign keys. We allow the ExecutionContext to rule on which
-	  *	foreign keys are relevant and which aren't.
+	  *	action.
 	  *
 	  *	@param	ec	the ExecutionContext
 	  *
 	  *	@return	the list of foreign keys to enforce for this action
 	  *
-	  * @exception StandardException		Thrown on failure
 	  */
-	public	FKInfo[]	getFKInfo
-	(
-		ExecutionContext	ec
-    )
-		throws StandardException
+	final FKInfo[] getFKInfo()
 	{
-		FKInfo[]	siftedArray = (FKInfo[]) ec.siftForeignKeys( fkInfo );
-
-		return siftedArray;
+		return fkInfo;
 	}
 
 	/**
@@ -204,12 +191,10 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	 *
 	 * @return	the triggers that should be fired
 	 *
-	 * @exception StandardException		Thrown on failure
 	 */
-	public TriggerInfo getTriggerInfo(ExecutionContext ec) 
-		throws StandardException
+	TriggerInfo getTriggerInfo()
 	{
-		return (TriggerInfo)ec.siftTriggers(triggerInfo);
+		return triggerInfo;
 	}
 
 
