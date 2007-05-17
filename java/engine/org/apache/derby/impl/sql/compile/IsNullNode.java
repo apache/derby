@@ -56,7 +56,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 						implements RelationalOperator
 {
 
-	Object nullValue = null;
+	private DataValueDescriptor nullValue;
 
 	public void setNodeType(int nodeType)
 	{
@@ -245,10 +245,10 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	{
 		if (nullValue == null)
 		{
-			nullValue = operand.getTypeId().getNull();
+			nullValue = operand.getTypeServices().getNull();
 		}
 
-		return (DataValueDescriptor) nullValue;
+		return nullValue;
 	}
 
 	/** @see RelationalOperator#equalsComparisonWithConstantExpression */

@@ -258,8 +258,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 				/* Now wort the list in ascending order using the dominant
 				 * type found above.
 				 */
-				DataValueDescriptor judgeODV =
-					(DataValueDescriptor)targetType.getTypeId().getNull();
+				DataValueDescriptor judgeODV = targetType.getNull();
 
 				rightOperandList.sortInAscendingOrder(judgeODV);
 				isOrdered = true;
