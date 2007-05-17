@@ -637,8 +637,6 @@ public class CollationTest2 extends BaseJDBCTestCase
      * for instance to run the default, pass in 0.
      * <p>
      *
-     * @return The identifier to be used to open the conglomerate later.
-     *
      * @param db_index  index of which test to run.
      *
      * @exception  SQLException

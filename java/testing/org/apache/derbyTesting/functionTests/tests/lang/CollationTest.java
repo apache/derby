@@ -322,12 +322,16 @@ private void dropTable(DataSource ds) throws SQLException {
     s.execute("DROP TABLE CUSTOMER");     
     s.close();
 }
+
 /**
  * sort customers by 
- * @param ds
+ *
+ * @param s              statement object to use to execute the query
+ * @param query          string with the query to execute.
  * @param expectedResult Null for this means that the passed query is 
  * expected to return an empty resultset. If not empty, then the resultset
  * from the query should match this paramter
+ *
  * @throws SQLException
  */
 private void checkLangBasedQuery(Statement s, String query, String[][] expectedResult) throws SQLException {
