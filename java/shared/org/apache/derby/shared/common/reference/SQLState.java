@@ -845,6 +845,7 @@ public interface SQLState {
 	String LANG_NO_FIELD_FOUND                                         = "42X68";
 	String LANG_PRIMITIVE_REFERENCING_EXPRESSION                       = "42X69";
 	String LANG_TABLE_DEFINITION_R_C_L_MISMATCH                        = "42X70";
+	String LANG_INVALID_COLUMN_TYPE_CREATE_TABLE                       = "42X71";
 	String LANG_NO_STATIC_FIELD_FOUND                                  = "42X72";
 	String LANG_AMBIGUOUS_METHOD_INVOCATION                            = "42X73";
 	String LANG_INVALID_CALL_STATEMENT                                 = "42X74";

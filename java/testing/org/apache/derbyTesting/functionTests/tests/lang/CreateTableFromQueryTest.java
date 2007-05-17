@@ -233,6 +233,24 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
         assertStatementError("0A000", stmt,
             "create table t3 as select * from t1 with data");
     }
+    
+    /**
+     * Test error for creating table where the data type is invalid.
+     */
+    public void testInvalidDataType() throws Exception
+    {
+        // BOOLEAN
+        assertStatementError("42X71", stmt,
+            "create table t as select systemalias from sys.sysaliases with no data");
+
+        // USER (Java Object)
+        assertStatementError("42X71", stmt,
+            "create table t as select aliasinfo from sys.sysaliases with no data");
+        
+        // DECIMAL(44,0)
+        assertStatementError("42X71", stmt,
+        	"create table t(x) as values 12345678901234567890123456789012345678901234 with no data");
+    }
    
     private void positiveTest(String sql, String [] columnNames,
             String [] nullability, String [] types) throws Exception

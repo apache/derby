@@ -297,8 +297,8 @@ public class CreateTableNode extends DDLStatementNode
 			{
 				ResultColumn rc = (ResultColumn) qeRCL.elementAt(index);
 				if (rc.isGenerated()) 
-			        {
-				    continue;
+				{
+					continue;
 				}
 				/* Raise error if column name is system generated. */
 				if (rc.isNameGenerated())
@@ -306,6 +306,16 @@ public class CreateTableNode extends DDLStatementNode
 					throw StandardException.newException(
 							SQLState.LANG_TABLE_REQUIRES_COLUMN_NAMES);
 				}
+
+				DataTypeDescriptor dtd = rc.getExpressionType();
+				if ((dtd != null) && !dtd.isUserCreatableType())
+				{
+					throw StandardException.newException(
+							SQLState.LANG_INVALID_COLUMN_TYPE_CREATE_TABLE,
+							dtd.getFullSQLTypeName(),
+							rc.getName());
+				}
+
 				ColumnDefinitionNode column = new ColumnDefinitionNode();
 				column.init(rc.getName(), null, rc.getType(), null);
 				tableElementList.addTableElement(column);

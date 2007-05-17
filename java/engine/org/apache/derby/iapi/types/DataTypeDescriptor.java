@@ -1332,5 +1332,73 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 *	@return	the formatID of this class
 	 */
 	public	int	getTypeFormatId()	{ return StoredFormatIds.DATA_TYPE_SERVICES_IMPL_V01_ID; }
+
+    /**
+     * Check to make sure that this type id is something a user can create
+     * him/herself directly through an SQL CREATE TABLE statement.
+     * 
+     * This method is used for CREATE TABLE AS ... WITH [NO] DATA binding
+     * because it's possible for the query to return types which are not
+     * actually creatable for a user.  DERBY-2605.
+     *
+     * Three examples are:
+     *
+     *  BOOLEAN: A user can select boolean columns from system tables, but
+     *   s/he is not allowed to create such a column him/herself.
+     *
+     *  JAVA_OBJECT: A user can select columns of various java object types
+     *   from system tables, but s/he is not allowed to create such a column
+     *   him/herself.
+     *  
+     *  DECIMAL: A user can specify a VALUES clause with a constant that
+     *   has a precision of greater than 31.  Derby can apparently handle
+     *   such a value internally, but the user is not supposed to be able
+     *   create such a column him/herself.
+     * 
+     * @return True if the type associated with this DTD can be created via
+     *  the CREATE TABLE syntax; false otherwise.
+     */
+    public boolean isUserCreatableType() throws StandardException
+    {
+        switch (typeId.getJDBCTypeId())
+        {
+            case Types.BOOLEAN:
+            case Types.JAVA_OBJECT:
+            	return false;
+            case Types.DECIMAL:
+                return
+                (getPrecision() <= typeId.getMaximumPrecision()) &&
+                (getScale() <= typeId.getMaximumScale()) &&
+                (getMaximumWidth() <= typeId.getMaximumMaximumWidth());
+            default: break;
+        }
+        return true;
+    }
+
+    /**
+     * Return the SQL type name and, if applicable, scale/precision/length
+     * for this DataTypeDescriptor.  Note that we want the values from *this*
+     * object specifically, not the max values defined on this.typeId.
+     */
+    public String getFullSQLTypeName()
+    {
+        StringBuffer sbuf = new StringBuffer(typeId.getSQLTypeName());
+        if (typeId.isDecimalTypeId() || typeId.isNumericTypeId())
+        {
+            sbuf.append("(");
+            sbuf.append(getPrecision());
+            sbuf.append(", ");
+            sbuf.append(getScale());
+            sbuf.append(")");
+        }
+        else if (typeId.variableLength())
+        {
+            sbuf.append("(");
+            sbuf.append(getMaximumWidth());
+            sbuf.append(")");
+        }
+
+        return sbuf.toString();
+    }
 }
 

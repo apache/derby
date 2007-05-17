@@ -1650,6 +1650,13 @@ Guide.
             </msg>
 
             <msg>
+                <name>42X71</name>
+                <text>Invalid data type '{0}' for column '{1}'.</text>
+                <arg>datatypeName</arg>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
                 <name>42X72</name>
                 <text>No static field '{0}' was found belonging to class '{1}'.  The field might exist, but it is not public and/or static, or the class does not exist or the class is not public.  </text>
                 <arg>fieldName</arg>
