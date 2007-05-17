@@ -181,9 +181,6 @@ public class ClassSizeCrawler
           System.getProperty( "out", WS + "/java/org.apache.derby.iapi.services.cache.ClassSizeCatalog.java");
         try
         {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime( new Date());
-            int year = cal.get( Calendar.YEAR);
             PrintWriter out = new PrintWriter( new FileWriter( outputFileName));
             out.print( "/*\n\n" +
 
