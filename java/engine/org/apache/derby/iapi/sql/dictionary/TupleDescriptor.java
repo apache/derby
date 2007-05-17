@@ -47,29 +47,7 @@ public class TupleDescriptor
 	//
 	//////////////////////////////////////////////////////////////////
 
-	// list types
 
-	public	static	final	int	COLUMN_LIST				= 1;
-	public	static	final	int	CONGLOMERATE_LIST		= 2;
-	public	static	final	int	TRIGGER_LIST			= 3;
-	public	static	final	int	CONSTRAINT_LIST			= 4;
-
-	// generic items
-/*
-	public	static	final	int	INDEX_PROPERTIES		= 1;
-	public	static	final	int	TRIGGER_WHEN_TEXT		= 2;
-	public	static	final	int	TRIGGER_ACTION_TEXT		= 3;
-	public	static	final	int	TRIGGER_COMP_SCHEMA_ID	= 4;
-	public	static	final	int	VIEW_DEPENDENCIES		= 5;
-	public	static	final	int	SOURCE_COLUMN_IDS		= 6;
-	public	static	final	int	UUID_ID					= 7;
-	public	static	final	int	UUID_FLATNAME			= 8;
-	public	static	final	int	UUID_TYPE				= 9;
-	public	static	final	int	UUID_OTHER_ID			= 10;
-	public	static	final	int	EXTERNAL_TYPE			= 11;
-	public	static	final	int	PLUGIN_PRIMARY_KEY		= 12;
-	public	static	final	int	SOURCE_JAR_FILE			= 13;
-*/
 	//////////////////////////////////////////////////////////////////
 	//
 	//	STATE
