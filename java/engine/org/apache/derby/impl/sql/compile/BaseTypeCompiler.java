@@ -93,10 +93,24 @@ abstract class BaseTypeCompiler implements TypeCompiler
 										);
 	}
 
-	/** @see TypeCompiler#generateNull(ExpressionClassBuilder, MethodBuilder, int, String)*/
+    /**
+     * The caller will have pushed a DataValueFactory and a null or a value
+     * of the correct type (interfaceName()). Thus upon entry the
+     * stack looks like on of:
+     * ...,dvf,ref
+     * ...,dvf,null
+     * 
+     * This method then sets up to call the required method
+     * on DataValueFactory using the nullMethodName().
+     * The value left on the stack will be a DataValueDescriptor
+     * of the correct type:
+     * 
+     * ...,dvd
+     * 
+     * @see TypeCompiler#generateNull(ExpressionClassBuilder, MethodBuilder, int)
+     */
 	public void generateNull(ExpressionClassBuilder e,
-			MethodBuilder mb, int collationType, 
-			String className)
+			MethodBuilder mb, int collationType)
 	{
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
 									nullMethodName(),
@@ -104,10 +118,42 @@ abstract class BaseTypeCompiler implements TypeCompiler
 									1);
 	}
 
-	/** @see TypeCompiler#generateDataValue(ExpressionClassBuilder, MethodBuilder, int, String, LocalField) */
-	public void generateDataValue(ExpressionClassBuilder eb,
+    
+    /**
+     * The caller will have pushed a DataValueFactory and  value
+     * of that can be converted to the correct type, e.g. int
+     * for a SQL INTEGER.
+     *  
+     * Thus upon entry the
+     * stack looks like:
+     * ...,dvf,value
+     * 
+     * If field is not null then it is used as the holder
+     * of the generated DataValueDescriptor to avoid object
+     * creations on multiple passes through this code.
+     * The field may contain null or a valid value.
+     * 
+     * This method then sets up to call the required method
+     * on DataValueFactory using the dataValueMethodName().
+     * The value left on the stack will be a DataValueDescriptor
+     * of the correct type:
+     * 
+     * If the field contained a valid value then generated
+     * code will return that value rather than a newly created
+     * object. If field was not-null then the generated code
+     * will set the value of field to be the return from
+     * the DataValueFactory method call. Thus if the field
+     * was empty (set to null) when this code is executed it
+     * will contain the newly generated value, otherwise it
+     * will be reset to the same value.
+     * 
+     * ...,dvd
+     * 
+     * @see TypeCompiler#generateDataValue(ExpressionClassBuilder, MethodBuilder, int, LocalField)
+     */
+    public void generateDataValue(ExpressionClassBuilder eb,
 			MethodBuilder mb, int collationType,
-			String className, LocalField field)
+			LocalField field)
 	{
 		String				interfaceName = interfaceName();
 
@@ -162,12 +208,11 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	 *   what Collator should be associated with the DVD which in turn will 
 	 *   decide whether to generate CollatorSQLcharDVDs or SQLcharDVDs. For 
 	 *   other types of DVDs, this parameter will be ignored.
-	 * @param className name of the base class of the activation's hierarchy
 	 */
-	protected void generateCollationSensitiveDataValue(
+	void generateCollationSensitiveDataValue(
 			ExpressionClassBuilder eb,
 			MethodBuilder mb, 
-			int collationType, String className){		
+			int collationType){		
 		if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
 			return; 
 		//In case of character DVDs, for territory based collation, we need to 

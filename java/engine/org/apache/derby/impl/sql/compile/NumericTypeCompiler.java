@@ -533,7 +533,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 	/** @see TypeCompiler#generateDataValue(ExpressionClassBuilder, MethodBuilder, int, String, LocalField) */
 	public void generateDataValue(ExpressionClassBuilder eb,
 			MethodBuilder mb, int collationType,
-			String className, LocalField field)
+			LocalField field)
 	{
 		if (!JVMInfo.J2ME && getTypeId().isDecimalTypeId())
 		{
@@ -544,7 +544,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			mb.upCast("java.lang.Number");
 		}
 
-		super.generateDataValue(eb, mb, collationType, className, field);
+		super.generateDataValue(eb, mb, collationType, field);
 	}
 
 }

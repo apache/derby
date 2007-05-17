@@ -184,11 +184,10 @@ public interface TypeCompiler
 	 * @param collationType For character DVDs, this will be used to determine
 	 *   what Collator should be associated with the DVD which in turn will 
 	 *   decide whether to generate CollatorSQLcharDVDs or SQLcharDVDs.
-	 * @param className name of the base class of the activation's hierarchy
 	 */
 
 	void generateNull(ExpressionClassBuilder eb,
-			MethodBuilder mb, int collationType, String className);
+			MethodBuilder mb, int collationType);
 
 
 	/**
@@ -209,13 +208,12 @@ public interface TypeCompiler
 	 *   what Collator should be associated with the DVD which in turn will 
 	 *   decide whether to generate CollatorSQLcharDVDs or SQLcharDVDs. For 
 	 *   other types of DVDs, this parameter will be ignored.
-	 * @param className name of the base class of the activation's hierarchy
 	 * @param field LocalField
 	 */
 	void generateDataValue(
 			ExpressionClassBuilder eb,
 			MethodBuilder mb, int collationType, 
-			String className, LocalField field);
+			LocalField field);
 
 	/**
 	 * Return the maximum width for this data type when cast to a char type.
