@@ -385,6 +385,13 @@ public class CastNode extends ValueNode
 		destCTI = castTarget.getTypeId();
 		sourceCTI = castOperand.getTypeId();
 
+		//If we are dealing with result type of cast to be string data type, 
+		//then that data type should get it's collation type from the 
+		//current schema. That is what we are doing below 
+		if (destCTI.isStringTypeId()) {
+			getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema().getCollationType());
+		}
 		/* 
 		** If it is a java cast, do some work to make sure
 		** the classes are ok and that they are compatible

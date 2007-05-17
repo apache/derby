@@ -38,6 +38,27 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class CollationTest extends BaseJDBCTestCase {
 
+	/*
+	 * ToDo test cases
+	 * 1)Use a parameter as cast operand and cast that to character type. The
+	 * resultant type should get it's collation from the compilation schema
+	 * 2)Test conditional if (NULLIF and CASE) with different datatypes to see
+	 * how casting works. The compile node for this SQL construct seems to be
+	 * dealing with lot of casting code (ConditionalNode)
+	 * 3)When doing concatenation testing, check what happens if concatantion
+	 * is between non-char types. This is because ConcatenationOperatorNode
+	 * in compile package has following comment "If either the left or right 
+	 * operands are non-string, non-bit types, then we generate an implicit 
+	 * cast to VARCHAR."
+	 * 4)Do testing with upper and lower
+	 * 5)It looks like node for LIKE ESCAPE which is LikeEscapeOperatorNode
+	 * also uses quite a bit of casting. Should include test for LIKE ESCAPE
+	 * which will trigger the casting.
+	 * 6)Binary arithmetic operators do casting if one of the operands is
+	 * string and other is numeric. Test that combination
+	 * 7)Looks like import utility does casting (in ColumnInfo class). See
+	 * if any testing is required for that.
+	 */
     public CollationTest(String name) {
         super(name);
     }
@@ -106,6 +127,20 @@ public void testDefaultCollation() throws SQLException {
       checkLangBasedQuery(s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ",
       		new String[][] {{"0","Smith"}, {"4","Acorn"} });   
 
+      s.executeUpdate("set schema APP");
+      //Following sql will not fail in a database which uses UCS_BASIC for
+      //user schemas. Since the collation of user schemas match that of system
+      //schema, the following comparison will not fail. It will fail in a 
+      //database with territory based collation for user schemas. 
+      checkLangBasedQuery(s, "SELECT 1 FROM SYS.SYSTABLES WHERE " +
+      		" TABLENAME = 'CUSTOMER' ",
+      		new String[][] {{"1"} });    
+      //Using cast for persistent character column from system table in the
+      //query above won't affect the above sql in any ways. 
+      checkLangBasedQuery(s, "SELECT 1 FROM SYS.SYSTABLES WHERE CAST " +
+      		" (TABLENAME AS CHAR(15)) = 'CUSTOMER' ",
+      		new String[][] {{"1"} });   
+
       s.close();
       conn.commit();
 
@@ -167,6 +202,26 @@ public void testPolishCollation() throws SQLException {
       s.executeUpdate("set schema SYS");
       assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
 
+      s.executeUpdate("set schema APP");
+      //Following sql will fail because the compilation schema is user schema
+      //and hence the character constant "CUSTOMER" will pickup the collation
+      //of user schema, which is territory based for this database. But the
+      //persistent character columns from sys schema, which is TABLENAME in
+      //following query will have the UCS_BASIC collation. Since the 2 
+      //collation types don't match, the following comparison will fail
+      assertStatementError("42818", s, "SELECT 1 FROM SYS.SYSTABLES WHERE " +
+      		" TABLENAME = 'CUSTOMER' ");   
+      //To get around the problem in the query above, use cast for persistent 
+      //character column from system table and then compare it against a 
+      //character constant. Do this when the compilation schema is a user 
+      //schema and not system schema. This will ensure that the result 
+      //of the casting will pick up the collation of the user schema. And 
+      //constant character string will also pick up the collation of user 
+      //schema and hence the comparison between the 2 will not fail
+      checkLangBasedQuery(s, "SELECT 1 FROM SYS.SYSTABLES WHERE CAST " +
+      		" (TABLENAME AS CHAR(15)) = 'CUSTOMER' ",
+      		new String[][] {{"1"} });   
+
       s.close();
       conn.commit();
 
@@ -226,6 +281,26 @@ public void testNorwayCollation() throws SQLException {
       //COLUMN AND CHARACTER CONSTANT WILL FAIL IN SYSTEM SCHEMA.
       s.executeUpdate("set schema SYS");
       assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
+
+      s.executeUpdate("set schema APP");
+      //Following sql will fail because the compilation schema is user schema
+      //and hence the character constant "CUSTOMER" will pickup the collation
+      //of user schema, which is territory based for this database. But the
+      //persistent character columns from sys schema, which is TABLENAME in
+      //following query will have the UCS_BASIC collation. Since the 2 
+      //collation types don't match, the following comparison will fail
+      assertStatementError("42818", s, "SELECT 1 FROM SYS.SYSTABLES WHERE " +
+      		" TABLENAME = 'CUSTOMER' ");   
+      //To get around the problem in the query above, use cast for persistent 
+      //character column from system table and then compare it against a 
+      //character constant. Do this when the compilation schema is a user 
+      //schema and not system schema. This will ensure that the result 
+      //of the casting will pick up the collation of the user schema. And 
+      //constant character string will also pick up the collation of user 
+      //schema and hence the comparison between the 2 will not fail
+      checkLangBasedQuery(s, "SELECT 1 FROM SYS.SYSTABLES WHERE CAST " +
+      		" (TABLENAME AS CHAR(15)) = 'CUSTOMER' ",
+      		new String[][] {{"1"} });   
 
       s.close();
       conn.commit();
@@ -289,6 +364,26 @@ public void testEnglishCollation() throws SQLException {
       //COLUMN AND CHARACTER CONSTANT WILL FAIL IN SYSTEM SCHEMA.
       s.executeUpdate("set schema SYS");
       assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
+
+      s.executeUpdate("set schema APP");
+      //Following sql will fail because the compilation schema is user schema
+      //and hence the character constant "CUSTOMER" will pickup the collation
+      //of user schema, which is territory based for this database. But the
+      //persistent character columns from sys schema, which is TABLENAME in
+      //following query will have the UCS_BASIC collation. Since the 2 
+      //collation types don't match, the following comparison will fail
+      assertStatementError("42818", s, "SELECT 1 FROM SYS.SYSTABLES WHERE " +
+      		" TABLENAME = 'CUSTOMER' ");   
+      //To get around the problem in the query above, use cast for persistent 
+      //character column from system table and then compare it against a 
+      //character constant. Do this when the compilation schema is a user 
+      //schema and not system schema. This will ensure that the result 
+      //of the casting will pick up the collation of the user schema. And 
+      //constant character string will also pick up the collation of user 
+      //schema and hence the comparison between the 2 will not fail
+      checkLangBasedQuery(s, "SELECT 1 FROM SYS.SYSTABLES WHERE CAST " +
+      		" (TABLENAME AS CHAR(15)) = 'CUSTOMER' ",
+      		new String[][] {{"1"} });   
       
       s.close();
       conn.commit();
