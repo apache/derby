@@ -4944,17 +4944,14 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
-	 * Drops the given ConstraintDescriptor that is associated
-	 * with the given table and constraint type from the data dictionary.
+	 * Drops the given ConstraintDescriptor from the data dictionary.
 	 *
-	 * @param table	The table from which to drop the
-	 *			constraint descriptor
 	 * @param descriptor	The descriptor to drop
 	 * @param tc			The TransactionController
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void	dropConstraintDescriptor(TableDescriptor table,
+	public void	dropConstraintDescriptor(
 			ConstraintDescriptor descriptor,
 			TransactionController tc)
 		throws StandardException
@@ -5015,7 +5012,7 @@ public final class	DataDictionaryImpl
 		for (Iterator iterator = cdl.iterator(); iterator.hasNext(); )
 		{
 			ConstraintDescriptor cd = (ConstraintDescriptor) iterator.next();
-			dropConstraintDescriptor(table, cd, tc);
+			dropConstraintDescriptor(cd, tc);
 		}
 
 		/*
@@ -8223,7 +8220,7 @@ public final class	DataDictionaryImpl
 				//record the new timestamp
 				if (timeNow > timeForLastSystemSQLName) {
 					systemSQLNameNumber = 0;
-					calendarForLastSystemSQLName.setTime(new Date(timeNow));
+					calendarForLastSystemSQLName.setTimeInMillis(timeNow);
 					timeForLastSystemSQLName = timeNow;
 				} else { 
 					//the request has come at the same time as the last generated name request
@@ -8237,7 +8234,7 @@ public final class	DataDictionaryImpl
 						systemSQLNameNumber = 0;
 						timeForLastSystemSQLName = timeForLastSystemSQLName + 10L;
 						//increment the timestamp for system generated names by 10ms
-            calendarForLastSystemSQLName.setTime(new Date(timeForLastSystemSQLName));
+                        calendarForLastSystemSQLName.setTimeInMillis(timeForLastSystemSQLName);
 					}
 				}
 

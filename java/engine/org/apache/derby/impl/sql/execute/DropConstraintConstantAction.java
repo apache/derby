@@ -227,7 +227,7 @@ public class DropConstraintConstantAction extends ConstraintConstantAction
 		** be repeatedly changing the reference count of the referenced
 		** key and generating unnecessary I/O.
 		*/
-		dropConstraintAndIndex(dm, td, dd, conDesc, tc, lcc, !cascadeOnRefKey);
+        conDesc.drop(lcc, !cascadeOnRefKey);
 
 		if (cascadeOnRefKey) 
 		{
@@ -243,8 +243,7 @@ public class DropConstraintConstantAction extends ConstraintConstantAction
 			{
 				fkcd = (ForeignKeyConstraintDescriptor) cdl.elementAt(index);
 				dm.invalidateFor(fkcd, DependencyManager.DROP_CONSTRAINT, lcc);
-				dropConstraintAndIndex(dm, fkcd.getTableDescriptor(), dd, fkcd,
-								tc, lcc, true);
+				fkcd.drop(lcc, true);
 			}
 	
 			/*
@@ -255,72 +254,5 @@ public class DropConstraintConstantAction extends ConstraintConstantAction
 			dm.invalidateFor(conDesc, DependencyManager.DROP_CONSTRAINT, lcc);
 			dm.clearDependencies(lcc, conDesc);
 		}
-	}
-
-	/*
-	 * Drop the constraint.  Clears dependencies, drops 
-	 * the backing index and removes the constraint
-	 * from the list on the table descriptor.  Does NOT
-	 * do an dm.invalidateFor()
-	 */
-	public static void dropConstraintAndIndex(DependencyManager	dm,
-								TableDescriptor 		td,
-								DataDictionary 			dd,
-								ConstraintDescriptor 	conDesc,
-								TransactionController 	tc,
-								LanguageConnectionContext lcc,
-								boolean					clearDependencies)
-		throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(tc != null, "tc is null");
-			SanityManager.ASSERT(td != null, "td is null");
-		}
-
-		if (clearDependencies)
-		{
-			dm.clearDependencies(lcc, conDesc);
-		}
-
-		/* Drop the constraint.
-		 * NOTE: This must occur before dropping any backing index, since
-		 * a user is not allowed to drop a backing index without dropping
-		 * the constraint.
-		 */
-		dd.dropConstraintDescriptor(td, conDesc, tc);
-
-		/* Drop the index, if there's one for this constraint.
-		 * NOTE: There will always be an indexAction. We don't
-		 * force the constraint to exist at bind time, so we always
-		 * generate one.
-		 */
-		if (conDesc.hasBackingIndex())
-		{
-			ConglomerateDescriptor[] conglomDescs;
-
-			// it may have duplicates, and we drop a backing index
-			// Bug 4307
-			// We need to get the conglomerate descriptors from the 
-			// dd in case we dropped other constraints in a cascade operation. 
-			conglomDescs = dd.getConglomerateDescriptors(
-							conDesc.getConglomerateId());
-
-			if (conglomDescs.length != 0)
-			{
-				for (int i = 0; i < conglomDescs.length; i++)
-				{
-					if (conglomDescs[i].isConstraint())
-					{
-						DropIndexConstantAction.dropIndex(dm, dd, tc,
-													conglomDescs[i], td, 
-													lcc);
-						break;
-					}
-				}
-			}
-		}
-
-		td.removeConstraintDescriptor(conDesc);
 	}
 }

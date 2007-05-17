@@ -35,8 +35,7 @@ import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import	org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.impl.sql.execute.DropConstraintConstantAction;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
  * This class is used to get information from a ConstraintDescriptor.
@@ -607,13 +606,7 @@ public abstract class ConstraintDescriptor
 			//depend on a privilege. None of the other constraint types 
 			//can be dependent on a privilege becuse those constraint types
 			//can not reference a table/routine.
-			DropConstraintConstantAction.dropConstraintAndIndex(
-					getDataDictionary().getDependencyManager(),
-					table,
-					getDataDictionary(),
-					this,
-					lcc.getTransactionExecute(),
-					lcc, true);
+			drop(lcc, true);
 			return;
 		}
 
@@ -642,6 +635,69 @@ public abstract class ConstraintDescriptor
 			}
 		}
 	}
+    
+    /**
+     * Drop the constraint.  Clears dependencies, drops 
+     * the backing index and removes the constraint
+     * from the list on the table descriptor.  Does NOT
+     * do an dm.invalidateFor()
+     */
+    public void drop(LanguageConnectionContext lcc,
+            boolean clearDependencies)
+        throws StandardException
+    {       
+        DataDictionary dd = getDataDictionary();
+        DependencyManager dm = dd.getDependencyManager();
+        TransactionController tc = lcc.getTransactionExecute();
+
+        if (clearDependencies)
+        {
+            dm.clearDependencies(lcc, this);
+        }
+
+        /* Drop the constraint.
+         * NOTE: This must occur before dropping any backing index, since
+         * a user is not allowed to drop a backing index without dropping
+         * the constraint.
+         */
+        dd.dropConstraintDescriptor(this, tc);
+
+        /* Drop the index, if there's one for this constraint.
+         * NOTE: There will always be an indexAction. We don't
+         * force the constraint to exist at bind time, so we always
+         * generate one.
+         */
+        if (hasBackingIndex())
+        {
+
+            // it may have duplicates, and we drop a backing index
+            // Bug 4307
+            // We need to get the conglomerate descriptors from the 
+            // dd in case we dropped other constraints in a cascade operation. 
+             ConglomerateDescriptor[]conglomDescs =
+                 dd.getConglomerateDescriptors(getConglomerateId());
+
+            if (conglomDescs.length != 0)
+            {
+                // Typically there is only one ConglomerateDescriptor
+                // for a given UUID, but due to an old bug
+                // there may be more than one. If there is more
+                // than one then which one is remvoed does not
+                // matter since they will all have the same critical
+                // information since they point to the same physical index.
+                for (int i = 0; i < conglomDescs.length; i++)
+                {
+                    if (conglomDescs[i].isConstraint())
+                    {
+                        conglomDescs[i].drop(lcc, table);
+                        break;
+                    }
+                }
+            }
+        }
+
+        table.removeConstraintDescriptor(this);
+    }
 	
 	/** @see TupleDescriptor#getDescriptorName */
 	public String getDescriptorName() { return constraintName; }

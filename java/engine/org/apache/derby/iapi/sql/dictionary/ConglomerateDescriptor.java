@@ -342,6 +342,16 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 	/** @see TupleDescriptor#getDescriptorName */
 	public String getDescriptorName() { return name; }
     
+    /**
+     * Drop this ConglomerateDescriptor when it represents
+     * an index. If this is the last desciptor for
+     * a physical index then the physical index (conglomerate)
+     * and its descriptor will be dropped.
+     * 
+     * @param lcc
+     * @param td
+     * @throws StandardException
+     */
 	public void drop(LanguageConnectionContext lcc,
 	        TableDescriptor td)
 	throws StandardException

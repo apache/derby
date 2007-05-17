@@ -836,7 +836,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			{
 				if ((cd instanceof CheckConstraintDescriptor) && changed)
 				{
-					dd.dropConstraintDescriptor(td, cd, tc);
+					dd.dropConstraintDescriptor(cd, tc);
 					for (j = 0; j < numRefCols; j++)
 					{
 						if (referencedColumns[j] > droppedColumnPosition)
@@ -870,8 +870,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			// drop now in all other cases
 			dm.invalidateFor(cd, DependencyManager.DROP_CONSTRAINT,
 									lcc);
-			DropConstraintConstantAction.dropConstraintAndIndex(dm, td, dd,
-							 cd, tc, lcc, true);
+            cd.drop(lcc, true);
 
 			activation.addWarning(
                 StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
@@ -881,8 +880,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		for (int i = tbr_size - 1; i >= 0; i--)
 		{
 			ConstraintDescriptor cd = toBeRemoved[i];
-			DropConstraintConstantAction.dropConstraintAndIndex(
-                dm, td, dd, cd, tc, lcc, false);
+			cd.drop(lcc, false);
 
 			activation.addWarning(
                 StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
@@ -900,8 +898,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									DependencyManager.DROP_CONSTRAINT,
 									lcc);
 
-					DropConstraintConstantAction.dropConstraintAndIndex(
-						dm, fkcd.getTableDescriptor(), dd, fkcd, tc, lcc, true);
+                    fkcd.drop(lcc, true);
 
 					activation.addWarning(
                         StandardException.newWarning(

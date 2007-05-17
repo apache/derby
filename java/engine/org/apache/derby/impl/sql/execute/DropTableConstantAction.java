@@ -312,8 +312,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 			}
 
 			dm.invalidateFor(cd, DependencyManager.DROP_CONSTRAINT, lcc);
-			DropConstraintConstantAction.dropConstraintAndIndex(dm, td, dd, cd, 
-						tc, lcc, true);
+			cd.drop(lcc, true);
 		}
 
 		/*
@@ -344,8 +343,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 			** Pass in false to dropConstraintsAndIndex so it
 			** doesn't clear dependencies, we'll do that ourselves.
 			*/
-			DropConstraintConstantAction.dropConstraintAndIndex(dm, td, dd, cd, 
-						tc, lcc, false);
+			cd.drop(lcc, false);
 
 			/*
 			** If we are going to cascade, get all the
@@ -368,9 +366,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 				{
 					fkcd = (ConstraintDescriptor) fkcdl.elementAt(inner);
 					dm.invalidateFor(fkcd, DependencyManager.DROP_CONSTRAINT, lcc);
-					DropConstraintConstantAction.dropConstraintAndIndex(
-							dm, fkcd.getTableDescriptor(), dd, fkcd,
-							tc, lcc, true);
+					fkcd.drop(lcc, true);
 					activation.addWarning(
 						StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
  							fkcd.getConstraintName(),

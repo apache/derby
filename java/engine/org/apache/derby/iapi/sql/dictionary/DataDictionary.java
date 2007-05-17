@@ -808,8 +808,7 @@ public interface DataDictionary
 						throws StandardException;
 
 	/**
-	 * Drops the given ConstraintDescriptor that is associated
-	 * with the given table and constraint type from the data dictionary.
+	 * Drops the given ConstraintDescriptor from the data dictionary.
 	 *
 	 * NOTE: Caller is responsible for dropping any backing index
 	 *
@@ -820,7 +819,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void	dropConstraintDescriptor(TableDescriptor table,
+	public void	dropConstraintDescriptor(
 			ConstraintDescriptor descriptor,
 			TransactionController tc)
 						throws StandardException;

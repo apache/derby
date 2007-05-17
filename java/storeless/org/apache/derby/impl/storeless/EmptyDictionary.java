@@ -320,8 +320,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	}
 
-	public void dropConstraintDescriptor(TableDescriptor table,
-			ConstraintDescriptor descriptor, TransactionController tc)
+	public void dropConstraintDescriptor(
+            ConstraintDescriptor descriptor, TransactionController tc)
 			throws StandardException {
 		// TODO Auto-generated method stub
 

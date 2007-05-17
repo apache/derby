@@ -173,45 +173,4 @@ class DropIndexConstantAction extends IndexConstantAction
 
 		cd.drop(lcc, td);
 	}
-
-	public static void dropIndex(DependencyManager 	dm,
-							DataDictionary			dd,
-							TransactionController	tc,
-							ConglomerateDescriptor	cd,
-							TableDescriptor			td,
-							LanguageConnectionContext lcc)
-		throws StandardException
-	{	
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(tc != null, "tc is null");
-			SanityManager.ASSERT(cd != null, "cd is null");
-		}
-
-		// only drop the conglomerate if no similar index but with different
-		// name. Get from dd in case we drop other dup indexes with a cascade operation
-
-		if (dd.getConglomerateDescriptors(cd.getConglomerateNumber()).length == 1)
-		{
-			/* Drop statistics */
-			dd.dropStatisticsDescriptors(td.getUUID(), cd.getUUID(), tc);
-
-			/* Drop the conglomerate */
-			tc.dropConglomerate(cd.getConglomerateNumber());
-		}
-
-		// invalidate any prepared statements that
-		// depended on the index (including this one)
-		dm.invalidateFor(cd, DependencyManager.DROP_INDEX, lcc);
-
-		/* Drop the conglomerate descriptor */
-		dd.dropConglomerateDescriptor(cd, tc);
-
-		/* 
-		** Remove the conglomerate descriptor from the list hanging off of the
-		** table descriptor
-		*/
-		td.removeConglomerateDescriptor(cd);
-	}
-
 }

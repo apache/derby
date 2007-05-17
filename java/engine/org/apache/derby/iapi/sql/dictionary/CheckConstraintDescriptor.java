@@ -22,8 +22,11 @@
 package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.catalog.ReferencedColumns;
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
  * This class represents a check constraint descriptor.
@@ -31,8 +34,8 @@ import org.apache.derby.iapi.sql.StatementType;
  */
 public class CheckConstraintDescriptor extends ConstraintDescriptor
 {
-	ReferencedColumns	referencedColumns;
-	String						constraintText;
+	private ReferencedColumns	referencedColumns;
+	private String						constraintText;
 
 	CheckConstraintDescriptor(
 		    DataDictionary dataDictionary,
@@ -159,7 +162,7 @@ public class CheckConstraintDescriptor extends ConstraintDescriptor
 	
 		// if update, only relevant if columns intersect
 		return doColumnsIntersect(modifiedCols, getReferencedColumns());
-	}
+	}   
 
 	/**
 	 * Convert the CheckConstraintDescriptor to a String.
