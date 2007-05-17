@@ -75,7 +75,7 @@ public class _Suite extends BaseTestCase {
     /**
      * The saved location in svn at apache for older releases for testing
      */
-    public static final String OLD_JAR_URL =
+    static final String OLD_JAR_URL =
         "https://svn.apache.org/repos/asf/db/derby/jars";
     
     /**
@@ -90,6 +90,18 @@ public class _Suite extends BaseTestCase {
      * 
      * If the property is set, but ${derbyTesting.oldReleasePath}/M.m.f.p does not exist
      * for a specific release then those sets of tests will be skipped.
+     * 
+     * One can also set derbyTesting.oldReleasePath to a checked out
+     * version of the jars from the Apache svn repo. E.g.
+     * 
+     * cd $HOME
+     * mkdir derby_upgrade
+     * cd derby_upgrade
+     * svn co https://svn.apache.org/repos/asf/db/derby/jars
+     * 
+     * Then set derbyTesting.oldReleasePath as:
+     *   -DderbyTesting.oldReleasePath=$HOME/derby_upgrade/jars
+     * when running tests.
      */
     private static final int[][] OLD_VERSIONS =
     {
