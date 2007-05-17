@@ -34,6 +34,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.client.ClientXid;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -174,12 +175,11 @@ public class XATransactionTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        Test test;
-        TestSuite suite = new TestSuite("XATransactionTest");
+        // the test requires XADataSource to run
+        if (JDBC.vmSupportsJDBC3()) {
+            return TestConfiguration.defaultSuite(XATransactionTest.class);
+        }
 
-        test = TestConfiguration.defaultSuite(XATransactionTest.class);
-        suite.addTest(test);
-
-        return suite;
+        return new TestSuite("XATransactionTest cannot run without XA support");
     }
 }

@@ -74,7 +74,6 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(ClosedObjectTest.suite());
 		suite.addTest(SetTransactionIsolationTest.suite());
 		suite.addTest(AuthenticationTest.suite());
-		suite.addTest(XATransactionTest.suite());
 		suite.addTest(DriverTest.suite());
         
         // Old harness .java tests that run using the HarnessJavaTest
@@ -102,6 +101,7 @@ public class _Suite extends BaseTestCase  {
             // Tests uses JDBC 3.0 datasources
             suite.addTest(PoolDSAuthenticationTest.suite());
             suite.addTest(XADSAuthenticationTest.suite());
+            suite.addTest(XATransactionTest.suite());
 
             // Test uses JDBC 3.0 datasources, and javax.naming.Reference etc.
             suite.addTest(DataSourceReferenceTest.suite());
