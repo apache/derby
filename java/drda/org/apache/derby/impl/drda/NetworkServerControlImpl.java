@@ -575,6 +575,7 @@ public final class NetworkServerControlImpl {
 	{
 		DRDAServerStarter starter = new DRDAServerStarter();
 		starter.setStartInfo(hostAddress,portNumber,consoleWriter);
+        this.setLogWriter(consoleWriter);
 		startNetworkServer();
 		starter.boot(false,null);
 	}
@@ -855,6 +856,7 @@ public final class NetworkServerControlImpl {
 
 				}
 				catch (Exception e) {
+                    this.consoleExceptionPrintTrace(e);
 					consolePropertyMessage("DRDA_LoadException.S", e.getMessage());
 				}
 				cleanupOnStart = true;
