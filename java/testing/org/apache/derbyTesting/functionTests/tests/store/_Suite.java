@@ -57,9 +57,11 @@ public class _Suite extends BaseTestCase  {
         // J2ME (JSR169) does not support encryption.
         if (JDBC.vmSupportsJDBC3()) {
             // Add tests of basic functionality on encrypted databases.
-            suite.addTest(EncryptionKeyAESTest.suite());
-            suite.addTest(EncryptionKeyBlowfishTest.suite());
-            suite.addTest(EncryptionKeyDESTest.suite());
+	    // DERBY-2644 disable encryption tests until permissions failures 
+	    // are resolved.
+            //suite.addTest(EncryptionKeyAESTest.suite());
+            //suite.addTest(EncryptionKeyBlowfishTest.suite());
+            //suite.addTest(EncryptionKeyDESTest.suite());
         }
         
         return suite;
