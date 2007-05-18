@@ -72,10 +72,10 @@ public class AllPackages extends BaseTestCase {
         // directories(packages)
         suite.addTest(org.apache.derbyTesting.unitTests.junit._Suite.suite());
         
-        // Add the upgrade tests, though will only run tests if the
-        // System property derbyTesting.oldReleasePath is set
-        // to point at old releases. See upgradeTests._Suite
-        // for more information.
+        // Add the upgrade tests,See upgradeTests._Suite
+        // for more information on how the old jars are
+        // located. If the system property derbyTesting.oldReleasePath
+        // is not set then the jars will be loaded from the Apache SVN repo.
         suite.addTest(
            org.apache.derbyTesting.functionTests.tests.upgradeTests._Suite.suite());
 
