@@ -130,7 +130,20 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 
 				try {
 					// SECURITY PERMISSION - OP2b
-					home.mkdirs();
+                    // Attempt to create just the folder initially
+                    // which does not require read permission on
+                    // the parent folder. This is to allow a policy
+                    // file to limit file permissions for derby.jar
+                    // to be contained under derby.system.home.
+                    // If the folder cannot be created that way
+                    // due to missing parent folder(s) 
+                    // then mkdir() will return false and thus
+                    // mkdirs will be called to create the
+                    // intermediate folders. This use of mkdir()
+                    // and mkdirs() retains existing (pre10.3) behaviour
+                    // but avoids requiring read permission on the parent
+                    // directory if it exists.
+					boolean created = home.mkdir() || home.mkdirs();
 				} catch (SecurityException se) {
 					return false;
 				}
