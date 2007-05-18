@@ -299,7 +299,7 @@ public class T_ConsistencyChecker
 				    TransactionController.ISOLATION_SERIALIZABLE);
 
 		/* Get a row template for the base table */
-		baseRow = ec.getExecutionFactory().getValueRow(td.getNumberOfColumns());
+		baseRow = lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(td.getNumberOfColumns());
 
 		/* Fill the row with nulls of the correct type */
 		ColumnDescriptorList cdl = td.getColumnDescriptorList();
@@ -375,7 +375,7 @@ public class T_ConsistencyChecker
 		}
 
 		/* Get a row template */
-		indexScanTemplate = ec.getExecutionFactory().getValueRow(baseColumns + 1);
+		indexScanTemplate = lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(baseColumns + 1);
 
 		/* Fill the row with nulls of the correct type */
 		for (int column = 0; column < baseColumns; column++)

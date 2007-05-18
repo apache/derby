@@ -79,14 +79,8 @@ import org.apache.derby.iapi.util.ReuseFactory;
 public abstract class BaseActivation implements CursorActivation, GeneratedByteCode
 
 {
-
-	protected ResultSetFactory rsFactory;
-	protected ExecutionFactory exFactory;
-	protected	DataValueFactory			dvFactory;
-	protected	LanguageConnectionContext	lcc;
+	private	LanguageConnectionContext	lcc;
 	protected ContextManager			cm;
-	protected /*private*/ ExecutionContext			ec;
-
 
 	protected ExecPreparedStatement preStmt;
 	protected ResultSet resultSet;
@@ -182,29 +176,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 			if (lcc == null)
 				SanityManager.THROWASSERT("lcc is null in activation type " + getClass());
 		}
-
-		dvFactory = lcc.getDataValueFactory();
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(dvFactory != null,
-								 "No data value factory in getDataValueFactory");
-		}
-
-		ec = lcc.getExecutionContext();
-
-		// look for the execution context and
-		// get our result set factory from it.
-		rsFactory = ec.getResultSetFactory();
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(rsFactory!=null, "Unable to find ResultSetFactory");
-		}
-
-		exFactory = ec.getExecutionFactory();
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(exFactory!=null, "Unable to find ExecutionFactory");
-		}		
 
 		// mark in use
 		inUse = true;
@@ -595,15 +566,16 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		Used in the execute method of activations for
 		generating the result sets that they concatenate together.
 	 */
-	public ResultSetFactory getResultSetFactory() {
-		return rsFactory;
+	public final ResultSetFactory getResultSetFactory() {
+		return getExecutionFactory().getResultSetFactory();
 	}
 
 	/**
 		Used in activations for generating rows.
 	 */
-	public ExecutionFactory getExecutionFactory() {
-		return exFactory;
+	public final ExecutionFactory getExecutionFactory() {
+		return getLanguageConnectionContext().
+            getLanguageConnectionFactory().getExecutionFactory();
 	}
 
 
@@ -1593,14 +1565,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	}
 			
 	/**
-	 * Get the ExecutionContext.
-	 */
-	ExecutionContext getExecutionContext()
-	{
-		return ec;
-	}
-
-	/**
 	 * Get the Current ContextManager.
 	 *
 	 * @return Current ContextManager
@@ -1616,7 +1580,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 */
 	public DataValueFactory getDataValueFactory()
 	{
-		return dvFactory;
+		return getLanguageConnectionContext().getDataValueFactory();
 	}
 
 	/**
@@ -1627,7 +1591,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	public Connection getCurrentConnection() throws SQLException {
 
 		ConnectionContext cc = 
-			(ConnectionContext) cm.getContext(ConnectionContext.CONTEXT_ID);
+			(ConnectionContext) getContextManager().getContext(ConnectionContext.CONTEXT_ID);
 
 		return cc.getNestedConnection(true);
 	}	

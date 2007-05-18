@@ -66,14 +66,6 @@ public interface ExecutionContext extends Context {
 	};
 
 	/**
-	 * Get the ResultSetFactory from this ExecutionContext.
-	 *
-	 * @return	The result set factory associated with this
-	 *		ExecutionContext
-	 */
-	ResultSetFactory getResultSetFactory();
-
-	/**
 	 * Get the ResultSetStatisticsFactory from this ExecutionContext.
 	 *
 	 * @return	The result set statistics factory associated with this

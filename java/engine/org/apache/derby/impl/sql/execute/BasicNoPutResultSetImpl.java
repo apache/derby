@@ -966,7 +966,7 @@ implements NoPutResultSet
 
 			if (compactRow == null)
 			{
-				ExecutionFactory ex = lcc.getExecutionContext().getExecutionFactory();
+				ExecutionFactory ex = lcc.getLanguageConnectionFactory().getExecutionFactory();
 
 				if (isKeyed)
 				{

@@ -25,9 +25,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.impl.jdbc.Util;
 
 /**
  * Additional methods the embedded engine exposes on its Connection object

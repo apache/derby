@@ -361,12 +361,11 @@ abstract class DMLStatementNode extends StatementNode
 
 	public ResultDescription makeResultDescription()
 	{
-		ExecutionContext ec = (ExecutionContext) getContextManager().getContext(
-			ExecutionContext.CONTEXT_ID);
-	    ResultColumnDescriptor[] colDescs = resultSet.makeResultDescriptors(ec);
+	    ResultColumnDescriptor[] colDescs = resultSet.makeResultDescriptors();
 		String statementType = statementToString();
 
-	    return ec.getExecutionFactory().getResultDescription(colDescs, statementType );
+	    return getExecutionFactory().getResultDescription(
+                           colDescs, statementType );
 	}
 
 	/**

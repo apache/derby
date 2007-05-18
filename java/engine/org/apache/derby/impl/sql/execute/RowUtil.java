@@ -52,10 +52,7 @@ public class RowUtil
 	  */
 	public static ExecRow getEmptyValueRow(int columnCount, LanguageConnectionContext lcc)
 	{
-		ExecutionContext	ec;
-
-		ec = lcc.getExecutionContext();
-		return ec.getExecutionFactory().getValueRow(columnCount);
+		return lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(columnCount);
 	}
 
  	/**

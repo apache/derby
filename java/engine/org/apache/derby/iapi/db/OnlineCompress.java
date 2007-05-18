@@ -301,7 +301,7 @@ public class OnlineCompress
 
 			/* Get a row template for the base table */
 			ExecRow baseRow = 
-                lcc.getExecutionContext().getExecutionFactory().getValueRow(
+                lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(
                     td.getNumberOfColumns());
 
 

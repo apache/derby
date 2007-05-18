@@ -21,24 +21,16 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.iapi.sql.execute.ResultSetFactory;
-import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
+import java.util.Properties;
 
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import java.util.Properties;
-import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
 /**
  * ExecutionContext stores the result set factory to be used by
  * the current connection, and manages execution-level connection
@@ -55,30 +47,12 @@ class GenericExecutionContext
 	//
 	// class implementation
 	//
-	private ResultSetFactory rsFactory;
 	private ResultSetStatisticsFactory rssFactory;
 	private ExecutionFactory execFactory;
 
 	//
 	// ExecutionContext interface
 	//
-	/**
-	 * Get the ResultSetFactory from this ExecutionContext.
-	 *
-	 * @return	The result set factory associated with this
-	 *		ExecutionContext
-	 */
-	public ResultSetFactory getResultSetFactory() 
-	{
-		/* null rsFactory may have been passed to
-		 * constructor in order to speed up boot time.
-		 */
-		if (rsFactory == null)
-		{
-			rsFactory = execFactory.getResultSetFactory();
-		}
-		return rsFactory;
-	}
 
 	/**
 	 * Get the ResultSetStatisticsFactory from this ExecutionContext.
@@ -136,13 +110,11 @@ class GenericExecutionContext
 	// class interface
 	//
 	GenericExecutionContext(
-		    ResultSetFactory rsf,
 			ContextManager cm,
 			ExecutionFactory ef)
 	{
 
 		super(cm, ExecutionContext.CONTEXT_ID);
-		rsFactory = rsf;
 		execFactory = ef;
 	}
 

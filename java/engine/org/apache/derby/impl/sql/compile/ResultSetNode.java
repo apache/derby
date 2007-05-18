@@ -910,9 +910,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 		return modifyAccessPaths();
 	}
 
-	ResultColumnDescriptor[] makeResultDescriptors(ExecutionContext ec)
+	ResultColumnDescriptor[] makeResultDescriptors()
 	{
-	    return resultColumns.makeResultDescriptors(ec);
+	    return resultColumns.makeResultDescriptors();
 	}
 
 	/*
@@ -1274,11 +1274,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 	public ResultDescription makeResultDescription()
 	{
-		ExecutionContext ec = (ExecutionContext) getContextManager().getContext(
-			ExecutionContext.CONTEXT_ID);
-	    ResultColumnDescriptor[] colDescs = makeResultDescriptors(ec);
+	    ResultColumnDescriptor[] colDescs = makeResultDescriptors();
 
-	    return ec.getExecutionFactory().getResultDescription(colDescs, null );
+	    return getExecutionFactory().getResultDescription(colDescs, null);
 	}
 
 	/**

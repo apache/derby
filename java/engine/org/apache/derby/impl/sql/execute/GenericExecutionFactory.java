@@ -159,7 +159,6 @@ public class GenericExecutionFactory
 		 * at boot time.)
 		 */
 		return new GenericExecutionContext(
-							(ResultSetFactory) null,
 							cm, this);
 	}
 

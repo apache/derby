@@ -131,9 +131,9 @@ public class OrderByNode extends SingleChildResultSetNode
 		}
 	}
 
-	ResultColumnDescriptor[] makeResultDescriptors(ExecutionContext ec)
+	ResultColumnDescriptor[] makeResultDescriptors()
 	{
-	    return childResult.makeResultDescriptors(ec);
+	    return childResult.makeResultDescriptors();
 	}
 
     /**

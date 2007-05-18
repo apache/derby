@@ -1522,15 +1522,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return	A ResultDescription for this ResultSetNode.
 	 */
-
 	public ResultColumnDescriptor[] makeResultDescriptors()
-	{
-		ExecutionContext ec = (ExecutionContext) getContextManager().getContext(
-			ExecutionContext.CONTEXT_ID);
-		return makeResultDescriptors(ec);
-	}
-
-	ResultColumnDescriptor[] makeResultDescriptors(ExecutionContext ec)
 	{
 	    ResultColumnDescriptor colDescs[] = new ResultColumnDescriptor[size()];
 		int size = size();
@@ -1538,7 +1530,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		for (int index = 0; index < size; index++)
 		{
 		    // the ResultColumn nodes are descriptors, so take 'em...
-            colDescs[index] = ec.getExecutionFactory().getResultColumnDescriptor(((ResultColumnDescriptor) elementAt(index)));
+            colDescs[index] = getExecutionFactory().getResultColumnDescriptor(((ResultColumnDescriptor) elementAt(index)));
 		}
 
 		return colDescs;

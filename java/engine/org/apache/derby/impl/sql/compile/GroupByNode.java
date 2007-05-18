@@ -896,9 +896,9 @@ public class GroupByNode extends SingleChildResultSetNode
 		return this;
 	}
 
-	ResultColumnDescriptor[] makeResultDescriptors(ExecutionContext ec)
+	ResultColumnDescriptor[] makeResultDescriptors()
 	{
-	    return childResult.makeResultDescriptors(ec);
+	    return childResult.makeResultDescriptors();
 	}
 
 	/**

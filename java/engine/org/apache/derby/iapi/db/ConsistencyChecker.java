@@ -34,7 +34,7 @@ import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -128,7 +128,6 @@ public class ConsistencyChecker
 		long					indexRows;
 		ConglomerateController	baseCC = null;
 		ConglomerateController	indexCC = null;
-		ExecutionContext		ec;
 		SchemaDescriptor		sd;
 		ConstraintDescriptor	constraintDesc;
 
@@ -140,8 +139,8 @@ public class ConsistencyChecker
             dd = lcc.getDataDictionary();
 
             dvf = lcc.getDataValueFactory();
-
-            ec = lcc.getExecutionContext() ;
+            
+            ExecutionFactory ef = lcc.getLanguageConnectionFactory().getExecutionFactory();
 
             sd = dd.getSchemaDescriptor(schemaName, tc, true);
             td = dd.getTableDescriptor(tableName, sd);
@@ -171,7 +170,7 @@ public class ConsistencyChecker
 			heapCD = td.getConglomerateDescriptor(td.getHeapConglomerateId());
 
 			/* Get a row template for the base table */
-			baseRow = ec.getExecutionFactory().getValueRow(td.getNumberOfColumns());
+			baseRow = ef.getValueRow(td.getNumberOfColumns());
 
 			/* Fill the row with nulls of the correct type */
 			ColumnDescriptorList cdl = td.getColumnDescriptorList();
@@ -263,7 +262,7 @@ public class ConsistencyChecker
 				}
 
 				/* Get one row template for the index scan, and one for the fetch */
-				indexRow = ec.getExecutionFactory().getValueRow(baseColumns + 1);
+				indexRow = ef.getValueRow(baseColumns + 1);
 
 				/* Fill the row with nulls of the correct type */
 				for (int column = 0; column < baseColumns; column++)
