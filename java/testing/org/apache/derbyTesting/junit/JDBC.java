@@ -725,9 +725,13 @@ public class JDBC {
         int rows;
         ResultSetMetaData rsmd = rs.getMetaData();
 
-        // Assert that we have the right number of columns.
-        Assert.assertEquals("Unexpected column count:",
-            expectedRows[0].length, rsmd.getColumnCount());
+        // Assert that we have the right number of columns. If we expect an
+        // empty result set, the expected column count is unknown, so don't
+        // check.
+        if (expectedRows.length > 0) {
+            Assert.assertEquals("Unexpected column count:",
+                expectedRows[0].length, rsmd.getColumnCount());
+        }
 
         for (rows = 0; rs.next(); rows++)
         {
