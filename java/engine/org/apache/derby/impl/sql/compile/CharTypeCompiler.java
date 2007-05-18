@@ -192,8 +192,12 @@ public final class CharTypeCompiler extends BaseTypeCompiler
                 }
         }
 
-    	/** @see TypeCompiler#generateDataValue(ExpressionClassBuilder, MethodBuilder, int, String, LocalField) */
-    	public void generateDataValue(
+        /**
+         * Augment the parent's method by ensuring the generated
+         * value is setup for collation if required.
+         * @see BaseTypeCompiler#generateCollationSensitiveDataValue(ExpressionClassBuilder, MethodBuilder, int)
+         */
+     	public void generateDataValue(
     			ExpressionClassBuilder eb,
 				MethodBuilder mb, int collationType,
     			LocalField field)
@@ -202,7 +206,11 @@ public final class CharTypeCompiler extends BaseTypeCompiler
     		generateCollationSensitiveDataValue(eb, mb, collationType);
     	}
 
-    	/** @see TypeCompiler#generateNull(ExpressionClassBuilder, MethodBuilder, int, String)*/
+        /**
+         * Augment the parent's method by ensuring the generated
+         * value is setup for collation if required.
+         * @see BaseTypeCompiler#generateCollationSensitiveDataValue(ExpressionClassBuilder, MethodBuilder, int)
+         */
     	public void generateNull(
     			ExpressionClassBuilder eb,
 				MethodBuilder mb, int collationType)

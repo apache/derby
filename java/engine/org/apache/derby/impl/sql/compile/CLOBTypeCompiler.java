@@ -140,7 +140,11 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
                 }
         }
 
-    	/** @see TypeCompiler#generateDataValue(ExpressionClassBuilder, MethodBuilder, int, String, LocalField) */
+        /**
+         * Augment the parent's method by ensuring the generated
+         * value is setup for collation if required.
+         * @see BaseTypeCompiler#generateCollationSensitiveDataValue(ExpressionClassBuilder, MethodBuilder, int)
+         */
     	public void generateDataValue(
     			ExpressionClassBuilder eb,
 				MethodBuilder mb, int collationType,
@@ -150,8 +154,12 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
     		generateCollationSensitiveDataValue(eb, mb, collationType);
     	}
 
-    	/** @see TypeCompiler#generateNull(ExpressionClassBuilder, MethodBuilder, int, String)*/
-    	public void generateNull(
+        /**
+         * Augment the parent's method by ensuring the generated
+         * value is setup for collation if required.
+         * @see BaseTypeCompiler#generateCollationSensitiveDataValue(ExpressionClassBuilder, MethodBuilder, int)
+         */
+        public void generateNull(
     			ExpressionClassBuilder eb,
 				MethodBuilder mb, int collationType)
     	{

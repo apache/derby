@@ -530,7 +530,6 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 	}
 
 
-	/** @see TypeCompiler#generateDataValue(ExpressionClassBuilder, MethodBuilder, int, String, LocalField) */
 	public void generateDataValue(ExpressionClassBuilder eb,
 			MethodBuilder mb, int collationType,
 			LocalField field)

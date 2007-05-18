@@ -812,8 +812,6 @@ public interface DataDictionary
 	 *
 	 * NOTE: Caller is responsible for dropping any backing index
 	 *
-	 * @param table	The table from which to drop the
-	 *			constraint descriptor
 	 * @param descriptor	The descriptor to drop
 	 * @param tc	The TransactionController.
 	 *
