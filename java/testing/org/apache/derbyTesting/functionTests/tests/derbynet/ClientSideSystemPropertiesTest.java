@@ -68,7 +68,7 @@ public class ClientSideSystemPropertiesTest extends BaseJDBCTestCase {
     				public Object run(){
     					File dir = new File(getSystemProperty("derby.client.traceDirectory"));
     					if (dir.exists() == false) //create the trace Directory
-    						junit.framework.Assert.assertTrue(dir.mkdirs());
+    						junit.framework.Assert.assertTrue(dir.mkdir() || dir.mkdirs());
     					else {//cleanup the trace Directory which already exists
     						int fileCounter = 0;
     						File[] list = dir.listFiles();
