@@ -241,7 +241,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
              {"XSTB6","Cannot substitute a transaction table with another while one is already in use.","50000"},
              {"XXXXX","Normal database session close.","40000"}};
 
-        JDBC.assertFullResultSet(rs, expectedRows);
+        JDBC.assertUnorderedResultSet(rs, expectedRows);
         conn.rollback();
         s.close();
     }
