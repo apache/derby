@@ -22,6 +22,8 @@
 package org.apache.derby.client.am;
 import java.io.IOException;
 
+import org.apache.derby.shared.common.sanity.SanityManager;
+
 /**
  * An <code>OutputStream</code> that will use an locator to write
  * bytes to the Blob value on the server.
@@ -51,6 +53,10 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
     public BlobLocatorOutputStream(Connection connection, Blob blob, long pos)
         throws SqlException
     {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(blob.isLocator());
+        }
+
         if (pos-1 > blob.sqlLength()) {
             throw new IndexOutOfBoundsException();
         }

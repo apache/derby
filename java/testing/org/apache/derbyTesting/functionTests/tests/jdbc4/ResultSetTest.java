@@ -1051,6 +1051,11 @@ public class ResultSetTest
      */
     public void testUpdateBlob()
     throws Exception {
+
+        // Life span of Blob objects are limited by the transaction.  Need
+        // autocommit off so Blob objects survive execution of next statement.
+        getConnection().setAutoCommit(false);
+
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it
@@ -1339,6 +1344,10 @@ public class ResultSetTest
      */
     public void testUpdateBlobStringParameterName()
     throws Exception {
+        // Life span of Blob objects are limited by the transaction.  Need
+        // autocommit off so Blob objects survive execution of next statement.
+        getConnection().setAutoCommit(false);
+
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it

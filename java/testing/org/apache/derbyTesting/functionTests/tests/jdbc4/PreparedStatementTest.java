@@ -472,8 +472,11 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     public void testSetBlob()
             throws IOException, SQLException {
-        //insert default values into the table
+        // Life span of Blob objects are limited by the transaction.  Need
+        // autocommit off so Blob objects survive execution of next statement.
+        getConnection().setAutoCommit(false);
         
+        //insert default values into the table
         InputStream is = new java.io.ByteArrayInputStream(BYTES);
         is.reset();
         
@@ -509,34 +512,26 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     /**
      * Insert <code>Blob</code> without specifying length and read it back
      * for verification.
-     *
-     * Beacuse we don't yet support <code>Connection.createBlob</code> in the
-     * client driver, we must first insert data into the database and read back
-     * a <code>Blob</code> object. This object is then inserted into the
-     * database again.
      */
     public void testSetBlobLengthless()
             throws IOException, SQLException {
-        // Insert test data.
-        InputStream is = new ByteArrayInputStream(BYTES);
-        psInsertBlob.setInt(1, key);
-        psInsertBlob.setBinaryStream(2, is);
-        psInsertBlob.execute();
-        is.close();
-        // Must fetch Blob from database because we don't support
-        // Connection.createBlob on the client yet.
-        psFetchBlob.setInt(1, key);
-        ResultSet rs = psFetchBlob.executeQuery();
-        assertTrue("No results retrieved", rs.next());
-        Blob insertBlob = rs.getBlob(1);
+        // Life span of Blob objects are the transaction.  Need autocommit off
+        // to have Blob objects survive execution of next statement.
+        getConnection().setAutoCommit(false);
+        // Create Blob to be inserted
+        Blob insertBlob = getConnection().createBlob();
+        OutputStream os = insertBlob.setBinaryStream(1);
+        os.write(BYTES);
         int secondKey = requestKey();
         psInsertBlob.setInt(1, secondKey);
         psInsertBlob.setBlob(2, insertBlob);
         psInsertBlob.execute();
+        os.close();
+        psInsertBlob.close();
 
         // Read back test data from database.
         psFetchBlob.setInt(1, secondKey);
-        rs = psFetchBlob.executeQuery();
+        ResultSet rs = psFetchBlob.executeQuery();
         assertTrue("No results retrieved", rs.next());
         Blob blobRetrieved = rs.getBlob(1);
 
@@ -753,12 +748,11 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         psInsertBlob.setBinaryStream(2, is, BYTES.length);
         psInsertBlob.executeUpdate();
         
-        //Now query to retrieve the Clob
+        // Now query to retrieve the Blob
         psFetchBlob.setInt(1, key);
         ResultSet rs = psFetchBlob.executeQuery();
         rs.next();
         Blob blobRetrieved = rs.getBlob(1);
-        rs.close();
         
         try {
             InputStream is_ret = blobRetrieved.getBinaryStream();
@@ -766,6 +760,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         } catch(IOException ioe) {
             fail("IOException while reading the Clob from the database");
         }
+        rs.close(); // Because of autocommit, this will invalidate blobRetrieved
         
         for(int i=0;i<BYTES.length;i++) {
             assertEquals("Error in inserting data into the Blob",BYTES[i],bytes1[i]);

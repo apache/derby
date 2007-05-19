@@ -26,7 +26,7 @@ import java.sql.SQLException;
 
 import java.io.IOException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * An <code>InputStream</code> that will use an locator to fetch the
@@ -61,7 +61,7 @@ public class BlobLocatorInputStream extends java.io.InputStream
         throws SqlException
     {        
         if (SanityManager.DEBUG) {
-        	SanityManager.ASSERT(blob.isLocator());
+            SanityManager.ASSERT(blob.isLocator());
         }
         this.connection = connection;
         this.blob = blob;

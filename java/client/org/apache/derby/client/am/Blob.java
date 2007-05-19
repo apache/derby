@@ -21,11 +21,12 @@
 
 package org.apache.derby.client.am;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -267,7 +268,8 @@ public class Blob extends Lob implements java.sql.Blob {
         {
             return binaryStream_;
         } else if (isLocator()) {
-            return new BlobLocatorInputStream(agent_.connection_, this);
+            return new BufferedInputStream(
+                    new BlobLocatorInputStream(agent_.connection_, this));
         } else {  // binary string
             return new java.io.ByteArrayInputStream(binaryString_, dataOffset_,
                                            binaryString_.length - dataOffset_);
@@ -654,10 +656,11 @@ public class Blob extends Lob implements java.sql.Blob {
                 
                 InputStream retVal;
                 if (isLocator()) {
-                    retVal = new BlobLocatorInputStream(agent_.connection_, 
-                                                        this, 
-                                                        pos, 
-                                                        length);
+                    retVal = new BufferedInputStream(
+                            new BlobLocatorInputStream(agent_.connection_,
+                                                       this,
+                                                       pos,
+                                                       length));
                 } else {  // binary string
                     retVal = new java.io.ByteArrayInputStream
                         (binaryString_, 

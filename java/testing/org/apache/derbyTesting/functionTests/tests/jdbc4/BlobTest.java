@@ -156,6 +156,10 @@ public class BlobTest
     public void setUp() 
         throws SQLException {
 
+        // Life span of Blob objects are limited by the transaction.  Need
+        // autocommit off so Blob objects survive closing of result set.
+        getConnection().setAutoCommit(false);
+
         blob = BlobClobTestSetup.getSampleBlob(getConnection());
         
         //call the buildHashSetMethod to initialize the 
@@ -409,10 +413,10 @@ public class BlobTest
         InputStream is_1 = blob.getBinaryStream(2L,5L);
         InputStream is_2 = new java.io.ByteArrayInputStream(BYTES1,1,5);
 
+        assertEquals(is_2,is_1);
+
         rs.close();
         st.close();
-
-        assertEquals(is_2,is_1);
     }
     
     /**

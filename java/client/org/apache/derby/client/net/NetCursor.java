@@ -1060,7 +1060,8 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     {
         int locator = get_INTEGER(column);
         // If Lob value was sent instead of locator, highest bit will be set
-        if ((locator & 0x8000) == 0x8000) { 
+        // Zero is not a valid locator, it indicates a zero length value
+        if (((locator & 0x8000) == 0x8000) || (locator == 0)) {
             return Lob.INVALID_LOCATOR;
         } else {
             return locator;
