@@ -29,7 +29,7 @@ import org.apache.derby.iapi.error.StandardException;
  * WorkHorseForCollatorDatatypes's collation sensitive methods 
  * "like, stringcompare" etc.  
  */
-public interface CollationElementsInterface
+interface CollationElementsInterface
 {
 	/**
 	 * This method translates the string into a series of collation elements.

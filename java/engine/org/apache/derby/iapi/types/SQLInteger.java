@@ -49,23 +49,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * SQLInteger satisfies the DataValueDescriptor
- * interfaces (i.e., OrderableDataType). It implements an integer column, 
- * e.g. for * storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction, as it affects the storage size and mechanism.
- * <p>
- * Because OrderableDataType is a subtype of DataType,
- * SQLInteger can play a role in either a DataType/Row
- * or a OrderableDataType/Row, interchangeably.
- * <p>
- * We assume the store has a flag for nullness of the value,
- * and simply return a 0-length array for the stored form
- * when the value is null.
- * <p>
- * PERFORMANCE: There are likely alot of performance improvements
- * possible for this implementation -- it new's Integer
- * more than it probably wants to.
+ * SQLInteger represents an INTEGER value.
  */
 public final class SQLInteger
 	extends NumberDataType

@@ -39,7 +39,7 @@ import java.text.RuleBasedCollator;
  * just passing an appropriate RuleBasedCollator object for that kind of 
  * collation.
  */
-public class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterface
+class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterface
 {
 	WorkHorseForCollatorDatatypes holderForCollationSensitiveInfo;
 

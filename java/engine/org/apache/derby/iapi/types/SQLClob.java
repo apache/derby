@@ -41,15 +41,8 @@ import java.util.Calendar;
 
 
 /**
- * SQLClob uses SQLVarchar by inheritance.
- * It satisfies the DataValueDescriptor interfaces (i.e., OrderableDataType). It implements a String
- * holder, e.g. for storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction.
- * <p>
- * Because OrderableDataType is a subclass of DataType,
- * SQLLongvarchar can play a role in either a DataType/ValueRow
- * or a OrderableDataType/KeyRow, interchangeably.
+ * SQLClob represents a CLOB value with UCS_BASIC collation.
+ * CLOB supports LIKE operator only for collation.
  */
 public class SQLClob
 	extends SQLVarchar

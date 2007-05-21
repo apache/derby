@@ -25,7 +25,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.BooleanDataValue;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -44,20 +43,20 @@ import java.text.RuleBasedCollator;
  * the code for collation sensitive methods. Instead, they can simply delegate
  * the work to methods defined in this class. 
  */
-public class WorkHorseForCollatorDatatypes  
+final class WorkHorseForCollatorDatatypes  
 {
 	/** 
 	 * Use this object for collation on character datatype. This collator
 	 * object is passed as a parameter to the constructor.
 	 */
-	RuleBasedCollator collatorForCharacterDatatypes;
+	private RuleBasedCollator collatorForCharacterDatatypes;
 	/**
 	 * collatorForCharacterDatatypes will be used on this SQLChar to determine
 	 * collationElementsForString. The collationElementsForString is used by
 	 * the like method to do Collator specific comparison.
 	 * This SQLChar object is passed as a parameter to the constructor.
 	 */
-	SQLChar stringData;
+	private SQLChar stringData;
 	/**
 	 * Following is the array holding a series of collation elements for the
 	 * string. It will be used in the like method. This gets initialized when
@@ -74,7 +73,7 @@ public class WorkHorseForCollatorDatatypes
 	// For null strings, cKey = null.
 	private CollationKey cKey; 
 
-	public WorkHorseForCollatorDatatypes(
+	WorkHorseForCollatorDatatypes(
 			RuleBasedCollator collatorForCharacterDatatypes,
 			SQLChar stringData)
 	{
@@ -83,7 +82,7 @@ public class WorkHorseForCollatorDatatypes
 	}
 	
 	/** @see SQLChar#stringCompare(SQLChar, SQLChar) */
-	protected int stringCompare(SQLChar str1, SQLChar str2)
+	int stringCompare(SQLChar str1, SQLChar str2)
 	throws StandardException
 	{
 		CollationKey ckey1 = str1.getCollationKey();
@@ -117,7 +116,7 @@ public class WorkHorseForCollatorDatatypes
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public BooleanDataValue like(DataValueDescriptor pattern)
+	BooleanDataValue like(DataValueDescriptor pattern)
 								throws StandardException
 	{
 		Boolean likeResult;
@@ -149,7 +148,7 @@ public class WorkHorseForCollatorDatatypes
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public BooleanDataValue like(DataValueDescriptor pattern, 
+	BooleanDataValue like(DataValueDescriptor pattern, 
 			DataValueDescriptor escape)	throws StandardException
 	{
 		Boolean likeResult;
@@ -197,7 +196,7 @@ public class WorkHorseForCollatorDatatypes
 	 * Get the RuleBasedCollator which is getting used for collation sensitive
 	 * methods. 
 	 */
-	protected RuleBasedCollator getCollatorForCollation()
+	RuleBasedCollator getCollatorForCollation()
 	{
 		return(collatorForCharacterDatatypes);
 	}
@@ -210,7 +209,7 @@ public class WorkHorseForCollatorDatatypes
 	 *
 	 * @return count of collation elements for this instance of CollatorSQLChar
 	 */
-	protected int getCountOfCollationElements()
+	int getCountOfCollationElements()
 	{
 		return countOfCollationElements;
 	}
@@ -222,7 +221,7 @@ public class WorkHorseForCollatorDatatypes
 	 * @return an array of collation elements for the string
 	 * @throws StandardException
 	 */
-	protected int[] getCollationElementsForString()
+	int[] getCollationElementsForString()
 		throws StandardException
 	{
 		if (stringData.isNull())

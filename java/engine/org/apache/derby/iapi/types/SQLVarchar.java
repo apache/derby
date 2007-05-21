@@ -38,15 +38,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.util.StringUtil;
 
 /**
- * SQLVarchar satisfies the DataValueDescriptor
- * interfaces (i.e., OrderableDataType). It implements a String holder, 
- * e.g. for storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction.
- * <p>
- * Because OrderableDataType is a subclass of DataType,
- * SQLVarchar can play a role in either a DataType/ValueRow
- * or a OrderableDataType/KeyRow, interchangeably.
+ * SQLVarchar represents a VARCHAR value with UCS_BASIC collation.
  *
  * SQLVarchar is mostly the same as SQLChar, so it is implemented as a
  * subclass of SQLChar.  Only those methods with different behavior are

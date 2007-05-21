@@ -73,15 +73,7 @@ import java.util.Locale;
 import java.util.Calendar;
 
 /**
- * SQLChar satisfies the DataValueDescriptor
- * interfaces (i.e., OrderableDataType). It implements an String holder,
- * e.g. for storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction.
- * <p>
- * Because OrderableDataType is a subclass of DataType,
- * SQLChar can play a role in either a DataType/ValueRow
- * or a OrderableDataType/KeyRow, interchangeably.
+ * SQLChar represents a VARCHAR value with UCS_BASIC collation.
  */
 public class SQLChar
 	extends DataType implements StringDataValue, StreamStorable

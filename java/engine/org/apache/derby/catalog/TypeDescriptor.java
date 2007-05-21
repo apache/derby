@@ -142,21 +142,29 @@ public interface TypeDescriptor
 
 	/**
 	 * Get the collation type for this type. This api applies only to character
-	 * string types. And it's return value is valid only if the collation 
+	 * string types. And its return value is valid only if the collation 
 	 * derivation  of this type is "implicit" or "explicit". (In Derby 10.3,
 	 * collation derivation can't be "explicit". Hence in Derby 10.3, this api
 	 * should be used only if the collation derivation is "implicit". 
 	 *
 	 * @return	collation type which applies to character string types with
 	 * collation derivation of "implicit" or "explicit". The possible return
-	 * values in Derby 10.3 will be 0(UCS_BASIC) and 1(TERRITORY_BASED). 
+	 * values in Derby 10.3 will be COLLATION_TYPE_UCS_BASIC
+     * and COLLATION_TYPE_TERRITORY_BASED.
+     * 
+     * @see StringDataValue#COLLATION_TYPE_UCS_BASIC
+     * @see StringDataValue#COLLATION_TYPE_TERRITORY_BASED
 	 * 
 	 */
 	public int getCollationType();
 
 	/**
 	 * Set the collation type of this TypeDescriptor
-	 * @param collationTypeValue This will be 0(UCS_BASIC)/1(TERRITORY_BASED)
+	 * @param collationTypeValue This will be COLLATION_TYPE_UCS_BASIC
+     * or COLLATION_TYPE_TERRITORY_BASED
+     * 
+     * @see StringDataValue#COLLATION_TYPE_UCS_BASIC
+     * @see StringDataValue#COLLATION_TYPE_TERRITORY_BASED
 	 */
 	public void setCollationType(int collationTypeValue);
 
@@ -188,17 +196,26 @@ public interface TypeDescriptor
 	 * with character strings with different collations (Section 9.3 Data types 
 	 * of results of aggregations Syntax Rule 3aii).
 	 *  
-	 * Collation derivation will be initialized to 0("none").
+	 * Collation derivation will be initialized to COLLATION_DERIVATION_NONE.
 	 *  
-	 * @return Should be 0("none") or 1("implicit"). 
+	 * @return Should be COLLATION_DERIVATION_NONE or COLLATION_DERIVATION_IMPLICIT
+     * 
+     * @see StringDataValue#COLLATION_DERIVATION_NONE
+     * @see StringDataValue#COLLATION_DERIVATION_IMPLICIT
+     * @see StringDataValue#COLLATION_DERIVATION_EXPLICIT
 	 */
 	public int getCollationDerivation();
 
 	/**
 	 * Set the collation derivation of this DTD
 	 * @param collationDerivationValue This will be 
-	 * (0)none/(1)implicit/(2)explicit
-	 * In Derby 10.3, we do not expect to get value 2(explicit).
+	 * COLLATION_DERIVATION_NONE/COLLATION_DERIVATION_IMPLICIT/COLLATION_DERIVATION_EXPLICIT
+	 * In Derby 10.3, we do not expect to get value COLLATION_DERIVATION_EXPLICIT.
+     * 
+     * @see StringDataValue#COLLATION_DERIVATION_NONE
+     * @see StringDataValue#COLLATION_DERIVATION_IMPLICIT
+     * @see StringDataValue#COLLATION_DERIVATION_EXPLICIT
+
 	 */
 	public void setCollationDerivation(int collationDerivationValue);
 

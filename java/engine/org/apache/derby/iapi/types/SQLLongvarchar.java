@@ -38,14 +38,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.util.StringUtil;
 
 /**
- * SQLLongvarchar satisfies the DataValueDescriptor interfaces (i.e., OrderableDataType). It implements a String
- * holder, e.g. for storing a column value; it can be specified
- * when constructed to not allow nulls. Nullability cannot be changed
- * after construction.
- * <p>
- * Because OrderableDataType is a subclass of DataType,
- * SQLLongvarchar can play a role in either a DataType/ValueRow
- * or a OrderableDataType/KeyRow, interchangeably.
+ * SQLLongvarchar represents a LONG VARCHAR value with UCS_BASIC collation.
  *
  * SQLLongvarchar is mostly the same as SQLVarchar, so it is implemented as a
  * subclass of SQLVarchar.  Only those methods with different behavior are
