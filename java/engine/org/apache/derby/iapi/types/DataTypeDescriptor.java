@@ -302,6 +302,35 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	}
 
 	/**
+	 * Constructor for use with numeric types/non-numeric types. For instance,
+	 * when dealing with MAX/MIN aggregrade operators, we do not if we are
+	 * working with numeric or non-numeric types. Such a constructor will be
+	 * used in those cases. 
+	 *
+	 * @param typeId	The typeId of the type being described
+	 * @param precision	The number of decimal digits.
+	 * @param scale		The number of digits after the decimal point.
+	 * @param isNullable	TRUE means it could contain NULL, FALSE means
+	 *			it definitely cannot contain NULL.
+	 * @param maximumWidth	The maximum number of bytes for this datatype
+	 * @param collationType The collation type of a string data type
+	 * @param collationDerivation Collation Derivation of a string data type
+	 */
+	public DataTypeDescriptor(TypeId typeId, int precision, int scale,
+		boolean isNullable, int maximumWidth, int collationType,
+		int collationDerivation)
+	{
+		this.typeId = typeId;
+		typeDescriptor = new TypeDescriptorImpl(typeId.getBaseTypeId(),
+												precision,
+												scale,
+												isNullable,
+												maximumWidth,
+												collationType,
+												collationDerivation);
+	}
+
+	/**
 	 * Constructor for use with non-numeric types
 	 *
 	 * @param typeId	The typeId of the type being described

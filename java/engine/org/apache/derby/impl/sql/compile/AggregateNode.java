@@ -409,7 +409,9 @@ public class AggregateNode extends UnaryOperatorNode
 							resultType.getPrecision(),
 							resultType.getScale(),
 							resultType.isNullable(),
-							resultType.getMaximumWidth()
+							resultType.getMaximumWidth(),
+							resultType.getCollationType(),
+							resultType.getCollationDerivation()
 						)
 				);
 
