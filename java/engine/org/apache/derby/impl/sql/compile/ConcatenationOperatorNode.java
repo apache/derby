@@ -27,14 +27,10 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.types.TypeId;
 
-import org.apache.derby.iapi.types.ConcatableDataValue;
-import org.apache.derby.iapi.types.BitDataValue;
-
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -136,8 +132,15 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 				else
 					leftType = TypeId.getBuiltInTypeId(Types.VARCHAR);
 			}
-
-		leftOperand.setType(new DataTypeDescriptor(leftType, true));
+			
+			leftOperand.setType(new DataTypeDescriptor(leftType, true));
+			if (rightOperand.getTypeId().isStringTypeId())
+			{//collation of ? operand should be same as the other operand
+				leftOperand.getTypeServices().setCollationDerivation(
+					rightOperand.getTypeServices().getCollationDerivation());
+				leftOperand.getTypeServices().setCollationType(
+					rightOperand.getTypeServices().getCollationType());
+			}
 		}
 
 		/*
@@ -179,11 +182,17 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 				else
 					rightType = TypeId.getBuiltInTypeId(Types.VARCHAR);
 			}
-		
-		rightOperand.setType(
+			rightOperand.setType(
 							new DataTypeDescriptor(
 										rightType,
 										true));
+			if (leftOperand.getTypeId().isStringTypeId())
+			{//collation of ? operand should be same as the other operand
+				rightOperand.getTypeServices().setCollationDerivation(
+						leftOperand.getTypeServices().getCollationDerivation());
+				rightOperand.getTypeServices().setCollationType(
+						leftOperand.getTypeServices().getCollationType());
+			}
 		}
 
 		/* If the left operand is not a built-in type, then generate a bound conversion
@@ -476,11 +485,24 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode
 		** It's OK to call the implementation of the DataTypeDescriptorFactory
 		** here, because we're in the same package.
 		*/
-		return new DataTypeDescriptor(
+		DataTypeDescriptor returnDTD = new DataTypeDescriptor(
 					TypeId.getBuiltInTypeId(higherType),
 					nullable,
 					resultLength
 				);
+
+		//Check if collation derivations and collation types of 2 operands match?
+		//If they do, then the result of the concatenation will get the smae
+		//collation information. But if not, then the collation derivation of
+		//the result will be NONE.
+		if (leftType.getCollationDerivation() != rightType.getCollationDerivation()
+			|| leftType.getCollationType() != rightType.getCollationType())
+			returnDTD.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_NONE);
+		else {
+			returnDTD.setCollationDerivation(leftType.getCollationDerivation());
+			returnDTD.setCollationType(leftType.getCollationType());
+		}
+		return returnDTD;
 	}
 
 	/*

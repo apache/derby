@@ -369,7 +369,9 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 												precision,
 												scale,
 												isNullable,
-												maximumWidth);
+												maximumWidth,
+												source.getCollationType(),
+												source.getCollationDerivation());
 	}
 
 	/**
@@ -385,8 +387,13 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	{
 		this.typeId = source.typeId;
 		typeDescriptor = new TypeDescriptorImpl(source.typeDescriptor,
-												isNullable,
-												maximumWidth);
+				source.getPrecision(),
+				source.getScale(),
+				isNullable,
+				maximumWidth,
+				source.getCollationType(),
+				source.getCollationDerivation());
+
 	}
 
 	/**
@@ -663,8 +670,9 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 			scale = higherType.getScale();
 		}
 
+
 		higherType = new DataTypeDescriptor(higherType, 
-											  precision, scale, nullable, maximumWidth);
+				precision, scale, nullable, maximumWidth);
 
 		return higherType;
 	}

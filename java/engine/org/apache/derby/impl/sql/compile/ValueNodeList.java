@@ -25,12 +25,9 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
@@ -143,8 +140,32 @@ public class ValueNodeList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Get the dominant DataTypeServices from the elements in the list.
-	 *
+	 * Get the dominant DataTypeServices from the elements in the list. This 
+	 * method will also check if it is dealing with character string datatypes.
+	 * If yes, then it will check if all the character string datatypes have
+	 * the same collation derivation and collation type associated with them.
+	 * If not, then the resultant DTD from this method will have collation
+	 * derivation of NONE. If yes, then the resultant DTD from this method will
+	 * have the same collation derivation and collation type as all the 
+	 * character string datatypes.
+	 * 
+	 * eg consider we are dealing with a database with territory based 
+	 * collation. Now consider following example first
+	 * sysCharColumn || userCharColumn
+	 * The result of this concatenation will have collation derivation of NONE
+	 * because the first operand has collation derivation of IMPLICIT and 
+	 * collation type of UCS_BASIC whereas the 2nd opernad has collation 
+	 * derivation of IMPLICIT and collation type of territory based. Since the
+	 * 2 operands don't have matching collaiton information, the result of this
+	 * concatenation will have collation derivation of NONE.
+	 * 
+	 * Now consider following example
+	 * sysCharColumn1 || sysCharColumn2
+	 * Since in this example, both the operands have the same collation
+	 * derivation of IMPLICIT and same collation type of UCS_BASIC, the 
+	 * resultant type will have collation derivation of IMPLICIT and collation 
+	 * type of UCS_BASIC
+	 * 
 	 * @return DataTypeServices		The dominant DataTypeServices.
 	 *
 	 * @exception StandardException		Thrown on error
@@ -152,6 +173,18 @@ public class ValueNodeList extends QueryTreeNodeVector
 	public DataTypeDescriptor getDominantTypeServices() throws StandardException
 	{
 		DataTypeDescriptor	dominantDTS = null;
+		//Following 2 will hold the collation derivation and type of the first 
+		//string operand. This collation information will be checked against
+		//the collation derivation and type of other string operands. If a 
+		//mismatch is found, foundCollationMisMatch will be set to true.
+		int firstCollationDerivation = -1;
+		int firstCollationType = -1;
+		//As soon as we find 2 strings with different collations, we set the 
+		//following flag to true. At the end of the method, if this flag is set 
+		//to true then it means that we have operands with different collation
+		//types and hence the resultant dominant type will have to have the
+		//collation derivation of NONE. 
+		boolean foundCollationMisMatch = false;
 
 		for (int index = 0; index < size(); index++)
 		{
@@ -162,6 +195,23 @@ public class ValueNodeList extends QueryTreeNodeVector
 				continue;
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
 
+			if (valueNodeDTS.getTypeId().isStringTypeId())
+			{
+				if (firstCollationDerivation == -1)
+				{
+					//found first string type. Initialize firstCollationDerivation
+					//and firstCollationType with collation information from 
+					//that first string type operand.
+					firstCollationDerivation = valueNodeDTS.getCollationDerivation(); 
+					firstCollationType = valueNodeDTS.getCollationType(); 
+				} else if (!foundCollationMisMatch)
+				{
+					if (firstCollationDerivation != valueNodeDTS.getCollationDerivation())
+						foundCollationMisMatch = true;//collation derivations don't match
+					else if (firstCollationType != valueNodeDTS.getCollationType())
+						foundCollationMisMatch = true;//collation types don't match
+				}
+			}
 			if (dominantDTS == null)
 			{
 				dominantDTS = valueNodeDTS;
@@ -170,6 +220,22 @@ public class ValueNodeList extends QueryTreeNodeVector
 			{
 				dominantDTS = dominantDTS.getDominantType(valueNodeDTS, getClassFactory());
 			}
+		}
+
+		//if following if returns true, then it means that we are dealing with 
+		//string operands.
+		if (firstCollationDerivation != -1)
+		{
+			if (foundCollationMisMatch) {
+				//if we come here that it means that alll the string operands
+				//do not have matching collation information on them. Hence the
+				//resultant dominant DTD should have collation derivation of 
+				//NONE.
+				dominantDTS.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_NONE);
+			}			
+			//if we didn't fine any collation mismatch, then resultant dominant
+			//DTD already has the correct collation information on it and hence
+			//we don't need to do anything.
 		}
 
 		return dominantDTS;

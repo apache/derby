@@ -21,23 +21,14 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.types.TypeId;
@@ -46,26 +37,18 @@ import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.VariableSizeDataValue;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.StringUtil;
 
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import java.lang.reflect.Modifier;
 
@@ -75,14 +58,6 @@ import org.apache.derby.iapi.types.NumberDataType;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
 
-import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.catalog.TypeDescriptor;
-
-import org.apache.derby.iapi.types.SQLReal;
-
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.sql.Types;
 
 import java.util.Vector;
@@ -385,10 +360,12 @@ public class CastNode extends ValueNode
 		destCTI = castTarget.getTypeId();
 		sourceCTI = castOperand.getTypeId();
 
-		//If we are dealing with result type of cast to be string data type, 
-		//then that data type should get it's collation type from the 
-		//current schema. That is what we are doing below 
+		//If the result type of cast is string data type, then that data type 
+		//should get it's collation type from the current schema. 
 		if (destCTI.isStringTypeId()) {
+			//set the collation type to be same as the current schema's 
+			//collation type. Collation derivation is already initialized
+			//to correct value by default which is "IMPLICIT"
 			getTypeServices().setCollationType(
 					getLanguageConnectionContext().getDefaultSchema().getCollationType());
 		}

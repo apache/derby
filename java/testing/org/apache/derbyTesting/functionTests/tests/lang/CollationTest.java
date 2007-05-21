@@ -141,6 +141,58 @@ public void testDefaultCollation() throws SQLException {
       		" (TABLENAME AS CHAR(15)) = 'CUSTOMER' ",
       		new String[][] {{"1"} });   
 
+      //Do some testing using CASE WHEN THEN ELSE
+      //following will work with no problem for a database with UCS_BASIC
+      //collation for system and user schemas
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CASE " +
+      		" WHEN 1=1 THEN TABLENAME ELSE 'c' END = 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+      //Using cast for result of CASE expression in the query above would not
+      //affect the sql in any ways. 
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CAST " +
+      		" ((CASE WHEN 1=1 THEN TABLENAME ELSE 'c' END) AS CHAR(12)) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using CONCATENATION
+      //following will work with no problem for a database with UCS_BASIC
+      //collation for system and user schemas
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" TABLENAME || ' ' = 'SYSCOLUMNS '",
+      		new String[][] {{"SYSCOLUMNS"} });   
+      //Using cast for result of CAST expression in the query above would not
+      //affect the sql in any ways. 
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" CAST (TABLENAME || ' ' AS CHAR(12)) = " +
+			" 'SYSCOLUMNS '",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using COALESCE
+      //following will work with no problem for a database with UCS_BASIC
+      //collation for system and user schemas
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" COALESCE(TABLENAME, 'c') = 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+      //Using cast for result of COALESCE expression in the query above would not
+      //affect the sql in any ways. 
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" CAST (COALESCE (TABLENAME, 'c') AS CHAR(12)) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using NULLIF
+      //following will work with no problem for a database with UCS_BASIC
+      //collation for system and user schemas
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+		" NULLIF(TABLENAME, 'c') = 'SYSCOLUMNS'",
+  		new String[][] {{"SYSCOLUMNS"} });   
+      //Using cast for result of NULLIF expression in the query above would not
+      //affect the sql in any ways. 
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" CAST (NULLIF (TABLENAME, 'c') AS CHAR(12)) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
       s.close();
       conn.commit();
 
@@ -222,6 +274,80 @@ public void testPolishCollation() throws SQLException {
       		" (TABLENAME AS CHAR(15)) = 'CUSTOMER' ",
       		new String[][] {{"1"} });   
 
+      //Do some testing using CASE WHEN THEN ELSE
+      //following sql will not work for a database with territory based
+      //collation for user schemas. This is because the resultant string type 
+      //from the CASE expression below will have collation derivation of NONE.
+      //The reason for collation derivation of NONE is that the CASE's 2 
+      //operands have different collation types and as per SQL standards, if an
+      //aggregate method has operands with different collations, then the 
+      //result will have collation derivation of NONE. The right side of =
+      //operation has collation type of territory based and hence the following
+      //sql fails.
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CASE " +
+      		" WHEN 1=1 THEN TABLENAME ELSE 'c' END = 'SYSCOLUMNS'");
+      //CASTing the result of the CASE expression will solve the problem in the
+      //query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CAST " +
+      		" ((CASE WHEN 1=1 THEN TABLENAME ELSE 'c' END) AS CHAR(12)) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using CONCATENATION
+      //following will fail because result string of concatenation has 
+      //collation derivation of NONE. That is because it's 2 operands have
+      //different collation types. TABLENAME has collation type of UCS_BASIC
+      //but constant character string ' ' has collation type of territory based
+      //So the left hand side of = operator has collation derivation of NONE
+      //and right hand side has collation derivation of territory based and
+      //that causes the = comparison to fail
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" TABLENAME || ' ' = 'SYSCOLUMNS '");   
+      //CASTing the result of the concat expression will solve the problem in 
+      //the query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" CAST (TABLENAME || ' ' AS CHAR(12)) = " +
+			" 'SYSCOLUMNS '",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using COALESCE
+      //following will fail because result string of COALESCE has 
+      //collation derivation of NONE. That is because it's 2 operands have
+      //different collation types. TABLENAME has collation type of UCS_BASIC
+      //but constant character string 'c' has collation type of territory based
+      //So the left hand side of = operator has collation derivation of NONE
+      //and right hand side has collation derivation of territory based and
+      //that causes the = comparison to fail
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" COALESCE(TABLENAME, 'c') = 'SYSCOLUMNS'");   
+      //CASTing the result of the COALESCE expression will solve the problem in 
+      //the query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" CAST (COALESCE (TABLENAME, 'c') AS CHAR(12)) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using NULLIF
+      //following will fail because result string of NULLIF has 
+      //collation derivation of NONE. That is because it's 2 operands have
+      //different collation types. TABLENAME has collation type of UCS_BASIC
+      //but constant character string 'c' has collation type of territory based
+      //So the left hand side of = operator has collation derivation of NONE
+      //and right hand side has collation derivation of territory based and
+      //that causes the = comparison to fail
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+		" NULLIF(TABLENAME, 'c') = 'SYSCOLUMNS'");   
+      //CASTing the result of the NULLIF expression will solve the problem in 
+      //the query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" NULLIF (CAST (TABLENAME AS CHAR(12)), 'c' ) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
       s.close();
       conn.commit();
 
@@ -301,6 +427,80 @@ public void testNorwayCollation() throws SQLException {
       checkLangBasedQuery(s, "SELECT 1 FROM SYS.SYSTABLES WHERE CAST " +
       		" (TABLENAME AS CHAR(15)) = 'CUSTOMER' ",
       		new String[][] {{"1"} });   
+
+      //Do some testing using CASE WHEN THEN ELSE
+      //following sql will not work for a database with territory based
+      //collation for user schemas. This is because the resultant string type 
+      //from the CASE expression below will have collation derivation of NONE.
+      //The reason for collation derivation of NONE is that the CASE's 2 
+      //operands have different collation types and as per SQL standards, if an
+      //aggregate method has operands with different collations, then the 
+      //result will have collation derivation of NONE. The right side of =
+      //operation has collation type of territory based and hence the following
+      //sql fails.
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CASE " +
+      		" WHEN 1=1 THEN TABLENAME ELSE 'c' END = 'SYSCOLUMNS'");
+      //CASTing the result of the CASE expression will solve the problem in the
+      //query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CAST " +
+      		" ((CASE WHEN 1=1 THEN TABLENAME ELSE 'c' END) AS CHAR(12)) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using CONCATENATION
+      //following will fail because result string of concatenation has 
+      //collation derivation of NONE. That is because it's 2 operands have
+      //different collation types. TABLENAME has collation type of UCS_BASIC
+      //but constant character string ' ' has collation type of territory based
+      //So the left hand side of = operator has collation derivation of NONE
+      //and right hand side has collation derivation of territory based and
+      //that causes the = comparison to fail
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" TABLENAME || ' ' = 'SYSCOLUMNS '");   
+      //CASTing the result of the concat expression will solve the problem in 
+      //the query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" CAST (TABLENAME || ' ' AS CHAR(12)) = " +
+			" 'SYSCOLUMNS '",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using COALESCE
+      //following will fail because result string of COALESCE has 
+      //collation derivation of NONE. That is because it's 2 operands have
+      //different collation types. TABLENAME has collation type of UCS_BASIC
+      //but constant character string 'c' has collation type of territory based
+      //So the left hand side of = operator has collation derivation of NONE
+      //and right hand side has collation derivation of territory based and
+      //that causes the = comparison to fail
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" COALESCE(TABLENAME, 'c') = 'SYSCOLUMNS'");   
+      //CASTing the result of the COALESCE expression will solve the problem in 
+      //the query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" CAST (COALESCE (TABLENAME, 'c') AS CHAR(12)) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using NULLIF
+      //following will fail because result string of NULLIF has 
+      //collation derivation of NONE. That is because it's 2 operands have
+      //different collation types. TABLENAME has collation type of UCS_BASIC
+      //but constant character string 'c' has collation type of territory based
+      //So the left hand side of = operator has collation derivation of NONE
+      //and right hand side has collation derivation of territory based and
+      //that causes the = comparison to fail
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+		" NULLIF(TABLENAME, 'c') = 'SYSCOLUMNS'");   
+      //CASTing the result of the NULLIF expression will solve the problem in 
+      //the query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" NULLIF (CAST (TABLENAME AS CHAR(12)), 'c' ) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
 
       s.close();
       conn.commit();
@@ -384,6 +584,80 @@ public void testEnglishCollation() throws SQLException {
       checkLangBasedQuery(s, "SELECT 1 FROM SYS.SYSTABLES WHERE CAST " +
       		" (TABLENAME AS CHAR(15)) = 'CUSTOMER' ",
       		new String[][] {{"1"} });   
+
+      //Do some testing using CASE WHEN THEN ELSE
+      //following sql will not work for a database with territory based
+      //collation for user schemas. This is because the resultant string type 
+      //from the CASE expression below will have collation derivation of NONE.
+      //The reason for collation derivation of NONE is that the CASE's 2 
+      //operands have different collation types and as per SQL standards, if an
+      //aggregate method has operands with different collations, then the 
+      //result will have collation derivation of NONE. The right side of =
+      //operation has collation type of territory based and hence the following
+      //sql fails.
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CASE " +
+      		" WHEN 1=1 THEN TABLENAME ELSE 'c' END = 'SYSCOLUMNS'");
+      //CASTing the result of the CASE expression will solve the problem in the
+      //query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CAST " +
+      		" ((CASE WHEN 1=1 THEN TABLENAME ELSE 'c' END) AS CHAR(12)) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using CONCATENATION
+      //following will fail because result string of concatenation has 
+      //collation derivation of NONE. That is because it's 2 operands have
+      //different collation types. TABLENAME has collation type of UCS_BASIC
+      //but constant character string ' ' has collation type of territory based
+      //So the left hand side of = operator has collation derivation of NONE
+      //and right hand side has collation derivation of territory based and
+      //that causes the = comparison to fail
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" TABLENAME || ' ' = 'SYSCOLUMNS '");   
+      //CASTing the result of the concat expression will solve the problem in 
+      //the query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" CAST (TABLENAME || ' ' AS CHAR(12)) = " +
+			" 'SYSCOLUMNS '",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using COALESCE
+      //following will fail because result string of COALESCE has 
+      //collation derivation of NONE. That is because it's 2 operands have
+      //different collation types. TABLENAME has collation type of UCS_BASIC
+      //but constant character string 'c' has collation type of territory based
+      //So the left hand side of = operator has collation derivation of NONE
+      //and right hand side has collation derivation of territory based and
+      //that causes the = comparison to fail
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" COALESCE(TABLENAME, 'c') = 'SYSCOLUMNS'");   
+      //CASTing the result of the COALESCE expression will solve the problem in 
+      //the query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" CAST (COALESCE (TABLENAME, 'c') AS CHAR(12)) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing using NULLIF
+      //following will fail because result string of NULLIF has 
+      //collation derivation of NONE. That is because it's 2 operands have
+      //different collation types. TABLENAME has collation type of UCS_BASIC
+      //but constant character string 'c' has collation type of territory based
+      //So the left hand side of = operator has collation derivation of NONE
+      //and right hand side has collation derivation of territory based and
+      //that causes the = comparison to fail
+      assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+		" NULLIF(TABLENAME, 'c') = 'SYSCOLUMNS'");   
+      //CASTing the result of the NULLIF expression will solve the problem in 
+      //the query above. Now both the operands around = operation will have 
+      //collation type of territory based and hence the sql won't fail
+      checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      		" NULLIF (CAST (TABLENAME AS CHAR(12)), 'c' ) = " +
+			" 'SYSCOLUMNS'",
+      		new String[][] {{"SYSCOLUMNS"} });   
       
       s.close();
       conn.commit();
