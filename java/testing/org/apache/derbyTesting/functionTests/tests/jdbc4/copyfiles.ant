@@ -1,7 +1,4 @@
 default_app.properties
 TestRowId_app.properties
 TestConnectionMethods_app.properties
-TestPreparedStatementMethods_app.properties
-aclob.txt
-littleclob.txt
 short.txt

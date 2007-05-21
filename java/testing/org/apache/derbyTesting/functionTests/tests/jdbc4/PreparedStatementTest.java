@@ -141,6 +141,9 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     public void tearDown() 
         throws Exception {
         
+        s.close();
+        ps.close();
+
         psFetchBlob.close();
         psFetchClob.close();
         psInsertBlob.close();
@@ -550,16 +553,28 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     
     public void testSetPoolable() throws SQLException {
+        // Set the poolable statement hint to false
+        ps.setPoolable(false);
+        assertFalse("Expected a non-poolable statement", ps.isPoolable());
+        // Set the poolable statement hint to true
+        ps.setPoolable(true);
+        assertTrue("Expected a non-poolable statement", ps.isPoolable());
+    }
+
+    /**
+     *
+     * Tests the PreparedStatement interface method setPoolable on a closed
+     * PreparedStatement
+     *
+     * @throws SQLException
+     */
+    public void testSetPoolableOnClosed() throws SQLException {
         try {
+            ps.close();
             // Set the poolable statement hint to false
             ps.setPoolable(false);
-            if (ps.isPoolable())
-                fail("Expected a non-poolable statement");
-            // Set the poolable statement hint to true
-            ps.setPoolable(true);
-            if (!ps.isPoolable())
-                fail("Expected a poolable statement");
-        } catch(SQLException sqle) {
+            fail("Expected an exception on closed statement");
+         } catch(SQLException sqle) {
             // Check which SQLException state we've got and if it is
             // expected, do not print a stackTrace
             // Embedded uses XJ012, client uses XCL31.
@@ -569,8 +584,6 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             } else {
                 fail("Unexpected SQLException " + sqle);
             }
-        } catch(Exception e) {
-            fail("Unexpected exception thrown in method " + e);
         }
     }
     
@@ -583,10 +596,23 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     
     public void testIsPoolable() throws SQLException {
+        // By default a prepared statement is poolable
+        assertTrue("Expected a poolable statement", ps.isPoolable());
+    }
+
+    /**
+     *
+     * Tests the PreparedStatement interface method isPoolable on closed
+     * PreparedStatement
+     *
+     * @throws SQLException
+     *
+     */
+    public void testIsPoolableOnClosed() throws SQLException {
         try {
-            // By default a prepared statement is poolable
-            if (!ps.isPoolable())
-                fail("Expected a poolable statement");
+            ps.close();
+            boolean p = ps.isPoolable();
+            fail("Should throw exception on closed statement");
         } catch(SQLException sqle) {
             // Check which SQLException state we've got and if it is
             // expected, do not print a stackTrace
@@ -597,11 +623,8 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             } else {
                 fail("Unexpected SQLException " + sqle);
             }
-        } catch(Exception e) {
-            fail("Unexpected exception thrown in method " + e);
         }
     }
-    
     
     /**
      *
