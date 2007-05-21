@@ -79,7 +79,8 @@ public final class SecurityManagerSetup extends TestSetup {
 	public static Test noSecurityManager(Test test)
 	{
 		if (externalSecurityManagerInstalled)
-			return new TestSuite();
+			return new TestSuite("skipped due to external security manager "
+                    + test.toString());
 		return new SecurityManagerSetup(test, "<NONE>");
 	}
 	
@@ -90,17 +91,16 @@ public final class SecurityManagerSetup extends TestSetup {
     public static Test noSecurityManager(TestSetup tSetup)
     {
 		if (externalSecurityManagerInstalled)
-			return new TestSuite();
+			return new TestSuite("skipped due to external security manager "
+                    + tSetup.toString());
 		return new SecurityManagerSetup(tSetup, "<NONE>");
     }
 
 	/**
-	 * Install a SecurityManager with the default test policy
-	 * file:
-	 * org/apache/derbyTesting/functionTests/util/derby_tests.policy
+	 * "Install" no security manager.
 	 * 
 	 */
-	static void noSecurityManager() throws PrivilegedActionException
+	static void noSecurityManager()
 	{
 		installSecurityManager("<NONE>");
 	}
@@ -109,7 +109,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * Install specific polciy file with the security manager
 	 * including the special case of no security manager.
 	 */
-	protected void setUp() throws PrivilegedActionException {
+	protected void setUp() {
 		installSecurityManager(decoratorPolicyResource);
 	}
     
@@ -137,13 +137,13 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * org/apache/derbyTesting/functionTests/util/derby_tests.policy
 	 * 
 	 */
-	static void installSecurityManager() throws PrivilegedActionException
+	static void installSecurityManager()
 	{
 		installSecurityManager( getDefaultPolicy() );
 	}
 	
 	private static void installSecurityManager(String policyFile)
-			throws PrivilegedActionException {
+			 {
 
 		if (externalSecurityManagerInstalled)
 			return;
@@ -191,7 +191,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	}
 	
 	private static void setSecurityPolicy(Properties set,
-			String policyResource) throws PrivilegedActionException
+			String policyResource)
 	{
 		if ("<NONE>".equals(policyResource)) {
 			set.setProperty("java.security.policy", policyResource);
@@ -369,7 +369,7 @@ public final class SecurityManagerSetup extends TestSetup {
      * Remove the security manager.
      */
     private static void uninstallSecurityManager()
-        throws PrivilegedActionException {
+    {
 
             AccessController.doPrivileged
             (

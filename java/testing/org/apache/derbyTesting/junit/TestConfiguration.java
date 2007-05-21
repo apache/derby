@@ -1155,7 +1155,7 @@ public class TestConfiguration {
      * for the current configuration.
      * @throws PrivilegedActionException 
      */
-    boolean defaultSecurityManagerSetup() throws PrivilegedActionException {
+    boolean defaultSecurityManagerSetup() {
     	
     	// Testing with the DB2 client has not been performed
     	// under the security manager since it's not part
