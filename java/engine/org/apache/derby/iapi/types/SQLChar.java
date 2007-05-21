@@ -73,7 +73,9 @@ import java.util.Locale;
 import java.util.Calendar;
 
 /**
- * SQLChar represents a VARCHAR value with UCS_BASIC collation.
+ * SQLChar represents a CHAR value with UCS_BASIC collation.
+ * SQLChar may be used directly by any code when it is guaranteed
+ * that the required collation is UCS_BASIC, e.g. system columns.
  */
 public class SQLChar
 	extends DataType implements StringDataValue, StreamStorable
