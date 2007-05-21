@@ -1,4 +1,4 @@
-/* 
+/*
 
    Derby - Class org.apache.derby.impl.jdbc.ClobStreamControl
 
@@ -35,7 +35,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.ByteArray;
 
 final class ClobStreamControl extends LOBStreamControl {
-    
+
     private ConnectionChild conChild;
 
     /**
@@ -48,8 +48,8 @@ final class ClobStreamControl extends LOBStreamControl {
     ClobStreamControl (String dbName, ConnectionChild conChild) {
         super (dbName);
         this.conChild = conChild;
-    }        
-    
+    }
+
     /**
      * Finds the corresponding byte position for the given UTF-8 character
      * position, starting from the byte position <code>startPos</code>.
@@ -82,7 +82,7 @@ final class ClobStreamControl extends LOBStreamControl {
                     //no second and third byte present
                     throw new UTFDataFormatException();
                 }
-                streamLength += 2;                
+                streamLength += 2;
             }
             else if ((c & 0x70) == 0x60) // we know the top bit is set here
             {
@@ -98,11 +98,11 @@ final class ClobStreamControl extends LOBStreamControl {
                 throw new UTFDataFormatException();
             }
         }
-        
+
         in.close();
-        return streamLength;        
+        return streamLength;
     }
-    
+
     /**
      * Constructs and returns a <code>Writer</code> for the CLOB value.
      *
@@ -118,7 +118,7 @@ final class ClobStreamControl extends LOBStreamControl {
                                 "" + (pos + 1));
         return new ClobUtf8Writer (this, getStreamPosition (0, charPos));
     }
-    
+
     /**
      * Constructs and returns a <code>Reader</code>.
      * @param pos initial position of the returned <code>Reader</code> in
@@ -137,8 +137,8 @@ final class ClobStreamControl extends LOBStreamControl {
             leftToSkip -= isr.skip (leftToSkip);
         }
         return isr;
-    }    
-    
+    }
+
     /**
      * Returns a substring.
      * @param bIndex 
@@ -147,9 +147,9 @@ final class ClobStreamControl extends LOBStreamControl {
      * @throws IOException
      * @throws SQLException
      */
-    synchronized String getSubstring (long bIndex, long eIndex) 
+    synchronized String getSubstring (long bIndex, long eIndex)
                                             throws IOException, SQLException {
-        Reader r = getReader(bIndex);        
+        Reader r = getReader(bIndex);
         char [] buff = new char [(int) (eIndex - bIndex)];
         int length = 0;
         do {
@@ -160,7 +160,7 @@ final class ClobStreamControl extends LOBStreamControl {
         } while (length < eIndex - bIndex);
         return new String (buff, 0, length);
     }
-    
+
     /**
      * returns number of charecter in the clob.
      * @return char length
@@ -177,7 +177,7 @@ final class ClobStreamControl extends LOBStreamControl {
         }while (true);
         return length;
     }
-    
+
     /**
      * Returns the size of the Clob in bytes.
      * @return Number of bytes in the <code>CLOB</code> value.
@@ -186,7 +186,7 @@ final class ClobStreamControl extends LOBStreamControl {
     long getByteLength () throws IOException {
         return super.getLength();
     }
-    
+
     /**
      * inserts a string at a given postion.
      * @param str 
@@ -194,7 +194,7 @@ final class ClobStreamControl extends LOBStreamControl {
      * @return current byte postion
      * @throws IOException
      */
-    synchronized long insertString (String str, long pos) 
+    synchronized long insertString (String str, long pos)
                                             throws IOException, SQLException {
         int len = str.length();
         if (pos == super.getLength()) {
@@ -207,7 +207,7 @@ final class ClobStreamControl extends LOBStreamControl {
         replaceBytes (getByteFromString (str), pos, endPos);
         return str.length();
     }
-    
+
     /**
      * Converts a string into utf8 byte array.
      * @param str 
@@ -236,5 +236,5 @@ final class ClobStreamControl extends LOBStreamControl {
         byte [] buff = new byte [len];
         System.arraycopy (buffer, 0, buff, 0, len);
         return buff;
-    } 
+    }
 }
