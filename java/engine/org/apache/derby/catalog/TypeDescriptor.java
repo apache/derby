@@ -21,6 +21,8 @@
 
 package org.apache.derby.catalog;
 
+import org.apache.derby.iapi.types.StringDataValue;
+
 /**
  *
  * An interface for describing types in Derby systems.
@@ -37,7 +39,6 @@ public interface TypeDescriptor
 	//	CONSTANTS
 	//
 	///////////////////////////////////////////////////////////////////////
-
 
 	/**
 	  The return value from getMaximumWidth() for types where the maximum
