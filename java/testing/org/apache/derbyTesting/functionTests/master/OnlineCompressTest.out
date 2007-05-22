@@ -83,3 +83,6 @@ Executing test: no delete case complete.
 Executing test: delete all rows case succeeded.
 Executing test: end simple deleteAllRows,104000 row test.
 Ending test: test6
+Beginning test: test7
+Executing test: delete rows case succeeded.
+Ending test: test7

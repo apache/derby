@@ -102,6 +102,12 @@ class HeapCompressScan
         int                     ret_row_count           = 0;
         DataValueDescriptor[]   fetch_row               = null;
 
+        // only fetch maximum number of rows per "group" as the size of
+        // the array.  If more than one group is available on page, just
+        // leave the scan on the page and the next group will come from
+        // this page also.
+        int                     max_rowcnt = row_array.length;
+
         if (SanityManager.DEBUG)
         {
             SanityManager.ASSERT(row_array != null);
@@ -175,6 +181,7 @@ class HeapCompressScan
 			while ((scan_position.current_slot + 1) < 
                     scan_position.current_page.recordCount())
 			{
+
                 // Allocate a new row to read the row into.
                 if (fetch_row == null)
                 {
@@ -191,6 +198,7 @@ class HeapCompressScan
 
                 // move scan current position forward.
                 scan_position.positionAtNextSlot();
+                int restart_slot = scan_position.current_slot;
 
                 this.stat_numrows_visited++;
 
@@ -226,7 +234,7 @@ class HeapCompressScan
                             new_handle) == 1)
                     {
                         // raw store moved the row, so bump the row count but 
-                        // postion the scan at previous slot, so next trip
+                        // position the scan at previous slot, so next trip
                         // through loop will pick up correct row.
                         // The subsequent rows will have been moved forward
                         // to take place of moved row.
@@ -244,6 +252,24 @@ class HeapCompressScan
                         fetch_row = null;
 
                     }
+                }
+
+                // Derby-2549. If ret_row_count reaches the limit of the buffer,
+                // then return the maximum number and come back into the same 
+                // method to fetch the remaining rows. In this block we ensure
+                // that the scan_position is appropriate.
+                if (ret_row_count >= max_rowcnt)
+                {
+                    // filled group buffer, exit fetch loop and return to caller
+
+                    // save current scan position by record handle.
+                    scan_position.current_rh =
+                        scan_position.current_page.getRecordHandleAtSlot(
+                            restart_slot);
+
+                    scan_position.unlatch();
+
+                    return(ret_row_count);
                 }
 			}
 

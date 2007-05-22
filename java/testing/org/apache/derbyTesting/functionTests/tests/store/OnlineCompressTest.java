@@ -1407,7 +1407,7 @@ public class OnlineCompressTest extends BaseTest
         // delete all the rows.
         ret_before = getSpaceInfo(conn, "APP", table_name, true);
         executeQuery(conn, "delete from " + table_name, true);
-	conn.commit();
+        conn.commit();
 
         if (verbose)
             testProgress("deleted all rows, now calling compress.");
@@ -1436,6 +1436,63 @@ public class OnlineCompressTest extends BaseTest
         endTest(conn, test_name);
     }
 
+    /**
+     * Test 7 - Online compress test for fetching more rows than buffer limit.
+     * <p>
+     * For smaller row size, if number of rows per page is more than max buffer
+     * size, then check if the remaining rows are also fetched for Compress 
+     * Operation
+     * <p>
+     **/
+    private void test7(
+    Connection  conn,
+    String      test_name,
+    String      table_name)
+        throws SQLException 
+    {
+        beginTest(conn, test_name);
+
+        Statement s = conn.createStatement();
+
+        s.execute("create table " + table_name + "(keycol int)");
+        s.close();
+        PreparedStatement insert_stmt = 
+            conn.prepareStatement("insert into " + table_name + " values(?)");
+        try
+        {
+            for (int i = 0; i < 1200; i++)
+            {
+                insert_stmt.setInt(1, i);
+
+                insert_stmt.execute();
+            }
+        }
+        catch (SQLException sqle)
+        {
+            System.out.println(
+                "Exception while trying to insert a row");
+            throw sqle;
+        }
+        conn.commit();
+
+        // delete the front rows leaving the last 200.  Post commit may reclaim
+        // space on pages where all rows are deleted.  
+        executeQuery(
+            conn, "delete from " + table_name + " where keycol < 1000", true);
+
+        conn.commit();
+
+        if (verbose)
+            testProgress("deleted first 1000 rows, now calling compress.");
+
+        callCompress(conn, "APP", table_name, true, true, true, true);
+
+        testProgress("delete rows case succeeded.");
+
+        executeQuery(conn, "drop table " + table_name, true);
+
+        endTest(conn, test_name);
+    }
 
     public void testList(Connection conn)
         throws SQLException
@@ -1445,7 +1502,8 @@ public class OnlineCompressTest extends BaseTest
         test3(conn, "test3", "TEST3");
         // test4(conn, "test4", "TEST4");
         test5(conn, "test5", "TEST5");
-	test6(conn, "test6", "TEST6");
+        test6(conn, "test6", "TEST6");
+        test7(conn, "test7", "TEST7");
     }
 
     public static void main(String[] argv) 
