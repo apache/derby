@@ -193,6 +193,12 @@ public void testDefaultCollation() throws SQLException {
 			" 'SYSCOLUMNS'",
       		new String[][] {{"SYSCOLUMNS"} });   
 
+      //Do some testing with MAX/MIN operators
+      checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
+      		new String[][] {{"\u017Bebra"}});   
+      checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
+      		new String[][] {{"Acorn"}});   
+
       s.close();
       conn.commit();
 
@@ -348,6 +354,12 @@ public void testPolishCollation() throws SQLException {
 			" 'SYSCOLUMNS'",
       		new String[][] {{"SYSCOLUMNS"} });   
 
+      //Do some testing with MAX/MIN operators
+      checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
+      		new String[][] {{"\u017Bebra"}});   
+      checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
+      		new String[][] {{"aacorn"}});   
+
       s.close();
       conn.commit();
 
@@ -501,6 +513,12 @@ public void testNorwayCollation() throws SQLException {
       		" NULLIF (CAST (TABLENAME AS CHAR(12)), 'c' ) = " +
 			" 'SYSCOLUMNS'",
       		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing with MAX/MIN operators
+      checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
+      		new String[][] {{"aacorn"}});   
+      checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
+      		new String[][] {{"Acorn"}});   
 
       s.close();
       conn.commit();
@@ -658,6 +676,12 @@ public void testEnglishCollation() throws SQLException {
       		" NULLIF (CAST (TABLENAME AS CHAR(12)), 'c' ) = " +
 			" 'SYSCOLUMNS'",
       		new String[][] {{"SYSCOLUMNS"} });   
+
+      //Do some testing with MAX/MIN operators
+      checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
+      		new String[][] {{"\u017Bebra"}});   
+      checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
+      		new String[][] {{"aacorn"}});   
       
       s.close();
       conn.commit();

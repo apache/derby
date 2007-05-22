@@ -743,17 +743,20 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * Get a ConstantNode to represent a typed null value
+	 * Get a ConstantNode to represent a typed null value. Then set it's 
+	 * collation type and derivation
 	 *
 	 * @param typeId	The TypeId of the datatype of the null value
 	 * @param cm		The ContextManager
+	 * @param collationType The collation type of the ConstantNode
+	 * @param collationDerivation The Collation Derivation of the ConstantNode
 	 *
 	 * @return	A ConstantNode with the specified type, and a value of null
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public  ConstantNode getNullNode(TypeId typeId,
-			ContextManager cm)
+			ContextManager cm, int collationType, int collationDerivation)
 		throws StandardException
 	{
 		QueryTreeNode constantNode = null;
@@ -907,7 +910,10 @@ public abstract class QueryTreeNode implements Visitable
 			}
 		}
 
-		return (ConstantNode) constantNode;
+		ConstantNode cn = (ConstantNode) constantNode;
+		cn.getTypeServices().setCollationType(collationType);
+		cn.getTypeServices().setCollationDerivation(collationDerivation);
+		return cn;
 	}
 
 	/**

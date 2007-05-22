@@ -346,7 +346,8 @@ public class ResultColumn extends ValueNode
 		throws StandardException
 	{
 		expression = getNullNode(getTypeId(), 
-									getContextManager());
+									getContextManager(), getTypeServices().getCollationType(),
+									getTypeServices().getCollationDerivation());
 	}
 
 	/**
@@ -700,7 +701,14 @@ public class ResultColumn extends ValueNode
 		}
 
         if( expression instanceof UntypedNullConstantNode)
-            expression = getNullNode( typeId, getContextManager());
+        	//since we don't know the type of such a constant node, we just
+        	//use the default values for collation type and derivation.
+        	//eg insert into table1 values(1,null)
+        	//When this method is executed for the sql above, we don't know
+        	//the type of the null at this point.
+            expression = getNullNode( typeId, getContextManager(),
+            		StringDataValue.COLLATION_TYPE_UCS_BASIC,
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
         else if( ( expression instanceof ColumnReference) && expression.getTypeServices() == null)
         {
             // The expression must be a reference to a null column in a values table.

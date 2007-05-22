@@ -1185,7 +1185,9 @@ public abstract class ResultSetNode extends QueryTreeNode
                     colType,
                     getNullNode(
                         colType.getTypeId(),
-                        getContextManager()
+                        getContextManager(), 
+						colType.getCollationType(),
+                        colType.getCollationDerivation()
                         ),
                     getContextManager()
                     );

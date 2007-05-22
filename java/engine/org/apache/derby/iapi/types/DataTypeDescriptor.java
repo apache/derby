@@ -302,10 +302,14 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	}
 
 	/**
-	 * Constructor for use with numeric types/non-numeric types. For instance,
-	 * when dealing with MAX/MIN aggregrade operators, we do not if we are
-	 * working with numeric or non-numeric types. Such a constructor will be
-	 * used in those cases. 
+	 * Constructor to use when the caller doesn't know if it is requesting
+	 * numeric or no-numeric DTD. For instance, when dealing with MAX/MIN 
+	 * aggregrate operators, AggregateNode.bindExpression could be dealing
+	 * with a character string operand or a numeric operand. The result of
+	 * MAX/MIN will depend on the type of it's operand. And hence when this
+	 * constructor gets called by AggregateNode.bindExpression, we don't know 
+	 * what type we are constructing and hence this constructor supports 
+	 * arguments for both numeric and non-numeric types.
 	 *
 	 * @param typeId	The typeId of the type being described
 	 * @param precision	The number of decimal digits.

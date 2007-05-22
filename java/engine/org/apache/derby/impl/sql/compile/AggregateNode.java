@@ -553,8 +553,11 @@ public class AggregateNode extends UnaryOperatorNode
 		** are created dynamically by the SortObservers
 		*/
 		ConstantNode nullNode = getNullNode(
-							compTypeId,
-							getContextManager());		// no params
+				compTypeId,
+				getContextManager(),
+				getTypeServices().getCollationType(),
+				getTypeServices().getCollationDerivation()
+				); // no params
 
 		nullNode.bindExpression(
 						null,	// from
@@ -620,7 +623,8 @@ public class AggregateNode extends UnaryOperatorNode
 		** it.
 		*/
 		return getNullNode(this.getTypeId(),
-							getContextManager());
+							getContextManager(), this.getTypeServices().getCollationType(),
+							this.getTypeServices().getCollationDerivation());
 	}
 
 	/**
