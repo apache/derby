@@ -176,7 +176,6 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	  *	A full list of foreign keys was compiled into this constant
 	  *	action.
 	  *
-	  *	@param	ec	the ExecutionContext
 	  *
 	  *	@return	the list of foreign keys to enforce for this action
 	  *
