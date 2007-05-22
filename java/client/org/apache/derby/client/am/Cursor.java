@@ -95,9 +95,7 @@ public abstract class Cursor {
     final static public java.lang.Boolean ROW_IS_NULL = new Boolean(true);
     final static public java.lang.Boolean ROW_IS_NOT_NULL = new Boolean(false);
 
-    java.sql.Date recyclableDate_ = null;
-    java.sql.Time recyclableTime_ = null;
-    java.sql.Timestamp recyclableTimestamp_ = null;
+    java.util.Calendar recyclableCalendar_ = null;
 
     // For the net, this data comes from the query descriptor.
 
@@ -511,7 +509,7 @@ public abstract class Cursor {
         try {
             return org.apache.derby.client.am.DateTime.dateBytesToDate(dataBuffer_,
                 columnDataPosition_[column - 1],
-                recyclableDate_, 
+                getRecyclableCalendar(), 
                 charsetName_[column - 1]);
         }catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -527,7 +525,7 @@ public abstract class Cursor {
         try {
             return org.apache.derby.client.am.DateTime.timeBytesToTime(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    recyclableTime_,
+                    getRecyclableCalendar(),
                     charsetName_[column - 1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -540,10 +538,10 @@ public abstract class Cursor {
     private final java.sql.Timestamp getTIMESTAMP(int column) throws SqlException {
 
         try {
-        return org.apache.derby.client.am.DateTime.timestampBytesToTimestamp(
+            return org.apache.derby.client.am.DateTime.timestampBytesToTimestamp(
                 dataBuffer_,
                 columnDataPosition_[column - 1],
-                recyclableTimestamp_, 
+                getRecyclableCalendar(), 
                 charsetName_[column - 1]);
     } catch (java.io.UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -557,7 +555,7 @@ public abstract class Cursor {
         try {
             return org.apache.derby.client.am.DateTime.dateBytesToTimestamp(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    recyclableTimestamp_, 
+                    getRecyclableCalendar(), 
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -571,7 +569,7 @@ public abstract class Cursor {
         try {
             return org.apache.derby.client.am.DateTime.timeBytesToTimestamp(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    recyclableTimestamp_,
+                    getRecyclableCalendar(),
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -585,7 +583,7 @@ public abstract class Cursor {
         try {
             return org.apache.derby.client.am.DateTime.timestampBytesToDate(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    recyclableDate_,
+                    getRecyclableCalendar(),
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -599,7 +597,7 @@ public abstract class Cursor {
         try {
             return org.apache.derby.client.am.DateTime.timestampBytesToTime(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    recyclableTime_,
+                    getRecyclableCalendar(),
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -647,6 +645,20 @@ public abstract class Cursor {
         bytes = new byte[columnLength];
         System.arraycopy(dataBuffer_, columnDataPosition_[column - 1] + 2, bytes, 0, bytes.length);
         return bytes;
+    }
+
+    /**
+     * Instantiate an instance of Calendar that can be re-used for getting
+     * Time, Timestamp, and Date values from this cursor.  Assumption is
+     * that all users of the returned Calendar object will clear it as
+     * appropriate before using it.
+     */
+    private java.util.Calendar getRecyclableCalendar()
+    {
+        if (recyclableCalendar_ == null)
+            recyclableCalendar_ = new java.util.GregorianCalendar();
+
+        return recyclableCalendar_;
     }
 
     abstract public Blob getBlobColumn_(int column, Agent agent) throws SqlException;
