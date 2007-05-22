@@ -213,6 +213,11 @@ public final class NetworkServerControlImpl {
 	private InetAddress hostAddress;
 	private int sessionArg;
 	private boolean unsecureArg;
+	
+	/** Any exception that occurs during 
+	 *  start up will be saved in this variable and
+	 *  thrown by the start method.
+	 */
 	private Exception runtimeException = null;
 
 	// Used to debug memory in SanityManager.DEBUG mode
@@ -235,6 +240,10 @@ public final class NetworkServerControlImpl {
 	private boolean traceAll;			// trace all sessions
 	private Object traceAllSync = new Object();	// object to use for syncing reading
 										// and changing trace all
+	/**
+	 * Object to sync the start of network server and wait until server startup is 
+	 * complete
+	 */
 	private Object serverStartSync = new Object();	// for syncing start of server.
 	private boolean logConnections;		// log connects
 	private Object logConnectionsSync = new Object(); // object to use for syncing 
@@ -594,6 +603,12 @@ public final class NetworkServerControlImpl {
 		    // up.     
 		   
 		    t.start();
+		    // We wait on the serverStartComplete object until
+		    // blocking_start sends a notify to tell us the 
+		    // server is up. Then we throw any exception that 
+		    // occurred on startup. blocking_start will remain
+		    // blocked on shutdownSync until it gets a shutdown
+		    // command.
 		    synchronized(serverStartComplete){
 		    	serverStartComplete.wait();
 		    }
