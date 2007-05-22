@@ -21,9 +21,8 @@
 
 package org.apache.derby.catalog;
 
-import java.security.AccessControlException;
 import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedAction;
 import java.security.Policy;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -77,20 +76,6 @@ public class SystemProcedures  {
      */
     public  static String SQLERRMC_MESSAGE_DELIMITER = new String(new char[] {(char)20,(char)20,(char)20});
 
-    public  static  class   ReloadPolicyAction   implements PrivilegedExceptionAction
-    {
-        public     ReloadPolicyAction() {}
-       
-        public  Object  run()
-        throws Exception
-        {
-            Policy          policy = Policy.getPolicy();
-            
-            policy.refresh();
-        
-            return null;
-        }
-    }
 	/**
 	  Method used by Derby Network Server to get localized message (original call
 	  from jcc.
@@ -1444,14 +1429,24 @@ public class SystemProcedures  {
     public static void SYSCS_RELOAD_SECURITY_POLICY()
         throws SQLException
     {
-        ReloadPolicyAction             reloadPolicyAction = new ReloadPolicyAction();
-
+        // If no security manager installed then there
+        // is no policy to refresh. Calling Policy.getPolicy().refresh()
+        // without a SecurityManager seems to lock in a policy with
+        // no permissions thus ignoring the system property java.security.policy
+        // when later installing a SecurityManager.
+        if (System.getSecurityManager() == null)
+            return;
+        
         try {
-            AccessController.doPrivileged( reloadPolicyAction );
-        }
-        catch (Exception e)
-        {
-            throw Util.policyNotReloaded( e );
+            AccessController.doPrivileged(
+                    new PrivilegedAction() {
+                        public Object run() {
+                            Policy.getPolicy().refresh();
+                            return null;
+                        }
+                    });
+        } catch (SecurityException se) {
+            throw Util.policyNotReloaded(se);
         }
     }
 
