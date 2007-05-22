@@ -161,6 +161,7 @@ public final class NetworkServerControlImpl {
     
 	private static String buildNumber;
 	private static String versionString;
+	
 	// we will use single or mixed, not double byte to reduce traffic on the
 	// wire, this is in keeping with JCC
 	// Note we specify UTF8 for the single byte encoding even though it can
@@ -212,6 +213,7 @@ public final class NetworkServerControlImpl {
 	private InetAddress hostAddress;
 	private int sessionArg;
 	private boolean unsecureArg;
+	private Exception runtimeException = null;
 
 	// Used to debug memory in SanityManager.DEBUG mode
 	private memCheck mc;
@@ -310,6 +312,7 @@ public final class NetworkServerControlImpl {
 	private static final int SSL_PEER_AUTHENTICATION = 2;
 
 	private int sslMode = SSL_OFF;
+	private Object  serverStartComplete = new Object();
 
     /**
      * Can EUSRIDPWD security mechanism be used with 
@@ -566,19 +569,40 @@ public final class NetworkServerControlImpl {
 	 *
 	 * @param consoleWriter   PrintWriter to which server console will be 
 	 *                        output. Null will disable console output.
-	 *
+	 *                        
+	 * 
 	 *		   
 	 * @exception Exception	throws an exception if an error occurs
 	 */
-	public void start(PrintWriter consoleWriter)
+	public void start(final PrintWriter consoleWriter)
 		throws Exception
-	{
-		DRDAServerStarter starter = new DRDAServerStarter();
-		starter.setStartInfo(hostAddress,portNumber,consoleWriter);
-        this.setLogWriter(consoleWriter);
-		startNetworkServer();
-		starter.boot(false,null);
+	{		
+		 
+		   Thread t = new Thread("NetworkServerControl") {
+			   
+		        public void run() {
+		          try {
+		        	  blockingStart(consoleWriter);
+		            } catch (Exception e) {
+		            	runtimeException = e;
+		            }
+		          }
+		        };
+		    // if there was an immediate error like
+		    // another server already running, throw it here.
+		    // ping is still required to verify the server is
+		    // up.     
+		   
+		    t.start();
+		    synchronized(serverStartComplete){
+		    	serverStartComplete.wait();
+		    }
+		    
+		    if (runtimeException != null)
+		    	throw runtimeException;		   
 	}
+	
+	
 
 	/**
 	 * Create the right kind of server socket
@@ -634,8 +658,8 @@ public final class NetworkServerControlImpl {
 	public void blockingStart(PrintWriter consoleWriter)
 		throws Exception
 	{
-		startNetworkServer();
 		setLogWriter(consoleWriter);
+		startNetworkServer();
 		cloudscapeLogWriter = Monitor.getStream().getPrintWriter();
 		if (SanityManager.DEBUG && debugOutput)
 		{
@@ -643,7 +667,7 @@ public final class NetworkServerControlImpl {
 			mc = new memCheck(200000);
 			mc.start();
 		}
-		// Open a server socket listener	  
+		// Open a server socket listener
 		try{
 			serverSocket = 
 				(ServerSocket) 
@@ -676,10 +700,15 @@ public final class NetworkServerControlImpl {
 			} else {
 				throw e1;
 			}
+		
 		} catch (Exception e) {
 		// If we find other (unexpected) errors, we ultimately exit--so make
 		// sure we print the error message before doing so (Beetle 5033).
 			throwUnexpectedException(e);
+		} finally {
+			synchronized (serverStartComplete) {
+				serverStartComplete.notifyAll();
+			}
 		}
 
 		switch (getSSLMode()) {
@@ -700,7 +729,7 @@ public final class NetworkServerControlImpl {
 				 getFormattedTimestamp()});
 			break;
 		}
-		
+
 		// We accept clients on a separate thread so we don't run into a problem
 		// blocking on the accept when trying to process a shutdown
 		ClientThread clientThread =	 
@@ -714,7 +743,9 @@ public final class NetworkServerControlImpl {
 								}
 							);
 		clientThread.start();
-			
+		
+
+		
 		// wait until we are told to shutdown or someone sends an InterruptedException
         synchronized(shutdownSync) {
             try {
@@ -790,7 +821,7 @@ public final class NetworkServerControlImpl {
 				}
 			}
 		}
-
+		 
 		consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
 						        {att_srvclsnm, versionString, 
 								getFormattedTimestamp()});
