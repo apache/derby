@@ -22,6 +22,8 @@
 package org.apache.derby.impl.sql.catalog;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -146,13 +148,13 @@ public class SYSSCHEMASRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSSCHEMAS_COLUMN_COUNT);
 
 		/* 1st column is SCHEMAID */
-		row.setColumn(1, dvf.getCharDataValue(uuid));
+		row.setColumn(1, new SQLChar(uuid));
 
 		/* 2nd column is SCHEMANAME */
-		row.setColumn(2, dvf.getVarcharDataValue(name));
+		row.setColumn(2, new SQLVarchar(name));
 
 		/* 3rd column is SCHEMAAID */
-		row.setColumn(3, dvf.getVarcharDataValue(aid));
+		row.setColumn(3, new SQLVarchar(aid));
 
 		return row;
 	}

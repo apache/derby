@@ -24,6 +24,7 @@ package org.apache.derby.impl.sql.catalog;
 import org.apache.derby.iapi.reference.Property;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -195,16 +196,16 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSSTATEMENTS_COLUMN_COUNT);
 
 		/* 1st column is STMTID */
-		row.setColumn(1, dvf.getCharDataValue(uuidStr));
+		row.setColumn(1, new SQLChar(uuidStr));
 
 		/* 2nd column is STMTNAME */
-		row.setColumn(2, dvf.getVarcharDataValue(name));
+		row.setColumn(2, new SQLVarchar(name));
 
 		/* 3rd column is SCHEMAID */
-		row.setColumn(3, dvf.getCharDataValue(suuidStr));
+		row.setColumn(3, new SQLChar(suuidStr));
 
 		/* 4th column is TYPE */
-		row.setColumn(4, dvf.getCharDataValue(typeStr));
+		row.setColumn(4, new SQLChar(typeStr));
 
 		/* 5th column is VALID */
 		row.setColumn(5, dvf.getDataValue(valid));
@@ -216,7 +217,7 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 		row.setColumn(7, new SQLTimestamp(time));
 
 		/* 8th column is COMPILATIONSCHEMAID */
-		row.setColumn(8, dvf.getCharDataValue(compUuidStr));
+		row.setColumn(8, new SQLChar(compUuidStr));
 
 		/* 9th column is USINGTEXT */
 		row.setColumn(9, dvf.getLongvarcharDataValue(usingText));

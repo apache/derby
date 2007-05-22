@@ -23,6 +23,8 @@ package org.apache.derby.impl.sql.catalog;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.types.TypeId;
@@ -192,37 +194,37 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSTRIGGERS_COLUMN_COUNT);
 
 		/* 1st column is TRIGGERID */
-		row.setColumn(1, dvf.getCharDataValue((uuid == null) ? null : uuid.toString()));
+		row.setColumn(1, new SQLChar((uuid == null) ? null : uuid.toString()));
 
 		/* 2nd column is TRIGGERNAME */
-		row.setColumn(2, dvf.getVarcharDataValue(name));
+		row.setColumn(2, new SQLVarchar(name));
 
 		/* 3rd column is SCHEMAID */
-		row.setColumn(3, dvf.getCharDataValue((suuid == null) ? null : suuid.toString()));
+		row.setColumn(3, new SQLChar((suuid == null) ? null : suuid.toString()));
 
 		/* 4th column is CREATIONTIMESTAMP */
 		row.setColumn(4, dvf.getDataValue(createTime));
 
 		/* 5th column is EVENT */
-		row.setColumn(5, dvf.getCharDataValue(event));
+		row.setColumn(5, new SQLChar(event));
 
 		/* 6th column is FIRINGTIME */
-		row.setColumn(6, dvf.getCharDataValue(time));
+		row.setColumn(6, new SQLChar(time));
 
 		/* 7th column is TYPE */
-		row.setColumn(7, dvf.getCharDataValue(type));
+		row.setColumn(7, new SQLChar(type));
 
 		/* 8th column is STATE */
-		row.setColumn(8, dvf.getCharDataValue(enabled));
+		row.setColumn(8, new SQLChar(enabled));
 
 		/* 9th column is TABLEID */
-		row.setColumn(9, dvf.getCharDataValue((tuuid == null) ? null : tuuid.toString()));
+		row.setColumn(9, new SQLChar((tuuid == null) ? null : tuuid.toString()));
 
 		/* 10th column is WHENSTMTID */
-		row.setColumn(10, dvf.getCharDataValue((whenSPSID == null) ? null : whenSPSID.toString()));
+		row.setColumn(10, new SQLChar((whenSPSID == null) ? null : whenSPSID.toString()));
 
 		/* 11th column is ACTIONSTMTID */
-		row.setColumn(11, dvf.getCharDataValue((actionSPSID == null) ? null : actionSPSID.toString()));
+		row.setColumn(11, new SQLChar((actionSPSID == null) ? null : actionSPSID.toString()));
 
 		/* 12th column is REFERENCEDCOLUMNS 
 		 *  (user type org.apache.derby.catalog.ReferencedColumns)
@@ -239,10 +241,10 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		row.setColumn(15, dvf.getDataValue(referencingNew));
 
 		/* 16th column is OLDREFERENCINGNAME */
-		row.setColumn(16, dvf.getVarcharDataValue(oldReferencingName));
+		row.setColumn(16, new SQLVarchar(oldReferencingName));
 
 		/* 17th column is NEWREFERENCINGNAME */
-		row.setColumn(17, dvf.getVarcharDataValue(newReferencingName));
+		row.setColumn(17, new SQLVarchar(newReferencingName));
 
 		return row;
 	}

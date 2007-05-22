@@ -36,6 +36,7 @@ import org.apache.derby.catalog.types.BaseTypeIdImpl;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
+import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -237,10 +238,10 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSCOLUMNS_COLUMN_COUNT);
 
 		/* 1st column is REFERENCEID (UUID - char(36)) */
-		row.setColumn(SYSCOLUMNS_REFERENCEID, dvf.getCharDataValue(tabID));
+		row.setColumn(SYSCOLUMNS_REFERENCEID, new SQLChar(tabID));
 
 		/* 2nd column is COLUMNNAME (varchar(128)) */
-		row.setColumn(SYSCOLUMNS_COLUMNNAME, dvf.getVarcharDataValue(colName));
+		row.setColumn(SYSCOLUMNS_COLUMNNAME, new SQLVarchar(colName));
 
 		/* 3rd column is COLUMNNUMBER (int) */
 		row.setColumn(SYSCOLUMNS_COLUMNNUMBER, dvf.getDataValue(colID));
@@ -254,7 +255,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 					  dvf.getDataValue(defaultSerializable));
 
 		/* 6th column is DEFAULTID (UUID - char(36)) */
-		row.setColumn(SYSCOLUMNS_COLUMNDEFAULTID, dvf.getCharDataValue(defaultID));
+		row.setColumn(SYSCOLUMNS_COLUMNDEFAULTID, new SQLChar(defaultID));
 
 		if (autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.CREATE_AUTOINCREMENT ||
 				autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE)

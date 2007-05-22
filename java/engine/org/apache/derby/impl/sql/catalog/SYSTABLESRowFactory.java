@@ -27,6 +27,8 @@ import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLVarchar;
 
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
@@ -200,19 +202,19 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSTABLES_COLUMN_COUNT);
 
 		/* 1st column is TABLEID (UUID - char(36)) */
-		row.setColumn(SYSTABLES_TABLEID, dvf.getCharDataValue(tableID));
+		row.setColumn(SYSTABLES_TABLEID, new SQLChar(tableID));
 
 		/* 2nd column is NAME (varchar(30)) */
-		row.setColumn(SYSTABLES_TABLENAME, dvf.getVarcharDataValue(tableName));
+		row.setColumn(SYSTABLES_TABLENAME, new SQLVarchar(tableName));
 
 		/* 3rd column is TABLETYPE (char(1)) */
-		row.setColumn(SYSTABLES_TABLETYPE, dvf.getCharDataValue(tabSType));
+		row.setColumn(SYSTABLES_TABLETYPE, new SQLChar(tabSType));
 
 		/* 4th column is SCHEMAID (UUID - char(36)) */
-		row.setColumn(SYSTABLES_SCHEMAID, dvf.getCharDataValue(schemaID));
+		row.setColumn(SYSTABLES_SCHEMAID, new SQLChar(schemaID));
 
 		/* 5th column is LOCKGRANULARITY (char(1)) */
-		row.setColumn(SYSTABLES_LOCKGRANULARITY, dvf.getCharDataValue(lockGranularity));
+		row.setColumn(SYSTABLES_LOCKGRANULARITY, new SQLChar(lockGranularity));
 
 		return row;
 	}
@@ -239,16 +241,16 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 		{
 		    case SYSTABLES_INDEX1_ID:
 				/* 1st column is TABLENAME (varchar(128)) */
-				row.setColumn(1, getDataValueFactory().getVarcharDataValue((String) null));
+				row.setColumn(1, new SQLVarchar());
 
 				/* 2nd column is SCHEMAID (UUID - char(36)) */
-				row.setColumn(2, getDataValueFactory().getCharDataValue((String) null));
+				row.setColumn(2, new SQLChar());
 
 				break;
 
 		    case SYSTABLES_INDEX2_ID:
 				/* 1st column is TABLEID (UUID - char(36)) */
-				row.setColumn(1, getDataValueFactory().getCharDataValue((String) null));
+				row.setColumn(1,new SQLChar());
 				break;
 		}	// end switch
 

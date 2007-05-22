@@ -23,6 +23,8 @@ package org.apache.derby.impl.sql.catalog;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.catalog.TypeDescriptor;
@@ -167,10 +169,10 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSCONGLOMERATES_COLUMN_COUNT);
 
 		/* 1st column is SCHEMAID (UUID - char(36)) */
-		row.setColumn(1, dvf.getCharDataValue(schemaID));
+		row.setColumn(1, new SQLChar(schemaID));
 
 		/* 2nd column is TABLEID (UUID - char(36)) */
-		row.setColumn(2, dvf.getCharDataValue(tabID));
+		row.setColumn(2, new SQLChar(tabID));
 
 		/* 3rd column is CONGLOMERATENUMBER (long) */
 		row.setColumn(3, dvf.getDataValue(conglomNumber));
@@ -180,8 +182,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 		** have a unique column
 		*/
 		row.setColumn(4, (conglomName == null) ?
-				dvf.getVarcharDataValue(tabID):
-				dvf.getVarcharDataValue(conglomName));
+                new SQLVarchar(tabID): new SQLVarchar(conglomName));
 
 		/* 5th  column is ISINDEX (boolean) */
 		row.setColumn(5, dvf.getDataValue(supportsIndex));
@@ -202,7 +203,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 		row.setColumn(7, dvf.getDataValue(supportsConstraint));
 
 		/* 8th column is CONGLOMERATEID (UUID - char(36)) */
-		row.setColumn(8, dvf.getCharDataValue(conglomUUIDString));
+		row.setColumn(8, new SQLChar(conglomUUIDString));
 
 		return row;
 	}

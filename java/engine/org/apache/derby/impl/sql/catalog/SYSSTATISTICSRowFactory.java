@@ -160,11 +160,11 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 			columnCount = statDesc.getColumnCount();
 		}
 
-		row.setColumn(1, dvf.getCharDataValue(myID));
-		row.setColumn(2, dvf.getCharDataValue(referenceID));
-		row.setColumn(3, dvf.getCharDataValue(tableID));
+		row.setColumn(1, new SQLChar(myID));
+		row.setColumn(2, new SQLChar(referenceID));
+		row.setColumn(3, new SQLChar(tableID));
 		row.setColumn(4, new SQLTimestamp(updateTime));
-		row.setColumn(5, dvf.getCharDataValue(statType));
+		row.setColumn(5, new SQLChar(statType));
   		row.setColumn(6, dvf.getDataValue(validStat));
 		row.setColumn(7, dvf.getDataValue(columnCount));
 		row.setColumn(8, dvf.getDataValue(statisticsObject));

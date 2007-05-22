@@ -35,6 +35,7 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.types.TypeId;
 
 /**
@@ -157,17 +158,17 @@ public class SYSVIEWSRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSVIEWS_COLUMN_COUNT);
 
 		/* 1st column is TABLEID (UUID - char(36)) */
-		row.setColumn(SYSVIEWS_TABLEID, dvf.getCharDataValue(tableID));
+		row.setColumn(SYSVIEWS_TABLEID, new SQLChar(tableID));
 
 		/* 2nd column is VIEWDEFINITION */
 		row.setColumn(SYSVIEWS_VIEWDEFINITION,
 				dvf.getLongvarcharDataValue(viewText));
 
 		/* 3rd column is CHECKOPTION (char(1)) */
-		row.setColumn(SYSVIEWS_CHECKOPTION, dvf.getCharDataValue(checkSType));
+		row.setColumn(SYSVIEWS_CHECKOPTION, new SQLChar(checkSType));
 
 		/* 4th column is COMPILATIONSCHEMAID (UUID - char(36)) */
-		row.setColumn(SYSVIEWS_COMPILATION_SCHEMAID, dvf.getCharDataValue(compSchemaId));
+		row.setColumn(SYSVIEWS_COMPILATION_SCHEMAID, new SQLChar(compSchemaId));
 
 		return row;
 	}

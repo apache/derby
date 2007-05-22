@@ -38,6 +38,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.types.StringDataValue;
 
 /**
@@ -133,16 +134,16 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
             triggerPriv = tpd.getTriggerPriv();
         }
         ExecRow row = getExecutionFactory().getValueRow( COLUMN_COUNT);
-        row.setColumn( TABLEPERMSID_COL_NUM, dvf.getCharDataValue(tablePermID));
+        row.setColumn( TABLEPERMSID_COL_NUM, new SQLChar(tablePermID));
         row.setColumn( GRANTEE_COL_NUM, grantee);
         row.setColumn( GRANTOR_COL_NUM, grantor);
-        row.setColumn( TABLEID_COL_NUM, dvf.getCharDataValue( tableID));
-        row.setColumn( SELECTPRIV_COL_NUM, dvf.getCharDataValue( selectPriv));
-        row.setColumn( DELETEPRIV_COL_NUM, dvf.getCharDataValue( deletePriv));
-        row.setColumn( INSERTPRIV_COL_NUM, dvf.getCharDataValue( insertPriv));
-        row.setColumn( UPDATEPRIV_COL_NUM, dvf.getCharDataValue( updatePriv));
-        row.setColumn( REFERENCESPRIV_COL_NUM,dvf.getCharDataValue(  referencesPriv));
-        row.setColumn( TRIGGERPRIV_COL_NUM, dvf.getCharDataValue( triggerPriv));
+        row.setColumn( TABLEID_COL_NUM, new SQLChar(tableID));
+        row.setColumn( SELECTPRIV_COL_NUM, new SQLChar(selectPriv));
+        row.setColumn( DELETEPRIV_COL_NUM, new SQLChar(deletePriv));
+        row.setColumn( INSERTPRIV_COL_NUM, new SQLChar(insertPriv));
+        row.setColumn( UPDATEPRIV_COL_NUM, new SQLChar(updatePriv));
+        row.setColumn( REFERENCESPRIV_COL_NUM, new SQLChar( referencesPriv));
+        row.setColumn( TRIGGERPRIV_COL_NUM, new SQLChar(triggerPriv));
 
         return row;
     } // end of makeRow
@@ -319,17 +320,17 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
             row = getExecutionFactory().getIndexableRow( 2);
             row.setColumn(1, getAuthorizationID( perm.getGrantee()));
             String tableUUIDStr = ((TablePermsDescriptor) perm).getTableUUID().toString();
-            row.setColumn(2, getDataValueFactory().getCharDataValue( tableUUIDStr));
+            row.setColumn(2, new SQLChar(tableUUIDStr));
             break;
         case TABLEPERMSID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             String tablePermsUUIDStr = perm.getObjectID().toString();
-            row.setColumn(1, getDataValueFactory().getCharDataValue( tablePermsUUIDStr));
+            row.setColumn(1, new SQLChar(tablePermsUUIDStr));
             break;
         case TABLEID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             tableUUIDStr = ((TablePermsDescriptor) perm).getTableUUID().toString();
-            row.setColumn(1, getDataValueFactory().getCharDataValue( tableUUIDStr));
+            row.setColumn(1, new SQLChar(tableUUIDStr));
             break;
         }
         return row;

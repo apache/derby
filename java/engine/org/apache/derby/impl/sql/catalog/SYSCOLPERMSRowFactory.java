@@ -35,6 +35,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
@@ -130,11 +131,11 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
             columns = cpd.getColumns();
         }
         ExecRow row = getExecutionFactory().getValueRow( COLUMN_COUNT);
-        row.setColumn( COLPERMSID_COL_NUM, dvf.getCharDataValue(colPermID));
+        row.setColumn( COLPERMSID_COL_NUM, new SQLChar(colPermID));
         row.setColumn( GRANTEE_COL_NUM, grantee);
         row.setColumn( GRANTOR_COL_NUM, grantor);
-        row.setColumn( TABLEID_COL_NUM, dvf.getCharDataValue( tableID));
-        row.setColumn( TYPE_COL_NUM, dvf.getCharDataValue( type));
+        row.setColumn( TABLEID_COL_NUM, new SQLChar(tableID));
+        row.setColumn( TYPE_COL_NUM, new SQLChar(type));
         row.setColumn( COLUMNS_COL_NUM, dvf.getDataValue( (Object) columns));
         return row;
     } // end of makeRow
@@ -209,19 +210,19 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
             row.setColumn(1, getAuthorizationID( perm.getGrantee()));
             ColPermsDescriptor colPerms = (ColPermsDescriptor) perm;
             String tableUUIDStr = colPerms.getTableUUID().toString();
-            row.setColumn(2, getDataValueFactory().getCharDataValue( tableUUIDStr));
-            row.setColumn(3, getDataValueFactory().getCharDataValue( colPerms.getType()));
+            row.setColumn(2, new SQLChar(tableUUIDStr));
+            row.setColumn(3, new SQLChar(colPerms.getType()));
             break;
         case COLPERMSID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             String colPermsUUIDStr = perm.getObjectID().toString();
-            row.setColumn(1, getDataValueFactory().getCharDataValue( colPermsUUIDStr));
+            row.setColumn(1, new SQLChar(colPermsUUIDStr));
             break;
         case TABLEID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             colPerms = (ColPermsDescriptor) perm;
             tableUUIDStr = colPerms.getTableUUID().toString();
-            row.setColumn(1, getDataValueFactory().getCharDataValue( tableUUIDStr));
+            row.setColumn(1, new SQLChar(tableUUIDStr));
             break;
         }
         return row;

@@ -76,6 +76,8 @@ import org.apache.derby.iapi.sql.execute.ScanQualifier;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.NumberDataValue;
 
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -1487,7 +1489,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					ti = coreInfo[SYSSCHEMAS_CORE_NUM];
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
-		UUIDStringOrderable = dvf.getCharDataValue(schemaId.toString());
+		UUIDStringOrderable = getIDValueAsCHAR(schemaId);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -1528,7 +1530,7 @@ public final class	DataDictionaryImpl
 		/* Use aliasNameOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		schemaNameOrderable = dvf.getVarcharDataValue(schemaName);
+		schemaNameOrderable = new SQLVarchar(schemaName);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -1726,7 +1728,7 @@ public final class	DataDictionaryImpl
 		/* Use schemaNameOrderable in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		schemaNameOrderable = dvf.getVarcharDataValue(schemaName);
+		schemaNameOrderable = new SQLVarchar(schemaName);
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = exFactory.getIndexableRow(1);
@@ -1829,8 +1831,8 @@ public final class	DataDictionaryImpl
 		/* Use tableNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		tableNameOrderable = dvf.getVarcharDataValue(tableName);
-		schemaIDOrderable = dvf.getCharDataValue(schemaUUID);
+		tableNameOrderable = new SQLVarchar(tableName);
+		schemaIDOrderable = new SQLChar(schemaUUID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
@@ -1942,7 +1944,7 @@ public final class	DataDictionaryImpl
 		/* Use tableNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		tableIDOrderable = dvf.getCharDataValue(tableUUID);
+		tableIDOrderable = new SQLChar(tableUUID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -2005,7 +2007,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor     schemaIdOrderable;
 		TransactionController	tc = getTransactionCompile();
 
-		schemaIdOrderable = getValueAsDVD(sd.getUUID());
+		schemaIdOrderable = getIDValueAsCHAR(sd.getUUID());
 
 		if (isSchemaReferenced(tc, coreInfo[SYSTABLES_CORE_NUM],
 					SYSTABLESRowFactory.SYSTABLES_INDEX1_ID,
@@ -2156,8 +2158,8 @@ public final class	DataDictionaryImpl
 		/* Use tableIdOrderable and schemaIdOrderable in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		tableNameOrderable = dvf.getVarcharDataValue(td.getName());
-		schemaIDOrderable = getValueAsDVD(schema.getUUID());
+		tableNameOrderable = new SQLVarchar(td.getName());
+		schemaIDOrderable = getIDValueAsCHAR(schema.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(2);
@@ -2192,8 +2194,8 @@ public final class	DataDictionaryImpl
 		/* Use tableIdOrderable and schemaIdOrderable in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		tableNameOrderable = dvf.getVarcharDataValue(td.getName());
-		schemaIDOrderable = getValueAsDVD(schema.getUUID());
+		tableNameOrderable = new SQLVarchar(td.getName());
+		schemaIDOrderable = getIDValueAsCHAR(schema.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(2);
@@ -2249,7 +2251,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl				ti = coreInfo[SYSCOLUMNS_CORE_NUM];
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
-		UUIDStringOrderable = dvf.getCharDataValue(uuid.toString());
+		UUIDStringOrderable = getIDValueAsCHAR(uuid);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -2310,7 +2312,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl                 ti              = coreInfo[SYSCOLUMNS_CORE_NUM];
 
 		/* Use refIDOrderable in both start and stop position for scan. */
-		refIDOrderable = getValueAsDVD(uuid);
+		refIDOrderable = getIDValueAsCHAR(uuid);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -2364,8 +2366,8 @@ public final class	DataDictionaryImpl
 		/* Use tableIDOrderable and columnNameOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		tableIdOrderable = getValueAsDVD(tableID);
-		columnNameOrderable = dvf.getVarcharDataValue(columnName);
+		tableIdOrderable = getIDValueAsCHAR(tableID);
+		columnNameOrderable = new SQLVarchar(columnName);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
@@ -2391,7 +2393,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		tableIdOrderable;
 
 		/* Use tableIDOrderable in both start and stop position for scan. */
-		tableIdOrderable = getValueAsDVD(tableID);
+		tableIdOrderable = getIDValueAsCHAR(tableID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -2419,7 +2421,7 @@ public final class	DataDictionaryImpl
 			return;
 
 		/* Use tableIDOrderable in both start and stop position for scan. */
-		tableIdOrderable = getValueAsDVD(tableID);
+		tableIdOrderable = getIDValueAsCHAR(tableID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -2501,7 +2503,7 @@ public final class	DataDictionaryImpl
 		// First get all the ColPermsDescriptor for the given tableid from   
 		//SYSCOLPERMS using getDescriptorViaIndex(). 
 		List permissionDescriptorsList;//all ColPermsDescriptor for given tableid
-		DataValueDescriptor		tableIDOrderable = getValueAsDVD(tableID);
+		DataValueDescriptor		tableIDOrderable = getIDValueAsCHAR(tableID);
 		TabInfoImpl	ti = getNonCoreTI(SYSCOLPERMS_CATALOG_NUM);
 		SYSCOLPERMSRowFactory rf = (SYSCOLPERMSRowFactory) ti.getCatalogRowFactory();
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -2607,7 +2609,7 @@ public final class	DataDictionaryImpl
 			return;
 
 		/* Use tableIDOrderable in both start and stop position for scan. */
-		routineIdOrderable = getValueAsDVD(routineID);
+		routineIdOrderable = getIDValueAsCHAR(routineID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -2745,8 +2747,8 @@ public final class	DataDictionaryImpl
 		/* Use objectID/columnName in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		refIDOrderable = getValueAsDVD(formerUUID);
-		columnNameOrderable = dvf.getVarcharDataValue(formerName);
+		refIDOrderable = getIDValueAsCHAR(formerUUID);
+		columnNameOrderable = new SQLVarchar(formerName);
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(2);
@@ -2874,7 +2876,7 @@ public final class	DataDictionaryImpl
 		/* Use viewIdOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		viewIdOrderable = dvf.getCharDataValue(viewID.toString());
+		viewIdOrderable = getIDValueAsCHAR(viewID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -2915,7 +2917,7 @@ public final class	DataDictionaryImpl
 		/* Use aliasNameOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		viewIdOrderable = getValueAsDVD(vd.getUUID());
+		viewIdOrderable = getIDValueAsCHAR(vd.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -2936,7 +2938,7 @@ public final class	DataDictionaryImpl
 	{
 		DataValueDescriptor		  idOrderable;
 		TabInfoImpl					  ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
-		idOrderable = dvf.getCharDataValue(id.toString());
+		idOrderable = getIDValueAsCHAR(id);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -2978,8 +2980,8 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		  nameOrderable;
 		TabInfoImpl					  ti = getNonCoreTI(SYSFILES_CATALOG_NUM);
 
-		nameOrderable = dvf.getVarcharDataValue(name);
-		schemaIDOrderable = dvf.getCharDataValue(schemaId.toString());
+		nameOrderable = new SQLVarchar(name);
+		schemaIDOrderable = getIDValueAsCHAR(schemaId);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
@@ -3023,7 +3025,7 @@ public final class	DataDictionaryImpl
 		/* Use tableIdOrderable and schemaIdOrderable in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		idOrderable = getValueAsDVD(fid.getUUID());
+		idOrderable = getIDValueAsCHAR(fid.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -3162,7 +3164,7 @@ public final class	DataDictionaryImpl
 		/* Use stmtIdOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		stmtIDOrderable = dvf.getCharDataValue(stmtUUID);
+		stmtIDOrderable = new SQLChar(stmtUUID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -3254,8 +3256,8 @@ public final class	DataDictionaryImpl
 		/* Use stmtNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		stmtNameOrderable = dvf.getVarcharDataValue(stmtName);
-		schemaIDOrderable = dvf.getCharDataValue(schemaUUID);
+		stmtNameOrderable = new SQLVarchar(stmtName);
+		schemaIDOrderable = new SQLChar(schemaUUID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
@@ -3471,7 +3473,7 @@ public final class	DataDictionaryImpl
 			updCols = new int[]	{SYSSTATEMENTSRowFactory.SYSSTATEMENTS_VALID} ;
 		}
 			
-		idOrderable = getValueAsDVD(spsd.getUUID());
+		idOrderable = getIDValueAsCHAR(spsd.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -3672,7 +3674,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		stmtIdOrderable;
 		TabInfoImpl					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 
-		stmtIdOrderable = getValueAsDVD(uuid);
+		stmtIdOrderable = getIDValueAsCHAR(uuid);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -3774,7 +3776,7 @@ public final class	DataDictionaryImpl
 				throws StandardException
 	{
 		TabInfoImpl					  ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
-		DataValueDescriptor triggerIdOrderable = dvf.getCharDataValue(uuid.toString());
+		DataValueDescriptor triggerIdOrderable = getIDValueAsCHAR(uuid);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -3812,8 +3814,8 @@ public final class	DataDictionaryImpl
 		/* Use triggerNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		triggerNameOrderable = dvf.getVarcharDataValue(name);
-		schemaIDOrderable = dvf.getCharDataValue(sd.getUUID().toString());
+		triggerNameOrderable = new SQLVarchar(name);
+		schemaIDOrderable = getIDValueAsCHAR(sd.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
@@ -3891,7 +3893,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 
 		/* Use tableIDOrderable in both start and stop positions for scan */
-		tableIDOrderable = getValueAsDVD(td.getUUID());
+		tableIDOrderable = getIDValueAsCHAR(td.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -3927,7 +3929,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		idOrderable;
 		TabInfoImpl					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 
-		idOrderable = getValueAsDVD(descriptor.getUUID());
+		idOrderable = getIDValueAsCHAR(descriptor.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -3968,7 +3970,7 @@ public final class	DataDictionaryImpl
 		/* Use objectID in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		IDOrderable = getValueAsDVD(formerUUID);
+		IDOrderable = getIDValueAsCHAR(formerUUID);
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -4051,7 +4053,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
-		UUIDStringOrderable = dvf.getCharDataValue(uuid.toString());
+		UUIDStringOrderable = getIDValueAsCHAR(uuid);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -4090,8 +4092,8 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 
 		/* Construct keys for both start and stop positions for scan */
-		constraintNameOrderable = dvf.getVarcharDataValue(constraintName);
-		UUIDStringOrderable = dvf.getCharDataValue(schemaID.toString());
+		constraintNameOrderable = new SQLVarchar(constraintName);
+		UUIDStringOrderable = getIDValueAsCHAR(schemaID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
@@ -4118,7 +4120,7 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor UUIDStringOrderable;
 
 		/* set up the start/stop position for the scan */
-		UUIDStringOrderable = dvf.getCharDataValue(td.getUUID().toString());
+		UUIDStringOrderable = getIDValueAsCHAR(td.getUUID());
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, UUIDStringOrderable);
 		
@@ -4310,7 +4312,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					  ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
 
 		/* Use tableIDOrderable in both start and stop positions for scan */
-		tableIDOrderable = getValueAsDVD(td.getUUID());
+		tableIDOrderable = getIDValueAsCHAR(td.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -4627,7 +4629,7 @@ public final class	DataDictionaryImpl
 		List fkList = newSList();
 
 		// Use constraintIDOrderable in both start and stop positions for scan
-		DataValueDescriptor constraintIDOrderable = getValueAsDVD(constraintId);
+		DataValueDescriptor constraintIDOrderable = getIDValueAsCHAR(constraintId);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -4698,7 +4700,7 @@ public final class	DataDictionaryImpl
 		try
 		{
 			/* Use tableIDOrderable in both start and stop positions for scan */
-			DataValueDescriptor orderable = getValueAsDVD(uuid);
+			DataValueDescriptor orderable = getIDValueAsCHAR(uuid);
 	
 			/* Set up the start/stop position for the scan */
 			ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -4728,8 +4730,7 @@ public final class	DataDictionaryImpl
               new FormatableBitSet(SYSCONSTRAINTSRowFactory.SYSCONSTRAINTS_COLUMN_COUNT);
 			columnToGetSet.set(columnNum - 1);
 
-			rowTemplate[columnNum - 1] = 
-                dvf.getNullChar((StringDataValue) null);
+			rowTemplate[columnNum - 1] = new SQLChar();
 	
 			// Scan the index and go to the data pages for qualifying rows 
 			scanController = tc.openScan(
@@ -4880,7 +4881,7 @@ public final class	DataDictionaryImpl
 		/* Use objectID/columnName in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		IDOrderable = getValueAsDVD(formerUUID);
+		IDOrderable = getIDValueAsCHAR(formerUUID);
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -4981,8 +4982,8 @@ public final class	DataDictionaryImpl
 		/* Use constraintNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for index 2 scan. 
 		 */
-		constraintNameOrderable = dvf.getVarcharDataValue(descriptor.getConstraintName());
-		schemaIDOrderable = getValueAsDVD(descriptor.getSchemaDescriptor().getUUID());
+		constraintNameOrderable = new SQLVarchar(descriptor.getConstraintName());
+		schemaIDOrderable = getIDValueAsCHAR(descriptor.getSchemaDescriptor().getUUID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow = (ExecIndexRow) exFactory.getIndexableRow(2);
@@ -5058,7 +5059,7 @@ public final class	DataDictionaryImpl
 		ti = getNonCoreTI(baseNum);
 
 		/* Use constraintIDOrderable in both start and stop positions for scan */
-		constraintIDOrderable = getValueAsDVD(constraintId);
+		constraintIDOrderable = getIDValueAsCHAR(constraintId);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -5208,7 +5209,7 @@ public final class	DataDictionaryImpl
 		/* Use constraintIdOrderable in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		constraintIdOrderable = getValueAsDVD(constraint.getUUID());
+		constraintIdOrderable = getIDValueAsCHAR(constraint.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -5235,7 +5236,7 @@ public final class	DataDictionaryImpl
 		SYSCHECKSRowFactory			rf = (SYSCHECKSRowFactory) ti.getCatalogRowFactory();
 
 		/* Use constraintIDOrderable in both start and stop positions for scan */
-		constraintIDOrderable = getValueAsDVD(constraintId);
+		constraintIDOrderable = getIDValueAsCHAR(constraintId);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -5270,7 +5271,7 @@ public final class	DataDictionaryImpl
 		/* Use constraintIdOrderable in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		constraintIdOrderable = getValueAsDVD(constraintId);
+		constraintIdOrderable = getIDValueAsCHAR(constraintId);
 
 		/* Set up the start/stop position for the scan */
 		checkRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -5431,7 +5432,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
-		UUIDStringOrderable = dvf.getCharDataValue(uuid.toString());
+		UUIDStringOrderable = getIDValueAsCHAR(uuid);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -5549,7 +5550,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
 		/* Use tableIDOrderable in both start and stop positions for scan */
-		tableIDOrderable = getValueAsDVD(td.getUUID());
+		tableIDOrderable = getIDValueAsCHAR(td.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow3 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -5591,8 +5592,8 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		  schemaIDOrderable = null;
 		TabInfoImpl					  ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
-		nameOrderable = dvf.getVarcharDataValue(indexName);
-		schemaIDOrderable = getValueAsDVD(sd.getUUID());
+		nameOrderable = new SQLVarchar(indexName);
+		schemaIDOrderable = getIDValueAsCHAR(sd.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow2 = exFactory.getIndexableRow(2);
@@ -5628,8 +5629,8 @@ public final class	DataDictionaryImpl
 		DataValueDescriptor		schemaIDOrderable = null;
 		TabInfoImpl					ti = coreInfo[SYSCONGLOMERATES_CORE_NUM];
 
-		nameOrderable = dvf.getVarcharDataValue(conglomerate.getConglomerateName());
-		schemaIDOrderable = getValueAsDVD(conglomerate.getSchemaID());
+		nameOrderable = new SQLVarchar(conglomerate.getConglomerateName());
+		schemaIDOrderable = getIDValueAsCHAR(conglomerate.getSchemaID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow2 = (ExecIndexRow) exFactory.getIndexableRow(2);
@@ -5661,7 +5662,7 @@ public final class	DataDictionaryImpl
 		/* Use tableIDOrderable in both start 
 		 * and stop position for index 3 scan. 
 		 */
-		tableIDOrderable = getValueAsDVD(td.getUUID());
+		tableIDOrderable = getIDValueAsCHAR(td.getUUID());
 
 		/* Set up the start/stop position for the scan */
 		keyRow3 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -5742,7 +5743,7 @@ public final class	DataDictionaryImpl
 		/* Use schemaNameOrderable in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		schemaNameOrderable = dvf.getVarcharDataValue(schemaName);
+		schemaNameOrderable = new SQLVarchar(schemaName);
 
 		/* Set up the start/stop position for the scan */
 		keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -5752,7 +5753,7 @@ public final class	DataDictionaryImpl
 		ExecRow row = rf.makeEmptyRow();
 
 		row.setColumn(SYSSCHEMASRowFactory.SYSSCHEMAS_SCHEMAAID,
-					  dvf.getVarcharDataValue(authorizationId));
+					  new SQLVarchar(authorizationId));
 
 		boolean[] bArray = {false, false};
 
@@ -5799,7 +5800,7 @@ public final class	DataDictionaryImpl
 			/* Use conglomIDOrderable in both start 
 			 * and stop position for index 1 scan. 
 			 */
-			conglomIDOrderable = getValueAsDVD(cds[i].getUUID());
+			conglomIDOrderable = getIDValueAsCHAR(cds[i].getUUID());
 
 			/* Set up the start/stop position for the scan */
 			keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -5839,7 +5840,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
 		/* Use dependentIDOrderable in both start and stop positions for scan */
-		dependentIDOrderable = dvf.getCharDataValue(dependentID);
+		dependentIDOrderable = new SQLChar(dependentID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -5876,7 +5877,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
 		/* Use providerIDOrderable in both start and stop positions for scan */
-		providerIDOrderable = dvf.getCharDataValue(providerID);
+		providerIDOrderable = new SQLChar(providerID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -5967,7 +5968,7 @@ public final class	DataDictionaryImpl
 		ExecIndexRow			keyRow1 = null;
 		UUID					dependentID = dd.getUUID();
 		UUID					providerID = dd.getProviderID();
-		DataValueDescriptor		dependentIDOrderable = getValueAsDVD(dependentID);
+		DataValueDescriptor		dependentIDOrderable = getIDValueAsCHAR(dependentID);
 		TabInfoImpl					ti = getNonCoreTI(SYSDEPENDS_CATALOG_NUM);
 
 		/* Use dependentIDOrderable in both start 
@@ -6022,7 +6023,7 @@ public final class	DataDictionaryImpl
 		/* Use dependentIDOrderable in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		dependentIDOrderable = getValueAsDVD(dependentsUUID);
+		dependentIDOrderable = getIDValueAsCHAR(dependentsUUID);
 
 		/* Set up the start/stop position for the scan */
 		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(1);
@@ -6063,7 +6064,7 @@ public final class	DataDictionaryImpl
 		rf = (SYSALIASESRowFactory) ti.getCatalogRowFactory();
 
 		/* Use UUIDStringOrderable in both start and stop positions for scan */
-		UUIDStringOrderable = dvf.getCharDataValue(uuid.toString());
+		UUIDStringOrderable = getIDValueAsCHAR(uuid);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
@@ -6103,14 +6104,14 @@ public final class	DataDictionaryImpl
 		/* Use aliasNameOrderable and aliasTypeOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		aliasNameOrderable = dvf.getVarcharDataValue(aliasName);
+		aliasNameOrderable = new SQLVarchar(aliasName);
 		char[] charArray = new char[1];
 		charArray[0] = nameSpace;
-		nameSpaceOrderable = dvf.getCharDataValue(new String(charArray));
+		nameSpaceOrderable = new SQLChar(new String(charArray));
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(3);
-		keyRow.setColumn(1, dvf.getCharDataValue(schemaId));
+		keyRow.setColumn(1, new SQLChar(schemaId));
 		keyRow.setColumn(2, aliasNameOrderable);
 		keyRow.setColumn(3, nameSpaceOrderable);
 
@@ -6221,24 +6222,20 @@ public final class	DataDictionaryImpl
 									TransactionController tc)
 			throws StandardException
 	{	
-		ExecIndexRow			keyRow1 = null;
-		DataValueDescriptor		aliasNameOrderable;
-		DataValueDescriptor		nameSpaceOrderable;
 		TabInfoImpl					ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
 
 		/* Use aliasNameOrderable and nameSpaceOrderable in both start 
 		 * and stop position for index 1 scan. 
 		 */
-		aliasNameOrderable = dvf.getVarcharDataValue(ad.getDescriptorName());
+
 		char[] charArray = new char[1];
 		charArray[0] = ad.getNameSpace();
-		nameSpaceOrderable = dvf.getCharDataValue(new String(charArray));
 
 		/* Set up the start/stop position for the scan */
-		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(3);
-		keyRow1.setColumn(1, dvf.getCharDataValue(ad.getSchemaUUID().toString()));
-		keyRow1.setColumn(2, aliasNameOrderable);
-		keyRow1.setColumn(3, nameSpaceOrderable);
+        ExecIndexRow keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(3);
+		keyRow1.setColumn(1, getIDValueAsCHAR(ad.getSchemaUUID()));
+		keyRow1.setColumn(2, new SQLVarchar(ad.getDescriptorName()));
+		keyRow1.setColumn(3, new SQLChar(new String(charArray)));
 
 		ti.deleteRow( tc, keyRow1, SYSALIASESRowFactory.SYSALIASES_INDEX1_ID );
 
@@ -6865,8 +6862,8 @@ public final class	DataDictionaryImpl
 		/* Use tableNameOrderable and schemaIdOrderable in both start 
 		 * and stop position for scan. 
 		 */
-		tableNameOrderable = dvf.getVarcharDataValue(tableName);
-		schemaIDOrderable = dvf.getCharDataValue(schemaUUID);
+		tableNameOrderable = new SQLVarchar(tableName);
+		schemaIDOrderable = new SQLChar(schemaUUID);
 
 		/* Set up the start/stop position for the scan */
 		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
@@ -6908,7 +6905,7 @@ public final class	DataDictionaryImpl
 												indexTemplateRow.nColumns());
 	
 			/* 1st column is TABLEID (UUID - char(36)) */
-			row.setColumn(SYSTABLESRowFactory.SYSTABLES_TABLEID, dvf.getCharDataValue((String) null));
+			row.setColumn(SYSTABLESRowFactory.SYSTABLES_TABLEID, new SQLChar());
 			FormatableBitSet bi = new FormatableBitSet(1);
 			bi.set(0);
 			boolean base_row_exists = 
@@ -7432,12 +7429,11 @@ public final class	DataDictionaryImpl
 	  *
 	  *	@return	the UUID converted to an DataValueDescriptor
 	 *
-	 * @exception StandardException		Thrown on error
 	 */
-	public DataValueDescriptor getValueAsDVD( UUID uuid ) throws StandardException
+	private static SQLChar getIDValueAsCHAR(UUID uuid)
 	{
 		String	uuidString = uuid.toString();
-		return 	dvf.getCharDataValue(uuidString);
+		return 	new SQLChar(uuidString);
 	}
 
 	/**
@@ -8285,8 +8281,8 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = null;
 
 		keyRow = (ExecIndexRow)exFactory.getIndexableRow(2);
-		keyRow.setColumn(1, dvf.getCharDataValue(tableUUID.toString()));
-  		keyRow.setColumn(2, dvf.getCharDataValue(columnName));
+		keyRow.setColumn(1, getIDValueAsCHAR(tableUUID));
+  		keyRow.setColumn(2, new SQLChar(columnName));
 		
 		SYSCOLUMNSRowFactory	rf = (SYSCOLUMNSRowFactory) ti.getCatalogRowFactory();
 		ExecRow row = rf.makeEmptyRow();
@@ -8341,8 +8337,8 @@ public final class	DataDictionaryImpl
 		UUID tableUUID = td.getUUID();
 
 		keyRow = (ExecIndexRow)exFactory.getIndexableRow(2);
-		keyRow.setColumn(1, dvf.getCharDataValue(tableUUID.toString()));
-  		keyRow.setColumn(2, dvf.getCharDataValue(columnName));
+		keyRow.setColumn(1, getIDValueAsCHAR(tableUUID));
+  		keyRow.setColumn(2, new SQLChar(columnName));
 		return ti.getRowLocation(tc, keyRow, 
 								 SYSCOLUMNSRowFactory.SYSCOLUMNS_INDEX1_ID);
 	}
@@ -8426,13 +8422,13 @@ public final class	DataDictionaryImpl
 	{
 		TabInfoImpl					ti = getNonCoreTI(SYSSTATISTICS_CATALOG_NUM);
 		DataValueDescriptor first, second;
-		first = dvf.getCharDataValue(tableUUID.toString());
+		first = getIDValueAsCHAR(tableUUID);
 
 		ExecIndexRow keyRow;
 		if (referenceUUID != null)
 		{
 			keyRow = exFactory.getIndexableRow(2);
-			second = dvf.getCharDataValue(referenceUUID.toString());
+			second = getIDValueAsCHAR(referenceUUID);
 			keyRow.setColumn(2, second);
 		}
 		else

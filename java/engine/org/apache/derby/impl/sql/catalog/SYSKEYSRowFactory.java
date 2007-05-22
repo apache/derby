@@ -36,6 +36,7 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.SQLChar;
 
 /**
  * Factory for creating a SYSKEYS row.
@@ -125,9 +126,9 @@ public class SYSKEYSRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSKEYS_COLUMN_COUNT);
 
 		/* 1st column is CONSTRAINTID (UUID - char(36)) */
-		row.setColumn(SYSKEYS_CONSTRAINTID, dvf.getCharDataValue(constraintID));
+		row.setColumn(SYSKEYS_CONSTRAINTID, new SQLChar(constraintID));
 		/* 2nd column is CONGLOMERATEID (UUID - char(36)) */
-		row.setColumn(SYSKEYS_CONGLOMERATEID, dvf.getCharDataValue(conglomerateID));
+		row.setColumn(SYSKEYS_CONGLOMERATEID, new SQLChar(conglomerateID));
 
 		return row;
 	}

@@ -32,6 +32,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.StringDataValue;
 
 abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
@@ -48,12 +49,12 @@ abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
 
     DataValueDescriptor getAuthorizationID( String value)
     {
-        return getDataValueFactory().getVarcharDataValue( value);
+        return new SQLVarchar(value);
     }
 
     DataValueDescriptor getNullAuthorizationID()
     {
-        return getDataValueFactory().getNullVarchar( (StringDataValue) null);
+        return new SQLVarchar();
     }
 
     /**

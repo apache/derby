@@ -41,6 +41,8 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLVarchar;
 
 /**
  * Factory for creating a SYSCONTRAINTS row.
@@ -184,22 +186,22 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSCONSTRAINTS_COLUMN_COUNT);
 
 		/* 1st column is CONSTRAINTID (UUID - char(36)) */
-		row.setColumn(SYSCONSTRAINTS_CONSTRAINTID, dvf.getCharDataValue(constraintID));
+		row.setColumn(SYSCONSTRAINTS_CONSTRAINTID, new SQLChar(constraintID));
 
 		/* 2nd column is TABLEID (UUID - char(36)) */
-		row.setColumn(SYSCONSTRAINTS_TABLEID, dvf.getCharDataValue(tableID));
+		row.setColumn(SYSCONSTRAINTS_TABLEID, new SQLChar(tableID));
 
 		/* 3rd column is NAME (varchar(128)) */
-		row.setColumn(SYSCONSTRAINTS_CONSTRAINTNAME, dvf.getVarcharDataValue(constraintName));
+		row.setColumn(SYSCONSTRAINTS_CONSTRAINTNAME, new SQLVarchar(constraintName));
 
 		/* 4th column is TYPE (char(1)) */
-		row.setColumn(SYSCONSTRAINTS_TYPE, dvf.getCharDataValue(constraintSType));
+		row.setColumn(SYSCONSTRAINTS_TYPE, new SQLChar(constraintSType));
 
 		/* 5th column is SCHEMAID (UUID - char(36)) */
-		row.setColumn(SYSCONSTRAINTS_SCHEMAID, dvf.getCharDataValue(schemaID));
+		row.setColumn(SYSCONSTRAINTS_SCHEMAID, new SQLChar(schemaID));
 
 		/* 6th column is STATE (char(1)) */
-		row.setColumn(SYSCONSTRAINTS_STATE, dvf.getCharDataValue(isEnabled ? "E" : "D"));
+		row.setColumn(SYSCONSTRAINTS_STATE, new SQLChar(isEnabled ? "E" : "D"));
 
 		/* 7th column is REFERENCED */
 		row.setColumn(SYSCONSTRAINTS_REFERENCECOUNT, dvf.getDataValue(referenceCount));

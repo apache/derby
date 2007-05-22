@@ -36,6 +36,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
@@ -117,11 +118,11 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
                 routineID = rpd.getRoutineUUID().toString();
         }
 		ExecRow row = getExecutionFactory().getValueRow( COLUMN_COUNT);
-		row.setColumn( ROUTINEPERMSID_COL_NUM, dvf.getCharDataValue(routinePermID));
+		row.setColumn( ROUTINEPERMSID_COL_NUM, new SQLChar(routinePermID));
         row.setColumn( GRANTEE_COL_NUM, grantee);
         row.setColumn( GRANTOR_COL_NUM, grantor);
-        row.setColumn( ALIASID_COL_NUM, dvf.getCharDataValue( routineID));
-        row.setColumn( GRANTOPTION_COL_NUM, dvf.getCharDataValue( "N"));
+        row.setColumn( ALIASID_COL_NUM, new SQLChar(routineID));
+        row.setColumn( GRANTOPTION_COL_NUM, new SQLChar("N"));
         return row;
     } // end of makeRow
             
@@ -231,17 +232,17 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
             row = getExecutionFactory().getIndexableRow( 2);
             row.setColumn(1, getAuthorizationID( perm.getGrantee()));
             String routineUUIDStr = ((RoutinePermsDescriptor) perm).getRoutineUUID().toString();
-            row.setColumn(2, getDataValueFactory().getCharDataValue( routineUUIDStr));
+            row.setColumn(2, new SQLChar(routineUUIDStr));
             break;
         case ROUTINEPERMSID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             String routinePermsUUIDStr = perm.getObjectID().toString();
-            row.setColumn(1, getDataValueFactory().getCharDataValue( routinePermsUUIDStr));
+            row.setColumn(1, new SQLChar(routinePermsUUIDStr));
             break;
         case ALIASID_INDEX_NUM:
             row = getExecutionFactory().getIndexableRow( 1);
             routineUUIDStr = ((RoutinePermsDescriptor) perm).getRoutineUUID().toString();
-            row.setColumn(1, getDataValueFactory().getCharDataValue( routineUUIDStr));
+            row.setColumn(1, new SQLChar(routineUUIDStr));
             break;
         }
         return row;

@@ -39,6 +39,7 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.SQLChar;
 
 /**
  * Factory for creating a SYSFOREIGNKEYS row.
@@ -141,20 +142,20 @@ public class SYSFOREIGNKEYSRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getIndexableRow(SYSFOREIGNKEYS_COLUMN_COUNT);
 
 		/* 1st column is CONSTRAINTID (UUID - char(36)) */
-		row.setColumn(SYSFOREIGNKEYS_CONSTRAINTID, dvf.getCharDataValue(constraintId));
+		row.setColumn(SYSFOREIGNKEYS_CONSTRAINTID, new SQLChar(constraintId));
 
 		/* 2nd column is CONGLOMERATEID (UUID - char(36)) */
-		row.setColumn(SYSFOREIGNKEYS_CONGLOMERATEID, dvf.getCharDataValue(conglomId));
+		row.setColumn(SYSFOREIGNKEYS_CONGLOMERATEID, new SQLChar(conglomId));
 
 		/* 3rd column is KEYCONSTRAINTID (UUID - char(36)) */
-		row.setColumn(SYSFOREIGNKEYS_KEYCONSTRAINTID, dvf.getCharDataValue(keyConstraintId));
+		row.setColumn(SYSFOREIGNKEYS_KEYCONSTRAINTID, new SQLChar(keyConstraintId));
 
 		// currently, DELETERULE and UPDATERULE are always "R" for restrict
 		/* 4th column is DELETERULE char(1) */
-		row.setColumn(SYSFOREIGNKEYS_DELETERULE, dvf.getCharDataValue(raDeleteRule));
+		row.setColumn(SYSFOREIGNKEYS_DELETERULE, new SQLChar(raDeleteRule));
 
 		/* 5th column is UPDATERULE char(1) */
-		row.setColumn(SYSFOREIGNKEYS_UPDATERULE, dvf.getCharDataValue(raUpdateRule));
+		row.setColumn(SYSFOREIGNKEYS_UPDATERULE, new SQLChar(raUpdateRule));
 
 		return row;
 	}

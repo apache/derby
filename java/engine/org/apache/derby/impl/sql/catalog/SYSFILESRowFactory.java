@@ -33,6 +33,8 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
@@ -146,13 +148,13 @@ class SYSFILESRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getValueRow(SYSFILES_COLUMN_COUNT);
 
 		/* 1st column is ID (UUID - char(36)) */
-		row.setColumn(ID_COL_NUM, dvf.getCharDataValue(id_S));
+		row.setColumn(ID_COL_NUM, new SQLChar(id_S));
 
 		/* 2nd column is SCHEMAID (UUID - char(36)) */
-		row.setColumn(SCHEMA_ID_COL_NUM, dvf.getCharDataValue(schemaId_S));
+		row.setColumn(SCHEMA_ID_COL_NUM, new SQLChar(schemaId_S));
 
 		/* 3rd column is NAME (varchar(30)) */
-		row.setColumn(NAME_COL_NUM, dvf.getVarcharDataValue(SQLname));
+		row.setColumn(NAME_COL_NUM, new SQLVarchar(SQLname));
 
 		/* 4th column is GENERATIONID (long) */
 		row.setColumn(GENERATION_ID_COL_NUM, dvf.getDataValue(generationId));

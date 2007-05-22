@@ -36,6 +36,8 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLVarchar;
 
 
 /**
@@ -188,26 +190,26 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 		ExecRow row = getExecutionFactory().getValueRow(SYSALIASES_COLUMN_COUNT);
 
 		/* 1st column is ALIASID (UUID - char(36)) */
-		row.setColumn(SYSALIASES_ALIASID, dvf.getCharDataValue(aliasID));
+		row.setColumn(SYSALIASES_ALIASID, new SQLChar(aliasID));
 
 		/* 2nd column is ALIAS (varchar(128))) */
-		row.setColumn(SYSALIASES_ALIAS, dvf.getVarcharDataValue(aliasName));
+		row.setColumn(SYSALIASES_ALIAS, new SQLVarchar(aliasName));
 		//		System.out.println(" added row-- " + aliasName);
 
 		/* 3rd column is SCHEMAID (UUID - char(36)) */
-		row.setColumn(SYSALIASES_SCHEMAID, dvf.getCharDataValue(schemaID));
+		row.setColumn(SYSALIASES_SCHEMAID, new SQLChar(schemaID));
 
 		/* 4th column is JAVACLASSNAME (longvarchar) */
 		row.setColumn(SYSALIASES_JAVACLASSNAME, dvf.getLongvarcharDataValue(javaClassName));
 
 		/* 5th column is ALIASTYPE (char(1)) */
-		row.setColumn(SYSALIASES_ALIASTYPE, dvf.getCharDataValue(sAliasType));
+		row.setColumn(SYSALIASES_ALIASTYPE, new SQLChar(sAliasType));
 
 		/* 6th column is NAMESPACE (char(1)) */
 		String sNameSpace = new String(new char[] { cNameSpace });
 
 		row.setColumn
-			(SYSALIASES_NAMESPACE, dvf.getCharDataValue(sNameSpace));
+			(SYSALIASES_NAMESPACE, new SQLChar(sNameSpace));
 
 
 		/* 7th column is SYSTEMALIAS (boolean) */
@@ -220,7 +222,7 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 
 		/* 9th column is specific name */
 		row.setColumn
-			(SYSALIASES_SPECIFIC_NAME, dvf.getVarcharDataValue(specificName));
+			(SYSALIASES_SPECIFIC_NAME, new SQLVarchar(specificName));
 
 
 		return row;

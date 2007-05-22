@@ -40,6 +40,7 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.SQLChar;
 
 /**
  * Factory for creating a SYSCHECKS row.
@@ -129,7 +130,7 @@ class SYSCHECKSRowFactory extends CatalogRowFactory
 		row = getExecutionFactory().getIndexableRow(SYSCHECKS_COLUMN_COUNT);
 
 		/* 1st column is CONSTRAINTID (UUID - char(36)) */
-		row.setColumn(SYSCHECKS_CONSTRAINTID, dvf.getCharDataValue(constraintID));
+		row.setColumn(SYSCHECKS_CONSTRAINTID, new SQLChar(constraintID));
 
 		/* 2nd column is CHECKDEFINITION */
 		row.setColumn(SYSCHECKS_CHECKDEFINITION,

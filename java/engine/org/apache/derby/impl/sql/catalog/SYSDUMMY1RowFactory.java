@@ -38,6 +38,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
 
@@ -87,7 +88,7 @@ class SYSDUMMY1RowFactory extends CatalogRowFactory
 	{
 		ExecRow row = getExecutionFactory().getValueRow(SYSDUMMY1_COLUMN_COUNT);
 		
-		row.setColumn(1, dvf.getCharDataValue("Y"));
+		row.setColumn(1, new SQLChar("Y"));
 		return row;
 	}
 	
