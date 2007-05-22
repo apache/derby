@@ -32,6 +32,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.info.JVMInfo;
 
+import org.apache.derby.iapi.types.SQLInteger;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.types.NumberDataValue;
@@ -95,7 +96,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.INT_MAXWIDTH;
 				typeid = Types.INTEGER;
-				setValue(getDataValueFactory().getDataValue((Integer) arg1));
+				setValue(new SQLInteger((Integer) arg1));
 			}
 			break;
 

@@ -151,7 +151,7 @@ abstract class SQLBinary
 	int streamValueLength;
 
 	/**
-		no-arg constructor, required by Formattable.
+		Create a binary value set to NULL
 	*/
 	SQLBinary()
 	{

@@ -244,7 +244,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		row.setColumn(SYSCOLUMNS_COLUMNNAME, new SQLVarchar(colName));
 
 		/* 3rd column is COLUMNNUMBER (int) */
-		row.setColumn(SYSCOLUMNS_COLUMNNUMBER, dvf.getDataValue(colID));
+		row.setColumn(SYSCOLUMNS_COLUMNNUMBER, new SQLInteger(colID));
 
 		/* 4th column is COLUMNDATATYPE */
 		row.setColumn(SYSCOLUMNS_COLUMNDATATYPE,

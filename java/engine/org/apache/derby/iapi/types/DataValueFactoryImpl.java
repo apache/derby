@@ -146,16 +146,11 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         {
                 if (previous == null)
                 {
-                        return getDataValue(value);
+                        return new SQLInteger(value);
                 }
 
                 previous.setValue(value);
                 return previous;
-        }
-
-        public NumberDataValue getDataValue(char value)
-        {
-                return new SQLInteger(value);
         }
 
         public NumberDataValue getDataValue(char value, NumberDataValue previous)
@@ -165,11 +160,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         return new SQLInteger(value);
                 previous.setValue(value);
                 return previous;
-        }
-
-        public NumberDataValue getDataValue(short value)
-        {
-                return new SQLSmallint(value);
         }
 
         public NumberDataValue getDataValue(short value, NumberDataValue previous)
@@ -197,11 +187,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 
                 previous.setValue(value);
                 return previous;
-        }
-
-        public NumberDataValue getDataValue(byte value)
-        {
-                return new SQLTinyint(value);
         }
 
         public NumberDataValue getDataValue(byte value, NumberDataValue previous)
@@ -263,12 +248,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public NumberDataValue getDataValue(float value)
-                throws StandardException
-        {
-                return new SQLReal(value);
-        }
-
         public NumberDataValue getDataValue(float value, NumberDataValue previous)
                         throws StandardException
         {
@@ -295,11 +274,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 
                 previous.setValue(value);
                 return previous;
-        }
-
-        public NumberDataValue getDataValue(double value) throws StandardException
-        {
-                return new SQLDouble(value);
         }
 
         public NumberDataValue getDataValue(double value, NumberDataValue previous)
@@ -414,11 +388,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public BitDataValue getVarbitDataValue(byte[] value)
-        {
-                return new SQLVarbit(value);
-        }
-
         public BitDataValue getVarbitDataValue(byte[] value, BitDataValue previous)
                         throws StandardException
         {
@@ -431,11 +400,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 
         // LONGVARBIT
 
-        public BitDataValue getLongVarbitDataValue(byte[] value) throws StandardException
-        {
-                return new SQLLongVarbit(value);
-        }
-
         public BitDataValue getLongVarbitDataValue(byte[] value, BitDataValue previous)
                         throws StandardException
         {
@@ -446,10 +410,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         }
 
         // BLOB
-        public BitDataValue getBlobDataValue(byte[] value) throws StandardException
-        {
-                return new SQLBlob(value);
-        }
 
         public BitDataValue getBlobDataValue(byte[] value, BitDataValue previous)
                         throws StandardException
@@ -494,11 +454,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         public StringDataValue getLongvarcharDataValue(String value)
         {
                 return new SQLLongvarchar(value);
-        }
-
-        public StringDataValue getClobDataValue(String value)
-        {
-                return new SQLClob(value);
         }
 
         public StringDataValue getLongvarcharDataValue(String value,
@@ -667,11 +622,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public RefDataValue getDataValue(RowLocation value)
-        {
-                return new SQLRef(value);
-        }
-
         public RefDataValue getDataValue(RowLocation value, RefDataValue previous)
         {
                 if (previous == null)
@@ -789,7 +739,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         {
                 if (dataValue == null)
                 {
-                        return getVarbitDataValue((byte[]) null);
+                        return new SQLVarbit();
                 }
                 else
                 {
@@ -803,7 +753,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         {
                 if (dataValue == null)
                 {
-                        return getLongVarbitDataValue((byte[]) null);
+                        return new SQLLongVarbit();
                 }
                 else
                 {
@@ -817,7 +767,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         {
                 if (dataValue == null)
                 {
-                        return getBlobDataValue((byte[]) null);
+                        return new SQLBlob();
                 }
                 else
                 {
@@ -870,7 +820,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         {
                 if (dataValue == null)
                 {
-                        return getClobDataValue((String) null);
+                        return new SQLClob();
                 }
                 else
                 {
@@ -948,7 +898,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         {
                 if (dataValue == null)
                 {
-                        return getDataValue((RowLocation) null);
+                        return new SQLRef();
                 }
                 else
                 {
@@ -1044,18 +994,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         return new SQLTimestamp( timestampStr, isJdbcEscape, getLocaleFinder());
     } // end of getTimestampValue( String timestampStr)
 
-
-    /**
-     * getXMLDataValue:
-     * Get a SQL null value with XML type.
-     * @return An XMLDataValue instance corresponding to a
-     *  a NULL value.
-     */
-    public XMLDataValue getXMLDataValue()
-    {
-        return new XML();
-    }
-
     /**
      * getXMLDataValue:
      * Get a null XML  value.  If a non-null XMLDataValue is
@@ -1089,7 +1027,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     public XMLDataValue getNullXML(XMLDataValue dataValue)
     {
         if (dataValue == null)
-            return getXMLDataValue();
+            return new XML();
         else {
             dataValue.setToNull();
             return dataValue;

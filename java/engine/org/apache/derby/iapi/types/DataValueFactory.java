@@ -41,21 +41,19 @@ public interface DataValueFactory
 {
         /**
          * Get a SQL int with the given value.  A null argument means get
-         * a SQL null value.  The second form uses the previous value (if non-null)
+         * a SQL null value.  Uses the previous value (if non-null)
          * to hold the return value.
          *
          */
-        NumberDataValue         getDataValue(Integer value);
         NumberDataValue         getDataValue(Integer value, NumberDataValue previous)
                                                         throws StandardException;
 
         /**
          * Get a SQL int with a char value.  A null argument means get
-         * a SQL null value.  The second form uses the previous value (if non-null)
+         * a SQL null value.  Uses the previous value (if non-null)
          * to hold the return value.
          *
          */
-        public NumberDataValue getDataValue(char value);
         public NumberDataValue getDataValue(char value, NumberDataValue previous)
                                                         throws StandardException;
 
@@ -124,12 +122,11 @@ public interface DataValueFactory
 
         /**
          * Get a SQL Long Bit Varying with the given value.  A null argument means
-         * get a SQL null value.  The second form uses the previous value (if
+         * get a SQL null value.  Uses the previous value (if
          * non-null) to hold the return value.
          *
          * @exception StandardException         Thrown on error
          */
-        BitDataValue            getLongVarbitDataValue(byte[] value) throws StandardException;
         BitDataValue            getLongVarbitDataValue(byte[] value,
                                                                                                 BitDataValue previous)
                                                         throws StandardException;
@@ -138,12 +135,11 @@ public interface DataValueFactory
 
         /**
          * Get a SQL Blob with the given value.  A null argument means
-         * get a SQL null value.  The second form uses the previous value (if
+         * get a SQL null value.  Uses the previous value (if
          * non-null) to hold the return value.
          *
          * @exception StandardException         Thrown on error
          */
-        BitDataValue            getBlobDataValue(byte[] value) throws StandardException;
         BitDataValue            getBlobDataValue(byte[] value,
                                                                                                 BitDataValue previous)
                                                         throws StandardException;
@@ -183,7 +179,6 @@ public interface DataValueFactory
          * (if non-null) to hold the return value.
          *
          */
-        StringDataValue         getClobDataValue(String value);
         StringDataValue         getClobDataValue(String value, StringDataValue previous) throws StandardException;
 
         /**
@@ -227,11 +222,10 @@ public interface DataValueFactory
 
         /**
          * Get a RefDataValue with the given value.  A null argument means get
-         * a SQL null value.  The second form uses the previous value (if non-null)
+         * a SQL null value.  Uses the previous value (if non-null)
          * to hold the return value.
          *
          */
-        RefDataValue            getDataValue(RowLocation value);
         RefDataValue            getDataValue(RowLocation value, RefDataValue previous);
 
         /**
@@ -253,40 +247,34 @@ public interface DataValueFactory
                                                         throws StandardException;
 
         /**
-         * Get a SQL real with the given value.  The second form
-         * re-uses the previous value, if non-null, as the data holder to return.
+         * Get a SQL real with the given value.  Uses the previous value, if non-null, as the data holder to return.
          *
          * @exception StandardException         Thrown on error
          */
-        NumberDataValue         getDataValue(float value) throws StandardException;
         NumberDataValue         getDataValue(float value, NumberDataValue previous)
                                                         throws StandardException;
 
         /**
-         * Get a SQL double precision with the given value.  The second form
-         * re-uses the previous value, if non-null, as the data holder to return.
+         * Get a SQL double precision with the given value.  Uses the previous value, if non-null, as the data holder to return.
          *
          * @exception StandardException         Thrown on error
          */
-        NumberDataValue         getDataValue(double value) throws StandardException;
         NumberDataValue         getDataValue(double value, NumberDataValue previous)
                                                         throws StandardException;
 
         /**
-         * Get a SQL SMALLINT with the given value.  The second form re-uses the
+         * Get a SQL SMALLINT with the given value.  Uses the
          * previous value, if non-null, as the data holder to return.
          *
          */
-        NumberDataValue         getDataValue(short value);
-        NumberDataValue         getDataValue(short value, NumberDataValue previous)
+         NumberDataValue         getDataValue(short value, NumberDataValue previous)
                                                         throws StandardException;
 
         /**
-         * Get a SQL TINYINT with the given value.  The second form re-uses the
+         * Get a SQL TINYINT with the given value. Uses the
          * previous value, if non-null, as the data holder to return.
          *
          */
-        NumberDataValue         getDataValue(byte value);
         NumberDataValue         getDataValue(byte value, NumberDataValue previous)
                                                         throws StandardException;
 
@@ -341,25 +329,24 @@ public interface DataValueFactory
                                                         throws StandardException;
 
         /**
-         * Get a SQL bit with the given value.  The second form re-uses the
+         * Get a SQL bit with the given value.  Uses the
          * previous value, if non-null, as the data holder to return.
          *
          * @exception StandardException         Thrown on error
          */
-        BitDataValue            getVarbitDataValue(byte[] value) throws StandardException;
         BitDataValue            getVarbitDataValue(byte[] value, BitDataValue previous)
                                                         throws StandardException;
 
         /**
-         * Get a new SQLChar object to represent a SQL CHAR with the given value.
-         * A null argument means get a SQL NULL value.
+         * Get a new SQLChar object to represent a SQL CHAR (UCS_BASIC)
+         * with the given value. A null argument means get a SQL NULL value.
          *
          */
         StringDataValue         getCharDataValue(String value);
         
         /**
-         * Get a SQLChar object to represent a SQL CHAR with the given value.
-         * A null argument means get a SQL NULL value.
+         * Get a SQLChar object to represent a SQL CHAR  (UCS_BASIC
+         * with the given value. A null argument means get a SQL NULL value.
          * If previous is not null (Java reference) then it will be set
          * to the value passed in and returned, otherwise a new SQLChar
          * will be created and set to the value.
@@ -465,10 +452,9 @@ public interface DataValueFactory
         public DateTimeDataValue getTimestampValue( String timestampStr, boolean isJdbcEscape) throws StandardException;
 
         /**
-         * Get a null XML value. The second form re-uses the previous value,
+         * Get a null XML value. Uses the previous value,
          * if non-null, as the data holder to return.
          */
-        XMLDataValue getXMLDataValue();
         XMLDataValue getXMLDataValue(XMLDataValue previous)
 			throws StandardException;
 
