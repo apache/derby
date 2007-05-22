@@ -39,10 +39,7 @@ import java.util.Calendar;
 
 /**
  * The DataValueDescriptor interface provides methods to get the data from
- * a column returned by a statement.  This interface has the same methods
- * as NoCastDataValueDescriptor - the only reason it exists is for purposes
- * of internal documentation, to make it clear when the different getXXX
- * methods throw exceptions for illegal conversions.
+ * a column returned by a statement.
  * <p>
  * This interface matches the getXXX methods on java.sql.ResultSet. This means
  * everyone satisfies getString and getObject; all of the numeric types, within

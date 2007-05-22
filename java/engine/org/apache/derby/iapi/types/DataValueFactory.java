@@ -351,12 +351,20 @@ public interface DataValueFactory
                                                         throws StandardException;
 
         /**
-         * Get a SQL char with the given value.  A null argument means get
-         * a SQL null value.  The second form re-uses the previous value,
-         * if non-null, as the data holder to return.
+         * Get a new SQLChar object to represent a SQL CHAR with the given value.
+         * A null argument means get a SQL NULL value.
          *
          */
         StringDataValue         getCharDataValue(String value);
+        
+        /**
+         * Get a SQLChar object to represent a SQL CHAR with the given value.
+         * A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new SQLChar
+         * will be created and set to the value.
+         *
+         */
         StringDataValue         getCharDataValue(String value, StringDataValue previous)
                                                         throws StandardException;
 
