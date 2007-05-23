@@ -59,7 +59,7 @@ public interface DataFactory extends Corruptable {
 	 */
 	public static final String DB_LOCKFILE_NAME = "db.lck";
 
-	/*
+	/**
 	** file name that is used to acquire exclusive lock on DB.
 	**/
 	public static final String DB_EX_LOCKFILE_NAME = "dbex.lck";
@@ -292,7 +292,7 @@ public interface DataFactory extends Corruptable {
 	public void encryptAllContainers(RawTransaction t) 
         throws StandardException;
 
-    /*
+    /**
      * Remove old versions of the containers after (re)encryption 
      * of the  database. 
      * @param inRecovery  <code> true </code>, if cleanup is 
@@ -302,7 +302,7 @@ public interface DataFactory extends Corruptable {
     public void removeOldVersionOfContainers(boolean inRecovery) 
         throws StandardException;
 
-    /*
+    /**
      * Set that the database is encrypted.
      */
     public void setDatabaseEncrypted();
