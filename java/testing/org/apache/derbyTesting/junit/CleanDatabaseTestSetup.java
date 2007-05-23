@@ -175,7 +175,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
                 try {
                     JDBC.dropSchema(dmd, schema);
                 } catch (SQLException e) {
-                    sqle = null;
+                    sqle = e;
                 }
             }
             // No errors means all the schemas we wanted to

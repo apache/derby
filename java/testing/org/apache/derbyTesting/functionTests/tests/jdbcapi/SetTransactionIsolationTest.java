@@ -270,7 +270,6 @@ public class SetTransactionIsolationTest extends BaseJDBCTestCase {
                 s.executeUpdate("create table t3 (i integer)");
                 
 
-                s.close();
                 CallableStatement cs = conn
                         .prepareCall("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY (?, ?)");
                 cs.setString(1, "derby.locks.waitTimeout");

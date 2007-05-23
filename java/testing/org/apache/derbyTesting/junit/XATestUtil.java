@@ -57,9 +57,8 @@ public class XATestUtil {
      * Create a view that allows useful inspection of the active
      * global transactions.
     */
-    public static void createXATransactionView(Connection conn) throws SQLException
+    public static void createXATransactionView(Statement s) throws SQLException
     {
-        Statement s = conn.createStatement();
         s.execute(
                 "create view XATESTUTIL.global_xactTable as " +
                 "select  cast(global_xid as char(2)) as gxid," +
@@ -67,7 +66,6 @@ public class XATestUtil {
                 " CAST (case when first_instant is NULL then 'NULL' else 'false' end AS VARCHAR(8)) as readOnly, " +
                 " cast (username as char(10)) as username, type " +
                 " from syscs_diag.transaction_table");
-        s.close();
     }
     
     /**

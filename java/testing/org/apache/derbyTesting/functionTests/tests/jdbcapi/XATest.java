@@ -1002,8 +1002,7 @@ public class XATest extends BaseJDBCTestCase {
              * 
              */
             protected void decorateSQL(Statement s) throws SQLException {
-                Connection conn = getConnection();
-                XATestUtil.createXATransactionView(conn);
+                XATestUtil.createXATransactionView(s);
             }
 
         };
