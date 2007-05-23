@@ -90,7 +90,6 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 				s.execute("create table t2 ( s smallint, c char(10), r real, ts timestamp )");
                                 s.execute("create table t3 (i int not null constraint t3pk primary key, b char(10))");
 				s.execute("create table t4 (c1 int)");	
-                        	s.close();
             		}
         	};
     	} 

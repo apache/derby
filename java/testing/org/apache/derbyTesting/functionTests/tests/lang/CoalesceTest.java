@@ -191,19 +191,12 @@ public class CoalesceTest extends BaseJDBCTestCase
     }
 
     /**
-     * Create a suite of tests.
+     * Create a suite of tests, run only in embedded since
+     * this is testing server-side behaviour.
      **/
     public static Test suite() {
-        TestSuite suite = new TestSuite("CoalesceTest");
-        suite.addTest(baseSuite("CoalesceTest:embedded"));
-        suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("CoalesceTest:client")));
-        return suite;
-    }
-
-    protected static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
-        suite.addTestSuite(CoalesceTest.class);
-
+        Test suite = TestConfiguration.embeddedSuite(CoalesceTest.class);
+        
         return new CleanDatabaseTestSetup(suite) 
         {
             protected void decorateSQL(Statement stmt) throws SQLException
@@ -230,7 +223,6 @@ public class CoalesceTest extends BaseJDBCTestCase
                     createSQL.append(SQLData[SQLTypes.length - 1][row]+")");
                     stmt.executeUpdate(createSQL.toString());
                 }
-                stmt.close();
             }
         };
 

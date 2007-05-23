@@ -725,8 +725,6 @@ public class ScrollCursors1Test extends BaseJDBCTestCase {
                                 + "                   ('f', 6), ('g', 7), ('h', 8), ('i', 9),"
                                 + "                   ('j', 10), ('k', 11), ('l', 12), ('m', 13)");
 
-                
-                getConnection().setAutoCommit(false);
             }
         };
     }

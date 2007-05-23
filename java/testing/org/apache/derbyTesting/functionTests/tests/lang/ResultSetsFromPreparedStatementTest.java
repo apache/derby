@@ -504,7 +504,6 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
                     ResultSetsFromPreparedStatementTest.apply(ps, emp);
                     c.commit();
                     ps.close();
-                    s.close();
 
                     // No, cannot do this here. Will crash
                     // CleanDatabaseTestSetup.setUp()

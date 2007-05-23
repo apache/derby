@@ -84,11 +84,13 @@ public void testDefaultCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("defaultdb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true");
-      setUpTable(ds);
+
       
       Connection conn = ds.getConnection();
       conn.setAutoCommit(false);
       Statement s = conn.createStatement();
+      
+      setUpTable(s);
 
       //The collation should be UCS_BASIC for this database
       checkLangBasedQuery(s, 
@@ -199,10 +201,12 @@ public void testDefaultCollation() throws SQLException {
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
       		new String[][] {{"Acorn"}});   
 
-      s.close();
+
       conn.commit();
 
-      dropTable(ds);
+      dropTable(s);
+      s.close();
+      conn.close();
       }
       
   /**
@@ -213,11 +217,13 @@ public void testPolishCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("poldb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=pl;collation=TERRITORY_BASED");
-      setUpTable(ds);
+
       
       Connection conn = ds.getConnection();
       conn.setAutoCommit(false);
       Statement s = conn.createStatement();
+      
+      setUpTable(s);
 
       //The collation should be TERRITORY_BASED for this database
       checkLangBasedQuery(s, 
@@ -360,10 +366,13 @@ public void testPolishCollation() throws SQLException {
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
       		new String[][] {{"aacorn"}});   
 
-      s.close();
+
       conn.commit();
 
-      dropTable(ds);
+      dropTable(s);
+      s.close();
+      conn.close();
+      
       }    
   
 
@@ -376,11 +385,12 @@ public void testNorwayCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("nordb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=no;collation=TERRITORY_BASED");
-      setUpTable(ds);
+
       
       Connection conn = ds.getConnection();
       conn.setAutoCommit(false);
       Statement s = conn.createStatement();
+      setUpTable(s);
 
       //The collation should be TERRITORY_BASED for this database
       checkLangBasedQuery(s, 
@@ -520,10 +530,12 @@ public void testNorwayCollation() throws SQLException {
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
       		new String[][] {{"Acorn"}});   
 
-      s.close();
+
       conn.commit();
 
-      dropTable(ds);
+      dropTable(s);
+      s.close();
+      conn.close();
       }
   
 
@@ -536,11 +548,12 @@ public void testEnglishCollation() throws SQLException {
       DataSource ds = JDBCDataSource.getDataSourceLogical("endb");
       JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
                   "create=true;territory=en;collation=TERRITORY_BASED");
-      setUpTable(ds);
+
       
       Connection conn = ds.getConnection();
       conn.setAutoCommit(false);
       Statement s = conn.createStatement();
+      setUpTable(s);
 
       //The collation should be TERRITORY_BASED for this database
       checkLangBasedQuery(s, 
@@ -683,18 +696,20 @@ public void testEnglishCollation() throws SQLException {
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
       		new String[][] {{"aacorn"}});   
       
-      s.close();
+
       conn.commit();
       
-      dropTable(ds);
+      dropTable(s);
+      s.close();
+      conn.close();
       }
 
-private void setUpTable(DataSource ds) throws SQLException {
-	Connection conn = ds.getConnection();
-	Statement s = conn.createStatement();
-    s.execute("CREATE TABLE CUSTOMER(ID INT, NAME VARCHAR(40))");
+private void setUpTable(Statement s) throws SQLException {
 
-    conn.setAutoCommit(false);
+    s.execute("CREATE TABLE CUSTOMER(ID INT, NAME VARCHAR(40))");
+    
+    Connection conn = s.getConnection();
+
     PreparedStatement ps = conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?)");
     for (int i = 0; i < NAMES.length; i++)
     {
@@ -705,15 +720,12 @@ private void setUpTable(DataSource ds) throws SQLException {
 
     conn.commit();
     ps.close();
-    s.close();
 }
 
-private void dropTable(DataSource ds) throws SQLException {
-	Connection conn = ds.getConnection();
-	Statement s = conn.createStatement();
+private void dropTable(Statement s) throws SQLException {
 	
     s.execute("DROP TABLE CUSTOMER");     
-    s.close();
+    s.getConnection().commit();
 }
 
 /**
@@ -735,9 +747,13 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
     	JDBC.assertFullResultSet(rs,expectedResult);
 }
     
+  /**
+   * Tests only need to run in embedded since collation
+   * is a server side operation.
+   */
   public static Test suite() {
 
-        Test test =  TestConfiguration.defaultSuite(CollationTest.class);
+        Test test =  TestConfiguration.embeddedSuite(CollationTest.class);
         test = TestConfiguration.additionalDatabaseDecorator(test, "defaultdb");
         test = TestConfiguration.additionalDatabaseDecorator(test, "endb");
         test = TestConfiguration.additionalDatabaseDecorator(test, "nordb");

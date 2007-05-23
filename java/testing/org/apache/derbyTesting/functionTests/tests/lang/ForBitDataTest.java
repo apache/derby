@@ -903,7 +903,6 @@ public class ForBitDataTest extends BaseJDBCTestCase {
                 		for (int i = 0; i < TABLES.length; i++) {
                     			s.execute(TABLES[i]);
                 		}
-                        	s.close();
             		}
         	};
     	} 

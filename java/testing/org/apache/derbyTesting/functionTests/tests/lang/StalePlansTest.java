@@ -68,6 +68,7 @@ public class StalePlansTest extends BaseJDBCTestCase {
                 for (int i = 0; i < 64; i++) {
                     ps.executeUpdate();
                 }
+                ps.close();
             }
         };
     }

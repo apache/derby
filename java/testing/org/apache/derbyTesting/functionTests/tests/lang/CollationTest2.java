@@ -731,7 +731,7 @@ public class CollationTest2 extends BaseJDBCTestCase
     
     public static Test suite() {
 
-        Test test =  TestConfiguration.defaultSuite(CollationTest2.class);
+        Test test =  TestConfiguration.embeddedSuite(CollationTest2.class);
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_DEFAULT]);
         test = TestConfiguration.additionalDatabaseDecorator(

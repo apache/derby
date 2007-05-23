@@ -672,9 +672,12 @@ public static String[][]SQLData =
             return "'" + str + "'";
     }
 
+    /**
+     * Testing server-side behaviour so run in embedded only.
+     */
     public static Test suite() {
 
-        return TestConfiguration.defaultSuite(CastingTest.class);
+        return TestConfiguration.embeddedSuite(CastingTest.class);
 
     }
 }

@@ -600,7 +600,6 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 s.execute("insert into t2 values '123 ', 'abc ', '123', 'abc'") ;
                 s.execute("insert into t3 values (1,1), (2,2), (2,2), (3,3), (null, null), (5,100)");
 
-                s.close();
               }
             }; 
         return wrapper;
