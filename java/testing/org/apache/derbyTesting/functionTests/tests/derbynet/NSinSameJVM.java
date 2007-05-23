@@ -100,13 +100,6 @@ public class NSinSameJVM {
 			// sure the thread closes down.
 			// connection.close();
 			
-            // DERBY-1465 Make sure attempt to start another
-            // server on the same port fails.
-            try {
-            	serverControl.start(null);
-            	System.out.println("FAIL: Should have gotten exception");
-            } catch (Exception e) {// expecting exception 
-            	}
 			System.out.println("getting ready to shutdown");
 			serverControl.shutdown();
 			Thread.sleep(5000);

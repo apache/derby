@@ -3,3 +3,4 @@ Apache Derby Network Server - 10.3.0.0 alpha -(EXPECTED SUBVERSION INFO)  starte
 main-NSinSameJVM: NetworkServer started
 main-NSinSameJVM: Connected to database NSinSameJVMTestDB;create=true
 getting ready to shutdown
+Apache Derby Network Server - 10.3.0.0 alpha -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
