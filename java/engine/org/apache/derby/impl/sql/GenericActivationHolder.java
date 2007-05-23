@@ -337,14 +337,6 @@ final class GenericActivationHolder implements Activation
 	}
 
 	/**
-	 * @see Activation#clearResultSet
-	 */
-	public void clearResultSet()
-	{
-		ac.clearResultSet();
-	}
-
-	/**
 	 * @see Activation#setCurrentRow
 	 *
 	 */

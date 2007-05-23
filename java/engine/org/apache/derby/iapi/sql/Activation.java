@@ -215,11 +215,6 @@ public interface Activation
 	ResultSet getResultSet();
 
 	/**
-	 * Sets the ResultSet to be returned by getResultSet() to null.
-	 */
-	void clearResultSet();
-
-	/**
 	 * Generated plans have a current row field for ease in defining
 	 * the methods and finding them dynamically. The interface is
 	 * used to set the row before a dynamic method that uses it is

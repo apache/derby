@@ -244,10 +244,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		return resultSet;
 	}
 
-	public void clearResultSet() {
-		resultSet = null;
-	}
-
 	/**
 		Get the saved RowLocation.
 
@@ -315,7 +311,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 				// would really like to check if it is open,
 				// this is as close as we can approximate that.
 				resultSet.close();
-				resultSet = null; // forget about it, prepare for next exec.
 			} else if (resultSet.returnsRows()) {
 				resultSet.clearCurrentRow();
 			}
@@ -344,20 +339,19 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 			
 			// markUnused();
 
-			// we finish the result set before we call reset
-			// because reset will set it to null.
-			if (resultSet != null)
-			{
-				resultSet.finish();
-				resultSet = null;
-			}
-
 			// we call reset so that if the actual type of "this"
 			// is a subclass of BaseActivation, its cleanup will
 			// also happen -- reset in the actual type is called,
 			// not reset in BaseActivation.  Subclass reset's
 			// are supposed to call super.reset() as well.
 			reset(); // get everything related to executing released
+
+			if (resultSet != null)
+			{
+				// Finish the resultSet, it will never be used again.
+				resultSet.finish();
+				resultSet = null;
+			}
 
 			closed = true;
 

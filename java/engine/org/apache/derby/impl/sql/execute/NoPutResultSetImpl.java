@@ -187,15 +187,6 @@ extends BasicNoPutResultSetImpl
 			}
 		}
 
-		/*
-		** If we are the activation's top result set, make it forget about
-		** us, because we're closed now.
-		*/
-		if (activation.getResultSet() == this)
-		{
-			activation.clearResultSet();
-		}
-
 		isOpen = false;
 
 	}
