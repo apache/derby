@@ -22,6 +22,7 @@ package org.apache.derbyTesting.junit;
 import java.io.File;
 import java.net.URL;
 import java.security.AccessController;
+import java.security.Policy;
 import java.security.PrivilegedActionException;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -75,6 +76,10 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * mode of no security manager as it may not have enough information
 	 * to re-install the security manager. So the passed in test
 	 * will be skipped.
+     * 
+     * @param test Test to run without a security manager. Note that
+     * this must be an instance of BaseTestCase as this call depends
+     * on setup code in that class. Arbitrary Test instances cannot be passed in.
 	 */
 	public static Test noSecurityManager(Test test)
 	{
@@ -83,18 +88,6 @@ public final class SecurityManagerSetup extends TestSetup {
                     + test.toString());
 		return new SecurityManagerSetup(test, "<NONE>");
 	}
-	
-    /**
-     * Same as noSecurityManager() above but takes a TestSetup
-     * instead of a BaseTestCase.
-     */
-    public static Test noSecurityManager(TestSetup tSetup)
-    {
-		if (externalSecurityManagerInstalled)
-			return new TestSuite("skipped due to external security manager "
-                    + tSetup.toString());
-		return new SecurityManagerSetup(tSetup, "<NONE>");
-    }
 
 	/**
 	 * "Install" no security manager.
@@ -183,8 +176,9 @@ public final class SecurityManagerSetup extends TestSetup {
 
 
                 public Object run() {
-				System.setSecurityManager(new SecurityManager());
-				return null;
+                    SecurityManager sm = new SecurityManager();
+				System.setSecurityManager(sm);
+ 				return null;
 			}
 		});
 
@@ -206,9 +200,10 @@ public final class SecurityManagerSetup extends TestSetup {
 			catch (Exception e) { System.out.println( "Unreadable url: " + policyResource ); }
 		}
 
-		if (policyURL != null)
+		if (policyURL != null) {
 			set.setProperty("java.security.policy",
 					policyURL.toExternalForm());
+        }
 	}
 
 	
@@ -376,7 +371,7 @@ public final class SecurityManagerSetup extends TestSetup {
              new java.security.PrivilegedAction()
              {
                  public Object run() {
-                     System.setSecurityManager(null);
+                      System.setSecurityManager(null);
                      return null;
                  }
              }

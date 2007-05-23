@@ -41,7 +41,7 @@ import org.apache.derby.drda.NetworkServerControl;
  * and it does not support starting it from a remote 
  * machine.
  */
-final public class NetworkServerTestSetup extends TestSetup {
+final public class NetworkServerTestSetup extends BaseTestSetup {
 
     /** Setting maximum wait time to 300 seconds.   For some systems it looks
      *  like restarting a server to listen on the same port is blocked waiting

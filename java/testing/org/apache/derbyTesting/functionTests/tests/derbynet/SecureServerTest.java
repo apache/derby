@@ -214,7 +214,8 @@ public class SecureServerTest extends BaseTestCase
         String[]        startupProperties = getStartupProperties( authenticationRequired, useCustomDerbyProperties );
         String[]        startupArgs = getStartupArgs( unsecureSet );
 
-        TestSetup   testSetup = new NetworkServerTestSetup
+        Test  testSetup = SecurityManagerSetup.noSecurityManager(
+                new NetworkServerTestSetup
             (
              secureServerTest,
              startupProperties,
@@ -222,7 +223,7 @@ public class SecureServerTest extends BaseTestCase
              true,
              secureServerTest._outcome.serverShouldComeUp(),
              secureServerTest._inputStreamHolder
-             );
+             ));
 
         // if using the custom derby.properties, copy the custom properties to a visible place
         if ( useCustomDerbyProperties )
@@ -238,8 +239,6 @@ public class SecureServerTest extends BaseTestCase
         }
 
         Test        test = TestConfiguration.defaultServerDecorator( testSetup );
-
-        test = SecurityManagerSetup.noSecurityManager( test );
 
         return test;
     }

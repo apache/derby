@@ -61,7 +61,7 @@ public class Decorator {
      */
     public static Test encryptedDatabase(Test test)
     {
-        test = new TestSetup(test) {
+        test = new BaseTestSetup(test) {
             
             /**
              * Create an encrypted database using a
@@ -69,8 +69,6 @@ public class Decorator {
              */
             protected void setUp() throws SQLException
             {
-                String bootPhrase = getBootPhrase(16);
-
                 DataSource ds = JDBCDataSource.getDataSource();
                                
                 JDBCDataSource.setBeanProperty(ds,
@@ -108,7 +106,7 @@ public class Decorator {
      */
     public static Test encryptedDatabase(Test test, final String algorithm)
     {
-        test = new TestSetup(test) {
+        test = new BaseTestSetup(test) {
             
             /**
              * Create an encrypted database using a

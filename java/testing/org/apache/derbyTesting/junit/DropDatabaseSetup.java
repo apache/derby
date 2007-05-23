@@ -35,7 +35,7 @@ import junit.framework.Test;
  * name passed in when creating this decorator.
  *
  */
-class DropDatabaseSetup extends TestSetup {
+class DropDatabaseSetup extends BaseTestSetup {
 
     final String logicalDBName;
     DropDatabaseSetup(Test test, String logicalDBName) {

@@ -29,7 +29,7 @@ import junit.framework.Test;
  * Base class for JDBC JUnit test decorators.
  */
 public abstract class BaseJDBCTestSetup
-    extends TestSetup {
+    extends BaseTestSetup {
 	
 	public BaseJDBCTestSetup(Test test) {
 		super(test);

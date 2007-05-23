@@ -28,6 +28,7 @@ import javax.sql.DataSource;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+import org.apache.derbyTesting.junit.BaseTestSetup;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -35,7 +36,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Decorator that sets the phase of the upgrade process
  * for a suite of upgrade tests.
  */
-final class PhaseChanger extends TestSetup {
+final class PhaseChanger extends BaseTestSetup {
 
     private final int phase;
     private final int[] version;
