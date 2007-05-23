@@ -32,7 +32,9 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test for creating tables using a query expression.
@@ -53,9 +55,20 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
     */
     public static Test suite()
     {
-        final TestSuite suite = new TestSuite("CreateTableFromQueryTest");
-        suite.addTestSuite(CreateTableFromQueryTest.class);
-        return suite;
+        Test test = TestConfiguration.embeddedSuite(CreateTableFromQueryTest.class);
+        return new CleanDatabaseTestSetup(test) {
+
+            protected void decorateSQL(Statement stmt) throws SQLException
+            {
+                // create base tables t1 and t2       
+                stmt.executeUpdate(
+                    "create table t1(i int not null, s smallint, f float, dp "
+                    + "double precision, v varchar(10) not null)");
+
+                stmt.executeUpdate("create table t2 (a int, s varchar(5))");
+
+            }
+        };
     }
 
     /**
@@ -275,22 +288,16 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
                 columnNames.length, col);
         stmt.executeUpdate("drop table t3");
     }
-
+    
     /**
      * Set the fixture up with base tables t1 and t2.
      */
     protected void setUp() throws SQLException
     {    
-        getConnection().setAutoCommit(false);
+       getConnection().setAutoCommit(false);
 
         stmt = createStatement();
 
-        // create base tables t1 and t2       
-        stmt.executeUpdate(
-            "create table t1(i int not null, s smallint, f float, dp "
-            + "double precision, v varchar(10) not null)");
-
-        stmt.executeUpdate("create table t2 (a int, s varchar(5))");
     }
     
     /**
@@ -299,26 +306,8 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
      */
     protected void tearDown() throws Exception
     {
-        // drop tables
-        try {
-            stmt.execute("drop table t1");
-        } catch (SQLException e) {
-            assertSQLState("42Y55", e);
-        }
-
-        try {
-            stmt.execute("drop table t2");
-        } catch (SQLException e) {
-            assertSQLState("42Y55", e);
-        }
-
-        try {
-            stmt.execute("drop table t3");
-        } catch (SQLException e) {
-            assertSQLState("42Y55", e);
-        }
-
         stmt.close();
+        getConnection().commit();
 
         super.tearDown();
     }
