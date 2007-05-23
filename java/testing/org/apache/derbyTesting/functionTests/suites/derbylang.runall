@@ -23,7 +23,6 @@ lang/declareGlobalTempTableJava.java
 lang/declareGlobalTempTableJavaJDBC30.java
 lang/desc_index.sql
 lang/dropTable.sql
-lang/dynamicLikeOptimization.sql
 lang/emptyStatistics.sql
 lang/errorStream.java
 lang/fk_nonSPS.sql

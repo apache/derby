@@ -33,6 +33,8 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
+import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -520,5 +522,49 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
         s.close();
         ps[0].close();
         ps[1].close();
+    }
+
+    /**
+     * Test that dynamic like optimization is performed. That is, the LIKE
+     * predicate is rewritten to &gt;=, &lt; and LIKE.
+     */
+    public void testDynamicLikeOptimization() throws SQLException {
+        Statement s = createStatement();
+        s.execute("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+        PreparedStatement ps =
+            prepareStatement("select id from test where vc10 like ?");
+        ps.setString(1, "%");
+        JDBC.assertDrainResults(ps.executeQuery());
+        RuntimeStatisticsParser p = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(p.hasGreaterThanOrEqualQualifier());
+        assertTrue(p.hasLessThanQualifier());
+        s.close();
+        ps.close();
+    }
+
+    public void testCast() throws SQLException {
+        Statement s = createStatement();
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select 1 from t1 where 'asdf' like " +
+                           "cast('%f' as varchar(2))"),
+            "1");
+        JDBC.assertEmpty(s.executeQuery("select 1 from t1 where 'asdf' like " +
+                                        "cast(null as char)"));
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select 1 from t1 where '%foobar' like 'Z%foobar' " +
+                           "escape cast('Z' as varchar(1))"),
+            "1");
+        // quoted values clause should not match anything
+        JDBC.assertEmpty(s.executeQuery(
+                "select vc10 from test where vc10 like " +
+                "'values cast(null as varchar(1))'"));
+        JDBC.assertEmpty(s.executeQuery(
+                "select id from test where c10 like " +
+                "cast ('%f' as varchar(2))"));
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                "select id from test where vc10 like " +
+                "cast ('%f' as varchar(2))"),
+                new String[][] { {"asdf"}, {"aasdf"} });
+        s.close();
     }
 }

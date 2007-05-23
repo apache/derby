@@ -20,6 +20,8 @@
 package org.apache.derbyTesting.junit;
 
 import java.sql.Connection;
+import java.util.HashSet;
+import java.util.StringTokenizer;
 
 public class RuntimeStatisticsParser {
 
@@ -31,6 +33,7 @@ public class RuntimeStatisticsParser {
     private final boolean indexRowToBaseRow;
     private String statistics = "";
     private boolean scrollInsensitive = false;
+    private final HashSet qualifiers;
 
     /**
      * Create a RuntimeStatistics object to parse the text and extract
@@ -68,6 +71,71 @@ public class RuntimeStatisticsParser {
         }
         if (rts.indexOf("Scroll Insensitive ResultSet:") > 0)
             scrollInsensitive = true;
+
+        qualifiers = findQualifiers();
+    }
+
+    /**
+     * Class which represents a qualifier used in a scan.
+     */
+    private static class Qualifier {
+        String operator;
+        boolean negated;
+        Qualifier(String operator, boolean negated) {
+            this.operator = operator;
+            this.negated = negated;
+        }
+        public int hashCode() {
+            if (negated) {
+                return ~(operator.hashCode());
+            }
+            return operator.hashCode();
+        }
+        public boolean equals(Object o) {
+            if (o instanceof Qualifier) {
+                Qualifier q = (Qualifier) o;
+                return (negated == q.negated) && operator.equals(q.operator);
+            }
+            return false;
+        }
+        /**
+         * Represent the qualifier as a string for debugging.
+         */
+        public String toString() {
+            return (negated ? "\u00ac" : "" ) + operator;
+        }
+    }
+
+    /**
+     * Find all qualifiers in a query plan.
+     *
+     * @return set of <code>Qualifier</code>s
+     */
+    private HashSet findQualifiers() {
+        HashSet set = new HashSet();
+        int startPos = statistics.indexOf("qualifiers:\n");
+        if (startPos >= 0) {
+            // start search after "qualifiers:\n"
+            String searchString = statistics.substring(startPos + 12);
+            StringTokenizer t = new StringTokenizer(searchString, "\n");
+            while (t.hasMoreTokens()) {
+                String s = t.nextToken();
+                if (s.startsWith("Operator: ")) {
+                    String operator = s.substring(10);
+                    t.nextToken();  // skip "Ordered nulls: ..."
+                    t.nextToken();  // skip "Unknown return value: ..."
+                    s = t.nextToken();
+                    if (!s.startsWith("Negate comparison result: ")) {
+                        throw new AssertionError(
+                            "Expected to find \"Negate comparison result\"");
+                    }
+                    boolean negated =
+                        Boolean.valueOf(s.substring(26)).booleanValue();
+                    set.add(new Qualifier(operator, negated));
+                }
+            }
+        }
+        return set;
     }
 
     /**
@@ -119,5 +187,19 @@ public class RuntimeStatisticsParser {
     public boolean isScrollInsensitive(){
         return scrollInsensitive;
     }
-    
+
+    /**
+     * Return whether or not the query used a &gt;= scan qualifier.
+     */
+    public boolean hasGreaterThanOrEqualQualifier() {
+        // < negated is equivalent to >=
+        return qualifiers.contains(new Qualifier("<", true));
+    }
+
+    /**
+     * Return whether or not the query used a &lt; scan qualifier.
+     */
+    public boolean hasLessThanQualifier() {
+        return qualifiers.contains(new Qualifier("<", false));
+    }
 }
