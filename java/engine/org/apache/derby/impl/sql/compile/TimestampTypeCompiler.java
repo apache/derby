@@ -153,7 +153,7 @@ public class TimestampTypeCompiler extends BaseTypeCompiler
 	{
 		return 12.0;
 	}
-	protected String nullMethodName()
+	String nullMethodName()
 	{
 		return "getNullTimestamp";
 	}

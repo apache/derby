@@ -114,7 +114,7 @@ public class LOBTypeCompiler extends BaseTypeCompiler
                 return dts.getMaximumWidth();
         }
 
-        protected String nullMethodName() {
+        String nullMethodName() {
             int formatId = getStoredFormatIdFromTypeId();
             switch (formatId) {
                 case StoredFormatIds.BLOB_TYPE_ID:  return "getNullBlob";
@@ -125,7 +125,7 @@ public class LOBTypeCompiler extends BaseTypeCompiler
             }
         }
 
-        protected String dataValueMethodName()
+        String dataValueMethodName()
         {
             int formatId = getStoredFormatIdFromTypeId();
             switch (formatId) {

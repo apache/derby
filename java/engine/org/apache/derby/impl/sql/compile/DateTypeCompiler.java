@@ -126,7 +126,7 @@ public class DateTypeCompiler extends BaseTypeCompiler
 		return 10;
 	}
 
-	protected String nullMethodName()
+	String nullMethodName()
 	{
 		return "getNullDate";
 	}

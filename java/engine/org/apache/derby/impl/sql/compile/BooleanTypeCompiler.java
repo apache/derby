@@ -128,7 +128,7 @@ public class BooleanTypeCompiler extends BaseTypeCompiler
 		return TypeCompiler.BOOLEAN_MAXWIDTH_AS_CHAR;
 	}
 
-	protected String nullMethodName()
+	String nullMethodName()
 	{
 		return "getNullBoolean";
 	}

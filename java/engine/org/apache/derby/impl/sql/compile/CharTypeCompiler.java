@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
@@ -159,7 +160,7 @@ public final class CharTypeCompiler extends BaseTypeCompiler
         }
 
 
-        protected String nullMethodName()
+        String nullMethodName()
         {
                 int formatId = getStoredFormatIdFromTypeId();
                 switch (formatId)
@@ -193,18 +194,15 @@ public final class CharTypeCompiler extends BaseTypeCompiler
         }
 
         /**
-         * Augment the parent's method by ensuring the generated
-         * value is setup for collation if required.
-         * @see BaseTypeCompiler#generateCollationSensitiveDataValue(ExpressionClassBuilder, MethodBuilder, int)
+         * Push the collation type if it is not COLLATION_TYPE_UCS_BASIC.
+         * 
+         * @param collationType Collation type of character values.
+         * @return true collationType will be pushed, false collationType will be ignored.
          */
-     	public void generateDataValue(
-    			ExpressionClassBuilder eb,
-				MethodBuilder mb, int collationType,
-    			LocalField field)
-    	{
-    		super.generateDataValue(eb, mb, collationType, field);
-    		generateCollationSensitiveDataValue(eb, mb, collationType);
-    	}
+        boolean pushCollationForDataValue(int collationType)
+        {
+            return collationType != StringDataValue.COLLATION_TYPE_UCS_BASIC;
+        }
 
         /**
          * Augment the parent's method by ensuring the generated
@@ -219,7 +217,7 @@ public final class CharTypeCompiler extends BaseTypeCompiler
     		generateCollationSensitiveDataValue(eb, mb, collationType);
     	}
 
-        protected String dataValueMethodName()
+        String dataValueMethodName()
         {
                 int formatId = getStoredFormatIdFromTypeId();
                 switch (formatId)

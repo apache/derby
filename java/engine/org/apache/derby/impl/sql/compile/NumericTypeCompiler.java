@@ -333,7 +333,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		Return the method name to get a Derby DataValueDescriptor
 		object of the correct type. This implementation returns "getDataValue".
 	*/
-	protected String dataValueMethodName()
+	String dataValueMethodName()
 	{
 		if (getStoredFormatIdFromTypeId() == StoredFormatIds.DECIMAL_TYPE_ID)
 			return "getDecimalDataValue";
@@ -341,7 +341,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			return super.dataValueMethodName();
 	}
 
-	protected String nullMethodName()
+	String nullMethodName()
 	{
 		int formatId = getStoredFormatIdFromTypeId();
 		switch (formatId)

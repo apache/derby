@@ -132,7 +132,7 @@ public class TimeTypeCompiler extends BaseTypeCompiler
 		return 12.0;
 	}
 
-	protected String nullMethodName()
+	String nullMethodName()
 	{
 		return "getNullTime";
 	}

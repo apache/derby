@@ -130,18 +130,16 @@ public class XMLTypeCompiler extends BaseTypeCompiler
     /**
      * @see BaseTypeCompiler#nullMethodName
      */
-    protected String nullMethodName()
+    String nullMethodName()
     {
-        int formatId = getStoredFormatIdFromTypeId();
-        if (formatId == StoredFormatIds.XML_TYPE_ID)
-            return "getNullXML";
-
         if (SanityManager.DEBUG) {
-            SanityManager.THROWASSERT(
-                "unexpected formatId in nullMethodName(): " + formatId);
+            if (getStoredFormatIdFromTypeId() != StoredFormatIds.XML_TYPE_ID)
+                SanityManager.THROWASSERT(
+                "unexpected formatId in nullMethodName(): " + 
+                     getStoredFormatIdFromTypeId());
         }
-
-        return null;
+        
+        return "getNullXML";
     }
 
     /**

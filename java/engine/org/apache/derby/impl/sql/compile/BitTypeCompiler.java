@@ -128,7 +128,7 @@ public class BitTypeCompiler extends BaseTypeCompiler
                 return dts.getMaximumWidth();
         }
 
-        protected String nullMethodName()
+        String nullMethodName()
         {
                 int formatId = getStoredFormatIdFromTypeId();
                 switch (formatId)
@@ -152,7 +152,7 @@ public class BitTypeCompiler extends BaseTypeCompiler
                 }
         }
 
-        protected String dataValueMethodName()
+        String dataValueMethodName()
         {
                 int formatId = getStoredFormatIdFromTypeId();
                 switch (formatId)

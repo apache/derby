@@ -113,7 +113,7 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 		return -1;
 	}
 
-	protected String nullMethodName()
+	String nullMethodName()
 	{
 		return "getNullObject";
 	}

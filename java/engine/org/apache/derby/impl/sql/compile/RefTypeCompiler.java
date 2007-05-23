@@ -91,7 +91,7 @@ public class RefTypeCompiler extends BaseTypeCompiler
 		return ClassName.RefDataValue;
 	}
 
-	protected String nullMethodName()
+	String nullMethodName()
 	{
 		return "getNullRef";
 	}
