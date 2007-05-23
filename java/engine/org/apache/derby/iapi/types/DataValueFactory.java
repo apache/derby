@@ -34,9 +34,12 @@ import java.text.RuleBasedCollator;
 import java.util.Locale;
 
 /**
- * This interface is how we get constant data values of different types.
+ * This interface is how we get data values of different types.
+ * 
+ * For any method that takes a 'previous' argument it is required
+ * that the caller pass in an object of the same class that would
+ * be returned by the call if null was passed for previous.
  */
-
 public interface DataValueFactory
 {
         /**
@@ -160,10 +163,29 @@ public interface DataValueFactory
          *
          */
         StringDataValue         getVarcharDataValue(String value);
-        StringDataValue         getVarcharDataValue(String value,
-                                                                                        StringDataValue previous)
-                                                                                                        throws StandardException;
-
+        
+        /**
+         * Get a SQLVarhar object to represent a SQL VARCHAR  (UCS_BASIC)
+         * with the given value. A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new SQLVarchar
+         * will be created and set to the value.
+         *
+         */
+        StringDataValue getVarcharDataValue(String value, StringDataValue previous)
+            throws StandardException;
+        
+        /**
+         * Get a StringDataValue to represent a SQL VARCHAR with the
+         * passed in collationType. A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new StringDataValue
+         * will be created and set to the value.
+         * If collationType is equal to StringDataValue.COLLATION_TYPE_UCS_BASIC
+         * then the call is the equivalent of the overload without collationType.
+         */
+        StringDataValue getVarcharDataValue(String value, StringDataValue previous,
+                int collationType) throws StandardException;
         /**
          * Get a SQL long varchar with the given value.  A null argument means
          * get a SQL null value.  The second form uses the previous value
@@ -171,16 +193,53 @@ public interface DataValueFactory
          *
          */
         StringDataValue         getLongvarcharDataValue(String value);
-        StringDataValue         getLongvarcharDataValue(String value, StringDataValue previous) throws StandardException;
-
+        
         /**
-         * Get a SQL Clob with the given value.  A null argument means
-         * get a SQL null value.  The second form uses the previous value
-         * (if non-null) to hold the return value.
+         * Get a SQLLongvarchar object to represent a SQL LONG VARCHAR  (UCS_BASIC)
+         * with the given value. A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new SQLLongvarchar
+         * will be created and set to the value.
          *
          */
-        StringDataValue         getClobDataValue(String value, StringDataValue previous) throws StandardException;
+        StringDataValue getLongvarcharDataValue(String value, StringDataValue previous) throws StandardException;
 
+        /**
+         * Get a StringDataValue to represent a SQL LONG VARCHAR with the
+         * passed in collationType. A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new StringDataValue
+         * will be created and set to the value.
+         * If collationType is equal to StringDataValue.COLLATION_TYPE_UCS_BASIC
+         * then the call is the equivalent of the overload without collationType.
+
+         */
+        StringDataValue getLongvarcharDataValue(String value, StringDataValue previous,
+                int collationType) throws StandardException;
+        
+ 
+        /**
+         * Get a SQLClob object to represent a SQL CLOB  (UCS_BASIC)
+         * with the given value. A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new SQLLongvarchar
+         * will be created and set to the value.
+         *
+         */
+        StringDataValue getClobDataValue(String value, StringDataValue previous) throws StandardException;
+
+        /**
+         * Get a StringDataValue to represent a SQL LONG VARCHAR with the
+         * passed in collationType. A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new StringDataValue
+         * will be created and set to the value.
+         * If collationType is equal to StringDataValue.COLLATION_TYPE_UCS_BASIC
+         * then the call is the equivalent of the overload without collationType.
+         */
+        StringDataValue getClobDataValue(String value, StringDataValue previous,
+                int collationType) throws StandardException;
+        
         /**
          * Get a SQL national varchar with the given value.  A null argument means get
          * a SQL null value.  The second form uses the previous value (if non-null)
@@ -352,8 +411,20 @@ public interface DataValueFactory
          * will be created and set to the value.
          *
          */
-        StringDataValue         getCharDataValue(String value, StringDataValue previous)
+        StringDataValue  getCharDataValue(String value, StringDataValue previous)
                                                         throws StandardException;
+        
+        /**
+         * Get a StringDataValue to represent a SQL CHAR with the
+         * passed in collationType. A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new StringDataValue
+         * will be created and set to the value.
+         * If collationType is equal to StringDataValue.COLLATION_TYPE_UCS_BASIC
+         * then the call is the equivalent of the overload without collationType.
+         */
+        StringDataValue getCharDataValue(String value, StringDataValue previous,
+                int collationType) throws StandardException;
 
         /**
          * Get a SQL national char with the given value.  A null argument means get

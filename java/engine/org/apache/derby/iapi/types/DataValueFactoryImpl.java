@@ -435,6 +435,26 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 previous.setValue(value);
                 return previous;
         }
+        
+        /**
+         * Return a StringDataValue to represent a SQL CHAR
+         * with the given collation re-using previous if not null.
+         */
+        public StringDataValue getCharDataValue(String value,
+                StringDataValue previous, int collationType)
+            throws StandardException
+        {
+            if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+                return getCharDataValue(value, previous);
+            
+            if (previous == null)
+                return new CollatorSQLChar(value, getCharacterCollator(collationType));
+            
+            previous.setValue(value);
+            return previous;
+        }
+
+        
 
         public StringDataValue getVarcharDataValue(String value)
         {
@@ -449,6 +469,25 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         return new SQLVarchar(value);
                 previous.setValue(value);
                 return previous;
+        }
+        
+        /**
+         * Return a StringDataValue to represent a SQL VARCHAR
+         * with the given collation re-using previous if not null.
+         */
+        public StringDataValue getVarcharDataValue(String value,
+                StringDataValue previous, int collationType)
+            throws StandardException
+        {
+            if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+                return getVarcharDataValue(value, previous);
+            
+            if (previous == null)
+                return new CollatorSQLVarchar(value,
+                        getCharacterCollator(collationType));
+            
+            previous.setValue(value);
+            return previous;
         }
 
         public StringDataValue getLongvarcharDataValue(String value)
@@ -465,6 +504,25 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 previous.setValue(value);
                 return previous;
         }
+        
+        /**
+         * Return a StringDataValue to represent a SQL LONG VARCHAR
+         * with the given collation re-using previous if not null.
+         */
+        public StringDataValue getLongvarcharDataValue(String value,
+                StringDataValue previous, int collationType)
+            throws StandardException
+        {
+            if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+                return getLongvarcharDataValue(value, previous);
+            
+            if (previous == null)
+                return new CollatorSQLLongvarchar(value,
+                        getCharacterCollator(collationType));
+            
+            previous.setValue(value);
+            return previous;
+        }
 
         public StringDataValue getClobDataValue(String value, StringDataValue previous) throws StandardException
         {
@@ -472,6 +530,25 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         return new SQLClob(value);
                 previous.setValue(value);
                 return previous;
+        }
+        
+        /**
+         * Return a StringDataValue to represent a SQL CLOB
+         * with the given collation re-using previous if not null.
+         */
+        public StringDataValue getClobDataValue(String value,
+                StringDataValue previous, int collationType)
+            throws StandardException
+        {
+            if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+                return getClobDataValue(value, previous);
+            
+            if (previous == null)
+                return new CollatorSQLClob(value,
+                        getCharacterCollator(collationType));
+            
+            previous.setValue(value);
+            return previous;
         }
 
         //
