@@ -97,9 +97,8 @@ public class SQLLongvarchar
 		} else {
 			//non-null collatorForComparison means use collator sensitive
 			//implementation of SQLLongvarchar
-		     CollatorSQLLongvarchar s = new CollatorSQLLongvarchar();
+		     CollatorSQLLongvarchar s = new CollatorSQLLongvarchar(collatorForComparison);
 		     s.copyState(this);
-		     s.setCollator(collatorForComparison);
 		     return s;
 		}
 	}

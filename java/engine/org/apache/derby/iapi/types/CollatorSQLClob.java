@@ -41,31 +41,36 @@ import java.text.RuleBasedCollator;
  */
 class CollatorSQLClob extends SQLClob implements CollationElementsInterface
 {
-	WorkHorseForCollatorDatatypes holderForCollationSensitiveInfo;
+	private WorkHorseForCollatorDatatypes holderForCollationSensitiveInfo;
 
 	/*
 	 * constructors
 	 */
-
-	/**
-		no-arg constructor, required by Formattable.
-	*/
-	public CollatorSQLClob()
-	{
-	}
-
-	public CollatorSQLClob(String val, RuleBasedCollator collatorForCharacterDatatypes)
+    
+    /**
+     * Create SQL CLOB value initially set to NULL that
+     * performs collation according to collatorForCharacterDatatypes 
+     */
+    CollatorSQLClob(RuleBasedCollator collatorForCharacterDatatypes)
+    {
+        setCollator(collatorForCharacterDatatypes);
+    }
+    
+    /**
+     * Create SQL CLOB value initially set to value that
+     * performs collation according to collatorForCharacterDatatypes 
+     */
+	CollatorSQLClob(String val, RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		super(val);
-		holderForCollationSensitiveInfo = 
-			new WorkHorseForCollatorDatatypes(collatorForCharacterDatatypes, this);
+        setCollator(collatorForCharacterDatatypes);
 	}
 
 	/**
 	 * Set the RuleBasedCollator for this instance of CollatorSQLClob. It will
 	 * be used to do the collation.
 	 */
-	protected void setCollator(RuleBasedCollator collatorForCharacterDatatypes)
+	private void setCollator(RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		holderForCollationSensitiveInfo = 
 			new WorkHorseForCollatorDatatypes(collatorForCharacterDatatypes, this);
@@ -110,8 +115,7 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
 	 */
 	public DataValueDescriptor getNewNull()
 	{
-		CollatorSQLClob result = new CollatorSQLClob();
-		result.setCollator(
+		CollatorSQLClob result = new CollatorSQLClob(null,
 				holderForCollationSensitiveInfo.getCollatorForCollation());
 		return result;
 	}

@@ -97,9 +97,8 @@ public class SQLClob
 		} else {
 			//non-null collatorForComparison means use collator sensitive
 			//implementation of SQLClob
-		     CollatorSQLClob s = new CollatorSQLClob();
+		     CollatorSQLClob s = new CollatorSQLClob(collatorForComparison);
 		     s.copyState(this);
-		     s.setCollator(collatorForComparison);
 		     return s;
 		}
 	}

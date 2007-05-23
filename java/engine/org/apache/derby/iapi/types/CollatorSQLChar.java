@@ -42,30 +42,34 @@ import java.text.RuleBasedCollator;
  */
 class CollatorSQLChar extends SQLChar implements CollationElementsInterface
 {
-	WorkHorseForCollatorDatatypes holderForCollationSensitiveInfo;
+	private WorkHorseForCollatorDatatypes holderForCollationSensitiveInfo;
 	/*
 	 * constructors
 	 */
-
-	/**
-		no-arg constructor, required by Formattable.
-	*/
-	public CollatorSQLChar()
-	{
-	}
-
-	public CollatorSQLChar(String val, RuleBasedCollator collatorForCharacterDatatypes)
+    /**
+     * Create SQL CHAR value initially set to NULL that
+     * performs collation according to collatorForCharacterDatatypes 
+     */
+    CollatorSQLChar(RuleBasedCollator collatorForCharacterDatatypes)
+    {
+        setCollator(collatorForCharacterDatatypes);
+    }
+    
+    /**
+     * Create SQL CHAR value initially set to value that
+     * performs collation according to collatorForCharacterDatatypes 
+     */
+	CollatorSQLChar(String val, RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		super(val);
-		holderForCollationSensitiveInfo = 
-			new WorkHorseForCollatorDatatypes(collatorForCharacterDatatypes, this);
+        setCollator(collatorForCharacterDatatypes);
 	}
 
 	/**
 	 * Set the RuleBasedCollator for this instance of CollatorSQLChar. It will
 	 * be used to do the collation.
 	 */
-	protected void setCollator(RuleBasedCollator collatorForCharacterDatatypes)
+	private void setCollator(RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		holderForCollationSensitiveInfo = 
 			new WorkHorseForCollatorDatatypes(collatorForCharacterDatatypes, this);
@@ -110,8 +114,7 @@ class CollatorSQLChar extends SQLChar implements CollationElementsInterface
 	 */
 	public DataValueDescriptor getNewNull()
 	{
-		CollatorSQLChar result = new CollatorSQLChar();
-		result.setCollator(
+		CollatorSQLChar result = new CollatorSQLChar(
 				holderForCollationSensitiveInfo.getCollatorForCollation());
 		return result;
 	}

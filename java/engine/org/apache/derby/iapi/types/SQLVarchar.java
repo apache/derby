@@ -95,9 +95,8 @@ public class SQLVarchar
 		} else {
 			//non-null collatorForComparison means use collator sensitive
 			//implementation of SQLVarchar
-		     CollatorSQLVarchar s = new CollatorSQLVarchar();
+		     CollatorSQLVarchar s = new CollatorSQLVarchar(collatorForComparison);
 		     s.copyState(this);
-		     s.setCollator(collatorForComparison);
 		     return s;
 		}
 	}

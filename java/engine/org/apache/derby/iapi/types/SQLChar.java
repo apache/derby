@@ -957,9 +957,8 @@ readingLoop:
 		} else {
 			//non-null collatorForComparison means use collator sensitive
 			//implementation of SQLChar
-		     CollatorSQLChar s = new CollatorSQLChar();
+		     CollatorSQLChar s = new CollatorSQLChar(collatorForComparison);
 		     s.copyState(this);
-		     s.setCollator(collatorForComparison);
 		     return s;
 		}
 	}

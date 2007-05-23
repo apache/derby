@@ -41,24 +41,30 @@ import java.text.RuleBasedCollator;
  */
 class CollatorSQLLongvarchar extends SQLLongvarchar implements CollationElementsInterface
 {
-	WorkHorseForCollatorDatatypes holderForCollationSensitiveInfo;
+	private WorkHorseForCollatorDatatypes holderForCollationSensitiveInfo;
 
 	/*
 	 * constructors
 	 */
 
-	/**
-		no-arg constructor, required by Formattable.
-	*/
-	public CollatorSQLLongvarchar()
-	{
-	}
 
-	public CollatorSQLLongvarchar(String val, RuleBasedCollator collatorForCharacterDatatypes)
+    /**
+     * Create SQL LONG VARCHAR value initially set to NULL that
+     * performs collation according to collatorForCharacterDatatypes 
+     */
+	CollatorSQLLongvarchar(RuleBasedCollator collatorForCharacterDatatypes)
+	{
+        setCollator(collatorForCharacterDatatypes);
+	}
+    
+    /**
+     * Create SQL LONG VARCHAR value initially set to value that
+     * performs collation according to collatorForCharacterDatatypes 
+     */
+	CollatorSQLLongvarchar(String val, RuleBasedCollator collatorForCharacterDatatypes)
 	{
 		super(val);
-		holderForCollationSensitiveInfo = 
-			new WorkHorseForCollatorDatatypes(collatorForCharacterDatatypes, this);
+		setCollator(collatorForCharacterDatatypes);
 	}
 
 	/**
@@ -110,8 +116,7 @@ class CollatorSQLLongvarchar extends SQLLongvarchar implements CollationElements
 	 */
 	public DataValueDescriptor getNewNull()
 	{
-		CollatorSQLLongvarchar result = new CollatorSQLLongvarchar();
-		result.setCollator(
+		CollatorSQLLongvarchar result = new CollatorSQLLongvarchar(
 				holderForCollationSensitiveInfo.getCollatorForCollation());
 		return result;
 	}
