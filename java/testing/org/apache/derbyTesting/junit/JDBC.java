@@ -41,6 +41,24 @@ import junit.framework.Assert;
 public class JDBC {
     
     /**
+     * Constant to pass to DatabaseMetaData.getTables() to fetch
+     * just tables.
+     */
+    public static final String[] GET_TABLES_TABLE = new String[] {"TABLE"};
+    /**
+     * Constant to pass to DatabaseMetaData.getTables() to fetch
+     * just views.
+     */
+    public static final String[] GET_TABLES_VIEW = new String[] {"VIEW"};
+    /**
+     * Constant to pass to DatabaseMetaData.getTables() to fetch
+     * just synonyms. Need work around for DERBY-1790 where
+     * passing a table type of SYNONYM fails.
+     */
+    public static final String[] GET_TABLES_SYNONYM =
+        new String[] {"AA_DERBY-1790-SYNONYM"};
+    
+    /**
      * Types.SQLXML value without having to compile with JDBC4.
      */
     public static final int SQLXML = 2009;
@@ -207,13 +225,13 @@ public class JDBC {
 		
 		// Views
 		rs = dmd.getTables((String) null, schema, (String) null,
-				new String[] {"VIEW"});
+                GET_TABLES_VIEW);
 		
 		dropUsingDMD(s, rs, schema, "TABLE_NAME", "VIEW");
 		
 		// Tables
 		rs = dmd.getTables((String) null, schema, (String) null,
-				new String[] {"TABLE"});
+                GET_TABLES_TABLE);
 		
 		dropUsingDMD(s, rs, schema, "TABLE_NAME", "TABLE");
         
@@ -222,7 +240,7 @@ public class JDBC {
         // Drop any constraints that remain and then drop the tables.
         // If there are no tables then this should be a quick no-op.
         ResultSet table_rs = dmd.getTables((String) null, schema, (String) null,
-                new String[] {"TABLE"});
+                GET_TABLES_TABLE);
 
         while (table_rs.next()) {
             String tablename = table_rs.getString("TABLE_NAME");
@@ -251,13 +269,13 @@ public class JDBC {
                 
         // Tables (again)
         rs = dmd.getTables((String) null, schema, (String) null,
-                new String[] {"TABLE"});        
+                GET_TABLES_TABLE);        
         dropUsingDMD(s, rs, schema, "TABLE_NAME", "TABLE");
 
         // Synonyms - need work around for DERBY-1790 where
         // passing a table type of SYNONYM fails.
         rs = dmd.getTables((String) null, schema, (String) null,
-                new String[] {"AA_DERBY-1790-SYNONYM"});
+                GET_TABLES_SYNONYM);
         
         dropUsingDMD(s, rs, schema, "TABLE_NAME", "SYNONYM");
                 
@@ -299,6 +317,8 @@ public class JDBC {
             ddl.add(dropLeadIn + JDBC.escape(schema, objectName));
 		}
 		rs.close();
+        if (ddl.isEmpty())
+            return;
                 
         // Execute them as a complete batch, hoping they will all succeed.
         s.clearBatch();
