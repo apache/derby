@@ -100,6 +100,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ProcedureInTriggerTest.suite());
 	    suite.addTest(ForUpdateTest.suite());
         suite.addTest(CollationTest.suite());
+        suite.addTest(CollationTest2.suite());
         suite.addTest(ScrollCursors1Test.suite());
         suite.addTest(SimpleTest.suite());
         suite.addTest(GrantRevokeDDLTest.suite());

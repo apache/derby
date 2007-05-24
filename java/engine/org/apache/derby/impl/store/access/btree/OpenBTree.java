@@ -520,12 +520,10 @@ public class OpenBTree
             DataValueDescriptor[] template = 
                 this.init_conglomerate.createTemplate(getRawTran());
 
-            // RESOLVE - could just compare format id's rather than allocate
-            // objects.
-
             for (int i = 0; i < row.length; i++)
             {
-                // RESOLVE (mikem) - use format id's for more efficient test.
+                // Compare class's rather than format id's to pick up 
+                // different problems with wrong collation implementation.
 				if (!row[i].getClass().equals(template[i].getClass()))
                 {
                     SanityManager.THROWASSERT(
