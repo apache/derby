@@ -703,10 +703,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
         assertTime1970(tv);
 
         // Check the TIME portion is set to the same as tv
-        // DERBY-1816 java.sql.Time values from TIMESTAMP
-        // colummns lose their precision with client.
-        if (!usingDerbyNetClient())
-            assertTimeEqual(tv, tsv);
+        assertTimeEqual(tv, tsv);
                
         String sv = rs.getString(column);
         assertNotNull(sv);

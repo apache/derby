@@ -166,31 +166,62 @@ public class DateTime {
         String timestamp = new String(buffer, offset, 
                 DateTime.timestampRepresentationLength,encoding);
        
+        Calendar cal = getCleanCalendar(recyclableCal);
+
+        /* java.sql.Timestamp has nanosecond precision, so we have to keep
+         * the parsed microseconds value and use that to set nanos.
+         */
+        int micros = parseTimestampString(timestamp, cal);
+        java.sql.Timestamp ts = new java.sql.Timestamp(cal.getTimeInMillis());
+        ts.setNanos(micros * 1000);
+        return ts;
+    }
+
+    /**
+     * Parse a String of the form <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>
+     * and store the various fields into the received Calendar object.
+     *
+     * @param timestamp Timestamp value to parse, as a String.
+     * @param cal Calendar into which to store the parsed fields.  Should
+     *  not be null.
+     *
+     * @return The microseconds field as parsed from the timestamp string.
+     *  This cannot be set in the Calendar object but we still want to
+     *  preserve the value, in case the caller needs it (for example, to
+     *  create a java.sql.Timestamp with microsecond precision).
+     */
+    private static int parseTimestampString(String timestamp,
+        Calendar cal)
+    {
         int zeroBase = ((int) '0');
 
-        year =
+        cal.set(Calendar.YEAR,
                 1000 * (((int) timestamp.charAt(0)) - zeroBase) +
                 100 * (((int) timestamp.charAt(1)) - zeroBase) +
                 10 * (((int) timestamp.charAt(2)) - zeroBase) +
-                (((int) timestamp.charAt(3)) - zeroBase);
+                (((int) timestamp.charAt(3)) - zeroBase));
 
-        month =
+        cal.set(Calendar.MONTH,
                 10 * (((int) timestamp.charAt(5)) - zeroBase) +
-                (((int) timestamp.charAt(6)) - zeroBase) -
-                1;
-        day =
+                (((int) timestamp.charAt(6)) - zeroBase) - 1);
+
+        cal.set(Calendar.DAY_OF_MONTH,
                 10 * (((int) timestamp.charAt(8)) - zeroBase) +
-                (((int) timestamp.charAt(9)) - zeroBase);
-        hour =
+                (((int) timestamp.charAt(9)) - zeroBase));
+
+        cal.set(Calendar.HOUR,
                 10 * (((int) timestamp.charAt(11)) - zeroBase) +
-                (((int) timestamp.charAt(12)) - zeroBase);
-        minute =
+                (((int) timestamp.charAt(12)) - zeroBase));
+
+        cal.set(Calendar.MINUTE,
                 10 * (((int) timestamp.charAt(14)) - zeroBase) +
-                (((int) timestamp.charAt(15)) - zeroBase);
-        second =
+                (((int) timestamp.charAt(15)) - zeroBase));
+
+        cal.set(Calendar.SECOND,
                 10 * (((int) timestamp.charAt(17)) - zeroBase) +
-                (((int) timestamp.charAt(18)) - zeroBase);
-        fraction =
+                (((int) timestamp.charAt(18)) - zeroBase));
+
+        int micros = 
                 100000 * (((int) timestamp.charAt(20)) - zeroBase) +
                 10000 * (((int) timestamp.charAt(21)) - zeroBase) +
                 1000 * (((int) timestamp.charAt(22)) - zeroBase) +
@@ -198,11 +229,12 @@ public class DateTime {
                 10 * (((int) timestamp.charAt(24)) - zeroBase) +
                 (((int) timestamp.charAt(25)) - zeroBase);
 
-        Calendar cal = getCleanCalendar(recyclableCal);
-        cal.set(year, month, day, hour, minute, second);
-        java.sql.Timestamp ts = new java.sql.Timestamp(cal.getTimeInMillis());
-        ts.setNanos(fraction * 1000);
-        return ts;
+        /* The "ffffff" that we parsed is microseconds.  In order to
+         * capture that information inside of the MILLISECOND field
+         * we have to divide by 1000.
+         */
+        cal.set(Calendar.MILLISECOND, micros / 1000);
+        return micros;
     }
 
     // ********************************************************
@@ -529,25 +561,38 @@ public class DateTime {
                                                            int offset,
                                                            Calendar recyclableCal, 
                                                            String encoding) 
-    throws  UnsupportedEncodingException {
-        int hour, minute, second;
-
+    throws  UnsupportedEncodingException
+    {
+        /* When getting a java.sql.Time object from a TIMESTAMP value we
+         * need to preserve the milliseconds from the timestamp.
+         * 
+         * Note: a Derby SQL TIME value has by definition resolution of only
+         * a second so its millisecond value is always zero.  However,
+         * java.sql.Time is not a direct mapping to the SQL Type; rather, it's
+         * a JDBC type, and the JDBC java.sql.Time class has a precision of
+         * milliseconds.  So when converting from a SQL TIMESTAMP we should
+         * retain the millisecond precision.  DERBY-1816.
+         *
+         * In order to accomplish this we parse *all* fields of the timestamp
+         * into a Calendar object, then create the java.sql.Time object from
+         * that Calendar. This allows us to preserve the sub-second resolution
+         * that is parsed from the timestamp. 
+         */
+ 
         String timestamp = new String(buffer, offset, 
                 DateTime.timestampRepresentationLength, encoding);
-        int zeroBase = ((int) '0');
-
-        hour =
-                10 * (((int) timestamp.charAt(11)) - zeroBase) +
-                (((int) timestamp.charAt(12)) - zeroBase);
-        minute =
-                10 * (((int) timestamp.charAt(14)) - zeroBase) +
-                (((int) timestamp.charAt(15)) - zeroBase);
-        second =
-                10 * (((int) timestamp.charAt(17)) - zeroBase) +
-                (((int) timestamp.charAt(18)) - zeroBase);
-
+       
         Calendar cal = getCleanCalendar(recyclableCal);
-        cal.set(1970, Calendar.JANUARY, 1, hour, minute, second);
+
+        /* Note that "parseTimestampString()" returns microseconds but we
+         * ignore micros because java.sql.Time only has millisecond precision.
+         */
+        parseTimestampString(timestamp, cal);
+
+        /* Java API indicates that the date components of a Time value
+         * must be set to January 1, 1970. So override those values now.
+         */
+        cal.set(1970, Calendar.JANUARY, 1);
         return new java.sql.Time(cal.getTimeInMillis());
     }
 
