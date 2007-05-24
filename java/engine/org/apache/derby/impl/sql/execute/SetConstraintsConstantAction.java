@@ -366,7 +366,7 @@ class SetConstraintsConstantAction extends DDLConstantAction
 		IndexRowGenerator irg = fk.getIndexConglomerateDescriptor(dd).getIndexDescriptor();	
 		ExecIndexRow indexTemplateRow = irg.getIndexRowTemplate();
 		TableDescriptor td = fk.getTableDescriptor();
-		ExecRow baseRow = td.getEmptyExecRow(cm);
+		ExecRow baseRow = td.getEmptyExecRow();
 		irg.getIndexRow(baseRow, getRowLocation(dd, td, tc), 
 								indexTemplateRow, (FormatableBitSet)null);
 

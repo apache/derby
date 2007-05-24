@@ -270,7 +270,7 @@ public class DeleteNode extends DMLModStatementNode
 				/*
 				** Construct an empty heap row for use in our constant action.
 				*/
-				emptyHeapRow = targetTableDescriptor.getEmptyExecRow(getContextManager());
+				emptyHeapRow = targetTableDescriptor.getEmptyExecRow();
 
 				/* Generate the RowLocation column */
 				rowLocationNode = (CurrentRowLocationNode) getNodeFactory().getNode(

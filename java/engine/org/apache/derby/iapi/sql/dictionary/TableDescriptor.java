@@ -21,34 +21,21 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
-
-import org.apache.derby.iapi.sql.depend.Provider;
-
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.catalog.DependableFinder;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-
-import org.apache.derby.iapi.reference.SQLState;
-import	org.apache.derby.catalog.Dependable;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import java.util.Vector;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
+
+import org.apache.derby.catalog.Dependable;
+import org.apache.derby.catalog.DependableFinder;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
  * This class represents a table descriptor. The external interface to this
@@ -480,17 +467,16 @@ public class TableDescriptor extends TupleDescriptor
 	/**
 	 * Gets an ExecRow for rows stored in the table this describes.
 	 *
-	 *	@param cm Current ContextManager
 	 *
 	 *	@return	the row.
 	 *  @exception StandardException		Thrown on failure
 	 */
-	public ExecRow getEmptyExecRow( ContextManager cm)
+	public ExecRow getEmptyExecRow()
 		 throws StandardException
 	{
 		int							columnCount = getNumberOfColumns();
-		ExecutionContext			ec = (ExecutionContext) cm.getContext(ExecutionContext.CONTEXT_ID);
-		ExecRow result = ec.getExecutionFactory().getValueRow(columnCount);
+		ExecRow result =
+            getDataDictionary().getExecutionFactory().getValueRow(columnCount);
 
 		for (int index = 0; index < columnCount; index++)
 		{

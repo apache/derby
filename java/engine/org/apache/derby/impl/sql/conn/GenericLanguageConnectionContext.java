@@ -1197,8 +1197,7 @@ public class GenericLanguageConnectionContext
 		long conglomId = 
             tran.createConglomerate(
                 "heap", // we're requesting a heap conglomerate
-                td.getEmptyExecRow(
-                    getContextManager()).getRowArray(), // row template
+                td.getEmptyExecRow().getRowArray(), // row template
                 null, //column sort order - not required for heap
                 td.getColumnCollationIds(),  // same ids as old conglomerate
                 null, // properties

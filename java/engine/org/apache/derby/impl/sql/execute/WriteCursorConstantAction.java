@@ -39,7 +39,6 @@ import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 
 
@@ -322,7 +321,7 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	
 			td = dd.getTableDescriptor(targetUUID);
 	
-			emptyHeapRow = td.getEmptyExecRow(lcc.getContextManager());
+			emptyHeapRow = td.getEmptyExecRow();
 		}
 
 		return emptyHeapRow.getClone();

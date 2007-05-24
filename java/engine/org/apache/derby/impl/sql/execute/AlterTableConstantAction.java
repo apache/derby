@@ -1174,7 +1174,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				"constraintActions expected to be null");
 		}
 
-		ExecRow emptyHeapRow  = td.getEmptyExecRow(lcc.getContextManager());
+		ExecRow emptyHeapRow  = td.getEmptyExecRow();
         int[]   collation_ids = td.getColumnCollationIds();
 
 		compressHeapCC = 
@@ -1249,7 +1249,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		for (int i = 0; i < bulkFetchSize; i++)
 		{
 			// create a base row template
-			baseRow[i] = td.getEmptyExecRow(lcc.getContextManager());
+			baseRow[i] = td.getEmptyExecRow();
 			baseRowArray[i] = baseRow[i].getRowArray();
 			compressRL[i] = compressHeapGSC.newRowLocationTemplate();
 		}
@@ -1397,7 +1397,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 
 		//gather information from the existing conglomerate to create new one.
-		emptyHeapRow = td.getEmptyExecRow(lcc.getContextManager());
+		emptyHeapRow = td.getEmptyExecRow();
 		compressHeapCC = tc.openConglomerate(
 								td.getHeapConglomerateId(),
                                 false,

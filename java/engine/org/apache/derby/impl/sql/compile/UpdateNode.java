@@ -483,7 +483,7 @@ public final class UpdateNode extends DMLModStatementNode
 			/*
 			** Construct an empty heap row for use in our constant action.
 			*/
-			emptyHeapRow = targetTableDescriptor.getEmptyExecRow(getContextManager());
+			emptyHeapRow = targetTableDescriptor.getEmptyExecRow();
 
 			/* Append the list of "after" columns to the list of "before" columns,
 			 * preserving the afterColumns list.  (Necessary for binding
