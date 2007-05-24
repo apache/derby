@@ -80,7 +80,7 @@ import java.io.Serializable;
  * FilterClassBuilder. See the documentation on ActivationClassBuilder.
  *
  */
-public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
+abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 {
 	///////////////////////////////////////////////////////////////////////
 	//
@@ -870,7 +870,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 	void generateNull(MethodBuilder mb, TypeCompiler tc, int collationType) {
 		pushDataValueFactory(mb);
 		mb.pushNull(tc.interfaceName());
-		tc.generateNull(this, mb, collationType);
+		tc.generateNull(mb, collationType);
 	}
 
 	/**
@@ -883,7 +883,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 		pushDataValueFactory(mb);
 		mb.swap(); // need the dvf as the instance
 		mb.cast(tc.interfaceName());
-		tc.generateNull(this, mb, collationType);
+		tc.generateNull(mb, collationType);
 	}
 
 	/**
@@ -896,7 +896,7 @@ public abstract	class ExpressionClassBuilder implements ExpressionClassBuilderIn
 			int collationType, LocalField field) {
 		pushDataValueFactory(mb);
 		mb.swap(); // need the dvf as the instance
-		tc.generateDataValue(this, mb, collationType, field);
+		tc.generateDataValue(mb, collationType, field);
 	}
 
 	

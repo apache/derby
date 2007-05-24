@@ -633,35 +633,67 @@ public interface DataValueFactory
         
     // ------ CHAR
         /**
-         * Get a SQL char with a SQL null value. If the supplied value
+         * Get a SQL CHAR (UCS_BASIC) with a SQL null value. If the supplied value
          * is null then get a new value, otherwise set it to null and return 
          * that value.
          */
         StringDataValue         getNullChar(StringDataValue dataValue);
+        
+        /**
+         * Get a SQL CHAR set to NULL with collation set to collationType.
+         * If the supplied value is null then get a new value,
+         * otherwise set it to null and return that value.
+         */
+        StringDataValue         getNullChar(StringDataValue dataValue,
+                int collationType);
 
         /**
-         * Get a SQL varchar with a SQL null value. If the supplied value
+         * Get a SQL VARCHAR (UCS_BASIC) with a SQL null value. If the supplied value
          * is null then get a new value, otherwise set it to null and return 
          * that value.
          *
          */
         StringDataValue         getNullVarchar(StringDataValue dataValue);
+        
+        /**
+         * Get a SQL VARCHAR set to NULL with collation set to collationType.
+         * If the supplied value is null then get a new value,
+         * otherwise set it to null and return that value.
+         */
+        StringDataValue         getNullVarchar(StringDataValue dataValue,
+                int collationType);
 
         /**
-         * Get a SQL long varchar with a SQL null value. If the supplied value
+         * Get a SQL LONG VARCHAR (UCS_BASIC) with a SQL null value. If the supplied value
          * is null then get a new value, otherwise set it to null and return 
          * that value.
          *
          */
         StringDataValue         getNullLongvarchar(StringDataValue dataValue);
+        
+        /**
+         * Get a SQL LONG VARCHAR set to NULL with collation set to collationType.
+         * If the supplied value is null then get a new value,
+         * otherwise set it to null and return that value.
+         */
+        StringDataValue         getNullLongvarchar(StringDataValue dataValue,
+                int collationType);
 
         /**
-         * Get a SQL long varchar with a SQL null value. If the supplied value
+         * Get a SQL CLOB (UCS_BASIC) with a SQL null value. If the supplied value
          * is null then get a new value, otherwise set it to null and return 
          * that value.
          *
          */
         StringDataValue         getNullClob(StringDataValue dataValue);
+
+        /**
+         * Get a SQL CLOB set to NULL with collation set to collationType.
+         * If the supplied value is null then get a new value,
+         * otherwise set it to null and return that value.
+         */
+        StringDataValue         getNullClob(StringDataValue dataValue,
+                int collationType);
 
         /**
          * Get a SQL national char with a SQL null value. If the supplied value

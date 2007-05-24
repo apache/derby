@@ -204,19 +204,6 @@ public final class CharTypeCompiler extends BaseTypeCompiler
             return collationType != StringDataValue.COLLATION_TYPE_UCS_BASIC;
         }
 
-        /**
-         * Augment the parent's method by ensuring the generated
-         * value is setup for collation if required.
-         * @see BaseTypeCompiler#generateCollationSensitiveDataValue(ExpressionClassBuilder, MethodBuilder, int)
-         */
-    	public void generateNull(
-    			ExpressionClassBuilder eb,
-				MethodBuilder mb, int collationType)
-    	{
-    		super.generateNull(eb, mb, collationType);
-    		generateCollationSensitiveDataValue(eb, mb, collationType);
-    	}
-
         String dataValueMethodName()
         {
                 int formatId = getStoredFormatIdFromTypeId();

@@ -118,13 +118,13 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 		return "getNullObject";
 	}
 
-	public void generateDataValue(ExpressionClassBuilder eb, MethodBuilder mb, int collationType,
+	public void generateDataValue(MethodBuilder mb, int collationType,
 			LocalField field)
 	{
 		// cast the value to an object for method resolution
 		mb.upCast("java.lang.Object");
 
-		super.generateDataValue(eb, mb, collationType, field);
+		super.generateDataValue(mb, collationType, field);
 	}
 
 		

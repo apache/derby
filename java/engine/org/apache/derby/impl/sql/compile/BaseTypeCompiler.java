@@ -34,12 +34,9 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.SQLInteger;
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -111,13 +108,12 @@ abstract class BaseTypeCompiler implements TypeCompiler
      * 
      * ...,dvd
      * 
-     * @see TypeCompiler#generateNull(ExpressionClassBuilder, MethodBuilder, int)
+     * @see TypeCompiler#generateNull(MethodBuilder, int)
      */
-	public void generateNull(ExpressionClassBuilder e,
-			MethodBuilder mb, int collationType)
+	public void generateNull(MethodBuilder mb, int collationType)
 	{
         int argCount;
-        if (false & pushCollationForDataValue(collationType))
+        if (pushCollationForDataValue(collationType))
         {
             mb.push(collationType);
             argCount = 2;
@@ -162,10 +158,9 @@ abstract class BaseTypeCompiler implements TypeCompiler
      * 
      * ...,dvd
      * 
-     * @see TypeCompiler#generateDataValue(ExpressionClassBuilder, MethodBuilder, int, LocalField)
+     * @see TypeCompiler#generateDataValue(MethodBuilder, int, LocalField)
      */
-    public void generateDataValue(ExpressionClassBuilder eb,
-			MethodBuilder mb, int collationType,
+    public void generateDataValue(MethodBuilder mb, int collationType,
 			LocalField field)
 	{
 
@@ -208,46 +203,6 @@ abstract class BaseTypeCompiler implements TypeCompiler
 			 */
 			mb.putField(field);
 		}
-	}
-
-	/**
-	 * If the collation type is UCS_BASIC, then we have already generated the
-	 * code for the correct DVD and hence simply return from this method. 
-	 * 
-	 * But if the collation type is territory based and we are generating DVDs
-	 * for character types, then we need to generate CollatorSQLxxx type of 
-	 * DVD. This CollatorSQLxxx DVD will be provided by generating following 
-	 * code which works on top of the DVD that has been generated with 
-	 * UCS_BASIC collation.
-	 * DVDwithUCS_BASIC.getValue(DVF.getCharacterCollator(collationType));
-	 * 
-	 * This method will be called only by CharTypeCompiler and ClobTypeCompiler 
-	 * because those are the only type compilers who generate DVDs which are 
-	 * impacted by the collation. Rest of the TypeCompilers generate DVDs which
-	 * are collation in-sensitive.
-	 *
-	 * @param eb The ExpressionClassBuilder for the class we're generating
-	 * @param mb The method to put the expression in
-	 * @param collationType For character DVDs, this will be used to determine
-	 *   what Collator should be associated with the DVD which in turn will 
-	 *   decide whether to generate CollatorSQLcharDVDs or SQLcharDVDs. For 
-	 *   other types of DVDs, this parameter will be ignored.
-	 */
-	void generateCollationSensitiveDataValue(
-			ExpressionClassBuilder eb,
-			MethodBuilder mb, 
-			int collationType){		
-		if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
-			return; 
-		//In case of character DVDs, for territory based collation, we need to 
-		//generate DVDs with territory based RuleBasedCollator and hence we 
-		//need to generate CollatorSQLChar/CollatorSQLVarchar/
-		//CollatorSQLLongvarchar/CollatorSQLClob 
-		eb.pushDataValueFactory(mb);
-		mb.push(collationType);
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "getCharacterCollator",
-				"java.text.RuleBasedCollator", 1);
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "getValue", interfaceName(), 1);
 	}
 
     /**

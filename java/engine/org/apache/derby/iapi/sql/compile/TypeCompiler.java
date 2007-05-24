@@ -25,7 +25,6 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
@@ -179,15 +178,13 @@ public interface TypeCompiler
 	 * type. The stack must contain a DataValueFactory and a null or a value
 	 * of the correct type (interfaceName()).
 	 *
-	 * @param eb The ExpressionClassBuilder for the class we're generating
 	 * @param mb	The method to put the expression in
 	 * @param collationType For character DVDs, this will be used to determine
 	 *   what Collator should be associated with the DVD which in turn will 
 	 *   decide whether to generate CollatorSQLcharDVDs or SQLcharDVDs.
 	 */
 
-	void generateNull(ExpressionClassBuilder eb,
-			MethodBuilder mb, int collationType);
+	void generateNull(MethodBuilder mb, int collationType);
 
 
 	/**
@@ -202,7 +199,6 @@ public interface TypeCompiler
 	 * 
 	 * The stack must contain data value factory value.
 	 * 
-	 * @param eb The ExpressionClassBuilder for the class we're generating
 	 * @param mb	The method to put the expression in
 	 * @param collationType For character DVDs, this will be used to determine
 	 *   what Collator should be associated with the DVD which in turn will 
@@ -211,7 +207,6 @@ public interface TypeCompiler
 	 * @param field LocalField
 	 */
 	void generateDataValue(
-			ExpressionClassBuilder eb,
 			MethodBuilder mb, int collationType, 
 			LocalField field);
 

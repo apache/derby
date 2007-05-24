@@ -866,6 +866,23 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         return dataValue;
                 }
         }
+        /**
+         * Get a SQL CHAR set to NULL with collation set to collationType.
+         * If the supplied value is null then get a new value,
+         * otherwise set it to null and return that value.
+         */
+        public StringDataValue         getNullChar(StringDataValue previous,
+                int collationType)
+        {
+            if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+                return getNullChar(previous);
+            
+            if (previous == null)
+                return new CollatorSQLChar(getCharacterCollator(collationType));
+            
+            previous.setToNull();
+            return previous;
+         }
 
         public StringDataValue          getNullVarchar(StringDataValue dataValue)
         {
@@ -878,6 +895,24 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         dataValue.setToNull();
                         return dataValue;
                 }
+        }
+        
+        /**
+         * Get a SQL VARCHAR set to NULL with collation set to collationType.
+         * If the supplied value is null then get a new value,
+         * otherwise set it to null and return that value.
+         */
+        public StringDataValue         getNullVarchar(StringDataValue previous,
+                int collationType)
+        {
+            if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+                return getNullChar(previous);
+            
+            if (previous == null)
+                return new CollatorSQLVarchar(getCharacterCollator(collationType));
+            
+            previous.setToNull();
+            return previous;
         }
 
         public StringDataValue          getNullLongvarchar(StringDataValue dataValue)
@@ -892,6 +927,24 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         return dataValue;
                 }
         }
+        
+        /**
+         * Get a SQL LONG VARCHAR set to NULL with collation set to collationType.
+         * If the supplied value is null then get a new value,
+         * otherwise set it to null and return that value.
+         */
+        public StringDataValue         getNullLongvarchar(StringDataValue previous,
+                int collationType)
+        {
+            if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+                return getNullChar(previous);
+            
+            if (previous == null)
+                return new CollatorSQLLongvarchar(getCharacterCollator(collationType));
+            
+            previous.setToNull();
+            return previous;
+        }
 
         public StringDataValue          getNullClob(StringDataValue dataValue)
         {
@@ -904,6 +957,24 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         dataValue.setToNull();
                         return dataValue;
                 }
+        }
+        
+        /**
+         * Get a SQL CLOB set to NULL with collation set to collationType.
+         * If the supplied value is null then get a new value,
+         * otherwise set it to null and return that value.
+         */
+        public StringDataValue         getNullClob(StringDataValue previous,
+                int collationType)
+        {
+            if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
+                return getNullChar(previous);
+            
+            if (previous == null)
+                return new CollatorSQLClob(getCharacterCollator(collationType));
+            
+            previous.setToNull();
+            return previous;
         }
 
         public StringDataValue          getNullNationalChar(StringDataValue dataValue)
