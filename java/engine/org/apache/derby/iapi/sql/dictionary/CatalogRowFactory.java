@@ -21,25 +21,18 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.util.StringUtil;
-
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.catalog.UUID;
 import java.util.Properties;
+
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.store.raw.RawStoreFactory;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.util.StringUtil;
 
 /**
  * Superclass of all row factories.

@@ -21,11 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
@@ -41,27 +43,11 @@ import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.impl.sql.execute.AggregatorInfo;
 import org.apache.derby.impl.sql.execute.AggregatorInfoList;
-
-
-
-import org.apache.derby.impl.sql.compile.MaxMinAggregateDefinition;
-import java.util.Iterator;
-import java.util.Vector;
 
 
 /**
