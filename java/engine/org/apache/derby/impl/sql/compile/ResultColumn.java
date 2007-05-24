@@ -1090,10 +1090,10 @@ public class ResultColumn extends ValueNode
 				ConstantNode constant = (ConstantNode)otherColumn.getExpression();
 				DataValueDescriptor oldValue = constant.getValue();
 
-
 				DataValueDescriptor newValue = convertConstant(
 					resultColumnType.getTypeId(),
-					resultColumnType.getMaximumWidth(), oldValue);
+					resultColumnType.getMaximumWidth(), 
+					oldValue);
 
 				if ((oldValue != newValue) &&
 					(oldValue instanceof StringDataValue ==
@@ -1103,6 +1103,21 @@ public class ResultColumn extends ValueNode
 					constant.setType(getTypeServices());
 					otherColumn.bindResultColumnToExpression();
 					otherResultColumnType = otherColumn.getType();
+				}
+				//If we are dealing with StringDataValue, then make sure we 
+				//have correct collation type and derivaiton set and the value
+				//represented by collation is either SQLxxx or CollatorSQLxxx
+				//depending on the collation type.
+				if (newValue instanceof StringDataValue)
+				{
+					constant.getTypeServices().setCollationDerivation(
+							resultColumnType.getCollationDerivation());
+					constant.getTypeServices().setCollationType(
+							resultColumnType.getCollationType());
+					DataValueFactory dvf = getDataValueFactory();
+					newValue = ((StringDataValue)newValue).getValue(dvf.getCharacterCollator(
+							constant.getTypeServices().getCollationType()));
+					constant.setValue(newValue);
 				}
 			}
 			if ( ! resultColumnType.getTypeId().equals(
@@ -1613,7 +1628,8 @@ public class ResultColumn extends ValueNode
 	/**
 	 * @exception StandardException		Thrown on error
 	 */
-	private DataValueDescriptor convertConstant(TypeId toTypeId, int maxWidth, DataValueDescriptor constantValue)
+	private DataValueDescriptor convertConstant(TypeId toTypeId, int maxWidth,
+			DataValueDescriptor constantValue)
 		throws StandardException
 	{
 		int formatId = toTypeId.getTypeFormatId();
