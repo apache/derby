@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.io.FilterInputStream;
 
 import java.io.IOException;
-import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
 class CloseFilterInputStream extends FilterInputStream {

@@ -24,7 +24,6 @@ package org.apache.derby.impl.jdbc;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
 	ReaderToAscii converts Reader (with characters) to a stream of ASCII characters.
