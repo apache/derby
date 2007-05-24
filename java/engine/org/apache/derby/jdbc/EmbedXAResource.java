@@ -771,8 +771,7 @@ class EmbedXAResource implements XAResource {
      */
     private static XAException wrapInXAException(StandardException se) {
         return wrapInXAException(
-                TransactionResourceImpl.wrapInSQLException(
-                (SQLException) null, se));
+                TransactionResourceImpl.wrapInSQLException(se));
     }
     
     /**

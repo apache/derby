@@ -625,13 +625,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         cSt.setString(1, "SYSCS_DIAG");
         cSt.setString(2, vtiTableName.toUpperCase());
 
-        /* Currently BaseJDBCTestCase.assertSQLState() is unable
-         * to find nested SQLSTATEs with 1.6 JVMs, so we have to
-         * check for the top-level SQLSTATE in that case.  When
-         * that changes the "JDBC.vmSupportsJDBC4()" call can be
-         * removed from the following line.  DERBY-1440.
-         */
-        assertStatementError(JDBC.vmSupportsJDBC4() ? "38000" : "42X62", cSt);
+        assertStatementError("42X62", cSt);
         
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?, ?, 1, 1, 1)");

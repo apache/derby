@@ -231,8 +231,20 @@ public abstract class Util  {
 		msg = t.getMessage();
 		if (msg == null) msg = "";
 		name = t.getClass().getName();
+        SQLException next = null;
+        Throwable cause = t.getCause();
+        if (cause != null) {
+            if (cause instanceof SQLException) {
+                next = (SQLException) cause;
+            } else if (cause instanceof StandardException) {
+                next = generateCsSQLException((StandardException) cause);
+            } else {
+                next = javaException(cause);
+            }
+        }
 		return newEmbedSQLException(SQLState.JAVA_EXCEPTION,
-			new Object[] {name, msg}, ExceptionSeverity.NO_APPLICABLE_SEVERITY, t);
+                new Object[] {name, msg}, next,
+                ExceptionSeverity.NO_APPLICABLE_SEVERITY, t);
 	}
 
 

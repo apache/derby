@@ -349,18 +349,12 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             "CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE ("
             + "  null, 'T1', 'xmlexport.del', null, null, null)");
 
-        /* Currently BaseJDBCTestCase.assertSQLState() is unable
-         * to find nested SQLSTATEs with 1.6 JVMs, so we have to
-         * check for the top-level SQLSTATE in that case.  When
-         * that changes the "JDBC.vmSupportsJDBC4()" call can be
-         * removed from the following line.
-         */
-        assertStatementError(JDBC.vmSupportsJDBC4() ? "38000" : "42Z71", cSt);
+        assertStatementError("42Z71", cSt);
         
         cSt = prepareCall(
             " CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY("
             + "  'select x from t1', 'xmlexport.del', null, null, null)");
-        assertStatementError(JDBC.vmSupportsJDBC4() ? "38000" : "42Z71", cSt);
+        assertStatementError("42Z71", cSt);
 
         cSt = prepareCall(
             " CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ("

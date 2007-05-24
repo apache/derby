@@ -4404,7 +4404,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		// the ResultSet or the Statement. So we only need
 		// to convert the exception to a SQLException.
 
-		return TransactionResourceImpl.wrapInSQLException((SQLException) null, thrownException);
+		return TransactionResourceImpl.wrapInSQLException(thrownException);
 
 	}
 

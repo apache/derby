@@ -235,12 +235,8 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         try {
             s.execute("insert into t2 values (1,2), (2,4)");
         } catch (SQLException se) {
-            //--- Bug DERBY-1629 -- in JDK 1.6 you only get 38001, not 38000
-            if (!JDBC.vmSupportsJDBC4())
-            {
-                assertSQLState("38000", se);
-                se = se.getNextException();
-            }
+            assertSQLState("38000", se);
+            se = se.getNextException();
             // Client does not get chained exceptions
             if (usingEmbedded())
                 assertSQLState("38001", se);           

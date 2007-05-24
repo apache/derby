@@ -342,7 +342,7 @@ public final class TransactionResourceImpl
 
 
 
-			return wrapInSQLException((SQLException) null, thrownException);
+			return wrapInSQLException(thrownException);
 
 		} catch (Throwable t) {
 
@@ -355,16 +355,16 @@ public final class TransactionResourceImpl
 			   We assume if we are in this degenerate
 			   case that it is actually a java exception
 			 */
-			throw wrapInSQLException((SQLException) null, t);
+			throw wrapInSQLException(t);
 			//throw t;
 		}
 
 	}
 		 
-	public static final SQLException wrapInSQLException(SQLException sqlException, Throwable thrownException) {
+	public static SQLException wrapInSQLException(Throwable thrownException) {
 
 		if (thrownException == null)
-			return sqlException;
+			return null;
 
 		SQLException nextSQLException;
 
@@ -377,30 +377,17 @@ public final class TransactionResourceImpl
 
 			StandardException se = (StandardException) thrownException;
 
-			nextSQLException = Util.generateCsSQLException(se);
-
-			wrapInSQLException(nextSQLException, se.getCause());
+            if (se.getCause() == null) {
+                nextSQLException = Util.generateCsSQLException(se);
+            } else {
+                nextSQLException = Util.seeNextException(se.getMessageId(),
+                        se.getArguments(), wrapInSQLException(se.getCause()));
+            }
 
 		} else {
 
 			nextSQLException = Util.javaException(thrownException);
 
-			// special case some java exceptions that have nested exceptions themselves
-			Throwable nestedByJVM = null;
-			if (thrownException instanceof ExceptionInInitializerError) {
-				nestedByJVM = ((ExceptionInInitializerError) thrownException).getException();
-			} else if (thrownException instanceof java.lang.reflect.InvocationTargetException) {
-				nestedByJVM = ((java.lang.reflect.InvocationTargetException) thrownException).getTargetException();
-			}
-
-			if (nestedByJVM != null) {
-				wrapInSQLException(nextSQLException, nestedByJVM);
-			}
-			
-		}
-
-		if (sqlException != null) {
-			sqlException.setNextException(nextSQLException);
 		}
 
 		return nextSQLException;

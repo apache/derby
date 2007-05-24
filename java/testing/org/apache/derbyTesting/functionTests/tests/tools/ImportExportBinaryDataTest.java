@@ -195,25 +195,17 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
 
         doExportTable("APP", "BIN_TAB", fileName, null, null , null);
 
-        /* Currently BaseJDBCTestCase.assertSQLState() is unable
-         * to find nested SQLSTATEs with 1.6 JVMs, so we have to
-         * check for the top-level SQLSTATE in that case.  When
-         * that changes the "JDBC.vmSupportsJDBC4()" call can be
-         * removed from the following assertSQLState() calls.
-         * (DERBY-1440)
-         */
-
         try {
             doImportTable("APP", "BIN_TAB_IMP", fileName, "2", null, null, 0);
         } catch (SQLException e) {
-             assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0J", e);
+             assertSQLState("XIE0J", e);
         }
 
         try {
             doImportData(null, "BIN_TAB_IMP", null, 
                          null,  fileName, null, "c", null, 1);
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0J", e);
+            assertSQLState("XIE0J", e);
         }
     }
 
@@ -258,7 +250,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
             doImportTable("APP", "BIN_TAB_IMP", fileName, null, null, null, 0);
             fail("import did not fail on data with invalid hex string");
         } catch (SQLException e) {
-             assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
+             assertSQLState("XIE0N", e);
         }
 
         try {
@@ -268,7 +260,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
+            assertSQLState("XIE0N", e);
         }
         
         try {
@@ -278,7 +270,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
+            assertSQLState("XIE0N", e);
         }
     }
 

@@ -91,8 +91,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 			Connection c = getConnection();
 			doImport(c, "Z" , "T1" , null , null , null, 0);
 		} catch (SQLException e) {
-            // DERBY-1440: JDBC 4 client driver doesn't include nested exception SQLStates
-			assertSQLState(JDBC.vmSupportsJDBC4() ? "38000" : "XIE04", e);
+			assertSQLState("XIE04", e);
 		}
 	}
 	
@@ -101,8 +100,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 			Connection c = getConnection();
 			doImport(c, null, "T1" , null , null, null, 0);
 		} catch (SQLException e) {
-            // DERBY-1440: JDBC 4 client driver doesn't include nested exception SQLStates
-			assertSQLState(JDBC.vmSupportsJDBC4() ? "38000" : "XIE05", e);
+			assertSQLState("XIE05", e);
 		}
 	}
 	
@@ -166,8 +164,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		try {
 			doImportFromFile(c, "extin/EndOfFile.txt" , "T4" , null , null , null, 0);
 		} catch (SQLException e) {
-			// DERBY-1440: JDBC 4 client driver doesn't include nested exception SQLStates
-			assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R" : "XIE0E", e);
+			assertSQLState("XIE0E", e);
 		}
 	}
 	

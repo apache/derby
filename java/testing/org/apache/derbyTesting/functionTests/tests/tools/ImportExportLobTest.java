@@ -226,7 +226,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
             doImportTable("APP", "BOOKS_IMP", fileName, null, null, null, 0);
             fail("import did not fail on data with invalid hex string");
         } catch (SQLException e) {
-             assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
+             assertSQLState("XIE0N", e);
         }
 
         try {
@@ -238,7 +238,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
+            assertSQLState("XIE0N", e);
         }
 
         try {
@@ -250,7 +250,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
                          fileName, null, null, null, 1);
             fail("import did not fail on data with invalid hex strings");
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0N", e);
+            assertSQLState("XIE0N", e);
         }
     }
 
@@ -375,27 +375,18 @@ public class ImportExportLobTest extends ImportExportBaseTest
         doExportQueryLobsToExtFile("select * from BOOKS where id < 10", 
                                    fileName, null, null, null, lobsFileName);
 
-
-        /* Currently BaseJDBCTestCase.assertSQLState() is unable
-         * to find nested SQLSTATEs with 1.6 JVMs, so we have to
-         * check for the top-level SQLSTATE in that case.  When
-         * that changes the "JDBC.vmSupportsJDBC4()" call can be
-         * removed from the following assertSQLState() calls.
-         * (DERBY-1440)
-         */
-
         try {
             doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, "2", 
                                          null, null, 0);
         } catch (SQLException e) {
-             assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0J", e);
+             assertSQLState("XIE0J", e);
         }
 
         try {
             doImportDataLobsFromExtFile(null, "BOOKS_IMP", null, 
                                       null,  fileName, null, "c", null, 1);
         } catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "38000": "XIE0J", e);
+            assertSQLState("XIE0J", e);
         }
     }
 
@@ -432,7 +423,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
             doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
                                          null, null, null, 0);
         }catch (SQLException e) {
-            assertSQLState(JDBC.vmSupportsJDBC4() ? "XIE0R": "XIE0P", e);
+            assertSQLState("XIE0P", e);
         }
     }
 
