@@ -35,6 +35,7 @@ import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 
@@ -49,19 +50,19 @@ T2: (TODO) Index based compare using predicate pushing
 T3: (DONE) order by on heap using in memory sorter
 T4: (TODO) order by on heap using disk based sorter
 T5: (TODO) system catalogs should not be collated
-T6: (TODO) create a heap table in collated 
+T6: (TODO) test like
 T7: (TODO) test create conglomerate triggered by DiskHashtable code
 T8: (TODO) test create conglomerate triggered by DataDictionaryImpl
 T9: (TODO) test create conglomerate triggered by java/engine/org/apache/derby/impl/sql/conn/GenericLanguageConnectionContext.java
 T10: (DONE) alter table compress with indexes
 T11: (DONE) alter table drop column with indexes
 T12: (DONE) alter table add column with index
-T13: (TODO) bulk insert into empty table, with and without indexes
-T13: (TODO) bulk insert replace, with and without indexes
+T13: (DONE) bulk insert into empty table, with and without indexes
+T14: (DONE) bulk insert replace, with and without indexes
 
-T13: (TODO) java/engine/org/apache/derby/impl/sql/execute/MaterializedResultSet.java
-T14: (TODO) /java/engine/org/apache/derby/impl/sql/execute/TemporaryRowHolderImpl.java
-T15: (TODO) /java/engine/org/apache/derby/impl/store/access/PropertyConglomerate.java
+T15: (TODO) java/engine/org/apache/derby/impl/sql/execute/MaterializedResultSet.java
+T16: (TODO) /java/engine/org/apache/derby/impl/sql/execute/TemporaryRowHolderImpl.java
+T17: (TODO) /java/engine/org/apache/derby/impl/store/access/PropertyConglomerate.java
 
 **/
 
@@ -189,9 +190,93 @@ public class CollationTest2 extends BaseJDBCTestCase
     }
 
     /**************************************************************************
-     * Private/Protected methods of This class:
+     * Private/Protected setup/utility methods of This class:
      **************************************************************************
      */
+
+
+    private void setUpTable(Connection conn) throws SQLException 
+    {
+        Statement s = conn.createStatement();
+        s.execute(
+            "CREATE TABLE CUSTOMER(" +
+                "D1 CHAR(200), D2 CHAR(200), D3 CHAR(200), D4 INT, " + 
+                "ID INT, NAME VARCHAR(40), NAME2 VARCHAR(40))");
+
+        conn.setAutoCommit(false);
+        PreparedStatement ps = 
+            conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?,?,?)");
+
+        for (int i = 0; i < NAMES.length; i++)
+        {
+            ps.setString(1, NAMES[i]);
+            ps.setString(2, NAMES[i]);
+            ps.setString(3, NAMES[i]);
+            ps.setInt(   4, i);
+            ps.setInt(   5, i);
+            ps.setString(6, NAMES[i]);
+            ps.setString(7, NAMES[i]);
+            ps.executeUpdate();
+        }
+
+        conn.commit();
+        ps.close();
+        s.close();
+    }
+
+    /**
+     * Perform export using SYSCS_UTIL.SYSCS_EXPORT_TABLE procedure.
+     */
+    protected void doExportTable(
+    Connection  conn,
+    String      schemaName, 
+    String      tableName, 
+    String      fileName, 
+    String      colDel , 
+    String      charDel, 
+    String      codeset) 
+        throws SQLException 
+    {
+        PreparedStatement ps = 
+            conn.prepareStatement(
+                "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (? , ? , ? , ?, ? , ?)");
+        ps.setString(1, schemaName);
+        ps.setString(2, tableName);
+        ps.setString(3, fileName);
+        ps.setString(4, colDel);
+        ps.setString(5, charDel);
+        ps.setString(6, codeset);
+        ps.execute();
+        ps.close();
+    }
+
+    /**
+     * Perform import using SYSCS_UTIL.SYSCS_IMPORT_TABLE procedure.
+     */
+    protected void doImportTable(
+    Connection  conn,
+    String      schemaName, 
+    String      tableName, 
+    String      fileName, 
+    String      colDel , 
+    String      charDel, 
+    String      codeset,
+    int         replace) 
+        throws SQLException 
+    {
+        PreparedStatement ps = 
+            conn.prepareStatement(
+                "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (?, ?, ?, ?, ?, ?, ?)");
+        ps.setString(1 , schemaName);
+        ps.setString(2, tableName);
+        ps.setString(3, fileName);
+        ps.setString(4 , colDel);
+        ps.setString(5 , charDel);
+        ps.setString(6 , codeset);
+        ps.setInt(7, replace);
+        ps.execute();
+        ps.close();
+    }
 
     /**
      * Produce an expect row set given the order and asc/desc info.
@@ -292,6 +377,10 @@ public class CollationTest2 extends BaseJDBCTestCase
         conn.commit();
     }
 
+    /**************************************************************************
+     * Private/Protected tests of This class:
+     **************************************************************************
+     */
 
     /**
      * Check simple boolean compare of string constant to column value.
@@ -511,34 +600,6 @@ public class CollationTest2 extends BaseJDBCTestCase
     }
 
 
-    private void setUpTable(Connection conn) throws SQLException 
-    {
-        Statement s = conn.createStatement();
-        s.execute(
-            "CREATE TABLE CUSTOMER(" +
-                "D1 CHAR(200), D2 CHAR(200), D3 CHAR(200), D4 INT, " + 
-                "ID INT, NAME VARCHAR(40), NAME2 VARCHAR(40))");
-
-        conn.setAutoCommit(false);
-        PreparedStatement ps = 
-            conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?,?,?)");
-
-        for (int i = 0; i < NAMES.length; i++)
-        {
-            ps.setString(1, NAMES[i]);
-            ps.setString(2, NAMES[i]);
-            ps.setString(3, NAMES[i]);
-            ps.setInt(   4, i);
-            ps.setInt(   5, i);
-            ps.setString(6, NAMES[i]);
-            ps.setString(7, NAMES[i]);
-            ps.executeUpdate();
-        }
-
-        conn.commit();
-        ps.close();
-        s.close();
-    }
 
     private void dropTable(Connection conn) throws SQLException 
     {
@@ -723,6 +784,94 @@ public class CollationTest2 extends BaseJDBCTestCase
     }
 
     /**
+     * Bulk insert test.
+     * <p>
+     * Tests code path through create conglomerate code executed as part of
+     * a bulk table insert.  In empty table and replace case the bulk table
+     * code will create new conglomerates for the base table and index table
+     * and this tests the code that the correct collation is associated with
+     * the new tables/indexes.
+     *
+     * Tests:
+     * T13: (DONE) bulk insert into empty table, with and without indexes
+     * T14: (DONE) bulk insert replace, with and without indexes
+     **/
+    private void runBulkInsert(
+    Connection  conn,
+    int         db_index)
+        throws SQLException 
+    {
+        Statement s = conn.createStatement();
+
+        setUpTable(conn);
+
+        // export CUSTOMER date to names.dat
+        String fileName =
+            (SupportFilesSetup.getReadWrite("names.dat")).getPath();
+
+        doExportTable(conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16");
+
+        conn.commit();
+
+
+        // bulk insert to empty table, no indexes without replace 
+        // (last arg 0 = no replace).
+        s.execute("DELETE FROM CUSTOMER");
+        doImportTable(
+            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
+        runQueries(conn, db_index, null, null);
+
+        // bulk insert to empty table, with indexes without replace 
+        // (last arg 0 = no replace).
+        s.execute("DELETE FROM CUSTOMER");
+        s.execute("CREATE INDEX IDX1 ON CUSTOMER (NAME)");
+        s.execute("CREATE INDEX IDX2 ON CUSTOMER (NAME, ID)");
+        s.execute("CREATE INDEX IDX3 ON CUSTOMER (ID,   NAME)");
+        s.execute("CREATE INDEX IDX4 ON CUSTOMER (ID)");
+        s.execute("CREATE INDEX IDX5 ON CUSTOMER (ID, NAME, D1, D2, D3)");
+        doImportTable(
+            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
+        runQueries(conn, db_index, null, null);
+        s.execute("DROP INDEX IDX1 ");
+        s.execute("DROP INDEX IDX2 ");
+        s.execute("DROP INDEX IDX3 ");
+        s.execute("DROP INDEX IDX4 ");
+        s.execute("DROP INDEX IDX5 ");
+
+        // bulk insert to non-empty table, no indexes with replace, call 
+        // import first to double the rows in the table.
+        // (last arg to Import 1 = replace).
+        doImportTable(
+            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
+        doImportTable(
+            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 1);
+        runQueries(conn, db_index, null, null);
+
+        // bulk insert to non-empty table, indexes with replace, call 
+        // import first to double the rows in the table.
+        // (last arg to Import 1 = replace).
+        s.execute("CREATE INDEX IDX1 ON CUSTOMER (NAME)");
+        s.execute("CREATE INDEX IDX2 ON CUSTOMER (NAME, ID)");
+        s.execute("CREATE INDEX IDX3 ON CUSTOMER (ID,   NAME)");
+        s.execute("CREATE INDEX IDX4 ON CUSTOMER (ID)");
+        s.execute("CREATE INDEX IDX5 ON CUSTOMER (ID, NAME, D1, D2, D3)");
+        doImportTable(
+            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
+        doImportTable(
+            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 1);
+        runQueries(conn, db_index, null, null);
+        s.execute("DROP INDEX IDX1 ");
+        s.execute("DROP INDEX IDX2 ");
+        s.execute("DROP INDEX IDX3 ");
+        s.execute("DROP INDEX IDX4 ");
+        s.execute("DROP INDEX IDX5 ");
+
+        dropTable(conn);
+
+        conn.commit();
+    }
+
+    /**
      * Shared code to run all test cases against a single collation.
      * <p>
      * Pass in the index of which TEST_DATABASE database to test.  So
@@ -796,6 +945,8 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         runAlterTableCompress(conn, db_index);
 
+        runBulkInsert(conn, db_index);
+
         /*
         TODO -MIKEM, this test does not work yet.
         runAlterTableDropColumn(conn, db_index);
@@ -831,15 +982,23 @@ public class CollationTest2 extends BaseJDBCTestCase
     
     public static Test suite() {
 
-        Test test =  TestConfiguration.embeddedSuite(CollationTest2.class);
+        Test test =  
+               TestConfiguration.embeddedSuite(CollationTest2.class);
+
+        test = new SupportFilesSetup(test);
+
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_DEFAULT]);
+
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_ENGLISH]);
+
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_POLISH]);
+
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_NORWAY]);
+
         return test;
     }
 }
