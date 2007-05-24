@@ -94,7 +94,7 @@ final class ClobAsciiStream extends OutputStream {
         {
             int clen = Math.min(len, buffer.length);
             for (int i = 0; i < clen; i++) {
-                buffer[i] = (char) b[off + i];
+                buffer[i] = (char)(b[off + i] & 0xff);
             }
             writer.write(buffer, 0, clen);
             off += clen;
