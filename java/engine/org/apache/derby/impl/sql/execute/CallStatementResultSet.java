@@ -22,20 +22,9 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-
+import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.store.access.ConglomerateController;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * Call the specified expression, ignoring the return, if any.

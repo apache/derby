@@ -21,32 +21,10 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.context.Context;
-
-import org.apache.derby.iapi.jdbc.ConnectionContext;
-
-import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.reference.Attribute;
-
-import org.apache.derby.iapi.sql.ResultSet;
-
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * BaseExpressionActivation
