@@ -1636,7 +1636,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	private ExecRow makeIndexTemplate(FKInfo fkInfo, ExecRow fullTemplate, ContextManager cm)
 		throws StandardException
 	{
-		ExecRow newRow = RowUtil.getEmptyIndexRow(fkInfo.colArray.length+1, cm);
+		ExecRow newRow = RowUtil.getEmptyIndexRow(fkInfo.colArray.length+1, lcc);
 
 		DataValueDescriptor[] templateColArray = fullTemplate.getRowArray();
 		DataValueDescriptor[] newRowColArray   = newRow.getRowArray();

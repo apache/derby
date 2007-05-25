@@ -21,19 +21,12 @@
 
 package org.apache.derby.impl.sql.execute;
  
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import java.util.Vector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.execute.ExecIndexRow;
+import org.apache.derby.iapi.sql.execute.ExecRow;
 
 /**
   Utility class manipulating rows.
@@ -62,13 +55,10 @@ public class RowUtil
 	  @param cm			 Current ContextManager
 	  @return the row.
 	  */
-	public static ExecIndexRow getEmptyIndexRow(int columnCount, ContextManager cm)
+	public static ExecIndexRow getEmptyIndexRow(int columnCount, LanguageConnectionContext lcc)
 	{
-		ExecutionContext	ec;
-
-		ec = (ExecutionContext)
-				cm.getContext(ExecutionContext.CONTEXT_ID);
-		return ec.getExecutionFactory().getIndexableRow(columnCount);
+		return lcc.getLanguageConnectionFactory().
+            getExecutionFactory().getIndexableRow(columnCount);
 	}
 
 	/**
