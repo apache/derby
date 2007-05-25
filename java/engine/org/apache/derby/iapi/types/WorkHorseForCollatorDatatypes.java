@@ -229,25 +229,41 @@ final class WorkHorseForCollatorDatatypes
 			return (int[]) null;
 		}
 
+
+
+        // Caching of collationElementsForString is not working properly, in 
+        // order to cache it needs to get invalidated everytime the container
+        // type's value is changed - through any interface, eg: readExternal, 
+        // setValue, ...  To get proper behavior, disabling caching, and will
+        // file a performance enhancement to implement correct caching.
+        collationElementsForString = null;
+        countOfCollationElements   = 0;
+
+
 		if (collationElementsForString != null)
 		{
 			return collationElementsForString;
 		}
 
-		// countOfCollationElements should always be 0 when collationElementsForString is null
+		// countOfCollationElements should always be 0 when 
+        // collationElementsForString is null
 		if (SanityManager.DEBUG)
 		{
 			if (countOfCollationElements != 0)
 			{
 				SanityManager.THROWASSERT(
-					"countOfCollationElements expected to be 0, not " + countOfCollationElements);
+					"countOfCollationElements expected to be 0, not " + 
+                    countOfCollationElements);
 			}
 		}
+        
 
 		collationElementsForString = new int[stringData.getLength()];
 
-		CollationElementIterator cei = collatorForCharacterDatatypes.getCollationElementIterator(
-				stringData.getString());
+		CollationElementIterator cei = 
+            collatorForCharacterDatatypes.getCollationElementIterator(
+                stringData.getString());
+
 		int nextInt;
 		while ((nextInt = cei.next()) != CollationElementIterator.NULLORDER)
 		{

@@ -50,7 +50,7 @@ T2: (TODO) Index based compare using predicate pushing
 T3: (DONE) order by on heap using in memory sorter
 T4: (TODO) order by on heap using disk based sorter
 T5: (TODO) system catalogs should not be collated
-T6: (TODO) test like
+T6: (DONE) test like
 T7: (TODO) test create conglomerate triggered by DiskHashtable code
 T8: (TODO) test create conglomerate triggered by DataDictionaryImpl
 T9: (TODO) test create conglomerate triggered by java/engine/org/apache/derby/impl/sql/conn/GenericLanguageConnectionContext.java
@@ -63,6 +63,30 @@ T14: (DONE) bulk insert replace, with and without indexes
 T15: (TODO) java/engine/org/apache/derby/impl/sql/execute/MaterializedResultSet.java
 T16: (TODO) /java/engine/org/apache/derby/impl/sql/execute/TemporaryRowHolderImpl.java
 T17: (TODO) /java/engine/org/apache/derby/impl/store/access/PropertyConglomerate.java
+T18: (TODO) upgrade tests - may be changes to upgrade suite rather than here.
+T19: (TODO) recovery testing - may be old function harness changes as no one has
+            suggested how to do this in junit harness.
+T20: (TODO) For both a newly created 10.3 database and an upgraded 10.3 
+            database, make sure that metadata continues to show the scale for 
+            character datatypes as 0 (rather than the collation type value). 
+            That is, test that the scale of the character datatypes is always
+            0 and it didn't get impacted negatively by the overloading of scale
+            field as collation type in TypeDescriptor. 
+T21: (TODO) Testing with views
+T22: (TODO) Testing with global temporary tables
+T23: (TODO) Alter table testing. Two specific cases 1)add a new character column and 2)increase the length of an existing character
+T24: (TODO) Need to add a test case for DERBY-2669 If no territory attribute is not specified at create database time, then we should ignore the collation attribute if specified.
+column(this 2nd test should not impact the collation type setting of the character column).
+
+13)Performance- CollatorSQLChar has a method called getCollationElementsForString which currently gets called by like method. 
+getCollationElementsForString gets the collation elements for the value of CollatorSQLChar class. But say like method is looking 
+for pattern 'A%' and the value of CollatorSQLChar is 'BXXXXXXXXXXXXXXXXXXXXXXX'. This is eg of one case where it would have been 
+better to get collation element one character of CollatorSQLChar value at a time so we don't go through the process of getting 
+collation elements for the entire string when we don't really need. This is a performance issue and could be taken up at the end 
+of the implementation. Comments on this from Dan and Dag can be found in DERBY-2416. 
+15)DERBY-2668 At the time of compilation of a comparison operation, if the collation types of the operands do not match, then we 
+should throw a meaningful error message
+
 
 **/
 
@@ -73,7 +97,12 @@ public class CollationTest2 extends BaseJDBCTestCase
      **************************************************************************
      */
 
-    
+
+    /**
+     * Set to get output if something in the test is failing and you want
+     * more information about what was going on.
+     **/
+    private static final boolean    verbose_debug = false;
 
     private static final int    TEST_DEFAULT = 0;
     private static final int    TEST_ENGLISH = 1;
@@ -110,7 +139,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         null,
         "en",
         "pl",
-        "no"
+        "no_NO"
     };
 
 
@@ -178,6 +207,122 @@ public class CollationTest2 extends BaseJDBCTestCase
         NORWAY_NAME_ORDER
     };
 
+    
+    /**
+     * set up LIKE test cases, configured for all languages by 
+     * the TEST_* constants.
+     * <p>
+     * Insert all data to tested against into LIKE_NAMES. A customer table
+     * will be filled with this data.
+     * {p>
+     * Insert test cases for like string into the LIKE_TEST_CASES, results
+     * are expected only to return a single row.
+     * <p>
+     * Insert actual string expected back for each language, for each test
+     * case in the {LANG}_LIKE_RESULT array.  Insert null if no match is
+     * expected.
+     * <p>
+     * Current test tries all 4 datatypes, CHAR will blank pad making the
+     * results different than the other datatypes if data is shorter than
+     * type, thus a different set of LIKE clauses needs to be entered in the
+     * LIKE_CHAR_TEST_CASES which should match the same results in a CHAR
+     * field as does the corresponding LIKE_TEST_CASES test.  
+     *
+     **/
+    private static final String[] LIKE_NAMES =
+    {
+        "Waagan",      // 0
+        "Smith",       // 1
+        "Zebra",       // 2
+        "xcorn",       // 3
+        "aBebra",      // 4
+        "Acorn",       // 5
+        "Amith",       // 6
+        "aacorn",      // 7
+        "xxxaa",       // 8
+        "aaxxx",       // 9
+        "yyyaa y",     // 10
+    };
+
+    private static final String[] LIKE_TEST_CASES = 
+    {
+        "Waagan",
+        "W_gan",
+        "aaxxx",
+        "_xxx",
+        "xxxaa",
+        "xxx_",
+        "xxx_%",
+        "yyy_%"
+    };
+    private static final String[] LIKE_CHAR_TEST_CASES = 
+    {
+        "Waagan    ",
+        "W_gan    ",
+        "aaxxx%",
+        "_xxx%",
+        "xxx%",
+        "xxx_ %",
+        "xxx%",
+        "yyy_%"
+    };
+
+    private static final int[] DEFAULT_LIKE_RESULT =
+    {
+        0,
+        -1,
+        9,
+        -1,
+        8,
+        -1,
+        8,
+        10
+    };
+        
+    private static final int[] ENGLISH_LIKE_RESULT =
+    {
+        0,
+        -1,
+        9,
+        -1,
+        8,
+        -1,
+        8,
+        10
+    };
+
+    private static final int[] POLISH_LIKE_RESULT =
+    {
+        0,
+        -1,
+        9,
+        -1,
+        8,
+        -1,
+        8,
+        10
+    };
+
+    private static final int[] NORWAY_LIKE_RESULT =
+    {
+        0,
+        0,
+        9,
+        9,
+        8,
+        8,
+        8,
+        10
+    };
+
+    private static final int[][] EXPECTED_LIKE_RESULTS = 
+    {
+        DEFAULT_LIKE_RESULT,
+        ENGLISH_LIKE_RESULT,
+        POLISH_LIKE_RESULT,
+        NORWAY_LIKE_RESULT
+    };
+
 
     /**************************************************************************
      * Constructors for This class:
@@ -194,6 +339,34 @@ public class CollationTest2 extends BaseJDBCTestCase
      **************************************************************************
      */
 
+    /**
+     * Creates a database and return connection to database.
+     * <p>
+     * Creates a database with territory/collation as indicated by db_index
+     * test case.  
+     * Database name:       TEST_DATABASE[db_index]
+     * territory attribute: TEST_CONNECTION_ATTRIBUTE[db_index]
+     **/
+    private Connection setUpDBandOpenConnection(int db_index) 
+        throws SQLException 
+    {
+        DataSource ds = 
+            JDBCDataSource.getDataSourceLogical(TEST_DATABASE[db_index]);
+
+        String conn_string = 
+            "create=true" + 
+                ((TEST_CONNECTION_ATTRIBUTE[db_index] == null) ? 
+                     "" : 
+                     ";territory=" + 
+                     TEST_CONNECTION_ATTRIBUTE[db_index] + 
+                     ";collation=TERRITORY_BASED");
+
+        JDBCDataSource.setBeanProperty(ds, "connectionAttributes", conn_string);
+
+        Connection conn = ds.getConnection();
+
+        return(conn);
+    }
 
     private void setUpTable(Connection conn) throws SQLException 
     {
@@ -216,6 +389,36 @@ public class CollationTest2 extends BaseJDBCTestCase
             ps.setInt(   5, i);
             ps.setString(6, NAMES[i]);
             ps.setString(7, NAMES[i]);
+            ps.executeUpdate();
+        }
+
+        conn.commit();
+        ps.close();
+        s.close();
+    }
+
+    private void setUpLikeTable(Connection conn) throws SQLException 
+    {
+        Statement s = conn.createStatement();
+        s.execute(
+            "CREATE TABLE CUSTOMER ("              +
+                "NAME_CHAR          CHAR(10), "    +
+                "NAME_VARCHAR       VARCHAR(40),"  +
+                "NAME_LONGVARCHAR   LONG VARCHAR," +
+                "NAME_CLOB          CLOB,"         +
+                "ID                 INT)");
+
+        conn.setAutoCommit(false);
+        PreparedStatement ps = 
+            conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?)");
+
+        for (int i = 0; i < LIKE_NAMES.length; i++)
+        {
+            ps.setString(1, LIKE_NAMES[i]);
+            ps.setString(2, LIKE_NAMES[i]);
+            ps.setString(3, LIKE_NAMES[i]);
+            ps.setString(4, LIKE_NAMES[i]);
+            ps.setInt(   5, i);
             ps.executeUpdate();
         }
 
@@ -281,10 +484,19 @@ public class CollationTest2 extends BaseJDBCTestCase
     /**
      * Produce an expect row set given the order and asc/desc info.
      * <p>
-     * Input array gives the offset into the NAMES array of data of the
-     * expected order of rows to return for this test.
+     * Given the expected order of rows, the offset of first and last row
+     * to return, and whether rows will be ascending or descending produce
+     * a 2d expected row set.  Each row in the row set represents a row 
+     * with 2 columns (ID, NAME) from the CUSTOMER table used throughout
+     * this test.
      *
      * @param expected_order    Expected order of rows in this language.
+     * @param start_offset      expect rows starting at 
+     *                          expected_order[start_offset] up to and including
+     *                          expected_order[stop_offset].
+     * @param stop_offset       expect rows starting at 
+     *                          expected_order[start_offset] up to and including
+     *                          expected_order[stop_offset].
      * @param ascending_order   true if rows are in order, else rows are in
      *                          reverse order.
      **/
@@ -329,10 +541,42 @@ public class CollationTest2 extends BaseJDBCTestCase
         return(ret_order);
     }
 
+    /**
+     * Produce an expect row set given list and offset of row in list.
+     * <p>
+     * Given the list of rows and offset of the expected row in the list
+     * produce a 2d expected row set.  If expected_row is -1 then no row
+     * set is returned.  Each row in the row set represents a row 
+     * with 2 columns (ID, NAME) from the CUSTOMER table used throughout
+     * this test.
+     *
+     * @param expected_row      -1 if no expected row, else 
+     *                          ret_list[expected_row] is single value expected.
+     * @param ret_list          list of strings in data set.
+     **/
+    private String[][] full_row_single_value(
+    int         expected_row,
+    String[]    ret_list)
+    {
+        String[][] ret_order = null;
+
+        if (expected_row != -1)
+        {
+            // if not -1 then exactly one row expected.
+            ret_order = new String[1][2];
+            ret_order[0][0] = String.valueOf(expected_row);
+            ret_order[0][1] = ret_list[expected_row];
+        }
+
+        return(ret_order);
+    }
+
+
     private void checkLangBasedQuery(
     Connection  conn,
     String      query, 
-    String[][]  expectedResult) 
+    String[][]  expectedResult,
+    boolean     ordered) 
         throws SQLException 
     {
         Statement s  = conn.createStatement();
@@ -410,7 +654,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     0, 
                     i - 1,
-                    true));
+                    true),
+                true);
 
             // '<=' test
             checkLangBasedQuery(
@@ -421,7 +666,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     0, 
                     i,
-                    true));
+                    true),
+                true);
 
             // '=' test
             checkLangBasedQuery(
@@ -432,7 +678,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     i, 
                     i,
-                    true));
+                    true),
+                true);
 
             // '>=' test
             checkLangBasedQuery(
@@ -443,7 +690,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     i, 
                     expected_order.length - 1,
-                    true));
+                    true),
+                true);
 
 
             // '>' test
@@ -455,7 +703,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     i + 1, 
                     expected_order.length - 1,
-                    true));
+                    true),
+                true);
 
             // now check prepared query
 
@@ -560,7 +809,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                 expected_order,
                 4, 
                 expected_order.length - 1,
-                true));
+                true),
+            true);
 
         // check persistent compared to persistent - CHAR TO VARCHAR, 
         // should return rows bigger than 3rd in expected order.
@@ -571,7 +821,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                 expected_order,
                 4, 
                 expected_order.length - 1,
-                true));
+                true),
+            true);
 
         // check persistent compared to persistent - VARCHAR TO VARCHAR, 
         // should return rows bigger than 3rd in expected order.
@@ -582,7 +833,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                 expected_order,
                 4, 
                 expected_order.length - 1,
-                true));
+                true),
+            true);
 
         // check persistent compared to persistent - CHAR TO CHAR, 
         // should return rows bigger than 3rd in expected order.
@@ -593,7 +845,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                 expected_order,
                 4, 
                 expected_order.length - 1,
-                true));
+                true),
+            true);
 
         // put back data the way it was on entry to test.
         conn.rollback();
@@ -632,7 +885,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                 EXPECTED_NAME_ORDER[db_index], 
                 0, 
                 EXPECTED_NAME_ORDER[db_index].length - 1, 
-                true));
+                true),
+            true);
 
         // Simple check of getting all rows back in order
         checkLangBasedQuery(
@@ -642,7 +896,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                 EXPECTED_NAME_ORDER[db_index], 
                 0, 
                 EXPECTED_NAME_ORDER[db_index].length - 1, 
-                true));
+                true),
+            true);
 
         // Simple check of getting all rows back in opposite order
         checkLangBasedQuery(
@@ -652,7 +907,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                 EXPECTED_NAME_ORDER[db_index], 
                 0, 
                 EXPECTED_NAME_ORDER[db_index].length - 1, 
-                false));
+                false),
+            true);
 
         // Check <, <=, =, >=, > operators on constant vs. column
         checkSimpleCompare(conn, EXPECTED_NAME_ORDER[db_index]);
@@ -664,6 +920,72 @@ public class CollationTest2 extends BaseJDBCTestCase
             s.execute("DROP INDEX " + idx_name);
 
         conn.commit();
+    }
+
+    /**
+     * Test various like expressions against all string datatypes.
+     *
+     * T6: (DONE) test like
+     * @throws SQLException
+     **/
+    private void runLikeTests(
+    Connection  conn,
+    int         db_index)
+        throws SQLException
+    {
+        setUpLikeTable(conn);
+
+        for (int i = 0; i < LIKE_TEST_CASES.length; i++)
+        {
+            if (verbose_debug)
+            {
+                System.out.println(
+                    "Running like test[" + i + "] = " + LIKE_TEST_CASES[i]);
+            }
+
+            // varchar column
+            checkLangBasedQuery(
+                conn,
+                "SELECT ID, NAME_VARCHAR FROM CUSTOMER WHERE NAME_VARCHAR LIKE " +
+                    "'" + LIKE_TEST_CASES[i] + "'",
+                full_row_single_value(
+                    EXPECTED_LIKE_RESULTS[db_index][i],
+                    LIKE_NAMES),
+                true);
+
+            // long varchar column
+            checkLangBasedQuery(
+                conn,
+                "SELECT ID, NAME_LONGVARCHAR FROM CUSTOMER WHERE NAME_LONGVARCHAR LIKE " +
+                    "'" + LIKE_TEST_CASES[i] + "'",
+                full_row_single_value(
+                    EXPECTED_LIKE_RESULTS[db_index][i],
+                    LIKE_NAMES),
+                true);
+
+            // clob column
+            checkLangBasedQuery(
+                conn,
+                "SELECT ID, NAME_CLOB FROM CUSTOMER WHERE NAME_CLOB LIKE " +
+                    "'" + LIKE_TEST_CASES[i] + "'",
+                full_row_single_value(
+                    EXPECTED_LIKE_RESULTS[db_index][i],
+                    LIKE_NAMES),
+                true);
+
+            // char column, char includes blank padding so alter all these
+            // tests cases to match for blanks at end also.
+            checkLangBasedQuery(
+                conn,
+                "SELECT ID, NAME_CHAR FROM CUSTOMER WHERE NAME_CHAR LIKE " + 
+                    "'" + LIKE_CHAR_TEST_CASES[i] + "%'",
+                full_row_single_value(
+                    EXPECTED_LIKE_RESULTS[db_index][i],
+                    LIKE_NAMES),
+                true);
+        }
+
+        dropTable(conn);
     }
 
 
@@ -871,6 +1193,55 @@ public class CollationTest2 extends BaseJDBCTestCase
         conn.commit();
     }
 
+
+    /**
+     * Test case for DERBY-2670 - problem with like in no like processing.
+     * <p>
+     * Before fix, the table/query below would return results like B and
+     * C, obviously wrong for like %a%.  The code was incorrectly caching
+     * collation key info in a DataValueDescriptor across the reuse of the
+     * holder object from one row to the next.
+     **/
+    private void runDerby2670(
+    Connection conn)
+        throws SQLException
+    {
+        Statement s = conn.createStatement();
+
+        String[] rows = 
+            { "Waagan", "W\u00E5han", "Wanvik", "Wågan", "ekstrabetaling", 
+              "ekstraarbeid", "ekstra\u00ADarbeid", "\u00ADa", "a", "\u00ADb", 
+              "b", "-a", "-b", " a", " b", "A", "B", "C" 
+            };
+
+
+        s.executeUpdate("create table t (x varchar(20))");
+        PreparedStatement ps = conn.prepareStatement("insert into t values ?");
+        for (int i = 0; i < rows.length; i++) {
+            ps.setString(1, rows[i]);
+            ps.executeUpdate();
+        }
+
+        checkLangBasedQuery(
+            conn, 
+            "select * from t where x like '%a%'",
+            new String[][] 
+            { 
+                {"Waagan"}, {"W\u00E5han"}, {"Wanvik"}, {"Wågan"}, 
+                {"ekstrabetaling"}, {"ekstra\u00ADarbeid"}, {"\u00ADa"}, {"a"}, 
+                {"-a"}, {" a"}
+            },
+            true);
+
+        s.executeUpdate("drop table t");
+
+        conn.commit();
+        
+        // cleanup
+        ps.close();
+        s.close();
+    }
+
     /**
      * Shared code to run all test cases against a single collation.
      * <p>
@@ -882,26 +1253,14 @@ public class CollationTest2 extends BaseJDBCTestCase
      *
      * @exception  SQLException
      **/
-    private void runTestIter(int db_index) throws SQLException 
+    private void runTestIter(
+    Connection  conn, 
+    int         db_index) 
+        throws SQLException 
     {
-        DataSource ds = 
-            JDBCDataSource.getDataSourceLogical(TEST_DATABASE[db_index]);
-
-        String conn_string = 
-            "create=true" + 
-                ((TEST_CONNECTION_ATTRIBUTE[db_index] == null) ? 
-                     "" : 
-                     ";territory=" + 
-                     TEST_CONNECTION_ATTRIBUTE[db_index] + 
-                     ";collation=TERRITORY_BASED");
-
-        JDBCDataSource.setBeanProperty(ds, "connectionAttributes", conn_string);
-
-        Connection conn = ds.getConnection();
         Statement s = conn.createStatement();
 
         setUpTable(conn);
-
 
         // run tests against base table no index, exercise heap path
         // Tests the following:
@@ -947,14 +1306,14 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         runBulkInsert(conn, db_index);
 
+        runLikeTests(conn, db_index);
+
         /*
         TODO -MIKEM, this test does not work yet.
         runAlterTableDropColumn(conn, db_index);
         */
 
-
         conn.commit();
-        conn.close();
     }
 
     /**************************************************************************
@@ -964,23 +1323,34 @@ public class CollationTest2 extends BaseJDBCTestCase
 
     public void testDefaultCollation() throws SQLException
     {
-        runTestIter(TEST_DEFAULT);
+        Connection conn = setUpDBandOpenConnection(TEST_DEFAULT);
+        runTestIter(conn, TEST_DEFAULT);
+        conn.close();
     }
     public void testEnglishCollation() throws SQLException
     {
-        runTestIter(TEST_ENGLISH);
+        Connection conn = setUpDBandOpenConnection(TEST_ENGLISH);
+        runTestIter(conn, TEST_ENGLISH);
+        conn.close();
     }
     public void testPolishCollation() throws SQLException
     {
-        runTestIter(TEST_POLISH);
+        Connection conn = setUpDBandOpenConnection(TEST_POLISH);
+        runTestIter(conn, TEST_POLISH);
+        conn.close();
     }
     public void testNorwayCollation() throws SQLException
     {
-        runTestIter(TEST_NORWAY);
+        Connection conn = setUpDBandOpenConnection(TEST_NORWAY);
+        runTestIter(conn, TEST_NORWAY);
+
+        runDerby2670(conn);
+        conn.close();
     }
     
     
-    public static Test suite() {
+    public static Test suite() 
+    {
 
         Test test =  
                TestConfiguration.embeddedSuite(CollationTest2.class);
