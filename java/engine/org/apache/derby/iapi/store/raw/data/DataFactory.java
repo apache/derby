@@ -373,4 +373,10 @@ public interface DataFactory extends Corruptable {
     public StorageFactory getStorageFactory();
 
 	public void	stop();
+
+    /**
+     * Returns if data base is in encrypted mode.
+     * @return true if database encrypted false otherwise
+     */
+    public boolean databaseEncrypted();
 }

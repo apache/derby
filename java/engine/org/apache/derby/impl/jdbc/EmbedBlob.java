@@ -119,6 +119,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
          catch (IOException e) {
              throw Util.setStreamFailure (e);
          }
+         catch (StandardException se) {
+            throw Util.generateCsSQLException (se);
+         }
      }
      
     /*
@@ -228,10 +231,15 @@ final class EmbedBlob extends ConnectionChild implements Blob
         int c;
         if (materialized)
         {
-            if (pos >= control.getLength())
-                return -1;
-            else
-                c = control.read (pos);
+            try {
+                if (pos >= control.getLength())
+                    return -1;
+                else
+                    c = control.read (pos);
+            }
+            catch (StandardException se) {
+                throw Util.generateCsSQLException (se);
+            }
         }
         else
             c = biStream.read();
@@ -784,6 +792,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
         catch (IOException e) {
             throw Util.setStreamFailure (e);
         }
+        catch (StandardException se) {
+            throw Util.generateCsSQLException (se);
+        }
     }
 
    /**
@@ -822,6 +833,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
             catch (IOException e) {
                 throw Util.setStreamFailure (e);
             }
+            catch (StandardException se) {
+                throw Util.generateCsSQLException (se);
+            }
 	}
 
 	/**
@@ -835,7 +849,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
     * @exception SQLException Feature not implemented for now.
 	*/
 	public void truncate(long len)
-    throws SQLException
+                                        throws SQLException
 	{
             if (len > length())
                 throw Util.generateCsSQLException(
@@ -853,6 +867,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
             }
             catch (IOException e) {
                 throw Util.setStreamFailure (e);
+            }
+            catch (StandardException se) {
+                throw Util.generateCsSQLException (se);
             }
 	}
 

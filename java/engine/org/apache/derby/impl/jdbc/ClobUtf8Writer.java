@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.SQLException;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
@@ -106,6 +107,9 @@ final class ClobUtf8Writer extends Writer {
             IOException ioe = new IOException (e.getMessage());
             ioe.initCause (e);
             throw ioe;
+        }
+        catch (StandardException se) {
+            throw new IOException (se.getMessage());
         }
     }
 }

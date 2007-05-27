@@ -31,6 +31,7 @@ import java.io.Reader;
 import java.io.UTFDataFormatException;
 import java.io.Writer;
 import java.sql.SQLException;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.ByteArray;
 
@@ -193,9 +194,11 @@ final class ClobStreamControl extends LOBStreamControl {
      * @param pos byte postion
      * @return current byte postion
      * @throws IOException
+     * @throws StandardException
+     * @throws SQLException
      */
     synchronized long insertString (String str, long pos)
-                                            throws IOException, SQLException {
+                 throws IOException, SQLException, StandardException {
         int len = str.length();
         if (pos == super.getLength()) {
             byte b [] = getByteFromString (str);

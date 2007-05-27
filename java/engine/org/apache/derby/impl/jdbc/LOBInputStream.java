@@ -25,6 +25,7 @@ package org.apache.derby.impl.jdbc;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.shared.common.error.ExceptionUtil;
@@ -125,6 +126,9 @@ public class LOBInputStream extends InputStream {
         } catch (SQLException e) {
             return handleSQLException (e);
         }
+        catch (StandardException se) {
+            throw new IOException (se.getMessage());
+        }
     }
 
     /**
@@ -165,6 +169,8 @@ public class LOBInputStream extends InputStream {
             return ret;
         } catch (SQLException e) {
             throw new IOException(e.getMessage());
+        } catch (StandardException se) {
+            throw new IOException (se.getMessage());
         }
     }
 

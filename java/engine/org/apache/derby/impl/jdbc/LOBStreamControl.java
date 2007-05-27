@@ -55,7 +55,7 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
  */
 
 class LOBStreamControl {
-    private StorageRandomAccessFile tmpFile;
+    private LOBFile tmpFile;
     private StorageFile lobFile;
     private byte [] dataBytes = new byte [0];
     private boolean isBytes = true;
@@ -70,7 +70,8 @@ class LOBStreamControl {
         updateCount = 0;
     }
 
-    private void init(byte [] b, long len) throws IOException, SQLException {
+    private void init(byte [] b, long len)
+                    throws IOException, SQLException, StandardException {
         try {
             AccessController.doPrivileged (new PrivilegedExceptionAction() {
                 public Object run() throws IOException, StandardException {
@@ -81,7 +82,11 @@ class LOBStreamControl {
                     //create a temporary file
                     lobFile =
                         df.getStorageFactory().createTemporaryFile("lob", null);
-                    tmpFile = lobFile.getRandomAccessFile ("rw");
+                    if (df.databaseEncrypted()) {
+                        tmpFile = new EncryptedLOBFile (lobFile, df);
+                    }
+                    else
+                        tmpFile = new LOBFile (lobFile);
                     return null;
                 }
             });
@@ -136,7 +141,8 @@ class LOBStreamControl {
         }
     }
 
-    private void isValidPostion(long pos) throws SQLException, IOException {
+    private void isValidPostion(long pos)
+                        throws SQLException, IOException {
         if (pos < 0)
             throw Util.generateCsSQLException(
                     SQLState.BLOB_NONPOSITIVE_LENGTH, new Long(pos + 1));
@@ -170,9 +176,10 @@ class LOBStreamControl {
      * @param b byte
      * @param pos
      * @return new postion
-     * @throws IOException, SQLException
+     * @throws IOException, SQLException, StandardException
      */
-    synchronized long write(int b, long pos) throws IOException, SQLException {
+    synchronized long write(int b, long pos)
+                throws IOException, SQLException, StandardException {
         isValidPostion(pos);
         updateCount++;
         if (isBytes) {
@@ -196,10 +203,10 @@ class LOBStreamControl {
      * @param len number of bytes to be copied
      * @param pos starting postion
      * @return new postion
-     * @throws IOException, SQLException
+     * @throws IOException, SQLException, StandardException
      */
     synchronized long write(byte[] b, int off, int len, long pos)
-    throws IOException, SQLException {
+                        throws IOException, SQLException, StandardException {
         try {
             isValidPostion(pos);
             isValidOffset(off, b.length);
@@ -227,9 +234,10 @@ class LOBStreamControl {
      * Reads one byte.
      * @param pos postion from where to read
      * @return byte
-     * @throws IOException, SQLException
+     * @throws IOException, SQLException, StandardException
      */
-    synchronized int read(long pos) throws IOException, SQLException {
+    synchronized int read(long pos)
+                throws IOException, SQLException, StandardException {
         isValidPostion(pos);
         if (isBytes) {
             if (dataBytes.length == pos)
@@ -262,10 +270,10 @@ class LOBStreamControl {
      * @param len number of bytes to read
      * @param pos initial postion before reading
      * @return number new postion
-     * @throws IOException, SQLException
+     * @throws IOException, SQLException, StandardException
      */
     synchronized int read(byte[] buff, int off, int len, long pos)
-    throws IOException, SQLException {
+    throws IOException, SQLException, StandardException {
         isValidPostion(pos);
         isValidOffset(off, buff.length);
         if (isBytes) {
@@ -309,7 +317,8 @@ class LOBStreamControl {
      * @param size new size should be smaller than exisiting size
      * @throws IOException, SQLException
      */
-    synchronized void truncate(long size) throws IOException, SQLException {
+    synchronized void truncate(long size)
+                        throws IOException, SQLException, StandardException {
         isValidPostion(size);
         if (isBytes) {
             byte [] tmpByte = new byte [(int) size];
@@ -322,8 +331,14 @@ class LOBStreamControl {
                 isBytes = true;
                 tmpFile.close();
                 tmpFile = null;
-            } else
-                tmpFile.setLength(size);
+            } else {
+                try {
+                    tmpFile.setLength(size);
+                }
+                catch (StandardException se) {
+                    Util.generateCsSQLException (se);
+                }
+            }
         }
     }
 
@@ -331,10 +346,10 @@ class LOBStreamControl {
      * Copies bytes from stream to local storage.
      * @param inStream
      * @param length length to be copied
-     * @throws IOException, SQLException
+     * @throws IOException, SQLException, StandardException
      */
     synchronized void copyData(InputStream inStream,
-            long length) throws IOException, SQLException {
+            long length) throws IOException, SQLException, StandardException {
         byte [] data = new byte [MAX_BUF_SIZE];
         long sz = 0;
         while (sz < length) {
@@ -388,10 +403,11 @@ class LOBStreamControl {
      * @param endPos exclusive end position of current block
      * @return Current position after write.
      * @throws IOExcepton if writing to temporary file fails
+     * @throws StandardException
      * @throws SQLException
      */
     synchronized long replaceBytes (byte [] buf, long stPos, long endPos) 
-                                            throws IOException, SQLException {
+                         throws IOException, SQLException, StandardException {
         long length = getLength();
         long finalLength = length - endPos + stPos + buf.length;
         if (isBytes) {
@@ -417,7 +433,7 @@ class LOBStreamControl {
             //create new file with 0 size
             
             byte tmp [] = new byte [0];
-            StorageRandomAccessFile oldFile = tmpFile;
+            LOBFile oldFile = tmpFile;
             init (tmp, 0);
             byte [] tmpByte = new byte [1024];
             long sz = stPos;

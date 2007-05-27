@@ -29,7 +29,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -159,8 +161,13 @@ public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        return TestConfiguration.embeddedSuite(
-                    ClobUpdateableReaderTest.class);
+        TestSuite ts = new TestSuite ("ClobUpdateableReaderTest");
+        ts.addTest(TestConfiguration.embeddedSuite(
+                    ClobUpdateableReaderTest.class));
+        TestSuite encSuite = new TestSuite ("ClobUpdateableReaderTest:encrypted");
+        encSuite.addTestSuite (ClobUpdateableReaderTest.class);
+        ts.addTest(Decorator.encryptedDatabase (encSuite));
+        return ts;
     }        
 
     /**

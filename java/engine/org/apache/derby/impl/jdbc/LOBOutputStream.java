@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.shared.common.error.ExceptionUtil;
@@ -70,6 +71,8 @@ public class LOBOutputStream extends OutputStream {
             pos = control.write(b, pos);
         } catch (SQLException e) {
             throw  new IOException(e.getMessage());
+        } catch (StandardException se) {
+            throw new IOException (se.getMessage());
         }
     }
 
@@ -114,6 +117,8 @@ public class LOBOutputStream extends OutputStream {
                                   SQLState.BLOB_INVALID_OFFSET)))
                     throw new ArrayIndexOutOfBoundsException (e.getMessage());
             throw new IOException(e.getMessage());
+        } catch (StandardException se) {
+            throw new IOException (se.getMessage());
         }
     }
 

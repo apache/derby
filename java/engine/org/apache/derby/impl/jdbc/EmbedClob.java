@@ -99,9 +99,11 @@ final class EmbedClob extends ConnectionChild implements Clob
         try {
             control.insertString (clobString, 0);
         }
-
         catch (IOException e) {
             throw Util.setStreamFailure (e);
+        }
+        catch (StandardException se) {
+            throw Util.generateCsSQLException (se);
         }
     }
 
@@ -720,6 +722,9 @@ restartScan:
             } catch (IOException e) {
                 throw Util.setStreamFailure(e);
             }
+            catch (StandardException se) {
+                throw Util.generateCsSQLException (se);
+            }
         }
 
 	/**
@@ -759,6 +764,8 @@ restartScan:
             return control.getWriter(pos - 1);
         } catch (IOException e) {
             throw Util.setStreamFailure(e);
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException (se);
         }
     }
 
