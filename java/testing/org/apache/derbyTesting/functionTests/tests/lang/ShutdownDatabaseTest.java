@@ -83,6 +83,7 @@ public class ShutdownDatabaseTest extends BaseJDBCTestCase {
         st.execute("DROP TABLE TEST_TABLE");
         st.close();
         commit();
+        super.tearDown();
     }
 
     /**

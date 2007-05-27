@@ -126,7 +126,9 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
     
     protected void tearDown() throws Exception {
         cacheInPlanPS_ID.close();
+        cacheInPlanPS_ID = null;
         cacheInPlanPS_TEXT.close();
+        cacheInPlanPS_TEXT = null;
         super.tearDown();
     }
     

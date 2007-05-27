@@ -69,14 +69,19 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
 
     public void setUp() throws Exception
     {
-        createStatement().execute("create table app.t1 (i int, c varchar(10))");
-        createStatement().execute("insert into app.t1 values (1, 'one'), "
+        Statement stmt = createStatement();
+        stmt.execute("create table app.t1 (i int, c varchar(10))");
+        stmt.execute("insert into app.t1 values (1, 'one'), "
             + "(2, 'two'), (4, 'four')");
+        stmt.close();
     }
 
     public void tearDown() throws Exception
     {
-        createStatement().execute("drop table app.t1");
+        Statement stmt = createStatement();
+        stmt.execute("drop table app.t1");
+        stmt.close();
+        super.tearDown();
     }
 
     /**
