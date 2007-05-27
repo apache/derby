@@ -81,8 +81,9 @@ public final class NewByteArrayInputStream extends InputStream {
 		if (data == null)
 			throw new IOException();
 
-		if (length == 0)
-			return -1;
+		if (length == 0 || count <= 0L) {
+			return 0L;
+		}
 
 		if (count > length)
 			count = length;

@@ -20,7 +20,6 @@
  */
 package org.apache.derby.impl.drda;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
@@ -28,8 +27,6 @@ import java.sql.ResultSet;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
-
-import java.io.UnsupportedEncodingException;
 
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -252,6 +249,9 @@ class EXTDTAInputStream extends InputStream {
 	 * @see java.io.InputStream#skip(long)
 	 */
 	public long skip(long arg0) throws IOException {
+		if (arg0 < 0L) {
+			return 0L;
+		}
 		return binaryInputStream.skip(arg0);
 	}
 

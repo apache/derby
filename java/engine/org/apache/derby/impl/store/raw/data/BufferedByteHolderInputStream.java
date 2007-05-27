@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import java.io.InputStream;
 import java.io.IOException;
 
 public abstract class BufferedByteHolderInputStream
@@ -48,10 +47,14 @@ extends ByteHolderInputStream
 
 	public long skip(long count) throws IOException
 	{
-		int bytesSkipped = 0;
+		long bytesSkipped = 0L;
 		while (bytesSkipped < count) {
 			fillByteHolder();
-			bytesSkipped += super.skip(count - bytesSkipped);
+			long skipped = super.skip(count - bytesSkipped);
+			if (skipped <= 0L) {
+				break;
+			}
+			bytesSkipped += skipped;
 		}
 		return bytesSkipped;
 	}
