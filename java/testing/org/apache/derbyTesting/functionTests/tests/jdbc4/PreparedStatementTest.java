@@ -144,12 +144,21 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         s.close();
         ps.close();
 
+        s = null;
+        ps = null;
+
         psFetchBlob.close();
         psFetchClob.close();
         psInsertBlob.close();
         psInsertClob.close();
         psInsertLongVarchar.close();
         
+        psFetchBlob = null;
+        psFetchClob = null;
+        psInsertBlob = null;
+        psInsertClob = null;
+        psInsertLongVarchar = null;
+
         super.tearDown();
     }
 

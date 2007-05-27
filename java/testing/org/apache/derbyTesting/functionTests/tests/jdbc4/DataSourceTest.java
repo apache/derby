@@ -62,8 +62,9 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * Initialize the ds to null once the tests that need to be run have been 
      * run
      */
-    public void tearDown() {
+    public void tearDown() throws Exception {
         ds = null;
+        super.tearDown();
     }
 
     public void testIsWrapperForDataSource() throws SQLException {

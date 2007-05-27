@@ -125,7 +125,7 @@ public class BlobTest
     //throwing a SQLException when they are called after calling free()
     //on a LOB.
     
-    private ExemptBlobMD [] emd = new ExemptBlobMD [] {
+    private static final ExemptBlobMD [] emd = new ExemptBlobMD [] {
         new ExemptBlobMD( "getBinaryStream", new Class[] { long.class,long.class }
                                                                    ,true,true ),
         new ExemptBlobMD( "setBinaryStream", new Class[] { long.class },false,true ),
@@ -167,6 +167,13 @@ public class BlobTest
         //from throwing a SQLException after free has been called
         //on the Clob object.
         buildHashSet();
+    }
+
+    protected void tearDown() throws Exception {
+        blob.free();
+        blob = null;
+        excludedMethodSet = null;
+        super.tearDown();
     }
     
     /**

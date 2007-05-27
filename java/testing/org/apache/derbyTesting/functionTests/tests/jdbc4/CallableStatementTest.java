@@ -71,9 +71,9 @@ public class CallableStatementTest
      */
     protected void tearDown()
         throws Exception {
-        if (cStmt != null && !cStmt.isClosed()) {
-            cStmt.close();
-        }
+
+        cStmt.close();
+        cStmt = null;
 
         super.tearDown();
     }
@@ -83,7 +83,6 @@ public class CallableStatementTest
         DatabaseMetaData met = getConnection().getMetaData();
         assertFalse("Named parameters are not supported, but the metadata " +
                     "says they are", met.supportsNamedParameters());
-        met = null;
     }
     
     public void testGetDoubleIntOnInParameter()

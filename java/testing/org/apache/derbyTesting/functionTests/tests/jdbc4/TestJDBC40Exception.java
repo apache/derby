@@ -56,7 +56,10 @@ public class TestJDBC40Exception extends BaseJDBCTestCase {
     }
 
     protected void tearDown() throws Exception {
-        createStatement().execute("drop table EXCEPTION_TABLE1");
+        Statement s = createStatement();
+        s.execute("drop table EXCEPTION_TABLE1");
+        s.close();
+        commit();
         super.tearDown();
     }
 

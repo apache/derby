@@ -94,12 +94,11 @@ public class ResultSetTest
     protected void tearDown()
         throws Exception {
 
-        if (rs != null) {
-            rs.close();
-        }
-        if (stmt != null) {
-            stmt.close();
-        }
+        rs.close(); 
+        stmt.close();
+
+        rs = null;
+        stmt = null;
 
         super.tearDown();
     }

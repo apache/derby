@@ -126,7 +126,7 @@ public class ClobTest
     //throwing a SQLException when they are called after calling free()
     //on a LOB.
     
-    private ExemptClobMD [] emd = new ExemptClobMD [] {
+    private static final ExemptClobMD [] emd = new ExemptClobMD [] {
         new ExemptClobMD( "getCharacterStream", new Class[] { long.class, long.class } ,true,true),
         new ExemptClobMD( "setAsciiStream",     new Class[] { long.class } ,false,true),
 	new ExemptClobMD( "setCharacterStream", new Class[] { long.class } ,true,true),
@@ -161,6 +161,13 @@ public class ClobTest
         //from throwing a SQLException after free has been called
         //on the Clob object.
         buildHashSet();
+    }
+
+    protected void tearDown() throws Exception {
+        clob.free();
+        clob = null;
+        excludedMethodSet = null;
+        super.tearDown();
     }
     
     /**
