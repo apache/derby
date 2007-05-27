@@ -51,7 +51,6 @@ import java.security.AccessController;
 import org.apache.derby.iapi.services.info.PropertyNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.info.ProductGenusNames;
-import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.tools.i18n.*;
 
@@ -347,7 +346,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     value is null, the info is written to System.out
 
   */
-  private static void reportLocales (java.io.PrintWriter localAW) {          // throws StandardException {
+  private static void reportLocales (java.io.PrintWriter localAW) {
 
     boolean cur_loc = true;
 

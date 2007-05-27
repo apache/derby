@@ -22,16 +22,12 @@
 package org.apache.derby.impl.tools.ij;
                 
 import org.apache.derby.iapi.reference.JDBC20Translation;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.iapi.tools.i18n.*;
 
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.info.ProductGenusNames;
-
-import org.apache.derby.iapi.error.PublicAPI;
-import org.apache.derby.iapi.error.StandardException;
 
 import java.util.List;
 import java.util.Stack;
@@ -53,8 +49,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 
-import java.lang.reflect.*;
-
 /**
 	This class is utilities specific to the two ij Main's.
 	This factoring enables sharing the functionality for
@@ -62,9 +56,6 @@ import java.lang.reflect.*;
 
  */
 public class utilMain implements java.security.PrivilegedAction {
-
-  private static final Class[] CONN_PARAM = { Integer.TYPE };
-  private static final Object[] CONN_ARG = { new Integer(JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)};
 
 	private StatementFinder[] commandGrabber;
 	UCode_CharStream charStream;
@@ -671,7 +662,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	/**
 	 * Connections by default create ResultSet objects with holdability true. This method can be used
 	 * to change the holdability of the connection by passing one of ResultSet.HOLD_CURSORS_OVER_COMMIT
-	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT. We implement this using reflection in jdk13 and lower
+	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT.
 	 *
 	 * @param conn			The connection.
 	 * @param holdType	The new holdability for the Connection object.
@@ -685,19 +676,13 @@ public class utilMain implements java.security.PrivilegedAction {
     //were written based on that assumption
     //Later, as part of db2 compatibility, we changed the default holdability for connection to hold cursors over commit.
     //But in order for the existing tests to work fine, the tests needed a way to set the holdability to close cursors for connections
-    //Since there is no direct jdbc api in jdk13 and lower to do that, we are using reflection to set the holdability to close cursors
-    try { //for jdks prior to jdk14, need to use reflection to set holdability to false. 
-    	Method sh = conn.getClass().getMethod("setHoldability", CONN_PARAM);
-    	sh.invoke(conn, CONN_ARG);
-    } catch( Exception e) {
-    	throw PublicAPI.wrapStandardException( StandardException.plainWrapException( e));
-    }
-    return conn;
+        conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        return conn;
 	}
 
 	/**
 	 * Retrieves the current holdability of ResultSet objects created using this
-	 * Connection object. We implement this using reflection in jdk13 and lower
+	 * Connection object.
 	 *
 	 * @return  The holdability, one of ResultSet.HOLD_CURSORS_OVER_COMMIT
 	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT
@@ -712,14 +697,7 @@ public class utilMain implements java.security.PrivilegedAction {
     //and statement is getting created with holdability true
     //Another instance of holdability of connection and statement not being same is when connection holdability is hold cursor
     //over commit and statement is being created with holdability false
-    int defaultHoldability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
-    try {
-    	Method sh = conn.getClass().getMethod("getHoldability", null);
-    	defaultHoldability = ((Integer)sh.invoke(conn, null)).intValue();
-    } catch( Exception e) {
-    	throw PublicAPI.wrapStandardException( StandardException.plainWrapException( e));
-    }
-    return defaultHoldability;
+        return conn.getHoldability();
 	}
 
 	/**
