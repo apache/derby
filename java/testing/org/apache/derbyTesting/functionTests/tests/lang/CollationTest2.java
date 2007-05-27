@@ -28,15 +28,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.Properties; 
+
 import javax.sql.DataSource;
 
+import junit.framework.Assert;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
+
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 
 /**
@@ -339,6 +347,66 @@ public class CollationTest2 extends BaseJDBCTestCase
      **************************************************************************
      */
 
+	private boolean is142JVM() 
+	{
+	    String java_version = System.getProperty("java.version");
+
+        // get string indexes for major/minor numbers
+        int jvm_major_idx = java_version.indexOf('.');
+        int jvm_minor_idx = java_version.indexOf('.', jvm_major_idx + 1);
+
+        
+        int jvm_major = 
+            Integer.parseInt(
+                java_version.substring(0, jvm_major_idx));
+        int jvm_minor = 
+            Integer.parseInt(
+                java_version.substring(jvm_major_idx + 1, jvm_minor_idx));
+
+
+        return(jvm_major == 1 && jvm_minor == 4);
+	}
+
+    /**
+     * Test simple call to DatabaseMetaData.getColumns()
+     * <p>
+     * This test is the same form of the getColumns() call that 
+     * the IMPORT and EXPORT system procedures depend on. 
+     * Currently on ibm and sun 1.4.2 jvm's this test fails.
+     **/
+    private void runDERBY_2703(Connection conn, int db_index)
+        throws SQLException
+    {
+        // DERBY-2703, get columns does not work in collated dbs under sun
+        // and ibm 142 jvm's.
+        if (is142JVM())
+            return;
+
+        setUpTable(conn);
+
+        ResultSet rs = 
+            conn.getMetaData().getColumns(null, "APP", "CUSTOMER", "%");
+        SanityManager.DEBUG_PRINT("", "called GetColumns:");
+
+        Assert.assertTrue("catch bug where no rows are returned.", rs.next());
+
+        if (verbose_debug)
+            System.out.println("column =" + rs.getString(4));
+
+        while (rs.next())
+        {
+            if (verbose_debug)
+                System.out.println("column =" + rs.getString(4));
+        }
+
+        // TODO should verify all columns are returned.
+
+        rs.close();
+
+        dropTable(conn);
+
+    }
+
     /**
      * Creates a database and return connection to database.
      * <p>
@@ -440,8 +508,8 @@ public class CollationTest2 extends BaseJDBCTestCase
     String      codeset) 
         throws SQLException 
     {
-        PreparedStatement ps = 
-            conn.prepareStatement(
+        CallableStatement ps = 
+            conn.prepareCall(
                 "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (? , ? , ? , ?, ? , ?)");
         ps.setString(1, schemaName);
         ps.setString(2, tableName);
@@ -449,7 +517,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         ps.setString(4, colDel);
         ps.setString(5, charDel);
         ps.setString(6, codeset);
-        ps.execute();
+        ps.executeUpdate();
         ps.close();
     }
 
@@ -461,23 +529,23 @@ public class CollationTest2 extends BaseJDBCTestCase
     String      schemaName, 
     String      tableName, 
     String      fileName, 
-    String      colDel , 
+    String      colDel, 
     String      charDel, 
     String      codeset,
     int         replace) 
         throws SQLException 
     {
-        PreparedStatement ps = 
-            conn.prepareStatement(
+        CallableStatement ps = 
+            conn.prepareCall(
                 "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (?, ?, ?, ?, ?, ?, ?)");
-        ps.setString(1 , schemaName);
+        ps.setString(1, schemaName);
         ps.setString(2, tableName);
         ps.setString(3, fileName);
-        ps.setString(4 , colDel);
-        ps.setString(5 , charDel);
-        ps.setString(6 , codeset);
-        ps.setInt(7, replace);
-        ps.execute();
+        ps.setString(4, colDel);
+        ps.setString(5, charDel);
+        ps.setString(6, codeset);
+        ps.setInt(   7, replace);
+        ps.executeUpdate();
         ps.close();
     }
 
@@ -1123,6 +1191,11 @@ public class CollationTest2 extends BaseJDBCTestCase
     int         db_index)
         throws SQLException 
     {
+        // DERBY-2703, get columns does not work in collated dbs under sun
+        // and ibm 142 jvm's.
+        if (is142JVM())
+            return;
+
         Statement s = conn.createStatement();
 
         setUpTable(conn);
@@ -1139,6 +1212,10 @@ public class CollationTest2 extends BaseJDBCTestCase
         // bulk insert to empty table, no indexes without replace 
         // (last arg 0 = no replace).
         s.execute("DELETE FROM CUSTOMER");
+        conn.commit();
+
+        // checkGetColumn(conn);
+
         doImportTable(
             conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
         runQueries(conn, db_index, null, null);
@@ -1258,8 +1335,6 @@ public class CollationTest2 extends BaseJDBCTestCase
     int         db_index) 
         throws SQLException 
     {
-        Statement s = conn.createStatement();
-
         setUpTable(conn);
 
         // run tests against base table no index, exercise heap path
@@ -1299,6 +1374,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         // the following tests mess with column values and ddl, so they
         // are going to drop and recreate the small test data table.
+        runDERBY_2703(conn, db_index);
 
         runAlterTableAddColumn(conn, db_index);
 
@@ -1352,22 +1428,37 @@ public class CollationTest2 extends BaseJDBCTestCase
     public static Test suite() 
     {
 
+        // only test in embedded mode, all tests are server side actions.
         Test test =  
                TestConfiguration.embeddedSuite(CollationTest2.class);
 
+        // add support to use external files for import/export calls.
         test = new SupportFilesSetup(test);
 
+        // turn on log statement text for sequence of statements in derby.log.  
+        /* if (verbose_debug) */
+        {
+            Properties props = new Properties();
+            props.setProperty("derby.language.logStatementText", "true");
+            test = new SystemPropertyTestSetup(test, props);
+        }
+
+        // database to use for testing default collation.
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_DEFAULT]);
 
+        // database to use for testing collation, english territory.
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_ENGLISH]);
 
+        // database to use for testing collation, polish territory.
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_POLISH]);
 
+        // database to use for testing collation, norway territory.
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_NORWAY]);
+
 
         return test;
     }
