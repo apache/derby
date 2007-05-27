@@ -135,4 +135,9 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
         outStream.flush();
         outStream.close();
     }
+
+    protected void tearDown() throws Exception {
+        rawBytes = null;
+        super.tearDown();
+    }
 }
