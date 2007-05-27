@@ -272,7 +272,7 @@ public class NetResultSetRequest extends NetStatementRequest
                              ColumnMetaData resultSetMetaData,
                              boolean firstOutovrBuilt,
                              boolean hasLobs) throws SqlException {
-        if (false && hasLobs) {  // Disable use of locators for now
+        if (hasLobs) {
             if (!firstOutovrBuilt) {
                 buildOUTOVR(resultSet, resultSetMetaData);
                 resultSet.firstOutovrBuilt_ = true;

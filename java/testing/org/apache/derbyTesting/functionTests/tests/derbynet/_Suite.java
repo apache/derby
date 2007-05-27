@@ -48,7 +48,6 @@ public class _Suite extends BaseTestCase  {
              
         suite.addTest(PrepareStatementTest.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
-        suite.addTest(SuicideOfStreamingTest.suite());
         suite.addTest(DRDAProtocolTest.suite());
         suite.addTest(ClientSideSystemPropertiesTest.suite());
         suite.addTest(BadConnectionTest.suite());

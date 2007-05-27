@@ -2210,10 +2210,7 @@ public abstract class Connection implements java.sql.Connection,
         //If the locator value is -1 it means that we do not
         //have locator support on the server.
         
-        //The code here has been disabled because the Lob implementations
-        //have still not been completely converted to use locators. Once
-        //the Lob implementations are completed then this code can be enabled.
-        if (locator != INVALID_LOCATOR && false) {
+        if (locator != INVALID_LOCATOR) {
             //A valid locator value has been obtained.
             blob = new org.apache.derby.client.am.Blob(this.agent_, locator);
         } 

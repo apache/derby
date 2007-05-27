@@ -2208,65 +2208,50 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         commit();
 
 
-        assertTrue("FAIL - shotBlob is NULL", shortBlob != null);
-        assertEquals("FAIL - wrong length after commit",
-                26, shortBlob.length());
+        assertTrue("FAIL - shortBlob is NULL", shortBlob != null);
+        // this should give blob/clob unavailable exceptions on client
+        try {
+            shortBlob.length();
+            if (usingDerbyNetClient()) {
+                fail("FAIL - should not be able to access Blob after commit");
+            }
+        } catch (SQLException e) {
+            checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            assertTrue("FAIL - method should not fail when using embedded",
+                       usingDerbyNetClient());
+        }
 
+        assertTrue("FAIL - blob is NULL", blob != null);
         // these should all give blob/clob data unavailable exceptions
         try {
             blob.length();
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - method should not fail when using Derby Client" +
-                    " and JCC", usingEmbedded());
         }
         try {
             blob.getBytes(2,3);
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - method should not fail when using Derby Client" +
-                    " and JCC", usingEmbedded());
         }
         try {
             blob.getBinaryStream();
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - method should not fail when using Derby Client" +
-                    " and JCC", usingEmbedded());
         }
         try {
             blob.position("foo".getBytes("US-ASCII"),2);
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - method should not fail when using Derby Client" +
-                    " and JCC", usingEmbedded());
         }
         try {
             blob.position(blob,2);
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - method should not fail when using Derby Client" +
-                    " and JCC", usingEmbedded());
         }
     }
 

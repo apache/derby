@@ -176,7 +176,12 @@ class CallableLocatorProcedures
         }
 
         blobReleaseLocatorCall.setIntX(1, locator);
-        blobReleaseLocatorCall.executeX();
+        try {
+            blobReleaseLocatorCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
     }
 
     /**
@@ -211,7 +216,12 @@ class CallableLocatorProcedures
         blobGetPositionFromLocatorCall.setIntX(2, locator);
         blobGetPositionFromLocatorCall.setIntX(3, searchLocator);
         blobGetPositionFromLocatorCall.setLongX(4, fromPosition);
-        blobGetPositionFromLocatorCall.executeX();
+        try {
+            blobGetPositionFromLocatorCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
         return blobGetPositionFromLocatorCall.getLongX(1);
     }
 
@@ -342,7 +352,12 @@ class CallableLocatorProcedures
         blobGetPositionFromBytesCall.setIntX(2, locator);
         blobGetPositionFromBytesCall.setBytesX(3, bytesToBeCompared);
         blobGetPositionFromBytesCall.setLongX(4, fromPosition);
-        blobGetPositionFromBytesCall.executeX();
+        try {
+            blobGetPositionFromBytesCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
         return blobGetPositionFromBytesCall.getLongX(1);
     }
 
@@ -369,7 +384,12 @@ class CallableLocatorProcedures
         }
 
         blobGetLengthCall.setIntX(2, sourceLocator);
-        blobGetLengthCall.executeX();
+        try {
+            blobGetLengthCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
         return blobGetLengthCall.getLongX(1);
     }
 
@@ -419,7 +439,12 @@ class CallableLocatorProcedures
             blobGetBytesCall.setIntX(2, sourceLocator);
             blobGetBytesCall.setLongX(3, fromPosition + gotSoFar);
             blobGetBytesCall.setIntX(4, forLength - gotSoFar);
-            blobGetBytesCall.executeX();
+            try {
+                blobGetBytesCall.executeX();
+            } catch (SqlException sqle) {
+                sqle = handleInvalidLocator(sqle);
+                throw sqle;
+            }
             byte[] result = blobGetBytesCall.getBytesX(1);
             
             if (gotSoFar == 0) {  // First round of reading
@@ -501,7 +526,12 @@ class CallableLocatorProcedures
             blobSetBytesCall.setLongX(2, fromPosition + sentSoFar);
             blobSetBytesCall.setIntX(3, numBytesThisRound);
             blobSetBytesCall.setBytesX(4, bytesToBeSent);
-            blobSetBytesCall.executeX();
+            try {
+                blobSetBytesCall.executeX();
+            } catch (SqlException sqle) {
+                sqle = handleInvalidLocator(sqle);
+                throw sqle;
+            }
             
             sentSoFar += numBytesThisRound;
         }
@@ -513,7 +543,7 @@ class CallableLocatorProcedures
      * <p>
      * <b>Note:</b> If the value specified for <code>length</code> is greater
      * than the length+1 of the <code>BLOB</code> value then an
-     * <code>SQLException</code> will be thrown.
+     * <code>SqlException</code> will be thrown.
      * 
      * @param sourceLocator locator identifying the Blob to be truncated
      * @param length the length, in bytes, to which the <code>BLOB</code> value
@@ -534,7 +564,12 @@ class CallableLocatorProcedures
 
         blobTruncateCall.setIntX(1, sourceLocator);
         blobTruncateCall.setLongX(2, length);
-        blobTruncateCall.executeX();
+        try {
+            blobTruncateCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
     }
 
     /**
@@ -619,7 +654,12 @@ class CallableLocatorProcedures
         }
 
         clobReleaseLocatorCall.setIntX(1, locator);
-        clobReleaseLocatorCall.executeX();
+        try {
+            clobReleaseLocatorCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
     }
 
 
@@ -745,7 +785,12 @@ class CallableLocatorProcedures
         clobGetPositionFromStringCall.setIntX(2, locator);
         clobGetPositionFromStringCall.setStringX(3, searchLiteral);
         clobGetPositionFromStringCall.setLongX(4, fromPosition);
-        clobGetPositionFromStringCall.executeX();
+        try {
+            clobGetPositionFromStringCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
         return clobGetPositionFromStringCall.getLongX(1);
     }
 
@@ -781,7 +826,12 @@ class CallableLocatorProcedures
         clobGetPositionFromLocatorCall.setIntX(2, locator);
         clobGetPositionFromLocatorCall.setIntX(3, searchLocator);
         clobGetPositionFromLocatorCall.setLongX(4, fromPosition);
-        clobGetPositionFromLocatorCall.executeX();
+        try {
+            clobGetPositionFromLocatorCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
         return clobGetPositionFromLocatorCall.getLongX(1);
     }
 
@@ -807,7 +857,12 @@ class CallableLocatorProcedures
         }
 
         clobGetLengthCall.setIntX(2, sourceLocator);
-        clobGetLengthCall.executeX();
+        try {
+            clobGetLengthCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
         return clobGetLengthCall.getLongX(1);
     }
 
@@ -858,7 +913,12 @@ class CallableLocatorProcedures
             clobGetSubStringCall.setIntX(2, sourceLocator);
             clobGetSubStringCall.setLongX(3, fromPosition + gotSoFar);
             clobGetSubStringCall.setIntX(4, forLength - gotSoFar);
-            clobGetSubStringCall.executeX();
+            try {
+                clobGetSubStringCall.executeX();
+            } catch (SqlException sqle) {
+                sqle = handleInvalidLocator(sqle);
+                throw sqle;
+            }
             String result =  clobGetSubStringCall.getStringX(1);
 
             if (gotSoFar == 0) {  // First round of reading
@@ -937,7 +997,12 @@ class CallableLocatorProcedures
             clobSetStringCall.setLongX(2, fromPosition + sentSoFar);
             clobSetStringCall.setIntX(3, numCharsThisRound);
             clobSetStringCall.setStringX(4, stringToBeSent);
-            clobSetStringCall.executeX();
+            try {
+                clobSetStringCall.executeX();
+            } catch (SqlException sqle) {
+                sqle = handleInvalidLocator(sqle);
+                throw sqle;
+            }
 
             sentSoFar += numCharsThisRound;
         }
@@ -949,7 +1014,7 @@ class CallableLocatorProcedures
      * <p>
      * <b>Note:</b> If the value specified for <code>length</code> is greater
      * than the length+1 of the <code>CLOB</code> value then an
-     * <code>SQLException</code> will be thrown.
+     * <code>SqlException</code> will be thrown.
      * 
      * @param sourceLocator locator identifying the Clob to be truncated
      * @param length the length, in characters, to which the <code>CLOB</code>
@@ -970,6 +1035,42 @@ class CallableLocatorProcedures
 
         clobTruncateCall.setIntX(1, sourceLocator);
         clobTruncateCall.setLongX(2, length);
-        clobTruncateCall.executeX();
+        try {
+            clobTruncateCall.executeX();
+        } catch (SqlException sqle) {
+            sqle = handleInvalidLocator(sqle);
+            throw sqle;
+        }
+    }
+
+    /**
+     * If the given exception indicates that locator was not valid, we
+     * assume the locator has been garbage-collected due to
+     * transaction commit, and wrap the exception in an exception with
+     * SQL state <code>BLOB_ACCESSED_AFTER_COMMIT</code>.
+     * @param sqle Exception to be checked
+     * @return If <code>sqle</code> indicates that locator was
+     *         invalid, an <code>SqlException</code> with SQL state
+     *         <code>BLOB_ACCESSED_AFTER_COMMIT</code>. Otherwise, the
+     *         incoming exception is returned.
+     */
+    private SqlException handleInvalidLocator(SqlException sqle)
+    {
+        if ((sqle.getMessage().indexOf(ExceptionUtil
+                .getSQLStateFromIdentifier(SQLState.LOB_LOCATOR_INVALID)) >= 0)
+            // With Java 6, the reason for the failure of the
+            // procedure call is not reported, just
+            // LANG_UNEXPECTED_USER_EXCEPTION (see DERBY-1629).
+            // Until this is fixed, treat all such errors as INVALID_LOCATOR
+            || (sqle.getSQLState().compareTo
+                (ExceptionUtil.getSQLStateFromIdentifier
+                 (SQLState.LANG_UNEXPECTED_USER_EXCEPTION)) == 0)) {
+            return new SqlException(connection.agent_.logWriter_,
+                    new ClientMessageId(SQLState.BLOB_ACCESSED_AFTER_COMMIT),
+                    null,
+                    sqle);
+        } else {
+            return sqle;
+        }
     }
 }
