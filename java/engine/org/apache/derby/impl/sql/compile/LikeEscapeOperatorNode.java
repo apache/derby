@@ -19,7 +19,7 @@
 
  */
 
-package	org.apache.derby.impl.sql.compile;
+package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
@@ -121,10 +121,10 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
      *
      * receiver like pattern [ escape escapeValue ]
      *
-     * @param receiver   		The left operand of the like: 
+     * @param receiver      The left operand of the like: 
      *                              column, CharConstant or Parameter
-     * @param leftOperand		The right operand of the like: the pattern
-     * @param rightOperand		The optional escape clause, null if not present
+     * @param leftOperand   The right operand of the like: the pattern
+     * @param rightOperand  The optional escape clause, null if not present
      */
     public void init(
     Object receiver,
@@ -143,7 +143,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
      * overrides BindOperatorNode.bindExpression because like has special
      * requirements for parameter binding.
      *
-     * @return	The new top of the expression tree.
+     * @return  The new top of the expression tree.
      *
      * @exception StandardException thrown on failure
      */
@@ -308,9 +308,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          *
          * The transformed tree will become:
          *
-         *			AND
-         *		   /   \
-         *	     LIKE   =
+         *        AND
+         *       /   \
+         *     LIKE   =
          */
 
         if ((receiver instanceof ColumnReference) && 
@@ -372,11 +372,11 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
                     // create new and node and hook in "equals" the new "=' node
                     //
-                    //			AND
-                    //		   /   \
-                    //	     LIKE  = 
-                    //	          / \
-                    //	    column  'Derby'
+                    //        AND
+                    //       /   \
+                    //     LIKE   = 
+                    //           / \
+                    //       column 'Derby'
 
                     AndNode newAnd = 
                         (AndNode) getNodeFactory().getNode(
@@ -470,14 +470,14 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
     /**
     * Bind this operator
     *
-    * @exception StandardException		Thrown on error
+    * @exception StandardException  Thrown on error
     */
 
     public void bindComparisonOperator()
         throws StandardException
     {
-        TypeId	receiverType = receiver.getTypeId();
-        TypeId	leftType     = leftOperand.getTypeId();
+        TypeId receiverType = receiver.getTypeId();
+        TypeId leftType     = leftOperand.getTypeId();
 
         /*
         ** Check the type of the operands - this function is allowed only on
@@ -510,14 +510,14 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
     * subquery flattening.
     * NOTE: This is done before the outer ResultSetNode is preprocessed.
     *
-    * @param	numTables			Number of tables in the DML Statement
-    * @param	outerFromList		FromList from outer query block
-    * @param	outerSubqueryList	SubqueryList from outer query block
-    * @param	outerPredicateList	PredicateList from outer query block
+    * @param numTables          Number of tables in the DML Statement
+    * @param outerFromList      FromList from outer query block
+    * @param outerSubqueryList  SubqueryList from outer query block
+    * @param outerPredicateList PredicateList from outer query block
     *
-    * @return		The modified expression
+    * @return The modified expression
     *
-    * @exception StandardException		Thrown on error
+    * @exception StandardException  Thrown on error
     */
     public ValueNode preprocess(
     int             numTables,
@@ -527,7 +527,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         throws StandardException
     {
         boolean eliminateLikeComparison = false;
-        String	greaterEqualString      = null;
+        String  greaterEqualString      = null;
         String  lessThanString          = null;
 
         /* We must 1st preprocess the component parts */
@@ -612,23 +612,23 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          */
 
         /* The transformed tree has to be normalized.  Either:
-         *			AND									AND
-         *		   /   \							   /   \
-         *	     LIKE   AND				OR:			 LIKE	AND
-         *			   /   \							   /   \
-         *			  >=    AND							  >=    TRUE
-         *				   /   \
-         *				  <     TRUE
+         *        AND                   AND
+         *       /   \                 /   \
+         *     LIKE   AND     OR:   LIKE   AND
+         *           /   \                /   \
+         *          >=    AND           >=    TRUE
+         *               /   \
+         *              <     TRUE
          * unless the like string is of the form CONSTANT%, in which
          * case we can do away with the LIKE altogether:
-         *			AND									AND
-         *		   /   \							   /   \
-         *	     >=     AND				OR:			 >=  	TRUE
-         *			   /   \
-         *			  <    TRUE
+         *        AND                   AND
+         *       /   \                 /   \
+         *      >=   AND      OR:     >=  TRUE
+         *          /   \
+         *         <    TRUE
          */
 
-        AndNode	  newAnd   = null;
+        AndNode   newAnd   = null;
         ValueNode trueNode = 
             (ValueNode) getNodeFactory().getNode(
                             C_NodeTypes.BOOLEAN_CONSTANT_NODE,
@@ -726,7 +726,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         //       >=
         //      /   \
         //  reciever pattern
-		BinaryComparisonOperatorNode greaterEqual = 
+        BinaryComparisonOperatorNode greaterEqual = 
             (BinaryComparisonOperatorNode) getNodeFactory().getNode(
                 C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
                 receiver.getClone(), 
@@ -787,13 +787,13 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
     /**
      * Do code generation for this binary operator.
      *
-     *		This code was copied from BinaryOperatorNode and stripped down
+     * This code was copied from BinaryOperatorNode and stripped down
      *
-     * @param acb	The ExpressionClassBuilder for the class we're generating
-     * @param mb	The method the code to place the code
+     * @param acb   The ExpressionClassBuilder for the class we're generating
+     * @param mb    The method the code to place the code
      *
      *
-     * @exception StandardException		Thrown on error
+     * @exception StandardException Thrown on error
      */
 
     public void generateExpression(
@@ -822,24 +822,26 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         ** Generate LHS (field = <receiver operand>). This assignment is
         ** used as the receiver of the method call for this operator.
         **
-        **	(<receiver operand>).method(<left operand>,
-        **                      <right operand>, [<escaperightOp>,]
-        **						<result field>)
+        ** (<receiver operand>).method(
+        **     <left operand>, 
+        **     <right operand>, 
+        **     [<escaperightOp>,] 
+        **     result field>)
         */
 
-        receiver.generateExpression(acb, mb);	// first arg
+        receiver.generateExpression(acb, mb);   // first arg
 
         receiverInterfaceType = receiver.getTypeCompiler().interfaceName();
 
-        mb.upCast(receiverInterfaceType); 		// cast the method instance
+        mb.upCast(receiverInterfaceType);       // cast the method instance
 
         leftOperand.generateExpression(acb, mb);
-        mb.upCast(leftInterfaceType); 			// first arg with cast
+        mb.upCast(leftInterfaceType);           // first arg with cast
 
         if (rightOperand != null)
         {
             rightOperand.generateExpression(acb, mb);
-            mb.upCast(rightInterfaceType); 		// second arg with cast
+            mb.upCast(rightInterfaceType);      // second arg with cast
         }
 
         /* Figure out the result type name */
