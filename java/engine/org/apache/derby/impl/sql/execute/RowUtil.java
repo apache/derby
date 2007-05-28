@@ -52,7 +52,6 @@ public class RowUtil
 	  Get an empty ExecIndexRow.
 
 	  @param columnCount the number of columns in the row.
-	  @param cm			 Current ContextManager
 	  @return the row.
 	  */
 	public static ExecIndexRow getEmptyIndexRow(int columnCount, LanguageConnectionContext lcc)
