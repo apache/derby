@@ -386,7 +386,10 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         ResultSet rs = 
             conn.getMetaData().getColumns(null, "APP", "CUSTOMER", "%");
-        SanityManager.DEBUG_PRINT("", "called GetColumns:");
+
+        if (SanityManager.DEBUG) {
+            SanityManager.DEBUG_PRINT("", "called GetColumns:");
+        }
 
         Assert.assertTrue("catch bug where no rows are returned.", rs.next());
 
