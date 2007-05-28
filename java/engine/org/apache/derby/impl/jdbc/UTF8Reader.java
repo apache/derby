@@ -144,6 +144,10 @@ public final class UTF8Reader extends Reader
 	}
 
 	public long skip(long len) throws IOException {
+		if (len < 0) {
+			throw new IllegalArgumentException(
+				"Number of characters to skip must be positive:" + len);
+		}
 		synchronized (lock) {
 			// check if closed..
 			if (noMoreReads)
@@ -152,7 +156,7 @@ public final class UTF8Reader extends Reader
 			if (readPositionInBuffer >= charactersInBuffer) {
 				// do somthing
 				if (fillBuffer()) {
-					return -1;
+					return 0L;
 				}
 				readPositionInBuffer = 0;
 			}

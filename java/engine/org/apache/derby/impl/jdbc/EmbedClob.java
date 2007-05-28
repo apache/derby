@@ -206,7 +206,7 @@ final class EmbedClob extends ConnectionChild implements Clob
                 for (;;)
                 {
                     long size = clobReader.skip(32 * 1024);
-                    if (size == -1)
+                    if (size == 0L)
                         break;
                     clobLength += size;
                 }
@@ -396,7 +396,7 @@ final class EmbedClob extends ConnectionChild implements Clob
         long remainToSkip = position - 1;
         while (remainToSkip > 0) {
             long skipBy = clobReader.skip(remainToSkip);
-            if (skipBy == -1)
+            if (skipBy == 0L)
                 return null;
 
             remainToSkip -= skipBy;
