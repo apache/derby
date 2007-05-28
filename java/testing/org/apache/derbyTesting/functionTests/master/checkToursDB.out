@@ -14,7 +14,8 @@ ij> -- Licensed to the Apache Software Foundation (ASF) under one or more
 -- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
-CREATE TABLE AIRLINES
+AUTOCOMMIT OFF;
+ij> CREATE TABLE AIRLINES
    (
       AIRLINE CHAR(2) NOT NULL ,
       AIRLINE_FULL VARCHAR(24),
@@ -161,6 +162,7 @@ CREATE TRIGGER TRIG1 AFTER UPDATE ON FLIGHTS REFERENCING OLD AS UPDATEDROW FOR E
 ij> CREATE TRIGGER TRIG2 AFTER DELETE ON FLIGHTS FOR EACH STATEMENT
 INSERT INTO FLIGHTS_HISTORY (STATUS) VALUES ('INSERTED FROM TRIG2');
 0 rows inserted/updated/deleted
+ij> COMMIT;
 ij> ij version 10.3
 WARNING 01J01: Database 'toursDB' not created, connection made to existing database instead.
 CONNECTION0* - 	jdbc:derby:toursDB
