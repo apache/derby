@@ -101,6 +101,7 @@ import java.sql.SQLException;
  * |  (EmbedStatement)    |  |  (EmbedResultSet)    |  |  (...)               |
  * |======================|  |======================|  |======================|
  *
+ * </PRE>
  * <P>A plain local connection <B>must</B> be attached (doubly linked with) to a
  * TransactionResource at all times.  A detachable connection can be without a
  * TransactionResource, and a TransactionResource for an XATransaction
@@ -127,7 +128,7 @@ public final class TransactionResourceImpl
 	protected Database database;
 	protected LanguageConnectionContext lcc;
 
-	/*
+	/**
 	 * create a brand new connection for a brand new transaction
 	 */
 	TransactionResourceImpl(
@@ -159,7 +160,7 @@ public final class TransactionResourceImpl
 		cm = csf.newContextManager();
 	}
 
-	/*
+	/**
 	 * Called only in EmbedConnection construtor.
 	 * The Local Connection sets up the database in its constructor and sets it
 	 * here.
@@ -187,7 +188,7 @@ public final class TransactionResourceImpl
 		lcc = database.setupConnection(cm, username, drdaID, dbname);
 	}
 
-	/*
+	/**
 	 * Return instance variables to EmbedConnection.  RESOLVE: given time, we
 	 * should perhaps stop giving out reference to these things but instead use
 	 * the transaction resource itself.
@@ -199,7 +200,7 @@ public final class TransactionResourceImpl
 		return  csf;
 	}
 
-	/*
+	/**
 	 * need to be public because it is in the XATransactionResource interface
 	 */
 	ContextManager getContextManager() {
@@ -225,7 +226,7 @@ public final class TransactionResourceImpl
 		return se;
 	}
 
-	/*
+	/**
 	 * local transaction demarcation - note that global or xa transaction
 	 * cannot commit thru the connection, they can only commit thru the
 	 * XAResource, which uses the xa_commit or xa_rollback interface as a 
@@ -284,7 +285,7 @@ public final class TransactionResourceImpl
 	 * exception handling
 	 */
 
-	/*
+	/**
 	 * clean up the error and wrap the real exception in some SQLException.
 	 */
 	final SQLException handleException(Throwable thrownException,
@@ -360,37 +361,46 @@ public final class TransactionResourceImpl
 		}
 
 	}
-		 
+
+    /**
+     * Wrap a <code>Throwable</code> in an <code>SQLException</code>.
+     *
+     * @param thrownException a <code>Throwable</code>
+     * @return <code>thrownException</code>, if it is an
+     * <code>SQLException</code>; otherwise, an <code>SQLException</code> which
+     * wraps <code>thrownException</code>
+     */
 	public static SQLException wrapInSQLException(Throwable thrownException) {
 
 		if (thrownException == null)
 			return null;
 
-		SQLException nextSQLException;
-
 		if (thrownException instanceof SQLException) {
-
-			// server side JDBC can end up with a SQLException in the nested stack
-			nextSQLException = (SQLException) thrownException;
+            // Server side JDBC can end up with a SQLException in the nested
+            // stack. Return the exception with no wrapper.
+            return (SQLException) thrownException;
 		}
-		else if (thrownException instanceof StandardException) {
+
+        if (thrownException instanceof StandardException) {
 
 			StandardException se = (StandardException) thrownException;
 
             if (se.getCause() == null) {
-                nextSQLException = Util.generateCsSQLException(se);
-            } else {
-                nextSQLException = Util.seeNextException(se.getMessageId(),
-                        se.getArguments(), wrapInSQLException(se.getCause()));
+                // se is a single, unchained exception. Just convert it to an
+                // SQLException.
+                return Util.generateCsSQLException(se);
             }
 
-		} else {
+            // se contains a non-empty exception chain. We want to put all of
+            // the exceptions (including Java exceptions) in the next-exception
+            // chain. Therefore, call wrapInSQLException() recursively to
+            // convert the cause chain into a chain of SQLExceptions.
+            return Util.seeNextException(se.getMessageId(),
+                        se.getArguments(), wrapInSQLException(se.getCause()));
+        }
 
-			nextSQLException = Util.javaException(thrownException);
-
-		}
-
-		return nextSQLException;
+        // thrownException is a Java exception
+        return Util.javaException(thrownException);
 	}
 
 	/*
