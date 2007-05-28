@@ -28,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.Locale;
 import java.util.Properties; 
 
 import javax.sql.DataSource;
@@ -112,10 +113,11 @@ public class CollationTest2 extends BaseJDBCTestCase
      **/
     private static final boolean    verbose_debug = false;
 
-    private static final int    TEST_DEFAULT = 0;
-    private static final int    TEST_ENGLISH = 1;
-    private static final int    TEST_POLISH  = 2;
-    private static final int    TEST_NORWAY  = 3;
+    private static final int    TEST_DEFAULT            = 0;
+    private static final int    TEST_ENGLISH            = 1;
+    private static final int    TEST_POLISH             = 2;
+    private static final int    TEST_NORWAY             = 3;
+    private static final int    TEST_DEFAULT_TERRITORY  = 4;
 
     /**
      * logical database names to use for the DataSource connection.
@@ -130,7 +132,8 @@ public class CollationTest2 extends BaseJDBCTestCase
         "defaultdb2",
         "enddb2",
         "poldb2",
-        "nordb2"
+        "nordb2",
+        "defaultdb3"
     };
 
 
@@ -147,9 +150,18 @@ public class CollationTest2 extends BaseJDBCTestCase
         null,
         "en",
         "pl",
-        "no_NO"
+        "no_NO",
+        null
     };
 
+    private static final String[] TEST_COLLATION_ATTRIBUTE =
+    {
+        null,
+        ";collation=TERRITORY_BASED",
+        ";collation=TERRITORY_BASED",
+        ";collation=TERRITORY_BASED",
+        ";collation=TERRITORY_BASED"
+    };
 
     private static final String[] NAMES =
     {
@@ -387,10 +399,6 @@ public class CollationTest2 extends BaseJDBCTestCase
         ResultSet rs = 
             conn.getMetaData().getColumns(null, "APP", "CUSTOMER", "%");
 
-        if (SanityManager.DEBUG) {
-            SanityManager.DEBUG_PRINT("", "called GetColumns:");
-        }
-
         Assert.assertTrue("catch bug where no rows are returned.", rs.next());
 
         if (verbose_debug)
@@ -424,13 +432,23 @@ public class CollationTest2 extends BaseJDBCTestCase
         DataSource ds = 
             JDBCDataSource.getDataSourceLogical(TEST_DATABASE[db_index]);
 
-        String conn_string = 
-            "create=true" + 
-                ((TEST_CONNECTION_ATTRIBUTE[db_index] == null) ? 
-                     "" : 
-                     ";territory=" + 
-                     TEST_CONNECTION_ATTRIBUTE[db_index] + 
-                     ";collation=TERRITORY_BASED");
+        // what territory, if any to specify
+        String territory_str = 
+            (TEST_CONNECTION_ATTRIBUTE[db_index] == null) ?  
+                "" : ";territory=" + TEST_CONNECTION_ATTRIBUTE[db_index];
+
+        String collation_str = 
+            (TEST_COLLATION_ATTRIBUTE[db_index] == null) ?  
+                "" : ";collation=TERRITORY_BASED";
+
+        // build strings of the form:
+        // create=true
+        // create=true;territory=en;collation=TERRITORY_BASED
+        // create=true;collation=TERRITORY_BASED
+        String conn_string = "create=true" + territory_str + collation_str;
+
+        if (verbose_debug)
+            System.out.println("connection attribute string: " + conn_string);
 
         JDBCDataSource.setBeanProperty(ds, "connectionAttributes", conn_string);
 
@@ -1426,6 +1444,36 @@ public class CollationTest2 extends BaseJDBCTestCase
         runDerby2670(conn);
         conn.close();
     }
+    public void testDefaultJVMTerritoryCollation() throws SQLException
+    {
+        boolean run_test = false;
+        int     db_index = -1;
+
+        Locale locale = Locale.getDefault();
+
+        if (locale.getLanguage().equals("en"))
+        {
+            run_test = true;
+            db_index = TEST_ENGLISH;
+        }
+        else if (locale.getLanguage().equals("no"))
+        {
+            run_test = true;
+            db_index = TEST_NORWAY;
+        }
+        else if (locale.getLanguage().equals("po"))
+        {
+            run_test = true;
+            db_index = TEST_POLISH;
+        }
+
+        if (run_test)
+        {
+            Connection conn = setUpDBandOpenConnection(TEST_DEFAULT_TERRITORY);
+            runTestIter(conn, db_index);
+            conn.close();
+        }
+    }
     
     
     public static Test suite() 
@@ -1439,7 +1487,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         test = new SupportFilesSetup(test);
 
         // turn on log statement text for sequence of statements in derby.log.  
-        /* if (verbose_debug) */
+        if (verbose_debug)
         {
             Properties props = new Properties();
             props.setProperty("derby.language.logStatementText", "true");
@@ -1461,6 +1509,10 @@ public class CollationTest2 extends BaseJDBCTestCase
         // database to use for testing collation, norway territory.
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_NORWAY]);
+
+        // database to use for testing collation, default jvm territory
+        test = TestConfiguration.additionalDatabaseDecorator(
+                    test, TEST_DATABASE[TEST_DEFAULT_TERRITORY]);
 
 
         return test;
