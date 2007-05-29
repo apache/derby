@@ -572,6 +572,29 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             return this;
         }
 
+        /* 
+         * In first implementation of non default collation don't attempt
+         * any transformations for LIKE.  
+         *
+         * Future possibilities:
+         * o is it valid to produce a >= clause for a leading constant with
+         *   a wildcard that works across all possible collations?  Is 
+         *   c1 like a% the same as c1 like a% and c1 >= a'\u0000''\u0000',... ?
+         *
+         *   This is what was done for national char's.  It seems like a 
+         *   given collation could sort: ab, a'\u0000'.  Is there any guarantee
+         *   about the sort of the unicode '\u0000'.
+         *
+         * o National char's don't try to produce a < than, is there a way
+         *   in collation?
+         */
+        if (receiver.getTypeServices().getCollationType() != 
+                StringDataValue.COLLATION_TYPE_UCS_BASIC)
+        {
+            // don't do any < or >= transformations for non default collations.
+            return this;
+        }
+
         /* This is where we do the transformation for LIKE to make it 
          * optimizable.
          * c1 LIKE 'asdf%' -> c1 LIKE 'asdf%' AND c1 >= 'asdf' AND c1 < 'asdg'

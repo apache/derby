@@ -28,6 +28,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.text.Collator;
+import java.text.RuleBasedCollator;
+
 import java.util.Locale;
 import java.util.Properties; 
 
@@ -84,17 +87,9 @@ T20: (TODO) For both a newly created 10.3 database and an upgraded 10.3
 T21: (TODO) Testing with views
 T22: (TODO) Testing with global temporary tables
 T23: (TODO) Alter table testing. Two specific cases 1)add a new character column and 2)increase the length of an existing character
-T24: (TODO) Need to add a test case for DERBY-2669 If no territory attribute is not specified at create database time, then we should ignore the collation attribute if specified.
-column(this 2nd test should not impact the collation type setting of the character column).
-
-13)Performance- CollatorSQLChar has a method called getCollationElementsForString which currently gets called by like method. 
-getCollationElementsForString gets the collation elements for the value of CollatorSQLChar class. But say like method is looking 
-for pattern 'A%' and the value of CollatorSQLChar is 'BXXXXXXXXXXXXXXXXXXXXXXX'. This is eg of one case where it would have been 
-better to get collation element one character of CollatorSQLChar value at a time so we don't go through the process of getting 
-collation elements for the entire string when we don't really need. This is a performance issue and could be taken up at the end 
-of the implementation. Comments on this from Dan and Dag can be found in DERBY-2416. 
-15)DERBY-2668 At the time of compilation of a comparison operation, if the collation types of the operands do not match, then we 
-should throw a meaningful error message
+T24: (DONE) DERBY-2669 If no territory attribute is specified at create 
+            database time, then create collated db based on default territory
+            of Database.
 
 
 **/
@@ -359,161 +354,244 @@ public class CollationTest2 extends BaseJDBCTestCase
      **************************************************************************
      */
 
-	private boolean is142JVM() 
-	{
-	    String java_version = System.getProperty("java.version");
+    /**
+     * RESOLVE - unfinished LIKE test with dataset of all unicode characters
+     **/
+    private static final void printRuleBasedCollator()
+    {
+        // get en_US Collator rules
+        RuleBasedCollator en_USCollator = 
+            (RuleBasedCollator)Collator.getInstance(Locale.US);
+        String en_rules = en_USCollator.getRules();
 
-        // get string indexes for major/minor numbers
-        int jvm_major_idx = java_version.indexOf('.');
-        int jvm_minor_idx = java_version.indexOf('.', jvm_major_idx + 1);
-
-        
-        int jvm_major = 
-            Integer.parseInt(
-                java_version.substring(0, jvm_major_idx));
-        int jvm_minor = 
-            Integer.parseInt(
-                java_version.substring(jvm_major_idx + 1, jvm_minor_idx));
-
-
-        return(jvm_major == 1 && jvm_minor == 4);
-	}
+        System.out.println("ENGLISH RULES: " + en_rules);
+        System.out.println("ENGLISH RULES: " + formatString(en_rules, true));
+        System.out.println("ENGLISH RULES: " + formatString(en_rules, false));
+    }
 
     /**
-     * Test simple call to DatabaseMetaData.getColumns()
-     * <p>
-     * This test is the same form of the getColumns() call that 
-     * the IMPORT and EXPORT system procedures depend on. 
-     * Currently on ibm and sun 1.4.2 jvm's this test fails.
+     * RESOLVE - unfinished LIKE test with dataset of all unicode characters
      **/
-    private void runDERBY_2703(Connection conn, int db_index)
+    private static final String formatString(
+    String  str,
+    boolean all)
+    {
+        // format it as \u0000(x)\u0001(x)...
+        String ret_val = "";
+
+        for (int i = 0; i < str.length(); i++)
+        {
+            char ch = str.charAt(i);
+
+            if (!all && (ch <= 128))
+            {
+                ret_val += Character.toString(ch);
+            }
+            else
+            {
+                ret_val += 
+                    "\\u" + Integer.toString(ch, 16) + 
+                    "(" + Character.toString(ch) + ")";
+            }
+        }
+        return(ret_val);
+    }
+
+    /**
+     * RESOLVE - unfinished LIKE test with dataset of all unicode characters
+     **/
+    private final void formatLikeResults(
+    Connection  conn,
+    String      query)
         throws SQLException
     {
-        // DERBY-2703, get columns does not work in collated dbs under sun
-        // and ibm 142 jvm's.
-        if (is142JVM())
-            return;
+        Statement s     = conn.createStatement();
+        ResultSet rs    = s.executeQuery(query);
 
-        setUpTable(conn);
 
-        ResultSet rs = 
-            conn.getMetaData().getColumns(null, "APP", "CUSTOMER", "%");
+        String    txt_str   = null;
+        String    ucode_str = null;
+        String    mixed_str = null;
 
-        Assert.assertTrue("catch bug where no rows are returned.", rs.next());
-
-        if (verbose_debug)
-            System.out.println("column =" + rs.getString(4));
+        int       count     = 0;
 
         while (rs.next())
         {
-            if (verbose_debug)
-                System.out.println("column =" + rs.getString(4));
+            count++;
+
+            if (count == 1)
+            {
+                txt_str   = "{";
+                ucode_str = "{";
+                mixed_str = "{";
+            }
+            else
+            {
+                txt_str   += ", ";
+                ucode_str += ", ";
+                mixed_str += ", ";
+            }
+
+            String ret_val = rs.getString(1);
+
+            txt_str   += "\"" + ret_val + "\"";
+            
+            // string using \u0104 format for chars
+            ucode_str += formatString(ret_val, true);
+
+            mixed_str += "{\"" + formatString(ret_val, false) + "\"}";
         }
 
-        // TODO should verify all columns are returned.
+        if (count != 0)
+        {
+            txt_str   += "}";
+            ucode_str += "}";
+            mixed_str += "}";
+        }
+
+        System.out.println(
+            "Query: " + query + 
+            "\nnumber rows  :" + count     +
+            "\nString Result:" + txt_str   +
+            "\nUcode  Result:" + ucode_str +
+            "\nmixed  Result:" + mixed_str);
 
         rs.close();
-
-        dropTable(conn);
-
+        s.close();
     }
 
     /**
-     * Creates a database and return connection to database.
-     * <p>
-     * Creates a database with territory/collation as indicated by db_index
-     * test case.  
-     * Database name:       TEST_DATABASE[db_index]
-     * territory attribute: TEST_CONNECTION_ATTRIBUTE[db_index]
+     * RESOLVE - unfinished LIKE test with dataset of all unicode characters
      **/
-    private Connection setUpDBandOpenConnection(int db_index) 
+    private final void printLikeResults(Connection conn)
+        throws SQLException
+    {
+        /*
+        RESOLVE-COMMENTED OUT
+
+        for (int i = 0; i < LIKE_ALLVALS_TEST.length; i++)
+        {
+            if (verbose_debug)
+            {
+                System.out.println(
+                    "Running like allvals test[" + i + "] = " + 
+                    LIKE_ALLVALS_TEST[i]);
+            }
+
+            formatLikeResults(
+                conn,
+                "SELECT STR_VARCHAR FROM ALLVALS WHERE STR_VARCHAR LIKE " +
+                    "'" + LIKE_ALLVALS_TEST[i] + "'");
+
+            formatLikeResults(
+                conn,
+                "SELECT STR_LONGVARCHAR FROM ALLVALS WHERE STR_LONGVARCHAR LIKE " +
+                    "'" + LIKE_ALLVALS_TEST[i] + "'");
+
+            formatLikeResults(
+                conn,
+                "SELECT STR_CLOB FROM ALLVALS WHERE STR_CLOB LIKE " +
+                    "'" + LIKE_ALLVALS_TEST[i] + "'");
+
+            formatLikeResults(
+                conn,
+                "SELECT STR_CHAR FROM ALLVALS WHERE STR_CHAR LIKE " +
+                    "'" + LIKE_ALLVALS_TEST[i] + "'");
+        }
+        */
+    }
+
+    private void checkLangBasedQuery(
+    Connection  conn,
+    String      query, 
+    String[][]  expectedResult,
+    boolean     ordered) 
         throws SQLException 
     {
-        DataSource ds = 
-            JDBCDataSource.getDataSourceLogical(TEST_DATABASE[db_index]);
-
-        // what territory, if any to specify
-        String territory_str = 
-            (TEST_CONNECTION_ATTRIBUTE[db_index] == null) ?  
-                "" : ";territory=" + TEST_CONNECTION_ATTRIBUTE[db_index];
-
-        String collation_str = 
-            (TEST_COLLATION_ATTRIBUTE[db_index] == null) ?  
-                "" : ";collation=TERRITORY_BASED";
-
-        // build strings of the form:
-        // create=true
-        // create=true;territory=en;collation=TERRITORY_BASED
-        // create=true;collation=TERRITORY_BASED
-        String conn_string = "create=true" + territory_str + collation_str;
+        Statement s  = conn.createStatement();
+        ResultSet rs = s.executeQuery(query);
 
         if (verbose_debug)
-            System.out.println("connection attribute string: " + conn_string);
-
-        JDBCDataSource.setBeanProperty(ds, "connectionAttributes", conn_string);
-
-        Connection conn = ds.getConnection();
-
-        return(conn);
-    }
-
-    private void setUpTable(Connection conn) throws SQLException 
-    {
-        Statement s = conn.createStatement();
-        s.execute(
-            "CREATE TABLE CUSTOMER(" +
-                "D1 CHAR(200), D2 CHAR(200), D3 CHAR(200), D4 INT, " + 
-                "ID INT, NAME VARCHAR(40), NAME2 VARCHAR(40))");
-
-        conn.setAutoCommit(false);
-        PreparedStatement ps = 
-            conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?,?,?)");
-
-        for (int i = 0; i < NAMES.length; i++)
         {
-            ps.setString(1, NAMES[i]);
-            ps.setString(2, NAMES[i]);
-            ps.setString(3, NAMES[i]);
-            ps.setInt(   4, i);
-            ps.setInt(   5, i);
-            ps.setString(6, NAMES[i]);
-            ps.setString(7, NAMES[i]);
-            ps.executeUpdate();
+            System.out.println("executed query: " + query);
         }
 
-        conn.commit();
-        ps.close();
+        if (expectedResult == null) //expecting empty resultset from the query
+        {
+            if (verbose_debug)
+                System.out.println(
+                    "executed query expecting no results: " + query);
+
+            JDBC.assertEmpty(rs);
+        }
+        else
+        {
+            if (ordered)
+            {
+                if (verbose_debug)
+                    System.out.println(
+                        "executed query expecting ordered results: " + query);
+
+                JDBC.assertFullResultSet(rs, expectedResult);
+            }
+            else
+            {
+                if (verbose_debug)
+                    System.out.println(
+                        "executed query expecting unordered results: " + query);
+
+                JDBC.assertUnorderedResultSet(rs, expectedResult);
+            }
+        }
+
+        rs.close();
         s.close();
     }
 
-    private void setUpLikeTable(Connection conn) throws SQLException 
+    private void checkOneParamQuery(
+    Connection  conn,
+    String      query, 
+    String      param,
+    String[][]  expectedResult, 
+    boolean     ordered) 
+        throws SQLException 
     {
-        Statement s = conn.createStatement();
-        s.execute(
-            "CREATE TABLE CUSTOMER ("              +
-                "NAME_CHAR          CHAR(10), "    +
-                "NAME_VARCHAR       VARCHAR(40),"  +
-                "NAME_LONGVARCHAR   LONG VARCHAR," +
-                "NAME_CLOB          CLOB,"         +
-                "ID                 INT)");
+        PreparedStatement   ps = conn.prepareStatement(query);
+        ps.setString(1, param);
+        ResultSet           rs = ps.executeQuery();
 
-        conn.setAutoCommit(false);
-        PreparedStatement ps = 
-            conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?)");
-
-        for (int i = 0; i < LIKE_NAMES.length; i++)
+        if (expectedResult == null) //expecting empty resultset from the query
         {
-            ps.setString(1, LIKE_NAMES[i]);
-            ps.setString(2, LIKE_NAMES[i]);
-            ps.setString(3, LIKE_NAMES[i]);
-            ps.setString(4, LIKE_NAMES[i]);
-            ps.setInt(   5, i);
-            ps.executeUpdate();
+            JDBC.assertEmpty(rs);
+        }
+        else
+        {
+            if (ordered)
+                JDBC.assertFullResultSet(rs,expectedResult);
+            else
+                JDBC.assertUnorderedResultSet(rs, expectedResult);
         }
 
-        conn.commit();
+
+        // re-execute it to test path through the cache
+        ps.setString(1, param);
+        rs = ps.executeQuery();
+
+        if (expectedResult == null) //expecting empty resultset from the query
+        {
+            JDBC.assertEmpty(rs);
+        }
+        else
+        {
+            if (ordered)
+                JDBC.assertFullResultSet(rs,expectedResult);
+            else
+                JDBC.assertUnorderedResultSet(rs, expectedResult);
+        }
+
+        rs.close();
         ps.close();
-        s.close();
+        conn.commit();
     }
 
     /**
@@ -660,54 +738,286 @@ public class CollationTest2 extends BaseJDBCTestCase
         return(ret_order);
     }
 
+	private boolean is142JVM() 
+	{
+	    String java_version = System.getProperty("java.version");
 
-    private void checkLangBasedQuery(
-    Connection  conn,
-    String      query, 
-    String[][]  expectedResult,
-    boolean     ordered) 
+        // get string indexes for major/minor numbers
+        int jvm_major_idx = java_version.indexOf('.');
+        int jvm_minor_idx = java_version.indexOf('.', jvm_major_idx + 1);
+
+        
+        int jvm_major = 
+            Integer.parseInt(
+                java_version.substring(0, jvm_major_idx));
+        int jvm_minor = 
+            Integer.parseInt(
+                java_version.substring(jvm_major_idx + 1, jvm_minor_idx));
+
+
+        return(jvm_major == 1 && jvm_minor == 4);
+	}
+
+
+
+    /**************************************************************************
+     * Set up and clean up routines.
+     **************************************************************************
+     */
+
+    /**
+     * Creates a database and return connection to database.
+     * <p>
+     * Creates a database with territory/collation as indicated by db_index
+     * test case.  
+     * Database name:       TEST_DATABASE[db_index]
+     * territory attribute: TEST_CONNECTION_ATTRIBUTE[db_index]
+     **/
+    private Connection setUpDBandOpenConnection(int db_index) 
         throws SQLException 
     {
-        Statement s  = conn.createStatement();
-        ResultSet rs = s.executeQuery(query);
+        DataSource ds = 
+            JDBCDataSource.getDataSourceLogical(TEST_DATABASE[db_index]);
 
-        if (expectedResult == null) //expecting empty resultset from the query
-            JDBC.assertEmpty(rs);
-        else
-            JDBC.assertFullResultSet(rs,expectedResult);
+        // what territory, if any to specify
+        String territory_str = 
+            (TEST_CONNECTION_ATTRIBUTE[db_index] == null) ?  
+                "" : ";territory=" + TEST_CONNECTION_ATTRIBUTE[db_index];
 
+        String collation_str = 
+            (TEST_COLLATION_ATTRIBUTE[db_index] == null) ?  
+                "" : ";collation=TERRITORY_BASED";
+
+        // build strings of the form:
+        // create=true
+        // create=true;territory=en;collation=TERRITORY_BASED
+        // create=true;collation=TERRITORY_BASED
+        String conn_string = "create=true" + territory_str + collation_str;
+
+        if (verbose_debug)
+            System.out.println("connection attribute string: " + conn_string);
+
+        JDBCDataSource.setBeanProperty(ds, "connectionAttributes", conn_string);
+
+        Connection conn = ds.getConnection();
+
+        return(conn);
+    }
+
+    private void setUpTable(Connection conn) throws SQLException 
+    {
+        Statement s = conn.createStatement();
+        s.execute(
+            "CREATE TABLE CUSTOMER(" +
+                "D1 CHAR(200), D2 CHAR(200), D3 CHAR(200), D4 INT, " + 
+                "ID INT, NAME VARCHAR(40), NAME2 VARCHAR(40))");
+
+        conn.setAutoCommit(false);
+        PreparedStatement ps = 
+            conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?,?,?)");
+
+        for (int i = 0; i < NAMES.length; i++)
+        {
+            ps.setString(1, NAMES[i]);
+            ps.setString(2, NAMES[i]);
+            ps.setString(3, NAMES[i]);
+            ps.setInt(   4, i);
+            ps.setInt(   5, i);
+            ps.setString(6, NAMES[i]);
+            ps.setString(7, NAMES[i]);
+            ps.executeUpdate();
+        }
+
+        conn.commit();
+        ps.close();
         s.close();
     }
 
-    private void checkOneParamQuery(
-    Connection  conn,
-    String      query, 
-    String      param,
-    String[][]  expectedResult) 
+    private void setUpLikeTable(Connection conn) throws SQLException 
+    {
+        conn.setAutoCommit(false);
+
+        Statement s = conn.createStatement();
+        s.execute(
+            "CREATE TABLE CUSTOMER ("              +
+                "NAME_CHAR          CHAR(10), "    +
+                "NAME_VARCHAR       VARCHAR(40),"  +
+                "NAME_LONGVARCHAR   LONG VARCHAR," +
+                "NAME_CLOB          CLOB,"         +
+                "ID                 INT)");
+
+        PreparedStatement ps = 
+            conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?)");
+
+        for (int i = 0; i < LIKE_NAMES.length; i++)
+        {
+            ps.setString(1, LIKE_NAMES[i]);
+            ps.setString(2, LIKE_NAMES[i]);
+            ps.setString(3, LIKE_NAMES[i]);
+            ps.setString(4, LIKE_NAMES[i]);
+            ps.setInt(   5, i);
+            ps.executeUpdate();
+        }
+
+        ps.close();
+        s.close();
+    }
+
+    
+    /**
+     * RESOLVE - unfinished LIKE test with dataset of all unicode characters
+     **/
+    private void setUpALLVALS(Connection conn) 
         throws SQLException 
     {
-        PreparedStatement   ps = conn.prepareStatement(query);
-        ps.setString(1, param);
-        ResultSet           rs = ps.executeQuery();
+        Statement s = conn.createStatement();
 
-        if (expectedResult == null) //expecting empty resultset from the query
-            JDBC.assertEmpty(rs);
-        else
-            JDBC.assertFullResultSet(rs,expectedResult);
+        s.execute(
+            "CREATE TABLE ALLVALS ("              +
+                "STR_CHAR          CHAR(3), "    +
+                "STR_VARCHAR       VARCHAR(40),"  +
+                "STR_LONGVARCHAR   LONG VARCHAR," +
+                "STR_CLOB          CLOB,"         +
+                "ID                INT)");
+
+        PreparedStatement ps = 
+            conn.prepareStatement("INSERT INTO ALLVALS VALUES(?,?,?,?,?)");
+
+        char[]  single_char = new char[1];
+        char[]  leading_b   = new char[2];
+        char[]  trailing_b  = new char[2];
+        char[]  middle_b    = new char[3];
+
+        leading_b[0]                        = 'b';
+        trailing_b[trailing_b.length - 1]   = 'b';
+        middle_b[1]                         = 'b';
+
+        int max_char = (int) Character.MAX_VALUE;
+
+        long before_load_ms = System.currentTimeMillis();
+
+        for (int i = Character.MIN_VALUE; i <= max_char; i++)
+        {
+            // insert a row with string value of a single unicode char
+            single_char[0] = (char) i;
+            String  str_val = String.valueOf(single_char);
+
+            ps.setString(1, str_val);
+            ps.setString(2, str_val);
+            ps.setString(3, str_val);
+            ps.setString(4, str_val);
+            ps.setInt(   5, i);
+            ps.executeUpdate();
+
+            // insert a row with 'b' followed by unicode value followed by 'b'
+            leading_b[1] = (char) i;
+            str_val = String.valueOf(leading_b);
+
+            ps.setString(1, str_val);
+            ps.setString(2, str_val);
+            ps.setString(3, str_val);
+            ps.setString(4, str_val);
+            ps.setInt(   5, i);
+            ps.executeUpdate();
+
+            // insert a row with unicode value followed by 'b' 
+            trailing_b[0] = (char) i;
+            str_val = String.valueOf(trailing_b);
+
+            ps.setString(1, str_val);
+            ps.setString(2, str_val);
+            ps.setString(3, str_val);
+            ps.setString(4, str_val);
+            ps.setInt(   5, i);
+            ps.executeUpdate();
+
+            // insert a row with unicode value followed by 'b' 
+            // followed by unicode value
+            middle_b[0] = (char) i;
+            middle_b[2] = (char) i;
+            str_val = String.valueOf(middle_b);
+
+            ps.setString(1, str_val);
+            ps.setString(2, str_val);
+            ps.setString(3, str_val);
+            ps.setString(4, str_val);
+            ps.setInt(   5, i);
+            ps.executeUpdate();
+        }
+
+        long after_load_ms = System.currentTimeMillis();
+
+        conn.commit();
+
+        long after_commit_ms = System.currentTimeMillis();
+
+        if (verbose_debug)
+        {
+
+            System.out.println("Loaded and committed ALLVALS table:");
+            System.out.println(
+                "load time = "   + (after_load_ms   - before_load_ms) +
+                "commit time = " + (after_commit_ms - after_load_ms));
+        }
+
+        ps.close();
+        s.close();
+    }
 
 
-        // re-execute it to test path through the cache
-        ps.setString(1, param);
-        rs = ps.executeQuery();
+    private void dropLikeTable(Connection conn) 
+        throws SQLException 
+    {
+        Statement s = conn.createStatement();
+	
+        s.execute("DROP TABLE CUSTOMER");     
+        s.close();
 
-        if (expectedResult == null) //expecting empty resultset from the query
-            JDBC.assertEmpty(rs);
-        else
-            JDBC.assertFullResultSet(rs,expectedResult);
+    }
+
+    /**************************************************************************
+     * run*() tests, called from the actual test*() tests.
+     **************************************************************************
+     */
+
+
+    /**
+     * Test simple call to DatabaseMetaData.getColumns()
+     * <p>
+     * This test is the same form of the getColumns() call that 
+     * the IMPORT and EXPORT system procedures depend on. 
+     * Currently on ibm and sun 1.4.2 jvm's this test fails.
+     **/
+    private void runDERBY_2703(Connection conn, int db_index)
+        throws SQLException
+    {
+        // DERBY-2703, get columns does not work in collated dbs under sun
+        // and ibm 142 jvm's.
+        if (is142JVM())
+            return;
+
+        setUpTable(conn);
+
+        ResultSet rs = 
+            conn.getMetaData().getColumns(null, "APP", "CUSTOMER", "%");
+
+        Assert.assertTrue("catch bug where no rows are returned.", rs.next());
+
+        if (verbose_debug)
+            System.out.println("column =" + rs.getString(4));
+
+        while (rs.next())
+        {
+            if (verbose_debug)
+                System.out.println("column =" + rs.getString(4));
+        }
+
+        // TODO should verify all columns are returned.
 
         rs.close();
-        ps.close();
-        conn.commit();
+
+        dropTable(conn);
+
     }
 
     /**************************************************************************
@@ -806,7 +1116,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     0, 
                     i - 1,
-                    true));
+                    true),
+                true);
 
             // '<=' test
             checkOneParamQuery(
@@ -817,7 +1128,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     0, 
                     i,
-                    true));
+                    true),
+                true);
 
             // '=' test
             checkOneParamQuery(
@@ -828,7 +1140,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     i, 
                     i,
-                    true));
+                    true),
+                true);
 
             // '>=' test
             checkOneParamQuery(
@@ -839,7 +1152,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     i, 
                     expected_order.length - 1,
-                    true));
+                    true),
+                true);
 
             // '>' test
             checkOneParamQuery(
@@ -850,7 +1164,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     expected_order, 
                     i + 1, 
                     expected_order.length - 1,
-                    true));
+                    true),
+                true);
         }
     }
 
@@ -1074,7 +1389,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
         }
 
-        dropTable(conn);
+        dropLikeTable(conn);
     }
 
 
@@ -1292,6 +1607,87 @@ public class CollationTest2 extends BaseJDBCTestCase
     }
 
 
+    private static final String[] derby2670_pattern =
+    {
+        "%",
+        "a%",
+        "b%",
+        "c%",
+        "%a%",
+        "%b%",
+        "%c%",
+        "%a",
+        "%b",
+        "%c"
+    };
+
+    private static final String[][][] derby2670_pattern_result = 
+    {
+        // pattern = % 
+        { {"a"}, 
+          {"A"}, 
+          {" a"}, 
+          {"-a"}, 
+          {"\u00ADa"}, 
+          {"b"}, 
+          {"B"}, 
+          {" b"}, 
+          {"-b"}, 
+          {"\u00ADb"}, 
+          {"C"},
+          {"ekstra\u00ADarbeid"}, 
+          {"ekstrabetaling"}, 
+          {"ekstraarbeid"}, 
+          {"Wanvik"}, 
+          {"Wågan"},
+          {"Waagan"}, 
+          {"W\u00E5han"}
+        },
+        // pattern = a% 
+        { {"a"} },
+        // pattern = b% 
+        { {"b"} },
+        // pattern = c% 
+        null,
+        // pattern = %a% 
+        { {"a"}, 
+          {" a"}, 
+          {"-a"}, 
+          {"\u00ADa"}, 
+          {"ekstra\u00ADarbeid"}, 
+          {"ekstrabetaling"}, 
+          {"Wanvik"}, 
+          {"Wågan"},
+          {"Waagan"}, 
+          {"W\u00E5han"}
+        },
+        // pattern = %b% 
+        { {"b"}, 
+          {" b"}, 
+          {"-b"}, 
+          {"\u00ADb"}, 
+          {"ekstra\u00ADarbeid"}, 
+          {"ekstrabetaling"}, 
+          {"ekstraarbeid"}
+        }, 
+        // pattern = %c% 
+        null,
+        // pattern = %a
+        { {"a"}, 
+          {" a"}, 
+          {"-a"}, 
+          {"\u00ADa"} 
+        }, 
+        // pattern = %b
+        { {"b"}, 
+          {" b"}, 
+          {"-b"}, 
+          {"\u00ADb"}
+        }, 
+        // pattern = %c
+        null
+    };
+
     /**
      * Test case for DERBY-2670 - problem with like in no like processing.
      * <p>
@@ -1299,6 +1695,10 @@ public class CollationTest2 extends BaseJDBCTestCase
      * C, obviously wrong for like %a%.  The code was incorrectly caching
      * collation key info in a DataValueDescriptor across the reuse of the
      * holder object from one row to the next.
+     * <p>
+     * Added more patterns to also test DERBY-2710 and DERBY-2706, both
+     * to do with bad like optimization which can not be applied to collation
+     * based like.
      **/
     private void runDerby2670(
     Connection conn)
@@ -1319,24 +1719,110 @@ public class CollationTest2 extends BaseJDBCTestCase
             ps.setString(1, rows[i]);
             ps.executeUpdate();
         }
+        ps.close();
 
-        checkLangBasedQuery(
-            conn, 
-            "select * from t where x like '%a%'",
-            new String[][] 
-            { 
-                {"Waagan"}, {"W\u00E5han"}, {"Wanvik"}, {"Wågan"}, 
-                {"ekstrabetaling"}, {"ekstra\u00ADarbeid"}, {"\u00ADa"}, {"a"}, 
-                {"-a"}, {" a"}
-            },
-            true);
+        Assert.assertTrue(
+            "source and result arrays do not match for derby2670",
+            derby2670_pattern_result.length == derby2670_pattern.length);
+
+        String like_qry = "select * from t where x like ";
+        PreparedStatement ps_like = 
+            conn.prepareStatement("select * from t where x like ?");
+        PreparedStatement ps_like_orderby = 
+            conn.prepareStatement("select * from t where x like ? order by x");
+
+        for (int i = 0; i < derby2670_pattern.length; i++)
+        {
+            // Try just unordered like with constant pattern
+            String qry = like_qry + "'" + derby2670_pattern[i] + "'";
+
+            checkLangBasedQuery(
+                conn, qry, derby2670_pattern_result[i], false);
+
+            // add an order by 
+            qry += " order by x";
+
+            checkLangBasedQuery(
+                conn, qry, derby2670_pattern_result[i], false);
+
+            // try parameter for pattern
+            ps_like.setString(1, derby2670_pattern[i]);
+            ResultSet rs = ps_like.executeQuery();
+
+            if (derby2670_pattern_result[i] == null)
+                JDBC.assertEmpty(rs);
+            else
+                JDBC.assertUnorderedResultSet(rs, derby2670_pattern_result[i]);
+
+            rs.close();
+            rs = null;
+
+            // try parameter for pattern
+            ps_like_orderby.setString(1, derby2670_pattern[i]);
+            rs = ps_like_orderby.executeQuery();
+
+            if (derby2670_pattern_result[i] == null)
+                JDBC.assertEmpty(rs);
+            else
+                JDBC.assertFullResultSet(rs, derby2670_pattern_result[i]);
+
+            rs.close();
+            rs = null;
+        }
+
+        // add an index and try it again.
+        s.executeUpdate("create index t_idx on t (x)");
+        like_qry = "select * from t where x like ";
+
+        for (int i = 0; i < derby2670_pattern.length; i++)
+        {
+            // Try just unordered like with constant pattern
+            String qry = like_qry + "'" + derby2670_pattern[i] + "'";
+
+            checkLangBasedQuery(
+                conn, qry, derby2670_pattern_result[i], false);
+
+            // add an order by 
+            qry += " order by x";
+
+            checkLangBasedQuery(
+                conn, qry, derby2670_pattern_result[i], false);
+
+            // try parameter for pattern
+            ps_like.setString(1, derby2670_pattern[i]);
+            ResultSet rs = ps_like.executeQuery();
+
+            if (derby2670_pattern_result[i] == null)
+                JDBC.assertEmpty(rs);
+            else
+                JDBC.assertUnorderedResultSet(rs, derby2670_pattern_result[i]);
+
+            rs.close();
+            rs = null;
+
+            // try parameter for pattern
+            ps_like_orderby.setString(1, derby2670_pattern[i]);
+            rs = ps_like_orderby.executeQuery();
+
+
+            if (derby2670_pattern_result[i] == null)
+                JDBC.assertEmpty(rs);
+            else
+                JDBC.assertFullResultSet(rs, derby2670_pattern_result[i]);
+
+            rs.close();
+            rs = null;
+        }
+
+
 
         s.executeUpdate("drop table t");
 
         conn.commit();
         
         // cleanup
-        ps.close();
+        ps_like_orderby.close();
+        ps_like.close();
         s.close();
     }
 
@@ -1405,6 +1891,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         runLikeTests(conn, db_index);
 
+
         /*
         TODO -MIKEM, this test does not work yet.
         runAlterTableDropColumn(conn, db_index);
@@ -1430,6 +1917,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         runTestIter(conn, TEST_ENGLISH);
         conn.close();
     }
+
     public void testPolishCollation() throws SQLException
     {
         Connection conn = setUpDBandOpenConnection(TEST_POLISH);
@@ -1439,11 +1927,20 @@ public class CollationTest2 extends BaseJDBCTestCase
     public void testNorwayCollation() throws SQLException
     {
         Connection conn = setUpDBandOpenConnection(TEST_NORWAY);
-        runTestIter(conn, TEST_NORWAY);
-
         runDerby2670(conn);
+        runTestIter(conn, TEST_NORWAY);
         conn.close();
     }
+    /**
+     * Test creating a TERRITORY_BASED collated database by only setting
+     * the collation attribute.  The Territory will be picked up from the
+     * default territory of the JVM.
+     *
+     * Tests:
+     * T24: DERBY-2669 If no territory attribute is specified at create 
+     *      database time, then create collated db based on default 
+     *      territory of Database.
+     **/
     public void testDefaultJVMTerritoryCollation() throws SQLException
     {
         boolean run_test = false;
@@ -1475,10 +1972,8 @@ public class CollationTest2 extends BaseJDBCTestCase
         }
     }
     
-    
     public static Test suite() 
     {
-
         // only test in embedded mode, all tests are server side actions.
         Test test =  
                TestConfiguration.embeddedSuite(CollationTest2.class);
@@ -1513,7 +2008,6 @@ public class CollationTest2 extends BaseJDBCTestCase
         // database to use for testing collation, default jvm territory
         test = TestConfiguration.additionalDatabaseDecorator(
                     test, TEST_DATABASE[TEST_DEFAULT_TERRITORY]);
-
 
         return test;
     }
