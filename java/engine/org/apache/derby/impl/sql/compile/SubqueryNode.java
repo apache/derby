@@ -36,6 +36,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.sql.execute.ExecRow;
 
@@ -531,6 +532,12 @@ public class SubqueryNode extends ValueNode
 		{
 			leftOperand.setType(
 				((ResultColumn) resultColumns.elementAt(0)).getTypeServices());
+			//collation of ? operand should be same as the current schema
+			leftOperand.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			leftOperand.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
 		}
 
 		// Set the DataTypeServices

@@ -30,6 +30,7 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.JSQLType;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
@@ -624,6 +625,12 @@ public class StaticMethodCallNode extends MethodCallNode
 		  				pn = ((UnaryOperatorNode)sql2j.getSQLValueNode()).getParameterOperand();
 		  			else
 		  				pn = (ParameterNode) (sql2j.getSQLValueNode());
+					//collation of ? operand should be same as the current schema
+					pn.getTypeServices().setCollationDerivation(
+							StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+					pn.getTypeServices().setCollationType(
+							getLanguageConnectionContext().getDefaultSchema()
+									.getCollationType());
 
 					// applicationParameterNumbers is only set up for a procedure.
 					int applicationParameterNumber = pn.getParameterNumber();

@@ -125,6 +125,12 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 					getCastToCharWidth(operand.getTypeServices())
 						)
 				);
+		//Result of upper()/lower() will have the same collation as the   
+		//argument to upper()/lower(). 
+		getTypeServices().setCollationDerivation(
+				operand.getTypeServices().getCollationDerivation());
+		getTypeServices().setCollationType(
+				operand.getTypeServices().getCollationType());
 
 		return this;
 	}
@@ -145,6 +151,12 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 		*/
 
 		operand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR));
+		//collation of ? operand should be same as the current schema
+		operand.getTypeServices().setCollationDerivation(
+				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+		operand.getTypeServices().setCollationType(
+				getLanguageConnectionContext().getDefaultSchema()
+						.getCollationType());
 	}
 
 	/**

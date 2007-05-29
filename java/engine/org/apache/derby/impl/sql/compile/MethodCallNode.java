@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.JSQLType;
 
@@ -783,6 +784,12 @@ abstract class MethodCallNode extends JavaValueNode
 		we generate the metadata info for the return parameter and reset the flag
 		in the compilercontext for future call statements*/
 		DataTypeDescriptor dts = DataTypeDescriptor.getSQLDataTypeDescriptor(typeName);
+		//collation of ? operand should be same as the current schema
+		dts.setCollationDerivation(
+				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+		dts.setCollationType(
+				getLanguageConnectionContext().getDefaultSchema()
+						.getCollationType());
 		if (getCompilerContext().getReturnParameterFlag()) {
 			getCompilerContext().getParameterTypes()[0] = dts;
 		}

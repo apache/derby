@@ -48,6 +48,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
@@ -335,6 +336,12 @@ public abstract class ResultSetNode extends QueryTreeNode
 				** corresponding column of the target table.
 				*/
 				re.setType(typeCol.getTypeServices());
+				//collation of ? operand should be same as the current schema
+				re.getTypeServices().setCollationDerivation(
+						StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+				re.getTypeServices().setCollationType(
+						getLanguageConnectionContext().getDefaultSchema()
+								.getCollationType());
 			}
 			else if (re instanceof CharConstantNode)
 			{

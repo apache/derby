@@ -524,6 +524,12 @@ public class TernaryOperatorNode extends ValueNode
 			*/
 	
 			receiver.setType(getVarcharDescriptor());
+			//collation of ? operand should be same as the current schema
+			receiver.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			receiver.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
 		}
 
 		/* Is there a ? parameter on the left? */
@@ -531,6 +537,12 @@ public class TernaryOperatorNode extends ValueNode
 		{
 			/* Set the left operand type to varchar. */
 			leftOperand.setType(getVarcharDescriptor());
+			//collation of ? operand should be same as the current schema
+			leftOperand.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			leftOperand.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
 		}
 
 		bindToBuiltIn();
@@ -570,6 +582,13 @@ public class TernaryOperatorNode extends ValueNode
 		** The result type of trim is varchar.
 		*/
 		setResultType(resultType);
+		//Result of TRIM should pick up the collation of the 1st argument
+		//to TRIM. The 1st argument to TRIM is represented by the variable
+		//receiver in this class.
+		getTypeServices().setCollationDerivation(
+				receiver.getTypeServices().getCollationDerivation());
+		getTypeServices().setCollationType(
+				receiver.getTypeServices().getCollationType());
 
 		return this;
 	}
@@ -616,6 +635,12 @@ public class TernaryOperatorNode extends ValueNode
 							         leftOperand.getTypeServices());
 				}
 			}
+			//collation of ? operand should be same as the current schema
+			receiver.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			receiver.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
 		}
 							                            
 		/*
@@ -636,6 +661,12 @@ public class TernaryOperatorNode extends ValueNode
 							         receiver.getTypeServices());
 				}
 			}
+			//collation of ? operand should be same as the current schema
+			leftOperand.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			leftOperand.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
 		}
 
 		/*
@@ -645,6 +676,12 @@ public class TernaryOperatorNode extends ValueNode
 		{
 			rightOperand.setType(
 				new DataTypeDescriptor(TypeId.INTEGER_ID, true)); 
+			//collation of ? operand should be same as the current schema
+			rightOperand.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			rightOperand.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
 		}
 
 		bindToBuiltIn();
@@ -720,6 +757,12 @@ public class TernaryOperatorNode extends ValueNode
 			*/
 	
 			receiver.setType(getVarcharDescriptor());
+			//collation of ? operand should be same as the current schema
+			receiver.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			receiver.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
 		}
 
 		/* Is there a ? parameter on the left? */
@@ -779,7 +822,13 @@ public class TernaryOperatorNode extends ValueNode
 						true,
 						resultLen
 					));
-
+		//Result of SUSBSTR should pick up the collation of the 1st argument
+		//to SUBSTR. The 1st argument to SUBSTR is represented by the variable
+		//receiver in this class.
+		getTypeServices().setCollationDerivation(
+				receiver.getTypeServices().getCollationDerivation());
+		getTypeServices().setCollationType(
+				receiver.getTypeServices().getCollationType());
 		return this;
 	}
 
@@ -844,6 +893,12 @@ public class TernaryOperatorNode extends ValueNode
         if( arg.requiresTypeFromContext() && arg.getTypeId() == null)
         {
             arg.setType( new DataTypeDescriptor(TypeId.getBuiltInTypeId( jdbcType), true));
+			//collation of ? operand should be same as the current schema
+			arg.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			arg.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
             return true;
         }
         return false;

@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -87,11 +88,25 @@ public class TimestampOperatorNode extends BinaryOperatorNode
 			aggregateVector);
 
 		//Set the type if there is a parameter involved here 
-		if (leftOperand.requiresTypeFromContext())
+		if (leftOperand.requiresTypeFromContext()) {
 			leftOperand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.DATE));
+			//collation of ? operand should be same as the current schema
+			leftOperand.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			leftOperand.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
+		}
 		//Set the type if there is a parameter involved here 
-		if (rightOperand.requiresTypeFromContext())
+		if (rightOperand.requiresTypeFromContext()) {
 			rightOperand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.TIME));
+			//collation of ? operand should be same as the current schema
+			rightOperand.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			rightOperand.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
+		}
 
 		TypeId leftTypeId = leftOperand.getTypeId();
         TypeId rightTypeId = rightOperand.getTypeId();

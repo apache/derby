@@ -36,6 +36,7 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import java.lang.reflect.Modifier;
 
@@ -175,6 +176,14 @@ public class CoalesceFunctionNode extends ValueNode
 			if (((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext())
 			{
 				((ValueNode)argumentsList.elementAt(index)).setType(getTypeServices());
+				//collation of ? operand should be same as the current schema
+				((ValueNode)argumentsList.elementAt(index)).getTypeServices()
+				.setCollationDerivation(
+						StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+				((ValueNode)argumentsList.elementAt(index)).getTypeServices()
+				.setCollationType(
+						getLanguageConnectionContext().getDefaultSchema()
+								.getCollationType());
 				break;
 			}
 		}

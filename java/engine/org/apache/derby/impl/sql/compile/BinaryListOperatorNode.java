@@ -23,18 +23,15 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.Visitable;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.util.JBitSet;
 
@@ -163,6 +160,12 @@ public abstract class BinaryListOperatorNode extends ValueNode
 
 			/* Set the left operand to the type of right parameter. */
 			leftOperand.setType(rightOperandList.getTypeServices());
+			//? parameter should pick up the collation type of the schema in
+			//which this statement is getting compiled.
+			leftOperand.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			leftOperand.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema().getCollationType());
 		}
 
 		/* Is there a ? parameter on the right? */

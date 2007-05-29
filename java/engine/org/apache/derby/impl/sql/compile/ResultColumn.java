@@ -574,6 +574,12 @@ public class ResultColumn extends ValueNode
 			if (getTypeServices() != null)
 			{
 				expression.setType(getTypeServices());
+				//collation of ? operand should be same as the current schema
+				expression.getTypeServices().setCollationDerivation(
+						StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+				expression.getTypeServices().setCollationType(
+						getLanguageConnectionContext().getDefaultSchema()
+								.getCollationType());
 			}
 		}
 

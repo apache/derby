@@ -36,6 +36,7 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.SqlXmlUtil;
@@ -269,7 +270,7 @@ public class UnaryOperatorNode extends ValueNode
 	 * 
 	 * @return	The parameter operand of this unary operator else null.
 	 */
-	public ParameterNode getParameterOperand()
+	public ParameterNode getParameterOperand() throws StandardException
 	{
 		if (requiresTypeFromContext() == false)
 			return null;

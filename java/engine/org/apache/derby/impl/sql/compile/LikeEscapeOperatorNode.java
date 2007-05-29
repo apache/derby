@@ -189,6 +189,12 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             receiver.setType(
                 new DataTypeDescriptor(
                     TypeId.getBuiltInTypeId(Types.VARCHAR), true));
+			//collation of ? operand should be same as the current schema
+			receiver.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			receiver.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
         }
 
         /* 
@@ -214,6 +220,12 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     new DataTypeDescriptor(
                         TypeId.getBuiltInTypeId(Types.VARCHAR), true));
             }
+			//collation of ? operand should be same as the current schema
+			leftOperand.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			leftOperand.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
         }
 
         /* 
@@ -238,6 +250,12 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     new DataTypeDescriptor(
                         TypeId.getBuiltInTypeId(Types.VARCHAR), true));
             }
+			//collation of ? operand should be same as the current schema
+			rightOperand.getTypeServices().setCollationDerivation(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			rightOperand.getTypeServices().setCollationType(
+					getLanguageConnectionContext().getDefaultSchema()
+							.getCollationType());
         }
 
         bindToBuiltIn();

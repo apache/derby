@@ -37,6 +37,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.util.JBitSet;
 
@@ -727,6 +728,12 @@ abstract class SetOperatorNode extends TableOperatorNode
 				** type array.
 				*/
 				rc.getExpression().setType(types[index]);
+				//collation of ? operand should be same as the current schema
+				rc.getExpression().getTypeServices().setCollationDerivation(
+						StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+				rc.getExpression().getTypeServices().setCollationType(
+						getLanguageConnectionContext().getDefaultSchema()
+								.getCollationType());
 			}
 		}
 	}

@@ -30,6 +30,7 @@ import org.apache.derby.iapi.types.JSQLType;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
@@ -165,6 +166,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  			else
 	  				pn = (ParameterNode) (value);
 				jsqlType = pn.getJSQLType();
+				
 			}
 			else
 			{

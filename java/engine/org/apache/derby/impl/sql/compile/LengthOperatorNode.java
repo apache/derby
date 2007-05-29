@@ -26,6 +26,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.ConcatableDataValue;
@@ -147,6 +148,12 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 
 		operand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(parameterType, true, 
 												parameterWidth));
+		//collation of ? operand should be same as the current schema
+		operand.getTypeServices().setCollationDerivation(
+				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+		operand.getTypeServices().setCollationType(
+				getLanguageConnectionContext().getDefaultSchema()
+						.getCollationType());
 	}
 
 	/**

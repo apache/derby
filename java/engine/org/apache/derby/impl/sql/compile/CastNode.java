@@ -31,6 +31,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.types.DataTypeUtilities;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.reference.Limits;
 
@@ -803,6 +804,12 @@ public class CastNode extends ValueNode
 					throws StandardException
 	{
 		castOperand.setType(castTarget);
+		//collation of ? operand should be same as the current schema
+		castOperand.getTypeServices().setCollationDerivation(
+				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+		castOperand.getTypeServices().setCollationType(
+				getLanguageConnectionContext().getDefaultSchema()
+						.getCollationType());
 	}
 
 	/**
