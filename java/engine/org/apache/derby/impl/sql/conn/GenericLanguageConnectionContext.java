@@ -613,8 +613,23 @@ public class GenericLanguageConnectionContext
 				dm.invalidateFor(td, DependencyManager.DROP_TABLE, this);
 				tran.dropConglomerate(td.getHeapConglomerateId());
 			} catch (StandardException e) {
-				e.initCause(topLevelStandardException);
-				topLevelStandardException = e;
+				if (topLevelStandardException == null) {
+					// always keep the first exception unchanged
+					topLevelStandardException = e;
+				} else {
+					try {
+						// Try to create a chain of exceptions. If successful,
+						// the current exception is the top-level exception,
+						// and the previous exception the cause of it.
+						e.initCause(topLevelStandardException);
+						topLevelStandardException = e;
+					} catch (IllegalStateException ise) {
+						// initCause() has already been called on e. We don't
+						// expect this to happen, but if it happens, just skip
+						// the current exception from the chain. This is safe
+						// since we always keep the first exception.
+					}
+				}
 			}
 		}
     
@@ -622,8 +637,15 @@ public class GenericLanguageConnectionContext
 		try {
 			internalCommit(true);
 		} catch (StandardException e) {
-			e.initCause(topLevelStandardException);
-			topLevelStandardException = e;
+			// do the same chaining as above
+			if (topLevelStandardException == null) {
+				topLevelStandardException = e;
+			} else {
+				try {
+					e.initCause(topLevelStandardException);
+					topLevelStandardException = e;
+				} catch (IllegalStateException ise) { /* ignore */ }
+			}
 		}
 		if (topLevelStandardException != null) throw topLevelStandardException;
 	}

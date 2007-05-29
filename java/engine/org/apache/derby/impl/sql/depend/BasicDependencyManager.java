@@ -382,10 +382,18 @@ public class BasicDependencyManager implements DependencyManager {
 					dep.prepareToInvalidate(p, action, lcc);
 				} catch (StandardException sqle) {
 
-					if (noInvalidate != null)
-						sqle.initCause(noInvalidate);
-
-					noInvalidate = sqle;
+					if (noInvalidate == null) {
+						noInvalidate = sqle;
+					} else {
+						try {
+							sqle.initCause(noInvalidate);
+							noInvalidate = sqle;
+						} catch (IllegalStateException ise) {
+							// We weren't able to chain the exceptions. That's
+							// OK, since we always have the first exception we
+							// caught. Just skip the current exception.
+						}
+					}
 				}
 				if (noInvalidate == null) {
 
