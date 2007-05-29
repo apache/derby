@@ -38,7 +38,7 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
 
 public class LOBOutputStream extends OutputStream {
     private boolean closed;
-    private LOBStreamControl control;
+    private final LOBStreamControl control;
     private long pos;
 
     LOBOutputStream(LOBStreamControl control, long position) {

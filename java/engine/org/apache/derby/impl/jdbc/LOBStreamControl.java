@@ -99,6 +99,9 @@ class LOBStreamControl {
                 throw (IOException) e;
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
+            IOException ioe = new IOException (e.getMessage());
+            ioe.initCause (e);
+            throw ioe;
         }
         isBytes = false;
         //now this call will write into the file
@@ -183,7 +186,7 @@ class LOBStreamControl {
         isValidPostion(pos);
         updateCount++;
         if (isBytes) {
-            if (pos + 1 < MAX_BUF_SIZE) {
+            if (pos < MAX_BUF_SIZE) {
                 byte [] bytes = {(byte) b};
                 updateData(bytes, 0, 1, pos);
                 return pos + 1;
@@ -216,10 +219,11 @@ class LOBStreamControl {
                     ExceptionUtil.getSQLStateFromIdentifier(
                                   SQLState.BLOB_INVALID_OFFSET)))
                     throw new ArrayIndexOutOfBoundsException (e.getMessage());
+            throw e;
         }
         updateCount++;
         if (isBytes) {
-            if (pos + b.length < MAX_BUF_SIZE)
+            if (pos + len <= MAX_BUF_SIZE)
                 return updateData(b, off, len, pos);
             else {
                 init(dataBytes, pos);
@@ -255,6 +259,8 @@ class LOBStreamControl {
     }
 
     private int readBytes(byte [] b, int off, int len, long pos) {
+        if (pos >= dataBytes.length)
+            return -1;
         int lengthFromPos = dataBytes.length - (int) pos;
         int actualLength = len > lengthFromPos ? lengthFromPos : len;
         byte [] result = new byte[actualLength];
@@ -325,7 +331,7 @@ class LOBStreamControl {
             System.arraycopy(dataBytes, 0, tmpByte, 0, (int) size);
             dataBytes = tmpByte;
         } else {
-            if (size < Integer.MAX_VALUE && size < MAX_BUF_SIZE) {
+            if (size < MAX_BUF_SIZE) {
                 dataBytes = new byte [(int) size];
                 read(dataBytes, 0, dataBytes.length, 0);
                 isBytes = true;
@@ -387,6 +393,9 @@ class LOBStreamControl {
                     throw (IOException) e;
                 if (e instanceof RuntimeException)
                     throw (RuntimeException) e;
+                IOException ioe = new IOException (e.getMessage());
+                ioe.initCause (e);
+                throw ioe;
             }
         }
     }

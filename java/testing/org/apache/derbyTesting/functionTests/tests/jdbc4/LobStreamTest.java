@@ -38,11 +38,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class LobStreamTest extends BaseJDBCTestCase {
 
-    private static final String dbName = "LobStreamTest";
-    private static final boolean useLOBStreamControl = true;
-
-    private Connection conn = null;
-    File f = null;
     private InputStream in = null;
     private OutputStream out = null;
     private Blob blob;
@@ -52,7 +47,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
     }
 
     protected void setUp() throws Exception {
-        conn = getConnection();
+        Connection conn = getConnection();
         blob = conn.createBlob();
         in = blob.getBinaryStream();
         out = blob.setBinaryStream (1);
@@ -60,8 +55,8 @@ public class LobStreamTest extends BaseJDBCTestCase {
 
     protected void tearDown() throws Exception {
         blob.free();
-        conn.rollback();
-        conn.close();
+        blob = null;
+        super.tearDown();
     }
 
     /**
@@ -69,7 +64,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
      */
 
     /**
-     * Test read and write methods with one parameter.
+     * Test read and write methods with no parameter.
      */
     public void testReadWriteNoParameters() throws IOException {
 
@@ -79,7 +74,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
 
         for (int i=0; i<8000; i++) {
             int value = in.read();
-            assertEquals("Read value is equal to i", i%255, value);
+            assertEquals("Output does not match input", i%255, value);
         }
 
         in.close();
@@ -102,7 +97,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
 
         for (int i=0; i<8000; i++) {
             int value = in.read();
-            assertEquals("Read value is equal to i", i%255, value);
+            assertEquals("Output does not match input", i%255, value);
         }
 
         in.close();
@@ -128,7 +123,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
             int count = in.read(b);
             for (int j=0; j<count; j++) {
                 int value = b[j] & 0xFF;
-                assertEquals("Read value is equal to i",
+                assertEquals("Output does not match input",
                                         (((i * 100) + j) % 255), value);
             }
         }
@@ -159,7 +154,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
             int count = in.read(b, offset, 100);
             for (int j=0; j<count; j++) {
                 int value = b[j + offset] & 0xFF;
-                assertEquals("Read value is equal to i",
+                assertEquals("Output does not match input",
                                         (((i * 100) + j) % 255), value);
             }
             offset += 1;
@@ -260,7 +255,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         while (i < 8000) {
             if ((i%255) < 100) {
                 int value = in.read();
-                assertEquals("Read value is equal to i", i%255, value);
+                assertEquals("Output does not match input", i%255, value);
                 i++;
             } else {
                 long count = in.skip(155);
@@ -287,7 +282,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         byte[] b = null;
         try {
             out.write(b, 100, 20);
-            assertTrue("byte[] = null should cause exception", false);
+            fail("byte[] = null should cause exception");
         } catch (Exception e) {
             assertTrue("Expected NullPointerException",
                     e instanceof NullPointerException);
@@ -296,7 +291,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         b = new byte[100];
         try {
             out.write(b, 0, 200);
-            assertTrue("length > b.length should cause exception", false);
+            fail("length > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                     e instanceof IndexOutOfBoundsException);
@@ -305,7 +300,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset > b.length
         try {
             out.write(b, 150, 0);
-            assertTrue("offset > b.length should cause exception", false);
+            fail("offset > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                                     e instanceof IndexOutOfBoundsException);
@@ -314,8 +309,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset + length > b.length
         try {
             out.write(b, 50, 100);
-            assertTrue("length + offset > b.length should cause exception",
-                    false);
+            fail("length + offset > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                                     e instanceof IndexOutOfBoundsException);
@@ -324,7 +318,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset is negative
         try {
             out.write(b, -50, 100);
-            assertTrue("negative offset should cause exception", false);
+            fail("negative offset should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                                         e instanceof IndexOutOfBoundsException);
@@ -333,7 +327,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         //length is negative
         try {
             out.write(b, 0, -100);
-            assertTrue("negative length should cause exception", false);
+            fail("negative length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                                 e instanceof IndexOutOfBoundsException);
@@ -343,7 +337,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         out.close();
         try {
             out.write(b, 0, 100);
-            assertTrue("Stream should be closed", false);
+            fail("Stream should be closed");
         } catch (Exception e) {
             assertTrue("Expected IOException", e instanceof IOException);
         }
@@ -369,7 +363,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         byte[] b = null;
         try {
             in.read(b, 100, 20);
-            assertTrue("byte[] = null should cause exception", false);
+            fail("byte[] = null should cause exception");
         } catch (Exception e) {
             assertTrue("Expected NullPointerException",
                                         e instanceof NullPointerException);
@@ -379,7 +373,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         b = new byte[100];
         try {
             int count = in.read(b, 0, 200);
-            assertTrue("length > b.length should cause exception", false);
+            fail("length > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                                     e instanceof IndexOutOfBoundsException);
@@ -388,7 +382,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset > b.length
         try {
             in.read(b, 150, 0);
-            assertTrue("offset > b.length should cause exception", false);
+            fail("offset > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                                         e instanceof IndexOutOfBoundsException);
@@ -397,8 +391,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset + length > b.length
         try {
             int count = in.read(b, 50, 100);
-            assertTrue("offset + length > b.length should cause exception",
-                                                                        false);
+            fail("offset + length > b.length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                                     e instanceof IndexOutOfBoundsException);
@@ -407,7 +400,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         // offset is negative
         try {
             in.read(b, -50, 100);
-            assertTrue("negative offset should cause exception", false);
+            fail("negative offset should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                                         e instanceof IndexOutOfBoundsException);
@@ -416,7 +409,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         //length is negative
         try {
             in.read(b, 0, -100);
-            assertTrue("negative length should cause exception", false);
+            fail("negative length should cause exception");
         } catch (Exception e) {
             assertTrue("Expected IndexOutOfBoundException",
                                     e instanceof IndexOutOfBoundsException);
@@ -426,7 +419,7 @@ public class LobStreamTest extends BaseJDBCTestCase {
         in.close();
         try {
             in.read(b, 0, 100);
-            assertTrue("Stream should be closed", false);
+            fail("Stream should be closed");
         } catch (Exception e) {
             assertTrue("Expected IOException", e instanceof IOException);
         }
@@ -438,6 +431,8 @@ public class LobStreamTest extends BaseJDBCTestCase {
      * Suite method automatically generated by JUnit module.
      */
     public static Test suite() {
+        //testing only embedded driver generic test suite testing both
+        //client and ebedded is present in jdbcapi/LobStreamsTest
         TestSuite ts  = new TestSuite ("LobStreamTest");
         ts.addTest(TestConfiguration.embeddedSuite(LobStreamTest.class));
         TestSuite encSuite = new TestSuite ("LobStreamsTest:encrypted");

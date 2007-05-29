@@ -39,7 +39,7 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
 public class LOBInputStream extends InputStream {
 
     private boolean closed;
-    private LOBStreamControl control;
+    private final LOBStreamControl control;
     private long pos;
     private long updateCount;
 
@@ -118,7 +118,7 @@ public class LOBInputStream extends InputStream {
                    MessageService.getTextMessage(SQLState.LANG_STREAM_CLOSED));
         try {
             int ret = control.read(b, off, len, pos);
-            if (ret > 0) {
+            if (ret != -1) {
                 pos += ret;
                 return ret;
             }

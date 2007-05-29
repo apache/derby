@@ -360,6 +360,8 @@ final class EmbedBlob extends ConnectionChild implements Blob
             if (materialized) {
                  result = new byte [length];
                  int sz = control.read (result, 0, result.length, startPos - 1);
+                 if (sz == -1)
+                     return new byte [0];
                  if (sz < length) {
                      byte [] tmparray = new byte [sz];
                      System.arraycopy (result, 0, tmparray, 0, sz);
