@@ -740,22 +740,21 @@ public class CollationTest2 extends BaseJDBCTestCase
 
 	private boolean is142JVM() 
 	{
+        // bug shows up in ibm142, sun142, 
+        // and j9 (J2ME Foundation Specification v1.1)
 	    String java_version = System.getProperty("java.version");
 
-        // get string indexes for major/minor numbers
-        int jvm_major_idx = java_version.indexOf('.');
-        int jvm_minor_idx = java_version.indexOf('.', jvm_major_idx + 1);
+        // only match java versions with leading 1.4.2
+        String leading_version_no = java_version.substring(0, 5);
 
-        
-        int jvm_major = 
-            Integer.parseInt(
-                java_version.substring(0, jvm_major_idx));
-        int jvm_minor = 
-            Integer.parseInt(
-                java_version.substring(jvm_major_idx + 1, jvm_minor_idx));
+        /*
+        System.out.println("java_version = " + java_version);
+        System.out.println("leading_version_no = " + leading_version_no);
+        */
 
 
-        return(jvm_major == 1 && jvm_minor == 4);
+        return(leading_version_no.equals("1.4.2") || 
+               java_version.equals("J2ME Foundation Specification v1.1"));
 	}
 
 
