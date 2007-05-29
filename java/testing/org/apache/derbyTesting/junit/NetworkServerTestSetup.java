@@ -67,6 +67,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private final InputStream[] inputStreamHolder;
     private final String[]    systemProperties;
     private final String[]    startupArgs;
+    private Process serverProcess;
     
     /**
      * Decorator this test with the NetworkServerTestSetup
@@ -115,7 +116,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         networkServerController = getNetworkServerControl();
 
         if (useSeparateProcess)
-        { startSeparateProcess(); }
+        { serverProcess = startSeparateProcess(); }
         else if (asCommand)
         { startWithCommand(); }
         else
@@ -164,7 +165,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         }, "NetworkServerTestSetup command").start();
     }
 
-    private void startSeparateProcess() throws Exception
+    private Process startSeparateProcess() throws Exception
     {
         StringBuffer    buffer = new StringBuffer();
         String              classpath = BaseTestCase.getSystemProperty( "java.class.path" );
@@ -219,6 +220,17 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             );
 
         inputStreamHolder[ 0 ] = serverProcess.getInputStream();
+        return serverProcess;
+    }
+
+    /**
+     * Returns the <code>Process</code> object for the server process.
+     *
+     * @param a <code>Process</code> object, or <code>null</code> if the
+     * network server does not run in a separate process
+     */
+    public Process getServerProcess() {
+        return serverProcess;
     }
 
     /**
@@ -241,6 +253,11 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             if ( serverOutput != null ) { serverOutput.close(); }
             networkServerController = null;
             serverOutput = null;
+
+            if (serverProcess != null) {
+                serverProcess.waitFor();
+                serverProcess = null;
+            }
         }
     }
     
@@ -303,8 +320,13 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * Ping server for upto sixty seconds. If the server responds
      * in that time then return true, otherwise return false.
      * 
+     * @param networkServerController controller object for network server
+     * @param serverProcess the external process in which the server runs
+     * (could be <code>null</code>)
+     * @return true if server responds in time, false otherwise
      */
-    public static boolean pingForServerStart(NetworkServerControl networkServerController)
+    public static boolean pingForServerStart(
+        NetworkServerControl networkServerController, Process serverProcess)
         throws InterruptedException
     {
         final long startTime = System.currentTimeMillis();
@@ -318,6 +340,26 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     return false;
                 }
             }
+            if (serverProcess != null) {
+                // if the server runs in a separate process, check whether the
+                // process is still alive
+                try {
+                    int exitVal = serverProcess.exitValue();
+                    // When exitValue() returns successfully, the server
+                    // process must have terminated. No point in pinging the
+                    // server anymore.
+                    return false;
+                } catch (IllegalThreadStateException e) {
+                    // This exception is thrown by Process.exitValue() if the
+                    // process has not terminated. Keep on pinging the server.
+                }
+            }
         }
+    }
+
+    public static boolean pingForServerStart(NetworkServerControl control)
+        throws InterruptedException
+    {
+        return pingForServerStart(control, null);
     }
 }

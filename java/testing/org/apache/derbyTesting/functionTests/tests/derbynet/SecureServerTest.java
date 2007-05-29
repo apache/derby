@@ -95,6 +95,8 @@ public class SecureServerTest extends BaseTestCase
     private static final Outcome RUNNING_SECURITY_NOT_BOOTED = new Outcome( true, "" );
     private static final Outcome RUNNING_SECURITY_BOOTED = new Outcome( true,  serverBootedOK() );
 
+    /** Reference to the enclosing NetworkServerTestSetup. */
+    private NetworkServerTestSetup nsTestSetup;
         
     // startup state
     private boolean _unsecureSet;
@@ -214,7 +216,7 @@ public class SecureServerTest extends BaseTestCase
         String[]        startupProperties = getStartupProperties( authenticationRequired, useCustomDerbyProperties );
         String[]        startupArgs = getStartupArgs( unsecureSet );
 
-        Test  testSetup = SecurityManagerSetup.noSecurityManager(
+        NetworkServerTestSetup networkServerTestSetup =
                 new NetworkServerTestSetup
             (
              secureServerTest,
@@ -223,7 +225,12 @@ public class SecureServerTest extends BaseTestCase
              true,
              secureServerTest._outcome.serverShouldComeUp(),
              secureServerTest._inputStreamHolder
-             ));
+             );
+
+        secureServerTest.nsTestSetup = networkServerTestSetup;
+
+        Test testSetup =
+            SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
 
         // if using the custom derby.properties, copy the custom properties to a visible place
         if ( useCustomDerbyProperties )
@@ -366,7 +373,9 @@ public class SecureServerTest extends BaseTestCase
     private boolean serverCameUp()
         throws Exception
     {
-        return NetworkServerTestSetup.pingForServerStart( NetworkServerTestSetup.getNetworkServerControl() );
+        return NetworkServerTestSetup.pingForServerStart(
+            NetworkServerTestSetup.getNetworkServerControl(),
+            nsTestSetup.getServerProcess());
     }
 
 }
