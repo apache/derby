@@ -149,6 +149,79 @@ select * from x,y where x.c1 = y.c1 and x.c1 is null;
 select * from x,y where x.c1 = y.c1 and x.c1 is null and y.c1 = 2;
 select * from x,y where x.c1 = y.c1 and x.c1 is null and y.c1 is null;
 
+-- DERBY-2526: join node flattening leads to incorrect transitive closure,
+-- which in turn results in incorrect results.
+
+-- Ex. 1: As posted to DERBY-2526:
+
+create table b2 (c1 int, c2 int, c3 char(1), c4 int, c5 int, c6 int);
+create table b4 (c7 int, c4 int, c6 int);
+create table b3 (c8 int, c9 int, c5 int, c6 int);
+create table b (c1 int, c2 int, c3 char(1), c4 int, c5 int, c6 int);
+
+create view bvw (c5, c1 ,c2 ,c3 ,c4) as
+          select c5, c1 ,c2 ,c3 ,c4 from b2 union
+          select c5, c1 ,c2 ,c3 ,c4 from b;
+
+create view bvw2 (c1 ,c2 ,c3 ,c4 ,c5) as
+           select c1 ,c2 ,c3 ,c4 ,c5 from b2 union
+           select c1 ,c2 ,c3 ,c4 ,c5 from b;
+
+insert into b4 (c7,c4,c6) values (4, 42, 31);
+insert into b2 (c5,c1,c3,c4,c6) values (3,4, 'F',43,23);
+insert into b3 (c5,c8,c9,c6) values (2,3,19,28);
+
+-- Should see 1 row for *both* of these queries.
+select b3.* from b3 join bvw on (b3.c8 = bvw.c5) join b4 on (bvw.c1 = b4.c7) where b4.c4 = 42;
+select b3.* from b3 join bvw2 on (b3.c8 = bvw2.c5) join b4 on (bvw2.c1 = b4.c7) where b4.c4 = 42;
+
+-- Cleanup.
+drop view bvw;
+drop view bvw2;
+drop table b;
+drop table b2;
+drop table b3;
+drop table b4;
+
+-- Ex. 2: Simplified repro.
+
+  create table b1 (c0 int);
+  create table xx (c1 int, c2 int);
+  create table b2 (c3 int, c4 int);
+
+  insert into b1 values 1;
+  insert into xx values (0, 1);
+  insert into b2 values (0, 2);
+
+-- Following should return 1 row.
+select b1.* from
+    b1 JOIN (select * from xx) VW(c1,c2) on (b1.c0 = vw.c2)
+       JOIN b2 on (vw.c1 = b2.c3);
+
+-- Try out various correlation name combinations to make sure that
+-- correct column remapping occurs regardless of correlation name.
+
+select b1.* from
+    b1 JOIN (select * from xx) VW(ccx1,ccx2) on (b1.c0 = vw.ccx2)
+       JOIN b2 on (vw.ccx1 = b2.c3);
+
+select b1.* from
+    b1 JOIN (select c1 as ccx1, c2 as ccx2 from xx) VW(ccx1,ccx2) on (b1.c0 = vw.ccx2)
+       JOIN b2 on (vw.ccx1 = b2.c3);
+
+select b1.* from
+    b1 JOIN (select c1 as ccx1, c2 as ccx2 from xx) VW(x1,x2) on (b1.c0 = vw.x2)
+       JOIN b2 on (vw.x1 = b2.c3);
+
+select b1.* from
+    b1 JOIN (select c1 as ccx1, c2 as ccx2 from xx) VW(c1,c2) on (b1.c0 = vw.c2)
+       JOIN b2 on (vw.c1 = b2.c3);
+
+-- Cleanup.
+drop table b1;
+drop table b2;
+drop table xx;
+
 -- Beetle task 5000. Bug found by Websphere. Should not return any rows.
 select t1_c1, t1_c2, t2_c1, t2_c2
   from t1, t2

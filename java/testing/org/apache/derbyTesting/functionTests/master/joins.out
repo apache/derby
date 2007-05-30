@@ -339,6 +339,110 @@ C1         |C1
 ij> select * from x,y where x.c1 = y.c1 and x.c1 is null and y.c1 is null;
 C1         |C1         
 -----------------------
+ij> -- DERBY-2526: join node flattening leads to incorrect transitive closure,
+-- which in turn results in incorrect results.
+
+-- Ex. 1: As posted to DERBY-2526:
+
+create table b2 (c1 int, c2 int, c3 char(1), c4 int, c5 int, c6 int);
+0 rows inserted/updated/deleted
+ij> create table b4 (c7 int, c4 int, c6 int);
+0 rows inserted/updated/deleted
+ij> create table b3 (c8 int, c9 int, c5 int, c6 int);
+0 rows inserted/updated/deleted
+ij> create table b (c1 int, c2 int, c3 char(1), c4 int, c5 int, c6 int);
+0 rows inserted/updated/deleted
+ij> create view bvw (c5, c1 ,c2 ,c3 ,c4) as
+          select c5, c1 ,c2 ,c3 ,c4 from b2 union
+          select c5, c1 ,c2 ,c3 ,c4 from b;
+0 rows inserted/updated/deleted
+ij> create view bvw2 (c1 ,c2 ,c3 ,c4 ,c5) as
+           select c1 ,c2 ,c3 ,c4 ,c5 from b2 union
+           select c1 ,c2 ,c3 ,c4 ,c5 from b;
+0 rows inserted/updated/deleted
+ij> insert into b4 (c7,c4,c6) values (4, 42, 31);
+1 row inserted/updated/deleted
+ij> insert into b2 (c5,c1,c3,c4,c6) values (3,4, 'F',43,23);
+1 row inserted/updated/deleted
+ij> insert into b3 (c5,c8,c9,c6) values (2,3,19,28);
+1 row inserted/updated/deleted
+ij> -- Should see 1 row for *both* of these queries.
+select b3.* from b3 join bvw on (b3.c8 = bvw.c5) join b4 on (bvw.c1 = b4.c7) where b4.c4 = 42;
+C8         |C9         |C5         |C6         
+-----------------------------------------------
+3          |19         |2          |28         
+ij> select b3.* from b3 join bvw2 on (b3.c8 = bvw2.c5) join b4 on (bvw2.c1 = b4.c7) where b4.c4 = 42;
+C8         |C9         |C5         |C6         
+-----------------------------------------------
+3          |19         |2          |28         
+ij> -- Cleanup.
+drop view bvw;
+0 rows inserted/updated/deleted
+ij> drop view bvw2;
+0 rows inserted/updated/deleted
+ij> drop table b;
+0 rows inserted/updated/deleted
+ij> drop table b2;
+0 rows inserted/updated/deleted
+ij> drop table b3;
+0 rows inserted/updated/deleted
+ij> drop table b4;
+0 rows inserted/updated/deleted
+ij> -- Ex. 2: Simplified repro.
+
+  create table b1 (c0 int);
+0 rows inserted/updated/deleted
+ij> create table xx (c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> create table b2 (c3 int, c4 int);
+0 rows inserted/updated/deleted
+ij> insert into b1 values 1;
+1 row inserted/updated/deleted
+ij> insert into xx values (0, 1);
+1 row inserted/updated/deleted
+ij> insert into b2 values (0, 2);
+1 row inserted/updated/deleted
+ij> -- Following should return 1 row.
+select b1.* from
+    b1 JOIN (select * from xx) VW(c1,c2) on (b1.c0 = vw.c2)
+       JOIN b2 on (vw.c1 = b2.c3);
+C0         
+-----------
+1          
+ij> -- Try out various correlation name combinations to make sure that
+-- correct column remapping occurs regardless of correlation name.
+
+select b1.* from
+    b1 JOIN (select * from xx) VW(ccx1,ccx2) on (b1.c0 = vw.ccx2)
+       JOIN b2 on (vw.ccx1 = b2.c3);
+C0         
+-----------
+1          
+ij> select b1.* from
+    b1 JOIN (select c1 as ccx1, c2 as ccx2 from xx) VW(ccx1,ccx2) on (b1.c0 = vw.ccx2)
+       JOIN b2 on (vw.ccx1 = b2.c3);
+C0         
+-----------
+1          
+ij> select b1.* from
+    b1 JOIN (select c1 as ccx1, c2 as ccx2 from xx) VW(x1,x2) on (b1.c0 = vw.x2)
+       JOIN b2 on (vw.x1 = b2.c3);
+C0         
+-----------
+1          
+ij> select b1.* from
+    b1 JOIN (select c1 as ccx1, c2 as ccx2 from xx) VW(c1,c2) on (b1.c0 = vw.c2)
+       JOIN b2 on (vw.c1 = b2.c3);
+C0         
+-----------
+1          
+ij> -- Cleanup.
+drop table b1;
+0 rows inserted/updated/deleted
+ij> drop table b2;
+0 rows inserted/updated/deleted
+ij> drop table xx;
+0 rows inserted/updated/deleted
 ij> -- Beetle task 5000. Bug found by Websphere. Should not return any rows.
 select t1_c1, t1_c2, t2_c1, t2_c2
   from t1, t2

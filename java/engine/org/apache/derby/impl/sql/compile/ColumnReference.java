@@ -851,12 +851,34 @@ public class ColumnReference extends ValueNode
 			ResultSetNode rsn = vcn.getSourceResultSet();
 			if (rsn instanceof FromTable)
 			{
-				tableNumber = ((FromTable) rsn).getTableNumber();
+				FromTable ft = (FromTable)rsn;
+				tableNumber = ft.getTableNumber();
 				if (SanityManager.DEBUG)
 				{
 					SanityManager.ASSERT(tableNumber != -1,
 						"tableNumber not expected to be -1");
 				}
+
+				/* It's not enough to just set the table number.  Depending
+				 * on the original query specified and on whether or not
+				 * subquery flattening has occurred, it's possible that
+				 * the expression to which we're remapping has a different
+				 * RCL ordering than the one to which we were mapped before
+				 * we got here.  In that case we also need to update the
+				 * columnNumber to point to the correct column in "ft".
+				 * See DERBY-2526 for details.
+				 */
+				ResultColumn ftRC =
+					ft.getResultColumns().getResultColumn(columnName);
+
+				if (SanityManager.DEBUG)
+				{
+					SanityManager.ASSERT(ftRC != null,
+						"Failed to find column '" + columnName + "' in the " +
+						"RCL for '" + ft.getTableName() + "'.");
+				}
+
+				columnNumber = ftRC.getColumnPosition();
 			}
 			else
 			{
