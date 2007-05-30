@@ -568,14 +568,7 @@ public class NetworkServerControl{
         
         if ( !authenticationRequired )
         {
-            String  errorMessage = server.localizeMessage
-                (
-                 "DRDA_NoAuthentication.S",
-                 new String[]
-                    {
-                        Property.REQUIRE_AUTHENTICATION_PARAMETER,
-                        NetworkServerControlImpl.DASHARGS[  NetworkServerControlImpl.DASHARG_UNSECURE ] }
-                );
+            String  errorMessage = server.localizeMessage( "DRDA_NoAuthentication.S", null );
 
             // this throws an exception and exits this method
             server.consoleError( errorMessage );

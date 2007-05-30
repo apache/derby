@@ -358,11 +358,17 @@ public class SecureServerTest extends BaseTestCase
 
     private static  String  authenticationFailure()
     {
-        return "Network Server startup failed. " +
-            "User authentication should be enabled " +
-            "before the Network Server installs a security manager. " +
-            "Please either set the 'derby.connection.requireAuthentication' " +
-            "system property to true or run the network server with the '-noSecurityManager' option.";
+        return
+        "Network Server startup failed. User authentication " +
+        "must be enabled before the Network Server installs a security manager. " +
+        "You must either enable user authentication or disable the installation " +
+        "of a security manager. For information on enabling user authentication, " +
+        "see the section of the Derby Developer's Guide entitled \"Working with user authentication\". " +
+        "Disabling the installation of a security manager is strongly discouraged " +
+        "in a client/server environment. However, if you must do this, " +
+        "you can disable the installation of a security manager by specifying " +
+        "the \"-noSecurityManager\" command line option when you " +
+         "bring up the Network Server.";
     }
 
     private static  String  serverBootedOK()
