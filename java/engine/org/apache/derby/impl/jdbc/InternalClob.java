@@ -105,7 +105,7 @@ interface InternalClob {
     /**
      * Returns a writer to write data into the Clob.
      * <p>
-     * The semantics of the writer is the same as for {@link #setString}.
+     * The semantics of the writer is the same as for {@link #insertString}.
      *
      * @param charPos the starting character position. The first character is
      *      at position <code>1</code>.
@@ -115,7 +115,7 @@ interface InternalClob {
      * @throws UnsupportedOperationException if the Clob representation is
      *      read-only
      */
-    Writer getWriter(long pos) throws IOException, SQLException;
+    Writer getWriter(long charPos) throws IOException, SQLException;
 
     /**
      * Inserts the given string at the specified character position.
