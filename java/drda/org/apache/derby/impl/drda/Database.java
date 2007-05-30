@@ -399,6 +399,34 @@ class Database
 				}
 		return s;
 	}
+    
+    private boolean locatorSupport = false;
+    private boolean locatorSupportChecked = false;
+    
+    /**
+     * Checks whether database can support locators.  This is done by
+     * checking whether one of the stored procedures needed for
+     * locators exists.  (If the database has been soft-upgraded from
+     * an earlier version, the procedures will not exist).
+     *
+     * @throws SQLException if metadata call fails
+     * @return <code>true</code> if locators are supported,
+     *         <code>false</code otherwise
+     */
+    boolean supportsLocator() throws SQLException
+    {
+        if (!locatorSupportChecked) {
+            // Check if locator procedures exist
+            ResultSet rs = getConnection().getMetaData()
+                    .getProcedures(null, "SYSIBM", "BLOBTRUNCATE");
+            locatorSupport =  rs.next();  // True if procedure exists
+            rs.close();
+            locatorSupportChecked = true;
+        }
+        
+        return locatorSupport;
+    }
+       
 
     /**
      * This method resets the state of this Database object so that it can

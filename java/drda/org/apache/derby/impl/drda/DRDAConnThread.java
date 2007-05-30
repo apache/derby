@@ -2484,7 +2484,19 @@ class DRDAConnThread extends Thread {
 			}
 			for (int i = start; i < numVars + start; i++)
 			{
-				outovr_drdaType[i] = reader.readUnsignedByte();
+                int drdaType = reader.readUnsignedByte();
+                if (!database.supportsLocator()) { 
+                    // ignore requests for locator when it is not supported
+                    if ((drdaType >= DRDAConstants.DRDA_TYPE_LOBLOC)
+                        && (drdaType <= DRDAConstants.DRDA_TYPE_NCLOBLOC)) {
+                        if (SanityManager.DEBUG) {
+                            trace("ignoring drdaType: " + drdaType);
+                        }
+                        reader.readNetworkShort(); // Skip rest
+                        continue;
+                    }
+                }
+                outovr_drdaType[i] = drdaType;
 				if (SanityManager.DEBUG)
 					trace("drdaType is: "+ outovr_drdaType[i]);
 				precision = reader.readNetworkShort();
