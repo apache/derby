@@ -42,17 +42,18 @@ import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
+/**
+ * Tests authentication and connection level authorization.
+ *
+ */
 public class AuthenticationTest extends BaseJDBCTestCase {
 
-    protected static String PASSWORD_SUFFIX = "suf2ix";
-    protected static String USERS[] = 
+    private static final String PASSWORD_SUFFIX = "suf2ix";
+    private static final String USERS[] = 
         {"APP","dan","kreg","jeff","ames","jerry","francois","jamie","howardR"};
 
-    protected String zeus = "\u0396\u0395\u03A5\u03A3";
-    protected String apollo = "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
-
-    protected static Properties sysprops = new Properties();
-    protected static Properties props = new Properties();
+    private static final String zeus = "\u0396\u0395\u03A5\u03A3";
+    private static final String apollo = "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
     
     /** Creates a new instance of the Test */
     public AuthenticationTest(String name) {
@@ -60,10 +61,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Set up the conection to the database.
+     * Ensure all connections are not in auto commit mode.
      */
-    public void setUp() throws  Exception {
-        getConnection().setAutoCommit(false);
+    protected void initializeConnection(Connection conn) throws SQLException {
+        conn.setAutoCommit(false);
     }
 
     public static Test suite() {
@@ -116,8 +117,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // Additionally use DatabasePropertyTestSetup to add some
         // possibly useful settings
         // Finally SystemPropertyTestSetup sets up system level users
+        Properties props = new Properties();
         props.setProperty("derby.infolog.append", "true");
         props.setProperty("derby.debug.true", "AuthenticationTrace");
+        Properties sysprops = new Properties();
         sysprops.put("derby.user.system", "admin");
         sysprops.put("derby.user.mickey", "mouse");
         test = DatabasePropertyTestSetup.builtinAuthentication(test,
@@ -133,8 +136,6 @@ public class AuthenticationTest extends BaseJDBCTestCase {
                 public Object run(){
                     System.getProperties().remove(
                         "derby.connection.requireAuthentication");
-                    String apollo = 
-                        "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
                     return 
                         System.getProperties().remove("derby.user." +apollo);
                 }
@@ -190,6 +191,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         setDatabaseProperty(
             "derby.database.defaultConnectionMode","NoAccess", conn1);
         conn1.commit();
+        conn1.close();
 
         // check the system wide user
         assertConnectionOK(dbName, "system", "admin"); 
@@ -247,16 +249,16 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // we have not set require authentication at system level.
         // try system shutdown with wrong user - should work
         assertSystemShutdownOK("", "badUser", ("dan" + PASSWORD_SUFFIX));
-        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)).close(); // revive
         // with 'allowed' user but bad pwd - will succeed
         assertSystemShutdownOK("", "dan", ("jeff" + PASSWORD_SUFFIX));
-        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)).close(); // revive
         // dbo, but bad pwd - will succeed
         assertSystemShutdownOK("", "APP", ("POO"));
-        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)).close(); // revive
         // allowed user but not dbo - will also succeed
         assertSystemShutdownOK("", "dan", ("dan" + PASSWORD_SUFFIX));
-        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)).close(); // revive
         // expect Derby system shutdown, which gives XJ015 error.
         assertSystemShutdownOK("", "APP", ("APP" + PASSWORD_SUFFIX));
 
@@ -325,6 +327,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             assertSQLState("23513", sqle);
         }
         stmt.close();
+        conn1.rollback();
         conn1.close();
 
         // Note: there is not much point in attempting to write with an invalid
@@ -389,29 +392,19 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         setDatabaseProperty(
             "derby.database.propertiesOnly","false", conn1);
         conn1.commit();
+        conn1.close();
         assertConnectionOK(dbName, "system", "admin");
         
         // try changing system's pwd
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-                public Object run(){
-                    return java.lang.System.setProperty(
-                        "derby.user.system", "thrdSysPwd");
-                }
-        });
+        setSystemProperty("derby.user.system", "thrdSysPwd");
 
         // can we get in as system user with changed pwd
         assertConnectionOK(dbName, "system", "thrdSysPwd");
         
         // reset
         // first change system's pwd back
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-                public Object run(){
-                    return java.lang.System.setProperty(
-                        "derby.user.system", "admin");
-                }
-        });
+        setSystemProperty("derby.user.system", "admin");
+
         conn1 = openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX));
         setDatabaseProperty(
             "derby.database.defaultConnectionMode","fullAccess", conn1);
@@ -477,6 +470,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         stmt = conn1.createStatement();
         assertStatementError(
             "25502", stmt, "delete from APP.t1 where c1 = 'SYSTEM'");
+        conn1.rollback();
         conn1.close();
 
         // reset
@@ -495,17 +489,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     public void testGreekCharacters() throws SQLException {
         
         String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
-
-        // add a system level user
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-                public Object run(){
-                    String zeus = "\u0396\u0395\u03A5\u03A3";
-                    String apollo = "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
-                    return java.lang.System.setProperty(
-                        ("derby.user." + apollo), zeus);
-                }
-        });
+        
+        setSystemProperty("derby.user." + apollo, zeus);
 
         Connection conn1 = openDefaultConnection(
                 "dan", ("dan" + PASSWORD_SUFFIX));
@@ -539,9 +524,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             assertUpdateCount(stmt, 0, 
             "create table APP.t1(c1 varchar(30))");
             assertUpdateCount(stmt, 1, "insert into APP.t1 values USER");
+            conn1.commit();
             assertUserValue(new String[] {zeus}, zeus, apollo,
             "select * from APP.t1 where c1 like CURRENT_USER");
-            conn1.commit();
             stmt.close();
             conn1.close();
         }
@@ -574,13 +559,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
 
         // try ensuring system level is set for authentication
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-                public Object run(){
-                    return java.lang.System.setProperty(
-                        "derby.connection.requireAuthentication", "true");
-                }
-        });
+        setSystemProperty("derby.connection.requireAuthentication", "true");
+
         // bring down the database
         assertShutdownUsingSetShutdownOK(
             dbName, "APP", "APP" + PASSWORD_SUFFIX);
@@ -589,7 +569,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
         // bring down server to ensure settings take effect 
         assertSystemShutdownOK("", "badUser", ("dan" + PASSWORD_SUFFIX));
-        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)); // revive
+        openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX)).close(); // revive
 
         // try system shutdown with wrong user
         assertSystemShutdownFail("08004", "", "badUser", ("dan" + PASSWORD_SUFFIX));
@@ -607,20 +587,16 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             "derby.database.defaultConnectionMode","fullAccess", conn1);
         setDatabaseProperty(
             "derby.connection.requireAuthentication","false", conn1);
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-                public Object run(){
-                    return java.lang.System.setProperty(
-                        "derby.connection.requireAuthentication", "false");
-                }
-        });
+        
+        setSystemProperty("derby.connection.requireAuthentication", "false");
+
         conn1.commit();
         conn1.close();
-        openDefaultConnection("system", "admin");
+        openDefaultConnection("system", "admin").close();
         assertShutdownUsingSetShutdownOK(
             dbName, "APP", "APP" + PASSWORD_SUFFIX);
         assertSystemShutdownOK("", "system", "admin");
-        openDefaultConnection("system", "admin"); // just so teardown works.
+        openDefaultConnection("system", "admin").close(); // just so teardown works.
     }
     
     protected void assertFailSetDatabaseProperty(
@@ -632,6 +608,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         setDBP.setString(2, value);
         // user jamie cannot be both readOnly and fullAccess
         assertStatementError("4250C", setDBP);
+        setDBP.close();
     }
     
     protected void setDatabaseProperty(
@@ -642,6 +619,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         setDBP.setString(1, propertyName);
         setDBP.setString(2, value);
         setDBP.execute();
+        setDBP.close();
     }
     
     protected void useUserValue(int expectedUpdateCount, String user, String sql)
@@ -690,12 +668,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     throws SQLException
     {
         DataSource ds = JDBCDataSource.getDataSource(dbName);
-        try {
-            assertNotNull(ds.getConnection(user, password));
-        }
-        catch (SQLException e) {
-            throw e;
-        }
+        Connection conn = ds.getConnection(user, password);
+        assertNotNull(conn);
+        conn.close();
     }
     
     // get a connection, using setUser / setPassword, and ds.getConnection()
@@ -706,12 +681,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         DataSource ds = JDBCDataSource.getDataSource(dbName);
         JDBCDataSource.setBeanProperty(ds, "user", user);
         JDBCDataSource.setBeanProperty(ds, "password", password);
-        try {
-            assertNotNull(ds.getConnection());
-        }
-        catch (SQLException e) {
-            throw e;
-        }
+        Connection conn = ds.getConnection();
+        assertNotNull(conn);
+        conn.close();
     }
     
     protected void assertConnectionFail(

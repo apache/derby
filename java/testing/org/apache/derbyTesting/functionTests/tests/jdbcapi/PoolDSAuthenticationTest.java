@@ -38,7 +38,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 //This class implements the checks for ConnectionPoolDataSources
 public class PoolDSAuthenticationTest extends AuthenticationTest {
 
-    private static ConnectionPoolDataSource pds;
     /** Creates a new instance of the Test */
     public PoolDSAuthenticationTest(String name) {
         super(name);
@@ -94,37 +93,27 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         String dbName, String user, String password)
     throws SQLException
     {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
-        try {
-            assertNotNull(pds.getPooledConnection(user, password));
-        }
-        catch (SQLException e) {
-                throw e;
-        }
+        pds.getPooledConnection(user, password).close();
     }
 
     protected void assertConnectionWOUPOK(
         String dbName, String user, String password)
     throws SQLException
     {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(pds, "user", user);
         JDBCDataSource.setBeanProperty(pds, "password", password);
-        try {
-            assertNotNull(pds.getPooledConnection());
-        }
-        catch (SQLException e) {
-                throw e;
-        }
+        pds.getPooledConnection().close();
     }
 
     protected void assertConnectionFail(
         String expectedSqlState, String dbName, String user, String password)
     throws SQLException
     {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         try {
             pds.getPooledConnection(user, password);
@@ -139,7 +128,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password)
     throws SQLException
     {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(pds, "user", user);
         JDBCDataSource.setBeanProperty(pds, "password", password);
@@ -155,7 +144,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     protected void assertShutdownUsingSetShutdownOK(
         String dbName, String user, String password)
     throws SQLException {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
         try {
@@ -169,7 +158,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     
     protected void assertShutdownUsingConnAttrsOK(
         String dbName, String user, String password) throws SQLException {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.setBeanProperty(
             pds, "connectionAttributes", "shutdown=true");
         try {
@@ -184,7 +173,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     protected void assertShutdownWOUPOK(
         String dbName, String user, String password)
     throws SQLException {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(pds, "user", user);
         JDBCDataSource.setBeanProperty(pds, "password", password);
@@ -202,7 +191,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         try {
@@ -217,7 +206,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(pds, "user", user);
         JDBCDataSource.setBeanProperty(pds, "password", password);
@@ -234,7 +223,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     protected void assertSystemShutdownOK(
         String dbName, String user, String password)
     throws SQLException {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
@@ -252,7 +241,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     protected void assertSystemShutdownFail(
             String expectedError, String dbName, String user, String password)
     throws SQLException {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         JDBCDataSource.clearStringBeanProperty(pds, "databaseName");
         JDBCDataSource.setBeanProperty(pds, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(pds, "shutdownDatabase", "shutdown");
@@ -267,7 +256,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     }
 
     public void assertConnectionFail(String dbName) throws SQLException {
-        pds = J2EEDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
         // Reset to no user/password though client requires
         // a valid name, so reset to the default
         if (usingDerbyNetClient())

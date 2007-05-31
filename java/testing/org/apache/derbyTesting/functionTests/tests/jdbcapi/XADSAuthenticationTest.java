@@ -38,8 +38,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 //This class implements the checks for XADataSources
 public class XADSAuthenticationTest extends AuthenticationTest {
     
-    private static XADataSource xads;
-    
     /** Creates a new instance of the Test */
     public XADSAuthenticationTest(String name) {
         super(name);
@@ -93,36 +91,28 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         String dbName, String user, String password)
     throws SQLException 
     {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
-        try {
-            assertNotNull(xads.getXAConnection(user, password));
-        } catch (SQLException sqle) {
-            throw sqle;
-        }
+        xads.getXAConnection(user, password).close();
+
     }
 
     protected void assertConnectionWOUPOK(
             String dbName, String user, String password)
     throws SQLException
     {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(xads, "user", user);
         JDBCDataSource.setBeanProperty(xads, "password", password);
-        try {
-            assertNotNull(xads.getXAConnection());
-        }
-        catch (SQLException e) {
-            throw e;
-        }
+        xads.getXAConnection().close();
     }
     
     protected void assertConnectionFail(
         String expectedSqlState, String dbName, String user, String password)
     throws SQLException
     {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         try {
             xads.getXAConnection(user, password);
@@ -136,7 +126,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password)
     throws SQLException
     {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(xads, "user", user);
         JDBCDataSource.setBeanProperty(xads, "password", password);
@@ -151,7 +141,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     
     protected void assertShutdownUsingSetShutdownOK(
             String dbName, String user, String password) throws SQLException {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(
             xads, "shutdownDatabase", "shutdown");
@@ -166,7 +156,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
 
     protected void assertShutdownUsingConnAttrsOK(
         String dbName, String user, String password) throws SQLException {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(
             xads, "connectionAttributes", "shutdown=true");
         try {
@@ -181,7 +171,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     protected void assertShutdownWOUPOK(
         String dbName, String user, String password)
     throws SQLException {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(
                 xads, "shutdownDatabase", "shutdown");
@@ -200,7 +190,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(xads, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         try {
@@ -215,7 +205,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException
     {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(xads, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(xads, "user", user);
@@ -231,7 +221,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     protected void assertSystemShutdownOK(
         String dbName, String user, String password)
     throws SQLException {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(
                 xads, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
@@ -249,7 +239,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     protected void assertSystemShutdownFail(
         String expectedError, String dbName, String user, String password)
     throws SQLException {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(
                 xads, "shutdownDatabase", "shutdown");
         JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
@@ -264,7 +254,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     }
 
     public void assertConnectionFail(String dbName) throws SQLException {
-        xads = J2EEDataSource.getXADataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
         // Reset to no user/password though client requires
         // a valid name, so reset to the default
         if (usingDerbyNetClient())

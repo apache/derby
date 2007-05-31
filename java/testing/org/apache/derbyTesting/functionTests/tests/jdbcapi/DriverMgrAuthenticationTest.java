@@ -93,12 +93,7 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
     throws SQLException
     {
         String url = TestConfiguration.getCurrent().getJDBCUrl(dbName);
-        try {
-            assertNotNull(DriverManager.getConnection(url, user, password));
-        }
-        catch (SQLException e) {
-                throw e;
-        }
+        DriverManager.getConnection(url, user, password).close();
     }
 
     // getConnection(), using url connection attributes
@@ -108,12 +103,7 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
     {
         String url = TestConfiguration.getCurrent().getJDBCUrl(dbName);
         String url2 = url + ";user=" + user + ";password=" + password;
-        try {
-            assertNotNull(DriverManager.getConnection(url2));
-        }
-        catch (SQLException e) {
-                throw e;
-        }
+        DriverManager.getConnection(url2).close();
     }
 
     protected void assertConnectionFail(
