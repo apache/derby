@@ -207,10 +207,21 @@ public void testDefaultCollation() throws SQLException {
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
       		new String[][] {{"Acorn"}});   
 
+      //Do some testing with CHAR/VARCHAR functions
+      s.executeUpdate("set schema SYS");
+      checkLangBasedQuery(s, "SELECT CHAR(ID) FROM APP.CUSTOMER WHERE " +
+      		" CHAR(ID)='0'", new String[] [] {{"0"}});
+      
+      s.executeUpdate("set schema APP");
+      checkLangBasedQuery(s, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
+    		" FROM xmlTable, SYS.SYSTABLES WHERE " + 
+			" XMLSERIALIZE(x as CHAR(10)) = TABLENAME",
+      		null);
       //Start of parameter testing
       //Start with simple ? param in a string comparison
       //Since all schemas (ie user and system) have the same collation, the 
       //following test won't fail.
+      s.executeUpdate("set schema APP");
       ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
       		" ? = TABLENAME");
       ps.setString(1, "SYSCOLUMNS");
@@ -575,12 +586,47 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
 			" 'SYSCOLUMNS'",
     		new String[][] {{"SYSCOLUMNS"} });   
 
+    //Do some testing with CHAR/VARCHAR functions
+    s.executeUpdate("set schema SYS");
+    //Following will work because both operands are = have the collation type
+    //of UCS_BASIC
+    checkLangBasedQuery(s, "SELECT CHAR(ID) FROM APP.CUSTOMER WHERE " +
+    		" CHAR(ID)='0'", new String[] [] {{"0"}});
+    //Derby does not allow VARCHAR function on numeric columns and hence 
+    //this VARCHAR test looks little different than the CHAR test above.
+    checkLangBasedQuery(s, "SELECT ID FROM APP.CUSTOMER WHERE " +
+    		" VARCHAR(NAME)='Smith'", new String[] [] {{"0"}});
+    //Now try a negative test
+    s.executeUpdate("set schema APP");
+    //following will fail because CHAR(TABLENAME)= TABLENAME is causing compare
+    //between 2 character string types with different collation types. The lhs
+    //operand has collation of territory based but rhs operand has collation of
+    //UCS_BASIC
+    assertStatementError("42818", s, "SELECT CHAR(TABLENAME) FROM " +
+    		" SYS.SYSTABLES WHERE CHAR(TABLENAME)= TABLENAME AND " + 
+			" VARCHAR(TABLENAME) = 'SYSCOLUMNS'");
+    //To resolve the problem above, we need to use CAST around TABLENAME
+    checkLangBasedQuery(s, "SELECT CHAR(TABLENAME) FROM SYS.SYSTABLES WHERE " +
+    		" CHAR(TABLENAME)= (CAST (TABLENAME AS CHAR(12))) AND " + 
+			" VARCHAR(TABLENAME) = 'SYSCOLUMNS'",
+    		new String[][] {{"SYSCOLUMNS"} });  
+    
+    s.executeUpdate("set schema APP");
+    assertStatementError("42818", s, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
+    		" FROM xmlTable, SYS.SYSTABLES WHERE " + 
+			" XMLSERIALIZE(x as CHAR(10)) = TABLENAME");
+    checkLangBasedQuery(s, "SELECT XMLSERIALIZE(x as CHAR(10)) FROM " +
+    		" xmlTable, SYS.SYSTABLES WHERE XMLSERIALIZE(x as CHAR(10)) = " + 
+			" CAST(TABLENAME AS CHAR(10))",
+    		null);
+
     //Start of parameter testing
     //Start with simple ? param in a string comparison
     //Won't work in territory based database because in ? = TABLENAME,
     //? will get the collation of the current schema which is a user
     //schema and hence the collation type of ? is territory based.
     //But the collation of TABLENAME is UCS_BASIC
+    s.executeUpdate("set schema APP");
     checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" ? = TABLENAME", "42818");
     //To fix the problem above, we need to CAST TABLENAME so that the result 
@@ -703,6 +749,9 @@ private void setUpTable(Statement s) throws SQLException {
             ps.executeUpdate();
     }
 
+    s.execute("create table xmlTable (x xml)");
+    s.executeUpdate("insert into xmlTable values(null)");
+    
     conn.commit();
     ps.close();
 }

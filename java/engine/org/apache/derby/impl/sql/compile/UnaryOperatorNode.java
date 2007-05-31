@@ -444,6 +444,13 @@ public class UnaryOperatorNode extends ValueNode
         // The result type of XMLSerialize() is always a string; which
         // kind of string is determined by the targetType field.
         setType(targetType);
+		//Set the collation type to be same as the current schema's 
+		//collation type. 
+		getTypeServices().setCollationType(
+				getLanguageConnectionContext().getDefaultSchema().getCollationType());
+		//Set the collation derivation to be "IMPLICIT".
+		getTypeServices().setCollationDerivation(
+				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
     }
 
 	/**
