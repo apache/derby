@@ -435,6 +435,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
                 "derby.database.requireAuthentication","true", conn1);
         conn1.commit();
         
+        
         PreparedStatement psGetAccess = conn1.prepareStatement(
                 "VALUES SYSCS_UTIL.SYSCS_GET_USER_ACCESS(?)");
         psGetAccess.setString(1, "jamie");
@@ -455,11 +456,82 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // unknown user
         psGetAccess.setString(1, "hagrid");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "NOACCESS");
+        
+        conn1.commit();
+        
+        // now add/switch some names using the utility method
+        CallableStatement csSetAccess = conn1.prepareCall(
+            "CALL SYSCS_UTIL.SYSCS_SET_USER_ACCESS(?, ?)");
+        
+        // Change AMES, everyone else is unchanged
+        csSetAccess.setString(1, "AMES");
+        csSetAccess.setString(2, "FULLACCESS");
+        csSetAccess.execute();
+        
+        psGetAccess.setString(1, "AMES");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
+        
+        psGetAccess.setString(1, "miCKEY");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
+        psGetAccess.setString(1, "jamie");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");       
+        psGetAccess.setString(1, "DAN");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");        
+        psGetAccess.setString(1, "system");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
 
+        // and change AMES back again
+        csSetAccess.setString(1, "AMES");
+        csSetAccess.setString(2, "READONLYACCESS");
+        csSetAccess.execute();
+        
+        psGetAccess.setString(1, "AMES");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
+        
+        psGetAccess.setString(1, "miCKEY");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
+        psGetAccess.setString(1, "jamie");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");       
+        psGetAccess.setString(1, "DAN");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");        
+        psGetAccess.setString(1, "system");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
+
+        // add a new users in
+        csSetAccess.setString(1, "BOND");
+        csSetAccess.setString(2, "FULLACCESS");
+        csSetAccess.execute(); 
+        csSetAccess.setString(1, "JAMES");
+        csSetAccess.setString(2, "READONLYACCESS");
+        csSetAccess.execute();
+        conn1.commit();
+        
+        psGetAccess.setString(1, "BOND");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
+        psGetAccess.setString(1, "JAMES");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
+        conn1.commit();
+        
+        // and remove them
+        csSetAccess.setString(1, "BOND");
+        csSetAccess.setString(2, null);
+        csSetAccess.execute(); 
+        csSetAccess.setString(1, "JAMES");
+        csSetAccess.setString(2, null);
+        csSetAccess.execute(); 
+        conn1.commit();
+        
+        psGetAccess.setString(1, "BOND");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "NOACCESS");
+        psGetAccess.setString(1, "JAMES");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "NOACCESS");
+        conn1.commit();
+         
+        
         psGetAccess.close();
+        csSetAccess.close();
         
-        
-
+  
         // we should still be connected as dan
         Statement stmt = conn1.createStatement();
         assertUpdateCount(stmt, 0, 

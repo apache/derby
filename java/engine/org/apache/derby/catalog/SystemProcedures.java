@@ -1557,10 +1557,60 @@ public class SystemProcedures  {
         throws SQLException
     {
         try {
-            String sqlUser = IdUtil.getUserAuthorizationId(userName);
-
+            // Validate the name, however the name stored in 
+            // the properties is in the external format, as a
+            // quoted identifier if required. The external form
+            // is what the user passes into this method so that
+            // gets used in modifying the lists.
+            IdUtil.getUserAuthorizationId(userName);
+            
+            String addListProperty;
+            if (Property.FULL_ACCESS.equals(connectionPermission))
+            {
+                removeFromAccessList(Property.READ_ONLY_ACCESS_USERS_PROPERTY,
+                        userName);
+                addListProperty = Property.FULL_ACCESS_USERS_PROPERTY;
+            }
+            else if (Property.READ_ONLY_ACCESS.equals(connectionPermission))
+            {
+                removeFromAccessList(Property.FULL_ACCESS_USERS_PROPERTY,
+                        userName);                
+                addListProperty = Property.READ_ONLY_ACCESS_USERS_PROPERTY;
+            }
+            else if (connectionPermission == null)
+            {
+                removeFromAccessList(Property.FULL_ACCESS_USERS_PROPERTY,
+                        userName);
+                removeFromAccessList(Property.READ_ONLY_ACCESS_USERS_PROPERTY,
+                        userName);
+                return;
+            }
+            else
+                throw StandardException.newException(SQLState.UU_UNKNOWN_PERMISSION,
+                        connectionPermission);
+            
+            String addList = SYSCS_GET_DATABASE_PROPERTY(addListProperty);
+            SYSCS_SET_DATABASE_PROPERTY(addListProperty,
+                IdUtil.appendId(userName, addList));
+            
         } catch (StandardException se) {
             throw PublicAPI.wrapStandardException(se);
+        }
+    }
+  
+    /**
+     * Utility method for SYSCS_SET_USER_ACCESS removes a user from
+     * one of the access lists, driven by the property name.
+     */
+    private static void removeFromAccessList(
+            String listProperty, String userName)
+        throws SQLException, StandardException
+    {
+        String removeList = SYSCS_GET_DATABASE_PROPERTY(listProperty);
+        if (removeList != null)
+        {
+            SYSCS_SET_DATABASE_PROPERTY(listProperty,
+                    IdUtil.deleteId(userName, removeList));
         }
     }
     
