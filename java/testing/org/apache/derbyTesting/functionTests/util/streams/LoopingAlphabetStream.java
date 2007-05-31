@@ -95,7 +95,7 @@ public class LoopingAlphabetStream
             return SPACE;
         }
         remainingNonBlanks--;
-        return alphabet.nextByte();
+        return (alphabet.nextByte() & 0xff);
     }
 
     public int read(byte[] buf, int off, int length) {
