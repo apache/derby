@@ -1638,7 +1638,7 @@ public class CollationTest2 extends BaseJDBCTestCase
           {"ekstrabetaling"}, 
           {"ekstraarbeid"}, 
           {"Wanvik"}, 
-          {"Wågan"},
+          {"W\u00E5gan"},
           {"Waagan"}, 
           {"W\u00E5han"}
         },
@@ -1656,7 +1656,7 @@ public class CollationTest2 extends BaseJDBCTestCase
           {"ekstra\u00ADarbeid"}, 
           {"ekstrabetaling"}, 
           {"Wanvik"}, 
-          {"Wågan"},
+          {"W\u00E5gan"},
           {"Waagan"}, 
           {"W\u00E5han"}
         },
@@ -1706,7 +1706,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         Statement s = conn.createStatement();
 
         String[] rows = 
-            { "Waagan", "W\u00E5han", "Wanvik", "Wågan", "ekstrabetaling", 
+            { "Waagan", "W\u00E5han", "Wanvik", "W\u00E5gan", "ekstrabetaling",
               "ekstraarbeid", "ekstra\u00ADarbeid", "\u00ADa", "a", "\u00ADb", 
               "b", "-a", "-b", " a", " b", "A", "B", "C" 
             };
