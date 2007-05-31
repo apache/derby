@@ -72,7 +72,6 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 {
     private final static String MESSAGE_DIGEST = "MD5";
 
-	private final static String DEFAULT_PROVIDER = "com.sun.crypto.provider.SunJCE";
 	private final static String DEFAULT_ALGORITHM = "DES/CBC/NoPadding";
 	private final static String DES = "DES";
 	private final static String DESede = "DESede";
@@ -423,28 +422,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 
         cryptoProvider = properties.getProperty(Attribute.CRYPTO_PROVIDER);
 
-		if (cryptoProvider == null)
-		{
-			// JDK 1.3 does not create providers by itself.
-			if (JVMInfo.JDK_ID == JVMInfo.J2SE_13) {
-
-				String vendor;
-				try {
-					vendor = System.getProperty("java.vendor", "");
-				} catch (SecurityException se) {
-					vendor = "";
-				}
-
-				vendor = StringUtil.SQLToUpperCase(vendor);
-
-				if (vendor.startsWith("IBM "))
-					cryptoProvider = "com.ibm.crypto.provider.IBMJCE";
-				else if (vendor.startsWith("SUN "))
-					cryptoProvider = "com.sun.crypto.provider.SunJCE";
-
-			}
-		}
-		else
+		if (cryptoProvider != null)
 		{
             provider_or_algo_specified = true;
 
