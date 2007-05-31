@@ -92,6 +92,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         test = new AuthenticationTest("testNotFullAccessUsers");
         setBaseProps(suite, test);
         
+        test = new AuthenticationTest("testUserAccessRoutines");
+        setBaseProps(suite, test);
+        
         test = new AuthenticationTest(
             "testChangePasswordAndDatabasePropertiesOnly");
         setBaseProps(suite, test);
@@ -591,6 +594,57 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         conn1.commit();
         stmt.close();
         conn1.close();
+    }
+    
+    /**
+     * Test the procedure and function that provide short-cuts
+     * to setting and getting connection level access.
+     * @throws SQLException
+     */
+    public void testUserAccessRoutines() throws SQLException
+    {
+        // use valid user/pwd to set the full accessusers.
+        Connection conn1 = openDefaultConnection(
+            "dan", ("dan" + PASSWORD_SUFFIX));
+        
+        PreparedStatement psGetAccess = conn1.prepareStatement(
+            "VALUES SYSCS_UTIL.SYSCS_GET_USER_ACCESS(?)");
+        CallableStatement csSetAccess = conn1.prepareCall(
+            "CALL SYSCS_UTIL.SYSCS_SET_USER_ACCESS(?, ?)"); 
+        
+        // Clear out the properties to ensure we start afresh
+        setDatabaseProperty("derby.database.fullAccessUsers", 
+                null, conn1);
+        setDatabaseProperty("derby.database.readOnlyAccessUsers", 
+                null, conn1);
+        
+        csSetAccess.setString(1, "dan");
+        csSetAccess.setString(2, "FULLACCESS");
+
+        // Random user will now have only READONLYACCESS
+        setDatabaseProperty(
+                "derby.database.defaultConnectionMode","READONLYACCESS", conn1);       
+        conn1.commit();             
+        psGetAccess.setString(1, "TONYBLAIR");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
+        conn1.commit();
+
+        // Random user will now have FULLACCESS
+        setDatabaseProperty(
+                "derby.database.defaultConnectionMode","FULLACCESS", conn1);       
+        conn1.commit();             
+        psGetAccess.setString(1, "TONYBLAIR");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
+        conn1.commit();
+        
+        // and still full access
+        setDatabaseProperty(
+                "derby.database.defaultConnectionMode", null, conn1);       
+        conn1.commit();             
+        psGetAccess.setString(1, "TONYBLAIR");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
+        conn1.commit();
+           
     }
     
     public void testGreekCharacters() throws SQLException {

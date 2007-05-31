@@ -1638,6 +1638,8 @@ public class SystemProcedures  {
                 SYSCS_GET_DATABASE_PROPERTY(Property.DEFAULT_CONNECTION_MODE_PROPERTY);
             if (defaultAccess != null)
                 defaultAccess = StringUtil.SQLToUpperCase(defaultAccess);
+            else
+                defaultAccess = Property.FULL_ACCESS; // is the default.
             
             return defaultAccess;
             
