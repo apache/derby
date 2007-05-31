@@ -24,6 +24,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Run the full upgrade suite. This is the only
@@ -125,6 +126,10 @@ public class _Suite extends BaseTestCase {
         TestSuite suite = new TestSuite("Upgrade Suite");       
 
         for (int i = 0; i < OLD_VERSIONS.length; i++) {
+            // JSR169 support was only added with 10.1, so don't
+            // run 10.0 to later upgrade if that's what our jvm is supporting.
+            if (!(JDBC.vmSupportsJSR169() && 
+                (OLD_VERSIONS[i][0]==10) && (OLD_VERSIONS[i][1]==0))); 
             suite.addTest(UpgradeRun.suite(OLD_VERSIONS[i]));
         }
         
