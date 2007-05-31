@@ -35,7 +35,7 @@ import java.io.UnsupportedEncodingException;
  *     <li><em>Norwegian/Danish, lowercase</em> ; letters a - z, plus three
  *         additional letters (29)
  *     <li><em>Tamil</em> ; 46 Tamil letters from UNICODE U0B80
- *     <li><em>CJK subset</em> ; 12 letter from UNICODE CJK U4E00 
+ *     <li><em>CJK subset</em> ; 12 letter from UNICODE CJK U4E00
  * </ul>
  */
 public class ByteAlphabet {
@@ -180,9 +180,9 @@ public class ByteAlphabet {
         if (boff >= byteCount) {
             boff = 0;
         }
-        return bytes[boff++]; 
+        return bytes[boff++];
     }
-    
+
     /**
      * Reset the alphabet, the next byte returned is the first byte in the
      * alphabet, which might not be a complete character.
@@ -193,7 +193,7 @@ public class ByteAlphabet {
 
     /**
      * Compute the next byte to read after reading the specified number
-     * of bytes. 
+     * of bytes.
      *
      * Besides from returning the index, the internal state of
      * the alphabet is updated.

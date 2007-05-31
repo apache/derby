@@ -40,7 +40,7 @@ public class LoopingAlphabetStream
 
     /** Length of the stream. */
     private final long length;
-    private final int trailingBlanks; 
+    private final int trailingBlanks;
     /** Remaining bytes in the stream. */
     private long remainingBlanks;
     private long remainingNonBlanks;
