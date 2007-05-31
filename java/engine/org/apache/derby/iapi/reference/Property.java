@@ -629,17 +629,27 @@ public interface Property {
 	public static final String
 	SQL_AUTHORIZATION_PROPERTY = "derby.database.sqlAuthorization";
 
+    /**
+     * Default connection level authorization, set to
+     * one of NO_ACCESS, READ_ONLY_ACCESS or FULL_ACCESS.
+     * Defaults to FULL_ACCESS if not set.
+     */
 	public static final String
 	DEFAULT_CONNECTION_MODE_PROPERTY = "derby.database.defaultConnectionMode";
 
-	public static final String NO_ACCESS = "noAccess";
-	public static final String READ_ONLY_ACCESS = "readOnlyAccess";
-	public static final String FULL_ACCESS = "fullAccess";
-	public static final String DEFAULT_ACCESS = FULL_ACCESS;
+	public static final String NO_ACCESS = "NOACCESS";
+	public static final String READ_ONLY_ACCESS = "READONLYACCESS";
+	public static final String FULL_ACCESS = "FULLACCESS";
 
+    /**
+     * List of users with read-only connection level authorization.
+     */
 	public static final String
 	READ_ONLY_ACCESS_USERS_PROPERTY = "derby.database.readOnlyAccessUsers";
 
+    /**
+     * List of users with full access connection level authorization.
+     */
 	public static final String
 	FULL_ACCESS_USERS_PROPERTY = "derby.database.fullAccessUsers";
 

@@ -87,25 +87,6 @@ public final class PropertyInfo
 	}
 
 	/**
-		Fetch the value of a property of the database on the current connection.
-
-		@param key the property key
-
-		@return the value of the property or null if the property is not set.
-
-		@exception SQLException on error
-	*/
-	public static String getDatabaseProperty(String key) throws SQLException {
-		LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-
-		try {
-			return PropertyUtil.getDatabaseProperty(lcc.getTransactionExecute(), key);
-		} catch (StandardException se) {
-			throw PublicAPI.wrapStandardException(se);
-		}
-	}
-
-	/**
 		Set or delete the value of a property of the database on the current connection.
 
 		@param key the property key

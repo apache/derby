@@ -37,11 +37,14 @@ import org.apache.derby.iapi.db.Factory;
 import org.apache.derby.iapi.db.PropertyInfo;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.load.Export;
@@ -679,7 +682,13 @@ public class SystemProcedures  {
     String  key)
         throws SQLException
     {
-        return(PropertyInfo.getDatabaseProperty(key));
+        LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+
+        try {
+            return PropertyUtil.getDatabaseProperty(lcc.getTransactionExecute(), key);
+        } catch (StandardException se) {
+            throw PublicAPI.wrapStandardException(se);
+        }
     }
 
     /**
@@ -1537,5 +1546,54 @@ public class SystemProcedures  {
 	{
 		return (new Random(seed)).nextDouble();
 	}
+    
+    /**
+     * Set the connection level authorization for
+     * a specific user - SYSCS_UTIL.SYSCS_SET_USER_ACCESS.
+     * @throws SQLException Error setting the permission
+     */
+    public static void SYSCS_SET_USER_ACCESS(String userName,
+            String connectionPermission)
+        throws SQLException
+    {
+        try {
+            String sqlUser = IdUtil.getUserAuthorizationId(userName);
+
+        } catch (StandardException se) {
+            throw PublicAPI.wrapStandardException(se);
+        }
+    }
+    
+    /**
+     * Get the connection level authorization for
+     * a specific user - SYSCS_UTIL.SYSCS_GET_USER_ACCESS.
+     */
+    public static String SYSCS_GET_USER_ACCESS(String userName)
+        throws SQLException
+    {
+        try {
+            String sqlUser = IdUtil.getUserAuthorizationId(userName);
+            
+            String fullUserList =
+                SYSCS_GET_DATABASE_PROPERTY(Property.FULL_ACCESS_USERS_PROPERTY);
+            if (IdUtil.idOnList(sqlUser, fullUserList))
+                return Property.FULL_ACCESS;
+            
+            String readOnlyUserList =
+                SYSCS_GET_DATABASE_PROPERTY(Property.READ_ONLY_ACCESS_USERS_PROPERTY);
+            if (IdUtil.idOnList(sqlUser, readOnlyUserList))
+                return Property.READ_ONLY_ACCESS;
+            
+            String defaultAccess = 
+                SYSCS_GET_DATABASE_PROPERTY(Property.DEFAULT_CONNECTION_MODE_PROPERTY);
+            if (defaultAccess != null)
+                defaultAccess = StringUtil.SQLToUpperCase(defaultAccess);
+            
+            return defaultAccess;
+            
+        } catch (StandardException se) {
+            throw PublicAPI.wrapStandardException(se);
+        }
+    }
 
 }

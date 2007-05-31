@@ -25,6 +25,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import java.security.AccessController;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -433,6 +434,31 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         setDatabaseProperty(
                 "derby.database.requireAuthentication","true", conn1);
         conn1.commit();
+        
+        PreparedStatement psGetAccess = conn1.prepareStatement(
+                "VALUES SYSCS_UTIL.SYSCS_GET_USER_ACCESS(?)");
+        psGetAccess.setString(1, "jamie");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
+        
+        psGetAccess.setString(1, "DAN");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
+        
+        psGetAccess.setString(1, "system");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
+        
+        psGetAccess.setString(1, "AMES");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
+        
+        psGetAccess.setString(1, "mickEy");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
+
+        // unknown user
+        psGetAccess.setString(1, "hagrid");
+        JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "NOACCESS");
+
+        psGetAccess.close();
+        
+        
 
         // we should still be connected as dan
         Statement stmt = conn1.createStatement();
