@@ -31,6 +31,8 @@ import javax.sql.DataSource;
 
 import junit.framework.Test;
 
+import org.apache.derbyTesting.junit.XML;
+//import org.apache.derby.iapi.types.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -213,10 +215,11 @@ public void testDefaultCollation() throws SQLException {
       		" CHAR(ID)='0'", new String[] [] {{"0"}});
       
       s.executeUpdate("set schema APP");
-      checkLangBasedQuery(s, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
-    		" FROM xmlTable, SYS.SYSTABLES WHERE " + 
-			" XMLSERIALIZE(x as CHAR(10)) = TABLENAME",
-      		null);
+      if (XML.classpathMeetsXMLReqs())
+      	checkLangBasedQuery(s, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
+      			" FROM xmlTable, SYS.SYSTABLES WHERE " +
+				" XMLSERIALIZE(x as CHAR(10)) = TABLENAME",
+				null);
       //Start of parameter testing
       //Start with simple ? param in a string comparison
       //Since all schemas (ie user and system) have the same collation, the 
@@ -612,13 +615,16 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     		new String[][] {{"SYSCOLUMNS"} });  
     
     s.executeUpdate("set schema APP");
-    assertStatementError("42818", s, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
-    		" FROM xmlTable, SYS.SYSTABLES WHERE " + 
-			" XMLSERIALIZE(x as CHAR(10)) = TABLENAME");
-    checkLangBasedQuery(s, "SELECT XMLSERIALIZE(x as CHAR(10)) FROM " +
-    		" xmlTable, SYS.SYSTABLES WHERE XMLSERIALIZE(x as CHAR(10)) = " + 
-			" CAST(TABLENAME AS CHAR(10))",
-    		null);
+    if (XML.classpathMeetsXMLReqs()) {
+        assertStatementError("42818", s, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
+        		" FROM xmlTable, SYS.SYSTABLES WHERE " + 
+    			" XMLSERIALIZE(x as CHAR(10)) = TABLENAME");
+        checkLangBasedQuery(s, "SELECT XMLSERIALIZE(x as CHAR(10)) FROM " +
+        		" xmlTable, SYS.SYSTABLES WHERE XMLSERIALIZE(x as CHAR(10)) = " + 
+    			" CAST(TABLENAME AS CHAR(10))",
+        		null);
+    }
+
 
     //Start of parameter testing
     //Start with simple ? param in a string comparison
