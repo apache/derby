@@ -55,7 +55,6 @@ lang/renameTable.sql
 lang/reopenScan.sql
 lang/setOpPlan.sql
 lang/specjPlans.sql
-lang/SpillHash.java
 lang/subquery.sql
 lang/subquery2.sql
 lang/subqueryFlattening.sql
