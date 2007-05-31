@@ -109,7 +109,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 			throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, javaClassName + "::" + fieldName);
 		}
 
-		javaClassName = verifyClassExist(javaClassName, ! classNameDelimitedIdentifier);
+		verifyClassExist(javaClassName);
 
 		/*
 		** Find the field that is public.

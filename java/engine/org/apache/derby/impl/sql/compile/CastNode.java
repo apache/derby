@@ -376,11 +376,9 @@ public class CastNode extends ValueNode
 		*/
 		if (destCTI.userType())
 		{
-			String className = ((TypeId) dataTypeServices.getTypeId()).getCorrespondingJavaTypeName();
+			String className = dataTypeServices.getTypeId().getCorrespondingJavaTypeName();
 
-			boolean convertCase = ! destCTI.getClassNameWasDelimitedIdentifier();
-
-			className = verifyClassExist(className, convertCase);
+			verifyClassExist(className);
 
 			castTarget = new DataTypeDescriptor(TypeId.getUserDefinedTypeId(className, false),
 														true /* assume nullable for now, change it if not nullable */

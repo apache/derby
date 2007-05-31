@@ -236,7 +236,7 @@ public class StaticMethodCallNode extends MethodCallNode
 		}
 
 
-		javaClassName = verifyClassExist(javaClassName, true);
+		verifyClassExist(javaClassName);
 
 		/* Resolve the method call */
 		resolveMethodCall(javaClassName, true);

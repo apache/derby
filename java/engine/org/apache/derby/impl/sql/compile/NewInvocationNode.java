@@ -253,7 +253,7 @@ public class NewInvocationNode extends MethodCallNode
 	{
 		bindParameters(fromList, subqueryList, aggregateVector);
 
-		javaClassName = verifyClassExist(javaClassName, !delimitedIdentifier);
+		verifyClassExist(javaClassName);
 		/*
 		** Get the parameter type names out of the parameters and put them
 		** in an array.

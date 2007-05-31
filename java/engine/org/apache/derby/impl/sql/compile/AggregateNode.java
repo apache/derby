@@ -423,7 +423,7 @@ public class AggregateNode extends UnaryOperatorNode
 	*/
 	private void checkAggregatorClassName(String className) throws StandardException
 	{
-		className = verifyClassExist(className, false);
+		verifyClassExist(className);
 
 		if (!classInspector.assignableTo(className, "org.apache.derby.iapi.sql.execute.ExecAggregator"))
 		{
@@ -446,7 +446,7 @@ public class AggregateNode extends UnaryOperatorNode
 		if (theClass == null)
 		{
 			String aggClassName = aggregateDefinitionClassName;
-			aggClassName = verifyClassExist(aggClassName, false);
+			verifyClassExist(aggClassName);
 
 			try
 			{

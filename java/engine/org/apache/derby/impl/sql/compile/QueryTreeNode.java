@@ -1436,25 +1436,17 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * 
+	 * Verify that a java class exists, is accessible (public)
+     * and not a class representing a primitive type.
 	 * @param javaClassName	The name of the java class to resolve.
 	 *
-	 * @param convertCase	whether to convert the case before resolving class alias.
-	 *
-	 * @return	Resolved class name or class alias name.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	String verifyClassExist(String javaClassName, boolean convertCase)
+	void verifyClassExist(String javaClassName)
 		throws StandardException
 	{
-		/* Verify that the class exists */
-
 		ClassInspector classInspector = getClassFactory().getClassInspector();
-
-		/* We first try to resolve the javaClassName as a class.  If that
-		 * fails then we try to resolve it as a class alias.
-		 */
 
 		Throwable reason = null;
 		boolean foundMatch = false;
@@ -1472,8 +1464,6 @@ public abstract class QueryTreeNode implements Visitable
 
 		if (ClassInspector.primitiveType(javaClassName))
 			throw StandardException.newException(SQLState.LANG_TYPE_DOESNT_EXIST3, javaClassName);
-
-		return javaClassName;
 	}
 
 	/**
