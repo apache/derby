@@ -336,12 +336,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 				** corresponding column of the target table.
 				*/
 				re.setType(typeCol.getTypeServices());
-				//collation of ? operand should be same as the current schema
-				re.getTypeServices().setCollationDerivation(
+				//collation of ? operand should be same as the compilation schema
+				re.setCollationUsingCompilationSchema(
 						StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-				re.getTypeServices().setCollationType(
-						getLanguageConnectionContext().getDefaultSchema()
-								.getCollationType());
 			}
 			else if (re instanceof CharConstantNode)
 			{

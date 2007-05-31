@@ -532,12 +532,9 @@ public class SubqueryNode extends ValueNode
 		{
 			leftOperand.setType(
 				((ResultColumn) resultColumns.elementAt(0)).getTypeServices());
-			//collation of ? operand should be same as the current schema
-			leftOperand.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			leftOperand.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			leftOperand.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
 		}
 
 		// Set the DataTypeServices

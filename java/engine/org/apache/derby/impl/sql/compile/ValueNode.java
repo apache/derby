@@ -238,6 +238,28 @@ public abstract class ValueNode extends QueryTreeNode
 		// Clear the typeCompiler, just in case type has changed
 		typeCompiler = null;
 	}
+	
+	/**
+	 * There are many subclasses of ValueNode where we want the 
+	 * DataTypeDescriptor of the node to have the same collation type as the 
+	 * compilation schema's collation type. For that purpose, this method in 
+	 * the baseclass here can be utilized by the subclasses. In addition, the
+	 * subclasses can pass the collationDerivation that they expect the
+	 * DataTypeDescriptor to have.
+	 * 
+	 * @param collationDerivation This can be 
+	 * StringDataValue#COLLATION_DERIVATION_IMPLICIT
+	 * StringDataValue#COLLATION_DERIVATION_NONE
+	 * StringDataValue#COLLATION_DERIVATION_EXPLICIT
+	 * 
+	 * @throws StandardException
+	 */
+	protected void setCollationUsingCompilationSchema(int collationDerivation)
+	throws StandardException {
+		dataTypeServices.setCollationType(
+	    	     getSchemaDescriptor(null).getCollationType());
+		dataTypeServices.setCollationDerivation(collationDerivation);
+	}
 
 
 	/**

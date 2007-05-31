@@ -728,12 +728,9 @@ abstract class SetOperatorNode extends TableOperatorNode
 				** type array.
 				*/
 				rc.getExpression().setType(types[index]);
-				//collation of ? operand should be same as the current schema
-				rc.getExpression().getTypeServices().setCollationDerivation(
+				//collation of ? operand should be same as the compilation schema
+				rc.getExpression().setCollationUsingCompilationSchema(
 						StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-				rc.getExpression().getTypeServices().setCollationType(
-						getLanguageConnectionContext().getDefaultSchema()
-								.getCollationType());
 			}
 		}
 	}

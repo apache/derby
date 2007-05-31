@@ -176,14 +176,9 @@ public class CoalesceFunctionNode extends ValueNode
 			if (((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext())
 			{
 				((ValueNode)argumentsList.elementAt(index)).setType(getTypeServices());
-				//collation of ? operand should be same as the current schema
-				((ValueNode)argumentsList.elementAt(index)).getTypeServices()
-				.setCollationDerivation(
+				//collation of ? operand should be same as the compilation schema
+				((ValueNode)argumentsList.elementAt(index)).setCollationUsingCompilationSchema(
 						StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-				((ValueNode)argumentsList.elementAt(index)).getTypeServices()
-				.setCollationType(
-						getLanguageConnectionContext().getDefaultSchema()
-								.getCollationType());
 				break;
 			}
 		}

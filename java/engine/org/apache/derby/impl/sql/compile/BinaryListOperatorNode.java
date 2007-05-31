@@ -162,10 +162,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 			leftOperand.setType(rightOperandList.getTypeServices());
 			//? parameter should pick up the collation type of the schema in
 			//which this statement is getting compiled.
-			leftOperand.getTypeServices().setCollationDerivation(
+			leftOperand.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			leftOperand.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema().getCollationType());
 		}
 
 		/* Is there a ? parameter on the right? */

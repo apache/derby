@@ -446,10 +446,7 @@ public class UnaryOperatorNode extends ValueNode
         setType(targetType);
 		//Set the collation type to be same as the current schema's 
 		//collation type. 
-		getTypeServices().setCollationType(
-				getLanguageConnectionContext().getDefaultSchema().getCollationType());
-		//Set the collation derivation to be "IMPLICIT".
-		getTypeServices().setCollationDerivation(
+        setCollationUsingCompilationSchema(
 				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
     }
 

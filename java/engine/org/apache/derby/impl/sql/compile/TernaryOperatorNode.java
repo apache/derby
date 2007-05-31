@@ -524,12 +524,9 @@ public class TernaryOperatorNode extends ValueNode
 			*/
 	
 			receiver.setType(getVarcharDescriptor());
-			//collation of ? operand should be same as the current schema
-			receiver.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			receiver.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			receiver.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
 		}
 
 		/* Is there a ? parameter on the left? */
@@ -537,12 +534,9 @@ public class TernaryOperatorNode extends ValueNode
 		{
 			/* Set the left operand type to varchar. */
 			leftOperand.setType(getVarcharDescriptor());
-			//collation of ? operand should be same as the current schema
-			leftOperand.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			leftOperand.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			leftOperand.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
 		}
 
 		bindToBuiltIn();
@@ -635,12 +629,9 @@ public class TernaryOperatorNode extends ValueNode
 							         leftOperand.getTypeServices());
 				}
 			}
-			//collation of ? operand should be same as the current schema
-			receiver.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			receiver.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			receiver.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
 		}
 							                            
 		/*
@@ -661,12 +652,9 @@ public class TernaryOperatorNode extends ValueNode
 							         receiver.getTypeServices());
 				}
 			}
-			//collation of ? operand should be same as the current schema
-			leftOperand.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			leftOperand.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			leftOperand.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
 		}
 
 		/*
@@ -676,12 +664,9 @@ public class TernaryOperatorNode extends ValueNode
 		{
 			rightOperand.setType(
 				new DataTypeDescriptor(TypeId.INTEGER_ID, true)); 
-			//collation of ? operand should be same as the current schema
-			rightOperand.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			rightOperand.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			rightOperand.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
 		}
 
 		bindToBuiltIn();
@@ -757,12 +742,9 @@ public class TernaryOperatorNode extends ValueNode
 			*/
 	
 			receiver.setType(getVarcharDescriptor());
-			//collation of ? operand should be same as the current schema
-			receiver.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			receiver.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			receiver.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
 		}
 
 		/* Is there a ? parameter on the left? */
@@ -893,12 +875,9 @@ public class TernaryOperatorNode extends ValueNode
         if( arg.requiresTypeFromContext() && arg.getTypeId() == null)
         {
             arg.setType( new DataTypeDescriptor(TypeId.getBuiltInTypeId( jdbcType), true));
-			//collation of ? operand should be same as the current schema
-			arg.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			arg.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			arg.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
             return true;
         }
         return false;

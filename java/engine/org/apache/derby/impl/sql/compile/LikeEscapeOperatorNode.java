@@ -189,12 +189,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             receiver.setType(
                 new DataTypeDescriptor(
                     TypeId.getBuiltInTypeId(Types.VARCHAR), true));
-			//collation of ? operand should be same as the current schema
-			receiver.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			receiver.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			receiver.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
         }
 
         /* 
@@ -220,12 +217,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     new DataTypeDescriptor(
                         TypeId.getBuiltInTypeId(Types.VARCHAR), true));
             }
-			//collation of ? operand should be same as the current schema
-			leftOperand.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			leftOperand.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			leftOperand.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
         }
 
         /* 
@@ -250,12 +244,9 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     new DataTypeDescriptor(
                         TypeId.getBuiltInTypeId(Types.VARCHAR), true));
             }
-			//collation of ? operand should be same as the current schema
-			rightOperand.getTypeServices().setCollationDerivation(
+			//collation of ? operand should be same as the compilation schema
+			rightOperand.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			rightOperand.getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
         }
 
         bindToBuiltIn();

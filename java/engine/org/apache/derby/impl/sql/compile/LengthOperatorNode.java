@@ -148,12 +148,9 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 
 		operand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(parameterType, true, 
 												parameterWidth));
-		//collation of ? operand should be same as the current schema
-		operand.getTypeServices().setCollationDerivation(
+		//collation of ? operand should be same as the compilation schema
+		operand.setCollationUsingCompilationSchema(
 				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-		operand.getTypeServices().setCollationType(
-				getLanguageConnectionContext().getDefaultSchema()
-						.getCollationType());
 	}
 
 	/**

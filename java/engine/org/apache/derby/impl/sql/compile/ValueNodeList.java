@@ -551,10 +551,8 @@ public class ValueNodeList extends QueryTreeNodeVector
 				valueNode.setType(descriptor);
 				//? parameter should pick up the collation type of the schema in
 				//which this statement is getting compiled.
-				valueNode.getTypeServices().setCollationDerivation(
+				valueNode.setCollationUsingCompilationSchema(
 						StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-				valueNode.getTypeServices().setCollationType(
-						getLanguageConnectionContext().getDefaultSchema().getCollationType());
 			}
 		}
 	}
