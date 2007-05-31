@@ -456,6 +456,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertUserValue(new String[] {"SYSTEM"},"ames", 
             "select * from APP.t1"); // should succeed
         conn1 = openDefaultConnection("ames", ("ames"+PASSWORD_SUFFIX));
+        
+        // DERBY-2738 (network client always returns false for isReadOnly)
+        if (usingEmbedded())
+            assertTrue(conn1.isReadOnly());
         stmt = conn1.createStatement();
         assertStatementError(
             "25502", stmt, "delete from APP.t1 where c1 = 'SYSTEM'");
@@ -465,8 +469,13 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertStatementError("25503", stmt, "create table APP.t2 (c1 int)");
         conn1.commit();
         stmt.close();
+        conn1.close();
+        
         // read-only system level user
         conn1 = openDefaultConnection("mickey", "mouse");
+        // DERBY-2738 (network client always returns false for isReadOnly)
+        if (usingEmbedded())
+            assertTrue(conn1.isReadOnly());
         stmt = conn1.createStatement();
         assertStatementError(
             "25502", stmt, "delete from APP.t1 where c1 = 'SYSTEM'");
