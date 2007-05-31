@@ -237,9 +237,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         } catch (SQLException se) {
             assertSQLState("38000", se);
             se = se.getNextException();
-            // Client does not get chained exceptions
-            if (usingEmbedded())
-                assertSQLState("38001", se);           
+            assertSQLState("38001", se);
         }
         //--- check trigger is not fired.
         rs = s.executeQuery("select * from t1");

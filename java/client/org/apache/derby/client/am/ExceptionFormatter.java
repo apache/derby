@@ -157,7 +157,6 @@ public class ExceptionFormatter {
             printWriter.println(header + " SqlCode        = " + sqlca.getSqlCode());
             printWriter.println(header + " SqlErrd        = " + Utils.getStringFromInts(sqlca.getSqlErrd()));
             printWriter.println(header + " SqlErrmc       = " + sqlca.getSqlErrmc());
-            printWriter.println(header + " SqlErrmcTokens = " + Utils.getStringFromStrings(sqlca.getSqlErrmcTokens()));
             printWriter.println(header + " SqlErrp        = " + sqlca.getSqlErrp());
             printWriter.println(header + " SqlState       = " + sqlca.getSqlState());
             printWriter.println(header + " SqlWarn        = " + new String(sqlca.getSqlWarn()));

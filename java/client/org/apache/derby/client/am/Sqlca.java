@@ -31,8 +31,12 @@ public abstract class Sqlca {
 
     // data corresponding to SQLCA fields
     protected int sqlCode_;        // SQLCODE
-    private String sqlErrmc_;       // A string with all error tokens delimited by sqlErrmcDelimiter
-    protected String[] sqlErrmcTokens_; // A string array with each element
+    /** A string representation of <code>sqlErrmcBytes_</code>. */
+    private String sqlErrmc_;
+    /** Array of errmc strings for each message in the chain. */
+    protected String[] sqlErrmcMessages_;
+    /** SQL states for all the messages in the exception chain. */
+    private String[] sqlStates_;
     // contain an error token
     protected String sqlErrp_;        // function name issuing error
     protected int[] sqlErrd_;        // 6 diagnostic Information
@@ -48,15 +52,20 @@ public abstract class Sqlca {
     protected boolean containsSqlcax_ = true;
     protected long rowsetRowCount_;
 
-    //public static final String sqlErrmcDelimiter = "\u00FF";
-    private static final String sqlErrmcDelimiter__ = ";";
+    /**
+     * Character sequence that separates the different messages in the errmc.
+     * @see org.apache.derby.catalog.SystemProcedures#SQLERRMC_MESSAGE_DELIMITER
+     */
+    private static final String sqlErrmcDelimiter__ = "\u0014\u0014\u0014";
 
     // JDK stack trace calls e.getMessage(), so we must set some state on the sqlca that says return tokens only.
     private boolean returnTokensOnlyInMessageText_ = false;
 
     transient private final Agent agent_;
 
-    private String cachedMessage;
+    /** Cached error messages (to prevent multiple invocations of the stored
+     * procedure to get the same message). */
+    private String[] cachedMessages;
 
     protected Sqlca(org.apache.derby.client.am.Connection connection) {
         connection_ = connection;
@@ -65,6 +74,21 @@ public abstract class Sqlca {
 
     void returnTokensOnlyInMessageText(boolean returnTokensOnlyInMessageText) {
         returnTokensOnlyInMessageText_ = returnTokensOnlyInMessageText;
+    }
+
+    /**
+     * Returns the number of messages this SQLCA contains.
+     *
+     * @return number of messages
+     */
+    synchronized int numberOfMessages() {
+        initSqlErrmcMessages();
+        if (sqlErrmcMessages_ != null) {
+            return sqlErrmcMessages_.length;
+        }
+        // even if we don't have an array of errmc messages, we are able to get
+        // one message out of this sqlca (although it's not very readable)
+        return 1;
     }
 
     synchronized public int getSqlCode() {
@@ -76,19 +100,18 @@ public abstract class Sqlca {
             return sqlErrmc_;
         }
 
-        // sqlErrmc string is dependent on sqlErrmcTokens array having been built
-        if (sqlErrmcTokens_ == null) {
-            getSqlErrmcTokens();
-        }
+        // sqlErrmc string is dependent on sqlErrmcMessages_ array having
+        // been built
+        initSqlErrmcMessages();
 
-        // sqlErrmc will be build only if sqlErrmcTokens has been build.
+        // sqlErrmc will be built only if sqlErrmcMessages_ has been built.
         // Otherwise, a null string will be returned.
-        if (sqlErrmcTokens_ == null) {
+        if (sqlErrmcMessages_ == null) {
             return null;
         }
 
         // create 0-length String if no tokens
-        if (sqlErrmcTokens_.length == 0) {
+        if (sqlErrmcMessages_.length == 0) {
             sqlErrmc_ = "";
             return sqlErrmc_;
         }
@@ -96,26 +119,32 @@ public abstract class Sqlca {
         // concatenate tokens with sqlErrmcDelimiter delimiters into one String
         StringBuffer buffer = new StringBuffer();
         int indx;
-        for (indx = 0; indx < sqlErrmcTokens_.length - 1; indx++) {
-            buffer.append(sqlErrmcTokens_[indx]);
+        for (indx = 0; indx < sqlErrmcMessages_.length - 1; indx++) {
+            buffer.append(sqlErrmcMessages_[indx]);
             buffer.append(sqlErrmcDelimiter__);
+            // all but the first message should be preceded by the SQL state
+            // and a colon (see DRDAConnThread.buildTokenizedSqlerrmc() on the
+            // server)
+            buffer.append(sqlStates_[indx+1]);
+            buffer.append(":");
         }
         // add the last token
-        buffer.append(sqlErrmcTokens_[indx]);
+        buffer.append(sqlErrmcMessages_[indx]);
 
         // save as a string
         sqlErrmc_ = buffer.toString();
         return sqlErrmc_;
     }
 
-    synchronized public String[] getSqlErrmcTokens() {
-        if (sqlErrmcTokens_ != null) {
-            return sqlErrmcTokens_;
+    /**
+     * Initialize and build the arrays <code>sqlErrmcMessages_</code> and
+     * <code>sqlStates_</code>.
+     */
+    private void initSqlErrmcMessages() {
+        if (sqlErrmcMessages_ == null || sqlStates_ == null) {
+            // processSqlErrmcTokens handles null sqlErrmcBytes_ case
+            processSqlErrmcTokens(sqlErrmcBytes_);
         }
-
-        // processSqlErrmcTokens handles null sqlErrmcBytes_ case
-        sqlErrmcTokens_ = processSqlErrmcTokens(sqlErrmcBytes_);
-        return sqlErrmcTokens_;
     }
 
     synchronized public String getSqlErrp() {
@@ -169,15 +198,29 @@ public abstract class Sqlca {
         return sqlState_;
     }
 
+    /**
+     * Get the SQL state for a given error.
+     *
+     * @param messageNumber the error to retrieve SQL state for
+     * @return SQL state for the error
+     */
+    synchronized String getSqlState(int messageNumber) {
+        initSqlErrmcMessages();
+        if (sqlStates_ != null) {
+            return sqlStates_[messageNumber];
+        }
+        return getSqlState();
+    }
+
     // Gets the formatted message, can throw an exception.
-    synchronized public String getMessage() throws SqlException {
+    private String getMessage(int messageNumber) throws SqlException {
         // should this be traced to see if we are calling a stored proc?
-        if (cachedMessage != null) {
-            return cachedMessage;
+        if (cachedMessages != null && cachedMessages[messageNumber] != null) {
+            return cachedMessages[messageNumber];
         }
 
         if (connection_ == null || connection_.isClosedX() || returnTokensOnlyInMessageText_) {
-            return getUnformattedMessage();
+            return getUnformattedMessage(messageNumber);
         }
 
         CallableStatement cs = null;
@@ -185,12 +228,20 @@ public abstract class Sqlca {
             try {
                 cs = connection_.prepareMessageProc("call SYSIBM.SQLCAMESSAGE(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
+                String errmc = null;
+                String sqlState = null;
+
+                if (sqlErrmcMessages_ != null) {
+                    errmc = sqlErrmcMessages_[messageNumber];
+                    sqlState = sqlStates_[messageNumber];
+                }
+
                 // SQLCode: SQL return code.
-                cs.setIntX(1, getSqlCode());
+                cs.setIntX(1, (messageNumber == 0) ? getSqlCode() : 0);
                 // SQLErrml: Length of SQL error message tokens.
-                cs.setShortX(2, (short) ((getSqlErrmc() != null) ? getSqlErrmc().length() : 0));
-                // SQLErrmc: SQL error message tokens as a String (delimited by semicolon ";").
-                cs.setStringX(3, getSqlErrmc());
+                cs.setShortX(2, (short) ((errmc == null) ? 0 : errmc.length()));
+                // SQLErrmc: SQL error message tokens as a String
+                cs.setStringX(3, errmc);
                 // SQLErrp: Product signature.
                 cs.setStringX(4, getSqlErrp());
                 // SQLErrd: SQL internal error code.
@@ -203,7 +254,7 @@ public abstract class Sqlca {
                 // SQLWarn: SQL warning flags.
                 cs.setStringX(11, new String(getSqlWarn()));
                 // SQLState: standard SQL state.
-                cs.setStringX(12, getSqlState());
+                cs.setStringX(12, sqlState);
                 // MessageFileName: Not used by our driver, so set to null.
                 cs.setStringX(13, null);
                 // Locale: language preference requested for the return error message.
@@ -220,12 +271,15 @@ public abstract class Sqlca {
                     // Return the message text.
                     messageTextRetrievedContainsTokensOnly_ = false;
                     String message = cs.getStringX(15);
-                    cachedMessage = message;
+                    if (cachedMessages == null) {
+                        cachedMessages = new String[numberOfMessages()];
+                    }
+                    cachedMessages[messageNumber] = message;
                     return message;
                 } else {
                     // Stored procedure can't return a valid message text, so we return
                     // unformated exception
-                    return getUnformattedMessage();
+                    return getUnformattedMessage(messageNumber);
                 }
             } finally {
                 if (cs != null) {
@@ -239,24 +293,46 @@ public abstract class Sqlca {
     }
 
     // May or may not get the formatted message depending upon datasource directives.  cannot throw exeption.
-    public synchronized String getJDBCMessage() {
+    synchronized String getJDBCMessage(int messageNumber) {
         // The transient connection_ member will only be null if the Sqlca has been deserialized
         if (connection_ != null && connection_.retrieveMessageText_) {
             try {
-                return getMessage();
+                return getMessage(messageNumber);
             } catch (SqlException e) {
                 // Invocation of stored procedure fails, so we return error message tokens directly.
                 exceptionThrownOnStoredProcInvocation_ = e;
                 chainDeferredExceptionsToAgentOrAsConnectionWarnings((SqlException) e);
-                return getUnformattedMessage();
+                return getUnformattedMessage(messageNumber);
             }
         } else {
-            return getUnformattedMessage();
+            return getUnformattedMessage(messageNumber);
         }
     }
 
-    private String getUnformattedMessage() {
-        return "DERBY SQL error: SQLCODE: " + getSqlCode() + ", SQLSTATE: " + getSqlState() + ", SQLERRMC: " + getSqlErrmc();
+    /**
+     * Get the unformatted message text (in case we cannot ask the server).
+     *
+     * @param messageNumber which message number to get the text for
+     * @return string with details about the error
+     */
+    private String getUnformattedMessage(int messageNumber) {
+        int sqlCode;
+        String sqlState;
+        String sqlErrmc;
+        if (messageNumber == 0) {
+            // if the first exception in the chain is requested, return all the
+            // information we have
+            sqlCode = getSqlCode();
+            sqlState = getSqlState();
+            sqlErrmc = getSqlErrmc();
+        } else {
+            // otherwise, return information about the specified error only
+            sqlCode = 0;
+            sqlState = sqlStates_[messageNumber];
+            sqlErrmc = sqlErrmcMessages_[messageNumber];
+        }
+        return "DERBY SQL error: SQLCODE: " + sqlCode + ", SQLSTATE: " +
+            sqlState + ", SQLERRMC: " + sqlErrmc;
     }
 
     private void chainDeferredExceptionsToAgentOrAsConnectionWarnings(SqlException e) {
@@ -291,68 +367,36 @@ public abstract class Sqlca {
     }
     // ------------------- helper methods ----------------------------------------
 
-    private String[] processSqlErrmcTokens(byte[] tokenBytes) {
+    private void processSqlErrmcTokens(byte[] tokenBytes) {
         if (tokenBytes == null) {
-            return null;
+            return;
         }
 
         // create 0-length String tokens array if tokenBytes is 0-length
         int length = tokenBytes.length;
         if (length == 0) {
-            return new String[0];
+            sqlStates_ = sqlErrmcMessages_ = new String[0];
+            return;
         }
 
         try {
             // tokenize and convert tokenBytes
-            java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
-            java.util.LinkedList tokens = new java.util.LinkedList();
-
-            // parse the error message tokens
-            for (int index = 0; index < length - 1; index++) {
-
-                // non-delimiter - continue to write into buffer
-                if (tokenBytes[index] != -1)  // -1 is the delimiter '\xFF'
-                {
-                    buffer.write(tokenBytes[index]);
-                }
-
-                // delimiter - convert current token and add to list
-                else {
-                    tokens.add(bytes2String(buffer.toByteArray(), 0, buffer.size()));
-                    buffer.reset();
-                }
+            String fullString = bytes2String(tokenBytes, 0, length);
+            String[] tokens = fullString.split("\\u0014{3}");
+            String[] states = new String[tokens.length];
+            states[0] = getSqlState();
+            for (int i = 1; i < tokens.length; i++) {
+                // All but the first message are preceded by the SQL state
+                // (five characters) and a colon. Extract the SQL state and
+                // clean up the token. See
+                // DRDAConnThread.buildTokenizedSqlerrmc() for more details.
+                states[i] = tokens[i].substring(0, 5);
+                tokens[i] = tokens[i].substring(6);
             }
-
-            int lastIndex = length - 1;
-            // check for last byte not being a delimiter, i.e. part of last token
-            if (tokenBytes[lastIndex] != -1) {
-                // write the last byte
-                buffer.write(tokenBytes[lastIndex]);
-                // convert the last token and add to list
-                tokens.add(bytes2String(buffer.toByteArray(), 0, buffer.size()));
-            }
-
-            // last byte is delimiter implying an empty String for last token
-            else {
-                // convert current token, if one exists, and add to list
-                if (lastIndex != 0) {
-                    tokens.add(bytes2String(buffer.toByteArray(), 0, buffer.size()));
-                }
-                // last token is an empty String
-                tokens.add("");
-            }
-
-            // create the String array and fill it with tokens.
-            String[] tokenStrings = new String[tokens.size()];
-
-            java.util.Iterator iterator = tokens.iterator();
-            for (int i = 0; iterator.hasNext(); i++) {
-                tokenStrings[i] = (String) iterator.next();
-            }
-
-            return tokenStrings;
+            sqlStates_ = states;
+            sqlErrmcMessages_ = tokens;
         } catch (java.io.UnsupportedEncodingException e) {
-            return null;
+            /* do nothing, the arrays continue to be null */
         }
     }
 

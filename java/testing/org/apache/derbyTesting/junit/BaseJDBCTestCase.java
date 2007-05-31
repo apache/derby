@@ -566,20 +566,7 @@ public abstract class BaseJDBCTestCase
                 // Some VMs don't support initCause(). It is OK if they fail.
             }
 
-            if (usingDerbyNetClient())
-            {
-                /* For chained exceptions the Derby Client just concatenates
-                 * them into the exception message.  So search the message
-                 * for the desired SQLSTATE.  This isn't ideal, but it
-                 * should work...
-                 */
-                if (exception.getMessage().
-                    indexOf("SQLSTATE: " + expected) == -1)
-                {
-                    throw e;
-                }
-            }
-            else if (usingDerbyNet())
+            if (usingDerbyNet())
             {
                 /* For JCC the error message is a series of tokens representing
                  * different things like SQLSTATE, SQLCODE, nested SQL error
