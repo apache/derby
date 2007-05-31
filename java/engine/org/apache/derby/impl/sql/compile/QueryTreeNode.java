@@ -1292,15 +1292,22 @@ public abstract class QueryTreeNode implements Visitable
 
 	/**
 	 * Get the descriptor for the named schema. If the schemaName
-	 * parameter is NULL, it gets the descriptor for the current (default)
-	 * schema. Schema descriptors include authorization ids and schema ids.
+	 * parameter is NULL, it gets the descriptor for the current
+	 * compilation schema.
+     * 
+     * QueryTreeNodes must obtain schemas using this method or the two argument
+     * version of it. This is to ensure that the correct default compliation schema
+     * is returned and to allow determination of if the statement being compiled
+     * depends on the current schema. 
+     * 
+     * Schema descriptors include authorization ids and schema ids.
 	 * SQL92 allows a schema to specify a default character set - we will
 	 * not support this.  Will check default schema for a match
 	 * before scanning a system table.
 	 * 
 	 * @param schemaName	The name of the schema we're interested in.
 	 *			If the name is NULL, get the descriptor for the
-	 *			current schema.
+	 *			current compilation schema.
 	 *
 	 * @return	The descriptor for the schema.
 	 *
@@ -1312,6 +1319,25 @@ public abstract class QueryTreeNode implements Visitable
 		//return getSchemaDescriptor(schemaName, schemaName != null);
 		return getSchemaDescriptor(schemaName, true);
 	}
+    
+    /**
+     * Get the descriptor for the named schema. If the schemaName
+     * parameter is NULL, it gets the descriptor for the current
+     * compilation schema.
+     * 
+     * QueryTreeNodes must obtain schemas using this method or the single argument
+     * version of it. This is to ensure that the correct default compliation schema
+     * is returned and to allow determination of if the statement being compiled
+     * depends on the current schema. 
+     * 
+     * @param schemaName The name of the schema we're interested in.
+     * If the name is NULL, get the descriptor for the current compilation schema.
+     * @param raiseError True to raise an error if the schema does not exist,
+     * false to return null if the schema does not exist.
+     * @return Valid SchemaDescriptor or null if raiseError is false and the
+     * schema does not exist. 
+     * @throws StandardException Schema does not exist and raiseError is true.
+     */
 	final SchemaDescriptor	getSchemaDescriptor(String schemaName, boolean raiseError)
 		throws StandardException
 	{

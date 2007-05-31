@@ -424,7 +424,7 @@ public interface LanguageConnectionContext extends Context {
 	public String getAuthorizationId();
   
 	/**
-	 *	Get the current default schema
+	 *	Get the current default schema for the connection.
 	 *
 	 * @return SchemaDescriptor	the current schema
 	 */
