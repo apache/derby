@@ -972,6 +972,7 @@ public class EmbedStatement extends ConnectionChild
 									sqle.getErrorCode(), successfulUpdateCount);
 
 			batch.setNextException(sqle);
+			batch.initCause(sqle);
 			throw batch;
       }
 	}

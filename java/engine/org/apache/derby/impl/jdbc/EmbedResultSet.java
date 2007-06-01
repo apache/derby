@@ -4346,9 +4346,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 				try {
 					close();
 	    		} catch (Throwable t) {
-		        	SQLException top = handleException(t);
-					top.setNextException(sqle);
-					sqle = top;
+					sqle.setNextException(handleException(t));
 				}
 			}
 		}

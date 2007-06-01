@@ -242,13 +242,9 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction {
         
       }
     } catch (FileNotFoundException ex) {
-      throw LoadError.dataFileNotFound(inputFileName);
+        throw LoadError.dataFileNotFound(inputFileName, ex);
     } catch (SecurityException se) {
-		java.sql.SQLException sqle = LoadError.dataFileNotFound(inputFileName);
-
-		sqle.setNextException(new java.sql.SQLException("XJ001", se.getMessage(), 0));
-
-		throw sqle;
+		throw LoadError.dataFileNotFound(inputFileName, se);
 	}
     java.io.Reader rd = dataCodeset == null ?
     		new InputStreamReader(inputStream) : new InputStreamReader(inputStream, dataCodeset);    

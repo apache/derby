@@ -58,11 +58,13 @@ class LoadError {
 	/**
 	   Raised if, the passed data file can't be found.
 	   @param fileName the data file name 
+	   @param ex the exception that prevented us from opening the file
 	*/
-	static SQLException dataFileNotFound(String fileName) {
+	static SQLException dataFileNotFound(String fileName, Exception ex) {
 
 		return PublicAPI.wrapStandardException(
-			   StandardException.newException(SQLState.DATA_FILE_NOT_FOUND, fileName));
+			   StandardException.newException(SQLState.DATA_FILE_NOT_FOUND, ex,
+											  fileName));
 	}
 
   
