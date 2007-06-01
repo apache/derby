@@ -432,8 +432,6 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	/**
 	 * Converts this data type descriptor (including length/precision)
 	 * to a string. E.g.
-
-
 	 *
 	 *			VARCHAR(30)
 	 *

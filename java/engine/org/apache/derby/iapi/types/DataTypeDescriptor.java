@@ -865,8 +865,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 */
 	public String getCollationName()
 	{
-        return(typeDescriptor.getCollationType() == 0 ?
-                    "UCS_BASIC" : "TERRITORY_BASED");
+        return(typeDescriptor.getCollationName());
 	}
 
 	/** @see TypeDescriptor#setCollationType(int) */
