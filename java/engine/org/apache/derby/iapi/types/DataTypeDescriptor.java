@@ -855,6 +855,20 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		return typeDescriptor.getCollationType();
 	}
 
+	/**
+	 * Gets the name of this datatype.
+     * <p>
+     * Used to generate strings decribing collation type for error messages.
+	 * 
+	 *
+	 *  @return	the name of the collation being used in this type.
+	 */
+	public String getCollationName()
+	{
+        return(typeDescriptor.getCollationType() == 0 ?
+                    "UCS_BASIC" : "TERRITORY_BASED");
+	}
+
 	/** @see TypeDescriptor#setCollationType(int) */
 	public void	setCollationType(int collationTypeValue)
 	{

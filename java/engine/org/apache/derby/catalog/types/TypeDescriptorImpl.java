@@ -414,6 +414,22 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	}
 
 	/**
+	 * Gets the name of the collation type in this descriptor.
+     * <p>
+     * Used to generate strings decribing collation type for error messages.
+	 * 
+	 *
+	 *  @return	the name of the collation being used in this type.
+	 */
+	public String getCollationName()
+    {
+        return(
+            collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC ? 
+                StringDataValue.COLLATION_TYPE_UCS_BASIC_STRING : 
+                StringDataValue.COLLATION_TYPE_TERRITORY_BASED_STRING);
+    }
+
+	/**
 	 * Converts this data type descriptor (including length/precision)
 	 * to a string. E.g.
 

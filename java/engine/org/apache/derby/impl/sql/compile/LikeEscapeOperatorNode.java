@@ -304,6 +304,28 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             rightConstant = true;
         }
 
+        /* If we are comparing a char with a national char then
+         * we generate a cast above the receiver to force preprocess to
+         * not attempt any of the > <= optimizations since there is no
+         * way to determine the 'next' character for the <= operand.
+         *
+         * TODO-COLLATE - probably need to do something about different 
+         *                collation types here.
+         */
+
+        // The left and the pattern of the LIKE must be same collation type.
+        if (receiver.getTypeServices().getCollationType() !=
+                leftOperand.getTypeServices().getCollationType())
+        {
+            // throw error.
+            throw StandardException.newException(
+                        SQLState.LANG_LIKE_COLLATION_MISMATCH, 
+                        receiver.getTypeServices().getSQLstring(),
+                        receiver.getTypeServices().getCollationName(),
+                        leftOperand.getTypeServices().getSQLstring(),
+                        leftOperand.getTypeServices().getCollationName());
+        }
+
         /* If the left side of LIKE is a ColumnReference and right side is a 
          * string constant without a wildcard (eg. column LIKE 'Derby') then we 
          * transform the LIKE into the equivalent LIKE AND =.  
@@ -400,33 +422,6 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     return newAnd;
                 }
             }
-        }
-
-        /* If we are comparing a char with a national char then
-         * we generate a cast above the receiver to force preprocess to
-         * not attempt any of the > <= optimizations since there is no
-         * way to determine the 'next' character for the <= operand.
-         *
-         * TODO-COLLATE - probably need to do something about different 
-         *                collation types here.
-         */
-
-        TypeId leftTypeId     = leftOperand.getTypeId();
-        TypeId receiverTypeId = receiver.getTypeId();
-
-        if (receiverTypeId.isNationalStringTypeId() && 
-            !leftTypeId.isNationalStringTypeId())
-        {
-            // if column is national column and pattern is not national column
-            receiver = 
-                castArgToNationalString(receiver, receiverTC, receiverTypeId);
-        }
-        else if (leftTypeId.isNationalStringTypeId() && 
-                 !receiverTypeId.isNationalStringTypeId())
-        {
-            // if patern is national column and column is not national column
-            leftOperand = 
-                castArgToNationalString(leftOperand, leftTC, leftTypeId);
         }
 
         finishBindExpr();

@@ -1026,24 +1026,25 @@ public interface SQLState {
 	String LANG_SHARE_TABLE											   = "42Z87.U";
 	String LANG_SHARE_ROW											   = "42Z88.U";
 
-	// MORE GENERIC LANGUAGE STUFF
-	// String LANG_UPDATABLE_VTI_BAD_GETRESULTSETCONCURRENCY			   = "42Z89";
-	String LANG_UPDATABLE_VTI_NON_UPDATABLE_RS						   = "42Z90";
-    String LANG_SUBQUERY                                               = "42Z91";
-    String LANG_REPEATABLE_READ                                        = "42Z92";
-    String LANG_MULTIPLE_CONSTRAINTS_WITH_SAME_COLUMNS                 = "42Z93";
-	// String LANG_ALTER_SYSTEM_TABLE_ATTEMPTED                            = "42Z94"; -- replaced by 42X62
-	// String LANG_ALTER_TABLE_ON_NON_TABLE                                = "42Z95"; -- replaced by 42Y62
-	String LANG_RENAME_COLUMN_WILL_BREAK_CHECK_CONSTRAINT              = "42Z97";
-	// beetle 2758.  For now just raise an error for literals > 64K
-	String LANG_INVALID_LITERAL_LENGTH                                 = "42Z99";
-    String LANG_READ_UNCOMMITTED                                       = "42Z9A";
-    String LANG_VTI_BLOB_CLOB_UNSUPPORTED                              = "42Z9B";
-	String LANG_UNSUPPORTED_TRIGGER_STMT		   					   = "42Z9D";
-	String LANG_UNSUPPORTED_TRIGGER_PROC		   					   = "42Z9D.S.1";
-	String LANG_DROP_CONSTRAINT_TYPE                                   = "42Z9E";
-	String LANG_QUERY_TOO_COMPLEX                                      = "42ZA0";
-    String LANG_INVALID_SQL_IN_BATCH                                   = "42ZA1";
+    // MORE GENERIC LANGUAGE STUFF
+    // String LANG_UPDATABLE_VTI_BAD_GETRESULTSETCONCURRENCY          = "42Z89";
+    String LANG_UPDATABLE_VTI_NON_UPDATABLE_RS                        = "42Z90";
+    String LANG_SUBQUERY                                              = "42Z91";
+    String LANG_REPEATABLE_READ                                       = "42Z92";
+    String LANG_MULTIPLE_CONSTRAINTS_WITH_SAME_COLUMNS                = "42Z93";
+    // String LANG_ALTER_SYSTEM_TABLE_ATTEMPTED                       = "42Z94"; -- replaced by 42X62
+    // String LANG_ALTER_TABLE_ON_NON_TABLE                           = "42Z95"; -- replaced by 42Y62
+    String LANG_RENAME_COLUMN_WILL_BREAK_CHECK_CONSTRAINT             = "42Z97";
+    // beetle 2758.  For now just raise an error for literals > 64K
+    String LANG_INVALID_LITERAL_LENGTH                                = "42Z99";
+    String LANG_READ_UNCOMMITTED                                      = "42Z9A";
+    String LANG_VTI_BLOB_CLOB_UNSUPPORTED                             = "42Z9B";
+    String LANG_UNSUPPORTED_TRIGGER_STMT                              = "42Z9D";
+    String LANG_UNSUPPORTED_TRIGGER_PROC                              = "42Z9D.S.1";
+    String LANG_DROP_CONSTRAINT_TYPE                                  = "42Z9E";
+    String LANG_QUERY_TOO_COMPLEX                                     = "42ZA0";
+    String LANG_INVALID_SQL_IN_BATCH                                  = "42ZA1";
+    String LANG_LIKE_COLLATION_MISMATCH                               = "42ZA2";
 
 	//following 3 matches the DB2 sql states
 	String LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA = "428EK";

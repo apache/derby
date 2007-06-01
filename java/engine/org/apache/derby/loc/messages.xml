@@ -1119,8 +1119,8 @@ Guide.
             <msg>
                 <name>42818</name>
                 <text>Comparisons between '{0}' and '{1}' are not supported.</text>
-                <arg>value</arg>
-                <arg>alue1</arg>
+                <arg>type</arg>
+                <arg>type</arg>
             </msg>
 
             <msg>
@@ -2455,6 +2455,15 @@ Guide.
                 <name>42ZA1</name>
                 <text>Invalid SQL in Batch: '{0}'.</text>
                 <arg>batch</arg>
+            </msg>
+
+            <msg>
+                <name>42ZA2</name>
+                <text>Operand of LIKE predicate with type {0} and collation {1} is not compatable with LIKE pattern operand with type {2} and collation {3}.</text>
+                <arg>type</arg>
+                <arg>value</arg>
+                <arg>type</arg>
+                <arg>value</arg>
             </msg>
 
         </family>

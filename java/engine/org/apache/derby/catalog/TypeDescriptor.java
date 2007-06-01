@@ -220,5 +220,14 @@ public interface TypeDescriptor
 	 */
 	public void setCollationDerivation(int collationDerivationValue);
 
+	/**
+	 * Gets the name of the collation type in this descriptor.
+     * <p>
+     * Used to generate strings decribing collation type for error messages.
+	 * 
+	 *
+	 *  @return	the name of the collation being used in this type.
+	 */
+	public String getCollationName();
 }
 

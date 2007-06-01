@@ -355,6 +355,43 @@ public class CollationTest2 extends BaseJDBCTestCase
      */
 
     /**
+     * Assert that the query does not compile and throws
+     * a SQLException with the expected state.
+     * 
+     * @param conn      Connection to correct datatabase.
+     * @param sqlState  expected sql state.
+     * @param query     the query to compile.
+     */
+    private void assertCompileError(
+    Connection  conn,
+    String      sqlState, 
+    String      query) 
+    {
+        try 
+        {
+            PreparedStatement pSt = conn.prepareStatement(query);
+
+            if (usingDerbyNet())
+            {
+                /* For JCC the prepares are deferred until execution,
+                 * so we have to actually execute in order to see the
+                 * expected error.  Note that we don't need to worry
+                 * about binding the parameters (if any); the compile
+                 * error should occur before the execution-time error
+                 * about unbound parameters.
+                 */
+                pSt.execute();
+            }
+            fail("expected compile error: " + sqlState);
+            pSt.close();
+        } 
+        catch (SQLException se) 
+        {
+            assertSQLState(sqlState, se);
+        }
+    }
+
+    /**
      * RESOLVE - unfinished LIKE test with dataset of all unicode characters
      **/
     private static final void printRuleBasedCollator()
@@ -757,6 +794,27 @@ public class CollationTest2 extends BaseJDBCTestCase
                java_version.equals("J2ME Foundation Specification v1.1"));
 	}
 
+    private boolean isDatabaseBasicCollation(Connection conn)
+        throws SQLException
+    {
+        PreparedStatement ps = 
+            conn.prepareStatement(
+                "VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY" + 
+                    "('derby.database.collation')");
+
+        ResultSet rs = ps.executeQuery();
+
+        Assert.assertTrue(rs.next());
+
+        String collation = rs.getString(1);
+
+        Assert.assertFalse(rs.next());
+
+        rs.close();
+        ps.close();
+
+        return(collation.equals("UCS_BASIC"));
+    }
 
 
     /**************************************************************************
@@ -1346,31 +1404,63 @@ public class CollationTest2 extends BaseJDBCTestCase
                     "Running like test[" + i + "] = " + LIKE_TEST_CASES[i]);
             }
 
-            // varchar column
+            // varchar column - constant pattern
             checkLangBasedQuery(
                 conn,
-                "SELECT ID, NAME_VARCHAR FROM CUSTOMER WHERE NAME_VARCHAR LIKE " +
-                    "'" + LIKE_TEST_CASES[i] + "'",
+                "SELECT ID, NAME_VARCHAR FROM CUSTOMER " + 
+                    "WHERE NAME_VARCHAR LIKE '" + LIKE_TEST_CASES[i] + "'",
                 full_row_single_value(
                     EXPECTED_LIKE_RESULTS[db_index][i],
                     LIKE_NAMES),
                 true);
 
-            // long varchar column
-            checkLangBasedQuery(
+            // varchar column - parameter pattern
+            checkOneParamQuery(
                 conn,
-                "SELECT ID, NAME_LONGVARCHAR FROM CUSTOMER WHERE NAME_LONGVARCHAR LIKE " +
-                    "'" + LIKE_TEST_CASES[i] + "'",
+                "SELECT ID, NAME_VARCHAR FROM CUSTOMER " + 
+                    "WHERE NAME_VARCHAR LIKE ?",
+                LIKE_TEST_CASES[i],
                 full_row_single_value(
                     EXPECTED_LIKE_RESULTS[db_index][i],
                     LIKE_NAMES),
                 true);
 
-            // clob column
+            // long varchar column - constant
+            checkLangBasedQuery(
+                conn,
+                "SELECT ID, NAME_LONGVARCHAR FROM CUSTOMER " + 
+                    "WHERE NAME_LONGVARCHAR LIKE '" + LIKE_TEST_CASES[i] + "'",
+                full_row_single_value(
+                    EXPECTED_LIKE_RESULTS[db_index][i],
+                    LIKE_NAMES),
+                true);
+
+            // long varchar column - parameter
+            checkOneParamQuery(
+                conn,
+                "SELECT ID, NAME_LONGVARCHAR FROM CUSTOMER " + 
+                    "WHERE NAME_LONGVARCHAR LIKE ?",
+                LIKE_TEST_CASES[i],
+                full_row_single_value(
+                    EXPECTED_LIKE_RESULTS[db_index][i],
+                    LIKE_NAMES),
+                true);
+
+            // clob column - constant
             checkLangBasedQuery(
                 conn,
                 "SELECT ID, NAME_CLOB FROM CUSTOMER WHERE NAME_CLOB LIKE " +
                     "'" + LIKE_TEST_CASES[i] + "'",
+                full_row_single_value(
+                    EXPECTED_LIKE_RESULTS[db_index][i],
+                    LIKE_NAMES),
+                true);
+
+            // clob column - parameter
+            checkOneParamQuery(
+                conn,
+                "SELECT ID, NAME_CLOB FROM CUSTOMER WHERE NAME_CLOB LIKE ?",
+                LIKE_TEST_CASES[i],
                 full_row_single_value(
                     EXPECTED_LIKE_RESULTS[db_index][i],
                     LIKE_NAMES),
@@ -1386,6 +1476,48 @@ public class CollationTest2 extends BaseJDBCTestCase
                     EXPECTED_LIKE_RESULTS[db_index][i],
                     LIKE_NAMES),
                 true);
+
+            // char column, char includes blank padding so alter all these
+            // tests cases to match for blanks at end also.
+            checkOneParamQuery(
+                conn,
+                "SELECT ID, NAME_CHAR FROM CUSTOMER WHERE NAME_CHAR LIKE ?",
+                LIKE_CHAR_TEST_CASES[i] + "%",
+                full_row_single_value(
+                    EXPECTED_LIKE_RESULTS[db_index][i],
+                    LIKE_NAMES),
+                true);
+        }
+
+        // test error thrown from LIKE on mismatched collation 
+        String zero_row_syscat_query1 = 
+            "SELECT * from SYS.SYSCOLUMNS where COLUMNNAME like 'nonmatchiing'";
+        String zero_row_syscat_query2 = 
+            "SELECT * from SYS.SYSCOLUMNS where 'nonmatchiing' like COLUMNNAME";
+        String zero_row_syscat_query_param1 = 
+            "SELECT * from SYS.SYSCOLUMNS where COLUMNNAME like ?";
+        String zero_row_syscat_query_param2 = 
+            "SELECT * from SYS.SYSCOLUMNS where ? like COLUMNNAME";
+
+        if (!isDatabaseBasicCollation(conn))
+        {
+            // collation of 'fred' picked up from current schema which is
+            // territory based collation, but system column will have basic
+            // collation.
+
+            assertCompileError(conn, "42ZA2", zero_row_syscat_query1);
+            assertCompileError(conn, "42ZA2", zero_row_syscat_query2);
+            assertCompileError(conn, "42ZA2", zero_row_syscat_query_param1);
+            assertCompileError(conn, "42ZA2", zero_row_syscat_query_param2);
+        }
+        else
+        {
+            checkLangBasedQuery(conn, zero_row_syscat_query1, null, true);
+            checkLangBasedQuery(conn, zero_row_syscat_query2, null, true);
+            checkOneParamQuery(
+                conn, zero_row_syscat_query_param1, "nonmatchiing", null, true);
+            checkOneParamQuery(
+                conn, zero_row_syscat_query_param2, "nonmatchiing", null, true);
         }
 
         dropLikeTable(conn);
@@ -1907,12 +2039,14 @@ public class CollationTest2 extends BaseJDBCTestCase
     public void testDefaultCollation() throws SQLException
     {
         Connection conn = setUpDBandOpenConnection(TEST_DEFAULT);
+        Assert.assertTrue(isDatabaseBasicCollation(conn));
         runTestIter(conn, TEST_DEFAULT);
         conn.close();
     }
     public void testEnglishCollation() throws SQLException
     {
         Connection conn = setUpDBandOpenConnection(TEST_ENGLISH);
+        Assert.assertTrue(!isDatabaseBasicCollation(conn));
         runTestIter(conn, TEST_ENGLISH);
         conn.close();
     }
@@ -1920,12 +2054,14 @@ public class CollationTest2 extends BaseJDBCTestCase
     public void testPolishCollation() throws SQLException
     {
         Connection conn = setUpDBandOpenConnection(TEST_POLISH);
+        Assert.assertTrue(!isDatabaseBasicCollation(conn));
         runTestIter(conn, TEST_POLISH);
         conn.close();
     }
     public void testNorwayCollation() throws SQLException
     {
         Connection conn = setUpDBandOpenConnection(TEST_NORWAY);
+        Assert.assertTrue(!isDatabaseBasicCollation(conn));
         runDerby2670(conn);
         runTestIter(conn, TEST_NORWAY);
         conn.close();
@@ -1966,6 +2102,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         if (run_test)
         {
             Connection conn = setUpDBandOpenConnection(TEST_DEFAULT_TERRITORY);
+            Assert.assertTrue(!isDatabaseBasicCollation(conn));
             runTestIter(conn, db_index);
             conn.close();
         }

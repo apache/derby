@@ -58,12 +58,17 @@ public interface StringDataValue extends ConcatableDataValue
 	 * Data types will start with collation type defaulting to UCS_BASIC in
 	 * TypeDescriptorImpl. This collation type ofcourse makes sense fpr 
 	 * character string types only. It will be ignored for the rest of the
-	 * types. If a character's collation type should be TERRIOTRY_BASED, then
+	 * types. If a character's collation type should be TERRITORY_BASED, then
 	 * DTD.setCollationType can be called to change the default of UCS_BASIC.
 	 */
 	public	static final int COLLATION_TYPE_UCS_BASIC = 0;
 	/** @see StringDataValue#COLLATION_TYPE_UCS_BASIC */
 	public	static final int COLLATION_TYPE_TERRITORY_BASED = 1;
+
+    public  static final String COLLATION_TYPE_UCS_BASIC_STRING = 
+        "USC_BASIC";
+    public  static final String COLLATION_TYPE_TERRITORY_BASED_STRING = 
+        "TERRITORY_BASED";
 
 	/**
 	 * The SQL concatenation '||' operator.
