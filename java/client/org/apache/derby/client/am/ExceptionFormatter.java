@@ -36,11 +36,7 @@ public class ExceptionFormatter {
                 header = messageHeader + "[" + "SQLException@" + Integer.toHexString(e.hashCode()) + "]";
                 printWriter.println(header + " java.sql.SQLException");
 
-                java.lang.Throwable throwable = null;
-                try {
-                    throwable = ((Diagnosable) e).getThrowable();
-                } catch (java.lang.NoSuchMethodError doNothing) {
-                }
+                java.lang.Throwable throwable = e.getCause();
                 if (throwable != null) {
                     printTrace(throwable, printWriter, header);
                 }
@@ -185,27 +181,6 @@ public class ExceptionFormatter {
             printWriter.println(header + " Stack trace follows");
 
             e.printStackTrace(printWriter);
-
-            if (!((org.apache.derby.client.am.Configuration.jreLevelMajor == 1) &&
-                    (org.apache.derby.client.am.Configuration.jreLevelMinor >= 4)) ||
-                    (org.apache.derby.client.am.Configuration.jreLevelMajor > 1)) { // If not jre 1.4 or above, we need to print the cause if there is one
-                // For jre 1.4 or above, e.printStackTrace() will print the cause automatically
-                if (e instanceof Diagnosable) {
-                    java.lang.Throwable throwable = null;
-                    try {
-                        throwable = ((Diagnosable) e).getThrowable();
-                    } catch (java.lang.NoSuchMethodError doNothing) {
-                    }
-                    if (throwable != null) {
-                        printWriter.print("Caused by: ");
-                        if (throwable instanceof java.sql.SQLException) {
-                            throwable.printStackTrace(printWriter);
-                        } else {
-                            printTrace(throwable, printWriter, header);
-                        }
-                    }
-                }
-            }
         }
     }
 }

@@ -24,7 +24,6 @@ package org.apache.derby.client.am;
 import java.sql.SQLException;
 import java.util.TreeMap;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -315,15 +314,13 @@ public class SqlException extends Exception implements Diagnosable {
     }
     
     /**
-     * Set the cause of this exception based on its type and
-     * the current runtime version of Java
+     * Set the cause of this exception based on its type.
+     * <code>SQLException</code>s and <code>SqlException</code>s are
+     * linked with <code>setNextException()</code> and <code>initCause()</code>.
+     * All other exception types are linked with <code>initCause()</code>.
      */
-    protected void setThrowable(Throwable throwable)
+    private void setThrowable(Throwable throwable)
     {
-        throwable_ = throwable;
-        
-        // If the throwable is a SQL exception, use nextException rather
-        // than chained exceptions
         if ( throwable instanceof SqlException )
         {
             setNextException((SqlException) throwable);
@@ -332,23 +329,10 @@ public class SqlException extends Exception implements Diagnosable {
         {
             setNextException((SQLException) throwable );
         }
-        else if ( throwable != null )
-        {
-            // Set up a string indicating the cause if the current runtime
-            // doesn't support the initCause() method.  This is then used
-            // by getMessage() when it composes the message string.
-            if (JVMInfo.JDK_ID < JVMInfo.J2SE_14 )
-            {
-                causeString_ = " " + 
-                    getMessageUtil().getTextMessage(CAUSED_BY_EXCEPTION_ID)  + " " +
-                    throwable.getClass() + ": " + throwable.getMessage();
-            }
-            else
-            {
-                initCause(throwable);
-            }
-        }
 
+        if (throwable != null) {
+            initCause(throwable);
+        }
     }
         
     /**
@@ -377,14 +361,7 @@ public class SqlException extends Exception implements Diagnosable {
         // where we decide which exception to create
         SQLException sqle = exceptionFactory.getSQLException(getMessage(), getSQLState(), 
             getErrorCode());
-
-        // If we're in a runtime that supports chained exceptions, set the cause 
-        // of the SQLException to be this SqlException.  Otherwise the stack
-        // trace is lost.
-         if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14 )
-        {
-            sqle.initCause(this);
-        }
+        sqle.initCause(this);
 
         // Set up the nextException chain
         if ( nextException_ != null )
@@ -408,10 +385,6 @@ public class SqlException extends Exception implements Diagnosable {
 
     public Sqlca getSqlca() {
         return sqlca_;
-    }
-
-    public java.lang.Throwable getThrowable() {
-        return throwable_;
     }
 
     public String getMessage() {

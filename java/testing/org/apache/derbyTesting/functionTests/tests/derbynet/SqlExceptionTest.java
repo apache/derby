@@ -73,7 +73,7 @@ public class SqlExceptionTest extends BaseJDBCTestCase
     
     /**
      * Make sure a SQLException is chained as a nextSQLException()
-     * rather than as a chained exception
+     * and as a chained exception.
      */
     public void testNextException() {
         SQLException nexte = new SQLException("test");
@@ -83,7 +83,7 @@ public class SqlExceptionTest extends BaseJDBCTestCase
         SQLException javae = sqle.getSQLException();
         
         assertEquals(sqle, javae.getCause());
-        assertNull(javae.getCause().getCause());
+        assertEquals(nexte, javae.getCause().getCause());
         assertEquals(nexte, javae.getNextException());
         
         // Make sure exception chaining works with Derby's SqlException
@@ -98,6 +98,7 @@ public class SqlExceptionTest extends BaseJDBCTestCase
         
         assertNotNull(javae.getNextException());
         assertEquals(javae.getNextException().getSQLState(), "08000");
+        assertEquals(internalException, javae.getCause().getCause());
     }
 
     /**

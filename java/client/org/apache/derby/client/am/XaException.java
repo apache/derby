@@ -23,7 +23,6 @@ package org.apache.derby.client.am;
 
 
 public class XaException extends javax.transaction.xa.XAException implements Diagnosable {
-    java.lang.Throwable throwable_ = null;
 
     //-----------------constructors-----------------------------------------------
 
@@ -36,12 +35,7 @@ public class XaException extends javax.transaction.xa.XAException implements Dia
 
     public XaException(LogWriter logWriter, java.lang.Throwable throwable) {
         super();
-        throwable_ = throwable;
-        if (((org.apache.derby.client.am.Configuration.jreLevelMajor == 1) &&
-                (org.apache.derby.client.am.Configuration.jreLevelMinor >= 4)) ||
-                (org.apache.derby.client.am.Configuration.jreLevelMajor > 1)) { // jre 1.4 or above, init the cause
-            initCause(throwable);
-        }
+        initCause(throwable);
         if (logWriter != null) {
             logWriter.traceDiagnosable(this);
         }
@@ -58,12 +52,7 @@ public class XaException extends javax.transaction.xa.XAException implements Dia
     public XaException(LogWriter logWriter, java.lang.Throwable throwable, int errcode) {
         super();
         errorCode = errcode;
-        throwable_ = throwable;
-        if (((org.apache.derby.client.am.Configuration.jreLevelMajor == 1) &&
-                (org.apache.derby.client.am.Configuration.jreLevelMinor >= 4)) ||
-                (org.apache.derby.client.am.Configuration.jreLevelMajor > 1)) { // jre 1.4 or above, init the cause
-            initCause(throwable);
-        }
+        initCause(throwable);
         if (logWriter != null) {
             logWriter.traceDiagnosable(this);
         }
@@ -78,12 +67,7 @@ public class XaException extends javax.transaction.xa.XAException implements Dia
 
     public XaException(LogWriter logWriter, java.lang.Throwable throwable, String s) {
         super(s);
-        throwable_ = throwable;
-        if (((org.apache.derby.client.am.Configuration.jreLevelMajor == 1) &&
-                (org.apache.derby.client.am.Configuration.jreLevelMinor >= 4)) ||
-                (org.apache.derby.client.am.Configuration.jreLevelMajor > 1)) { // jre 1.4 or above, init the cause
-            initCause(throwable);
-        }
+        initCause(throwable);
         if (logWriter != null) {
             logWriter.traceDiagnosable(this);
         }
@@ -91,10 +75,6 @@ public class XaException extends javax.transaction.xa.XAException implements Dia
 
     public Sqlca getSqlca() {
         return null;
-    }
-
-    public java.lang.Throwable getThrowable() {
-        return throwable_;
     }
 
     public void printTrace(java.io.PrintWriter printWriter, String header) {
@@ -105,7 +85,7 @@ public class XaException extends javax.transaction.xa.XAException implements Dia
     // Because the "next" is a private field in java.sql.SQLException,
     // we have to create a new XaException in order to break the chain with "next" as null.
     XaException copyAsUnchainedXAException(LogWriter logWriter) {
-        XaException xae = new XaException(logWriter, this.getThrowable(), getMessage()); // client error
+        XaException xae = new XaException(logWriter, getCause(), getMessage());
         xae.errorCode = this.errorCode;
         return xae;
     }

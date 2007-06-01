@@ -22,7 +22,6 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLWarning;
-import org.apache.derby.iapi.services.info.JVMInfo;
 
 /**
  * This represents a warning versus a full exception.  As with
@@ -96,12 +95,7 @@ public class SqlWarning extends SqlException implements Diagnosable {
         SQLWarning sqlw = new SQLWarning(getMessage(), getSQLState(), 
             getErrorCode());
 
-        // If we're in a runtime that supports chained exceptions, set the cause 
-        // of the SQLWarning to be this SqlWarning.
-         if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14 )
-        {
-            sqlw.initCause(this);
-        }
+        sqlw.initCause(this);
 
         // Set up the nextException chain
         if ( nextWarning_ != null )
