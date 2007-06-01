@@ -113,13 +113,14 @@ class EncryptedLOBFile extends LOBFile {
      * @throws IOException
      */
     void seek (long pos) throws IOException {
-        if (pos > length()) {
+        long fileLength = super.length();
+        if (pos > fileLength + tailSize) {
             //this should never happen
             //this exception will mean internal error most
             //probably in LOBStreamControl
             throw new IllegalArgumentException ("Internal Error");
         }
-        if (pos < super.length()) {
+        if (pos < fileLength) {
             super.seek (pos);
         }
         currentPos = pos;
@@ -268,9 +269,9 @@ class EncryptedLOBFile extends LOBFile {
      * @throws StandardException if error occured during encryption/decryption
      */
     int readByte() throws IOException, StandardException {
-        if (currentPos >= length())
-            throw new EOFException ();
         long fileLength = super.length();
+        if (currentPos >= fileLength + tailSize)
+            throw new EOFException ();
         if (currentPos >= fileLength)
             return tail [(int) (currentPos++ - fileLength)] & 0xff;
         //get the block containing the byte we are interested in
@@ -333,26 +334,27 @@ class EncryptedLOBFile extends LOBFile {
     /**
      * Sets the file length to a given size. If the new size is smaller than the
      * file length the file is truncated.
+     *
      * @param size new  file size. Must be lower than file length.
      * @throws IOException if file i/o fails
      * @throws StandardException if error occured during encryption/decryption
      */
     void setLength(long size) throws IOException, StandardException {
-        if (size > length()) {
+        long fileLength = super.length();
+        if (size > fileLength + tailSize) {
             //this should never happen
             //this exception will mean internal error most
             //probably in LOBStreamControl
             throw new IllegalArgumentException ("Internal Error");
         }
-        long length = super.length();
-        if (size < length) {
+        if (size < fileLength) {
             byte [] block = getBlocks (size, 1);
             super.setLength (size - size % blockSize);
             df.decrypt (block, 0, blockSize, tail, 0);
             tailSize = (int) (size % blockSize);
         }
         else {
-            tailSize = (int) (size - length);
+            tailSize = (int) (size - fileLength);
         }
     }
 }
