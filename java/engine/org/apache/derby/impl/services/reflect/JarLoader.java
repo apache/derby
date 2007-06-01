@@ -30,8 +30,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
 
+import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.GeneralSecurityException;
+import java.security.PrivilegedActionException;
 import java.security.SecureClassLoader;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -102,7 +104,20 @@ class JarLoader extends SecureClassLoader {
 					schemaName, sqlName);
 
 			if (installedJar instanceof File) {
-				jar = new JarFile((File) installedJar);
+                try {
+                    jar = (JarFile) AccessController.doPrivileged
+                    (new java.security.PrivilegedExceptionAction(){
+
+                        public Object run() throws IOException {
+                        return new JarFile((File) installedJar);
+
+                        }
+
+                    }
+                     );
+                } catch (PrivilegedActionException pae) {
+                    throw (IOException) pae.getException();
+                }
 				return;
 			}
 

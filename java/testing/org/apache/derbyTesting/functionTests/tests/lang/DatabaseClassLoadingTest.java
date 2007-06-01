@@ -81,58 +81,36 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         // as it uses server side jdbc.
         Test test = suite;
         if (JDBC.vmSupportsJDBC3()) {
-        
-          suite.addTest(new DatabaseClassLoadingTest("testJarHandling"));
-        
-          suite.addTest(new DatabaseClassLoadingTest("testWithNoInstalledJars"));
-          suite.addTest(new DatabaseClassLoadingTest("testWithNoClasspath"));
+            
+            String[] orderedTests = {
+                "testJarHandling",
+                "testWithNoInstalledJars",
+                "testWithNoClasspath",
+                "testSetClasspath",
+                "testAddContact",
+                "testGetResource",          
+                "testAlterTable",
+                "testClassPathRollback",
+                "testReplaceJar",      
+                "testReplacedClass",
+                "testSecondJar",
+                "testSignedJar",
+                "testCreateDatabaseJar",
+                "testHackedJarReplacedClass",
+                "testInvalidJar",
+                "testRemoveJar",
+                "testLoadJavaClassIndirectly",
+                "testLoadJavaClassDirectly",
+                "testLoadJavaClassDirectly2",
+                "testLoadJavaClassDirectly3",
+                "testLoadDerbyClassIndirectly",
  
-          suite.addTest(
-                SecurityManagerSetup.noSecurityManager(
-                        new DatabaseClassLoadingTest("testSetClasspath")));
-        
-          
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                new DatabaseClassLoadingTest("testAddContact")));
-        
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                new DatabaseClassLoadingTest("testGetResource")));
-           
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testAlterTable")));
-
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testClassPathRollback")));
-           
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testReplaceJar")));        
-           
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testReplacedClass")));
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testSecondJar")));
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testSignedJar")));
-           
-           suite.addTest(new DatabaseClassLoadingTest("testCreateDatabaseJar"));
-           
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testHackedJarReplacedClass")));
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testInvalidJar")));           
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testRemoveJar"))); 
-           
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testLoadJavaClassIndirectly"))); 
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testLoadJavaClassDirectly")));
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testLoadJavaClassDirectly2")));
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testLoadJavaClassDirectly3")));
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testLoadDerbyClassIndirectly")));
+            };
+            
+            for (int i = 0; i < orderedTests.length; i++)
+            {
+                suite.addTest(new DatabaseClassLoadingTest(orderedTests[i]));
+            }
        
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testDatabaseInJar"))); 
