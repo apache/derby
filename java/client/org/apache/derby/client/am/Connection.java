@@ -139,7 +139,7 @@ public abstract class Connection implements java.sql.Connection,
     public org.apache.derby.jdbc.ClientBaseDataSource dataSource_;
     public String serverNameIP_;
     public int portNumber_;
-    public int clientSSLMode_ = org.apache.derby.jdbc.ClientBaseDataSource.SSL_OFF;
+    public int clientSSLMode_ = ClientBaseDataSource.SSL_OFF;
 
     public java.util.Hashtable clientCursorNameCache_ = new java.util.Hashtable();
     public boolean canUseCachedConnectBytes_ = false;
@@ -212,11 +212,14 @@ public abstract class Connection implements java.sql.Connection,
         serverNameIP_ = dataSource.getServerName();
         portNumber_ = dataSource.getPortNumber();
 
+        clientSSLMode_ = 
+            ClientBaseDataSource.getSSLModeFromString(dataSource.getSsl());
+
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
                 serverNameIP_,
                 portNumber_,
-                0 /*TODO: SSL & Datasource*/);
+                clientSSLMode_);
     }
 
     // For jdbc 2 connections
@@ -241,11 +244,14 @@ public abstract class Connection implements java.sql.Connection,
         serverNameIP_ = dataSource.getServerName();
         portNumber_ = dataSource.getPortNumber();
 
+        clientSSLMode_ = 
+            ClientBaseDataSource.getSSLModeFromString(dataSource.getSsl());
+
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
                 serverNameIP_,
                 portNumber_,
-                0 /*TODO: SSL & Datasource*/);
+                clientSSLMode_);
     }
 
     // This is a callback method, called by subsystem - NetConnection

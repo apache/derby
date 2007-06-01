@@ -76,7 +76,8 @@ public class DataSourceReferenceTest extends BaseJDBCTestCase {
          {"portNumber", "tmpportno"},
          {"retrieveMessageText", "true"},
          {"securityMechanism", "4"},
-         {"serverName", "tmphostName"}, null, null, null, 
+         {"serverName", "tmphostName"}, null, 
+         {"ssl","off"}, null, null, 
          {"traceFileAppend", "false"},
          {"traceLevel", "-1"},
          {"user", "tmpUserName"}},
@@ -92,6 +93,7 @@ public class DataSourceReferenceTest extends BaseJDBCTestCase {
          {"securityMechanism", "1805"},
          {"serverName", "XX_serverName_1048"},
          {"shutdownDatabase", "shutdown"},
+         {"ssl","basic"},
          {"traceDirectory", "XX_traceDirectory_1476"},
          {"traceFile", "XX_traceFile_911"},
          {"traceFileAppend", "true"},
@@ -156,7 +158,7 @@ public class DataSourceReferenceTest extends BaseJDBCTestCase {
                 String.valueOf(TestConfiguration.getCurrent().getPort());
             expectedValues[expectedArrayIndex][10][1] =
                 TestConfiguration.getCurrent().getHostName();
-            expectedValues[expectedArrayIndex][16][1] =
+            expectedValues[expectedArrayIndex][17][1] =
                 TestConfiguration.getCurrent().getUserName();
         }
         
@@ -239,6 +241,8 @@ public class DataSourceReferenceTest extends BaseJDBCTestCase {
                     value = "create";
                 else if (property.equals("shutdownDatabase"))
                     value = "shutdown";
+                else if (property.equals("ssl"))
+                    value = "basic";
                 else
                     value = "XX_" + property + "_" + val;
                     

@@ -175,10 +175,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static int SSL_OFF = 0;
     public final static int SSL_BASIC = 1;
     public final static int SSL_PEER_AUTHENTICATION = 2;
-    
-    public static final int getClientSSLMode(Properties properties)
-    {
-        String s = properties.getProperty(Attribute.SSL_ATTR);
+
+    public static final int getSSLModeFromString(String s) {
 		if (s != null){
 			if (s.equalsIgnoreCase("off")) {
 				return SSL_OFF;
@@ -194,6 +192,11 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 			// Default
 			return SSL_OFF;
 		}
+    }
+    
+    public static final int getClientSSLMode(Properties properties)
+    {
+        return getSSLModeFromString(properties.getProperty(Attribute.SSL_ATTR));
     }
 
     // ---------------------------- user -----------------------------------
@@ -854,6 +857,30 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         return securityMechanism;
     }
 
+    // ----------------------- ssl
+
+    private int sslMode;
+
+    public void setSsl(String mode) {
+        sslMode = getSSLModeFromString(mode);
+    }
+
+    public void setSsl(int mode) {
+        sslMode = mode;
+    }
+
+    public String getSsl() {
+        switch(sslMode) {
+        case SSL_OFF: 
+        default: 
+            return "off";
+        case SSL_BASIC: 
+            return "basic";
+        case SSL_PEER_AUTHENTICATION: 
+            return "peerAuthentication";
+        }
+    }
+
     // ----------------------- set/getCreate/ShutdownDatabase ---------------------------
     /**
      * Set to true if the database should be created.
@@ -1041,6 +1068,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         }
         if (prop.containsKey(Attribute.CLIENT_RETIEVE_MESSAGE_TEXT)) {
             setRetrieveMessageText(getRetrieveMessageText(prop));
+        }
+        if (prop.containsKey(Attribute.SSL_ATTR)) {
+            setSsl(getClientSSLMode(prop));
         }
     }
 }
