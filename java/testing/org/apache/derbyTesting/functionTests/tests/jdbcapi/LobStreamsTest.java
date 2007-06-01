@@ -38,6 +38,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Decorator;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class LobStreamsTest extends BaseJDBCTestCase {
@@ -446,9 +447,12 @@ public class LobStreamsTest extends BaseJDBCTestCase {
                 
         TestSuite ts  = new TestSuite ("LobStreamsTest");
         ts.addTest(TestConfiguration.defaultSuite (LobStreamsTest.class));
-        TestSuite encSuite = new TestSuite ("LobStreamsTest:encrypted");
-        encSuite.addTestSuite (LobStreamsTest.class);
-        ts.addTest(Decorator.encryptedDatabase (encSuite));
+        // JSR169 does not have support for encryption
+        if (JDBC.vmSupportsJDBC3()) {
+            TestSuite encSuite = new TestSuite ("LobStreamsTest:encrypted");
+            encSuite.addTestSuite (LobStreamsTest.class);
+            ts.addTest(Decorator.encryptedDatabase (encSuite));
+        }
         return ts;
     }
     //method to ensure that buffer is filled if there is any data in stream

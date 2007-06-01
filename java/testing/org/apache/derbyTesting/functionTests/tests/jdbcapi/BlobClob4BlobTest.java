@@ -35,6 +35,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.Utilities;
 
 import junit.framework.*;
@@ -2752,10 +2753,13 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 TestConfiguration.embeddedSuite(BlobClob4BlobTest.class));
         suite.addTest(
                 TestConfiguration.clientServerSuite(BlobClob4BlobTest.class));
-
-        TestSuite encSuite = new TestSuite ("BlobClob4BlobTest:encrypted");
-        encSuite.addTestSuite (BlobClob4BlobTest.class);
-        suite.addTest(Decorator.encryptedDatabase (encSuite));
+        // JSR169 does not have encryption support
+        if (JDBC.vmSupportsJDBC3())
+        {
+            TestSuite encSuite = new TestSuite ("BlobClob4BlobTest:encrypted");
+            encSuite.addTestSuite (BlobClob4BlobTest.class);
+            suite.addTest(Decorator.encryptedDatabase (encSuite));
+        }
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4));
     }
