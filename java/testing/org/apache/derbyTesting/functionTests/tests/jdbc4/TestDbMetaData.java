@@ -127,52 +127,58 @@ public class TestDbMetaData extends BaseJDBCTestCase {
             "FUNCTION_CAT", "FUNCTION_SCHEM", "FUNCTION_NAME", "REMARKS",
             "SPECIFIC_NAME" });
     }
+    
+    private static final GeneratedId GENERIC_NAME = new GeneratedId();
 
     /** Expected rows from getFunctions() when all functions match. */
     private static final Object[][] ALL_FUNCTIONS = {
-        { null, "APP", "DUMMY1", "java.some.func", new GeneratedId() },
-        { null, "APP", "DUMMY2", "java.some.func", new GeneratedId() },
-        { null, "APP", "DUMMY3", "java.some.func", new GeneratedId() },
-        { null, "APP", "DUMMY4", "java.some.func", new GeneratedId() },
+        { null, "APP", "DUMMY1", "java.some.func", GENERIC_NAME },
+        { null, "APP", "DUMMY2", "java.some.func", GENERIC_NAME },
+        { null, "APP", "DUMMY3", "java.some.func", GENERIC_NAME },
+        { null, "APP", "DUMMY4", "java.some.func", GENERIC_NAME },
         { null, "SYSCS_UTIL", "SYSCS_CHECK_TABLE",
           "org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE",
-          new GeneratedId() },
+          GENERIC_NAME },
         { null, "SYSCS_UTIL", "SYSCS_GET_DATABASE_PROPERTY",
           "org.apache.derby.catalog.SystemProcedures." +
-          "SYSCS_GET_DATABASE_PROPERTY", new GeneratedId() },
+          "SYSCS_GET_DATABASE_PROPERTY", GENERIC_NAME },
         { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
           "org.apache.derby.catalog.SystemProcedures." +
-          "SYSCS_GET_RUNTIMESTATISTICS", new GeneratedId() },
+          "SYSCS_GET_RUNTIMESTATISTICS", GENERIC_NAME },
+          { null, "SYSCS_UTIL", "SYSCS_GET_USER_ACCESS",
+              "org.apache.derby.catalog.SystemProcedures." +
+              "SYSCS_GET_USER_ACCESS", GENERIC_NAME },
         { null, "SYSIBM", "BLOBCREATELOCATOR",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBCREATELOCATOR", new GeneratedId() },
+          "BLOBCREATELOCATOR", GENERIC_NAME },
         { null, "SYSIBM", "BLOBGETBYTES",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBGETBYTES", new GeneratedId() },
+          "BLOBGETBYTES", GENERIC_NAME },
         { null, "SYSIBM", "BLOBGETLENGTH",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBGETLENGTH", new GeneratedId() },
+          "BLOBGETLENGTH", GENERIC_NAME },
         { null, "SYSIBM", "BLOBGETPOSITIONFROMBYTES",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBGETPOSITIONFROMBYTES", new GeneratedId() },
+          "BLOBGETPOSITIONFROMBYTES", GENERIC_NAME },
         { null, "SYSIBM", "BLOBGETPOSITIONFROMLOCATOR",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
+          "BLOBGETPOSITIONFROMLOCATOR", GENERIC_NAME },
         { null, "SYSIBM", "CLOBCREATELOCATOR",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBCREATELOCATOR", new GeneratedId() },
+          "CLOBCREATELOCATOR", GENERIC_NAME },
         { null, "SYSIBM", "CLOBGETLENGTH",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBGETLENGTH", new GeneratedId() },
+          "CLOBGETLENGTH", GENERIC_NAME },
         { null, "SYSIBM", "CLOBGETPOSITIONFROMLOCATOR",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
+          "CLOBGETPOSITIONFROMLOCATOR", GENERIC_NAME },
         { null, "SYSIBM", "CLOBGETPOSITIONFROMSTRING",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBGETPOSITIONFROMSTRING", new GeneratedId() },
+          "CLOBGETPOSITIONFROMSTRING", GENERIC_NAME },
         { null, "SYSIBM", "CLOBGETSUBSTRING",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBGETSUBSTRING", new GeneratedId() },
+          "CLOBGETSUBSTRING", GENERIC_NAME },
+
     };
 
     public void testGetFunctionsNullNullNull() throws SQLException {
@@ -192,91 +198,73 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     }
 
     public void testGetFunctionsFromSysSchemas() throws SQLException {
+        
+        getSysFunctions();
         // Any function in a schema starting with "SYS"
         ResultSet rs = meta.getFunctions(null, "SYS%", null);
         assertGetFunctionsRs(rs);
-        Object[][] sysFunctions = {
-            { null, "SYSCS_UTIL", "SYSCS_CHECK_TABLE",
-              "org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE",
-              new GeneratedId() },
-            { null, "SYSCS_UTIL", "SYSCS_GET_DATABASE_PROPERTY",
-              "org.apache.derby.catalog.SystemProcedures." +
-              "SYSCS_GET_DATABASE_PROPERTY", new GeneratedId() },
-            { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
-              "org.apache.derby.catalog.SystemProcedures." +
-              "SYSCS_GET_RUNTIMESTATISTICS", new GeneratedId() },
-            { null, "SYSIBM", "BLOBCREATELOCATOR",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "BLOBCREATELOCATOR", new GeneratedId() },
-            { null, "SYSIBM", "BLOBGETBYTES",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "BLOBGETBYTES", new GeneratedId() },
-            { null, "SYSIBM", "BLOBGETLENGTH",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "BLOBGETLENGTH", new GeneratedId() },
-            { null, "SYSIBM", "BLOBGETPOSITIONFROMBYTES",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "BLOBGETPOSITIONFROMBYTES", new GeneratedId() },
-            { null, "SYSIBM", "BLOBGETPOSITIONFROMLOCATOR",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "BLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
-            { null, "SYSIBM", "CLOBCREATELOCATOR",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "CLOBCREATELOCATOR", new GeneratedId() },
-            { null, "SYSIBM", "CLOBGETLENGTH",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "CLOBGETLENGTH", new GeneratedId() },
-            { null, "SYSIBM", "CLOBGETPOSITIONFROMLOCATOR",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "CLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
-            { null, "SYSIBM", "CLOBGETPOSITIONFROMSTRING",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "CLOBGETPOSITIONFROMSTRING", new GeneratedId() },
-            { null, "SYSIBM", "CLOBGETSUBSTRING",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "CLOBGETSUBSTRING", new GeneratedId() },
-        };
-        JDBC.assertFullResultSet(rs, sysFunctions, false);
+        JDBC.assertFullResultSet(rs, getSysFunctions(), false);
     }
+    
+    /**
+     * From the list of all functions extract the ones in schemas
+     * starting with SYS.
+      */
+    private static Object[][] getSysFunctions()
+    {
+        int n = 0;
+        for (int i = 0; i < ALL_FUNCTIONS.length; i++)
+        {
+            String schema = (String) ALL_FUNCTIONS[i][1];
+            if (schema.startsWith("SYS"))
+                n++;
+        }
+        
+        Object[][] sysFunctions = new Object[n][];
+        n = 0;
+        for (int i = 0; i < ALL_FUNCTIONS.length; i++)
+        {
+            String schema = (String) ALL_FUNCTIONS[i][1];
+            if (schema.startsWith("SYS"))
+                sysFunctions[n++] = ALL_FUNCTIONS[i];
+        }        
+               
+        return sysFunctions;
+    }
+    
+    /**
+     * From the list of all functions extract the ones with GET in the name.
+     * This assumes this test does not create functions with GET.
+      */
+    private static Object[][] getGetFunctions()
+    {
+        int n = 0;
+        for (int i = 0; i < ALL_FUNCTIONS.length; i++)
+        {
+            String name = (String) ALL_FUNCTIONS[i][2];
+            if (name.indexOf("GET") != -1)
+                n++;
+        }
+        
+        Object[][] getFunctions = new Object[n][];
+        n = 0;
+        for (int i = 0; i < ALL_FUNCTIONS.length; i++)
+        {
+            String name = (String) ALL_FUNCTIONS[i][2];
+            if (name.indexOf("GET") != -1)
+                getFunctions[n++] = ALL_FUNCTIONS[i];
+        }        
+               
+        return getFunctions;
+    }
+    
 
     public void testGetFunctionsContainingGET() throws SQLException {
         // All functions containing "GET" in any schema 
         // (and any catalog)
         ResultSet rs = meta.getFunctions(null, null, "%GET%");
         assertGetFunctionsRs(rs);
-        Object[][] getFunctions = {
-            { null, "SYSCS_UTIL", "SYSCS_GET_DATABASE_PROPERTY",
-              "org.apache.derby.catalog.SystemProcedures." +
-              "SYSCS_GET_DATABASE_PROPERTY", new GeneratedId() },
-            { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
-              "org.apache.derby.catalog.SystemProcedures." +
-              "SYSCS_GET_RUNTIMESTATISTICS", new GeneratedId() },
-            { null, "SYSIBM", "BLOBGETBYTES",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "BLOBGETBYTES", new GeneratedId() },
-            { null, "SYSIBM", "BLOBGETLENGTH",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "BLOBGETLENGTH", new GeneratedId() },
-            { null, "SYSIBM", "BLOBGETPOSITIONFROMBYTES",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "BLOBGETPOSITIONFROMBYTES", new GeneratedId() },
-            { null, "SYSIBM", "BLOBGETPOSITIONFROMLOCATOR",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "BLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
-            { null, "SYSIBM", "CLOBGETLENGTH",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "CLOBGETLENGTH", new GeneratedId() },
-            { null, "SYSIBM", "CLOBGETPOSITIONFROMLOCATOR",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "CLOBGETPOSITIONFROMLOCATOR", new GeneratedId() },
-            { null, "SYSIBM", "CLOBGETPOSITIONFROMSTRING",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "CLOBGETPOSITIONFROMSTRING", new GeneratedId() },
-            { null, "SYSIBM", "CLOBGETSUBSTRING",
-              "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-              "CLOBGETSUBSTRING", new GeneratedId() },
-        };
-        JDBC.assertFullResultSet(rs, getFunctions, false);
+        JDBC.assertFullResultSet(rs, getGetFunctions(), false);
     }
 
     public void testGetFunctionsNoSchemaNoCatalog() throws SQLException {
@@ -308,48 +296,48 @@ public class TestDbMetaData extends BaseJDBCTestCase {
             { null, "APP", "DUMMY1", "", new Integer(4), new Integer(5),
               "SMALLINT", new Integer(5), new Integer(2), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(0),
-              "YES", new GeneratedId(), new Integer(1), new Integer(-1) },
+              "YES", GENERIC_NAME, new Integer(1), new Integer(-1) },
             { null, "APP", "DUMMY1", "X", new Integer(1), new Integer(5),
               "SMALLINT", new Integer(5), new Integer(2), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(1),
-              "YES", new GeneratedId(), new Integer(1), new Integer(0) },
+              "YES", GENERIC_NAME, new Integer(1), new Integer(0) },
             { null, "APP", "DUMMY2", "", new Integer(4), new Integer(4),
               "INTEGER", new Integer(10), new Integer(4), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(0),
-              "YES", new GeneratedId(), new Integer(2), new Integer(-1) },
+              "YES", GENERIC_NAME, new Integer(2), new Integer(-1) },
             { null, "APP", "DUMMY2", "X", new Integer(1), new Integer(4),
               "INTEGER", new Integer(10), new Integer(4), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(1),
-              "YES", new GeneratedId(), new Integer(2), new Integer(0) },
+              "YES", GENERIC_NAME, new Integer(2), new Integer(0) },
             { null, "APP", "DUMMY2", "Y", new Integer(1), new Integer(5),
               "SMALLINT", new Integer(5), new Integer(2), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(2),
-              "YES", new GeneratedId(), new Integer(2), new Integer(1) },
+              "YES", GENERIC_NAME, new Integer(2), new Integer(1) },
             { null, "APP", "DUMMY3", "", new Integer(4), new Integer(12),
               "VARCHAR", new Integer(16), new Integer(32), null, null,
               new Integer(1), null, 32, new Integer(0), "YES",
-              new GeneratedId(), new Integer(2), new Integer(-1) },
+              GENERIC_NAME, new Integer(2), new Integer(-1) },
             { null, "APP", "DUMMY3", "X", new Integer(1), new Integer(12),
               "VARCHAR", new Integer(16), new Integer(32), null, null,
               new Integer(1), null, 32, new Integer(1), "YES",
-              new GeneratedId(), new Integer(2), new Integer(0) },
+              GENERIC_NAME, new Integer(2), new Integer(0) },
             { null, "APP", "DUMMY3", "Y", new Integer(1), new Integer(4),
               "INTEGER", new Integer(10), new Integer(4), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(2),
-              "YES", new GeneratedId(), new Integer(2), new Integer(1) },
+              "YES", GENERIC_NAME, new Integer(2), new Integer(1) },
             { null, "APP", "DUMMY4", "", new Integer(4), new Integer(4),
               "INTEGER", new Integer(10), new Integer(4), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(0),
-              "YES", new GeneratedId(), new Integer(2), new Integer(-1) },
+              "YES", GENERIC_NAME, new Integer(2), new Integer(-1) },
             { null, "APP", "DUMMY4", "X", new Integer(1), new Integer(12),
               "VARCHAR", new Integer(128), new Integer(256),
               null, null, new Integer(1), null, 256, new Integer(1), "YES",
-              new GeneratedId(),
+              GENERIC_NAME,
               new Integer(2), new Integer(0) },
             { null, "APP", "DUMMY4", "Y", new Integer(1), new Integer(4),
               "INTEGER", new Integer(10), new Integer(4), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(2),
-              "YES", new GeneratedId(), new Integer(2), new Integer(1) },
+              "YES", GENERIC_NAME, new Integer(2), new Integer(1) },
         };
         JDBC.assertFullResultSet(rs, expectedRows, false);
     }
@@ -362,20 +350,20 @@ public class TestDbMetaData extends BaseJDBCTestCase {
             { null, "APP", "DUMMY1", "", new Integer(4), new Integer(5),
               "SMALLINT", new Integer(5), new Integer(2), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(0),
-              "YES", new GeneratedId(), new Integer(1), new Integer(-1) },
+              "YES", GENERIC_NAME, new Integer(1), new Integer(-1) },
             { null, "APP", "DUMMY2", "", new Integer(4), new Integer(4),
               "INTEGER", new Integer(10), new Integer(4), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(0),
-              "YES", new GeneratedId(), new Integer(2), new Integer(-1) },
+              "YES", GENERIC_NAME, new Integer(2), new Integer(-1) },
             { null, "APP", "DUMMY3", "", new Integer(4), new Integer(12),
               "VARCHAR", new Integer(16), new Integer(32),
               null, null, new Integer(1), null, 32, new Integer(0), "YES",
-              new GeneratedId(),
+              GENERIC_NAME,
               new Integer(2), new Integer(-1) },
             { null, "APP", "DUMMY4", "", new Integer(4), new Integer(4),
               "INTEGER", new Integer(10), new Integer(4), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(0),
-              "YES", new GeneratedId(), new Integer(2), new Integer(-1) },
+              "YES", GENERIC_NAME, new Integer(2), new Integer(-1) },
         };
         JDBC.assertFullResultSet(rs, expectedRows, false);
     }
