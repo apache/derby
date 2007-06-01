@@ -106,7 +106,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         ResultSet rs = meta.getClientInfoProperties();
         JDBC.assertColumnNames(rs, new String[] {
             "NAME", "MAX_LEN", "DEFAULT_VALUE", "DESCRIPTION" });
-        JDBC.assertDrainResults(rs, 0);
+        JDBC.assertEmpty(rs);
     }
 
     /**
@@ -272,7 +272,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         // NO catalog (none)
         ResultSet rs = meta.getFunctions("", "", null);
         assertGetFunctionsRs(rs);
-        JDBC.assertDrainResults(rs, 0);
+        JDBC.assertEmpty(rs);
     }
 
     /** Check that the column names are as expected from
@@ -426,7 +426,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         // set when a schema is passed with no match
         ResultSet rs = meta.getSchemas(null, "BLAH");
         assertGetSchemasRs(rs);
-        JDBC.assertDrainResults(rs, 0);
+        JDBC.assertEmpty(rs);
     }
 
     /**

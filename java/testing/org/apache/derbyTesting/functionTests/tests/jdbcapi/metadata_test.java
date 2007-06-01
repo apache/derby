@@ -296,91 +296,11 @@ public abstract class metadata_test {
 							   "." + met.getDriverMinorVersion() +
 							   " (" + met.getDriverVersion() + ")");
 
-			testGetSchemasWithTwoParams(met);
-
 
 			System.out.println("getProcedures():");
 			dumpRS(GET_PROCEDURES, getMetaDataRS(met, GET_PROCEDURES,
 				new String [] {null, "%", "GETPCTEST%"},
 				null, null, null));
-
-			// Using reflection to check if we have getFunctions in the
-			// the current version of Derby
-			try {
-				Class s = "".getClass();
-				
-				// Make sure the method is actually implemented
-				java.lang.reflect.Method gf = 
-					met.getClass().getMethod("getFunctions", 
-											 new Class [] { s, s, s });
-				if (!java.lang.reflect.Modifier.isAbstract(gf.getModifiers())){
-					// Any function in any schema in any catalog
-					System.out.println("getFunctions(null,null,null):");
-					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
-						   invoke(met, new String [] {null, null, null}));
-
-					// Any function in any schema in "Dummy
-					// Catalog". Same as above since the catalog
-					// argument is ignored (is always null)
-					System.out.println("getFunctions(\"Dummy Catalog\",null,"+
-									   "null):");
-					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
-						   invoke(met, new String [] {"Dummy Catalog", 
-													  null, null}));
-
-					// Any function in a schema starting with "SYS"
-					System.out.println("getFunctions(null,\"%SYS%\",null):");
-					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
-						   invoke(met, new String [] {null, "SYS%", null}));
-
-					// All functions containing "GET" in any schema
-					// (and any catalog)
-					System.out.println("getFunctions(null,null,\"%GET%\"):");
-					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
-						   invoke(met, new String [] {null, null, "%GET%"}));
-
-					// Any function that belongs to NO schema and
-					// NO catalog (none)
-					System.out.println("getFunctions(\"\",\"\",null):");
-					dumpRS(IGNORE_PROC_ID, (ResultSet)gf.
-						   invoke(met, new String [] {"", "", null}));
-
-				}
-				
-				// Test getFunctionColumns(String,String,String,String)
-				java.lang.reflect.Method gfp = 
-					met.getClass().getMethod("getFunctionColumns", 
-											 new Class [] { s, s, s, s });
-
-				if (!java.lang.reflect.Modifier.
-					isAbstract(gfp.getModifiers())){
-					System.out.println("getFunctionColumns(null,"+
-									   "null,null,null):");
-					dumpRS(IGNORE_PROC_ID, (ResultSet)gfp.
-						   invoke(met, 
-								  new String [] {null, null, null, null}));
-
-					System.out.println("getFunctionColumns(null,\"APP\","+
-									   "\"DUMMY%\",\"X\"):");
-					dumpRS(IGNORE_PROC_ID, (ResultSet)gfp.
-						   invoke(met, 
-								  new String [] {null, "APP", "DUMMY%", "X"}));
-
-					System.out.println("getFunctionColumns(null,\"APP\","+
-									   "\"DUMMY%\",\"\"):");
-					dumpRS(IGNORE_PROC_ID, (ResultSet)gfp.
-						   invoke(met, 
-								  new String [] {null, "APP", "DUMMY%", ""}));
-
-				}
-			} 
-			catch (NoSuchMethodException e) {
-				if (org.apache.derby.iapi.services.info.JVMInfo.JDK_ID >= 
-					org.apache.derby.iapi.services.info.JVMInfo.J2SE_16) {
-					e.printStackTrace();
-				}
-			}
-			catch (Exception e) { e.printStackTrace(); }
 
 			System.out.println("getUDTs() with user-named types null :");
  			dumpRS(met.getUDTs(null, null, null, null));
@@ -924,55 +844,6 @@ public abstract class metadata_test {
 		}
 
 		System.out.println("Test metadata finished");
-    }
-
-
-
-    /**
-     * Run tests for <code>getSchemas()</code> with two
-     * parameters. (New method introduced by JDBC 4.0.)
-     *
-     * @param dmd a <code>DatabaseMetaData</code> object
-     */
-    private void testGetSchemasWithTwoParams(DatabaseMetaData dmd) {
-        // not implemented in JCC
-        if (TestUtil.isJCCFramework()) return;
-
-        Class[] paramTypes = { String.class, String.class };
-
-        Method method = null;
-        try {
-            method = dmd.getClass().getMethod("getSchemas", paramTypes);
-        } catch (NoSuchMethodException nsme) { }
-
-        if (method == null || Modifier.isAbstract(method.getModifiers())) {
-            System.out.println("DatabaseMetaData.getSchemas(String, String) " +
-                               "is not available.");
-            return;
-        }
-
-        System.out.println();
-        System.out.println("getSchemas(String, String):");
-
-        // array of argument lists
-        String[][] args = {
-            // no qualifiers
-            { null, null },
-            // wildcard
-            { null, "SYS%" },
-            // exact match
-            { null, "APP" },
-            // no match
-            { null, "BLAH" },
-        };
-
-        for (int i = 0; i < args.length; ++i) {
-            try {
-                dumpRS((ResultSet) method.invoke(dmd, args[i]));
-            } catch (Exception e) {
-                dumpAllExceptions(e);
-            }
-        }
     }
 
     /**
