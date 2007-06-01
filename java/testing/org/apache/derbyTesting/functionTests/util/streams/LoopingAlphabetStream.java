@@ -103,7 +103,7 @@ public class LoopingAlphabetStream
             return -1;
         }
         // We can only read as many bytes as there are in the stream.
-        int nonBlankLength = Math.min((int)remainingNonBlanks, length);
+        int nonBlankLength = (int)Math.min(remainingNonBlanks, (long)length);
         fillBuffer(nonBlankLength);
         int read = 0;
         // Find position of next letter in the buffer.
