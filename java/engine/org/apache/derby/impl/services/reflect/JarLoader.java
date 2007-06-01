@@ -30,7 +30,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
 
+import java.security.CodeSource;
 import java.security.GeneralSecurityException;
+import java.security.SecureClassLoader;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.jar.JarEntry;
@@ -47,7 +49,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.io.StorageFile;
 
 
-class JarLoader extends ClassLoader {
+class JarLoader extends SecureClassLoader {
     
     /**
      * Two part name for the jar file.
@@ -280,14 +282,14 @@ class JarLoader extends ClassLoader {
 
 		byte[] data = readData(e, in, className);
 
-		Object[] signers = getSigners(className, e);
+		Certificate[] signers = getSigners(className, e);
 
 		synchronized (updateLoader) {
 			// see if someone else loaded it while we
 			// were getting the bytes ...
 			Class c = updateLoader.checkLoaded(className, resolve);
 			if (c == null) {
-				c = defineClass(className, data, 0, data.length);
+				c = defineClass(className, data, 0, data.length, (CodeSource) null);
 				if (signers != null) {
 					setSigners(c, signers);
 				}
@@ -437,7 +439,7 @@ class JarLoader extends ClassLoader {
     /**
      * Validate the security certificates (signers) for the class data.
      */
-    Object[] getSigners(String className, JarEntry je) throws IOException {
+    private Certificate[] getSigners(String className, JarEntry je) throws IOException {
 
         try {
             Certificate[] list = je.getCertificates();

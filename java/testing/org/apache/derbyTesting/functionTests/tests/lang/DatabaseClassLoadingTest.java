@@ -122,7 +122,17 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                    new DatabaseClassLoadingTest("testInvalidJar")));           
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testRemoveJar"))); 
-
+           
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                   new DatabaseClassLoadingTest("testLoadJavaClassIndirectly"))); 
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                   new DatabaseClassLoadingTest("testLoadJavaClassDirectly")));
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                   new DatabaseClassLoadingTest("testLoadJavaClassDirectly2")));
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                   new DatabaseClassLoadingTest("testLoadJavaClassDirectly3")));
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                   new DatabaseClassLoadingTest("testLoadDerbyClassIndirectly")));
        
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testDatabaseInJar"))); 
@@ -137,7 +147,8 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                    "functionTests/tests/lang/dcl_emc2.jar",
                    "functionTests/tests/lang/dcl_emc2s.jar",
                    "functionTests/tests/lang/dcl_emc2sm.jar",
-                   "functionTests/tests/lang/dcl_emc2l.jar"
+                   "functionTests/tests/lang/dcl_emc2l.jar",
+                   "functionTests/tests/lang/dcl_java.jar",
                    });
            
            }
@@ -663,6 +674,94 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         } finally {
             //setContextClassLoader(null);
         } 
+    }
+    
+    /**
+     * Load a java.sql class indirectly (ie. through a valid class
+     * in the installed jar file) from the jar file.
+     */
+    public void testLoadJavaClassIndirectly() throws SQLException, MalformedURLException
+    {
+        loadJavaClass(
+                "org.apache.derbyTesting.databaseclassloader.cracker.C1.simple",
+                "38000");
+    }
+    
+    /**
+     * Load a java.sql class directly (ie. through a direct procedure call)
+     * from the jar file.
+     */    
+    public void testLoadJavaClassDirectly() throws SQLException, MalformedURLException
+    {
+        loadJavaClass("java.sql.J1.simple", "XJ001");
+    }
+    
+    /**
+     * Load a java.derby99 class directly (ie. through a direct procedure call)
+     * from the jar file. This is to see if additional non-standard java.* packages
+     * can be added into the JVM
+     */    
+    public void testLoadJavaClassDirectly2() throws SQLException, MalformedURLException
+    {
+        loadJavaClass("java.derby99.J2.simple", "XJ001");
+    }
+    
+    /**
+     * Load a javax.derby99 class directly (ie. through a direct procedure call)
+     * from the jar file. This is to see if additional non-standard javax.* packages
+     * can be added into the JVM. As an implementation note this is blocked
+     * by Derby's class loader, not the JVM's security mechanism.
+     */    
+    public void testLoadJavaClassDirectly3() throws SQLException, MalformedURLException
+    {
+        loadJavaClass("javax.derby99.J3.simple", "XJ001");
+    }
+    
+    /**
+     * Load a org.apache.derby class directly (ie. through a direct procedure call)
+     * from the jar file. As an implementation note this is blocked
+     * by Derby's class loader, not the JVM's security mechanism.
+     */    
+    public void testLoadDerbyClassIndirectly() throws SQLException, MalformedURLException
+    {
+        loadJavaClass(
+                "org.apache.derbyTesting.databaseclassloader.cracker.C1.derby",
+                "38000");
+    }
+    
+    /**
+     * Test loading classes in the java. and javax. namespaces
+     * from a jar, it should be disallowed or be ignored. These tests
+     * are run as separate fixtures to ensure the failed loading
+     * does not affect subsequent attempts to load.
+     * @throws MalformedURLException 
+     */
+    private void loadJavaClass(String method, String expectedSQLState)
+        throws SQLException, MalformedURLException
+    {
+        String jarName = "EMC.MY_JAVA";
+        
+        installJar("dcl_java.jar", jarName);
+        setDBClasspath(jarName);
+        
+        Statement s = createStatement();
+        s.execute("CREATE PROCEDURE C1() LANGUAGE JAVA PARAMETER STYLE JAVA " +
+                "NO SQL EXTERNAL NAME " +
+                "'" + method + "'");
+       
+        try {
+            s.execute("CALL C1()");
+            fail("Call to procedure loading java class from installed jar");
+        } catch (SQLException sqle)
+        {
+            assertSQLState(expectedSQLState, sqle);
+        }
+        
+        s.execute("DROP PROCEDURE C1");
+        s.close();
+        setDBClasspath(null);
+        removeJar(jarName);
+
     }
     
     /**
