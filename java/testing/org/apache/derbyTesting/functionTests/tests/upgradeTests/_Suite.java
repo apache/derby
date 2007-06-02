@@ -129,8 +129,8 @@ public class _Suite extends BaseTestCase {
             // JSR169 support was only added with 10.1, so don't
             // run 10.0 to later upgrade if that's what our jvm is supporting.
             if (!(JDBC.vmSupportsJSR169() && 
-                (OLD_VERSIONS[i][0]==10) && (OLD_VERSIONS[i][1]==0))); 
-            suite.addTest(UpgradeRun.suite(OLD_VERSIONS[i]));
+                (OLD_VERSIONS[i][0]==10) && (OLD_VERSIONS[i][1]==0)))
+                suite.addTest(UpgradeRun.suite(OLD_VERSIONS[i]));
         }
         
         return suite;
