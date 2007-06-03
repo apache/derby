@@ -18,8 +18,6 @@
 -- This test will cover SHOW TABLES, SHOW SCHEMAS, etc.
 -- and the DESCRIBE command.
 
-connect 'jdbc:derby:wombat;create=true';
-
 -- first, set schema to sys and demonstrate that we can see the system tables.
 SET SCHEMA SYS;
 SHOW TABLES;
@@ -51,8 +49,6 @@ SHOW SCHEMAS;
 SHOW VIEWS IN USER1;
 SHOW PROCEDURES IN APP;
 SHOW SYNONYMS IN USER1;
-SHOW INDEXES IN APP;
-SHOW INDEXES FROM APP.t1;
 
 -- DERBY-2019: ensure that tables with mixed-case names can be described:
 SET SCHEMA APP;

@@ -14,10 +14,11 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
+
 -- This test will cover SHOW TABLES, SHOW SCHEMAS, etc.
 -- and the DESCRIBE command.
-connect 'jdbc:derby:wombat;create=true';
-ij> -- first, set schema to sys and demonstrate that we can see the system tables.
+
+-- first, set schema to sys and demonstrate that we can see the system tables.
 SET SCHEMA SYS;
 0 rows inserted/updated/deleted
 ij> SHOW TABLES;
@@ -42,7 +43,6 @@ SYS                 |SYSTABLES                     |
 SYS                 |SYSTRIGGERS                   |                    
 SYS                 |SYSVIEWS                      |                    
 SYSIBM              |SYSDUMMY1                     |                    
-19 rows selected
 ij> SET SCHEMA APP;
 0 rows inserted/updated/deleted
 ij> CREATE TABLE t1 (i int generated always as identity, d DECIMAL(5,2), test VARCHAR(20));
@@ -88,12 +88,10 @@ SYS                 |SYSVIEWS                      |
 SYSIBM              |SYSDUMMY1                     |                    
 APP                 |T1                            |                    
 USER1               |T2                            |                    
-21 rows selected
 ij> SHOW TABLES IN APP;
 TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
 ------------------------------------------------------------------------
 APP                 |T1                            |                    
-1 row selected
 ij> -- 'describe t1' will give error, as not in current schema
 DESCRIBE t1;
 IJ ERROR: No table exists with the name T1
@@ -103,14 +101,12 @@ COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
 I                   |INTEGER  |0   |10  |10    |AUTOINCRE&|NULL      |NO      
 D                   |DECIMAL  |2   |10  |5     |NULL      |NULL      |YES     
 TEST                |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
-3 rows selected
 ij> DESCRIBE v1;
 COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
 ------------------------------------------------------------------------------
 I                   |INTEGER  |0   |10  |10    |NULL      |NULL      |NO      
 D                   |DECIMAL  |2   |10  |5     |NULL      |NULL      |YES     
 TEST                |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
-3 rows selected
 ij> SHOW SCHEMAS;
 TABLE_SCHEM                   
 ------------------------------
@@ -126,32 +122,18 @@ SYSIBM
 SYSPROC                       
 SYSSTAT                       
 USER1                         
-12 rows selected
 ij> SHOW VIEWS IN USER1;
 TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
 ------------------------------------------------------------------------
 USER1               |V1                            |                    
-1 row selected
 ij> SHOW PROCEDURES IN APP;
 PROCEDURE_SCHEM     |PROCEDURE_NAME                |REMARKS             
 ------------------------------------------------------------------------
 APP                 |PROCTEST                      |a.b.c.d.e           
-1 row selected
 ij> SHOW SYNONYMS IN USER1;
 TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
 ------------------------------------------------------------------------
 USER1               |T3                            |                    
-1 row selected
-ij> SHOW INDEXES IN APP;
-TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
-----------------------------------------------------------------------------
-T1                  |TEST                |true  |3   |A   |NULL    |NULL    
-1 row selected
-ij> SHOW INDEXES FROM APP.t1;
-TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
-----------------------------------------------------------------------------
-T1                  |TEST                |true  |3   |A   |NULL    |NULL    
-1 row selected
 ij> -- DERBY-2019: ensure that tables with mixed-case names can be described:
 SET SCHEMA APP;
 0 rows inserted/updated/deleted
@@ -168,7 +150,6 @@ COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
 ------------------------------------------------------------------------------
 C1                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
 C2                  |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
-2 rows selected
 ij> -- should fail, as case is wrong:
 describe 'CAMELCaseTable';
 IJ ERROR: No table exists with the name CAMELCaseTable
@@ -178,7 +159,6 @@ COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
 ------------------------------------------------------------------------------
 C1                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
 C2                  |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
-2 rows selected
 ij> set SCHEMA USER1;
 0 rows inserted/updated/deleted
 ij> -- should work, even after changing default schema, so long as schema is right
@@ -187,7 +167,6 @@ COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
 ------------------------------------------------------------------------------
 C1                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
 C2                  |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
-2 rows selected
 ij> -- should fail, since table is in the other schema
 describe 'CamelCaseTable';
 IJ ERROR: No table exists with the name CamelCaseTable
@@ -199,7 +178,6 @@ USER1               |T2                  |I                   |INTEGER  |0   |10
 USER1               |V1                  |I                   |INTEGER  |0   |10  |10    |NULL      |NULL      |NO      
 USER1               |V1                  |D                   |DECIMAL  |2   |10  |5     |NULL      |NULL      |YES     
 USER1               |V1                  |TEST                |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
-4 rows selected
 ij> describe 'APP.*';
 TABLE_SCHEM         |TABLE_NAME          |COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
 ------------------------------------------------------------------------------------------------------------------------
@@ -208,7 +186,6 @@ APP                 |CamelCaseTable      |C2                  |VARCHAR  |NULL|NU
 APP                 |T1                  |I                   |INTEGER  |0   |10  |10    |AUTOINCRE&|NULL      |NO      
 APP                 |T1                  |D                   |DECIMAL  |2   |10  |5     |NULL      |NULL      |YES     
 APP                 |T1                  |TEST                |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
-5 rows selected
 ij> -- Observe behavior with empty string:
 describe '';
 IJ ERROR: No table exists with the name (missing)
