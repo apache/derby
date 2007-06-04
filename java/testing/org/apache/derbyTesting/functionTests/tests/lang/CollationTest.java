@@ -203,6 +203,11 @@ public void testDefaultCollation() throws SQLException {
 			" 'SYSCOLUMNS'",
       		new String[][] {{"SYSCOLUMNS"} });   
 
+      //Test USER/CURRENT_USER/SESSION_USER
+      checkLangBasedQuery(s, "SELECT count(*) FROM CUSTOMER WHERE "+ 
+      		"CURRENT_USER = 'APP'",
+      		new String[][] {{"7"}});   
+      
       //Do some testing with MAX/MIN operators
       checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
       		new String[][] {{"\u017Bebra"}});   
@@ -613,6 +618,40 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     		" CHAR(TABLENAME)= (CAST (TABLENAME AS CHAR(12))) AND " + 
 			" VARCHAR(TABLENAME) = 'SYSCOLUMNS'",
     		new String[][] {{"SYSCOLUMNS"} });  
+
+    //Test USER/CURRENT_USER/SESSION_USER/CURRENT SCHMEA/ CURRENT ISOLATION
+    //following will fail because we are trying to compare UCS_BASIC 
+    //(CURRENT_USER) with territory based ("APP" taking it's collation from
+    //compilation schema which is user schema at this time). 
+    assertStatementError("42818", s, "SELECT count(*) FROM CUSTOMER WHERE "+
+    		"CURRENT_USER = 'APP'");  
+    //The problem above can be fixed by CASTing CURRENT_USER so that the 
+    //collation type will be picked up from compilation schema which is user
+    //schema at this point.
+    checkLangBasedQuery(s, "SELECT count(*) FROM CUSTOMER WHERE "+ 
+    		"CAST(CURRENT_USER AS CHAR(12)) = 'APP'",
+    		new String[][] {{"7"}});   
+    //following comparison will not cause compilation error because both the
+    //operands around = have collation type of UCS_BASIC
+    checkLangBasedQuery(s, "SELECT count(*) FROM CUSTOMER WHERE "+ 
+    		"SESSION_USER = USER", new String[][] {{"7"}});
+    //following will fail because we are trying to compare UCS_BASIC 
+    //(CURRENT ISOLATION) with territory based ("CS" taking it's collation from
+    //compilation schema which is user schema at this time). 
+    assertStatementError("42818", s, "SELECT count(*) FROM CUSTOMER WHERE "+
+	"CURRENT ISOLATION = 'CS'");  
+    //Following will not give compilation error because both sides in = have 
+    //the same collation type 
+    checkLangBasedQuery(s, "SELECT count(*) FROM CUSTOMER WHERE "+ 
+    		"CAST(CURRENT ISOLATION AS CHAR(12)) = 'CS'",
+    		new String[][] {{"7"}});   
+    //Following will not cause compilation error because both the operands
+    //around the = have collation type of UCS_BASIC. We are in the SYS
+    //schema and hence character string constant 'APP' has picked the collation
+    //type of SYS schema which is UCS_BASIC
+    s.executeUpdate("set schema SYS");
+    checkLangBasedQuery(s, "SELECT count(*) FROM APP.CUSTOMER WHERE "+ 
+    		"CURRENT SCHEMA = 'SYS'", new String[][] {{"7"}});   
     
     s.executeUpdate("set schema APP");
     if (XML.classpathMeetsXMLReqs()) {
@@ -624,7 +663,6 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     			" CAST(TABLENAME AS CHAR(10))",
         		null);
     }
-
 
     //Start of parameter testing
     //Start with simple ? param in a string comparison

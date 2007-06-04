@@ -24,6 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
@@ -40,7 +41,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 
 import java.sql.Types;
 
@@ -134,6 +134,13 @@ public class SpecialFunctionNode extends ValueNode
 			methodName = "getAuthorizationId";
 			methodType = "java.lang.String";
 			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, false, 128);
+			//SQL spec Section 6.4 Syntax Rule 4 says that the collation type 
+			//of these functions will be the collation of character set 
+			//SQL_IDENTIFIER. In Derby's case, that will mean, the collation of
+			//these functions will be UCS_BASIC. The collation derivation will 
+			//be implicit. 
+			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			dtd.setCollationType(StringDataValue.COLLATION_TYPE_UCS_BASIC);
 			break;
 
 		case C_NodeTypes.CURRENT_SCHEMA_NODE:
@@ -141,6 +148,12 @@ public class SpecialFunctionNode extends ValueNode
 			methodName = "getCurrentSchemaName";
 			methodType = "java.lang.String";
 			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, false, 128);
+			//This is a Derby specific function but it's collation type will
+			//be based on the same rules as for SESSION_USER/CURRENT_USER etc. 
+			//ie there collation type will be UCS_BASIC. The collation 
+			//derivation will be implicit. 
+			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			dtd.setCollationType(StringDataValue.COLLATION_TYPE_UCS_BASIC);
 			break;
 
 		case C_NodeTypes.IDENTITY_VAL_NODE:
@@ -155,6 +168,12 @@ public class SpecialFunctionNode extends ValueNode
 			methodName = "getCurrentIsolationLevelStr";
 			methodType = "java.lang.String";
 			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 2);
+			//This is a Derby specific function but it's collation type will
+			//be based on the same rules as for SESSION_USER/CURRENT_USER etc. 
+			//ie there collation type will be UCS_BASIC. The collation 
+			//derivation will be implicit. 
+			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			dtd.setCollationType(StringDataValue.COLLATION_TYPE_UCS_BASIC);
 			break;
 		default:
 			if (SanityManager.DEBUG)
