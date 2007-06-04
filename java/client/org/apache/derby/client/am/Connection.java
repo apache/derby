@@ -2166,9 +2166,39 @@ public abstract class Connection implements java.sql.Connection,
         } catch (SqlException se) {
             throw se.getSQLException();
         }
-        org.apache.derby.client.am.Clob clob = new 
-                org.apache.derby.client.am.Clob(this.agent_,"");
         
+        //Stores a locator value obtained by calling the
+        //stored procedure CLOBCREATELOCATOR.
+        int locator = INVALID_LOCATOR;
+
+        //Stores the Clob instance that is returned.
+        org.apache.derby.client.am.Clob clob = null;
+
+        //Call the CLOBCREATELOCATOR stored procedure
+        //that will return a locator value.
+        try {
+            locator = locatorProcedureCall().clobCreateLocator();
+        }
+        catch(SqlException sqle) {
+            throw sqle.getSQLException();
+        }
+
+        //If the locator value is -1 it means that we do not
+        //have locator support on the server.
+
+        //The code here has been disabled because the Lob implementations
+        //have still not been completely converted to use locators. Once
+        //the Lob implementations are completed then this code can be enabled.
+        if (locator != INVALID_LOCATOR && false) {
+            //A valid locator value has been obtained.
+            clob = new org.apache.derby.client.am.Clob(this.agent_, locator);
+        }
+        else {
+            //A valid locator value could not be obtained.
+            clob = new org.apache.derby.client.am.Clob
+                    (this.agent_, "");
+        }
+
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "createClob", clob);
         }
