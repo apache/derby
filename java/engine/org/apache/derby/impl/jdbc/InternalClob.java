@@ -58,6 +58,7 @@ interface InternalClob {
      *
      * @param charPos character position. The first position is <code>1</code>.
      * @return A 0-based byte position.
+     * @throws EOFException if the position is bigger than the Clob
      * @throws IOException if accessing the underlying I/O resources fail
      * @throws SQLException if the specified character position is invalid
      */
@@ -79,6 +80,12 @@ interface InternalClob {
      * encoding. There is no predetermined encoding associated with this byte
      * stream, it is up to the Clob representation which one it uses.
      * <p>
+     * This stream may be an internal store stream, and should not be directly
+     * published to the end user (returned through the JDBC API). There are two
+     * motivations for this; the stream may be closed by the end user when it is
+     * not supposed to, and operations on the stream might throw exceptions we
+     * do not want to present to the end user unwrapped.
+     * <p>
      * The primary use of this method is to clone the Clob contents without
      * going via char (or String). Make sure the clone uses the same encoding
      * as the original Clob representation.
@@ -97,6 +104,7 @@ interface InternalClob {
      * @param characterPosition character position. The first character is at
      *      position <code>1</code>.
      * @return A <code>Reader</coder> serving the content of the Clob.
+     * @throws EOFException if the position is larger then the Clob
      * @throws IOException if accessing underlying I/O resources fail
      * @throws SQLException if accessing underlying resources fail
      */
