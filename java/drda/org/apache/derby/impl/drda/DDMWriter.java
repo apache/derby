@@ -55,6 +55,9 @@ class DDMWriter
 
 
 	static final BigDecimal ZERO = BigDecimal.valueOf(0L);
+        
+	private static final byte MULTI_BYTE_MASK = (byte) 0xC0;
+	private static final byte CONTINUATION_BYTE = (byte) 0x80;
 
 	// output buffer
 	private byte[] bytes;
@@ -1220,19 +1223,20 @@ class DDMWriter
 					SanityManager.THROWASSERT("Encoding assumed to be UTF8, but is actually" + NetworkServerControlImpl.DEFAULT_ENCODING);
 			}
 
-			if (writeLen != origLen)
-				// first position on the first byte of the multibyte char
-				while ((byteval[writeLen -1] & 0xC0) == 0x80)
-				{
-					multiByteTrunc = true;
+			if (writeLen != origLen) {
+				//find the first byte of the multibyte char in case
+				//the last byte is part of a multibyte char
+				while (isContinuationChar (byteval [writeLen])) {
 					writeLen--;
-					// Then subtract one more to get to the end of the
-					// previous character
-					if (multiByteTrunc == true)
-					{
-						writeLen = writeLen -1;
-					}
 				}
+				//
+				// Now byteval[ writeLen ] is either a standalone 1-byte char
+				// or the first byte of a multi-byte character. That means that
+				// byteval[ writeLen -1 ] is the last (perhaps only) byte of the
+				// previous character.
+				//
+			}
+                        
 
 			writeShort(writeLen);
 			writeBytes(byteval,writeLen);
@@ -1241,6 +1245,9 @@ class DDMWriter
 			//this should never happen
 			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
 		}
+	}
+	private boolean isContinuationChar( byte b ) {    
+		return ( (b & MULTI_BYTE_MASK) == CONTINUATION_BYTE );
 	}
 
 	/**
