@@ -51,12 +51,12 @@ public class ClobLocatorReader extends java.io.Reader {
      * Current position in the underlying Clob.
      * Clobs are indexed from 1
      */
-    private long currentPos = 1;
+    private long currentPos;
     
     /**
-     * The length in characters of the partial value to be retrieved.
+     * Position in Clob where to stop reading.
      */
-    private long length = -1;
+    private long maxPos;
     
     /**
      * Stores the information to whether this Reader has been
@@ -74,13 +74,16 @@ public class ClobLocatorReader extends java.io.Reader {
      * @param clob <code>Clob</code> object that contains locator for
      *        the <code>Clob</code> value on the server.
      */
-    public ClobLocatorReader(Connection connection, Clob clob) {
+    public ClobLocatorReader(Connection connection, Clob clob)
+    throws SqlException {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(clob.isLocator());
         }
         
         this.connection = connection;
         this.clob = clob;
+        this.currentPos = 1;
+        this.maxPos = clob.sqlLength();
     }
     
     /**
@@ -96,10 +99,10 @@ public class ClobLocatorReader extends java.io.Reader {
      * @param len The length in characters of the partial value to be retrieved.
      */
     public ClobLocatorReader(Connection connection, Clob clob, 
-            long pos, long len) {
+            long pos, long len) throws SqlException {
         this(connection, clob);
-        currentPos = pos;
-        length = len;
+        this.currentPos = pos;
+        this.maxPos = Math.min(clob.sqlLength(), pos + len - 1);
     }
     
     /**
@@ -180,7 +183,7 @@ public class ClobLocatorReader extends java.io.Reader {
     private char[] readCharacters(int len) throws IOException {
         try {
             int actualLength
-                    = (int )Math.min(len, getStreamLength() - currentPos + 1);
+                    = (int )Math.min(len, maxPos - currentPos + 1);
             String resultStr = connection.locatorProcedureCall().
                     clobGetSubString(clob.getLocator(),
                     currentPos, actualLength);
@@ -191,26 +194,6 @@ public class ClobLocatorReader extends java.io.Reader {
             IOException ioEx = new IOException();
             ioEx.initCause(ex);
             throw ioEx;
-        }
-    }
-    
-    /**
-     * Return the length of the stream.
-     *
-     * @return the length of the stream.
-     */
-    private long getStreamLength() throws SqlException {
-        //check to see if the length of the stream has been set
-        //during initialization
-        if(length != -1) {
-            //The length has been set. Hence return this as the
-            //length
-            return length;
-        }
-        else {
-            //The length has not been set. Obtain the length from
-            //the Clob.
-            return clob.sqlLength();
         }
     }
 }

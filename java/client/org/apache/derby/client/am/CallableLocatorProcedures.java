@@ -783,7 +783,7 @@ class CallableLocatorProcedures
         }
 
         clobGetPositionFromStringCall.setIntX(2, locator);
-        clobGetPositionFromStringCall.setStringX(3, searchLiteral);
+        clobGetPositionFromStringCall.setStringX(3, stringToBeCompared);
         clobGetPositionFromStringCall.setLongX(4, fromPosition);
         try {
             clobGetPositionFromStringCall.executeX();
