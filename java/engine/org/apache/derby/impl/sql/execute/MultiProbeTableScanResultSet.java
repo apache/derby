@@ -154,11 +154,6 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
             SanityManager.ASSERT(
                 (probingVals != null) && (probingVals.length > 0),
                 "No probe values found for multi-probe scan.");
-
-            SanityManager.ASSERT(sameStartStopPosition,
-                "All multi-probing result sets are expected to have a single" +
-                " key that is both the start key AND the stop key, but that" +
-                " is not the case.");
         }
 
         this.origProbeValues = probingVals;

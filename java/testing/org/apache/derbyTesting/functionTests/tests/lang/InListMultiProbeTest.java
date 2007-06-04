@@ -44,6 +44,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 
 /**
  * Test to verify that Derby will perform "multi-probing" of an index
@@ -259,6 +260,164 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Make sure that we get the correct results when the optimizer chooses
+     * to do index multi-probing *and* there are multiple start/stop preds.
+     * That is to say, there are predicates other than the probe predicate
+     * that can be used as start and/or stop keys on the index, as well.
+     * DERBY-2470.
+     */
+    public void testMultipleStartStopPreds() throws Exception
+    {
+        Statement st = createStatement();
+
+        // Following DDL inserts 80 rows.
+        st.execute("create table ct (i int, c1 char(5), c2 char(10))");
+        st.execute("insert into ct(i) values 1, 2, 3, 4, 5, 6, 7, 8, 9");
+        st.execute("insert into ct(i) values 0, 10, 11, 12, 13, 14, 15");
+        st.execute("insert into ct(i) values 16, 17, 18, 19");
+        st.execute("insert into ct(i) select 7 * i from ct");
+        st.execute("insert into ct(i) select 13 * i from ct");
+        st.execute("update ct set c1 = cast(i as char(25))");
+        st.execute("update ct set c2 = c1 || c1");
+
+        /* Now insert two more duplicates with different "C2" values.
+         * These are used to verify that all predicates are working
+         * correctly.
+         */
+        st.execute("insert into ct values (91, '91', '1234')");
+        st.execute("insert into ct values (91, '91', '212398')");
+
+        /* Create an index that has TWO columns; the fact that there
+         * is more one that column in the index is essential to the
+         * issue being tested here.
+         */
+        st.execute("create index idx2 on ct (c1, c2)");
+
+        String [][] expRS =
+            new String [][]
+            {
+                {"1","1    ","1    1    "},
+                {"2","2    ","2    2    "}
+            };
+
+        /* Turn on runtime stats so we can verify that multi-probing
+         * is occuring.
+         */
+        st.execute(RUNTIME_STATS_ON_QUERY);
+
+        // Run some some simple queries as sanity check.
+
+        PreparedStatement ps = prepareStatement(
+            "select i,c1,c2 from ct where c1 in (?,?) and c2 like '%'");
+
+        ps.setString(1, "1");
+        ps.setString(2, "2");
+        assertResultsAndQueryPlan(ps.executeQuery(), expRS, st);
+
+        ps = prepareStatement(
+            "select i,c1,c2 from ct where c1 in ('2','1') and c2 like '%'");
+
+        assertResultsAndQueryPlan(ps.executeQuery(), expRS, st);
+
+        /* Parameter in the LIKE leads to generation of additional
+         * start/stop predicates on C2.  So run some queries with
+         * that.
+         */
+
+        ps = prepareStatement("select i,c1,c2 from ct where " +
+            "c1 in (?,?) and c2 like ? order by i");
+
+        ps.setString(1, "1");
+        ps.setString(2, "2");
+        ps.setString(3, "%");
+        assertResultsAndQueryPlan(ps.executeQuery(), expRS, st);
+
+        ps = prepareStatement("select i,c1,c2 from ct where " +
+            "c1 in (?,?) and c2 like ?");
+
+        ps.setString(1, "1");
+        ps.setString(2, "2");
+        ps.setString(3, "%");
+        assertResultsAndQueryPlan(ps.executeQuery(), expRS, st);
+
+        ps = prepareStatement("select i,c1,c2 from ct where " +
+            "c1 in ('2','1') and c2 like ?");
+
+        ps.setString(1, "%");
+        assertResultsAndQueryPlan(ps.executeQuery(), expRS, st);
+
+        ps = prepareStatement("select i,c1,c2 from ct where " +
+            "c1 in ('2',?) and c2 like ?");
+
+        ps.setString(1, "1");
+        ps.setString(2, "%");
+        assertResultsAndQueryPlan(ps.executeQuery(), expRS, st);
+
+        // Run some tests that execute directly (no params required).
+
+        assertResultsAndQueryPlan(st.executeQuery(
+            "select i,c1,c2 from ct " +
+            "where c1 in ('1','2') and c2 like '%' order by i"),
+            expRS, st);
+
+        /* The rest of these explicitly specify predicates on C2
+         * (instead of relying on "LIKE ?" to generate the additional
+         * predicates).  Should see similar behavior, though.  The
+         * think we want to check here is that the extra predicates
+         * are being enforced correctly, too.
+         */
+
+        // 1 additional START key.
+        assertResultsAndQueryPlan(st.executeQuery(
+            "select i,c1,c2 from ct where c1 in ('1','2') and " +
+            "c2 >= '_' order by i"),
+            null, st);
+
+        // 1 additional STOP key.
+        assertResultsAndQueryPlan(st.executeQuery(
+            "select i,c1,c2 from ct where c1 in ('14','91') and " +
+            "c2 < '_' order by i"),
+            new String [][] {
+                {"14","14   ","14   14   "},
+                {"14","14   ","14   14   "},
+                {"91","91   ","91   91   "},
+                {"91","91   ","91   91   "},
+                {"91","91   ","91   91   "},
+                {"91","91   ","212398    "},
+                {"91","91   ","1234      "}
+            }, st);
+
+        // 1 additional STOP key.
+        assertResultsAndQueryPlan(st.executeQuery(
+            "select i,c1,c2 from ct where c1 in ('14','91') and " +
+            "c2 < '9' order by i"),
+            new String [][] {
+                {"14","14   ","14   14   "},
+                {"14","14   ","14   14   "},
+                {"91","91   ","212398    "},
+                {"91","91   ","1234      "}
+            }, st);
+
+        // 1 additional START key and 1 additional STOP key.
+        assertResultsAndQueryPlan(st.executeQuery(
+            "select i,c1,c2 from ct where c1 in ('14','91') and " +
+            "c2 < '9' and c2 > '13' order by i"),
+            new String [][] {
+                {"14","14   ","14   14   "},
+                {"14","14   ","14   14   "},
+                {"91","91   ","212398    "}
+            }, st);
+
+        // Cleanup.
+
+        st.execute(RUNTIME_STATS_OFF_QUERY);
+        st.execute("drop table ct");
+
+        ps.close();
+        st.close();
+    }
+
+    /**
      * Insert the received number of rows into DATA_TABLE via
      * batch processing.
      */
@@ -321,26 +480,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         if (cnt > allIds.length)
             return;
 
-        /* We determine that "multi-probing" was in effect by looking at
-         * the query plan and verifying two things:
-         *
-         * 1. We did an index scan on the target table AND
-         * 2. The number of rows that "qualified" is equal to the
-         *    number of rows that were actually returned for the query.
-         *    If we did *not* do multi-probing then we would scan all or
-         *    part of the index and then apply the IN-list restriction
-         *    after reading the rows.  That means that the number of
-         *    rows "qualified" for the scan would be greater than the
-         *    number of rows returned from the query.  But if we do
-         *    multi-probing we will probe for rows that we know satsify
-         *    the restriction, thus the number of rows that we "fetch"
-         *    (i.e. "rows qualified") should exactly match the number
-         *    of rows in the result set.
-         */
-        String indexScan = "Index Scan ResultSet for " + DATA_TABLE;
-        String qualRows = "rows qualified=";
         String failedStrategy = null;
-
         Statement st = createStatement();
         for (Iterator iter = strategies.iterator(); iter.hasNext();)
         {
@@ -348,17 +488,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
             int numRows = strategy.testSize(cnt);
 
             ResultSet rs = st.executeQuery(GET_RUNTIME_STATS_QUERY);
-            if (rs.next())
-            {
-                String str = rs.getString(1);
-                if ((str.indexOf(indexScan) == -1) ||
-                    (str.indexOf(qualRows + numRows + "\n") == -1))
-                {
-                    failedStrategy = strategy.getName();
-                    break;
-                }
-            }
-            else
+            if (!checkMultiProbeQueryPlan(rs, numRows))
             {
                 failedStrategy = strategy.getName();
                 break;
@@ -432,6 +562,75 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         }
 
         return new String(chars);
+    }
+
+    /**
+     * Assert that the received ResultSet matches the expected results,
+     * and then make sure the optimizer actually chose to do multi-
+     * probing.  If the received expRS array is null, we take that
+     * to mean we expect an empty result set.
+     */
+    private void assertResultsAndQueryPlan(ResultSet rs,
+        String [][] expRS, Statement st) throws SQLException
+    {
+        int numRows = 0;
+        if ((expRS == null) || (expRS.length == 0))
+            JDBC.assertEmpty(rs);
+        else
+        {
+            JDBC.assertUnorderedResultSet(rs, expRS);
+            numRows = expRS.length;
+        }
+
+        /* Now assert the query plan.  We're checking to make sure that
+         * the optimizer actually chose to do index multi-probing; otherwise
+         * this test is somewhat meaningless...
+         */
+
+        ResultSet statRS = st.executeQuery(GET_RUNTIME_STATS_QUERY);
+        if (!checkMultiProbeQueryPlan(statRS, numRows))
+        {
+            fail("Expected multi-probing index scan but query plan showed " +
+                "something else.");
+        }
+
+        statRS.close();
+    }
+
+    /**
+     * Take the received ResultSet, which is assumed to hold runtime
+     * statistics from the most recently-executed query, and verify
+     * that the optimizer chose to do index multi-probing.
+     *
+     * We determine that "multi-probing" was in effect by looking at
+     * the query plan and verifying two things:
+     *
+     * 1. We used an IndexRowToBaseRow ResultSet on the target
+     *    table, AND
+     * 2. We did an index scan on the target table AND
+     * 3. The number of rows that "qualified" is equal to the
+     *    number of rows that were actually returned for the query.
+     *    If we did *not* do multi-probing then we would scan all or
+     *    part of the index and then apply the IN-list restriction
+     *    after reading the rows.  That means that the number of
+     *    rows "qualified" for the scan would be greater than the
+     *    number of rows returned from the query.  But if we do
+     *    multi-probing we will probe for rows that we know satsify
+     *    the restriction, thus the number of rows that we "fetch"
+     *    (i.e. "rows qualified") should exactly match the number
+     *    of rows in the result set.
+     */
+    private boolean checkMultiProbeQueryPlan(ResultSet rStat,
+        int expRowCount) throws SQLException
+    {
+        if (!rStat.next())
+            return false;
+
+        RuntimeStatisticsParser rsp =
+            new RuntimeStatisticsParser(rStat.getString(1));
+
+        return (rsp.usedIndexRowToBaseRow() && rsp.usedIndexScan()
+            && (rsp.rowsQualifiedEquals(expRowCount)));
     }
 
     /**

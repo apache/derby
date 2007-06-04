@@ -202,4 +202,21 @@ public class RuntimeStatisticsParser {
     public boolean hasLessThanQualifier() {
         return qualifiers.contains(new Qualifier("<", false));
     }
+
+    /**
+     * Return whether or not the query plan includes a line of the form
+     *
+     *   "Number of rows qualified=n"
+     *
+     * where "n" is the received qualRows argument.  Note that this
+     * method will return true if the above string is found anywhere
+     * in the query plan.  For queries which specifying more than one
+     * table, more advanced parsing will be required to associate the
+     * number of rows qualified with the correct table.
+     */
+    public boolean rowsQualifiedEquals(int qualRows)
+    {
+        return (statistics.indexOf("Number of rows qualified=" +
+            qualRows + "\n") != -1);
+    }
 }

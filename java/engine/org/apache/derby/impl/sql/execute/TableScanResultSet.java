@@ -366,18 +366,51 @@ class TableScanResultSet extends ScanResultSet
 		/* If we have a probe value then we do the "probe" by positioning
 		 * the scan at the first row matching the value.  The way to do
 		 * that is to use the value as a start key, which is what will
-		 * happen if we plug it into "startPositionRow".  So in this case
-		 * startPositionRow functions as a "place-holder" for the probe
-		 * value.  Note: if we have a probe value then we want to use it
-		 * as the start key AND as the stop key.  In that case the value
-		 * of "sameStartStopPosition" would have been true when we created
-		 * this result set, and thus we've already set stopPosition equal
-		 * to startPosition as part of openCore(). So by putting the probe
-		 * value into startPositionRow, we're also putting it into
-		 * stopPositionRow, which is what we want.
+		 * happen if we plug it into first column of "startPositionRow".
+		 * So in this case startPositionRow[0] functions as a "place-holder"
+		 * for the probe value.  The same goes for stopPositionRow[0].
+		 *
+		 * Note that it *is* possible for a start/stop key to contain more
+		 * than one column (ex. if we're scanning a multi-column index). In
+		 * that case we plug probeValue into the first column of the start
+		 * and/or stop key and leave the rest of the key as it is.  As an 
+		 * example, assume we have the following predicates:
+		 *
+		 *    ... where d in (1, 20000) and b > 200 and b <= 500
+		 *
+		 * And assume further that we have an index defined on (d, b).
+		 * In this case it's possible that we have TWO start predicates
+		 * and TWO stop predicates: the IN list will give us "d = probeVal",
+		 * which is a start predicate and a stop predicate; then "b > 200"
+		 * may give us a second start predicate, while "b <= 500" may give
+		 * us a second stop predicate.  So in this situation we want our
+		 * start key to be:
+		 *
+		 *    (probeValue, 200)
+		 *
+		 * and our stop key to be:
+		 *
+		 *    (probeValue, 500).
+		 *
+		 * This will effectively limit the scan so that it only returns
+		 * rows whose "D" column equals probeValue and whose "B" column
+		 * falls in the range of 200 thru 500.
+		 *
+		 * Note: Derby currently only allows a single start/stop predicate
+		 * per column. See PredicateList.orderUsefulPredicates().
 		 */
 		if (probeValue != null)
+		{
 			startPositionRow[0] = probeValue;
+
+		 	/* If the start key and stop key are the same, we've already set
+			 * stopPosition equal to startPosition as part of openCore().
+			 * So by putting the probe value into startPositionRow[0], we
+			 * also put it into stopPositionRow[0].
+			 */
+			if (!sameStartStopPosition)
+				stopPositionRow[0] = probeValue;
+		}
 
 		// Clear the Qualifiers's Orderable cache 
 		if (qualifiers != null)
@@ -467,7 +500,11 @@ class TableScanResultSet extends ScanResultSet
 		 * (if needed) for probing scans.
 		 */
 		if (probeValue != null)
+		{
 			startPositionRow[0] = probeValue;
+			if (!sameStartStopPosition)
+				stopPositionRow[0] = probeValue;
+		}
 		else
 			rowsThisScan = 0;
 
