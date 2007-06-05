@@ -23,14 +23,11 @@ package org.apache.derby.impl.drda;
 
 import java.io.OutputStream;
 import java.io.InputStream;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.UnsupportedEncodingException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import java.sql.SQLException;
-import java.sql.DataTruncation;
 import java.math.BigDecimal;
-import org.apache.derby.iapi.error.ExceptionSeverity;
 import java.util.Arrays;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -1203,7 +1200,6 @@ class DDMWriter
 		try {
 			byte [] byteval = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
 			int origLen = byteval.length;
-			boolean multiByteTrunc = false;
 			int writeLen =
 				java.lang.Math.min(FdocaConstants.LONGVARCHAR_MAX_LEN,
 								   origLen);
