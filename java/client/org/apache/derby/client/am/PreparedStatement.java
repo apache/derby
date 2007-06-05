@@ -1095,7 +1095,7 @@ public class PreparedStatement extends Statement
                         new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
                         new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
                 }
-                setInput(parameterIndex, new Clob(agent_, x, "US-ASCII", (int)length));
+                setInput(parameterIndex, new Clob(agent_, x, "ISO-8859-1", (int)length));
             }
         }
         catch ( SqlException se )
@@ -2570,7 +2570,7 @@ public class PreparedStatement extends Statement
                     setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
                     return;
                 }
-                setInput(parameterIndex, new Clob(agent_, x, "US-ASCII"));
+                setInput(parameterIndex, new Clob(agent_, x, "ISO-8859-1"));
             } catch (SqlException se) {
                 throw se.getSQLException();
             }

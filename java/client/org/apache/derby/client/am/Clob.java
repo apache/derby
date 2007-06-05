@@ -100,7 +100,7 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
     // CTOR for ascii/unicode stream input
-    //"US-ASCII", "UTF-8", or "UnicodeBigUnmarked"
+    //"ISO-8859-1", "UTF-8", or "UnicodeBigUnmarked"
     public Clob(Agent agent,
                 java.io.InputStream inputStream,
                 String encoding,
@@ -111,7 +111,7 @@ public class Clob extends Lob implements java.sql.Clob {
 
         setSqlLength(length);
 
-        if (encoding.equals("US-ASCII")) {
+        if (encoding.equals("ISO-8859-1")) {
             asciiStream_ = inputStream;
             dataType_ |= ASCII_STREAM;
         } else if (encoding.equals("UTF-8")) { // "UTF-8"
@@ -141,7 +141,7 @@ public class Clob extends Lob implements java.sql.Clob {
      *
      * @param agent
      * @param inputStream the data to insert
-     * @param encoding encoding to use for characters. Only "US-ASCII" is
+     * @param encoding encoding to use for characters. Only "ISO-8859-1" is
      *      allowed.
      */
     public Clob(Agent agent, java.io.InputStream inputStream, String encoding)
@@ -150,7 +150,7 @@ public class Clob extends Lob implements java.sql.Clob {
         this(agent,
              isLayerBStreamingPossible( agent ));
         
-        if (encoding.equals("US-ASCII")) {
+        if (encoding.equals("ISO-8859-1")) {
             asciiStream_ = inputStream;
             dataType_ |= ASCII_STREAM;
         } else {
@@ -1004,12 +1004,12 @@ public class Clob extends Lob implements java.sql.Clob {
     public void convertFromAsciiToCharacterStream() throws SqlException {
         try {
             characterStream_ =
-                    new java.io.InputStreamReader(asciiStream_, "US-ASCII");
+                    new java.io.InputStreamReader(asciiStream_, "ISO-8859-1");
             dataType_ = CHARACTER_STREAM;
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.UNSUPPORTED_ENCODING), 
-                "US-ASCII", "CharacterStream", e);
+                "ISO-8859-1", "CharacterStream", e);
         }
     }
 

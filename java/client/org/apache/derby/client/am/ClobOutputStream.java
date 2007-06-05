@@ -67,7 +67,7 @@ public class ClobOutputStream extends java.io.OutputStream {
     {
         // Since this is an OutputStream returned by Clob.setAsciiStream 
         // use Ascii encoding when creating the String from bytes
-        String str = new String(b, "US-ASCII");
+        String str = new String(b, "ISO-8859-1");
         clob_.string_ = clob_.string_.substring(0, (int) offset_ - 1);
         clob_.string_ = clob_.string_.concat(str);
         clob_.asciiStream_ = new java.io.StringBufferInputStream(clob_.string_);

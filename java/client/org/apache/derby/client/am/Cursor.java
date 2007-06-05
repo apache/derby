@@ -1041,7 +1041,7 @@ public abstract class Cursor {
                 return c.getAsciiStream();
             case java.sql.Types.CHAR:
                 try {
-                    return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("US-ASCII"));
+                    return new java.io.ByteArrayInputStream(getCHAR(column).getBytes("ISO-8859-1"));
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
                     		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
@@ -1050,7 +1050,7 @@ public abstract class Cursor {
             case java.sql.Types.VARCHAR:
             case java.sql.Types.LONGVARCHAR:
                 try {
-                    return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("US-ASCII"));
+                    return new java.io.ByteArrayInputStream(getVARCHAR(column).getBytes("ISO-8859-1"));
                 } catch (java.io.UnsupportedEncodingException e) {
                     throw new SqlException(agent_.logWriter_, 
                     		new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 

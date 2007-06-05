@@ -3040,7 +3040,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     agent_.logWriter_.traceEntry(this, "updateAsciiStream", column, x, length);
                 }
                 checkUpdatePreconditions(column, "updateAsciiStream");
-                updateColumn(column, agent_.crossConverters_.setObjectFromCharacterStream(resultSetMetaData_.types_[column - 1], x, "US-ASCII", length));
+                updateColumn(column, agent_.crossConverters_.setObjectFromCharacterStream(resultSetMetaData_.types_[column - 1], x, "ISO-8859-1", length));
             }
         }
         catch ( SqlException se )
@@ -5563,7 +5563,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                         agent_.crossConverters_.setObjectFromCharacterStream(
                             resultSetMetaData_.types_[columnIndex -1],
                             x,
-                            "US-ASCII",
+                            "ISO-8859-1",
                             CrossConverters.UNKNOWN_LENGTH));
             } catch (SqlException se) {
                 throw se.getSQLException();
