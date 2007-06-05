@@ -87,21 +87,15 @@ final class StoreStreamClob
      *      See the class JavaDoc for more information about this stream.
      * @param conChild the connection (child) this Clob belongs to
      * @throws StandardException if initializing the store stream fails
+     * @throws NullPointerException if <code>stream</code> or
+     *      <code>conChild</code> is null
+     * @throws ClassCastException if <code>stream</code> is not an instance
+     *      of <code>Resetable</code>
      * @see org.apache.derby.iapi.services.io.FormatIdInputStream
      * @see org.apache.derby.impl.store.raw.data.OverflowInputStream
      */
     public StoreStreamClob(InputStream stream, ConnectionChild conChild)
             throws StandardException {
-        if (stream == null) {
-            throw new IllegalArgumentException("Stream cannot be <null>");
-        }
-        if (conChild == null) {
-            throw new IllegalArgumentException("conChild cannot be <null>");
-        }
-        if (!(stream instanceof Resetable)) {
-            throw new IllegalArgumentException("Stream must be resetable: " +
-                stream.toString());
-        }
         this.storeStream = stream;
         this.conChild = conChild;
         this.synchronizationObject = conChild.getConnectionSynchronization();
