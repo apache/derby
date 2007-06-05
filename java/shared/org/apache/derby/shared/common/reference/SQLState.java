@@ -855,6 +855,7 @@ public interface SQLState {
 	String LANG_ORDER_BY_COLUMN_NOT_FOUND                              = "42X78";
 	String LANG_DUPLICATE_COLUMN_FOR_ORDER_BY                          = "42X79";
 	String LANG_QUALIFIED_COLUMN_NAME_NOT_ALLOWED                      = "42877";
+        String LANG_UNION_ORDER_BY                                         = "42878";
 	String LANG_EMPTY_VALUES_CLAUSE                                    = "42X80";
 	String LANG_USING_CARDINALITY_VIOLATION                            = "42X82";
 	String LANG_ADDING_COLUMN_WITH_NULL_AND_NOT_NULL_CONSTRAINT        = "42X83";

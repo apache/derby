@@ -1174,6 +1174,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>42878</name>
+                <text>The ORDER BY clause of a SELECT UNION statement only supports unqualified column references and column position numbers. Other expressions are not currently supported.</text>
+            </msg>
+
+            <msg>
                 <name>42884</name>
                 <text>No authorized routine named '{0}' of type '{1}' having compatible arguments was found.</text>
                 <arg>routineName</arg>

@@ -185,6 +185,8 @@ public class OrderByColumn extends OrderedColumn {
                 SanityManager.ASSERT( addedColumnOffset >= 0,
                                       "Order by expression was not pulled into the result column list");
             resolveAddedColumn(target);
+		if (resultCol == null)
+			throw StandardException.newException(SQLState.LANG_UNION_ORDER_BY);
 		}
 
 		// Verify that the column is orderable

@@ -534,3 +534,105 @@ select * from derby1861 order by c-1, c+1, a, b, c * 6;
 select t.*, t.c+2 from derby1861 t order by a, b, c+2;
 select * from derby1861 order by 3, 1;
 select * from derby1861 order by 2, a-2;
+
+-- Tests which verify the handling of expressions in the ORDER BY list
+-- related to DERBY-2459. The issue in DERBY-2459 has to do with handling
+-- of ORDER BY in the UNION case. The current Derby implementation has no
+-- support for expressions in the ORDER BY clause of a UNION SELECT.
+-- These test cases demonstrate some aspects of what works, and what doesn't.
+
+create table d2459_A1 ( id char(1) ,value int ,ref char(1));
+create table d2459_A2 ( id char(1) ,value int ,ref char(1));
+create table d2459_B1 ( id char(1) ,value int);
+create table d2459_B2 ( id char(1) ,value int);
+insert into d2459_A1 (id, value, ref) values ('b', 1, null);
+insert into d2459_A1 (id, value, ref) values ('a', 12, 'e');
+insert into d2459_A2 (id, value, ref) values ('c', 3, 'g');
+insert into d2459_A2 (id, value, ref) values ('d', 8, null);
+insert into d2459_B1 (id, value) values ('f', 2);
+insert into d2459_B1 (id, value) values ('e', 4);
+insert into d2459_B2 (id, value) values ('g', 5); 
+
+-- Should work, as the order by expression is against a select, not a union:
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A2 t1 left outer join d2459_B2 t2 ON t2.id = t1.ref
+order by CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END ;
+
+-- Should work, it's a simple column reference to the first column in UNION:
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A1 t1 left outer join d2459_B1 t2 ON t2.id = t1.ref
+union all
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A2 t1 left outer join d2459_B2 t2 ON t2.id = t1.ref
+order by id;
+
+-- Should work, it's a column reference by position number
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A1 t1 left outer join d2459_B1 t2 ON t2.id = t1.ref
+union all
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A2 t1 left outer join d2459_B2 t2 ON t2.id = t1.ref
+order by 2;
+
+-- should fail, because qualified column references can't refer to UNIONs
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A1 t1 left outer join d2459_B1 t2 ON t2.id = t1.ref
+union all
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A2 t1 left outer join d2459_B2 t2 ON t2.id = t1.ref
+order by t1.id;
+
+-- should fail, because the union's results can't be referenced this way
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A1 t1 left outer join d2459_B1 t2 ON t2.id = t1.ref
+union all
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A2 t1 left outer join d2459_B2 t2 ON t2.id = t1.ref
+order by CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END;
+
+-- should fail, because this column is not in the result:
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A1 t1 left outer join d2459_B1 t2 ON t2.id = t1.ref
+union all
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A2 t1 left outer join d2459_B2 t2 ON t2.id = t1.ref
+order by value;
+
+-- ought to work, but currently fails, due to implementation restrictions:
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A1 t1 left outer join d2459_B1 t2 ON t2.id = t1.ref
+union all
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A2 t1 left outer join d2459_B2 t2 ON t2.id = t1.ref
+order by CASE WHEN id IS NOT NULL THEN id ELSE 2 END;
+
+-- Also ought to work, but currently fails due to implementation restrictions:
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A1 t1 left outer join d2459_B1 t2 ON t2.id = t1.ref
+union all
+select t1.id, CASE WHEN t2.value IS NOT NULL THEN t2.value ELSE t1.value END
+from d2459_A2 t1 left outer join d2459_B2 t2 ON t2.id = t1.ref
+order by id || 'abc';
+
+-- A number of simpler test cases investigating how the result set of the
+-- UNION is constructed. If both children have identical result column names,
+-- then the UNION result set's columns have the same names. Otherwise the
+-- UNION result set's columns have generated names, and can only be
+-- referred to by column position. Note als othat the matching of columns
+-- for the result set of the UNION is done by column position, not by name
+
+select id from D2459_A1 union select ref from D2459_A2;
+select id from D2459_A1 union select ref from D2459_A2 order by id;
+select id from D2459_A1 union select ref from D2459_A2 order by 1;
+select id i from D2459_A1 union select ref i from D2459_A2 order by i;
+select id i from D2459_A1 union select ref j from D2459_A2;
+select id i from D2459_A1 union select ref j from D2459_A2 order by i;
+select id i from D2459_A1 union select ref j from D2459_A2 order by 1;
+select id from D2459_A1 union select id from D2459_A2 order by D2459_A1.id;
+select id from D2459_A1 union select id from D2459_A2 order by id||'abc';
+select * from D2459_A1 union select id, value, ref from D2459_A2 order by value;
+select id, value, ref from D2459_A1 union select * from D2459_A2 order by 2;
+select id, id i from D2459_A1 union select id j, id from D2459_A2 order by id;
+select id, id i from D2459_A1 union select id j, id from D2459_A2 order by 2;
+select id, ref from D2459_A1 union select ref, id from D2459_A2;
+select id i, ref j from D2459_A1 union select ref i, id j from D2459_A2;
