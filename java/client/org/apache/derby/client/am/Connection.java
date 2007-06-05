@@ -2151,7 +2151,7 @@ public abstract class Connection implements java.sql.Connection,
      * Constructs an object that implements the <code>Clob</code> interface. 
      * The object returned initially contains no data.
      *
-     * @return An object that implements the <clob>Clob</clob> interface
+     * @return An object that implements the <code>Clob</code> interface
      * @throws java.sql.SQLException if an object that implements the
      * <code>Clob</code> interface can not be constructed.
      */
