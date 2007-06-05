@@ -401,6 +401,10 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      */
     public void testSetClob()
             throws IOException, SQLException {
+        // Life span of Clob objects are limited by the transaction.  Need
+        // autocommit off so Clob objects survive execution of next statement.
+        getConnection().setAutoCommit(false);
+
         //insert default values into the table
         
         String str = "Test data for the Clob object";
@@ -440,34 +444,30 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * Insert <code>Clob</code> without specifying length and read it back
      * for verification.
      *
-     * Beacuse we don't yet support <code>Connection.createClob</code> in the
-     * client driver, we must first insert data into the database and read back
-     * a <code>Clob</code> object. This object is then inserted into the
-     * database again.
+     * @throws IOException If an IOException during the close operation on the
+     *                     reader.
+     * @throws SQLException If an SQLException occurs.
      */
     public void testSetClobLengthless()
             throws IOException, SQLException {
-        // Insert test data.
-        String testString = "Test string for setCharacterStream\u1A00";
-        Reader reader = new StringReader(testString);
+        // Life span of Clob objects are the transaction.  Need autocommit off
+        // to have Clob objects survive execution of next statement.
+        getConnection().setAutoCommit(false);
+
+        //Create the Clob and insert data into it.
+        Clob insertClob = getConnection().createClob();
+        OutputStream os = insertClob.setAsciiStream(1);
+        os.write(BYTES);
+
+        //Insert the Clob created above into the
+        //database.
         psInsertClob.setInt(1, key);
-        psInsertClob.setCharacterStream(2, reader);
-        psInsertClob.execute();
-        reader.close();
-        // Must fetch Clob from database because we don't support
-        // Connection.createClob on the client yet.
-        psFetchClob.setInt(1, key);
-        ResultSet rs = psFetchClob.executeQuery();
-        assertTrue("No results retrieved", rs.next());
-        int secondKey = requestKey();
-        Clob insertClob = rs.getClob(1);
-        psInsertClob.setInt(1, secondKey);
         psInsertClob.setClob(2, insertClob);
         psInsertClob.execute();
 
         // Read back test data from database.
-        psFetchClob.setInt(1, secondKey);
-        rs = psFetchClob.executeQuery();
+        psFetchClob.setInt(1, key);
+        ResultSet rs = psFetchClob.executeQuery();
         assertTrue("No results retrieved", rs.next());
         Clob clobRetrieved = rs.getClob(1);
 
@@ -658,12 +658,18 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         ResultSet rs = psFetchClob.executeQuery();
         rs.next();
         Clob clobRetrieved = rs.getClob(1);
-        rs.close();
         
         String str_out = clobRetrieved.getSubString(1L,(int)clobRetrieved.length());
         
         assertEquals("Error in inserting data into the Clob object",str,str_out);
         psInsertClob.close();
+
+        //Since auto-commit is true in this test
+        //this will invalidate the clob object
+        //Hence closing the ResultSet after
+        //accessing the Clob object.
+        //follows the same pattern as testSetBinaryStream().
+        rs.close();
     }
 
     public void testSetCharacterStreamLengthless()
@@ -714,7 +720,6 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         ResultSet rs = psFetchClob.executeQuery();
         rs.next();
         Clob ClobRetrieved = rs.getClob(1);
-        rs.close();
         
         try {
             InputStream is_ret = ClobRetrieved.getAsciiStream();
@@ -726,6 +731,13 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             assertEquals("Error in inserting data into the Clob",BYTES[i],bytes1[i]);
         }
         psInsertClob.close();
+
+        //Since auto-commit is true in this test
+        //this will invalidate the clob object
+        //Hence closing the ResultSet after
+        //accessing the Clob object.
+        //follows the same pattern as testSetBinaryStream().
+        rs.close();
     }
 
     public void testSetAsciiStreamLengthless()

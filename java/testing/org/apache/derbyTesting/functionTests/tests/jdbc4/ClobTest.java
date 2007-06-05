@@ -154,6 +154,10 @@ public class ClobTest
     
     public void setUp() 
         throws SQLException {
+        // Life span of Clob objects are limited by the transaction.  Need
+        // autocommit off so Clob objects survive closing of result set.
+        getConnection().setAutoCommit(false);
+
         clob = BlobClobTestSetup.getSampleClob(getConnection());
         
         //call the buildHashSetMethod to initialize the 
@@ -429,10 +433,10 @@ public class ClobTest
         String str2 = str1.substring(1,6);
         Reader r_2 = new java.io.StringReader(str2);
 
+        assertEquals(r_2,r_1);
+
         rs.close();
         st.close();
-
-        assertEquals(r_2,r_1);
     }
 
     /**

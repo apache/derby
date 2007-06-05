@@ -2189,7 +2189,7 @@ public abstract class Connection implements java.sql.Connection,
         //The code here has been disabled because the Lob implementations
         //have still not been completely converted to use locators. Once
         //the Lob implementations are completed then this code can be enabled.
-        if (locator != INVALID_LOCATOR && false) {
+        if (locator != INVALID_LOCATOR) {
             //A valid locator value has been obtained.
             clob = new org.apache.derby.client.am.Clob(this.agent_, locator);
         }

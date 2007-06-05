@@ -1230,65 +1230,89 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         rs.close();
         stmt.close();
         commit();
-        // no problem accessing this after commit since it is in memory
-        assertEquals("FAIL - can not access short clob after commit",
-                26, shortClob.length());
+        assertTrue("FAIL - shortClob is NULL", shortClob != null);
+        // this should give blob/clob unavailable exceptions on client
+        try {
+            shortClob.length();
+            //Check to see if we are running in the client
+            //and a SQLException has not been thrown.
+            if (usingDerbyNetClient()) {
+                //Should have thrown an SQLException in the
+                //Network Client.
+                fail("FAIL - should not be able to access Clob after commit");
+            }
+        } catch (SQLException e) {
+            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //is used for LOB's(Both Clob and Blob). Ensure that
+            //we get the expected exception by comparing the SQLState.
+            checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            //In the embedded clobs of small size are
+            //accessible after commit. Hence ensure that
+            //we are dealing with the Embedded side here.
+            assertTrue("FAIL - method should not fail when using embedded",
+                       usingDerbyNetClient());
+        }
 
         // these should all give blob/clob data unavailable exceptions
         try {
             clob.length();
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after commit. Should have thrown
+            //an SQLException here.
+            fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
+            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //is used for LOB's(Both Clob and Blob). Ensure that
+            //we get the expected exception by comparing the SQLState.
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - Derby Client and JCC should not get an " +
-                    "exception", usingEmbedded());
         }
         try {
             clob.getSubString(2,3);
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after commit. Should have thrown
+            //an SQLException here.
+            fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
+            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //is used for LOB's(Both Clob and Blob). Ensure that
+            //we get the expected exception by comparing the SQLState.
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - Derby Client and JCC should not get an " +
-                    "exception", usingEmbedded());
         }
         try {
             clob.getAsciiStream();
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after commit. Should have thrown
+            //an SQLException here.
+            fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
+            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //is used for LOB's(Both Clob and Blob). Ensure that
+            //we get the expected exception by comparing the SQLState.
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - Derby Client and JCC should not get an " +
-                    "exception", usingEmbedded());
         }
         try {
             clob.position("foo",2);
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after commit. Should have thrown
+            //an SQLException here.
+            fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
+            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //is used for LOB's(Both Clob and Blob). Ensure that
+            //we get the expected exception by comparing the SQLState.
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - Derby Client and JCC should not get an " +
-                    "exception", usingEmbedded());
         }
         try {
             clob.position(clob,2);
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after commit. Should have thrown
+            //an SQLException here.
+            fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
+            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //is used for LOB's(Both Clob and Blob). Ensure that
+            //we get the expected exception by comparing the SQLState.
             checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            assertTrue("FAIL - Derby Client and JCC should not get an " +
-                    "exception", usingEmbedded());
         }
     }
 
@@ -1317,58 +1341,77 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
 
         try {
             long len = shortClob.length();
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large log " +
-                        "after commit");
-            }
-            assertEquals ("FAIL length mismatch", 26, len);
+            //Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after closing the
+            //connection. Should have thrown an SQLException here.
+            fail("FAIL - should not be able to access Clob after " +
+                    "Connection Close");
         }
         catch (SQLException e) {
+            //Ensure that we get the expected exception by comparing
+            //the SQLState.
             checkException(NO_CURRENT_CONNECTION, e);
-            assertTrue("FAIL - Derby Client and JCC should not get an " +
-                    "exception", usingEmbedded());
         }
 
         // these should all give blob/clob data unavailable exceptions
         try {
             clob.length();
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large lob " +
-                        "after the connection is closed");
-            }
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after Connection Close. Should
+            //have thrown an SQLException here.
+            fail("FAIL - should not be able to access large " +
+                    "Clob after Connection Close");
         } catch (SQLException e) {
+            //Ensure that we get the expected exception by comparing
+            //the SQLState.
             checkException(NO_CURRENT_CONNECTION, e);
-            assertTrue("FAIL - Derby Net and JCC should not get an exception",
-                    usingEmbedded());
         }
         try {
             clob.getSubString(2,3);
-            fail("FAIL - should not be able to access large lob " +
-                    "after the connection is closed");
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after Connection Close. Should
+            //have thrown an SQLException here.
+            fail("FAIL - should not be able to access large " +
+                    "Clob after Connection Close");
         } catch (SQLException e) {
+            //Ensure that we get the expected exception by comparing
+            //the SQLState.
             checkException(NO_CURRENT_CONNECTION, e);
         }
         try {
             clob.getAsciiStream();
-            fail("FAIL - should not be able to access large lob " +
-                    "after the connection is closed");
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after Connection Close. Should
+            //have thrown an SQLException here.
+            fail("FAIL - should not be able to access large " +
+                    "Clob after Connection Close");
         } catch (SQLException e) {
+            //Ensure that we get the expected exception by comparing
+            //the SQLState.
             checkException(NO_CURRENT_CONNECTION, e);
         }
         try {
             clob.position("foo",2);
-            if (usingEmbedded()) {
-                fail("FAIL - should not be able to access large lob " +
-                        "after the connection is closed");
-            }
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after Connection Close. Should
+            //have thrown an SQLException here.
+            fail("FAIL - should not be able to access large " +
+                    "Clob after Connection Close");
         } catch (SQLException e) {
+            //Ensure that we get the expected exception by comparing
+            //the SQLState.
             checkException(NO_CURRENT_CONNECTION, e);
         }
         try {
             clob.position(clob,2);
-            fail("FAIL - should not be able to access large lob " +
-                    "after the connection is closed");
+            //Large Clobs on the Embedded side and the NetworkClient
+            //side are not accessible after Connection Close. Should
+            //have thrown an SQLException here.
+            fail("FAIL - should not be able to access large " +
+                    "Clob after Connection Close");
         } catch (SQLException e) {
+            //Ensure that we get the expected exception by comparing
+            //the SQLState.
             checkException(NO_CURRENT_CONNECTION, e);
         }
     }
@@ -2623,16 +2666,13 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     break;
                 columnSize += size;
             }
-            if (usingEmbedded()) {
-                fail("FAIL - should have got an IOException");
-            } else {
-                assertEquals("FAIL - wrong column size", 10000, columnSize);
-            }
+            fail("FAIL - should have got an IOException");
         } catch (java.io.IOException ioe) {
-            assertTrue("FAIL - only embedded should be this exception",
-                    usingEmbedded());
-            assertEquals("FAIL - wrong exception", "ERROR 40XD0: Container " +
-                    "has been closed.", ioe.getMessage());
+            if(usingEmbedded()) {
+                assertEquals("FAIL - wrong exception",
+                        "ERROR 40XD0: Container has been closed.",
+                        ioe.getMessage());
+            }
         }
 
         rollback();

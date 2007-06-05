@@ -921,6 +921,10 @@ public class ResultSetTest
      */
     public void testUpdateClob()
     throws Exception {
+        // Life span of Clob objects are limited by the transaction.  Need
+        // autocommit off so Clob objects survive execution of next statement.
+        getConnection().setAutoCommit(false);
+
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it
@@ -982,6 +986,10 @@ public class ResultSetTest
 
     public void testUpdateClobLengthless()
             throws Exception {
+        // Life span of Clob objects are limited by the transaction.  Need
+        // autocommit off so Clob objects survive execution of next statement.
+        getConnection().setAutoCommit(false);
+
         Reader r1 = new java.io.StringReader(new String(BYTES1));
         // InputStream for insertion.
         Reader r2 = new java.io.StringReader(new String(BYTES2));
@@ -1214,6 +1222,10 @@ public class ResultSetTest
      */
     public void testUpdateClobStringParameterName()
     throws Exception {
+        // Life span of Clob objects are limited by the transaction.  Need
+        // autocommit off so Clob objects survive execution of next statement.
+        getConnection().setAutoCommit(false);
+
         //Byte array in which the returned bytes from
         //the Database after the update are stored. This
         //array is then checked to determine if it

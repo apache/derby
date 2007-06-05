@@ -640,11 +640,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
  
                 case java.sql.Types.CLOB:
                     lidAndLengths[i][0] = (resultSetMetaData.nullable_[i])
-                    // Locators for Clob has not yet been implemented
-//                            ? DRDAConstants.DRDA_TYPE_NLOBLOC
-//                            : DRDAConstants.DRDA_TYPE_LOBLOC;
-                            ? DRDAConstants.DRDA_TYPE_NLOBCMIXED
-                            : DRDAConstants.DRDA_TYPE_LOBCMIXED;
+                            ? DRDAConstants.DRDA_TYPE_NCLOBLOC
+                            : DRDAConstants.DRDA_TYPE_CLOBLOC;
                     lidAndLengths[i][1] = 4;
                     break;
             }
