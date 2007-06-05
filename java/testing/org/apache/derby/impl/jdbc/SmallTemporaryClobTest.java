@@ -1,0 +1,80 @@
+/*
+
+   Derby - Class org.apache.derby.impl.jdbc.SmallTemporaryClobTest
+
+   Licensed to the Apache Software Foundation (ASF) under one
+   or more contributor license agreements.  See the NOTICE file
+   distributed with this work for additional information
+   regarding copyright ownership.  The ASF licenses this file
+   to you under the Apache License, Version 2.0 (the
+   "License"); you may not use this file except in compliance
+   with the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the License is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   KIND, either express or implied.  See the License for the
+   specific language governing permissions and limitations
+   under the License.
+
+ */
+package org.apache.derby.impl.jdbc;
+
+import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+/**
+ * Test basic operations on a small temporary Clob.
+ * <p>
+ * The test is intended to use sizes that makes the Clob stay in memory (i.e.
+ * it is not being pushed to disk due to size).
+ */
+public class SmallTemporaryClobTest
+    extends InternalClobTest {
+
+    private static final long CLOBLENGTH = 1027;
+    private static final long BYTES_PER_CHAR = 3;
+
+    public SmallTemporaryClobTest(String name) {
+        super(name);
+    }
+
+    /**
+     * Creates a small read-write Clob that is kept in memory.
+     */
+    public void setUp()
+            throws Exception {
+        super.initialCharLength = CLOBLENGTH;
+        super.initialByteLength = CLOBLENGTH *3; // All tamil letters.
+        super.bytesPerChar = BYTES_PER_CHAR;
+        EmbedStatement embStmt = (EmbedStatement)createStatement();
+        EmbedConnection embCon =(EmbedConnection)getConnection();
+        iClob = new ClobStreamControl(embCon.getDBName(), embStmt);
+        transferData(
+            new LoopingAlphabetReader(CLOBLENGTH, CharAlphabet.tamil()),
+            iClob.getWriter(1L),
+            CLOBLENGTH);
+        assertEquals(CLOBLENGTH, iClob.getCharLength());
+    }
+
+    public void tearDown()
+            throws Exception {
+        this.iClob.release();
+        this.iClob = null;
+        super.tearDown();
+    }
+
+    public static Test suite()
+            throws Exception {
+        Class theClass = SmallTemporaryClobTest.class;
+        TestSuite suite = new TestSuite(theClass, "SmallTemporaryClobTest suite");
+        suite.addTest(addModifyingTests(theClass));
+        return suite;
+    }
+
+} // End class SmallTemporaryClobTest
