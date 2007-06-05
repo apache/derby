@@ -99,7 +99,7 @@ public final class UTF8Util {
      * @param in byte stream with UTF-8 encoded characters
      * @param charsToSkip the number of characters to skip
      * @return A long array with counts; the characters skipped at position
-     *      <code>CHAR_COUNT<code>, the bytes skipped at position
+     *      <code>CHAR_COUNT</code>, the bytes skipped at position
      *      <code>BYTE_COUNT</code>. Note that the number of characters skipped
      *      may be smaller than the requested number.
      * @throws IOException if reading from the stream fails
