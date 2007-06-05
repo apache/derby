@@ -71,11 +71,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("AuthenticationTest");
         suite.addTest(baseSuite("AuthenticationTest:embedded"));
-        if (!JDBC.vmSupportsJSR169())
-        {
-            suite.addTest(TestConfiguration.clientServerDecorator(
+        suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("AuthenticationTest:client")));
-        }
         return suite;
     }
     
@@ -620,6 +617,16 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         
         csSetAccess.setString(1, "dan");
         csSetAccess.setString(2, "FULLACCESS");
+        csSetAccess.execute();
+
+        // Invalid users
+        csSetAccess.setString(1, null);
+        csSetAccess.setString(2, "FULLACCESS");
+        assertStatementError("28502", csSetAccess);
+        
+        csSetAccess.setString(1, "123"); // not an identifier.
+        csSetAccess.setString(2, "FULLACCESS");
+        assertStatementError("28502", csSetAccess);
 
         // Random user will now have only READONLYACCESS
         setDatabaseProperty(
@@ -644,6 +651,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         psGetAccess.setString(1, "TONYBLAIR");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
         conn1.commit();
+        
+        conn1.close();
            
     }
     

@@ -59,8 +59,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
     {
         ResultSet rs = null;
         
-        Connection conn = getConnection();        
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         
         s.executeUpdate(
             "create table t(i int, s smallint)");
@@ -126,7 +125,6 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
              {"08006","An error occurred during connect reset and the connection has been terminated.  See chained exceptions for details.","40000"},
              {"08006","Database '{0}' shutdown.","45000"},
              {"0A000","The DRDA command {0} is not currently implemented.  The connection has been terminated.","40000"},
-             {"28502","The user name '{0}' is not valid.","40000"},
              {"57017","There is no available conversion for the source code page, {0}, to the target code page, {1}.  The connection has been terminated.","40000"},
              {"58009","Network protocol exception: only one of the VCM, VCS length can be greater than 0.  The connection has been terminated.","40000"},
              {"58009","The connection was terminated because the encoding is not supported.","40000"},
@@ -242,7 +240,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
              {"XXXXX","Normal database session close.","40000"}};
 
         JDBC.assertUnorderedResultSet(rs, expectedRows);
-        conn.rollback();
+        rollback();
         s.close();
     }
 }

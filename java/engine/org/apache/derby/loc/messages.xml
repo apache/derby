@@ -733,7 +733,7 @@ Guide.
             <title>Class 28: Invalid Authorization Specification</title>
 
             <msg>
-                <name>28502.C</name>
+                <name>28502</name>
                 <text>The user name '{0}' is not valid. </text>
                 <arg>authorizationID</arg>
             </msg>

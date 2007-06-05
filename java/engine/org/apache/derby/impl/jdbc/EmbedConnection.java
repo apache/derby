@@ -39,6 +39,7 @@ import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 
 import org.apache.derby.iapi.db.Database;
+import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -369,6 +370,12 @@ public abstract class EmbedConnection implements EngineConnection
 			throw NO_MEM;
 		}
 		catch (Throwable t) {
+            if (t instanceof StandardException)
+            {
+                StandardException se = (StandardException) t;
+                if (se.getSeverity() < ExceptionSeverity.SESSION_SEVERITY)
+                    se.setSeverity(ExceptionSeverity.SESSION_SEVERITY);
+            }
 			tr.cleanupOnError(t);
 			throw handleException(t);
 		} finally {

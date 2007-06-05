@@ -473,16 +473,17 @@ public abstract class IdUtil
 	/**
 	 * Map userName to authorizationId
 	 * 
-	 * @exception StandardException on error
+	 * @exception StandardException on error or userName is null
 	 */
 	public static String getUserAuthorizationId(String userName) throws StandardException
 	{
 		try {
-			return parseId(userName);
+            if (userName != null)
+			    return parseId(userName);
 		}
 		catch (StandardException se) {
-			throw StandardException.newException(SQLState.AUTH_INVALID_USER_NAME, userName);
 		}
+        throw StandardException.newException(SQLState.AUTH_INVALID_USER_NAME, userName);
 	}
 
 	/**
