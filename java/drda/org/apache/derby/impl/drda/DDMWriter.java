@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.UnsupportedEncodingException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import java.sql.SQLException;
 import java.sql.DataTruncation;
@@ -1241,7 +1242,7 @@ class DDMWriter
 			writeShort(writeLen);
 			writeBytes(byteval,writeLen);
 		}
-		catch (Exception e) {
+		catch (UnsupportedEncodingException e) {
 			//this should never happen
 			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
 		}
@@ -1261,7 +1262,7 @@ class DDMWriter
 	{
 		try {
 			writeBytes(s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING));
-		} catch (Exception e) {
+		} catch (UnsupportedEncodingException e) {
 			//this should never happen
 			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
 		}
@@ -1280,7 +1281,7 @@ class DDMWriter
 		byte[] bs = null;
 		try {
 			bs = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
-		} catch (Exception e) {
+		} catch (UnsupportedEncodingException e) {
 			//this should never happen
 			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
 		}
