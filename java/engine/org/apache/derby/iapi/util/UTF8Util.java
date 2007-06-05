@@ -199,10 +199,4 @@ public final class UTF8Util {
         }
         return skipped;
     }
-
-    private static final boolean isDerbyEOFMarker(InputStream in)
-            throws IOException {
-        // Expected to have read 224 (0xe0), check if the two next bytes are 0.
-        return (in.read() == 0x00 && in.read() == 0x00);
-    }
 } // End class UTF8Util
