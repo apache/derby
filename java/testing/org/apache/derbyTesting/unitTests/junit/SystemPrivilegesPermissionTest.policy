@@ -1,0 +1,111 @@
+// Policy file with minimal set of permissions to run unit test for
+// Derby System Privileges (DERBY-2109).
+//
+// The test harness sets up four variables used by this policy file
+//
+// derbyTesting.codejar - URL to the jar files when they are in the classpath
+// derbyTesting.codeclasses - URL to the classes directory when it is in the classpath
+//
+// Only one of derbyTesting.codejar and derbyTesting.codeclasses will be valid, the
+// other will be set to a bogus URL like file://unused
+//
+// derbyTesting.codedir - File location of either derbyTesting.codejar or derbyTesting.codeclasses.
+// Only required due to a BUG (see below for more info).
+//
+// derbyTesting.jaxpjar - URL to the jar file containing the JAXP implementation
+//     for XML-based tests (ex. lang/XMLBindingTest.java).
+//
+// derbyTesting.serverhost - Host name or ip where network server is started 
+// derbyTesting.clienthost - specifies the clients ip address/hostName. 
+//     when testing with networkserver on a remote host, this needs to be passed in 
+//     with the NetworkServerControl start command
+
+
+// PROVISIONAL: Universally granted permissions for testing System Privileges
+// When consolidated, these permissions should be moved/copied into the
+//   ${derbyTesting.codejar}
+//   ${derbyTesting.codeclasses}
+//   ${derbyTesting.junit}
+// sections
+grant {
+  // System Privileges need to run "doAsPrivileged".
+  permission javax.security.auth.AuthPermission "doAsPrivileged";
+
+  // System Privileges need to be allowed to resolve relative directory names,
+  // which requires a property-read permission.
+  //permission java.util.PropertyPermission "*", "read,write";
+  permission java.util.PropertyPermission "user.dir", "read";
+
+  // System Privileges need to be allowed to canonicalize directory names,
+  // which requires file-read permission.
+  // Because this unit test involves some relative and absolute sample paths,
+  // we liberally grant read access to all files.
+  //permission java.io.FilePermission "${user.dir}${/}-", "read"; 
+  //permission java.io.FilePermission "${/}-", "read";
+  permission java.io.FilePermission "<<ALL FILES>>", "read";
+};
+
+// specific test authorizations for System Privileges
+grant principal org.apache.derby.authentication.DatabasePrincipal "authorizedSystemUser" {
+  permission org.apache.derby.security.SystemPermission "shutdownEngine";
+  permission org.apache.derby.security.DatabasePermission "directory:*", "create";
+  permission org.apache.derby.security.DatabasePermission "directory:level0/level1/-", "create";
+  permission org.apache.derby.security.DatabasePermission "directory:/*", "create";
+  permission org.apache.derby.security.DatabasePermission "directory:/level0/level1/-", "create";
+};
+
+//
+// Permissions for the tests (derbyTesting.jar)
+// We are liberal here, it's not a goal to make the test harness
+// or tests secure.
+//
+grant codeBase "${derbyTesting.codejar}" {
+  // Support for debugging test.
+  permission java.util.PropertyPermission "java.security.policy", "read";
+
+  // When running with useprocess=false need to install and uninstall
+  // the security manager and allow setIO to change the system err and out
+  // streams. Currently the nist suite runs with useprocess=false.
+  permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.lang.RuntimePermission "setIO"; 
+};
+
+//
+// super-set of the jar permissions for running out of the classes directory
+//
+grant codeBase "${derbyTesting.codeclasses}" {
+  // Support for debugging test.
+  permission java.util.PropertyPermission "java.security.policy", "read";
+
+  // When running with useprocess=false need to install and uninstall
+  // the security manager and allow setIO to change the system err and out
+  // streams. Currently the nist suite runs with useprocess=false.
+  permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.lang.RuntimePermission "setIO"; 
+};
+
+// JUnit jar file tries to read junit.properties in the user's
+// home directory and seems to require permission to read the
+// property user.home as well.
+// junit.swingui.TestRunner writes to .junitsession on exit.
+grant codeBase "${derbyTesting.junit}" {
+    permission java.util.PropertyPermission "user.home", "read";
+    permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
+    permission java.io.FilePermission "${user.home}${/}.junitsession", "write";
+};
+
+// Due to a problem running tests/derbynet/CompatibilityTest in the old test
+// harness, permission to read junit.properties is granted to all. This can be 
+// removed when CompatibilityTest is rewritten to conform to our current Junit
+// usage. See DERBY-2076.
+grant {
+    permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
+};
+
+// Ant's junit runner requires setOut to redirect the System output streams
+// to the forked JVM used when running junit tests inside Ant. Ant requires
+// forking the JVM if you want to run tests in a different directory than the
+// current one.
+grant codeBase "${derbyTesting.antjunit}" {
+    permission java.lang.RuntimePermission "setIO";
+};

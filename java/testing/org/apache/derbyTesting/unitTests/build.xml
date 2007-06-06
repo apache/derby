@@ -74,7 +74,11 @@
       </classpath>
       <include name="${derby.testing.unittest.dir}/**/*.java"/>
     </javac>
-  </target>
+    <copy todir="${out.dir}/${derby.testing.unittest.dir}">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.unittest.dir}" 
+        includes="**/*.policy"/>  
+    </copy>
+  </target> 
 
 <!--             ============= End Targets ==============                -->
 

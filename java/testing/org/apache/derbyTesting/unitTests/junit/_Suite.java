@@ -47,6 +47,7 @@ public class _Suite extends BaseTestCase  {
         TestSuite suite = new TestSuite("JUnit unit tests");
 
         suite.addTest(FormatableBitSetTest.suite());
+        //suite.addTest(SystemPrivilegesPermissionTest.suite());
 
         return suite;
     }
