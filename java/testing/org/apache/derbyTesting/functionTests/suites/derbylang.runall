@@ -6,7 +6,6 @@ lang/DB2IsolationLevels.sql
 lang/LOBDB2compatibility.sql
 lang/aggregateOptimization.sql
 lang/altertable.sql
-lang/authorize.sql
 lang/autoincrement.sql
 lang/checkConstraint.sql
 lang/closed.java
