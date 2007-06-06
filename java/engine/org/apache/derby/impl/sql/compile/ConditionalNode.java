@@ -113,6 +113,12 @@ public class ConditionalNode extends ValueNode
 		}
 	}
 
+	/**
+	 * Checks if the provided node is a CastNode.
+	 *
+	 * @param node	The node to check.
+	 * @return 		True if this node is a CastNode, false otherwise.
+	 */
 	private boolean isCastNode(ValueNode node) {
 		if (node.getNodeType() == C_NodeTypes.CAST_NODE)
 			return true;
@@ -120,6 +126,13 @@ public class ConditionalNode extends ValueNode
 			return false;
 	}
 
+	/**
+	 * Checks if the provided CastNode is cast to a SQL CHAR type.
+	 *
+	 * @param node	The CastNode to check.
+	 * @return		True if this CastNode's target type is CHAR,
+	 *              false otherwise.
+	 */
 	private boolean isCastToChar(CastNode node) {
 		if (node.castTarget.getTypeName().equals(TypeId.CHAR_NAME))
 			return true;
@@ -154,24 +167,6 @@ public class ConditionalNode extends ValueNode
 			return true;
 		else
 			return false;
-	}
-
-	private boolean shouldCast(ValueNode newNode, ValueNode oldNode)
-	throws StandardException
-	{
-		return shouldCast(newNode.getTypeServices(), oldNode.getTypeServices());
-	}
-
-	private boolean shouldCast(DataTypeDescriptor newType, ValueNode oldNode)
-	throws StandardException
-	{
-		return shouldCast(newType, oldNode.getTypeServices());
-	}
-
-	private boolean shouldCast(ValueNode newNode, DataTypeDescriptor oldType)
-	throws StandardException
-	{
-		return shouldCast(newNode.getTypeServices(), oldType);
 	}
 
 	/**
@@ -296,19 +291,26 @@ public class ConditionalNode extends ValueNode
 		ValueNode thenNode = (ValueNode)thenElseList.elementAt(0);
 		ValueNode elseNode = (ValueNode)thenElseList.elementAt(1);
 
-		// check if the "then" node is NULL
-		if (isNullNode(thenNode) && shouldCast(castType, thenNode)) {
+		// first check if the "then" node is NULL
+		if (isNullNode(thenNode) &&
+		    shouldCast(castType, thenNode.getTypeServices()))
+		{
 			thenElseList.setElementAt(recastNullNode(thenNode, castType), 0);
-		// otherwise recurse if it's a conditional
+		// otherwise recurse on thenNode, but only if it's a conditional
 		} else if (isConditionalNode(thenNode)) {
-			recastNullNodes(((ConditionalNode)thenNode).thenElseList, castType);
+			recastNullNodes(((ConditionalNode)thenNode).thenElseList,
+			                castType);
 		}
-		// check if the "else node is NULL
-		if (isNullNode(elseNode) && shouldCast(castType, elseNode)) {
+
+		// lastly, check if the "else" node is NULL
+		if (isNullNode(elseNode) &&
+		    shouldCast(castType, elseNode.getTypeServices()))
+		{
 			thenElseList.setElementAt(recastNullNode(elseNode, castType), 1);
-		// otherwise recurse if it's a conditional
+		// otherwise recurse on elseNode, but only if it's a conditional
 		} else if (isConditionalNode(elseNode)) {
-			recastNullNodes(((ConditionalNode)elseNode).thenElseList, castType);
+			recastNullNodes(((ConditionalNode)elseNode).thenElseList,
+			                castType);
 		}
 	}
 
