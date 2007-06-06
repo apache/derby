@@ -1037,12 +1037,14 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt = samConnection.prepareCall(
             " call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SAM', 'SAMTABLE', 1)");
         assertUpdateCount(cSt, 0);
+        cSt.close();
         
         cSt = samConnection.prepareCall(
             " call "
             + "SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SAM', "
             + "'SAMTABLE', 1, 1, 1)");
         assertUpdateCount(cSt, 0);
+        cSt.close();
         
         // Try compressing tables not owned... INPLACE_COMPRESS 
         // currently passes, pending DERBY-1062
@@ -1050,12 +1052,14 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         cSt = samConnection.prepareCall(
             "call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SWIPER', 'MYTAB', 1)");
         assertStatementError("38000", cSt);
+        cSt.close();
         
         cSt = samConnection.prepareCall(
             " call "
             + "SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SWIPER', "
             + "'MYTAB', 1, 1, 1)");
         assertUpdateCount(cSt, 0);
+        cSt.close();
         
         // Try other system routines. All should fail
         
@@ -1063,17 +1067,32 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE('SAM', "
             + "'SAMTABLE' , 'extinout/table.dat', null, null, null)");
         assertStatementError("42504", cSt);
+        cSt.close();
         
         cSt = samConnection.prepareCall(
             " call "
             + "SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.storag"
             + "e.pageSize', '4096')");
         assertStatementError("42504", cSt);
+        cSt.close();
         
         assertStatementError("42504", st_samConnection,
             " values "
             + "SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.storag"
             + "e.pageSize')");
+
+        PreparedStatement psgua = samConnection.prepareStatement(
+            "VALUES SYSCS_UTIL.SYSCS_GET_USER_ACCESS(CURRENT_USER)");
+        
+        assertStatementError("42504", psgua);
+        psgua.close();
+
+        cSt = samConnection.prepareCall(
+             "CALL SYSCS_UTIL.SYSCS_SET_USER_ACCESS(CURRENT_USER, NULL)");
+        assertStatementError("42504", cSt);
+        cSt.close();
+        
+        
         
         // set connection satConnection
         // Try after DBA grants permissions
