@@ -714,3 +714,9 @@ ${j14lib}/charsets.jar
 compile.classpath=${java14compile.classpath}
 javadoc.tool.jdk14=${java.home}/bin/javadoc
 
+<NOTE> If you get an error saying "unable to find java.lang
+in classpath or bootclasspath", you might want to try this alternate
+setting for java14compile.classpath:
+
+java14compile.classpath=${j14lib}/classes.jar;${j14lib}/ui.jar;${j14lib}/laf.jar;${j14lib}/sunrsasign.jar;${j14lib}/jsse.jar;${j14lib}/jce.jar;${j14lib}/charsets.jar
+</NOTE>
