@@ -77,15 +77,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
                 "derby.language.statementCacheSize", "0", true));
         
         
-        return new CleanDatabaseTestSetup(suite) {
-            protected void decorateSQL(Statement s) throws SQLException {
-                s.execute("CREATE PROCEDURE EMPTY_STATEMENT_CACHE() " +
-                        "LANGUAGE JAVA PARAMETER STYLE JAVA " +
-                        "NO SQL " +
-                        "EXTERNAL NAME 'org.apache.derby.diag.StatementCache.emptyCache'");
-            }
-            
-        };
+        return new CleanDatabaseTestSetup(suite);
     }
     
     private static Test suiteWithSizeSet(int cacheSize)
@@ -119,7 +111,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
                 "SELECT COUNT(ID) FROM SYSCS_DIAG.STATEMENT_CACHE WHERE " +
                 "SCHEMANAME = ? AND SQL_TEXT = ?");
         Statement s = createStatement();
-        s.execute("CALL EMPTY_STATEMENT_CACHE()");
+        s.execute("CALL SYSCS_UTIL.SYSCS_EMPTY_STATEMENT_CACHE()");
         s.close();
        
     }

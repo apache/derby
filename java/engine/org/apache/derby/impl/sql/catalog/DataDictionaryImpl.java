@@ -10740,8 +10740,7 @@ public final class	DataDictionaryImpl
                 tc);
         }
         
-        // void SYSCS_UTIL.SYSCS_SET_USER_ACCESS(USER_NAME VARCHAR(128),
-        // CONNECTION_PERMISSION VARCHAR(128))
+        // VARCHAR(128) SYSCS_UTIL.SYSCS_SET_USER_ACCESS(USER_NAME VARCHAR(128))
         {               
             TypeDescriptor[] arg_types = { varchar128 };
 
@@ -10754,6 +10753,20 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.READS_SQL_DATA,
                 varchar128,
+                tc);
+        }
+        
+        // void SYSCS_UTIL.SYSCS_EMPTY_STATEMENT_CACHE()
+        {               
+            createSystemProcedureOrFunction(
+                "SYSCS_EMPTY_STATEMENT_CACHE",
+                sysUtilUUID,
+                (String[]) null,
+                (TypeDescriptor[]) null,
+                0,
+                0,
+                RoutineAliasInfo.NO_SQL,
+                (TypeDescriptor) null,
                 tc);
         }
 

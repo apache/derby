@@ -39,6 +39,7 @@ import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
@@ -1647,5 +1648,22 @@ public class SystemProcedures  {
             throw PublicAPI.wrapStandardException(se);
         }
     }
-
+    
+    /**
+     * Empty as much of the cache as possible. It is not guaranteed 
+     * that the cache is empty after this call, as statements may be kept
+     * by currently executing queries, activations that are about to be garbage
+     * collected.
+     */
+    public static void SYSCS_EMPTY_STATEMENT_CACHE()
+       throws SQLException
+    {
+       LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+       
+       CacheManager statementCache =
+           lcc.getLanguageConnectionFactory().getStatementCache();
+       
+       if (statementCache != null)
+           statementCache.ageOut();
+    }
 }

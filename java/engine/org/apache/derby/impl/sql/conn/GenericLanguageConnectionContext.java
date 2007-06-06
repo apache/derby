@@ -254,9 +254,6 @@ public class GenericLanguageConnectionContext
 	// cache of ai being handled in memory (bulk insert + alter table).
 	private HashMap autoincrementCacheHashtable;
 
-	// temp public
-	public CacheManager statementCache;
-
 	/*
 	   constructor
 	*/
@@ -310,8 +307,6 @@ public class GenericLanguageConnectionContext
 		stmtValidators = new ArrayList();
 		triggerExecutionContexts = new ArrayList();
 		triggerTables = new ArrayList();
-		
-		statementCache = lcf.getStatementCache();
 	}
 
 	public void initialize(boolean sqlConnection) throws StandardException
@@ -407,17 +402,6 @@ public class GenericLanguageConnectionContext
 	public int getLockEscalationThreshold()
 	{
 		return lockEscalationThreshold;
-	}
-
-	/*
-		The methods that follow are for consistency checking purposes
-	 */
-
-	public int getCacheSize() {
-		if (statementCache != null)
-			return statementCache.getNumberInUse();
-		else
-			return 0;
 	}
 
 	/**
@@ -855,6 +839,9 @@ public class GenericLanguageConnectionContext
 	*/	
 	public void removeStatement(Statement statement)
 		throws StandardException {
+        
+        CacheManager statementCache =
+            getLanguageConnectionFactory().getStatementCache();
 
 		if (statementCache == null)
 			return;
@@ -875,7 +862,9 @@ public class GenericLanguageConnectionContext
 	public PreparedStatement lookupStatement(GenericStatement statement)
 		throws StandardException {
 
-
+        CacheManager statementCache =
+            getLanguageConnectionFactory().getStatementCache();
+            
 		if (statementCache == null)
 			return null;
 
@@ -1833,20 +1822,6 @@ public class GenericLanguageConnectionContext
 	{
 		identityVal = val;
 		identityNotNull = true;
-	}
-
-	/**
-		Empty as much of the cache as possible. It is not guaranteed
-		that the cache is empty after this call, as statements may be kept
-		by currently executing queries, activations that are about to be garbage
-		collected.
-	*/
-	public void emptyCache() {
-		/* We know prepared statements don't become dirty
-		** statementCache.cleanAll(); 
-		*/
-		if (statementCache != null)
-			statementCache.ageOut(); 
 	}
 
 	/**

@@ -21,30 +21,25 @@
 
 package org.apache.derby.diag;
 
-import org.apache.derby.vti.VTITemplate;
-
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.impl.sql.GenericPreparedStatement;
-import org.apache.derby.impl.sql.GenericStatement;
-
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.iapi.reference.Limits;
-import org.apache.derby.iapi.util.StringUtil;
-
-import java.sql.Types;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-
-import org.apache.derby.impl.sql.conn.CachedStatement;
-
-
+import java.sql.Types;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Vector;
 
-import java.util.Iterator;
-import java.util.Collection;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.services.cache.CacheManager;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
+import org.apache.derby.iapi.sql.conn.ConnectionUtil;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
+import org.apache.derby.impl.sql.GenericPreparedStatement;
+import org.apache.derby.impl.sql.GenericStatement;
+import org.apache.derby.impl.sql.conn.CachedStatement;
+import org.apache.derby.vti.VTITemplate;
 
 /**
 	StatementCache is a virtual table that shows the contents of the SQL statement cache.
@@ -78,29 +73,15 @@ public final class StatementCache extends VTITemplate {
 	private GenericPreparedStatement currentPs;
 	private boolean wasNull;
 
-	/**
-		Empty the statement cache. Must be called from a SQL statement, e.g.
-		<PRE>
-		CALL org.apache.derby.diag.StatementCache::emptyCache()
-		</PRE>
-
-	*/
-	public static void emptyCache() throws SQLException {
-
-		org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext lcc =
-			(org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext) ConnectionUtil.getCurrentLCC();
-
-		lcc.emptyCache();
-	}
-
 	public StatementCache() throws SQLException {
 
-		org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext lcc =
-			(org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext)
-			ConnectionUtil.getCurrentLCC();
+		LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+        
+        CacheManager statementCache =
+            lcc.getLanguageConnectionFactory().getStatementCache();
 
-		if (lcc.statementCache != null) {
-			final Collection values = lcc.statementCache.values();
+		if (statementCache != null) {
+			final Collection values = statementCache.values();
 			data = new Vector(values.size());
 			for (Iterator i = values.iterator(); i.hasNext(); ) {
 				final CachedStatement cs = (CachedStatement) i.next();
