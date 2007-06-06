@@ -164,7 +164,7 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
         //remember in setup a locator is already created
         //hence expected value is 2
         assertEquals("The locator values returned by " +
-            "SYSIBM.BLOBCREATELOCATOR() are incorrect", 2, locator);
+            "SYSIBM.BLOBCREATELOCATOR() are incorrect", 4, locator);
         cs.close();
     }
 

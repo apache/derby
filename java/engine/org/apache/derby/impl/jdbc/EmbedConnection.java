@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.jdbc;
 
+import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.jdbc.InternalDriver;
 
 import org.apache.derby.iapi.reference.Attribute;
@@ -1549,6 +1550,18 @@ public abstract class EmbedConnection implements EngineConnection
 	SQLException handleException(Throwable thrownException)
 			throws SQLException
 	{
+		//assume in case of SQLException cleanup is 
+		//done already. This assumption is inline with
+		//TR's assumption. In case no rollback was 
+		//called lob objects will remain valid.
+		if (thrownException instanceof StandardException) {
+			if (((StandardException) thrownException)
+				.getSeverity() 
+				>= ExceptionSeverity.TRANSACTION_SEVERITY) {
+				clearLOBMapping();
+			}
+		}
+
 		/*
 		** By default, rollback the connection on if autocommit
 	 	** is on.
@@ -1585,6 +1598,17 @@ public abstract class EmbedConnection implements EngineConnection
 									   boolean rollbackOnAutoCommit) 
 			throws SQLException 
 	{
+		//assume in case of SQLException cleanup is 
+		//done already. This assumption is inline with
+		//TR's assumption. In case no rollback was 
+		//called lob objects will remain valid.
+		if (thrownException instanceof StandardException) {
+			if (((StandardException) thrownException)
+				.getSeverity() 
+				>= ExceptionSeverity.TRANSACTION_SEVERITY) {
+				clearLOBMapping();
+			}
+		}
 		return getTR().handleException(thrownException, autoCommit,
 								  rollbackOnAutoCommit); 
 
@@ -1667,6 +1691,7 @@ public abstract class EmbedConnection implements EngineConnection
             try
             {
                 getTR().commit();
+                clearLOBMapping();
             } 
             catch (Throwable t)
             {
@@ -1698,6 +1723,7 @@ public abstract class EmbedConnection implements EngineConnection
             try
             {
                 getTR().commit();
+                clearLOBMapping();
             } 
             catch (Throwable t)
             {
@@ -2295,7 +2321,7 @@ public abstract class EmbedConnection implements EngineConnection
 		//initialize the locator value to 0 and
 		//the hash table object to null.
 		if (lobHashMap != null) {
-			for (Iterator e = getlobHMObj().keySet().iterator();
+			for (Iterator e = getlobHMObj().values().iterator();
 				e.hasNext() ;) {
 				Object obj = e.next();
 				if (obj instanceof Clob)  {

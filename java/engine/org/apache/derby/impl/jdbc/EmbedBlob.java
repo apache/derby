@@ -115,6 +115,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
              control = new LOBStreamControl (con.getDBName());
              control.write (blobBytes, 0, blobBytes.length, 0);
              materialized = true;
+             //add entry in connection so it can be cleared 
+             //when transaction is not valid
+             con.addLOBMapping (this);
          }
          catch (IOException e) {
              throw Util.setStreamFailure (e);
@@ -187,6 +190,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
             buf = new byte[BLOB_BUF_SIZE];
         }
         pos = 0;
+        //add entry in connection so it can be cleared 
+        //when transaction is not valid
+        con.addLOBMapping (this);
     }
 
 
@@ -944,6 +950,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
      * throws SQLException if isvalid is not true.
      */
     private void checkValidity() throws SQLException{
+        //check for connection to maintain sqlcode for closed
+        //connection
+        getEmbedConnection().checkIfClosed();
         if(!isValid)
             throw newSQLException(SQLState.LOB_OBJECT_INVALID);
     }

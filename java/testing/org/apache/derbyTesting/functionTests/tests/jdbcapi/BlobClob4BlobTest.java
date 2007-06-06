@@ -2322,17 +2322,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         getConnection().close();
 
         try {
-            long length = shortBlob.length();
-            // no problem accessing this after commit since it is in memory
-            if (usingEmbedded()) {
-                assertEquals("FAIL - wrong blob length", 26, length);
-            } else {
-                fail("FAIL - should get an exception, connection is closed");
-            }
+            long length = shortBlob.length();                        
+            fail("FAIL - should get an exception, connection is closed");
         } catch (SQLException e) {
-            checkException(NO_CURRENT_CONNECTION, e);
-            assertTrue("FAIL - Embedded should not get this exception",
-                    !usingEmbedded());
+            checkException(NO_CURRENT_CONNECTION, e);            
         }
 
         // these should all give blob/clob data unavailable exceptions
@@ -2341,55 +2334,35 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             fail("FAIL - should not be able to access large lob " +
                     "after the connection is closed");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(NO_CURRENT_CONNECTION, e);
-            }
+            checkException(NO_CURRENT_CONNECTION, e);
         }
         try {
             blob.getBytes(2,3);
             fail("FAIL - should not be able to access large lob " +
                     "after the connection is closed");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(NO_CURRENT_CONNECTION, e);
-            }
+            checkException(NO_CURRENT_CONNECTION, e);
         }
         try {
             blob.getBinaryStream();
             fail("FAIL - should not be able to access large lob " +
                     "after the connection is closed");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(NO_CURRENT_CONNECTION, e);
-            }
+            checkException(NO_CURRENT_CONNECTION, e);
         }
         try {
             blob.position("foo".getBytes("US-ASCII"),2);
             fail("FAIL - should not be able to access large lob " +
                     "after the connection is closed");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(NO_CURRENT_CONNECTION, e);
-            }
+            checkException(NO_CURRENT_CONNECTION, e);
         }
         try {
             blob.position(blob,2);
             fail("FAIL - should not be able to access large lob " +
                     "after the connection is closed");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(NO_CURRENT_CONNECTION, e);
-            }
+            checkException(NO_CURRENT_CONNECTION, e);
         }
 
         // restart the connection
@@ -3217,8 +3190,6 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
 
-
-
     private static final String BLOB_BAD_POSITION = "XJ070";
     private static final String BLOB_NONPOSITIVE_LENGTH = "XJ071";
     private static final String BLOB_POSITION_TOO_LARGE = "XJ076";
@@ -3227,5 +3198,6 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     private static final String LOCK_TIMEOUT = "40XL1";
     private static final String BLOB_ACCESSED_AFTER_COMMIT = "XJ073";
     private static final String NO_CURRENT_CONNECTION = "08003";
+    private static final String INVALID_BLOB = "XJ215";
 
 }
