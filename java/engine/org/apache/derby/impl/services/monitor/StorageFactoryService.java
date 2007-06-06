@@ -736,7 +736,14 @@ final class StorageFactoryService implements PersistentService
                         try
                         {
                             if (SanityManager.DEBUG)
-                                SanityManager.ASSERT(serviceName.equals( storageFactory.getCanonicalName()), serviceName);
+                            {
+                                SanityManager.ASSERT(
+                                    serviceName.equals(
+                                        storageFactory.getCanonicalName()), 
+                                    "serviceName = " + serviceName +
+                                    ";storageFactory.getCanonicalName() = " + 
+                                    storageFactory.getCanonicalName());
+                            }
                             StorageFile serviceDirectory = storageFactory.newStorageFile( null);
                             return serviceDirectory.deleteAll() ? this : null;
                         }
