@@ -642,6 +642,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         while (rs.next()) {
             try {
                 Clob clob = rs.getClob(1);
+
+                rs.close(); // Cleanup on fail
+                stmt.close();
+
                 fail("FAIL - getClob on column type int should throw " +
                         "an exception");
             } catch (SQLException se) {
@@ -673,6 +677,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     ps.setClob(1,clob);
                     ps.setInt(2, clobLength);
                     ps.executeUpdate();
+
+                    rs.close(); // Cleanup on fail
+                    stmt.close();
+
                     fail("FAIL - can not use setClob on int column");
                 } catch (SQLException se) {
                     checkException(LANG_DATA_TYPE_GET_MISMATCH, se);
@@ -1143,6 +1151,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         try {
             stmt2.executeUpdate(
                     "update testClob set b = b + 1 where b = 10000");
+            stmt2.close(); // Cleanup on fail
+            conn2.rollback();
+            conn2.close();
             fail("FAIL: row should be locked");
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
@@ -1199,6 +1210,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         try {
             stmt2.executeUpdate(
                     "update testClob set el = 'smurfball' where b = 1");
+            stmt2.close(); // Cleanup on fail
+            conn2.commit();
+            conn2.close();
             fail("FAIL - statement should timeout");
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
@@ -1896,12 +1910,15 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             // get the first column as a clob
             try {
                 Blob blob = rs.getBlob(1);
-                fail("FAIL - getBlob on int column should throw and " +
+                rs.close();
+                stmt.close();
+                fail("FAIL - getBlob on int column should throw an " +
                         "exception");
             } catch (SQLException se) {
                 checkException(LANG_DATA_TYPE_GET_MISMATCH, se);
             }
         }
+        rs.close();
         stmt.close();
         commit();
 
@@ -1926,6 +1943,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 try {
                     ps.setBlob(1,blob);
                     ps.executeUpdate();
+                    rs.close();
+                    stmt.close();
+                    ps.close();
                     fail("FAIL - setBlob worked on INT column");
                 } catch (SQLException se) {
                     checkException(LANG_DATA_TYPE_GET_MISMATCH, se);
@@ -2163,6 +2183,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             
             stmt2.executeUpdate(
                     "update testBlob set b = b + 1 where b = 10000");
+            stmt.close();
+            stmt2.close();
+            conn2.close();
             fail("FAIL - should have gotten lock timeout");
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
@@ -2219,6 +2242,9 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt2 = conn2.createStatement();
         try {
             stmt2.executeUpdate("update testBlob set el = null where b = 1");
+            stmt2.close();
+            stmt.close();
+            conn2.close();
             fail("FAIL - statement should timeout");
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
