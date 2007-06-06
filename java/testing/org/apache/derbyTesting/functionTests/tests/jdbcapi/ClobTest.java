@@ -200,16 +200,8 @@ public class ClobTest
         assertEquals(1, this.clob.setString(9, "c"));
         assertEquals(1, this.clob.setString(5, "a"));
         assertEquals(1, this.clob.setString(6, "b"));
-        if (BaseJDBCTestCase.usingEmbedded()) {
-            assertEquals("Clob content is incorrect",
-                newContent, this.clob.getSubString(1, newContent.length()));
-        } else {
-            // Client currently truncates the Clob when inserting strings.
-            // See DERBY-1286 and DERBY-2652.
-            assertEquals("Clob content is incorrect",
-                newContent.substring(0, 6),
-                this.clob.getSubString(1, newContent.length()));
-        }
+	    assertEquals("Clob content is incorrect",
+            newContent, this.clob.getSubString(1, newContent.length()));
     }
 
     public void testPositionWithString_ASCII_SimplePartialRecurringPattern()
@@ -244,7 +236,7 @@ public class ClobTest
         final long prefix = 11L;
         final long postfix = 90L;
         char[] tmpChar = new char[1];
-        LoopingAlphabetReader tokenSrc = 
+        LoopingAlphabetReader tokenSrc =
             new LoopingAlphabetReader(1L, CharAlphabet.cjkSubset());
         tokenSrc.read(tmpChar);
         String token = String.copyValueOf(tmpChar);
@@ -253,7 +245,7 @@ public class ClobTest
         executeTestPositionWithStringToken(token, prefix);
     }
 
-    /* Test ideas
+    /* Test ideas for more tests
      *
      * truncate:
      *      truncate both on in store and from createClob
@@ -262,6 +254,11 @@ public class ClobTest
      *      truncate with too big size
      *      truncate to 0
      *      truncate to current length
+     *
+     * setString:
+     *      test with null string
+     *      test with offset out of range
+     *      test with length of string to insert out of range
      */
 
     /**

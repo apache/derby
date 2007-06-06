@@ -36,7 +36,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
  */
 final class ClobUtf8Writer extends Writer {
     private ClobStreamControl control;    
-    private long pos; // Position in bytes.
+    private long pos; // Position in characters.
     private boolean closed;
     
     /**
@@ -107,9 +107,6 @@ final class ClobUtf8Writer extends Writer {
             IOException ioe = new IOException (e.getMessage());
             ioe.initCause (e);
             throw ioe;
-        }
-        catch (StandardException se) {
-            throw new IOException (se.getMessage());
         }
     }
 }

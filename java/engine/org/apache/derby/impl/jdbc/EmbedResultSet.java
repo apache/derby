@@ -4062,7 +4062,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 				if (pushStack)
 					setupContextStack();
 
-				return new EmbedClob(dvd, getEmbedConnection());
+				return new EmbedClob(getEmbedConnection(), dvd);
 			} catch (Throwable t) {
 				throw handleException(t);
 			} finally {

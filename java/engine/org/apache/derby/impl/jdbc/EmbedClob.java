@@ -30,12 +30,9 @@ import org.apache.derby.iapi.types.Resetable;
 import org.apache.derby.impl.jdbc.ConnectionChild;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.impl.jdbc.UTF8Reader;
 import org.apache.derby.impl.jdbc.ReaderToAscii;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.io.Reader;
 import java.io.IOException;
 import java.io.EOFException;
@@ -71,49 +68,40 @@ import java.sql.Clob;
  */
 final class EmbedClob extends ConnectionChild implements Clob
 {
-    // clob is either a string or stream
-    private boolean         materialized;
-    private InputStream     myStream;
-    private ClobStreamControl control;
 
-    //This boolean variable indicates whether the Clob object has
-    //been invalidated by calling free() on it
+    /**
+     * The underlying Clob object, which may change depending on what the user
+     * does with the Clob.
+     */
+    private InternalClob clob;
+
+    /** Tells whether the Clob has been freed or not. */
     private boolean isValid = true;
 
     /**
-     * This constructor is used to create a empty Clob object. It is used by the
-     * Connection interface method createClob().
-     *
-     * @param clobString A String object containing the data to be stores in the
-     *        Clob.
+     * Creates an empty Clob object.
      *
      * @param con The Connection object associated with this EmbedClob object.
      * @throws SQLException
      *
      */
-    EmbedClob(String clobString,EmbedConnection con) throws SQLException {
+    EmbedClob(EmbedConnection con) throws SQLException {
         super(con);
-        materialized = true;
-        control = new ClobStreamControl (con.getDBName(), this);
-        try {
-            control.insertString (clobString, 0);
-        }
-        catch (IOException e) {
-            throw Util.setStreamFailure (e);
-        }
-        catch (StandardException se) {
-            throw Util.generateCsSQLException (se);
-        }
+        this.clob = new ClobStreamControl (con.getDBName(), this);
     }
 
     /**
+     * Creates a Clob on top of a data value descriptor.
+     * <p>
      * This constructor should only be called by {@link EmbedResultSet#getClob}.
+     * The data value descriptor may provide a <code>String</code> or a stream
+     * as the source of the Clob.
      *
-     * @param dvd 
-     * @param con 
+     * @param dvd data value descriptor providing the Clob source
+     * @param con associated connection for the Clob
      * @throws StandardException
      */
-    protected EmbedClob(DataValueDescriptor dvd, EmbedConnection con)
+    protected EmbedClob(EmbedConnection con, DataValueDescriptor dvd)
         throws StandardException
     {
         super(con);
@@ -122,14 +110,12 @@ final class EmbedClob extends ConnectionChild implements Clob
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(!dvd.isNull(), "clob is created on top of a null column");
 
-        myStream = dvd.getStream();
-        if (myStream == null)
-        {
-            control = new ClobStreamControl (con.getDBName(), this);
-            materialized = true;
+        InputStream storeStream = dvd.getStream();
+        // See if a String or a stream will be the source of the Clob.
+        if (storeStream == null) {
+            this.clob = new ClobStreamControl(con.getDBName(), this);
             try {
-                String str = dvd.getString();
-                control.insertString (dvd.getString(), 0);
+                this.clob.insertString (dvd.getString(), 1L);
             }
             catch (SQLException sqle) {
                 throw StandardException.newException (sqle.getSQLState(), sqle);
@@ -138,9 +124,7 @@ final class EmbedClob extends ConnectionChild implements Clob
                 throw StandardException.newException (
                                         SQLState.SET_STREAM_FAILURE, e);
             }
-        }
-        else
-        {
+        } else {
             /*
              We are expecting this stream to be a FormatIdInputStream with an
              OverflowInputStream inside. FormatIdInputStream implements
@@ -155,102 +139,61 @@ final class EmbedClob extends ConnectionChild implements Clob
              should not break the ASSERT below.
              */
             if (SanityManager.DEBUG)
-                SanityManager.ASSERT(myStream instanceof Resetable);
+                SanityManager.ASSERT(storeStream instanceof Resetable);
 
             try {
-                ((Resetable) myStream).initStream();
+                ((Resetable) storeStream).initStream();
             } catch (StandardException se) {
                 if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
                     throw StandardException
                             .newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
                 }
+                throw se;
             }
+            this.clob = new StoreStreamClob(storeStream, this);
         }
     }
 
-
     /**
-     * Returns the number of characters
-     * in the <code>CLOB</code> value
+     * Returns the number of characters in the <code>CLOB</code> value
      * designated by this <code>Clob</code> object.
-     * @return length of the <code>CLOB</code> in characters
-     * @exception SQLException if there is an error accessing the
-     * length of the <code>CLOB</code>
+     *
+     * @return The length of the <code>CLOB</code> in number of characters.
+     * @exception SQLException if obtaining the length fails
      */
     public long length() throws SQLException
     {
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
         checkValidity();
-        // if we have a string, not a stream
         try {
-            if (materialized)
-                return control.getCharLength ();
-        }
-        catch (IOException e) {
-            throw Util.setStreamFailure (e);
-        }
-
-
-        Object synchronization = getConnectionSynchronization();
-        synchronized (synchronization)
-        {
-            Reader clobReader = null;
-            setupContextStack();
-            try {
-
-                clobReader = getCharacterStream();
-                long clobLength = 0;
-                for (;;)
-                {
-                    long size = clobReader.skip(32 * 1024);
-                    if (size == 0L)
-                        break;
-                    clobLength += size;
-                }
-                clobReader.close();
-                clobReader = null;
-
-                return clobLength;
-            }
-            catch (Throwable t)
-            {
-                throw noStateChangeLOB(t);
-            }
-            finally
-            {
-                if (clobReader != null) {
-                    try {
-                        clobReader.close();
-                    } catch (IOException ioe) {
-                    }
-                }
-                restoreContextStack();
-            }
+            return this.clob.getCharLength();
+        } catch (IOException e) {
+            throw Util.setStreamFailure(e);
         }
     }
 
     /**
-     * Returns a copy of the specified substring
-     * in the <code>CLOB</code> value
+     * Returns a copy of the specified substring in the <code>CLOB</code> value
      * designated by this <code>Clob</code> object.
-     * The substring begins at position
-     * <code>pos</code> and has up to <code>length</code> consecutive
-     * characters. The starting position must be between 1 and the length
-     * of the CLOB plus 1. This allows for zero-length CLOB values, from
-     * which only zero-length substrings can be returned.
+     * <p>
+     * The substring begins at position <code>pos</code> and has up to
+     * * <code>length</code> consecutive characters. The starting position must be
+     * between 1 and the length of the CLOB plus 1. This allows for zero-length
+     * CLOB values, from which only zero-length substrings can be returned.
      * If a larger length is requested than there are characters available,
      * characters from the start position to the end of the CLOB are returned.
+     * <p>
+     * <em>NOTE</em>: If the starting position is the length of the CLOB plus 1,
+     * zero characters are returned regardless of the length requested.
+     *
      * @param pos the first character of the substring to be extracted.
-     *            The first character is at position 1.
+     *    The first character is at position 1.
      * @param length the number of consecutive characters to be copied
      * @return a <code>String</code> that is the specified substring in
-     *         the <code>CLOB</code> value designated by this <code>Clob</code> object
-     * @exception SQLException if there is an error accessing the
-     * <code>CLOB</code>
-
-     * NOTE: If the starting position is the length of the CLOB plus 1,
-     * zero characters are returned regardless of the length requested.
+     *    the <code>CLOB</code> value designated by this <code>Clob</code> object
+     * @exception SQLException if there is an error accessing the 
+     *    <code>CLOB</code>
      */
     public String getSubString(long pos, int length) throws SQLException
     {
@@ -265,140 +208,67 @@ final class EmbedClob extends ConnectionChild implements Clob
             throw Util.generateCsSQLException(
                 SQLState.BLOB_NONPOSITIVE_LENGTH, new Integer(length));
 
-        // if we have a string, not a stream
-        if (materialized)
-        {
-            try {
-                long sLength = control.getCharLength ();
-                if (sLength + 1 < pos)
-                    throw Util.generateCsSQLException(
-                        SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
-                int endIndex = ((int) pos) + length - 1;
-                // cannot go over length of string
-                    return control.getSubstring (pos - 1,
-                            (sLength > endIndex ? endIndex : sLength));
-            }
-            catch (IOException e) {
-                throw Util.setStreamFailure (e);
-            }
-        }
-
-        Object synchronization = getConnectionSynchronization();
-        synchronized (synchronization)
-        {
-            setupContextStack();
-
-            UTF8Reader clobReader = null;
-            try {
-
-                clobReader = getCharacterStreamAtPos(pos, synchronization);
-                if (clobReader == null)
-                    throw StandardException.newException(SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
-
-                StringBuffer sb = new StringBuffer(length);
-                int remainToRead = length;
-                while (remainToRead > 0) {
-
-                    int read = clobReader.readInto(sb, remainToRead);
-                    if (read == -1)
-                        break;
-
-                    remainToRead -= read;
+        String result;
+        // An exception will be thrown if the position is larger than the Clob.
+        try {
+            Reader reader = this.clob.getReader(pos);
+            char[] chars = new char[length];
+            int charsRead = 0;
+            // Read all the characters requested, or until EOF is reached.
+            while (charsRead < length) {
+                int read = reader.read(chars, charsRead, length - charsRead);
+                if (read == -1) {
+                    break;
                 }
-                clobReader.close();
-                clobReader = null;
-
-                return sb.toString();
+                charsRead += read;
             }
-            catch (Throwable t)
-            {
-                throw noStateChangeLOB(t);
+            reader.close();
+            // If we have an empty Clob or requested length is zero, return "".
+            if (charsRead == 0) {
+                result = "";
+            } else {
+                result = String.copyValueOf(chars, 0, charsRead);
             }
-            finally
-            {
-                if (clobReader != null)
-                    clobReader.close();
-                restoreContextStack();
-            }
+        } catch (EOFException eofe) {
+            throw Util.generateCsSQLException(
+                                        SQLState.BLOB_POSITION_TOO_LARGE, eofe);
+        } catch (IOException ioe) {
+            throw Util.setStreamFailure(ioe);
         }
+        return result;
     }
 
     /**
-     * Gets the <code>Clob</code> contents as a Unicode stream.
-     * @return a Unicode stream containing the <code>CLOB</code> data
+     * Gets the <code>Clob</code> contents as a stream of characters.
+     * @return A character stream containing the <code>CLOB</code> data.
      * @exception SQLException if there is an error accessing the
-     * <code>CLOB</code>
+     *    <code>CLOB</code>
      */
     public java.io.Reader getCharacterStream() throws SQLException
     {
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
         checkValidity();
-
-
-        Object synchronization = getConnectionSynchronization();
-        synchronized (synchronization)
-        {
-            setupContextStack();
-
-            try {
-                            if (materialized) {
-                                return control.getReader (0);
-                            }
-
-                            return getCharacterStreamAtPos(1, synchronization);
-            }
-            catch (Throwable t)
-            {
-                throw noStateChangeLOB(t);
-            }
-            finally
-            {
-                restoreContextStack();
-            }
+        try {
+            return this.clob.getReader(1L);
+        } catch (IOException ioe) {
+            throw Util.setStreamFailure(ioe);
         }
     }
 
     /**
      * Gets the <code>CLOB</code> value designated by this <code>Clob</code>
      * object as a stream of Ascii bytes.
-     * @return an ascii stream containing the <code>CLOB</code> data
+     * @return An Ascii stream containing the <code>CLOB</code> data. Valid values
+     *    in the stream are 0 - 255.
      * @exception SQLException if there is an error accessing the
-     * <code>CLOB</code> value
+     *    <code>CLOB</code> value
      */
     public java.io.InputStream getAsciiStream() throws SQLException
     {
-                //call checkValidity to exit by throwing a SQLException if
-                //the Clob object has been freed by calling free() on it
-                checkValidity();
+        // Validity is checked in getCharacterStream().
         return new ReaderToAscii(getCharacterStream());
     }
-
-    private UTF8Reader getCharacterStreamAtPos(long position, Object synchronization)
-    throws IOException, StandardException {
-        UTF8Reader clobReader = null;
-        if (materialized)
-            clobReader = new UTF8Reader (control.getInputStream (0), 0,
-                                            control.getByteLength(),
-                                    this, control);
-        else {
-            ((Resetable)myStream).resetStream();
-            clobReader = new UTF8Reader(myStream, 0, this, synchronization);
-        }
-
-        // skip to the correct position (pos is one based)
-        long remainToSkip = position - 1;
-        while (remainToSkip > 0) {
-            long skipBy = clobReader.skip(remainToSkip);
-            if (skipBy == 0L)
-                return null;
-
-            remainToSkip -= skipBy;
-        }
-
-        return clobReader;
-    }
-
 
     /**
      * Determines the character position at which the specified substring
@@ -442,17 +312,18 @@ final class EmbedClob extends ConnectionChild implements Clob
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
         checkValidity();
+        if (start < 1)
+            throw Util.generateCsSQLException(
+                            SQLState.BLOB_BAD_POSITION, new Long(start));
+        if (searchStr == null)
+            throw Util.generateCsSQLException(
+                            SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
+        if (searchStr == "")
+            return start; // match DB2's SQL LOCATE function
 
         boolean pushStack = false;
         try
         {
-            if (start < 1)
-                throw StandardException.newException(
-                    SQLState.BLOB_BAD_POSITION, new Long(start));
-            if (searchStr == null)
-                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
-            if (searchStr == "")
-                return start; // match DB2's SQL LOCATE function
 
             Object synchronization = getConnectionSynchronization();
             synchronized (synchronization)
@@ -461,9 +332,9 @@ final class EmbedClob extends ConnectionChild implements Clob
                 if (pushStack)
                     setupContextStack();
                 int matchCount = 0;
-                long pos = start - 1;
+                long pos = start;
                 long newStart = -1;
-                Reader reader = getCharacterStreamAtPos (start, this);
+                Reader reader = this.clob.getReader(start);
                 char [] tmpClob = new char [4096];
                 boolean reset;
                 for (;;) {
@@ -471,25 +342,21 @@ final class EmbedClob extends ConnectionChild implements Clob
                     int readCount = reader.read (tmpClob);
                     if (readCount == -1)
                         return -1;
-                    if (readCount == 0)
-                        continue;
                     for (int clobOffset = 0;
                                 clobOffset < readCount; clobOffset++) {
-                        if (tmpClob [clobOffset]
-                                        == searchStr.charAt (matchCount)) {
+                        if (tmpClob[clobOffset]
+                                        == searchStr.charAt(matchCount)) {
                             //find the new starting position in
                             // case this match is unsuccessful
                             if (matchCount != 0 && newStart == -1
-                                    && tmpClob [clobOffset]
-                                    == searchStr.charAt (0)) {
+                                    && tmpClob[clobOffset]
+                                    == searchStr.charAt(0)) {
                                 newStart = pos + clobOffset + 1;
                             }
                             matchCount ++;
                             if (matchCount == searchStr.length()) {
-                                //return after converting the position
-                                //to 1 based index
                                 return pos + clobOffset
-                                        - searchStr.length() + 1 + 1;
+                                        - searchStr.length() + 1;
                             }
                         }
                         else {
@@ -506,8 +373,7 @@ final class EmbedClob extends ConnectionChild implements Clob
                                 if (newStart < pos) {
                                     pos = newStart;
                                     reader.close();
-                                    reader = getCharacterStreamAtPos
-                                                (newStart + 1, this);
+                                    reader = this.clob.getReader(newStart);
                                     newStart = -1;
                                     reset = true;
                                     break;
@@ -524,19 +390,14 @@ final class EmbedClob extends ConnectionChild implements Clob
                 }
 
             }
-        }
-        catch (Throwable t)
-        {
-            throw noStateChangeLOB(t);
-        }
-        finally
-        {
-            if (pushStack)
+        } catch (IOException ioe) {
+            throw Util.setStreamFailure(ioe);
+        } finally {
+            if (pushStack) {
                 restoreContextStack();
+            }
         }
-
     }
-
 
     /**
      * Determines the character position at which the specified
@@ -557,35 +418,26 @@ final class EmbedClob extends ConnectionChild implements Clob
         //call checkValidity to exit by throwing a SQLException if
         //the Clob object has been freed by calling free() on it
         checkValidity();
+        if (start < 1)
+            throw Util.generateCsSQLException(
+                                SQLState.BLOB_BAD_POSITION, new Long(start));
+        if (searchClob == null)
+            throw Util.generateCsSQLException(
+                                SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
 
         boolean pushStack = false;
         try
         {
-            if (start < 1)
-                throw StandardException.newException(
-                    SQLState.BLOB_BAD_POSITION, new Long(start));
-            if (searchClob == null)
-                throw StandardException.newException(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
-
             synchronized (getConnectionSynchronization())
             {
                 char[] subPatternChar = new char[1024];
 
                 boolean seenOneCharacter = false;
 
-                //System.out.println("BEGIN CLOB SEARCH @ " + start);
-
 restartScan:
                 for (;;) {
-
                     long firstPosition = -1;
-
                     Reader patternReader = searchClob.getCharacterStream();
-
-                    //System.out.println("RESTART CLOB SEARCH @ " + start);
-
-                    try {
-
                         for (;;) {
 
                             int read = patternReader.read(subPatternChar, 0, subPatternChar.length);
@@ -593,20 +445,15 @@ restartScan:
                                 //empty pattern
                                 if (!seenOneCharacter)
                                     return start; // matches DB2 SQL LOCATE function
-
                                 return firstPosition;
                             }
                             if (read == 0) {
-                                //System.out.println("STUCK IN READ 0 HELL");
                                 continue;
                             }
-
                             seenOneCharacter = true;
 
                             String subPattern = new String(subPatternChar, 0, read);
-                    //System.out.println("START CLOB SEARCH @ " + start + " -- " + subPattern);
                             long position = position(subPattern, start);
-                    //System.out.println("DONE SUB CLOB SEARCH @ " + start + " -- " + position);
                             if (position == -1) {
                                 // never seen any match
                                 if (firstPosition == -1)
@@ -626,34 +473,16 @@ restartScan:
 
                             // read is the length of the subPattern string
                             start = position + read;
-                    }
-                    } finally {
-                        patternReader.close();
-                    }
-                }
+                    } // End inner for loop
+            } // End outer for loop
+        } // End synchronized block
+        } catch (IOException ioe) {
+            throw Util.setStreamFailure(ioe);
+        } finally {
+            if (pushStack) {
+                restoreContextStack();
             }
         }
-        catch (Throwable t)
-        {
-            throw noStateChangeLOB(t);
-        }
-        finally
-        {
-            if (pushStack)
-                restoreContextStack();
-        }
-
-    }
-
-
-    /*
-     If we have a stream, release the resources associated with it.
-     */
-    protected void finalize()
-    {
-        // System.out.println("finalizer called");
-        if (!materialized)
-            ((Resetable)myStream).closeStream();
     }
 
     /**
@@ -699,24 +528,28 @@ restartScan:
      * @exception SQLException Feature not implemented for now.
      */
     public int setString(long pos, String str, int offset, int len)
-    throws SQLException {
+            throws SQLException {
+        checkValidity();
+        if (pos < 1)
+            throw Util.generateCsSQLException(
+                SQLState.BLOB_BAD_POSITION, new Long(pos));
         try {
-            if (!materialized) {
-                control.copyData(myStream, length());
-                materialized = true;
+            if (!this.clob.isWritable()) {
+                makeWritableClobClone();
             }
-            long charPos = control.getStreamPosition(0, pos - 1);
-            if (charPos == -1)
-                throw Util.generateCsSQLException(
-                        SQLState.BLOB_POSITION_TOO_LARGE, "" + pos);
-            return (int) control.insertString(str.substring (offset,
-                    (offset + len)), charPos);
+            // Note that Clob.length() +1 is a valid position for setString.
+            // If the position is larger than this, an EOFException will be
+            // thrown. This is cheaper then getting the length up front.
+            this.clob.insertString(str.substring(offset, (offset + len)),
+                                   pos);
+        } catch (EOFException eofe) {
+            throw Util.generateCsSQLException(
+                        SQLState.BLOB_POSITION_TOO_LARGE,
+                        new Long(pos));
         } catch (IOException e) {
             throw Util.setStreamFailure(e);
         }
-        catch (StandardException se) {
-            throw Util.generateCsSQLException (se);
-        }
+        return str.length();
     }
 
     /**
@@ -730,8 +563,9 @@ restartScan:
      * @exception SQLException Feature not implemented for now.
      */
     public java.io.OutputStream setAsciiStream(long pos) throws SQLException {
+        checkValidity();
         try {
-            return new ClobAsciiStream (control.getWriter(pos - 1));
+            return new ClobAsciiStream (this.clob.getWriter(pos));
         } catch (IOException e) {
             throw Util.setStreamFailure(e);
         }
@@ -748,16 +582,14 @@ restartScan:
      * @exception SQLException Feature not implemented for now.
      */
     public java.io.Writer setCharacterStream(long pos) throws SQLException {
+        checkValidity();
         try {
-            if (!materialized) {
-                control.copyData(myStream, length());
-                materialized = true;
+            if (!this.clob.isWritable()) {
+                makeWritableClobClone();
             }
-            return control.getWriter(pos - 1);
-        } catch (IOException e) {
-            throw Util.setStreamFailure(e);
-        } catch (StandardException se) {
-            throw Util.generateCsSQLException (se);
+            return this.clob.getWriter(pos);
+        } catch (IOException ioe) {
+            throw Util.setStreamFailure(ioe);
         }
     }
 
@@ -781,32 +613,25 @@ restartScan:
     //
     /////////////////////////////////////////////////////////////////////////
     /**
-     * This method frees the <code>Clob</code> object and releases the resources the resources
-     * that it holds.  The object is invalid once the <code>free</code> method
+     * Frees the <code>Clob</code> and releases the resources that it holds.
+     * <p>
+     * The object is invalid once the <code>free</code> method
      * is called. If <code>free</code> is called multiple times, the
      * subsequent calls to <code>free</code> are treated as a no-op.
      *
-     * @throws SQLException if an error occurs releasing
-     * the Clob's resources
+     * @throws SQLException if an error occurs releasing the Clobs resources
      */
     public void free()
         throws SQLException {
-        //calling free() on a already freed object is treated as a no-op
-        if (!isValid) return;
-
-        //now that free has been called the Clob object is no longer
-        //valid
-        isValid = false;
-
-        if (!materialized) {
-            ((Resetable)myStream).closeStream();
-        }
-        else {
+        if (this.isValid) {
+            this.isValid = false;
+            // Release and nullify the internal Clob.
             try {
-                control.free();
-            }
-            catch (IOException e) {
+                this.clob.release();
+            } catch (IOException e) {
                 throw Util.setStreamFailure(e);
+            } finally {
+                this.clob = null;
             }
         }
     }
@@ -817,31 +642,35 @@ restartScan:
     }
 
     /*
-    **
-    */
-
-    static SQLException noStateChangeLOB(Throwable t) {
-        if (t instanceof StandardException)
-        {
-            // container closed means the blob or clob was accessed after commit
-            if (((StandardException) t).getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED))
-            {
-                t = StandardException.newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
-            }
-        }
-        return org.apache.derby.impl.jdbc.EmbedResultSet.noStateChangeException(t);
-    }
-
-    /*
-     * Checks is isValid is true. If it is not true throws
-     * a SQLException stating that a method has been called on
-     * an invalid LOB object
+     * Checks if the Clob is valid.
+     * <p>
+     * A Clob is invalidated when {@link #free} is called or if the parent
+     * connection is closed.
      *
-     * throws SQLException if isValid is not true.
+     * @throws SQLException if the Clob is not valid
      */
     private void checkValidity() throws SQLException{
         if(!isValid)
             throw newSQLException(SQLState.LOB_OBJECT_INVALID);
         localConn.checkIfClosed();
+    }
+
+    /**
+     * Makes a writable clone of the current Clob.
+     * <p>
+     * This is called when we have a {@link StoreStreamClob} and the user calls
+     * a method updating the content of the Clob. A temporary Clob will then be
+     * created to hold the updated content.
+     *
+     * @throws IOException if accessing underlying I/O resources fail
+     * @throws SQLException if accessing underlying resources fail
+     */
+    private void makeWritableClobClone()
+            throws IOException, SQLException {
+        InternalClob toBeAbandoned = this.clob;
+        this.clob = ClobStreamControl.cloneClobContent(
+                        getEmbedConnection().getDBName(),
+                        this, toBeAbandoned);
+        toBeAbandoned.release();
     }
 }

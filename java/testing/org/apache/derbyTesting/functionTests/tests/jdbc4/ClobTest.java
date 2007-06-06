@@ -128,10 +128,7 @@ public class ClobTest
     
     private static final ExemptClobMD [] emd = new ExemptClobMD [] {
         new ExemptClobMD( "getCharacterStream", new Class[] { long.class, long.class } ,true,true),
-        new ExemptClobMD( "setAsciiStream",     new Class[] { long.class } ,false,true),
-	new ExemptClobMD( "setCharacterStream", new Class[] { long.class } ,true,true),
 	new ExemptClobMD( "setString",          new Class[] { long.class, String.class } ,false,true),
-	new ExemptClobMD( "setString",          new Class[] { long.class, String.class, int.class, int.class},false,true),
 	new ExemptClobMD( "truncate",           new Class[] { long.class },false,true),
         new ExemptClobMD( "free",               null,true,true)
     };
@@ -201,7 +198,7 @@ public class ClobTest
      *
      */
     public void testFreeandMethodsAfterCallingFree()
-        throws SQLException {
+        throws IllegalAccessException, InvocationTargetException, SQLException {
             InputStream asciiStream = clob.getAsciiStream();
             Reader charStream  = clob.getCharacterStream();
             clob.free();
@@ -224,7 +221,8 @@ public class ClobTest
      * get the list of methods present in the interface
      * @param LOB an instance of the Clob interface implementation
      */
-    void buildMethodList(Object LOB) {
+    void buildMethodList(Object LOB)
+            throws IllegalAccessException, InvocationTargetException {
         //If the given method throws the correct exception
         //set this to true and add it to the 
         boolean valid = true;
@@ -271,30 +269,27 @@ public class ClobTest
     }
     
     /**
-     *Checks if the method throws a SQLFeatureNotSupportedException
-     *@param m The method object that needs to be verified to see if it 
-     *         is exempted
-     *@return true if the given method does not throw the required SQLException
+     * Checks if the method is to be exempted from testing or not.
      *
+     * @param m the method to check for exemption
+     * @return <code>false</code> if the method shall be tested,
+     *      <code>true</code> if the method is exempted and shall not be tested.
      */
     boolean checkIfExempted(Method m) {
         ExemptClobMD md = excludedMethodSet.get(m);
-        
-        if(md != null && usingDerbyNetClient()) { 
-            if(md.getIfClientFramework()) 
-                return true;
-            else
-                return false;
-        } 
-        if(md != null && usingEmbedded()) {
-            if(md.getIfEmbeddedFramework())
-                return true;
-            else
-                return false;
+        boolean isExempted = false;
+        if (md != null) {
+            if (usingDerbyNetClient()) {
+                isExempted = md.getIfClientFramework();
+            } else if (usingEmbedded()) {
+                isExempted = md.getIfEmbeddedFramework();
+            } else {
+                fail("Unknown test environment/framework");
+            }
         }
-        return false;
+        return isExempted;
     }
-    
+
     /*
      * Checks if the invocation of the method throws a SQLExceptio
      * as expected.
@@ -306,27 +301,20 @@ public class ClobTest
      *               LOB object
      *
      */
-    boolean checkIfMethodThrowsSQLException(Object LOB,Method method) {
+    boolean checkIfMethodThrowsSQLException(Object LOB,Method method)
+            throws IllegalAccessException, InvocationTargetException {
         try {
             method.invoke(LOB,getNullValues(method.getParameterTypes()));
-        } catch(Throwable e) {
-            if(e instanceof InvocationTargetException) {
-                Throwable cause = e.getCause();
-                if (cause instanceof SQLException ) {
-                    SQLException sqle = (SQLException)cause;
-                    if(sqle.getSQLState().equals("XJ215"))
-                        return true;
-                    else
-                        return false;
-                } else {
-                    return false;
-                }
-                
+        } catch (InvocationTargetException ite) {
+            Throwable cause = ite.getCause();
+            if (cause instanceof SQLException ) {
+                return ((SQLException)cause).getSQLState().equals("XJ215");
             }
+            throw ite;
         }
         return false;
     }
-    
+
     /*
      * Return a array of objects containing the default values for
      * the objects passed in as parameters

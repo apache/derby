@@ -2256,7 +2256,7 @@ public abstract class EmbedConnection implements EngineConnection
 	*/
 	public Clob createClob() throws SQLException {
 		checkIfClosed();
-		return new EmbedClob("", this);
+		return new EmbedClob(this);
 	}
 
 	/**
