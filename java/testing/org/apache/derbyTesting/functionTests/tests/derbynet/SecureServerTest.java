@@ -91,7 +91,6 @@ public class SecureServerTest extends BaseTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private static final Outcome FAILED_NO_AUTHENTICATION = new Outcome( false, authenticationFailure() );
     private static final Outcome RUNNING_SECURITY_NOT_BOOTED = new Outcome( true, "" );
     private static final Outcome RUNNING_SECURITY_BOOTED = new Outcome( true,  serverBootedOK() );
 
@@ -165,7 +164,7 @@ public class SecureServerTest extends BaseTestCase
         //      .addTest( decorateTest( O,        A,       C,    Outcome ) );
         //
 
-        suite.addTest( decorateTest( false,  false, false, FAILED_NO_AUTHENTICATION ) );
+        suite.addTest( decorateTest( false,  false, false, RUNNING_SECURITY_BOOTED ) );
         suite.addTest( decorateTest( false,  false, true, RUNNING_SECURITY_BOOTED ) );
         suite.addTest( decorateTest( false,  true, false, RUNNING_SECURITY_BOOTED ) );
         suite.addTest( decorateTest( true,  false, false, RUNNING_SECURITY_NOT_BOOTED ) );
@@ -354,21 +353,6 @@ public class SecureServerTest extends BaseTestCase
         int             bytesRead = is.read( inputBuffer );
 
         return new String( inputBuffer, 0, bytesRead );
-    }
-
-    private static  String  authenticationFailure()
-    {
-        return
-        "Network Server startup failed. User authentication " +
-        "must be enabled before the Network Server installs a security manager. " +
-        "You must either enable user authentication or disable the installation " +
-        "of a security manager. For information on enabling user authentication, " +
-        "see the section of the Derby Developer's Guide entitled \"Working with user authentication\". " +
-        "Disabling the installation of a security manager is strongly discouraged " +
-        "in a client/server environment. However, if you must do this, " +
-        "you can disable the installation of a security manager by specifying " +
-        "the \"-noSecurityManager\" command line option when you " +
-         "bring up the Network Server.";
     }
 
     private static  String  serverBootedOK()

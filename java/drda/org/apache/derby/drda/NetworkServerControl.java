@@ -552,27 +552,16 @@ public class NetworkServerControl{
     
     /**
      * Verify that all prerequisites are met before bringing up a security
-     * manager. See DERBY-2196.
+     * manager. See DERBY-2196. If prerequisites aren't met, raise an
+     * exception which explains how to get up and running. At one point, we were going to require
+     * that authentication be enabled before bringing up a security manager.
+     * This, however, gave rise to incompatibilities. See DERBY-2757.
+     *
+     * Currently, this method is a nop.
      */
     private static  void verifySecurityState( NetworkServerControlImpl server )
         throws Exception
     {
-        //
-        // Authentication should be turned on. Otherwise, the user will
-        // be tricked into a false sense of security. Important security checks
-        // will be identity based.
-        //
-        String      authenticationProperty =
-            PropertyUtil.getSystemProperty( Property.REQUIRE_AUTHENTICATION_PARAMETER );
-        boolean     authenticationRequired = Boolean.valueOf( authenticationProperty ).booleanValue();
-        
-        if ( !authenticationRequired )
-        {
-            String  errorMessage = server.localizeMessage( "DRDA_NoAuthentication.S", null );
-
-            // this throws an exception and exits this method
-            server.consoleError( errorMessage );
-        }
     }
 
     
