@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.io.PrintWriter;
 import java.io.File;
 import java.security.AccessController;
+import java.security.PrivilegedActionException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
@@ -379,17 +380,20 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      */
     public static String getTraceDirectory(Properties properties) {
     	String traceDirectoryString;
+       
     	traceDirectoryString  = readSystemProperty(Attribute.CLIENT_JVM_PROPERTY_PREFIX+Attribute.CLIENT_TRACE_DIRECTORY);
+
 		if (traceDirectoryString == null) 
 			return properties.getProperty(Attribute.CLIENT_TRACE_DIRECTORY);
 		else
 			return traceDirectoryString;
     }
     
+    
     /**
      * Read the value of the passed system property.
      * @param key name of the system property
-     * @return value of the system property
+     * @return value of the system property, null if there is no permission to read the property
      */
     private static String readSystemProperty(final String key) {
     	//Using an anonymous class to read the system privilege because the
@@ -404,7 +408,14 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     	return (String )AccessController.doPrivileged
     	    (new java.security.PrivilegedAction(){
     		    public Object run(){
-    			return System.getProperty(key);
+                    try {
+                        return System.getProperty(key);
+                    } catch (SecurityException se) {
+                        // We do not want the connection to fail if the user does not have permission to 
+                        // read the property, so if a security exception occurs, just return null and 
+                        // continue with the connection.  
+                        return null;
+                    }
     		    }
     	    }
     	    );
