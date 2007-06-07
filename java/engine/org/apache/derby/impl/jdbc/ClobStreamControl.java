@@ -125,6 +125,22 @@ final class ClobStreamControl implements InternalClob {
     }
 
     /**
+     * Constructs a <code>ClobStreamControl</code> object and
+     * initializes with a initial String.
+     *
+     * @param dbName name of the database the CLOB value belongs to
+     * @param data initial value in String
+     * @param conChild connection object used to obtain synchronization object
+     */
+    ClobStreamControl (String dbName, String data, ConnectionChild conChild)
+                          throws IOException, SQLException, StandardException {
+        if (conChild == null) {
+            throw new NullPointerException("conChild cannot be <null>");
+        }
+        this.conChild = conChild;
+        bytes = new LOBStreamControl(dbName, getByteFromString (data));
+    }
+    /**
      * Finds the corresponding byte position for the given UTF-8 character
      * position, starting from the byte position <code>startPos</code>.
      * See comments in SQLChar.readExternal for more notes on

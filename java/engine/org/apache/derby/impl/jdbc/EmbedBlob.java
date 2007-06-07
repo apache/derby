@@ -112,8 +112,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
      EmbedBlob(byte [] blobBytes,EmbedConnection con) throws SQLException {
         super(con);
          try {
-             control = new LOBStreamControl (con.getDBName());
-             control.write (blobBytes, 0, blobBytes.length, 0);
+             control = new LOBStreamControl (con.getDBName(), blobBytes);
              materialized = true;
              //add entry in connection so it can be cleared 
              //when transaction is not valid
@@ -149,9 +148,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(dvdBytes != null,"blob has a null value underneath");
-            control = new LOBStreamControl (getEmbedConnection().getDBName());
             try {
-                control.write (dvdBytes, 0, dvdBytes.length, pos);
+                control = new LOBStreamControl (
+                            getEmbedConnection().getDBName(), dvdBytes);
             }
             catch (SQLException e) {
                 throw StandardException.newException (e.getSQLState());

@@ -45,12 +45,17 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
 
 /**
  * This class acts as a layer of blob/clob repository (in memory or file).
- * The max bytes of data stored in memory is MAX_BUF_SIZE. When write
- * increases the data beyond this value a temporary file is created and data
- * is moved into that. If truncate reduces the size of the file below
- * MAX_BUF_SIZE the data moved into memory.
+ * The max bytes of data stored in memory depends on the way this
+ * class is created. If the class is created with initial data, the buffer
+ * size is set to the size of the byte array supplied. If no initial data
+ * is supplied or if the initial data size is less than DEFAULT_MAX_BUF_SIZE,
+ * The buffer size is set to DEFAULT_MAX_BUF_SIZE.
+ * When write increases the data beyond this value a temporary file is created
+ * and data is moved into that. If truncate reduces the size of the file below
+ * initial buffer size (max of DEFAULT_MAX_BUF_SIZE and initial byte array size)
+ * the data moved into memory.
  *
- * This class also creates Input- and OutputStream which can be used to access
+ * This class also creates InputStream and OutputStream which can be used to access
  * blob data irrespective of if its in memory or in file.
  */
 
@@ -59,15 +64,33 @@ class LOBStreamControl {
     private StorageFile lobFile;
     private byte [] dataBytes = new byte [0];
     private boolean isBytes = true;
-    //keeping max 4k bytes in memory
-    //randomly selected value
-    private final int MAX_BUF_SIZE = 4096;
+    private final int bufferSize;
     private String dbName;
     private long updateCount;
+    private static final int DEFAULT_MAX_BUF_SIZE = 4096;
 
-    public LOBStreamControl (String dbName) {
+    /**
+     * Creates an empty LOBStreamControl.
+     * @param dbName database name
+     */
+    LOBStreamControl (String dbName) {
         this.dbName = dbName;
         updateCount = 0;
+        //default buffer size
+        bufferSize = DEFAULT_MAX_BUF_SIZE;
+    }
+
+    /**
+     * Creates a LOBStreamControl and initializes with a bytes array.
+     * @param dbName database name
+     * @param data initial value
+     */
+    LOBStreamControl (String dbName, byte [] data)
+                throws IOException, SQLException, StandardException {
+        this.dbName = dbName;
+        updateCount = 0;
+        bufferSize = Math.max (DEFAULT_MAX_BUF_SIZE, data.length);
+        write (data, 0, data.length, 0);
     }
 
     private void init(byte [] b, long len)
@@ -107,6 +130,7 @@ class LOBStreamControl {
         //now this call will write into the file
         if (len != 0)
             write(b, 0, (int) len, 0);
+        dataBytes = null;
     }
 
     private long updateData(byte[] bytes, int offset, int len, long pos)
@@ -186,7 +210,7 @@ class LOBStreamControl {
         isValidPostion(pos);
         updateCount++;
         if (isBytes) {
-            if (pos < MAX_BUF_SIZE) {
+            if (pos < bufferSize) {
                 byte [] bytes = {(byte) b};
                 updateData(bytes, 0, 1, pos);
                 return pos + 1;
@@ -223,7 +247,7 @@ class LOBStreamControl {
         }
         updateCount++;
         if (isBytes) {
-            if (pos + len <= MAX_BUF_SIZE)
+            if (pos + len <= bufferSize)
                 return updateData(b, off, len, pos);
             else {
                 init(dataBytes, pos);
@@ -331,7 +355,7 @@ class LOBStreamControl {
             System.arraycopy(dataBytes, 0, tmpByte, 0, (int) size);
             dataBytes = tmpByte;
         } else {
-            if (size < MAX_BUF_SIZE) {
+            if (size < bufferSize) {
                 dataBytes = new byte [(int) size];
                 read(dataBytes, 0, dataBytes.length, 0);
                 isBytes = true;
@@ -356,11 +380,10 @@ class LOBStreamControl {
      */
     synchronized void copyData(InputStream inStream,
             long length) throws IOException, SQLException, StandardException {
-        byte [] data = new byte [MAX_BUF_SIZE];
+        byte [] data = new byte [bufferSize];
         long sz = 0;
         while (sz < length) {
-            int len = (int) (((length - sz) >= MAX_BUF_SIZE) ? MAX_BUF_SIZE
-                    : length - sz);
+            int len = (int) Math.min (length - sz, bufferSize);
             inStream.read(data, 0, len);
             write(data, 0, len, sz);
             sz += len;
@@ -420,7 +443,7 @@ class LOBStreamControl {
         long length = getLength();
         long finalLength = length - endPos + stPos + buf.length;
         if (isBytes) {
-            if (finalLength > MAX_BUF_SIZE) {
+            if (finalLength > bufferSize) {
                 init (dataBytes, stPos);
                 write (buf, 0, buf.length, getLength());
                 if (endPos < length)

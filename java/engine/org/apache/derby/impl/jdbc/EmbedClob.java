@@ -113,9 +113,9 @@ final class EmbedClob extends ConnectionChild implements Clob
         InputStream storeStream = dvd.getStream();
         // See if a String or a stream will be the source of the Clob.
         if (storeStream == null) {
-            this.clob = new ClobStreamControl(con.getDBName(), this);
             try {
-                this.clob.insertString (dvd.getString(), 1L);
+                clob = new ClobStreamControl(con.getDBName(),
+                        dvd.getString(), this);
             }
             catch (SQLException sqle) {
                 throw StandardException.newException (sqle.getSQLState(), sqle);
