@@ -696,6 +696,18 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     rs = ps.executeQuery();
     JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});      
 
+    //Do parameter testing with COALESCE
+    //following will pass because the ? inside the COALESCE will take the 
+    //collation type of the other operand which is TABLENAME. The result of
+    //COALESCE will have collation type of UCS_BASIC and that is the same
+    //collation that the ? on rhs of = will get.
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+	" COALESCE(TABLENAME, ?) = ?");   
+    ps.setString(1, " ");
+    ps.setString(2, "SYSCOLUMNS ");
+    rs = ps.executeQuery();
+    JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});
+
     //Do parameter testing with LTRIM
     //Won't work in territory based database because in 
     //LTRIM(?) = TABLENAME
