@@ -265,15 +265,12 @@ public abstract class ValueNode extends QueryTreeNode
 	/**
 	 * Get the source for this ValueNode.
 	 *
-	 * @return	The source of this ValueNode.
+	 * @return	The source of this ValueNode, null if this node
+     * is not sourced by a column.
 	 */
 
 	public ResultColumn getSourceResultColumn()
 	{
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(false,
-			"getSourceResultColumn() not expected to be called for this node - " +
-			getClass().toString());
 		return null;
 	}
 

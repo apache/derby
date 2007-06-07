@@ -257,8 +257,7 @@ public class OrderByColumn extends OrderedColumn {
 			}
 		}
 
-		VirtualColumnNode vcn = (VirtualColumnNode) resultCol.getExpression();
-		resultCol = vcn.getSourceResultColumn();
+		resultCol = resultCol.getExpression().getSourceResultColumn();
 	}
 
 	/**

@@ -216,7 +216,7 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @return	The nesting level for this CR.
 	 */
-	int getNestingLevel()
+	private int getNestingLevel()
 	{
 		return nestingLevel;
 	}
@@ -751,26 +751,17 @@ public class ColumnReference extends ValueNode
 	 */
 	public ResultColumn getSourceResultColumn()
 	{
-		ValueNode expression = source.getExpression();
-
-		/* Find the matching ResultColumn */
-		if (expression instanceof VirtualColumnNode) 
-		{
-			return ((VirtualColumnNode) expression).getSourceResultColumn();
-		}
-		else
-		{
-			/* RESOLVE - If expression is a ColumnReference, then we are hitting
-			 * the top of a query block (derived table or view.)
-			 * In order to be able to push the expression down into the next
-			 * query block, it looks like we should reset the contents of the
-			 * current ColumnReference to be the same as expression.  (This probably
-			 * only means names and tableNumber.)  We would then "rebind" the top
-			 * level predicate somewhere up the call stack and see if we could push
-			 * the predicate through.
-			 */
-			return ((ColumnReference) expression).getSourceResultColumn();
-		}
+        /* RESOLVE - If expression is a ColumnReference, then we are hitting
+         * the top of a query block (derived table or view.)
+         * In order to be able to push the expression down into the next
+         * query block, it looks like we should reset the contents of the
+         * current ColumnReference to be the same as expression.  (This probably
+         * only means names and tableNumber.)  We would then "rebind" the top
+         * level predicate somewhere up the call stack and see if we could push
+         * the predicate through.
+         */
+        
+        return source.getExpression().getSourceResultColumn();
 	}
 
 	/**
@@ -798,22 +789,8 @@ public class ColumnReference extends ValueNode
 		 */
 		for (rc = source; rc != null && rc.isRedundant(); )
 		{
-			ResultColumn	nextRC = null;
-			ValueNode		expression = rc.getExpression();
-
 			/* Find the matching ResultColumn */
-			if (expression instanceof VirtualColumnNode) 
-			{
-				nextRC = ((VirtualColumnNode) expression).getSourceResultColumn();
-			}
-			else if (expression instanceof ColumnReference)
-			{
-				nextRC = ((ColumnReference) expression).getSourceResultColumn();
-			}
-			else
-			{
-				nextRC = null;
-			}
+            ResultColumn nextRC = rc.getExpression().getSourceResultColumn();
 
 			if (nextRC != null && nextRC.isRedundant())
 			{
@@ -887,8 +864,7 @@ public class ColumnReference extends ValueNode
 					SanityManager.THROWASSERT("rsn expected to be a FromTable, but is a " + rsn.getClass().getName());
 				}
 			}
-			source = ((VirtualColumnNode) sourceRC.getExpression()).
-										getSourceResultColumn();
+			source = sourceRC.getExpression().getSourceResultColumn();
 			return this;
 		}
 		else
@@ -1116,7 +1092,7 @@ public class ColumnReference extends ValueNode
 			{
 				rcExpr = rc.getExpression();
 				if (rcExpr instanceof VirtualColumnNode)
-					rc = ((VirtualColumnNode)rcExpr).getSourceResultColumn();
+					rc = rcExpr.getSourceResultColumn();
 				else if (rcExpr instanceof ColumnReference)
 				{
 					colNum[0] = ((ColumnReference)rcExpr).getColumnNumber();

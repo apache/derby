@@ -46,8 +46,8 @@ public class VirtualColumnNode extends ValueNode
 	 * that is materializing the virtual column and the ResultColumn
 	 * that represents that materialization.
 	 */
-	ResultSetNode	sourceResultSet;
-	ResultColumn	sourceColumn;
+	private ResultSetNode	sourceResultSet;
+	private ResultColumn	sourceColumn;
 
 	/* columnId is redundant since a ResultColumn also has one, but
 	 * we need it here for generate()
@@ -92,11 +92,8 @@ public class VirtualColumnNode extends ValueNode
 		{
 			super.printSubNodes(depth);
 
-			if (sourceColumn != null)
-			{
-				printLabel(depth, "sourceColumn: ");
-				sourceColumn.treePrint(depth + 1);
-			}
+			printLabel(depth, "sourceColumn: ");
+		    sourceColumn.treePrint(depth + 1);
 		}
 	}
 
@@ -132,7 +129,7 @@ public class VirtualColumnNode extends ValueNode
 	 */
 	public String getTableName()
 	{
-		return ( ( sourceColumn != null) ? sourceColumn.getTableName() : null );
+		return sourceColumn.getTableName();
 	}
 
 	/**
@@ -147,7 +144,7 @@ public class VirtualColumnNode extends ValueNode
 	 */
 	public String getSchemaName() throws StandardException
 	{
-		return ( ( sourceColumn != null) ? sourceColumn.getSchemaName() : null );
+		return sourceColumn.getSchemaName();
 	}
 
 	/**
@@ -158,7 +155,7 @@ public class VirtualColumnNode extends ValueNode
 	 */
 	public boolean updatableByCursor()
 	{
-		return ((sourceColumn != null) ? sourceColumn.updatableByCursor() : false);
+		return sourceColumn.updatableByCursor();
 	}
 
 	/**
