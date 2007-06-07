@@ -2602,15 +2602,40 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		String primaryCatalog, String primarySchema, String primaryTable,
 		String foreignCatalog, String foreignSchema, String foreignTable
 		) throws SQLException {
+
+		if (primaryTable == null || foreignTable == null) {
+			throw Util.generateCsSQLException(
+							SQLState.TABLE_NAME_CANNOT_BE_NULL);
+		}
+
 		PreparedStatement s = getPreparedQuery("getCrossReference");
 		s.setString(1, swapNull(primaryCatalog));
 		s.setString(2, swapNull(primarySchema));
-		s.setString(3, swapNull(primaryTable));
+		s.setString(3, primaryTable); //JDBC spec: must match table name as stored
 		s.setString(4, swapNull(foreignCatalog));
 		s.setString(5, swapNull(foreignSchema));
-		s.setString(6, swapNull(foreignTable));
+		s.setString(6, foreignTable); //JDBC spec: must match table name as stored
 		return s.executeQuery();
 	}
+
+    /**
+     * In contrast to the JDBC version of getCrossReference, this
+     * method allows null values for table names.
+     */
+    public ResultSet getCrossReferenceForODBC(
+        String primaryCatalog, String primarySchema, String primaryTable,
+        String foreignCatalog, String foreignSchema, String foreignTable)
+        throws SQLException {
+
+        PreparedStatement s = getPreparedQuery("odbc_getCrossReference");
+        s.setString(1, swapNull(primaryCatalog));
+        s.setString(2, swapNull(primarySchema));
+        s.setString(3, swapNull(primaryTable));
+        s.setString(4, swapNull(foreignCatalog));
+        s.setString(5, swapNull(foreignSchema));
+        s.setString(6, swapNull(foreignTable));
+        return s.executeQuery();
+    }
 
     /**
      * Get a description of all the standard SQL types supported by

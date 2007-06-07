@@ -56,23 +56,30 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  */
 public class ODBCMetadataGenerator {
 
-	// Types of changes that are possible.  There are three
+	// Types of changes that are possible.  There are four
 	// types that we handle here:
 	//
 	//	1. Column rename:
 	//		Rename a column to have an ODBC-specified name.
 	//		For ex. change "SCALE" to "DECIMAL_DIGITS"
-	//	2. Type and/or value change:
+	//	2. Where clause:
+	//		Change the where clause of the query. For ex. 
+	//		used to change getCrossReference "T.TABLENAME=?"
+	//		to "T.TABLENAME LIKE ?" since JDBC and ODBC specs
+	//		differ on whether table name must be set or not
+	//	3. Type and/or value change:
 	//		Cast a column to an OBDC-specified type.  At time
 	//		of writing, this was just for casting INTs to
 	//		SMALLINTs; OR modify an existing JDBC value
 	//		to match the ODBC specification.
-	//	3. Additional column(s):
+	//	4. Additional column(s):
 	//		Add a new, ODBC-specified column to an existing
 	//		result set.
+
 	private final byte COL_RENAME_CHANGE = 0x01;
 	private final byte TYPE_VALUE_CHANGE = 0x02;
 	private final byte ADD_COLUMN_CHANGE = 0x04;
+	private final byte WHERE_CLAUSE_CHANGE = 0x08;
 
 	// Notice written before each generated ODBC statement.
 	private final String ODBC_QUERY_NOTICE =
@@ -210,6 +217,9 @@ public class ODBCMetadataGenerator {
 
 		changeMap.put("getIndexInfo",
 			new Byte(TYPE_VALUE_CHANGE));
+
+		changeMap.put("getCrossReference",
+			new Byte(WHERE_CLAUSE_CHANGE));
 
 		return;
 
@@ -351,6 +361,9 @@ public class ODBCMetadataGenerator {
 		StringBuffer outerQueryText = new StringBuffer();
 		boolean haveODBCChanges = renameColsForODBC(queryName, queryText);
 
+		// -- #2: Change WHERE clause.
+		if (changeWhereClause(queryName, queryText)) haveODBCChanges = true;
+
 		// Get a list of the column definitions in the subquery, for
 		// use by subsequent operations.
 		ArrayList colDefs = new ArrayList();
@@ -361,7 +374,7 @@ public class ODBCMetadataGenerator {
 		// the outer query.
 		addHelperColsToSubquery(queryName, queryText, pos);
 
-		// -- #2.A: Prep to add new ODBC columns.  Note: we need
+		// -- #3.A: Prep to add new ODBC columns.  Note: we need
 		// to do this BEFORE we generate the outer SELECT statement.
 		markNewColPosition(queryName, colDefs);
 
@@ -370,10 +383,10 @@ public class ODBCMetadataGenerator {
 		// types (via CAST) if needed.
 		generateSELECTClause(queryName, colDefs, outerQueryText);
 
-		// -- #3: Alter column values, where needed.
+		// -- #4: Alter column values, where needed.
 		changeValuesForODBC(queryName, outerQueryText);
 
-		// -- #2.B: Add new ODBC columns.
+		// -- #3.B: Add new ODBC columns.
 		addNewColumnsForODBC(queryName, outerQueryText);
 
 		haveODBCChanges = (haveODBCChanges || (outerQueryText.length() > 0));
@@ -392,6 +405,12 @@ public class ODBCMetadataGenerator {
 		// all we did was change column names, so just write out the
 		// original query with the new column names.
 			odbcMetaFile.write(queryText.toString());
+
+			if (orderBy.length() != 0) {
+				// re-attach ORDER BY clause.
+				odbcMetaFile.write(orderBy);
+			}
+
 			odbcMetaFile.write("\n\n");
 			return;
 		}
@@ -1067,6 +1086,69 @@ public class ODBCMetadataGenerator {
 		}
 
 	}
+
+    /**
+     * changeWhereClause
+     * Substitutes patterns in the WHERE clause
+     * @param queryName The name of the JDBC query; found in
+     * metadata.properties
+     * @param queryText The buffer in which we are going to do
+     * the substitution.
+     * @return the substitution is performed IN PLACE. If no changes
+     * are needed on this query, the queryText buffer remains
+     * unchanged.
+     */
+    private boolean changeWhereClause(String queryName,
+                                      StringBuffer queryText) {
+
+        if (!stmtNeedsChange(queryName, WHERE_CLAUSE_CHANGE))
+            return false;
+
+        if (queryName.equals("getCrossReference")) {
+            substitutePatternWhere("T.TABLENAME=",
+                                   "T.TABLENAME LIKE ",
+                                   queryText);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Replaces a single occurrence of the received old pattern with
+     * the text in the new pattern
+     * @param oldPattern the text we want to remove
+     * @param newPattern the text we want to replace the oldPattern
+     * with
+     * @param queryText The buffer in which we are going to do the
+     * substitution.
+     * @return the old pattern is substituted with the new pattern (IN
+     * PLACE). If the old pattern could not be found, the queryText
+     * buffer remains unchanged.
+     */
+    private void substitutePatternWhere(String oldPattern, String newPattern,
+                                        StringBuffer queryText){
+        String queryTextString = queryText.toString();
+        int queryLength = queryTextString.length();
+        int wherePos = queryTextString.indexOf("WHERE");
+
+        //only look for the pattern after the WHERE keyword. There may
+        //actually be more than one where clause, in which case we do
+        //not know if this is the right one. Since the pattern
+        //substitution is only performed at compile time (on specified
+        //queries), more rigorous checks are not performed her.
+        //Rather, verify that
+        //classes/org/apache/derby/impl/jdbc/metadata.properties is
+        //updated correctly when you add new where-clause
+        //substitutions.
+        int posSubString = queryTextString.substring(wherePos, queryLength).
+                                           indexOf(oldPattern);
+        if (posSubString != -1)
+            //posSubString is the position in the query *after* the
+            //word WHERE. Have to add
+            queryText.replace(wherePos + posSubString,
+                              wherePos + posSubString + oldPattern.length(),
+                              newPattern);
+    }
 
 	/* ****
 	 * trimIgnorable

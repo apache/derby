@@ -341,12 +341,14 @@ public class SystemProcedures  {
 			rs[0] = getDMD().getExportedKeys(pkCatalogName,
 										pkSchemaName,pkTableName);
 		else
-			rs[0] = getDMD().getCrossReference (pkCatalogName,
-										   pkSchemaName,
-										   pkTableName,
-										   fkCatalogName,
-										   fkSchemaName,
-										   fkTableName);
+			//ODBC allows table name value 'null'. JDBC does not
+			rs[0] = isForODBC(options)
+				? ((EmbedDatabaseMetaData)getDMD()).getCrossReferenceForODBC(
+										pkCatalogName, pkSchemaName, pkTableName,
+										fkCatalogName, fkSchemaName, fkTableName)
+				: getDMD().getCrossReference (
+										pkCatalogName, pkSchemaName, pkTableName,
+										fkCatalogName, fkSchemaName, fkTableName);
 	}
 
 	/**
