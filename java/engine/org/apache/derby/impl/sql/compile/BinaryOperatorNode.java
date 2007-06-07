@@ -316,9 +316,6 @@ public class BinaryOperatorNode extends ValueNode
 
 			/* Set the left operand to the type of right parameter. */
 			leftOperand.setType(rightOperand.getTypeServices());
-			//collation of ? operand should be same as the compilation schema
-			leftOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 		}
 
 		/* Is there a ? parameter on the right? */
@@ -326,9 +323,6 @@ public class BinaryOperatorNode extends ValueNode
 		{
 			/* Set the right operand to the type of the left parameter. */
 			rightOperand.setType(leftOperand.getTypeServices());
-			//collation of ? operand should be same as the compilation schema
-			rightOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 		}
 
 		return genSQLJavaSQLTree();

@@ -666,19 +666,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
 
     //Start of parameter testing
     //Start with simple ? param in a string comparison
-    //Won't work in territory based database because in ? = TABLENAME,
-    //? will get the collation of the current schema which is a user
-    //schema and hence the collation type of ? is territory based.
-    //But the collation of TABLENAME is UCS_BASIC
+    //Following will work fine because ? is supposed to take it's collation 
+    //from the context which in this case is from TABLENAME and TABLENAME
+    //has collation type of UCS_BASIC
     s.executeUpdate("set schema APP");
-    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
-    		" ? = TABLENAME", "42818");
-    //To fix the problem above, we need to CAST TABLENAME so that the result 
-    //of CAST will pick up the collation of the current schema and this will
-    //cause both the operands of ? = CAST(TABLENAME AS CHAR(10)) to have 
-    //same collation
     ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
-		" ? = CAST(TABLENAME AS CHAR(10))");
+    		" ? = TABLENAME");
     ps.setString(1, "SYSCOLUMNS");
     rs = ps.executeQuery();
     JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});      
